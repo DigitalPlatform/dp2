@@ -115,7 +115,7 @@ namespace dp2KernelApiTester
             // MenuItem_settings
             // 
             this.MenuItem_settings.Name = "MenuItem_settings";
-            this.MenuItem_settings.Size = new System.Drawing.Size(315, 40);
+            this.MenuItem_settings.Size = new System.Drawing.Size(192, 40);
             this.MenuItem_settings.Text = "设置 ...";
             this.MenuItem_settings.Click += new System.EventHandler(this.MenuItem_settings_Click);
             // 

@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Xml;
 
 using DigitalPlatform;
+using DigitalPlatform.Core;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.Text;
@@ -43,21 +44,6 @@ namespace dp2KernelApiTester
                     return result;
             }
             */
-
-            // 2023/1/26
-            {
-                var create_result = CreateEmptyRecord("1", token);
-                if (create_result.Value == -1)
-                    return create_result;
-
-                var result = DeleteRecords(
-    token,
-    create_result.CreatedPaths,
-    create_result.AccessPoints,
-    "");
-                if (result.Value == -1)
-                    return result;
-            }
 
             {
                 var create_result = QuickCreateRecords(100, token);
@@ -96,7 +82,7 @@ namespace dp2KernelApiTester
                         return result;
                 }
 
-                for (int i = 0; i < 10; i++)
+                for (int i = 0; i < 2; i++)
                 {
                     token.ThrowIfCancellationRequested();
 
@@ -123,6 +109,54 @@ namespace dp2KernelApiTester
                     return result;
             }
             */
+
+            return new NormalResult();
+        }
+
+        // 测试创建和覆盖空白记录
+        public static NormalResult EmptyRecordTest(int count, CancellationToken token)
+        {
+            {
+                var result = PrepareEnvironment();
+                if (result.Value == -1)
+                    return result;
+            }
+
+            // 2023/2/7
+            {
+                var create_result = CreateEmptyRecord("1", token);
+                if (create_result.Value == -1)
+                    return create_result;
+
+                // TODO: 覆盖记录
+                for (int i = 0; i < 2; i++)
+                {
+                    token.ThrowIfCancellationRequested();
+
+                    var result = FragmentOverwriteRecords(
+                        token,
+                        create_result.CreatedPaths,
+                        -1);    // -1 表示不用碎片，而是一次性覆盖
+                    if (result.Value == -1)
+                        return result;
+                }
+
+                {
+                    var result = DeleteRecords(
+        token,
+        create_result.CreatedPaths,
+        create_result.AccessPoints,
+        "");
+                    if (result.Value == -1)
+                        return result;
+                }
+            }
+
+            {
+                var result = Finish();
+                if (result.Value == -1)
+                    return result;
+            }
 
             return new NormalResult();
         }
@@ -204,6 +238,40 @@ namespace dp2KernelApiTester
                     return result;
             }
 
+            // 2023/2/7
+            // 测试创建和覆盖空白记录
+            string[] numbers = new string[] { "1", "2" };
+            foreach (var number in numbers)
+            {
+                var create_result = CreateEmptyRecord("1", token);
+                if (create_result.Value == -1)
+                    return create_result;
+
+                // TODO: 覆盖记录
+                for (int i = 0; i < 2; i++)
+                {
+                    token.ThrowIfCancellationRequested();
+
+                    var result = FragmentOverwriteRecords(
+                        token,
+                        create_result.CreatedPaths,
+                        -1);    // -1 表示不用碎片，而是一次性覆盖
+                    if (result.Value == -1)
+                        return result;
+                }
+
+                {
+                    var result = DeleteRecords(
+        token,
+        create_result.CreatedPaths,
+        create_result.AccessPoints,
+        "");
+                    if (result.Value == -1)
+                        return result;
+                }
+            }
+
+
             // 临时测试
             // 碎片方式创建记录，overlap 风格
             {
@@ -242,7 +310,8 @@ namespace dp2KernelApiTester
 
             // 碎片方式创建记录
             {
-                var create_result = FragmentCreateRecords(token, 1);
+                var create_result = FragmentCreateRecords(token, 1,
+                    1, "emptychunk");
                 if (create_result.Value == -1)
                     return create_result;
 
@@ -671,6 +740,7 @@ namespace dp2KernelApiTester
                     ranges = "";
                 else if (StringUtil.IsInList("2", style))
                     ranges = "0:0"; // 新用法，可以定义一个长度为 0 的分段
+
                 var ret = channel.WriteRes(path,
                     ranges,
                     0,
@@ -700,6 +770,62 @@ namespace dp2KernelApiTester
                     Path = output_path,
                 });
                 */
+
+                // 读取一次验证
+                {
+                    ret = channel.GetRes(output_path,
+                        "data,timestamp,outputpath,metadata",
+                        out string xml,
+                        out string metadata,
+                        out byte[] read_timestamp,
+                        out string read_path,
+                        out strError);
+                    if (ret == -1)
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError,
+                        };
+                    // 验证读取的记录长度
+                    if (ret != 0)
+                    {
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"写入空白记录后重新读取，期待返回 0，但返回了 {ret}"
+                        };
+                    }
+
+                    // 验证 xml
+                    if (string.IsNullOrEmpty(xml) == false)
+                    {
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"写入空白记录后重新读取，期待返回空内容，但返回了 '{xml}'"
+                        };
+                    }
+
+                    // 验证返回的时间戳
+                    if (ByteArray.Compare(output_timestamp, read_timestamp) != 0)
+                    {
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"写入空白记录后重新读取，期待返回时间戳为 {ByteArray.GetHexTimeStampString(output_timestamp)}，但实际返回了 {ByteArray.GetHexTimeStampString(read_timestamp)}"
+                        };
+                    }
+
+                    // 验证返回的路径
+                    if (output_path != read_path)
+                    {
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"写入空白记录后重新读取，期待返回记录路径为 {output_path}，但实际返回了 {read_path}"
+                        };
+                    }
+                }
 
                 DataModel.SetMessage($"创建记录 {output_path} 成功");
             }
@@ -823,7 +949,7 @@ namespace dp2KernelApiTester
                     {
                         token.ThrowIfCancellationRequested();
 
-                        string strQueryXml = $"<target list='{ strDatabaseName}:{accesspoint.From}'><item><word>{accesspoint.Key}</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                        string strQueryXml = $"<target list='{strDatabaseName}:{accesspoint.From}'><item><word>{accesspoint.Key}</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
 
                         ret = channel.DoSearch(strQueryXml, "default", out strError);
                         if (ret == -1)
@@ -955,7 +1081,7 @@ out string strError);
             {
                 token.ThrowIfCancellationRequested();
 
-                string strQueryXml = $"<target list='{ strDatabaseName}:{accesspoint.From}'><item><word>{accesspoint.Key}</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                string strQueryXml = $"<target list='{strDatabaseName}:{accesspoint.From}'><item><word>{accesspoint.Key}</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
 
                 ret = channel.DoSearch(strQueryXml, "default", out strError);
                 if (ret == -1)
@@ -1020,7 +1146,7 @@ out string strError);
             {
                 token.ThrowIfCancellationRequested();
 
-                string strQueryXml = $"<target list='{ strDatabaseName}:{accesspoint.From}'><item><word>{accesspoint.Key}</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                string strQueryXml = $"<target list='{strDatabaseName}:{accesspoint.From}'><item><word>{accesspoint.Key}</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
 
                 ret = channel.DoSearch(strQueryXml, "default", out strError);
                 if (ret == -1)
@@ -1185,7 +1311,7 @@ out string strError);
             AccessPoint accesspoint,
             string condition)
         {
-            string strQueryXml = $"<target list='{ strDatabaseName}:{accesspoint.From}'><item><word>{accesspoint.Key}</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+            string strQueryXml = $"<target list='{strDatabaseName}:{accesspoint.From}'><item><word>{accesspoint.Key}</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
 
             var ret = channel.DoSearch(strQueryXml, "default", out string strError);
             if (ret == -1)
@@ -1376,7 +1502,7 @@ out string strError);
             {
                 token.ThrowIfCancellationRequested();
 
-                string strQueryXml = $"<target list='{ strDatabaseName}:{accesspoint.From}'><item><word>{accesspoint.Key}</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                string strQueryXml = $"<target list='{strDatabaseName}:{accesspoint.From}'><item><word>{accesspoint.Key}</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
 
                 ret = channel.DoSearch(strQueryXml, "default", out strError);
                 if (ret == -1)
@@ -1502,6 +1628,191 @@ out string strError);
             return -1;
         }
 
+#if REMOVED
+        // 覆盖已经创建好的记录
+        public static NormalResult ___OverwriteRecords(
+            CancellationToken token,
+            IEnumerable<string> paths,
+            string style = "")
+        {
+            var channel = DataModel.GetChannel();
+
+            int i = 1;
+            foreach (var path in paths)
+            {
+                token.ThrowIfCancellationRequested();
+
+                string origin_xml = "";
+                byte[] origin_timestamp = null;
+                // 先获得一次原始记录。然后覆盖，在覆盖完以前，每次中途再获取一次记录，应该是看到原始记录
+                {
+                    var ret = channel.GetRes(path,
+                        RmsChannel.GETRES_ALL_STYLE,
+                        out origin_xml,
+                        out string _,
+                        out origin_timestamp,
+                        out string _,
+                        out string strError);
+                    if (ret == -1)
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError,
+                        };
+                }
+
+                XmlDocument dom = new XmlDocument();
+                if (string.IsNullOrEmpty(origin_xml) == false)
+                    dom.LoadXml(origin_xml);
+                else
+                    dom.LoadXml("<root />");
+                var old_text = DomUtil.GetElementText(dom.DocumentElement, "changed");
+                if (old_text == null)
+                    old_text = "";
+                DomUtil.SetElementText(dom.DocumentElement, "changed", old_text + CreateString(i++));
+
+                if (i > 2000)
+                    i = 0;
+
+                string new_xml = dom.DocumentElement.OuterXml;
+                byte[] bytes = Encoding.UTF8.GetBytes(new_xml);
+
+                byte[] timestamp = origin_timestamp;
+                long start = 0;
+                long end = 0;
+
+                var overlap = StringUtil.IsInList("overlap", style);
+
+                string progress_id = DataModel.NewProgressID();
+                DataModel.ShowProgressMessage(progress_id, $"正在用 Fragment 方式{style}覆盖记录 {path}，请耐心等待 ...");
+
+                while (true)
+                {
+                    token.ThrowIfCancellationRequested();
+
+                    int chunk_length = fragment_length;
+
+                    if (chunk_length == -1)
+                        chunk_length = bytes.Length;
+
+                    end = start + chunk_length - 1;
+
+                    if (end > bytes.Length - 1)
+                    {
+                        end = bytes.Length - 1;
+                        chunk_length = (int)(end - start + 1);
+                    }
+
+                    Debug.Assert(end >= start);
+
+                    long delta = 0;  // 调整长度
+                    if (overlap)
+                    {
+                        delta = -10;
+                        if (start + delta < 0)
+                            delta = -1 * start;
+                    }
+
+                    byte[] fragment = new byte[end - (start + delta) + 1];
+                    Array.Copy(bytes, start + delta, fragment, 0, fragment.Length);
+
+                    DataModel.ShowProgressMessage(progress_id, $"正在用 Fragment 方式{style}覆盖记录 {path} {start + delta}-{end} {StringUtil.GetPercentText(end + 1, bytes.Length)}...");
+
+                    byte[] timestamp_param = timestamp;
+                    // 如果是从头覆盖，则需要使用读出时的完成时间戳
+                    if (start + delta == 0)
+                        timestamp_param = origin_timestamp;
+
+                    var ret = channel.TryWriteRes(path,
+                        $"{start + delta}-{end}",
+                        bytes.Length,
+                        fragment,
+                        "", // strMetadata
+                        "", // strStyle,
+                        timestamp_param,
+                        out string output_path,
+                        out byte[] output_timestamp,
+                        out string strError);
+                    if (ret == -1)
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError,
+                        };
+
+                    // 马上读取检验
+                    if (end < bytes.Length - 1)
+                    {
+                        token.ThrowIfCancellationRequested();
+
+                        ret = channel.GetRes(path,
+                        RmsChannel.GETRES_ALL_STYLE,
+    out string read_xml,
+    out string _,
+    out byte[] read_timestamp,
+    out string _,
+    out strError);
+                        if (ret == -1)
+                            return new CreateResult
+                            {
+                                Value = -1,
+                                ErrorInfo = strError,
+                            };
+                        if (read_xml != origin_xml)
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = $"记录 {path} {start}-{end}轮次 读取出来和 origin_xml 不一致"
+                            };
+                        if (ByteArray.Compare(read_timestamp, origin_timestamp) != 0)
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = $"记录 {path} 的时间戳({ByteArray.GetHexTimeStampString(read_timestamp)})读取出来和 origin_timestamp({ByteArray.GetHexTimeStampString(origin_timestamp)}) 不一致"
+                            };
+                    }
+
+                    timestamp = output_timestamp;
+
+                    start += chunk_length;
+                    if (start > bytes.Length - 1)
+                        break;
+                }
+
+                DataModel.ShowProgressMessage(progress_id, $"用 Fragment 方式{style}覆盖记录 {path} 完成");
+
+                token.ThrowIfCancellationRequested();
+
+                // 覆盖成功后，马上读取检验
+                {
+                    var ret = channel.GetRes(path,
+                        RmsChannel.GETRES_ALL_STYLE,
+out string read_xml,
+out string _,
+out byte[] read_timestamp,
+out string _,
+out string strError);
+                    if (ret == -1)
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError,
+                        };
+                    if (read_xml != new_xml)
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"记录 {path} 读取出来和 new_xml 不一致"
+                        };
+                }
+
+                DataModel.SetMessage($"覆盖记录 {path} 成功");
+            }
+
+            return new NormalResult();
+        }
+#endif
+
         // 用片段方式创建记录
         public static CreateResult FragmentCreateRecords(
             CancellationToken token,
@@ -1515,6 +1826,11 @@ out string strError);
                 throw new ArgumentException("fragment_length 必须大于等于 1");
 
             var overlap = StringUtil.IsInList("overlap", style);
+            // 第一个 chunk 调整为  0 length
+            var empty_chunk = StringUtil.IsInList("emptychunk", style);
+
+            if (overlap && empty_chunk)
+                throw new ArgumentException("style 值中 overlap 和 emptychunk 不允许同时存在");
 
             List<string> created_paths = new List<string>();
             List<AccessPoint> created_accesspoints = new List<AccessPoint>();
@@ -1561,6 +1877,8 @@ out string strError);
                 long start = 0;
                 long end = 0;
 
+                bool adjusted = false;
+
                 string progress_id = DataModel.NewProgressID();
                 DataModel.ShowProgressMessage(progress_id, $"正在用 Fragment 方式{style}创建记录 {i}，请耐心等待 ...");
 
@@ -1593,8 +1911,19 @@ out string strError);
 
                     DataModel.ShowProgressMessage(progress_id, $"正在用 Fragment 方式{style}创建记录 {current_path} {start + delta}-{end} {StringUtil.GetPercentText(end + 1, bytes.Length)}...");
 
+                    RangeItem ri = new RangeItem { lStart = start + delta, lLength = fragment.Length };
+
+                    if (empty_chunk && adjusted == false
+                        && ri.lStart == 0 && ri.lLength == 1)
+                    {
+                        ri.lLength = 0;
+                        fragment = new byte[0];
+                        adjusted = true;
+                    }
+
+                    var range = ri.ToString();  // $"{start + delta}-{end}",
                     var ret = channel.TryWriteRes(current_path,
-                        $"{start + delta}-{end}",
+                        range,
                         bytes.Length,
                         fragment,
                         "", // strMetadata
@@ -1615,7 +1944,10 @@ out string strError);
                     timestamp = output_timestamp;
                     current_path = output_path;
 
-                    start += chunk_length;
+                    if (empty_chunk)
+                        start += fragment.Length;
+                    else
+                        start += chunk_length;
                     if (start > bytes.Length - 1)
                         break;
                 }
@@ -1627,6 +1959,7 @@ out string strError);
                 // TODO: 读出记录检查内容是否和发出的一致
                 {
                     var ret = channel.GetRes(current_path,
+                        RmsChannel.GETRES_ALL_STYLE,
                         out string strResult,
                         out string _,
                         out byte[] _,
@@ -1765,7 +2098,7 @@ out string strError);
                 {
                     token.ThrowIfCancellationRequested();
 
-                    string strQueryXml = $"<target list='{ strDatabaseName}:{accesspoint.From}'><item><word>{accesspoint.Key}</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                    string strQueryXml = $"<target list='{strDatabaseName}:{accesspoint.From}'><item><word>{accesspoint.Key}</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
 
                     var ret = channel.DoSearch(strQueryXml, "default", out string strError);
                     if (ret == -1)
@@ -1811,6 +2144,7 @@ out string strError);
                 // 先获得一次原始记录。然后 Fragment 覆盖，在覆盖完以前，每次中途再获取一次记录，应该是看到原始记录
                 {
                     var ret = channel.GetRes(path,
+                        RmsChannel.GETRES_ALL_STYLE,
                         out origin_xml,
                         out string _,
                         out origin_timestamp,
@@ -1825,7 +2159,10 @@ out string strError);
                 }
 
                 XmlDocument dom = new XmlDocument();
-                dom.LoadXml(origin_xml);
+                if (string.IsNullOrEmpty(origin_xml) == false)
+                    dom.LoadXml(origin_xml);
+                else
+                    dom.LoadXml("<root />");
                 var old_text = DomUtil.GetElementText(dom.DocumentElement, "changed");
                 if (old_text == null)
                     old_text = "";
@@ -1906,6 +2243,7 @@ out string strError);
                         token.ThrowIfCancellationRequested();
 
                         ret = channel.GetRes(path,
+                        RmsChannel.GETRES_ALL_STYLE,
     out string read_xml,
     out string _,
     out byte[] read_timestamp,
@@ -1945,6 +2283,7 @@ out string strError);
                 // 覆盖成功后，马上读取检验
                 {
                     var ret = channel.GetRes(path,
+                        RmsChannel.GETRES_ALL_STYLE,
 out string read_xml,
 out string _,
 out byte[] read_timestamp,
@@ -2396,7 +2735,7 @@ out string strError);
 
         // 测试交替上载覆盖大小对象
         public static CreateResult UploadSmallLargObject(
-            int count, 
+            int count,
             string strStyle,
             CancellationToken token)
         {

@@ -360,7 +360,7 @@ string style = "")
                     }
                     catch (Exception ex)
                     {
-                        AppendString($"exception: {ex.Message}");
+                        AppendString($"exception: {ExceptionUtil.GetDebugText(ex)}");
                     }
                     finally
                     {
@@ -540,6 +540,7 @@ string style = "")
             _cancelCurrent?.Cancel();
         }
 
+        // 一些临时测试
         private async void MenuItem_test_special_Click(object sender, EventArgs e)
         {
             using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(this._cancelApp.Token))

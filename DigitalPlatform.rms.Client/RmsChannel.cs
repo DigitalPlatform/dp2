@@ -5194,6 +5194,10 @@ ref strNewStyle);	// 不要数据体和metadata
             return lRet;
         }
 
+        // 用于 GetRes() API 的默认全部 style 组合值
+        public const string GETRES_ALL_STYLE = "content,data,metadata,timestamp,outputpath";
+
+
         // 获得资源。返回字符串版本。适用于获得主记录体。
         // 可用来获得配置文件
         // return:
@@ -5206,7 +5210,6 @@ ref strNewStyle);	// 不要数据体和metadata
             out string strOutputPath,
             out string strError)
         {
-
             return GetRes(strPath,
                 "content,data,metadata,timestamp,outputpath",
                 out strResult,
