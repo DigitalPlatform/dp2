@@ -89,10 +89,22 @@ namespace dp2Inventory
         {
             get
             {
+#if USE_SN
+                // 先验证序列号是否有效
+                int nRet = FormClientInfo.VerifySerialCode("",
+                    "",
+                    "", 
+                    out string strError);
+                if (nRet == -1
+    || nRet == 0
+    || FormClientInfo.CommunityMode == true)
+                    return "error:dp2inventory需要成功设置序列号以后才能继续使用";
+
                 // 如果序列号的 function 中有 dp2library:xxx 部分，xxx 表示锁定的 dp2library URL
                 var url = FormClientInfo.GetSerialCodeFunctionValueByPrefix("dp2library:");
                 if (string.IsNullOrEmpty(url) == false)
                     return url;
+#endif
                 return ClientInfo.Config.Get("dp2library", "serverUrl", null);
             }
             set
@@ -314,10 +326,10 @@ namespace dp2Inventory
             return Cryptography.Encrypt(strPlainText, EncryptKey);
         }
 
-        #endregion
+#endregion
 
 
-        #region UID table
+#region UID table
 
         // 预先从全部实体记录中准备好 UID 到 PII 的对照关系。这一部分标签就不需要 GetTagData 了
         // UID --> PII
@@ -416,7 +428,7 @@ namespace dp2Inventory
             }
         }
 
-        #endregion
+#endregion
 
         public static void ParseOiPii(string text,
     out string pii,
@@ -448,7 +460,7 @@ namespace dp2Inventory
         }
 
 
-        #region SIP2
+#region SIP2
 
         public static XmlDocument GetInventoryDom()
         {

@@ -25,6 +25,7 @@ using DigitalPlatform.Xml;
 
 using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.Core;
+using System.Data.SqlClient;
 
 namespace DigitalPlatform.rms.Client
 {
@@ -930,10 +931,16 @@ namespace DigitalPlatform.rms.Client
 
                 Result result = this.ws.EndGetVersion(soapresult);
 
+                // ---------
+                // 2023/2/27
+                SetErrorCode(result, ref strError);
+
                 if (result.Value == -1)
                 {
+                    /*
                     ConvertErrorCode(result);
                     strError = result.ErrorString;
+                    */
                     return -1;
                 }
 
@@ -953,6 +960,14 @@ namespace DigitalPlatform.rms.Client
                     return -1;
                 goto REDO;
             }
+        }
+
+        // 2023/3/7
+        void SetErrorCode(Result result, ref string strError)
+        {
+            ConvertErrorCode(result);
+            this.ErrorInfo = result.ErrorString;
+            strError = this.ErrorInfo;
         }
 
         // 登录
@@ -991,23 +1006,30 @@ namespace DigitalPlatform.rms.Client
 
                 Result result = this.ws.EndLogin(soapresult);
 
+                // ---------
+                // 2023/2/27
+                SetErrorCode(result, ref strError);
+
                 if (result.Value == -1)
                 {
+                    /*
                     ConvertErrorCode(result);
                     strError = result.ErrorString;
+                    */
                     return -1;
                 }
 
                 if (result.Value == 0)
                 {
+                    /*
                     strError = result.ErrorString;
+                    */
                     return 0;
                 }
 
                 this.ClearRedoCount();
                 return 1;
             }
-
             catch (Exception ex)
             {
                 /*
@@ -1120,6 +1142,10 @@ namespace DigitalPlatform.rms.Client
                     result = this.ws.EndChangeOtherPassword(soapresult);
                 }
 
+                // ---------
+                // 2023/2/27
+                SetErrorCode(result, ref strError);
+
                 if (result.Value == -1)
                 {
                     if (result.ErrorCode == ErrorCodeValue.NotLogin
@@ -1177,9 +1203,7 @@ namespace DigitalPlatform.rms.Client
 
                 this.ClearRedoCount();
                 return 0;
-
             }
-
             catch (Exception ex)
             {
                 /*
@@ -1227,6 +1251,10 @@ namespace DigitalPlatform.rms.Client
                     return -1;
                 }
                 Result result = this.ws.EndInitializeDb(soapresult);
+
+                // ---------
+                // 2023/2/27
+                SetErrorCode(result, ref strError);
 
                 if (result.Value == -1)
                 {
@@ -1310,6 +1338,10 @@ namespace DigitalPlatform.rms.Client
                 }
                 Result result = this.ws.EndRefreshDb(soapresult);
 
+                // ---------
+                // 2023/2/27
+                SetErrorCode(result, ref strError);
+
                 if (result.Value == -1)
                 {
                     if (result.ErrorCode == ErrorCodeValue.NotLogin
@@ -1384,6 +1416,10 @@ namespace DigitalPlatform.rms.Client
                     return -1;
                 }
                 Result result = this.ws.EndDeleteDb(soapresult);
+
+                // ---------
+                // 2023/2/27
+                SetErrorCode(result, ref strError);
 
                 if (result.Value == -1)
                 {
@@ -1480,6 +1516,10 @@ namespace DigitalPlatform.rms.Client
                     return -1;
                 }
                 Result result = this.ws.EndCreateDb(soapresult);
+
+                // ---------
+                // 2023/2/27
+                SetErrorCode(result, ref strError);
 
                 if (result.Value == -1)
                 {
@@ -1581,6 +1621,10 @@ namespace DigitalPlatform.rms.Client
                     out strKeysDef,
                     out strBrowseDef,
                     soapresult);
+
+                // ---------
+                // 2023/2/27
+                SetErrorCode(result, ref strError);
 
                 if (result.Value == -1)
                 {
@@ -1687,6 +1731,10 @@ namespace DigitalPlatform.rms.Client
                 }
                 Result result = this.ws.EndSetDbInfo(soapresult);
 
+                // ---------
+                // 2023/2/27
+                SetErrorCode(result, ref strError);
+
                 if (result.Value == -1)
                 {
                     if (result.ErrorCode == ErrorCodeValue.NotLogin
@@ -1759,10 +1807,16 @@ namespace DigitalPlatform.rms.Client
                 }
                 Result result = this.ws.EndLogout(soapresult);
 
+                // ---------
+                // 2023/2/27
+                SetErrorCode(result, ref strError);
+
                 if (result.Value == -1)
                 {
+                    /*
                     ConvertErrorCode(result);
                     strError = result.ErrorString;
+                    */
                     return -1;
                 }
 
@@ -1831,19 +1885,6 @@ namespace DigitalPlatform.rms.Client
 
                 for (; ; )
                 {
-
-                    /*
-                    try 
-                    {
-                        Application.DoEvents();	// 出让界面控制权
-                    }
-                    catch
-                    {
-                    }
-					
-
-                    // System.Threading.Thread.Sleep(10);	// 避免CPU资源过度耗费
-                     */
                     DoIdle(); // 出让控制权，避免CPU资源耗费过度
 
                     bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
@@ -1860,6 +1901,10 @@ namespace DigitalPlatform.rms.Client
                     out strIdChangeList,
                     out strOutputPath,
                     out baOutputTimeStamp, soapresult);
+
+                // ---------
+                // 2023/2/27
+                SetErrorCode(result, ref strError);
 
                 if (result.Value == -1)
                 {
@@ -1950,6 +1995,10 @@ namespace DigitalPlatform.rms.Client
                 Result result = this.ws.EndBatchTask(
                     out results,
                     soapresult);
+
+                // ---------
+                // 2023/2/27
+                SetErrorCode(result, ref strError);
 
                 if (result.Value == -1)
                 {
@@ -2174,6 +2223,10 @@ namespace DigitalPlatform.rms.Client
                     out records,
                     soapresult);
 
+                // ---------
+                // 2023/2/27
+                SetErrorCode(result, ref strError);
+
                 if (result.Value == -1)
                 {
                     if (result.ErrorCode == ErrorCodeValue.NotLogin
@@ -2254,6 +2307,10 @@ namespace DigitalPlatform.rms.Client
                 }
 
                 Result result = this.ws.EndSearch(soapresult);
+
+                // ---------
+                // 2023/2/27
+                SetErrorCode(result, ref strError);
 
                 if (result.Value == -1)
                 {
@@ -2339,6 +2396,11 @@ namespace DigitalPlatform.rms.Client
                     return -1;
                 }
                 Result result = this.ws.EndSearch(soapresult);
+
+                // ---------
+                // 2023/2/27
+                SetErrorCode(result, ref strError);
+
                 if (result.Value == -1)
                 {
                     ConvertErrorCode(result);
@@ -2402,6 +2464,10 @@ namespace DigitalPlatform.rms.Client
                 Record[] records = null;
                 Result result = this.ws.EndGetBrowse(
                     out records, soapresult);
+
+                // ---------
+                // 2023/2/27
+                SetErrorCode(result, ref strError);
 
                 if (result.Value == -1)
                 {
@@ -2517,9 +2583,15 @@ namespace DigitalPlatform.rms.Client
                         out records,
                         soapresult);
 
+                    // ---------
+                    // 2023/2/27
+                    SetErrorCode(result, ref strError);
+
                     if (result.Value == -1)
                     {
+                        /*
                         strError = result.ErrorString;
+                        */
                         return -1;
                     }
                     else
@@ -2537,7 +2609,6 @@ namespace DigitalPlatform.rms.Client
 
                         if (bIncludeID == true)
                         {
-
                             string[] cols = new string[record.Cols.Length + (bIncludeID == true ? 1 : 0)];
 
                             if (bIncludeID)
@@ -2752,9 +2823,15 @@ namespace DigitalPlatform.rms.Client
                     Result result = this.ws.EndGetRichRecords(
                         out records, soapresult);
 
+                    // ---------
+                    // 2023/2/27
+                    SetErrorCode(result, ref strError);
+
                     if (result.Value == -1)
                     {
+                        /*
                         strError = result.ErrorString;
+                        */
                         return -1;
                     }
                     else
@@ -2886,6 +2963,10 @@ namespace DigitalPlatform.rms.Client
                     }
                     Result result = this.ws.EndGetRecords(
                         out records, soapresult);
+
+                    // ---------
+                    // 2023/2/27
+                    SetErrorCode(result, ref strError);
 
                     if (result.Value == -1)
                     {
@@ -3093,6 +3174,10 @@ namespace DigitalPlatform.rms.Client
                     Result result = this.ws.EndGetRecords(
                         out records, soapresult);
 
+                    // ---------
+                    // 2023/2/27
+                    SetErrorCode(result, ref strError);
+
                     if (result.Value == -1)
                     {
                         // 2011/4/21
@@ -3250,6 +3335,10 @@ namespace DigitalPlatform.rms.Client
                     }
                     Result result = this.ws.EndGetRecords(
                         out records, soapresult);
+
+                    // ---------
+                    // 2023/2/27
+                    SetErrorCode(result, ref strError);
 
                     if (result.Value == -1)
                     {
@@ -3409,6 +3498,10 @@ namespace DigitalPlatform.rms.Client
                     Result result = this.ws.EndGetRecords(
                         out records, soapresult);
 
+                    // ---------
+                    // 2023/2/27
+                    SetErrorCode(result, ref strError);
+
                     if (result.Value == -1)
                     {
                         // 2011/4/21
@@ -3464,8 +3557,6 @@ namespace DigitalPlatform.rms.Client
                             stop.SetMessage("正在装入 " + Convert.ToString(lStart + i) + " / "
                                 + ((lTotalCount == -1) ? "?" : Convert.ToString(lTotalCount)));
                         }
-
-
 
                         Record record = records[i];
                         string[] acol = new string[record.Cols.Length + 1];
@@ -3574,6 +3665,10 @@ namespace DigitalPlatform.rms.Client
                     }
                     Result result = this.ws.EndGetRecords(
                         out records, soapresult);
+
+                    // ---------
+                    // 2023/2/27
+                    SetErrorCode(result, ref strError);
 
                     if (result.Value == -1)
                     {
@@ -3712,6 +3807,10 @@ namespace DigitalPlatform.rms.Client
                 Result result = this.ws.EndWriteRecords(
                     out results, soapresult);
 
+                // ---------
+                // 2023/2/27
+                SetErrorCode(result, ref strError);
+
                 if (result.Value == -1)
                 {
                     if (result.ErrorCode == ErrorCodeValue.NotLogin
@@ -3798,6 +3897,10 @@ namespace DigitalPlatform.rms.Client
                 Result result = this.ws.EndGetRecords(
                     out searchresults,  // records,
                     soapresult);
+
+                // ---------
+                // 2023/2/27
+                SetErrorCode(result, ref strError);
 
                 if (result.Value == -1)
                 {
@@ -3923,6 +4026,10 @@ namespace DigitalPlatform.rms.Client
                     Result result = this.ws.EndCreateKeys(
                         out keys, soapresult);
 
+                    // ---------
+                    // 2023/2/27
+                    SetErrorCode(result, ref strError);
+
                     if (result.Value == -1)
                     {
                         if (result.ErrorCode == ErrorCodeValue.NotLogin
@@ -3941,7 +4048,6 @@ namespace DigitalPlatform.rms.Client
 
                             goto REDO;
                         }
-
 
                         ConvertErrorCode(result);
                         strError = result.ErrorString;
@@ -4086,6 +4192,10 @@ namespace DigitalPlatform.rms.Client
                     }
                     Result result = this.ws.EndCreateKeys(
                         out keys, soapresult);
+
+                    // ---------
+                    // 2023/2/27
+                    SetErrorCode(result, ref strError);
 
                     if (result.Value == -1)
                     {
@@ -4255,6 +4365,10 @@ namespace DigitalPlatform.rms.Client
                     Result result = this.ws.EndDir(
                         out items, soapresult);
 
+                    // ---------
+                    // 2023/2/27
+                    SetErrorCode(result, ref strError);
+
                     if (result.Value == -1)
                     {
                         if (result.ErrorCode == ErrorCodeValue.NotLogin
@@ -4358,6 +4472,10 @@ namespace DigitalPlatform.rms.Client
                 Result result = this.ws.EndDir(
                     out results, soapresult);
 
+                // ---------
+                // 2023/2/27
+                SetErrorCode(result, ref strError);
+
                 if (result.Value == -1)
                 {
                     if (result.ErrorCode == ErrorCodeValue.NotLogin
@@ -4442,8 +4560,15 @@ namespace DigitalPlatform.rms.Client
                 Result result = this.ws.EndWriteRes(
                     out strOutputResPath,
                     out baOutputTimestamp, soapresult);
+                // ---------
+                // 2023/2/27
+                SetErrorCode(result, ref strError);
 
+                /*
+                ConvertErrorCode(result);   // 2023/2/7
                 this.ErrorInfo = result.ErrorString;	// 无论是否返回错误，都将result的ErrorString放到Channel中
+                strError = this.ErrorInfo;  // 2023/2/7
+                */
 
                 if (result.Value == -1)
                 {
@@ -4465,7 +4590,7 @@ namespace DigitalPlatform.rms.Client
                     }
 
                     ConvertErrorCode(result);
-                    strError = result.ErrorString;
+                    // strError = result.ErrorString;
 
                     if (result.ErrorCode == ErrorCodeValue.TimestampMismatch)
                     {
@@ -4596,8 +4721,15 @@ namespace DigitalPlatform.rms.Client
                         out strOutputPath,
                         out output_timestamp/*baOutputTimeStamp*/, soapresult);
 
+                    // ---------
+                    // 2023/2/27
+                    SetErrorCode(result, ref strError);
+
+                    /*
+                    ConvertErrorCode(result);   // 2023/2/7
                     this.ErrorInfo = result.ErrorString;	// 无论是否返回错误，都将result的ErrorString放到Channel中
-                    strError = result.ErrorString;  // 2007/6/28 服务于 带有局部path的保存中返回值放在strError的情况
+                    strError = this.ErrorInfo;  // 2023/2/7
+                    */
 
                     if (result.Value == -1)
                     {
@@ -4728,6 +4860,10 @@ namespace DigitalPlatform.rms.Client
                 Result result = this.ws.EndDeleteRes(
                     out output_timestamp, soapresult);
 
+                // ---------
+                // 2023/2/27
+                SetErrorCode(result, ref strError);
+
                 if (result.Value == -1)
                 {
                     if (result.ErrorCode == ErrorCodeValue.NotLogin
@@ -4826,6 +4962,10 @@ namespace DigitalPlatform.rms.Client
                 Result result = this.ws.EndRebuildResKeys(
                     out strOutputResPath, soapresult);
 
+                // ---------
+                // 2023/2/27
+                SetErrorCode(result, ref strError);
+
                 if (result.Value == -1)
                 {
                     if (result.ErrorCode == ErrorCodeValue.NotLogin
@@ -4860,9 +5000,7 @@ namespace DigitalPlatform.rms.Client
                     // 原来在这里，稍晚
                     return -1;
                 }
-
             }
-
             catch (Exception ex)
             {
                 /*
@@ -5134,9 +5272,15 @@ ref strNewStyle);	// 不要数据体和metadata
                     out strOutputResPath,
                     out baOutputTimestamp, soapresult);
 
+                // ---------
+                // 2023/2/27
+                SetErrorCode(result, ref strError);
+
+                /*
                 // 即便不是返回-1,也可能有错误码和错误信息字符串
                 ConvertErrorCode(result);
                 strError = result.ErrorString;
+                */
 
                 if (result.Value == -1)
                 {
@@ -5266,9 +5410,15 @@ ref strNewStyle);	// 不要数据体和metadata
                         out strOutputResPath,
                         out baOutputTimeStamp, soapresult);
 
+                    // ---------
+                    // 2023/2/27
+                    SetErrorCode(result, ref strError);
+
+                    /*
                     // 即便不是返回-1,也可能有错误码和错误信息字符串
                     ConvertErrorCode(result);
                     strError = result.ErrorString;
+                    */
 
                     if (result.Value == -1)
                     {
@@ -5582,9 +5732,15 @@ ref strNewStyle);	// 不要数据体和metadata
                         out strOutputPath,
                         out timestamp, soapresult);
 
+                    // ---------
+                    // 2023/2/27
+                    SetErrorCode(result, ref strError);
+
+                    /*
                     // 即便不是返回-1,也可能有错误码和错误信息字符串
                     ConvertErrorCode(result);
                     strError = result.ErrorString;
+                    */
 
                     if (result.Value == -1)
                     {
@@ -5811,6 +5967,10 @@ ref strNewStyle);	// 不要数据体和metadata
                 Result result = this.ws.EndWriteRes(
                     out strOutputPath,
                     out output_timestamp, soapresult);
+
+                // ---------
+                // 2023/2/27
+                SetErrorCode(result, ref strError);
 
                 if (result.Value == -1)
                 {
@@ -6160,6 +6320,10 @@ out strError);
                     out strOutputPath,
                     out output_timestamp, soapresult);
 
+                // ---------
+                // 2023/2/27
+                SetErrorCode(result, ref strError);
+
                 if (result.Value == -1)
                 {
                     if (result.ErrorCode == ErrorCodeValue.NotLogin
@@ -6249,10 +6413,7 @@ out strError);
             {
                 return -1;
             }
-
-
         }
-
     }
 
 

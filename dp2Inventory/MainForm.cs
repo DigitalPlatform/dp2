@@ -161,7 +161,9 @@ bool bClickClose = false)
 
         private async void MainForm_Load(object sender, EventArgs e)
         {
+#if USE_SN
             FormClientInfo.SerialNumberMode = "must";
+#endif
             var ret = FormClientInfo.Initial("dp2inventory",
                 () => StringUtil.IsDevelopMode());
             if (ret == false)
@@ -438,7 +440,7 @@ bool bClickClose = false)
                 e.Cancel = true;
         }
 
-        #region 操作历史
+#region 操作历史
 
         const int COLUMN_UID = 0;
         const int COLUMN_PII = 1;
@@ -491,7 +493,7 @@ bool bClickClose = false)
             ListViewUtil.ChangeItemText(item, COLUMN_BATCHNO, info.BatchNo);
         }
 
-        #endregion
+#endregion
 
         private void MenuItem_openUserFolder_Click(object sender, EventArgs e)
         {
@@ -905,7 +907,7 @@ MessageBoxDefaultButton.Button2);
         }
 
 
-        #region ProcessManager
+#region ProcessManager
 
         CancellationTokenSource _cancelProcessMonitor = new CancellationTokenSource();
 
@@ -942,7 +944,7 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
-        #endregion
+#endregion
 
         ShelfDialog _shelfDialog = null;
 

@@ -15162,6 +15162,7 @@ handle.CancelTokenSource.Token).Result;
                         string strFileName = BuildObjectFileName(strID, false); // 长文件名
                         row_info.FileName = GetShortFileName(strFileName); // 短文件名
 
+#if OLDCODE
                         if (lTotalLength == 0)
                         {
                             nRet = CreateZeroLengthFile(strFileName,
@@ -15170,40 +15171,9 @@ handle.CancelTokenSource.Token).Result;
                                 return -1;
 
                             succeed = true;
-#if NO
-                        // 创建一个0bytes的文件
-                        int nRedoCount = 0;
-                    REDO:
-                        try
-                        {
-                            using (FileStream s = File.Open(
-    strFileName,
-    FileMode.OpenOrCreate,
-    FileAccess.Write,
-    FileShare.ReadWrite))
-                            {
-                                s.SetLength(0);
-                            }
-                        }
-                        catch (DirectoryNotFoundException ex)
-                        {
-                            if (nRedoCount == 0)
-                            {
-                                // 创建中间子目录
-                                PathUtil.TryCreateDir(PathUtil.PathPart(strFileName));
-                                nRedoCount++;
-                                goto REDO;
-                            }
-                            throw ex;
-                        }
-                        catch (Exception ex)
-                        {
-                            strError = "创建0字节的文件 '" + strFileName + "' 时出错：" + ex.Message;
-                            return -1;
-                        }
-#endif
                         }
                         else
+#endif
                         {
                             Debug.Assert(string.IsNullOrEmpty(row_info.NewFileName) == false, "");
                             string strSourceFilename = GetObjectFileName(row_info.NewFileName);
@@ -15226,8 +15196,6 @@ handle.CancelTokenSource.Token).Result;
                                 strError = "对象文件(临时文件) '" + strSourceFilename + "' 不存在...";
                                 return -1;
                             }
-
-
                         }
 
                         row_info.NewFileName = "";
@@ -17250,7 +17218,7 @@ handle.CancelTokenSource.Token).Result;
 
 #if OLD_CODE
 
-            #region MS SQL Server
+#region MS SQL Server
             if (connection.SqlServerType == SqlServerType.MsSqlServer)
             {
                 using (SqlCommand command = new SqlCommand("",
@@ -17464,9 +17432,9 @@ handle.CancelTokenSource.Token).Result;
 
                 return 0;
             }
-            #endregion // MS SQL Server
+#endregion // MS SQL Server
 
-            #region SQLite
+#region SQLite
             else if (connection.SqlServerType == SqlServerType.SQLite)
             {
                 using (SQLiteCommand command = new SQLiteCommand("",
@@ -17623,9 +17591,9 @@ handle.CancelTokenSource.Token).Result;
                     }
                 } // end of using command
             }
-            #endregion // SQLite
+#endregion // SQLite
 
-            #region MySql
+#region MySql
             else if (connection.SqlServerType == SqlServerType.MySql)
             {
                 List<string> lines = new List<string>();
@@ -17754,9 +17722,9 @@ handle.CancelTokenSource.Token).Result;
 
                 return 0;
             }
-            #endregion // MySql
+#endregion // MySql
 
-            #region Oracle
+#region Oracle
             else if (connection.SqlServerType == SqlServerType.Oracle)
             {
                 using (OracleCommand command = new OracleCommand("", connection.OracleConnection))
@@ -17920,7 +17888,7 @@ handle.CancelTokenSource.Token).Result;
                     }
                 } // end of using command
             }
-            #endregion // Oracle
+#endregion // Oracle
 
 #endif
             return 0;
@@ -18291,7 +18259,7 @@ handle.CancelTokenSource.Token).Result;
 
 #if OLD_CODE
 
-        #region MS SQL Server
+#region MS SQL Server
             if (connection.SqlServerType == SqlServerType.MsSqlServer)
             {
                 string strCommand = "";
@@ -18419,9 +18387,9 @@ handle.CancelTokenSource.Token).Result;
                     }
                 } // enf of using command
             }
-        #endregion // MS SQL Server
+#endregion // MS SQL Server
 
-        #region SQLite
+#region SQLite
             else if (connection.SqlServerType == SqlServerType.SQLite)
             {
                 string strCommand = "";
@@ -18549,9 +18517,9 @@ handle.CancelTokenSource.Token).Result;
                     }
                 } // end of using command
             }
-        #endregion // SQLite
+#endregion // SQLite
 
-        #region MySql
+#region MySql
             else if (connection.SqlServerType == SqlServerType.MySql)
             {
                 string strCommand = "";
@@ -18683,12 +18651,12 @@ handle.CancelTokenSource.Token).Result;
                     }
                 } // end of using command
             }
-        #endregion // MySql
+#endregion // MySql
 
 #endif
 
 #if REMOVED
-        #region Oracle
+#region Oracle
             else if (connection.IsOracle())
             {
                 string strCommand = "";
@@ -18797,7 +18765,7 @@ handle.CancelTokenSource.Token).Result;
                     }
                 } // end of using command
             }
-        #endregion // Oracle
+#endregion // Oracle
 #endif
 
 
@@ -18856,7 +18824,7 @@ handle.CancelTokenSource.Token).Result;
                 strError = "connection为null";
                 return -1;
             }
-            #region MS SQL Server
+#region MS SQL Server
             if (connection.SqlServerType == SqlServerType.MsSqlServer)
             {
                 if (connection.SqlConnection == null)
@@ -18871,9 +18839,9 @@ handle.CancelTokenSource.Token).Result;
                 }
                 return 0;
             }
-            #endregion // MS SQL Server
+#endregion // MS SQL Server
 
-            #region SQLite
+#region SQLite
             if (connection.SqlServerType == SqlServerType.SQLite)
             {
                 if (connection.SQLiteConnection == null)
@@ -18888,9 +18856,9 @@ handle.CancelTokenSource.Token).Result;
                 }
                 return 0;
             }
-            #endregion // SQLite
+#endregion // SQLite
 
-            #region MySql
+#region MySql
             if (connection.SqlServerType == SqlServerType.MySql)
             {
                 if (connection.MySqlConnection == null)
@@ -18905,9 +18873,9 @@ handle.CancelTokenSource.Token).Result;
                 }
                 return 0;
             }
-            #endregion // MySql
+#endregion // MySql
 
-            #region Oracle
+#region Oracle
             if (connection.SqlServerType == SqlServerType.Oracle)
             {
                 if (connection.OracleConnection == null)
@@ -18923,7 +18891,7 @@ handle.CancelTokenSource.Token).Result;
                 }
                 return 0;
             }
-            #endregion // Oracle
+#endregion // Oracle
 
             return 0;
         }
