@@ -284,7 +284,7 @@ namespace DigitalPlatform.CirculationClient
                     var task = VerifyMac("https://dp2003.com/sncenter",
                         ProductName,
                         mac_list);
-                    while(task.IsCompleted == false)
+                    while (task.IsCompleted == false)
                     {
                         Application.DoEvents();
                     }
@@ -442,6 +442,36 @@ namespace DigitalPlatform.CirculationClient
             }
 
             return false;
+        }
+
+        // 根据前缀获取一个序列号功能。注意使用本函数以前应该用 VerifySerialCode() 函数先确认序列号有效
+        public static string GetSerialCodeFunctionValueByPrefix(
+string strPrefix)
+        {
+            var env = GetEnvironmentString("");
+            return GetFunctionValueByPrefix(env, strPrefix);
+        }
+
+        // 在 function 参数中，根据前缀找到对应的值
+        // parameters:
+        //      strPrefix   前缀部分。注意，返回的内容是截取字符串中前缀匹配部分右侧内容，和前缀是密排的关系。
+        //                  假设命中的字符串内容为 "prefix:xxx"，如果前缀是 "prefix"，那么返回的其实是 ":xxx"。
+        //                  为了返回 "xxx"，可以用前缀 "prefix:" 来调用本函数
+        static string GetFunctionValueByPrefix(string strEnvString,
+    string strPrefix)
+        {
+            Hashtable table = StringUtil.ParseParameters(strEnvString);
+            string strFuncValue = (string)table["function"];
+            if (strFuncValue == null)
+                return null;
+
+            foreach (var value in strFuncValue.Split('|'))
+            {
+                if (value.StartsWith(strPrefix))
+                    return value.Substring(strPrefix.Length);
+            }
+
+            return null;
         }
 
 

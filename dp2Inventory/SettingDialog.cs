@@ -31,6 +31,12 @@ namespace dp2Inventory
             this.textBox_rfid_uploadInterfaceUrl.Text = DataModel.uploadInterfaceUrl;
 
             this.textBox_dp2library_serverUrl.Text = DataModel.dp2libraryServerUrl;
+            if (DataModel.is_dp2libraryServerUrl_locked)
+            {
+                this.textBox_dp2library_serverUrl.ReadOnly = true;
+                this.toolStrip_server.Enabled = false;
+            }
+
             this.textBox_dp2library_userName.Text = DataModel.dp2libraryUserName;
             this.textBox_dp2library_password.Text = DataModel.dp2libraryPassword;
             this.textBox_dp2library_location.Text = DataModel.dp2libraryLocation;
@@ -204,7 +210,7 @@ namespace dp2Inventory
             {
                 dom.LoadXml(rule);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 error = $"XML 结构不合法: {ex.Message}";
                 return false;

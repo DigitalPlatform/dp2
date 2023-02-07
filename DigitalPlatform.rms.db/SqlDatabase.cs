@@ -15415,8 +15415,8 @@ handle.CancelTokenSource.Token).Result;
             // 排序
             rl1.Sort();
 
-            // 合并事项
-            rl1.Merge();
+            // 合并事项。注意，并不移走长度为 0 的事项。这样可以有效处理空内容的 0:0 段落
+            rl1.Merge(false);
 
             // 调试用!
             // Debug.Assert(rl1.Count == 1, "");

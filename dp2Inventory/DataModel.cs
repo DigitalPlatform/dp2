@@ -73,10 +73,26 @@ namespace dp2Inventory
             }
         }
 
+        // dp2library 服务器 URL 是否被序列号锁定
+        public static bool is_dp2libraryServerUrl_locked
+        {
+            get
+            {
+                var url = FormClientInfo.GetSerialCodeFunctionValueByPrefix("dp2library:");
+                if (string.IsNullOrEmpty(url) == false)
+                    return true;
+                return false;
+            }
+        }
+
         public static string dp2libraryServerUrl
         {
             get
             {
+                // 如果序列号的 function 中有 dp2library:xxx 部分，xxx 表示锁定的 dp2library URL
+                var url = FormClientInfo.GetSerialCodeFunctionValueByPrefix("dp2library:");
+                if (string.IsNullOrEmpty(url) == false)
+                    return url;
                 return ClientInfo.Config.Get("dp2library", "serverUrl", null);
             }
             set
