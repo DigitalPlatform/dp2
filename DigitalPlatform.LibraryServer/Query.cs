@@ -14,6 +14,9 @@ namespace DigitalPlatform.LibraryServer
     public partial class LibraryApplication
     {
         // 构造检索实体库的 XML 检索式
+        // parameters:
+        //      strSearchStyle  desc 表示检索结果集中的记录按照 id 倒序排列。缺省为正序
+        //                      最终是通过 XML 检索式中 item/order 元素文本值 "DESC" 来实现的
         // return:
         //      -1  出错
         //      0   没有发现任何实体库定义

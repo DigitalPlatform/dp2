@@ -4790,7 +4790,6 @@ out strError);
             if (String.IsNullOrEmpty(strIssueDbName) == true)
                 return false;
 
-
             for (int i = 0; i < this.ItemDbs.Count; i++)
             {
                 if (strIssueDbName == this.ItemDbs[i].IssueDbName)

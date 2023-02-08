@@ -2561,7 +2561,7 @@ namespace dp2Library
                     if (lRet == 0)
                     {
                         result.Value = 0;
-                        result.ErrorInfo = "not found";
+                        result.ErrorInfo = "没有命中";
                         return result;
                     }
 
@@ -2910,6 +2910,7 @@ namespace dp2Library
             {
                 // 权限判断
 
+                /*
                 // 权限字符串
                 if (StringUtil.IsInList("searchonedb", sessioninfo.RightsOrigin) == false)
                 {
@@ -2918,6 +2919,7 @@ namespace dp2Library
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
+                */
 
                 // 对读者身份的附加判断
                 if (sessioninfo.UserType == "reader")
@@ -2928,7 +2930,26 @@ namespace dp2Library
                     return result;
                 }
 
-                // 需要限制检索读者库为当前管辖的范围
+                // 权限判断
+                var db_type = app.GetAllDbType(strDbName);
+                if (string.IsNullOrEmpty(db_type))
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = $"检索数据库 '{strDbName}' 信息被拒绝。未找到数据库 '{strDbName}' 的类型定义";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+                if (StringUtil.IsInList($"search{db_type}", sessioninfo.RightsOrigin) == false)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = $"检索数据库 '{strDbName}' 信息被拒绝。不具备 search{db_type} 权限。";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+
+
+                // 对于读者库，需要限制检索读者库为当前管辖的范围
+#if OLDCODE
                 {
                     string strLibraryCode = "";
                     bool bReaderDbInCirculation = true;
@@ -2948,6 +2969,21 @@ namespace dp2Library
                         }
                     }
                 }
+#endif
+                // 2023/2/8
+                if (db_type == "reader")
+                {
+                    // 检查当前操作者是否管辖这个读者库
+                    // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
+                    if (app.IsCurrentChangeableReaderPath(strDbName + "/?",
+                        sessioninfo.ExpandLibraryCodeList/*sessioninfo.LibraryCodeList*/) == false)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = $"检索读者库 '{strDbName}' 信息被拒绝。因读者库 '{strDbName}' 不在当前用户管辖范围内";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
+                    }
+                }
 
                 // 构造检索式
                 string strQueryXml = "";
@@ -2958,7 +2994,6 @@ namespace dp2Library
                     + "'><item><word>"
                     + StringUtil.GetXmlStringSimple(strQueryWord)
                     + "</word><match>" + strMatchStyle + "</match><relation>=</relation><dataType>string</dataType><maxCount>" + lMaxCount.ToString() + "</maxCount></item><lang>" + strLang + "</lang></target>";
-
 
                 RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
                 if (channel == null)
@@ -3001,7 +3036,7 @@ namespace dp2Library
                     if (lRet == 0)
                     {
                         result.Value = 0;
-                        result.ErrorInfo = "not found";
+                        result.ErrorInfo = "没有命中";
                         return result;
                     }
 
@@ -3191,7 +3226,7 @@ namespace dp2Library
                     if (lRet == 0)
                     {
                         result.Value = 0;
-                        result.ErrorInfo = "not found";
+                        result.ErrorInfo = "没有命中";
                         return result;
                     }
 
@@ -3674,6 +3709,16 @@ strBrowseInfoStyle);
                         sessioninfo.Access,
                         strBrowseInfoStyle);
                 }
+                else if (app.IsItemDbName(strDbName)
+                    || app.IsIssueDbName(strDbName)
+                    || app.IsOrderDbName(strDbName)
+                    || app.IsCommentDbName(strDbName))
+                {
+                    FilterItemRecord(record,
+                        strDbName,
+                        strBrowseInfoStyle);
+                }
+#if OLDCODE
                 else if (app.IsItemDbName(strDbName))
                 {
                     if (StringUtil.IsInList("getiteminfo,getentities,order", sessioninfo.RightsOrigin) == false)
@@ -3708,18 +3753,24 @@ strBrowseInfoStyle);
                         ClearCols(record, LibraryApplication.FILTERED);
                     }
                 }
+
+#endif
                 else if (app.ArrivedDbName == strDbName)
                 {
-                    if (StringUtil.IsInList("borrow,return", sessioninfo.RightsOrigin) == true
+#if OLDCODE
+                    if (StringUtil.IsInList("borrow,return,reservation", sessioninfo.RightsOrigin) == true
                         || read_level == "")
                     {
-
+                        // ？具有完整 getreaderinfo 权限的就可以观看预约到书记录?
+                        // TODO: 读者身份只能观看和自己有关的预约到书记录
                     }
                     else
                     {
                         ClearXml(record);
                         ClearCols(record, LibraryApplication.FILTERED);
                     }
+#endif
+                    FilterArrivedRecord(record);
                 }
                 else if (app.AmerceDbName == strDbName)
                 {
@@ -3733,7 +3784,7 @@ strBrowseInfoStyle);
                     }
                     else
 #endif
-                        FilterAmerceRecord(record);
+                    FilterAmerceRecord(record);
                     // 注: GetRecord() API 可以获取违约金记录
                     // settlement undosettlement deletesettlement
                 }
@@ -4325,6 +4376,133 @@ out byte[] _);
         }
 
 
+        // 过滤各种(书目库之)下级库记录
+        void FilterItemRecord(Record record,
+            string strItemDbName,
+            string strBrowseInfoStyle)
+        {
+            bool bHasCols = StringUtil.IsInList("cols", strBrowseInfoStyle);
+            bool bHasXml = StringUtil.IsInList("xml", strBrowseInfoStyle);
+
+            // 如果 record 中没有包含 cols 或者 xml，那么就没有必要进行权限过滤
+            if (bHasCols == false && bHasXml == false)
+                return;
+
+            var origin_xml = record.RecordBody?.Xml;
+            if (string.IsNullOrEmpty(origin_xml))
+                return;
+
+            string db_type = app.GetDbType(strItemDbName, out _);
+            if (string.IsNullOrEmpty(db_type))
+                throw new ArgumentException($"无法得到书目库下级数据库名 '{strItemDbName}' 的具体类型");
+
+            XmlDocument item_dom = new XmlDocument();
+            try
+            {
+                item_dom.LoadXml(origin_xml);
+            }
+            catch (Exception ex)
+            {
+                var error = $"{db_type}记录 '{record.Path}' 装入XMLDOM时出错: " + ex.Message;
+                SetRecordBodyError(record, error, ErrorCodeValue.CommonError);
+                ClearXml(record);
+                ClearCols(record, LibraryApplication.FILTERED);
+                return;
+            }
+
+            string xml = "";
+            {
+                // 按照当前账户的权限，来过滤掉原始册记录中的一些敏感字段
+                // return:
+                //      -2  权限不具备。也可以理解为全部字段都应被过滤掉
+                //      -1  出错
+                //      0   过滤后记录没有改变
+                //      1   过滤后记录发生了改变
+                int nRet = app.FilterItemRecord(
+            sessioninfo,
+            db_type,
+            item_dom,
+            out string strError);
+                if (nRet == -1 || nRet == -2)
+                {
+                    ClearXml(record);
+                    ClearCols(record, LibraryApplication.FILTERED);
+                    SetRecordBodyError(record, strError, ErrorCodeValue.AccessDenied);
+                    return;
+                }
+                if (nRet == 1)
+                {
+                    xml = item_dom.DocumentElement.OuterXml;
+                    record.RecordBody.Xml = xml;
+                }
+            }
+
+            if (string.IsNullOrEmpty(xml) == false)  // XML 记录发生过改变，也要重新创建 Cols
+            {
+                if (bHasCols)
+                {
+                    // 有可能返回 null
+                    string strFormat = StringUtil.GetStyleParam(strBrowseInfoStyle, "format");
+
+                    RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
+                    // return:
+                    //      // cols中包含的字符总数
+                    //      -1  出错
+                    //      0   记录没有找到
+                    //      其他  cols 中包含的字符总数。最少为 1，不会为 0
+                    int nRet = app.GetCols(
+                        channel,
+                        strFormat,
+                        strItemDbName,
+                        xml,
+                        // 0,
+                        out string[] cols,
+                        out string strError);
+                    // TODO: 检查 nRet == -1 时候 cols 是否为报错信息
+                    record.Cols = cols;
+                }
+                else
+                    record.Cols = null;
+            }
+        }
+
+
+        // 过滤预约到书记录
+        // 读者身份只能看关于自己的预约到书记录
+        void FilterArrivedRecord(Record record)
+        {
+            var origin_xml = record.RecordBody?.Xml;
+            if (string.IsNullOrEmpty(origin_xml))
+                return;
+
+            XmlDocument arrived_dom = new XmlDocument();
+            try
+            {
+                arrived_dom.LoadXml(origin_xml);
+            }
+            catch (Exception ex)
+            {
+                var error = "预约到书记录 '" + record.Path + "' 装入XMLDOM时出错: " + ex.Message;
+                SetRecordBodyError(record, error, ErrorCodeValue.CommonError);
+                ClearXml(record);
+                ClearCols(record, LibraryApplication.FILTERED);
+                return;
+            }
+
+            int nRet = HasArrivedReadRight(
+    sessioninfo,
+    record.Path,
+    arrived_dom,
+    out string strError);
+            if (nRet != 1)
+            {
+                ClearXml(record);
+                ClearCols(record, LibraryApplication.FILTERED);
+                SetRecordBodyError(record, strError, ErrorCodeValue.AccessDenied);
+            }
+        }
+
+
         void FilterAmerceRecord(Record record)
         {
             var origin_xml = record.RecordBody?.Xml;
@@ -4816,6 +4994,87 @@ out timestamp);
             return result;
         }
 #endif
+
+        // 2023/2/8
+        // 检查当前账户是否有查看一条预约到书记录的权限
+        // return:
+        //      -1  出错
+        //      0   不具备权限
+        //      1   具备权限
+        int HasArrivedReadRight(
+            SessionInfo sessioninfo,
+            string strArrivedRecPath,
+            XmlDocument arrived_dom,
+            out string strError)
+        {
+            strError = "";
+
+            // 注意这里要获得原始的 getreaderinfo:，因为并不在意 file 元素的权限
+            var level = StringUtil.GetParameterByPrefix(sessioninfo.RightsOrigin, "getreaderinfo");
+            if (level == null)
+            {
+                if (StringUtil.IsInList("borrow,return,reservation", sessioninfo.RightsOrigin) == false)
+                {
+                    strError = "当前账户不具备 getreaderinfo 或 borrow return reservation 权限";
+                    return 0;
+                }
+            }
+
+            // 读者只能看自己的预约到书记录
+            if (sessioninfo.UserType == "reader")
+            {
+                // 证条码号
+                string strReaderBarcode = DomUtil.GetElementText(arrived_dom.DocumentElement, "readerBarcode");
+                if (sessioninfo.Account == null)
+                {
+                    strError = "sessioninfo.Account == null";
+                    return -1;
+                }
+                if (sessioninfo.Account?.Barcode != strReaderBarcode)
+                {
+                    strError = "读者身份不能查看其他人的预约到书记录";
+                    return 0;
+                }
+            }
+
+            // 当前用户只能获取和管辖的馆代码关联的预约到书记录
+            // 具体来说，就是预约到书记录涉及到的读者和册都要被当前账户管辖
+            if (sessioninfo.GlobalUser == false)
+            {
+                // 读者所在馆代码
+                string strLibraryCode = DomUtil.GetElementText(arrived_dom.DocumentElement, "libraryCode");
+                // 册条码号
+                string strItemBarcode = DomUtil.GetElementText(arrived_dom.DocumentElement, "itemBarcode");
+                if (StringUtil.IsInList(strLibraryCode, sessioninfo.LibraryCodeList) == false)
+                {
+                    // 进一步判断册记录是否在当前用户管辖范围内
+                    if (string.IsNullOrEmpty(strItemBarcode) == false)
+                    {
+                        // return:
+                        //      -1  errpr
+                        //      0   不在控制范围
+                        //      1   在控制范围
+                        int nRet = app.IsItemInControl(
+                            sessioninfo,
+                            // channel,
+                            strItemBarcode,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strError = $"预约到书记录 '{strArrivedRecPath}' 超出当前用户管辖范围，并且在尝试检索册记录 '{strItemBarcode}' 时遇到问题: {strError}";
+                            return -1;  // AceessDenied and error
+                        }
+                        if (nRet == 1)
+                        {
+                            return 1;
+                        }
+                    }
+                    strError = "预约到书记录 '" + strArrivedRecPath + "' 超出当前用户管辖范围，无法获取";
+                    return 0;
+                }
+            }
+            return 1;
+        }
 
         // 2022/11/3
         // 检查当前账户是否有查看一条违约金记录的权限
@@ -5792,7 +6051,7 @@ out timestamp);
                     if (lRet == 0)
                     {
                         result.Value = 0;
-                        result.ErrorInfo = "not found";
+                        result.ErrorInfo = "没有命中";
                         return result;
                     }
 
@@ -6438,7 +6697,16 @@ out timestamp);
         //      strQueryWord    检索词
         //      strFrom 检索途径
         //      strMathStyle    匹配方式 exact left right middle
-        //      strOutputStyle  特殊用法, 如果包含 __buildqueryxml，则在result.ErrorInfo中返回XML检索式，但不进行检索
+        //      strSearchStyle  检索风格。
+        //                      desc 表示检索结果集中的记录按照 id 倒序排列。缺省为正序
+        //                      最终是通过 XML 检索式中 item/order 元素文本值 "DESC" 来实现的
+        //      strOutputStyle  输出风格。
+        //                      desc 表示倒序。
+        //                      keycount 
+        //                      keycount，则输出归并统计后的key+count(把相同的 key 后面的 count 合并)；否则，或者缺省，为传统的输出记录id
+        //                      keyid，输出 key 和 id
+        //                      如果 keycount 和 keyid 都没有，则表示仅输出 id
+        //                      特殊用法, 如果包含 __buildqueryxml，则在result.ErrorInfo中返回XML检索式，但不进行检索
         // 权限: 
         //      需要 searchitem 权限
         // return:
@@ -6478,6 +6746,9 @@ out timestamp);
 
                 string strQueryXml = "";
                 // 构造检索实体库的 XML 检索式
+                // parameters:
+                //      strSearchStyle  desc 表示检索结果集中的记录按照 id 倒序排列。缺省为正序
+                //                      最终是通过 XML 检索式中 item/order 元素文本值 "DESC" 来实现的
                 // return:
                 //      -1  出错
                 //      0   没有发现任何实体库定义
@@ -6536,7 +6807,7 @@ out timestamp);
                     if (lRet == 0)
                     {
                         result.Value = 0;
-                        result.ErrorInfo = "not found";
+                        result.ErrorInfo = "没有命中";
                         return result;
                     }
 
@@ -9192,7 +9463,7 @@ PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin)
                     if (lRet == 0)
                     {
                         result.Value = 0;
-                        result.ErrorInfo = "not found";
+                        result.ErrorInfo = "没有命中";
                         return result;
                     }
 
@@ -10295,7 +10566,7 @@ PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin)
                     if (lRet == 0)
                     {
                         result.Value = 0;
-                        result.ErrorInfo = "not found";
+                        result.ErrorInfo = "没有命中";
                         return result;
                     }
 
@@ -17334,7 +17605,7 @@ out strError);
                     if (lRet == 0)
                     {
                         result.Value = 0;
-                        result.ErrorInfo = "not found";
+                        result.ErrorInfo = "没有命中";
                         return result;
                     }
 

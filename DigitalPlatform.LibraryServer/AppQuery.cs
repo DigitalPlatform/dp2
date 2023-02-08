@@ -685,11 +685,29 @@ namespace DigitalPlatform.LibraryServer
             {
                 right = "amerce,settlement";
             }
+            else if (this.GetInventoryDbName() == strDbName)
+            {
+                right = "inventory,inventorydelete";
+            }
+            else if (this.ArrivedDbName == strDbName)
+            {
+                right = "borrow,return,getreaderinfo,reservation";    // 注: reservation 权限是指读者或者工作人员具有进行预约的能力。注意，并不是指预约管理，而是指给自己预约图书
+            }
             else
-                return "无法识别数据库类型";
+                return $"无法识别数据库 '{strDbName}' 的类型";
+
+            // 如果 right 中包含 getreaderinfo，则需要单独 if 一次
+            if (StringUtil.IsInList("getreaderinfo", right))
+            {
+                // 注意这里要获得原始的 getreaderinfo:，因为并不在意 file 元素的权限
+                var level = StringUtil.GetParameterByPrefix(rights, "getreaderinfo");
+                if (level != null)
+                    return null;
+            }
 
             if (StringUtil.IsInList(right, rights) == false)
                 return $"不具备权限 {right}";
+
             return null;
         }
 

@@ -265,6 +265,7 @@ namespace DigitalPlatform.LibraryServer
         // 合并新旧记录
         // parameters:
         //      important_fields    重要的字段名列表。要检查这些字段是否没有被采纳，如果没有被采纳要报错
+        //                          注: dprms:file 元素，在 important_fields 里面应当表达为 "http://dp2003.com/dprms:file"
         // return:
         //      -1  出错
         //      0   成功
@@ -1909,7 +1910,8 @@ out List<string> send_skips);
                         //      1   发生了实质性修改
                         nRet = BuildNewReaderRecord(domNewRec,
                             element_names,
-                            string.IsNullOrEmpty(important_fields) ? null : important_fields.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries),
+                            CanonicalizeElementNames(important_fields),
+                            // string.IsNullOrEmpty(important_fields) ? null : important_fields.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries),
                             sessioninfo.RightsOrigin,
                             out bool useClientRefID,
                             // out fileElementFiltered,
@@ -2183,7 +2185,8 @@ strLibraryCode);    // 读者所在的馆代码
                     // 根据 data_fields 进行元素范围限定
                     if (data_fields != null/*string.IsNullOrEmpty(data_fields) == false*/)
                     {
-                        var names = StringUtil.SplitList(data_fields);
+                        var names = CanonicalizeElementNames(data_fields);
+                        // var names = StringUtil.SplitList(data_fields);
                         element_names = element_names.Intersect(names).ToArray();
                         Append(comment, "AND(dataFields 集合:", names.ToArray(), ")");
                         count++;
@@ -2269,7 +2272,8 @@ strLibraryCode);    // 读者所在的馆代码
                     // 根据 data_fields 进行元素范围限定
                     if (data_fields != null/*string.IsNullOrEmpty(data_fields) == false*/)
                     {
-                        var names = StringUtil.SplitList(data_fields);
+                        var names = CanonicalizeElementNames(data_fields);
+                        // var names = StringUtil.SplitList(data_fields);
                         element_names = element_names.Intersect(names).ToArray();
                     }
 
@@ -2291,7 +2295,7 @@ strLibraryCode);    // 读者所在的馆代码
                     nRet = DoReaderOperDelete(
                         sessioninfo.LibraryCodeList,
                         element_names,
-                        important_fields,
+                        // important_fields,
                         sessioninfo,
                         bForce,
                         channel,
@@ -2725,7 +2729,7 @@ root, strLibraryCode);
         int DoReaderOperDelete(
             string strCurrentLibraryCode,
             string[] element_names,
-            string importantFields,
+            // string importantFields,
             SessionInfo sessioninfo,
             bool bForce,
             RmsChannel channel,
@@ -3233,8 +3237,8 @@ root, strLibraryCode);
                 strAction,
                 domExist,
                 domNewRec,
-                importantFields == null || string.IsNullOrEmpty(importantFields) ? null : importantFields.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries),
-                // out string strNewXml,
+                CanonicalizeElementNames(importantFields),
+                // importantFields == null || string.IsNullOrEmpty(importantFields) ? null : importantFields.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries),
                 out XmlDocument domMerged,
                 out strError);
                 if (nRet == -1)
@@ -8140,17 +8144,40 @@ out strError);
         {
             var names = new List<string>(full_names);
             names.Remove("dprms.file");
+            names.Remove("dprms:file");
             names.Remove("http://dp2003.com/dprms:file");
             return names;
         }
 
+        // 2023/2/8
+        // 正规化元素名列表
+        // 这里指和读者 XML 记录字段权限有关的元素名列表
+        static string[] CanonicalizeElementNames(string list)
+        {
+            if (string.IsNullOrEmpty(list))
+                return null;
+
+            List<string> results = new List<string>();
+            var origins = list.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach(var origin in origins)
+            {
+                if (origin == "dprms.file" || origin == "dprms:file")
+                    results.Add("http://dp2003.com/dprms:file");
+                else
+                    results.Add(origin);
+            }
+
+            return results.ToArray();
+        }
 
         // 获得元素名列表
         // parameters:
         //      name_param    元素集合的名称或者定义。
         //              形态: n|元素名|组名
         //              (n代表数字)
-        //              注: 这里使用 dprms.file 元素名，实际上表达的是 "http://dp2003.com/dprms:file"，因为 setreaderinfo:xxx 这里 xxx 之内不允许里面再出现冒号，逗号，竖线
+        //              注: 这里可以使用 dprms.file 元素名，实际上表达的是 "http://dp2003.com/dprms:file"，因为 setreaderinfo:xxx 这里 xxx 之内不允许里面再出现冒号，逗号，竖线
+        // return:
+        //      元素名集合。注意里面的 dprms.file 已经被规范为 http://dp2003.com/dprms:file 形态
         static List<string> GetElementNames(string name_param,
             string[] full_names = null)
         {
@@ -8191,7 +8218,7 @@ out strError);
                 else
                 {
                     // 2021/7/23
-                    if (part == "dprms.file")
+                    if (part == "dprms.file" || part == "dprms:file")
                         results.Add("http://dp2003.com/dprms:file");
                     else
                         results.Add(part);

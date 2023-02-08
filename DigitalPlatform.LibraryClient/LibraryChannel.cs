@@ -4129,7 +4129,7 @@ out strError);
             }
         }
 
-        // 检索读者信息
+        // 通用检索
         /// <summary>
         /// 直接用 XML 检索式进行检索
         /// </summary>
