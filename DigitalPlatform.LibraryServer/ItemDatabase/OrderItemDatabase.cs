@@ -43,6 +43,8 @@ namespace DigitalPlatform.LibraryServer
 
         // DoOperChange()和DoOperMove()的下级函数
         // 合并新旧记录
+        // parmeters:
+        //      strMergedXml    合并后产生的 XML
         // return:
         //      -1  出错
         //      0   正确
@@ -70,15 +72,21 @@ namespace DigitalPlatform.LibraryServer
             string strWarning = "";
 
             bool bChangePartDeniedParam = false;
+
+            // 合并记录
+            // parameters:
+            //      bChangePartDenied   如果本次被设定为 true，则 strError 中返回了关于部分修改的注释信息
+            //      domNew  新记录。
+            //      domOld  旧记录。函数执行后其内容会被改变
             // return:
             //      -1  error
             //      0   new record not changed
             //      1   new record changed
-            nRet = MergeOldNewRec(
+            nRet = MergeNewOldRec(
                 "order",
                 sessioninfo.RightsOrigin,
-                domExist,
                 domNew,
+                domExist,
                 ref bChangePartDeniedParam,
                 out strError);
             if (nRet == -1)
@@ -208,6 +216,11 @@ namespace DigitalPlatform.LibraryServer
                 domExist.DocumentElement.AppendChild(frag);
             }
 #endif
+            /*
+            // 2023/2/9
+            // 再把 domNew 中的 dprms:file 元素转移到 domExist 中
+            LibraryApplication.MergeDprmsFile(ref domExist, domNew);
+            */
 
             strMergedXml = domExist.OuterXml;
 

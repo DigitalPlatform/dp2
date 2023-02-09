@@ -18,6 +18,74 @@ namespace DigitalPlatform.LibraryServer
     /// </summary>
     public partial class LibraryApplication
     {
+#if TEMP
+        public LibraryServerResult GetItemInfo(
+            SessionInfo sessioninfo,
+            string strResPath,
+            string strStyle,
+            out string strMetadata,
+            out byte[] baOutputTimestamp,
+            out string strOutputResPath)
+        {
+            LibraryServerResult result = new LibraryServerResult();
+
+            // TODO: 建议这里抽取出一个函数 GetAmerceInfo()，里面包含检查分馆权限的功能。FilterResultSet() 那里也可以用上这个抽取出来的函数
+            lRet = channel.GetRes(strResPath,
+                strStyle + ",data", // 确保可以获取到记录 XML
+                out string amerce_xml,
+                out strMetadata,
+                out baOutputTimestamp,
+                out strOutputResPath,
+                out strError);
+            if (lRet == -1)
+            {
+                result.Value = lRet;
+                result.ErrorInfo = strError;
+                ConvertKernelErrorCode(channel.ErrorCode,
+                    ref result);
+                return result;
+            }
+
+            XmlDocument amerce_dom = new XmlDocument();
+            try
+            {
+                amerce_dom.LoadXml(amerce_xml);
+            }
+            catch (Exception ex)
+            {
+                strError = "违约金记录 '" + strOutputResPath + "' 装入XMLDOM时出错: " + ex.Message;
+                goto ERROR1;
+            }
+
+            // 检查当前账户是否有查看一条违约金记录的权限
+            // return:
+            //      -1  出错
+            //      0   不具备权限
+            //      1   具备权限
+            int nRet = HasAmerceReadRight(
+                sessioninfo,
+                strOutputResPath,
+                amerce_dom,
+                out strError);
+            if (nRet != 1)
+            {
+                result.Value = -1;
+                result.ErrorInfo = strError;
+                result.ErrorCode = ErrorCode.AccessDenied;
+                return result;
+            }
+
+            // TODO: 根据当前账户是否具备 getamerceobject 权限，决定是否过滤掉 XML 记录中的 dprms:file 元素
+
+            if (StringUtil.IsInList("data", strStyle))
+            {
+                formats.Add("xml");
+                results = new string[] { amerce_xml };
+            }
+
+        }
+
+#endif
 
         // TODO: 这里要检查一下 strDbName，是否为合法的实用库名
         // 设置实用库信息

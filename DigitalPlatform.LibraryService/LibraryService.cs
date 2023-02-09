@@ -5090,16 +5090,27 @@ out timestamp);
         {
             strError = "";
 
-            if (sessioninfo.UserType == "reader")
+            if (StringUtil.IsInList("getamerceinfo", sessioninfo.RightsOrigin) == false)
             {
-                strError = "读者身份不允许查看违约金记录";
+                strError = "当前账户不具备 getamerceinfo 权限";
                 return 0;
             }
 
-            if (StringUtil.IsInList("amerce,settlement", sessioninfo.RightsOrigin) == false)
+            // 2023/2/9
+            // 读者身份只能获得自己的违约金记录
+            if (sessioninfo.UserType == "reader")
             {
-                strError = "当前账户不具备 amerce 或 settlement 权限";
-                return 0;
+                string strReaderBarcode = DomUtil.GetElementText(amerce_dom.DocumentElement, "readerBarcode");
+                if (sessioninfo.Account == null)
+                {
+                    strError = "sessioninfo.Account == null";
+                    return -1;
+                }
+                if (sessioninfo.Account.Barcode != strReaderBarcode)
+                {
+                    strError = "读者身份不允许查看其他人的违约金记录";
+                    return 0;
+                }
             }
 
             // 当前用户只能获取和管辖的馆代码关联的违约金记录
@@ -15566,6 +15577,8 @@ out byte[] temp_timestamp);
                                     result.ErrorCode = ErrorCode.AccessDenied;
                                     return result;
                                 }
+
+                                // TODO: 根据当前账户是否具备 getamerceobject 权限，决定是否过滤掉 XML 记录中的 dprms:file 元素
 
                                 if (StringUtil.IsInList("data", strStyle))
                                 {

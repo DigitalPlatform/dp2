@@ -16760,7 +16760,15 @@ out string db_type);
             else if (this.AmerceDbName == strDbName)
             {
                 db_type = "amerce";
-                right = "amerce,settlement";
+                right = "getamerceinfo";
+            }
+            else if (ServerDatabaseUtility.IsUtilDbName(this.LibraryCfgDom,
+    strDbName,
+    out string util_db_type) == true)
+            {
+                // 实用库包括 publisher / zhongcihao / dictionary / inventory 类型
+                db_type = util_db_type;
+                right = $"get{db_type}info";
             }
             //else
             //    right = "getres";
@@ -17081,15 +17089,16 @@ out string db_type);
             }
             else if (this.AmerceDbName == strDbName)
             {
-                // TODO: 违约金库元数据记录不允许 WriteRes() API 直接写入。按规定是用 Settlement() API 进行操作
-                // 违约金库对象记录允许具有 amerce settlement undosettlement deletesettlement 等权限的账户操作
                 db_type = "amerce";
-                if (strAction == "new")
-                    right = "settlement";   // 只有结算者才被允许直接修改违约金库记录。注: Amerce() API 过程虽然也要修改违约金库记录，但那是通过 dp2library Amerce() API 进行的，不是前端直接请求 WriteRes() API 修改违约金记录
-                else if (strAction == "change")
-                    right = "undosettlement,deletesettlement";
-                else if (strAction == "delete")
-                    right = "deletesettlement";
+                right = "setamerceinfo";
+            }
+            else if (ServerDatabaseUtility.IsUtilDbName(this.LibraryCfgDom,
+    strDbName,
+    out string util_db_type) == true)
+            {
+                // 实用库包括 publisher / zhongcihao / dictionary / inventory 类型
+                db_type = util_db_type;
+                right = $"set{db_type}info";
             }
             else
                 return $"数据库 {strDbName} 内资源不允许写入";

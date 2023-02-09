@@ -252,15 +252,20 @@ namespace DigitalPlatform.LibraryServer
 
             if (sessioninfo != null)
             {
+                // 合并记录
+                // parameters:
+                //      bChangePartDenied   如果本次被设定为 true，则 strError 中返回了关于部分修改的注释信息
+                //      domNew  新记录。
+                //      domOld  旧记录。函数执行后其内容会被改变
                 // return:
                 //      -1  error
                 //      0   new record not changed
                 //      1   new record changed
-                nRet = ItemDatabase.MergeOldNewRec(
+                nRet = ItemDatabase.MergeNewOldRec(
                     "item",
                     sessioninfo.RightsOrigin,
-                    domExist,
                     domNew,
+                    domExist,
                     ref bChangePartDeniedParam,
                     out strError);
                 if (nRet == -1)
@@ -3129,6 +3134,7 @@ out strError);
         }
 
         // 方便写入单条下级记录的包装后函数
+        // TODO: 增加对 amerce publisher 等等类型数据库的支持
         public LibraryServerResult SetItemInfo(
     SessionInfo sessioninfo,
     string strDbType,
@@ -5111,12 +5117,12 @@ out strError);
                 }
             }
 
-
             return 0;
         }
 
         // DoOperChange()和DoOperMove()的下级函数
         // 合并新旧记录
+        // 注意函数执行过程中 domNew 被临时改变，返回后要小心
         // return:
         //      -1  出错
         //      0   正确
@@ -5134,6 +5140,7 @@ out strError);
             string strWarning = "";
 
             bool bChangePartDeniedParam = false;
+            // ????
             // return:
             //      -1  error
             //      0   new record not changed
@@ -6780,6 +6787,11 @@ out strError);
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
+
+            // 2023/2/10
+            // 防止 domNew 后面再被使用
+            domNew = null;
+
             if (nRet == 1 || nRet == 2)
             {
                 if (nRet == 1)

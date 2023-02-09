@@ -112,7 +112,6 @@
 		<comment lang='zh'>获得操作日志</comment>
 		<comment lang='en'>get oper log</comment>
 	</property>
-
 	<property name='amerce'>
 		<comment lang='zh'>交费</comment>
 		<comment lang='en'>amerce</comment>
@@ -129,7 +128,10 @@
 		<comment lang='zh'>撤回交费</comment>
 		<comment lang='en'>amerce undo</comment>
 	</property>
-
+	<property name='setamerceinfo'>
+		<comment lang='zh'>修改违约金信息</comment>
+		<comment lang='en'>set amerce info</comment>
+	</property>
 	<property name='inventory'>
 		<comment lang='zh'>盘点</comment>
 		<comment lang='en'>inventory</comment>
@@ -138,7 +140,14 @@
 		<comment lang='zh'>删除盘点记录</comment>
 		<comment lang='en'>delete inventory record</comment>
 	</property>
-
+	<property name='getinventoryinfo'>
+		<comment lang='zh'>获取盘点信息</comment>
+		<comment lang='en'>get inventory info</comment>
+	</property>
+	<property name='setinventoryinfo'>
+		<comment lang='zh'>修改盘点信息</comment>
+		<comment lang='en'>set inventory info</comment>
+	</property>
 	<property name='search'>
 		<comment lang='zh'>检索</comment>
 		<comment lang='en'>search</comment>
@@ -422,7 +431,10 @@
 		<comment lang='zh'>写入违约金下属对象</comment>
 		<comment lang='en'>write amerce object</comment>
 	</property>
-	
+	<property name='writeinventoryobject'>
+		<comment lang='zh'>写入盘点下属对象</comment>
+		<comment lang='en'>write inventory object</comment>
+	</property>
 	<property name='writerecord' comment='危险权限'>
 		<comment lang='zh'>写入各种元数据记录</comment>
 		<comment lang='en'>write metadata records</comment>

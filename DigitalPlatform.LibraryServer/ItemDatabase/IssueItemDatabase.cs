@@ -93,15 +93,20 @@ namespace DigitalPlatform.LibraryServer
             string strWarning = "";
 
             bool bChangePartDeniedParam = false;
+            // 合并记录
+            // parameters:
+            //      bChangePartDenied   如果本次被设定为 true，则 strError 中返回了关于部分修改的注释信息
+            //      domNew  新记录。
+            //      domOld  旧记录。函数执行后其内容会被改变
             // return:
             //      -1  error
             //      0   new record not changed
             //      1   new record changed
-            nRet = MergeOldNewRec(
+            nRet = MergeNewOldRec(
                 "issue",
                 sessioninfo.RightsOrigin,
-                domExist,
                 domNew,
+                domExist,
                 ref bChangePartDeniedParam,
                 out strError);
             if (nRet == -1)

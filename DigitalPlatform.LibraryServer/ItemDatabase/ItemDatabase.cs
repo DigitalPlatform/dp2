@@ -501,6 +501,77 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
+        // 合并记录
+        // parameters:
+        //      bChangePartDenied   如果本次被设定为 true，则 strError 中返回了关于部分修改的注释信息
+        //      domNew  新记录。
+        //      domOld  旧记录。函数执行后其内容会被改变
+        // return:
+        //      -1  error
+        //      0   new record not changed
+        //      1   new record changed
+        public static int MergeNewOldRec(
+            string db_type,
+    string strRights,
+    XmlDocument domNew,
+    XmlDocument domOld,
+    ref bool bChangePartDeniedParam,
+    out string strError)
+        {
+            strError = "";
+            string strOldSave = domOld.OuterXml;
+
+            string strComment = "";
+            bool bChangePartDenied = false;
+
+            try
+            {
+                // 如果不具备 writebiblioobject 和 writeobject 权限，则要屏蔽前端发来的 XML 记录中的 dprms:file 元素
+                if (StringUtil.IsInList($"write{db_type}object,writeobject", strRights) == false)
+                {
+                    // domOld 不发生变化
+                    string strRequstFragments = LibraryApplication.GetAllFileElements(domNew);
+                    string strAcceptedFragments = LibraryApplication.GetAllFileElements(domOld);
+                    if (strRequstFragments != strAcceptedFragments)
+                    {
+                        // 如果前端提交的关于 dprms:file 元素的修改被拒绝，则要通过设置 bChangePartDenied = true 来反映这种情况
+                        bChangePartDenied = true;
+                        if (string.IsNullOrEmpty(strComment) == false)
+                            strComment += "; ";
+                        strComment += $"因不具备 write{db_type}object 或 writeobject 权限, 改变 dprms:file (数字对象)元素被拒绝";
+                    }
+                }
+                else
+                {
+                    // 此时 StringUtil.IsInList("writebiblioobject,writeobject", strRights) == true
+                    // 意味着直接采纳前端发来的 XML 记录中的 dprms:file 元素，写入记录
+                    // 但需要注意检查账户权限，读的字段范围是否小于写的字段范围？如果小了，则读和写往返一轮会丢失记录中原有的 dprms:file 元素。这种情况需要直接报错
+                    if (StringUtil.IsInList($"get{db_type}object,getobject", strRights) == false)
+                    {
+                        strError = $"操作被放弃。当前用户的权限定义不正确：具有 write{db_type}object(或writeobject) 但不具有 get{db_type}object(或getobject) 权限(即写范围大于读范围)，这样会造成数据库内记录中原有的 dprms:file 元素丢失。请修改当前账户权限再重新操作";
+                        return -1;
+                    }
+
+                    // 把 domNew 中的 dprms:file 元素兑现到 domOld 中
+                    LibraryApplication.MergeDprmsFile(ref domOld, domNew);
+                }
+
+                var strOldBiblioXml = domOld.OuterXml;
+
+                if (strOldSave == strOldBiblioXml)
+                    return 0;
+
+                return 1;
+            }
+            finally
+            {
+                if (bChangePartDenied == true && string.IsNullOrEmpty(strComment) == false)
+                    strError += strComment;
+
+                if (bChangePartDenied == true)
+                    bChangePartDeniedParam = true;
+            }
+        }
 
         // 是否允许创建新记录?
         // parameters:
