@@ -4861,7 +4861,8 @@ out strError);
         {
             strError = "";
 
-            string[] element_names = _reader_element_names;
+            string[] element_names = GetReaderFullElementNames();
+            // string[] element_names = _reader_element_names;
 
             RecoverLevel level = level_param;
 
@@ -5177,6 +5178,12 @@ out strError);
 
                     // 合并新旧记录
                     // string strNewXml = "";
+                    // parameters:
+                    //      important_fields    重要的字段名列表。要检查这些字段是否没有被采纳，如果没有被采纳要报错
+                    //                          注: dprms:file 元素，在 important_fields 里面应当表达为 "http://dp2003.com/dprms:file"
+                    //      strRights           当前账户权限。
+                    //                          用于检查账户权限问题。如果不希望检查，可以用 null
+                    //      denied_element_names    [out] 返回哪些被阻止修改的元素名集合。注意，如果本函数因为 importantFields 原因返回 -1 了，则 denied_element_names 不会返回任何内容
                     // return:
                     //      -1  出错
                     //      0   成功
@@ -5187,8 +5194,10 @@ out strError);
                         domExist,
                         domNew,
                         null,
+                        null,
                         // out strNewXml,
                         out XmlDocument domMerged,
+                        out _,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;

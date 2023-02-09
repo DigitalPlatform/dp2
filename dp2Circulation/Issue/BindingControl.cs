@@ -3014,7 +3014,7 @@ namespace dp2Circulation
                     // 使用后自然会被丢弃
                 }
 
-                PLACEMEMT:
+            PLACEMEMT:
                 memberitems_table[parent_item] = member_items;
             }
 
@@ -3988,7 +3988,7 @@ namespace dp2Circulation
                 goto END1;
             }
 
-            END1:
+        END1:
             result.X = x;
             result.Y = y;
             result.Object = null;
@@ -4178,7 +4178,7 @@ namespace dp2Circulation
                 // this.Update();
             }
 
-            END1:
+        END1:
             base.OnMouseDown(e);
         }
 
@@ -4240,7 +4240,7 @@ namespace dp2Circulation
                 }
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4346,7 +4346,7 @@ namespace dp2Circulation
                 return;
 
             this.HoverObject = (Cell)result.Object;
-            END1:
+        END1:
             base.OnMouseHover(e);
         }
 
@@ -4817,7 +4817,7 @@ namespace dp2Circulation
                 }
             }
 
-            END1:
+        END1:
             // Call MyBase.OnMouseHover to activate the delegate.
             base.OnMouseMove(e);
         }
@@ -4905,7 +4905,7 @@ namespace dp2Circulation
                 goto END1;
             }
 
-            END1:
+        END1:
             base.OnMouseUp(e);
         }
 
@@ -4953,7 +4953,7 @@ namespace dp2Circulation
                 }
             }
 
-            END1:
+        END1:
             base.OnMouseDoubleClick(e);
         }
 
@@ -5778,7 +5778,7 @@ namespace dp2Circulation
 
             this.AfterWidthChanged(true);   // content宽度可能改变
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5863,7 +5863,7 @@ namespace dp2Circulation
 
             this.UpdateObjects(changed_cells);
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5947,7 +5947,7 @@ namespace dp2Circulation
 
             this.UpdateObjects(changed_cells);
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6166,7 +6166,7 @@ namespace dp2Circulation
 
             this.Invalidate();
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
 
         }
@@ -6206,7 +6206,7 @@ namespace dp2Circulation
             e1.Action = "focus";
             this.EditArea(this, e1);
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6372,7 +6372,7 @@ issue.Volume);
 
             this.AfterWidthChanged(true);
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6545,7 +6545,7 @@ issue.Volume);
 
             this.AfterWidthChanged(true);
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6581,7 +6581,7 @@ issue.Volume);
             // UpdateIssues(changed_issues);
             this.AfterWidthChanged(true);
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6779,7 +6779,7 @@ issue.Volume);
             // UpdateIssues(changed_issues);
             this.AfterWidthChanged(true);
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6858,7 +6858,7 @@ issue.Volume);
                 dlg.EditComment = "当前订购时间范围为 " + strStartDate + "-" + strEndDate;   // 显示可用的订购时间范围
                 dlg.StartPosition = FormStartPosition.CenterScreen;
 
-                REDO_INPUT:
+            REDO_INPUT:
                 dlg.ShowDialog(this);
 
                 if (dlg.DialogResult != DialogResult.OK)
@@ -7107,6 +7107,22 @@ issue.Volume);
                 }
                 if (warning_issues.Count > 0)
                 {
+                    /// 2023/2/8
+                    // 警告一次。可以防止死循环
+                    {
+                        DialogResult dialog_result =
+                            MessageBox.Show(this,
+    $"检查号码时发现问题: {strWarning}\r\n\r\n请问是否继续处理?",
+    "BindingControls",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+                        if (dialog_result == DialogResult.No)
+                        {
+                            strError = strWarning;
+                            goto ERROR1;
+                        }
+                    }
                     Debug.Assert(warning_issues.Count > 0, "");
                     ref_issue = warning_issues[0];  // 放弃创建，而改将发现的重复对象作为新的参考位置，继续创建
                     continue;
@@ -7200,7 +7216,7 @@ issue.Volume);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -7398,7 +7414,7 @@ issue.Volume);
                 }
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -9111,7 +9127,7 @@ MessageBoxDefaultButton.Button2);
                 }
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -9239,7 +9255,7 @@ MessageBoxDefaultButton.Button2);
                 }
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -9365,7 +9381,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -9439,7 +9455,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -9560,7 +9576,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -9679,7 +9695,7 @@ MessageBoxDefaultButton.Button2);
             // this.m_lContentHeight = this.m_nCellHeight * this.Issues.Count;
             this.AfterWidthChanged(true);
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -9812,7 +9828,7 @@ MessageBoxDefaultButton.Button2);
             // this.m_lContentHeight = this.m_nCellHeight * this.Issues.Count;
             this.AfterWidthChanged(true);
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -9895,7 +9911,7 @@ MessageBoxDefaultButton.Button2);
             VerifyAll();
 #endif
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -9924,7 +9940,7 @@ MessageBoxDefaultButton.Button2);
                 goto ERROR1;
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -9953,7 +9969,7 @@ MessageBoxDefaultButton.Button2);
                 goto ERROR1;
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -10007,7 +10023,7 @@ MessageBoxDefaultButton.Button2);
             this.EnsureVisible(cell);  // 确保滚入视野
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -10484,10 +10500,10 @@ MessageBoxDefaultButton.Button2);
                     }
                 }
 
-                DODELETE:
+            DODELETE:
                 // 其他单册(订购信息管辖外的单册)，删除
                 issue.RemoveSingleIndex(nCol);
-                CONTINUE:
+            CONTINUE:
                 this.m_bChanged = true;
             }
 
@@ -10566,7 +10582,7 @@ MessageBoxDefaultButton.Button2);
 
             this.AfterWidthChanged(true);
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -10841,7 +10857,7 @@ MessageBoxDefaultButton.Button2);
 
             this.Invalidate();
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -11426,7 +11442,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -12210,7 +12226,7 @@ MessageBoxDefaultButton.Button2);
                     }
                 }
 
-                END1:
+            END1:
                 if (bBackSetParent == true)
                     parent_cell.item.AfterMembersChanged();
                 return;
@@ -13750,7 +13766,7 @@ MessageBoxDefaultButton.Button2);
             VerifyAll();
 #endif
             return;
-            ERROR1:
+        ERROR1:
             // 复原
             if (bAddToParentItems == true)
             {
@@ -15393,7 +15409,7 @@ Color.FromArgb(100, color)
                     goto CONTINUE;
 
                 issue.Paint(i, (int)x, (int)y, e);
-                CONTINUE:
+            CONTINUE:
                 y += lIssueHeight;
                 //  lHeight += lIssueHeight;
             }

@@ -153,9 +153,13 @@ namespace TestDp2Library
                 domExist,
     domNew,
     out string strError);
+
+            Assert.AreEqual(-1, nRet);
+            /*
             Assert.AreEqual(1, nRet);   // 有实质性修改
             string newValue = DomUtil.GetElementText(domNew.DocumentElement, "currentLocation");
             Assert.AreEqual("阅览室", newValue);
+            */
         }
 
         // 旧内容缺乏冒号
@@ -177,9 +181,13 @@ namespace TestDp2Library
                 domExist,
     domNew,
     out string strError);
+
+            Assert.AreEqual(-1, nRet);
+            /*
             Assert.AreEqual(1, nRet);   // 有实质性修改
             string newValue = DomUtil.GetElementText(domNew.DocumentElement, "currentLocation");
             Assert.AreEqual("保存本库", newValue);
+            */
         }
 
         // 旧内容只有右侧
@@ -201,9 +209,13 @@ namespace TestDp2Library
                 domExist,
     domNew,
     out string strError);
+
+            Assert.AreEqual(-1, nRet);
+            /*
             Assert.AreEqual(1, nRet);   // 有实质性修改
             string newValue = DomUtil.GetElementText(domNew.DocumentElement, "currentLocation");
             Assert.AreEqual(":0202", newValue);
+            */
         }
 
         // 旧内容只有右侧
@@ -249,9 +261,12 @@ namespace TestDp2Library
                 domExist,
     domNew,
     out string strError);
+            Assert.AreEqual(-1, nRet);
+            /*
             Assert.AreEqual(1, nRet);   // 有实质性修改
             string newValue = DomUtil.GetElementText(domNew.DocumentElement, "currentLocation");
             Assert.AreEqual(":0101", newValue);
+            */
         }
 
         // 新内容只有左侧

@@ -188,7 +188,7 @@ namespace DigitalPlatform.LibraryServer
                 // 2022/5/23
                 if (string.IsNullOrEmpty(old_left))
                 {
-                    strError = $"无法创建 currentLocation 元素。因 '{newValue}' 中左侧星号部分缺失原有内容";
+                    strError = $"无法创建 currentLocation 元素。因 '{oldValue}' 中左侧星号部分缺失原有内容";
                     return -1;
                 }
                 new_left = old_left;
@@ -199,7 +199,7 @@ namespace DigitalPlatform.LibraryServer
                 // 2022/5/23
                 if (string.IsNullOrEmpty(old_right))
                 {
-                    strError = $"无法创建 currentLocation 元素。因 '{newValue}' 中右侧星号部分缺失原有内容";
+                    strError = $"无法创建 currentLocation 元素。因 '{oldValue}' 中右侧星号部分缺失原有内容";
                     return -1;
                 }
                 new_right = old_right;

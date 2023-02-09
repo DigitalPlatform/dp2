@@ -3233,13 +3233,13 @@ namespace dp2Library
                     result.Value = lRet;
                     result.ErrorInfo = "";
 
+                    return result;
                 }
                 finally
                 {
                     channel.Idle -= new IdleEventHandler(channel_IdleEvent);
                     EndSearch();
                 }
-                return result;
             ERROR1:
                 result.Value = -1;
                 result.ErrorInfo = strError;

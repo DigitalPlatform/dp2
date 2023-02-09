@@ -43,7 +43,9 @@ namespace TestDp2Library
     domExist,
     domNew,
     important_fields,
+    null,
     out XmlDocument domMerged,
+    out _,
     out string strError);
             Assert.AreEqual(0, ret);
             AreEqual(domNew, domMerged);
@@ -104,7 +106,9 @@ namespace TestDp2Library
     domExist,
     domNew,
     important_fields,
+    null,
     out XmlDocument domMerged,
+    out _,
     out string strError);
             Assert.AreEqual(0, ret);
             Assert.AreEqual( Convert(result_xml), GetOuterXml(domMerged));
@@ -141,7 +145,9 @@ namespace TestDp2Library
     domExist,
     domNew,
     important_fields,
+    null,
     out XmlDocument domMerged,
+    out _,
     out string strError);
             Assert.AreEqual(-1, ret);
             Assert.AreEqual(true, strError.StartsWith("下列"));
@@ -183,7 +189,9 @@ namespace TestDp2Library
     domExist,
     domNew,
     important_fields,
+    null,
     out XmlDocument domMerged,
+    out _,  // 注意检查被阻止修改的元素名
     out string strError);
             Assert.AreEqual(0, ret);
             Assert.AreEqual(Convert(result_xml), GetOuterXml(domMerged));
@@ -220,7 +228,9 @@ namespace TestDp2Library
     domExist,
     domNew,
     important_fields,
+    null,
     out XmlDocument domMerged,
+    out _,
     out string strError);
             Assert.AreEqual(-1, ret);
             Assert.AreEqual(true, strError.StartsWith("下列"));
@@ -259,7 +269,9 @@ namespace TestDp2Library
     domExist,
     domNew,
     important_fields,
+    null,
     out XmlDocument domMerged,
+    out _,
     out string strError);
             Assert.AreEqual(0, ret);
             AreEqual(domNew, domMerged);
@@ -298,7 +310,9 @@ namespace TestDp2Library
     domExist,
     domNew,
     important_fields,
+    null,
     out XmlDocument domMerged,
+    out _,
     out string strError);
             Assert.AreEqual(0, ret);
             AreEqual(domNew, domMerged);
@@ -336,7 +350,9 @@ namespace TestDp2Library
     domExist,
     domNew,
     important_fields,
+    null,
     out XmlDocument domMerged,
+    out _,
     out string strError);
             Assert.AreEqual(-1, ret);
             Assert.AreEqual(true, strError.StartsWith("下列"));
@@ -373,7 +389,9 @@ namespace TestDp2Library
     domExist,
     domNew,
     important_fields,
+    null,
     out XmlDocument domMerged,
+    out _,
     out string strError);
             Assert.AreEqual(0, ret);
             AreEqual(domNew, domMerged);
@@ -416,7 +434,9 @@ namespace TestDp2Library
     domExist,
     domNew,
     important_fields,
+    null,
     out XmlDocument domMerged,
+    out _,
     out string strError);
             Assert.AreEqual(0, ret);
             Assert.AreEqual(Convert(result_xml), GetOuterXml(domMerged));
@@ -455,7 +475,9 @@ namespace TestDp2Library
     domExist,
     domNew,
     important_fields,
+    null,
     out XmlDocument domMerged,
+    out _,
     out string strError);
             Assert.AreEqual(-1, ret);
             Assert.AreEqual(true, strError.StartsWith("下列"));
@@ -491,7 +513,9 @@ namespace TestDp2Library
     domExist,
     domNew,
     important_fields,
+    null,
     out XmlDocument domMerged,
+    out _,
     out string strError);
             Assert.AreEqual(-1, ret);
             Assert.AreEqual(true, strError.StartsWith("下列"));
@@ -525,7 +549,9 @@ namespace TestDp2Library
     domExist,
     domNew,
     important_fields,
+    null,
     out XmlDocument domMerged,
+    out _,
     out string strError);
             Assert.AreEqual(0, ret);
             AreEqual(domNew, domMerged);
@@ -565,7 +591,9 @@ namespace TestDp2Library
     domExist,
     domNew,
     important_fields,
+    null,
     out XmlDocument domMerged,
+    out _,
     out string strError);
             Assert.AreEqual(0, ret);
             Assert.AreEqual(Convert(result_xml), GetOuterXml(domMerged));
@@ -606,7 +634,9 @@ namespace TestDp2Library
     domExist,
     domNew,
     important_fields,
+    null,
     out XmlDocument domMerged,
+    out _,
     out string strError);
             Assert.AreEqual(0, ret);
             Assert.AreEqual(Convert(result_xml), GetOuterXml(domMerged));
@@ -642,7 +672,9 @@ namespace TestDp2Library
     domExist,
     domNew,
     important_fields,
+    null,
     out XmlDocument domMerged,
+    out _,
     out string strError);
             Assert.AreEqual(-1, ret);
             Assert.AreEqual(true, strError.StartsWith("下列"));
@@ -676,7 +708,9 @@ namespace TestDp2Library
     domExist,
     domNew,
     important_fields,
+    null,
     out XmlDocument domMerged,
+    out _,
     out string strError);
             Assert.AreEqual(0, ret);
             AreEqual(domNew, domMerged);
@@ -716,7 +750,9 @@ namespace TestDp2Library
     domExist,
     domNew,
     important_fields,
+    null,
     out XmlDocument domMerged,
+    out _,
     out string strError);
             Assert.AreEqual(0, ret);
             Assert.AreEqual(Convert(result_xml), GetOuterXml(domMerged));
@@ -757,7 +793,9 @@ namespace TestDp2Library
     domExist,
     domNew,
     important_fields,
+    null,
     out XmlDocument domMerged,
+    out _,
     out string strError);
             Assert.AreEqual(0, ret);
             Assert.AreEqual(Convert(result_xml), GetOuterXml(domMerged));

@@ -36,7 +36,9 @@ namespace DigitalPlatform.LibraryServer
     /// </summary>
     public partial class LibraryApplication
     {
-        // 读者记录中 要害元素名列表。注意没有包含 borrows 等流通信息元素
+        // 读者记录中 要害元素名列表。
+        // 注意没有包含 borrows 等流通信息元素。
+        // 另外，libraryCode 和 oi 元素是不存储在数据库记录里面的，它们是在服务器返回给前端之前临时插入记录的
         static string[] _reader_element_names = new string[] {
                 "barcode",
                 "state",
@@ -80,13 +82,19 @@ namespace DigitalPlatform.LibraryServer
                 "preference",   // 个性化参数
             };
 
+        // 读者记录中 服务器自动维护的元素名列表
+        static string[] _auto_maintain_element_names = new string[] {
+            "libraryCode",
+            "oi"
+        };
+
         // 更换 domTarget 中所有 dprms:file 元素
         // 算法是：删除target中的全部<dprms:file>元素，然后将source记录中的全部<dprms:file>元素插入到target记录中
         // return:
         //      false   没有发生实质性改变
         //      true    发生了实质性改变
         public static bool MergeDprmsFile(ref XmlDocument domTarget,
-            XmlDocument domSource)
+                XmlDocument domSource)
         {
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
             nsmgr.AddNamespace("dprms", DpNs.dprms);
@@ -266,6 +274,9 @@ namespace DigitalPlatform.LibraryServer
         // parameters:
         //      important_fields    重要的字段名列表。要检查这些字段是否没有被采纳，如果没有被采纳要报错
         //                          注: dprms:file 元素，在 important_fields 里面应当表达为 "http://dp2003.com/dprms:file"
+        //      strRights           当前账户权限。
+        //                          用于检查账户权限问题。如果不希望检查，可以用 null
+        //      denied_element_names    [out] 返回哪些被阻止修改的元素名集合。注意，如果本函数因为 importantFields 原因返回 -1 了，则 denied_element_names 不会返回任何内容
         // return:
         //      -1  出错
         //      0   成功
@@ -276,13 +287,16 @@ namespace DigitalPlatform.LibraryServer
             XmlDocument domExistParam,
             XmlDocument domNew,
             string[] important_fields,
+            string strRights,
             // out string strMergedXml,
             out XmlDocument domMerged,
+            out List<string> denied_element_names,
             out string strError)
         {
             domMerged = null;
             // strMergedXml = "";
             strError = "";
+            denied_element_names = new List<string>();
 
             bool useClientRefID = false;
 
@@ -314,13 +328,20 @@ namespace DigitalPlatform.LibraryServer
                 }
                 StringUtil.RemoveBlank(ref outof_names);
                 /*
-                if (outof_names.Count > 0)
+                if (element_names.Count > 0)
                 {
                     strImportantError = $"下列元素超过当前用户权限: '{StringUtil.MakePathList(temp)}'";
                 }
                 */
             }
 
+            // 检查超出部分元素的内容是否即将发生变化
+            // 实际发生了内容修改的、超出权限的元素名集合
+            List<string> error_names = DetectElementChanging(
+    domExistParam,
+    domNew,
+    outof_names);
+#if OLDCODE
             // 检查超出部分元素的内容是否即将发生变化
             // 实际发生了内容修改的、超出权限的元素名集合
             List<string> error_names = new List<string>();
@@ -331,7 +352,7 @@ namespace DigitalPlatform.LibraryServer
                 string new_outerXml = GetOuterXml(domNew, strElementName);
 
                 if (old_outerXml != new_outerXml)
-                    error_names.Add(strElementName);
+                    changing_names.Add(strElementName);
                 */
                 // 如果是 fingerprint face palmprint 元素，则只比较 InnerText
                 if (strElementName == "fingerprint"
@@ -365,10 +386,11 @@ namespace DigitalPlatform.LibraryServer
                         error_names.Add(strElementName);
                 }
             }
+#endif
 
             if (error_names.Count > 0)
             {
-                strError = $"下列元素越过当前元素集范围: '{StringUtil.MakePathList(error_names)}'";
+                strError = $"下列重要元素越过当前元素集范围: '{StringUtil.MakePathList(error_names)}'";
                 return -1;
             }
 
@@ -527,15 +549,30 @@ namespace DigitalPlatform.LibraryServer
                     // 判断是否发生了变化
                     string changed_outerXml = domExist.DocumentElement.SelectSingleNode(strElementName)?.OuterXml;
                     if (old_outerXml != changed_outerXml
-&& outof_names.IndexOf(strElementName) != -1)
+&& element_names.IndexOf(strElementName) != -1)
                     {
-                        error_names.Add(strElementName);
+                        changing_names.Add(strElementName);
                     }
                     */
                 }
 
                 if (has_file_element)
                 {
+                    // 2023/2/9
+                    // 检查写集合大于读集合的账户权限问题
+                    if (strRights != null)
+                    {
+                        if (StringUtil.IsInList("writereaderobject,writeobject", strRights) == true
+                            && StringUtil.IsInList("getreaderobject,getobject", strRights) == false)
+                        {
+                            // 此时 StringUtil.IsInList("writereaderobject,writeobject", strRights) == true
+                            // 意味着直接采纳前端发来的 XML 记录中的 dprms:file 元素，写入记录
+                            // 但需要注意检查账户权限，读的字段范围是否小于写的字段范围？如果小了，则读和写往返一轮会丢失记录中原有的 dprms:file 元素。这种情况需要直接报错
+                            strError = "当前用户的权限定义不正确：具有 writereaderobject(或writeobject) 但不具有 getreaderobject(或getobject) 权限(即写范围大于读范围)，这样会造成数据库内读者记录中原有的 dprms:file 元素丢失。请修改当前账户权限再重新操作";
+                            return -1;
+                        }
+                    }
+
                     // 删除target中的全部<dprms:file>元素，然后将source记录中的全部<dprms:file>元素插入到target记录中
                     MergeDprmsFile(ref domExist,
                         domNew);
@@ -600,12 +637,103 @@ namespace DigitalPlatform.LibraryServer
             // 删除以前误为根元素添加的 expireDate 属性
             domExist.DocumentElement.RemoveAttribute("expireDate");
 
+            // 2023/2/9
+            // 观察被阻止修改修改的元素
+            {
+                List<string> unprocessed_element_names = new List<string>();
+                unprocessed_element_names.AddRange(GetUnprocessedElementNames(
+                    domNew,
+                    element_names,
+                    false));
+                unprocessed_element_names.AddRange(GetUnprocessedElementNames(
+    domExist,
+    element_names,
+    false));
+                StringUtil.RemoveDupNoSort(ref unprocessed_element_names);
+
+                // 根据元素名集合，看看其中哪些元素内容原本期望发生变化
+                denied_element_names.AddRange(DetectElementChanging(
+domExist,
+domNew,
+unprocessed_element_names.Except(_auto_maintain_element_names)));
+            }
+
             // strMergedXml = domExist.OuterXml;
             domMerged = domExist;
 
             if (useClientRefID)
                 return 1;
             return 0;
+        }
+
+        // 搜集 XML 记录中没有被处理到的元素名
+        static List<string> GetUnprocessedElementNames(
+            XmlDocument dom,
+            string[] processed_element_names,
+            bool remove_dup = true)
+        {
+            List<string> results = new List<string>();
+            foreach (XmlElement element in dom.DocumentElement.ChildNodes)
+            {
+                if (element == null || element.NodeType != XmlNodeType.Element)
+                    continue;
+
+                string name = GetMyName(element);
+
+                if (Array.IndexOf(processed_element_names, name) == -1)
+                    results.Add(name);
+            }
+
+            // 去重。dprms:file 可能会出现重复
+            if (remove_dup)
+                StringUtil.RemoveDupNoSort(ref results);
+            return results;
+        }
+
+        // 根据给定的元素名集合，检查记录中这些元素是否即将发生修改
+        static List<string> DetectElementChanging(
+            XmlDocument domExistParam,
+            XmlDocument domNew,
+            IEnumerable<string> element_names)
+        {
+            // 检查元素的内容是否即将发生变化
+            List<string> changing_names = new List<string>();
+            foreach (var strElementName in element_names)
+            {
+                // 如果是 fingerprint face palmprint 元素，则只比较 InnerText
+                if (strElementName == "fingerprint"
+                    || strElementName == "face"
+                    || strElementName == "palmprint")
+                {
+                    string old_innerText = DomUtil.GetElementText(domExistParam.DocumentElement, strElementName);
+                    string new_innerText = DomUtil.GetElementText(domNew.DocumentElement, strElementName);
+
+                    if (old_innerText != new_innerText)
+                        changing_names.Add(strElementName);
+                }
+                else if (strElementName == "refID")
+                {
+                    // 2021/8/9
+                    string old_innerText = DomUtil.GetElementText(domExistParam.DocumentElement, strElementName);
+                    string new_innerText = DomUtil.GetElementText(domNew.DocumentElement, strElementName);
+                    // 如果现有记录中 refID 为非空，则不允许修改它
+                    if (string.IsNullOrEmpty(old_innerText) == false)
+                        new_innerText = old_innerText;
+
+                    if (old_innerText != new_innerText)
+                        changing_names.Add(strElementName);
+                }
+                else
+                {
+                    string old_outerXml = GetOuterXml(domExistParam, strElementName);
+                    string new_outerXml = GetOuterXml(domNew, strElementName);
+
+                    if (old_outerXml != new_outerXml)
+                        changing_names.Add(strElementName);
+                }
+            }
+
+            return changing_names;
         }
 
         static string GetOuterXml(XmlDocument domTarget,
@@ -949,6 +1077,13 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
+        // 2023/2/9
+        // 获得读者记录元素名集合，全部元素集合
+        public string[] GetReaderFullElementNames()
+        {
+            return StringUtil.Append(_reader_element_names, this.PatronAdditionalFields.ToArray());
+        }
+
         // 修改读者记录
         // TODO: 是否要提供条码号重的情况下强制写入的功能？
         // 需要一并发来旧记录的原因, 是为了和数据库中当前可能已经变化了的记录进行比较，
@@ -992,7 +1127,8 @@ namespace DigitalPlatform.LibraryServer
             strSavedRecPath = "";
             baNewTimestamp = null;
 
-            string[] element_names = StringUtil.Append(_reader_element_names, this.PatronAdditionalFields.ToArray());
+            string[] element_names = GetReaderFullElementNames();
+            // string[] element_names = StringUtil.Append(_reader_element_names, this.PatronAdditionalFields.ToArray());
 
             LibraryServerResult result = new LibraryServerResult();
 
@@ -2186,6 +2322,9 @@ strLibraryCode);    // 读者所在的馆代码
                     if (data_fields != null/*string.IsNullOrEmpty(data_fields) == false*/)
                     {
                         var names = CanonicalizeElementNames(data_fields);
+                        if (names == null)
+                            names = new string[0];
+
                         // var names = StringUtil.SplitList(data_fields);
                         element_names = element_names.Intersect(names).ToArray();
                         Append(comment, "AND(dataFields 集合:", names.ToArray(), ")");
@@ -2211,6 +2350,11 @@ strLibraryCode);    // 读者所在的馆代码
                     // 执行"change"操作
                     // 1) 操作成功后, NewRecord中有实际保存的新记录，NewTimeStamp为新的时间戳
                     // 2) 如果返回TimeStampMismatch错，则OldRecord中有库中发生变化后的“原记录”，OldTimeStamp是其时间戳
+                    // parameters:
+                    //      element_names   元素名集合。包含允许修改的元素名。注意元素名要求是内部正规形态，不允许使用别名(例如 dprms.file 和 dprms:file 就是别名)
+                    //      importantFields 要重点关注是否兑现了修改的元素名列表。如果列表中的元素没有兑现修改，则 API 应该报错
+                    //      library_errorcode   [out] 返回 dp2library 型错误码。注意，即便本函数没有返回 -1，library_errorcode 中也有可能返回有意义的错误码。
+                    //                      如果没有错误, library_errorcode 返回 ErrorCode.NoError
                     // return:
                     //      -1  出错
                     //      0   成功
@@ -2238,7 +2382,7 @@ strLibraryCode);    // 读者所在的馆代码
                     if (nRet == -1)
                     {
                         // 2021/8/5
-                        if (library_errorcode != ErrorCode.SystemError)
+                        if (library_errorcode != ErrorCode.NoError)
                         {
                             result.Value = -1;
                             result.ErrorInfo = strError;
@@ -2250,20 +2394,23 @@ strLibraryCode);    // 读者所在的馆代码
                         goto ERROR1;
                     }
 
+                    // 2023/2/9
+                    if (library_errorcode != ErrorCode.NoError)
+                        result.ErrorCode = library_errorcode;
+
+                    // 2023/2/9
+                    // 成功时 result.ErrorInfo 中也可能有内容
+                    result.ErrorInfo = strError;
+
                     this.SessionTable.CloseSessionByReaderBarcode(strNewBarcode);
 
                     strSavedRecPath = strRecPath;   // 保存过程不会改变记录路径
                 }
                 else if (strAction == "delete")
                 {
-                    // 2021/8/3
-
                     string write_level = GetReaderInfoLevel("setreaderinfo", sessioninfo.RightsOrigin);
                     if (string.IsNullOrEmpty(write_level) == false)
                     {
-                        // 微调一下，让 element_names 中增加包含 libraryCode 和 oi 这两个原本是服务器自动维护的元素
-                        element_names = StringUtil.Append(_reader_element_names, new string[] { "libraryCode", "oi" });
-
                         var names = GetElementNames(write_level, element_names/*2023/2/2*/);
                         element_names = element_names.Intersect(names).ToArray();
                     }
@@ -2273,6 +2420,9 @@ strLibraryCode);    // 读者所在的馆代码
                     if (data_fields != null/*string.IsNullOrEmpty(data_fields) == false*/)
                     {
                         var names = CanonicalizeElementNames(data_fields);
+                        if (names == null)
+                            names = new string[0];
+
                         // var names = StringUtil.SplitList(data_fields);
                         element_names = element_names.Intersect(names).ToArray();
                     }
@@ -2286,6 +2436,12 @@ strLibraryCode);    // 读者所在的馆代码
                         element_names = element_names.Except(names).ToArray();
                     }
 #endif
+
+                    {
+                        // 微调一下，让 element_names 中增加包含 libraryCode 和 oi 这两个原本是服务器自动维护的元素
+                        element_names = StringUtil.Append(element_names, _auto_maintain_element_names);
+                        // element_names = StringUtil.Append(_reader_element_names, new string[] { "libraryCode", "oi" });
+                    }
 
                     // return:
                     //      -2  记录中有流通信息，不能删除
@@ -2367,6 +2523,8 @@ strLibraryCode);    // 读者所在的馆代码
                         goto ERROR1;
                     }
                 }
+
+                return result;
             }
             catch (Exception ex)
             {
@@ -2390,7 +2548,6 @@ strLibraryCode);    // 读者所在的馆代码
                 }
             }
 
-            return result;
         ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
@@ -3125,6 +3282,11 @@ root, strLibraryCode);
         // 执行"change"操作
         // 1) 操作成功后, NewRecord中有实际保存的新记录，NewTimeStamp为新的时间戳
         // 2) 如果返回TimeStampMismatch错，则OldRecord中有库中发生变化后的“原记录”，OldTimeStamp是其时间戳
+        // parameters:
+        //      element_names   元素名集合。包含允许修改的元素名。注意元素名要求是内部正规形态，不允许使用别名(例如 dprms.file 和 dprms:file 就是别名)
+        //      importantFields 要重点关注是否兑现了修改的元素名列表。如果列表中的元素没有兑现修改，则 API 应该报错
+        //      library_errorcode   [out] 返回 dp2library 型错误码。注意，即便本函数没有返回 -1，library_errorcode 中也有可能返回有意义的错误码。
+        //                      如果没有错误, library_errorcode 返回 ErrorCode.NoError
         // return:
         //      -1  出错
         //      0   成功
@@ -3154,7 +3316,7 @@ root, strLibraryCode);
             strExistingRecord = "";
             strNewRecord = "";
             baNewTimestamp = null;
-            library_errorcode = ErrorCode.SystemError;
+            library_errorcode = ErrorCode.NoError;
             kernel_errorcode = ErrorCodeValue.NoError;
 
             int nRedoCount = 0;
@@ -3224,10 +3386,18 @@ root, strLibraryCode);
                 }
             }
 
+            List<string> denied_element_names = null;
+
             // 2021/8/5
             // 先合并新旧记录，得到真正保存的新记录内容状态。后面再进行新旧比较
             if (bForce == false)
             {
+                // parameters:
+                //      important_fields    重要的字段名列表。要检查这些字段是否没有被采纳，如果没有被采纳要报错
+                //                          注: dprms:file 元素，在 important_fields 里面应当表达为 "http://dp2003.com/dprms:file"
+                //      strRights           当前账户权限。
+                //                          用于检查账户权限问题。如果不希望检查，可以用 null
+                //      denied_element_names    [out] 返回哪些被阻止修改的元素名集合。注意，如果本函数因为 importantFields 原因返回 -1 了，则 denied_element_names 不会返回任何内容
                 // return:
                 //      -1  出错
                 //      0   成功
@@ -3238,13 +3408,21 @@ root, strLibraryCode);
                 domExist,
                 domNewRec,
                 CanonicalizeElementNames(importantFields),
+                sessioninfo.RightsOrigin,
                 // importantFields == null || string.IsNullOrEmpty(importantFields) ? null : importantFields.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries),
                 out XmlDocument domMerged,
+                out denied_element_names,
                 out strError);
                 if (nRet == -1)
                 {
-                    strError += "。" + elementset_comment;
+                    strError = "修改被拒绝。" + strError + "。" + elementset_comment;
                     goto ERROR1;
+                }
+
+                if (nRet == 0)
+                {
+                    // 合并后没有任何变化
+                    // TODO:
                 }
 
                 // 查重 refID
@@ -3929,9 +4107,22 @@ root, strLibraryCode);
                     strExistingRecord = domExist.OuterXml;
                 }
                 */
-
-                strError = "保存操作成功。NewTimeStamp中返回了新的时间戳，NewRecord中返回了实际保存的新记录(可能和提交的新记录稍有差异)。";
+                strError = "保存操作成功。NewTimeStamp中返回了新的时间戳，NewRecord中返回了实际保存的新记录(可能和提交的新记录稍有差异)";
                 kernel_errorcode = DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue.NoError;
+
+                if (denied_element_names != null && denied_element_names.Count > 0)
+                {
+                    string caption = "下列元素";
+                    // 如果可修改字段集合为空，可以预计，合并新旧记录不可能发生实质性修改。但也不能绝对说记录不会发生变化，因为有一些特殊字段可能会发生变化
+                    if (element_names == null || element_names.Length == 0)
+                        caption = "(因 dataFields 属性为空导致)前端提交的所有元素";
+
+                    // 把 strError 内容覆盖
+                    strError = $"保存操作成功，但{caption}保存时被拒绝兑现: {StringUtil.MakePathList(denied_element_names)}。NewTimeStamp中返回了新的时间戳，NewRecord中返回了实际保存的新记录";
+                    if (library_errorcode == ErrorCode.NoError)
+                        library_errorcode = ErrorCode.PartialDenied;
+                }
+
 
                 /// 
                 {
@@ -6594,7 +6785,8 @@ out strError);
                             struct_dom.DocumentElement.SetAttribute("visibleFields", "[none]");
                         else if (string.IsNullOrEmpty(read_level) == false)
                         {
-                            string[] full_element_names = StringUtil.Append(_reader_element_names, this.PatronAdditionalFields.ToArray());
+                            string[] full_element_names = GetReaderFullElementNames();
+                            // string[] full_element_names = StringUtil.Append(_reader_element_names, this.PatronAdditionalFields.ToArray());
 
                             var names = GetElementNames(read_level, full_element_names/*2023/2/2*/);
                             if (base_names != null)
@@ -6623,7 +6815,8 @@ out strError);
                             struct_dom.DocumentElement.SetAttribute("writeableFields", "[none]");
                         else if (string.IsNullOrEmpty(write_level) == false)
                         {
-                            string[] full_element_names = StringUtil.Append(_reader_element_names, this.PatronAdditionalFields.ToArray());
+                            string[] full_element_names = GetReaderFullElementNames();
+                            // string[] full_element_names = StringUtil.Append(_reader_element_names, this.PatronAdditionalFields.ToArray());
 
                             var names = GetElementNames(write_level, full_element_names/*2023/2/2*/);
                             if (base_names != null)
@@ -8159,7 +8352,7 @@ out strError);
 
             List<string> results = new List<string>();
             var origins = list.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-            foreach(var origin in origins)
+            foreach (var origin in origins)
             {
                 if (origin == "dprms.file" || origin == "dprms:file")
                     results.Add("http://dp2003.com/dprms:file");
