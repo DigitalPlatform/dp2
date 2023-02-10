@@ -88,6 +88,32 @@
 		<comment lang='zh'>获得书目信息</comment>
 		<comment lang='en'>get biblio info</comment>
 	</property>
+
+	<property name='getauthorityinfo'>
+		<comment lang='zh'>获得规范信息</comment>
+		<comment lang='en'>get authority info</comment>
+	</property>
+	<property name='getarrivedinfo'>
+		<comment lang='zh'>获得预约到书信息</comment>
+		<comment lang='en'>get arrived info</comment>
+	</property>
+	<property name='getpublisherinfo'>
+		<comment lang='zh'>获得出版者信息</comment>
+		<comment lang='en'>get publisher info</comment>
+	</property>
+	<property name='getzhongcihaoinfo'>
+		<comment lang='zh'>获得种次号信息</comment>
+		<comment lang='en'>get zhongcihao info</comment>
+	</property>
+	<property name='getdictionaryinfo'>
+		<comment lang='zh'>获得词典信息</comment>
+		<comment lang='en'>get dictionary info</comment>
+	</property>
+	<property name='getinventoryinfo'>
+		<comment lang='zh'>获得盘点信息</comment>
+		<comment lang='en'>get inventory info</comment>
+	</property>
+
 	<property name='searchauthority'>
 		<comment lang='zh'>检索规范库</comment>
 		<comment lang='en'>search authority</comment>
@@ -127,6 +153,10 @@
 	<property name='amerceundo'>
 		<comment lang='zh'>撤回交费</comment>
 		<comment lang='en'>amerce undo</comment>
+	</property>
+	<property name='getamerceinfo'>
+		<comment lang='zh'>获取违约金信息</comment>
+		<comment lang='en'>get amerce info</comment>
 	</property>
 	<property name='setamerceinfo'>
 		<comment lang='zh'>修改违约金信息</comment>
@@ -277,6 +307,26 @@
 		<comment lang='zh'>获取违约金下属对象</comment>
 		<comment lang='en'>get amerce object</comment>
 	</property>
+	<property name='getarrivedobject'>
+		<comment lang='zh'>获取预约到书下属对象</comment>
+		<comment lang='en'>get arrived object</comment>
+	</property>
+	<property name='getpublisherobject'>
+		<comment lang='zh'>获取出版者下属对象</comment>
+		<comment lang='en'>get publisher object</comment>
+	</property>
+	<property name='getzhongcihaoobject'>
+		<comment lang='zh'>获取种次号下属对象</comment>
+		<comment lang='en'>get zhongcihao object</comment>
+	</property>
+	<property name='getdictionaryobject'>
+		<comment lang='zh'>获取词典下属对象</comment>
+		<comment lang='en'>get dictionary object</comment>
+	</property>
+	<property name='getinventoryobject'>
+		<comment lang='zh'>获取盘点下属对象</comment>
+		<comment lang='en'>get inventory object</comment>
+	</property>
 	<!--
 	<property name='getrecord'>
 		<comment lang='zh'>获取元数据记录(已废止)</comment>
@@ -307,6 +357,14 @@
 		<comment lang='zh'>修改规范数据</comment>
 		<comment lang='en'>set authority info</comment>
 	</property>
+	<property name='setarrivedinfo'>
+		<comment lang='zh'>修改预约到书数据</comment>
+		<comment lang='en'>set arrived info</comment>
+	</property>
+	<property name='setpublisherinfo'>
+		<comment lang='zh'>修改出版者数据</comment>
+		<comment lang='en'>set publisher info</comment>
+	</property>
 	<property name='setzhongcihaoinfo'>
 		<comment lang='zh'>修改种次号数据</comment>
 		<comment lang='en'>set zhongcihao info</comment>
@@ -314,10 +372,6 @@
 	<property name='setdictionaryinfo'>
 		<comment lang='zh'>修改词典数据</comment>
 		<comment lang='en'>set dictionary info</comment>
-	</property>
-	<property name='setpublisherinfo'>
-		<comment lang='zh'>修改出版者数据</comment>
-		<comment lang='en'>set publisher info</comment>
 	</property>
 	<property name='setinventoryinfo'>
 		<comment lang='zh'>修改盘点数据</comment>
@@ -430,6 +484,22 @@
 	<property name='writeamerceobject'>
 		<comment lang='zh'>写入违约金下属对象</comment>
 		<comment lang='en'>write amerce object</comment>
+	</property>
+	<property name='writearrivedobject'>
+		<comment lang='zh'>写入预约到书下属对象</comment>
+		<comment lang='en'>write arrived object</comment>
+	</property>
+	<property name='writepublisherobject'>
+		<comment lang='zh'>写入出版者下属对象</comment>
+		<comment lang='en'>write publisher object</comment>
+	</property>
+	<property name='writezhongcihaoobject'>
+		<comment lang='zh'>写入种次号下属对象</comment>
+		<comment lang='en'>write zhongcihao object</comment>
+	</property>
+	<property name='writedictionaryobject'>
+		<comment lang='zh'>写入词典下属对象</comment>
+		<comment lang='en'>write dictionary object</comment>
 	</property>
 	<property name='writeinventoryobject'>
 		<comment lang='zh'>写入盘点下属对象</comment>

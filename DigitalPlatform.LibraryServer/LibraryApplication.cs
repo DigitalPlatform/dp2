@@ -4562,7 +4562,14 @@ out strError);
                 return "reader";
             if (strDbName == this.AmerceDbName)
                 return "amerce";
-            
+            if (strDbName == this.ArrivedDbName)
+                return "arrived";
+            // 实用库包括 publisher / zhongcihao / dictionary / inventory 类型
+            if (ServerDatabaseUtility.IsUtilDbName(this.LibraryCfgDom,
+    strDbName,
+    out string util_db_type) == true)
+                return util_db_type;
+
             return null;
         }
 
@@ -15972,7 +15979,8 @@ out string db_type);
                 || this.IsItemDbName(strDbName) == true
                 || this.IsIssueDbName(strDbName) == true
                 || this.IsOrderDbName(strDbName) == true
-                || this.AmerceDbName == strDbName)
+                || this.AmerceDbName == strDbName
+                || this.ArrivedDbName == strDbName)
             {
                 string strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
 
@@ -16762,6 +16770,11 @@ out string db_type);
                 db_type = "amerce";
                 right = "getamerceinfo";
             }
+            else if (this.ArrivedDbName == strDbName)
+            {
+                db_type = "arrived";
+                right = "getarrivedinfo";
+            }
             else if (ServerDatabaseUtility.IsUtilDbName(this.LibraryCfgDom,
     strDbName,
     out string util_db_type) == true)
@@ -17091,6 +17104,11 @@ out string db_type);
             {
                 db_type = "amerce";
                 right = "setamerceinfo";
+            }
+            else if (this.ArrivedDbName == strDbName)
+            {
+                db_type = "arrived";
+                right = "setarrivedinfo";
             }
             else if (ServerDatabaseUtility.IsUtilDbName(this.LibraryCfgDom,
     strDbName,

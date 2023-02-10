@@ -4489,7 +4489,7 @@ out byte[] _);
                 return;
             }
 
-            int nRet = HasArrivedReadRight(
+            int nRet = app.HasArrivedReadRight(
     sessioninfo,
     record.Path,
     arrived_dom,
@@ -4524,7 +4524,7 @@ out byte[] _);
                 return;
             }
 
-            int nRet = HasAmerceReadRight(
+            int nRet = app.HasAmerceReadRight(
     sessioninfo,
     record.Path,
     amerce_dom,
@@ -4995,159 +4995,6 @@ out timestamp);
         }
 #endif
 
-        // 2023/2/8
-        // 检查当前账户是否有查看一条预约到书记录的权限
-        // return:
-        //      -1  出错
-        //      0   不具备权限
-        //      1   具备权限
-        int HasArrivedReadRight(
-            SessionInfo sessioninfo,
-            string strArrivedRecPath,
-            XmlDocument arrived_dom,
-            out string strError)
-        {
-            strError = "";
-
-            // 注意这里要获得原始的 getreaderinfo:，因为并不在意 file 元素的权限
-            var level = StringUtil.GetParameterByPrefix(sessioninfo.RightsOrigin, "getreaderinfo");
-            if (level == null)
-            {
-                if (StringUtil.IsInList("borrow,return,reservation", sessioninfo.RightsOrigin) == false)
-                {
-                    strError = "当前账户不具备 getreaderinfo 或 borrow return reservation 权限";
-                    return 0;
-                }
-            }
-
-            // 读者只能看自己的预约到书记录
-            if (sessioninfo.UserType == "reader")
-            {
-                // 证条码号
-                string strReaderBarcode = DomUtil.GetElementText(arrived_dom.DocumentElement, "readerBarcode");
-                if (sessioninfo.Account == null)
-                {
-                    strError = "sessioninfo.Account == null";
-                    return -1;
-                }
-                if (sessioninfo.Account?.Barcode != strReaderBarcode)
-                {
-                    strError = "读者身份不能查看其他人的预约到书记录";
-                    return 0;
-                }
-            }
-
-            // 当前用户只能获取和管辖的馆代码关联的预约到书记录
-            // 具体来说，就是预约到书记录涉及到的读者和册都要被当前账户管辖
-            if (sessioninfo.GlobalUser == false)
-            {
-                // 读者所在馆代码
-                string strLibraryCode = DomUtil.GetElementText(arrived_dom.DocumentElement, "libraryCode");
-                // 册条码号
-                string strItemBarcode = DomUtil.GetElementText(arrived_dom.DocumentElement, "itemBarcode");
-                if (StringUtil.IsInList(strLibraryCode, sessioninfo.LibraryCodeList) == false)
-                {
-                    // 进一步判断册记录是否在当前用户管辖范围内
-                    if (string.IsNullOrEmpty(strItemBarcode) == false)
-                    {
-                        // return:
-                        //      -1  errpr
-                        //      0   不在控制范围
-                        //      1   在控制范围
-                        int nRet = app.IsItemInControl(
-                            sessioninfo,
-                            // channel,
-                            strItemBarcode,
-                            out strError);
-                        if (nRet == -1)
-                        {
-                            strError = $"预约到书记录 '{strArrivedRecPath}' 超出当前用户管辖范围，并且在尝试检索册记录 '{strItemBarcode}' 时遇到问题: {strError}";
-                            return -1;  // AceessDenied and error
-                        }
-                        if (nRet == 1)
-                        {
-                            return 1;
-                        }
-                    }
-                    strError = "预约到书记录 '" + strArrivedRecPath + "' 超出当前用户管辖范围，无法获取";
-                    return 0;
-                }
-            }
-            return 1;
-        }
-
-        // 2022/11/3
-        // 检查当前账户是否有查看一条违约金记录的权限
-        // return:
-        //      -1  出错
-        //      0   不具备权限
-        //      1   具备权限
-        int HasAmerceReadRight(
-            SessionInfo sessioninfo,
-            string strAmerceRecPath,
-            XmlDocument amerce_dom,
-            out string strError)
-        {
-            strError = "";
-
-            if (StringUtil.IsInList("getamerceinfo", sessioninfo.RightsOrigin) == false)
-            {
-                strError = "当前账户不具备 getamerceinfo 权限";
-                return 0;
-            }
-
-            // 2023/2/9
-            // 读者身份只能获得自己的违约金记录
-            if (sessioninfo.UserType == "reader")
-            {
-                string strReaderBarcode = DomUtil.GetElementText(amerce_dom.DocumentElement, "readerBarcode");
-                if (sessioninfo.Account == null)
-                {
-                    strError = "sessioninfo.Account == null";
-                    return -1;
-                }
-                if (sessioninfo.Account.Barcode != strReaderBarcode)
-                {
-                    strError = "读者身份不允许查看其他人的违约金记录";
-                    return 0;
-                }
-            }
-
-            // 当前用户只能获取和管辖的馆代码关联的违约金记录
-            if (sessioninfo.GlobalUser == false)
-            {
-                string strLibraryCode = DomUtil.GetElementText(amerce_dom.DocumentElement, "libraryCode");
-                string strItemBarcode = DomUtil.GetElementText(amerce_dom.DocumentElement, "itemBarcode");
-                if (StringUtil.IsInList(strLibraryCode, sessioninfo.LibraryCodeList) == false)
-                {
-                    // 进一步判断册记录是否在当前用户管辖范围内
-                    if (string.IsNullOrEmpty(strItemBarcode) == false)
-                    {
-                        // return:
-                        //      -1  errpr
-                        //      0   不在控制范围
-                        //      1   在控制范围
-                        int nRet = app.IsItemInControl(
-                            sessioninfo,
-                            // channel,
-                            strItemBarcode,
-                            out strError);
-                        if (nRet == -1)
-                        {
-                            strError = $"违约金记录 '{strAmerceRecPath}' 超出当前用户管辖范围，并且在尝试检索册记录 '{strItemBarcode}' 时遇到问题: {strError}";
-                            return -1;  // AceessDenied and error
-                        }
-                        if (nRet == 1)
-                        {
-                            return 1;
-                        }
-                    }
-                    strError = "违约金记录 '" + strAmerceRecPath + "' 超出当前用户管辖范围，无法获取";
-                    return 0;
-                }
-            }
-            return 1;
-        }
 
         // 获得指定记录的浏览信息
         // (注: 本方法基本上是内核对应功能GetBrowse()的浅包装)
@@ -15395,7 +15242,7 @@ out byte[] temp_timestamp);
                                     result = ret;
                                     if (channel.ErrorCode != ChannelErrorCode.None
                                         && result.ErrorCode == ErrorCode.NoError)
-                                        ConvertKernelErrorCode(channel.ErrorCode,
+                                        LibraryApplication.ConvertKernelErrorCode(channel.ErrorCode,
                                             ref result);
                                 }
                                 else if (ret.Value == 0)
@@ -15444,7 +15291,7 @@ out byte[] temp_timestamp);
                                     result = ret;
                                     if (channel.ErrorCode != ChannelErrorCode.None
                                         && result.ErrorCode == ErrorCode.NoError)
-                                        ConvertKernelErrorCode(channel.ErrorCode,
+                                        LibraryApplication.ConvertKernelErrorCode(channel.ErrorCode,
                                             ref result);
                                 }
                                 else if (ret.Value == 0)
@@ -15487,7 +15334,7 @@ out byte[] temp_timestamp);
                                 {
                                     result.Value = lRet;
                                     result.ErrorInfo = strError;
-                                    ConvertKernelErrorCode(channel.ErrorCode,
+                                    LibraryApplication.ConvertKernelErrorCode(channel.ErrorCode,
                                         ref result);
                                     return result;
                                 }
@@ -15530,8 +15377,21 @@ out byte[] temp_timestamp);
                                     xml = dom.DocumentElement.OuterXml;
                                 }
                             }
-                            else if (db_type == "amerce")
+                            else if (StringUtil.IsInList(db_type,
+                                "amerce,arrived,publisher,zhongcihao,dictionary,inventory"))
                             {
+                                var ret = app.GetRecordInfo(
+    sessioninfo,
+    strResPath,
+    strStyle,
+    out xml,
+    out strMetadata,
+    out baOutputTimestamp,
+    out strOutputResPath);
+                                if (ret.Value == -1)
+                                    return ret;
+
+#if OLDCODE
                                 // TODO: 建议这里抽取出一个函数 GetAmerceInfo()，里面包含检查分馆权限的功能。FilterResultSet() 那里也可以用上这个抽取出来的函数
                                 lRet = channel.GetRes(strResPath,
                                     strStyle + ",data", // 确保可以获取到记录 XML
@@ -15544,7 +15404,7 @@ out byte[] temp_timestamp);
                                 {
                                     result.Value = lRet;
                                     result.ErrorInfo = strError;
-                                    ConvertKernelErrorCode(channel.ErrorCode,
+                                    LibraryApplication.ConvertKernelErrorCode(channel.ErrorCode,
                                         ref result);
                                     return result;
                                 }
@@ -15585,6 +15445,7 @@ out byte[] temp_timestamp);
                                     formats.Add("xml");
                                     results = new string[] { amerce_xml };
                                 }
+#endif
                             }
 
                             if (formats.Contains("xml"))
@@ -15717,7 +15578,7 @@ out strError);
 
                 // 做错误码的翻译工作
                 // 2008/7/28
-                ConvertKernelErrorCode(channel.ErrorCode,
+                LibraryApplication.ConvertKernelErrorCode(channel.ErrorCode,
                     ref result);
 
                 if (bWriteLog)
@@ -15830,145 +15691,6 @@ out strError);
                 return null;
             return results[index];
         }
-
-        public static void ConvertKernelErrorCode(ChannelErrorCode origin,
-            ref LibraryServerResult result)
-        {
-            if (origin == ChannelErrorCode.AlreadyExist)
-            {
-                result.ErrorCode = ErrorCode.AlreadyExist;
-                return;
-            }
-            if (origin == ChannelErrorCode.AlreadyExistOtherType)
-            {
-                result.ErrorCode = ErrorCode.AlreadyExistOtherType;
-                return;
-            }
-            if (origin == ChannelErrorCode.ApplicationStartError)
-            {
-                result.ErrorCode = ErrorCode.ApplicationStartError;
-                return;
-            }
-            if (origin == ChannelErrorCode.EmptyRecord)
-            {
-                result.ErrorCode = ErrorCode.EmptyRecord;
-                return;
-            }
-            if (origin == ChannelErrorCode.None)
-            {
-                result.ErrorCode = ErrorCode.NoError;
-                return;
-            }
-            if (origin == ChannelErrorCode.NotFound)
-            {
-                result.ErrorCode = ErrorCode.NotFound;
-                return;
-            }
-            if (origin == ChannelErrorCode.NotFoundSubRes)
-            {
-                result.ErrorCode = ErrorCode.NotFoundSubRes;
-                return;
-            }
-            if (origin == ChannelErrorCode.NotHasEnoughRights)
-            {
-                result.ErrorCode = ErrorCode.NotHasEnoughRights;
-                return;
-            }
-
-            if (origin == ChannelErrorCode.OtherError)
-            {
-                result.ErrorCode = ErrorCode.OtherError;
-                return;
-            }
-            if (origin == ChannelErrorCode.PartNotFound)
-            {
-                result.ErrorCode = ErrorCode.PartNotFound;
-                return;
-            }
-            if (origin == ChannelErrorCode.RequestCanceled)
-            {
-                result.ErrorCode = ErrorCode.RequestCanceled;
-                return;
-            }
-            if (origin == ChannelErrorCode.RequestCanceledByEventClose)
-            {
-                result.ErrorCode = ErrorCode.RequestCanceledByEventClose;
-                return;
-            }
-            if (origin == ChannelErrorCode.RequestError)
-            {
-                result.ErrorCode = ErrorCode.RequestError;
-                return;
-            }
-            if (origin == ChannelErrorCode.RequestTimeOut)
-            {
-                result.ErrorCode = ErrorCode.RequestTimeOut;
-                return;
-            }
-            if (origin == ChannelErrorCode.TimestampMismatch)
-            {
-                result.ErrorCode = ErrorCode.TimestampMismatch;
-                return;
-            }
-
-            // TODO: 其实可以用 Parse() 来翻译值
-            if (origin == ChannelErrorCode.Compressed)
-            {
-                result.ErrorCode = ErrorCode.Compressed;
-                return;
-            }
-
-            if (origin == ChannelErrorCode.NotLogin)
-            {
-                result.ErrorCode = ErrorCode.SystemError;
-                result.ErrorInfo = "内核登录失败: " + result.ErrorInfo;
-                return;
-            }
-
-            result.ErrorCode = ErrorCode.SystemError;
-        }
-
-        /*
-        public static ErrorCode ConvertKernelErrorCode(ChannelErrorCode origin)
-        {
-            if (origin == ChannelErrorCode.AlreadyExist)
-                return ErrorCode.AlreadyExist;
-            if (origin == ChannelErrorCode.AlreadyExistOtherType)
-                return ErrorCode.AlreadyExistOtherType;
-            if (origin == ChannelErrorCode.ApplicationStartError)
-                return ErrorCode.ApplicationStartError;
-            if (origin == ChannelErrorCode.EmptyRecord)
-                return ErrorCode.EmptyRecord;
-            if (origin == ChannelErrorCode.None)
-                return ErrorCode.NoError;
-            if (origin == ChannelErrorCode.NotFound)
-                return ErrorCode.NotFound;
-            if (origin == ChannelErrorCode.NotFoundSubRes)
-                return ErrorCode.NotFoundSubRes;
-            if (origin == ChannelErrorCode.NotHasEnoughRights)
-                return ErrorCode.NotHasEnoughRights;
-
-            if (origin == ChannelErrorCode.OtherError)
-                return ErrorCode.OtherError;
-            if (origin == ChannelErrorCode.PartNotFound)
-                return ErrorCode.PartNotFound;
-            if (origin == ChannelErrorCode.RequestCanceled)
-                return ErrorCode.RequestCanceled;
-            if (origin == ChannelErrorCode.RequestCanceledByEventClose)
-                return ErrorCode.RequestCanceledByEventClose;
-            if (origin == ChannelErrorCode.RequestError)
-                return ErrorCode.RequestError;
-            if (origin == ChannelErrorCode.RequestTimeOut)
-                return ErrorCode.RequestTimeOut;
-            if (origin == ChannelErrorCode.TimestampMismatch)
-                return ErrorCode.TimestampMismatch;
-
-            if (origin == ChannelErrorCode.NotLogin)
-                return ErrorCode.SystemError;
-
-            return ErrorCode.SystemError;
-        }
-         * */
 
         // 写入资源
         // 注：写入 backup 或 cfgs 目录要求具备 backup 或者 managedatabase 权限；
@@ -16105,6 +15827,14 @@ out strError);
                         return result;
                     }
 
+                    var db_type = app.GetAllDbType(strDbName);
+                    if (string.IsNullOrEmpty(db_type))
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = $"无法识别数据库 '{strDbName}' 的类型 '{db_type}'";
+                        result.ErrorCode = ErrorCode.SystemError;
+                        return result;
+                    }
 
                     long lRet = 0;
                     // 2015/9/3 新增删除资源的功能
@@ -16176,11 +15906,11 @@ out strError);
                         || app.IsIssueDbName(strDbName)
                         || app.IsCommentDbName(strDbName))
                         {
-                            string db_type = app.GetDbType(strDbName, out _);
+                            // string db_type = app.GetDbType(strDbName, out _);
 
                             var ret = app.SetItemInfo(
                                 sessioninfo,
-                                db_type,
+                                // db_type,
                                 "delete",
                                 strResPath,
                                 "",
@@ -16224,6 +15954,8 @@ out strError);
                         || app.IsOrderDbName(strDbName)
                         || app.IsIssueDbName(strDbName)
                         || app.IsCommentDbName(strDbName)
+                        || StringUtil.IsInList(db_type,
+                        "amerce,arrived,publisher,zhongcihao,dictionary,inventory")
                         )
                         && app.IsDatabaseMetadataPath(sessioninfo, strResPath) == true)
                     {
@@ -16262,7 +15994,7 @@ out strError);
                             {
                                 result.Value = append_ret;
                                 result.ErrorInfo = strError;
-                                ConvertKernelErrorCode(channel.ErrorCode,
+                                LibraryApplication.ConvertKernelErrorCode(channel.ErrorCode,
                     ref result);
                                 return result;
                             }
@@ -16371,10 +16103,10 @@ out strError);
                         || app.IsIssueDbName(strDbName)
                         || app.IsCommentDbName(strDbName))
                             {
-                                string db_type = app.GetDbType(strDbName, out _);
+                                // string db_type = app.GetDbType(strDbName, out _);
 
                                 var ret = app.SetItemInfo(sessioninfo,
-                                    db_type,
+                                    // db_type,
                                     strAction,
                                     strResPath,
                                     strBiblio,
@@ -16388,6 +16120,25 @@ out strError);
                                 strError = ret.ErrorInfo;
                                 result.ErrorCode = ret.ErrorCode;
                             }
+                            if (StringUtil.IsInList(db_type,
+                        "amerce,arrived,publisher,zhongcihao,dictionary,inventory"))
+                            {
+                                var ret = app.SetRecordInfo(
+sessioninfo,
+strResPath,
+strBiblio,
+strMetadata,
+strStyle,
+baInputTimestamp,
+out strOutputResPath,
+out baOutputTimestamp);
+                                if (ret.Value == -1)
+                                    return ret;
+                                // baContent = ??
+                                result = ret;
+                                strError = ret.ErrorInfo;
+                            }
+
                         }
                         else
                         {
@@ -16415,7 +16166,7 @@ out strError);
                         // 做错误码的翻译工作
                         // 2008/7/28
                         // result.ErrorCode = ConvertKernelErrorCode(channel.ErrorCode);
-                        ConvertKernelErrorCode(channel.ErrorCode,
+                        LibraryApplication.ConvertKernelErrorCode(channel.ErrorCode,
             ref result);
                     }
                     result.Value = lRet;

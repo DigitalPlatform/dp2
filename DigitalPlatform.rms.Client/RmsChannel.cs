@@ -4619,10 +4619,31 @@ namespace DigitalPlatform.rms.Client
             }
         }
 
+        public long DoSaveTextRes(string strPath,
+    string strXml,
+    bool bInlucdePreamble,
+    string strStyle,
+    byte[] timestamp,
+    out byte[] output_timestamp,
+    out string strOutputPath,
+    out string strError)
+        {
+            return DoSaveTextRes(strPath,
+    strXml,
+    bInlucdePreamble,
+    "",
+    strStyle,
+    timestamp,
+    out output_timestamp,
+    out strOutputPath,
+    out strError);
+        }
+
         // 保存Xml记录
         public long DoSaveTextRes(string strPath,
             string strXml,
             bool bInlucdePreamble,
+            string strMetadata,
             string strStyle,
             byte[] timestamp,
             out byte[] output_timestamp,
@@ -4683,7 +4704,7 @@ namespace DigitalPlatform.rms.Client
                 try
                 {
                 REDOSAVE:
-                    string strMetadata = "";
+                    // string strMetadata = "";
                     string strRange = "";
                     int nEnd = nStart + baChunk.Length - 1;
 
@@ -4697,7 +4718,7 @@ namespace DigitalPlatform.rms.Client
                         lTotalLength,	// 这是整个包尺寸，不是本次chunk的尺寸。因为服务器显然可以从baChunk中看出其尺寸，不必再专门用一个参数表示这个尺寸了
                         baChunk,
                         // null,	// attachmentid
-                        strMetadata,
+                        strMetadata,    // TODO: 是不是最后一次才用发出内容？
                         strStyle,
                         baInputTimeStamp,
                         null,
@@ -4774,9 +4795,7 @@ namespace DigitalPlatform.rms.Client
 
                     strPath = strOutputPath;	// 如果第一次的strPath中包含'?'id, 必须用outputpath才能正确继续
                     baInputTimeStamp = output_timestamp;	//baOutputTimeStamp;
-
                 }
-
                 catch (Exception ex)
                 {
                     /*

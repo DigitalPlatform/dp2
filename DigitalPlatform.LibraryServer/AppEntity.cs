@@ -16,6 +16,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.rms.Client.rmsws_localhost;
+using System.Data.SqlClient;
 
 
 namespace DigitalPlatform.LibraryServer
@@ -259,8 +260,8 @@ namespace DigitalPlatform.LibraryServer
                 //      domOld  旧记录。函数执行后其内容会被改变
                 // return:
                 //      -1  error
-                //      0   new record not changed
-                //      1   new record changed
+                //      0   old record not changed
+                //      1   old record changed
                 nRet = ItemDatabase.MergeNewOldRec(
                     "item",
                     sessioninfo.RightsOrigin,
@@ -3137,7 +3138,7 @@ out strError);
         // TODO: 增加对 amerce publisher 等等类型数据库的支持
         public LibraryServerResult SetItemInfo(
     SessionInfo sessioninfo,
-    string strDbType,
+    // string strDbType,
     string strAction,
     string strRecPath,
     string strXml,
@@ -3148,6 +3149,17 @@ out strError);
         {
             strOutputRecPath = "";
             baOutputTimestamp = null;
+
+            LibraryServerResult result = new LibraryServerResult();
+            string strError = "";
+
+            var strDbName = ResPath.GetDbName(strRecPath);
+            var strDbType = GetAllDbType(strDbName);
+            if (string.IsNullOrEmpty(strDbType))
+            {
+                strError = $"无法识别路径 '{strRecPath}' 中数据库 '{strDbName}' 的类型";
+                goto ERROR1;
+            }
 
             var entity = new EntityInfo();
             entity.Action = strAction;
@@ -3170,12 +3182,10 @@ out strError);
                 entity.OldRecPath = strRecPath;
             */
 
-            LibraryServerResult result = new LibraryServerResult();
             EntityInfo[] errorinfos = null;
 
             if (strDbType == "item" || strDbType == "entity")
             {
-
                 result = SetEntities(
     sessioninfo,
     "", // strBiblioRecPath,
@@ -3250,6 +3260,11 @@ out strError);
                 }
             }
 
+            return result;
+        ERROR1:
+            result.Value = -1;
+            result.ErrorInfo = strError;
+            result.ErrorCode = ErrorCode.SystemError;
             return result;
         }
 

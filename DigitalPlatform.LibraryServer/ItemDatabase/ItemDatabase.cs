@@ -368,6 +368,7 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 合并新旧记录
+        // 注: 本函数修改的是 domNew。另有一个函数 MergeNewOldRec()，和本函数效果对应，修改的是 domOld
         // parameters:
         //      bChangePartDenied   如果本次被设定为 true，则 strError 中返回了关于部分修改的注释信息
         //      domOld  旧记录。
@@ -508,8 +509,8 @@ namespace DigitalPlatform.LibraryServer
         //      domOld  旧记录。函数执行后其内容会被改变
         // return:
         //      -1  error
-        //      0   new record not changed
-        //      1   new record changed
+        //      0   old record not changed
+        //      1   old record changed
         public static int MergeNewOldRec(
             string db_type,
     string strRights,

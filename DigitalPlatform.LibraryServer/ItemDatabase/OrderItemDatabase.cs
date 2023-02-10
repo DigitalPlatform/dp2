@@ -80,8 +80,8 @@ namespace DigitalPlatform.LibraryServer
             //      domOld  旧记录。函数执行后其内容会被改变
             // return:
             //      -1  error
-            //      0   new record not changed
-            //      1   new record changed
+            //      0   old record not changed
+            //      1   old record changed
             nRet = MergeNewOldRec(
                 "order",
                 sessioninfo.RightsOrigin,
