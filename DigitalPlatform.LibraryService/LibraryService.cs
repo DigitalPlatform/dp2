@@ -15735,7 +15735,7 @@ out strError);
                     // 路径中的 ID 为问号代表这是一个 "new" 动作。但后继分片请求是否需要检查权限？
                     if (app.IsBiblioDbName(strDbName)
                         && app.IsDatabaseMetadataPath(sessioninfo, strResPath, out _, out string id) == true
-                        && LibraryApplication.IsId(id)
+                        && ResPath.IsAppendRecPath(strResPath)
                         && delete == false)
                     {
                         strAction = "new";
