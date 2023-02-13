@@ -1164,6 +1164,7 @@ namespace TestMarcKernel
 
             nRet = LibraryApplication.MaskCantGet856(
     strUserRights,
+    true,
     ref strOldMarc,
     out strError);
             if (nRet == -1)
@@ -1179,6 +1180,7 @@ namespace TestMarcKernel
             //      其他  滤除的 856 字段个数
             nRet = LibraryApplication.MaskCantGet856(
                 strUserRights,
+                true,
                 ref strNewMarc,
                 out strError);
             if (nRet == -1)
@@ -1195,6 +1197,7 @@ namespace TestMarcKernel
             nRet = MarcDiff.MergeOldNew(
                 "insert,replace,delete",
                 strFieldNameList,
+                null,
                 strOldMarc,
                 ref strNewMarc,
                 out strComment,

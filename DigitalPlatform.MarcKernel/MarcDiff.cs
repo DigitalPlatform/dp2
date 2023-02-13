@@ -10,7 +10,7 @@ using DiffPlex.DiffBuilder;
 using DiffPlex.DiffBuilder.Model;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
-
+using System.Linq;
 
 namespace DigitalPlatform.Marc
 {
@@ -50,7 +50,7 @@ namespace DigitalPlatform.Marc
             nRet = list.Build(strFieldNameList, out strError);
             if (nRet == -1)
             {
-                strError = "字段权限定义 '"+strFieldNameList+"' 不合法: " + strError;
+                strError = "字段权限定义 '" + strFieldNameList + "' 不合法: " + strError;
                 return -1;
             }
 
@@ -63,7 +63,7 @@ namespace DigitalPlatform.Marc
                 text.Append(new string('?', 24));
             }
 
-            string[] fields = strBody.Split(new char[] {(char)30}, StringSplitOptions.RemoveEmptyEntries);
+            string[] fields = strBody.Split(new char[] { (char)30 }, StringSplitOptions.RemoveEmptyEntries);
             foreach (string s in fields)
             {
                 if (string.IsNullOrEmpty(s) == true)
@@ -106,7 +106,12 @@ namespace DigitalPlatform.Marc
 
         // 按照字段修改权限定义，合并新旧两个 MARC 记录
         // parameters:
-        //      strDefaultOperation   insert/replace/delete 之一或者逗号间隔组合
+        //      strDefaultOperation 默认操作，用于补充 strFieldNameList 中缺省的动作语义
+        //                          insert/replace/delete 之一或者逗号间隔组合
+        //      strFieldNameList    账户权限中的(增删改)字段列表，可以被何种操作的字段列表
+        //      strChangeableFieldNameList  用于限定修改范围的，可修改字段名列表。例如 "###,100-200"
+        //                          如果为 null，表示不使用此参数，意思是不限制任何字段的修改
+        //                          如果为 ""，则表示空集合，意思是限制所有字段的修改。那实际上此时调用本函数不会对 strTargetMarc 发生任何改动
         // return:
         //      -1  出错
         //      0   成功
@@ -114,6 +119,7 @@ namespace DigitalPlatform.Marc
         public static int MergeOldNew(
             string strDefaultOperation,
             string strFieldNameList,
+            string strChangeableFieldNameList,
             string strOldMarc,
             ref string strNewMarc,
             out string strComment,
@@ -144,6 +150,60 @@ namespace DigitalPlatform.Marc
                 bChange = StringUtil.IsInList("change", strAction);
             }
 #endif
+            // 可以修改的字段名列表
+            FieldNameList changeable_list = null;
+
+            // 2023/2/11
+            if (strChangeableFieldNameList != null)
+            {
+                changeable_list = new FieldNameList();
+                nRet = changeable_list.Build(strChangeableFieldNameList, out strError);
+                if (nRet == -1)
+                {
+                    strError = "(可修改)字段名列表 '" + strChangeableFieldNameList + "' 不合法";
+                    return -1;
+                }
+
+                /*
+                // 把旧记录中不可修改的字段先补回到新记录中，这样可以降低 Diff 合并算法扭曲匹配的机率
+                AddFields(
+                    changeable_list,
+                    strOldMarc,
+                    ref strNewMarc);
+                */
+                // 把新记录中的符合范围的字段替换或者插入到旧记录中，这样就成了补充了余下(因为读权限限制没有读到的)字段的“新记录”
+                {
+                    string strTargetMarc = strOldMarc;
+                    MergeFields(changeable_list,
+        strNewMarc,
+        ref strTargetMarc);
+                    strNewMarc = strTargetMarc;
+                }
+
+                // 给需要保护的字段打上标记，从而防范被修改
+                // 注意本函数无法给头标区打保护标记，因为头标区固定长度 24 字符，再也无法增加临时字符了
+                // parameters:
+                //      changeable_list 可以修改的字段名列表。由于头标区无法通过尾部添加 (char)1 保护字符，所以本参数在函数返回后还要用于判断头标区，所以用了 FieldNameList 类型
+                //      clearMaskBefore 是否要在处理之前清理 MARC 记录中以前的标记字符?
+                // return:
+                //      -1  出错
+                //      其他  标记的字段个数
+                nRet = MaskProtectFields(
+            changeable_list,
+            false,
+            ref strOldMarc,
+            out strError);
+                if (nRet == -1)
+                    return -1;
+
+                nRet = MaskProtectFields(
+changeable_list,
+false,
+ref strNewMarc,
+out strError);
+                if (nRet == -1)
+                    return -1;
+            }
 
             string strOldHeader = "";
             string strNewHeader = "";
@@ -171,7 +231,7 @@ namespace DigitalPlatform.Marc
                 return -1;
             }
 #endif
-            
+
             OperationRights rights_table = new OperationRights();
             nRet = rights_table.Build(strFieldNameList,
                 strDefaultOperation,
@@ -206,9 +266,9 @@ namespace DigitalPlatform.Marc
             // 被拒绝修改的字段名
             List<string> denied_change_fieldnames = new List<string>();
 
-            bool bNotAccepted = false;
+            // bool bNotAccepted = false;
             List<string> fields = new List<string>();
-            for (int index = 0; index < result.NewText.Lines.Count; index ++ )
+            for (int index = 0; index < result.NewText.Lines.Count; index++)
             {
                 var newline = result.NewText.Lines[index];
                 var oldline = result.OldText.Lines[index];
@@ -237,9 +297,9 @@ namespace DigitalPlatform.Marc
                         fields.Add(newline.Text);
                     else
                     {
-                        denied_insert_fieldnames.Add(strNewFieldName 
+                        denied_insert_fieldnames.Add(strNewFieldName
                             + (bMask ? "!" : ""));
-                        bNotAccepted = true;
+                        //bNotAccepted = true;
                     }
                 }
                 else if (newline.Type == ChangeType.Modified)
@@ -290,11 +350,11 @@ namespace DigitalPlatform.Marc
                     }
                     else
                         bReserveOld = true; // 2018/4/28
-                    
+
                     if (bReserveOld)
                     {
                         fields.Add(RemoveMask(result.OldText.Lines[index].Text));    // 依然采用修改前的值
-                        bNotAccepted = true;
+                        //bNotAccepted = true;
 
                         denied_change_fieldnames.Add(strOldFieldName
                             + (bMaskNew ? "!" : ""));
@@ -316,7 +376,7 @@ namespace DigitalPlatform.Marc
                         // 当具有标记的时候，表示这是因为旧记录中的字段权限禁止当前用户获取，造成前端得不到这个字段，然后在提交保存的时候也就没有这个字段，并不是前端故意要删除这个字段，因而也就不要做 partial_denied 提示了
                         if (bMask == false)
                         {
-                            bNotAccepted = true;
+                            //bNotAccepted = true;
 
                             denied_delete_fieldnames.Add(strOldFieldName
                                 + (bMask ? "!" : ""));
@@ -330,14 +390,21 @@ namespace DigitalPlatform.Marc
             }
 
             StringBuilder text = new StringBuilder(4096);
-            if (rights_table.ReplaceFieldNames.Contains("###") == true
-                || rights_table.InsertFieldNames.Contains("###") == true)
+
+            if (changeable_list?.Contains("###") == false)
+            {
+                // 2023/2/11
+                // 如果头标区被保护
+                text.Append(strOldHeader);
+            }
+            else if (rights_table.ReplaceFieldNames.Contains("###") == true
+            || rights_table.InsertFieldNames.Contains("###") == true)
                 text.Append(strNewHeader);
             else
             {
                 if (strNewHeader != strOldHeader)
                 {
-                    bNotAccepted = true;
+                    //bNotAccepted = true;
                     denied_change_fieldnames.Add("###");    // ### 表示头标区
                 }
                 text.Append(strOldHeader);
@@ -351,28 +418,225 @@ namespace DigitalPlatform.Marc
                 text.Append((char)30);
             }
 
-            if (denied_insert_fieldnames.Count > 0)
-                strComment += "字段 " + StringUtil.MakePathList(denied_insert_fieldnames)+ " 被拒绝插入";
-
-            if (denied_delete_fieldnames.Count > 0)
+            /*
             {
-                if (string.IsNullOrEmpty(strComment) == false)
-                    strComment += " ; ";
-                strComment += "字段 " + StringUtil.MakePathList(denied_delete_fieldnames) + " 被拒绝删除";
+                var names = RemoveMaskFieldName(denied_insert_fieldnames);
+                if (names.Count > 0)
+                    strComment += "字段 " + StringUtil.MakePathList(names) + " 被拒绝插入";
+
+                names = RemoveMaskFieldName(denied_delete_fieldnames);
+                if (names.Count > 0)
+                {
+                    if (string.IsNullOrEmpty(strComment) == false)
+                        strComment += " ; ";
+                    strComment += "字段 " + StringUtil.MakePathList(names) + " 被拒绝删除";
+                }
+
+                names = RemoveMaskFieldName(denied_change_fieldnames);
+                if (names.Count > 0)
+                {
+                    if (string.IsNullOrEmpty(strComment) == false)
+                        strComment += " ; ";
+                    strComment += "字段 " + StringUtil.MakePathList(names) + " 被拒绝修改";
+                }
             }
+            */
 
-            if (denied_change_fieldnames.Count > 0)
             {
-                if (string.IsNullOrEmpty(strComment) == false)
-                    strComment += " ; ";
-                strComment += "字段 " + StringUtil.MakePathList(denied_change_fieldnames) + " 被拒绝修改";
+                var names = (denied_insert_fieldnames);
+                if (names.Count > 0)
+                    strComment += "字段 " + StringUtil.MakePathList(names) + " 被拒绝插入";
+
+                names = (denied_delete_fieldnames);
+                if (names.Count > 0)
+                {
+                    if (string.IsNullOrEmpty(strComment) == false)
+                        strComment += " ; ";
+                    strComment += "字段 " + StringUtil.MakePathList(names) + " 被拒绝删除";
+                }
+
+                names = (denied_change_fieldnames);
+                if (names.Count > 0)
+                {
+                    if (string.IsNullOrEmpty(strComment) == false)
+                        strComment += " ; ";
+                    strComment += "字段 " + StringUtil.MakePathList(names) + " 被拒绝修改";
+                }
             }
 
             strNewMarc = text.ToString();
+            /*
             if (bNotAccepted == true)
+                return 1;
+            */
+            if (string.IsNullOrEmpty(strComment) == false)
                 return 1;
             return 0;
         }
+
+        static List<string> RemoveMaskFieldName(List<string> list)
+        {
+            return list.Where(o => o.EndsWith("!") == false).ToList();
+        }
+
+        // 把 source 记录中的符合范围的字段替换或者插入到 target 记录中
+        static int MergeFields(FieldNameList changeable_list,
+            string strSourceMarc,
+            ref string strTargetMarc)
+        {
+            var source_record = new MarcRecord(strSourceMarc);
+            var target_record = new MarcRecord(strTargetMarc);
+
+            // 先标记 target 记录中的可修改范围的字段，便于后面进行替换
+            List<MarcField> deleted_fields = new List<MarcField>();
+            foreach (MarcField target_field in target_record.Fields)
+            {
+                if (changeable_list.Contains(target_field.Name))
+                    deleted_fields.Add(target_field);
+            }
+
+            int nCount = 0;
+            foreach (MarcField source_field in source_record.Fields)
+            {
+                if (changeable_list.Contains(source_field.Name) == true)
+                {
+                    // 寻找第一个同名目标字段替换(替换后打上标记，下次避开它替换)。如果找不到，则在目标记录中插入一个
+                    var target_field = FindField(deleted_fields, source_field.Name);
+                    if (target_field != null)
+                    {
+                        deleted_fields.Remove(target_field);
+                        target_field.Text = source_field.Text;
+                    }
+                    else
+                        target_record.ChildNodes.insertSequence(new MarcField(source_field.Text),
+    InsertSequenceStyle.PreferTail);
+                    nCount++;
+                }
+            }
+
+            if (changeable_list.Contains("###") == true)
+            {
+                target_record.Header = source_record.Header;
+                nCount++;
+            }
+
+            // 删除替换后剩下的待删除字段
+            foreach(var field in deleted_fields)
+            {
+                field.detach();
+            }
+
+            if (nCount > 0)
+                strTargetMarc = target_record.Text;
+            return nCount;
+        }
+
+        static MarcField FindField(List<MarcField> fields, string name)
+        {
+            return fields.Where(o => o.Name == name).FirstOrDefault();
+        }
+
+#if REMOVED
+        // 把旧记录中不可修改的字段先补回到新记录中，这样可以降低 Diff 合并算法扭曲匹配的机率
+        static int AddFields(FieldNameList changeable_list,
+            string strOldMarc,
+            ref string strNewMarc)
+        {
+            var old_record = new MarcRecord(strOldMarc);
+            var new_record = new MarcRecord(strNewMarc);
+
+            // TODO: 先清理新记录中的超过可修改范围的字段。避免后面重复插入
+
+            int nCount = 0;
+            foreach (MarcField old_field in old_record.Fields)
+            {
+                if (changeable_list.Contains(old_field.Name) == false)
+                {
+                    new_record.ChildNodes.insertSequence(new MarcField(old_field.Text),
+InsertSequenceStyle.PreferTail);
+                    nCount++;
+                }
+            }
+
+            if (changeable_list.Contains("###") == false)
+            {
+                new_record.Header = old_record.Header;
+                nCount++;
+            }
+
+            if (nCount > 0)
+                strNewMarc = new_record.Text;
+            return nCount;
+        }
+#endif
+
+
+        // 给需要保护的字段打上标记，从而防范被修改
+        // 注意本函数无法给头标区打保护标记，因为头标区固定长度 24 字符，再也无法增加临时字符了
+        // parameters:
+        //      changeable_list 可以修改的字段名列表。由于头标区无法通过尾部添加 (char)1 保护字符，所以本参数在函数返回后还要用于判断头标区，所以用了 FieldNameList 类型
+        //      clearMaskBefore 是否要在处理之前清理 MARC 记录中以前的标记字符?
+        // return:
+        //      -1  出错
+        //      其他  标记的字段个数
+        public static int MaskProtectFields(
+    // string strChangeableFieldNameList,
+    FieldNameList changeable_list,
+    bool clearMaskBefore,
+    ref string strMARC,
+    out string strError)
+        {
+            strError = "";
+
+            if (string.IsNullOrEmpty(strMARC) == true)
+                return 0;
+
+            /*
+            FieldNameList changeable_list = new FieldNameList();
+            int nRet = changeable_list.Build(strChangeableFieldNameList, out strError);
+            if (nRet == -1)
+            {
+                strError = "(可修改)字段名列表 '" + strChangeableFieldNameList + "' 不合法";
+                return -1;
+            }
+            */
+
+            string strMaskChar = new string((char)1, 1);
+
+            if (clearMaskBefore)
+            {
+                // 在处理前替换记录中可能出现的 (char)1
+                // 建议在调用本函数前，探测 strMARC 中是否有这个符号，如果有，可能是相关环节检查不严创建了这样的记录，需要进一步检查处理
+                strMARC = strMARC.Replace(strMaskChar, "*");
+            }
+
+            MarcRecord record = new MarcRecord(strMARC);
+            int nCount = 0;
+            foreach (MarcField field in record.Fields)
+            {
+                if (changeable_list.Contains(field.Name) == false)
+                {
+                    if (field.Content.EndsWith(strMaskChar) == false)
+                    {
+                        field.Content += strMaskChar;
+                        nCount++;
+                    }
+                }
+            }
+
+            /*
+            // 头标区
+            if (changeable_list.Contains("###") == false)
+            {
+                    // 注意本函数无法给头标区打保护标记，因为头标区固定长度 24 字符，再也无法增加临时字符了
+            }
+            */
+
+            if (nCount > 0)
+                strMARC = record.Text;
+            return nCount;
+        }
+
 
         // 获得一段文本前三个字符，作为字段名
         static string GetFieldName(string strText)
@@ -583,7 +847,7 @@ namespace DigitalPlatform.Marc
                 string strLineClass = "datafield";
                 strResult.Append("\r\n<tr class='" + strLineClass + "'>");
                 // 创建一个字段的 HTML 局部 三个 <td>
-                strResult.Append(BuildFieldHtml( oldline.Type, oldline.Text));
+                strResult.Append(BuildFieldHtml(oldline.Type, oldline.Text));
                 strResult.Append(SEP);
                 strResult.Append(BuildFieldHtml(newline.Type, newline.Text));
                 strResult.Append("\r\n</tr>");
@@ -834,7 +1098,7 @@ namespace DigitalPlatform.Marc
                     string strOldText = "";
                     if (old_node != null && old_node.NodeType == XmlNodeType.Element)
                         strOldText = GetIndentXml(oldline.Text);
-                    else 
+                    else
                         strOldText = oldline.Text;
 
                     string strNewText = "";
@@ -947,13 +1211,13 @@ namespace DigitalPlatform.Marc
             {
                 if (c == ' ')
                     result.Append("&nbsp;");
-                else 
+                else
                 {
                     result.Append(strText.Substring(i));
                     break;
                 }
 
-                i ++;
+                i++;
             }
 
             return result.ToString();
@@ -982,7 +1246,7 @@ namespace DigitalPlatform.Marc
 
             string strLevel = "";
             if (nLevel > 0)
-                strLevel = strLevel.PadRight(nLevel, ' ').Replace(" ","    ");  // .Replace(" ", "&nbsp;&nbsp;&nbsp;&nbsp;");
+                strLevel = strLevel.PadRight(nLevel, ' ').Replace(" ", "    ");  // .Replace(" ", "&nbsp;&nbsp;&nbsp;&nbsp;");
             // 
             string[] lines = HttpUtility.HtmlEncode(strField).Replace("\r\n", "\n").Split(new char[] { '\n' });
             StringBuilder result = new StringBuilder(4096);
@@ -1168,8 +1432,8 @@ namespace DigitalPlatform.Marc
 
             var marc_differ = new Differ();
             var marc_builder = new SideBySideDiffBuilder(marc_differ);
-            var marc_diff_result = marc_builder.BuildDiffModel(strOldText, 
-                strNewText == null? "" : strNewText);
+            var marc_diff_result = marc_builder.BuildDiffModel(strOldText,
+                strNewText == null ? "" : strNewText);
 
             Debug.Assert(marc_diff_result.OldText.Lines.Count == marc_diff_result.NewText.Lines.Count, "");
 

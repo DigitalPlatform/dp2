@@ -2425,6 +2425,9 @@ return result;
         // 合并联合编目的新旧书目库XML记录
         // 功能：排除新记录中对strLibraryCode定义以外的905字段的修改
         // parameters:
+        //      strChangeableFieldNameList  用于限定修改范围的，可修改字段名列表。例如 "###,100-200"
+        //                          如果为 null，表示不使用此参数，意思是不限制任何字段的修改
+        //                          如果为 ""，则表示空集合，意思是限制所有字段的修改。那实际上此时调用本函数不会对 strNewMarc 发生任何改动
         //      bChangePartDenied   如果本次被设定为 true，则 strError 中返回了关于部分修改的注释信息
         // return:
         //      -1  error
@@ -2436,6 +2439,7 @@ return result;
             string strLibraryCode,
             string strDefaultOperation,
             string strFieldNameList,
+            string strChangeableFieldNameList, // 2023/2/11
             string strOldBiblioXml,
             ref string strNewBiblioXml,
             ref bool bChangePartDeniedParam,
@@ -2462,6 +2466,7 @@ return result;
                         strRights,
                         strDefaultOperation,
                         strFieldNameList,
+                        strChangeableFieldNameList,
                         strOldBiblioXml,
                         ref strNewBiblioXml,
                         out strError);
@@ -3364,6 +3369,9 @@ out string strError)
         // 2015/7/17 本函数还能保护 856 字段，避免用户修改自己不能获取的 856 rights 的字段。UNIMARC 和 USMARC 都是用 856 表示数字资源
         // TODO: 特定的数据库应该规定了 MARC 格式，可以作为本函数输入参数。这样可以避免复杂的判断
         // parameters:
+        //      strChangeableFieldNameList  用于限定修改范围的，可修改字段名列表。例如 "###,100-200"
+        //                          如果为 null，表示不使用此参数，意思是不限制任何字段的修改
+        //                          如果为 ""，则表示空集合，意思是限制所有字段的修改。那实际上此时调用本函数不会对 strNewMarc 发生任何改动
         //      strFieldNameList    字段过滤列表。如果为空，则表示不(利用它)对字段进行过滤，即全用新记录的字段
         // return:
         //      -1  出错
@@ -3373,6 +3381,7 @@ out string strError)
             string strUserRights,
             string strDefaultOperation,
             string strFieldNameList,
+            string strChangeableFieldNameList, // 2023/2/11
             string strOldBiblioXml,
             ref string strNewBiblioXml,
             out string strError)
@@ -3449,6 +3458,26 @@ out string strError)
                 }
             }
 
+#if NO
+            // strNewMarc 中，要把那些当前账户无法修改的字段先加回去，然后再和 strOldMarc 进行合并
+            {
+                // 按照字段修改权限定义，合并新旧两个 MARC 记录
+                // return:
+                //      -1  出错
+                //      0   成功
+                //      1   有部分修改要求被拒绝
+                nRet = MarcDiff.MergeOldNew(
+                    strDefaultOperation,
+                    strProtectFieldNameList,
+                    strNewMarc,
+                    ref strOldMarc,
+                    out _,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+            }
+#endif
+
             bool b856Masked = false;
 
             int field_856_count = Get856Count(strNewMarc);
@@ -3460,6 +3489,7 @@ out string strError)
             //      其他  滤除的 856 字段个数
             nRet = MaskCantGet856(
                 strUserRights,
+                true,
                 ref strNewMarc,
                 out strError);
             if (nRet == -1)
@@ -3469,12 +3499,25 @@ out string strError)
 
             nRet = MaskCantGet856(
     strUserRights,
+    true,
     ref strOldMarc,
     out strError);
             if (nRet == -1)
                 return -1;
             if (nRet > 0)
                 b856Masked = true;
+
+            // 2023/2/11
+            // 给 997 字段打上保护标记，避免 MergeOldNew() 因为 997 变化返回 PartialDenied
+            {
+                Protect997(
+false,
+ref strOldMarc);
+
+                Protect997(
+false,
+ref strNewMarc);
+            }
 
             string strComment = "";
             bool bNotAccepted = false;
@@ -3492,6 +3535,7 @@ out string strError)
             nRet = MarcDiff.MergeOldNew(
                 strDefaultOperation,
                 strFieldNameList,
+                strChangeableFieldNameList,
                 strOldMarc,
                 ref strNewMarc,
                 out strComment,
@@ -3841,6 +3885,38 @@ nsmgr);
         }
 
 #endif
+        // 给 997 字段打上保护标记
+        public static void Protect997(
+bool clearMaskBefore,
+ref string strMARC)
+        {
+            if (string.IsNullOrEmpty(strMARC) == true)
+                return;
+
+            string strMaskChar = new string((char)1, 1);
+
+            if (clearMaskBefore)
+            {
+                // 在处理前替换记录中可能出现的 (char)1
+                // 建议在调用本函数前，探测 strMARC 中是否有这个符号，如果有，可能是相关环节检查不严创建了这样的记录，需要进一步检查处理
+                strMARC = strMARC.Replace(strMaskChar, "*");
+            }
+
+            MarcRecord record = new MarcRecord(strMARC);
+            var fields = record.select("field[@name='997']");
+            int nCount = 0;
+            foreach (MarcField field in fields)
+            {
+                if (field.Content.EndsWith(strMaskChar) == false)
+                {
+                    field.Content += strMaskChar;
+                    nCount++;
+                }
+            }
+
+            if (nCount > 0)
+                strMARC = record.Text;
+        }
 
         public static int Get856Count(string strMARC)
         {
@@ -3849,11 +3925,14 @@ nsmgr);
         }
 
         // 对 MARC 记录进行标记，将那些当前用户无法读取的 856 字段打上特殊标记(内码为 1 的字符)
+        // parameters:
+        //      clearMaskBefore 是否要在处理之前清理 MARC 记录中以前的标记字符?
         // return:
         //      -1  出错
-        //      其他  滤除的 856 字段个数
+        //      其他  标记的 856 字段个数
         public static int MaskCantGet856(
             string strUserRights,
+            bool clearMaskBefore,
             ref string strMARC,
             out string strError)
         {
@@ -3869,9 +3948,12 @@ nsmgr);
 
             string strMaskChar = new string((char)1, 1);
 
-            // 在处理前替换记录中可能出现的 (char)1
-            // 建议在调用本函数前，探测 strMARC 中是否有这个符号，如果有，可能是相关环节检查不严创建了这样的记录，需要进一步检查处理
-            strMARC = strMARC.Replace(strMaskChar, "*");
+            if (clearMaskBefore)
+            {
+                // 在处理前替换记录中可能出现的 (char)1
+                // 建议在调用本函数前，探测 strMARC 中是否有这个符号，如果有，可能是相关环节检查不严创建了这样的记录，需要进一步检查处理
+                strMARC = strMARC.Replace(strMaskChar, "*");
+            }
 
             MarcRecord record = new MarcRecord(strMARC);
             MarcNodeList fields = record.select("field[@name='856']");
@@ -4843,6 +4925,7 @@ nsmgr);
             bool bRightVerified = false;
             bool bOwnerOnly = false;
 
+            string strChangeableFieldNameList = null;
             string strAccessParameters = "";
             ItemDbCfg cfg = null;
             string strDbType = "";
@@ -5030,6 +5113,36 @@ nsmgr);
                     }
                 }
             }
+
+
+            // 2023/2/11 获得 getbiblioinfo 可读的字段范围，在合并 MARC 记录的时候要用到
+            {
+                var error = CheckGetBiblioInfoAccess(
+                    sessioninfo,
+                    strDbType,
+                    strBiblioDbName,
+                    false,
+                    out strChangeableFieldNameList);
+                if (error == "normal")
+                {
+                    if (StringUtil.IsInList("getbiblioinfo", sessioninfo.RightsOrigin) == false)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = "设置书目信息被拒绝。虽然当前账户具备 setbiblioinfo 权限(或对应存取定义)，但不具备 getbiblioinfo 权限(或对应存取定义)，这违反了权限安全性规则。请修改账户权限";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
+                    }
+                    strChangeableFieldNameList = null;  // 表示全部字段都可以修改
+                }
+                else if (error != null)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = $"设置书目信息被拒绝。虽然当前账户具备 setbiblioinfo 权限(或对应存取定义)，但不具备 getbiblioinfo 权限(或对应存取定义)，这违反了权限安全性规则。请修改账户权限。\r\n注: 检查 getbiblioinfo 权限时的详情如下: {error}";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+            }
+
 
             // 2016/7/4
             // 看看所保存的数据MARC格式是不是这个数据库要求的格式
@@ -5275,6 +5388,7 @@ out strError);
                             strLibraryCode,
                             "insert,replace,delete",
                             strAccessParameters,
+                            strChangeableFieldNameList,
                             strExistingXml,
                             ref strBiblio,
                             ref bChangePartDenied,
@@ -5302,6 +5416,7 @@ out strError);
                         strLibraryCode,
                         "insert",
                         strAccessParameters,
+                        strChangeableFieldNameList,
                         strExistingXml,
                         ref strBiblio,
                         ref bChangePartDenied,
@@ -5396,6 +5511,7 @@ out strError);
                         strLibraryCode,
                         "insert",
                         strAccessParameters,
+                        strChangeableFieldNameList,
                         strExistingXml,
                         ref strBiblio,
                         ref bChangePartDenied,
@@ -5580,6 +5696,7 @@ out strError);
                         strLibraryCode,
                         "insert,replace,delete",
                         strAccessParameters,
+                        strChangeableFieldNameList,
                         strExistingXml,
                         ref strBiblio,
                         ref bChangePartDenied,
@@ -5754,6 +5871,7 @@ out strError);
                         strLibraryCode,
                         "delete",
                         strAccessParameters,
+                        strChangeableFieldNameList,
                         strExistingXml,
                         ref strBiblio,
                         ref bChangePartDenied,
@@ -5895,6 +6013,7 @@ out strError);
                         strLibraryCode,
                         "delete",
                         strAccessParameters,
+                        strChangeableFieldNameList,
                         strExistingXml,
                         ref strBiblio,
                         ref bChangePartDenied,
@@ -6638,7 +6757,8 @@ out strError);
             }
 
             string strUnionCatalogStyle = "";
-            string strAccessParameters = "";
+            string strReadAccessParameters = "";
+            string strWriteAccessParameters = "";
             // 针对源的读权限是否已经校验过
             bool bReadRightVerified = false;
             // 针对目标的写权限是否已经校验过
@@ -6756,7 +6876,7 @@ out strError);
                         }
                         else
                         {
-                            if (IsInAccessList(strReadAction, strActionList, out strAccessParameters) == false)
+                            if (IsInAccessList(strReadAction, strActionList, out strReadAccessParameters) == false)
                             {
                                 strError = "用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strBiblioDbName + "' 执行 getbiblioinfo " + strReadAction + " 操作的存取权限(注:复制操作由一个读和一个写操作构成)";
                                 result.Value = -1;
@@ -6812,7 +6932,7 @@ out strError);
                         }
                         else
                         {
-                            if (IsInAccessList(strWriteAction, strActionList, out strAccessParameters) == false)
+                            if (IsInAccessList(strWriteAction, strActionList, out strWriteAccessParameters) == false)
                             {
                                 strError = "用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strBiblioDbName + "' 执行 setbiblioinfo " + strWriteAction + " 操作的存取权限";
                                 result.Value = -1;
@@ -6973,7 +7093,8 @@ out strError);
                             strUnionCatalogStyle,
                             strLibraryCodeList,
                             "insert,replace,delete",
-                            strAccessParameters,
+                            strWriteAccessParameters,
+                            strReadAccessParameters,    // 2023/2/11
                             strExistingSourceXml,
                             ref strNewBiblio,
                             ref bChangePartDenied,
