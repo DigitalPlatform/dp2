@@ -15925,6 +15925,9 @@ out string db_type);
                 // 记录ID
                 if (IsId(strFirstPart) == true)
                 {
+                    string strRecordID = strFirstPart;
+                    bool bIsReader = sessioninfo.UserType == "reader";
+
                     // 只到记录ID这一层
                     if (strPath == "")
                     {
@@ -15937,6 +15940,14 @@ out string db_type);
                         }
                         */
                         // 前面 CheckDbSetRights() 已经检查过了
+
+                        // 读者身份判断
+                        if (bIsReader && sessioninfo.Account.ReaderDomPath != strDbName + "/" + strRecordID)
+                        {
+                            strError = "读者身份不允许写入其他读者的 XML 记录";
+                            return 0;
+                        }
+
                         return 1;
                     }
 
@@ -15951,6 +15962,14 @@ out string db_type);
                             strError = "写入对象资源 " + strResPath + " 被拒绝。不具备 writereaderobject 或 writeobject 权限";
                             return 0;
                         }
+
+                        // 读者身份判断
+                        if (bIsReader && sessioninfo.Account.ReaderDomPath != strDbName + "/" + strRecordID)
+                        {
+                            strError = "读者身份不允许写入其他读者的对象记录";
+                            return 0;
+                        }
+
                         return 1;
                     }
                 }
@@ -16521,7 +16540,7 @@ out string db_type);
             // 对读者库记录的特殊要求
             if (IsReaderDbName(strDbName,
                 out _,
-                out _) == true)
+                out strLibraryCode) == true)
             {
                 // 检查当前操作者是否管辖这个读者库
                 // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
@@ -16554,9 +16573,18 @@ out string db_type);
                 // 记录ID
                 if (IsId(strRecordID) == true)
                 {
+                    bool bIsReader = sessioninfo.UserType == "reader";
+
                     // 只到记录ID这一层
                     if (string.IsNullOrEmpty(strPath) == true)
                     {
+                        // 读者身份判断
+                        if (bIsReader && sessioninfo.Account.ReaderDomPath != strDbName + "/" + strRecordID)
+                        {
+                            strError = "读者身份不允许访问其他读者的 XML 记录";
+                            return 0;
+                        }
+
                         return 1;
                     }
 
@@ -16570,6 +16598,13 @@ out string db_type);
                         if (error != null)
                         {
                             strError = error;
+                            return 0;
+                        }
+
+                        // 读者身份判断
+                        if (bIsReader && sessioninfo.Account.ReaderDomPath != strDbName + "/" + strRecordID)
+                        {
+                            strError = "读者身份不允许访问其他读者的对象记录";
                             return 0;
                         }
 

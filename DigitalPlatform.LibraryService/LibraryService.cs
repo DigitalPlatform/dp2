@@ -15564,6 +15564,8 @@ out strError);
                 if (bWriteLog == true && bIsReaderDb == true)
                     bWriteLog = false;
 
+                // TODO: 如果是读者身份试图获得读者记录下的对象，要想办法检查对象所从属的读者 XML 记录的 Barcode 等于 sessioninfo.Account.Barcode
+
                 lRet = channel.GetRes(strResPath,
                     nStart,
                     nLength,
