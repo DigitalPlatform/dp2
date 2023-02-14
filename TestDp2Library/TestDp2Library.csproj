@@ -80,6 +80,7 @@
     <Compile Include="BarcodeValidator\TestBarcodeMultiMatch.cs" />
     <Compile Include="Install\TestInstall.cs" />
     <Compile Include="LoanParam\TestLoanParam.cs" />
+    <Compile Include="MarcDiff\TestFieldNameList.cs" />
     <Compile Include="ResultSet\TestResultSet.cs" />
     <Compile Include="TestAdjustOverflow.cs" />
     <Compile Include="TestAssemblyCache.cs" />
@@ -118,6 +119,10 @@
     <ProjectReference Include="..\DigitalPlatform.LibraryServer\DigitalPlatform.LibraryServer.csproj">
       <Project>{E153CC55-DA01-4403-A53F-AF801BDDF4BA}</Project>
       <Name>DigitalPlatform.LibraryServer</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.MarcKernel\DigitalPlatform.MarcKernel.csproj">
+      <Project>{74242530-EF96-457E-852D-5C21A3EA8449}</Project>
+      <Name>DigitalPlatform.MarcKernel</Name>
     </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.ResultSet\DigitalPlatform.ResultSet.csproj">
       <Project>{86E0817D-79A4-4769-B450-C8352D0D1907}</Project>

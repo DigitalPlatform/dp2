@@ -16964,7 +16964,7 @@ out string db_type);
             bool check_normal_right,
             out string strAccessParameters)
         {
-            strAccessParameters = "";
+            strAccessParameters = null; // null 表示不使用这个参数
 
             Debug.Assert((db_type == "biblio" || db_type == "authority"));
 

@@ -4107,7 +4107,7 @@ root, strLibraryCode);
                     strExistingRecord = domExist.OuterXml;
                 }
                 */
-                strError = "保存操作成功。NewTimeStamp中返回了新的时间戳，NewRecord中返回了实际保存的新记录(可能和提交的新记录稍有差异)";
+                strError = "保存操作成功。baNewTimestamp 中返回了新的时间戳，strSavedXml 中返回了实际保存的新记录(可能和提交的新记录稍有差异)";
                 kernel_errorcode = DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue.NoError;
 
                 if (denied_element_names != null && denied_element_names.Count > 0)

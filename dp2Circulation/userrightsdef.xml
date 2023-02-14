@@ -178,11 +178,24 @@
 		<comment lang='zh'>修改盘点信息</comment>
 		<comment lang='en'>set inventory info</comment>
 	</property>
+	<!--
 	<property name='search'>
-		<comment lang='zh'>检索</comment>
+		<comment lang='zh'>检索(已废止)</comment>
 		<comment lang='en'>search</comment>
 	</property>
-
+	-->
+	<property name='searchamerce'>
+		<comment lang='zh'>检索违约金信息</comment>
+		<comment lang='en'>search amerce</comment>
+	</property>
+	<property name='searchinventory'>
+		<comment lang='zh'>检索盘点信息</comment>
+		<comment lang='en'>search inventory</comment>
+	</property>
+	<property name='searcharrived'>
+		<comment lang='zh'>检索预约到书信息</comment>
+		<comment lang='en'>search arrived</comment>
+	</property>
 	<property name='getcalendar'>
 		<comment lang='zh'>获得日历</comment>
 		<comment lang='en'>get calendar</comment>

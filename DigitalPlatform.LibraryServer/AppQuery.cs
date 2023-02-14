@@ -683,15 +683,15 @@ namespace DigitalPlatform.LibraryServer
             }
             else if (this.AmerceDbName == strDbName)
             {
-                right = "amerce,settlement";
+                right = "searchamerce";
             }
             else if (this.GetInventoryDbName() == strDbName)
             {
-                right = "inventory,inventorydelete";
+                right = "searchinventory";
             }
             else if (this.ArrivedDbName == strDbName)
             {
-                right = "borrow,return,getreaderinfo,reservation";    // 注: reservation 权限是指读者或者工作人员具有进行预约的能力。注意，并不是指预约管理，而是指给自己预约图书
+                right = "searcharrived";
             }
             else
                 return $"无法识别数据库 '{strDbName}' 的类型";

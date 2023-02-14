@@ -132,6 +132,15 @@ namespace DigitalPlatform.Marc
             if (string.IsNullOrEmpty(strOldMarc) == true && string.IsNullOrEmpty(strNewMarc) == true)
                 return 0;
 
+            OperationRights rights_table = new OperationRights();
+            nRet = rights_table.Build(strFieldNameList,
+                strDefaultOperation,
+                out strError);
+            if (nRet == -1)
+            {
+                strError = "字段权限定义 '" + strFieldNameList + "' 不合法: " + strError;
+                return -1;
+            }
 #if NO
             bool bNew = false;
             bool bDelete = false;
@@ -152,6 +161,8 @@ namespace DigitalPlatform.Marc
 #endif
             // 可以修改的字段名列表
             FieldNameList changeable_list = null;
+            // 前端请求的原始记录中被丢弃的、超过读范围的字段名列表。有可能会包含 ### 字段
+            List<string> denied_origin_fieldnames = new List<string>();
 
             // 2023/2/11
             if (strChangeableFieldNameList != null)
@@ -164,6 +175,15 @@ namespace DigitalPlatform.Marc
                     return -1;
                 }
 
+                // 检查 changeable_list 的范围是否小于 strFieldNameList 的范围。如果小于，则报错说权限定义不正确
+                {
+                    strError = CheckOutof(changeable_list, rights_table);
+                    if (strError != null)
+                    {
+                        strError = $"当前账户权限定义不正确: {strError}";
+                        return -1;
+                    }
+                }
                 /*
                 // 把旧记录中不可修改的字段先补回到新记录中，这样可以降低 Diff 合并算法扭曲匹配的机率
                 AddFields(
@@ -176,7 +196,8 @@ namespace DigitalPlatform.Marc
                     string strTargetMarc = strOldMarc;
                     MergeFields(changeable_list,
         strNewMarc,
-        ref strTargetMarc);
+        ref strTargetMarc,
+        out denied_origin_fieldnames);
                     strNewMarc = strTargetMarc;
                 }
 
@@ -232,15 +253,7 @@ out strError);
             }
 #endif
 
-            OperationRights rights_table = new OperationRights();
-            nRet = rights_table.Build(strFieldNameList,
-                strDefaultOperation,
-                out strError);
-            if (nRet == -1)
-            {
-                strError = "字段权限定义 '" + strFieldNameList + "' 不合法: " + strError;
-                return -1;
-            }
+
 
             var differ = new MarcDiffer();
             var builder = new MarcDiffBuilder(differ);
@@ -395,6 +408,8 @@ out strError);
             {
                 // 2023/2/11
                 // 如果头标区被保护
+                if (strNewHeader != strOldHeader)
+                    denied_change_fieldnames.Add("###");    // ### 表示头标区
                 text.Append(strOldHeader);
             }
             else if (rights_table.ReplaceFieldNames.Contains("###") == true
@@ -403,10 +418,7 @@ out strError);
             else
             {
                 if (strNewHeader != strOldHeader)
-                {
-                    //bNotAccepted = true;
                     denied_change_fieldnames.Add("###");    // ### 表示头标区
-                }
                 text.Append(strOldHeader);
             }
 
@@ -462,6 +474,15 @@ out strError);
                         strComment += " ; ";
                     strComment += "字段 " + StringUtil.MakePathList(names) + " 被拒绝修改";
                 }
+
+                // 2023/2/13
+                names = (denied_origin_fieldnames);
+                if (names.Count > 0)
+                {
+                    if (string.IsNullOrEmpty(strComment) == false)
+                        strComment += " ; ";
+                    strComment += "前端请求的记录中下列字段 " + StringUtil.MakePathList(names) + " 因超过可读范围被拒绝修改";
+                }
             }
 
             strNewMarc = text.ToString();
@@ -474,16 +495,55 @@ out strError);
             return 0;
         }
 
+        // 检查 oper_rights 的字段列表是否超过 changeable_list 范围
+        static string CheckOutof(FieldNameList changeable_list,
+            OperationRights oper_rights)
+        {
+            {
+                var outof = CheckOutof(changeable_list, oper_rights.InsertFieldNames);
+                if (outof.Count > 0)
+                    return $"可写字段范围 '{outof.ToString()}' 超越了可读范围 '{changeable_list.ToString()}'";
+            }
+
+            {
+                var outof = CheckOutof(changeable_list, oper_rights.ReplaceFieldNames);
+                if (outof.Count > 0)
+                    return $"下列字段范围 '{outof.ToString()}' 超越了可读范围 '{changeable_list.ToString()}'";
+            }
+
+            {
+                var outof = CheckOutof(changeable_list, oper_rights.DeleteFieldNames);
+                if (outof.Count > 0)
+                    return $"下列字段范围 '{outof.ToString()}' 超越了可读范围 '{changeable_list.ToString()}'";
+            }
+
+            return null;
+        }
+
+        // 检查 small_list 范围是否越过了 large_list
+        // return:
+        //      返回越过了的部分范围
+        public static FieldNameList CheckOutof(FieldNameList large_list,
+            FieldNameList small_list)
+        {
+            return FieldNameItem.Sub(small_list, large_list);
+        }
+
         static List<string> RemoveMaskFieldName(List<string> list)
         {
             return list.Where(o => o.EndsWith("!") == false).ToList();
         }
 
         // 把 source 记录中的符合范围的字段替换或者插入到 target 记录中
+        // parameters:
+        //      discard_field_names 返回处理过程中被丢弃的字段名集合
         static int MergeFields(FieldNameList changeable_list,
             string strSourceMarc,
-            ref string strTargetMarc)
+            ref string strTargetMarc,
+            out List<string> discard_field_names)
         {
+            discard_field_names = new List<string>();
+
             var source_record = new MarcRecord(strSourceMarc);
             var target_record = new MarcRecord(strTargetMarc);
 
@@ -512,19 +572,32 @@ out strError);
     InsertSequenceStyle.PreferTail);
                     nCount++;
                 }
+                else
+                {
+                    // source 中的字段被丢弃
+                    if (source_field.Name != "997") // 997 不必报警
+                        discard_field_names.Add(source_field.Name);
+                }
             }
 
             if (changeable_list.Contains("###") == true)
             {
-                target_record.Header = source_record.Header;
-                nCount++;
+                if (target_record.Header.ToString() != source_record.Header.ToString())
+                {
+                    target_record.Header = source_record.Header;
+                    nCount++;
+                    discard_field_names.Add("###");
+                }
             }
 
             // 删除替换后剩下的待删除字段
-            foreach(var field in deleted_fields)
+            foreach (var field in deleted_fields)
             {
                 field.detach();
             }
+
+            if (discard_field_names.Count > 0)
+                StringUtil.RemoveDupNoSort(ref discard_field_names);
 
             if (nCount > 0)
                 strTargetMarc = target_record.Text;
