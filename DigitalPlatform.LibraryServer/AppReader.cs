@@ -85,7 +85,17 @@ namespace DigitalPlatform.LibraryServer
         // 读者记录中 服务器自动维护的元素名列表
         static string[] _auto_maintain_element_names = new string[] {
             "libraryCode",
-            "oi"
+            "oi",
+            /*
+                "borrows",
+                "overdues",
+                "reservations",
+                "borrowHistory",
+                "outofReservations",
+                "hire", // 2008/11/11 
+                "foregift", // 2008/11/11 
+            */
+                "password",
         };
 
         // 更换 domTarget 中所有 dprms:file 元素
@@ -733,6 +743,8 @@ unprocessed_element_names.Except(_auto_maintain_element_names)));
                 }
             }
 
+            // TODO: dprms:file 元素要单独观察
+
             return changing_names;
         }
 
@@ -789,10 +801,12 @@ unprocessed_element_names.Except(_auto_maintain_element_names)));
             out bool useClientRefID,
             // out bool fileElementFiltered,
             out string strXml,
+            out List<string> denied_element_names,
             out string strError)
         {
             strError = "";
             strXml = "";
+            denied_element_names = new List<string>();
 
             useClientRefID = false;
             // fileElementFiltered = false;
@@ -827,8 +841,17 @@ unprocessed_element_names.Except(_auto_maintain_element_names)));
             //      ""      找到了前缀，并且 level 部分为空
             //      其他     返回 level 部分
             string write_level = GetReaderInfoLevel("setreaderinfo", rights);
-            if (FilterByLevel(dom, write_level, "write", this.PatronMaskDefinition) == true)
+            if (FilterByLevel(dom,
+                write_level,
+                "write",
+                this.PatronMaskDefinition,
+                out denied_element_names) == true)
                 bChanged = true;
+
+            // 不必汇报“自动维护的元素”被拒绝的情况
+            denied_element_names = new List<string>(
+                denied_element_names.Except(_auto_maintain_element_names)
+            );
 
             // 删除一些敏感元素
             for (int i = 0; i < remove_element_names.Length; i++)
@@ -2033,6 +2056,7 @@ out List<string> send_skips);
                     }
 
                     // bool fileElementFiltered = false;
+                    List<string> denied_element_names = null;
 
                     // 构造出适合保存的新读者记录
                     if (bForce == false)
@@ -2052,6 +2076,7 @@ out List<string> send_skips);
                             out bool useClientRefID,
                             // out fileElementFiltered,
                             out string xml,
+                            out denied_element_names,
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
@@ -2236,9 +2261,23 @@ out List<string> send_skips);
                             //      ""      找到了前缀，并且 level 部分为空
                             //      其他     返回 level 部分
                             string read_level = GetReaderInfoLevel("getreaderinfo", sessioninfo.RightsOrigin);
-                            FilterByLevel(domNewRec, read_level, "read", this.PatronMaskDefinition);
+                            FilterByLevel(domNewRec,
+                                read_level,
+                                "read",
+                                this.PatronMaskDefinition,
+                                out _);
 
                             strSavedXml = domNewRec.OuterXml;
+                        }
+
+                        if (denied_element_names != null && denied_element_names.Count > 0)
+                        {
+                            string caption = "下列元素";
+                            if (string.IsNullOrEmpty(result.ErrorInfo) == false)
+                                result.ErrorInfo += "; ";
+                            result.ErrorInfo += $"保存操作成功，但{caption}保存时被拒绝兑现: {StringUtil.MakePathList(denied_element_names)}。baNewTimeStamp中返回了新的时间戳，strSavedXml 中返回了实际保存的新记录";
+                            if (result.ErrorCode == ErrorCode.NoError)
+                                result.ErrorCode = ErrorCode.PartialDenied;
                         }
 
                         DomUtil.SetElementText(domOperLog.DocumentElement,
@@ -2296,6 +2335,8 @@ strLibraryCode);    // 读者所在的馆代码
                     //      ""      找到了前缀，并且 level 部分为空
                     //      其他     返回 level 部分
                     string read_level = GetReaderInfoLevel("getreaderinfo", sessioninfo.RightsOrigin);
+                    string write_level = GetReaderInfoLevel("setreaderinfo", sessioninfo.RightsOrigin);
+
                     /*
                     if (string.IsNullOrEmpty(read_level) == false)
                     {
@@ -2306,7 +2347,6 @@ strLibraryCode);    // 读者所在的馆代码
                     }
                     */
 
-                    string write_level = GetReaderInfoLevel("setreaderinfo", sessioninfo.RightsOrigin);
                     if (string.IsNullOrEmpty(write_level) == false)
                     {
                         var names = GetElementNames(write_level, element_names);
@@ -2571,6 +2611,14 @@ strLibraryCode);    // 读者所在的馆代码
 
             strError = "";
 
+            // 2023/2/20
+            // 检查当前账户是否定义了 getreaderinfo 或 getreaderobject
+            if (read_level == null)
+            {
+                strError = "当前账户不具备 getreaderinfo 或 getreaderobject 权限，因而无法进行修改读者记录的操作(注：仅有写入权限还不够，还要具有大于写入字段范围的读权限)";
+                return -1;
+            }
+
             if (string.IsNullOrEmpty(write_level) == false
                 && string.IsNullOrEmpty(read_level) == false)
             {
@@ -2588,7 +2636,7 @@ strLibraryCode);    // 读者所在的馆代码
             if (string.IsNullOrEmpty(write_level) == true
     && string.IsNullOrEmpty(read_level) == false)
             {
-                var write_names = GetFullElementNames(full_element_names);
+                var write_names = new List<string>(full_element_names);   // GetFullElementNames(full_element_names);
                 var read_names = GetElementNames(read_level, full_element_names/*2023/2/2*/);
                 var overflow_names = write_names.Except(read_names).ToArray();
                 if (overflow_names.Count() > 0)
@@ -3075,7 +3123,11 @@ root, strLibraryCode);
                     //      ""      找到了前缀，并且 level 部分为空
                     //      其他     返回 level 部分
                     string read_level = GetReaderInfoLevel("getreaderinfo", sessioninfo.RightsOrigin);
-                    FilterByLevel(temp_dom, read_level, "read", this.PatronMaskDefinition);
+                    FilterByLevel(temp_dom,
+                        read_level,
+                        "read",
+                        this.PatronMaskDefinition,
+                        out _);
 
                     strExistingRecord = temp_dom.OuterXml;
                 }
@@ -3913,7 +3965,11 @@ root, strLibraryCode);
                         //      ""      找到了前缀，并且 level 部分为空
                         //      其他     返回 level 部分
                         string read_level = GetReaderInfoLevel("getreaderinfo", rights);
-                        FilterByLevel(domExist, read_level, "read", this.PatronMaskDefinition);
+                        FilterByLevel(domExist,
+                            read_level,
+                            "read",
+                            this.PatronMaskDefinition,
+                            out _);
 
                         strExistingRecord = domExist.OuterXml;
                     }
@@ -4085,7 +4141,11 @@ root, strLibraryCode);
                     //      ""      找到了前缀，并且 level 部分为空
                     //      其他     返回 level 部分
                     string read_level = GetReaderInfoLevel("getreaderinfo", rights);
-                    FilterByLevel(domNewRec, read_level, "read", this.PatronMaskDefinition);
+                    FilterByLevel(domNewRec,
+                        read_level,
+                        "read",
+                        this.PatronMaskDefinition,
+                        out _);
 
                     strNewRecord = domNewRec.OuterXml;
                 }
@@ -4118,7 +4178,7 @@ root, strLibraryCode);
                         caption = "(因 dataFields 属性为空导致)前端提交的所有元素";
 
                     // 把 strError 内容覆盖
-                    strError = $"保存操作成功，但{caption}保存时被拒绝兑现: {StringUtil.MakePathList(denied_element_names)}。NewTimeStamp中返回了新的时间戳，NewRecord中返回了实际保存的新记录";
+                    strError = $"保存操作成功，但{caption}保存时被拒绝兑现: {StringUtil.MakePathList(denied_element_names)}。baNewTimeStamp中返回了新的时间戳，strSavedXml 中返回了实际保存的新记录";
                     if (library_errorcode == ErrorCode.NoError)
                         library_errorcode = ErrorCode.PartialDenied;
                 }
@@ -6523,7 +6583,8 @@ out strError);
             FilterByLevel(filtered_readerdom,
             level,
             "read",
-            this.PatronMaskDefinition);
+            this.PatronMaskDefinition,
+            out _);
 
             string[] result_types = strResultTypeList.Split(new char[] { ',' });
             //results = new string[result_types.Length];
@@ -8198,9 +8259,11 @@ out strError);
         //      maskDefinition  马赛克定义。对需要打马赛克的字段进行部分屏蔽的方法
         public static bool FilterByLevel(XmlDocument readerdom,
             string level,
-            string style = "read",
-            string maskDefinition = null)
+            string style,   //  = "read",
+            string maskDefinition,  // = null,
+            out List<string> denied_element_names)
         {
+            denied_element_names = new List<string>();
             bool changed = false;
 
             // 2023/2/1
@@ -8211,13 +8274,20 @@ out strError);
                 // 去除 dprms:file 元素
                 if (StringUtil.IsInList("-object", ext_rights) == true)
                 {
-                    changed = RemoveDprmsFile(readerdom);
+                    if (RemoveDprmsFile(readerdom) == true)
+                    {
+                        denied_element_names.Add("http://dp2003.com/dprms:file");
+                        changed = true;
+                    }
                 }
 
                 // 去除 password 元素
                 var node = DomUtil.DeleteElement(readerdom.DocumentElement, "password");
                 if (node != null)
+                {
+                    denied_element_names.Add("password");
                     changed = true;
+                }
                 return changed;
             }
 
@@ -8256,12 +8326,14 @@ out strError);
                         else
                             element.InnerText = dp2StringUtil.Mask(maskDefinition, element.InnerText, myname);
 
+                        denied_element_names.Add(myname);
                         changed = true;
                         continue;
                     }
                     else if (write)
                     {
                         element.ParentNode.RemoveChild(element);
+                        denied_element_names.Add(myname);
                         changed = true;
                         continue;
                     }
@@ -8270,6 +8342,7 @@ out strError);
                 if (names.IndexOf(myname) == -1)
                 {
                     element.ParentNode.RemoveChild(element);
+                    denied_element_names.Add(myname);
                     changed = true;
                     continue;
                 }
@@ -8278,7 +8351,10 @@ out strError);
             {
                 var node = DomUtil.DeleteElement(readerdom.DocumentElement, "password");
                 if (node != null)
+                {
+                    denied_element_names.Add("password");
                     changed = true;
+                }
             }
 
             return changed;
@@ -8332,15 +8408,19 @@ out strError);
             return StringUtil.SplitList(item.Elements);
         }
 
-        // 获得一个排除了 dprms.file 元素名的元素名全集集合
+#if REMOVED
+        // 获得一个包含了 dprms.file 元素名的元素名全集集合
         static List<string> GetFullElementNames(string[] full_names)
         {
             var names = new List<string>(full_names);
+            /*
             names.Remove("dprms.file");
             names.Remove("dprms:file");
             names.Remove("http://dp2003.com/dprms:file");
+            */
             return names;
         }
+#endif
 
         // 2023/2/8
         // 正规化元素名列表

@@ -4299,7 +4299,11 @@ out strError);
 
             // 2021/8/5
             if (string.IsNullOrEmpty(name_list) == false)
-                FilterByLevel(dom, name_list, "read", this.PatronMaskDefinition);
+                FilterByLevel(dom,
+                    name_list, 
+                    "read", 
+                    this.PatronMaskDefinition,
+                    out _);
 
             if (noborrowhistory)
             {

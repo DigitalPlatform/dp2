@@ -45,6 +45,16 @@ out byte[] baOutputTimestamp)
                 goto ERROR1;
             }
 
+            // 2023/2/21
+            // 补充判断 get???info 权限
+            if (StringUtil.IsInList($"get{db_type}info", sessioninfo.RightsOrigin) == false)
+            {
+                result.Value = -1;
+                result.ErrorInfo = $"修改{db_type}信息 操作被拒绝。虽然当前账户具备写入{db_type}记录的权限，但不具备 get{db_type}info 权限。请修改账户权限";
+                result.ErrorCode = ErrorCode.AccessDenied;
+                return result;
+            }
+
             RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
             if (channel == null)
             {
@@ -387,7 +397,7 @@ out byte[] baOutputTimestamp)
             }
 
             if (StringUtil.IsInList("data", strStyle))
-                xml = item_xml;
+                xml = existing_dom.DocumentElement.OuterXml;
 
             if (StringUtil.IsInList("outputpath", strStyle) == false)
                 strOutputResPath = null;

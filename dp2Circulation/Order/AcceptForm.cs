@@ -146,6 +146,8 @@ namespace dp2Circulation
             stop = new DigitalPlatform.Stop();
             stop.Register(Program.MainForm.stopManager, true);	// 和容器关联
 #endif
+            // 2023/2/20
+            this._loopingHost.StopManager = Program.MainForm.stopManager;
 
             bool bRet = InitialSizeParam();
             Debug.Assert(bRet == true, "");

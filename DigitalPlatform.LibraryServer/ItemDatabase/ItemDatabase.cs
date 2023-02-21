@@ -1927,6 +1927,42 @@ out strError);
             long lRet = 0;
             string strError = "";
 
+            // 2023/2/21
+            { 
+                string db_type = this.ItemNameInternal.ToLower();
+                string type_name = this.ItemName;
+                // 对读者身份的判断
+                if ((db_type == "order" || db_type == "issue")
+                    && sessioninfo.UserType == "reader")
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = $"修改{type_name}记录的操作被拒绝。作为读者不能进行此项操作";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+
+                // 权限字符串
+                string list = $"set{db_type}info,write{db_type}object,writeobject";
+                if (db_type == "order")
+                    list = $"set{db_type}info,write{db_type}object,writeobject,order";
+
+                if (StringUtil.IsInList(list, sessioninfo.RightsOrigin) == false)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = $"修改{type_name}信息 操作被拒绝。不具备 {list} 权限之一";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+
+                if (StringUtil.IsInList($"get{db_type}info", sessioninfo.RightsOrigin) == false)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = $"修改{type_name}信息 操作被拒绝。虽然当前账户具备写入{type_name}的权限，但不具备 get{db_type}info 权限。请修改账户权限";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+            }
+
             string strBiblioDbName = ResPath.GetDbName(strBiblioRecPath);
             string strBiblioRecId = ResPath.GetRecordId(strBiblioRecPath);
 

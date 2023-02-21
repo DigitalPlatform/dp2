@@ -3290,7 +3290,15 @@ out strError);
             if (StringUtil.IsInList("setiteminfo,setentities,writerecord,order", sessioninfo.RightsOrigin) == false)
             {
                 result.Value = -1;
-                result.ErrorInfo = "保存册信息 操作被拒绝。不具备 setiteminfo、setentities、writerecord 或 order 权限。";
+                result.ErrorInfo = "修改册信息 操作被拒绝。不具备 setiteminfo、setentities、writerecord 或 order 权限。";
+                result.ErrorCode = ErrorCode.AccessDenied;
+                return result;
+            }
+
+            if (StringUtil.IsInList("getiteminfo", sessioninfo.RightsOrigin) == false)
+            {
+                result.Value = -1;
+                result.ErrorInfo = "修改册信息 操作被拒绝。虽然当前账户具备写入册的权限，但不具备 getiteminfo 权限。请修改账户权限";
                 result.ErrorCode = ErrorCode.AccessDenied;
                 return result;
             }
@@ -3304,7 +3312,7 @@ out strError);
                 if (string.IsNullOrEmpty(strPersonalLibrary) == true)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "保存册信息 操作被拒绝。读者身份不具备个人书斋权限";
+                    result.ErrorInfo = "修改册信息 操作被拒绝。读者身份不具备个人书斋权限";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }

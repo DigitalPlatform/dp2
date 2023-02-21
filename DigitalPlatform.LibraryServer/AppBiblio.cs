@@ -22,6 +22,8 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.Core;
+using System.Data.SqlClient;
+using System.Windows.Forms;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -2482,10 +2484,11 @@ return result;
                 }
 
                 // 2016/12/14
-                if (strDefaultOperation != "delete" // 2017/5/5
-                    && String.IsNullOrEmpty(strNewBiblioXml) == false)
+                if (/*strDefaultOperation != "delete" // 2017/5/5
+                    &&*/ String.IsNullOrEmpty(strNewBiblioXml) == false)
                 {
                     int nRet = CreateUniformKey(
+                        strDefaultOperation == "delete",
 ref strNewBiblioXml,
 out strError);
                     if (nRet == -1)
@@ -2978,11 +2981,15 @@ out string strError)
             return 1;
         }
 
+        // parameters:
+        //      strAction   如果为 true，表示要删除 MARC 记录中的 997 字段
+        //                  如果为 false，表示正常创建 997 字段
         // return:
         //      -1  出错
         //      0   strBiblioXml 没有发生修改
         //      1   strBiblioXml 发生了修改
         public static int CreateUniformKey(
+            bool delete,
     ref string strBiblioXml,
     out string strError)
         {
@@ -2992,9 +2999,6 @@ out string strError)
             if (string.IsNullOrEmpty(strBiblioXml) == true)
                 return 0;
 
-            string strMarcSyntax = "";
-            string strMarc = "";
-
             // 将MARCXML格式的xml记录转换为marc机内格式字符串
             // parameters:
             //		bWarning	== true, 警告后继续转换,不严格对待错误; = false, 非常严格对待错误,遇到错误后不继续转换
@@ -3003,8 +3007,8 @@ out string strError)
             nRet = MarcUtil.Xml2Marc(strBiblioXml,
                 true,
                 "", // this.CurMarcSyntax,
-                out strMarcSyntax,
-                out strMarc,
+                out string strMarcSyntax,
+                out string strMarc,
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -3012,15 +3016,30 @@ out string strError)
             if (string.IsNullOrEmpty(strMarcSyntax) == true)
                 return 0;   // 不是 MARC 格式
 
-            string strKey = "";
-            string strCode = "";
-            nRet = CreateUniformKey(ref strMarc,
-                strMarcSyntax,
-                out strKey,
-                out strCode,
-                out strError);
-            if (nRet == -1)
-                return -1;
+            bool changed = false;
+            // 2023/2/21
+            if (delete)
+            {
+                MarcRecord record = new MarcRecord(strMarc);
+                record.select("field[@name='997']").detach();
+                if (strMarc != record.Text)
+                {
+                    strMarc = record.Text;
+                    changed = true;
+                }
+            }
+            else
+            {
+                nRet = CreateUniformKey(ref strMarc,
+                    strMarcSyntax,
+                    out _,
+                    out _,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 1)
+                    changed = true;
+            }
 
             nRet = MarcUtil.Marc2XmlEx(strMarc,
                 strMarcSyntax,
@@ -3029,7 +3048,9 @@ out string strError)
             if (nRet == -1)
                 return -1;
 
-            return 1;
+            if (changed)
+                return 1;
+            return 0;
         }
 
         // 997 内查重键的构造算法版本
@@ -3053,6 +3074,7 @@ out string strError)
             strKey = "";
             strCode = "";
 
+            bool changed = false;
             MarcRecord record = new MarcRecord(strMARC);
             List<string> segments = new List<string>();
             if (strMarcSyntax == "unimarc")
@@ -3163,7 +3185,11 @@ out string strError)
 
                 record.setFirstField("997", "  ", MarcQuery.SUBFLD + "a" + strKey + MarcQuery.SUBFLD + "h" + strCode + MarcQuery.SUBFLD + "v" + key_version);
 
-                strMARC = record.Text;
+                if (strMARC != record.Text)
+                {
+                    strMARC = record.Text;
+                    changed = true;
+                }
             }
 
             if (strMarcSyntax == "usmarc")
@@ -3280,10 +3306,16 @@ out string strError)
 
                 record.setFirstField("997", "  ", MarcQuery.SUBFLD + "a" + strKey + MarcQuery.SUBFLD + "h" + strCode + MarcQuery.SUBFLD + "v" + key_version);
 
-                strMARC = record.Text;
+                if (strMARC != record.Text)
+                {
+                    strMARC = record.Text;
+                    changed = true;
+                }
             }
 
-            return 1;
+            if (changed)
+                return 1;
+            return 0;
         }
 
         public static string TrimEndChar(string strText, string strDelimeters = "./,;:")
@@ -5815,7 +5847,8 @@ out strError);
                 }
             }
             else if (strAction == "delete"
-                || strAction == "onlydeletesubrecord")
+                || strAction == "onlydeletesubrecord"
+                || strAction == "onlydeletebiblio") // 2023/2/21 移动到这里
             {
                 if (strDbType == "biblio")
                 {
@@ -5853,7 +5886,8 @@ out strError);
                     }
                 }
 
-                if (strAction == "delete")
+                if (strAction == "delete"
+                    || strAction == "onlydeletebiblio")
                 {
                     strBiblio = "";
 
@@ -5886,6 +5920,7 @@ out strError);
                     // 如果已经为空，就表示不必检查了
                     if (String.IsNullOrEmpty(strBiblio) == false)
                     {
+#if REMOVED
                         XmlDocument tempdom = new XmlDocument();
                         try
                         {
@@ -5907,13 +5942,41 @@ out strError);
                                 node.ParentNode.RemoveChild(node);
                         }
 
-                        if (tempdom.DocumentElement.ChildNodes.Count != 0)
+                        // 删除空的 header 元素
+                        {
+                            XmlNamespaceManager mngr = new XmlNamespaceManager(new NameTable());
+                            mngr.AddNamespace("dprms", DpNs.dprms);
+
+                            mngr.AddNamespace("usmarc", Ns.usmarcxml);  // "http://www.loc.gov/MARC21/slim"
+                            mngr.AddNamespace("unimarc", DpNs.unimarcxml);	// "http://dp2003.com/UNIMARC"
+
+                            var headers = tempdom.DocumentElement.SelectNodes("//unimarc:header | //usmarc:header");
+                            foreach (XmlElement header in headers)
+                            {
+                                if (header.InnerText.Trim() == "????????????????????????")
+                                    header.ParentNode.RemoveChild(header);
+                            }
+                        }
+#endif
+                        // 移除 MARCXML 中的工作用元素和字段
+                        // return:
+                        //      -1  出错
+                        //      0   没有余下的字段
+                        //      1   有余下的字段，余下的字段返回在 strOutputBiblio 中
+                        nRet = RemoveWorkingFields(
+                            strBiblio,
+                            out List<string> rest_names,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+
+                        if (rest_names.Count > 0)
                         {
                             // 2017/5/5
-                            this.WriteErrorLog("用户 '" + sessioninfo.UserID + "' 删除书目记录 '" + strBiblioRecPath + "' (已被拒绝) 最后一步剩下的记录 XML 内容 '" + tempdom.OuterXml + "'");
+                            this.WriteErrorLog("用户 '" + sessioninfo.UserID + "' 删除书目记录 '" + strBiblioRecPath + "' (已被拒绝) 最后一步剩下的字段: " + StringUtil.MakePathList(rest_names));
 
                             result.Value = -1;
-                            result.ErrorInfo = "当前用户的权限不足以删除所有MARC字段，因此删除操作被拒绝。可改用修改操作。\r\n\r\n权限不足以删除的记录部分内容如下: \r\n" + tempdom.OuterXml;  // TODO: 可以考虑用更友好的显示 MARC 工作单格式的方式来报错
+                            result.ErrorInfo = "当前用户的权限不足以删除所有MARC字段，因此删除操作被拒绝。可改用修改操作。\r\n\r\n权限不足以删除的部分字段如下: \r\n" + StringUtil.MakePathList(rest_names);  // TODO: 可以考虑用更友好的显示 MARC 工作单格式的方式来报错
                             result.ErrorCode = ErrorCode.AccessDenied;
                             return result;
                         }
@@ -5934,30 +5997,61 @@ out strError);
 
                 if (strDbType == "biblio")
                 {
-                    // 删除书目记录的下级记录
-                    // return:
-                    //      -1  失败
-                    //      0   成功
-                    //      1   需要结束运行，result 结果已经设置好了
-                    nRet = DeleteBiblioAndSubRecords(
-                sessioninfo,
-                strAction,
-                strBiblioRecPath,
-                strExistingXml,
-                strStyle,
-                baTimestamp,
-                ref bBiblioNotFound,
-                ref strBiblio,
-                ref baOutputTimestamp,
-                ref domOperLog,
-                ref result,
-                out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
-                    if (nRet == 1)
-                        return result;
+                    if (strAction == "delete"
+                        || strAction == "onlydeletesubrecord")
+                    {
+                        // 删除书目记录的下级记录
+                        // return:
+                        //      -1  失败
+                        //      0   成功
+                        //      1   需要结束运行，result 结果已经设置好了
+                        nRet = DeleteBiblioAndSubRecords(
+                    sessioninfo,
+                    strAction,
+                    strBiblioRecPath,
+                    strExistingXml,
+                    strStyle,
+                    baTimestamp,
+                    ref bBiblioNotFound,
+                    ref strBiblio,
+                    ref baOutputTimestamp,
+                    ref domOperLog,
+                    ref result,
+                    out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (nRet == 1)
+                            return result;
+                    }
+                    if (strAction == "onlydeletebiblio")
+                    {
+                        // 不需要同时删除下属的实体记录
+                        this.BiblioLocks.LockForWrite(strBiblioRecPath);
+                        try
+                        {
+                            baOutputTimestamp = null;
+
+                            // 删除书目记录
+                            lRet = channel.DoDeleteRes(strBiblioRecPath,
+                                baTimestamp,
+                                out baOutputTimestamp,
+                                out strError);
+                            if (lRet == -1)
+                            {
+                                // 只删除书目记录，但是如果书目记录却不存在，要报错
+                                goto ERROR1;
+                            }
+                        }
+                        finally
+                        {
+                            this.BiblioLocks.UnlockForWrite(strBiblioRecPath);
+                        }
+
+                        this.DeleteBiblioSummary(strBiblioRecPath);
+                    }
                 }
             }
+#if REMOVED
             else if (strAction == "onlydeletebiblio")
             {
                 if (strDbType == "biblio")
@@ -6022,7 +6116,9 @@ out strError);
                         goto ERROR1;
 
                     if (bChangePartDenied == true && string.IsNullOrEmpty(strError) == false)
+                    {
                         strDeniedComment += " " + strError;
+                    }
 
                     // 检查根下面是不是没有任何元素了。如果还有，说明当前权限不足以删除它们。
                     // 如果已经为空，就表示不必检查了
@@ -6093,6 +6189,7 @@ out strError);
                     this.DeleteBiblioSummary(strBiblioRecPath);
                 }
             }
+#endif
             else
             {
                 strError = "未知的strAction参数值 '" + strAction + "'";
@@ -6143,8 +6240,90 @@ out strError);
         ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
-            result.ErrorCode = ErrorCode.SystemError;
+            if (result.ErrorCode == ErrorCode.NoError)
+                result.ErrorCode = ErrorCode.SystemError;
             return result;
+        }
+
+        // 移除 MARCXML 中的工作用元素和字段
+        // return:
+        //      -1  出错
+        //      0   没有余下的字段
+        //      1   有余下的字段，余下的字段返回在 strOutputBiblio 中
+        int RemoveWorkingFields(
+            string strBiblio,
+            out List<string> output_field_names,
+            out string strError)
+        {
+            strError = "";
+            output_field_names = new List<string>();
+
+            if (String.IsNullOrEmpty(strBiblio) == true)
+                return 0;
+
+            XmlDocument tempdom = new XmlDocument();
+            try
+            {
+                tempdom.LoadXml(strBiblio);
+            }
+            catch (Exception ex)
+            {
+                strError = "经过 MergeOldNewBiblioRec() 处理后的 strBiblio 装入 XmlDocument 失败: " + ex.Message;
+                return -1;
+            }
+
+            // 2011/11/30
+            // 删除全部<operations>元素
+            XmlNodeList nodes = tempdom.DocumentElement.SelectNodes("//operations");
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                XmlNode node = nodes[i];
+                if (node.ParentNode != null)
+                    node.ParentNode.RemoveChild(node);
+            }
+
+            XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
+            nsmgr.AddNamespace("dprms", DpNs.dprms);
+
+            nsmgr.AddNamespace("usmarc", Ns.usmarcxml);  // "http://www.loc.gov/MARC21/slim"
+            nsmgr.AddNamespace("unimarc", DpNs.unimarcxml);  // "http://dp2003.com/UNIMARC"
+
+            // 删除空的 header 元素
+            {
+
+                var headers = tempdom.DocumentElement.SelectNodes("//unimarc:leader | //usmarc:leader", nsmgr);
+                foreach (XmlElement header in headers)
+                {
+                    if (header.InnerText.Trim() == "????????????????????????")
+                        header.ParentNode.RemoveChild(header);
+                }
+            }
+
+            if (tempdom.DocumentElement.ChildNodes.Count != 0)
+            {
+                // strOutputBiblio = tempdom.OuterXml;
+
+                // 头标区
+                var headers = tempdom.DocumentElement.SelectNodes("//unimarc:leader | //usmarc:leader", nsmgr);
+                if (headers.Count > 0)
+                    output_field_names.Add("###");
+
+                // 列出 MARC 字段名
+                var names = tempdom.DocumentElement.SelectNodes("//*/@tag");
+                foreach (XmlAttribute attr in names)
+                {
+                    output_field_names.Add(attr.Value);
+                }
+
+                // dprms:file 元素
+                var files = tempdom.DocumentElement.SelectNodes("//dprms:file", nsmgr);
+                if (files.Count > 0)
+                    output_field_names.Add(GetMyName(files[0] as XmlElement));
+
+                return 1;
+            }
+
+            return 0;
         }
 
         // 删除书目记录的下级记录
@@ -6426,6 +6605,9 @@ out strError);
                         out strError);
                     if (lRet == -1)
                     {
+                        // 2023/2/21
+                        ConvertKernelErrorCode(channel.ErrorCode, ref result);
+
                         if (channel.IsNotFound()
                             && (entityinfos.Count > 0 || orderinfos.Count > 0 || issueinfos.Count > 0)
                             )
@@ -7174,6 +7356,7 @@ out strError);
                             //      0   strBiblioXml 没有发生修改
                             //      1   strBiblioXml 发生了修改
                             nRet = CreateUniformKey(
+                                false,
         ref strExistingSourceXml,
         out strError);
                             if (nRet == -1)

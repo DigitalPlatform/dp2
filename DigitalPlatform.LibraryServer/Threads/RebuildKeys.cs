@@ -838,6 +838,7 @@ out strError);
 
             // 重建查重键
             int nRet = LibraryApplication.CreateUniformKey(
+                false,
 ref strResult,
 out strError);
             if (nRet == -1)

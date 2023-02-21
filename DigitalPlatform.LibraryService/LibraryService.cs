@@ -7981,6 +7981,7 @@ out timestamp);
 
             try
             {
+                /*
                 // 对读者身份的判断
                 if (sessioninfo.UserType == "reader")
                 {
@@ -7998,7 +7999,7 @@ out timestamp);
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
-
+                */
 
                 return app.IssueItemDatabase.SetItems(sessioninfo,
                     strBiblioRecPath,
@@ -9518,24 +9519,6 @@ PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin)
 
             try
             {
-                // 对读者身份的判断
-                if (sessioninfo.UserType == "reader")
-                {
-                    result.Value = -1;
-                    result.ErrorInfo = "修改订购记录的操作被拒绝。作为读者不能进行此项操作";
-                    result.ErrorCode = ErrorCode.AccessDenied;
-                    return result;
-                }
-
-                // 权限字符串
-                if (StringUtil.IsInList("setorderinfo,setorders,writeobject,order", sessioninfo.RightsOrigin) == false)
-                {
-                    result.Value = -1;
-                    result.ErrorInfo = "保存订购信息 操作被拒绝。不具备 setorderinfo、setorders、writeobject 或 order 权限。";
-                    result.ErrorCode = ErrorCode.AccessDenied;
-                    return result;
-                }
-
                 return app.OrderItemDatabase.SetItems(sessioninfo,
                     strBiblioRecPath,
                     orderinfos,
@@ -16393,6 +16376,7 @@ out strError);
 
             try
             {
+                /*
                 // 权限字符串
                 if (StringUtil.IsInList("setcommentinfo,writerecord", sessioninfo.RightsOrigin) == false)
                 {
@@ -16401,6 +16385,7 @@ out strError);
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
+                */
 
                 return app.CommentItemDatabase.SetItems(sessioninfo,
                     strBiblioRecPath,
