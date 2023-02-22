@@ -16604,7 +16604,9 @@ out string db_type);
                     if (string.IsNullOrEmpty(strPath) == true)
                     {
                         // 读者身份判断
-                        if (bIsReader && sessioninfo.Account.ReaderDomPath != strDbName + "/" + strRecordID)
+                        if (db_type == "reader"
+                            && bIsReader 
+                            && sessioninfo.Account.ReaderDomPath != strDbName + "/" + strRecordID)
                         {
                             strError = "读者身份不允许访问其他读者的 XML 记录";
                             return 0;
