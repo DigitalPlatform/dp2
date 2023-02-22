@@ -1760,7 +1760,7 @@ out strError);
 
             // 合并新旧记录
             string strWarning = "";
-            string strNewXml = "";
+            // string strNewXml = "";
             if (bForce == false)
             {
                 // 2011/2/11
@@ -1788,30 +1788,32 @@ out strError);
                         DomUtil.SetElementText(domNew.DocumentElement, "refID", Guid.NewGuid().ToString());
                 }
 
-                // return:
-                //      -1  出错
-                //      0   正确
-                //      1   有部分修改没有兑现。说明在strError中
-                //      2   全部修改都没有兑现。说明在strError中 (2018/10/9)
-                nRet = MergeTwoItemXml(
-                    sessioninfo,
-                    domExist,
-                    domNew,
-                    out strNewXml,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-                if (nRet == 1 || nRet == 2)
                 {
-                    if (nRet == 1)
-                        part_type = "部分";
-                    else
-                        part_type = "全部都没有";
-                    strWarning = strError;
-                }
+                    // return:
+                    //      -1  出错
+                    //      0   正确
+                    //      1   有部分修改没有兑现。说明在strError中
+                    //      2   全部修改都没有兑现。说明在strError中 (2018/10/9)
+                    nRet = MergeTwoItemXml(
+                        sessioninfo,
+                        domExist,
+                        domNew,
+                        out string strNewXml,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    if (nRet == 1 || nRet == 2)
+                    {
+                        if (nRet == 1)
+                            part_type = "部分";
+                        else
+                            part_type = "全部都没有";
+                        strWarning = strError;
+                    }
 
-                // 为了后面的 CheckParent
-                domNew.LoadXml(strNewXml);
+                    // 为了后面的 CheckParent
+                    domNew.LoadXml(strNewXml);
+                }
 
                 // 2010/4/8
                 nRet = this.App.SetOperation(
@@ -1826,7 +1828,7 @@ out strError);
             else
             {
                 // 2008/10/19
-                strNewXml = domNew.OuterXml;
+                // strNewXml = domNew.OuterXml;
             }
 
             // 2023/2/1
@@ -1838,7 +1840,7 @@ out strError);
             // 保存新记录
             byte[] output_timestamp = null;
             lRet = channel.DoSaveTextRes(info.NewRecPath,
-                strNewXml,
+                domNew.OuterXml,    // strNewXml,
                 false,   // include preamble?
                 "content" + (bSimulate ? ",simulate" : ""),
                 exist_timestamp,
@@ -1872,7 +1874,9 @@ out strError);
 
                 // 新记录
                 XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
-                    "record", strNewXml);
+                    "record", 
+                    domNew.OuterXml    // strNewXml
+                    );
                 DomUtil.SetAttr(node, "recPath", info.NewRecPath);
 
                 // 旧记录
@@ -1883,7 +1887,7 @@ out strError);
                 // 保存成功，需要返回信息元素。因为需要返回新的时间戳
                 error = new EntityInfo(info);
                 error.NewTimestamp = output_timestamp;
-                error.NewRecord = strNewXml;
+                error.NewRecord = domNew.OuterXml;  // strNewXml;
 
                 error.ErrorInfo = "保存操作成功。NewTimeStamp 中返回了新的时间戳，NewRecord 中返回了实际保存的新记录(可能和提交的新记录稍有差异)。";
                 if (string.IsNullOrEmpty(strWarning) == false)

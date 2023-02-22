@@ -9008,7 +9008,8 @@ out string _);
             //      0   符合要求
             //      1   不符合要求
             nRet = CheckItemLibraryCode(itemdom,
-                sessioninfo.LibraryCodeList,
+                // sessioninfo.LibraryCodeList,
+                sessioninfo,    // 这样可以处理当前账户为读者身份情况
                 out strLibraryCode,
                 out strError);
             if (nRet == -1)
@@ -12930,12 +12931,22 @@ out string _);
         {
             strError = "";
 
+            /*
             // return:
             //      -1  检查过程出错
             //      0   符合要求
             //      1   不符合要求
             int nRet = CheckItemLibraryCode(item_dom,
                 sessioninfo.LibraryCodeList,
+                out string strItemLibraryCode,
+                out strError);
+            */
+            // return:
+            //      -1  检查过程出错
+            //      0   符合要求
+            //      1   不符合要求
+            int nRet = CheckItemLibraryCode(item_dom,
+                sessioninfo,
                 out string strItemLibraryCode,
                 out strError);
             if (nRet == -1)

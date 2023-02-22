@@ -1628,9 +1628,12 @@ string strText)
                     throw new Exception("ProgressMin 尚未初始化");
                 if (stop.ProgressMax == -1)
                     throw new Exception("ProgressMax 尚未初始化");
-                if (stop.ProgressValue < stop.ProgressMin
-                    || stop.ProgressValue > stop.ProgressMax)
-                    throw new Exception($"ProgressValue 越过 ProgressMin 和 ProgressMax 范围");
+                if (stop.ProgressValue != -1)
+                {
+                    if (stop.ProgressValue < stop.ProgressMin
+                        || stop.ProgressValue > stop.ProgressMax)
+                        throw new Exception($"ProgressValue 越过 ProgressMin 和 ProgressMax 范围");
+                }
 
                 Debug.Assert(stop.ProgressMin != -1);
                 Debug.Assert(stop.ProgressMax != -1);

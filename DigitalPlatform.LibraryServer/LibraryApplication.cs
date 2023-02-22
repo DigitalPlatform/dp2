@@ -16036,6 +16036,12 @@ out string db_type);
                         strError = "不允许使用WriteRes()写入评注库(等类型的书目下级)记录";
                         return 0;
                         */
+                        // 2023/2/21
+                        // 注: 对于读者身份修改册记录，和读者身份修改册记录下的对象记录，
+                        // 本函数这里只做了粗略的检查，还需要到具体获取的位置进行强化检查。
+                        // 所谓强化检查，对于册记录来说，要检查 location 元素内容是否为该读者的个人书斋名称，
+                        // 对于册记录下的对象记录，则先要检查册记录(如前所述 location 元素)
+
                         return 1;
                     }
 
@@ -16362,6 +16368,25 @@ out string db_type);
             return false;
         }
 
+        // 从一个路径中获得元数据记录路径部分
+        public static string GetMetadataPath(string strPath)
+        {
+            string strDbName = StringUtil.GetFirstPartPath(ref strPath);
+            if (string.IsNullOrEmpty(strDbName))
+                throw new Exception("路径中缺乏数据库名部分");
+            string strRecordID = StringUtil.GetFirstPartPath(ref strPath);
+            if (string.IsNullOrEmpty(strRecordID))
+                throw new Exception("路径中缺乏记录 ID 部分");
+            return strDbName + "/" + strRecordID;
+        }
+
+        // 判断一个路径是否为对象路径
+        public static bool IsObjectPath(string strPath)
+        {
+            string strDbName = StringUtil.GetFirstPartPath(ref strPath);
+            return IsRestObjectPath(strPath);
+        }
+
         // 检查数据库名以右的部分字符串是否为对象路径形态
         // parameters:
         //      strPath 数据库名以右的部分。例如 "1/object/0"
@@ -16593,6 +16618,7 @@ out string db_type);
                     // 对象资源
                     if (strObject == "object")
                     {
+
                         // 检查 getobject 或 getxxxobject 权限
                         error = CheckGetObjectRights(sessioninfo, db_type);
                         if (error != null)
@@ -16601,8 +16627,10 @@ out string db_type);
                             return 0;
                         }
 
-                        // 读者身份判断
-                        if (bIsReader && sessioninfo.Account.ReaderDomPath != strDbName + "/" + strRecordID)
+                        // 对访问读者库时读者身份的判断
+                        if (db_type == "reader"
+                            && bIsReader 
+                            && sessioninfo.Account.ReaderDomPath != strDbName + "/" + strRecordID)
                         {
                             strError = "读者身份不允许访问其他读者的对象记录";
                             return 0;
@@ -17152,6 +17180,10 @@ out string db_type);
                 // 实用库包括 publisher / zhongcihao / dictionary / inventory 类型
                 db_type = util_db_type;
                 right = $"set{db_type}info";
+                if (db_type == "inventory" && strAction == "delete")
+                    right = "setinventoryinfo,inventorydelete";
+                if (db_type == "amerce" && strAction == "delete")
+                    right = "setamerceinfo,deletesettlement";
             }
             else
                 return $"数据库 {strDbName} 内资源不允许写入";

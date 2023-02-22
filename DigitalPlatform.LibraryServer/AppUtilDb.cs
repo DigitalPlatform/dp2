@@ -18,6 +18,10 @@ namespace DigitalPlatform.LibraryServer
     /// </summary>
     public partial class LibraryApplication
     {
+        // 修改和删除违约金库、盘点库等杂项数据库记录
+        // 注: 本函数不判断账户权限
+        // parameters:
+        //      strStyle    如果包含 delete，表示要删除这条记录
         public LibraryServerResult SetRecordInfo(
 SessionInfo sessioninfo,
 string strRecPath,
@@ -54,6 +58,11 @@ out byte[] baOutputTimestamp)
                 result.ErrorCode = ErrorCode.AccessDenied;
                 return result;
             }
+
+            var delete = StringUtil.IsInList("delete", strStyle);
+            if (delete)
+                strXml = "<root />";
+
 
             RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
             if (channel == null)
@@ -119,6 +128,8 @@ out byte[] baOutputTimestamp)
 
             try
             {
+                if (string.IsNullOrEmpty(strXml))
+                    strXml = "<root />";
                 domNew.LoadXml(strXml);
             }
             catch (Exception ex)
@@ -171,6 +182,63 @@ out byte[] baOutputTimestamp)
             if (bChangePartDeniedParam == true)
             {
                 strWarning = strError;
+            }
+
+            if (delete)
+            {
+#if OLDCODE
+                if (domNew.DocumentElement != null
+                    && domNew.DocumentElement.ChildNodes.Count > 0)
+                {
+                    /*
+                    // 如果依然存在 dprms:file 元素，则拒绝删除
+                    var fragments = GetOuterXml(domNew,
+                        "http://dp2003.com/dprms:file");
+                    */
+
+                    List<string> rest_names = new List<string>();
+                    XmlNodeList nodes = domNew.DocumentElement.SelectNodes("*");
+                    foreach (XmlElement element in nodes)
+                    {
+                        var myname = GetMyName(element);
+                        rest_names.Add(myname);
+                    }
+                    if (rest_names.Count > 0)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = $"删除操作被拒绝。当前账户权限不足以删除记录的全部字段。下列字段无法删除: {StringUtil.MakePathList(rest_names)}";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
+                    }
+                }
+#endif
+                if (bChangePartDeniedParam == true)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = $"删除操作被拒绝。{strError}";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+
+                strOutputRecPath = strRecPath;
+                lRet = channel.DoDeleteRes(strRecPath,
+    baTimestamp,
+    strStyle,
+    out baOutputTimestamp,
+    out strError);
+                if (lRet == -1)
+                {
+                    strError = "删除操作发生错误:" + strError;
+                    ConvertKernelErrorCode(channel.ErrorCode, ref result);
+                    result.Value = -1;
+                    result.ErrorInfo = strError;
+                    return result;
+                }
+
+                result.Value = 0;
+                result.ErrorInfo = "删除操作成功";
+                result.ErrorCode = ErrorCode.NoError;
+                return result;
             }
 
             /*
@@ -424,15 +492,18 @@ out byte[] baOutputTimestamp)
         {
             strError = "";
 
+#if REMOVED
             // 注意这里要获得原始的 getreaderinfo:，因为并不在意 file 元素的权限
             var level = StringUtil.GetParameterByPrefix(sessioninfo.RightsOrigin, "getreaderinfo");
             if (level == null)
             {
-                if (StringUtil.IsInList("borrow,return,reservation", sessioninfo.RightsOrigin) == false)
-                {
-                    strError = "当前账户不具备 getreaderinfo 或 borrow return reservation 权限";
-                    return 0;
-                }
+
+            }
+#endif
+            if (StringUtil.IsInList("getarrivedinfo", sessioninfo.RightsOrigin) == false)
+            {
+                strError = "当前账户不具备 getarrivedinfo 权限";
+                return 0;
             }
 
             // 读者只能看自己的预约到书记录

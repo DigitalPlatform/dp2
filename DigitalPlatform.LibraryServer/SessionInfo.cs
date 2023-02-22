@@ -230,6 +230,7 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 是否为全局用户? 所谓全局用户就是管辖所有馆代码的用户
+        // 注: 全局用户不一定就是工作人员身份。读者身份其 GlobalUser 也可能为 true
         public bool GlobalUser
         {
             get

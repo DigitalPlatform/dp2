@@ -4720,11 +4720,12 @@ out strError);
             return CheckItemLibraryCode(dom, strLibraryCodeList, out strLibraryCode, out strError);
         }
 
+        // 注: 不处理读者身份
         // return:
         //      -1  检查过程出错
         //      0   符合要求
         //      1   不符合要求
-        public int CheckItemLibraryCode(XmlDocument dom,
+        /*public*/ int CheckItemLibraryCode(XmlDocument dom,
             string strLibraryCodeList,
             out string strLibraryCode,
             out string strError)
@@ -5511,7 +5512,6 @@ out strError);
                 }
             }
 
-            string strLibraryCode = "";
             // 检查一个册记录的馆藏地点是否符合馆代码列表要求
             // return:
             //      -1  检查过程出错
@@ -5520,19 +5520,20 @@ out strError);
             nRet = CheckItemLibraryCode(domExist,
                 sessioninfo,
                 // sessioninfo.LibraryCodeList,
-                out strLibraryCode,
+                out string strLibraryCode,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
 
             // 检查旧记录是否属于管辖范围
-            if (sessioninfo.GlobalUser == false)
+            if (sessioninfo.GlobalUser == false
+                || sessioninfo.UserType == "reader")
             {
                 if (nRet != 0)
                 {
                     strError = "即将被删除的册记录 '" + info.NewRecPath + "' 其馆藏地点不符合要求: " + strError;
                     if (force_clear_keys == true)
-                        strError += "。可重新用全局账户身份登录来进行删除";
+                        strError += "。可重新用全局工作人员账户身份登录来进行删除";
                     goto ERROR1;
                 }
             }

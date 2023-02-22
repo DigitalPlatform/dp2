@@ -15008,6 +15008,14 @@ Stack:
                 // TODO: 读者身份是否还需要作更细致的限定?
                 {
                     string strDbName = ResPath.GetDbName(strResPath);
+                    string db_type = app.GetAllDbType(strDbName);
+                    if (string.IsNullOrEmpty(db_type))
+                    {
+                        strError = $"无法探知数据库 '{strDbName}' 的类型";
+                        goto ERROR1;
+                    }
+                    Debug.Assert(string.IsNullOrEmpty(db_type) == false);
+
                     bool bIsReader = sessioninfo.UserType == "reader";
 
 #if OLDCODE // 读者库记录处理的代码合并到书目库记录处理的代码一起
@@ -15149,11 +15157,10 @@ out byte[] temp_timestamp);
                         || app.IsOrderDbName(strDbName)
                         || app.IsIssueDbName(strDbName)
                         || app.IsCommentDbName(strDbName)
-                        || strDbName == app.AmerceDbName)
+                        || StringUtil.IsInList(db_type,
+                                "amerce,arrived,publisher,zhongcihao,dictionary,inventory"))
                         && app.IsDatabaseMetadataPath(sessioninfo, strResPath) == true)
                     {
-                        string db_type = app.GetAllDbType(strDbName);
-                        Debug.Assert(string.IsNullOrEmpty(db_type) == false);
 
                         // strError = "不允许用 GetRes() 来获得书目记录。请改用 GetBiblioInfo() API";
                         // goto ERROR1;
@@ -15825,7 +15832,7 @@ out strError);
                     // 2015/9/3 新增删除资源的功能
                     if (delete)
                     {
-                        if (app.IsDatabaseMetadataPath(sessioninfo, strResPath) == true)
+                        if (app.IsDatabaseMetadataPath(sessioninfo, strResPath) == false)
                         {
                             result.Value = -1;
                             result.ErrorInfo = $"不允许使用 WriteRes() 删除元数据记录以外的其它类型资源 {strResPath}";
@@ -15833,13 +15840,16 @@ out strError);
                             return result;
                         }
 
-                        if (ServerDatabaseUtility.IsUtilDbName(app.LibraryCfgDom, strDbName, "inventory") == true)
+                        // if (ServerDatabaseUtility.IsUtilDbName(app.LibraryCfgDom, strDbName, "inventory") == true)
+                        if (StringUtil.IsInList(db_type,
+                        "amerce,arrived,publisher,zhongcihao,dictionary,inventory"))
                         {
+                            /*
                             // 盘点库记录
-                            if (StringUtil.IsInList("inventorydelete", sessioninfo.RightsOrigin) == false)
+                            if (StringUtil.IsInList("setinventoryinfo,inventorydelete", sessioninfo.RightsOrigin) == false)
                             {
                                 result.Value = -1;
-                                result.ErrorInfo = "当前用户缺乏删除盘点库记录 '" + strResPath + "' 所需要的 inventorydelete 权限";
+                                result.ErrorInfo = "当前用户缺乏删除盘点库记录 '" + strResPath + "' 所需要的 setinventoryinfo 或 inventorydelete 权限";
                                 result.ErrorCode = ErrorCode.AccessDenied;
                                 return result;
                             }
@@ -15848,8 +15858,26 @@ out strError);
                                 strStyle,   // 2017/9/16 增加
                                 out baOutputTimestamp,
                                 out strError);
+                            */
+
+                            // 不能简单删除。要判断是否具备 writexxxobject 权限，
+                            // 并且 XML 记录中是否具有 dprms:file 元素。只有当条件具备才允许删除
+                            var ret = app.SetRecordInfo(
+sessioninfo,
+strResPath,
+"",
+"",
+strStyle,
+baInputTimestamp,
+out strOutputResPath,
+out baOutputTimestamp);
+                            if (ret.Value == -1)
+                                return ret;
+                            lRet = 0;
+                            strError = ret.ErrorInfo;
+                            result.ErrorCode = ret.ErrorCode;
                         }
-                        else if (app.IsBiblioDbName(strDbName))
+                        else if (db_type == "biblio")
                         {
                             var ret = app.SetBiblioInfo(sessioninfo,
                                 "delete",
@@ -15867,7 +15895,7 @@ out strError);
                             strError = ret.ErrorInfo;
                             result.ErrorCode = ret.ErrorCode;
                         }
-                        else if (app.IsReaderDbName(strDbName))
+                        else if (db_type == "reader")
                         {
                             var ret = app.SetReaderInfo(sessioninfo,
                                 "delete",
@@ -15909,6 +15937,7 @@ out strError);
                             strError = ret.ErrorInfo;
                             result.ErrorCode = ret.ErrorCode;
                         }
+#if REMOVED
                         else if (strDbName == app.AmerceDbName)
                         {
                             if (StringUtil.IsInList("deletesettlement", sessioninfo.RightsOrigin) == false)
@@ -15924,6 +15953,7 @@ out strError);
                                 out baOutputTimestamp,
                                 out strError);
                         }
+#endif
                         else
                         {
                             result.Value = -1;
@@ -16137,6 +16167,38 @@ out baOutputTimestamp);
                     }
                     else
                     {
+                        // 对读者和工作人员身份写入册记录下的对象记录要做进一步权限判断
+                        // 对读者来说是进行个人书斋判断; 对工作人员来说是进行分馆管辖范围的判断
+                        if (db_type == "item" 
+                            // && sessioninfo.UserType == "reader"
+                            && LibraryApplication.IsObjectPath(strResPath))
+                        {
+                            string strRecordPath = LibraryApplication.GetMetadataPath(strResPath);
+                            // return:
+                            //      -1  errpr
+                            //      0   不在控制范围
+                            //      1   在控制范围
+                            int nRet = IsItemWriteable(sessioninfo,
+                                channel,
+                                strRecordPath,
+                                out strError);
+                            if (nRet == -1)
+                            {
+                                result.Value = -1;
+                                result.ErrorInfo = $"判断资源 '{strResPath}' 可否被修改的过程出错: {strError}";
+                                result.ErrorCode = ErrorCode.SystemError;
+                                return result;
+                            }
+                            if (nRet == 0)
+                            {
+                                result.Value = -1;
+                                result.ErrorInfo = $"对象记录 '{strResPath}' 不允许被修改。因 {strRecordPath} 不在当前账户的管辖范围之内";
+                                result.ErrorCode = ErrorCode.AccessDenied;
+                                return result;
+                            }
+                        }
+
+
                         lRet = channel.WriteRes(strResPath,
                             strRanges,
                             lTotalLength,
@@ -16266,6 +16328,45 @@ out baOutputTimestamp);
                 result.ErrorInfo = strErrorText;
                 return result;
             }
+        }
+
+        // return:
+        //      -1  errpr
+        //      0   不在控制范围
+        //      1   在控制范围
+        int IsItemWriteable(SessionInfo sessioninfo,
+            RmsChannel channel,
+            string strItemRecPath,
+            out string strError)
+        {
+            strError = "";
+            long lRet = channel.GetRes(strItemRecPath,
+out string item_xml,
+out _,
+out _,
+out _,
+out strError);
+            if (lRet == -1)
+                return -1;
+            XmlDocument item_dom = new XmlDocument();
+            try
+            {
+                item_dom.LoadXml(item_xml);
+            }
+            catch(Exception ex)
+            {
+                strError = $"册记录 {strItemRecPath} 的 XML 装入 XMLDOM 时出现异常: {ex.Message}";
+                return -1;
+            }
+            // return:
+            //      -1  errpr
+            //      0   不在控制范围
+            //      1   在控制范围
+            int nRet = app.IsItemInControl(
+                sessioninfo,
+                item_dom,
+                out strError);
+            return nRet;
         }
 
         // 为获得真实记录路径而追加写入一次
