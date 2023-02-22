@@ -80,7 +80,8 @@ namespace DigitalPlatform.LibraryServer
         static string[] _selfchangeable_reader_element_names = new string[] {
                 "displayName",  // 显示名
                 "preference",   // 个性化参数
-            };
+                "http://dp2003.com/dprms:file", // 2023/2/22
+                };
 
         // 读者记录中 服务器自动维护的元素名列表
         static string[] _auto_maintain_element_names = new string[] {
