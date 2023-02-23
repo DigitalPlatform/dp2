@@ -2276,7 +2276,7 @@ out List<string> send_skips);
                             string caption = "下列元素";
                             if (string.IsNullOrEmpty(result.ErrorInfo) == false)
                                 result.ErrorInfo += "; ";
-                            result.ErrorInfo += $"保存操作成功，但{caption}保存时被拒绝兑现: {StringUtil.MakePathList(denied_element_names)}。baNewTimeStamp中返回了新的时间戳，strSavedXml 中返回了实际保存的新记录";
+                            result.ErrorInfo += $"保存操作成功，但{caption}保存时被拒绝兑现: {StringUtil.MakePathList(denied_element_names)}";  // 。baNewTimeStamp中返回了新的时间戳，strSavedXml 中返回了实际保存的新记录
                             if (result.ErrorCode == ErrorCode.NoError)
                                 result.ErrorCode = ErrorCode.PartialDenied;
                         }
@@ -4168,7 +4168,7 @@ root, strLibraryCode);
                     strExistingRecord = domExist.OuterXml;
                 }
                 */
-                strError = "保存操作成功。baNewTimestamp 中返回了新的时间戳，strSavedXml 中返回了实际保存的新记录(可能和提交的新记录稍有差异)";
+                strError = "保存操作成功";    // 。baNewTimestamp 中返回了新的时间戳，strSavedXml 中返回了实际保存的新记录(可能和提交的新记录稍有差异)
                 kernel_errorcode = DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue.NoError;
 
                 if (denied_element_names != null && denied_element_names.Count > 0)
@@ -4179,7 +4179,7 @@ root, strLibraryCode);
                         caption = "(因 dataFields 属性为空导致)前端提交的所有元素";
 
                     // 把 strError 内容覆盖
-                    strError = $"保存操作成功，但{caption}保存时被拒绝兑现: {StringUtil.MakePathList(denied_element_names)}。baNewTimeStamp中返回了新的时间戳，strSavedXml 中返回了实际保存的新记录";
+                    strError = $"保存操作成功，但{caption}保存时被拒绝兑现: {StringUtil.MakePathList(denied_element_names)}";   // 。baNewTimeStamp中返回了新的时间戳，strSavedXml 中返回了实际保存的新记录
                     if (library_errorcode == ErrorCode.NoError)
                         library_errorcode = ErrorCode.PartialDenied;
                 }

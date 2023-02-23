@@ -17022,7 +17022,7 @@ out string db_type);
         //      "normal"    (存取定义已经满足要求了，但)还需要进一步检查普通权限
         //      null    具备权限
         //      其它      不具备权限。文字是报错信息
-        string CheckGetBiblioInfoAccess(
+        public string CheckGetBiblioInfoAccess(
             SessionInfo sessioninfo,
             string db_type,
             string strDbName,

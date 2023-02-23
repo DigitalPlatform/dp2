@@ -24,11 +24,7 @@ using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.rms;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.rms.Client.rmsws_localhost;
-using Microsoft.SqlServer.Server;
-using System.Runtime.Remoting.Activation;
-using System.Data;
-using System.Data.SqlClient;
-using System.Data.SqlTypes;
+
 
 namespace dp2Library
 {
@@ -4095,7 +4091,7 @@ out byte[] _);
                 if (bHasCols)
                 {
                     // 有可能返回 null
-                    string strFormat = StringUtil.GetStyleParam(strBrowseInfoStyle, "format");
+                    string strFormat = StringUtil.GetStyleParam(strBrowseInfoStyle, "result");
 
                     RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
                     // return:
@@ -4351,7 +4347,7 @@ out byte[] _);
                 if (bHasCols)
                 {
                     // 有可能返回 null
-                    string strFormat = StringUtil.GetStyleParam(strBrowseInfoStyle, "format");
+                    string strFormat = StringUtil.GetStyleParam(strBrowseInfoStyle, "result");
 
                     RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
                     // return:
@@ -4442,7 +4438,7 @@ out byte[] _);
                 if (bHasCols)
                 {
                     // 有可能返回 null
-                    string strFormat = StringUtil.GetStyleParam(strBrowseInfoStyle, "format");
+                    string strFormat = StringUtil.GetStyleParam(strBrowseInfoStyle, "result");
 
                     RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
                     // return:
@@ -6705,7 +6701,7 @@ out timestamp);
         //      strBarcode      如果 strItemDbType 为 "item"，这里为册条码号。
         //                      如果 strItemDbType 为 "Order" "Issue" "Comment" 之一，这里为 参考ID。
         //                      特殊情况下，可以使用"@path:"引导的册记录(或者其它类型记录)路径(只需要库名和id两个部分)作为检索入口。在@path引导下，路径后面还可以跟随 "$prev"或"$next"表示方向
-        //      strResultType   指定需要在strResult参数中返回的数据格式。为"xml" "html" "uii"之一。
+        //      strResultFormatList   指定需要在strResult参数中返回的数据格式。为"xml" "html" "uii"之一。
         //                      如果为空，则表示strResult参数中不返回任何数据。无论这个参数为什么值，strItemRecPath中都回返回册记录路径(如果命中了的话)
         //      strItemRecPath  返回册记录路径。可能为逗号间隔的列表，包含多个路径
         //      strBiblioType   指定需要在strBiblio参数中返回的数据格式。为"xml" "html"之一。
@@ -7194,7 +7190,20 @@ out timestamp);
                 if (nRet == 1)
                     strXml = item_dom.DocumentElement.OuterXml;
 
+                if (string.IsNullOrEmpty(strResultType) == false)
+                {
+                    nRet = app.BuildItemFormats(sessioninfo,
+        strResultType,
+        strItemRecPath,
+        strItemDbType,
+        item_dom,
+        out strResult,
+        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                }
 
+#if OLDCODE
                 // 取得册信息
                 if (String.IsNullOrEmpty(strResultType) == true
                     || String.Compare(strResultType, "recpath", true) == 0)
@@ -7289,6 +7298,7 @@ out timestamp);
                     strError = "未知的" + strItemDbType + "记录结果类型 '" + strResultType + "'";
                     goto ERROR1;
                 }
+#endif
 
                 // 若需要同时取得种记录
                 // TODO: 这里要检查一下，所获得的书目记录里面是否还有一些该过滤的字段没有被过滤
@@ -7346,12 +7356,41 @@ out timestamp);
                     }
 #endif
 
+                    /*
                     if (String.Compare(strBiblioType, "recpath", true) == 0)
                     {
                         // 如果仅仅需要获得书目记录recpath，则不需要获得书目记录
                         goto END1;
                     }
+                    */
 
+                    List<FormatItem> items = null;
+                    // 允许 strBiblioType 里面包含多种格式。这时 strBiblio 里面要用 XML 包装返回多个结果
+                    var formats = StringUtil.SplitList(strBiblioType);
+                    var ret = app.GetBiblioInfos(sessioninfo,
+                        strBiblioRecPath,
+                        null,
+                        formats.ToArray(),
+                        out string[] results,
+                        out byte[] timestamp);
+                    if (ret.Value == -1 || ret.Value == 0)
+                    {
+                        items = FormatItem.BuildErrorList(formats, ret.ErrorCode, ret.ErrorInfo);
+                    }
+                    else
+                    {
+                        items = new List<FormatItem>();
+                        for (int i = 0; i < formats.Count; i++)
+                        {
+                            FormatItem.SetFormat(items,
+                                i,
+                                formats[i],
+                                results[i]);
+                        }
+                    }
+
+                    strBiblio = FormatItem.GetXml(items);
+#if OLDCODE
                     RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
                     if (channel == null)
                     {
@@ -7359,22 +7398,47 @@ out timestamp);
                         goto ERROR1;
                     }
 
-                    lRet = channel.GetRes(strBiblioRecPath,
-                        out string strBiblioXml,
-                        out string strMetaData,
-                        out byte[] timestamp,
-                        out string strTempOutputPath,
-                        out strError);
-                    if (lRet == -1)
-                    {
-                        if (channel.IsNotFound())
-                        {
-                            result.ErrorInfo = "书目记录 " + strBiblioRecPath + " 不存在";
-                            return result;
-                        }
+                    string strBiblioXml = "";
+                    string strMetaData = "";
+                    byte[] timestamp = null;
 
-                        strError = "获得种记录 '" + strBiblioRecPath + "' 时出错: " + strError;
-                        goto ERROR1;
+                    // TODO: 检查当前账户是否有 getbiblioinfo 权限
+                    // 检查当前用户是否具备 GetBiblioInfo() API 的存取定义权限
+                    // parameters:
+                    //      check_normal_right 是否要连带一起检查普通权限？如果不连带，则本函数可能返回 "normal"，意思是需要追加检查一下普通权限
+                    // return:
+                    //      "normal"    (存取定义已经满足要求了，但)还需要进一步检查普通权限
+                    //      null    具备权限
+                    //      其它      不具备权限。文字是报错信息
+                    var error = app.CheckGetBiblioInfoAccess(
+                        sessioninfo,
+                        "biblio",
+                        ResPath.GetDbName(strBiblioRecPath),
+                        true,
+                        out _);
+                    if (error != null)
+                    {
+                        // TODO: 如何让前端知道这里因为 getbiblioinfo 权限不够?
+                    }
+                    else
+                    {
+                        lRet = channel.GetRes(strBiblioRecPath,
+                            out strBiblioXml,
+                            out strMetaData,
+                            out timestamp,
+                            out string strTempOutputPath,
+                            out strError);
+                        if (lRet == -1)
+                        {
+                            if (channel.IsNotFound())
+                            {
+                                result.ErrorInfo = "书目记录 " + strBiblioRecPath + " 不存在";
+                                return result;
+                            }
+
+                            strError = "获得种记录 '" + strBiblioRecPath + "' 时出错: " + strError;
+                            goto ERROR1;
+                        }
                     }
 
                     // 如果只需要种记录的XML格式
@@ -7409,6 +7473,9 @@ out timestamp);
                             goto ERROR1;
                         }
                     }
+#endif
+
+
 #if OLD_CODE
                     // 需要从内核映射过来文件
                     string strLocalPath = "";
@@ -7479,6 +7546,7 @@ out timestamp);
                 return result;
             }
         }
+
 
         // *** 此API已经废止 ***
         // 对册条码号进行查重
@@ -8498,7 +8566,7 @@ out timestamp);
         // parameters:
         //      strRefID  参考ID。特殊情况下，可以使用"@path:"引导的期记录路径(只需要库名和id两个部分)作为检索入口。在@path引导下，路径后面还可以跟随 "$prev"或"$next"表示方向
         //      strBiblioRecPath    指定书目记录路径
-        //      strResultType   指定需要在strResult参数中返回的数据格式。为"xml" "html"之一。
+        //      strResultFormatList   指定需要在strResult参数中返回的数据格式。为"xml" "html"之一。
         //                      如果为空，则表示strResult参数中不返回任何数据。无论这个参数为什么值，strItemRecPath中都回返回册记录路径(如果命中了的话)
         //      strItemRecPath  返回册记录路径。可能为逗号间隔的列表，包含多个路径
         //      strBiblioType   指定需要在strBiblio参数中返回的数据格式。为"xml" "html"之一。
@@ -9541,7 +9609,7 @@ PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin)
         // parameters:
         //      strRefID  参考ID。特殊情况下，可以使用"@path:"引导的订购记录路径(只需要库名和id两个部分)作为检索入口。在@path引导下，路径后面还可以跟随 "$prev"或"$next"表示方向
         //      strBiblioRecPath    指定书目记录路径
-        //      strResultType   指定需要在strResult参数中返回的数据格式。为"xml" "html"之一。
+        //      strResultFormatList   指定需要在strResult参数中返回的数据格式。为"xml" "html"之一。
         //                      如果为空，则表示strResult参数中不返回任何数据。无论这个参数为什么值，strItemRecPath中都回返回册记录路径(如果命中了的话)
         //      strItemRecPath  返回册记录路径。可能为逗号间隔的列表，包含多个路径
         //      strBiblioType   指定需要在strBiblio参数中返回的数据格式。为"xml" "html"之一。
@@ -16169,7 +16237,7 @@ out baOutputTimestamp);
                     {
                         // 对读者和工作人员身份写入册记录下的对象记录要做进一步权限判断
                         // 对读者来说是进行个人书斋判断; 对工作人员来说是进行分馆管辖范围的判断
-                        if (db_type == "item" 
+                        if (db_type == "item"
                             // && sessioninfo.UserType == "reader"
                             && LibraryApplication.IsObjectPath(strResPath))
                         {
@@ -16353,7 +16421,7 @@ out strError);
             {
                 item_dom.LoadXml(item_xml);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 strError = $"册记录 {strItemRecPath} 的 XML 装入 XMLDOM 时出现异常: {ex.Message}";
                 return -1;
@@ -16563,7 +16631,7 @@ out strError);
         // 获得评注信息
         // parameters:
         //      strRefID  参考ID。特殊情况下，可以使用"@path:"引导的评注记录路径(只需要库名和id两个部分)作为检索入口。在@path引导下，路径后面还可以跟随 "$prev"或"$next"表示方向
-        //      strResultType   指定需要在strResult参数中返回的数据格式。为"xml" "html"之一。
+        //      strResultFormatList   指定需要在strResult参数中返回的数据格式。为"xml" "html"之一。
         //                      如果为空，则表示strResult参数中不返回任何数据。无论这个参数为什么值，strItemRecPath中都回返回册记录路径(如果命中了的话)
         //      strItemRecPath  返回册记录路径。可能为逗号间隔的列表，包含多个路径
         //      strBiblioType   指定需要在strBiblio参数中返回的数据格式。为"xml" "html"之一。

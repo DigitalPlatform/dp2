@@ -556,7 +556,10 @@ namespace DigitalPlatform.LibraryServer
                 {
                     string strStyle = "timestamp,outputpath";  // "metadata,timestamp,outputpath";
 
-                    if (formats != null && formats.Length > 0)
+                    if (formats != null 
+                        && formats.Length > 0
+                        // TODO: 仅当必要时候才获得书目 XML
+                        )
                         strStyle += ",content,data";
 
                     // 2023/1/19
@@ -618,7 +621,6 @@ namespace DigitalPlatform.LibraryServer
 
                     // 2014/12/16
                     strCurrentBiblioRecPath = strOutputPath;
-
                 }
 
                 // 2023/1/28 把这一段放到外面，让前端提交的 XML 记录也经过字段过滤步骤
@@ -1299,7 +1301,8 @@ namespace DigitalPlatform.LibraryServer
                     else
                         strBiblio = collection_dom.DocumentElement.OuterXml;
                 }
-                else if (String.Compare(strBiblioType, "outputpath", true) == 0)
+                else if (String.Compare(strBiblioType, "outputpath", true) == 0
+                    || String.Compare(strBiblioType, "recpath", true) == 0)
                 {
                     strBiblio = strOutputPath;  // 2008/3/18 
                 }

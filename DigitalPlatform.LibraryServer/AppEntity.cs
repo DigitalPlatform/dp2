@@ -16,7 +16,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.rms.Client.rmsws_localhost;
-using System.Data.SqlClient;
+// using System.Data.SqlClient;
 
 
 namespace DigitalPlatform.LibraryServer
@@ -4725,10 +4725,11 @@ out strError);
         //      -1  检查过程出错
         //      0   符合要求
         //      1   不符合要求
-        /*public*/ int CheckItemLibraryCode(XmlDocument dom,
-            string strLibraryCodeList,
-            out string strLibraryCode,
-            out string strError)
+        /*public*/
+        int CheckItemLibraryCode(XmlDocument dom,
+ string strLibraryCodeList,
+ out string strLibraryCode,
+ out string strError)
         {
             string strLocation = DomUtil.GetElementText(dom.DocumentElement,
                 "location");
@@ -7826,7 +7827,219 @@ out strError);
             return 0;
         }
 
+        // 输出册(订购、期、评注)记录的各种格式
+        public int BuildItemFormats(SessionInfo sessioninfo,
+            string strResultFormatList,
+            string strItemRecPath,
+            string strItemDbType,
+            XmlDocument item_dom,
+            out string strResult,
+            out string strError)
+        {
+            strError = "";
+            strResult = "";
+
+            List<FormatItem> items = new List<FormatItem>();
+            var formats = StringUtil.SplitList(strResultFormatList);
+            int i = 0;
+            foreach (var format in formats)
+            {
+                if (String.Compare(format, "xml", true) == 0)
+                {
+                    FormatItem.SetFormat(items, i, format, item_dom.DocumentElement?.OuterXml);
+                }
+                else if (String.Compare(format, "recpath", true) == 0)
+                {
+                    FormatItem.SetFormat(items, i, format, strItemRecPath);
+                }
+                else if (String.Compare(format, "uii", true) == 0)
+                {
+                    try
+                    {
+                        var itemdom = item_dom; // 2023/2/3
+
+                        string oi = DomUtil.GetElementText(itemdom.DocumentElement, "oi");
+                        string barcode = DomUtil.GetElementText(itemdom.DocumentElement, "barcode");
+                        var content = oi + "." + barcode;
+                        if (string.IsNullOrEmpty(oi))
+                            content = barcode;
+                        FormatItem.SetFormat(items, i, format, content);
+                    }
+                    catch (Exception ex)
+                    {
+                        this.WriteErrorLog($"(GetItemInfo())为册记录添加 oi 元素时出现异常: \r\n{ExceptionUtil.GetDebugText(ex)}\r\n\r\n册记录 XML:'{item_dom.OuterXml}'");
+                        strError = $"(GetItemInfo())为册记录添加 oi 元素时出现异常: {ex.Message}";
+                        FormatItem.SetFormat(items,
+                            i,
+                            format,
+                            null,
+                            ErrorCode.SystemError,
+                            strError);
+                    }
+                }
+                else if (String.Compare(format, "html", true) == 0)
+                {
+                    // 将册记录数据从XML格式转换为HTML格式
+                    int nRet = this.ConvertItemXmlToHtml(
+                        this.CfgDir + "\\" + strItemDbType + "xml2html.cs",
+                        this.CfgDir + "\\" + strItemDbType + "xml2html.cs.ref",
+                        item_dom.OuterXml,  // strXml,
+                        strItemRecPath, // 2009/10/18 
+                        out string content,
+                        out strError);
+                    if (nRet == -1)
+                        FormatItem.SetFormat(items,
+                            i,
+                            format,
+                            null,
+                            ErrorCode.SystemError,
+                            strError);
+                    else
+                        FormatItem.SetFormat(items, i, format, content);
+
+                }
+                else if (String.Compare(format, "text", true) == 0)
+                {
+                    // 将册记录数据从XML格式转换为text格式
+                    int nRet = this.ConvertItemXmlToHtml(
+                        this.CfgDir + "\\" + strItemDbType + "xml2text.cs",
+                        this.CfgDir + "\\" + strItemDbType + "xml2text.cs.ref",
+                        item_dom.OuterXml,   // strXml,
+                        strItemRecPath, // 2009/10/18 
+                        out string content,
+                        out strError);
+                    if (nRet == -1)
+                        FormatItem.SetFormat(items,
+                            i,
+                            format,
+                            null,
+                            ErrorCode.SystemError,
+                            strError);
+                    else
+                        FormatItem.SetFormat(items, i, format, content);
+                }
+                // 模拟创建检索点
+                else if (String.Compare(format, "keys", true) == 0)
+                {
+                    int nRet = this.GetKeys(sessioninfo,
+                        strItemRecPath,
+                        item_dom.OuterXml, //    strXml,
+                        out string content,
+                        out strError);
+                    if (nRet == -1)
+                        FormatItem.SetFormat(items,
+                            i,
+                            format,
+                            null,
+                            ErrorCode.SystemError,
+                            strError);
+                    else
+                        FormatItem.SetFormat(items, i, format, content);
+                }
+                else
+                {
+                    strError = "未知的" + strItemDbType + "记录结果类型 '" + format + "'";
+                    FormatItem.SetFormat(items,
+                        i,
+                        format,
+                        null,
+                        ErrorCode.SystemError,
+                        strError);
+                }
+
+                i++;
+            }
+
+            strResult = FormatItem.GetXml(items);
+            return 0;
+        }
     }
+
+    // 一个返回格式事项
+    public class FormatItem
+    {
+        public string Format { get; set; }
+        public string Content { get; set; }
+
+        public ErrorCode ErrorCode { get; set; }
+
+        public string ErrorInfo { get; set; }
+
+        // 构造一个全是错误码的事项列表
+        public static List<FormatItem> BuildErrorList(
+            IEnumerable formats,
+            ErrorCode error_code,
+            string error_info)
+        {
+            List<FormatItem> results = new List<FormatItem>();
+            foreach (string format in formats)
+            {
+                results.Add(new FormatItem
+                {
+                    Format = format,
+                    ErrorCode = error_code,
+                    ErrorInfo = error_info
+                });
+            }
+            return results;
+        }
+
+        // 设置一个 result 事项
+        public static void SetFormat(List<FormatItem> list,
+            int index,
+            string format,
+            string content,
+            ErrorCode error_code = ErrorCode.NoError,
+            string error_info = null)
+        {
+            while (list.Count <= index)
+            {
+                list.Add(new FormatItem());
+            }
+            var item = list[index];
+            item.Format = format;
+            item.Content = content;
+            item.ErrorCode = error_code;
+            item.ErrorInfo = error_info;
+        }
+
+        // 装配为一个 XML 字符串
+        public static string GetXml(List<FormatItem> items)
+        {
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml("<results />");
+            foreach (var item in items)
+            {
+                var result = dom.CreateElement("result");
+                dom.DocumentElement.AppendChild(result);
+                if (item.Format != null
+                    && item.Format.Contains("xml"))
+                {
+                    if (string.IsNullOrEmpty(item.Content) == false)
+                        result = DomUtil.SetElementOuterXml(result, item.Content);
+                }
+                else
+                    result.InnerText = item.Content;
+                result.SetAttribute("_format", item.Format);
+                if (item.ErrorCode != ErrorCode.NoError)
+                {
+                    result.SetAttribute("_errorCode", item.ErrorCode.ToString());
+                    result.SetAttribute("_errorInfo", item.ErrorInfo);
+                }
+                if (items.Count == 1)
+                {
+                    if (item.Format != null
+                        && item.Format.Contains("xml"))
+                        return result.OuterXml;
+                    else
+                        return result.InnerText;
+                }
+            }
+
+            return dom.DocumentElement.OuterXml;
+        }
+    }
+
 
     // 实体信息
     public class DeleteEntityInfo
