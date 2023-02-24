@@ -3251,6 +3251,8 @@ out strError);
                     else
                         baOutputTimestamp = error.NewTimestamp;
                     strOutputRecPath = error.NewRecPath;
+                    // 2023/2/24
+                    result.ErrorCode = LibraryServerResult.FromErrorValue(error.ErrorCode);
                     return result;
                 }
                 else

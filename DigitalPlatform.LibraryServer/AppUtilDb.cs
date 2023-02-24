@@ -200,7 +200,7 @@ out byte[] baOutputTimestamp)
                 //      1   权限足够
                 nRet = CheckSetRights(
                     sessioninfo,
-                    db_type,
+                    strRecPath,
                     domExist,
                     domNew,
                     strAction,
@@ -369,7 +369,7 @@ out byte[] baOutputTimestamp)
 
                 // TODO: 是否要返回实际保存的 strNewXml 给调主，以便调主可以写操作日志?
 
-                result.ErrorInfo = "保存操作成功。NewTimeStamp 中返回了新的时间戳，NewRecord 中返回了实际保存的新记录(可能和提交的新记录稍有差异)。";
+                result.ErrorInfo = "保存操作成功";    // 。NewTimeStamp 中返回了新的时间戳，NewRecord 中返回了实际保存的新记录(可能和提交的新记录稍有差异)。
                 if (string.IsNullOrEmpty(strWarning) == false)
                 {
                     result.ErrorInfo = "保存操作" + part_type + "兑现。" + strWarning;
@@ -396,14 +396,15 @@ out byte[] baOutputTimestamp)
         //      1   权限足够
         int CheckSetRights(
             SessionInfo sessioninfo,
-            string db_type,
+            string strRecPath,
             XmlDocument domExist,
             XmlDocument domNew,
             string strAction,
             out string strError)
         {
-            strError = "";
 
+            /*
+            strError = "";
             if (db_type == "arrived")
             {
                 string readerBarcode = DomUtil.GetElementText(domNew.DocumentElement,
@@ -420,9 +421,580 @@ out byte[] baOutputTimestamp)
                     return 0;
                 }
             }
+            return 1;
+            */
 
-            return 0;
+            // return:
+            //      -1  errpr
+            //      0   不在控制范围
+            //      1   在控制范围
+            return IsItemWriteable(sessioninfo,
+                strAction,
+                strRecPath,
+                (out string error) =>
+                {
+                    error = "";
+                    if (strAction == "delete")
+                        return domExist;
+                    return domNew;
+                },
+                out strError);
         }
+
+        #region 记录权限判断
+
+        public int IsRecordReadable(SessionInfo sessioninfo,
+    RmsChannel channel,
+    string strItemRecPath,
+    out string strError)
+        {
+            strError = "";
+
+            return IsRecordReadable(sessioninfo,
+                strItemRecPath,
+                (out string error) =>
+                {
+                    long lRet = channel.GetRes(strItemRecPath,
+    out string item_xml,
+    out _,
+    out _,
+    out _,
+    out error);
+                    if (lRet == -1)
+                        return null;
+                    try
+                    {
+                        XmlDocument item_dom = new XmlDocument();
+                        item_dom.LoadXml(item_xml);
+                        return item_dom;
+                    }
+                    catch (Exception ex)
+                    {
+                        error = $"记录 {strItemRecPath} 的 XML 装入 XMLDOM 时出现异常: {ex.Message}";
+                        return null;
+                    }
+                },
+                out strError);
+        }
+
+        // 检查一个元数据记录是否允许当前用户读出。主要目的是用于判断这个元数据记录下的对象是否允许读出
+        // 书目库:     允许读出
+        // 读者库:     工作人员只允许读出自己管辖的分馆的; 读者只允许读出自己的
+        // 实体库:     允许读出
+        // 订购库:     工作人员允许; 读者不允许
+        // 期库:      工作人员允许; 读者不允许
+        // 评注库:     允许读出
+        // 违约金库:    工作人员只允许读出自己管辖分馆的; 读者只允许读出自己的
+        // 预约到书:    工作人员只允许读出自己管辖分馆的; 读者只允许读出自己的
+        // 出版者库:    允许
+        // 种次号库:    允许
+        // 词典库:     允许
+        // 盘点库:     工作人员允许读出自己管辖分馆的；读者不允许
+        // return:
+        //      -1  出错
+        //      0   不允许读出。错误信息在 strError 中返回
+        //      1   允许读出
+        public int IsRecordReadable(SessionInfo sessioninfo,
+            // RmsChannel channel,
+            string strItemRecPath,
+            Delegate_getRecord func_getRecord,
+            out string strError)
+        {
+            strError = "";
+
+            XmlDocument item_dom = new XmlDocument();
+
+            var strDbName = ResPath.GetDbName(strItemRecPath);
+            var db_type = this.GetAllDbType(strDbName);
+
+            // 读者库
+            if (db_type == "reader")
+            {
+                if (sessioninfo.UserType == "reader")
+                {
+                    // 观察读者记录中的 barcode 元素，是否正好是当前账户
+                    if (GetRecord(out strError) == -1)
+                        return -1;
+                    var barcode = DomUtil.GetElementText(item_dom.DocumentElement,
+                        "barcode");
+                    if (sessioninfo.Account.Barcode != barcode)
+                    {
+                        strError = $"读者身份不允许访问其他读者的读者记录";
+                        return 0;
+                    }
+                }
+                else
+                {
+                    if (this.IsCurrentChangeableReaderPath(strItemRecPath, sessioninfo.ExpandLibraryCodeList))
+                        return 1;
+                    strError = $"读者记录超出当前账户管辖范围";
+                    return 0;
+                }
+            }
+
+            // 订购库
+            if (db_type == "order")
+            {
+                if (sessioninfo.UserType == "reader")
+                {
+                    strError = $"读者身份不允许访问订购记录";
+                    return 0;
+                }
+            }
+
+            // 期库
+            if (db_type == "issue")
+            {
+                if (sessioninfo.UserType == "reader")
+                {
+                    strError = $"读者身份不允许访问期记录";
+                    return 0;
+                }
+            }
+
+            // 违约金库
+            if (db_type == "amerce")
+            {
+                if (GetRecord(out strError) == -1)
+                    return -1;
+                // 检查当前账户是否有查看一条违约金记录的权限
+                // return:
+                //      -1  出错
+                //      0   不具备权限
+                //      1   具备权限
+                int nRet = HasAmerceReadRight(
+                    sessioninfo,
+                    strItemRecPath,
+                    item_dom,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 0)
+                    return 0;
+                /*
+                if (sessioninfo.UserType == "reader")
+                {
+                    var readerBarcode = DomUtil.GetElementText(item_dom.DocumentElement,
+                        "readerBarcode");
+                    if (sessioninfo.UserID != readerBarcode)
+                    {
+                        strError = $"读者身份不允许访问其他人的违约金记录";
+                        return 0;
+                    }
+                }
+                else
+                {
+                    var libraryCode = DomUtil.GetElementText(item_dom.DocumentElement,
+                        "libraryCode");
+                    if (IsLibraryCodeInControl(libraryCode, sessioninfo.LibraryCodeList) == false)
+                    {
+                        strError = "违约金记录不在当前账户的管辖范围内";
+                        return 0;
+                    }
+                }
+                */
+            }
+
+            // 预约到书
+            if (db_type == "arrived")
+            {
+                if (GetRecord(out strError) == -1)
+                    return -1;
+
+                int nRet = HasArrivedReadRight(
+    sessioninfo,
+    strItemRecPath,
+    item_dom,
+    out strError);
+                if (nRet == 0)
+                    return 0;
+                /*
+                if (sessioninfo.UserType == "reader")
+                {
+                    // 观察预约到书记录中的 readerBarcode 元素，是否正好是当前账户
+                    var readerBarcode = DomUtil.GetElementText(item_dom.DocumentElement,
+                        "readerBarcode");
+                    if (sessioninfo.Account.Barcode != readerBarcode)
+                    {
+                        strError = $"读者身份不允许访问其他读者的预约到书记录";
+                        return 0;
+                    }
+                }
+                else
+                {
+                    var libraryCode = DomUtil.GetElementText(item_dom.DocumentElement,
+                        "libraryCode");
+                    if (IsLibraryCodeInControl(libraryCode, sessioninfo.LibraryCodeList) == false)
+                    {
+                        strError = "预约到书记录不在当前账户的管辖范围内";
+                        return 0;
+                    }
+                }
+                */
+            }
+
+            // 盘点库
+            if (db_type == "inventory")
+            {
+                if (sessioninfo.UserType == "reader")
+                {
+                    strError = $"读者身份不允许访问盘点记录";
+                    return 0;
+                }
+                else
+                {
+                    if (GetRecord(out strError) == -1)
+                        return -1;
+
+                    var libraryCode = DomUtil.GetElementText(item_dom.DocumentElement,
+                        "libraryCode");
+                    if (IsLibraryCodeInControl(libraryCode, sessioninfo.LibraryCodeList) == false)
+                    {
+                        strError = "盘点记录不在当前账户的管辖范围内";
+                        return 0;
+                    }
+                }
+            }
+
+            return 1;
+
+            int GetRecord(out string error)
+            {
+                item_dom = func_getRecord.Invoke(out error);
+                if (item_dom == null)
+                    return -1;
+                return 0;
+            }
+        }
+
+        // 检查册记录是否在当前账户控制范围内。“控制”的意思是修改
+        // parameters:
+        //      strAction   new/change/delete
+        // return:
+        //      -1  errpr
+        //      0   不在控制范围
+        //      1   在控制范围
+        public int IsItemWriteable(SessionInfo sessioninfo,
+            RmsChannel channel,
+            string strAction,
+            string strItemRecPath,
+            out string strError)
+        {
+            strError = "";
+
+            return IsItemWriteable(sessioninfo,
+                strAction,
+                strItemRecPath,
+                (out string error) =>
+                {
+                    long lRet = channel.GetRes(strItemRecPath,
+    out string item_xml,
+    out _,
+    out _,
+    out _,
+    out error);
+                    if (lRet == -1)
+                        return null;
+                    try
+                    {
+                        XmlDocument item_dom = new XmlDocument();
+                        item_dom.LoadXml(item_xml);
+                        return item_dom;
+                    }
+                    catch (Exception ex)
+                    {
+                        error = $"记录 {strItemRecPath} 的 XML 装入 XMLDOM 时出现异常: {ex.Message}";
+                        return null;
+                    }
+                },
+                out strError);
+        }
+
+        /*
+        delegate int Delegate_getRecord(string recpath,
+            out XmlDocument dom, 
+            out string error);
+        */
+        public delegate XmlDocument Delegate_getRecord(out string error);
+
+        // 检查册记录是否在当前账户控制范围内。“控制”的意思是修改
+        // 书目库:     允许写入
+        // 读者库:     工作人员只允许写入自己管辖的分馆的; 读者只允许写入自己的
+        // 实体库:     工作人员只允许写入自己管辖的分馆的; 读者只允许写入自己个人书斋的
+        // 订购库:     工作人员允许; 读者不允许
+        // 期库:      工作人员允许; 读者不允许
+        // 评注库:     工作人员只允许写入自己管辖分馆的; 读者只允许写入自己创建的评注记录
+        // 违约金库:    工作人员只允许写入自己管辖分馆的; 读者不允许
+        // 预约到书:    工作人员只允许写入自己管辖分馆的; 读者只允许写入自己的
+        // 出版者库:    工作人员允许; 读者不允许
+        // 种次号库:    工作人员允许; 读者不允许
+        // 词典库:     工作人员允许; 读者不允许
+        // 盘点库:     工作人员允许写入自己管辖分馆的；读者不允许
+        // parameters:
+        //      strAction   new/change/delete
+        // return:
+        //      -1  error
+        //      0   不在控制范围
+        //      1   在控制范围
+        int IsItemWriteable(SessionInfo sessioninfo,
+            string strAction,
+            string strItemRecPath,
+            Delegate_getRecord func_getRecord,
+            out string strError)
+        {
+            strError = "";
+
+            var strDbName = ResPath.GetDbName(strItemRecPath);
+            var db_type = this.GetAllDbType(strDbName);
+
+            XmlDocument item_dom = new XmlDocument();
+
+            // 读者库
+            if (db_type == "reader")
+            {
+                if (sessioninfo.UserType == "reader")
+                {
+                    // 观察读者记录中的 barcode 元素，是否正好是当前账户
+                    if (GetRecord(out strError) == -1)
+                        return -1;
+                    var barcode = DomUtil.GetElementText(item_dom.DocumentElement,
+                        "barcode");
+                    if (sessioninfo.Account.Barcode != barcode)
+                    {
+                        strError = $"读者身份不允许修改其他读者的读者记录";
+                        return 0;
+                    }
+                }
+                else
+                {
+                    if (this.IsCurrentChangeableReaderPath(strItemRecPath, sessioninfo.ExpandLibraryCodeList))
+                        return 1;
+
+                    strError = $"读者记录超出当前账户控制范围";
+                    return 0;
+                }
+            }
+
+            // 实体库
+            else if (db_type == "item")
+            {
+                if (GetRecord(out strError) == -1)
+                    return -1;
+
+                // return:
+                //      -1  errpr
+                //      0   不在控制范围
+                //      1   在控制范围
+                int nRet = this.IsItemInControl(
+                    sessioninfo,
+                    item_dom,
+                    out strError);
+                return nRet;
+            }
+
+            // 订购库
+            else if (db_type == "order")
+            {
+                if (sessioninfo.UserType == "reader")
+                {
+                    strError = $"读者身份不允许修改订购记录";
+                    return 0;
+                }
+            }
+
+            // 期库
+            else if (db_type == "issue")
+            {
+                if (sessioninfo.UserType == "reader")
+                {
+                    strError = $"读者身份不允许修改期记录";
+                    return 0;
+                }
+            }
+
+            // 评注库
+            else if (db_type == "comment")
+            {
+                if (GetRecord(out strError) == -1)
+                    return -1;
+
+                if (sessioninfo.UserType == "reader")
+                {
+                    var creator = DomUtil.GetElementText(item_dom.DocumentElement,
+                        "creator");
+                    if (sessioninfo.UserID != creator)
+                    {
+                        strError = $"读者身份不允许修改其他人创建的评注记录";
+                        return 0;
+                    }
+                }
+                else
+                {
+                    var libraryCode = DomUtil.GetElementText(item_dom.DocumentElement,
+                        "libraryCode");
+                    if (IsLibraryCodeInControl(libraryCode, sessioninfo.LibraryCodeList) == false)
+                    {
+                        strError = "评注记录不在当前账户的管辖范围内";
+                        return 0;
+                    }
+                }
+            }
+
+            // 违约金库
+            else if (db_type == "amerce")
+            {
+                if (sessioninfo.UserType == "reader")
+                {
+                    /*
+                    var readerBarcode = DomUtil.GetElementText(item_dom.DocumentElement,
+                        "readerBarcode");
+                    if (sessioninfo.UserID != readerBarcode)
+                    {
+                        strError = $"读者身份不允许修改其他人违约金记录";
+                        return 0;
+                    }
+                    */
+                    strError = $"读者身份不允许修改违约金记录";
+                    return 0;
+                }
+                else
+                {
+                    if (GetRecord(out strError) == -1)
+                        return -1;
+
+                    var libraryCode = DomUtil.GetElementText(item_dom.DocumentElement,
+                        "libraryCode");
+                    if (IsLibraryCodeInControl(libraryCode, sessioninfo.LibraryCodeList) == false)
+                    {
+                        strError = "违约金记录不在当前账户的管辖范围内";
+                        return 0;
+                    }
+                }
+            }
+
+            // 预约到书库
+            else if (db_type == "arrived")
+            {
+                if (GetRecord(out strError) == -1)
+                    return -1;
+                if (sessioninfo.UserType == "reader")
+                {
+                    // 观察预约到书记录中的 readerBarcode 元素，是否正好是当前账户
+
+                    var readerBarcode = DomUtil.GetElementText(item_dom.DocumentElement,
+                        "readerBarcode");
+                    if (sessioninfo.Account.Barcode != readerBarcode)
+                    {
+                        strError = $"读者身份不允许修改其他读者的预约到书记录";
+                        return 0;
+                    }
+                }
+                else
+                {
+                    var libraryCode = DomUtil.GetElementText(item_dom.DocumentElement,
+                        "libraryCode");
+                    if (IsLibraryCodeInControl(libraryCode, sessioninfo.LibraryCodeList) == false)
+                    {
+                        strError = "预约到书记录不在当前账户的管辖范围内";
+                        return 0;
+                    }
+                }
+            }
+
+            else if (db_type == "publisher")
+            {
+                if (sessioninfo.UserType == "reader")
+                {
+                    strError = $"读者身份不允许修改出版者记录";
+                    return 0;
+                }
+            }
+
+            else if (db_type == "zhongcihao")
+            {
+                if (sessioninfo.UserType == "reader")
+                {
+                    strError = $"读者身份不允许修改种次号记录";
+                    return 0;
+                }
+            }
+
+            else if (db_type == "dictionary")
+            {
+                if (sessioninfo.UserType == "reader")
+                {
+                    strError = $"读者身份不允许修改词典记录";
+                    return 0;
+                }
+            }
+
+            // 盘点库
+            else if (db_type == "inventory")
+            {
+                if (sessioninfo.UserType == "reader")
+                {
+                    strError = $"读者身份不允许修改盘点记录";
+                    return 0;
+                }
+                else
+                {
+                    if (GetRecord(out strError) == -1)
+                        return -1;
+
+                    var libraryCode = DomUtil.GetElementText(item_dom.DocumentElement,
+                        "libraryCode");
+                    if (IsLibraryCodeInControl(libraryCode, sessioninfo.LibraryCodeList) == false)
+                    {
+                        strError = "盘点记录不在当前账户的管辖范围内";
+                        return 0;
+                    }
+                }
+            }
+
+            return 1;
+
+            int GetRecord(out string error)
+            {
+                /*
+                RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
+                long lRet = channel.GetRes(strItemRecPath,
+out string item_xml,
+out _,
+out _,
+out _,
+out error);
+                if (lRet == -1)
+                    return -1;
+                try
+                {
+                    item_dom.LoadXml(item_xml);
+                    return 0;
+                }
+                catch (Exception ex)
+                {
+                    error = $"记录 {strItemRecPath} 的 XML 装入 XMLDOM 时出现异常: {ex.Message}";
+                    return -1;
+                }
+                */
+                item_dom = func_getRecord.Invoke(out error);
+                if (item_dom == null)
+                    return -1;
+                return 0;
+            }
+        }
+
+        static bool IsLibraryCodeInControl(string strLibraryCode,
+            string strLibraryCodeList)
+        {
+            if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
+            {
+                if (StringUtil.IsInList(strLibraryCode, strLibraryCodeList) == false)
+                    return false;
+            }
+            return true;
+        }
+
+        #endregion
 
         // 读出违约金库、盘点库等杂项数据库记录
         // 关键点是对读出的原始 XML 数据字段进行必要的权限和身份过滤
@@ -488,6 +1060,26 @@ out byte[] baOutputTimestamp)
                 goto ERROR1;
             }
 
+            // return:
+            //      -1  出错
+            //      0   不允许读出。错误信息在 strError 中返回
+            //      1   允许读出
+            nRet = IsRecordReadable(sessioninfo,
+                strOutputResPath,
+                (out string error) => 
+                {
+                    error = "";
+                    return existing_dom;
+                },
+                out strError);
+            if (nRet != 1)
+            {
+                result.Value = -1;
+                result.ErrorInfo = strError;
+                result.ErrorCode = ErrorCode.AccessDenied;
+                return result;
+            }
+#if OLDCODE
             if (db_type == "amerce")
             {
                 // 检查当前账户是否有查看一条违约金记录的权限
@@ -523,6 +1115,7 @@ out byte[] baOutputTimestamp)
                     return result;
                 }
             }
+#endif
 
             bool changed = false;
 
