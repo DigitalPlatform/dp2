@@ -556,7 +556,7 @@ namespace DigitalPlatform.LibraryServer
                 {
                     string strStyle = "timestamp,outputpath";  // "metadata,timestamp,outputpath";
 
-                    if (formats != null 
+                    if (formats != null
                         && formats.Length > 0
                         // TODO: 仅当必要时候才获得书目 XML
                         )
@@ -669,6 +669,10 @@ namespace DigitalPlatform.LibraryServer
                 if (formats != null)
                 {
                     // TODO: getbibliopart 应能返回函数的值
+                    // return:
+                    //      -1  出错
+                    //      0   成功
+                    //      1   有警告信息返回在 strError 中
                     nRet = BuildFormats(
                         sessioninfo,
                         strCurrentBiblioRecPath,
@@ -701,8 +705,11 @@ namespace DigitalPlatform.LibraryServer
             // 复制到结果中
             if (result_strings.Count > 0)
             {
+                /*
                 results = new string[result_strings.Count];
                 result_strings.CopyTo(results);
+                */
+                results = result_strings.ToArray();
 
                 if (String.IsNullOrEmpty(strErrorText) == false)
                 {
@@ -736,6 +743,10 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 构造各种书目格式
+        // return:
+        //      -1  出错
+        //      0   成功
+        //      1   有警告信息返回在 strError 中
         public int BuildFormats(
             SessionInfo sessioninfo,
             string strCurrentBiblioRecPath,
@@ -745,11 +756,11 @@ namespace DigitalPlatform.LibraryServer
             byte[] timestamp,
             string[] formats,
             out List<String> result_strings,
-            out string strErrorText)
+            out string strError)
         {
-            strErrorText = "";
+            strError = "";
+            string strErrorText = "";
             result_strings = new List<string>();
-            string strError = "";
             int nRet = 0;
 
             RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
@@ -788,9 +799,12 @@ namespace DigitalPlatform.LibraryServer
                     {
                         strError = "将XML装入DOM时失败: " + ex.Message;
                         // goto ERROR1;
+                        /*
                         if (String.IsNullOrEmpty(strErrorText) == false)
                             strErrorText += ";\r\n";
                         strErrorText += strError;
+                        */
+                        AppendErrorText(strError);
                         goto CONTINUE;
                     }
                     int nResultValue = 0;
@@ -811,9 +825,12 @@ namespace DigitalPlatform.LibraryServer
                     {
                         strError = "获得书目记录 '" + strCurrentBiblioRecPath + "' 的局部 " + strBiblioType + " 时出错: " + strError;
                         // goto ERROR1;
+                        /*
                         if (String.IsNullOrEmpty(strErrorText) == false)
                             strErrorText += ";\r\n";
                         strErrorText += strError;
+                        */
+                        AppendErrorText(strError);
                         goto CONTINUE;
                     }
                 }
@@ -859,9 +876,12 @@ namespace DigitalPlatform.LibraryServer
                         if (nRet == -1)
                         {
                             // goto ERROR1;
+                            /*
                             if (String.IsNullOrEmpty(strErrorText) == false)
                                 strErrorText += ";\r\n";
                             strErrorText += strError;
+                            */
+                            AppendErrorText(strError);
                             goto CONTINUE;
                         }
                         if (nRet == 0)
@@ -880,18 +900,24 @@ namespace DigitalPlatform.LibraryServer
                             if (nRet == -1)
                             {
                                 // goto ERROR1;
+                                /*
                                 if (String.IsNullOrEmpty(strErrorText) == false)
                                     strErrorText += ";\r\n";
                                 strErrorText += strError;
+                                */
+                                AppendErrorText(strError);
                                 goto CONTINUE;
                             }
                             if (nRet == 0)
                             {
                                 strError = strRemotePath + "不存在...";
                                 // goto ERROR1;
+                                /*
                                 if (String.IsNullOrEmpty(strErrorText) == false)
                                     strErrorText += ";\r\n";
                                 strErrorText += strError;
+                                */
+                                AppendErrorText(strError);
                                 goto CONTINUE;
                             }
                         }
@@ -910,9 +936,12 @@ namespace DigitalPlatform.LibraryServer
                             if (nRet == -1)
                             {
                                 // goto ERROR1;
+                                /*
                                 if (String.IsNullOrEmpty(strErrorText) == false)
                                     strErrorText += ";\r\n";
                                 strErrorText += strError;
+                                */
+                                AppendErrorText(strError);
                                 goto CONTINUE;
                             }
                             bFltx = false;
@@ -950,9 +979,12 @@ namespace DigitalPlatform.LibraryServer
                             if (nRet == -1)
                             {
                                 // goto ERROR1;
+                                /*
                                 if (String.IsNullOrEmpty(strErrorText) == false)
                                     strErrorText += ";\r\n";
                                 strErrorText += strError;
+                                */
+                                AppendErrorText(strError);
                                 goto CONTINUE;
                             }
                         }
@@ -976,9 +1008,12 @@ namespace DigitalPlatform.LibraryServer
                     if (nRet == -1)
                     {
                         // goto ERROR1;
+                        /*
                         if (String.IsNullOrEmpty(strErrorText) == false)
                             strErrorText += ";\r\n";
                         strErrorText += strError;
+                        */
+                        AppendErrorText(strError);
                         goto CONTINUE;
                     }
                 }
@@ -1002,9 +1037,12 @@ namespace DigitalPlatform.LibraryServer
                         out strError);
                     if (nRet == -1)
                     {
+                        /*
                         if (String.IsNullOrEmpty(strErrorText) == false)
                             strErrorText += ";\r\n";
                         strErrorText += strError;
+                        */
+                        AppendErrorText(strError);
                         goto CONTINUE;
                     }
                     strBiblio = Convert.ToBase64String(result);
@@ -1023,9 +1061,12 @@ namespace DigitalPlatform.LibraryServer
                         out strError);
                     if (nRet == -1)
                     {
+                        /*
                         if (String.IsNullOrEmpty(strErrorText) == false)
                             strErrorText += ";\r\n";
                         strErrorText += strError;
+                        */
+                        AppendErrorText(strError);
                         goto CONTINUE;
                     }
                 }
@@ -1040,9 +1081,12 @@ namespace DigitalPlatform.LibraryServer
                     if (nRet == -1)
                     {
                         // goto ERROR1;
+                        /*
                         if (String.IsNullOrEmpty(strErrorText) == false)
                             strErrorText += ";\r\n";
                         strErrorText += strError;
+                        */
+                        AppendErrorText(strError);
                         goto CONTINUE;
                     }
                     strBiblio = strResultXml;
@@ -1340,9 +1384,12 @@ namespace DigitalPlatform.LibraryServer
                             out strError);
                         if (nRet == -1)
                         {
+                            /*
                             if (String.IsNullOrEmpty(strErrorText) == false)
                                 strErrorText += ";\r\n";
                             strErrorText += strError;
+                            */
+                            AppendErrorText(strError);
                             goto CONTINUE;
                         }
                     }
@@ -1371,9 +1418,12 @@ namespace DigitalPlatform.LibraryServer
                     if (nRet == -1)
                     {
                         // goto ERROR1;
+                        /*
                         if (String.IsNullOrEmpty(strErrorText) == false)
                             strErrorText += ";\r\n";
                         strErrorText += strError;
+                        */
+                        AppendErrorText(strError);
                         goto CONTINUE;
                     }
 
@@ -1391,10 +1441,12 @@ namespace DigitalPlatform.LibraryServer
                         if (nRet == -1)
                         {
                             // goto ERROR1;
-
+                            /*
                             if (String.IsNullOrEmpty(strErrorText) == false)
                                 strErrorText += ";\r\n";
                             strErrorText += strError;
+                            */
+                            AppendErrorText(strError);
                             goto CONTINUE;
                         }
                     }
@@ -1423,9 +1475,12 @@ namespace DigitalPlatform.LibraryServer
                     if (nRet == -1)
                     {
                         //goto ERROR1;
+                        /*
                         if (String.IsNullOrEmpty(strErrorText) == false)
                             strErrorText += ";\r\n";
                         strErrorText += strError;
+                        */
+                        AppendErrorText(strError);
                         goto CONTINUE;
                     }
 
@@ -1444,9 +1499,12 @@ namespace DigitalPlatform.LibraryServer
                         if (nRet == -1)
                         {
                             //goto ERROR1;
+                            /*
                             if (String.IsNullOrEmpty(strErrorText) == false)
                                 strErrorText += ";\r\n";
                             strErrorText += strError;
+                            */
+                            AppendErrorText(strError);
                             goto CONTINUE;
                         }
                     }
@@ -1455,21 +1513,34 @@ namespace DigitalPlatform.LibraryServer
                 }
                 else
                 {
-                    strErrorText = "未知的书目格式 '" + strBiblioType + "'";
-                    return -1;
+                    //strErrorText = "未知的书目格式 '" + strBiblioType + "'";
+                    //return -1;
+                    // 2023/3/24
+                    // 尽量继续处理，不影响其它 format 的处理
+                    strError = $"未知的书目格式 '{strBiblioType}'";
+                    result_strings.Add($"!error:{strError}");
+                    AppendErrorText(strError);
+                    continue;
                 }
 
             CONTINUE:
                 result_strings.Add(strBiblio);
             } // end of for
 
-            // 2016/8/30
+            strError = strErrorText;
             if (string.IsNullOrEmpty(strErrorText) == false && formats.Length <= 1)
-            {
-                strError = strErrorText;
                 return -1;
-            }
+
+            if (string.IsNullOrEmpty(strError) == false)
+                return 1;
             return 0;
+
+            void AppendErrorText(string error)
+            {
+                if (String.IsNullOrEmpty(strErrorText) == false)
+                    strErrorText += ";\r\n";
+                strErrorText += error;
+            }
         }
 
         // 2017/6/16
@@ -4229,6 +4300,10 @@ ref string strMARC)
             string[] formats = new string[1];
             formats[0] = "summary";
             List<string> temp_results = null;
+            // return:
+            //      -1  出错
+            //      0   成功
+            //      1   有警告信息返回在 strError 中
             nRet = BuildFormats(
                 sessioninfo,
                 strBiblioRecPath,
@@ -4239,7 +4314,7 @@ ref string strMARC)
                 formats,
                 out temp_results,
                 out strError);
-            if (nRet == -1)
+            if (nRet == -1 || nRet == 1)
                 goto ERROR1;
             if (temp_results == null || temp_results.Count == 0)
             {

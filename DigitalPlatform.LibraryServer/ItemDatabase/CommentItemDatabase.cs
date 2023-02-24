@@ -30,12 +30,13 @@ namespace DigitalPlatform.LibraryServer
                 //"lastModifier",    // 最后修改者
                 "follow",   // 所跟从的(帖子)记录ID
                 "refID",    // 参考ID
-                "operations", // 
+                // "operations", // 2023/2/24 注: operations 应该由服务器决定，前端无法修改
                 "orderSuggestion",  // 2010/11/8
                 // "libraryCode",  // 2012/10/3
         };
 
         static string[] readerchangeable_comment_element_names = new string[] {
+                "parent",   // 2003/2/23
                 "title",    // 标题
                 "subject",
                 "summary",
@@ -43,7 +44,7 @@ namespace DigitalPlatform.LibraryServer
         };
 
         /* 2023/2/2 注:
-         * 注意 reader 账户需要具有 writecommentobject 权限，读者在 OPAC 界面上才能顺利上传和修改凭著记录的图片附件
+         * 注意 reader 账户需要具有 writecommentobject 权限，读者在 OPAC 界面上才能顺利上传和修改评注记录的图片附件
          * 
          * */
 
@@ -104,6 +105,7 @@ namespace DigitalPlatform.LibraryServer
                     bManager = true;
 
                 // 对不具备管理 comment 权限的读者，降低修改字段的权限范围
+                // TODO: 对于读者身份，创建记录的时候可以写入 parent 元素，但修改记录的时候不允许修改 parent 元素
                 if (bManager == false)
                     element_table = readerchangeable_comment_element_names;
             }
@@ -785,6 +787,11 @@ out string strError)
                 strBiblioRecId);
             }
             */
+            // 2023/2/23
+            // 由 dp2library 服务器强制产生 creator 元素
+            DomUtil.SetElementText(dom.DocumentElement,
+                "creator",
+                sessioninfo.UserID);
 
             // 2012/10/3
             // 当前用户所管辖的馆代码

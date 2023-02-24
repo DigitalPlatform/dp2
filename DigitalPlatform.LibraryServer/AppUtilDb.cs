@@ -184,6 +184,38 @@ out byte[] baOutputTimestamp)
                 strWarning = strError;
             }
 
+            // 权限判断
+            {
+                string strAction = "change";
+                if (append)
+                    strAction = "new";
+                if (delete)
+                    strAction = "delete";
+                // 权限判断
+                // parameters:
+                //      strAction   new/change/delete
+                // return:
+                //      -1  出错
+                //      0   权限不足。报错信息在 strError 中返回
+                //      1   权限足够
+                nRet = CheckSetRights(
+                    sessioninfo,
+                    db_type,
+                    domExist,
+                    domNew,
+                    strAction,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                if (nRet == 0)
+                {
+                    result.Value = -1;
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    result.ErrorInfo = strError;
+                    return result;
+                }
+            }
+
             if (delete)
             {
 #if OLDCODE
@@ -353,6 +385,43 @@ out byte[] baOutputTimestamp)
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
             return result;
+        }
+
+        // 权限判断
+        // parameters:
+        //      strAction   new/change/delete
+        // return:
+        //      -1  出错
+        //      0   权限不足。报错信息在 strError 中返回
+        //      1   权限足够
+        int CheckSetRights(
+            SessionInfo sessioninfo,
+            string db_type,
+            XmlDocument domExist,
+            XmlDocument domNew,
+            string strAction,
+            out string strError)
+        {
+            strError = "";
+
+            if (db_type == "arrived")
+            {
+                string readerBarcode = DomUtil.GetElementText(domNew.DocumentElement,
+                    "readerBarcode");
+                if (strAction == "delete")
+                    readerBarcode = DomUtil.GetElementText(domExist.DocumentElement,
+    "readerBarcode");
+
+                // 读者只能创建属于自己的预约到书记录；只能修改和删除属于自己的预约到书记录
+                if (sessioninfo.UserType == "reader"
+                    && sessioninfo.Account.Barcode != readerBarcode)
+                {
+                    strError = $"读者身份只允许{strAction}属于自己(证条码号'{sessioninfo.Account.Barcode}')的预约到书记录";
+                    return 0;
+                }
+            }
+
+            return 0;
         }
 
         // 读出违约金库、盘点库等杂项数据库记录

@@ -2742,6 +2742,10 @@ start_time_1,
                 // 将书目记录数据从XML格式转换为书目摘要格式。2019/10/12
                 else if (String.Compare(strBiblioFormat, "summary", true) == 0)
                 {
+                    // return:
+                    //      -1  出错
+                    //      0   成功
+                    //      1   有警告信息返回在 strError 中
                     nRet = BuildFormats(
     sessioninfo,
     strBiblioRecPath,
