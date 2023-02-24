@@ -1164,7 +1164,8 @@ namespace DigitalPlatform.LibraryServer
                 if (bForce == true)
                 {
                     error = new EntityInfo(info);
-                    error.NewTimestamp = exist_timestamp;   // 让前端知道库中记录实际上发生过变化
+                    // error.NewTimestamp = exist_timestamp;   // 让前端知道库中记录实际上发生过变化
+                    error.OldTimestamp = exist_timestamp;   // 2023/2/24 让前端知道库中记录实际上发生过变化
                     error.ErrorInfo = "数据库中即将删除的册记录已经发生了变化，请重新装载、仔细核对后再行删除。";
                     error.ErrorCode = ErrorCodeValue.TimestampMismatch;
                     ErrorInfos.Add(error);
@@ -1184,7 +1185,8 @@ namespace DigitalPlatform.LibraryServer
                     {
 
                         error = new EntityInfo(info);
-                        error.NewTimestamp = exist_timestamp;   // 让前端知道库中记录实际上发生过变化
+                        // error.NewTimestamp = exist_timestamp;   // 让前端知道库中记录实际上发生过变化
+                        error.OldTimestamp = exist_timestamp;   // 2023/2/24 让前端知道库中记录实际上发生过变化
                         error.ErrorInfo = "数据库中即将删除的" + this.ItemName + "记录已经发生了变化，请重新装载、仔细核对后再行删除。";
                         error.ErrorCode = ErrorCodeValue.TimestampMismatch;
                         ErrorInfos.Add(error);
@@ -1219,7 +1221,8 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 error = new EntityInfo(info);
-                error.NewTimestamp = output_timestamp;
+                // error.NewTimestamp = output_timestamp;
+                error.OldTimestamp = output_timestamp;  // 2023/2/24
                 error.ErrorInfo = "删除操作发生错误:" + strError;
                 error.ErrorCode = channel.OriginErrorCode;
                 ErrorInfos.Add(error);
@@ -2666,7 +2669,8 @@ out strError);
                         if (lRet == -1)
                         {
                             EntityInfo error = new EntityInfo(info);
-                            error.NewTimestamp = output_timestamp;
+                            //error.NewTimestamp = output_timestamp;
+                            error.OldTimestamp = output_timestamp;  // 2023/2/24
                             error.ErrorInfo = "保存新记录的操作发生错误:" + strError;
                             error.ErrorCode = channel.OriginErrorCode;
                             ErrorInfos.Add(error);
