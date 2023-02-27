@@ -42,12 +42,15 @@ namespace DigitalPlatform.LibraryServer
                 "subject",
                 "summary",
                 "content", // 文字内容
+                "follow",   // 所跟从的(帖子)记录ID
+                "orderSuggestion",  // 2010/11/8
         };
 
         // 服务器自动维护的评注记录字段名。PartialDenied 时候不用警告这些字段名
         static string[] _auto_maintain_comment_element_names = new string[] {
                 "libraryCode",
                 "operations",
+                "http://dp2003.com/dprms:file",
         };
 
         /* 2023/2/2 注:
@@ -63,6 +66,7 @@ namespace DigitalPlatform.LibraryServer
         //      1   有部分修改没有兑现。说明在strError中
         public override int MergeTwoItemXml(
             SessionInfo sessioninfo,
+            string strAction,
             XmlDocument domExistParam,
             XmlDocument domNewParam,
             out string strMergedXml,
@@ -102,7 +106,7 @@ namespace DigitalPlatform.LibraryServer
             if (bChangePartDeniedParam)
                 strWarning = strError;
 
-            string[] element_table = core_comment_element_names;
+            var element_table = new List<string>(core_comment_element_names);
 
             if (sessioninfo != null
                 && sessioninfo.Account != null
@@ -119,9 +123,12 @@ namespace DigitalPlatform.LibraryServer
 
                 // 对不具备管理 comment 权限的读者，降低修改字段的权限范围
                 // TODO: 对于读者身份，创建记录的时候可以写入 parent 元素，但修改记录的时候不允许修改 parent 元素
-                if (bManager == false)
-                    element_table = readerchangeable_comment_element_names;
+                if (bManager == false && strAction != "delete")
+                    element_table = new List<string>(readerchangeable_comment_element_names);
             }
+
+            if (strAction == "delete")
+                element_table.Add("creator");
 
             // 算法的要点是, 把"新记录"中的要害字段, 覆盖到"已存在记录"中
 
@@ -139,7 +146,7 @@ namespace DigitalPlatform.LibraryServer
                 "content", // 文字内容
             };*/
 
-            for (int i = 0; i < element_table.Length; i++)
+            for (int i = 0; i < element_table.Count; i++)
             {
                 /*
                 string strTextNew = DomUtil.GetElementText(domNew.DocumentElement,
@@ -189,11 +196,11 @@ namespace DigitalPlatform.LibraryServer
                 List<string> unprocessed_element_names = new List<string>();
                 unprocessed_element_names.AddRange(LibraryApplication.GetUnprocessedElementNames(
                     domExistParam,
-                    element_table,
+                    element_table.ToArray(),
                     false));
                 unprocessed_element_names.AddRange(LibraryApplication.GetUnprocessedElementNames(
     domExist,
-    element_table,
+    element_table.ToArray(),
     false));
                 StringUtil.RemoveDupNoSort(ref unprocessed_element_names);
 

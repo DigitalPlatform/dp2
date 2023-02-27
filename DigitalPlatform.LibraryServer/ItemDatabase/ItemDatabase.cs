@@ -356,6 +356,7 @@ namespace DigitalPlatform.LibraryServer
         //      1   有部分修改没有兑现。说明在strError中
         public virtual int MergeTwoItemXml(
             SessionInfo sessioninfo,
+            string strAction,
             XmlDocument domExist,
             XmlDocument domNew,
             out string strMergedXml,
@@ -670,6 +671,7 @@ namespace DigitalPlatform.LibraryServer
                 //      2   全部修改都没有兑现。说明在strError中 (2018/10/9)
                 int nRet = MergeTwoItemXml(
                     sessioninfo,
+                    "new",
                     domExist,
                     dom,
                     out strXml,
@@ -1136,6 +1138,7 @@ namespace DigitalPlatform.LibraryServer
                 //      2   全部修改都没有兑现。说明在strError中 (2018/10/9)
                 nRet = MergeTwoItemXml(
                     sessioninfo,
+                    "delete",
                     domExist,
                     domNew,
                     out string _,
@@ -1484,6 +1487,7 @@ out strError);
             //      2   全部修改都没有兑现。说明在strError中 (2018/10/9)
             nRet = MergeTwoItemXml(
                 sessioninfo,
+                "move",
                 domSourceExist,
                 domNew,
                 out string strNewXml,
@@ -1792,6 +1796,7 @@ out strError);
                     //      2   全部修改都没有兑现。说明在strError中 (2018/10/9)
                     nRet = MergeTwoItemXml(
                         sessioninfo,
+                        "change",
                         domExist,
                         domNew,
                         out string strNewXml,

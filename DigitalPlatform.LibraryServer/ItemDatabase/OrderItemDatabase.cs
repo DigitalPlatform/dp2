@@ -52,6 +52,7 @@ namespace DigitalPlatform.LibraryServer
         //      2   全部修改都没有兑现。说明在strError中 (2018/10/9)
         public override int MergeTwoItemXml(
             SessionInfo sessioninfo,
+            string strAction,
             XmlDocument domExist,
             XmlDocument domNew,
             out string strMergedXml,

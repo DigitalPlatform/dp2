@@ -502,7 +502,7 @@ out byte[] baOutputTimestamp)
         {
             strError = "";
 
-            XmlDocument item_dom = new XmlDocument();
+            XmlDocument item_dom = null;    // new XmlDocument();
 
             var strDbName = ResPath.GetDbName(strItemRecPath);
             var db_type = this.GetAllDbType(strDbName);
@@ -515,6 +515,7 @@ out byte[] baOutputTimestamp)
                     // 观察读者记录中的 barcode 元素，是否正好是当前账户
                     if (GetRecord(out strError) == -1)
                         return -1;
+
                     var barcode = DomUtil.GetElementText(item_dom.DocumentElement,
                         "barcode");
                     if (sessioninfo.Account.Barcode != barcode)
@@ -561,6 +562,7 @@ out byte[] baOutputTimestamp)
             {
                 if (GetRecord(out strError) == -1)
                     return -1;
+
                 // 检查当前账户是否有查看一条违约金记录的权限
                 // return:
                 //      -1  出错
@@ -751,7 +753,7 @@ out byte[] baOutputTimestamp)
             var strDbName = ResPath.GetDbName(strItemRecPath);
             var db_type = this.GetAllDbType(strDbName);
 
-            XmlDocument item_dom = new XmlDocument();
+            XmlDocument item_dom = null;    // new XmlDocument();
 
             // 读者库
             if (db_type == "reader")
@@ -847,6 +849,9 @@ out byte[] baOutputTimestamp)
             // 违约金库
             else if (db_type == "amerce")
             {
+                if (GetRecord(out strError) == -1)
+                    return -1;
+
                 if (sessioninfo.UserType == "reader")
                 {
                     var readerBarcode = DomUtil.GetElementText(item_dom.DocumentElement,
@@ -863,9 +868,6 @@ out byte[] baOutputTimestamp)
                 }
                 else
                 {
-                    if (GetRecord(out strError) == -1)
-                        return -1;
-
                     var libraryCode = DomUtil.GetElementText(item_dom.DocumentElement,
                         "libraryCode");
                     if (IsLibraryCodeInControl(libraryCode, sessioninfo.LibraryCodeList) == false)
@@ -881,6 +883,7 @@ out byte[] baOutputTimestamp)
             {
                 if (GetRecord(out strError) == -1)
                     return -1;
+
                 if (sessioninfo.UserType == "reader")
                 {
                     // 观察预约到书记录中的 readerBarcode 元素，是否正好是当前账户

@@ -3820,8 +3820,10 @@ out strError);
                         temp_sessioninfo.Account.AccountLibraryCode = strLibraryCode;
                         temp_sessioninfo.Account.UserID = strOperator;
 
+                        // TODO: 按理说日志中应该是当时操作时最终写入的内容，恢复的时候就不用经过合并这一步了
                         nRet = this.OrderItemDatabase.MergeTwoItemXml(
                             temp_sessioninfo,
+                            strAction,
                             domExist,
                             domNew,
                             out strNewXml,
@@ -4211,6 +4213,7 @@ out strError);
 
                         nRet = this.IssueItemDatabase.MergeTwoItemXml(
                             temp_sessioninfo,
+                            strAction,
                             domExist,
                             domNew,
                             out strNewXml,
@@ -4594,8 +4597,10 @@ out strError);
                         temp_sessioninfo.Account.AccountLibraryCode = strLibraryCode;
                         temp_sessioninfo.Account.UserID = strOperator;
 
+                        // TODO: 按理说日志中应该是当时操作时最终写入的内容，恢复的时候就不用经过合并这一步了
                         nRet = this.CommentItemDatabase.MergeTwoItemXml(
                             temp_sessioninfo,
+                            strAction,
                             domExist,
                             domNew,
                             out strNewXml,
