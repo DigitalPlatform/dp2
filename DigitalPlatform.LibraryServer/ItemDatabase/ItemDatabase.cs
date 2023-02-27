@@ -429,7 +429,7 @@ namespace DigitalPlatform.LibraryServer
                     // 删除new中的全部<operations>元素，然后将old记录中的全部<operations>元素插入到new记录中
 
                     // 删除new中的全部<operations>元素
-                    XmlNodeList nodes = domNew.DocumentElement.SelectNodes("//operations");
+                    XmlNodeList nodes = domNew.DocumentElement.SelectNodes("operations");
                     for (int i = 0; i < nodes.Count; i++)
                     {
                         XmlNode node = nodes[i];
@@ -438,7 +438,7 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     // 然后将old记录中的全部<operations>元素插入到new记录中
-                    nodes = domOld.DocumentElement.SelectNodes("//operations");
+                    nodes = domOld.DocumentElement.SelectNodes("operations");
                     for (int i = 0; i < nodes.Count; i++)
                     {
                         XmlNode node = nodes[i];
@@ -1645,19 +1645,13 @@ out strError);
                 }
             }
 
-            string strExistXml = "";
-            byte[] exist_timestamp = null;
-            string strOutputPath = "";
-            string strMetaData = "";
-
-
         // 先读出数据库中即将覆盖位置的已有记录
         REDOLOAD:
             lRet = channel.GetRes(info.NewRecPath,
-                out strExistXml,
-                out strMetaData,
-                out exist_timestamp,
-                out strOutputPath,
+                out string strExistXml,
+                out string strMetaData,
+                out byte [] exist_timestamp,
+                out string strOutputPath,
                 out strError);
             if (lRet == -1)
             {
@@ -1681,7 +1675,6 @@ out strError);
 
 
             // 把两个记录装入DOM
-
             XmlDocument domExist = new XmlDocument();
             XmlDocument domNew = new XmlDocument();
 
@@ -1902,7 +1895,6 @@ out strError);
                     error.ErrorCode = ErrorCodeValue.NoError;
                 ErrorInfos.Add(error);
             }
-
             return 0;
         ERROR1:
             error = new EntityInfo(info);

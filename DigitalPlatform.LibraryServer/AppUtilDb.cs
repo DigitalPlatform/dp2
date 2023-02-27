@@ -481,8 +481,8 @@ out byte[] baOutputTimestamp)
         // 书目库:     允许读出
         // 读者库:     工作人员只允许读出自己管辖的分馆的; 读者只允许读出自己的
         // 实体库:     允许读出
-        // 订购库:     工作人员允许; 读者不允许
-        // 期库:      工作人员允许; 读者不允许
+        // 订购库:     工作人员允许; 读者允许
+        // 期库:      工作人员允许; 读者允许
         // 评注库:     允许读出
         // 违约金库:    工作人员只允许读出自己管辖分馆的; 读者只允许读出自己的
         // 预约到书:    工作人员只允许读出自己管辖分馆的; 读者只允许读出自己的
@@ -535,21 +535,25 @@ out byte[] baOutputTimestamp)
             // 订购库
             if (db_type == "order")
             {
+                /*
                 if (sessioninfo.UserType == "reader")
                 {
                     strError = $"读者身份不允许访问订购记录";
                     return 0;
                 }
+                */
             }
 
             // 期库
             if (db_type == "issue")
             {
+                /*
                 if (sessioninfo.UserType == "reader")
                 {
                     strError = $"读者身份不允许访问期记录";
                     return 0;
                 }
+                */
             }
 
             // 违约金库
@@ -724,7 +728,7 @@ out byte[] baOutputTimestamp)
         // 订购库:     工作人员允许; 读者不允许
         // 期库:      工作人员允许; 读者不允许
         // 评注库:     工作人员只允许写入自己管辖分馆的; 读者只允许写入自己创建的评注记录
-        // 违约金库:    工作人员只允许写入自己管辖分馆的; 读者不允许
+        // 违约金库:    工作人员只允许写入自己管辖分馆的; 读者只允许写入自己的
         // 预约到书:    工作人员只允许写入自己管辖分馆的; 读者只允许写入自己的
         // 出版者库:    工作人员允许; 读者不允许
         // 种次号库:    工作人员允许; 读者不允许
@@ -845,7 +849,6 @@ out byte[] baOutputTimestamp)
             {
                 if (sessioninfo.UserType == "reader")
                 {
-                    /*
                     var readerBarcode = DomUtil.GetElementText(item_dom.DocumentElement,
                         "readerBarcode");
                     if (sessioninfo.UserID != readerBarcode)
@@ -853,9 +856,10 @@ out byte[] baOutputTimestamp)
                         strError = $"读者身份不允许修改其他人违约金记录";
                         return 0;
                     }
-                    */
+                    /*
                     strError = $"读者身份不允许修改违约金记录";
                     return 0;
+                    */
                 }
                 else
                 {

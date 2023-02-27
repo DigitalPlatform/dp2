@@ -40,7 +40,7 @@ namespace DigitalPlatform.LibraryServer
                 "comment",  // 注释
                 "batchNo",   // 批次号
                 "refID",    // 参考ID 2010/2/27 add
-                "operations", // 2010/4/7
+                // "operations", // 2010/4/7
             };
 
         // (派生类必须重载)

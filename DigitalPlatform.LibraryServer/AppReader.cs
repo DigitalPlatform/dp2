@@ -27,7 +27,7 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.Core;
-using Jint.Parser;
+
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -678,7 +678,7 @@ unprocessed_element_names.Except(_auto_maintain_element_names)));
         }
 
         // 搜集 XML 记录中没有被处理到的元素名
-        static List<string> GetUnprocessedElementNames(
+        public static List<string> GetUnprocessedElementNames(
             XmlDocument dom,
             string[] processed_element_names,
             bool remove_dup = true)
@@ -702,7 +702,7 @@ unprocessed_element_names.Except(_auto_maintain_element_names)));
         }
 
         // 根据给定的元素名集合，检查记录中这些元素是否即将发生修改
-        static List<string> DetectElementChanging(
+        public static List<string> DetectElementChanging(
             XmlDocument domExistParam,
             XmlDocument domNew,
             IEnumerable<string> element_names)

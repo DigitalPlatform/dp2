@@ -2603,7 +2603,7 @@ out strError);
                     // 删除new中的全部<operations>元素，然后将old记录中的全部<operations>元素插入到new记录中
 
                     // 删除new中的全部<operations>元素
-                    XmlNodeList nodes = domNew.DocumentElement.SelectNodes("//operations");
+                    XmlNodeList nodes = domNew.DocumentElement.SelectNodes("operations");
                     for (int i = 0; i < nodes.Count; i++)
                     {
                         XmlNode node = nodes[i];
@@ -2612,7 +2612,7 @@ out strError);
                     }
 
                     // 然后将old记录中的全部<operations>元素插入到new记录中
-                    nodes = domOld.DocumentElement.SelectNodes("//operations");
+                    nodes = domOld.DocumentElement.SelectNodes("operations");
                     for (int i = 0; i < nodes.Count; i++)
                     {
                         XmlNode node = nodes[i];
@@ -6012,7 +6012,7 @@ out strError);
 
                         // 2011/11/30
                         // 删除全部<operations>元素
-                        XmlNodeList nodes = tempdom.DocumentElement.SelectNodes("//operations");
+                        XmlNodeList nodes = tempdom.DocumentElement.SelectNodes("operations");
                         for (int i = 0; i < nodes.Count; i++)
                         {
                             XmlNode node = nodes[i];
@@ -6215,7 +6215,7 @@ out strError);
 
                         // 2011/12/9
                         // 删除全部<operations>元素
-                        XmlNodeList nodes = tempdom.DocumentElement.SelectNodes("//operations");
+                        XmlNodeList nodes = tempdom.DocumentElement.SelectNodes("operations");
                         for (int i = 0; i < nodes.Count; i++)
                         {
                             XmlNode node = nodes[i];
@@ -6352,7 +6352,7 @@ out strError);
 
             // 2011/11/30
             // 删除全部<operations>元素
-            XmlNodeList nodes = tempdom.DocumentElement.SelectNodes("//operations");
+            XmlNodeList nodes = tempdom.DocumentElement.SelectNodes("operations");
             for (int i = 0; i < nodes.Count; i++)
             {
                 XmlNode node = nodes[i];

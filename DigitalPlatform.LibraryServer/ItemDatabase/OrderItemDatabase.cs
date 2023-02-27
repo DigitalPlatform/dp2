@@ -36,7 +36,7 @@ namespace DigitalPlatform.LibraryServer
                 "batchNo",  // 批次号
                 "sellerAddress",    // 书商地址。用于非大宗订购情形 2009/2/13
                 "refID",    // 参考ID 2010/3/15 add
-                "operations", // 2010/4/8
+                // "operations", // 2010/4/8
                 "fixedPrice",   // 码洋。 2018/7/31
                 "discount", // 折扣。形态为 0.80 这样的。 2018/7/31
         };

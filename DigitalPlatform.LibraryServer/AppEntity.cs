@@ -46,7 +46,7 @@ namespace DigitalPlatform.LibraryServer
                 "accessNo", // 2008/12/12 
                 "intact",   // 2009/10/11 
                 "binding",  // 2009/10/11 
-                "operations", // 2009/10/24 
+                // "operations", // 2009/10/24 
                 "bindingCost",  // 2012/6/1 装订费
                 "biblio",   //  2016/12/8
                 "oldRefID", // 2016/12/19
@@ -62,14 +62,14 @@ namespace DigitalPlatform.LibraryServer
                 "accessNo",
                 "currentLocation",  // 2019/7/27 新增
                 "batchNo",
-                "operations",
+                // "operations",
             };
 
         // 2020/10/12
         static string[] setuid_entity_element_names = new string[] {
                 "uid",
                 "batchNo",
-                "operations",
+                // "operations",
             };
 
         // 用于借书还书的工作元素
@@ -108,6 +108,7 @@ namespace DigitalPlatform.LibraryServer
                 "renewComment",
                 "borrowID",
                 "reservations", // 2022/3/30 补遗
+                "operations",   // 2023/2/27
         };
 
         // 2020/9/17
