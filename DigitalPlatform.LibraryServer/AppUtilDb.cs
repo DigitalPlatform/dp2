@@ -821,21 +821,49 @@ out byte[] baOutputTimestamp)
             // 评注库
             else if (db_type == "comment")
             {
-                if (GetRecord(out strError) == -1)
-                    return -1;
+                bool bManager = false;
+                if (string.IsNullOrEmpty(sessioninfo.UserID) == true
+    || StringUtil.IsInList("managecomment", sessioninfo.RightsOrigin) == false)
+                    bManager = false;
+                else
+                    bManager = true;
 
+                // 已经注销的读者不允许修改评注
                 if (sessioninfo.UserType == "reader")
                 {
+                    string strReaderState = DomUtil.GetElementText(sessioninfo.Account.PatronDom.DocumentElement,
+        "state");
+                    if (StringUtil.IsInList("注销", strReaderState) == true)
+                    {
+                        strError = "读者证状态为 注销， 不能修改任何评注记录";
+                        return 0;
+                    }
+                }
+
+                if (bManager == false)
+                {
+                    if (GetRecord(out strError) == -1)
+                        return -1;
+
                     var creator = DomUtil.GetElementText(item_dom.DocumentElement,
                         "creator");
                     if (sessioninfo.UserID != creator)
                     {
-                        strError = $"读者身份不允许修改其他人创建的评注记录";
+                        strError = $"不允许修改其他人创建的评注记录";
+                        return 0;
+                    }
+
+                    string strState = DomUtil.GetElementText(item_dom.DocumentElement,
+    "state");
+                    if (StringUtil.IsInList("锁定", strState) == true)
+                    {
+                        strError = "不允许修改处于锁定状态的评注记录";
                         return 0;
                     }
                 }
                 else
                 {
+                    /*
                     var libraryCode = DomUtil.GetElementText(item_dom.DocumentElement,
                         "libraryCode");
                     if (IsLibraryCodeInControl(libraryCode, sessioninfo.LibraryCodeList) == false)
@@ -843,6 +871,7 @@ out byte[] baOutputTimestamp)
                         strError = "评注记录不在当前账户的管辖范围内";
                         return 0;
                     }
+                    */
                 }
             }
 
