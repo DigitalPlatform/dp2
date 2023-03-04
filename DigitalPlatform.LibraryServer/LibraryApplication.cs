@@ -2464,6 +2464,53 @@ out strError);
                 version = 3.00;
             }
 
+            // 2023/3/4
+            // 从 3.00 版升级
+            if (version <= 3.00)
+            {
+                // var now = DateTime.Now;
+
+                // 新版 library.xml 中由 libraries 元素定义所有馆代码。以前是散布在 readerdbgroup 中
+                // 将 readerdbgroup/database 元素中的 libraryCode 属性搜集整理去重以后，
+                // 用于创建 libraries/library 元素
+                List<string> library_codes = new List<string>();
+                var database_nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("readerdbgroup/database");
+                foreach (XmlElement database in database_nodes)
+                {
+                    if (database.HasAttribute("libraryCode") == false)
+                        continue;
+                    library_codes.Add(database.GetAttribute("libraryCode"));
+                }
+
+                StringUtil.RemoveDupNoSort(ref library_codes);
+
+                var libraries = this.LibraryCfgDom.DocumentElement.SelectSingleNode("libraries") as XmlElement;
+                if (libraries == null)
+                {
+                    libraries = this.LibraryCfgDom.CreateElement("libraries");
+                    this.LibraryCfgDom.DocumentElement.AppendChild(libraries);
+                }
+
+                foreach (var code in library_codes)
+                {
+                    var library_node = this.LibraryCfgDom.DocumentElement.SelectSingleNode($"libraries/library[@code='{code}']") as XmlElement;
+                    if (library_node != null)
+                        continue;
+                    library_node = this.LibraryCfgDom.CreateElement("library");
+                    libraries.AppendChild(library_node);
+                    library_node.SetAttribute("code", code);
+                }
+
+                // TODO: 自动修改 accounts/account 中的权限字符串
+
+                // 升级完成后，修改版本号
+                nodeVersion.InnerText = "3.01";
+                bChanged = true;
+                WriteErrorLog($"自动升级 library.xml v{version.ToString()}到v3.01");
+                version = 3.01;
+            }
+
+
             if (bChanged == true)
             {
                 this.Changed = true;
@@ -3947,7 +3994,7 @@ out strError);
                         if (string.IsNullOrEmpty(this.UID) == false)
                             writer.WriteAttributeString("uid", this.UID);
 
-                        // 2008/6/6 nwe add
+                        // 2008/6/6 new add
                         // <version>
                         {
                             XmlNode node = cfg_dom.DocumentElement.SelectSingleNode("version");
@@ -4150,6 +4197,7 @@ out strError);
                             "messageServer", // 2021/10/21
                             "commands", // 2021/12/23
                             "fileShare",    // 2022/5/19
+                            "libraries",    // 2023/3/4
                         };
 
                             RestoreElements(cfg_dom, writer, elements);
@@ -16605,7 +16653,7 @@ out string db_type);
                     {
                         // 读者身份判断
                         if (db_type == "reader"
-                            && bIsReader 
+                            && bIsReader
                             && sessioninfo.Account.ReaderDomPath != strDbName + "/" + strRecordID)
                         {
                             strError = "读者身份不允许访问其他读者的 XML 记录";
@@ -16631,7 +16679,7 @@ out string db_type);
 
                         // 对访问读者库时读者身份的判断
                         if (db_type == "reader"
-                            && bIsReader 
+                            && bIsReader
                             && sessioninfo.Account.ReaderDomPath != strDbName + "/" + strRecordID)
                         {
                             strError = "读者身份不允许访问其他读者的对象记录";
@@ -17601,6 +17649,29 @@ out string db_type);
             return ParseTimeSpan(name);
         }
 
+
+        // 获得一个分馆的当前状态
+        // return:
+        //      -1  出错
+        //      0   馆代码对应的 libraries/library 元素不存在
+        //      1   成功
+        public int GetLibraryState(string code,
+            out string state,
+            out string strError)
+        {
+            strError = "";
+            state = "";
+
+            var library = this.LibraryCfgDom.DocumentElement.SelectSingleNode($"libraries/library[@code='{code}']") as XmlElement;
+            if (library == null)
+            {
+                strError = $"馆代码为 '{code}' 的分馆配置信息(libraries/library 元素)不存在";
+                return 0;
+            }
+
+            state = library.GetAttribute("state");
+            return 1;
+        }
     }
 
 #if NO

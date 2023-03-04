@@ -408,10 +408,8 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
-            Account account = null;
-
             int nRet = this.App.GetAccount(strUserID,
-                out account,
+                out Account account,
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -421,6 +419,17 @@ namespace DigitalPlatform.LibraryServer
                     strError = this.App.GetString("帐户不存在或密码不正确") + " session 1";
                 return 0;
             }
+
+            // 2023/3/4
+            // 检查账户所在分馆是否停用
+            // return:
+            //      -1  出错
+            //      0   没有问题
+            //      1   状态有问题，错误信息在 strError 中返回
+            nRet = this.CheckLibraryCodeState(account.AccountLibraryCode,
+                out strError);
+            if (nRet == -1 || nRet == 1)
+                return -1;
 
             // 匹配 IP 地址
             if (string.IsNullOrEmpty(strClientIP) == false) // 2016/11/2
@@ -632,6 +641,43 @@ namespace DigitalPlatform.LibraryServer
             if (string.IsNullOrEmpty(this.App.GlobalAddRights) == false)
                 strRights += "," + this.App.GlobalAddRights;
             return 1;
+        }
+
+        // return:
+        //      -1  出错
+        //      0   没有问题
+        //      1   状态有问题，错误信息在 strError 中返回
+        int CheckLibraryCodeState(string librarycode_list,
+            out string strError)
+        {
+            strError = "";
+
+            var list = librarycode_list.Split(',');
+            foreach(var librarycode in list)
+            {
+                // 获得一个分馆的当前状态
+                // return:
+                //      -1  出错
+                //      0   馆代码对应的 libraries/library 元素不存在
+                //      1   成功
+                int nRet = this.App.GetLibraryState(librarycode,
+                    out string state,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 0)
+                {
+                    strError = $"当前账户所从属的馆代码 '{librarycode}' 没有找到定义: {strError}";
+                    return -1;
+                }
+                if (string.IsNullOrEmpty(state) == false)
+                {
+                    strError = $"当前账户所从属的分馆 '{librarycode}' 状态为 '{state}'，禁止登录";
+                    return 1;
+                }
+            }
+
+            return 0;
         }
 
         /*
