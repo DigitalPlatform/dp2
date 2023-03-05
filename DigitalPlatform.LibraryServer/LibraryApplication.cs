@@ -16369,7 +16369,7 @@ out string db_type);
             strDbName = "";
             strRecordID = "";
 
-            string strPath = strResPath.Replace("\\", "/");
+            string strPath = strResPath?.Replace("\\", "/");
 
             // 根据逻辑名称找到对应的起始物理目录
             // return:
@@ -17672,6 +17672,40 @@ out string db_type);
             state = library.GetAttribute("state");
             return 1;
         }
+
+        // 检查 librarycode_list 中的馆代码是否都存在定义(libraries/library 元素)
+        // return:
+        //      -1  出错
+        //      0   不存在定义，错误信息在 strError 中返回
+        //      1   存在定义
+        int CheckLibraryCodeExist(string librarycode_list,
+            out string strError)
+        {
+            strError = "";
+
+            var list = librarycode_list.Split(',');
+            foreach (var librarycode in list)
+            {
+                // 获得一个分馆的当前状态
+                // return:
+                //      -1  出错
+                //      0   馆代码对应的 libraries/library 元素不存在
+                //      1   成功
+                int nRet = this.GetLibraryState(librarycode,
+                    out string state,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 0)
+                {
+                    strError = $"馆代码 '{librarycode}' 没有找到定义: {strError}";
+                    return 0;
+                }
+            }
+
+            return 1;
+        }
+
     }
 
 #if NO

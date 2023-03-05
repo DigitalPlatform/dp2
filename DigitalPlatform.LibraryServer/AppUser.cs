@@ -343,6 +343,16 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
+            // 2023/3/5
+            // 检查 librarycode_list 中的馆代码是否都存在定义(libraries/library 元素)
+            // return:
+            //      -1  出错
+            //      0   不存在定义，错误信息在 strError 中返回
+            //      1   存在定义
+            int nRet = CheckLibraryCodeExist(userinfo.LibraryCode,
+                out strError);
+            if (nRet == -1 || nRet == 0)
+                return -1;
 
             // 2012/9/9
             // 分馆用户只允许创建馆代码属于管辖分馆的帐户
@@ -365,7 +375,7 @@ namespace DigitalPlatform.LibraryServer
             //      -2  not found script
             //      -1  出错
             //      0   成功
-            int nRet = this.DoVerifyBarcodeScriptFunction(
+            nRet = this.DoVerifyBarcodeScriptFunction(
                 null,
                 "",
                 strUserName,
@@ -1500,6 +1510,17 @@ out strError);
                 strError = "strUserName参数值和userinfo.UserName不一致";
                 return -1;
             }
+
+            // 2023/3/5
+            // 检查 librarycode_list 中的馆代码是否都存在定义(libraries/library 元素)
+            // return:
+            //      -1  出错
+            //      0   不存在定义，错误信息在 strError 中返回
+            //      1   存在定义
+            nRet = CheckLibraryCodeExist(userinfo.LibraryCode,
+                out strError);
+            if (nRet == -1 || nRet == 0)
+                return -1;
 
             XmlElement nodeAccount = null;
             string strOldOuterXml = "";

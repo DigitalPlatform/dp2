@@ -4004,9 +4004,15 @@ strDbName);
             if (record.RecordBody == null)
                 record.RecordBody = new RecordBody();
             if (record.RecordBody.Result == null)
-                record.RecordBody.Result = new Result();
+            {
+                if (error_code != ErrorCodeValue.NoError)
+                    record.RecordBody.Result = new Result { Value = -1 };
+                else
+                    record.RecordBody.Result = new Result();
+            }
             record.RecordBody.Result.ErrorCode = error_code;
             record.RecordBody.Result.ErrorString = strError;
+
         }
 
         /*
