@@ -5804,7 +5804,7 @@ FileShare.ReadWrite))
             "setiteminfo",
             "setissueinfo",
             "setorderinfo",
-            "setcommentinfo"};  // TODO: setorders 是 setorderinfo 的别名，也应当支持(setcommentinfo 没有别名)
+            "setcommentinfo"};
 
             string strRights = Program.MainForm._currentUserRights;
             foreach (string right in rights)

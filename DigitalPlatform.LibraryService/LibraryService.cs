@@ -5474,7 +5474,7 @@ out timestamp);
         //      strLang 语言代码。一般为"zh"
         //      infos   返回检索途径信息数组
         // rights:
-        //      需要 listbibliodbfroms 或 listdbfroms 或 order 权限
+        //      需要 listdbfroms 或 order 权限
         // return:
         //      result.Value    -1 出错；0 当前系统中没有定义此类数据库; 1: 成功(有至少一个此类数据库)
         public LibraryServerResult ListBiblioDbFroms(
@@ -5495,10 +5495,10 @@ out timestamp);
                 // 权限判断
 
                 // 权限字符串
-                if (StringUtil.IsInList("listbibliodbfroms,listdbfroms,order", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("listdbfroms,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "列出书目库检索途径 被拒绝。不具备order或listbibliodbfroms或listdbfroms权限。";
+                    result.ErrorInfo = "列出书目库检索途径 被拒绝。不具备 listdbfroms 或 order 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -6751,10 +6751,10 @@ out timestamp);
                 if (strItemDbType == "item")
                 {
                     // 权限字符串
-                    if (StringUtil.IsInList("getiteminfo,getentities,order", sessioninfo.RightsOrigin) == false)
+                    if (StringUtil.IsInList("getiteminfo,order", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "用户 '" + sessioninfo.UserID + "' 获取实体信息被拒绝。不具备order、getiteminfo或getentities权限。";
+                        result.ErrorInfo = "用户 '" + sessioninfo.UserID + "' 获取实体信息被拒绝。不具备 getiteminfo 或 order 权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -7998,7 +7998,7 @@ out timestamp);
         //                  "getfirstxml"   是对onlygetpath的补充，仅获得第一个元素的XML记录，其余的依然只返回路径
         //                  "query:父记录+期号|..." 使用特定的检索途径和检索词。...部分表示检索词，例如 1|2005|1|，默认前方一致
         //      issueinfos 返回的期信息数组
-        // 权限：需要有getissueinfo权限(兼容getissues权限)
+        // 权限：需要有getissueinfo权限
         public LibraryServerResult GetIssues(
             string strBiblioRecPath,
             long lStart,
@@ -8016,10 +8016,10 @@ out timestamp);
             try
             {
                 // 权限字符串
-                if (StringUtil.IsInList("getissues,getissueinfo,order", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("getissueinfo,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "获得期信息 操作被拒绝。不具备order、getissueinfo或getissues权限。";
+                    result.ErrorInfo = "获得期信息 操作被拒绝。不具备 getissueinfo 或 order 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -8048,7 +8048,7 @@ out timestamp);
         // parameters:
         //      strBiblioRecPath    书目记录路径，仅包含库名和id部分
         //      issueinfos 要提交的的期信息数组
-        // 权限：需要有setissueinfo权限(兼容setissues权限)
+        // 权限：需要有setissueinfo权限
         // 日志：
         //      要产生日志
         public LibraryServerResult SetIssues(
@@ -8075,10 +8075,10 @@ out timestamp);
                 }
 
                 // 权限字符串
-                if (StringUtil.IsInList("setissueinfo,setissues,writerecord", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("setissueinfo,writerecord", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "保存期信息 操作被拒绝。不具备 setissueinfo、setissues 或 writerecord 权限。";
+                    result.ErrorInfo = "保存期信息 操作被拒绝。不具备 setissueinfo 或 writerecord 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -9458,7 +9458,7 @@ PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin)
         //                  "getotherlibraryitem"    返回全部分馆的记录的详情。这个用法只对分馆用户有用。因为分馆用户如果不用这个style，则只获得属于自己管辖分馆的册记录的详情
         //      entityinfos 返回的实体信息数组
         //      Result.Value    -1出错 0没有找到 其他 总的实体记录的个数(本次返回的，可以通过entities.Count得到)
-        // 权限：需要有getiteminfo或order权限(兼容getentities权限)
+        // 权限：需要有getiteminfo或order权限
         public LibraryServerResult GetEntities(
             string strBiblioRecPath,
             long lStart,
@@ -9499,7 +9499,7 @@ PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin)
         // parameters:
         //      strBiblioRecPath    书目记录路径，仅包含库名和id部分
         //      entityinfos 要提交的的实体信息数组
-        // 权限：需要有setiteminfo 权限(兼容setentities权限) 或 writerecord 权限
+        // 权限：需要有 setiteminfo 权限或 writerecord 权限
         // 日志：
         //      要产生日志
         public LibraryServerResult SetEntities(
@@ -9543,7 +9543,7 @@ PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin)
         //      strStyle    "onlygetpath"   仅返回每个路径(OldRecPath)
         //                  "getfirstxml"   是对onlygetpath的补充，仅获得第一个元素的XML记录，其余的依然只返回路径
         //      orderinfos 返回的订购信息数组
-        // 权限：需要有getorderinfo权限(兼容以前的getorders权限)
+        // 权限：需要有getorderinfo权限
         public LibraryServerResult GetOrders(
             string strBiblioRecPath,
             long lStart,
@@ -9561,10 +9561,10 @@ PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin)
             try
             {
                 // 权限字符串
-                if (StringUtil.IsInList("getorders,getorderinfo,order", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("getorderinfo,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "获得订购信息 操作被拒绝。不具备order、getorderinfo或getorders权限。";
+                    result.ErrorInfo = "获得订购信息 操作被拒绝。不具备 getorderinfo 或 order 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -9593,7 +9593,7 @@ PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin)
         // parameters:
         //      strBiblioRecPath    书目记录路径，仅包含库名和id部分
         //      orderinfos 要提交的的订购信息数组
-        // 权限：需要有setorderinfo权限(兼容setorders权限)
+        // 权限：需要有setorderinfo权限
         // 日志：
         //      要产生日志
         public LibraryServerResult SetOrders(
@@ -14288,10 +14288,10 @@ strLibraryCodeList);
                 }
 
                 // 权限判断
-                if (StringUtil.IsInList("settailnumber", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("settailnumber,setzhongcihaoinfo", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "设置种次号尾号的操作被拒绝。不具备settailnumber权限。";
+                    result.ErrorInfo = "设置种次号尾号的操作被拒绝。不具备 settailnumber 或 setzhongcihaoinfo 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -14460,10 +14460,10 @@ strLibraryCodeList);
                 }
 
                 // 权限判断
-                if (StringUtil.IsInList("settailnumber", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("settailnumber,setzhongcihaoinfo", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "设置种次号尾号的操作被拒绝。不具备settailnumber权限。";
+                    result.ErrorInfo = "设置种次号尾号的操作被拒绝。不具备 settailnumber 或 setzhongcihaoinfo 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }

@@ -641,13 +641,14 @@ namespace DigitalPlatform.LibraryServer
             string strDbName)
         {
             string rights = sessioninfo.RightsOrigin;
+            var db_type = GetAllDbType(strDbName);
 
             string right = "";
-            if (this.IsBiblioDbName(strDbName) == true)
+            if (db_type == "biblio")
             {
                 right = "searchbiblio";
             }
-            else if (this.IsReaderDbName(strDbName) == true)
+            else if (db_type == "reader")
             {
                 var ret = (StringUtil.IsInList("searchreader", rights));
                 if (ret == false)
@@ -661,37 +662,49 @@ namespace DigitalPlatform.LibraryServer
                 }
                 return null;
             }
-            else if (this.IsOrderDbName(strDbName))
+            else if (db_type == "order")
             {
                 right = "searchorder";
             }
-            else if (this.IsIssueDbName(strDbName))
+            else if (db_type == "issue")
             {
                 right = "searchissue";
             }
-            else if (this.IsItemDbName(strDbName))
+            else if (db_type == "item")
             {
                 right = "searchitem";
             }
-            else if (this.IsCommentDbName(strDbName))
+            else if (db_type == "comment")
             {
                 right = "searchcomment";
             }
-            else if (this.IsAuthorityDbName(strDbName))
+            else if (db_type == "authority")
             {
                 right = "searchauthority";
             }
-            else if (this.AmerceDbName == strDbName)
+            else if (db_type == "amerce")
             {
                 right = "searchamerce";
             }
-            else if (this.GetInventoryDbName() == strDbName)
+            else if (db_type == "inventory")
             {
                 right = "searchinventory";
             }
-            else if (this.ArrivedDbName == strDbName)
+            else if (db_type == "arrived")
             {
                 right = "searcharrived";
+            }
+            else if (db_type == "publisher")
+            {
+                right = "searchpublisher";
+            }
+            else if (db_type == "zhongcihao")
+            {
+                right = "searchzhongcihao";
+            }
+            else if (db_type == "dictionary")
+            {
+                right = "searchdictionary";
             }
             else
                 return $"无法识别数据库 '{strDbName}' 的类型";

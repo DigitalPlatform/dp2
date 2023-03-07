@@ -37,7 +37,8 @@ namespace dp2LibraryXE
     {
         FloatingMessageForm _floatingMessage = null;
 
-        const string default_opac_rights = "denychangemypassword,getsystemparameter,getres,search,getbiblioinfo,setbiblioinfo,getreaderinfo,writeobject,getbibliosummary,listdbfroms,simulatereader,simulateworker"
+        // TODO: 需要增加 setreaderobject，以便读者可以上传头像？
+        const string default_opac_rights = "denychangemypassword,getsystemparameter,getres,search,getbiblioinfo,setbiblioinfo,getreaderinfo,setcommentobject,getbibliosummary,listdbfroms,simulatereader,simulateworker"
                                 + ",getiteminfo,getorderinfo,getissueinfo,getcommentinfo";  // 2016/1/27
 
         const string localhost_opac_url = "http://localhost:8081/dp2OPAC";

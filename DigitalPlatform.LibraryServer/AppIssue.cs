@@ -1176,7 +1176,7 @@ namespace DigitalPlatform.LibraryServer
         // parameters:
         //      strBiblioRecPath    书目记录路径，仅包含库名和id部分
         //      issues 返回的期信息数组
-        // 权限：需要有getissues权限
+        // 权限：需要有 getissueinfo 权限
         // return:
         //      Result.Value    -1出错 0没有找到 其他 实体记录的个数
         public Result GetIssues(
@@ -1190,11 +1190,10 @@ namespace DigitalPlatform.LibraryServer
             Result result = new Result();
 
             // 权限字符串
-            if (StringUtil.IsInList("getissues", sessioninfo.RightsOrigin) == false
-        && StringUtil.IsInList("getissueinfo", sessioninfo.RightsOrigin) == false)
+            if (StringUtil.IsInList("getissueinfo", sessioninfo.RightsOrigin) == false)
             {
                 result.Value = -1;
-                result.ErrorInfo = "获得期信息 操作被拒绝。不具备getissueinfo或getissues权限。";
+                result.ErrorInfo = "获得期信息 操作被拒绝。不具备getissueinfo权限。";
                 result.ErrorCode = ErrorCode.AccessDenied;
                 return result;
             }
@@ -1357,7 +1356,7 @@ namespace DigitalPlatform.LibraryServer
         // parameters:
         //      strBiblioRecPath    书目记录路径，仅包含库名和id部分。库名可以用来确定书目库，id可以被实体记录用来设置<parent>元素内容。另外书目库名和IssueInfo中的NewRecPath形成映照关系，需要检查它们是否正确对应
         //      issueinfos 要提交的的期信息数组
-        // 权限：需要有setissues权限
+        // 权限：需要有 setissueinfo 权限
         // 修改意见: 写入期库中的记录, 还缺乏<operator>和<operTime>字段
         public Result SetIssues(
             SessionInfo sessioninfo,

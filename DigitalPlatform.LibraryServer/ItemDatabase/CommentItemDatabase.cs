@@ -54,7 +54,7 @@ namespace DigitalPlatform.LibraryServer
         };
 
         /* 2023/2/2 注:
-         * 注意 reader 账户需要具有 writecommentobject 权限，读者在 OPAC 界面上才能顺利上传和修改评注记录的图片附件
+         * 注意 reader 账户需要具有 setcommentobject 权限，读者在 OPAC 界面上才能顺利上传和修改评注记录的图片附件
          * 
          * */
 

@@ -1604,7 +1604,9 @@ namespace DigitalPlatform.LibraryServer
             //      -2  not exist entity dbname
             //      -1  error
             //      >=0 含有流通信息的实体记录个数
-            nRet = this.App.SearchChildEntities(channel,
+            nRet = this.App.SearchChildEntities(
+                null,
+                channel,
                 strBiblioRecPath,
                 "count_borrow_info,return_record_xml",  // "count_borrow_info,return_record_xml",
                 null,
@@ -1629,7 +1631,9 @@ namespace DigitalPlatform.LibraryServer
             //      -1  error
             //      0   not exist entity dbname
             //      1   exist entity dbname
-            nRet = this.App.OrderItemDatabase.SearchChildItems(channel,
+            nRet = this.App.OrderItemDatabase.SearchChildItems(
+                null,
+                channel,
                 strBiblioRecPath,
                 "return_record_xml", // "return_record_xml,check_circulation_info",
                 (DigitalPlatform.LibraryServer.LibraryApplication.Delegate_checkRecord)null,
@@ -1653,7 +1657,9 @@ namespace DigitalPlatform.LibraryServer
             //      -1  error
             //      0   not exist entity dbname
             //      1   exist entity dbname
-            nRet = this.App.IssueItemDatabase.SearchChildItems(channel,
+            nRet = this.App.IssueItemDatabase.SearchChildItems(
+                null,
+                channel,
                 strBiblioRecPath,
                 "return_record_xml", // "return_record_xml,check_circulation_info",
                 (DigitalPlatform.LibraryServer.LibraryApplication.Delegate_checkRecord)null,
@@ -1676,7 +1682,9 @@ namespace DigitalPlatform.LibraryServer
             //      -1  error
             //      0   not exist entity dbname
             //      1   exist entity dbname
-            nRet = this.App.CommentItemDatabase.SearchChildItems(channel,
+            nRet = this.App.CommentItemDatabase.SearchChildItems(
+                null,
+                channel,
                 strBiblioRecPath,
                 "return_record_xml", // "return_record_xml,check_circulation_info",
                 (DigitalPlatform.LibraryServer.LibraryApplication.Delegate_checkRecord)null,

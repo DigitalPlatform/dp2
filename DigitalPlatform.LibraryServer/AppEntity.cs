@@ -399,6 +399,7 @@ namespace DigitalPlatform.LibraryServer
 
         // 如果返回值不是0，就中断循环并返回
         public delegate int Delegate_checkRecord(
+            SessionInfo sessioninfo,
             int index,
             string strRecPath,
             XmlDocument dom,
@@ -418,7 +419,9 @@ namespace DigitalPlatform.LibraryServer
         //      -2  not exist entity dbname
         //      -1  error
         //      >=0 含有流通信息的实体记录个数, 当strStyle包含count_borrow_info时。
-        public int SearchChildEntities(RmsChannel channel,
+        public int SearchChildEntities(
+            SessionInfo sessioninfo,
+            RmsChannel channel,
             string strBiblioRecPath,
             string strStyle,
             Delegate_checkRecord procCheckRecord,
@@ -651,6 +654,7 @@ namespace DigitalPlatform.LibraryServer
                         if (procCheckRecord != null)
                         {
                             nRet = procCheckRecord(
+                                sessioninfo,
                                 nStart + i,
                                 strOutputPath,
                                 domExist,
@@ -1438,7 +1442,9 @@ namespace DigitalPlatform.LibraryServer
             //      -2  not exist entity dbname
             //      -1  error
             //      >=0 含有流通信息的实体记录个数
-            int nRet = SearchChildEntities(channel,
+            int nRet = SearchChildEntities(
+                null,
+                channel,
                 strBiblioRecPath,
                 "",   // "check_borrow_info",    // 2011/4/24
                 (Delegate_checkRecord)null,
@@ -1750,7 +1756,7 @@ namespace DigitalPlatform.LibraryServer
         //      style中要包含 librarycode:xxxx
         // 注: librarycode:xxxx 中的 xxx 部分可以是多个馆代码的列表，用 | 分隔
         //
-        // 权限：需要有getentities权限
+        // 权限：需要有 getiteminfo 权限
         // return:
         //      Result.Value    -1出错 0没有找到 其他 总的实体记录的个数(本次返回的，可以通过entities.Count得到)
         public LibraryServerResult GetEntities(
@@ -1767,10 +1773,10 @@ namespace DigitalPlatform.LibraryServer
             LibraryServerResult result = new LibraryServerResult();
 
             // 权限字符串
-            if (StringUtil.IsInList("getentities,getiteminfo,order", sessioninfo.RightsOrigin) == false)
+            if (StringUtil.IsInList("getiteminfo,order", sessioninfo.RightsOrigin) == false)
             {
                 result.Value = -1;
-                result.ErrorInfo = "获得册信息 操作被拒绝。不具备 order、getiteminfo 或 getentities 权限。";
+                result.ErrorInfo = "获得册信息 操作被拒绝。不具备 getiteminfo 或 order 权限。";
                 result.ErrorCode = ErrorCode.AccessDenied;
                 return result;
             }
@@ -3277,7 +3283,7 @@ out strError);
         //      strBiblioRecPath    书目记录路径，仅包含库名和id部分。库名可以用来确定书目库，id可以被实体记录用来设置<parent>元素内容。另外书目库名和EntityInfo中的NewRecPath形成映照关系，需要检查它们是否正确对应
         //      entityinfos 要提交的的实体信息数组
         //      EntityInfo.Style    onlyWriteLog 只写入操作日志，不修改册记录 (2020/10/14)
-        // 权限：需要有setentities权限
+        // 权限：需要有 setiteminfo 权限
         // TODO: 写入册库中的记录, 还缺乏<operator>和<operTime>字段
         // TODO: 需要检查册记录的<parent>元素内容是否合法。不能为问号
         public LibraryServerResult SetEntities(
@@ -3291,10 +3297,10 @@ out strError);
             LibraryServerResult result = new LibraryServerResult();
 
             // 权限字符串
-            if (StringUtil.IsInList("setiteminfo,setentities,writerecord,order", sessioninfo.RightsOrigin) == false)
+            if (StringUtil.IsInList("setiteminfo,writerecord,order", sessioninfo.RightsOrigin) == false)
             {
                 result.Value = -1;
-                result.ErrorInfo = "修改册信息 操作被拒绝。不具备 setiteminfo、setentities、writerecord 或 order 权限。";
+                result.ErrorInfo = "修改册信息 操作被拒绝。不具备 setiteminfo、writerecord 或 order 权限。";
                 result.ErrorCode = ErrorCode.AccessDenied;
                 return result;
             }
@@ -5475,8 +5481,8 @@ out strError);
                 info.NewTimestamp = exist_timestamp;
             }
 
-            // 只有order权限(并且没有 setiteminfo setentities writerecord)的情况
-            if (StringUtil.IsInList("setiteminfo,setentities,writerecord", sessioninfo.RightsOrigin) == false
+            // 只有order权限(并且没有 setiteminfo writerecord)的情况
+            if (StringUtil.IsInList("setiteminfo,writerecord", sessioninfo.RightsOrigin) == false
                 && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == true)
             {
                 // 2009/11/26 changed
@@ -5514,7 +5520,7 @@ out strError);
                         "state");
                     if (IncludeStateProcessing(strState) == false)
                     {
-                        strError = "当前帐户只有 order 权限而没有 setiteminfo(或setentities、writerecord) 权限，不能用delete功能删除从属于非工作库的、状态不包含“加工中”的实体记录 '" + info.NewRecPath + "'";
+                        strError = "当前帐户只有 order 权限而没有 setiteminfo(或 writerecord) 权限，不能用delete功能删除从属于非工作库的、状态不包含“加工中”的实体记录 '" + info.NewRecPath + "'";
                         goto ERROR1;    // TODO: 如何返回AccessDenied错误码呢?
                     }
                 }
@@ -5741,8 +5747,8 @@ out strError);
 
             if (bExist == true)
             {
-                // 只有order权限(并且没有 setiteminfo setentities writerecord)的情况
-                if (StringUtil.IsInList("setiteminfo,setentities,writerecord", sessioninfo.RightsOrigin) == false
+                // 只有order权限(并且没有 setiteminfo writerecord)的情况
+                if (StringUtil.IsInList("setiteminfo,writerecord", sessioninfo.RightsOrigin) == false
                     && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == true)
                 {
                     // 2009/11/26 changed
@@ -5777,7 +5783,7 @@ out strError);
                             "state");
                         if (IncludeStateProcessing(strState) == false)
                         {
-                            strError = "当前帐户只有 order 权限而没有 setiteminfo (或setentities、writerecord)权限，不能用 change 功能修改从属于非工作库的、状态不包含“加工中”的实体记录 '" + info.OldRecPath + "'(此种记录的状态要包含“加工中”才能允许修改)";
+                            strError = "当前帐户只有 order 权限而没有 setiteminfo (或 writerecord)权限，不能用 change 功能修改从属于非工作库的、状态不包含“加工中”的实体记录 '" + info.OldRecPath + "'(此种记录的状态要包含“加工中”才能允许修改)";
                             goto ERROR1;
                         }
                     }
@@ -6834,8 +6840,8 @@ out strError);
                 strWarning = strError;
             }
 
-            // 只有order权限(并且没有 setiteminfo setentities writerecord)的情况
-            if (StringUtil.IsInList("setiteminfo,setentities,writerecord", sessioninfo.RightsOrigin) == false
+            // 只有order权限(并且没有 setiteminfo writerecord)的情况
+            if (StringUtil.IsInList("setiteminfo,writerecord", sessioninfo.RightsOrigin) == false
                 && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == true)
             {
                 // 2009/11/26 changed
@@ -6871,7 +6877,7 @@ out strError);
                         "state");
                     if (IncludeStateProcessing(strState) == false)
                     {
-                        strError = "当前帐户只有order权限而没有setiteminfo(或setentities、writerecord)权限，不能用move功能删除从属于非工作库的、状态不包含“加工中”的实体记录 '" + info.OldRecPath + "'";
+                        strError = "当前帐户只有order权限而没有setiteminfo(或 writerecord)权限，不能用move功能删除从属于非工作库的、状态不包含“加工中”的实体记录 '" + info.OldRecPath + "'";
                         goto ERROR1;
                     }
                 }
@@ -7774,9 +7780,9 @@ out strError);
             }
 
             Debug.Assert(db_type == "item");
-            string alias_right = "getentities";
+            string alias_right = "";    //  "getentities";
 
-            // 检查 getiteminfo getentities 基本权限
+            // 检查 getiteminfo 基本权限
             if (StringUtil.IsInList($"get{db_type}info", sessioninfo.RightsOrigin) == false
                 && (string.IsNullOrEmpty(alias_right) == false && StringUtil.IsInList(alias_right, sessioninfo.RightsOrigin) == false))
             {

@@ -573,13 +573,13 @@ namespace DigitalPlatform.LibraryServer
                     // 检查写集合大于读集合的账户权限问题
                     if (strRights != null)
                     {
-                        if (StringUtil.IsInList("writereaderobject,writeobject", strRights) == true
+                        if (StringUtil.IsInList("setreaderobject,setobject", strRights) == true
                             && StringUtil.IsInList("getreaderobject,getobject", strRights) == false)
                         {
-                            // 此时 StringUtil.IsInList("writereaderobject,writeobject", strRights) == true
+                            // 此时 StringUtil.IsInList("setreaderobject,setobject", strRights) == true
                             // 意味着直接采纳前端发来的 XML 记录中的 dprms:file 元素，写入记录
                             // 但需要注意检查账户权限，读的字段范围是否小于写的字段范围？如果小了，则读和写往返一轮会丢失记录中原有的 dprms:file 元素。这种情况需要直接报错
-                            strError = "当前用户的权限定义不正确：具有 writereaderobject(或writeobject) 但不具有 getreaderobject(或getobject) 权限(即写范围大于读范围)，这样会造成数据库内读者记录中原有的 dprms:file 元素丢失。请修改当前账户权限再重新操作";
+                            strError = "当前用户的权限定义不正确：具有 setreaderobject(或setobject) 但不具有 getreaderobject(或getobject) 权限(即写范围大于读范围)，这样会造成数据库内读者记录中原有的 dprms:file 元素丢失。请修改当前账户权限再重新操作";
                             return -1;
                         }
                     }
@@ -943,7 +943,7 @@ unprocessed_element_names.Except(_auto_maintain_element_names)));
             {
                 // 2023/1/31
                 // 根据 writexxxobject 权限对 dprms:file 元素进行限定
-                if (StringUtil.IsInList("writereaderobject,writeobject", rights) == false)
+                if (StringUtil.IsInList("setreaderobject,setobject", rights) == false)
                 {
                     // 删除target中的全部<dprms:file>元素，然后将source记录中的全部<dprms:file>元素插入到target记录中
                     XmlDocument temp = new XmlDocument();
@@ -2375,11 +2375,11 @@ strLibraryCode);    // 读者所在的馆代码
 #if REMOVED
                     // 2023/1/31
                     // 根据 writexxxobject 权限对 dprms:file 元素进行限定
-                    if (StringUtil.IsInList("writereaderobject,writeobject", sessioninfo.RightsOrigin) == false)
+                    if (StringUtil.IsInList("setreaderobject,setobject", sessioninfo.RightsOrigin) == false)
                     {
                         var names = StringUtil.SplitList("http://dp2003.com/dprms:file");
                         element_names = element_names.Except(names).ToArray();
-                        Append(comment, "SUB(http://dp2003.com/dprms:file 元素，因账户未定义 writereaderobject 或 writeobject 权限:", names.ToArray(), ")");
+                        Append(comment, "SUB(http://dp2003.com/dprms:file 元素，因账户未定义 setreaderobject 或 setobject 权限:", names.ToArray(), ")");
                         count++;
                     }
 #endif
@@ -2471,7 +2471,7 @@ strLibraryCode);    // 读者所在的馆代码
 #if REMOVED
                     // 2023/1/31
                     // 根据 writexxxobject 权限对 dprms:file 元素进行限定
-                    if (StringUtil.IsInList("writereaderobject,writeobject", sessioninfo.RightsOrigin) == false)
+                    if (StringUtil.IsInList("setreaderobject,setobject", sessioninfo.RightsOrigin) == false)
                     {
                         var names = StringUtil.SplitList("http://dp2003.com/dprms:file");
                         element_names = element_names.Except(names).ToArray();
@@ -3218,7 +3218,7 @@ root, strLibraryCode);
             // 2021/8/3
             string write_level = GetReaderInfoLevel("setreaderinfo", sessioninfo.RightsOrigin);
             if (string.IsNullOrEmpty(write_level) == false/*
-                || StringUtil.IsInList("writereaderobject,writeobject", sessioninfo.RightsOrigin) == false*//*2023/1/31*/)
+                || StringUtil.IsInList("setreaderobject,setobject", sessioninfo.RightsOrigin) == false*//*2023/1/31*/)
             {
                 var outof_names = GetOutofElements(domExist,
                     element_names,
@@ -8256,7 +8256,7 @@ out strError);
         // parameters:
         //      style   风格。可能包含 read/write/excludefile 
         //              read 表示这是用于读的 level 权限；write 表示这是用于写的 level 权限。如果 read 和 write 都缺乏，则当作 read 理解
-        //              excludefile 表示要故意排除掉 "http://dp2003.com/dprms:file"。一般用于当前账户不具备 writeobject 和 writereaderobject 权限时
+        //              excludefile 表示要故意排除掉 "http://dp2003.com/dprms:file"。一般用于当前账户不具备 setobject 和 setreaderobject 权限时
         //      maskDefinition  马赛克定义。对需要打马赛克的字段进行部分屏蔽的方法
         public static bool FilterByLevel(XmlDocument readerdom,
             string level,
@@ -8668,11 +8668,11 @@ out strError);
             }
             else if (prefix == "setreaderinfo")
             {
-                // 把 rights 中的 writereaderobject 和 writeobject 也融合到返回的字符串中
+                // 把 rights 中的 setreaderobject 和 setobject 也融合到返回的字符串中
                 List<string> list = new List<string>();
-                if (StringUtil.IsInList("writereaderobject", rights) == true)
+                if (StringUtil.IsInList("setreaderobject", rights) == true)
                     list.Add("readerobject");
-                if (StringUtil.IsInList("writeobject", rights) == true)
+                if (StringUtil.IsInList("setobject", rights) == true)
                     list.Add("object");
                 if (list.Count > 0 && string.IsNullOrEmpty(level))
                     return "";  // 完全集合

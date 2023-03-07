@@ -1774,7 +1774,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             e.Cancel = true;
         }
 
-        static string _baseRights = "getsystemparameter,getbiblioinfo,getbibliosummary,getiteminfo,getoperlog,getreaderinfo,getres,searchbiblio,searchitem,searchreader,borrow,renew,return,setreaderinfo,writeobject,setiteminfo";
+        static string _baseRights = "getsystemparameter,getbiblioinfo,getbibliosummary,getiteminfo,getoperlog,getreaderinfo,getreaderobject,getres,searchbiblio,searchitem,searchreader,borrow,renew,return,setreaderinfo,setreaderobject,setiteminfo"; // 取消 setobject
 
         static void VerifyRights(string rights)
         {

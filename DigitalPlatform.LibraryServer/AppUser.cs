@@ -21,6 +21,7 @@ using DigitalPlatform.Marc;
 
 using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
+using System.Linq;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -1995,6 +1996,45 @@ out strError);
 
             strError = "未知的动作 '" + strAction + "'";
             return -1;
+        }
+
+        static string[] _rights_replace_table = new string[] { 
+        "listbibliodbfroms-->listdbfroms",
+        "setentities-->setiteminfo",
+        "setissues-->setissueinfo",
+        "setorders-->setorderinfo",
+        // "setcomments-->setcommentinfo",
+        "getentities-->getiteminfo",
+        "getissues-->getissueinfo",
+        "getorders-->getoderinfo",
+        "getcomments-->getcommentinfo",
+        "writeobject-->setobject",
+        };
+
+        // 将旧版本的账户权限字符串升级到新版本
+        // 1) 将一些别名权限替换为正式名字
+        static string UpgradeUserRights(string rights)
+        {
+            List<string> results = new List<string>();
+            var source_rights = rights.Split(',');
+            foreach(var source_right in source_rights)
+            {
+                results.Add(Replace(source_right));
+            }
+
+            StringUtil.RemoveDupNoSort(ref results);
+            return string.Join(",", results);
+            string Replace(string text)
+            {
+                foreach(var item in _rights_replace_table)
+                {
+                    var parts = StringUtil.ParseTwoPart(item, "-->");
+                    if (text == parts[0])
+                        return parts[1];
+                }
+
+                return text;
+            }
         }
     }
 

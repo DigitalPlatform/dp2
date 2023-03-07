@@ -3275,7 +3275,7 @@ out strError);
         //      strLang 语言代码。一般为"zh"
         //      infos   返回检索途径信息数组
         // rights:
-        //      需要 listbibliodbfroms (或者listdbfroms) 权限
+        //      需要 listdbfroms 权限
         // return:
         //      -1  出错
         //      0   正常

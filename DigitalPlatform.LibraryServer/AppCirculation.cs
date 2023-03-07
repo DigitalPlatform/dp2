@@ -6103,10 +6103,10 @@ out _);
             else if (strAction == "transfer")
             {
                 // 权限字符串
-                if (StringUtil.IsInList("setiteminfo,setentities,writerecord", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("setiteminfo,writerecord", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = strActionName + " 操作被拒绝。不具备 setiteminfo (或 setentities、writerecord)权限。";
+                    result.ErrorInfo = strActionName + " 操作被拒绝。不具备 setiteminfo (或 writerecord)权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     // return result;
                 }

@@ -2501,7 +2501,15 @@ out strError);
                     library_node.SetAttribute("code", code);
                 }
 
-                // TODO: 自动修改 accounts/account 中的权限字符串
+                // 自动修改 accounts/account@rights 中的权限字符串
+                var account_nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("accounts/account");
+                foreach(XmlElement account in account_nodes)
+                {
+                    string old_rights = account.GetAttribute("rights");
+                    string new_rights = UpgradeUserRights(old_rights);
+                    if (old_rights != new_rights)
+                        account.SetAttribute("rights", new_rights);
+                }
 
                 // 升级完成后，修改版本号
                 nodeVersion.InnerText = "3.01";
@@ -15655,7 +15663,7 @@ strLibraryCode);    // 读者所在的馆代码
         // 注： 
         //      writetemplate 写入模板配置文件 template 所需要的权限; 
         //      writecfgfile    写入模板配置文件以外的其它配置文件所需要的权限;
-        //      writeobject writexxxobject 等    写入对象所需要的权限; 
+        //      setobject setxxxobject 等    写入对象所需要的权限; 
         //      writerecord setxxxinfo 等    写入各种数据库记录所需要的权限
         //      (已废止)writeres 写入数据库记录、配置文件、对象等所需要的笼统的权限
         // parameters:
@@ -15913,13 +15921,13 @@ out string db_type);
                     // 对象资源
                     if (strFirstPart == "object")
                     {
-                        // /*(在具备 setbiblioinfo 基础上)*/进一步需要 writebiblioobject 或 writeobject 权限
-                        if (StringUtil.IsInList("writebiblioobject,writeobject", strRights) == false)
+                        // /*(在具备 setbiblioinfo 基础上)*/进一步需要 setbiblioobject 或 setobject 权限
+                        if (StringUtil.IsInList("setbiblioobject,setobject", strRights) == false)
                         {
-                            strError = "写入对象资源 " + strResPath + " 被拒绝。不具备 writebiblioobject 或 writeobject 权限";
+                            strError = "写入对象资源 " + strResPath + " 被拒绝。不具备 setbiblioobject 或 setobject 权限";
                             return 0;
                         }
-                        return 1;   // 如果有了writeobject权限，就不再需要writeres权限
+                        return 1;   // 如果有了 setobject 权限，就不再需要writeres权限
                     }
                 }
 
@@ -16004,10 +16012,10 @@ out string db_type);
                     // 对象资源
                     if (strFirstPart == "object")
                     {
-                        // /*(在具备 setreaderinfo 基础上)*/进一步需要 writeobject 或 writereaderobject 权限
-                        if (StringUtil.IsInList("writereaderobject,writeobject", strRights) == false)
+                        // /*(在具备 setreaderinfo 基础上)*/进一步需要 setobject 或 setreaderobject 权限
+                        if (StringUtil.IsInList("setreaderobject,setobject", strRights) == false)
                         {
-                            strError = "写入对象资源 " + strResPath + " 被拒绝。不具备 writereaderobject 或 writeobject 权限";
+                            strError = "写入对象资源 " + strResPath + " 被拒绝。不具备setreaderobject 或 setobject 权限";
                             return 0;
                         }
 
@@ -16098,10 +16106,10 @@ out string db_type);
                     // 对象资源
                     if (strFirstPart == "object")
                     {
-                        // (在具备 setxxxinfo 基础上)进一步需要 writeobject 或 writexxxobject 权限
-                        if (StringUtil.IsInList($"write{db_type}object,writeobject", strRights) == false)
+                        // (在具备 setxxxinfo 基础上)进一步需要 setobject 或 setxxxobject 权限
+                        if (StringUtil.IsInList($"set{db_type}object,setobject", strRights) == false)
                         {
-                            strError = $"写入对象资源 {strResPath} 被拒绝。不具备 write{db_type}object 或 writeobject 权限";
+                            strError = $"写入对象资源 {strResPath} 被拒绝。不具备 set{db_type}object 或 setobject 权限";
                             return 0;
                         }
                         return 1;
@@ -16167,12 +16175,12 @@ out string db_type);
                     // 对象资源
                     if (strFirstPart == "object")
                     {
-                        if (StringUtil.IsInList($"writeobject,write{util_db_type}object", strRights) == false)
+                        if (StringUtil.IsInList($"set{util_db_type}object,setobject", strRights) == false)
                         {
-                            strError = $"写入对象资源 {strResPath} 被拒绝。不具备 writeobject 或 write{util_db_type}object 权限";
+                            strError = $"写入对象资源 {strResPath} 被拒绝。不具备 set{util_db_type}object 或 setobject 权限";
                             return 0;
                         }
-                        return 1;   // 如果有了writeobject权限，就不再需要writeres权限
+                        return 1;   // 如果有了setobject权限，就不再需要 writeres 权限
                     }
                 }
 
@@ -16583,8 +16591,8 @@ out string db_type);
             }
 
             /*
-            // 如果具备 writeobject 权限，则具备所有对象的读取权限了
-            if (StringUtil.IsInList("writeobject", strRights) == true
+            // 如果具备 setobject 权限，则具备所有对象的读取权限了
+            if (StringUtil.IsInList("setobject", strRights) == true
                 || StringUtil.IsInList("writeres", strRights) == true)
                 return 1;
             */
@@ -16805,12 +16813,12 @@ out string db_type);
                     // 对象资源
                     if (strFirstPart == "object")
                     {
-                        if (StringUtil.IsInList("writeobject", strRights) == false)
+                        if (StringUtil.IsInList("setobject", strRights) == false)
                         {
-                            strError = "写入对象资源 " + strResPath + " 被拒绝。不具备writeobject权限";
+                            strError = "写入对象资源 " + strResPath + " 被拒绝。不具备setobject权限";
                             return 0;
                         }
-                        return 1;   // 如果有了writeobject权限，就不再需要writeres权限
+                        return 1;   // 如果有了setobject权限，就不再需要writeres权限
                     }
                 }
 
@@ -17191,17 +17199,17 @@ out string db_type);
             else if (this.IsOrderDbName(strDbName))
             {
                 db_type = "order";
-                right = "setorderinfo,setorders";
+                right = "setorderinfo";
             }
             else if (this.IsIssueDbName(strDbName))
             {
                 db_type = "issue";
-                right = "setissueinfo,setissues";
+                right = "setissueinfo";
             }
             else if (this.IsItemDbName(strDbName))
             {
                 db_type = "item";
-                right = "setiteminfo,setentities";
+                right = "setiteminfo";
             }
             else if (this.IsCommentDbName(strDbName))
             {

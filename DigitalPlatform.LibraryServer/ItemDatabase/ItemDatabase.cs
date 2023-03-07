@@ -451,8 +451,8 @@ namespace DigitalPlatform.LibraryServer
                     }
                 }
 
-                // 如果不具备 writebiblioobject 和 writeobject 权限，则要屏蔽前端发来的 XML 记录中的 dprms:file 元素
-                if (StringUtil.IsInList($"write{db_type}object,writeobject", strRights) == false)
+                // 如果不具备 setxxxobject 和 setobject 权限，则要屏蔽前端发来的 XML 记录中的 dprms:file 元素
+                if (StringUtil.IsInList($"set{db_type}object,setobject", strRights) == false)
                 {
                     string strRequstFragments = LibraryApplication.GetAllFileElements(domNew);
 
@@ -466,19 +466,19 @@ namespace DigitalPlatform.LibraryServer
                         if (string.IsNullOrEmpty(strComment) == false)
                             strComment += "; ";
                         if (string.IsNullOrEmpty(strAcceptedFragments) && string.IsNullOrEmpty(strRequstFragments) == false)
-                            strComment += $"因不具备 write{db_type}object 或 writeobject 权限, 创建 dprms:file (数字对象)元素被拒绝";
+                            strComment += $"因不具备 set{db_type}object 或 setobject 权限, 创建 dprms:file (数字对象)元素被拒绝";
                         else
-                            strComment += $"因不具备 write{db_type}object 或 writeobject 权限, 修改 dprms:file (数字对象)元素被拒绝";
+                            strComment += $"因不具备 set{db_type}object 或 setobject 权限, 修改 dprms:file (数字对象)元素被拒绝";
                     }
                 }
                 else
                 {
-                    // 此时 StringUtil.IsInList("writebiblioobject,writeobject", strRights) == true
+                    // 此时 StringUtil.IsInList("setbiblioobject,setobject", strRights) == true
                     // 意味着直接采纳前端发来的 XML 记录中的 dprms:file 元素，写入记录
                     // 但需要注意检查账户权限，读的字段范围是否小于写的字段范围？如果小了，则读和写往返一轮会丢失记录中原有的 dprms:file 元素。这种情况需要直接报错
                     if (StringUtil.IsInList($"get{db_type}object,getobject", strRights) == false)
                     {
-                        strError = $"操作被放弃。当前用户的权限定义不正确：具有 write{db_type}object(或writeobject) 但不具有 get{db_type}object(或getobject) 权限(即写范围大于读范围)，这样会造成数据库内记录中原有的 dprms:file 元素丢失。请修改当前账户权限再重新操作";
+                        strError = $"操作被放弃。当前用户的权限定义不正确：具有 set{db_type}object(或 setobject) 但不具有 get{db_type}object(或getobject) 权限(即写范围大于读范围)，这样会造成数据库内记录中原有的 dprms:file 元素丢失。请修改当前账户权限再重新操作";
                         return -1;
                     }
 
@@ -528,8 +528,8 @@ namespace DigitalPlatform.LibraryServer
 
             try
             {
-                // 如果不具备 writebiblioobject 和 writeobject 权限，则要屏蔽前端发来的 XML 记录中的 dprms:file 元素
-                if (StringUtil.IsInList($"write{db_type}object,writeobject", strRights) == false)
+                // 如果不具备 setbiblioobject 和 setobject 权限，则要屏蔽前端发来的 XML 记录中的 dprms:file 元素
+                if (StringUtil.IsInList($"set{db_type}object,setobject", strRights) == false)
                 {
                     // domOld 不发生变化
                     string strRequstFragments = LibraryApplication.GetAllFileElements(domNew);
@@ -540,17 +540,17 @@ namespace DigitalPlatform.LibraryServer
                         bChangePartDenied = true;
                         if (string.IsNullOrEmpty(strComment) == false)
                             strComment += "; ";
-                        strComment += $"因不具备 write{db_type}object 或 writeobject 权限, 改变 dprms:file (数字对象)元素被拒绝";
+                        strComment += $"因不具备 set{db_type}object 或 setobject 权限, 改变 dprms:file (数字对象)元素被拒绝";
                     }
                 }
                 else
                 {
-                    // 此时 StringUtil.IsInList("writebiblioobject,writeobject", strRights) == true
+                    // 此时 StringUtil.IsInList("setbiblioobject,setobject", strRights) == true
                     // 意味着直接采纳前端发来的 XML 记录中的 dprms:file 元素，写入记录
                     // 但需要注意检查账户权限，读的字段范围是否小于写的字段范围？如果小了，则读和写往返一轮会丢失记录中原有的 dprms:file 元素。这种情况需要直接报错
                     if (StringUtil.IsInList($"get{db_type}object,getobject", strRights) == false)
                     {
-                        strError = $"操作被放弃。当前用户的权限定义不正确：具有 write{db_type}object(或writeobject) 但不具有 get{db_type}object(或getobject) 权限(即写范围大于读范围)，这样会造成数据库内记录中原有的 dprms:file 元素丢失。请修改当前账户权限再重新操作";
+                        strError = $"操作被放弃。当前用户的权限定义不正确：具有 set{db_type}object(或 setobject) 但不具有 get{db_type}object(或getobject) 权限(即写范围大于读范围)，这样会造成数据库内记录中原有的 dprms:file 元素丢失。请修改当前账户权限再重新操作";
                         return -1;
                     }
 
@@ -1654,7 +1654,7 @@ out strError);
             lRet = channel.GetRes(info.NewRecPath,
                 out string strExistXml,
                 out string strMetaData,
-                out byte [] exist_timestamp,
+                out byte[] exist_timestamp,
                 out string strOutputPath,
                 out strError);
             if (lRet == -1)
@@ -1875,7 +1875,7 @@ out strError);
 
                 // 新记录
                 XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
-                    "record", 
+                    "record",
                     domNew.OuterXml    // strNewXml
                     );
                 DomUtil.SetAttr(node, "recPath", info.NewRecPath);
@@ -1913,7 +1913,7 @@ out strError);
         // parameters:
         //      strBiblioRecPath    书目记录路径，仅包含库名和id部分。库名可以用来确定书目库，id可以被实体记录用来设置<parent>元素内容。另外书目库名和IssueInfo中的NewRecPath形成映照关系，需要检查它们是否正确对应
         //      issueinfos 要提交的的期信息数组
-        // 权限：需要有setissues权限
+        // 权限：需要有 setissueinfo 权限
         // 修改意见: 写入期库中的记录, 还缺乏<operator>和<operTime>字段
         // TODO: 需要改写，增加upgrade中直接写入不查重不创建事件日志的功能
         // TODO: 需要检查订购记录的<parent>元素内容是否合法。不能为问号
@@ -1932,7 +1932,7 @@ out strError);
             string strError = "";
 
             // 2023/2/21
-            { 
+            {
                 string db_type = this.ItemNameInternal.ToLower();
                 string type_name = this.ItemName;
                 // 对读者身份的判断
@@ -1946,9 +1946,9 @@ out strError);
                 }
 
                 // 权限字符串
-                string list = $"set{db_type}info,write{db_type}object,writeobject";
+                string list = $"set{db_type}info,set{db_type}object,setobject";
                 if (db_type == "order")
-                    list = $"set{db_type}info,write{db_type}object,writeobject,order";
+                    list = $"set{db_type}info,set{db_type}object,setobject,order";
 
                 if (StringUtil.IsInList(list, sessioninfo.RightsOrigin) == false)
                 {
@@ -3335,7 +3335,9 @@ strError);
         //      -1  error
         //      0   not exist item dbname
         //      1   exist item dbname
-        public int SearchChildItems(RmsChannel channel,
+        public int SearchChildItems(
+            SessionInfo sessioninfo,
+            RmsChannel channel,
             string strBiblioRecPath,
             string strStyle,
             DigitalPlatform.LibraryServer.LibraryApplication.Delegate_checkRecord procCheckRecord,
@@ -3526,6 +3528,7 @@ strError);
                         if (procCheckRecord != null)
                         {
                             nRet = procCheckRecord(
+                                sessioninfo,
                                 nStart + i,
                                 strOutputPath,
                                 domExist,
@@ -3967,7 +3970,9 @@ strError);
             List<DeleteEntityInfo> entityinfos = null;
             long lHitCount = 0;
 
-            int nRet = SearchChildItems(channel,
+            int nRet = SearchChildItems(
+                null,
+                channel,
                 strBiblioRecPath,
                 "check_circulation_info", // 在DeleteEntityInfo结构中*不*返回OldRecord内容
                 (DigitalPlatform.LibraryServer.LibraryApplication.Delegate_checkRecord)null,
@@ -4447,35 +4452,33 @@ out string strError)
             bool changed = false;
 
             string db_type = this.ItemNameInternal.ToLower();
+            /*
             string alias_right = "";
             // 检查 db_type
             switch (db_type)
             {
                 case "item":
-                    alias_right = "getentities";
+                    // alias_right = "getentities";
                     break;
                 case "order":
-                    alias_right = "getorders";
+                    // alias_right = "getorders";
                     break;
                 case "issue":
-                    alias_right = "getissues";
+                    // alias_right = "getissues";
                     break;
                 case "comment":
-                    alias_right = "getcomments";
+                    // alias_right = "getcomments";
                     break;
                 default:
                     strError = $"无法识别的 db_type '{db_type}'";
                     return -1;
             }
+            */
 
             // 检查 getxxxinfo 基本权限
-            if (StringUtil.IsInList($"get{db_type}info", sessioninfo.RightsOrigin) == false
-                && (string.IsNullOrEmpty(alias_right) == false && StringUtil.IsInList(alias_right, sessioninfo.RightsOrigin) == false))
+            if (StringUtil.IsInList($"get{db_type}info", sessioninfo.RightsOrigin) == false)
             {
-                if (string.IsNullOrEmpty(alias_right))
-                    strError = $"当前用户不具备 get{db_type}info 权限";
-                else
-                    strError = $"当前用户不具备 get{db_type}info 或 {alias_right} 权限";
+                strError = $"当前用户不具备 get{db_type}info 权限";
                 return -2;
             }
 
