@@ -4,7 +4,7 @@ MD x86
 MD x64
 
 REM CD ..\packages\system.data.sqlite.core.1.0.110.*
-CD ..\packages\system.data.sqlite.core.1.0.116.*
+CD ..\packages\system.data.sqlite.core.1.0.117.*
 
 REM copy .\build\net46\x86\sqlite.interop.dll ..\..\dp2circulation\x86
 REM copy .\build\net46\x64\sqlite.interop.dll ..\..\dp2circulation\x64

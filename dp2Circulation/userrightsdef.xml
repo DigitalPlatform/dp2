@@ -1,619 +1,567 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
 <root>
-	<property name='borrow'>
-		<comment lang='zh'>借书</comment>
-		<comment lang='en'>borrow</comment>
-	</property>
-	<property name='return'>
-		<comment lang='zh'>还书</comment>
-		<comment lang='en'>return</comment>
-	</property>
-	<property name='renew'>
-		<comment lang='zh'>续借</comment>
-		<comment lang='en'>renew</comment>
-	</property>
-	<property name='lost'>
-		<comment lang='zh'>丢失</comment>
-		<comment lang='en'>lost</comment>
-	</property>
-	<property name='read'>
-		<comment lang='zh'>读过</comment>
-		<comment lang='en'>read</comment>
-	</property>
-	<property name='reservation'>
-		<comment lang='zh'>预约</comment>
-		<comment lang='en'>reservation books</comment>
-	</property>
-	<property name='order'>
-		<comment lang='zh'>采购</comment>
-		<comment lang='en'>order</comment>
-	</property>
-	<property name='setclock'>
-		<comment lang='zh'>设置系统时钟</comment>
-		<comment lang='en'>set system clock</comment>
-	</property>
-	<property name='changereaderpassword'>
-		<comment lang='zh'>修改读者密码</comment>
-		<comment lang='en'>change reader password</comment>
-	</property>
-	<property name='verifyreaderpassword'>
-		<comment lang='zh'>校验读者密码</comment>
-		<comment lang='en'>verify reader password</comment>
-	</property>
-	<property name='getbibliosummary'>
-		<comment lang='zh'>获得书目摘要</comment>
-		<comment lang='en'>get biblio summary</comment>
-	</property>
-	<property name='searchcharging'>
-		<comment lang='zh'>检索借阅历史</comment>
-		<comment lang='en'>search charging history</comment>
-	</property>
-	<property name='searchreader'>
-		<comment lang='zh'>检索读者</comment>
-		<comment lang='en'>search reader</comment>
-	</property>
-	<property name='getreaderinfo'>
-		<comment lang='zh'>获取读者信息</comment>
-		<comment lang='en'>get reader info</comment>
-	</property>
-	<property name='setreaderinfo'>
-		<comment lang='zh'>修改读者信息</comment>
-		<comment lang='en'>set reader info</comment>
-	</property>
-	<property name='movereaderinfo'>
-		<comment lang='zh'>移动读者信息</comment>
-		<comment lang='en'>move reader info</comment>
-	</property>
-	<property name='changereaderstate'>
-		<comment lang='zh'>仅修改读者信息中的状态和注释</comment>
-		<comment lang='en'>only change reader state and comment</comment>
-	</property>
-	<property name='changereaderbarcode'>
-		<comment lang='zh'>强制修改读者信息中的证条码号</comment>
-		<comment lang='en'>force change reader barcode</comment>
-	</property>
-	<property name='listdbfroms' alias='listbibliodbfroms'>
-		<comment lang='zh'>列出数据库检索途径</comment>
-		<comment lang='en'>list database froms</comment>
-	</property>
-	<property name='searchbiblio'>
-		<comment lang='zh'>检索书目库</comment>
-		<comment lang='en'>search biblio</comment>
-	</property>
-	<property name='searchbiblio_unlimited'>
-		<comment lang='zh'>不限制检索书目库的最大命中数</comment>
-		<comment lang='en'>unlimited result count of search biblio</comment>
-	</property>
-	<property name='getbiblioinfo'>
-		<comment lang='zh'>获得书目信息</comment>
-		<comment lang='en'>get biblio info</comment>
-	</property>
-
-	<property name='getauthorityinfo'>
-		<comment lang='zh'>获得规范信息</comment>
-		<comment lang='en'>get authority info</comment>
-	</property>
-	<property name='getarrivedinfo'>
-		<comment lang='zh'>获得预约到书信息</comment>
-		<comment lang='en'>get arrived info</comment>
-	</property>
-	<property name='getpublisherinfo'>
-		<comment lang='zh'>获得出版者信息</comment>
-		<comment lang='en'>get publisher info</comment>
-	</property>
-	<property name='getzhongcihaoinfo'>
-		<comment lang='zh'>获得种次号信息</comment>
-		<comment lang='en'>get zhongcihao info</comment>
-	</property>
-	<property name='getdictionaryinfo'>
-		<comment lang='zh'>获得词典信息</comment>
-		<comment lang='en'>get dictionary info</comment>
-	</property>
-	<property name='getinventoryinfo'>
-		<comment lang='zh'>获得盘点信息</comment>
-		<comment lang='en'>get inventory info</comment>
-	</property>
-
-	<property name='searchauthority'>
-		<comment lang='zh'>检索规范库</comment>
-		<comment lang='en'>search authority</comment>
-	</property>
-	<property name='getauthorityinfo'>
-		<comment lang='zh'>获得规范信息</comment>
-		<comment lang='en'>get authority info</comment>
-	</property>
-	<property name='searchitem'>
-		<comment lang='zh'>检索册</comment>
-		<comment lang='en'>search item</comment>
-	</property>
-	<property name='getiteminfo' alias='getentities'>
-		<comment lang='zh'>获得册信息</comment>
-		<comment lang='en'>get item info</comment>
-	</property>
-	<property name='setiteminfo' alias='setentities'>
-		<comment lang='zh'>修改册</comment>
-		<comment lang='en'>set item info</comment>
-	</property>
-	<property name='getoperlog'>
-		<comment lang='zh'>获得操作日志</comment>
-		<comment lang='en'>get oper log</comment>
-	</property>
-	<property name='amerce'>
-		<comment lang='zh'>交费</comment>
-		<comment lang='en'>amerce</comment>
-	</property>
-	<property name='amercemodifyprice'>
-		<comment lang='zh'>变更费用之价格和注释</comment>
-		<comment lang='en'>modify amerce price and comment</comment>
-	</property>
-	<property name='amercemodifycomment'>
-		<comment lang='zh'>单独变更费用之注释部分(非追加式)</comment>
-		<comment lang='en'>only modify amerce comment</comment>
-	</property>
-	<property name='amerceundo'>
-		<comment lang='zh'>撤回交费</comment>
-		<comment lang='en'>amerce undo</comment>
-	</property>
-	<property name='getamerceinfo'>
-		<comment lang='zh'>获取违约金信息</comment>
-		<comment lang='en'>get amerce info</comment>
-	</property>
-	<property name='setamerceinfo'>
-		<comment lang='zh'>修改违约金信息</comment>
-		<comment lang='en'>set amerce info</comment>
-	</property>
-	<property name='inventory'>
-		<comment lang='zh'>盘点</comment>
-		<comment lang='en'>inventory</comment>
-	</property>
-	<property name='inventorydelete'>
-		<comment lang='zh'>删除盘点记录</comment>
-		<comment lang='en'>delete inventory record</comment>
-	</property>
-	<property name='getinventoryinfo'>
-		<comment lang='zh'>获取盘点信息</comment>
-		<comment lang='en'>get inventory info</comment>
-	</property>
-	<property name='setinventoryinfo'>
-		<comment lang='zh'>修改盘点信息</comment>
-		<comment lang='en'>set inventory info</comment>
-	</property>
-	<!--
-	<property name='search'>
-		<comment lang='zh'>检索(已废止)</comment>
-		<comment lang='en'>search</comment>
-	</property>
-	-->
-	<property name='searchamerce'>
-		<comment lang='zh'>检索违约金信息</comment>
-		<comment lang='en'>search amerce</comment>
-	</property>
-	<property name='searchinventory'>
-		<comment lang='zh'>检索盘点信息</comment>
-		<comment lang='en'>search inventory</comment>
-	</property>
-	<property name='searcharrived'>
-		<comment lang='zh'>检索预约到书信息</comment>
-		<comment lang='en'>search arrived</comment>
-	</property>
-	<property name='getcalendar'>
-		<comment lang='zh'>获得日历</comment>
-		<comment lang='en'>get calendar</comment>
-	</property>
-	<property name='changecalendar'>
-		<comment lang='zh'>修改日历</comment>
-		<comment lang='en'>change calendar</comment>
-	</property>
-	<property name='newcalendar'>
-		<comment lang='zh'>创建日历</comment>
-		<comment lang='en'>new calendar</comment>
-	</property>
-	<property name='deletecalendar'>
-		<comment lang='zh'>删除日历</comment>
-		<comment lang='en'>delete calendar</comment>
-	</property>
-
-
-	<property name='batchtask'>
-		<comment lang='zh'>批处理任务</comment>
-		<comment lang='en'>batch task</comment>
-	</property>
-	<property name='clearalldbs'>
-		<comment lang='zh'>清除所有数据库</comment>
-		<comment lang='en'>clear all dbs</comment>
-	</property>
-	<property name='devolvereaderinfo'>
-		<comment lang='zh'>转移读者信息</comment>
-		<comment lang='en'>devolve reader info</comment>
-	</property>
-	<property name='getuser'>
-		<comment lang='zh'>获得用户信息</comment>
-		<comment lang='en'>get user</comment>
-	</property>
-	<property name='changeuser'>
-		<comment lang='zh'>修改用户信息</comment>
-		<comment lang='en'>set user</comment>
-	</property>
-
-	<property name='newuser'>
-		<comment lang='zh'>创建新用户</comment>
-		<comment lang='en'>create new user</comment>
-	</property>
-	<property name='deleteuser'>
-		<comment lang='zh'>删除用户</comment>
-		<comment lang='en'>delete user</comment>
-	</property>
-
-	<property name='changeuserpassword'>
-		<comment lang='zh'>(强制)修改(其他)用户密码</comment>
-		<comment lang='en'>change user password</comment>
-	</property>
-
-	<property name='simulatereader'>
-		<comment lang='zh'>允许模拟读者登录</comment>
-		<comment lang='en'>Simulate Reader Login</comment>
-	</property>
-	<property name='simulateworker'>
-		<comment lang='zh'>允许模拟工作人员登录</comment>
-		<comment lang='en'>Simulate Worker Login</comment>
-	</property>
-
-	<property name='getsystemparameter'>
-		<comment lang='zh'>获得系统参数</comment>
-		<comment lang='en'>get system parameters</comment>
-	</property>
-
-	<property name='setsystemparameter'>
-		<comment lang='zh'>设置系统参数</comment>
-		<comment lang='en'>set system parameters</comment>
-	</property>
-
-	<property name='urgentrecover'>
-		<comment lang='zh'>应急恢复</comment>
-		<comment lang='en'>urgent recover</comment>
-	</property>
-
-	<property name='repairborrowinfo'>
-		<comment lang='zh'>修复借阅信息</comment>
-		<comment lang='en'>repair borrowinfo</comment>
-	</property>
-
-	<property name='passgate'>
-		<comment lang='zh'>入馆登记</comment>
-		<comment lang='en'>pass gate</comment>
-	</property>
-
-	<!-- new -->
-	<property name='getobject'>
-		<comment lang='zh'>获取对象</comment>
-		<comment lang='en'>get object</comment>
-	</property>
-	<property name='getbiblioobject'>
-		<comment lang='zh'>获取书目下属对象</comment>
-		<comment lang='en'>get biblio object</comment>
-	</property>
-	<property name='getreaderobject'>
-		<comment lang='zh'>获取读者下属对象</comment>
-		<comment lang='en'>get reader object</comment>
-	</property>
-	<property name='getorderobject'>
-		<comment lang='zh'>获取订购下属对象</comment>
-		<comment lang='en'>get order object</comment>
-	</property>
-	<property name='getissueobject'>
-		<comment lang='zh'>获取期下属对象</comment>
-		<comment lang='en'>get issue object</comment>
-	</property>
-	<property name='getitemobject'>
-		<comment lang='zh'>获取册下属对象</comment>
-		<comment lang='en'>get item object</comment>
-	</property>
-	<property name='getcommentobject'>
-		<comment lang='zh'>获取评注下属对象</comment>
-		<comment lang='en'>get comment object</comment>
-	</property>
-	<property name='getauthorityobject'>
-		<comment lang='zh'>获取规范下属对象</comment>
-		<comment lang='en'>get authority object</comment>
-	</property>
-	<property name='getamerceobject'>
-		<comment lang='zh'>获取违约金下属对象</comment>
-		<comment lang='en'>get amerce object</comment>
-	</property>
-	<property name='getarrivedobject'>
-		<comment lang='zh'>获取预约到书下属对象</comment>
-		<comment lang='en'>get arrived object</comment>
-	</property>
-	<property name='getpublisherobject'>
-		<comment lang='zh'>获取出版者下属对象</comment>
-		<comment lang='en'>get publisher object</comment>
-	</property>
-	<property name='getzhongcihaoobject'>
-		<comment lang='zh'>获取种次号下属对象</comment>
-		<comment lang='en'>get zhongcihao object</comment>
-	</property>
-	<property name='getdictionaryobject'>
-		<comment lang='zh'>获取词典下属对象</comment>
-		<comment lang='en'>get dictionary object</comment>
-	</property>
-	<property name='getinventoryobject'>
-		<comment lang='zh'>获取盘点下属对象</comment>
-		<comment lang='en'>get inventory object</comment>
-	</property>
-	<!--
-	<property name='getrecord'>
-		<comment lang='zh'>获取元数据记录(已废止)</comment>
-		<comment lang='en'>get metadata record</comment>
-	</property>
-	<property name='getcfgfile' comment='暂未使用'>
-		<comment lang='zh'>获取配置文件</comment>
-		<comment lang='en'>get config file</comment>
-	</property>
-	-->
-	
-	<!--
-	<property name='getres'>
-		<comment lang='zh'>获取资源</comment>
-		<comment lang='en'>get resource</comment>
-	</property>
-	<property name='writeres'>
-		<comment lang='zh'>修改资源</comment>
-		<comment lang='en'>write resource</comment>
-	</property>
-	-->
-	
-	<property name='setbiblioinfo'>
-		<comment lang='zh'>修改书目数据</comment>
-		<comment lang='en'>set biblio info</comment>
-	</property>
-	<property name='setauthorityinfo'>
-		<comment lang='zh'>修改规范数据</comment>
-		<comment lang='en'>set authority info</comment>
-	</property>
-	<property name='setarrivedinfo'>
-		<comment lang='zh'>修改预约到书数据</comment>
-		<comment lang='en'>set arrived info</comment>
-	</property>
-	<property name='setpublisherinfo'>
-		<comment lang='zh'>修改出版者数据</comment>
-		<comment lang='en'>set publisher info</comment>
-	</property>
-	<property name='setzhongcihaoinfo'>
-		<comment lang='zh'>修改种次号数据</comment>
-		<comment lang='en'>set zhongcihao info</comment>
-	</property>
-	<property name='setdictionaryinfo'>
-		<comment lang='zh'>修改词典数据</comment>
-		<comment lang='en'>set dictionary info</comment>
-	</property>
-	<property name='setinventoryinfo'>
-		<comment lang='zh'>修改盘点数据</comment>
-		<comment lang='en'>set inventory info</comment>
-	</property>
-	
-	<property name='hire'>
-		<comment lang='zh'>创建租金交费请求</comment>
-		<comment lang='en'>create hire record</comment>
-	</property>
-
-	<property name='foregift'>
-		<comment lang='zh'>创建押金交费请求</comment>
-		<comment lang='en'>create foregift record</comment>
-	</property>
-
-	<property name='returnforegift'>
-		<comment lang='zh'>创建押金退费请求</comment>
-		<comment lang='en'>create foregift returnback record</comment>
-	</property>
-
-	<property name='settlement'>
-		<comment lang='zh'>(费用)结算</comment>
-		<comment lang='en'>settlement</comment>
-	</property>
-	<property name='undosettlement'>
-		<comment lang='zh'>撤销(费用)结算</comment>
-		<comment lang='en'>undo settlement</comment>
-	</property>
-	<property name='deletesettlement'>
-		<comment lang='zh'>删除(费用)的结算记录</comment>
-		<comment lang='en'>delete settlement record</comment>
-	</property>
-
-	<property name='searchissue'>
-		<comment lang='zh'>检索期信息</comment>
-		<comment lang='en'>search issue</comment>
-	</property>
-	<property name='getissueinfo'>
-		<comment lang='zh'>获得期信息</comment>
-		<comment lang='en'>get issue info</comment>
-	</property>
-	<property name='setissueinfo' alias='setissues'>
-		<comment lang='zh'>修改期信息</comment>
-		<comment lang='en'>set issue info</comment>
-	</property>
-
-	<property name='searchorder'>
-		<comment lang='zh'>检索订购信息</comment>
-		<comment lang='en'>search order</comment>
-	</property>
-	<property name='getorderinfo'>
-		<comment lang='zh'>获得订购信息</comment>
-		<comment lang='en'>get order info</comment>
-	</property>
-	<property name='setorderinfo' alias='setorders'>
-		<comment lang='zh'>修改订购信息</comment>
-		<comment lang='en'>set order info</comment>
-	</property>
-	<property name='getcommentinfo'>
-		<comment lang='zh'>获得评注信息</comment>
-		<comment lang='en'>get comment info</comment>
-	</property>
-	<property name='setcommentinfo'>
-		<comment lang='zh'>修改评注信息</comment>
-		<comment lang='en'>set comment info</comment>
-	</property>
-
-	<property name='searchcomment'>
-		<comment lang='zh'>检索评注信息</comment>
-		<comment lang='en'>search comment</comment>
-	</property>
-
-	<property name='denychangemypassword'>
-		<comment lang='zh'>阻止修改自己的密码</comment>
-		<comment lang='en'>deny change my password</comment>
-	</property>
-	<property name='writeobject'>
-		<comment lang='zh'>写入对象资源</comment>
-		<comment lang='en'>write object resources</comment>
-	</property>
-	<property name='writebiblioobject'>
-		<comment lang='zh'>写入书目下属对象</comment>
-		<comment lang='en'>write biblio object</comment>
-	</property>
-	<property name='writereaderobject'>
-		<comment lang='zh'>写入读者下属对象</comment>
-		<comment lang='en'>write reader object</comment>
-	</property>
-	<property name='writeorderobject'>
-		<comment lang='zh'>写入订购下属对象</comment>
-		<comment lang='en'>write order object</comment>
-	</property>
-	<property name='writeissueobject'>
-		<comment lang='zh'>写入期下属对象</comment>
-		<comment lang='en'>write issue object</comment>
-	</property>
-	<property name='writeitemobject'>
-		<comment lang='zh'>写入册下属对象</comment>
-		<comment lang='en'>write item object</comment>
-	</property>
-	<property name='writecommentobject'>
-		<comment lang='zh'>写入评注下属对象</comment>
-		<comment lang='en'>write comment object</comment>
-	</property>
-	<property name='writeauthorityobject'>
-		<comment lang='zh'>写入规范下属对象</comment>
-		<comment lang='en'>write authority object</comment>
-	</property>
-	<property name='writeamerceobject'>
-		<comment lang='zh'>写入违约金下属对象</comment>
-		<comment lang='en'>write amerce object</comment>
-	</property>
-	<property name='writearrivedobject'>
-		<comment lang='zh'>写入预约到书下属对象</comment>
-		<comment lang='en'>write arrived object</comment>
-	</property>
-	<property name='writepublisherobject'>
-		<comment lang='zh'>写入出版者下属对象</comment>
-		<comment lang='en'>write publisher object</comment>
-	</property>
-	<property name='writezhongcihaoobject'>
-		<comment lang='zh'>写入种次号下属对象</comment>
-		<comment lang='en'>write zhongcihao object</comment>
-	</property>
-	<property name='writedictionaryobject'>
-		<comment lang='zh'>写入词典下属对象</comment>
-		<comment lang='en'>write dictionary object</comment>
-	</property>
-	<property name='writeinventoryobject'>
-		<comment lang='zh'>写入盘点下属对象</comment>
-		<comment lang='en'>write inventory object</comment>
-	</property>
-	<property name='writerecord' comment='危险权限'>
-		<comment lang='zh'>写入各种元数据记录</comment>
-		<comment lang='en'>write metadata records</comment>
-	</property>
-	
-	<!-- new 写入各种配置文件，包括模板配置文件 -->
-	<property name='writecfgfile'>
-		<comment lang='zh'>写入配置文件</comment>
-		<comment lang='en'>write config file</comment>
-	</property>
-	<property name='writetemplate'>
-		<comment lang='zh'>写入模板</comment>
-		<comment lang='en'>write template</comment>
-	</property>
-	<property name='managedatabase'>
-		<comment lang='zh'>管理数据库</comment>
-		<comment lang='en'>manage database</comment>
-	</property>
-	<property name='backup'>
-		<comment lang='zh'>备份</comment>
-		<comment lang='en'>Backup</comment>
-	</property>
-	<property name='restore'>
-		<comment lang='zh'>完整还原数据记录</comment>
-		<comment lang='en'>restore data record</comment>
-	</property>
-	<property name='managecache'>
-		<comment lang='zh'>管理缓存</comment>
-		<comment lang='en'>Manage Cache</comment>
-	</property>
-	<property name='managecomment'>
-		<comment lang='zh'>管理评注</comment>
-		<comment lang='en'>Manage Comment</comment>
-	</property>
-	<property name='manageopac'>
-		<comment lang='zh'>管理 OPAC</comment>
-		<comment lang='en'>Manage OPAC</comment>
-	</property>
-	<property name='settailnumber'>
-		<comment lang='zh'>设置种次号尾号</comment>
-		<comment lang='en'>Set Tail Number</comment>
-	</property>
-	<property name='setutilinfo'>
-		<comment lang='zh'>设置实用库记录信息</comment>
-		<comment lang='en'>Set Util Info</comment>
-	</property>
-	<property name='getpatrontempid'>
-		<comment lang='zh'>获得读者识别码</comment>
-		<comment lang='en'>Get Patron Identifier</comment>
-	</property>
-	<property name='getchannelinfo'>
-		<comment lang='zh'>获得通道信息</comment>
-		<comment lang='en'>Get Channel Information</comment>
-	</property>
-	<property name='managechannel'>
-		<comment lang='zh'>管理服务器通道</comment>
-		<comment lang='en'>Manage Server Channel</comment>
-	</property>
-	<property name='viewreport'>
-		<comment lang='zh'>观看报表</comment>
-		<comment lang='en'>View Report</comment>
-	</property>
-	<property name='upload'>
-		<comment lang='zh'>上传文件</comment>
-		<comment lang='en'>Upload Files</comment>
-	</property>
-	<property name='download'>
-		<comment lang='zh'>下载文件</comment>
-		<comment lang='en'>Download Files</comment>
-	</property>
-	<property name='checkclientversion'>
-		<comment lang='zh'>检查前端版本</comment>
-		<comment lang='en'>Check Client Version</comment>
-	</property>
-	<property name='bindpatron'>
-		<comment lang='zh'>为读者绑定号码</comment>
-		<comment lang='en'>Bind Number to Patron</comment>
-	</property>
-	<property name='client_uimodifyorderrecord'>
-		<comment lang='zh'>前端允许界面直接修改订购记录</comment>
-		<comment lang='en'>Client UI Allow Modify Order Record</comment>
-	</property>
-	<property name='client_forceverifydata'>
-		<comment lang='zh'>前端保存记录时是否强制校验数据。校验时如果发现数据有错，会拒绝保存</comment>
-		<comment lang='en'>Client Force Verify Data</comment>
-	</property>
-	<property name='client_deletebibliosubrecords'>
-		<comment lang='zh'>前端删除书目记录时是否强制删除下属的实体、期、订购、评注记录。如果不具备此权限，则需要下属记录全部删除以后才能删除书目记录</comment>
-		<comment lang='en'>Client Delete Biblio Subrecords</comment>
-	</property>
-	<property name='client_simulateborrow'>
-		<comment lang='zh'>前端允许进行模拟借还操作</comment>
-		<comment lang='en'>Client Simulate Borrow</comment>
-	</property>
-	<property name='client_multiplecharging'>
-		<comment lang='zh'>前端允许进行复选借还操作</comment>
-		<comment lang='en'>Client Multiple Charging</comment>
+	<!--获取系统配置-->
+	<property name="getsystemparameter" risklevel="1">
+		<comment lang="zh">获得系统参数</comment>
+		<comment lang="en">get system parameters</comment>
+	</property>
+	<property name="setsystemparameter" risklevel="2">
+		<comment lang="zh">设置系统参数</comment>
+		<comment lang="en">set system parameters</comment>
+	</property>
+	<property name="listdbfroms" risklevel="1">
+		<comment lang="zh">列出数据库检索途径</comment>
+		<comment lang="en">list database froms</comment>
+	</property>
+	<!--流通-->
+	<property name="borrow" risklevel="1">
+		<comment lang="zh">借书</comment>
+		<comment lang="en">borrow</comment>
+	</property>
+	<property name="return" risklevel="1">
+		<comment lang="zh">还书</comment>
+		<comment lang="en">return</comment>
+	</property>
+	<property name="renew" risklevel="1">
+		<comment lang="zh">续借</comment>
+		<comment lang="en">renew</comment>
+	</property>
+	<property name="lost" risklevel="1">
+		<comment lang="zh">丢失</comment>
+		<comment lang="en">lost</comment>
+	</property>
+	<property name="read" risklevel="1">
+		<comment lang="zh">读过</comment>
+		<comment lang="en">read</comment>
+	</property>
+	<!--读者(reader）-->
+	<property name="searchreader" risklevel="1">
+		<comment lang="zh">检索读者</comment>
+		<comment lang="en">search reader</comment>
+	</property>
+	<property name="getreaderinfo" risklevel="1">
+		<comment lang="zh">获取读者信息</comment>
+		<comment lang="en">get reader info</comment>
+	</property>
+	<property name="getreaderobject" risklevel="">
+		<comment lang="zh">获取读者下属对象</comment>
+		<comment lang="en">get reader object</comment>
+	</property>
+	<property name="setreaderinfo" risklevel="2">
+		<comment lang="zh">修改读者信息</comment>
+		<comment lang="en">set reader info</comment>
+	</property>
+	<property name="setreaderobject" risklevel="2">
+		<comment lang="zh">仅能写入读者下的对象</comment>
+		<comment lang="en">set reader object</comment>
+	</property>
+	<property name="getpatrontempid" risklevel="1">
+		<comment lang="zh">获得读者识别码</comment>
+		<comment lang="en">Get Patron Identifier</comment>
+	</property>
+	<property name="changereaderpassword" risklevel="2">
+		<comment lang="zh">修改读者密码</comment>
+		<comment lang="en">change reader password</comment>
+	</property>
+	<property name="verifyreaderpassword" risklevel="2">
+		<comment lang="zh">校验读者密码</comment>
+		<comment lang="en">verify reader password</comment>
+	</property>
+	<property name="movereaderinfo" risklevel="2">
+		<comment lang="zh">移动读者信息</comment>
+		<comment lang="en">move reader info</comment>
+	</property>
+	<property name="changereaderstate" risklevel="1">
+		<comment lang="zh">仅修改读者信息中的状态和注释</comment>
+		<comment lang="en">only change reader state and comment</comment>
+	</property>
+	<property name="changereaderbarcode" risklevel="2">
+		<comment lang="zh">强制修改读者信息中的证条码号</comment>
+		<comment lang="en">force change reader barcode</comment>
+	</property>
+	<property name="devolvereaderinfo" risklevel="2">
+		<comment lang="zh">转移读者信息</comment>
+		<comment lang="en">devolve reader info</comment>
+	</property>
+	<property name="searchcharging" risklevel="1">
+		<comment lang="zh">检索借阅历史</comment>
+		<comment lang="en">search charging history</comment>
+	</property>
+	<property name="passgate" risklevel="1">
+		<comment lang="zh">入馆登记</comment>
+		<comment lang="en">pass gate</comment>
+	</property>
+	<!--书目(biblio)-->
+	<property name="searchbiblio" risklevel="1">
+		<comment lang="zh">检索书目库</comment>
+		<comment lang="en">search biblio</comment>
+	</property>
+	<property name="getbiblioinfo" risklevel="1">
+		<comment lang="zh">获得书目信息</comment>
+		<comment lang="en">get biblio info</comment>
+	</property>
+	<property name="getbiblioobject" risklevel="1">
+		<comment lang="zh">获取书目下属对象</comment>
+		<comment lang="en">get biblio object</comment>
+	</property>
+	<property name="setbiblioinfo" risklevel="2">
+		<comment lang="zh">修改书目数据</comment>
+		<comment lang="en">set biblio info</comment>
+	</property>
+	<property name="setbiblioobject" risklevel="2">
+		<comment lang="zh">仅能写入书目下的对象</comment>
+		<comment lang="en">set biblio object</comment>
+	</property>
+	<property name="getbibliosummary" risklevel="1">
+		<comment lang="zh">获得书目摘要</comment>
+		<comment lang="en">get biblio info</comment>
+	</property>
+	<property name="searchbiblio_unlimited" risklevel="3">
+		<comment lang="zh">不限制检索书目库的最大命中数</comment>
+		<comment lang="en">unlimited result count of search biblio</comment>
+	</property>
+	<!--册(item)-->
+	<property name="searchitem" risklevel="1">
+		<comment lang="zh">检索册</comment>
+		<comment lang="en">search item</comment>
+	</property>
+	<property name="getiteminfo" risklevel="1">
+		<comment lang="zh">获得册信息</comment>
+		<comment lang="en">get item info</comment>
+	</property>
+	<property name="getitemobject" risklevel="1">
+		<comment lang="zh">获取册下属对象</comment>
+		<comment lang="en">get item object</comment>
+	</property>
+	<property name="setiteminfo" risklevel="2">
+		<comment lang="zh">修改册</comment>
+		<comment lang="en">set item info</comment>
+	</property>
+	<property name="setitemobject" risklevel="2">
+		<comment lang="zh">仅能写入册下属对象</comment>
+		<comment lang="en">set item object</comment>
+	</property>
+	<!--期刊(issue)-->
+	<property name="searchissue" risklevel="1">
+		<comment lang="zh">检索期信息</comment>
+		<comment lang="en">search issue</comment>
+	</property>
+	<property name="getissueinfo" risklevel="1">
+		<comment lang="zh">获得期信息</comment>
+		<comment lang="en">get issue info</comment>
+	</property>
+	<property name="getissueobject" risklevel="1">
+		<comment lang="zh">获取期下属对象</comment>
+		<comment lang="en">get issue object</comment>
+	</property>
+	<property name="setissueinfo" risklevel="2">
+		<comment lang="zh">修改期信息</comment>
+		<comment lang="en">set issue info</comment>
+	</property>
+	<property name="setissueobject" risklevel="2">
+		<comment lang="zh">写入期下属对象</comment>
+		<comment lang="en">set issue object</comment>
+	</property>
+	<!--订购(order)-->
+	<property name="order" risklevel="1">
+		<comment lang="zh">采购</comment>
+		<comment lang="en">order</comment>
+	</property>
+	<property name="searchorder" risklevel="1">
+		<comment lang="zh">检索订购信息</comment>
+		<comment lang="en">search order</comment>
+	</property>
+	<property name="getorderinfo" risklevel="1">
+		<comment lang="zh">获得订购信息</comment>
+		<comment lang="en">get order info</comment>
+	</property>
+	<property name="getorderobject" risklevel="1">
+		<comment lang="zh">获取订购下属对象</comment>
+		<comment lang="en">get order object</comment>
+	</property>
+	<property name="setorderinfo" risklevel="2">
+		<comment lang="zh">修改订购信息</comment>
+		<comment lang="en">set order info</comment>
+	</property>
+	<property name="setorderobject" risklevel="1">
+		<comment lang="zh">写入订购下属对象</comment>
+		<comment lang="en">set order object</comment>
+	</property>
+	<!--违约金(amerce)/租金/押金-->
+	<property name="searchamerce" risklevel="1">
+		<comment lang="zh">检索违约金信息</comment>
+		<comment lang="en">search amerce</comment>
+	</property>
+	<property name="getamerceinfo" risklevel="1">
+		<comment lang="zh">获取违约金信息</comment>
+		<comment lang="en">get amerce info</comment>
+	</property>
+	<property name="getamerceobject" risklevel="1">
+		<comment lang="zh">获取违约金下属对象</comment>
+		<comment lang="en">get amerce object</comment>
+	</property>
+	<property name="setamerceinfo" risklevel="2">
+		<comment lang="zh">修改违约金信息</comment>
+		<comment lang="en">set amerce info</comment>
+	</property>
+	<property name="setamerceobject" risklevel="2">
+		<comment lang="zh">写入违约金下属对象</comment>
+		<comment lang="en">set amerce object</comment>
+	</property>
+	<property name="amerce" risklevel="1">
+		<comment lang="zh">交费</comment>
+		<comment lang="en">amerce</comment>
+	</property>
+	<property name="amerceundo" risklevel="1">
+		<comment lang="zh">撤回交费</comment>
+		<comment lang="en">amerce undo</comment>
+	</property>
+	<property name="amercemodifyprice" risklevel="1">
+		<comment lang="zh">变更费用之价格和注释</comment>
+		<comment lang="en">modify amerce price and comment</comment>
+	</property>
+	<property name="amercemodifycomment" risklevel="1">
+		<comment lang="zh">单独变更费用之注释部分(非追加式)</comment>
+		<comment lang="en">only modify amerce comment</comment>
+	</property>
+	<property name="settlement" risklevel="2">
+		<comment lang="zh">(费用)结算</comment>
+		<comment lang="en">settlement</comment>
+	</property>
+	<property name="undosettlement" risklevel="2">
+		<comment lang="zh">撤销(费用)结算</comment>
+		<comment lang="en">undo settlement</comment>
+	</property>
+	<property name="deletesettlement" risklevel="2">
+		<comment lang="zh">删除(费用)的结算记录</comment>
+		<comment lang="en">delete settlement record</comment>
+	</property>
+	<property name="hire" risklevel="1">
+		<comment lang="zh">创建租金交费请求</comment>
+		<comment lang="en">create hire record</comment>
+	</property>
+	<property name="foregift" risklevel="1">
+		<comment lang="zh">创建押金交费请求</comment>
+		<comment lang="en">create foregift record</comment>
+	</property>
+	<property name="returnforegift" risklevel="1">
+		<comment lang="zh">创建押金退费请求</comment>
+		<comment lang="en">create foregift returnback record</comment>
+	</property>
+	<!--评注(comment)-->
+	<property name="searchcomment" risklevel="1">
+		<comment lang="zh">检索评注信息</comment>
+		<comment lang="en">search comment</comment>
+	</property>
+	<property name="getcommentinfo" risklevel="1">
+		<comment lang="zh">获得评注信息</comment>
+		<comment lang="en">get comment info</comment>
+	</property>
+	<property name="getcommentobject" risklevel="1">
+		<comment lang="zh">获取评注下属对象</comment>
+		<comment lang="en">get comment object</comment>
+	</property>
+	<property name="setcommentinfo" risklevel="2">
+		<comment lang="zh">修改评注信息</comment>
+		<comment lang="en">set comment info</comment>
+	</property>
+	<property name="setcommentobject" risklevel="2">
+		<comment lang="zh">写入评注下属对象</comment>
+		<comment lang="en">set comment object</comment>
+	</property>
+	<property name="managecomment" risklevel="3">
+		<comment lang="zh">管理评注</comment>
+		<comment lang="en">Manage Comment</comment>
+	</property>
+	<!--规范库(authority)-->
+	<property name="searchauthority" risklevel="1">
+		<comment lang="zh">检索规范库</comment>
+		<comment lang="en">search authority</comment>
+	</property>
+	<property name="getauthorityinfo" risklevel="1">
+		<comment lang="zh">获得规范信息</comment>
+		<comment lang="en">get authority info</comment>
+	</property>
+	<property name="getauthorityobject" risklevel="1">
+		<comment lang="zh">获取规范下属对象</comment>
+		<comment lang="en">get authority object</comment>
+	</property>
+	<property name="setauthorityinfo" risklevel="2">
+		<comment lang="zh">修改规范数据</comment>
+		<comment lang="en">set authority info</comment>
+	</property>
+	<property name="setauthorityobject" risklevel="2">
+		<comment lang="zh">写入规范下属对象</comment>
+		<comment lang="en">set authority object</comment>
+	</property>
+	<!--预约相关权限-->
+	<property name="reservation" risklevel="1">
+		<comment lang="zh">预约</comment>
+		<comment lang="en">reservation books</comment>
+	</property>
+	<property name="searcharrived" risklevel="1">
+		<comment lang="zh">检索预约到书信息</comment>
+		<comment lang="en">search arrived</comment>
+	</property>
+	<property name="getarrivedinfo" risklevel="1">
+		<comment lang="zh">获得预约到书信息</comment>
+		<comment lang="en">get arrived info</comment>
+	</property>
+	<property name="getarrivedobject" risklevel="1">
+		<comment lang="zh">获取预约到书下属对象</comment>
+		<comment lang="en">get arrived object</comment>
+	</property>
+	<property name="setarrivedinfo" risklevel="2">
+		<comment lang="zh">修改预约到书数据</comment>
+		<comment lang="en">set arrived info</comment>
+	</property>
+	<property name="setarrivedobject" risklevel="2">
+		<comment lang="zh">写入预约到书下属对象</comment>
+		<comment lang="en">set arrived object</comment>
+	</property>
+	<!--盘点-->
+	<property name="searchinventory" risklevel="1">
+		<comment lang="zh">检索盘点信息</comment>
+		<comment lang="en">search inventory</comment>
+	</property>
+	<property name="getinventoryinfo" risklevel="1">
+		<comment lang="zh">获得盘点信息</comment>
+		<comment lang="en">get inventory info</comment>
+	</property>
+	<property name="getinventoryobject" risklevel="1">
+		<comment lang="zh">获取盘点下属对象</comment>
+		<comment lang="en">get inventory object</comment>
+	</property>
+	<property name="setinventoryinfo" risklevel="2">
+		<comment lang="zh">修改盘点信息</comment>
+		<comment lang="en">set inventory info</comment>
+	</property>
+	<property name="setinventoryobject" risklevel="2">
+		<comment lang="zh">写入盘点下属对象</comment>
+		<comment lang="en">set inventory object</comment>
+	</property>
+	<property name="inventory" risklevel="2">
+		<comment lang="zh">盘点</comment>
+		<comment lang="en">inventory</comment>
+	</property>
+	<property name="inventorydelete" risklevel="2">
+		<comment lang="zh">删除盘点记录</comment>
+		<comment lang="en">delete inventory record</comment>
+	</property>
+	<!--出版者-->
+	<property name="getpublisherinfo" risklevel="1">
+		<comment lang="zh">获得出版者信息</comment>
+		<comment lang="en">get publisher info</comment>
+	</property>
+	<property name="getpublisherobject" risklevel="1">
+		<comment lang="zh">获取出版者下属对象</comment>
+		<comment lang="en">get publisher object</comment>
+	</property>
+	<property name="setpublisherinfo" risklevel="2">
+		<comment lang="zh">修改出版者数据</comment>
+		<comment lang="en">set publisher info</comment>
+	</property>
+	<property name="setpublisherobject" risklevel="2">
+		<comment lang="zh">写入出版者下属对象</comment>
+		<comment lang="en">set publisher object</comment>
+	</property>
+	<!--种次号-->
+	<property name="getzhongcihaoinfo" risklevel="1">
+		<comment lang="zh">获取种次号数据</comment>
+		<comment lang="en">get zhongcihao info</comment>
+	</property>
+	<property name="getzhongcihaoobject" risklevel="1">
+		<comment lang="zh">获取种次号下属对象</comment>
+		<comment lang="en">get zhongcihao object</comment>
+	</property>
+	<property name="setzhongcihaoinfo" risklevel="2">
+		<comment lang="zh">修改种次号数据</comment>
+		<comment lang="en">set zhongcihao info</comment>
+	</property>
+	<property name="setzhongcihaoobject" risklevel="2">
+		<comment lang="zh">写入种次号下属对象</comment>
+		<comment lang="en">set zhongcihao object</comment>
+	</property>
+	<property name="settailnumber" risklevel="2">
+		<comment lang="zh">设置种次号尾号</comment>
+		<comment lang="en">Set Tail Number</comment>
+	</property>
+	<!--出版者-->
+	<property name="getdictionaryinfo" risklevel="1">
+		<comment lang="zh">获得词典数据</comment>
+		<comment lang="en">get dictionary info</comment>
+	</property>
+	<property name="getdictionaryobject" risklevel="1">
+		<comment lang="zh">获取词典下属对象</comment>
+		<comment lang="en">get dictionary object</comment>
+	</property>
+	<property name="setdictionaryinfo" risklevel="2">
+		<comment lang="zh">修改词典数据</comment>
+		<comment lang="en">set dictionary info</comment>
+	</property>
+	<property name="setdictionaryobject" risklevel="2">
+		<comment lang="zh">写入词典下属对象</comment>
+		<comment lang="en">set dictionary object</comment>
+	</property>
+	<!--开馆日历(calendar)-->
+	<property name="getcalendar" risklevel="1">
+		<comment lang="zh">获得日历</comment>
+		<comment lang="en">get calendar</comment>
+	</property>
+	<property name="newcalendar" risklevel="2">
+		<comment lang="zh">创建日历</comment>
+		<comment lang="en">new calendar</comment>
+	</property>
+	<property name="changecalendar" risklevel="2">
+		<comment lang="zh">修改日历</comment>
+		<comment lang="en">change calendar</comment>
+	</property>
+	<property name="deletecalendar" risklevel="2">
+		<comment lang="zh">删除日历</comment>
+		<comment lang="en">delete calendar</comment>
+	</property>
+	<!--数据库-->
+	<property name="clearalldbs" risklevel="3">
+		<comment lang="zh">清除所有数据库</comment>
+		<comment lang="en">clear all dbs</comment>
+	</property>
+	<property name="managedatabase" risklevel="3">
+		<comment lang="zh">管理数据库</comment>
+		<comment lang="en">manage database</comment>
+	</property>
+	<!--工作人员账员-->
+	<property name="getuser" risklevel="1">
+		<comment lang="zh">获得用户信息</comment>
+		<comment lang="en">get user</comment>
+	</property>
+	<property name="newuser" risklevel="2">
+		<comment lang="zh">创建新用户</comment>
+		<comment lang="en">create new user</comment>
+	</property>
+	<property name="changeuser" risklevel="2">
+		<comment lang="zh">修改用户信息</comment>
+		<comment lang="en">set user</comment>
+	</property>
+	<property name="deleteuser" risklevel="2">
+		<comment lang="zh">删除用户</comment>
+		<comment lang="en">delete user</comment>
+	</property>
+	<property name="changeuserpassword" risklevel="2">
+		<comment lang="zh">(强制)修改(其他)用户密码</comment>
+		<comment lang="en">change user password</comment>
+	</property>
+	<property name="denychangemypassword" risklevel="2">
+		<comment lang="zh">阻止修改自己的密码</comment>
+		<comment lang="en">deny change my password</comment>
+	</property>
+	<!--通道管理-->
+	<property name="getchannelinfo" risklevel="1">
+		<comment lang="zh">获得通道信息</comment>
+		<comment lang="en">Get Channel Information</comment>
+	</property>
+	<property name="managechannel" risklevel="2">
+		<comment lang="zh">管理服务器通道</comment>
+		<comment lang="en">Manage Server Channel</comment>
+	</property>
+	<!--OPAC-->
+	<property name="viewreport" risklevel="1">
+		<comment lang="zh">观看报表</comment>
+		<comment lang="en">View Report</comment>
+	</property>
+	<property name="manageopac" risklevel="2">
+		<comment lang="zh">管理 OPAC</comment>
+		<comment lang="en">Manage OPAC</comment>
+	</property>
+	<property name="managecache" risklevel="2">
+		<comment lang="zh">管理缓存</comment>
+		<comment lang="en">Manage Cache</comment>
+	</property>
+	<!--其他管理权限-->
+	<property name="getoperlog" risklevel="1">
+		<comment lang="zh">获得操作日志</comment>
+		<comment lang="en">get oper log</comment>
+	</property>
+	<property name="setclock" risklevel="2">
+		<comment lang="zh">设置系统时钟</comment>
+		<comment lang="en">set system clock</comment>
+	</property>
+	<property name="backup" risklevel="2">
+		<comment lang="zh">备份</comment>
+		<comment lang="en">Backup</comment>
+	</property>
+	<property name="batchtask" risklevel="2">
+		<comment lang="zh">批处理任务</comment>
+		<comment lang="en">batch task</comment>
+	</property>
+	<property name="upload" risklevel="2">
+		<comment lang="zh">上传文件</comment>
+		<comment lang="en">Upload Files</comment>
+	</property>
+	<property name="download" risklevel="2">
+		<comment lang="zh">下载文件</comment>
+		<comment lang="en">Download Files</comment>
+	</property>
+	<property name="writetemplate" risklevel="2">
+		<comment lang="zh">写入模板</comment>
+		<comment lang="en">write template</comment>
+	</property>
+	<property name="writecfgfile" risklevel="2">
+		<comment lang="zh">写入配置文件</comment>
+		<comment lang="en">write config file</comment>
+	</property>
+	<property name="repairborrowinfo" risklevel="2">
+		<comment lang="zh">修复借阅信息</comment>
+		<comment lang="en">repair borrowinfo</comment>
+	</property>
+	<property name="setutilinfo" risklevel="3">
+		<comment lang="zh">设置实用库记录信息</comment>
+		<comment lang="en">Set Util Info</comment>
+	</property>
+	<property name="simulatereader" risklevel="2">
+		<comment lang="zh">允许模拟读者登录</comment>
+		<comment lang="en">Simulate Reader Login</comment>
+	</property>
+	<property name="simulateworker" risklevel="2">
+		<comment lang="zh">允许模拟工作人员登录</comment>
+		<comment lang="en">Simulate Worker Login</comment>
+	</property>
+	<property name="restore" risklevel="3">
+		<comment lang="zh">完整还原数据记录</comment>
+		<comment lang="en">restore data record</comment>
+	</property>
+	<property name="urgentrecover" risklevel="3">
+		<comment lang="zh">应急恢复</comment>
+		<comment lang="en">urgent recover</comment>
+	</property>
+	<!--前端使用的权限-->
+	<property name="checkclientversion" risklevel="2">
+		<comment lang="zh">检查前端版本</comment>
+		<comment lang="en">
+		</comment>
+	</property>
+	<property name="client_uimodifyorderrecord" risklevel="1">
+		<comment lang="zh">前端允许界面直接修改订购记录</comment>
+		<comment lang="en">Client UI Allow Modify Order Record</comment>
+	</property>
+	<property name="client_forceverifydata" risklevel="1">
+		<comment lang="zh">前端保存记录时是否强制校验数据。校验时如果发现数据有错，会拒绝保存</comment>
+		<comment lang="en">Client Force Verify Data</comment>
+	</property>
+	<property name="client_deletebibliosubrecords" risklevel="1">
+		<comment lang="zh">前端删除书目记录时是否强制删除下属的实体、期、订购、评注记录。如果不具备此权限，则需要下属记录全部删除以后才能删除书目记录</comment>
+		<comment lang="en">Client Delete Biblio Subrecords</comment>
+	</property>
+	<property name="client_simulateborrow" risklevel="1">
+		<comment lang="zh">前端允许进行模拟借还操作</comment>
+		<comment lang="en">Client Simulate Borrow</comment>
+	</property>
+	<property name="client_multiplecharging" risklevel="1">
+		<comment lang="zh">前端允许进行复选借还操作</comment>
+		<comment lang="en">Client Multiple Charging</comment>
+	</property>
+	<!--微信公众号-->
+	<property name="bindpatron" risklevel="1">
+		<comment lang="zh">为读者绑定号码</comment>
+		<comment lang="en">bind patron</comment>
 	</property>
 </root>

@@ -7,10 +7,12 @@ using System.Xml;
 using System.Text;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.Core;
+using DigitalPlatform.GUI;
 
 namespace DigitalPlatform.CommonControl
 {
@@ -29,14 +31,13 @@ namespace DigitalPlatform.CommonControl
 
         List<string> _langNameList = null;	// 配置中出现过的语言类型
 
-        ListViewItem tipsItem = null;
+        // ListViewItem tipsItem = null;
 
         private System.Windows.Forms.Label label_property;
         private System.Windows.Forms.TextBox textBox_property;
         private System.Windows.Forms.Button button_Cancel;
         private System.Windows.Forms.Button button_OK;
         private DigitalPlatform.GUI.ListViewNF listView_property;
-        private System.Windows.Forms.ToolTip toolTip_comment;
         private System.Windows.Forms.Button button_checkAll;
         private System.Windows.Forms.Button button_uncheckAll;
         private SplitContainer splitContainer_main;
@@ -87,21 +88,20 @@ namespace DigitalPlatform.CommonControl
             this.button_Cancel = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
             this.listView_property = new DigitalPlatform.GUI.ListViewNF();
-            this.toolTip_comment = new System.Windows.Forms.ToolTip(this.components);
             this.button_checkAll = new System.Windows.Forms.Button();
             this.button_uncheckAll = new System.Windows.Forms.Button();
             this.splitContainer_main = new System.Windows.Forms.SplitContainer();
             this.panel_up = new System.Windows.Forms.Panel();
-            this.panel_down = new System.Windows.Forms.Panel();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripDropDownButton_quickSet = new System.Windows.Forms.ToolStripDropDownButton();
+            this.panel_down = new System.Windows.Forms.Panel();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).BeginInit();
             this.splitContainer_main.Panel1.SuspendLayout();
             this.splitContainer_main.Panel2.SuspendLayout();
             this.splitContainer_main.SuspendLayout();
             this.panel_up.SuspendLayout();
-            this.panel_down.SuspendLayout();
             this.toolStrip1.SuspendLayout();
+            this.panel_down.SuspendLayout();
             this.SuspendLayout();
             // 
             // label_property
@@ -116,8 +116,8 @@ namespace DigitalPlatform.CommonControl
             // 
             // textBox_property
             // 
-            this.textBox_property.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.textBox_property.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_property.Location = new System.Drawing.Point(0, 31);
             this.textBox_property.MaxLength = 0;
@@ -152,33 +152,22 @@ namespace DigitalPlatform.CommonControl
             // 
             // listView_property
             // 
-            this.listView_property.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.listView_property.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.listView_property.CheckBoxes = true;
             this.listView_property.FullRowSelect = true;
             this.listView_property.HideSelection = false;
             this.listView_property.Location = new System.Drawing.Point(0, 0);
             this.listView_property.Name = "listView_property";
+            this.listView_property.ShowItemToolTips = true;
             this.listView_property.Size = new System.Drawing.Size(795, 296);
             this.listView_property.TabIndex = 0;
             this.listView_property.UseCompatibleStateImageBehavior = false;
             this.listView_property.View = System.Windows.Forms.View.Details;
             this.listView_property.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView_property_ColumnClick);
             this.listView_property.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.listView_property_ItemCheck);
-            this.listView_property.MouseMove += new System.Windows.Forms.MouseEventHandler(this.listView_property_MouseMove);
             this.listView_property.MouseUp += new System.Windows.Forms.MouseEventHandler(this.listView_property_MouseUp);
-            // 
-            // toolTip_comment
-            // 
-            this.toolTip_comment.AutomaticDelay = 1000;
-            this.toolTip_comment.AutoPopDelay = 5000;
-            this.toolTip_comment.InitialDelay = 1000;
-            this.toolTip_comment.IsBalloon = true;
-            this.toolTip_comment.ReshowDelay = 1000;
-            this.toolTip_comment.ShowAlways = true;
-            this.toolTip_comment.UseAnimation = false;
-            this.toolTip_comment.UseFading = false;
             // 
             // button_checkAll
             // 
@@ -204,8 +193,8 @@ namespace DigitalPlatform.CommonControl
             // 
             // splitContainer_main
             // 
-            this.splitContainer_main.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.splitContainer_main.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.splitContainer_main.Location = new System.Drawing.Point(16, 17);
             this.splitContainer_main.Name = "splitContainer_main";
@@ -235,16 +224,6 @@ namespace DigitalPlatform.CommonControl
             this.panel_up.Size = new System.Drawing.Size(795, 342);
             this.panel_up.TabIndex = 0;
             // 
-            // panel_down
-            // 
-            this.panel_down.Controls.Add(this.label_property);
-            this.panel_down.Controls.Add(this.textBox_property);
-            this.panel_down.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel_down.Location = new System.Drawing.Point(0, 0);
-            this.panel_down.Name = "panel_down";
-            this.panel_down.Size = new System.Drawing.Size(795, 149);
-            this.panel_down.TabIndex = 0;
-            // 
             // toolStrip1
             // 
             this.toolStrip1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
@@ -252,9 +231,9 @@ namespace DigitalPlatform.CommonControl
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripDropDownButton_quickSet});
-            this.toolStrip1.Location = new System.Drawing.Point(603, 292);
+            this.toolStrip1.Location = new System.Drawing.Point(657, 298);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(192, 44);
+            this.toolStrip1.Size = new System.Drawing.Size(138, 38);
             this.toolStrip1.TabIndex = 7;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -264,8 +243,18 @@ namespace DigitalPlatform.CommonControl
             this.toolStripDropDownButton_quickSet.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton_quickSet.Image")));
             this.toolStripDropDownButton_quickSet.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDropDownButton_quickSet.Name = "toolStripDropDownButton_quickSet";
-            this.toolStripDropDownButton_quickSet.Size = new System.Drawing.Size(117, 38);
+            this.toolStripDropDownButton_quickSet.Size = new System.Drawing.Size(117, 32);
             this.toolStripDropDownButton_quickSet.Text = "快速设定";
+            // 
+            // panel_down
+            // 
+            this.panel_down.Controls.Add(this.label_property);
+            this.panel_down.Controls.Add(this.textBox_property);
+            this.panel_down.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel_down.Location = new System.Drawing.Point(0, 0);
+            this.panel_down.Name = "panel_down";
+            this.panel_down.Size = new System.Drawing.Size(795, 149);
+            this.panel_down.TabIndex = 0;
             // 
             // PropertyDlg
             // 
@@ -285,10 +274,10 @@ namespace DigitalPlatform.CommonControl
             this.splitContainer_main.ResumeLayout(false);
             this.panel_up.ResumeLayout(false);
             this.panel_up.PerformLayout();
-            this.panel_down.ResumeLayout(false);
-            this.panel_down.PerformLayout();
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
+            this.panel_down.ResumeLayout(false);
+            this.panel_down.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -298,8 +287,6 @@ namespace DigitalPlatform.CommonControl
         private void PropertyDlg_Load(object sender, System.EventArgs e)
         {
             SetListViewTitle(listView_property);
-
-            toolTip_comment.SetToolTip(this.listView_property, "tool tip text");
 
             this.BeginInvoke(new Action(Initial));
         }
@@ -319,11 +306,13 @@ namespace DigitalPlatform.CommonControl
             {
                 listView.Columns.Add("属性值", 300, HorizontalAlignment.Left);
                 listView.Columns.Add("说明", 900, HorizontalAlignment.Left);
+                listView.Columns.Add("级别", 100, HorizontalAlignment.Right);
             }
-            else if (listView.Columns.Count >= 2)
+            else if (listView.Columns.Count >= 3)
             {
                 listView.Columns[0].Text = "属性值";
                 listView.Columns[1].Text = "说明";
+                listView.Columns[2].Text = "级别";
             }
         }
 
@@ -331,6 +320,10 @@ namespace DigitalPlatform.CommonControl
         class ItemInfo
         {
             public List<string> AliasList { get; set; }
+
+            // 2023/3/8
+            // 是否属于未定义的属性值
+            public bool Undefined { get; set; }
         }
 
         // 装载一个 XML 文件
@@ -379,8 +372,10 @@ namespace DigitalPlatform.CommonControl
                     strComment = DomUtil.GetNodeText(nodeComment);
                 }
 
-                ListViewItem item = new ListViewItem(strName, 0);
-                item.SubItems.Add(strComment);
+                ListViewItem item = new ListViewItem();
+                ListViewUtil.ChangeItemText(item, 0, strName);
+                ListViewUtil.ChangeItemText(item, 1, strComment);
+                ListViewUtil.ChangeItemText(item, 2, node.GetAttribute("risklevel"));
 
                 // 2017/4/20
                 string strAlias = node.GetAttribute("alias");
@@ -694,8 +689,10 @@ namespace DigitalPlatform.CommonControl
             // 得到checked事项
             List<ListViewItem> checkedItems = GetCheckedItems(listView_property, e);
 
+            /*
             // 获得edit中属于没有定义的部分
             List<string> aNotDefined = GetNoDefinedPropertyNames(textBox_property.Text);
+            */
 
             StringBuilder text = new StringBuilder();
 
@@ -707,6 +704,7 @@ namespace DigitalPlatform.CommonControl
                 text.Append(item.Text);
             }
 
+            /*
             // 没有定义部分组合为字符串
             foreach (string s in aNotDefined)
             {
@@ -714,6 +712,8 @@ namespace DigitalPlatform.CommonControl
                     text.Append(",");
                 text.Append(s);
             }
+            */
+
             string[] aOld = textBox_property.Text.Split(new Char[] { ',' });
             string[] aNew = text.ToString().Split(new Char[] { ',' });
             Array.Sort(aOld);
@@ -784,10 +784,24 @@ namespace DigitalPlatform.CommonControl
         }
 #endif
 
+        ListViewItem EnsureItem(string strName)
+        {
+            var item = ListViewUtil.FindItem(this.listView_property, strName, 0);
+            if (item == null)
+            {
+                item = new ListViewItem(strName);
+                this.listView_property.Items.Add(item);
+            }
+
+            return item;
+        }
+
         private void textBox_property_TextChanged(object sender, System.EventArgs e)
         {
+            var text = textBox_property.Text;
+
             // 提取已定义的部分
-            List<string> aDefined = GetDefinedPropertyNames(textBox_property.Text);
+            List<string> aDefined = GetDefinedPropertyNames(text);
 
             // check
             foreach (string strName in aDefined)
@@ -801,7 +815,7 @@ namespace DigitalPlatform.CommonControl
                 List<string> alias_list = new List<string>();
                 ItemInfo info = (ItemInfo)item.Tag;
                 if (info != null)
-                    alias_list = info.AliasList;
+                    alias_list = info.AliasList == null ? new List<string>() : info.AliasList;
 
                 alias_list.Insert(0, GetPureName(item.Text));
 
@@ -817,11 +831,59 @@ namespace DigitalPlatform.CommonControl
                 {
                     if (item.Checked == false)
                         continue;
+                    /*
                     item.Checked = false;
+                    */
+                    SilentlyCheck(item, false);
                 }
             }
 
+            // 2023/3/8
+            // 提取没有定义的部分，添加 ListViewItem
+            var undefined = GetNoDefinedPropertyNames(text);
+            foreach (var strName in undefined)
+            {
+                var item = EnsureItem(strName);
+                ItemInfo info = item.Tag as ItemInfo;
+                if (info == null)
+                {
+                    info = new ItemInfo { Undefined = true };
+                    item.Tag = info;
+                }
+                else
+                    info.Undefined = true;
+
+                SilentlyCheck(item, true);
+            }
+
+            // ListViewItem 中属于没有定义的，但在 undefined 集合中又找不到的，则要移走 ListViewItem
+            RemoveUndefinedUncheckedItem(undefined);
+
             TriggerTextEditChanged(this.textBox_property);
+        }
+
+        // ListViewItem 中属于没有定义的，但在 undefined 集合中又找不到的，则要移走 ListViewItem
+        void RemoveUndefinedUncheckedItem(List<string> undefined)
+        {
+            List<ListViewItem> remove_list = new List<ListViewItem>();
+            foreach (ListViewItem item in this.listView_property.Items)
+            {
+                ItemInfo info = item.Tag as ItemInfo;
+                if (info == null || info.Undefined == false)
+                    continue;
+                if (undefined.IndexOf(item.Text) == -1)
+                    remove_list.Add(item);
+            }
+
+            Task.Run(() => {
+                this.Invoke((Action)(() =>
+                {
+                    foreach (var item in remove_list)
+                    {
+                        this.listView_property.Items.Remove(item);
+                    }
+                }));
+            });
         }
 
 #if NO
@@ -866,12 +928,22 @@ namespace DigitalPlatform.CommonControl
             }
             else
             {
+                /*
                 _skipItemChecked++;
 
                 item.Checked = bChecked;
                 _skipItemChecked--;
+                */
+                SilentlyCheck(item, bChecked);
                 return true;	// 改变了状态
             }
+        }
+
+        void SilentlyCheck(ListViewItem item, bool bChecked)
+        {
+            _skipItemChecked++;
+            item.Checked = bChecked;
+            _skipItemChecked--;
         }
 
         // 得到所有checked Item
@@ -917,27 +989,6 @@ namespace DigitalPlatform.CommonControl
         {
             this.DialogResult = DialogResult.Cancel;
             this.Close();
-        }
-
-        private void listView_property_MouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
-        {
-            ListViewItem selection = listView_property.GetItemAt(e.X, e.Y);
-
-            // If the user selects an item in the ListView, display
-            // the image in the PictureBox.
-            if (selection != null)
-            {
-                if (selection != tipsItem)
-                {
-                    toolTip_comment.SetToolTip(this.listView_property, selection.SubItems[1].Text);
-                }
-            }
-            else
-            {
-                toolTip_comment.SetToolTip(listView_property, "");
-            }
-
-            tipsItem = selection;
         }
 
         private void listView_property_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
@@ -1203,7 +1254,7 @@ namespace DigitalPlatform.CommonControl
                     string current = parts[j];
                     var left2 = GetPureName(current);
                     if (left1 == left2)
-                        results.Add($"'{part}'(位置 {i+1}) 和 '{current}'(位置 {j + 1}) 发生重复");
+                        results.Add($"'{part}'(位置 {i + 1}) 和 '{current}'(位置 {j + 1}) 发生重复");
                 }
             }
 
