@@ -3254,7 +3254,7 @@ out strError);
                         if (strAction == "delete")
                             baOutputTimestamp = error.NewTimestamp;
                         else */
-                            baOutputTimestamp = error.OldTimestamp;
+                        baOutputTimestamp = error.OldTimestamp;
                     }
                     else
                         baOutputTimestamp = error.NewTimestamp;
@@ -7860,7 +7860,7 @@ out strError);
             {
                 if (String.Compare(format, "xml", true) == 0)
                 {
-                    FormatItem.SetFormat(items, i, format, item_dom.DocumentElement?.OuterXml);
+                    FormatItem.SetFormat(items, i, format, item_dom?.DocumentElement?.OuterXml);
                 }
                 else if (String.Compare(format, "recpath", true) == 0)
                 {
@@ -7870,18 +7870,23 @@ out strError);
                 {
                     try
                     {
-                        var itemdom = item_dom; // 2023/2/3
+                        if (item_dom != null)
+                        {
+                            var itemdom = item_dom; // 2023/2/3
 
-                        string oi = DomUtil.GetElementText(itemdom.DocumentElement, "oi");
-                        string barcode = DomUtil.GetElementText(itemdom.DocumentElement, "barcode");
-                        var content = oi + "." + barcode;
-                        if (string.IsNullOrEmpty(oi))
-                            content = barcode;
-                        FormatItem.SetFormat(items, i, format, content);
+                            string oi = DomUtil.GetElementText(itemdom.DocumentElement, "oi");
+                            string barcode = DomUtil.GetElementText(itemdom.DocumentElement, "barcode");
+                            var content = oi + "." + barcode;
+                            if (string.IsNullOrEmpty(oi))
+                                content = barcode;
+                            FormatItem.SetFormat(items, i, format, content);
+                        }
+                        else
+                            FormatItem.SetFormat(items, i, format, "");
                     }
                     catch (Exception ex)
                     {
-                        this.WriteErrorLog($"(GetItemInfo())为册记录添加 oi 元素时出现异常: \r\n{ExceptionUtil.GetDebugText(ex)}\r\n\r\n册记录 XML:'{item_dom.OuterXml}'");
+                        this.WriteErrorLog($"(GetItemInfo())为册记录添加 oi 元素时出现异常: \r\n{ExceptionUtil.GetDebugText(ex)}\r\n\r\n册记录 XML:'{item_dom?.OuterXml}'");
                         strError = $"(GetItemInfo())为册记录添加 oi 元素时出现异常: {ex.Message}";
                         FormatItem.SetFormat(items,
                             i,
@@ -7897,7 +7902,7 @@ out strError);
                     int nRet = this.ConvertItemXmlToHtml(
                         this.CfgDir + "\\" + strItemDbType + "xml2html.cs",
                         this.CfgDir + "\\" + strItemDbType + "xml2html.cs.ref",
-                        item_dom.OuterXml,  // strXml,
+                        item_dom?.OuterXml,  // strXml,
                         strItemRecPath, // 2009/10/18 
                         out string content,
                         out strError);
@@ -7918,7 +7923,7 @@ out strError);
                     int nRet = this.ConvertItemXmlToHtml(
                         this.CfgDir + "\\" + strItemDbType + "xml2text.cs",
                         this.CfgDir + "\\" + strItemDbType + "xml2text.cs.ref",
-                        item_dom.OuterXml,   // strXml,
+                        item_dom?.OuterXml,   // strXml,
                         strItemRecPath, // 2009/10/18 
                         out string content,
                         out strError);
@@ -7937,7 +7942,7 @@ out strError);
                 {
                     int nRet = this.GetKeys(sessioninfo,
                         strItemRecPath,
-                        item_dom.OuterXml, //    strXml,
+                        item_dom?.OuterXml, //    strXml,
                         out string content,
                         out strError);
                     if (nRet == -1)

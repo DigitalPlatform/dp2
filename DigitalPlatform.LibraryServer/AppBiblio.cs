@@ -5880,7 +5880,6 @@ out strError);
                 // 保存修改前的书目记录
                 if (StringUtil.IsInList("bibliotoitem", strStyle))
                 {
-
                     // 为册记录添加书目信息
                     // return:
                     //      -1  失败
@@ -6444,8 +6443,7 @@ out strError);
             this.BiblioLocks.LockForWrite(strBiblioRecPath);
             try
             {
-                // 探测书目记录有没有下属的实体记录(也顺便看看实体记录里面是否有流通信息)?
-                List<DeleteEntityInfo> entityinfos = null;
+                // 探测书目记录有没有下属的实体记录(也顺便看看实体记录里面是否有流通信息，并检查 dprms:file 元素是否存在)?
                 string strDetectStyle = "check_borrow_info";
                 long lHitCount = 0;
 
@@ -6469,7 +6467,7 @@ out strError);
                     CheckItemRecord,
                     sessioninfo.GlobalUser == false ? sessioninfo.LibraryCodeList : null,
                     out lHitCount,
-                    out entityinfos,
+                    out List<DeleteEntityInfo> entityinfos,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -6480,7 +6478,6 @@ out strError);
                 }
 
                 // 如果有实体记录，则要求 setiteminfo 权限，才能一同删除实体们
-                // TODO: 如果实体记录中包含 dprms:file 元素，则还需要 setitemobject 权限才允许删除册记录
                 if (entityinfos != null && entityinfos.Count > 0)
                 {
                     // 2020/10/27
@@ -6515,24 +6512,20 @@ out strError);
                     // bFoundEntities = true;
                 }
 
-                //
                 // 探测书目记录有没有下属的订购记录
-                List<DeleteEntityInfo> orderinfos = null;
-                // bool bFoundOrders = false;
-
                 // return:
                 //      -1  error
                 //      0   not exist entity dbname
                 //      1   exist entity dbname
                 nRet = this.OrderItemDatabase.SearchChildItems(
-                    null,
+                    sessioninfo,
                     channel,
                     strBiblioRecPath,
                     "check_circulation_info", // 在DeleteEntityInfo结构中*不*返回OldRecord内容
-                    (DigitalPlatform.LibraryServer.LibraryApplication.Delegate_checkRecord)null,
-                    null,
+                    CheckItemRecordDprmsFile,
+                    "order",
                     out lHitCount,
-                    out orderinfos,
+                    out List<DeleteEntityInfo> orderinfos,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -6555,10 +6548,10 @@ out strError);
                     }
 
                     // 权限字符串
-                    if (StringUtil.IsInList("setorderinfo,setobject,order", sessioninfo.RightsOrigin) == false)
+                    if (StringUtil.IsInList("setorderinfo,writerecord,order", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的订购记录，但当前用户不具备 setorderinfo、setobject 或 order 权限，不能删除它们。";
+                        result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的订购记录，但当前用户不具备 setorderinfo 或 writerecord 或 order 权限，不能删除它们。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         // return result;
                         return 1;
@@ -6578,22 +6571,19 @@ out strError);
 
                 //
                 // 探测书目记录有没有下属的期记录
-                List<DeleteEntityInfo> issueinfos = null;
-                // bool bFoundIssues = false;
-
                 // return:
                 //      -1  error
                 //      0   not exist entity dbname
                 //      1   exist entity dbname
                 nRet = this.IssueItemDatabase.SearchChildItems(
-                    null,
+                    sessioninfo,
                     channel,
                     strBiblioRecPath,
                     "check_circulation_info", // 在DeleteEntityInfo结构中*不*返回OldRecord内容
-                    (DigitalPlatform.LibraryServer.LibraryApplication.Delegate_checkRecord)null,
-                    null,
+                    CheckItemRecordDprmsFile,
+                    "issue",
                     out lHitCount,
-                    out issueinfos,
+                    out List<DeleteEntityInfo> issueinfos,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -6616,10 +6606,10 @@ out strError);
                     }
 
                     // 权限字符串
-                    if (StringUtil.IsInList("setissueinfo,setobject", sessioninfo.RightsOrigin) == false)
+                    if (StringUtil.IsInList("setissueinfo,writerecord", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的期记录，但当前用户不具备 setissueinfo 或 setobject 权限，不能删除它们。";
+                        result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的期记录，但当前用户不具备 setissueinfo 或 writerecord 权限，不能删除它们。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         // return result;
                         return 1;
@@ -6637,20 +6627,19 @@ out strError);
                 }
 
                 // 探测书目记录有没有下属的评注记录
-                List<DeleteEntityInfo> commentinfos = null;
                 // return:
                 //      -1  error
                 //      0   not exist entity dbname
                 //      1   exist entity dbname
                 nRet = this.CommentItemDatabase.SearchChildItems(
-                    null,
+                    sessioninfo,
                     channel,
                     strBiblioRecPath,
                     "check_circulation_info", // 在DeleteEntityInfo结构中*不*返回OldRecord内容
-                    (DigitalPlatform.LibraryServer.LibraryApplication.Delegate_checkRecord)null,
-                    null,
+                    CheckItemRecordDprmsFile,
+                    "comment",
                     out lHitCount,
-                    out commentinfos,
+                    out List<DeleteEntityInfo> commentinfos,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -6896,8 +6885,63 @@ out strError);
             return -1;
         }
 
+        // 检查订购、期、评注记录是否适合进行删除和移动
+        // 算法: 如果记录包含 dprms:file 元素，当前账户是否具备 setxxxobject 权限
+        // 如果返回值不是0，就中断循环并返回
+        int CheckItemRecordDprmsFile(
+            SessionInfo sessioninfo,
+            int index,
+            string strRecPath,
+            XmlDocument dom,
+            byte[] baTimestamp,
+            object param,
+            out string strError)
+        {
+            strError = "";
+
+            // 2023/3/9
+            // 检查 dprms:file 元素是否存在
+            if (sessioninfo != null)
+            {
+                /*
+                var strDbName = ResPath.GetDbName(strRecPath);
+                if (string.IsNullOrEmpty(strDbName))
+                {
+                    strError = $"无法从记录路径 '{strRecPath}' 中提取数据库名";
+                    return -1;
+                }
+                var db_type = GetAllDbType(strDbName);
+                if (string.IsNullOrEmpty(db_type))
+                {
+                    strError = $"没有找到数据库 '{strDbName}' 的类型";
+                    return -1;
+                }
+                */
+                string db_type = (string)param;
+                if (string.IsNullOrEmpty(db_type))
+                {
+                    strError = $"param 不允许为空";
+                    return -1;
+                }
+
+                XmlNamespaceManager mngr = new XmlNamespaceManager(new NameTable());
+                mngr.AddNamespace("dprms", DpNs.dprms);
+
+                var files = dom.DocumentElement.SelectNodes("//dprms:file", mngr);
+                if (files.Count > 0
+                    && StringUtil.IsInList($"set{db_type}object,setobject", sessioninfo.RightsOrigin) == false)
+                {
+                    strError = $"当前账户不具备 set{db_type}object 或 setobject 权限，然而记录 '{strRecPath}' 中包含 dprms:file 元素，操作被拒绝";
+                    return -1;
+                }
+            }
+
+            return 0;
+        }
+
+
         // 检查册记录是否适合进行删除和移动
-        // 算法: 要检查馆藏地点是否在当前用户的关系啊范围内；另外如果记录包含 dprms:file 元素，当前账户是否具备 setxxxobject 权限
+        // 算法: 要检查馆藏地点是否在当前用户的管辖范围内；另外如果记录包含 dprms:file 元素，当前账户是否具备 setxxxobject 权限
         // 如果返回值不是0，就中断循环并返回
         int CheckItemRecord(
             SessionInfo sessioninfo,
@@ -6911,21 +6955,21 @@ out strError);
             strError = "";
 
             string strLibraryCodeList = (string)param;
-            if (SessionInfo.IsGlobalUser(strLibraryCodeList) == true)
-                return 0;
-
-            string strLocation = DomUtil.GetElementText(dom.DocumentElement, "location");
-            strLocation = StringUtil.GetPureLocationString(strLocation);
-
-            // 解析
-            ParseCalendarName(strLocation,
-        out string strLibraryCode,
-        out string strPureName);
-
-            if (StringUtil.IsInList(strLibraryCode, strLibraryCodeList) == false)
+            if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
             {
-                strError = "册记录的 '" + strRecPath + "' 的馆藏地点 '" + strLocation + "' 不在当前用户管辖范围 '" + strLibraryCodeList + "' 内，操作被拒绝";
-                return -1;
+                string strLocation = DomUtil.GetElementText(dom.DocumentElement, "location");
+                strLocation = StringUtil.GetPureLocationString(strLocation);
+
+                // 解析
+                ParseCalendarName(strLocation,
+            out string strLibraryCode,
+            out string strPureName);
+
+                if (StringUtil.IsInList(strLibraryCode, strLibraryCodeList) == false)
+                {
+                    strError = "册记录的 '" + strRecPath + "' 的馆藏地点 '" + strLocation + "' 不在当前用户管辖范围 '" + strLibraryCodeList + "' 内，操作被拒绝";
+                    return -1;
+                }
             }
 
             // 2023/3/7
