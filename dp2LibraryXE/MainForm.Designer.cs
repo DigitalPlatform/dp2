@@ -57,6 +57,7 @@
             this.MenuItem_restartDp2Kernel = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_restoreDp2library = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_tools = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_dp2library_globalSetting = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_enableWindowsMsmq = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_configLibraryXmlMq = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator10 = new System.Windows.Forms.ToolStripSeparator();
@@ -95,7 +96,6 @@
             this.toolStripStatusLabel_update = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripProgressBar_main = new System.Windows.Forms.ToolStripProgressBar();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
-            this.MenuItem_dp2library_globalSetting = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
@@ -128,7 +128,7 @@
             // MenuItem_exit
             // 
             this.MenuItem_exit.Name = "MenuItem_exit";
-            this.MenuItem_exit.Size = new System.Drawing.Size(315, 40);
+            this.MenuItem_exit.Size = new System.Drawing.Size(199, 40);
             this.MenuItem_exit.Text = "退出(&X)";
             this.MenuItem_exit.Click += new System.EventHandler(this.MenuItem_exit_Click);
             // 
@@ -303,6 +303,13 @@
             this.MenuItem_tools.Size = new System.Drawing.Size(98, 33);
             this.MenuItem_tools.Text = "工具(&T)";
             // 
+            // MenuItem_dp2library_globalSetting
+            // 
+            this.MenuItem_dp2library_globalSetting.Name = "MenuItem_dp2library_globalSetting";
+            this.MenuItem_dp2library_globalSetting.Size = new System.Drawing.Size(508, 40);
+            this.MenuItem_dp2library_globalSetting.Text = "全局参数";
+            this.MenuItem_dp2library_globalSetting.Click += new System.EventHandler(this.MenuItem_dp2library_globalSetting_Click);
+            // 
             // MenuItem_enableWindowsMsmq
             // 
             this.MenuItem_enableWindowsMsmq.Name = "MenuItem_enableWindowsMsmq";
@@ -325,8 +332,9 @@
             // MenuItem_dp2library_setupMongoDB
             // 
             this.MenuItem_dp2library_setupMongoDB.Name = "MenuItem_dp2library_setupMongoDB";
-            this.MenuItem_dp2library_setupMongoDB.Size = new System.Drawing.Size(508, 40);
-            this.MenuItem_dp2library_setupMongoDB.Text = "安装 MongoDB ...";
+            this.MenuItem_dp2library_setupMongoDB.Size = new System.Drawing.Size(666, 40);
+            this.MenuItem_dp2library_setupMongoDB.Text = "将已经初步安装的 MongoDB 配置为 Windows Service...";
+            this.MenuItem_dp2library_setupMongoDB.Visible = false;
             this.MenuItem_dp2library_setupMongoDB.Click += new System.EventHandler(this.MenuItem_dp2library_setupMongoDB_Click);
             // 
             // MenuItem_configLibraryXmlMongoDB
@@ -596,13 +604,6 @@
             this.webBrowser1.Name = "webBrowser1";
             this.webBrowser1.Size = new System.Drawing.Size(682, 417);
             this.webBrowser1.TabIndex = 7;
-            // 
-            // MenuItem_dp2library_globalSetting
-            // 
-            this.MenuItem_dp2library_globalSetting.Name = "MenuItem_dp2library_globalSetting";
-            this.MenuItem_dp2library_globalSetting.Size = new System.Drawing.Size(508, 40);
-            this.MenuItem_dp2library_globalSetting.Text = "全局参数";
-            this.MenuItem_dp2library_globalSetting.Click += new System.EventHandler(this.MenuItem_dp2library_globalSetting_Click);
             // 
             // MainForm
             // 

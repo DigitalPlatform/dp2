@@ -7,6 +7,7 @@ using System.Xml;
 using System.Web;
 using System.IO;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 using DigitalPlatform;
 using DigitalPlatform.Xml;
@@ -17,7 +18,6 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.CommonDialog;
 using DigitalPlatform.Drawing;
-using System.Threading.Tasks;
 
 namespace dp2Circulation
 {

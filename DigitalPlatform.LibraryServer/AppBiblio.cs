@@ -6500,6 +6500,13 @@ out strError);
                         return 1;
                     }
 
+                    // 账户权限合规检查 当包含 write 的时候是否也包含了 read
+                    nRet = CheckWriteReadMetadataValid("item",
+                        sessioninfo.RightsOrigin,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
                     if (this.DeleteBiblioSubRecords == false)
                     {
                         result.Value = -1;
@@ -6556,6 +6563,13 @@ out strError);
                         // return result;
                         return 1;
                     }
+
+                    // 账户权限合规检查 当包含 write 的时候是否也包含了 read
+                    nRet = CheckWriteReadMetadataValid("order",
+                        sessioninfo.RightsOrigin,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
 
                     if (this.DeleteBiblioSubRecords == false)
                     {
@@ -6615,6 +6629,13 @@ out strError);
                         return 1;
                     }
 
+                    // 账户权限合规检查 当包含 write 的时候是否也包含了 read
+                    nRet = CheckWriteReadMetadataValid("issue",
+                        sessioninfo.RightsOrigin,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
                     if (this.DeleteBiblioSubRecords == false)
                     {
                         result.Value = -1;
@@ -6670,6 +6691,13 @@ out strError);
                         // return result;
                         return 1;
                     }
+
+                    // 账户权限合规检查 当包含 write 的时候是否也包含了 read
+                    nRet = CheckWriteReadMetadataValid("comment",
+                        sessioninfo.RightsOrigin,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
 
                     if (this.DeleteBiblioSubRecords == false)
                     {
@@ -6885,6 +6913,70 @@ out strError);
             return -1;
         }
 
+        static int CheckDprmsFileRight(
+            string strRecPath,
+            XmlDocument dom,
+            string db_type,
+            string rights,
+            out string strError)
+        {
+            strError = "";
+
+            // 检查 当包含 write 的时候是否也包含了 read
+            int nRet = CheckWriteReadObjectValid(db_type,
+                rights,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            XmlNamespaceManager mngr = new XmlNamespaceManager(new NameTable());
+            mngr.AddNamespace("dprms", DpNs.dprms);
+
+            var files = dom.DocumentElement.SelectNodes("//dprms:file", mngr);
+            if (files.Count > 0
+                && StringUtil.IsInList($"set{db_type}object,setobject", rights) == false)
+            {
+                strError = $"当前账户不具备 set{db_type}object 或 setobject 权限，然而记录 '{strRecPath}' 中包含 dprms:file 元素，操作被拒绝";
+                return -1;
+            }
+
+            return 0;
+        }
+
+        // 账户权限检查 当包含 write 的时候是否也包含了 read
+        static int CheckWriteReadObjectValid(string db_type,
+            string rights,
+            out string strError)
+        {
+            strError = "";
+
+            if (StringUtil.IsInList($"set{db_type}object,setobject", rights) == true
+                && StringUtil.IsInList($"get{db_type}object,getobject", rights) == false)
+            {
+                strError = $"当前账户包含了 set{db_type}object 或 setobject 权限，但不包含 get{db_type}object 或 getobject，这违反了账户安全原则，操作被拒绝。请联系系统管理员修改账户权限到合规状态";
+                return -1;
+            }
+
+            return 0;
+        }
+
+        // 账户权限检查 当包含 write 的时候是否也包含了 read
+        static int CheckWriteReadMetadataValid(string db_type,
+            string rights,
+            out string strError)
+        {
+            strError = "";
+
+            if (StringUtil.IsInList($"set{db_type}info,writerecord", rights) == true
+                && StringUtil.IsInList($"get{db_type}info", rights) == false)
+            {
+                strError = $"当前账户包含了 set{db_type}info 或 writerecord 权限，但不包含 get{db_type}info 权限，这违反了账户安全原则，操作被拒绝。请联系系统管理员修改账户权限到合规状态";
+                return -1;
+            }
+
+            return 0;
+        }
+
         // 检查订购、期、评注记录是否适合进行删除和移动
         // 算法: 如果记录包含 dprms:file 元素，当前账户是否具备 setxxxobject 权限
         // 如果返回值不是0，就中断循环并返回
@@ -6924,16 +7016,14 @@ out strError);
                     return -1;
                 }
 
-                XmlNamespaceManager mngr = new XmlNamespaceManager(new NameTable());
-                mngr.AddNamespace("dprms", DpNs.dprms);
-
-                var files = dom.DocumentElement.SelectNodes("//dprms:file", mngr);
-                if (files.Count > 0
-                    && StringUtil.IsInList($"set{db_type}object,setobject", sessioninfo.RightsOrigin) == false)
-                {
-                    strError = $"当前账户不具备 set{db_type}object 或 setobject 权限，然而记录 '{strRecPath}' 中包含 dprms:file 元素，操作被拒绝";
+                int nRet = CheckDprmsFileRight(
+    strRecPath,
+    dom,
+    db_type,
+    sessioninfo.RightsOrigin,
+    out strError);
+                if (nRet == -1)
                     return -1;
-                }
             }
 
             return 0;
@@ -6976,16 +7066,26 @@ out strError);
             // 检查 dprms:file 元素是否存在
             if (sessioninfo != null)
             {
+                /*
                 XmlNamespaceManager mngr = new XmlNamespaceManager(new NameTable());
                 mngr.AddNamespace("dprms", DpNs.dprms);
 
                 var files = dom.DocumentElement.SelectNodes("//dprms:file", mngr);
-                if (files.Count > 0 
+                if (files.Count > 0
                     && StringUtil.IsInList("setitemobject,setobject", sessioninfo.RightsOrigin) == false)
                 {
                     strError = $"当前账户不具备 setitemobject 或 setobject 权限，然而册记录 '{strRecPath}' 中包含 dprms:file 元素，操作被拒绝";
                     return -1;
                 }
+                */
+                int nRet = CheckDprmsFileRight(
+strRecPath,
+dom,
+"item",
+sessioninfo.RightsOrigin,
+out strError);
+                if (nRet == -1)
+                    return -1;
             }
 
             return 0;
@@ -7503,8 +7603,8 @@ out strError);
                         {
                             /* // 测试代码
                             nRet = RemoveUniformKey(
-ref strExistingSourceXml,
-out strError);
+    ref strExistingSourceXml,
+    out strError);
                             if (nRet == -1)
                                 goto ERROR1;
                             */
