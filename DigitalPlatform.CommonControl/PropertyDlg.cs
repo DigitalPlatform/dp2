@@ -45,6 +45,9 @@ namespace DigitalPlatform.CommonControl
         private Panel panel_down;
         private ToolStrip toolStrip1;
         private ToolStripDropDownButton toolStripDropDownButton_quickSet;
+        private ColumnHeader columnHeader_perperty;
+        private ColumnHeader columnHeader_comment;
+        private ColumnHeader columnHeader_level;
         private System.ComponentModel.IContainer components;
 
         public PropertyDlg()
@@ -81,7 +84,6 @@ namespace DigitalPlatform.CommonControl
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PropertyDlg));
             this.label_property = new System.Windows.Forms.Label();
             this.textBox_property = new System.Windows.Forms.TextBox();
@@ -95,6 +97,9 @@ namespace DigitalPlatform.CommonControl
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripDropDownButton_quickSet = new System.Windows.Forms.ToolStripDropDownButton();
             this.panel_down = new System.Windows.Forms.Panel();
+            this.columnHeader_perperty = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_comment = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_level = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).BeginInit();
             this.splitContainer_main.Panel1.SuspendLayout();
             this.splitContainer_main.Panel2.SuspendLayout();
@@ -156,6 +161,10 @@ namespace DigitalPlatform.CommonControl
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.listView_property.CheckBoxes = true;
+            this.listView_property.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader_perperty,
+            this.columnHeader_comment,
+            this.columnHeader_level});
             this.listView_property.FullRowSelect = true;
             this.listView_property.HideSelection = false;
             this.listView_property.Location = new System.Drawing.Point(0, 0);
@@ -256,6 +265,22 @@ namespace DigitalPlatform.CommonControl
             this.panel_down.Size = new System.Drawing.Size(795, 149);
             this.panel_down.TabIndex = 0;
             // 
+            // columnHeader_perperty
+            // 
+            this.columnHeader_perperty.Text = "属性值";
+            this.columnHeader_perperty.Width = 300;
+            // 
+            // columnHeader_comment
+            // 
+            this.columnHeader_comment.Text = "说明";
+            this.columnHeader_comment.Width = 900;
+            // 
+            // columnHeader_level
+            // 
+            this.columnHeader_level.Text = "级别";
+            this.columnHeader_level.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.columnHeader_level.Width = 100;
+            // 
             // PropertyDlg
             // 
             this.AutoScaleBaseSize = new System.Drawing.Size(11, 24);
@@ -286,7 +311,7 @@ namespace DigitalPlatform.CommonControl
 
         private void PropertyDlg_Load(object sender, System.EventArgs e)
         {
-            SetListViewTitle(listView_property);
+            // SetListViewTitle(listView_property);
 
             this.BeginInvoke(new Action(Initial));
         }
@@ -300,8 +325,10 @@ namespace DigitalPlatform.CommonControl
             ChangeColor();
         }
 
+#if REMOVED
         public void SetListViewTitle(ListView listView)
         {
+            /*
             if (listView.Columns.Count == 0)
             {
                 listView.Columns.Add("属性值", 300, HorizontalAlignment.Left);
@@ -314,7 +341,9 @@ namespace DigitalPlatform.CommonControl
                 listView.Columns[1].Text = "说明";
                 listView.Columns[2].Text = "级别";
             }
+            */
         }
+#endif
 
         // 一个事项的附加数据
         class ItemInfo
@@ -1157,18 +1186,42 @@ namespace DigitalPlatform.CommonControl
 
         private void button_checkAll_Click(object sender, System.EventArgs e)
         {
-            for (int i = 0; i < this.listView_property.Items.Count; i++)
+            this.listView_property.BeginUpdate();
+            _skipItemChecked++;
+            try
             {
-                this.listView_property.Items[i].Checked = true;
+                for (int i = 0; i < this.listView_property.Items.Count; i++)
+                {
+                    this.listView_property.Items[i].Checked = true;
+                }
             }
+            finally
+            {
+                _skipItemChecked--;
+                this.listView_property.EndUpdate();
+            }
+
+            listView_property_ItemCheck(null, null);
         }
 
         private void button_uncheckAll_Click(object sender, System.EventArgs e)
         {
-            for (int i = 0; i < this.listView_property.Items.Count; i++)
+            this.listView_property.BeginUpdate();
+            _skipItemChecked++;
+            try
             {
-                this.listView_property.Items[i].Checked = false;
+                for (int i = 0; i < this.listView_property.Items.Count; i++)
+                {
+                    this.listView_property.Items[i].Checked = false;
+                }
             }
+            finally
+            {
+                _skipItemChecked--;
+                this.listView_property.EndUpdate();
+            }
+
+            listView_property_ItemCheck(null, null);
         }
 
         SortColumns SortColumns = new SortColumns();
