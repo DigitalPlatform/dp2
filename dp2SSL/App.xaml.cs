@@ -1774,7 +1774,9 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             e.Cancel = true;
         }
 
-        static string _baseRights = "getsystemparameter,getbiblioinfo,getbibliosummary,getiteminfo,getoperlog,getreaderinfo,getreaderobject,getres,searchbiblio,searchitem,searchreader,borrow,renew,return,setreaderinfo,setreaderobject,setiteminfo"; // 取消 setobject
+        // TODO: setreaderobject 和 setobject 只要具备其中一个即可
+        // 演化 getres --> getobject --> getreaderobject
+        static string _baseRights = "getsystemparameter,getbiblioinfo,getbibliosummary,getiteminfo,getoperlog,getreaderinfo,getreaderobject,searchbiblio,searchitem,searchreader,borrow,renew,return,setreaderinfo,setiteminfo"; // setreaderobject, // 取消 setobject
 
         static void VerifyRights(string rights)
         {
@@ -1817,9 +1819,11 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             _currentUserName = channel.UserName;
             _currentUserLibraryCodeList = channel.LibraryCodeList;
 
+            /*
             // 2020/9/18
             // 检查 rights
             VerifyRights(channel.Rights);
+            */
 
             //_currentUserRights = channel.Rights;
             //_currentLibraryCodeList = channel.LibraryCodeList;

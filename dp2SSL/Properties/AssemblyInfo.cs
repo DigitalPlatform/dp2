@@ -51,8 +51,8 @@ using System.Windows;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.8.67")]    // 1.5.*
-[assembly: AssemblyFileVersion("1.8.67.0")]  // 1.5.0.0
+[assembly: AssemblyVersion("1.8.69")]    // 1.5.*
+[assembly: AssemblyFileVersion("1.8.69.0")]  // 1.5.0.0
 
 // 1.0 2019/2/21 第一个版本
 // 1.1 2019/2/26 可以显示版本号了
@@ -164,3 +164,4 @@ using System.Windows;
 //      1.8.66 (2022/3/21) 全量下载册记录之前，会自动清除以前残留的全部本地缓存册记录和书目记录
 //      1.8.67 (2022/3/22) 改进 dp2ssl 退出时自动保存全量下载册记录断点的功能，修正一个 bug
 //      1.8.68 (2022/9/9) dp2ssl 主窗口 Activated 和 Deactivated 的时候，会关闭和打开指纹、RFID 的 SendKey。早先版本只会在 Activated 的时候关闭，不会主动去打开
+//      1.8.69 (2023/1/10) dp2ssl 用到的 dp2library 账户的必备权限检查中，去掉了 setreaderobject 和 setobject 权限，因为人脸登记是依靠 facecenter 的账户进行的

@@ -53,9 +53,9 @@ namespace dp2SSL
             */
             Brush brush = null;
             if (state == "open")
-                brush = door.OpenBrush;
+                brush = door?.OpenBrush;
             else
-                brush = door.CloseBrush;
+                brush = door?.CloseBrush;
             /*
             if (brush is ImageBrush)
             {

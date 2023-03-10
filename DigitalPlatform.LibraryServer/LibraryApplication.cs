@@ -74,7 +74,7 @@ namespace DigitalPlatform.LibraryServer
 
         public DailyItemCountTable DailyItemCountTable = new DailyItemCountTable();
 
-        internal static DateTime _expire = new DateTime(2023, 3, 15); // 上一个版本是 2022/11/15 2022/9/15 2022/7/15 2022/5/15 2022/3/15 2021/12/15 2021/9/15 2021/7/15 2021/3/15 2020/11/15 2020/7/15 2019/2/15 2019/10/15 2019/7/15 2019/5/15 2019/2/15 2018/11/15 2018/9/15 2018/7/15 2018/5/15 2018/3/15 2017/1/15 2017/12/1 2017/9/1 2017/6/1 2017/3/1 2016/11/1
+        internal static DateTime _expire = new DateTime(2023, 6, 15); // 上一个版本是 2023/3/15 2022/11/15 2022/9/15 2022/7/15 2022/5/15 2022/3/15 2021/12/15 2021/9/15 2021/7/15 2021/3/15 2020/11/15 2020/7/15 2019/2/15 2019/10/15 2019/7/15 2019/5/15 2019/2/15 2018/11/15 2018/9/15 2018/7/15 2018/5/15 2018/3/15 2017/1/15 2017/12/1 2017/9/1 2017/6/1 2017/3/1 2016/11/1
 
 #if NO
         int m_nRefCount = 0;
@@ -2482,6 +2482,12 @@ out strError);
                     library_codes.Add(database.GetAttribute("libraryCode"));
                 }
 
+                // 2023/3/10
+                // 如果 library_codes 中缺乏 ""(表示全局分馆)，需要观察 accounts/account@libraryCode 属性中是否用到了 "" 这个分馆代码，如果用到了，需要添加到 library_codes 中
+                // 但因为通常至少都有 supervisor 账户，这个账户肯定是全局分馆的，所以不必太复杂，直接给 library_codes 添加一个 "" 即可
+                if (library_codes.IndexOf("") == -1)
+                    library_codes.Add("");
+
                 StringUtil.RemoveDupNoSort(ref library_codes);
 
                 var libraries = this.LibraryCfgDom.DocumentElement.SelectSingleNode("libraries") as XmlElement;
@@ -2503,10 +2509,31 @@ out strError);
 
                 // 自动修改 accounts/account@rights 中的权限字符串
                 var account_nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("accounts/account");
-                foreach(XmlElement account in account_nodes)
+                foreach (XmlElement account in account_nodes)
                 {
                     string old_rights = account.GetAttribute("rights");
                     string new_rights = UpgradeUserRights(old_rights);
+
+                    // 确保 setxxxobject 具有配套的 getxxxobject，如果没有，则添加上
+                    // return:
+                    //      -1  出错
+                    //      0   没有发生增补
+                    //      1   发生了增补，strError 中返回了增补情况文字描述
+                    int nRet = ExpandGetXXXObject(new_rights,
+                        out string output_rights,
+                        out strError);
+                    if (nRet == 1)
+                    {
+                        new_rights = output_rights;
+                        string old_comment = account.GetAttribute("comment");
+                        if (old_comment == null)
+                            old_comment = "";
+                        if (string.IsNullOrEmpty(old_comment) == false)
+                            old_comment += "; ";
+                        old_comment += $"{DateTime.Now.ToLongDateString()} 自动升级{strError}";
+                        account.SetAttribute("comment", old_comment);
+                    }
+
                     if (old_rights != new_rights)
                         account.SetAttribute("rights", new_rights);
                 }

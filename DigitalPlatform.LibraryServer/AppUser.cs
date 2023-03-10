@@ -495,7 +495,7 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     // DomUtil.SetAttr(nodeAccount, "password", strHashed);
-                    LibraryServerUtil.SetPasswordValue(nodeAccount, 
+                    LibraryServerUtil.SetPasswordValue(nodeAccount,
                         type,
                         strHashed);
                 }
@@ -1041,9 +1041,9 @@ out strError);
                 //      1   匹配
                 nRet = LibraryServerUtil.MatchUserPassword(
                     old_type,
-                    strOldPassword, 
-                    strExistPassword, 
-                    true, 
+                    strOldPassword,
+                    strExistPassword,
+                    true,
                     out strError);
                 if (nRet == -1)
                     return -1;
@@ -1090,7 +1090,7 @@ out strError);
                 if (nRet == -1)
                     return -1;
                 // DomUtil.SetAttr(node, "password", strHashed);
-                LibraryServerUtil.SetPasswordValue(nodeAccount, 
+                LibraryServerUtil.SetPasswordValue(nodeAccount,
                     new_type,
                     strHashed);
                 if (LibraryServerUtil.IsSpecialUserName(strUserName) == false)
@@ -1603,8 +1603,8 @@ out strError);
                     string type = "bcrypt";
                     nRet = LibraryServerUtil.SetUserPassword(
                         type,
-                        userinfo.Password, 
-                        out strHashed, 
+                        userinfo.Password,
+                        out strHashed,
                         out strError);
                     if (nRet == -1)
                     {
@@ -1998,7 +1998,7 @@ out strError);
             return -1;
         }
 
-        static string[] _rights_replace_table = new string[] { 
+        static string[] _rights_replace_table = new string[] {
         "listbibliodbfroms-->listdbfroms",
         "setentities-->setiteminfo",
         "setissues-->setissueinfo",
@@ -2009,6 +2009,7 @@ out strError);
         "getorders-->getoderinfo",
         "getcomments-->getcommentinfo",
         "writeobject-->setobject",
+        "getres-->getobject",   // 旧版本的 getres 大致对等于新版的 getobject。getres 权限已经废止
         };
 
         // 将旧版本的账户权限字符串升级到新版本
@@ -2017,7 +2018,7 @@ out strError);
         {
             List<string> results = new List<string>();
             var source_rights = rights.Split(',');
-            foreach(var source_right in source_rights)
+            foreach (var source_right in source_rights)
             {
                 results.Add(Replace(source_right));
             }
@@ -2026,7 +2027,7 @@ out strError);
             return string.Join(",", results);
             string Replace(string text)
             {
-                foreach(var item in _rights_replace_table)
+                foreach (var item in _rights_replace_table)
                 {
                     var parts = StringUtil.ParseTwoPart(item, "-->");
                     if (text == parts[0])
@@ -2034,6 +2035,74 @@ out strError);
                 }
 
                 return text;
+            }
+        }
+
+        static string[] _db_type_table = new string[] {
+        "biblio",
+        "reader",
+        "item",
+        "order",
+        "issue",
+        "comment",
+        "amerce",
+        "arrived",
+        "publisher",
+        "zhongcihao",
+        "dictionary",
+        "inventory",
+        };
+
+        // 确保 setxxxobject 具有配套的 getxxxobject，如果没有，则添加上
+        // return:
+        //      -1  出错
+        //      0   没有发生增补
+        //      1   发生了增补，strError 中返回了增补情况文字描述
+        static int ExpandGetXXXObject(string origin_rights,
+            out string output_rights,
+            out string strError)
+        {
+            strError = "";
+            output_rights = origin_rights;
+
+            List<string> results = new List<string>();
+            List<string> append_list = new List<string>();
+            var list = origin_rights.Split(',');
+            foreach (string origin in list)
+            {
+                results.Add(origin);
+                var get_right = GetXXXRight(origin);
+                if (get_right != null)
+                {
+                    if (StringUtil.IsInList(get_right, origin_rights) == false)
+                    {
+                        results.Add(get_right);
+                        append_list.Add(get_right);
+                    }
+                }
+            }
+
+            StringUtil.RemoveDupNoSort(ref results);
+            output_rights = string.Join(",", results);
+            if (append_list.Count > 0)
+            {
+                strError = $"增补了下列权限: {StringUtil.MakePathList(append_list)}";
+                return 1;
+            }
+
+            return 0;
+
+            string GetXXXRight(string right)
+            {
+                if (right == "setobject")
+                    return "getobject";
+                foreach (var db_type in _db_type_table)
+                {
+                    if ($"set{db_type}object" == right)
+                        return $"get{db_type}object";
+                }
+
+                return null;
             }
         }
     }
