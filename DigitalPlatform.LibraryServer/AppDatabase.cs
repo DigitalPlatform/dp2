@@ -463,7 +463,7 @@ namespace DigitalPlatform.LibraryServer
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
-                        strError = "当前用户不是全局用户，不允许修改书目库定义";
+                        strError = $"{GetCurrentUserName(sessioninfo)}不是全局用户，不允许修改书目库定义";
                         return -1;
                     }
 
@@ -1145,7 +1145,7 @@ namespace DigitalPlatform.LibraryServer
                         if (string.IsNullOrEmpty(strExistLibraryCode) == true
                             || StringUtil.IsInList(strExistLibraryCode, strLibraryCodeList) == false)
                         {
-                            strError = "修改读者库 '" + strName + "' 定义被拒绝。当前用户只能修改图书馆代码完全属于 '" + strLibraryCodeList + "' 范围的读者库";
+                            strError = $"修改读者库 '{strName}' 定义被拒绝。{GetCurrentUserName(sessioninfo)}只能修改图书馆代码完全属于 '{strLibraryCodeList}' 范围的读者库";
                             return -1;
                         }
                     }
@@ -1912,7 +1912,7 @@ out strError);
 
             if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
             {
-                strError = "当前用户不是全局用户，不允许修改实用库 '" + strOldUtilDbName + "' 定义";
+                strError = $"{GetCurrentUserName(null)}不是全局用户，不允许修改实用库 '{strOldUtilDbName}' 定义";
                 return -1;
             }
 
@@ -2067,7 +2067,7 @@ out strError);
 
             if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
             {
-                strError = "当前用户不是全局用户，不允许修改实体库定义";
+                strError = $"{GetCurrentUserName(null)}不是全局用户，不允许修改实体库定义";
                 return -1;
             }
 
@@ -2387,7 +2387,7 @@ out strError);
 
             if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
             {
-                strError = "当前用户不是全局用户，不允许修改" + strTypeCaption + "库定义";
+                strError = $"{GetCurrentUserName(null)}不是全局用户，不允许修改{strTypeCaption}库定义";
                 return -1;
             }
 
@@ -2692,7 +2692,7 @@ out strError);
                 if (string.IsNullOrEmpty(strExistLibraryCode) == true
                     || StringUtil.IsInList(strExistLibraryCode, strLibraryCodeList) == false)
                 {
-                    strError = "删除读者库 '" + strName + "' 被拒绝。当前用户只能删除图书馆代码完全完全属于 '" + strLibraryCodeList + "' 范围的读者库";
+                    strError = $"删除读者库 '{strName}' 被拒绝。{GetCurrentUserName(null)}只能删除图书馆代码完全完全属于 '{strLibraryCodeList}' 范围的读者库";
                     return -1;
                 }
             }
@@ -2746,7 +2746,7 @@ out strError);
             // 分馆用户只允许删除属于管辖分馆的读者库
             if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
             {
-                strError = "删除规范库 '" + strName + "' 被拒绝。当前用户不是全局用户";
+                strError = $"删除规范库 '{strName}' 被拒绝。{GetCurrentUserName(null)}不是全局用户";
                 return -1;
             }
 
@@ -2803,7 +2803,7 @@ out strError);
 
             if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
             {
-                strError = "当前用户不是全局用户，不允许删除实用库 '" + strName + "'";
+                strError = $"{GetCurrentUserName(null)}不是全局用户，不允许删除实用库 '{strName}'";
                 return -1;
             }
 
@@ -2859,7 +2859,7 @@ out strError);
 
             if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
             {
-                strError = "当前用户不是全局用户，不允许删除" + strCaption + "库";
+                strError = $"{GetCurrentUserName(null)}不是全局用户，不允许删除{strCaption}库";
                 return -1;
             }
 
@@ -2927,7 +2927,7 @@ out strError);
 
             if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
             {
-                strError = "当前用户不是全局用户，不允许删除" + strCaption + "库";
+                strError = $"{GetCurrentUserName(null)}不是全局用户，不允许删除{strCaption}库";
                 return -1;
             }
 
@@ -2988,7 +2988,7 @@ out strError);
 
             if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
             {
-                strError = "当前用户不是全局用户，不允许删除书目库";
+                strError = $"{GetCurrentUserName(null)}不是全局用户，不允许删除书目库";
                 return -1;
             }
 
@@ -3447,7 +3447,7 @@ out strError);
 
             if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
             {
-                strError = "当前用户不是全局用户，不允许删除" + strTypeCaption + "库";
+                strError = $"{GetCurrentUserName(null)}不是全局用户，不允许删除{strTypeCaption}库";
                 return -1;
             }
 
@@ -3552,7 +3552,7 @@ out strError);
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
-                        strError = "当前用户不是全局用户，不允许刷新书目库的定义";
+                        strError = $"{GetCurrentUserName(sessioninfo)}不是全局用户，不允许刷新书目库的定义";
                         goto ERROR1;
                     }
 
@@ -3705,7 +3705,7 @@ out strError);
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
-                        strError = "当前用户不是全局用户，不允许刷新实体库的定义";
+                        strError = $"{GetCurrentUserName(sessioninfo)}不是全局用户，不允许刷新实体库的定义";
                         goto ERROR1;
                     }
 
@@ -3745,7 +3745,7 @@ out strError);
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
-                        strError = "当前用户不是全局用户，不允许刷新订购库的定义";
+                        strError = $"{GetCurrentUserName(sessioninfo)}不是全局用户，不允许刷新订购库的定义";
                         goto ERROR1;
                     }
 
@@ -3784,7 +3784,7 @@ out strError);
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
-                        strError = "当前用户不是全局用户，不允许刷新期库的定义";
+                        strError = $"{GetCurrentUserName(sessioninfo)}不是全局用户，不允许刷新期库的定义";
                         goto ERROR1;
                     }
 
@@ -3824,7 +3824,7 @@ out strError);
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
-                        strError = "当前用户不是全局用户，不允许刷新评注库的定义";
+                        strError = $"{GetCurrentUserName(sessioninfo)}不是全局用户，不允许刷新评注库的定义";
                         goto ERROR1;
                     }
 
@@ -3871,7 +3871,7 @@ out strError);
                         if (string.IsNullOrEmpty(strExistLibraryCode) == true
                             || StringUtil.IsInList(strExistLibraryCode, strLibraryCodeList) == false)
                         {
-                            strError = "刷新读者库 '" + strName + "' 定义被拒绝。当前用户只能刷新图书馆代码完全完全属于 '" + strLibraryCodeList + "' 范围的读者库定义";
+                            strError = $"刷新读者库 '{strName}' 定义被拒绝。{GetCurrentUserName(sessioninfo)}只能刷新图书馆代码完全完全属于 '{strLibraryCodeList}' 范围的读者库定义";
                             goto ERROR1;
                         }
                     }
@@ -3913,7 +3913,7 @@ out strError);
                     // 分馆用户不允许刷新规范库
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
-                        strError = "刷新规范库 '" + strName + "' 定义被拒绝。当前用户不是全局用户";
+                        strError = $"刷新规范库 '{strName}' 定义被拒绝。{GetCurrentUserName(sessioninfo)}不是全局用户";
                         goto ERROR1;
                     }
 
@@ -3947,7 +3947,7 @@ out strError);
                 {
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
-                        strError = "当前用户不是全局用户，不允许刷新预约到书库的定义";
+                        strError = $"{GetCurrentUserName(sessioninfo)}不是全局用户，不允许刷新预约到书库的定义";
                         goto ERROR1;
                     }
 
@@ -3977,7 +3977,7 @@ out strError);
                 {
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
-                        strError = "当前用户不是全局用户，不允许刷新违约金库的定义";
+                        strError = $"{GetCurrentUserName(sessioninfo)}不是全局用户，不允许刷新违约金库的定义";
                         goto ERROR1;
                     }
 
@@ -4008,7 +4008,7 @@ out strError);
                 {
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
-                        strError = "当前用户不是全局用户，不允许刷新发票库的定义";
+                        strError = $"{GetCurrentUserName(sessioninfo)}不是全局用户，不允许刷新发票库的定义";
                         goto ERROR1;
                     }
 
@@ -4039,7 +4039,7 @@ out strError);
                 {
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
-                        strError = "当前用户不是全局用户，不允许刷新消息库的定义";
+                        strError = $"{GetCurrentUserName(sessioninfo)}不是全局用户，不允许刷新消息库的定义";
                         goto ERROR1;
                     }
 
@@ -4090,7 +4090,7 @@ out strError);
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
-                        strError = "当前用户不是全局用户，不允许刷新" + strTypeCaption + "库的定义";
+                        strError = $"{GetCurrentUserName(sessioninfo)}不是全局用户，不允许刷新{strTypeCaption}库的定义";
                         goto ERROR1;
                     }
 
@@ -4128,7 +4128,7 @@ out strError);
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
-                        strError = "当前用户不是全局用户，不允许刷新实用库的定义";
+                        strError = $"{GetCurrentUserName(sessioninfo)}不是全局用户，不允许刷新实用库的定义";
                         goto ERROR1;
                     }
 
@@ -4160,7 +4160,7 @@ out strError);
                 {
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
-                        strError = "当前用户不是全局用户，不允许刷新" + AccessLogDbName + "库的定义";
+                        strError = $"{GetCurrentUserName(sessioninfo)}不是全局用户，不允许刷新{AccessLogDbName}库的定义";
                         goto ERROR1;
                     }
 
@@ -4181,7 +4181,7 @@ out strError);
                 {
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
-                        strError = "当前用户不是全局用户，不允许刷新" + HitCountDbName + "库的定义";
+                        strError = $"{GetCurrentUserName(sessioninfo)}不是全局用户，不允许刷新{HitCountDbName}库的定义";
                         goto ERROR1;
                     }
 
@@ -4202,7 +4202,7 @@ out strError);
                 {
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
-                        strError = "当前用户不是全局用户，不允许刷新" + ChargingHistoryDbName + "库的定义";
+                        strError = $"{GetCurrentUserName(sessioninfo)}不是全局用户，不允许刷新{ChargingHistoryDbName}库的定义";
                         goto ERROR1;
                     }
 
@@ -4223,7 +4223,7 @@ out strError);
                 {
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
-                        strError = "当前用户不是全局用户，不允许刷新" + BiblioSummaryDbName + "库的定义";
+                        strError = $"{GetCurrentUserName(sessioninfo)}不是全局用户，不允许刷新{BiblioSummaryDbName}库的定义";
                         goto ERROR1;
                     }
 
@@ -4446,7 +4446,7 @@ out strError);
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
-                        strError = "当前用户不是全局用户，不允许初始化书目库";
+                        strError = $"{GetCurrentUserName(sessioninfo)}不是全局用户，不允许初始化书目库";
                         return -1;
                     }
 
@@ -4544,7 +4544,7 @@ out strError);
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
-                        strError = "当前用户不是全局用户，不允许初始化实体库";
+                        strError = $"{GetCurrentUserName(sessioninfo)}不是全局用户，不允许初始化实体库";
                         return -1;
                     }
 
@@ -4577,7 +4577,7 @@ out strError);
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
-                        strError = "当前用户不是全局用户，不允许初始化订购库";
+                        strError = $"{GetCurrentUserName(sessioninfo)}不是全局用户，不允许初始化订购库";
                         return -1;
                     }
 
@@ -4610,7 +4610,7 @@ out strError);
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
-                        strError = "当前用户不是全局用户，不允许初始化期库";
+                        strError = $"{GetCurrentUserName(sessioninfo)}不是全局用户，不允许初始化期库";
                         return -1;
                     }
 
@@ -4643,7 +4643,7 @@ out strError);
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
-                        strError = "当前用户不是全局用户，不允许初始化评注库";
+                        strError = $"{GetCurrentUserName(sessioninfo)}不是全局用户，不允许初始化评注库";
                         return -1;
                     }
 
@@ -4683,7 +4683,7 @@ out strError);
                         if (string.IsNullOrEmpty(strExistLibraryCode) == true
                             || StringUtil.IsInList(strExistLibraryCode, strLibraryCodeList) == false)
                         {
-                            strError = "初始化读者库 '" + strName + "' 被拒绝。当前用户只能初始化图书馆代码完全完全属于 '" + strLibraryCodeList + "' 范围的读者库";
+                            strError = $"初始化读者库 '{strName}' 被拒绝。{GetCurrentUserName(sessioninfo)}只能初始化图书馆代码完全完全属于 '{strLibraryCodeList}' 范围的读者库";
                             return -1;
                         }
                     }
@@ -4718,7 +4718,7 @@ out strError);
                     // 分馆用户不允许初始化规范库
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
-                        strError = "初始化规范库 '" + strName + "' 被拒绝。当前用户不是全局用户";
+                        strError = $"初始化规范库 '{strName}' 被拒绝。{GetCurrentUserName(sessioninfo)}不是全局用户";
                         return -1;
                     }
 
@@ -4743,7 +4743,7 @@ out strError);
                 {
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
-                        strError = "当前用户不是全局用户，不允许初始化预约到书库";
+                        strError = $"{GetCurrentUserName(sessioninfo)}不是全局用户，不允许初始化预约到书库";
                         return -1;
                     }
 
@@ -4766,7 +4766,7 @@ out strError);
                 {
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
-                        strError = "当前用户不是全局用户，不允许初始化违约金库";
+                        strError = $"{GetCurrentUserName(sessioninfo)}不是全局用户，不允许初始化违约金库";
                         return -1;
                     }
 
@@ -4790,7 +4790,7 @@ out strError);
                 {
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
-                        strError = "当前用户不是全局用户，不允许初始化发票库";
+                        strError = $"{GetCurrentUserName(sessioninfo)}不是全局用户，不允许初始化发票库";
                         return -1;
                     }
 
@@ -4814,7 +4814,7 @@ out strError);
                 {
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
-                        strError = "当前用户不是全局用户，不允许初始化消息库";
+                        strError = $"{GetCurrentUserName(sessioninfo)}不是全局用户，不允许初始化消息库";
                         return -1;
                     }
 
@@ -4838,7 +4838,7 @@ out strError);
                 {
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
-                        strError = "当前用户不是全局用户，不允许初始化拼音库";
+                        strError = $"{GetCurrentUserName(sessioninfo)}不是全局用户，不允许初始化拼音库";
                         return -1;
                     }
 
@@ -4862,7 +4862,7 @@ out strError);
                 {
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
-                        strError = "当前用户不是全局用户，不允许初始化著者号码库";
+                        strError = $"{GetCurrentUserName(sessioninfo)}不是全局用户，不允许初始化著者号码库";
                         return -1;
                     }
 
@@ -4892,7 +4892,7 @@ out strError);
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
-                        strError = "当前用户不是全局用户，不允许初始化实用库";
+                        strError = $"{GetCurrentUserName(sessioninfo)}不是全局用户，不允许初始化实用库";
                         return -1;
                     }
 
@@ -4915,7 +4915,7 @@ out strError);
                 {
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
-                        strError = "当前用户不是全局用户，不允许初始化" + AccessLogDbName + "库";
+                        strError = $"{GetCurrentUserName(sessioninfo)}不是全局用户，不允许初始化{AccessLogDbName}库";
                         return -1;
                     }
 
@@ -4942,7 +4942,7 @@ out strError);
                 {
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
-                        strError = "当前用户不是全局用户，不允许初始化" + HitCountDbName + "库";
+                        strError = $"{GetCurrentUserName(sessioninfo)}不是全局用户，不允许初始化{HitCountDbName}库";
                         return -1;
                     }
 
@@ -4969,7 +4969,7 @@ out strError);
                 {
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
-                        strError = "当前用户不是全局用户，不允许初始化" + ChargingHistoryDbName + "库";
+                        strError = $"{GetCurrentUserName(sessioninfo)}不是全局用户，不允许初始化{ChargingHistoryDbName}库";
                         return -1;
                     }
 
@@ -4996,7 +4996,7 @@ out strError);
                 {
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
-                        strError = "当前用户不是全局用户，不允许初始化" + BiblioSummaryDbName + "库";
+                        strError = $"{GetCurrentUserName(sessioninfo)}不是全局用户，不允许初始化{BiblioSummaryDbName}库";
                         return -1;
                     }
 
@@ -5645,7 +5645,7 @@ out strError);
             // 创建书目数据库
             if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
             {
-                strError = "当前用户不是全局用户，不允许创建或重新创建书目库";
+                strError = $"{GetCurrentUserName(null)}不是全局用户，不允许创建或重新创建书目库";
                 return -1;
             }
 
@@ -6038,7 +6038,7 @@ out strError);
             // 创建规范库
             if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
             {
-                strError = "当前用户不是全局用户，不允许创建或重新创建规范库";
+                strError = $"{GetCurrentUserName(null)}不是全局用户，不允许创建或重新创建规范库";
                 return -1;
             }
 
@@ -6579,7 +6579,7 @@ out strError);
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
-                        strError = "当前用户不是全局用户，不允许创建或重新创建" + strTypeCaption + "库";
+                        strError = $"{GetCurrentUserName(sessioninfo)}不是全局用户，不允许创建或重新创建{strTypeCaption}库";
                         return -1;
                     }
                     // TODO: 增加recreate能力
@@ -6914,7 +6914,7 @@ out strError);
                                 if (string.IsNullOrEmpty(strExistLibraryCode) == true
                                     || StringUtil.IsInList(strExistLibraryCode, strLibraryCodeList) == false)
                                 {
-                                    strError = "重新创建读者库 '" + strName + "' 被拒绝。当前用户只能重新创建图书馆代码完全完全属于 '" + strLibraryCodeList + "' 范围的读者库";
+                                    strError = $"重新创建读者库 '{strName}' 被拒绝。{GetCurrentUserName(sessioninfo)}只能重新创建图书馆代码完全完全属于 '{strLibraryCodeList}' 范围的读者库";
                                     goto ERROR1;
                                 }
                             }
@@ -6939,7 +6939,7 @@ out strError);
                         if (string.IsNullOrEmpty(info.LibraryCode) == true
                             || IsListInList(info.LibraryCode, strLibraryCodeList) == false)
                         {
-                            strError = "当前用户只能创建馆代码完全属于 '" + strLibraryCodeList + "' 范围内的读者库";
+                            strError = $"{GetCurrentUserName(sessioninfo)}只能创建馆代码完全属于 '{strLibraryCodeList}' 范围内的读者库";
                             return -1;
                         }
                     }
@@ -7069,7 +7069,7 @@ out strError);
                 {
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
-                        strError = "当前用户不是全局用户，不允许创建或重新创建出版者库、种次号库、字典库和盘点库";
+                        strError = $"{GetCurrentUserName(sessioninfo)}不是全局用户，不允许创建或重新创建出版者库、种次号库、字典库和盘点库";
                         goto ERROR1;
                     }
 
@@ -7188,7 +7188,7 @@ out strError);
                     {
                         if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                         {
-                            strError = "当前用户不是全局用户，不允许创建或重新创建" + strTypeCaption + "库";
+                            strError = $"当前用户不是全局用户，不允许创建或重新创建{strTypeCaption}库";
                             goto ERROR1;
                         }
                     }
@@ -8034,7 +8034,7 @@ out strError);
 
             if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
             {
-                strError = "当前用户不是全局用户，不允许创建或重新创建" + strTypeCaption + "库";
+                strError = $"{GetCurrentUserName(null)}不是全局用户，不允许创建或重新创建{strTypeCaption}库";
                 return -1;
             }
 

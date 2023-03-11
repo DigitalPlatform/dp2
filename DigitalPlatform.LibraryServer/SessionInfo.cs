@@ -667,17 +667,24 @@ namespace DigitalPlatform.LibraryServer
                     return -1;
                 if (nRet == 0)
                 {
-                    strError = $"当前账户所从属的馆代码 '{librarycode}' 没有找到定义: {strError}";
+                    strError = $"当前账户 '{this.UserID}' 所从属的馆代码 '{librarycode}' 没有找到定义: {strError}";
                     return -1;
                 }
                 if (string.IsNullOrEmpty(state) == false)
                 {
-                    strError = $"当前账户所从属的分馆 '{librarycode}' 状态为 '{state}'，禁止登录";
+                    strError = $"当前账户 '{this.UserID}' 所从属的分馆 '{librarycode}' 状态为 '{state}'，禁止登录";
                     return 1;
                 }
             }
 
             return 0;
+        }
+
+        public static string GetCurrentUserName(SessionInfo sessioninfo)
+        {
+            if (sessioninfo == null)
+                return "当前用户";
+            return $"当前用户 '{sessioninfo.UserID}' ";
         }
 
         /*

@@ -1776,7 +1776,7 @@ namespace DigitalPlatform.LibraryServer
             if (StringUtil.IsInList("getiteminfo,order", sessioninfo.RightsOrigin) == false)
             {
                 result.Value = -1;
-                result.ErrorInfo = "获得册信息 操作被拒绝。不具备 getiteminfo 或 order 权限。";
+                result.ErrorInfo = $"获得册信息 操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 getiteminfo 或 order 权限。";
                 result.ErrorCode = ErrorCode.AccessDenied;
                 return result;
             }
@@ -3300,7 +3300,7 @@ out strError);
             if (StringUtil.IsInList("setiteminfo,writerecord,order", sessioninfo.RightsOrigin) == false)
             {
                 result.Value = -1;
-                result.ErrorInfo = "修改册信息 操作被拒绝。不具备 setiteminfo、writerecord 或 order 权限。";
+                result.ErrorInfo = $"修改册信息 操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 setiteminfo、writerecord 或 order 权限。";
                 result.ErrorCode = ErrorCode.AccessDenied;
                 return result;
             }
@@ -3308,7 +3308,7 @@ out strError);
             if (StringUtil.IsInList("getiteminfo", sessioninfo.RightsOrigin) == false)
             {
                 result.Value = -1;
-                result.ErrorInfo = "修改册信息 操作被拒绝。虽然当前账户具备写入册的权限，但不具备 getiteminfo 权限。请修改账户权限";
+                result.ErrorInfo = $"修改册信息 操作被拒绝。虽然{SessionInfo.GetCurrentUserName(sessioninfo)}具备写入册的权限，但不具备 getiteminfo 权限。请修改账户权限";
                 result.ErrorCode = ErrorCode.AccessDenied;
                 return result;
             }
@@ -3322,7 +3322,7 @@ out strError);
                 if (string.IsNullOrEmpty(strPersonalLibrary) == true)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "修改册信息 操作被拒绝。读者身份不具备个人书斋权限";
+                    result.ErrorInfo = $"修改册信息 操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}为读者身份不具备个人书斋权限";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -3346,7 +3346,7 @@ out strError);
             if (string.IsNullOrEmpty(strBiblioDbName) == false
                 && string.IsNullOrEmpty(strItemDbName) == true)
             {
-                strError = "书目库 '" + strBiblioDbName + "' 不具备下属的实体库，设置实体记录的操作失败";
+                strError = $"书目库 '{ strBiblioDbName }' 不具备下属的实体库，设置实体记录的操作失败";
                 goto ERROR1;
             }
 
@@ -3427,7 +3427,7 @@ out strError);
                     if (StringUtil.IsInList("restore", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "修改册信息的" + strAction + "操作被拒绝。不具备 restore 权限。";
+                        result.ErrorInfo = $"修改册信息的{ strAction}操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 restore 权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -3454,7 +3454,7 @@ out strError);
                     if (StringUtil.IsInList("restore", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "带有风格 'force' 的修改册信息的" + strAction + "操作被拒绝。不具备 restore 权限。";
+                        result.ErrorInfo = $"带有风格 'force' 的修改册信息的{ strAction}操作被拒绝。不具备 restore 权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -3496,7 +3496,7 @@ out strError);
                     if (StringUtil.IsInList("restore", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "带有风格 'nocheckdup' 的修改册信息的" + strAction + "操作被拒绝。不具备 restore 权限。";
+                        result.ErrorInfo = $"带有风格 'nocheckdup' 的修改册信息的{ strAction}操作被拒绝。不具备 restore 权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -3516,7 +3516,7 @@ out strError);
                     if (StringUtil.IsInList("restore", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "带有风格 'noeventlog' 的修改册信息的" + strAction + "操作被拒绝。不具备 restore 权限。";
+                        result.ErrorInfo = $"带有风格 'noeventlog' 的修改册信息的{ strAction}操作被拒绝。不具备 restore 权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -5428,9 +5428,9 @@ out strError);
                 {
                     error = new EntityInfo(info);
                     if (nRet == 1)
-                        error.ErrorInfo = $"删除操作被拒绝。因部分字段不具备删除权限: {strError}";
+                        error.ErrorInfo = $"删除操作被拒绝。因{SessionInfo.GetCurrentUserName(sessioninfo)}针对部分字段不具备删除权限: {strError}";
                     else
-                        error.ErrorInfo = $"删除操作被拒绝。因全部字段不具备删除权限: {strError}";
+                        error.ErrorInfo = $"删除操作被拒绝。因{SessionInfo.GetCurrentUserName(sessioninfo)}针对全部字段不具备删除权限: {strError}";
                     error.ErrorCode = ErrorCodeValue.PartialDenied;
                     ErrorInfos.Add(error);
                     return -1;
@@ -7787,9 +7787,9 @@ out strError);
                 && (string.IsNullOrEmpty(alias_right) == false && StringUtil.IsInList(alias_right, sessioninfo.RightsOrigin) == false))
             {
                 if (string.IsNullOrEmpty(alias_right))
-                    strError = $"当前用户不具备 get{db_type}info 权限";
+                    strError = $"{GetCurrentUserName(sessioninfo)}不具备 get{db_type}info 权限";
                 else
-                    strError = $"当前用户不具备 get{db_type}info 或 {alias_right} 权限";
+                    strError = $"{GetCurrentUserName(sessioninfo)}不具备 get{db_type}info 或 {alias_right} 权限";
                 return -2;
             }
 

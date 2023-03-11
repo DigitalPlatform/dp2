@@ -73,6 +73,7 @@ ref sessioninfo) == false)
         temp_sessioninfo.Password = app.ManagerPassword;
         temp_sessioninfo.IsReader = false;
 #endif
+        // (注：采用了代理账户)
         LibraryChannel channel = app.GetChannel();
 
         try

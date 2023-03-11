@@ -1697,24 +1697,35 @@ out strError);
 
             if (upload.HasFile == true)
             {
-                // 
-                // 保存资源
-                // 采用了代理帐户
-                // return:
-                //		-1	error
-                //		0	发现上载的文件其实为空，不必保存了
-                //		1	已经保存
-                nRet = app.SaveUploadFile(
-                    this.Page,
-                    strNewCommentRecPath,
-                    strFileID,
-                    strResTimeStamp,
-                    upload.PostedFile,
-                    2048,
-                    2048,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
+                // 2023/3/11
+                // 用当前 OPAC 访问者账户，进行对象的上传
+                LibraryChannel channel = sessioninfo.GetChannel(true);
+                try
+                {
+                    // 
+                    // 保存资源
+                    // 采用了代理帐户
+                    // return:
+                    //		-1	error
+                    //		0	发现上载的文件其实为空，不必保存了
+                    //		1	已经保存
+                    nRet = OpacApplication.SaveUploadFile(
+                        this.Page,
+                        channel,
+                        strNewCommentRecPath,
+                        strFileID,
+                        strResTimeStamp,
+                        upload.PostedFile,
+                        2048,
+                        2048,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                }
+                finally
+                {
+                    sessioninfo.ReturnChannel(channel);
+                }
             }
 
             // 2012/11/19

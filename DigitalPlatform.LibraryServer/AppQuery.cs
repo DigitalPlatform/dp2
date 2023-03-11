@@ -166,7 +166,7 @@ namespace DigitalPlatform.LibraryServer
                             if (this.IsCurrentChangeableReaderPath(db.DbName + "/?",
                                 strLibraryCodeList) == false)
                             {
-                                strError = "读者库 '" + db.DbName + "' 不在当前用户管辖范围内";
+                                strError = $"读者库 '{db.DbName}' 不在{GetCurrentUserName(null)}管辖范围内";
                                 return 1;
                             }
                         }
@@ -629,7 +629,7 @@ namespace DigitalPlatform.LibraryServer
 
             if (outof_list.Count > 0)
             {
-                strError = $"当前账户对下列数据库不具备检索权限:\r\n{StringUtil.MakePathList(outof_list, "\r\n")} ";
+                strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)}对下列数据库不具备检索权限:\r\n{StringUtil.MakePathList(outof_list, "\r\n")} ";
                 return 1;
             }
 
@@ -658,7 +658,7 @@ namespace DigitalPlatform.LibraryServer
                     // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
                     if (this.IsCurrentChangeableReaderPath(strDbName + "/?",
                         sessioninfo.ExpandLibraryCodeList) == false)
-                        return "读者库 '" + strDbName + "' 不在当前用户管辖范围内";
+                        return $"读者库 '{strDbName}' 不在{GetCurrentUserName(sessioninfo)}管辖范围内";
                 }
                 return null;
             }

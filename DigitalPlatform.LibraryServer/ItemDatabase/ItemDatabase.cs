@@ -478,7 +478,7 @@ namespace DigitalPlatform.LibraryServer
                     // 但需要注意检查账户权限，读的字段范围是否小于写的字段范围？如果小了，则读和写往返一轮会丢失记录中原有的 dprms:file 元素。这种情况需要直接报错
                     if (StringUtil.IsInList($"get{db_type}object,getobject", strRights) == false)
                     {
-                        strError = $"操作被放弃。当前用户的权限定义不正确：具有 set{db_type}object(或 setobject) 但不具有 get{db_type}object(或getobject) 权限(即写范围大于读范围)，这样会造成数据库内记录中原有的 dprms:file 元素丢失。请修改当前账户权限再重新操作";
+                        strError = $"操作被放弃。{SessionInfo.GetCurrentUserName(null)}的权限定义不正确：具有 set{db_type}object(或 setobject) 但不具有 get{db_type}object(或getobject) 权限(即写范围大于读范围)，这样会造成数据库内记录中原有的 dprms:file 元素丢失。请修改当前账户权限再重新操作";
                         return -1;
                     }
 
@@ -550,7 +550,7 @@ namespace DigitalPlatform.LibraryServer
                     // 但需要注意检查账户权限，读的字段范围是否小于写的字段范围？如果小了，则读和写往返一轮会丢失记录中原有的 dprms:file 元素。这种情况需要直接报错
                     if (StringUtil.IsInList($"get{db_type}object,getobject", strRights) == false)
                     {
-                        strError = $"操作被放弃。当前用户的权限定义不正确：具有 set{db_type}object(或 setobject) 但不具有 get{db_type}object(或getobject) 权限(即写范围大于读范围)，这样会造成数据库内记录中原有的 dprms:file 元素丢失。请修改当前账户权限再重新操作";
+                        strError = $"操作被放弃。{SessionInfo.GetCurrentUserName(null)}的权限定义不正确：具有 set{db_type}object(或 setobject) 但不具有 get{db_type}object(或getobject) 权限(即写范围大于读范围)，这样会造成数据库内记录中原有的 dprms:file 元素丢失。请修改当前账户权限再重新操作";
                         return -1;
                     }
 
@@ -1149,9 +1149,9 @@ namespace DigitalPlatform.LibraryServer
                 {
                     error = new EntityInfo(info);
                     if (nRet == 1)
-                        error.ErrorInfo = $"删除操作被拒绝。因部分字段不具备删除权限: {strError}";
+                        error.ErrorInfo = $"删除操作被拒绝。因{SessionInfo.GetCurrentUserName(sessioninfo)}针对部分字段不具备删除权限: {strError}";
                     else
-                        error.ErrorInfo = $"删除操作被拒绝。因全部字段不具备删除权限: {strError}";
+                        error.ErrorInfo = $"删除操作被拒绝。因{SessionInfo.GetCurrentUserName(sessioninfo)}针对全部字段不具备删除权限: {strError}";
                     error.ErrorCode = ErrorCodeValue.PartialDenied;
                     ErrorInfos.Add(error);
                     return -1;
@@ -1953,7 +1953,7 @@ out strError);
                 if (StringUtil.IsInList(list, sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = $"修改{type_name}信息 操作被拒绝。不具备 {list} 权限之一";
+                    result.ErrorInfo = $"修改{type_name}信息 操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 {list} 权限之一";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -1961,7 +1961,7 @@ out strError);
                 if (StringUtil.IsInList($"get{db_type}info", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = $"修改{type_name}信息 操作被拒绝。虽然当前账户具备写入{type_name}的权限，但不具备 get{db_type}info 权限。请修改账户权限";
+                    result.ErrorInfo = $"修改{type_name}信息 操作被拒绝。虽然{SessionInfo.GetCurrentUserName(sessioninfo)}具备写入{type_name}的权限，但不具备 get{db_type}info 权限。请修改账户权限";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -2068,7 +2068,7 @@ out strError);
                     if (StringUtil.IsInList("restore", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "带有风格 'force' 的修改" + this.ItemName + "信息的" + strAction + "操作被拒绝。不具备 restore 权限。";
+                        result.ErrorInfo = $"带有风格 'force' 的修改{this.ItemName}信息的{strAction}操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 restore 权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -2080,7 +2080,7 @@ out strError);
                     if (StringUtil.IsInList("restore", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "带有风格 'nocheckdup' 的修改" + this.ItemName + "信息的" + strAction + "操作被拒绝。不具备 restore 权限。";
+                        result.ErrorInfo = $"带有风格 'nocheckdup' 的修改{this.ItemName}信息的{strAction}操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 restore 权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -2092,7 +2092,7 @@ out strError);
                     if (StringUtil.IsInList("restore", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "带有风格 'noeventlog' 的修改" + this.ItemName + "信息的" + strAction + "操作被拒绝。不具备 restore 权限。";
+                        result.ErrorInfo = $"带有风格 'noeventlog' 的修改{this.ItemName}信息的{strAction}操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 restore 权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -4478,7 +4478,7 @@ out string strError)
             // 检查 getxxxinfo 基本权限
             if (StringUtil.IsInList($"get{db_type}info", sessioninfo.RightsOrigin) == false)
             {
-                strError = $"当前用户不具备 get{db_type}info 权限";
+                strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 get{db_type}info 权限";
                 return -2;
             }
 

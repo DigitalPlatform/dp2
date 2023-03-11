@@ -607,6 +607,7 @@ namespace DigitalPlatform.OPAC.Server
         }
 
         // 创建一个缓存(一套)
+        // (注：采用了代理账户)
         // return:
         //      -1  error
         //      0   成功

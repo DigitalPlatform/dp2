@@ -715,7 +715,7 @@ namespace DigitalPlatform.LibraryServer
                 if (StringUtil.IsInList("borrow", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "借阅操作被拒绝。不具备 borrow 权限。";
+                    result.ErrorInfo = $"借阅操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 borrow 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     // return result;
                 }
@@ -727,7 +727,7 @@ namespace DigitalPlatform.LibraryServer
                     && string.IsNullOrEmpty(strPersonalLibrary) == true)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "借阅操作被拒绝。作为读者不能代他人进行借阅操作。";
+                    result.ErrorInfo = $"借阅操作被拒绝。{sessioninfo.Account.Barcode} 作为读者不能代他人进行借阅操作。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -1180,7 +1180,7 @@ namespace DigitalPlatform.LibraryServer
                                 else
                                 {
                                     // 对其他实体库定义了存取权限，但对 strItemDbName 没有定义
-                                    strError = "用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strItemDbName + "' 执行 出纳 操作的存取权限";
+                                    strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{strItemDbName}' 执行 出纳 操作的存取权限";
                                     result.Value = -1;
                                     result.ErrorInfo = strError;
                                     result.ErrorCode = ErrorCode.AccessDenied;
@@ -1196,7 +1196,7 @@ namespace DigitalPlatform.LibraryServer
                             {
                                 if (IsInAccessList(strAction, strAccessActionList, out strAccessParameters) == false)
                                 {
-                                    strError = "用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strItemDbName + "' 执行 出纳  " + strActionName + " 操作的存取权限";
+                                    strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{ strItemDbName}' 执行 出纳 { strActionName} 操作的存取权限";
                                     result.Value = -1;
                                     result.ErrorInfo = strError;
                                     result.ErrorCode = ErrorCode.AccessDenied;
@@ -3941,7 +3941,7 @@ out strError);
                 if (this.IsCurrentChangeableReaderPath(strOutputReaderRecPath,
         strExpandCodeList/*sessioninfo.LibraryCodeList*/) == false)
                 {
-                    strError = "读者记录路径 '" + strOutputReaderRecPath + "' 的读者库不在当前用户管辖范围内";
+                    strError = $"读者记录 '{strOutputReaderRecPath}' 所在的读者库不在{GetCurrentUserName(sessioninfo)}管辖范围内";
                     goto ERROR1;
                 }
             }
@@ -4057,7 +4057,7 @@ out strError);
                     return -1;
                 if (nRet == 1)
                 {
-                    strError = "当前用户 '" + sessioninfo.UserID + "' 的存取权限禁止操作读者(证条码号为 " + strReaderBarcode + ")。具体原因：" + strError;
+                    strError = $"{GetCurrentUserName(sessioninfo)} 的存取权限禁止操作读者(证条码号为 '{strReaderBarcode}')。具体原因：" + strError;
                     return 1;
                 }
                 if (nRet == 0)
@@ -4078,14 +4078,14 @@ out strError);
                     if (StringUtil.IsInList(sessioninfo.Account.Barcode, strFields) == true)
                         return 0;
                     strError = "'" + sessioninfo.Account.Barcode + "' 不在 '" + strReaderBarcode + "' 的好友列表中";
-                    strError = "借阅者 (证条码号为 " + strReaderBarcode + ") 的好友关系禁止当前用户 '" + sessioninfo.UserID + "' 进行操作)。具体原因：" + strError;
+                    strError = $"借阅者 (证条码号为 '{strReaderBarcode}') 的好友关系禁止{GetCurrentUserName(sessioninfo)} 进行操作)。具体原因：" + strError;
                     return 1;
                 }
                 else
                 {
                     // 没有定义任何好友关系
                     strError = "'" + strReaderBarcode + "' 尚未定义好友列表";
-                    strError = "借阅者 (证条码号为 " + strReaderBarcode + ") 的好友关系禁止当前用户 '" + sessioninfo.UserID + "' 进行操作)。具体原因：" + strError;
+                    strError = $"借阅者 (证条码号为 '{strReaderBarcode}') 的好友关系禁止{GetCurrentUserName(sessioninfo)} 进行操作)。具体原因：" + strError;
                     return 1;
                 }
             }
@@ -4136,7 +4136,7 @@ out strError);
             if (StringUtil.IsInList(strRoom, strAccessActionList) == true)
                 return 0;
 
-            strError = "当前用户只能操作馆藏地为 '" + strAccessActionList + "' 之一的册，不能操作(分馆 '" + strCode + "' 内)馆藏地为 '" + strRoom + "' 的册";
+            strError = $"{GetCurrentUserName(null)}只能操作馆藏地为 '{strAccessActionList}' 之一的册，不能操作(分馆 '{strCode}' 内)馆藏地为 '{strRoom}' 的册";
             return 1;
         }
 
@@ -4304,8 +4304,8 @@ out strError);
             // 2021/8/5
             if (string.IsNullOrEmpty(name_list) == false)
                 FilterByLevel(dom,
-                    name_list, 
-                    "read", 
+                    name_list,
+                    "read",
                     this.PatronMaskDefinition,
                     out _);
 
@@ -5084,7 +5084,7 @@ out strError);
 
                 if (bFound == false)
                 {
-                    strError = "借阅操作被拒绝。因册记录的馆藏地 '" + strLocation + "' 不在当前用户存取定义规定的馆藏地许可范围 '" + strAccessParameters + "' 之内";
+                    strError = $"借阅操作被拒绝。因册记录的馆藏地 '{strLocation}' 不在{GetCurrentUserName(null)}存取定义规定的馆藏地许可范围 '{strAccessParameters}' 之内";
                     return 0;
                 }
             }
@@ -5316,7 +5316,7 @@ out strError);
             if (string.IsNullOrEmpty(special) == false
                 && StringUtil.IsInList("specialcharging", account.RightsOrigin) == false)
             {
-                strError = "special:xxx|xxx 特性要求当前账户具有 specialcharging 权限";
+                strError = $"special:xxx|xxx 特性要求当前账户 '{account.UserID}' 具有 specialcharging 权限";
                 return 0;
             }
 
@@ -6073,7 +6073,7 @@ out _);
                 if (StringUtil.IsInList("return", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = strActionName + "操作被拒绝。不具备 return 权限。";
+                    result.ErrorInfo = $"{strActionName}操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 return 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     // return result;
                 }
@@ -6084,7 +6084,7 @@ out _);
                 if (StringUtil.IsInList("lost", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = strActionName + " 操作被拒绝。不具备 lost 权限。";
+                    result.ErrorInfo = $"{strActionName} 操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 lost 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     // return result;
                 }
@@ -6095,7 +6095,7 @@ out _);
                 if (StringUtil.IsInList("inventory", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = strActionName + " 操作被拒绝。不具备 inventory 权限。";
+                    result.ErrorInfo = $"{strActionName} 操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 inventory 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     // return result;
                 }
@@ -6106,7 +6106,7 @@ out _);
                 if (StringUtil.IsInList("setiteminfo,writerecord", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = strActionName + " 操作被拒绝。不具备 setiteminfo (或 writerecord)权限。";
+                    result.ErrorInfo = $"{strActionName} 操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 setiteminfo (或 writerecord)权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     // return result;
                 }
@@ -6117,7 +6117,7 @@ out _);
                 if (StringUtil.IsInList("read", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = strActionName + " 操作被拒绝。不具备 read 权限。";
+                    result.ErrorInfo = $"{strActionName} 操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 read 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     // return result;
                 }
@@ -6128,7 +6128,7 @@ out _);
                 if (StringUtil.IsInList("boxing", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = strActionName + " 操作被拒绝。不具备 boxing 权限。";
+                    result.ErrorInfo = $"{strActionName} 操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 boxing 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     // return result;
                 }
@@ -6710,7 +6710,7 @@ out _);
                                 else
                                 {
                                     // 对其他实体库定义了存取权限，但对 strItemDbName 没有定义
-                                    strError = "用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strItemDbName + "' 执行 出纳 操作的存取权限";
+                                    strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{ strItemDbName}' 执行 出纳 操作的存取权限";
                                     result.Value = -1;
                                     result.ErrorInfo = strError;
                                     result.ErrorCode = ErrorCode.AccessDenied;
@@ -6726,7 +6726,7 @@ out _);
                             {
                                 if (IsInAccessList(strAction, strAccessActionList, out strAccessParameters) == false)
                                 {
-                                    strError = "用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strItemDbName + "' 执行 出纳  " + strActionName + " 操作的存取权限";
+                                    strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{ strItemDbName}' 执行 出纳 { strActionName} 操作的存取权限";
                                     result.Value = -1;
                                     result.ErrorInfo = strError;
                                     result.ErrorCode = ErrorCode.AccessDenied;
@@ -9077,7 +9077,7 @@ out string _);
 
                 if (bFound == false)
                 {
-                    strError = "盘点操作被拒绝。因册记录的馆藏地 '" + strLocation + "' 不在当前用户存取定义规定的盘点操作的馆藏地许可范围 '" + strAccessParameters + "' 之内";
+                    strError = $"盘点操作被拒绝。因册记录的馆藏地 '{strLocation}' 不在{GetCurrentUserName(sessioninfo)}存取定义规定的盘点操作的馆藏地许可范围 '{strAccessParameters}' 之内";
                     return -1;
                 }
             }
@@ -9770,7 +9770,7 @@ out string _);
                     if (StringUtil.IsInList(strLibraryCode, strLibraryCodeList) == false)
                     {
                         error_code = ErrorCode.AccessDenied;
-                        strError = "当前用户管辖的馆代码为 '" + strLibraryCodeList + "'，不包含日历名中的馆代码 '" + strLibraryCode + "'，修改操作被拒绝";
+                        strError = $"{GetCurrentUserName(null)}管辖的馆代码为 '{strLibraryCodeList}'，不包含日历名中的馆代码 '{strLibraryCode}'，修改操作被拒绝";
                         return -1;
                     }
                 }
@@ -10094,7 +10094,7 @@ out string _);
                 XmlNodeList nodes = source_dom.DocumentElement.SelectNodes("descendant::*[count(ancestor-or-self::library) = 0]");
                 if (nodes.Count > 0)
                 {
-                    strError = "当前用户的分馆用户身份不允许拟保存的<" + strRootElementName + ">代码中出现非<library>元素下级的事项元素";
+                    strError = $"{GetCurrentUserName(null)}的分馆用户身份不允许拟保存的<{strRootElementName}>代码中出现非<library>元素下级的事项元素";
                     return -1;
                 }
             }
@@ -10594,7 +10594,7 @@ out string _);
 
                     if (StringUtil.IsInList(strLibraryCode, strLibraryCodeList) == false)
                     {
-                        strError = "要新增的name属性值为 '" + DomUtil.GetAttr(group_node, "name") + "' 的<group>元素因其下属的<location>元素name属性中的馆藏地点 '" + strLocationName + "' 不在当前用户管辖范围 '" + strLibraryCodeList + "' 内，修改<callNumber>定义操作被拒绝";
+                        strError = $"要新增的name属性值为 '{DomUtil.GetAttr(group_node, "name")}' 的<group>元素因其下属的<location>元素name属性中的馆藏地点 '{strLocationName}' 不在{GetCurrentUserName(null)}管辖范围 '{strLibraryCodeList}' 内，修改<callNumber>定义操作被拒绝";
                         return -1;
                     }
                 }
@@ -10618,7 +10618,7 @@ out string _);
 
                     if (StringUtil.IsInList(strLibraryCode, strLibraryCodeList) == false)
                     {
-                        strError = "要删除的name属性值为 '" + DomUtil.GetAttr(group_node, "name") + "' 的<group>元素因其下属的<location>元素name属性中的馆藏地点 '" + strLocationName + "' 不在当前用户管辖范围 '" + strLibraryCodeList + "' 内，修改<callNumber>定义操作被拒绝";
+                        strError = $"要删除的name属性值为 '{DomUtil.GetAttr(group_node, "name")}' 的<group>元素因其下属的<location>元素name属性中的馆藏地点 '{strLocationName}' 不在{GetCurrentUserName(null)}管辖范围 '{strLibraryCodeList}' 内，修改<callNumber>定义操作被拒绝";
                         return -1;
                     }
                 }
@@ -10678,7 +10678,7 @@ out string _);
 
                     if (StringUtil.IsInList(strLibraryCode, strLibraryCodeList) == false)
                     {
-                        strError = "name属性值为 '" + strGroupName + "' 的<group>元素下，拟新增的<location>元素name属性值中的馆藏地点 '" + strLocationName + "' 不在当前用户管辖范围 '" + strLibraryCodeList + "' 内，修改<callNumber>定义操作被拒绝";
+                        strError = $"name属性值为 '{strGroupName}' 的<group>元素下，拟新增的<location>元素name属性值中的馆藏地点 '{strLocationName}' 不在{GetCurrentUserName(null)}管辖范围 '{strLibraryCodeList}' 内，修改<callNumber>定义操作被拒绝";
                         return -1;
                     }
                 }
@@ -10699,7 +10699,7 @@ out string _);
 
                     if (StringUtil.IsInList(strLibraryCode, strLibraryCodeList) == false)
                     {
-                        strError = "name属性值为 '" + strGroupName + "' 的<group>元素下，拟删除的原有<location>元素name属性值中的馆藏地点 '" + strLocationName + "' 不在当前用户管辖范围 '" + strLibraryCodeList + "' 内，修改<callNumber>定义操作被拒绝";
+                        strError = $"name属性值为 '{strGroupName}' 的<group>元素下，拟删除的原有<location>元素name属性值中的馆藏地点 '{strLocationName}' 不在{GetCurrentUserName(null)}管辖范围 '{strLibraryCodeList}' 内，修改<callNumber>定义操作被拒绝";
                         return -1;
                     }
                 }
@@ -10723,7 +10723,7 @@ out string _);
 
                         if (StringUtil.IsInList(strLibraryCode, strLibraryCodeList) == false)
                         {
-                            strError = "name属性值为 '" + strGroupName + "' 的<group>元素，若其属性发生了修改，这要求其下的所有<location>元素应在当前用户的管辖范围内。但发现这个<group>元素其下的<location>元素name属性值中的馆藏地点 '" + strLocationName + "' 不在当前用户管辖范围 '" + strLibraryCodeList + "' 内，修改<callNumber>定义操作被拒绝";
+                            strError = $"name属性值为 '{strGroupName}' 的<group>元素，若其属性发生了修改，这要求其下的所有<location>元素应在当前用户的管辖范围内。但发现这个<group>元素其下的<location>元素name属性值中的馆藏地点 '{strLocationName}' 不在{GetCurrentUserName(null)}管辖范围 '{strLibraryCodeList}' 内，修改<callNumber>定义操作被拒绝";
                             return -1;
                         }
 
@@ -10811,7 +10811,7 @@ out string _);
                 XmlNodeList nodes = source_dom.DocumentElement.SelectNodes("descendant::*[count(ancestor-or-self::library) = 0]");
                 if (nodes.Count > 0)
                 {
-                    strError = "当前用户的分馆用户身份不允许拟保存的<locationTypes>代码中出现非<library>元素下级的事项元素";
+                    strError = $"{GetCurrentUserName(null)}的分馆用户身份不允许拟保存的<locationTypes>代码中出现非<library>元素下级的事项元素";
                     return -1;
                 }
 
@@ -12656,18 +12656,18 @@ out string _);
                                 out strError);
                             if (nRet == -1)
                             {
-                                strError = $"读者记录路径 '{strOutputReaderRecPath}' 从属的读者库超出当前用户管辖范围，并且在尝试检索册记录 '{strItemBarcode}' 时遇到问题: {strError}";
+                                strError = $"读者记录路径 '{strOutputReaderRecPath}' 从属的读者库超出{GetCurrentUserName(sessioninfo)}管辖范围，并且在尝试检索册记录 '{strItemBarcode}' 时遇到问题: {strError}";
                                 goto ERROR1;
                             }
                             if (nRet == 0)
                             {
-                                strError = "读者记录路径 '" + strOutputReaderRecPath + "' 从属的读者库不在当前用户管辖范围内";
+                                strError = $"读者记录路径 '{strOutputReaderRecPath}' 从属的读者库不在{GetCurrentUserName(sessioninfo)}管辖范围内";
                                 goto ERROR1;
                             }
                         }
                         else
                         {
-                            strError = "读者记录路径 '" + strOutputReaderRecPath + "' 从属的读者库不在当前用户管辖范围内";
+                            strError = $"读者记录路径 '{strOutputReaderRecPath}' 从属的读者库不在{GetCurrentUserName(sessioninfo)}管辖范围内";
                             goto ERROR1;
                         }
                     }
@@ -13124,7 +13124,7 @@ out string _);
                 if (StringUtil.IsInList("amerce", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "交违约金操作被拒绝。不具备 amerce 权限。";
+                    result.ErrorInfo = $"交违约金操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 amerce 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -13136,7 +13136,7 @@ out string _);
                 if (StringUtil.IsInList("amercemodifyprice", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "修改违约金额的操作被拒绝。不具备 amercemodifyprice 权限。";
+                    result.ErrorInfo = $"修改违约金额的操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 amercemodifyprice 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -13162,7 +13162,7 @@ out string _);
                 if (StringUtil.IsInList("amerceundo", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "撤销交违约金操作被拒绝。不具备 amerceundo 权限。";
+                    result.ErrorInfo = $"撤销交违约金操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 amerceundo 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -13174,7 +13174,7 @@ out string _);
                 if (StringUtil.IsInList("amerce", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "撤回交违约金事务的操作被拒绝。不具备 amerce 权限。";
+                    result.ErrorInfo = $"撤回交违约金事务的操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 amerce 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -13227,7 +13227,7 @@ out string _);
                     if (StringUtil.IsInList("amercemodifyprice", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "含有价格变更要求的交违约金操作被拒绝。不具备 amercemodifyprice 权限。(仅仅具备 amerce 权限还不够的)";
+                        result.ErrorInfo = $"含有价格变更要求的交违约金操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 amercemodifyprice 权限。(仅仅具备 amerce 权限还不够的)";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -13240,7 +13240,7 @@ out string _);
                     if (StringUtil.IsInList("amercemodifycomment", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "含有违约金注释(覆盖型)变更要求的操作被拒绝。不具备 amercemodifycomment 权限。(仅仅具备 amerce 权限还不够的)";
+                        result.ErrorInfo = $"含有违约金注释(覆盖型)变更要求的操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 amercemodifycomment 权限。(仅仅具备 amerce 权限还不够的)";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -13413,7 +13413,7 @@ out string _);
                     if (this.IsCurrentChangeableReaderPath(strOutputReaderRecPath,
             sessioninfo.ExpandLibraryCodeList) == false)
                     {
-                        strError = "读者记录路径 '" + strOutputReaderRecPath + "' 从属的读者库不在当前用户管辖范围内";
+                        strError = $"读者记录路径 '{strOutputReaderRecPath}' 从属的读者库不在{GetCurrentUserName(sessioninfo)}管辖范围内";
                         goto ERROR1;
                     }
                 }
@@ -14603,7 +14603,7 @@ sessioninfo.ExpandLibraryCodeList);
 
             if (completely_control == false && expand_control == false)
             {
-                strError = $"当前账户对读者 '{strReaderBarcode}' 没有管辖权";
+                strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)}对读者 '{strReaderBarcode}' 没有管辖权";
                 return -1;
             }
 
@@ -14666,7 +14666,7 @@ sessioninfo.ExpandLibraryCodeList);
                     // 如果不涉及到任何册记录，就不允许交费
                     if (string.IsNullOrEmpty(strItemBarcode))
                     {
-                        strError = $"ID 为 '{item.ID}' 的违约金事项无法进行交费，因为当前账户不具备管辖读者 '{strReaderBarcode}' 的权限";
+                        strError = $"ID 为 '{item.ID}' 的违约金事项无法进行交费，因为{SessionInfo.GetCurrentUserName(sessioninfo)}不具备管辖读者 '{strReaderBarcode}' 的权限";
                         return -1;
                     }
 
@@ -14684,7 +14684,7 @@ sessioninfo.ExpandLibraryCodeList);
                         return -1;
                     if (nRet == 1)
                     {
-                        strError = $"ID 为 '{item.ID}' 的违约金事项无法进行交费，因为当前账户既不具备管辖读者 '{strReaderBarcode}' 的权限，也不具备管辖册 '{strItemBarcode}' 的权限";
+                        strError = $"ID 为 '{item.ID}' 的违约金事项无法进行交费，因为{SessionInfo.GetCurrentUserName(sessioninfo)}既不具备管辖读者 '{strReaderBarcode}' 的权限，也不具备管辖册 '{strItemBarcode}' 的权限";
                         return -1;
                     }
                 }
@@ -16185,7 +16185,7 @@ sessioninfo.ExpandLibraryCodeList);
 
                 if (bFound == false)
                 {
-                    strError = strActionName + "操作被拒绝。因册记录的馆藏地 '" + strLocation + "' 不在当前用户存取定义规定的 " + strActionName + " 操作的馆藏地许可范围 '" + strAccessParameters + "' 之内";
+                    strError = $"{strActionName}操作被拒绝。因册记录的馆藏地 '{strLocation}' 不在{GetCurrentUserName(sessioninfo)}存取定义规定的 {strActionName} 操作的馆藏地许可范围 '{strAccessParameters}' 之内";
                     return -1;
                 }
             }
@@ -16257,9 +16257,9 @@ sessioninfo.ExpandLibraryCodeList);
                     && StringUtil.IsInList(strRoom, strPersonalLibrary) == false && StringUtil.IsInList(strRoomOrigin, strPersonalLibrary) == false)
                 {
                     if (strRoom != strRoomOrigin)
-                        strError = "还书失败。当前用户 '" + sessioninfo.Account.Barcode + "' 只能操作馆代码 '" + strReaderLibraryCode + "' 中地点为 '" + strPersonalLibrary + "' 的图书，不能操作地点为 '" + strRoom + "' (和 '" + strRoomOrigin + "')的图书";
+                        strError = $"还书失败。当前用户 '{sessioninfo.Account.Barcode}' 只能操作馆代码 '{strReaderLibraryCode}' 中地点为 '{strPersonalLibrary}' 的图书，不能操作地点为 '{strRoom}' (和 '{strRoomOrigin}')的图书";
                     else
-                        strError = "还书失败。当前用户 '" + sessioninfo.Account.Barcode + "' 只能操作馆代码 '" + strReaderLibraryCode + "' 中地点为 '" + strPersonalLibrary + "' 的图书，不能操作地点为 '" + strRoom + "' 的图书";
+                        strError = $"还书失败。当前用户 '{sessioninfo.Account.Barcode}' 只能操作馆代码 '{strReaderLibraryCode}' 中地点为 '{strPersonalLibrary}' 的图书，不能操作地点为 '{strRoom}' 的图书";
                     return -1;
                 }
             }
@@ -19356,7 +19356,7 @@ sessioninfo.ExpandLibraryCodeList);
             if (StringUtil.IsInList("devolvereaderinfo", sessioninfo.RightsOrigin) == false)
             {
                 result.Value = -1;
-                result.ErrorInfo = "转移借阅信息操作被拒绝。不具备 devolvereaderinfo 权限。";
+                result.ErrorInfo = $"转移借阅信息操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 devolvereaderinfo 权限。";
                 result.ErrorCode = ErrorCode.AccessDenied;
                 return result;
             }
@@ -19462,7 +19462,7 @@ sessioninfo.ExpandLibraryCodeList);
                     sessioninfo.LibraryCodeList,
                     out strSourceLibraryCode) == false)
                             {
-                                strError = "源读者记录路径 '" + strSourceOutputReaderRecPath + "' 从属的读者库不在当前用户管辖范围内";
+                                strError = $"源读者记录路径 '{strSourceOutputReaderRecPath}' 从属的读者库不在{GetCurrentUserName(sessioninfo)}管辖范围内";
                                 goto ERROR1;
                             }
                         }
@@ -19520,7 +19520,7 @@ sessioninfo.ExpandLibraryCodeList);
                     sessioninfo.LibraryCodeList,
                     out strTargetLibraryCode) == false)
                             {
-                                strError = "源读者记录路径 '" + strTargetOutputReaderRecPath + "' 从属的读者库不在当前用户管辖范围内";
+                                strError = $"源读者记录路径 '{strTargetOutputReaderRecPath}' 从属的读者库不在{GetCurrentUserName(sessioninfo)}管辖范围内";
                                 goto ERROR1;
                             }
                         }
@@ -20800,7 +20800,7 @@ sessioninfo.ExpandLibraryCodeList);
                     sessioninfo.LibraryCodeList,
                     out string strLibraryCode) == false)
                 {
-                    strError = "读者记录路径 '" + PatronRecPathLink(strOutputReaderRecPath) + "' 的读者库不在当前用户管辖范围内";
+                    strError = $"读者记录路径 '{PatronRecPathLink(strOutputReaderRecPath)}' 的读者库不在{GetCurrentUserName(sessioninfo)}管辖范围内";
                     goto ERROR1;
                 }
 
@@ -21198,7 +21198,7 @@ sessioninfo.ExpandLibraryCodeList);
                         sessioninfo.LibraryCodeList,
                         out strLibraryCode) == false)
                     {
-                        strError = "读者记录路径 '" + PatronRecPathLink(strOutputReaderRecPath) + "' 的读者库不在当前用户管辖范围内";
+                        strError = $"读者记录路径 '{PatronRecPathLink(strOutputReaderRecPath)}' 的读者库不在{GetCurrentUserName(sessioninfo)}管辖范围内";
                         goto ERROR1;
                     }
                 }
@@ -21375,7 +21375,7 @@ sessioninfo.ExpandLibraryCodeList);
                     }
                     if (nRet == 1)
                     {
-                        strError = "册记录 '" + ItemRecPathLink(strOutputItemRecPath) + "' 不在当前用户管辖范围内";
+                        strError = $"册记录 '{ItemRecPathLink(strOutputItemRecPath)}' 不在{GetCurrentUserName(sessioninfo)}管辖范围内";
                         goto ERROR1;
                     }
 
@@ -22003,7 +22003,7 @@ sessioninfo.ExpandLibraryCodeList);
                 if (StringUtil.IsInList("foregift", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "创建押金交费请求的操作被拒绝。不具备 foregift 权限。";
+                    result.ErrorInfo = $"创建押金交费请求的操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 foregift 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -22014,7 +22014,7 @@ sessioninfo.ExpandLibraryCodeList);
                 if (StringUtil.IsInList("returnforegift", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "创建退还押金(交费)请求的操作被拒绝。不具备 returnforegift 权限。";
+                    result.ErrorInfo = $"创建退还押金(交费)请求的操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 returnforegift 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -22080,7 +22080,7 @@ sessioninfo.ExpandLibraryCodeList);
             sessioninfo.LibraryCodeList,
             out strLibraryCode) == false)
                     {
-                        strError = "读者记录路径 '" + strOutputReaderRecPath + "' 从属的读者库不在当前用户管辖范围内";
+                        strError = $"读者记录路径 '{strOutputReaderRecPath}' 从属的读者库不在{GetCurrentUserName(sessioninfo)}管辖范围内";
                         goto ERROR1;
                     }
                 }
@@ -22468,7 +22468,7 @@ sessioninfo.ExpandLibraryCodeList);
             sessioninfo.LibraryCodeList,
             out strLibraryCode) == false)
                     {
-                        strError = "读者记录路径 '" + strOutputReaderRecPath + "' 从属的读者库不在当前用户管辖范围内";
+                        strError = $"读者记录路径 '{strOutputReaderRecPath}' 从属的读者库不在{GetCurrentUserName(sessioninfo)}管辖范围内";
                         goto ERROR1;
                     }
                 }
@@ -22849,7 +22849,7 @@ sessioninfo.ExpandLibraryCodeList);
                 if (StringUtil.IsInList("settlement", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "结算操作被拒绝。不具备 settlement 权限。";
+                    result.ErrorInfo = $"结算操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 settlement 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -22860,7 +22860,7 @@ sessioninfo.ExpandLibraryCodeList);
                 if (StringUtil.IsInList("undosettlement", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "撤销结算的操作被拒绝。不具备 undosettlement 权限。";
+                    result.ErrorInfo = $"撤销结算的操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 undosettlement 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -22871,7 +22871,7 @@ sessioninfo.ExpandLibraryCodeList);
                 if (StringUtil.IsInList("deletesettlement", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "删除结算记录的操作被拒绝。不具备 deletesettlement 权限。";
+                    result.ErrorInfo = $"删除结算记录的操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 deletesettlement 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -23080,7 +23080,7 @@ sessioninfo.ExpandLibraryCodeList);
             {
                 if (StringUtil.IsInList(strLibraryCode, strLibraryCodeList) == false)
                 {
-                    strError = "当前用户未能管辖违约金记录 '" + strAmercedRecPath + "' 所在的馆代码 '" + strLibraryCode + "'";
+                    strError = $"{GetCurrentUserName(null)}未能管辖违约金记录 '{strAmercedRecPath}' 所在的馆代码 '{strLibraryCode}'";
                     return -1;
                 }
             }

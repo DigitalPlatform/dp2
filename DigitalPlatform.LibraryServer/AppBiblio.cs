@@ -254,7 +254,7 @@ namespace DigitalPlatform.LibraryServer
                         if (StringUtil.IsInList("getbibliosummary,order", sessioninfo.RightsOrigin) == false)
                         {
                             result.Value = -1;
-                            result.ErrorInfo = "获取种摘要信息被拒绝。不具备order、getbibliosummary权限。";
+                            result.ErrorInfo = $"获取种摘要信息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备order、getbibliosummary权限。";
                             result.ErrorCode = ErrorCode.AccessDenied;
                             return result;
                         }
@@ -460,7 +460,7 @@ namespace DigitalPlatform.LibraryServer
                         if (StringUtil.IsInList("getbiblioinfo,order", sessioninfo.RightsOrigin) == false)
                         {
                             result.Value = -1;
-                            result.ErrorInfo = "获取书目信息被拒绝。不具备 getbiblioinfo 或 order 权限。";
+                            result.ErrorInfo = $"获取书目信息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 getbiblioinfo 或 order 权限。";
                             result.ErrorCode = ErrorCode.AccessDenied;
                             return result;
                         }
@@ -471,7 +471,7 @@ namespace DigitalPlatform.LibraryServer
                         if (StringUtil.IsInList("getauthorityinfo", sessioninfo.RightsOrigin) == false)
                         {
                             result.Value = -1;
-                            result.ErrorInfo = "获取规范信息被拒绝。不具备 getauthorityinfo 权限。";
+                            result.ErrorInfo = $"获取规范信息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 getauthorityinfo 权限。";
                             result.ErrorCode = ErrorCode.AccessDenied;
                             return result;
                         }
@@ -503,7 +503,7 @@ namespace DigitalPlatform.LibraryServer
                                         "",
                                         GetBiblioSummaryAction(strDbType)) != null)
                                     {
-                                        strError = "用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strBiblioDbName + "' 执行 " + GetBiblioSummaryAction(strDbType) + " 操作的存取权限";
+                                        strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{strBiblioDbName}' 执行 {GetBiblioSummaryAction(strDbType)} 操作的存取权限";
                                         result.Value = -1;
                                         result.ErrorInfo = strError;
                                         result.ErrorCode = ErrorCode.AccessDenied;
@@ -525,7 +525,7 @@ namespace DigitalPlatform.LibraryServer
                                 {
                                     if (IsInAccessList(strAction, strActionList, out strAccessParameters) == false)
                                     {
-                                        strError = "用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strBiblioDbName + "' 执行 " + GetBiblioSummaryAction(strDbType) + " 操作的存取权限";
+                                        strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{strBiblioDbName}' 执行 {GetBiblioSummaryAction(strDbType)} 操作的存取权限";
                                         result.Value = -1;
                                         result.ErrorInfo = strError;
                                         result.ErrorCode = ErrorCode.AccessDenied;
@@ -1950,7 +1950,7 @@ namespace DigitalPlatform.LibraryServer
                 if (StringUtil.IsInList("getbibliosummary,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "获取种摘要信息被拒绝。不具备 order 或 getbibliosummary 权限。";
+                    result.ErrorInfo = $"获取种摘要信息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 order 或 getbibliosummary 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -2688,7 +2688,7 @@ out strError);
                     // 但需要注意检查账户权限，读的字段范围是否小于写的字段范围？如果小了，则读和写往返一轮会丢失记录中原有的 dprms:file 元素。这种情况需要直接报错
                     if (StringUtil.IsInList("getbiblioobject,getobject", strRights) == false)
                     {
-                        strError = "操作被放弃。当前用户的权限定义不正确：具有 setbiblioobject(或 setobject) 但不具有 getbiblioobject(或getobject) 权限(即写范围大于读范围)，这样会造成数据库内书目记录中原有的 dprms:file 元素丢失。请修改当前账户权限再重新操作";
+                        strError = $"操作被放弃。{GetCurrentUserName(null)}的权限定义不正确：具有 setbiblioobject(或 setobject) 但不具有 getbiblioobject(或getobject) 权限(即写范围大于读范围)，这样会造成数据库内书目记录中原有的 dprms:file 元素丢失。请修改当前账户权限再重新操作";
                         return -1;
                     }
 
@@ -4172,7 +4172,7 @@ ref string strMARC)
             {
                 if (FullyContainIn(strLibraryCodeList, sessioninfo.LibraryCodeList) == false)
                 {
-                    strError = "所请求的馆代码 '" + strLibraryCodeList + "' 不是完全包含于当前用户的管辖范围馆代码 '" + sessioninfo.LibraryCodeList + "' 中";
+                    strError = $"所请求的馆代码 '{strLibraryCodeList}' 不是完全包含于{GetCurrentUserName(sessioninfo)}的管辖范围馆代码 '{sessioninfo.LibraryCodeList}' 中";
                     goto ERROR1;
                 }
             }
@@ -4544,7 +4544,7 @@ ref string strMARC)
                                     sessioninfo.LibraryCodeList,
                                     out strLibraryCode) == false)
                                 {
-                                    strError = "读者记录路径 '" + strOutputReaderRecPath + "' 的读者库不在当前用户管辖范围内";
+                                    strError = $"读者记录路径 '{strOutputReaderRecPath}' 的读者库不在{GetCurrentUserName(sessioninfo)}管辖范围内";
                                     return 1;
                                 }
                             }
@@ -4676,7 +4676,7 @@ ref string strMARC)
                                     sessioninfo.LibraryCodeList,
                                     out strLibraryCode) == false)
                                 {
-                                    strError = "读者记录路径 '" + strOutputReaderRecPath + "' 的读者库不在当前用户管辖范围内";
+                                    strError = $"读者记录路径 '{strOutputReaderRecPath}' 的读者库不在{GetCurrentUserName(sessioninfo)}管辖范围内";
                                     return 1;
                                 }
                             }
@@ -4867,7 +4867,7 @@ ref string strMARC)
                 if (StringUtil.IsInList("restore", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "带有风格 'force' 的修改书目信息的" + strAction + "操作被拒绝。不具备 restore 权限。";
+                    result.ErrorInfo = $"带有风格 'force' 的修改书目信息的{strAction}操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 restore 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -4875,7 +4875,7 @@ ref string strMARC)
                 if (sessioninfo.GlobalUser == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "修改书目信息的" + strAction + "操作被拒绝。只有全局用户并具备 restore 权限才能进行这样的操作。";
+                    result.ErrorInfo = $"修改书目信息的{strAction}操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不是全局用户。只有全局用户并具备 restore 权限才能进行这样的操作。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -4894,7 +4894,7 @@ ref string strMARC)
                 if (StringUtil.IsInList("restore", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "带有风格 'noeventlog' 的修改书目信息的" + strAction + "操作被拒绝。不具备 restore 权限。";
+                    result.ErrorInfo = $"带有风格 'noeventlog' 的修改书目信息的{strAction}操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 restore 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -4910,7 +4910,7 @@ ref string strMARC)
                 if (StringUtil.IsInList("restore", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "带有风格 'nocheckdup' 的修改书目信息的" + strAction + "操作被拒绝。不具备 restore 权限。";
+                    result.ErrorInfo = $"带有风格 'nocheckdup' 的修改书目信息的{strAction}操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 restore 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -4918,7 +4918,7 @@ ref string strMARC)
                 if (sessioninfo.GlobalUser == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "带有风格 'nocheckdup' 的修改书目信息的" + strAction + "操作被拒绝。只有全局用户并具备 restore 权限才能进行这样的操作。";
+                    result.ErrorInfo = $"带有风格 'nocheckdup' 的修改书目信息的{ strAction}操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不是全局用户。只有全局用户并具备 restore 权限才能进行这样的操作。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -4929,7 +4929,7 @@ ref string strMARC)
                 if (StringUtil.IsInList("restore", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "带有风格 'noeventlog' 的修改书目信息的" + strAction + "操作被拒绝。不具备 restore 权限。";
+                    result.ErrorInfo = $"带有风格 'noeventlog' 的修改书目信息的{strAction}操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 restore 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -4937,7 +4937,7 @@ ref string strMARC)
                 if (sessioninfo.GlobalUser == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "带有风格 'noeventlog' 的修改书目信息的" + strAction + "操作被拒绝。只有全局用户并具备 restore 权限才能进行这样的操作。";
+                    result.ErrorInfo = $"带有风格 'noeventlog' 的修改书目信息的{ strAction}操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不是全局用户。只有全局用户并具备 restore 权限才能进行这样的操作。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -5216,7 +5216,7 @@ ref string strMARC)
                     if (StringUtil.IsInList("setbiblioinfo,writerecord,order", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "设置书目信息被拒绝。不具备 setbiblioinfo 或 writerecord 或 order 权限";
+                        result.ErrorInfo = $"设置书目信息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 setbiblioinfo 或 writerecord 或 order 权限";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -5227,7 +5227,7 @@ ref string strMARC)
                     if (StringUtil.IsInList("setauthorityinfo,writerecord", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "设置规范信息被拒绝。不具备 setauthorityinfo 或 writerecord 权限。";
+                        result.ErrorInfo = $"设置规范信息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 setauthorityinfo 或 writerecord 权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -5248,7 +5248,7 @@ ref string strMARC)
                     if (StringUtil.IsInList("getbiblioinfo", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "设置书目信息被拒绝。虽然当前账户具备 setbiblioinfo 权限(或对应存取定义)，但不具备 getbiblioinfo 权限(或对应存取定义)，这违反了权限安全性规则。请修改账户权限";
+                        result.ErrorInfo = $"设置书目信息被拒绝。虽然{SessionInfo.GetCurrentUserName(sessioninfo)}具备 setbiblioinfo 权限(或对应存取定义)，但不具备 getbiblioinfo 权限(或对应存取定义)，这违反了权限安全性规则。请修改账户权限";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -5257,7 +5257,7 @@ ref string strMARC)
                 else if (error != null)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = $"设置书目信息被拒绝。虽然当前账户具备 setbiblioinfo 权限(或对应存取定义)，但不具备 getbiblioinfo 权限(或对应存取定义)，这违反了权限安全性规则。请修改账户权限。\r\n注: 检查 getbiblioinfo 权限时的详情如下: {error}";
+                    result.ErrorInfo = $"设置书目信息被拒绝。虽然{SessionInfo.GetCurrentUserName(sessioninfo)}具备 setbiblioinfo 权限(或对应存取定义)，但不具备 getbiblioinfo 权限(或对应存取定义)，这违反了权限安全性规则。请修改账户权限。\r\n注: 检查 getbiblioinfo 权限时的详情如下: {error}";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -5463,7 +5463,7 @@ out strError);
 
                     if (strOwner != sessioninfo.UserID)
                     {
-                        strError = $"当前用户 '{sessioninfo.UserID}' 不是{strDbTypeCaption}记录 '{strBiblioRecPath}' 的创建者(998$z) '{strOwner}'，因此 setbiblio(authority)info {strAction} 操作被拒绝";
+                        strError = $"{GetCurrentUserName(sessioninfo)} 不是{strDbTypeCaption}记录 '{strBiblioRecPath}' 的创建者(998$z) '{strOwner}'，因此 setbiblio(authority)info {strAction} 操作被拒绝";
                         result.Value = -1;
                         result.ErrorInfo = strError;
                         result.ErrorCode = ErrorCode.AccessDenied;
@@ -6063,7 +6063,7 @@ out strError);
                             this.WriteErrorLog("用户 '" + sessioninfo.UserID + "' 删除书目记录 '" + strBiblioRecPath + "' (已被拒绝) 最后一步剩下的字段: " + StringUtil.MakePathList(rest_names));
 
                             result.Value = -1;
-                            result.ErrorInfo = "当前用户的权限不足以删除所有MARC字段，因此删除操作被拒绝。可改用修改操作。\r\n\r\n权限不足以删除的部分字段如下: \r\n" + StringUtil.MakePathList(rest_names);  // TODO: 可以考虑用更友好的显示 MARC 工作单格式的方式来报错
+                            result.ErrorInfo = $"{GetCurrentUserName(sessioninfo)}的权限不足以删除所有MARC字段，因此删除操作被拒绝。可改用修改操作。\r\n\r\n权限不足以删除的部分字段如下: \r\n" + StringUtil.MakePathList(rest_names);  // TODO: 可以考虑用更友好的显示 MARC 工作单格式的方式来报错
                             result.ErrorCode = ErrorCode.AccessDenied;
                             return result;
                         }
@@ -6484,7 +6484,7 @@ out strError);
                     if (bWhenChildEmpty)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "设置书目信息的删除(delete)操作(带有 whenChildEmpty 条件)被拒绝。因拟删除的书目记录带有下属的实体记录，不允许删除书目记录";
+                        result.ErrorInfo = "设置书目信息的删除(delete)操作(带有 whenChildEmpty 条件)被拒绝。因拟删除的书目记录带有下属的实体记录，此时不允许删除书目记录";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         // return result;
                         return 1;
@@ -6494,7 +6494,7 @@ out strError);
                     if (StringUtil.IsInList("setiteminfo,writerecord", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的实体记录，但当前用户不具备 setiteminfo 或 writerecord 权限，不能删除它们。";
+                        result.ErrorInfo = $"设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的实体记录，但{GetCurrentUserName(sessioninfo)}不具备 setiteminfo 或 writerecord 权限，不能删除它们。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         // return result;
                         return 1;
@@ -6510,7 +6510,7 @@ out strError);
                     if (this.DeleteBiblioSubRecords == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的实体记录，不允许删除书目记录";
+                        result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的实体记录，此时不允许删除书目记录";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         // return result;
                         return 1;
@@ -6549,7 +6549,7 @@ out strError);
                     if (bWhenChildEmpty)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "设置书目信息的删除(delete)操作(带有 whenChildEmpty 条件)被拒绝。因拟删除的书目记录带有下属的订购记录，不允许删除书目记录";
+                        result.ErrorInfo = "设置书目信息的删除(delete)操作(带有 whenChildEmpty 条件)被拒绝。因拟删除的书目记录带有下属的订购记录，此时不允许删除书目记录";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return 1;
                     }
@@ -6558,7 +6558,7 @@ out strError);
                     if (StringUtil.IsInList("setorderinfo,writerecord,order", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的订购记录，但当前用户不具备 setorderinfo 或 writerecord 或 order 权限，不能删除它们。";
+                        result.ErrorInfo = $"设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的订购记录，但{GetCurrentUserName(sessioninfo)}不具备 setorderinfo 或 writerecord 或 order 权限，不能删除它们。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         // return result;
                         return 1;
@@ -6574,7 +6574,7 @@ out strError);
                     if (this.DeleteBiblioSubRecords == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的订购记录，不允许删除书目记录";
+                        result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的订购记录，此时不允许删除书目记录";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         // return result;
                         return 1;
@@ -6614,7 +6614,7 @@ out strError);
                     if (bWhenChildEmpty)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "设置书目信息的删除(delete)操作(带有 whenChildEmpty 条件)被拒绝。因拟删除的书目记录带有下属的期记录，不允许删除书目记录";
+                        result.ErrorInfo = "设置书目信息的删除(delete)操作(带有 whenChildEmpty 条件)被拒绝。因拟删除的书目记录带有下属的期记录，此时不允许删除书目记录";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return 1;
                     }
@@ -6623,7 +6623,7 @@ out strError);
                     if (StringUtil.IsInList("setissueinfo,writerecord", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的期记录，但当前用户不具备 setissueinfo 或 writerecord 权限，不能删除它们。";
+                        result.ErrorInfo = $"设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的期记录，但{GetCurrentUserName(sessioninfo)}不具备 setissueinfo 或 writerecord 权限，不能删除它们。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         // return result;
                         return 1;
@@ -6639,7 +6639,7 @@ out strError);
                     if (this.DeleteBiblioSubRecords == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的期记录，不允许删除书目记录";
+                        result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的期记录，此时不允许删除书目记录";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         // return result;
                         return 1;
@@ -6677,7 +6677,7 @@ out strError);
                     if (bWhenChildEmpty)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "设置书目信息的删除(delete)操作(带有 whenChildEmpty 条件)被拒绝。因拟删除的书目记录带有下属的评注记录，不允许删除书目记录";
+                        result.ErrorInfo = "设置书目信息的删除(delete)操作(带有 whenChildEmpty 条件)被拒绝。因拟删除的书目记录带有下属的评注记录，此时不允许删除书目记录";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return 1;
                     }
@@ -6686,7 +6686,7 @@ out strError);
                     if (StringUtil.IsInList("setcommentinfo,writerecord", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的评注记录，但当前用户不具备setcommentinfo 或 writerecord 权限，不能删除它们。";
+                        result.ErrorInfo = $"设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的评注记录，但{GetCurrentUserName(sessioninfo)}不具备setcommentinfo 或 writerecord 权限，不能删除它们。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         // return result;
                         return 1;
@@ -6702,7 +6702,7 @@ out strError);
                     if (this.DeleteBiblioSubRecords == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的评注记录，不允许删除书目记录";
+                        result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的评注记录，此时不允许删除书目记录";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         // return result;
                         return 1;
@@ -6936,7 +6936,7 @@ out strError);
             if (files.Count > 0
                 && StringUtil.IsInList($"set{db_type}object,setobject", rights) == false)
             {
-                strError = $"当前账户不具备 set{db_type}object 或 setobject 权限，然而记录 '{strRecPath}' 中包含 dprms:file 元素，操作被拒绝";
+                strError = $"{SessionInfo.GetCurrentUserName(null)}不具备 set{db_type}object 或 setobject 权限，然而记录 '{strRecPath}' 中包含 dprms:file 元素，操作被拒绝";
                 return -1;
             }
 
@@ -7057,7 +7057,7 @@ out strError);
 
                 if (StringUtil.IsInList(strLibraryCode, strLibraryCodeList) == false)
                 {
-                    strError = "册记录的 '" + strRecPath + "' 的馆藏地点 '" + strLocation + "' 不在当前用户管辖范围 '" + strLibraryCodeList + "' 内，操作被拒绝";
+                    strError = $"册记录 '{strRecPath}' 的馆藏地点 '{strLocation}' 不在{GetCurrentUserName(sessioninfo)}管辖范围 '{strLibraryCodeList}' 内，操作被拒绝";
                     return -1;
                 }
             }
@@ -7302,7 +7302,7 @@ out strError);
                             }
                             else
                             {
-                                strError = "用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strBiblioDbName + "' 执行 getbiblioinfo " + strReadAction + " 操作的存取权限(注:复制操作由一个读和一个写操作构成)";
+                                strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{strBiblioDbName}' 执行 getbiblioinfo {strReadAction} 操作的存取权限(注:复制操作由一个读和一个写操作构成)";
                                 result.Value = -1;
                                 result.ErrorInfo = strError;
                                 result.ErrorCode = ErrorCode.AccessDenied;
@@ -7318,7 +7318,7 @@ out strError);
                         {
                             if (IsInAccessList(strReadAction, strActionList, out strReadAccessParameters) == false)
                             {
-                                strError = "用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strBiblioDbName + "' 执行 getbiblioinfo " + strReadAction + " 操作的存取权限(注:复制操作由一个读和一个写操作构成)";
+                                strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{strBiblioDbName}' 执行 getbiblioinfo {strReadAction} 操作的存取权限(注:复制操作由一个读和一个写操作构成)";
                                 result.Value = -1;
                                 result.ErrorInfo = strError;
                                 result.ErrorCode = ErrorCode.AccessDenied;
@@ -7358,7 +7358,7 @@ out strError);
                             }
                             else
                             {
-                                strError = $"用户 '{sessioninfo.UserID}' 不具备 针对数据库 '{strTargetBiblioDbName}' 执行 setbiblioinfo {strWriteAction} 操作的存取权限";
+                                strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{strTargetBiblioDbName}' 执行 setbiblioinfo {strWriteAction} 操作的存取权限";
                                 result.Value = -1;
                                 result.ErrorInfo = strError;
                                 result.ErrorCode = ErrorCode.AccessDenied;
@@ -7374,7 +7374,7 @@ out strError);
                         {
                             if (IsInAccessList(strWriteAction, strActionList, out strWriteAccessParameters) == false)
                             {
-                                strError = "用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strBiblioDbName + "' 执行 setbiblioinfo " + strWriteAction + " 操作的存取权限";
+                                strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{strBiblioDbName}' 执行 setbiblioinfo {strWriteAction} 操作的存取权限";
                                 result.Value = -1;
                                 result.ErrorInfo = strError;
                                 result.ErrorCode = ErrorCode.AccessDenied;
@@ -7394,7 +7394,7 @@ out strError);
                 if (StringUtil.IsInList("getbiblioinfo,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "设置书目信息被拒绝。不具备针对源数据库的 order 或 getbiblioinfo 权限。";
+                    result.ErrorInfo = $"设置书目信息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备针对源数据库的 order 或 getbiblioinfo 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -7405,7 +7405,7 @@ out strError);
                 if (StringUtil.IsInList("setbiblioinfo,writerecord,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "设置书目信息被拒绝。不具备 setbiblioinfo 或 writerecord 或 order 权限";
+                    result.ErrorInfo = $"设置书目信息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 setbiblioinfo 或 writerecord 或 order 权限";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -7922,7 +7922,7 @@ out strError);
                 // 权限字符串
                 if (StringUtil.IsInList("setiteminfo,setobject", sessioninfo.RightsOrigin) == false)
                 {
-                    strError = "复制(移动)书目信息的操作被拒绝。因拟操作的书目记录带有下属的实体记录，但当前用户不具备 setiteminfo 或 setobject 权限，不能复制或者移动它们。";
+                    strError = $"复制(移动)书目信息的操作被拒绝。因拟操作的书目记录带有下属的实体记录，但{GetCurrentUserName(sessioninfo)}不具备 setiteminfo 或 setobject 权限，不能复制或者移动它们。";
                     return -2;
                 }
 
@@ -7984,7 +7984,7 @@ out strError);
                 // 权限字符串
                 if (StringUtil.IsInList("setorderinfo,setobject,order", sessioninfo.RightsOrigin) == false)
                 {
-                    strError = "复制(移动)书目信息的操作被拒绝。因拟操作的书目记录带有下属的订购记录，但当前用户不具备 setorderinfo、setobject 或 order 权限，不能复制或移动它们。";
+                    strError = $"复制(移动)书目信息的操作被拒绝。因拟操作的书目记录带有下属的订购记录，但{GetCurrentUserName(sessioninfo)}不具备 setorderinfo、setobject 或 order 权限，不能复制或移动它们。";
                     return -2;
                 }
 
@@ -8038,7 +8038,7 @@ out strError);
                 // 权限字符串
                 if (StringUtil.IsInList("setissueinfo,setobject", sessioninfo.RightsOrigin) == false)
                 {
-                    strError = "复制(移动)书目信息的操作被拒绝。因拟操作的书目记录带有下属的期记录，但当前用户不具备 setissueinfo 或 setobject 权限，不能复制或移动它们。";
+                    strError = $"复制(移动)书目信息的操作被拒绝。因拟操作的书目记录带有下属的期记录，但{GetCurrentUserName(sessioninfo)}不具备 setissueinfo 或 setobject 权限，不能复制或移动它们。";
                     return -2;
                 }
 
@@ -8092,7 +8092,7 @@ out strError);
                 // 权限字符串
                 if (StringUtil.IsInList("setcommentinfo,writerecord", sessioninfo.RightsOrigin) == false)
                 {
-                    strError = "复制(移动)书目信息的操作被拒绝。因拟操作的书目记录带有下属的评注记录，但当前用户不具备 setcommentinfo 或 writerecord 权限，不能复制或移动它们。";
+                    strError = $"复制(移动)书目信息的操作被拒绝。因拟操作的书目记录带有下属的评注记录，但{GetCurrentUserName(sessioninfo)}不具备 setcommentinfo 或 writerecord 权限，不能复制或移动它们。";
                     return -2;
                 }
 
@@ -8887,7 +8887,7 @@ out strError);
                     if (StringUtil.IsInList("setiteminfo,writerecord", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "为册记录设置书目信息的操作被拒绝。前用户不具备 setiteminfo 或 writerecord 权限，不能修改它们。";
+                        result.ErrorInfo = $"为册记录设置书目信息的操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 setiteminfo 或 writerecord 权限，不能修改它们。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         // return result;
                         return 1;

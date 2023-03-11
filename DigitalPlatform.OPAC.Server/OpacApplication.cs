@@ -1246,6 +1246,7 @@ namespace DigitalPlatform.OPAC.Server
         // 缓存的from信息
         Hashtable m_fromTable = new Hashtable();
 
+        // (注：采用了代理账户)
         public int GetDbFroms(
             string strDbType,
             string strLang,
@@ -1309,6 +1310,7 @@ namespace DigitalPlatform.OPAC.Server
         }
 
         // 从dp2Library获得XML定义
+        // (注：采用了代理账户)
         // return:
         //      -2  dp2Library版本不匹配
         //      -1  出错
@@ -3129,6 +3131,7 @@ System.Text.Encoding.UTF8))
         }
 
         // 通过册条码号得知从属的种记录路径
+        // (注：采用了代理账户)
         // parameters:
         //      strItemBarcode  册条码号
         //      strReaderBarcodeParam 借阅者证条码号。用于条码号重复的时候附加判断。
@@ -3196,6 +3199,7 @@ System.Text.Encoding.UTF8))
         }
 
         // 通过评注记录路径得知从属的种记录路径
+        // (注：采用了代理账户)
         // parameters:
         // return:
         //      -1  error
@@ -3258,6 +3262,7 @@ System.Text.Encoding.UTF8))
         }
 
         // 通过册记录路径得知从属的种记录路径
+        // (注：采用了代理账户)
         // parameters:
         // return:
         //      -1  error
@@ -3446,6 +3451,7 @@ System.Text.Encoding.UTF8))
         }
 
         // 获得读者证号二维码字符串
+        // (注：采用了代理账户)
         public int GetPatronTempId(
             string strReaderBarcode,
             out string strCode,
@@ -3541,6 +3547,7 @@ System.Text.Encoding.UTF8))
 #endif
 
         // 根据读者证条码号找到头像资源路径
+        // (注：采用了代理账户)
         // parameters:
         //      strReaderBarcode    读者证条码号
         //      strEncryptBarcode   如果strEncryptBarcode有内容，则用它，而不用strReaderBarcode
@@ -3708,8 +3715,8 @@ System.Text.Encoding.UTF8))
             }
         }
 
-        // 采用了代理帐户
         // 保存上载的文件
+        // (注：采用了代理账户)
         // 注: 本函数会检查上载的文件是否为图像文件，如果不是图像文件会报错
         public int SaveUploadFile(
     System.Web.UI.Page page,
@@ -3956,6 +3963,7 @@ out strError);
 
         // 获得计数器值
         // parameters:
+        //      channel 通讯通道。如果为 null，则函数会自动使用管理员身份创建通道
         //      strName 名字。为 书目记录路径 + '|' + URL
         public long GetHitCount(LibraryChannel channel_param,
             string strName,
@@ -4036,6 +4044,7 @@ out strError);
 
         // 增量计数器值
         // parameters:
+        //      channel 通讯通道。如果为 null，则函数会自动使用管理员身份创建通道
         //      strName 名字。为 书目记录路径 + '|' + URL
         // return:
         //      -1  出错

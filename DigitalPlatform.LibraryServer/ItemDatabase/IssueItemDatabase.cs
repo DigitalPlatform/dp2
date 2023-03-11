@@ -274,7 +274,7 @@ namespace DigitalPlatform.LibraryServer
                                 return -1;
                             if (nRet == 0)
                             {
-                                strError = "受当前用户的分馆用户身份限制，期记录中不允许新增(包括了超出管辖范围馆代码的)订购XML片断。(refID='" + strRefID + "')";
+                                strError = $"受{SessionInfo.GetCurrentUserName(sessioninfo)}的分馆用户身份限制，期记录中不允许新增(包括了超出管辖范围馆代码的)订购XML片断。(refID='{strRefID}')";
                                 return -1;
                             }
                         }
@@ -505,7 +505,7 @@ namespace DigitalPlatform.LibraryServer
 
                 if (strExistOldValue != strChangedOldValue)
                 {
-                    strError = "订购套数(方括号左边的部分)不允许修改。(原来='"+strExistCopy+"',新的='"+strChangedCopy+"')";
+                    strError = "订购套数(方括号左边的部分)不允许修改。(原来='" + strExistCopy + "',新的='" + strChangedCopy + "')";
                     return 1;
                 }
 
@@ -968,7 +968,7 @@ out string strError)
                         return -1;
                     if (nRet == 0)
                     {
-                        strError = "因出现了超越当前用户管辖范围的分馆馆藏信息，删除期记录的操作被拒绝：" + strError;
+                        strError = $"因出现了超越{SessionInfo.GetCurrentUserName(sessioninfo)}管辖范围的分馆馆藏信息，删除期记录的操作被拒绝：{strError}";
                         return 0;
                     }
                 }
@@ -1095,7 +1095,7 @@ out string strError)
                         return -1;
                     if (nRet == 0)
                     {
-                        strError = "因出现了超越当前用户管辖范围的分馆馆藏信息，创建期记录的操作被拒绝：" + strError;
+                        strError = $"因出现了超越{SessionInfo.GetCurrentUserName(sessioninfo)}管辖范围的分馆馆藏信息，创建期记录的操作被拒绝：{ strError}";
                         return 0;
                     }
                 }

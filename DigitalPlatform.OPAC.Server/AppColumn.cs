@@ -201,6 +201,7 @@ namespace DigitalPlatform.OPAC.Server
         }
 
         // 检索顶层文章
+        // (注：采用了代理账户)
         // return:
         //		-1	error
         //		其他 命中数

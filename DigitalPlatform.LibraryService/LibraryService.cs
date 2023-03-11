@@ -1669,7 +1669,7 @@ namespace dp2Library
                 if (StringUtil.IsInList("getpatrontempid", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "获得读者证号二维码被拒绝。不具备 getpatrontempid 权限";
+                    result.ErrorInfo = $"获得读者证号二维码被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 getpatrontempid 权限";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -1681,7 +1681,7 @@ namespace dp2Library
                     if (StringUtil.IsInList("verifytoken", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "验证 token 被拒绝。不具备 verifytoken 权限";
+                        result.ErrorInfo = $"验证 token 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 verifytoken 权限";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -1691,7 +1691,7 @@ namespace dp2Library
                     if (StringUtil.IsInList("verifyreaderpassword", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "验证读者密码被拒绝。不具备 verifyreaderpassword 权限";
+                        result.ErrorInfo = $"验证读者密码被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 verifyreaderpassword 权限";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -1784,7 +1784,7 @@ namespace dp2Library
                     if (app.IsCurrentChangeableReaderPath(strOutputPath,
             sessioninfo.LibraryCodeList) == false)
                     {
-                        strError = "读者记录路径 '" + strOutputPath + "' 从属的读者库不在当前用户管辖范围内";
+                        strError = $"读者记录路径 '{ strOutputPath}' 从属的读者库不在{SessionInfo.GetCurrentUserName(sessioninfo)}管辖范围内";
                         goto ERROR1;
                     }
                 }
@@ -2366,7 +2366,7 @@ namespace dp2Library
                 if (StringUtil.IsInList("searchreader", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "检索读者信息被拒绝。不具备searchreader权限。";
+                    result.ErrorInfo = $"检索读者信息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 searchreader 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -2426,7 +2426,7 @@ namespace dp2Library
 
                     if (notmatches.Count > 0)
                     {
-                        strError = "读者库 " + StringUtil.MakePathList(notmatches) + " 因为馆代码(及馆际互借权限)限制，不允许当前用户检索";
+                        strError = $"读者库 { StringUtil.MakePathList(notmatches)} 因为馆代码(及馆际互借权限)限制，不允许{SessionInfo.GetCurrentUserName(sessioninfo)}检索";
                         result.Value = -1;
                         result.ErrorInfo = strError;
                         result.ErrorCode = ErrorCode.AccessDenied;
@@ -2611,7 +2611,7 @@ namespace dp2Library
                 if (StringUtil.IsInList("searchcharging", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "获得出纳历史信息被拒绝。不具备 searchcharging 权限";
+                    result.ErrorInfo = $"获得出纳历史信息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 searchcharging 权限";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -2730,7 +2730,7 @@ namespace dp2Library
             if (sessioninfo.UserType != "reader")
             {
                 result.Value = -1;
-                result.ErrorInfo = "当前用户不是读者，不能进行好友操作";
+                result.ErrorInfo = $"{SessionInfo.GetCurrentUserName(sessioninfo)}不是读者，不能进行好友操作";
                 result.ErrorCode = ErrorCode.AccessDenied;
                 return result;
             }
@@ -2975,7 +2975,7 @@ namespace dp2Library
                         sessioninfo.ExpandLibraryCodeList/*sessioninfo.LibraryCodeList*/) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = $"检索读者库 '{strDbName}' 信息被拒绝。因读者库 '{strDbName}' 不在当前用户管辖范围内";
+                        result.ErrorInfo = $"检索读者库 '{strDbName}' 信息被拒绝。因读者库 '{strDbName}' 不在{SessionInfo.GetCurrentUserName(sessioninfo)}管辖范围内";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -3675,7 +3675,7 @@ namespace dp2Library
                     if (bChangeable == false)
                     {
                         // 当前用户不管辖此读者库
-                        ClearRecord(record, $"当前用户不管辖读者库 '{strDbName}'");
+                        ClearRecord(record, $"{SessionInfo.GetCurrentUserName(sessioninfo)}不管辖读者库 '{strDbName}'");
                         record.Path = "";
                         /*
                         record.Cols = null;
@@ -5498,7 +5498,7 @@ out timestamp);
                 if (StringUtil.IsInList("listdbfroms,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "列出书目库检索途径 被拒绝。不具备 listdbfroms 或 order 权限。";
+                    result.ErrorInfo = $"列出书目库检索途径 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 listdbfroms 或 order 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -5599,7 +5599,7 @@ out timestamp);
                 if (StringUtil.IsInList("searchbiblio,order,searchauthority", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "检索书目或规范信息被拒绝。不具备order、searchbiblio或searchauthority权限。";
+                    result.ErrorInfo = $"检索书目或规范信息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备order、searchbiblio或searchauthority权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -5826,7 +5826,7 @@ out timestamp);
                         if (StringUtil.IsInList("searchbiblio,order", sessioninfo.RightsOrigin) == false)
                         {
                             result.Value = -1;
-                            result.ErrorInfo = "检索书目信息被拒绝。不具备 order 或 searchbiblio权限。";
+                            result.ErrorInfo = $"检索书目信息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 searchbiblio 或 order 权限。";
                             result.ErrorCode = ErrorCode.AccessDenied;
                             return result;
                         }
@@ -5836,7 +5836,7 @@ out timestamp);
                         if (StringUtil.IsInList("searchauthority", sessioninfo.RightsOrigin) == false)
                         {
                             result.Value = -1;
-                            result.ErrorInfo = "检索规范信息被拒绝。不具备 searchauthority 权限。";
+                            result.ErrorInfo = $"检索规范信息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 searchauthority 权限。";
                             result.ErrorCode = ErrorCode.AccessDenied;
                             return result;
                         }
@@ -6035,7 +6035,7 @@ out timestamp);
                     if (StringUtil.IsInList("setbiblioinfo,order", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "通知读者新书到达被拒绝。不具备order或setbiblioinfo权限。";
+                        result.ErrorInfo = $"通知读者新书到达被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备order或setbiblioinfo权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -6599,7 +6599,7 @@ out timestamp);
                 if (StringUtil.IsInList("searchitem,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "检索实体信息被拒绝。不具备order、searchitem权限。";
+                    result.ErrorInfo = $"检索实体信息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 searchitem 或order 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -6754,7 +6754,7 @@ out timestamp);
                     if (StringUtil.IsInList("getiteminfo,order", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "用户 '" + sessioninfo.UserID + "' 获取实体信息被拒绝。不具备 getiteminfo 或 order 权限。";
+                        result.ErrorInfo = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 获取实体信息被拒绝。不具备 getiteminfo 或 order 权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -6765,7 +6765,7 @@ out timestamp);
                     if (StringUtil.IsInList("getorderinfo,order", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "用户 '" + sessioninfo.UserID + "' 获取订购信息被拒绝。不具备order或getorderinfo权限。";
+                        result.ErrorInfo = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 获取订购信息被拒绝。不具备order或getorderinfo权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -6776,7 +6776,7 @@ out timestamp);
                     if (StringUtil.IsInList("getissueinfo,order", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "用户 '" + sessioninfo.UserID + "' 获取期信息被拒绝。不具备order或getissueinfo权限。";
+                        result.ErrorInfo = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 获取期信息被拒绝。不具备order或getissueinfo权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -6787,7 +6787,7 @@ out timestamp);
                     if (StringUtil.IsInList("getcommentinfo,order", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "用户 '" + sessioninfo.UserID + "' 获取评注信息(GetItemInfo()被拒绝。不具备 getcommentinfo 或 order 权限。";
+                        result.ErrorInfo = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 获取评注信息(GetItemInfo())被拒绝。不具备 getcommentinfo 或 order 权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -7584,7 +7584,7 @@ out timestamp);
                 if (StringUtil.IsInList("searchitem,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "册条码号查重被拒绝。不具备order或searchitem权限。";
+                    result.ErrorInfo = $"册条码号查重被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 searchitem 或 order 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -8019,7 +8019,7 @@ out timestamp);
                 if (StringUtil.IsInList("getissueinfo,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "获得期信息 操作被拒绝。不具备 getissueinfo 或 order 权限。";
+                    result.ErrorInfo = $"获得期信息 操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 getissueinfo 或 order 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -9182,7 +9182,7 @@ PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin)
                 if (StringUtil.IsInList("searchissue,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "对期记录的参考ID查重被拒绝。不具备order或searchissue权限。";
+                    result.ErrorInfo = $"对期记录的参考ID查重被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 searchissue 或 order 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -9275,7 +9275,7 @@ PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin)
                 if (StringUtil.IsInList("searchissue", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "检索期信息被拒绝。不具备searchissue权限。";
+                    result.ErrorInfo = $"检索期信息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备searchissue权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -9564,7 +9564,7 @@ PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin)
                 if (StringUtil.IsInList("getorderinfo,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "获得订购信息 操作被拒绝。不具备 getorderinfo 或 order 权限。";
+                    result.ErrorInfo = $"获得订购信息 操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 getorderinfo 或 order 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -10201,7 +10201,7 @@ PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin)
                 if (StringUtil.IsInList("searchorder", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "编号查重被拒绝。不具备searchorder权限。";
+                    result.ErrorInfo = $"编号查重被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备searchorder权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -10294,7 +10294,7 @@ PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin)
                 if (StringUtil.IsInList("searchorder,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "检索订购信息被拒绝。不具备order、searchorder权限。";
+                    result.ErrorInfo = $"检索订购信息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备order、searchorder权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -10555,7 +10555,7 @@ PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin)
                 if (StringUtil.IsInList("setclock", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "设置时钟被拒绝。不具备setclock权限";
+                    result.ErrorInfo = $"设置时钟被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备setclock权限";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -10718,7 +10718,7 @@ PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin)
                 {
                     result.Value = -1;
                     // result.ErrorInfo = "绑定号码的操作被拒绝。当前用户 '"+sessioninfo.UserID+"' 不具备 bindpatron 权限。";
-                    result.ErrorInfo = "绑定号码的操作被拒绝。当前用户不具备 bindpatron 权限。";
+                    result.ErrorInfo = $"绑定号码的操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 bindpatron 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -10853,7 +10853,7 @@ PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin)
                     && sessioninfo.RightsOriginList.IsInList("replication") == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "获得日志记录被拒绝。不具备 getoperlog 权限。";
+                    result.ErrorInfo = $"获得日志记录被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 getoperlog 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -10890,7 +10890,7 @@ PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin)
                     if (StringUtil.IsInList("supervisor", strStyle) && sessioninfo.RightsOriginList.IsInList("replication") == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "以敏感信息方式获得日志记录被拒绝。不具备 replication 权限。";
+                        result.ErrorInfo = $"以敏感信息方式获得日志记录被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 replication 权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -11017,7 +11017,7 @@ PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin)
                     && sessioninfo.RightsOriginList.IsInList("replication") == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "获得日志记录被拒绝。不具备getoperlog权限。";
+                    result.ErrorInfo = $"获得日志记录被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备getoperlog权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -11052,7 +11052,7 @@ PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin)
                     if (StringUtil.IsInList("supervisor", strStyle) && sessioninfo.RightsOriginList.IsInList("replication") == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "以敏感信息方式获得日志记录被拒绝。不具备 replication 权限。";
+                        result.ErrorInfo = $"以敏感信息方式获得日志记录被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 replication 权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -11185,7 +11185,7 @@ PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin)
                 if (StringUtil.IsInList("getcalendar", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "获得日历操作被拒绝。不具备getcalendar权限。";
+                    result.ErrorInfo = $"获得日历操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备getcalendar权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -11257,7 +11257,7 @@ PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin)
                     if (StringUtil.IsInList("newcalendar", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "创建新日历的操作被拒绝。不具备newcalendar权限。";
+                        result.ErrorInfo = $"创建新日历的操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备newcalendar权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -11267,7 +11267,7 @@ PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin)
                     if (StringUtil.IsInList("deletecalendar", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "删除日历的操作被拒绝。不具备deletecalendar权限。";
+                        result.ErrorInfo = $"删除日历的操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备deletecalendar权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -11277,7 +11277,7 @@ PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin)
                     if (StringUtil.IsInList("changecalendar", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "修改日历的操作被拒绝。不具备changecalendar权限。";
+                        result.ErrorInfo = $"修改日历的操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备changecalendar权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -11287,14 +11287,14 @@ PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin)
                     if (StringUtil.IsInList("changecalendar", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "覆盖日历的操作被拒绝。不具备changecalendar权限。";
+                        result.ErrorInfo = $"覆盖日历的操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备changecalendar权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
                     if (StringUtil.IsInList("newcalendar", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "覆盖日历的操作被拒绝。不具备newcalendar权限。";
+                        result.ErrorInfo = $"覆盖日历的操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备newcalendar权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -11552,7 +11552,7 @@ Stack:
                     if (StringUtil.IsInList("managedatabase,getsystemparameter,order", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "管理数据库的操作 '" + strAction + "' 被拒绝。不具备 getsystemparameter 或 order 或 managedatabase 权限。";
+                        result.ErrorInfo = $"管理数据库的操作 '{ strAction}' 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 getsystemparameter 或 order 或 managedatabase 权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -11572,7 +11572,7 @@ Stack:
                     if (StringUtil.IsInList("managedatabase", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "管理数据库的操作 '" + strAction + "' 被拒绝。不具备managedatabase权限。";
+                        result.ErrorInfo = $"管理数据库的操作 '{ strAction}' 被拒绝。不具备managedatabase权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -11660,7 +11660,7 @@ Stack:
                 if (StringUtil.IsInList("getuser", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "获得用户操作被拒绝。不具备getuser权限。";
+                    result.ErrorInfo = $"获得用户操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 getuser 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -11729,7 +11729,7 @@ Stack:
                     if (StringUtil.IsInList("changeuser", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "关闭用户账户相关通道的操作被拒绝。不具备changeuser权限。";
+                        result.ErrorInfo = $"关闭用户账户相关通道的操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备changeuser权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -11744,7 +11744,7 @@ Stack:
                     if (StringUtil.IsInList("newuser", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "创建新用户的操作被拒绝。不具备newuser权限。";
+                        result.ErrorInfo = $"创建新用户的操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备newuser权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -11754,7 +11754,7 @@ Stack:
                     if (StringUtil.IsInList("deleteuser", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "删除用户的操作被拒绝。不具备deleteuser权限。";
+                        result.ErrorInfo = $"删除用户的操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备deleteuser权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -11764,7 +11764,7 @@ Stack:
                     if (StringUtil.IsInList("changeuser", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "修改用户的操作被拒绝。不具备changeuser权限。";
+                        result.ErrorInfo = $"修改用户的操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备changeuser权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -11775,7 +11775,7 @@ Stack:
                         if (StringUtil.IsInList("changeuserpassword", sessioninfo.RightsOrigin) == false)
                         {
                             result.Value = -1;
-                            result.ErrorInfo = "强制修改(其他)用户密码的操作被拒绝。不具备changeuserpassword权限。";
+                            result.ErrorInfo = $"强制修改(其他)用户密码的操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备changeuserpassword权限。";
                             result.ErrorCode = ErrorCode.AccessDenied;
                             return result;
                         }
@@ -11788,7 +11788,7 @@ Stack:
                     if (StringUtil.IsInList("changeuserpassword", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "修改用户密码的操作被拒绝。不具备changeuserpassword权限。";
+                        result.ErrorInfo = $"修改用户密码的操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备changeuserpassword权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -11873,7 +11873,7 @@ Stack:
                 if (StringUtil.IsInList("getchannelinfo", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "获得通道信息被拒绝。不具备 getchannelinfo 权限。";
+                    result.ErrorInfo = $"获得通道信息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 getchannelinfo 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -11940,7 +11940,7 @@ Stack:
                 if (StringUtil.IsInList("managechannel", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "管理通道操作被拒绝。不具备 managechannel 权限。";
+                    result.ErrorInfo = $"管理通道操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 managechannel 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -12005,7 +12005,7 @@ Stack:
                     if (StringUtil.IsInList("supervisor", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "当前登录用户 " + sessioninfo.UserID + " 不具备 supervisor 权限，无法修改 kernel 密码";
+                        result.ErrorInfo = $"当前登录用户 { sessioninfo.UserID} 不具备 supervisor 权限，无法修改 kernel 密码";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -12038,7 +12038,7 @@ true);
                     if (StringUtil.IsInList("supervisor", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "当前登录用户 " + sessioninfo.UserID + " 不具备 supervisor 权限，无法修改 library.xml 中的馆代码定义";
+                        result.ErrorInfo = $"当前登录用户 { sessioninfo.UserID} 不具备 supervisor 权限，无法修改 library.xml 中的馆代码定义";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -12555,7 +12555,7 @@ true);
                         && StringUtil.IsInList("managedatabase", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "不具备 managedatabase 权限，无法列出内核数据目录和文件";
+                        result.ErrorInfo = $"{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 managedatabase 权限，无法列出内核数据目录和文件";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -12718,7 +12718,7 @@ public int Type;	// 类型：0 库 / 1 途径 / 4 cfgs / 5 file
                 if (StringUtil.IsInList("getsystemparameter,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "获得系统文件的操作被拒绝。不具备order或getsystemparameter权限。";
+                    result.ErrorInfo = $"获得系统文件的操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 getsystemparameter 或 order 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -12874,7 +12874,7 @@ public int Type;	// 类型：0 库 / 1 途径 / 4 cfgs / 5 file
                 if (isPublic == false && StringUtil.IsInList("getsystemparameter,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "获得系统参数的操作被拒绝。不具备 order 或 getsystemparameter 权限。";
+                    result.ErrorInfo = $"获得系统参数的操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 getsystemparameter 或 order 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -12971,7 +12971,7 @@ public int Type;	// 类型：0 库 / 1 途径 / 4 cfgs / 5 file
                 if (StringUtil.IsInList("setsystemparameter", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "设置系统参数的操作被拒绝。不具备setsystemparameter权限。";
+                    result.ErrorInfo = $"设置系统参数的操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备setsystemparameter权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -13708,7 +13708,7 @@ strLibraryCodeList);
                 if (StringUtil.IsInList("urgentrecover", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "紧急恢复的操作被拒绝。不具备 urgentrecover 权限。";
+                    result.ErrorInfo = $"紧急恢复的操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 urgentrecover 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -13822,7 +13822,7 @@ strLibraryCodeList);
                 if (StringUtil.IsInList("repairborrowinfo", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "修复借还信息的操作被拒绝。不具备 repairborrowinfo 权限。";
+                    result.ErrorInfo = $"修复借还信息的操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 repairborrowinfo 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -13972,7 +13972,7 @@ strLibraryCodeList);
                 if (StringUtil.IsInList("passgate", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "入馆登记的操作被拒绝。不具备 passgate 权限。";
+                    result.ErrorInfo = $"入馆登记的操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 passgate 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -14291,7 +14291,7 @@ strLibraryCodeList);
                 if (StringUtil.IsInList("settailnumber,setzhongcihaoinfo", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "设置种次号尾号的操作被拒绝。不具备 settailnumber 或 setzhongcihaoinfo 权限。";
+                    result.ErrorInfo = $"设置种次号尾号的操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 settailnumber 或 setzhongcihaoinfo 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -14463,7 +14463,7 @@ strLibraryCodeList);
                 if (StringUtil.IsInList("settailnumber,setzhongcihaoinfo", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "设置种次号尾号的操作被拒绝。不具备 settailnumber 或 setzhongcihaoinfo 权限。";
+                    result.ErrorInfo = $"设置种次号尾号的操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 settailnumber 或 setzhongcihaoinfo 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -14695,7 +14695,7 @@ strLibraryCodeList);
                 if (StringUtil.IsInList("setutilinfo", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "设置实用库记录信息的操作被拒绝。不具备setutilinfo权限。";
+                    result.ErrorInfo = $"设置实用库记录信息的操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备setutilinfo权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -14813,7 +14813,7 @@ strLibraryCodeList);
                         && StringUtil.IsInList("managedatabase", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "不具备 managedatabase 权限，无法列出内核数据目录和文件";
+                        result.ErrorInfo = $"{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 managedatabase 权限，无法列出内核数据目录和文件";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -16312,7 +16312,7 @@ out baOutputTimestamp);
                             if (nRet == 0)
                             {
                                 result.Value = -1;
-                                result.ErrorInfo = $"对象记录 '{strResPath}' 不允许被修改。因 {strRecordPath} 不在当前账户的管辖范围之内";
+                                result.ErrorInfo = $"对象记录 '{strResPath}' 不允许被修改。因 {strRecordPath} 不在{SessionInfo.GetCurrentUserName(sessioninfo)}的管辖范围之内";
                                 result.ErrorCode = ErrorCode.AccessDenied;
                                 return result;
                             }
@@ -16513,7 +16513,7 @@ out strError);
                 if (StringUtil.IsInList("getcommentinfo,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "获得评注信息 操作被拒绝。不具备 getcommentinfo 或 order 权限。";
+                    result.ErrorInfo = $"获得评注信息 操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 getcommentinfo 或 order 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -17240,7 +17240,7 @@ out strError);
                 if (StringUtil.IsInList("searchcomment", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "对评注记录的参考ID查重被拒绝。不具备searchcomment权限。";
+                    result.ErrorInfo = $"对评注记录的参考ID查重被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 searchcomment 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -17333,7 +17333,7 @@ out strError);
                 if (StringUtil.IsInList("searchcomment", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "检索评注信息被拒绝。不具备searchcomment权限。";
+                    result.ErrorInfo = $"检索评注信息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 searchcomment 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -17591,7 +17591,7 @@ out strError);
                     if (StringUtil.IsInList("getmsmqmessage", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "从 MSMQ 获取消息被拒绝。当前用户不具备 getmsmqmessage 权限";
+                        result.ErrorInfo = $"从 MSMQ 获取消息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 getmsmqmessage 权限";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -18002,7 +18002,7 @@ out strError);
                             if (StringUtil.IsInList("sendmq", sessioninfo.RightsOrigin) == false)
                             {
                                 result.Value = -1;
-                                result.ErrorInfo = "发送 MQ 消息被拒绝。不具备 sendmq 权限";
+                                result.ErrorInfo = $"发送 MQ 消息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 sendmq 权限";
                                 result.ErrorCode = ErrorCode.AccessDenied;
                                 return result;
                             }

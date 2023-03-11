@@ -579,7 +579,7 @@ namespace DigitalPlatform.LibraryServer
                             // 此时 StringUtil.IsInList("setreaderobject,setobject", strRights) == true
                             // 意味着直接采纳前端发来的 XML 记录中的 dprms:file 元素，写入记录
                             // 但需要注意检查账户权限，读的字段范围是否小于写的字段范围？如果小了，则读和写往返一轮会丢失记录中原有的 dprms:file 元素。这种情况需要直接报错
-                            strError = "当前用户的权限定义不正确：具有 setreaderobject(或setobject) 但不具有 getreaderobject(或getobject) 权限(即写范围大于读范围)，这样会造成数据库内读者记录中原有的 dprms:file 元素丢失。请修改当前账户权限再重新操作";
+                            strError = $"{GetCurrentUserName(null)}的权限定义不正确：具有 setreaderobject(或setobject) 但不具有 getreaderobject(或getobject) 权限(即写范围大于读范围)，这样会造成数据库内读者记录中原有的 dprms:file 元素丢失。请修改当前账户权限再重新操作";
                             return -1;
                         }
                     }
@@ -1168,7 +1168,7 @@ unprocessed_element_names.Except(_auto_maintain_element_names)));
                 if (StringUtil.IsInList("restore", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "修改读者信息的" + strAction + "操作被拒绝。不具备 restore 权限。";
+                    result.ErrorInfo = $"修改读者信息的{strAction}操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 restore 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -1191,7 +1191,7 @@ unprocessed_element_names.Except(_auto_maintain_element_names)));
                         if (StringUtil.IsInList("changereaderstate", sessioninfo.RightsOrigin) == false)
                         {
                             result.Value = -1;
-                            result.ErrorInfo = "修改读者信息(状态字段)被拒绝。不具备 changereaderstate 权限。";
+                            result.ErrorInfo = $"修改读者信息(状态字段)被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 changereaderstate 权限。";
                             result.ErrorCode = ErrorCode.AccessDenied;
                             return result;
                         }
@@ -1204,7 +1204,7 @@ unprocessed_element_names.Except(_auto_maintain_element_names)));
                         if (names.Contains("state") == false)
                         {
                             result.Value = -1;
-                            result.ErrorInfo = "修改读者信息(状态字段)被拒绝。当前账户针对读者记录的可修改字段中未包含 状态 字段。";
+                            result.ErrorInfo = $"修改读者信息(状态字段)被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}针对读者记录的可修改字段中未包含 状态 字段。";
                             result.ErrorCode = ErrorCode.AccessDenied;
                             return result;
                         }
@@ -1217,7 +1217,7 @@ unprocessed_element_names.Except(_auto_maintain_element_names)));
                     if (StringUtil.IsInList("changereaderbarcode", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "修改读者信息(证条码号字段)被拒绝。不具备 changereaderbarcode 权限。";
+                        result.ErrorInfo = $"修改读者信息(证条码号字段)被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 changereaderbarcode 权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -1230,7 +1230,7 @@ unprocessed_element_names.Except(_auto_maintain_element_names)));
                     if (StringUtil.IsInList("changereaderforegift", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "changeforegift方式修改读者信息被拒绝。不具备 changereaderforegift 权限。";
+                        result.ErrorInfo = $"changeforegift方式修改读者信息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 changereaderforegift 权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -1250,7 +1250,7 @@ unprocessed_element_names.Except(_auto_maintain_element_names)));
                     if (write_level == null)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "删除读者记录操作被拒绝。不具备 setreaderinfo (全部字段)权限 或 包含 r_delete 的 setreaderinfo: 权限 或 writerecord 权限";
+                        result.ErrorInfo = $"删除读者记录操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 setreaderinfo (全部字段)权限 或 包含 r_delete 的 setreaderinfo: 权限 或 writerecord 权限";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -1264,7 +1264,7 @@ unprocessed_element_names.Except(_auto_maintain_element_names)));
                         && StringUtil.IsInList("r_delete", low_level.Replace("|", ",")) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = $"删除读者记录操作被拒绝。当前用户权限值 'setreaderinfo:{low_level}' 的字段权限部分 '{low_level}' 中未包含 r_delete";
+                        result.ErrorInfo = $"删除读者记录操作被拒绝。{GetCurrentUserName(sessioninfo)}权限值 'setreaderinfo:{low_level}' 的字段权限部分 '{low_level}' 中未包含 r_delete";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -1275,7 +1275,7 @@ unprocessed_element_names.Except(_auto_maintain_element_names)));
                     if (GetReaderInfoLevel("setreaderinfo", sessioninfo.RightsOrigin) == null)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "修改读者信息被拒绝。不具备 setreaderinfo 权限。";
+                        result.ErrorInfo = $"修改读者信息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 setreaderinfo 权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -1399,7 +1399,7 @@ unprocessed_element_names.Except(_auto_maintain_element_names)));
                     sessioninfo.ExpandLibraryCodeList,
                     out string strLibraryCode) == false)
                 {
-                    strError = "读者记录路径 '" + strRecPath + "' 的读者库不在当前用户管辖范围内";
+                    strError = $"读者记录路径 '{strRecPath}' 的读者库不在{GetCurrentUserName(sessioninfo)}管辖范围内";
                     goto ERROR1;
                 }
 
@@ -2128,7 +2128,7 @@ out List<string> send_skips);
                         sessioninfo.LibraryCodeList,
                         out string strLibraryCode) == false)
                     {
-                        strError = "读者记录路径 '" + strRecPath + "' 的读者库不在当前用户管辖范围内";
+                        strError = $"读者记录路径 '{strRecPath}' 的读者库不在{GetCurrentUserName(sessioninfo)}管辖范围内";
                         goto ERROR1;
                     }
 
@@ -2616,7 +2616,7 @@ strLibraryCode);    // 读者所在的馆代码
             // 检查当前账户是否定义了 getreaderinfo 或 getreaderobject
             if (read_level == null)
             {
-                strError = "当前账户不具备 getreaderinfo 或 getreaderobject 权限，因而无法进行修改读者记录的操作(注：仅有写入权限还不够，还要具有大于写入字段范围的读权限)";
+                strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 getreaderinfo 或 getreaderobject 权限，因而无法进行修改读者记录的操作(注：仅有写入权限还不够，还要具有大于写入字段范围的读权限)";
                 return -1;
             }
 
@@ -2628,7 +2628,7 @@ strLibraryCode);    // 读者所在的馆代码
                 var overflow_names = write_names.Except(read_names).ToArray();
                 if (overflow_names.Count() > 0)
                 {
-                    strError = $"用户权限定义不合法。当前用户对读者记录的可写元素集中下列部分元素越出了可读元素集范围: '{string.Join("|", overflow_names)}'。请修改账户权限，让可读元集完全包含可写元素集";
+                    strError = $"用户权限定义不合法。{GetCurrentUserName(sessioninfo)}对读者记录的可写元素集中下列部分元素越出了可读元素集范围: '{string.Join("|", overflow_names)}'。请修改账户权限，让可读元集完全包含可写元素集";
                     return -1;
                 }
             }
@@ -2642,7 +2642,7 @@ strLibraryCode);    // 读者所在的馆代码
                 var overflow_names = write_names.Except(read_names).ToArray();
                 if (overflow_names.Count() > 0)
                 {
-                    strError = $"用户权限定义不合法。当前用户对读者记录的可写元素集(完全集)中下列部分元素越出了可读元素集范围: '{string.Join("|", overflow_names)}'。请修改账户权限，让可读元集完全包含可写元素集";
+                    strError = $"用户权限定义不合法。{GetCurrentUserName(sessioninfo)}对读者记录的可写元素集(完全集)中下列部分元素越出了可读元素集范围: '{string.Join("|", overflow_names)}'。请修改账户权限，让可读元集完全包含可写元素集";
                     return -1;
                 }
             }
@@ -2679,7 +2679,7 @@ strLibraryCode);    // 读者所在的馆代码
             {
                 strReaderDbName = "";
 
-                strError = "当前用户没有管辖任何读者库";
+                strError = $"{GetCurrentUserName(null)}没有管辖任何读者库";
                 return -1;
             }
 
@@ -3047,7 +3047,7 @@ root, strLibraryCode);
                 strCurrentLibraryCode,
                 out string strLibraryCode) == false)
             {
-                strError = "读者记录路径 '" + strRecPath + "' 的读者库不在当前用户管辖范围内";
+                strError = $"读者记录路径 '{strRecPath}' 的读者库不在{GetCurrentUserName(sessioninfo)}管辖范围内";
                 library_errorcode = ErrorCode.AccessDenied;
                 goto ERROR1;
             }
@@ -3234,7 +3234,7 @@ root, strLibraryCode);
                         "borrowHistory"}); // 注: 把系统自己管理的一些元素从检测范围排除
                 if (outof_names.Count > 0)
                 {
-                    strError = $"删除读者记录被拒绝。记录中下列元素越过当前用户可修改权限范围: {StringUtil.MakePathList(outof_names)}";
+                    strError = $"删除读者记录被拒绝。记录中下列元素越过{GetCurrentUserName(sessioninfo)}可修改权限范围: {StringUtil.MakePathList(outof_names)}";
                     kernel_errorcode = ErrorCodeValue.AccessDenied;
                     library_errorcode = ErrorCode.AccessDenied;
                     domOperLog = null;  // 表示不必写入日志
@@ -3917,7 +3917,7 @@ root, strLibraryCode);
                 strCurrentLibraryCode,
                 out string strLibraryCode) == false)
             {
-                strError = "读者记录路径 '" + strRecPath + "' 的读者库不在当前用户管辖范围内";
+                strError = $"读者记录路径 '{strRecPath}' 的读者库不在{GetCurrentUserName(sessioninfo)}管辖范围内";
                 goto ERROR1;
             }
 
@@ -5200,7 +5200,7 @@ root, strLibraryCode);
                     if (this.IsCurrentChangeableReaderPath(strReaderRecPath,
                         sessioninfo.LibraryCodeList) == false)
                     {
-                        strError = "读者记录路径 '" + strReaderRecPath + "' 的读者库不在当前用户管辖范围内";
+                        strError = $"读者记录路径 '{strReaderRecPath}' 的读者库不在{GetCurrentUserName(sessioninfo)}管辖范围内";
                         return -1;
                     }
 
@@ -5265,7 +5265,7 @@ root, strLibraryCode);
                     if (this.IsCurrentChangeableReaderPath(strOutputPath,
                         sessioninfo.LibraryCodeList) == false)
                     {
-                        strError = "读者记录路径 '" + strOutputPath + "' 的读者库不在当前用户管辖范围内";
+                        strError = $"读者记录路径 '{strOutputPath}' 的读者库不在{GetCurrentUserName(sessioninfo)}管辖范围内";
                         return -1;
                     }
                     bRecordGetted = true;
@@ -5454,7 +5454,7 @@ out strError);
                     && this.IsCurrentChangeableReaderPath(strOutputPath,
                     sessioninfo.LibraryCodeList) == false)
                 {
-                    strError = "读者记录路径 '" + strOutputPath + "' 的读者库不在当前用户管辖范围内";
+                    strError = $"读者记录路径 '{strOutputPath}' 的读者库不在{GetCurrentUserName(sessioninfo)}管辖范围内";
                     return -1;
                 }
 
@@ -5579,7 +5579,7 @@ out strError);
             if (GetReaderInfoLevel("getreaderinfo", sessioninfo.RightsOrigin) == null)
             {
                 result.Value = -1;
-                result.ErrorInfo = "读取读者信息被拒绝。不具备 getreaderinfo 权限。";
+                result.ErrorInfo = $"读取读者信息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 getreaderinfo 权限。";
                 result.ErrorCode = ErrorCode.AccessDenied;
                 return result;
             }
@@ -5736,7 +5736,7 @@ out strError);
                         if (this.IsCurrentChangeableReaderPath(strReaderRecPath,
                             sessioninfo.LibraryCodeList) == false)
                         {
-                            strError = "读者记录路径 '" + strReaderRecPath + "' 的读者库不在当前用户管辖范围内";
+                            strError = $"读者记录路径 '{strReaderRecPath}' 的读者库不在{GetCurrentUserName(sessioninfo)}管辖范围内";
                             goto ERROR1;
                         }
 
@@ -5804,7 +5804,7 @@ out strError);
                     if (this.IsCurrentChangeableReaderPath(strOutputPath,
                         sessioninfo.LibraryCodeList) == false)
                     {
-                        strError = "读者记录路径 '" + strOutputPath + "' 的读者库不在当前用户管辖范围内";
+                        strError = $"读者记录路径 '{strOutputPath}' 的读者库不在{GetCurrentUserName(sessioninfo)}管辖范围内";
                         goto ERROR1;
                     }
                     bRecordGetted = true;
@@ -6109,7 +6109,7 @@ out strError);
                     && this.IsCurrentChangeableReaderPath(strOutputPath,
                     strExpandCodeList/*sessioninfo.LibraryCodeList*/) == false)
                 {
-                    strError = "读者记录路径 '" + strOutputPath + "' 的读者库不在当前用户管辖范围内";
+                    strError = $"读者记录路径 '{strOutputPath}' 的读者库不在{GetCurrentUserName(sessioninfo)}管辖范围内";
                     goto ERROR1;
                 }
 
@@ -6983,7 +6983,7 @@ out strError);
             if (StringUtil.IsInList("movereaderinfo", sessioninfo.RightsOrigin) == false)
             {
                 result.Value = -1;
-                result.ErrorInfo = "移动读者记录的操作被拒绝。不具备 movereaderinfo 权限。";
+                result.ErrorInfo = $"移动读者记录的操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 movereaderinfo 权限。";
                 result.ErrorCode = ErrorCode.AccessDenied;
                 return result;
             }
@@ -7084,7 +7084,7 @@ out strError);
         sessioninfo.LibraryCodeList,
         out strSourceLibraryCode) == false)
                 {
-                    strError = "源读者记录路径 '" + strTempOutputPath + "' 从属的读者库不在当前用户管辖范围内";
+                    strError = $"源读者记录路径 '{strTempOutputPath}' 从属的读者库不在{GetCurrentUserName(sessioninfo)}管辖范围内";
                     goto ERROR1;
                 }
             }
@@ -7216,7 +7216,7 @@ out strError);
             sessioninfo.LibraryCodeList,
             out strTargetLibraryCode) == false)
                     {
-                        strError = "目标读者记录路径 '" + strTargetRecPath + "' 从属的读者库不在当前用户管辖范围内";
+                        strError = $"目标读者记录路径 '{strTargetRecPath}' 从属的读者库不在{GetCurrentUserName(sessioninfo)}管辖范围内";
                         goto ERROR1;
                     }
                 }

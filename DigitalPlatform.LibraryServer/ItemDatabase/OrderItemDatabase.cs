@@ -185,7 +185,7 @@ namespace DigitalPlatform.LibraryServer
                 if (nRet == 1)
                 {
                     // 2018/8/30 也报出不完全管辖的理由
-                    strError = "当前用户对不完全管辖(" + strControlWarning + ")的订购数据修改超过权限范围: " + strError;
+                    strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)}对不完全管辖({strControlWarning})的订购数据修改超过权限范围: {strError}";
                     return -1;
                 }
                 if (nRet == 2 || nRet == 3)
@@ -947,7 +947,7 @@ namespace DigitalPlatform.LibraryServer
                         return -1;
                     if (nRet == 0)
                     {
-                        strError = "因原记录中出现了超越当前用户管辖范围的分馆馆藏信息，移动订购记录的操作被拒绝：" + strError;
+                        strError = $"因原记录中出现了超越{SessionInfo.GetCurrentUserName(sessioninfo)}管辖范围的分馆馆藏信息，移动订购记录的操作被拒绝：{strError}";
                         return 0;
                     }
                 }
@@ -990,7 +990,7 @@ namespace DigitalPlatform.LibraryServer
                     return -1;
                 if (nRet == 0)
                 {
-                    strError = "因出现了超越当前用户管辖范围的分馆馆藏信息，删除订购记录的操作被拒绝：" + strError;
+                    strError = $"因出现了超越{SessionInfo.GetCurrentUserName(sessioninfo)}管辖范围的分馆馆藏信息，删除订购记录的操作被拒绝：{strError}";
                     return 0;
                 }
             }
@@ -1146,7 +1146,7 @@ namespace DigitalPlatform.LibraryServer
                     return -1;
                 if (nRet == 0)
                 {
-                    strError = "因出现了超越当前用户管辖范围的分馆馆藏信息，创建订购记录的操作被拒绝：" + strError;
+                    strError = $"因出现了超越{SessionInfo.GetCurrentUserName(sessioninfo)}管辖范围的分馆馆藏信息，创建订购记录的操作被拒绝：{strError}";
                     return 0;
                 }
             }

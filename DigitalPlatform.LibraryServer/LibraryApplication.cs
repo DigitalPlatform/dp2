@@ -13352,7 +13352,7 @@ out strError);
                 if (StringUtil.IsInList("changereaderpassword", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "修改读者密码被拒绝。不具备 changereaderpassword 权限。";
+                    result.ErrorInfo = $"修改读者密码被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 changereaderpassword 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -13435,7 +13435,7 @@ out strError);
                 sessioninfo.LibraryCodeList,
                 out strLibraryCode) == false)
                         {
-                            strError = "读者记录路径 '" + strOutputPath + "' 从属的读者库不在当前用户管辖范围内";
+                            strError = $"读者记录路径 '{strOutputPath}' 从属的读者库不在{GetCurrentUserName(sessioninfo)}管辖范围内";
                             goto ERROR1;
                         }
                     }
@@ -13520,7 +13520,7 @@ out strError);
                     if (StringUtil.IsInList("changereaderpassword", rights) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "修改读者密码被拒绝。不具备 changereaderpassword 权限。";
+                        result.ErrorInfo = $"修改读者密码被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 changereaderpassword 权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -15746,7 +15746,7 @@ strLibraryCode);    // 读者所在的馆代码
                     }
                     if (StringUtil.IsInList("managedatabase", strRights) == false)
                     {
-                        strError = $"{strActionName}文件 {strResPath} 被拒绝。不具备 managedatabase 权限";
+                        strError = $"{strActionName}文件 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 managedatabase 权限";
                         return 0;
                     }
                 }
@@ -15754,7 +15754,7 @@ strLibraryCode);    // 读者所在的馆代码
                 {
                     if (StringUtil.IsInList("backup,managedatabase", strRights) == false)
                     {
-                        strError = $"{strActionName}文件 {strResPath} 被拒绝。不具备 backup 或 managedatabase 权限";
+                        strError = $"{strActionName}文件 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 backup 或 managedatabase 权限";
                         return 0;
                     }
                 }
@@ -15762,7 +15762,7 @@ strLibraryCode);    // 读者所在的馆代码
                 {
                     if (StringUtil.IsInList("managedatabase", strRights) == false)
                     {
-                        strError = $"{strActionName}文件 {strResPath} 被拒绝。不具备 managedatabase 权限";
+                        strError = $"{strActionName}文件 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 managedatabase 权限";
                         return 0;
                     }
                 }
@@ -15780,7 +15780,7 @@ strLibraryCode);    // 读者所在的馆代码
                 {
                     if (StringUtil.IsInList("upload,managedatabase", strRights) == false)
                     {
-                        strError = $"{strActionName}文件 {strResPath} 被拒绝。不具备 upload 或 managedatabase 权限";
+                        strError = $"{strActionName}文件 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 upload 或 managedatabase 权限";
                         return 0;
                     }
                 }
@@ -15794,7 +15794,7 @@ strLibraryCode);    // 读者所在的馆代码
                     }
                     if (StringUtil.IsInList("managedatabase", strRights) == false)
                     {
-                        strError = $"{strActionName}文件 {strResPath} 被拒绝。不具备 managedatabase 权限";
+                        strError = $"{strActionName}文件 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 managedatabase 权限";
                         return 0;
                     }
                 }
@@ -15892,7 +15892,7 @@ out string db_type);
                     {
                         if (StringUtil.IsInList("writetemplate", strRights) == false)
                         {
-                            strError = "写入模板配置文件 " + strResPath + " 被拒绝。不具备 writetemplate 权限";
+                            strError = $"写入模板配置文件 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 writetemplate 权限";
                             return 0;
                         }
                         return 1;   // 如果有了writetemplate权限，就不再需要writeres权限
@@ -15900,7 +15900,7 @@ out string db_type);
                     // 2023/1/5
                     if (StringUtil.IsInList("writecfgfile", strRights) == false)
                     {
-                        strError = "写入配置文件 " + strResPath + " 被拒绝。不具备 writecfgfile 权限";
+                        strError = $"写入配置文件 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 writecfgfile 权限";
                         return 0;
                     }
                 }
@@ -15951,7 +15951,7 @@ out string db_type);
                         // /*(在具备 setbiblioinfo 基础上)*/进一步需要 setbiblioobject 或 setobject 权限
                         if (StringUtil.IsInList("setbiblioobject,setobject", strRights) == false)
                         {
-                            strError = "写入对象资源 " + strResPath + " 被拒绝。不具备 setbiblioobject 或 setobject 权限";
+                            strError = $"写入对象资源 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 setbiblioobject 或 setobject 权限";
                             return 0;
                         }
                         return 1;   // 如果有了 setobject 权限，就不再需要writeres权限
@@ -15977,7 +15977,7 @@ out string db_type);
                 {
                     if (StringUtil.IsInList(strLibraryCode, strLibraryCodeList) == false)
                     {
-                        strError = "写入资源 " + strResPath + " 被拒绝。读者库 '" + strDbName + "' 不在当前用户的管辖范围 '" + strLibraryCodeList + "' 内";
+                        strError = $"写入资源 {strResPath} 被拒绝。读者库 '{strDbName}' 不在当前用户的管辖范围 '{strLibraryCodeList}' 内";
                         return 0;
                     }
                 }
@@ -15992,7 +15992,7 @@ out string db_type);
                     {
                         if (StringUtil.IsInList("writetemplate", strRights) == false)
                         {
-                            strError = "写入模板配置文件 " + strResPath + " 被拒绝。不具备 writetemplate 权限";
+                            strError = $"写入模板配置文件 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 writetemplate 权限";
                             return 0;
                         }
                         return 1;   // 如果有了writetemplate权限，就不再需要writeres权限
@@ -16000,7 +16000,7 @@ out string db_type);
                     // 2023/1/5
                     if (StringUtil.IsInList("writecfgfile", strRights) == false)
                     {
-                        strError = "写入配置文件 " + strResPath + " 被拒绝。不具备 writecfgfile 权限";
+                        strError = $"写入配置文件 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 writecfgfile 权限";
                         return 0;
                     }
                 }
@@ -16042,7 +16042,7 @@ out string db_type);
                         // /*(在具备 setreaderinfo 基础上)*/进一步需要 setobject 或 setreaderobject 权限
                         if (StringUtil.IsInList("setreaderobject,setobject", strRights) == false)
                         {
-                            strError = "写入对象资源 " + strResPath + " 被拒绝。不具备setreaderobject 或 setobject 权限";
+                            strError = $"写入对象资源 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 setreaderobject 或 setobject 权限";
                             return 0;
                         }
 
@@ -16094,7 +16094,7 @@ out string db_type);
                     {
                         if (StringUtil.IsInList("writetemplate", strRights) == false)
                         {
-                            strError = "写入模板配置文件 " + strResPath + " 被拒绝。不具备 writetemplate 权限";
+                            strError = $"写入模板配置文件 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 writetemplate 权限";
                             return 0;
                         }
                         return 1;   // 如果有了writetemplate权限，就不再需要writeres权限
@@ -16102,7 +16102,7 @@ out string db_type);
                     // 2023/1/5
                     if (StringUtil.IsInList("writecfgfile", strRights) == false)
                     {
-                        strError = "写入配置文件 " + strResPath + " 被拒绝。不具备 writecfgfile 权限";
+                        strError = $"写入配置文件 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 writecfgfile 权限";
                         return 0;
                     }
                 }
@@ -16136,7 +16136,7 @@ out string db_type);
                         // (在具备 setxxxinfo 基础上)进一步需要 setobject 或 setxxxobject 权限
                         if (StringUtil.IsInList($"set{db_type}object,setobject", strRights) == false)
                         {
-                            strError = $"写入对象资源 {strResPath} 被拒绝。不具备 set{db_type}object 或 setobject 权限";
+                            strError = $"写入对象资源 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 set{db_type}object 或 setobject 权限";
                             return 0;
                         }
                         return 1;
@@ -16169,7 +16169,7 @@ out string db_type);
                     {
                         if (StringUtil.IsInList("writetemplate", strRights) == false)
                         {
-                            strError = "写入模板配置文件 " + strResPath + " 被拒绝。不具备 writetemplate 权限";
+                            strError = $"写入模板配置文件 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 writetemplate 权限";
                             return 0;
                         }
                         return 1;   // 如果有了writetemplate权限，就不再需要writeres权限
@@ -16177,7 +16177,7 @@ out string db_type);
                     // 2023/1/5
                     if (StringUtil.IsInList("writecfgfile", strRights) == false)
                     {
-                        strError = "写入配置文件 " + strResPath + " 被拒绝。不具备 writecfgfile 权限";
+                        strError = $"写入配置文件 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 writecfgfile 权限";
                         return 0;
                     }
                 }
@@ -16191,7 +16191,7 @@ out string db_type);
                         // setxxxinfo
                         if (StringUtil.IsInList($"set{util_db_type}info,writerecord", strRights) == false)
                         {
-                            strError = $"直接写入记录 {strResPath} 被拒绝。不具备 set{util_db_type}info 或 writerecord 权限";
+                            strError = $"直接写入记录 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 set{util_db_type}info 或 writerecord 权限";
                             return 0;
                         }
                         return 1;
@@ -16204,7 +16204,7 @@ out string db_type);
                     {
                         if (StringUtil.IsInList($"set{util_db_type}object,setobject", strRights) == false)
                         {
-                            strError = $"写入对象资源 {strResPath} 被拒绝。不具备 set{util_db_type}object 或 setobject 权限";
+                            strError = $"写入对象资源 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 set{util_db_type}object 或 setobject 权限";
                             return 0;
                         }
                         return 1;   // 如果有了setobject权限，就不再需要 writeres 权限
@@ -16238,6 +16238,11 @@ out string db_type);
                 || text.StartsWith("#"))
                 return true;
             return false;
+        }
+
+        public static string GetCurrentUserName(SessionInfo sessioninfo)
+        {
+            return SessionInfo.GetCurrentUserName(sessioninfo);
         }
 
         // exception:
@@ -16571,7 +16576,7 @@ out string db_type);
                     }
                     else if (StringUtil.IsInList("managedatabase,backup", strRights) == false)
                     {
-                        strError = $"因当前用户不具备权限 managedatabase 或 backup，不允许列目录 '{strResPath}'";
+                        strError = $"因{GetCurrentUserName(sessioninfo)}不具备权限 managedatabase 或 backup，不允许列目录 '{strResPath}'";
                         return 0;
 
                         /*
@@ -16595,7 +16600,7 @@ out string db_type);
                     }
                     else // 2022/5/31
                     {
-                        strError = $"读取文件 {strResPath} 被拒绝。不具备 download 或 upload 或 backup 权限";
+                        strError = $"读取文件 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 download 或 upload 或 backup 权限";
                         return 0;
                     }
                     /*
@@ -16655,7 +16660,7 @@ out string db_type);
                 if (IsCurrentChangeableReaderPath(strDbName + "/?",
                     sessioninfo.ExpandLibraryCodeList/*sessioninfo.LibraryCodeList*/) == false)
                 {
-                    strError = "读者库 '" + strDbName + "' 不在当前用户管辖范围内，不允许读取";
+                    strError = $"读者库 '{strDbName}' 不在{GetCurrentUserName(sessioninfo)}管辖范围内，不允许读取";
                     return 0;
                 }
             }
@@ -16762,7 +16767,7 @@ out string db_type);
                         if (CanGet(strOperation, strRights, strObjectRights) == true)
                             goto ALLOW_ACCESS;
 
-                        strError = "读取资源 " + strResPath + " 被拒绝。不具备相应的权限";
+                        strError = $"读取资源 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备相应的权限";
                         return 0;
                     ALLOW_ACCESS:
                         // 2018/8/12
@@ -16781,7 +16786,7 @@ out string db_type);
                     }
                 }
 
-                strError = "读取资源 " + strResPath + " 被拒绝。不具备相应的权限";
+                strError = $"读取资源 { strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备相应的权限";
                 return 0;
             }
 
@@ -16969,12 +16974,12 @@ out string db_type);
                     //      其他     返回 level 部分
                     var level = GetReaderInfoLevel(right, sessioninfo.RightsOrigin);
                     if (level == null)
-                        return $"用户 {sessioninfo.UserID} 获取数据库 {strDbName} 内资源被拒绝。不具备 {right} 权限。";
+                        return $"{SessionInfo.GetCurrentUserName(sessioninfo)} 获取数据库 {strDbName} 内资源被拒绝。不具备 {right} 权限。";
                 }
                 else
                 {
                     if (StringUtil.IsInList(right, sessioninfo.RightsOrigin) == false)
-                        return $"用户 {sessioninfo.UserID} 获取数据库 {strDbName} 内资源被拒绝。不具备 {right} 权限。";
+                        return $"{SessionInfo.GetCurrentUserName(sessioninfo)} 获取数据库 {strDbName} 内资源被拒绝。不具备 {right} 权限。";
                 }
             }
 
@@ -17082,7 +17087,7 @@ out string db_type);
                     // 权限字符串
                     if (StringUtil.IsInList("setbiblioinfo,writerecord,order", sessioninfo.RightsOrigin) == false)
                     {
-                        return "设置书目信息被拒绝。不具备 setbiblioinfo 或 writerecord 或 order 权限";
+                        return $"设置书目信息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 setbiblioinfo 或 writerecord 或 order 权限";
                     }
                 }
                 if (strDbType == "authority")
@@ -17090,7 +17095,7 @@ out string db_type);
                     // 权限字符串
                     if (StringUtil.IsInList("setauthorityinfo,writerecord", sessioninfo.RightsOrigin) == false)
                     {
-                        return "设置规范信息被拒绝。不具备 setauthorityinfo 或 writerecord 权限。";
+                        return $"设置规范信息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 setauthorityinfo 或 writerecord 权限。";
                     }
                 }
             }
@@ -17133,7 +17138,7 @@ out string db_type);
                         "",
                         GetBiblioInfoAction(db_type)) != null)
                     {
-                        return $"用户 '{sessioninfo.UserID}' 不具备 针对数据库 '{strDbName}' 执行 {GetBiblioInfoAction(db_type)} 操作的存取权限";
+                        return $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{strDbName}' 执行 {GetBiblioInfoAction(db_type)} 操作的存取权限";
                     }
                     else
                     {
@@ -17152,7 +17157,7 @@ out string db_type);
                 {
                     if (IsInAccessList(strAction, strActionList, out strAccessParameters) == false)
                     {
-                        return $"用户 '{sessioninfo.UserID}' 不具备 针对数据库 '{strDbName}' 执行 {GetBiblioInfoAction(db_type)} 操作的存取权限";
+                        return $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{strDbName}' 执行 {GetBiblioInfoAction(db_type)} 操作的存取权限";
                     }
                 }
                 return null;
@@ -17165,7 +17170,7 @@ out string db_type);
                     // 权限字符串
                     if (StringUtil.IsInList("getbiblioinfo,order", sessioninfo.RightsOrigin) == false)
                     {
-                        return "获取书目信息被拒绝。不具备 getbiblioinfo 或 order 权限。";
+                        return $"获取书目信息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 getbiblioinfo 或 order 权限。";
                     }
                 }
                 else if (db_type == "authority")
@@ -17173,7 +17178,7 @@ out string db_type);
                     // 权限字符串
                     if (StringUtil.IsInList("getauthorityinfo", sessioninfo.RightsOrigin) == false)
                     {
-                        return "获取规范信息被拒绝。不具备 getauthorityinfo 权限。";
+                        return $"获取规范信息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 getauthorityinfo 权限。";
                     }
                 }
             }
@@ -17196,7 +17201,7 @@ out string db_type);
             if (StringUtil.IsInList($"get{db_type}object", sessioninfo.RightsOrigin) == true)
                 return null;
 
-            return $"用户 {sessioninfo.UserID} 获取{db_type}记录下属的对象被拒绝。不具备 get{db_type}object 权限或 getobject 权限";
+            return $"{SessionInfo.GetCurrentUserName(sessioninfo)} 获取{db_type}记录下属的对象被拒绝。不具备 get{db_type}object 权限或 getobject 权限";
         }
 
         // 检查 setxxxinfo 权限
@@ -17281,7 +17286,7 @@ out string db_type);
                 //      其他     返回 level 部分
                 var level = GetReaderInfoLevel(right, rights);
                 if (level == null && StringUtil.IsInList("writerecord", rights) == false)
-                    return $"写入数据库 {strDbName} 内资源被拒绝。当前用户不具备 setreaderinfo 或 writerecord 权限。";
+                    return $"写入数据库 {strDbName} 内资源被拒绝。{GetCurrentUserName(sessioninfo)}不具备 setreaderinfo 或 writerecord 权限。";
             }
             else if (db_type == "biblio" || db_type == "authority")
             {
@@ -17310,12 +17315,12 @@ out string db_type);
 
             NORMAL_RIGHTS:
                 if (StringUtil.IsInList(right + ",writerecord", rights) == false)
-                    return $"写入数据库 {strDbName} 内资源被拒绝。当前用户不具备 {right} 或 writerecord 权限。";
+                    return $"写入数据库 {strDbName} 内资源被拒绝。{GetCurrentUserName(sessioninfo)}不具备 {right} 或 writerecord 权限。";
             }
             else
             {
                 if (StringUtil.IsInList(right + ",writerecord", rights) == false)
-                    return $"写入数据库 {strDbName} 内资源被拒绝。当前用户不具备 {right} 或 writerecord 权限。";
+                    return $"写入数据库 {strDbName} 内资源被拒绝。{GetCurrentUserName(sessioninfo)}不具备 {right} 或 writerecord 权限。";
             }
             return null;
         }
@@ -17718,6 +17723,9 @@ out string db_type);
         {
             strError = "";
 
+            if (librarycode_list == null)
+                librarycode_list = "";
+
             var list = librarycode_list.Split(',');
             foreach (var librarycode in list)
             {
@@ -18078,7 +18086,7 @@ out string db_type);
             TempCode code = table.FindTempCode(strKey);
             if (code == null)
             {
-                strError = "当前用户的验证码尚未初始化";
+                strError = $"当前用户 '{this.UserID}' 的验证码尚未初始化";
                 return false;
             }
 

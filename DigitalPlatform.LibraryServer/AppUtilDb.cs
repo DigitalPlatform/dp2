@@ -54,7 +54,7 @@ out byte[] baOutputTimestamp)
             if (StringUtil.IsInList($"get{db_type}info", sessioninfo.RightsOrigin) == false)
             {
                 result.Value = -1;
-                result.ErrorInfo = $"修改{db_type}信息 操作被拒绝。虽然当前账户具备写入{db_type}记录的权限，但不具备 get{db_type}info 权限。请修改账户权限";
+                result.ErrorInfo = $"修改{db_type}信息 操作被拒绝。虽然{SessionInfo.GetCurrentUserName(sessioninfo)}具备写入{db_type}记录的权限，但不具备 get{db_type}info 权限。请修改账户权限";
                 result.ErrorCode = ErrorCode.AccessDenied;
                 return result;
             }
@@ -528,7 +528,7 @@ out byte[] baOutputTimestamp)
                 {
                     if (this.IsCurrentChangeableReaderPath(strItemRecPath, sessioninfo.ExpandLibraryCodeList))
                         return 1;
-                    strError = $"读者记录超出当前账户管辖范围";
+                    strError = $"读者记录超出{SessionInfo.GetCurrentUserName(sessioninfo)}管辖范围";
                     return 0;
                 }
             }
@@ -656,7 +656,7 @@ out byte[] baOutputTimestamp)
                         "libraryCode");
                     if (IsLibraryCodeInControl(libraryCode, sessioninfo.LibraryCodeList) == false)
                     {
-                        strError = "盘点记录不在当前账户的管辖范围内";
+                        strError = $"盘点记录不在{SessionInfo.GetCurrentUserName(sessioninfo)}的管辖范围内";
                         return 0;
                     }
                 }
@@ -776,7 +776,7 @@ out byte[] baOutputTimestamp)
                     if (this.IsCurrentChangeableReaderPath(strItemRecPath, sessioninfo.ExpandLibraryCodeList))
                         return 1;
 
-                    strError = $"读者记录超出当前账户控制范围";
+                    strError = $"读者记录超出{SessionInfo.GetCurrentUserName(sessioninfo)}控制范围";
                     return 0;
                 }
             }
@@ -901,7 +901,7 @@ out byte[] baOutputTimestamp)
                         "libraryCode");
                     if (IsLibraryCodeInControl(libraryCode, sessioninfo.LibraryCodeList) == false)
                     {
-                        strError = "违约金记录不在当前账户的管辖范围内";
+                        strError = $"违约金记录不在{SessionInfo.GetCurrentUserName(sessioninfo)}的管辖范围内";
                         return 0;
                     }
                 }
@@ -931,7 +931,7 @@ out byte[] baOutputTimestamp)
                         "libraryCode");
                     if (IsLibraryCodeInControl(libraryCode, sessioninfo.LibraryCodeList) == false)
                     {
-                        strError = "预约到书记录不在当前账户的管辖范围内";
+                        strError = $"预约到书记录不在{SessionInfo.GetCurrentUserName(sessioninfo)}的管辖范围内";
                         return 0;
                     }
                 }
@@ -981,7 +981,7 @@ out byte[] baOutputTimestamp)
                         "libraryCode");
                     if (IsLibraryCodeInControl(libraryCode, sessioninfo.LibraryCodeList) == false)
                     {
-                        strError = "盘点记录不在当前账户的管辖范围内";
+                        strError = $"盘点记录不在{SessionInfo.GetCurrentUserName(sessioninfo)}的管辖范围内";
                         return 0;
                     }
                 }
@@ -1102,7 +1102,7 @@ out error);
             //      1   允许读出
             nRet = IsRecordReadable(sessioninfo,
                 strOutputResPath,
-                (out string error) => 
+                (out string error) =>
                 {
                     error = "";
                     return existing_dom;
@@ -1200,7 +1200,7 @@ out error);
 #endif
             if (StringUtil.IsInList("getarrivedinfo", sessioninfo.RightsOrigin) == false)
             {
-                strError = "当前账户不具备 getarrivedinfo 权限";
+                strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 getarrivedinfo 权限";
                 return 0;
             }
 
@@ -1245,7 +1245,7 @@ out error);
                             out strError);
                         if (nRet == -1)
                         {
-                            strError = $"预约到书记录 '{strArrivedRecPath}' 超出当前用户管辖范围，并且在尝试检索册记录 '{strItemBarcode}' 时遇到问题: {strError}";
+                            strError = $"预约到书记录 '{strArrivedRecPath}' 超出{GetCurrentUserName(sessioninfo)}管辖范围，并且在尝试检索册记录 '{strItemBarcode}' 时遇到问题: {strError}";
                             return -1;  // AceessDenied and error
                         }
                         if (nRet == 1)
@@ -1253,7 +1253,7 @@ out error);
                             return 1;
                         }
                     }
-                    strError = "预约到书记录 '" + strArrivedRecPath + "' 超出当前用户管辖范围，无法获取";
+                    strError = $"预约到书记录 '{strArrivedRecPath}' 超出{GetCurrentUserName(sessioninfo)}管辖范围，无法获取";
                     return 0;
                 }
             }
@@ -1276,7 +1276,7 @@ out error);
 
             if (StringUtil.IsInList("getamerceinfo", sessioninfo.RightsOrigin) == false)
             {
-                strError = "当前账户不具备 getamerceinfo 权限";
+                strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 getamerceinfo 权限";
                 return 0;
             }
 
@@ -1318,7 +1318,7 @@ out error);
                             out strError);
                         if (nRet == -1)
                         {
-                            strError = $"违约金记录 '{strAmerceRecPath}' 超出当前用户管辖范围，并且在尝试检索册记录 '{strItemBarcode}' 时遇到问题: {strError}";
+                            strError = $"违约金记录 '{strAmerceRecPath}' 超出{GetCurrentUserName(sessioninfo)}管辖范围，并且在尝试检索册记录 '{strItemBarcode}' 时遇到问题: {strError}";
                             return -1;  // AceessDenied and error
                         }
                         if (nRet == 1)
@@ -1326,7 +1326,7 @@ out error);
                             return 1;
                         }
                     }
-                    strError = "违约金记录 '" + strAmerceRecPath + "' 超出当前用户管辖范围，无法获取";
+                    strError = $"违约金记录 '{strAmerceRecPath}' 超出{GetCurrentUserName(sessioninfo)}管辖范围，无法获取";
                     return 0;
                 }
             }

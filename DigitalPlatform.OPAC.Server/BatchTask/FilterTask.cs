@@ -72,6 +72,7 @@ namespace DigitalPlatform.OPAC.Server
             this.ProgressValue = lProgressValue;
         }
 
+        // (注：采用了代理账户)
         public void ThreadPoolCallBack(object context)
         {
             FilterTaskInput input = (FilterTaskInput)context;

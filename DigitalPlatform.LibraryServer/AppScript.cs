@@ -2301,7 +2301,7 @@ namespace DigitalPlatform.LibraryServer
                 List<string> warning_rights = null;
                 if (IsLessOrEqualThan(strRights, sessioninfo.Rights, out warning_rights) == false)
                 {
-                    strError = "读者记录中的权限超出了当前用户的权限，这是不允许的。超出的部分权限值 '" + StringUtil.MakePathList(warning_rights) + "'";
+                    strError = $"读者记录中的权限超出了{SessionInfo.GetCurrentUserName(sessioninfo)}的权限，这是不允许的。超出的部分权限值 '{StringUtil.MakePathList(warning_rights)}'";
                     return 1;
                 }
             }

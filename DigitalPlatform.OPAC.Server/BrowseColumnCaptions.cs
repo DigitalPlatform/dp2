@@ -52,6 +52,7 @@ namespace DigitalPlatform.OPAC.Server
         Hashtable BrowsColumnTable = new Hashtable();
 
         // 获得一个库的浏览列标题
+        // (注：采用了代理账户)
         // return:
         //      -1  出错
         //      0   没有找到

@@ -437,6 +437,7 @@ namespace DigitalPlatform.OPAC.Server
         }
 
         // 映射内核脚本配置文件到本地
+        // (注：采用了代理账户)
         // parameters:
         //      sessioninfo_param   如果为null，函数内部会自动创建一个SessionInfo对象，是管理员权限
         // return:

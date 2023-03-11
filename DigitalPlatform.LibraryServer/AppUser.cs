@@ -362,7 +362,7 @@ namespace DigitalPlatform.LibraryServer
                 if (string.IsNullOrEmpty(userinfo.LibraryCode) == true
                     || IsListInList(userinfo.LibraryCode, strLibraryCodeList) == false)
                 {
-                    strError = "当前用户只能创建图书馆代码完全属于 '" + strLibraryCodeList + "' 范围的新用户";
+                    strError = $"{GetCurrentUserName(null)}只能创建图书馆代码完全属于 '{strLibraryCodeList}' 范围的新用户";
                     error_code = ErrorCode.AccessDenied;
                     return -1;
                 }
@@ -994,7 +994,7 @@ namespace DigitalPlatform.LibraryServer
                     if (string.IsNullOrEmpty(strExistLibraryCodeList) == true
                         || IsListInList(strExistLibraryCodeList, strLibraryCodeList) == false)
                     {
-                        strError = "当前用户只能修改图书馆代码完全完全属于 '" + strLibraryCodeList + "' 范围的用户的密码";
+                        strError = $"{GetCurrentUserName(null)}只能修改图书馆代码完全完全属于 '{strLibraryCodeList}' 范围的用户的密码";
                         return -1;
                     }
                 }
@@ -1550,7 +1550,7 @@ out strError);
                     if (string.IsNullOrEmpty(strExistLibraryCodeList) == true
                         || IsListInList(strExistLibraryCodeList, strLibraryCodeList) == false)
                     {
-                        strError = "当前用户只能修改图书馆代码完全属于 '" + strLibraryCodeList + "' 范围的用户信息";
+                        strError = $"{GetCurrentUserName(null)}只能修改图书馆代码完全属于 '{strLibraryCodeList}' 范围的用户信息";
                         error_code = ErrorCode.AccessDenied;
                         return -1;
                     }
@@ -1563,7 +1563,7 @@ out strError);
                     if (string.IsNullOrEmpty(userinfo.LibraryCode) == true
                         || IsListInList(userinfo.LibraryCode, strLibraryCodeList) == false)
                     {
-                        strError = "当前用户只能将用户信息的馆代码修改到完全属于 '" + strLibraryCodeList + "' 范围内的值";
+                        strError = $"{GetCurrentUserName(null)}只能将用户信息的馆代码修改到完全属于 '{strLibraryCodeList}' 范围内的值";
                         error_code = ErrorCode.AccessDenied;
                         return -1;
                     }
@@ -1762,7 +1762,7 @@ out strError);
                     if (string.IsNullOrEmpty(strExistLibraryCodeList) == true
                         || IsListInList(strExistLibraryCodeList, strLibraryCodeList) == false)
                     {
-                        strError = "当前用户只能重设 图书馆代码完全属于 '" + strLibraryCodeList + "' 范围的用户的密码";
+                        strError = $"{GetCurrentUserName(null)}只能重设 图书馆代码完全属于 '{strLibraryCodeList}' 范围的用户的密码";
                         error_code = ErrorCode.AccessDenied;
                         return -1;
                     }
@@ -1878,7 +1878,7 @@ out strError);
                     if (string.IsNullOrEmpty(strExistLibraryCodeList) == true
                         || IsListInList(strExistLibraryCodeList, strLibraryCodeList) == false)
                     {
-                        strError = "当前用户只能删除 图书馆代码完全属于 '" + strLibraryCodeList + "' 范围的用户";
+                        strError = $"{GetCurrentUserName(null)}只能删除 图书馆代码完全属于 '{strLibraryCodeList}' 范围的用户";
                         error_code = ErrorCode.AccessDenied;
                         return -1;
                     }

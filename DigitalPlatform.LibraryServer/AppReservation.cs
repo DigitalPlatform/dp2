@@ -150,7 +150,7 @@ namespace DigitalPlatform.LibraryServer
                     if (this.IsCurrentChangeableReaderPath(strOutputReaderRecPath,
             sessioninfo.LibraryCodeList) == false)
                     {
-                        strError = "读者记录路径 '" + strOutputReaderRecPath + "' 的读者库不在当前用户管辖范围内";
+                        strError = $"读者记录路径 '{strOutputReaderRecPath}' 的读者库不在{GetCurrentUserName(sessioninfo)}管辖范围内";
                         goto ERROR1;
                     }
                 }
