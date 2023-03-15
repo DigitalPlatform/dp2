@@ -580,6 +580,7 @@ namespace dp2Circulation
 
                 looping.Progress.SetProgressRange(0, lHitCount);
 
+                List<string> access_denied_errors = new List<string>();
                 // 获得结果集，装入listview
                 for (; ; )
                 {
@@ -598,7 +599,7 @@ namespace dp2Circulation
                         "amerced",   // strResultSetName
                         lStart,
                         lPerCount,
-                        "id",   // "id,cols"
+                        "id,xml",   // "id"
                         this.Lang,
                         out searchresults,
                         out strError);
@@ -614,6 +615,8 @@ namespace dp2Circulation
                     // 处理浏览结果
                     for (int i = 0; i < searchresults.Length; i++)
                     {
+                        var record = searchresults[i];
+
                         Application.DoEvents();	// 出让界面控制权
 
                         if (looping.Stopped)
@@ -624,10 +627,11 @@ namespace dp2Circulation
 
                         bool bTempQuick = Control.ModifierKeys == Keys.Control;
 
-                        string strPath = searchresults[i].Path;
+                        string strPath = record.Path;
 
                         looping.Progress.SetMessage("正在装入违约金记录 " + strPath + " " + (lStart + i + 1).ToString() + " / " + lHitCount.ToString() + " ...");
 
+                        /*
                         lRet = channel.GetRecord(looping.Progress,
                             strPath,
                             out byte[] timestamp,
@@ -636,10 +640,37 @@ namespace dp2Circulation
                         if (lRet == -1)
                         {
                             if (channel.ErrorCode == ErrorCode.AccessDenied)
+                            {
+                                access_denied_errors.Add(strError);
                                 goto CONTINUE;
+                            }
 
                             goto ERROR1;
                         }
+                        */
+                        string strXml = record.RecordBody?.Xml;
+                        if (record.RecordBody?.Result?.ErrorCode == ErrorCodeValue.AccessDenied)
+                        {
+                            access_denied_errors.Add(strPath + ": " + record.RecordBody?.Result?.ErrorString);
+                            goto CONTINUE;
+                        }
+
+                        if (record.RecordBody != null 
+                            && record.RecordBody.Result != null)
+                        {
+                            if (record.RecordBody.Result.ErrorCode != ErrorCodeValue.NoError)
+                            {
+                                access_denied_errors.Add(strPath + ": " + record.RecordBody?.Result?.ErrorString);
+                                goto CONTINUE;
+                            }
+                        }
+
+                        if (string.IsNullOrEmpty(strXml))
+                        {
+                            MessageBox.Show(this, $"警告: 记录 '{strPath}' 的 XML 为空");
+                            goto CONTINUE;
+                        }
+
 
                         int nRet = FillAmercedLine(
                             null,
@@ -665,6 +696,13 @@ namespace dp2Circulation
                 if (nLoadCount != lHitCount)
                 {
                     MessageBox.Show(this, "检索命中 " + lHitCount.ToString() + " 条，实际装入 " + nLoadCount.ToString() + " 条");
+                }
+
+                if (access_denied_errors.Count > 0)
+                {
+                    MessageDlg.Show(this, 
+                        $"以下是装入违约金记录时遇到“权限不足”或其它类型报错的信息：\r\n{StringUtil.MakePathList(access_denied_errors, "\r\n")}", 
+                        "权限不足");
                 }
             }
             finally

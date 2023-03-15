@@ -1021,7 +1021,7 @@ namespace DigitalPlatform.OPAC.Server
             return 1;
         }
 
-#region 复制 CSS 文件
+        #region 复制 CSS 文件
 
         int CopyCssFiles(out string strError)
         {
@@ -1241,7 +1241,7 @@ namespace DigitalPlatform.OPAC.Server
             return 0;
         }
 
-#endregion
+        #endregion
 
         // 缓存的from信息
         Hashtable m_fromTable = new Hashtable();
@@ -3695,6 +3695,10 @@ System.Text.Encoding.UTF8))
 
             try
             {
+                // 2023/3/14
+                // 把文件指针卷回到开头
+                if (postedFile.InputStream.CanSeek)
+                    postedFile.InputStream.Seek(0, SeekOrigin.Begin);
                 string mime = API.GetMimeTypeFromFile(postedFile.InputStream);
                 if (mime == null
                     || mime.StartsWith("image/") == false)

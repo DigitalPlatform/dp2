@@ -2228,6 +2228,8 @@ out strError);
             if (String.IsNullOrEmpty(strVersion) == true)
                 strVersion = "0.01";
 
+            // this.WriteErrorLog($"INFO: UpgradeLibraryXml() 处理前的 library.xml 文件 version 为 '{strVersion}'");
+
             double version = 0.01;
             try
             {
@@ -2533,6 +2535,27 @@ out strError);
                         old_comment += $"{DateTime.Now.ToLongDateString()} 自动升级{strError}";
                         account.SetAttribute("comment", old_comment);
                     }
+
+                    // 2023/3/14
+                    // 对于 reader 账户，确保添加 setcommentobject,getcommentobject
+                    var name = account.GetAttribute("name");
+                    if (name == "reader")
+                    {
+                        StringUtil.SetInList(ref new_rights, "setcommentobject", true);
+                        StringUtil.SetInList(ref new_rights, "getcommentobject", true);
+                        StringUtil.SetInList(ref new_rights, "setreaderobject", true);
+                        StringUtil.SetInList(ref new_rights, "getreaderobject", true);
+                    }
+                    /*
+                    else if (name == "opac")
+                    {
+                        // 注: OPAC 中读者上传头像最新版已经不用 opac 账户了，而是用读者自己的账户进行
+                        StringUtil.SetInList(ref new_rights, "setreaderinfo", true);
+                        StringUtil.SetInList(ref new_rights, "getreaderinfo", true);
+                        StringUtil.SetInList(ref new_rights, "setreaderobject", true);
+                        StringUtil.SetInList(ref new_rights, "getreaderobject", true);
+                    }
+                    */
 
                     if (old_rights != new_rights)
                         account.SetAttribute("rights", new_rights);
@@ -5880,6 +5903,15 @@ out strError);
 
             account.Type = DomUtil.GetAttr(node, "type");
             account.Rights = DomUtil.GetAttr(node, "rights");
+
+            // 2023/3/14
+            // 将 writerecord 权限从 accout.Rights 中移除
+            {
+                string list = account.Rights;
+                StringUtil.RemoveFromInList("writerecord", true, ref list);
+                account.Rights = list;
+            }
+
             account.AccountLibraryCode = DomUtil.GetAttr(node, "libraryCode");
 
             account.Access = DomUtil.GetAttr(node, "access");
@@ -16786,7 +16818,7 @@ out string db_type);
                     }
                 }
 
-                strError = $"读取资源 { strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备相应的权限";
+                strError = $"读取资源 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备相应的权限";
                 return 0;
             }
 

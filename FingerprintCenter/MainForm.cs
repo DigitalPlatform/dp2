@@ -128,6 +128,7 @@ namespace FingerprintCenter
                     this.textBox_cfg_recognitionQualityThreshold,
                     new ControlWrapper(this.checkBox_speakWhenSendKeyStateChange, false),
                     new ControlWrapper(this.checkBox_speakDetailed, true),
+                    new ControlWrapper(this.checkBox_forceCreate, false),
                 };
                 return GuiState.GetUiState(controls);
             }
@@ -150,6 +151,7 @@ namespace FingerprintCenter
                     this.textBox_cfg_recognitionQualityThreshold,
                     new ControlWrapper(this.checkBox_speakWhenSendKeyStateChange, false),
                     new ControlWrapper(this.checkBox_speakDetailed, true),
+                    new ControlWrapper(this.checkBox_forceCreate, false),
                 };
                 GuiState.SetUiState(controls, value);
             }
@@ -1123,6 +1125,11 @@ out strError);
                     this.textBox_replicationStart.Text = plan.StartDate;
                 }));
 
+                bool force_create = (bool)this.Invoke((Func<bool>)(() =>
+                {
+                    return this.checkBox_forceCreate.Checked;
+                }));
+
                 string strDir = ClientInfo.FingerPrintCacheDir(strUrl);
                 PathUtil.TryCreateDir(strDir);
 
@@ -1131,7 +1138,7 @@ out strError);
                 //      >=0   成功。返回实际初始化的事项
                 var result = FingerPrint.InitFingerprintCache(channel,
                     strDir,
-                    "",
+                    force_create ? "force_create" : "",
                     _cancel.Token);
                 if (result.Value == -1)
                     return result;

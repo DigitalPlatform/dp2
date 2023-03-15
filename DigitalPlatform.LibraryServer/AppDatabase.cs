@@ -2788,7 +2788,7 @@ out strError);
             // TODO: 关注一下数据库不存在的时候是不是会报这个错
             if (ServerDatabaseUtility.IsUtilDbName(this.LibraryCfgDom, strName, out _) == false)
             {
-                strError = "数据库 '' 的类型不是实用库，无法用 DeleteUtilDatabase() 来加以删除";
+                strError = $"数据库 '{strName}' 的类型不是实用库，无法用 DeleteUtilDatabase() 来加以删除";
                 return -1;
             }
 

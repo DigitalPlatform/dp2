@@ -1774,14 +1774,33 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             e.Cancel = true;
         }
 
+
+
         // TODO: setreaderobject 和 setobject 只要具备其中一个即可
         // 演化 getres --> getobject --> getreaderobject
-        static string _baseRights = "getsystemparameter,getbiblioinfo,getbibliosummary,getiteminfo,getoperlog,getreaderinfo,getreaderobject,searchbiblio,searchitem,searchreader,borrow,renew,return,setreaderinfo,setiteminfo"; // setreaderobject, // 取消 setobject
+        // static string _baseRights = "getsystemparameter,getbiblioinfo,getbibliosummary,getiteminfo,getoperlog,getreaderinfo,getreaderobject,searchbiblio,searchitem,searchreader,borrow,renew,return,setreaderinfo,setiteminfo"; // setreaderobject, // 取消 setobject
+
+        // https://jihulab.com/DigitalPlatform/dp2doc/-/issues/88#note_2182237
+        // 自助机
+        // ,getiteminfo,getreaderinfo,getreaderobject,getbibliosummary,borrow,renew,return,setreaderinfo
+        // 书柜
+        // ,getiteminfo,getreaderinfo,getreaderobject,getbibliosummary,borrow,renew,return,setreaderinfo,getsystemparameter,setiteminfo,searchreader,getoperlog,searchitem
+
+        static string _baseRightsSelfLoan = "getiteminfo,getreaderinfo,getbibliosummary,borrow,renew,return,setreaderinfo"; // getreaderobject,
+        static string _baseRightsBookShelf = "getiteminfo,getreaderinfo,getbibliosummary,borrow,renew,return,setreaderinfo,getsystemparameter,setiteminfo,searchreader,getoperlog,searchitem";  // getreaderobject,
 
         static void VerifyRights(string rights)
         {
+            string baseRights = "";
+            if (App.Function == "自助借还")
+                baseRights = _baseRightsSelfLoan;
+            else if (App.Function == "智能书柜")
+                baseRights = _baseRightsBookShelf;
+            else
+                throw new Exception($"无法识别的 App.Function 值 '{App.Function}'");
+
             List<string> missing_rights = new List<string>();
-            var base_rights = StringUtil.SplitList(_baseRights);
+            var base_rights = StringUtil.SplitList(baseRights);
             foreach (var right in base_rights)
             {
                 if (StringUtil.IsInList(right, rights) == false)
@@ -1797,7 +1816,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             }
 
             if (missing_rights.Count > 0)
-                throw new Exception($"账户 {_currentUserName} 缺乏必备的权限 {StringUtil.MakePathList(missing_rights)}");
+                throw new Exception($"账户 {_currentUserName} 缺乏业务必备的权限 {StringUtil.MakePathList(missing_rights)}");
         }
 
         static string _currentUserName = "";
@@ -1819,11 +1838,9 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             _currentUserName = channel.UserName;
             _currentUserLibraryCodeList = channel.LibraryCodeList;
 
-            /*
             // 2020/9/18
             // 检查 rights
             VerifyRights(channel.Rights);
-            */
 
             //_currentUserRights = channel.Rights;
             //_currentLibraryCodeList = channel.LibraryCodeList;

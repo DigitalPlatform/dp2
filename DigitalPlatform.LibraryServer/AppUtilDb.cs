@@ -8,6 +8,7 @@ using System.Diagnostics;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.rms.Client;
+using DigitalPlatform.LibraryServer.Common;
 
 // using DigitalPlatform.rms.Client.rmsws_localhost;   // Record
 
@@ -1497,6 +1498,17 @@ out error);
 
             LibraryServerResult result = new LibraryServerResult();
 
+            // 2023/3/14
+            // 检查 strDbName 里面的数据库名是否合法
+            if (ServerDatabaseUtility.IsUtilDbName(this.LibraryCfgDom, 
+                strDbName,
+                out string db_type) == false
+                || db_type != "publisher")
+            {
+                strError = $"数据库 '{strDbName}' 的类型不是 publisher，不允许使用 SetUtilInfo()";
+                goto ERROR1;
+            }
+
             string strPath = "";
             string strXml = "";
             byte[] timestamp = null;
@@ -1633,6 +1645,17 @@ out error);
 
             LibraryServerResult result = new LibraryServerResult();
 
+            // 2023/3/14
+            // 检查 strDbName 里面的数据库名是否合法
+            if (ServerDatabaseUtility.IsUtilDbName(this.LibraryCfgDom,
+                strDbName,
+                out string db_type) == false
+                || db_type != "publisher")
+            {
+                strError = $"数据库 '{strDbName}' 的类型不是 publisher，不允许使用 GetUtilInfo()";
+                goto ERROR1;
+            }
+
             /*
             if (String.IsNullOrEmpty(strKeyAttrName) == true)
                 strKeyAttrName = "k";
@@ -1640,7 +1663,6 @@ out error);
 
             if (String.IsNullOrEmpty(strValueAttrName) == true)
                 strValueAttrName = "v";
-
 
             RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
             if (channel == null)

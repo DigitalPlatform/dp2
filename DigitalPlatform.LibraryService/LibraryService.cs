@@ -4029,7 +4029,8 @@ strDbName);
             string access,
             string strBrowseInfoStyle)
         {
-            bool bHasCols = StringUtil.IsInList("cols", strBrowseInfoStyle);
+            bool bHasCols = StringUtil.IsInList("cols", strBrowseInfoStyle)
+                || (StringUtil.GetParameterByPrefix(strBrowseInfoStyle, "format", ":") != null);
             bool bHasXml = StringUtil.IsInList("xml", strBrowseInfoStyle);
 
             // 如果 record 中没有包含 cols 或者 xml，那么就没有必要进行权限过滤
@@ -4097,7 +4098,7 @@ out byte[] _);
                 if (bHasCols)
                 {
                     // 有可能返回 null
-                    string strFormat = StringUtil.GetStyleParam(strBrowseInfoStyle, "result");
+                    string strFormat = StringUtil.GetStyleParam(strBrowseInfoStyle, "format");
 
                     RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
                     // return:
@@ -4280,11 +4281,13 @@ out byte[] _);
             string read_level,
             string strBrowseInfoStyle)
         {
-            bool bHasCols = StringUtil.IsInList("cols", strBrowseInfoStyle);
+            bool bHasCols = StringUtil.IsInList("cols", strBrowseInfoStyle)
+                || (StringUtil.GetParameterByPrefix(strBrowseInfoStyle, "format", ":") != null);
             bool bHasXml = StringUtil.IsInList("xml", strBrowseInfoStyle);
 
             // 如果 record 中没有包含 cols 或者 xml，那么就没有必要进行权限过滤
-            if (bHasCols == false && bHasXml == false)
+            if (bHasCols == false
+                && bHasXml == false)
                 return;
 
             // 加速运算
@@ -4353,7 +4356,7 @@ out byte[] _);
                 if (bHasCols)
                 {
                     // 有可能返回 null
-                    string strFormat = StringUtil.GetStyleParam(strBrowseInfoStyle, "result");
+                    string strFormat = StringUtil.GetStyleParam(strBrowseInfoStyle, "format");
 
                     RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
                     // return:
@@ -4383,7 +4386,8 @@ out byte[] _);
             string strItemDbName,
             string strBrowseInfoStyle)
         {
-            bool bHasCols = StringUtil.IsInList("cols", strBrowseInfoStyle);
+            bool bHasCols = StringUtil.IsInList("cols", strBrowseInfoStyle)
+                || (StringUtil.GetParameterByPrefix(strBrowseInfoStyle, "format", ":") != null);
             bool bHasXml = StringUtil.IsInList("xml", strBrowseInfoStyle);
 
             // 如果 record 中没有包含 cols 或者 xml，那么就没有必要进行权限过滤
@@ -4444,7 +4448,7 @@ out byte[] _);
                 if (bHasCols)
                 {
                     // 有可能返回 null
-                    string strFormat = StringUtil.GetStyleParam(strBrowseInfoStyle, "result");
+                    string strFormat = StringUtil.GetStyleParam(strBrowseInfoStyle, "format");
 
                     RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
                     // return:
@@ -14692,10 +14696,10 @@ strLibraryCodeList);
                 }
 
                 // 权限判断
-                if (StringUtil.IsInList("setutilinfo", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("setpublisherinfo,setutilinfo", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = $"设置实用库记录信息的操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备setutilinfo权限。";
+                    result.ErrorInfo = $"设置实用库记录信息的操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 setpublisherinfo 或 setutilinfo 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }

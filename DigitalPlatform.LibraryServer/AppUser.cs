@@ -2010,6 +2010,7 @@ out strError);
         "getcomments-->getcommentinfo",
         "writeobject-->setobject",
         "getres-->getobject",   // 旧版本的 getres 大致对等于新版的 getobject。getres 权限已经废止
+        "amerce-->amerce,getamerceinfo,searchamerce",
         };
 
         // 将旧版本的账户权限字符串升级到新版本
@@ -2020,11 +2021,14 @@ out strError);
             var source_rights = rights.Split(',');
             foreach (var source_right in source_rights)
             {
-                results.Add(Replace(source_right));
+                var replaced = Replace(source_right);
+                results.AddRange(replaced.Split(','));
             }
 
             StringUtil.RemoveDupNoSort(ref results);
             return string.Join(",", results);
+
+            // 注意，返回的结果字符串中可能会包含逗号
             string Replace(string text)
             {
                 foreach (var item in _rights_replace_table)

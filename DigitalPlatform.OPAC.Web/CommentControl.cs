@@ -261,7 +261,6 @@ namespace DigitalPlatform.OPAC.Web
 
             line.Controls.Add(new LiteralControl("<div class='cmdline' onmouseover='HilightCommentCmdline(this); return false;'>"));
 
-
             // change
             Button change_button = new Button();
             change_button.Text = this.GetString("编辑");
@@ -289,8 +288,6 @@ namespace DigitalPlatform.OPAC.Web
             string strConfirmText = this.GetString("确实要删除这条评注?");
             delete_button.Attributes.Add("onclick", "return myConfirm('" + strConfirmText + "');");
 
-
-
             line.Controls.Add(new LiteralControl("</div>"));
         }
 
@@ -314,7 +311,7 @@ namespace DigitalPlatform.OPAC.Web
 
             // this.Page.Response.Redirect(this.Page.Request.RawUrl, true);
             return;
-            ERROR1:
+        ERROR1:
             this.SetDebugInfo("errorinfo", strError);
         }
 
@@ -431,7 +428,7 @@ namespace DigitalPlatform.OPAC.Web
                 sessioninfo.ReturnChannel(channel);
             }
 
-            END1:
+        END1:
             // 修改评注记录后，更新栏目存储结构
             // parameters:
             //      strAction   动作。change/delete/new
@@ -450,7 +447,7 @@ namespace DigitalPlatform.OPAC.Web
                 goto ERROR1;
 
             return 0;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -1125,7 +1122,6 @@ string strText)
             LibraryChannel channel = sessioninfo.GetChannel(true);
             try
             {
-
                 string strOutputPath = "";
                 byte[] temp_timestamp = null;
                 string strBiblio = "";
@@ -1273,7 +1269,7 @@ out strError);
             }
 
             return 1;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -1316,7 +1312,7 @@ out strError);
                 this.Page.Response.Redirect("./book.aspx?commentrecpath=" + HttpUtility.UrlEncode(this.RecPath) + "#active", true);
             }
             return;
-            ERROR1:
+        ERROR1:
             this.SetDebugInfo("errorinfo", strError);
         }
 
@@ -1702,9 +1698,20 @@ out strError);
                 LibraryChannel channel = sessioninfo.GetChannel(true);
                 try
                 {
+                    // 检查上载文件的格式是否为图像文件？
+                    // return:
+                    //      -1  出错
+                    //      0   不是图像文件
+                    //      1   是图像文件
+                    nRet = OpacApplication.VerifyImageFileType(upload.PostedFile,
+                out strError);
+                    if (nRet != 1)
+                    {
+                        strError += "。上载失败";
+                        goto ERROR1;
+                    }
                     // 
                     // 保存资源
-                    // 采用了代理帐户
                     // return:
                     //		-1	error
                     //		0	发现上载的文件其实为空，不必保存了
@@ -1765,7 +1772,7 @@ out strError);
             }
 
             return 0;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -3147,7 +3154,7 @@ string strWrapperClass)
 
             base.Render(writer);
             return;
-            ERROR1:
+        ERROR1:
             this.SetDebugInfo("errorinfo", strError);
             base.Render(writer);
         }

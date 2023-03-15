@@ -17,6 +17,7 @@ using System.Diagnostics;
 using DigitalPlatform.Xml;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.IO;
+using DigitalPlatform.LibraryClient;
 //using DigitalPlatform.CirculationClient;
 
 namespace DigitalPlatform.OPAC.Web
@@ -715,7 +716,6 @@ namespace DigitalPlatform.OPAC.Web
                 bXmlRecordChanged = true;
             }
 
-
             // 如果有上传头像
             if (upload.HasFile == true
                 && bUploadSaved == false)
@@ -752,7 +752,6 @@ namespace DigitalPlatform.OPAC.Web
 
                 if (bXmlRecordChanged == true)
                 {
-
                     sessioninfo.SetLoginReaderDomChanged();
                     // 先要保存一次XML记录，这样才有<dprms:file>元素，为上载资源作好准备
                     // return:
@@ -779,26 +778,67 @@ namespace DigitalPlatform.OPAC.Web
                 }
 
 
-                // Stream stream = upload.FileContent;
-
-
-                // 保存资源
-                // 采用了代理帐户
-                // return:
-                //		-1	error
-                //		0	发现上载的文件其实为空，不必保存了
-                //		1	已经保存
-                nRet = app.SaveUploadFile(
-                    this.Page,
-                    sessioninfo.ReaderInfo.ReaderDomPath,
-                    strFileID,
-                    strResTimeStamp,
-                    upload.PostedFile,
-                    64,
-                    64,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
+                // 用读者身份上传图片
+                LibraryChannel channel = sessioninfo.GetChannel(true);
+                try
+                {
+                    /*
+                    // 保存资源
+                    // 采用了代理帐户
+                    // return:
+                    //		-1	error
+                    //		0	发现上载的文件其实为空，不必保存了
+                    //		1	已经保存
+                    nRet = app.SaveUploadFile(
+                        this.Page,
+                        sessioninfo.ReaderInfo.ReaderDomPath,
+                        strFileID,
+                        strResTimeStamp,
+                        upload.PostedFile,
+                        64,
+                        64,
+                        out strError);
+                    */
+                    // 检查上载文件的格式是否为图像文件？
+                    // return:
+                    //      -1  出错
+                    //      0   不是图像文件
+                    //      1   是图像文件
+                    nRet = OpacApplication.VerifyImageFileType(upload.PostedFile,
+                out strError);
+                    if (nRet != 1)
+                    {
+                        strError += "。上载失败";
+                        goto ERROR1;
+                    }
+                    int nRedoUploadCount = 0;
+                REDO_UPLOAD:
+                    nRet = OpacApplication.SaveUploadFile(
+                        this.Page,
+                        channel,
+                        sessioninfo.ReaderInfo.ReaderDomPath,
+                        strFileID,
+                        strResTimeStamp,
+                        upload.PostedFile,
+                        64,
+                        64,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        // 因为前面用读者身份 SetReaderInfo()，dp2library 服务器会自动切断这条通道，所以此处的请求会出现 ChannelReleased 报错
+                        if (channel.ErrorCode == LibraryClient.localhost.ErrorCode.ChannelReleased
+                            && nRedoUploadCount < 5)
+                        {
+                            nRedoUploadCount++;
+                            goto REDO_UPLOAD;
+                        }
+                        goto ERROR1;
+                    }
+                }
+                finally
+                {
+                    sessioninfo.ReturnChannel(channel);
+                }
 
                 bUploadSaved = true;
 
@@ -809,14 +849,12 @@ namespace DigitalPlatform.OPAC.Web
     out strError);
                 if (nRet == -1 || nRet == -2)
                     goto ERROR1;
-
             }
 
             // 为显示名的修改而保存
             if (bXmlRecordChanged == true)
             {
                 sessioninfo.SetLoginReaderDomChanged();
-
 
                 // return:
                 //      -2  时间戳冲突
