@@ -1773,7 +1773,7 @@ namespace DigitalPlatform.LibraryServer
             LibraryServerResult result = new LibraryServerResult();
 
             // 权限字符串
-            if (StringUtil.IsInList("getiteminfo,order", sessioninfo.RightsOrigin) == false)
+            if (StringUtil.IsInList($"{GetInfoRight("getiteminfo")},order", sessioninfo.RightsOrigin) == false)
             {
                 result.Value = -1;
                 result.ErrorInfo = $"获得册信息 操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 getiteminfo 或 order 权限。";
@@ -3305,7 +3305,7 @@ out strError);
                 return result;
             }
 
-            if (StringUtil.IsInList("getiteminfo", sessioninfo.RightsOrigin) == false)
+            if (StringUtil.IsInList($"{GetInfoRight("getiteminfo")}", sessioninfo.RightsOrigin) == false)
             {
                 result.Value = -1;
                 result.ErrorInfo = $"修改册信息 操作被拒绝。虽然{SessionInfo.GetCurrentUserName(sessioninfo)}具备写入册的权限，但不具备 getiteminfo 权限。请修改账户权限";
@@ -7783,7 +7783,7 @@ out strError);
             string alias_right = "";    //  "getentities";
 
             // 检查 getiteminfo 基本权限
-            if (StringUtil.IsInList($"get{db_type}info", sessioninfo.RightsOrigin) == false
+            if (StringUtil.IsInList($"{GetInfoRight($"get{db_type}info")}", sessioninfo.RightsOrigin) == false
                 && (string.IsNullOrEmpty(alias_right) == false && StringUtil.IsInList(alias_right, sessioninfo.RightsOrigin) == false))
             {
                 if (string.IsNullOrEmpty(alias_right))

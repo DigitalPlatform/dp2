@@ -25,7 +25,7 @@ using DigitalPlatform.Drawing;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.CommonControl;
-using Jint.Parser.Ast;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2Circulation
 {
@@ -34,6 +34,20 @@ namespace dp2Circulation
     /// </summary>
     public class Global
     {
+        // 2023/3/16
+        public static ErrorCodeValue GetErrorCode(DigitalPlatform.LibraryClient.localhost.Record record)
+        {
+            ErrorCodeValue error_code = ErrorCodeValue.NoError;
+            if (record == null
+                || record.RecordBody == null
+                || record.RecordBody.Result == null)
+                return error_code;
+            if (record.RecordBody.Result != null)
+                error_code = record.RecordBody.Result.ErrorCode;
+            return error_code;
+        }
+
+
         // 检测应还书时间是否超过当前时间
         // parameters:
         //      end 应还书时间。GMT 时间

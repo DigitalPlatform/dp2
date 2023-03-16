@@ -86,7 +86,7 @@ namespace dp2Circulation
                         item = Global.AppendNewLine(
                             this.listView_browse,
                             biblio_item.Path,
-                            new string[] { biblio_item.RecordBody.Result.ErrorString });
+                            new string[] { biblio_item.RecordBody?.Result?.ErrorString });
                         item.Tag = null;
                     }
                     else

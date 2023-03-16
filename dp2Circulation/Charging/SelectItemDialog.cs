@@ -95,6 +95,9 @@ namespace dp2Circulation
                 (object)this.toolStripProgressBar1);
             // 本窗口独立管理 stopManager
             this._loopingHost.StopManager = stopManager;
+            // 2023/3/16
+            this._loopingHost.GroupName = "";
+
             /*
             if (_stop != null)
                 _stop.Unregister();

@@ -305,11 +305,24 @@ namespace dp2Circulation
 
         void DoOpenDetail(OpenDetailEventArgs args)
         {
-            this.Visible = false;   // 2018/10/31 避免在 OpenDetail 事件执行期间出现的 MessageBox.Show() 被本窗口遮挡出现无法用鼠标点按按钮的问题
+            bool changed = false;
+            if (this.IsHandleCreated && this.Visible == true)
+            {
+                this.Visible = false;   // 2018/10/31 避免在 OpenDetail 事件执行期间出现的 MessageBox.Show() 被本窗口遮挡出现无法用鼠标点按按钮的问题
+                changed = true;
+            }
+
             this.listView_records.Enabled = false;
             this.OpenDetail(this, args);
             this.listView_records.Enabled = true;
-            this.Visible = true;
+
+            if (changed == true)
+            {
+                if (this.IsHandleCreated == false)
+                    this.Show();    // 2023/3/16
+                else
+                    this.Visible = true;
+            }
         }
 
         void OnLoadDetail()

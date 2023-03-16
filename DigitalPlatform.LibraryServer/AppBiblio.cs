@@ -457,7 +457,7 @@ namespace DigitalPlatform.LibraryServer
                     if (strDbType == "biblio")
                     {
                         // 权限字符串
-                        if (StringUtil.IsInList("getbiblioinfo,order", sessioninfo.RightsOrigin) == false)
+                        if (StringUtil.IsInList($"{GetInfoRight("getbiblioinfo")},order", sessioninfo.RightsOrigin) == false)
                         {
                             result.Value = -1;
                             result.ErrorInfo = $"获取书目信息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 getbiblioinfo 或 order 权限。";
@@ -468,7 +468,7 @@ namespace DigitalPlatform.LibraryServer
                     if (strDbType == "authority")
                     {
                         // 权限字符串
-                        if (StringUtil.IsInList("getauthorityinfo", sessioninfo.RightsOrigin) == false)
+                        if (StringUtil.IsInList($"{GetInfoRight("getauthorityinfo")}", sessioninfo.RightsOrigin) == false)
                         {
                             result.Value = -1;
                             result.ErrorInfo = $"获取规范信息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 getauthorityinfo 权限。";
@@ -1134,7 +1134,7 @@ namespace DigitalPlatform.LibraryServer
                         long lTemp = 0;
 
                         // 权限字符串
-                        if (StringUtil.IsInList("getiteminfo,order", sessioninfo.RightsOrigin) == false)
+                        if (StringUtil.IsInList($"{GetInfoRight("getiteminfo")},order", sessioninfo.RightsOrigin) == false)
                         {
                             lTemp = -1;
                         }
@@ -1202,7 +1202,7 @@ namespace DigitalPlatform.LibraryServer
                         long lTemp = 0;
 
                         // 权限字符串
-                        if (StringUtil.IsInList("getorderinfo,order", sessioninfo.RightsOrigin) == false)
+                        if (StringUtil.IsInList($"{GetInfoRight("getorderinfo")},order", sessioninfo.RightsOrigin) == false)
                         {
                             lTemp = -1;
                         }
@@ -1253,7 +1253,7 @@ namespace DigitalPlatform.LibraryServer
                         long lTemp = 0;
 
                         // 权限字符串
-                        if (StringUtil.IsInList("getissueinfo,order", sessioninfo.RightsOrigin) == false)
+                        if (StringUtil.IsInList($"{GetInfoRight("getissueinfo")},order", sessioninfo.RightsOrigin) == false)
                         {
                             lTemp = -1;
                         }
@@ -1304,7 +1304,7 @@ namespace DigitalPlatform.LibraryServer
                         long lTemp = 0;
 
                         // 权限字符串
-                        if (StringUtil.IsInList("getcommentinfo,order", sessioninfo.RightsOrigin) == false)
+                        if (StringUtil.IsInList($"{GetInfoRight("getcommentinfo")},order", sessioninfo.RightsOrigin) == false)
                         {
                             lTemp = -1;
                         }
@@ -5245,7 +5245,7 @@ ref string strMARC)
                     out strChangeableFieldNameList);
                 if (error == "normal")
                 {
-                    if (StringUtil.IsInList("getbiblioinfo", sessioninfo.RightsOrigin) == false)
+                    if (StringUtil.IsInList($"{GetInfoRight("getbiblioinfo")}", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
                         result.ErrorInfo = $"设置书目信息被拒绝。虽然{SessionInfo.GetCurrentUserName(sessioninfo)}具备 setbiblioinfo 权限(或对应存取定义)，但不具备 getbiblioinfo 权限(或对应存取定义)，这违反了权限安全性规则。请修改账户权限";
@@ -6968,7 +6968,7 @@ out strError);
             strError = "";
 
             if (StringUtil.IsInList($"set{db_type}info,writerecord", rights) == true
-                && StringUtil.IsInList($"get{db_type}info", rights) == false)
+                && StringUtil.IsInList($"{GetInfoRight($"get{db_type}info")}", rights) == false)
             {
                 strError = $"当前账户包含了 set{db_type}info 或 writerecord 权限，但不包含 get{db_type}info 权限，这违反了账户安全原则，操作被拒绝。请联系系统管理员修改账户权限到合规状态";
                 return -1;
@@ -7391,10 +7391,10 @@ out strError);
             if (bReadRightVerified == false)
             {
                 // 权限字符串
-                if (StringUtil.IsInList("getbiblioinfo,order", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList($"{GetInfoRight("getbiblioinfo")},order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = $"设置书目信息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备针对源数据库的 order 或 getbiblioinfo 权限。";
+                    result.ErrorInfo = $"设置书目信息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备针对源数据库的 getbiblioinfo 或 order 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }

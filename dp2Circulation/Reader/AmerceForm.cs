@@ -1032,7 +1032,7 @@ TaskScheduler.Default);
                             && record.RecordBody.Result.ErrorCode != ErrorCodeValue.NoError)
                         {
                             // 2022/11/3
-                            SetError(listView_amerced, "获取记录 '" + strPath + "' 时出错: " + record.RecordBody.Result.ErrorString);
+                            SetError(listView_amerced, "获取记录 '" + strPath + "' 时出错: " + record.RecordBody?.Result?.ErrorString);
                             continue;
                         }
                         string strXml = record.RecordBody?.Xml;

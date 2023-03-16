@@ -305,7 +305,7 @@ namespace DigitalPlatform.CirculationClient
                             if (record.RecordBody.Result != null
                                 && record.RecordBody.Result.ErrorCode != ErrorCodeValue.NoError)
                             {
-                                info.ErrorInfo = record.RecordBody.Result.ErrorString;
+                                info.ErrorInfo = record.RecordBody?.Result?.ErrorString;
                                 i++;
                                 continue;
                             }

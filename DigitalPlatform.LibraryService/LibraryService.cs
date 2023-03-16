@@ -3624,7 +3624,7 @@ namespace dp2Library
             bool bHasGetReaderInfoRight = read_level != null;
             // bool bHasGetReaderInfoRight = StringUtil.IsInList("getreaderinfo", sessioninfo.RightsOrigin);
 
-            bool bHasGetBiblioInfoRight = StringUtil.IsInList("getbiblioinfo", sessioninfo.RightsOrigin);
+            bool bHasGetBiblioInfoRight = StringUtil.IsInList($"{InfoRight("getbiblioinfo")}", sessioninfo.RightsOrigin);
 
             foreach (Record record in searchresults)
             {
@@ -6755,7 +6755,7 @@ out timestamp);
                 if (strItemDbType == "item")
                 {
                     // 权限字符串
-                    if (StringUtil.IsInList("getiteminfo,order", sessioninfo.RightsOrigin) == false)
+                    if (StringUtil.IsInList($"{InfoRight("getiteminfo")},order", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
                         result.ErrorInfo = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 获取实体信息被拒绝。不具备 getiteminfo 或 order 权限。";
@@ -6766,7 +6766,7 @@ out timestamp);
                 else if (strItemDbType == "order")
                 {
                     // 权限字符串
-                    if (StringUtil.IsInList("getorderinfo,order", sessioninfo.RightsOrigin) == false)
+                    if (StringUtil.IsInList($"{InfoRight("getorderinfo")},order", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
                         result.ErrorInfo = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 获取订购信息被拒绝。不具备order或getorderinfo权限。";
@@ -6777,7 +6777,7 @@ out timestamp);
                 else if (strItemDbType == "issue")
                 {
                     // 权限字符串
-                    if (StringUtil.IsInList("getissueinfo,order", sessioninfo.RightsOrigin) == false)
+                    if (StringUtil.IsInList($"{InfoRight("getissueinfo")},order", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
                         result.ErrorInfo = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 获取期信息被拒绝。不具备order或getissueinfo权限。";
@@ -6788,7 +6788,7 @@ out timestamp);
                 else if (strItemDbType == "comment")
                 {
                     // 权限字符串
-                    if (StringUtil.IsInList("getcommentinfo,order", sessioninfo.RightsOrigin) == false)
+                    if (StringUtil.IsInList($"{InfoRight("getcommentinfo")},order", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
                         result.ErrorInfo = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 获取评注信息(GetItemInfo())被拒绝。不具备 getcommentinfo 或 order 权限。";
@@ -8020,7 +8020,7 @@ out timestamp);
             try
             {
                 // 权限字符串
-                if (StringUtil.IsInList("getissueinfo,order", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList($"{InfoRight("getissueinfo")},order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
                     result.ErrorInfo = $"获得期信息 操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 getissueinfo 或 order 权限。";
@@ -8046,6 +8046,11 @@ out timestamp);
                 result.ErrorInfo = strErrorText;
                 return result;
             }
+        }
+
+        static string InfoRight(string right)
+        {
+            return LibraryApplication.GetInfoRight(right);
         }
 
         // 设置/保存期信息
@@ -9565,7 +9570,7 @@ PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin)
             try
             {
                 // 权限字符串
-                if (StringUtil.IsInList("getorderinfo,order", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList($"{InfoRight("getorderinfo")},order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
                     result.ErrorInfo = $"获得订购信息 操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 getorderinfo 或 order 权限。";
@@ -16514,7 +16519,7 @@ out strError);
             try
             {
                 // 权限字符串
-                if (StringUtil.IsInList("getcommentinfo,order", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList($"{InfoRight("getcommentinfo")},order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
                     result.ErrorInfo = $"获得评注信息 操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 getcommentinfo 或 order 权限。";

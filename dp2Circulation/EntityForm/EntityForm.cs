@@ -6636,6 +6636,8 @@ out strError);
         {
             this.TryInvoke(() =>
             {
+                var id = Thread.CurrentThread.ManagedThreadId;
+
                 if (this.browseWindow != null)
                 {
                     this.browseWindow.Close();
@@ -6667,7 +6669,10 @@ out strError);
                     Program.MainForm.AppInfo.LinkFormState(this.browseWindow, "browseWindow_state");
 
                 // 再观察一段 2015/9/8
-                this.browseWindow.Visible = true;
+                if (this.IsHandleCreated == false)
+                    this.browseWindow.Show(this);    // 2023/3/16
+                else
+                    this.browseWindow.Visible = true;
 
                 // 2014/7/8
                 if (this.browseWindow.WindowState == FormWindowState.Minimized)
@@ -6682,6 +6687,10 @@ out strError);
         {
             this.TryInvoke(() =>
             {
+                var id = Thread.CurrentThread.ManagedThreadId;
+
+                // Control.CheckForIllegalCrossThreadCalls = false;
+
                 if (this.browseWindow == null
                     || (this.browseWindow != null && this.browseWindow.IsDisposed == true))
                 {
@@ -6695,10 +6704,11 @@ out strError);
                     this.browseWindow.FormClosed -= new FormClosedEventHandler(browseWindow_FormClosed);
                     this.browseWindow.FormClosed += new FormClosedEventHandler(browseWindow_FormClosed);
                     // this.browseWindow.MdiParent = Program.MainForm;
+
                     if (bShow == true)
                     {
                         Program.MainForm.AppInfo.LinkFormState(this.browseWindow, "browseWindow_state");
-                        this.browseWindow.Show();
+                        this.browseWindow.Show(this);
                     }
 
                     this.browseWindow.OpenDetail -= new OpenDetailEventHandler(browseWindow_OpenDetail);

@@ -9827,8 +9827,7 @@ TaskScheduler.Default);
                         string strClass = "";
 
                         bool bNullBiblio = false;   // 书目记录是否为空
-                        if (item.RecordBody != null && item.RecordBody.Result != null
-                            && item.RecordBody.Result.ErrorCode == ErrorCodeValue.NotFound)
+                        if (Global.GetErrorCode(item) == ErrorCodeValue.NotFound)
                         {
                             bNullBiblio = true;
                             Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode("书目记录 '" + item.Path + "' 不存在。被当作空记录继续处理了") + "</div>");

@@ -1206,7 +1206,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
                     Program.MainForm.stopManager?.Active(this.TopLooping?.Progress);
                     */
                     var result = this._loopingHost.StopManager.ActivateGroup(this.GetGroupName());
-                    Debug.Assert(result != null);
+                    // Debug.Assert(result != null);
                 }
                 else
                 {

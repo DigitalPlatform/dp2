@@ -17010,7 +17010,7 @@ out string db_type);
                 }
                 else
                 {
-                    if (StringUtil.IsInList(right, sessioninfo.RightsOrigin) == false)
+                    if (StringUtil.IsInList(right+",getrecord", sessioninfo.RightsOrigin) == false)
                         return $"{SessionInfo.GetCurrentUserName(sessioninfo)} 获取数据库 {strDbName} 内资源被拒绝。不具备 {right} 权限。";
                 }
             }
@@ -17200,7 +17200,7 @@ out string db_type);
                 if (db_type == "biblio")
                 {
                     // 权限字符串
-                    if (StringUtil.IsInList("getbiblioinfo,order", sessioninfo.RightsOrigin) == false)
+                    if (StringUtil.IsInList($"{GetInfoRight("getbiblioinfo")},order", sessioninfo.RightsOrigin) == false)
                     {
                         return $"获取书目信息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 getbiblioinfo 或 order 权限。";
                     }
@@ -17208,7 +17208,7 @@ out string db_type);
                 else if (db_type == "authority")
                 {
                     // 权限字符串
-                    if (StringUtil.IsInList("getauthorityinfo", sessioninfo.RightsOrigin) == false)
+                    if (StringUtil.IsInList($"{GetInfoRight("getauthorityinfo")}", sessioninfo.RightsOrigin) == false)
                     {
                         return $"获取规范信息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 getauthorityinfo 权限。";
                     }

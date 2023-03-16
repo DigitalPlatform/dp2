@@ -649,7 +649,7 @@ namespace dp2Circulation
                         }
                         */
                         string strXml = record.RecordBody?.Xml;
-                        if (record.RecordBody?.Result?.ErrorCode == ErrorCodeValue.AccessDenied)
+                        if (Global.GetErrorCode(record) == ErrorCodeValue.AccessDenied)
                         {
                             access_denied_errors.Add(strPath + ": " + record.RecordBody?.Result?.ErrorString);
                             goto CONTINUE;

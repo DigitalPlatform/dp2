@@ -1958,7 +1958,7 @@ out strError);
                     return result;
                 }
 
-                if (StringUtil.IsInList($"get{db_type}info", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList($"{LibraryApplication.GetInfoRight($"get{db_type}info")}", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
                     result.ErrorInfo = $"修改{type_name}信息 操作被拒绝。虽然{SessionInfo.GetCurrentUserName(sessioninfo)}具备写入{type_name}的权限，但不具备 get{db_type}info 权限。请修改账户权限";
@@ -4476,7 +4476,7 @@ out string strError)
             */
 
             // 检查 getxxxinfo 基本权限
-            if (StringUtil.IsInList($"get{db_type}info", sessioninfo.RightsOrigin) == false)
+            if (StringUtil.IsInList($"{LibraryApplication.GetInfoRight($"get{db_type}info")}", sessioninfo.RightsOrigin) == false)
             {
                 strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 get{db_type}info 权限";
                 return -2;

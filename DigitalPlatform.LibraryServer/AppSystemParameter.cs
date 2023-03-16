@@ -16,6 +16,39 @@ namespace DigitalPlatform.LibraryServer
     /// </summary>
     public partial class LibraryApplication
     {
+        // 判断 database/@biblioDbName 中的书目库名是否在当前账户的可访问范围内
+        // return:
+        //      -1  出错
+        //      0   不可读
+        //      1   可读
+        int IsBiblioDbReadeable(
+            SessionInfo sessioninfo,
+            XmlElement database,
+            out string strError)
+        {
+            strError = "";
+
+            string strDbName = database.GetAttribute("biblioDbName");
+            if (string.IsNullOrEmpty(strDbName))
+                return 1;
+
+            // 检查当前用户是否具备 GetBiblioInfo() API 的存取定义权限
+            // parameters:
+            //      check_normal_right 是否要连带一起检查普通权限？如果不连带，则本函数可能返回 "normal"，意思是需要追加检查一下普通权限
+            // return:
+            //      "normal"    (存取定义已经满足要求了，但)还需要进一步检查普通权限
+            //      null    具备权限
+            //      其它      不具备权限。文字是报错信息
+            var error = CheckGetBiblioInfoAccess(
+                sessioninfo,
+                "biblio",
+                strDbName,
+                true,
+                out _);
+            if (error == null)
+                return 1;
+            return 0;
+        }
 
         void AppendCaptions(XmlNode node,
     string strAttrName)
@@ -583,30 +616,50 @@ namespace DigitalPlatform.LibraryServer
                             // 将name属性名修改为itemDbName属性
                             // TODO: 将来library.xml格式修改后，这部分可以免去了
                             XmlNodeList nodes = dom.DocumentElement.SelectNodes("database");
-                            for (int i = 0; i < nodes.Count; i++)
+                            // for (int i = 0; i < nodes.Count; i++)
+                            foreach(XmlElement nodeDatabase in nodes)
                             {
-                                XmlNode node = nodes[i];
-                                string strItemDbName = DomUtil.GetAttr(node, "name");
-                                DomUtil.SetAttr(node, "name", null);
-                                DomUtil.SetAttr(node, "itemDbName", strItemDbName);
+                                // XmlNode nodeDatabase = nodes[i];
+
+                                // 2023/3/16
+                                // 判断 database/@biblioDbName 中的书目库名是否在当前账户的可访问范围内
+                                // return:
+                                //      -1  出错
+                                //      0   不可读
+                                //      1   可读
+                                nRet = IsBiblioDbReadeable(
+                                    sessioninfo,
+                                    nodeDatabase,
+                                    out strError);
+                                if (nRet == -1)
+                                    goto ERROR1;
+                                if (nRet == 0)
+                                {
+                                    nodeDatabase.ParentNode.RemoveChild(nodeDatabase);
+                                    continue;
+                                }
+
+                                string strItemDbName = DomUtil.GetAttr(nodeDatabase, "name");
+                                DomUtil.SetAttr(nodeDatabase, "name", null);
+                                DomUtil.SetAttr(nodeDatabase, "itemDbName", strItemDbName);
 
                                 // 2012/7/2
                                 // 加入各个数据库的多语种名字
 
                                 // 实体库
-                                AppendCaptions(node, "itemDbName");
+                                AppendCaptions(nodeDatabase, "itemDbName");
 
                                 // 订购库
-                                AppendCaptions(node, "orderDbName");
+                                AppendCaptions(nodeDatabase, "orderDbName");
 
                                 // 期库
-                                AppendCaptions(node, "issueDbName");
+                                AppendCaptions(nodeDatabase, "issueDbName");
 
                                 // 评注库
-                                AppendCaptions(node, "commentDbName");
+                                AppendCaptions(nodeDatabase, "commentDbName");
 
                                 // 书目库
-                                AppendCaptions(node, "biblioDbName");
+                                AppendCaptions(nodeDatabase, "biblioDbName");
                             }
 
                             strValue = dom.DocumentElement.InnerXml;
@@ -704,14 +757,14 @@ namespace DigitalPlatform.LibraryServer
                     if (strName == "serverDirectory")
                     {
                         /*
-                        XmlNode node = this.LibraryCfgDom.SelectSingleNode("//opacServer");
-                        if (node == null)
+                        XmlNode nodeDatabase = this.LibraryCfgDom.SelectSingleNode("//opacServer");
+                        if (nodeDatabase == null)
                         {
                             strValue = "";
                             nRet = 0;
                         }
                         else
-                            strValue = DomUtil.GetAttr(node, "url");
+                            strValue = DomUtil.GetAttr(nodeDatabase, "url");
                         */
                         strValue = this.OpacServerUrl;
                         goto END1;

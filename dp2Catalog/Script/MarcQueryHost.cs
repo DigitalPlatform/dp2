@@ -14,7 +14,7 @@ namespace dp2Catalog
     /// MarcQuery 宿主类。
     /// 继承了MarcQuery类，具有一些全局的函数
     /// </summary>
-    public class MarcQueryHost : MarcQuery
+    public class MarcQueryHost// : MarcQuery
     {
         public MainForm MainForm = null;
         public string RecordPath = "";

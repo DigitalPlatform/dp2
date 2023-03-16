@@ -599,7 +599,10 @@ namespace dp2Circulation
 
                 if (preload_entities != null)
                 {
-                    // 
+                    // return:
+                    //      -1  出错
+                    //      0   正常
+                    //      2   全部事项都是 AccessDenied 报错
                     int nRet = FillEntities(
                         stop,
                         channel,
@@ -698,7 +701,10 @@ namespace dp2Circulation
 
                         Debug.Assert(entities != null, "");
 
-                        // 
+                        // return:
+                        //      -1  出错
+                        //      0   正常
+                        //      2   全部事项都是 AccessDenied 报错
                         int nRet = FillEntities(
                             stop,
                             channel,
@@ -709,6 +715,12 @@ namespace dp2Circulation
                             out strError);
                         if (nRet == -1)
                             return -1;
+                        if (nRet == 2)
+                        {
+                            strError = StringUtil.MakePathList(errors, "; ");
+                            channel.ErrorCode = ErrorCode.AccessDenied;
+                            return -1;
+                        }
 
                         lStart += entities.Length;
                         if (lStart >= lResultCount)
@@ -745,8 +757,23 @@ namespace dp2Circulation
             }
         }
 
+        static bool IsAccessDenied(List<ErrorCodeValue> error_codes)
+        {
+            foreach (var code in error_codes)
+            {
+                if (code != ErrorCodeValue.AccessDenied)
+                    return false;
+            }
+
+            return true;
+        }
+
         // parameters:
         //      parent_id   (下级记录所从属的)书目记录的 ID。用于补充有错误的下级记录的内存结构
+        // return:
+        //      -1  出错
+        //      0   正常
+        //      2   全部事项都是 AccessDenied 报错
         int FillEntities(
             Stop stop,  // 2022/11/1
             LibraryChannel channel,
@@ -767,6 +794,8 @@ namespace dp2Circulation
             });
             try
             {
+                List<ErrorCodeValue> error_codes = new List<ErrorCodeValue>();
+
                 foreach (EntityInfo entity in entities)
                 {
                     /*
@@ -782,6 +811,8 @@ namespace dp2Circulation
                     if (string.IsNullOrEmpty(entity.OldRecord) == true
                         && entity.ErrorCode == ErrorCodeValue.NoError)
                         continue;
+
+                    error_codes.Add(entity.ErrorCode);
 
                     // 剖析一个册的xml记录，取出有关信息放入listview中
                     T bookitem = new T();
@@ -858,6 +889,8 @@ namespace dp2Circulation
                     bookitem.AddToListView(this.m_listView);
                 }
 
+                if (IsAccessDenied(error_codes))
+                    return 2;   // 全部事项都是 AccessDenied 报错
                 return 0;
             }
             finally
@@ -1765,7 +1798,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
             return nRet;
         }
 
-#region 菜单命令
+        #region 菜单命令
 
         internal void menu_getKeys_Click(object sender, EventArgs e)
         {
@@ -2035,7 +2068,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
             MessageBoxShow(strError);
         }
 
-#endregion
+        #endregion
 
         // 外部调用接口
         /// <summary>
@@ -2297,7 +2330,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.6.7270.28358, Culture=neutral, 
                     }
                     */
                     var task = func_loadBiblioRecord?.Invoke(strBiblioRecPath);
-                    while(task.IsCompleted == false)
+                    while (task.IsCompleted == false)
                     {
                         Application.DoEvents();
                     }
@@ -2678,7 +2711,7 @@ size.Height);
             }
         }
 
-#region ILoopingHost
+        #region ILoopingHost
 
         IChannelLooping _loopingHost = null;
 
@@ -2764,7 +2797,7 @@ size.Height);
         }
 
 
-#endregion
+        #endregion
     }
 
     /*

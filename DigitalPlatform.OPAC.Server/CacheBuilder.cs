@@ -1582,7 +1582,7 @@ namespace DigitalPlatform.OPAC.Server
                                 && rec.RecordBody.Result != null
                                 && rec.RecordBody.Result.ErrorCode != ErrorCodeValue.NoError)
                             {
-                                strError = "获得结果集位置偏移 " + (lStart + j).ToString() + " 时出错，该记录已被忽略: " + rec.RecordBody.Result.ErrorString;
+                                strError = "获得结果集位置偏移 " + (lStart + j).ToString() + " 时出错，该记录已被忽略: " + rec.RecordBody?.Result?.ErrorString;
                                 this.AppendResultText(strError + "\r\n");
                                 continue;
                             }

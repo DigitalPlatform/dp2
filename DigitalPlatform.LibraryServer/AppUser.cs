@@ -30,6 +30,18 @@ namespace DigitalPlatform.LibraryServer
     /// </summary>
     public partial class LibraryApplication
     {
+        // 翻译 getxxxinfo 权限
+        public static string GetInfoRight(string right)
+        {
+            if (right == "getiteminfo"
+                || right == "getissueinfo"
+                || right == "getorderinfo"
+                || right == "getcommentinfo")
+                return right + ",getrecord,order";
+
+            return right + ",getrecord";
+        }
+
         // 或者针对一个特定数据库、特定操作的权限定义字符串
         /*
             原始定义字符串格式： "中央库:setbiblioinfo=new,change|getbiblioinfo=xxx;工作库:setbiblioinfo=new"

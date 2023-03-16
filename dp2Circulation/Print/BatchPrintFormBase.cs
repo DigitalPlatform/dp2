@@ -26,6 +26,7 @@ using DigitalPlatform.Text;
 
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
+using DocumentFormat.OpenXml.EMMA;
 
 namespace dp2Circulation
 {
@@ -256,16 +257,16 @@ namespace dp2Circulation
 
             // 一些必要的链接库
             string[] saAddRef1 = {
-										 Environment.CurrentDirectory + "\\digitalplatform.core.dll",
+                                         Environment.CurrentDirectory + "\\digitalplatform.core.dll",
                                          Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
                                          Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
 										 //Environment.CurrentDirectory + "\\digitalplatform.rms.client.dll",
 										 //Environment.CurrentDirectory + "\\digitalplatform.library.dll",
 										 Environment.CurrentDirectory + "\\digitalplatform.dll",
-										 Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
-										 Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
-										 Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
+                                         Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
+                                         Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
+                                         Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
 										 // Environment.CurrentDirectory + "\\Interop.SHDocVw.dll",
 										 Environment.CurrentDirectory + "\\dp2circulation.exe"
                 };
@@ -497,7 +498,7 @@ namespace dp2Circulation
                     List<string> lines = new List<string>();
                     // 正式开始处理
                     sr = new StreamReader(strRecPathFilename);
-                    for (int i = 0; ; )
+                    for (int i = 0; ;)
                     {
                         Application.DoEvents();
 
@@ -666,7 +667,7 @@ namespace dp2Circulation
                     return -1;
                 }
 
-                if (info.Record.RecordBody.Result.ErrorCode != ErrorCodeValue.NoError)
+                if (GetErrorCode(info) != ErrorCodeValue.NoError)
                     continue;
 
                 info.Dom = new XmlDocument();
@@ -682,7 +683,7 @@ namespace dp2Circulation
 
                 // 准备书目记录路径
                 string strParentID = DomUtil.GetElementText(info.Dom.DocumentElement,
-"parent");
+    "parent");
                 string strBiblioDbName = Program.MainForm.GetBiblioDbNameFromItemDbName(Global.GetDbName(info.Record.Path));
                 if (string.IsNullOrEmpty(strBiblioDbName) == true)
                 {
@@ -739,9 +740,9 @@ namespace dp2Circulation
                     string[] results = null;
                     byte[] timestamp = null;
 
-                    // stop.SetMessage("正在装入书目记录 '" + bibliorecpaths[0] + "' 等的摘要 ...");
+                // stop.SetMessage("正在装入书目记录 '" + bibliorecpaths[0] + "' 等的摘要 ...");
 
-                    // TODO: 有没有可能希望取的事项数目一次性取得没有取够?
+                // TODO: 有没有可能希望取的事项数目一次性取得没有取够?
                 REDO_GETBIBLIOINFO:
                     long lRet = channel.GetBiblioInfos(
                         stop,
@@ -754,11 +755,11 @@ namespace dp2Circulation
                     if (lRet == -1)
                     {
                         DialogResult temp_result = MessageBox.Show(this,
-        strError + "\r\n\r\n是否重试?",
-        this.FormCaption,
-        MessageBoxButtons.RetryCancel,
-        MessageBoxIcon.Question,
-        MessageBoxDefaultButton.Button1);
+                strError + "\r\n\r\n是否重试?",
+                this.FormCaption,
+                MessageBoxButtons.RetryCancel,
+                MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button1);
                         if (temp_result == DialogResult.Retry)
                             goto REDO_GETBIBLIOINFO;
                     }
@@ -824,6 +825,19 @@ namespace dp2Circulation
             return 0;
         }
 
+        static ErrorCodeValue GetErrorCode(RecordInfo info)
+        {
+            ErrorCodeValue error_code = ErrorCodeValue.NoError;
+            if (info == null
+                || info.Record == null
+                || info.Record.RecordBody == null
+                || info.Record.RecordBody.Result == null)
+                return error_code;
+            if (info.Record.RecordBody.Result != null)
+                error_code = info.Record.RecordBody.Result.ErrorCode;
+            return error_code;
+        }
+
         // 老版本，没有 channel 参数
         // 准备DOM和书目摘要等
         // parameters:
@@ -884,11 +898,11 @@ namespace dp2Circulation
         }
 
         internal virtual int VerifyItem(
-    string strPubType,
-    string strBarcodeOrRecPath,
-    ListViewItem item,
-    XmlDocument item_dom,
-    out string strError)
+        string strPubType,
+        string strBarcodeOrRecPath,
+        ListViewItem item,
+        XmlDocument item_dom,
+        out string strError)
         {
             strError = "";
             return 0;
@@ -957,11 +971,11 @@ namespace dp2Circulation
                 if (lRet == -1)
                 {
                     DialogResult temp_result = MessageBox.Show(this,
-    strError + "\r\n\r\n是否重试?",
-    this.FormCaption,
-    MessageBoxButtons.RetryCancel,
-    MessageBoxIcon.Question,
-    MessageBoxDefaultButton.Button1);
+        strError + "\r\n\r\n是否重试?",
+        this.FormCaption,
+        MessageBoxButtons.RetryCancel,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button1);
                     if (temp_result == DialogResult.Retry)
                         goto REDO_GETITEMINFO;
                 }
@@ -1070,12 +1084,12 @@ namespace dp2Circulation
                 strBarcodeOrRecPath = "@path:" + info.Record.Path;
                 bIsRecPath = true;
 
-                if (info.Record.RecordBody.Result.ErrorCode != ErrorCodeValue.NoError)
+                if (GetErrorCode(info) != ErrorCodeValue.NoError)
                 {
                     SetError(list,
-    ref item,
-    strBarcodeOrRecPath,
-    info.Record.RecordBody.Result.ErrorString);
+        ref item,
+        strBarcodeOrRecPath,
+        info.Record.RecordBody?.Result?.ErrorString);
                     goto ERROR1;
                 }
 
@@ -1124,7 +1138,7 @@ namespace dp2Circulation
                     strBiblioSummary,
                     strISBnISSN,
 #endif
- summary_col_names,
+        summary_col_names,
                     summary);
 
 
@@ -1148,7 +1162,7 @@ namespace dp2Circulation
     strBiblioSummary,
     strISBnISSN,
 #endif
- summary_col_names,
+        summary_col_names,
                     summary,
                     item);
             }
@@ -1169,16 +1183,16 @@ namespace dp2Circulation
 
         // 老版本，没有 channel 参数
         internal virtual int LoadOneItem(
-    string strPubType,
-    bool bFillSummaryColumn,
-    string[] summary_col_names,
-    string strBarcodeOrRecPath,
-    RecordInfo info,
-    ListView list,
-    string strMatchLocation,
-    out string strOutputItemRecPath,
-    ref ListViewItem item,
-    out string strError)
+        string strPubType,
+        bool bFillSummaryColumn,
+        string[] summary_col_names,
+        string strBarcodeOrRecPath,
+        RecordInfo info,
+        ListView list,
+        string strMatchLocation,
+        out string strOutputItemRecPath,
+        ref ListViewItem item,
+        out string strError)
         {
             using (var looping = Looping(out LibraryChannel channel))
             {
@@ -1657,17 +1671,17 @@ namespace dp2Circulation
                     stop?.SetMessage("正在检索馆藏地点 '" + strLocation + "' ...");
 
                     lRet = channel.SearchItem(
-    stop,
-    strPubType == "图书" ? "<all book>" : "<all series>",
-    strLocation,    // strBatchNo, BUG !!!
-    -1,
-    "馆藏地点",
-    "exact",
-    this.Lang,
-    "null",   // strResultSetName
-    "",    // strSearchStyle
-    "__buildqueryxml", // strOutputStyle
-    out strError);
+        stop,
+        strPubType == "图书" ? "<all book>" : "<all series>",
+        strLocation,    // strBatchNo, BUG !!!
+        -1,
+        "馆藏地点",
+        "exact",
+        this.Lang,
+        "null",   // strResultSetName
+        "",    // strSearchStyle
+        "__buildqueryxml", // strOutputStyle
+        out strError);
                     if (lRet == -1)
                         return -1;
                     strQueryXml = strError;
@@ -1677,17 +1691,17 @@ namespace dp2Circulation
                     Debug.Assert(strBatchNo == null && strLocation == null,
                         "");
                     lRet = channel.SearchItem(
-    stop,
-    strPubType == "图书" ? "<all book>" : "<all series>",
-    "", // strBatchNo,
-    -1,
-    "__id",
-    "left",
-    this.Lang,
-    "null",   // strResultSetName
-    "",    // strSearchStyle
-    "__buildqueryxml", // strOutputStyle
-    out strError);
+        stop,
+        strPubType == "图书" ? "<all book>" : "<all series>",
+        "", // strBatchNo,
+        -1,
+        "__id",
+        "left",
+        this.Lang,
+        "null",   // strResultSetName
+        "",    // strSearchStyle
+        "__buildqueryxml", // strOutputStyle
+        out strError);
                     if (lRet == -1)
                         return -1;
                     strQueryXml = strError;
@@ -1718,7 +1732,7 @@ namespace dp2Circulation
                     // 装入浏览格式
                     for (; ; )
                     {
-                        Application.DoEvents();	// 出让界面控制权
+                        Application.DoEvents(); // 出让界面控制权
 
                         if (stop != null && stop.State != 0)
                         {
@@ -1810,12 +1824,12 @@ namespace dp2Circulation
             _stop.BeginLoop();
             */
             var looping = Looping(out LibraryChannel channel,
-"正在刷新 ...",
-"disableControl");
+        "正在刷新 ...",
+        "disableControl");
             try
             {
                 // if (this.InvokeRequired == false)
-                    looping.Progress.SetProgressRange(0, items.Count);
+                looping.Progress.SetProgressRange(0, items.Count);
 
                 ProgressEstimate estimate = new ProgressEstimate();
                 estimate.SetRange(0, items.Count);

@@ -76,6 +76,9 @@ namespace dp2Circulation
                 (object)null);
             // 本窗口独立管理 stopManager
             this._loopingHost.StopManager = stopManager;
+            // 2023/3/16
+            this._loopingHost.GroupName = "";
+
             /*
             _stop = new DigitalPlatform.Stop();
             _stop.Register(this._stopManager, true);	// 和容器关联

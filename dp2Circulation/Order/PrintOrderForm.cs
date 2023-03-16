@@ -2655,11 +2655,11 @@ out strError);
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
-                        if (temp_filenames == null || temp_filenames.Count == 0)
-                            continue;
-
-                        Debug.Assert(temp_filenames != null);
-                        filenames.AddRange(temp_filenames);
+                        if (!(temp_filenames == null || temp_filenames.Count == 0))
+                        {
+                            Debug.Assert(temp_filenames != null);
+                            filenames.AddRange(temp_filenames);
+                        }
 
                         // 按渠道打印出版社统计页
                         temp_filenames = null;
@@ -2673,11 +2673,11 @@ out strError);
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
-                        if (temp_filenames == null || temp_filenames.Count == 0)
-                            continue;
-
-                        Debug.Assert(temp_filenames != null);
-                        filenames.AddRange(temp_filenames);
+                        if (!(temp_filenames == null || temp_filenames.Count == 0))
+                        {
+                            Debug.Assert(temp_filenames != null);
+                            filenames.AddRange(temp_filenames);
+                        }
                     }
 
                     if (doc == null)
@@ -3317,8 +3317,8 @@ out strError);
 
             bool bWiledMatched = false; // 是否遇到过通配符
 
-            stop?.SetProgressValue(0);
             stop?.SetProgressRange(0, items.Count);
+            stop?.SetProgressValue(0);
 
             stop?.SetMessage("正在遍历合并行 ...");
             for (int i = 0; i < items.Count; i++)
