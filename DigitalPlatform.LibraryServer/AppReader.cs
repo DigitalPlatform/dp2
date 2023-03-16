@@ -8649,6 +8649,16 @@ out strError);
                     return null;
             }
 
+            // 2023/3/16
+            // getreaderinfo 如果找不到，再尝试找 getrecord
+            if (prefix == "getreaderinfo" && level == null)
+            {
+                if (StringUtil.IsInList("getrecord", rights) == true)
+                    level = ""; // 当作等同于 getreaderinfo: 继续向后处理
+                else
+                    return null;
+            }
+
             if (level == null)
                 return level;
 

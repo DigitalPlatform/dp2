@@ -74,18 +74,23 @@ namespace dp2Circulation
                 this.CfgSectionName,    // "SearchByBatchnoForm",
                 "location",
                 this.comboBox_location.Text);
-
         }
 
         public string BatchNo
         {
             get
             {
-                return this.comboBox_batchNo.Text;
+                return this.TryGet(() =>
+                {
+                    return this.comboBox_batchNo.Text;
+                });
             }
             set
             {
-                this.comboBox_batchNo.Text = value;
+                this.TryInvoke(() =>
+                {
+                    this.comboBox_batchNo.Text = value;
+                });
             }
         }
 
@@ -93,11 +98,17 @@ namespace dp2Circulation
         {
             get
             {
-                return this.comboBox_location.Text;
+                return this.TryGet(() =>
+                {
+                    return this.comboBox_location.Text;
+                });
             }
             set
             {
-                this.comboBox_location.Text = value;
+                this.TryInvoke(() =>
+                {
+                    this.comboBox_location.Text = value;
+                });
             }
         }
 
@@ -182,12 +193,18 @@ namespace dp2Circulation
         {
             get
             {
-                return this.comboBox_location.Visible;
+                return this.TryGet(() =>
+                {
+                    return this.comboBox_location.Visible;
+                });
             }
             set
             {
-                this.comboBox_location.Visible = value;
-                this.label_location.Visible = value;
+                this.TryInvoke(() =>
+                {
+                    this.comboBox_location.Visible = value;
+                    this.label_location.Visible = value;
+                });
             }
         }
 

@@ -31,6 +31,7 @@ using DigitalPlatform.Core;
 using DigitalPlatform.dp2.Statis;
 using System.Threading.Tasks;
 using Jint.Parser.Ast;
+using System.Data.Sql;
 
 // 2017/4/9 从 this.Channel 用法改造为 ChannelPool 用法
 
@@ -6640,39 +6641,51 @@ strContent);
             return strResult;
         }
 
-        private void button_load_loadFromBatchNo_Click(object sender, EventArgs e)
+        private async void button_load_loadFromBatchNo_Click(object sender, EventArgs e)
         {
-            SearchByBatchnoForm dlg = new SearchByBatchnoForm();
-            MainForm.SetControlFont(dlg, this.Font, false);
+            await Task.Factory.StartNew(() =>
+            {
+                _loadFromBatchNo();
+            },
+default,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
 
-            dlg.CfgSectionName = "PrintOrderForm_SearchByBatchnoForm";
-            this.BatchNo = "";
+        void _loadFromBatchNo()
+        {
+            SearchByBatchnoForm dlg = null;
 
-            dlg.Text = "根据订购批次号检索出订购记录";
-            dlg.DisplayLocationList = false;
+            var dlg_result = this.TryGet(() =>
+            {
+                dlg = new SearchByBatchnoForm();
+                MainForm.SetControlFont(dlg, this.Font, false);
 
-            dlg.GetLocationValueTable -= new GetValueTableEventHandler(dlg_GetLocationValueTable);
-            dlg.GetLocationValueTable += new GetValueTableEventHandler(dlg_GetLocationValueTable);
+                dlg.CfgSectionName = "PrintOrderForm_SearchByBatchnoForm";
+                this.BatchNo = "";
 
-            dlg.GetBatchNoTable -= new GetKeyCountListEventHandler(dlg_GetBatchNoTable);
-            dlg.GetBatchNoTable += new GetKeyCountListEventHandler(dlg_GetBatchNoTable);
+                dlg.Text = "根据订购批次号检索出订购记录";
+                dlg.DisplayLocationList = false;
 
-            dlg.RefDbName = "";
-            // dlg.MainForm = Program.MainForm;
+                dlg.GetLocationValueTable -= new GetValueTableEventHandler(dlg_GetLocationValueTable);
+                dlg.GetLocationValueTable += new GetValueTableEventHandler(dlg_GetLocationValueTable);
 
-            dlg.StartPosition = FormStartPosition.CenterScreen;
-            dlg.ShowDialog(this);
+                dlg.GetBatchNoTable -= new GetKeyCountListEventHandler(dlg_GetBatchNoTable);
+                dlg.GetBatchNoTable += new GetKeyCountListEventHandler(dlg_GetBatchNoTable);
 
-            if (dlg.DialogResult != DialogResult.OK)
+                dlg.RefDbName = "";
+                // dlg.MainForm = Program.MainForm;
+
+                dlg.StartPosition = FormStartPosition.CenterScreen;
+                dlg.ShowDialog(this);
+
+                return dlg.DialogResult;
+            });
+
+            if (dlg_result != DialogResult.OK)
                 return;
 
             this.BatchNo = dlg.BatchNo;
-            /*
-            string strMatchLocation = dlg.ItemLocation;
-
-            if (strMatchLocation == "<不指定>")
-                strMatchLocation = null;    // null和""的区别很大
-             * */
 
             string strError = "";
             int nRet = 0;
@@ -6685,12 +6698,15 @@ strContent);
                 if (this.Changed == true)
                 {
                     // 警告尚未保存
-                    DialogResult result = MessageBox.Show(this,
+                    DialogResult result = this.TryGet(() =>
+                    {
+                        return MessageBox.Show(this,
                         "当前窗口内有原始信息被修改后尚未保存。若此时为装载新内容而清除原有信息，则未保存信息将丢失。\r\n\r\n确实要装载新内容? ",
                         "PrintOrderForm",
                         MessageBoxButtons.YesNo,
                         MessageBoxIcon.Question,
                         MessageBoxDefaultButton.Button2);
+                    });
                     if (result != DialogResult.Yes)
                     {
                         return; // 放弃
@@ -6776,8 +6792,48 @@ strContent);
 
                 looping.Progress.SetProgressRange(0, lHitCount);
 
+                ResultSetLoader loader = new ResultSetLoader(channel,
+    looping.Progress,
+    "batchno",
+    "id,cols",
+    "zh");
+                loader.Prompt += this.loader_Prompt;
+
+                int i = 0;
+                foreach (DigitalPlatform.LibraryClient.localhost.Record record in loader)
+                {
+                    if (looping.Stopped)
+                    {
+                        strError = "用户中断";
+                        goto ERROR1;
+                    }
+
+                    string strRecPath = record.Path;
+                    // 根据记录路径，装入订购记录
+                    // return: 
+                    //      -2  路径已经在list中存在了
+                    //      -1  出错
+                    //      1   成功
+                    nRet = LoadOneItem(
+                        looping.Progress,
+                        channel,
+                        strRecPath,
+                        this.listView_origin,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    if (nRet == -2)
+                        nDupCount++;
+
+                    looping.Progress.SetProgressValue(i + 1);
+                    i++;
+                }
+
+
+#if REMOVED
                 long lStart = 0;
                 long lCount = lHitCount;
+
                 DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                 // 装入浏览格式
@@ -6844,6 +6900,7 @@ strContent);
                     if (lStart >= lHitCount || lCount <= 0)
                         break;
                 }
+#endif
 
                 // 填充合并后数据列表
                 looping.Progress.SetMessage("正在合并数据...");
@@ -6871,6 +6928,27 @@ strContent);
             this.MessageBoxShow(strError);
         }
 
+        // PromptManager _prompt = new PromptManager(-1);
+
+        void loader_Prompt(object sender, MessagePromptEventArgs e)
+        {
+            // _prompt.Prompt(this, e);
+
+            // TODO: 不再出现此对话框。不过重试有个次数限制，同一位置失败多次后总要出现对话框才好
+            if (e.Actions == "yes,no,cancel")
+            {
+                DialogResult result = AutoCloseMessageBox.Show(this,
+    e.MessageText + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
+    20 * 1000,
+    "PrintOrderForm");
+                if (result == DialogResult.Cancel)
+                    e.ResultAction = "no";
+                else
+                    e.ResultAction = "yes";
+            }
+        }
+
+
         void dlg_GetBatchNoTable(object sender, GetKeyCountListEventArgs e)
         {
             using (var looping = Looping(out LibraryChannel channel))
@@ -6886,12 +6964,10 @@ strContent);
 
         void dlg_GetLocationValueTable(object sender, GetValueTableEventArgs e)
         {
-            string strError = "";
-            string[] values = null;
             int nRet = MainForm.GetValueTable(e.TableName,
                 e.DbName,
-                out values,
-                out strError);
+                out string[] values,
+                out string strError);
             if (nRet == -1)
                 MessageBox.Show(this, strError);
             e.values = values;
@@ -12714,7 +12790,6 @@ TaskCreationOptions.LongRunning,
 TaskScheduler.Default);
         }
 
-        // TODO: 独立线程改造
         NormalResult _searchAndFill(string strQueryWord,
             string strFrom,
             string strMatchStyle)
@@ -12798,6 +12873,7 @@ TaskScheduler.Default);
                     looping.Progress,
                     "batchno",
                     "id"); // "id,cols"
+                loader.Prompt += this.loader_Prompt;
 
                 int nDupCount = 0;
 

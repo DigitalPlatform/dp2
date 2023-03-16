@@ -203,7 +203,7 @@
             // 
             // columnHeader_recpath
             // 
-            this.columnHeader_recpath.Text = "册记录路径";
+            this.columnHeader_recpath.Text = "读者记录路径";
             this.columnHeader_recpath.Width = 100;
             // 
             // webBrowser_patron

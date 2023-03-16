@@ -969,12 +969,14 @@ namespace dp2Circulation
             out string strResult,
             out string strError);
 
+        // parameters:
+        //      recpath_list    读者记录路径，多个路径用逗号分隔
         // return:
         //      -1  error
         //      0   放弃
         //      1   成功
         internal int SelectOnePatron(long lRet,
-            string strRecPath,
+            string recpath_list,
             out string strBarcode,
             out string strResult,
             out string strError)
@@ -997,7 +999,7 @@ namespace dp2Circulation
                 Delegate_SelectOnePatron d = new Delegate_SelectOnePatron(SelectOnePatron);
                 object[] args = new object[5];
                 args[0] = lRet;
-                args[1] = strRecPath;
+                args[1] = recpath_list;
                 args[2] = strBarcode;
                 args[3] = strResult;
                 args[4] = strError;
@@ -1020,10 +1022,10 @@ namespace dp2Circulation
             dlg.NoBorrowHistory = this.NoBorrowHistory;
             dlg.ColorBarVisible = false;
             dlg.MessageVisible = false;
-            dlg.Overflow = StringUtil.SplitList(strRecPath).Count < lRet;
+            dlg.Overflow = StringUtil.SplitList(recpath_list).Count < lRet;
             int nRet = dlg.Initial(
                 // Program.MainForm,
-                StringUtil.SplitList(strRecPath),
+                StringUtil.SplitList(recpath_list),
                 "请选择一个读者记录",
                 out strError);
             if (nRet == -1)
