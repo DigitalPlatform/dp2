@@ -5502,7 +5502,7 @@ out timestamp);
                 if (StringUtil.IsInList("listdbfroms,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = $"列出书目库检索途径 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 listdbfroms 或 order 权限。";
+                    result.ErrorInfo = $"列出数据库的检索途径 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 listdbfroms 或 order 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }

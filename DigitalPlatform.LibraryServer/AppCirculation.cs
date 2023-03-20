@@ -1194,7 +1194,10 @@ namespace DigitalPlatform.LibraryServer
                             }
                             else
                             {
-                                if (IsInAccessList(strAction, strAccessActionList, out strAccessParameters) == false)
+                                if (IsInAccessList(strAction,
+                                    strAccessActionList,
+                                    true, // 2023/3/20
+                                    out strAccessParameters) == false)
                                 {
                                     strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{ strItemDbName}' 执行 出纳 { strActionName} 操作的存取权限";
                                     result.Value = -1;
@@ -6724,7 +6727,10 @@ out _);
                             }
                             else
                             {
-                                if (IsInAccessList(strAction, strAccessActionList, out strAccessParameters) == false)
+                                if (IsInAccessList(strAction,
+                                    strAccessActionList,
+                                    true, // 2023/3/20
+                                    out strAccessParameters) == false)
                                 {
                                     strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{ strItemDbName}' 执行 出纳 { strActionName} 操作的存取权限";
                                     result.Value = -1;

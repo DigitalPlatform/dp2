@@ -17100,7 +17100,10 @@ out string db_type);
                     {
                         bOwnerOnly = true;
                     }
-                    else if (IsInAccessList(strAction, strAccessActionList, out strAccessParameters) == false)
+                    else if (IsInAccessList(strAction, 
+                        strAccessActionList,
+                        true, // 2023/3/20
+                        out strAccessParameters) == false)
                     {
                         return "用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strBiblioDbName + "' 执行 " +
                             (strDbType == "biblio" ? "setbiblioinfo" : "setauthorityinfo") +
@@ -17187,7 +17190,10 @@ out string db_type);
                 }
                 else
                 {
-                    if (IsInAccessList(strAction, strActionList, out strAccessParameters) == false)
+                    if (IsInAccessList(strAction, 
+                        strActionList,
+                        true, // 2023/3/20
+                        out strAccessParameters) == false)
                     {
                         return $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{strDbName}' 执行 {GetBiblioInfoAction(db_type)} 操作的存取权限";
                     }

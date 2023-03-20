@@ -4,13 +4,14 @@ using System.Text;
 using System.Diagnostics;
 using System.Xml;
 using System.Web;
+using System.Linq;
 
 using DiffPlex;
 using DiffPlex.DiffBuilder;
 using DiffPlex.DiffBuilder.Model;
+
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
-using System.Linq;
 
 namespace DigitalPlatform.Marc
 {
@@ -297,6 +298,19 @@ out strError);
                 if (newline.Type == ChangeType.Unchanged)
                 {
                     fields.Add(RemoveMask(newline.Text));
+
+                    /*
+                    // 2023/3/17
+                    bool bMask = false;
+                    if (rights_table.ReplaceFieldNames.Contains(strNewFieldName) == true
+    && bMask == false)
+                        fields.Add(newline.Text);
+                    else
+                    {
+                        denied_change_fieldnames.Add(strNewFieldName
+                            + (bMask ? "!" : ""));
+                    }
+                    */
                 }
                 else if (newline.Type == ChangeType.Inserted)
                 {
