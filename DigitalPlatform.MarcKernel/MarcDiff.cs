@@ -22,7 +22,7 @@ namespace DigitalPlatform.Marc
         // return:
         //      -1  出错
         //      0   成功
-        //      1   有部分字段被修改或滤除
+        //      1   有部分字段被修改或滤除。strError 中返回被修改或滤除的字段的名字
         public static int FilterFields(string strFieldNameList,
             ref string strMarc,
             out string strError)
@@ -33,6 +33,8 @@ namespace DigitalPlatform.Marc
 
             if (string.IsNullOrEmpty(strMarc) == true)
                 return 0;
+
+            List<string> filtered_names = new List<string>();
 
             string strHeader = "";
             string strBody = "";
@@ -45,6 +47,7 @@ namespace DigitalPlatform.Marc
             {
                 strHeader = strHeader.PadRight(24, '?');
                 bChanged = true;
+                filtered_names.Add("###");
             }
 
             FieldNameList list = new FieldNameList();
@@ -62,6 +65,7 @@ namespace DigitalPlatform.Marc
             {
                 bChanged = true;
                 text.Append(new string('?', 24));
+                filtered_names.Add("###");
             }
 
             string[] fields = strBody.Split(new char[] { (char)30 }, StringSplitOptions.RemoveEmptyEntries);
@@ -74,6 +78,7 @@ namespace DigitalPlatform.Marc
                 if (list.Contains(strFieldName) == false)
                 {
                     bChanged = true;
+                    filtered_names.Add(strFieldName);
                     continue;
                 }
 
@@ -83,7 +88,14 @@ namespace DigitalPlatform.Marc
 
             strMarc = text.ToString();
             if (bChanged == true)
+            {
+                if (filtered_names.Count > 0)
+                {
+                    // StringUtil.RemoveDupNoSort(ref filtered_names);
+                    strError = StringUtil.MakePathList(filtered_names);
+                }
                 return 1;
+            }
             return 0;
         }
 

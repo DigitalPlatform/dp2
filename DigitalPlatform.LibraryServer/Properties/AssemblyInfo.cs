@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.137.*")]
-[assembly: AssemblyFileVersion("3.137.0.0")]
+[assembly: AssemblyVersion("3.138.*")]
+[assembly: AssemblyFileVersion("3.138.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -353,4 +353,8 @@ ItemCanReturn()
 //		3.135 (2022/11/9) 为 GetItemInfo() API 的 strBiblioType 增加多种格式，和 GetBiblioInfos() 中可以返回的格式相同
 //		3.136 (2023/3/9) 重构和对象有关的账户权限代码，增加 setxxxobject 系列权限
 //		3.137 (2023/3/16) 优化权限: 权限 getxxxinfo 被 getrecord 权限包含。getiteminfo ... getcommentinfo 等四个权限，可以被 order 权限包含
+//		3.138 (2023/3/22) 最新版改进了 CopyBiblioInfo() API 的部分行为。
+//						默认情况下，要求当前账户能读取源记录和写入目标记录的所有实际出现的字段，包括 dprms:file 元素。如果不具备，则会报错(AccessDenied 错误码)。
+//						特殊情况下，也就是 strMergeStyle 参数中包含一个 loose 值的情况下，不会做上述严格要求，而是改用宽松要求，拷贝或者复制过程可能会丢失部分字段(file元素)和下属对象。
+//						注: loose 在先前版本中表示复制或移动下级记录的时候，不要求目标书目记录相应的下级库一定存在。当然，这样宽松的结果，可能会造成下级记录在移动或者复制后发生丢失。最新版也继承了这个效果
 

@@ -6995,7 +6995,16 @@ out strError);
                         {
                             bool bFound = this.ActivateItemsPage();
                             if (bFound == true)
+                            {
+                                /*
+                                Debug.Assert(this.entityControl1.Enabled == true);
+                                Debug.Assert(this.entityControl1.Visible == true);
+                                */
+                                // TODO: 留下 pending 命令，等 EnableControls(true) 之后执行
+                                if (this.entityControl1.Enabled == false)
+                                    this.entityControl1.Enabled = true;
                                 this.entityControl1.Focus();
+                            }
                         }
                         else if ((int)m.WParam == ORDER_LIST)
                         {
@@ -8091,12 +8100,39 @@ out strError);
             {
                 Program.MainForm.CurrentVerifyResultControl = null;
             }
+        }
 
+        // 播放缓存的 SwitchFocus 命令
+        void PlayPendingSwitchFocusCommands()
+        {
+            if (this._pending_switch_focus_commands.Count > 0)
+            {
+                var target = this._pending_switch_focus_commands[this._pending_switch_focus_commands.Count - 1];
+                this._pending_switch_focus_commands.Clear();
+                this.TryInvoke(() =>
+                {
+                    API.PostMessage(this.Handle,
+                        WM_SWITCH_FOCUS,
+                        target,
+                        0);
+                });
+            }
         }
 
 
         void SwitchFocus(int target)
         {
+            var enabled = this.TryGet(() => {
+                return this.textBox_queryWord.Enabled;
+            });
+            // 暂存起来
+            if (enabled == false)
+            {
+                this._pending_switch_focus_commands.Clear();
+                this._pending_switch_focus_commands.Add(target);
+                return;
+            }
+
             this.TryInvoke(() =>
             {
                 API.PostMessage(this.Handle,
@@ -15509,6 +15545,22 @@ out strError);
             }
         ERROR1:
             ShowMessageBox(strError);
+        }
+
+        List<int> _pending_switch_focus_commands = new List<int>();
+
+
+        public override void EnableControls(bool bEnable)
+        {
+            base.EnableControls(bEnable);
+
+            /*
+            var enabled = this.TryGet(() => {
+                return this.textBox_queryWord.Enabled;
+            });
+            */
+            if (bEnable == true)
+                PlayPendingSwitchFocusCommands();
         }
 
 #if NO

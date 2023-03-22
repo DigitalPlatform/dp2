@@ -2153,7 +2153,9 @@ Stack:
             ProjectCollection projects = null;
             try
             {
-                using (Stream stream = File.Open(dlg.FileName, FileMode.Open))
+                using (Stream stream = File.Open(dlg.FileName,
+                    FileMode.Open,
+                    FileAccess.Read))   // 2023/3/21 以前版本是默认用 ReadWrite 方式i打开，会造成打开只读的 .projpack 文件时报错
                 {
                     BinaryFormatter formatter = new BinaryFormatter();
 
@@ -2175,12 +2177,12 @@ Stack:
             }
             catch (FileNotFoundException)
             {
-                strError = "文件 " + dlg.FileName + "不存在...";
+                strError = $"文件 { dlg.FileName} 不存在...";
                 goto ERROR1;
             }
             catch (Exception ex)
             {
-                strError = "从文件 " + dlg.FileName + "读入时发生错误: " + ExceptionUtil.GetAutoText(ex);
+                strError = $"从文件 { dlg.FileName} 读入时发生错误: " + ExceptionUtil.GetAutoText(ex);
                 goto ERROR1;
             }
 

@@ -1199,7 +1199,7 @@ namespace DigitalPlatform.LibraryServer
                                     true, // 2023/3/20
                                     out strAccessParameters) == false)
                                 {
-                                    strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{ strItemDbName}' 执行 出纳 { strActionName} 操作的存取权限";
+                                    strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{strItemDbName}' 执行 出纳 {strActionName} 操作的存取权限";
                                     result.Value = -1;
                                     result.ErrorInfo = strError;
                                     result.ErrorCode = ErrorCode.AccessDenied;
@@ -3760,7 +3760,7 @@ start_time_1,
                 // sessioninfo.Channels,
                 channel,
                 strReaderBarcode,
-                sessioninfo.LibraryCodeList,    // TODO: 对个人书斋情况要测试一下
+                sessioninfo.ExpandLibraryCodeList,    // TODO: 对个人书斋情况要测试一下
                 out string strReaderXml,
                 out strOutputReaderRecPath,
                 out reader_timestamp,
@@ -3780,6 +3780,21 @@ start_time_1,
                     strIdcardNumber = strReaderBarcode;
                     strReaderBarcode = ""; // 迫使函数返回后，重新获得 reader barcode
 
+                    nRet = this.GetReaderRecXmlByFrom(
+                        channel,
+                        null,
+                        strIdcardNumber,
+                        "身份证号", 
+                        1,
+                        sessioninfo.ExpandLibraryCodeList,
+                        out List<string> recpaths,
+                        out strReaderXml,
+                        out reader_timestamp,
+                        out strError);
+                    if (recpaths != null && recpaths.Count > 0)
+                        strOutputReaderRecPath = recpaths[0];
+
+                    /*
                     // 通过特定检索途径获得读者记录
                     // return:
                     //      -1  error
@@ -3795,6 +3810,7 @@ start_time_1,
                         out strOutputReaderRecPath,
                         out reader_timestamp,
                         out strError);
+                    */
                     if (nRet == -1)
                     {
                         // text-level: 内部错误
@@ -3828,6 +3844,21 @@ start_time_1,
                     foreach (string strFrom in this.PatronAdditionalFroms)
                     {
                         nRet = this.GetReaderRecXmlByFrom(
+// sessioninfo.Channels,
+channel,
+null,
+strReaderBarcode,
+strFrom,
+1,
+sessioninfo.ExpandLibraryCodeList,
+out List<string> recpaths,
+out strReaderXml,
+out reader_timestamp,
+out strError);
+                        if (recpaths != null && recpaths.Count > 0)
+                            strOutputReaderRecPath = recpaths[0];
+                        /*
+                        nRet = this.GetReaderRecXmlByFrom(
                             // sessioninfo.Channels,
                             channel,
                             null,
@@ -3837,6 +3868,7 @@ start_time_1,
                             out strOutputReaderRecPath,
                             out reader_timestamp,
                             out strError);
+                        */
                         if (nRet == -1)
                         {
                             // text-level: 内部错误
@@ -3853,6 +3885,7 @@ start_time_1,
                             result.ErrorCode = ErrorCode.IdcardNumberDup;
                             return result;
                         }
+
 
                         strReaderBarcode = "";
 
@@ -6713,7 +6746,7 @@ out _);
                                 else
                                 {
                                     // 对其他实体库定义了存取权限，但对 strItemDbName 没有定义
-                                    strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{ strItemDbName}' 执行 出纳 操作的存取权限";
+                                    strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{strItemDbName}' 执行 出纳 操作的存取权限";
                                     result.Value = -1;
                                     result.ErrorInfo = strError;
                                     result.ErrorCode = ErrorCode.AccessDenied;
@@ -6732,7 +6765,7 @@ out _);
                                     true, // 2023/3/20
                                     out strAccessParameters) == false)
                                 {
-                                    strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{ strItemDbName}' 执行 出纳 { strActionName} 操作的存取权限";
+                                    strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{strItemDbName}' 执行 出纳 {strActionName} 操作的存取权限";
                                     result.Value = -1;
                                     result.ErrorInfo = strError;
                                     result.ErrorCode = ErrorCode.AccessDenied;

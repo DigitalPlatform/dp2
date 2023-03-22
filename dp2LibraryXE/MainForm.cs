@@ -3936,7 +3936,8 @@ MessageBoxDefaultButton.Button2);
                     oldFileNames = new List<string>();
 
                 List<string> copiedFileNames = new List<string>();
-
+                int nRedoCount = 0;
+            REDO_UNZIP:
                 try
                 {
                     using (ZipFile zip = ZipFile.Read(strZipFileName))
@@ -3967,6 +3968,18 @@ MessageBoxDefaultButton.Button2);
                                 e.Extract(strTargetDir, ExtractExistingFileAction.OverwriteSilently);
                         }
                     }
+                }
+                catch(FileLoadException ex)
+                {
+                    // 2023/3/21
+                    if (nRedoCount < 10)
+                    {
+                        nRedoCount++;
+                        Thread.Sleep(1000);
+                        goto REDO_UNZIP;
+                    }
+                    strError = $"经过 {nRedoCount} 次重试依然出现异常: " + ExceptionUtil.GetAutoText(ex);
+                    return -1;
                 }
                 catch (Exception ex)
                 {

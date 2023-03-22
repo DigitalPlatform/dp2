@@ -24,6 +24,7 @@ using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.Core;
 using System.Data.SqlClient;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolTip;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -523,8 +524,8 @@ namespace DigitalPlatform.LibraryServer
                                 }
                                 else
                                 {
-                                    if (IsInAccessList(strAction, 
-                                        strActionList, 
+                                    if (IsInAccessList(strAction,
+                                        strActionList,
                                         true,   // 2023/3/20
                                         out strAccessParameters) == false)
                                     {
@@ -641,7 +642,7 @@ namespace DigitalPlatform.LibraryServer
                     // return:
                     //      -1  出错
                     //      0   成功
-                    //      1   有部分字段被修改或滤除
+                    //      1   有部分字段被修改或滤除。strError 中返回被修改或滤除的字段的名字
                     nRet = FilterBiblioByFieldNameList(
 #if USE_OBJECTRIGHTS
                             StringUtil.IsInList("objectRights", this.Function) == true ? sessioninfo.Rights : null,
@@ -2936,7 +2937,7 @@ out strError);
         // return:
         //      -1  出错
         //      0   成功
-        //      1   有部分字段被修改或滤除
+        //      1   有部分字段被修改或滤除。strError 中返回被修改或滤除的字段的名字
         public static int FilterBiblioByFieldNameList(
             string strUserRights,
             string strFieldNameList,
@@ -2973,6 +2974,7 @@ out strError);
                 return 0;   // 不是 MARC 格式
 
             bool bChanged = false;
+            string strComment = "";
 
             if (strUserRights != null)
             {
@@ -2987,7 +2989,10 @@ out strError);
                 if (nRet == -1)
                     return -1;
                 if (nRet > 0)
+                {
                     bChanged = true;
+                    strComment = $"856({nRet.ToString()}个)";
+                }
             }
 
             if (string.IsNullOrEmpty(strFieldNameList) == false)
@@ -2996,14 +3001,19 @@ out strError);
                 // return:
                 //      -1  出错
                 //      0   成功
-                //      1   有部分字段被修改或滤除
+                //      1   有部分字段被修改或滤除。strError 中返回被修改或滤除的字段的名字
                 nRet = MarcDiff.FilterFields(strFieldNameList,
                     ref strMarc,
                     out strError);
                 if (nRet == -1)
                     return -1;
                 if (nRet == 1)
+                {
                     bChanged = true;
+                    if (string.IsNullOrEmpty(strComment) == false)
+                        strComment += ",";
+                    strComment += strError;
+                }
             }
 
             if (bChanged == true)
@@ -3015,6 +3025,7 @@ out strError);
                 if (nRet == -1)
                     return -1;
 
+                strError = strComment;
                 return 1;
             }
 
@@ -7427,7 +7438,7 @@ out strError);
                         }
                         else
                         {
-                            if (IsInAccessList(strWriteAction, 
+                            if (IsInAccessList(strWriteAction,
                                 strActionList,
                                 true,   // 2023/3/20
                                 out strWriteAccessParameters) == false)
@@ -7495,6 +7506,8 @@ out strError);
             // string strExistTargetXml = "";  // 被覆盖位置，覆盖前的记录
             string strExistingTargetXml = "";   // 2023/3/17
 
+            var loose = StringUtil.IsInList("loose", strMergeStyle) == true;
+
             if (strAction == "onlymovebiblio"
                 || strAction == "onlycopybiblio"
                 || strAction == "copy"
@@ -7542,7 +7555,7 @@ out strError);
                     // return:
                     //      -1  出错
                     //      0   成功
-                    //      1   有部分字段被修改或滤除
+                    //      1   有部分字段被修改或滤除。strError 中返回被修改或滤除的字段的名字
                     nRet = FilterBiblioByFieldNameList(
                         sessioninfo.Rights,
                         strReadAccessParameters,
@@ -7550,6 +7563,14 @@ out strError);
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
+                    if (nRet == 1 && loose == false)
+                    {
+                        strError = $"为保证数据完整性，复制或移动操作被拒绝。{GetCurrentUserName(sessioninfo)}的权限不足以完整读取源记录 {strBiblioRecPath} 的所有字段: {strError}";
+                        result.Value = -1;
+                        result.ErrorInfo = strError;
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
+                    }
                 }
 
                 // 2023/3/19
@@ -7560,7 +7581,20 @@ out strError);
                     XmlDocument temp = new XmlDocument();
                     temp.LoadXml(strExistingSourceXml);
                     if (RemoveDprmsFile(temp))
+                    {
+                        // 2023/3/22
+                        // 当前账户对源记录不具备 getxxxobject 权限，但源记录却含有 dprms:file 元素
+                        if (loose == false)
+                        {
+                            strError = $"为保证数据完整性，复制或移动操作被拒绝。{GetCurrentUserName(sessioninfo)}的权限(缺乏 getbiblioobject 和 getobject)不足以完整读取源记录 {strBiblioRecPath} 中存在的 dprms:file 元素";
+                            result.Value = -1;
+                            result.ErrorInfo = strError;
+                            result.ErrorCode = ErrorCode.AccessDenied;
+                            return result;
+                        }
+
                         strExistingSourceXml = temp.DocumentElement.OuterXml;
+                    }
                 }
 
                 {
@@ -7614,7 +7648,8 @@ out strError);
                 || strAction == "copy"
                 || strAction == "move")
             {
-                if (string.IsNullOrEmpty(strNewBiblio) == false)
+                // if (string.IsNullOrEmpty(strNewBiblio) == false)
+                if (baTimestamp != null)
                 {
                     // 观察时间戳是否发生变化
                     nRet = ByteArray.Compare(baTimestamp, exist_source_timestamp);
@@ -7665,6 +7700,16 @@ out strError);
                             goto ERROR1;
                         if (bChangePartDenied == true && string.IsNullOrEmpty(strError) == false)
                             strDeniedComment += " " + strError;
+
+                        if (bChangePartDenied && loose == false)
+                        {
+                            // 2023/3/22
+                            strError = $"为保证数据完整性，复制或移动操作被拒绝。{GetCurrentUserName(sessioninfo)}的权限不足以将 XML 记录完整写入目标记录 {strNewBiblioRecPath}: {strError}";
+                            result.Value = -1;
+                            result.ErrorInfo = strError;
+                            result.ErrorCode = ErrorCode.AccessDenied;
+                            return result;
+                        }
 
                         /*
                         // 2011/11/30
@@ -8006,7 +8051,7 @@ out strError);
 
             string strTargetBiblioDbName = ResPath.GetDbName(strNewBiblioRecPath);
 
-            bool bStrict = true;
+            bool bStrict = true;    // 是否严格检查复制时丢失下级记录情况
             if (StringUtil.IsInList("loose", strStyle) == true)
                 bStrict = false;
 
@@ -8582,7 +8627,7 @@ out strError);
                     strSourceDbName,
                     strDbType == "biblio" ? "setbiblioinfo" : "setauthorityinfo");
 
-                if (strAccessActionList == "*" 
+                if (strAccessActionList == "*"
                     || IsInAccessList(strWriteAction/*strAction*/, strAccessActionList, out string _) == true)
                     has_rights = true;
             }
