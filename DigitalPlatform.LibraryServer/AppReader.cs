@@ -3200,15 +3200,17 @@ root, strLibraryCode);
                         element_names,
                         domExist,
                         domOldRec);
-                    if (nRet == 1)
-                    {
+                }
+                else
+                    nRet = 1;   // 2023/3/23
 
-                        strError = "数据库中即将删除的读者记录已经发生了变化，请重新装载、仔细核对后再行删除。";
-                        kernel_errorcode = ErrorCodeValue.TimestampMismatch;
-                        library_errorcode = ErrorCode.TimestampMismatch;    // TODO: 建议给一个专门的错误码表示“期间原记录已经被修改”
-                        baNewTimestamp = exist_timestamp;   // 让前端知道库中记录实际上发生过变化
-                        goto ERROR1;
-                    }
+                if (nRet != 0)
+                {
+                    strError = "数据库中即将删除的读者记录已经发生了变化，请重新装载、仔细核对后再行删除。";
+                    kernel_errorcode = ErrorCodeValue.TimestampMismatch;
+                    library_errorcode = ErrorCode.TimestampMismatch;    // TODO: 建议给一个专门的错误码表示“期间原记录已经被修改”
+                    baNewTimestamp = exist_timestamp;   // 让前端知道库中记录实际上发生过变化
+                    goto ERROR1;
                 }
 
                 baOldTimestamp = exist_timestamp;

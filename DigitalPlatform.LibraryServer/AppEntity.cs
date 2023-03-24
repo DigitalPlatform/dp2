@@ -5464,17 +5464,19 @@ out strError);
                     nRet = IsRegisterInfoChanged(domExist,
                         domOldRec,
                         null);
-                    if (nRet == 1)
-                    {
+                }
+                else
+                    nRet = 1;   // 2023/3/23
 
-                        error = new EntityInfo(info);
-                        // error.NewTimestamp = exist_timestamp;   // 让前端知道库中记录实际上发生过变化
-                        error.OldTimestamp = exist_timestamp;   // 2023/2/24 让前端知道库中记录实际上发生过变化
-                        error.ErrorInfo = "数据库中即将删除的册记录已经发生了变化，请重新装载、仔细核对后再行删除。";
-                        error.ErrorCode = ErrorCodeValue.TimestampMismatch;
-                        ErrorInfos.Add(error);
-                        return -1;
-                    }
+                if (nRet != 0)
+                {
+                    error = new EntityInfo(info);
+                    // error.NewTimestamp = exist_timestamp;   // 让前端知道库中记录实际上发生过变化
+                    error.OldTimestamp = exist_timestamp;   // 2023/2/24 让前端知道库中记录实际上发生过变化
+                    error.ErrorInfo = "数据库中即将删除的册记录已经发生了变化，请重新装载、仔细核对后再行删除。";
+                    error.ErrorCode = ErrorCodeValue.TimestampMismatch;
+                    ErrorInfos.Add(error);
+                    return -1;
                 }
 
                 info.OldTimestamp = exist_timestamp;
@@ -6079,7 +6081,7 @@ out strError);
                 else
                     nRet = 1;
 
-                if (nRet == 1 || bForce == true) // 2008/5/29 changed
+                if (nRet != 0 || bForce == true) // 2008/5/29 changed
                 {
                     error = new EntityInfo(info);
                     // 错误信息中, 返回了修改过的原记录和新时间戳

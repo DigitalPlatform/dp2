@@ -221,6 +221,10 @@ unprocessed_element_names.Except(_auto_maintain_comment_element_names)));
                 }
             }
 
+            // 2023/3/23
+            // 为旧版本记录增补 creator 元素
+            // UpgradeCommentRecord(domExist);
+
             // 修改者不能改变最初的馆代码
             strMergedXml = domExist.OuterXml;
 
@@ -573,10 +577,29 @@ out string strError)
                 return -1;
             }
 
+            // 2023/3/23
+            UpgradeCommentRecord(domExist);
+            UpgradeCommentRecord(domNew);
+            // 注: exist 和 new 都自动加上 creator 元素，避免交叉的时候，交叉算法以为 creator 发生了删除(也就是说 new 里面少了 creator 元素导致交叉算法出现 PartialDenied 警告)
+
+            // 如果经过 UpgradeCommentRecord() 以后 domNew 依然没有 creator 元素(可能是因为 operations 元素缺失)
+            {
+                var new_creator_node = domNew.DocumentElement.SelectSingleNode("creator") as XmlElement;
+                var exist_creator_node = domExist.DocumentElement.SelectSingleNode("creator") as XmlElement;
+
+                if (new_creator_node == null && exist_creator_node != null)
+                {
+                    DomUtil.SetElementText(domNew.DocumentElement,
+                        "creator",
+                        exist_creator_node.InnerText.Trim());
+                }
+            }
+
+
             string strOldUserID = DomUtil.GetElementText(domExist.DocumentElement,
     "creator");
             string strNewUserID = DomUtil.GetElementText(domNew.DocumentElement,
-"creator");
+    "creator");
 
             /*
             if (strNewUserID != strOldUserID)
@@ -604,7 +627,7 @@ out string strError)
                 string strOperator = sessioninfo.UserID;
                 if (strOperator != strOldUserID)
                 {
-                    strError = "不允许修改由其他用户创建的评注记录";
+                    strError = $"不允许当前用户 '{strOperator}' 修改由其他用户 '{strOldUserID}' 创建的评注记录";
                     return 0;
                 }
 
@@ -653,6 +676,9 @@ out string strError)
                 return -1;
             }
 
+            // 2023/3/23
+            UpgradeCommentRecord(domExist);
+
             // 已经注销的读者不允许删除评注
             if (sessioninfo.UserType == "reader")
             {
@@ -673,7 +699,7 @@ out string strError)
                     "creator");
                 if (strNewUserID != strOldUserID)
                 {
-                    strError = "不允许删除由其他用户创建的评注记录";
+                    strError = $"不允许当前用户 '{strNewUserID}' 删除由其他用户 '{strOldUserID}' 创建的评注记录";
                     return 0;
                 }
 
@@ -784,6 +810,24 @@ out string strError)
             {
                 return "GetComments";
             }
+        }
+
+        // 给旧版本的评注记录增添 creator 元素
+        static bool UpgradeCommentRecord(XmlDocument dom)
+        {
+            var creator_node = dom.DocumentElement.SelectSingleNode("creator") as XmlElement;
+            if (creator_node != null)
+                return false;
+            var operation_node = dom.DocumentElement.SelectSingleNode("operations/operation[@name='create']") as XmlElement;
+            if (operation_node == null)
+                return false;
+            var operator_value = operation_node.GetAttribute("operator");
+            if (string.IsNullOrEmpty(operator_value))
+                return false;
+            DomUtil.SetElementText(dom.DocumentElement,
+                "creator",
+                operator_value);
+            return true;
         }
 
         // 构造出适合保存的新事项记录
@@ -1016,6 +1060,5 @@ out string strError)
 
             // return 0;
         }
-
     }
 }

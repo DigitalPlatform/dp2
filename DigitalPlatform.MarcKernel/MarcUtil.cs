@@ -1818,7 +1818,10 @@ out strError);
                 if (bWarning == false)
                     return -1;
                 else
-                    strMarc.Append("012345678901234567890123");
+                {
+                    // strMarc.Append("012345678901234567890123");
+                    strMarc.Append(MarcDiff.GetNullHeader());   // 2023/3/24
+                }
             }
             else // 正常情况
             {

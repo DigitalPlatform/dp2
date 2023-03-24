@@ -8179,6 +8179,7 @@ out timestamp);
                     goto ERROR1;
                 }
 
+                // (2023/3/23)TODO: _recPath 元素是否要在保存前删除掉
                 strIssueRecPath = DomUtil.GetElementText(item_dom.DocumentElement, "_recPath");
 
                 if (string.IsNullOrEmpty(strIssueRecPath) == false)
@@ -15926,7 +15927,6 @@ out strError);
                     {
                         result.ErrorCode = ErrorCode.SystemError;
                         result.Value = -1;
-
                     }
                     else
                         result.Value = nRet;

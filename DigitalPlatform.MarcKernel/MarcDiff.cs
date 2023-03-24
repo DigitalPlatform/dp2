@@ -46,6 +46,15 @@ namespace DigitalPlatform.Marc
             if (strHeader.Length < 24)
             {
                 strHeader = strHeader.PadRight(24, '?');
+
+                // 因为 24 个 ? 表示头标区为 null，所以此处要避免出现这种巧合
+                if (IsNullHeader(strHeader))
+                {
+                    strHeader = GetBlankHeader();
+                    Debug.Assert(strHeader.Length == 24);
+                    Debug.Assert(IsNullHeader(strHeader) == false);
+                }
+
                 bChanged = true;
                 filtered_names.Add("###");
             }
@@ -64,7 +73,7 @@ namespace DigitalPlatform.Marc
             else
             {
                 bChanged = true;
-                text.Append(new string('?', 24));
+                text.Append(GetNullHeader());
                 filtered_names.Add("###");
             }
 
@@ -97,6 +106,39 @@ namespace DigitalPlatform.Marc
                 return 1;
             }
             return 0;
+        }
+
+        // 判断头标区是不是 null 值
+        public static bool IsNullHeader(string strHeader)
+        {
+            foreach (char c in strHeader)
+            {
+                if (c != '?')
+                    return false;
+            }
+
+            return true;
+        }
+
+        // 获得一个表示空的头标区内容。注意，空不是 null
+        public static string GetBlankHeader()
+        {
+            return "*".PadRight(24, '?');
+        }
+
+        // 获得头标区 null 值
+        public static string GetNullHeader()
+        {
+            return new string('?', 24);
+        }
+
+        public static string EnsureBlankHeader(string header)
+        {
+            if (header.Length != 24)
+                throw new ArgumentException($"header 应该为 24 字符(但却为 '{header}')");
+            if (IsNullHeader(header))
+                return GetBlankHeader();
+            return header;
         }
 
         // 末尾是否有内码为 1 的字符？
@@ -252,9 +294,47 @@ out strError);
                 out strNewBody);
 
             if (strOldHeader.Length < 24)
-                strOldHeader = strOldHeader.PadRight(24, '?');
+            {
+                if (string.IsNullOrEmpty(strOldMarc))
+                    strOldHeader = GetNullHeader();
+                else
+                {
+                    strOldHeader = strOldHeader.PadRight(24, '?');
+                    // 2023/3/24
+                    // 避免出现 null header 值
+                    if (IsNullHeader(strOldHeader))
+                        strOldHeader = GetBlankHeader();
+                }
+            }
+            else
+            {
+                /*
+                if (IsNullHeader(strOldHeader))
+                    strOldHeader = GetBlankHeader();
+                */
+            }
+
+
             if (strNewHeader.Length < 24)
-                strNewHeader = strNewHeader.PadRight(24, '?');
+            {
+                if (string.IsNullOrEmpty(strNewMarc))
+                    strNewHeader = GetNullHeader();
+                else
+                {
+                    strNewHeader = strNewHeader.PadRight(24, '?');
+                    // 2023/3/24
+                    // 避免出现 null header 值
+                    if (IsNullHeader(strNewHeader))
+                        strNewHeader = GetBlankHeader();
+                }
+            }
+            else
+            {
+                /*
+                if (IsNullHeader(strNewHeader))
+                    strNewHeader = GetBlankHeader();
+                */
+            }
 
 #if NO
             FieldNameList list = new FieldNameList();
@@ -430,21 +510,31 @@ out strError);
 
             StringBuilder text = new StringBuilder(4096);
 
+            // 如果有写入头标区的权限，写入的 null 要变为 *???(23 个?)，表示有权限这种状态
+            // 如果没有写入头标区的权限，写入的 null 就是 null(=24 个 ?)
+
             if (changeable_list?.Contains("###") == false)
             {
+                // 没有权限。oldheader 被保留
                 // 2023/2/11
                 // 如果头标区被保护
                 if (strNewHeader != strOldHeader)
                     denied_change_fieldnames.Add("###");    // ### 表示头标区
+
                 text.Append(strOldHeader);
             }
             else if (rights_table.ReplaceFieldNames.Contains("###") == true
             || rights_table.InsertFieldNames.Contains("###") == true)
-                text.Append(strNewHeader);
+            {
+                // 有权限，采用 newheader
+                text.Append(EnsureBlankHeader(strNewHeader));
+            }
             else
             {
+                // 没有权限，oldheader 被保留
                 if (strNewHeader != strOldHeader)
                     denied_change_fieldnames.Add("###");    // ### 表示头标区
+
                 text.Append(strOldHeader);
             }
 
@@ -778,6 +868,8 @@ InsertSequenceStyle.PreferTail);
 
             strHeader = strMARC.Substring(0, 24);
 
+            // 2023/3/24 注释掉
+            /*
             // 2021/4/12
             // 将两个地址部分替换为问号
             MarcHeader header = new MarcHeader();
@@ -785,6 +877,7 @@ InsertSequenceStyle.PreferTail);
             header.reclen = "?????";
             header.baseaddr = "?????";
             strHeader = header.ToString();
+            */
 
             strBody = strMARC.Substring(24);
         }

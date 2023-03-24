@@ -2995,6 +2995,10 @@ out strError);
                 }
             }
 
+            // 2023/3/23
+            // 先排除掉 997
+            Delete997(ref strMarc);
+
             if (string.IsNullOrEmpty(strFieldNameList) == false)
             {
                 // 根据字段权限定义过滤出允许的内容
@@ -3698,7 +3702,7 @@ ref strNewMarc);
 
             // 2017/5/5
             if (strDefaultOperation == "delete"
-                && IsBlankHeader(strNewMarc))
+                && MarcDiff.IsNullHeader(strNewMarc))
                 strNewBiblioXml = "";
             else
             {
@@ -3718,12 +3722,14 @@ ref strNewMarc);
             return 0;
         }
 
+        /*
         static bool IsBlankHeader(string strMARC)
         {
             if (strMARC == "????????????????????????")
                 return true;
             return false;
         }
+        */
 
 #if NO
         // 根据允许的字段名列表，合并新旧两条书目记录
@@ -6437,11 +6443,11 @@ out strError);
 
             // 删除空的 header 元素
             {
-
                 var headers = tempdom.DocumentElement.SelectNodes("//unimarc:leader | //usmarc:leader", nsmgr);
                 foreach (XmlElement header in headers)
                 {
-                    if (header.InnerText.Trim() == "????????????????????????")
+                    // if (header.InnerText.Trim() == "????????????????????????")
+                    if (MarcDiff.IsNullHeader(header.InnerText.Trim()))
                         header.ParentNode.RemoveChild(header);
                 }
             }
