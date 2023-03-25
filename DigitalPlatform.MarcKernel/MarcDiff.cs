@@ -72,9 +72,18 @@ namespace DigitalPlatform.Marc
                 text.Append(strHeader);
             else
             {
-                bChanged = true;
-                text.Append(GetNullHeader());
-                filtered_names.Add("###");
+                if (IsNullHeader(strHeader))
+                {
+                    // 2023/3/25
+                    // 虽然对头标区无权限，但碰巧头标区内容原本为 null，那就当作没有发生过滤
+                    text.Append(strHeader);
+                }
+                else
+                {
+                    bChanged = true;
+                    text.Append(GetNullHeader());
+                    filtered_names.Add("###");
+                }
             }
 
             string[] fields = strBody.Split(new char[] { (char)30 }, StringSplitOptions.RemoveEmptyEntries);
@@ -118,6 +127,12 @@ namespace DigitalPlatform.Marc
             }
 
             return true;
+        }
+
+        // 判断是否为 *???????... 值。这个值表示是权限足够情况下写入的 null。不同于权限不够情况下写入的 null(24 个 ?)
+        public static bool IsDiskNullHeader(string header)
+        {
+            return header == "*???????????????????????";
         }
 
         // 获得一个表示空的头标区内容。注意，空不是 null

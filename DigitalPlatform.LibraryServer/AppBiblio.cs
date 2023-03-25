@@ -6446,8 +6446,10 @@ out strError);
                 var headers = tempdom.DocumentElement.SelectNodes("//unimarc:leader | //usmarc:leader", nsmgr);
                 foreach (XmlElement header in headers)
                 {
+                    var value = header.InnerText.Trim();    // TODO: 检查一下是否 24 chars
                     // if (header.InnerText.Trim() == "????????????????????????")
-                    if (MarcDiff.IsNullHeader(header.InnerText.Trim()))
+                    if (MarcDiff.IsNullHeader(value)
+                        || MarcDiff.IsDiskNullHeader(value))
                         header.ParentNode.RemoveChild(header);
                 }
             }
