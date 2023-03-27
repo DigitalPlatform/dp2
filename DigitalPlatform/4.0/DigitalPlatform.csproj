@@ -311,6 +311,12 @@
     </Compile>
     <Compile Include="ControlExtension.cs" />
     <Compile Include="FormProperty.cs" />
+    <Compile Include="ListDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ListDialog.Designer.cs">
+      <DependentUpon>ListDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="ProgramUtil.cs" />
     <Compile Include="Result.cs" />
     <Compile Include="ScriptUtility.cs" />
@@ -358,6 +364,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FileDownloadDialog.resx">
       <DependentUpon>FileDownloadDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ListDialog.resx">
+      <DependentUpon>ListDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SelectDlg.resx">
       <DependentUpon>SelectDlg.cs</DependentUpon>

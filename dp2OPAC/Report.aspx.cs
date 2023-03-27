@@ -424,7 +424,9 @@ var data = [
 
         if (strFormat == "excel"
             || strFormat == "xslx"
-            || strFormat == ".xslx")
+            || strFormat == ".xslx"
+            || strFormat == "xlsx"
+            || strFormat == ".xlsx")
         {
             strFileName = Path.Combine(Path.GetDirectoryName(strFileName),
                 Path.GetFileNameWithoutExtension(strFileName) + ".xlsx");

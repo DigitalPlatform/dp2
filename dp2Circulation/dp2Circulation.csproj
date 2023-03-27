@@ -53,7 +53,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>366</ApplicationRevision>
+    <ApplicationRevision>368</ApplicationRevision>
     <ApplicationVersion>3.78.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -957,6 +957,12 @@
     </Compile>
     <Compile Include="Reader\GetMessageTypeDialog.Designer.cs">
       <DependentUpon>GetMessageTypeDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Reader\ImportPatronDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Reader\ImportPatronDialog.Designer.cs">
+      <DependentUpon>ImportPatronDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Reader\ImportPatronForm.cs">
       <SubType>Form</SubType>
@@ -2166,6 +2172,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Reader\GetMessageTypeDialog.resx">
       <DependentUpon>GetMessageTypeDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Reader\ImportPatronDialog.resx">
+      <DependentUpon>ImportPatronDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Reader\ImportPatronForm.resx">
       <DependentUpon>ImportPatronForm.cs</DependentUpon>

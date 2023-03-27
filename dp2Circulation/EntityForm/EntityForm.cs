@@ -6960,7 +6960,7 @@ out strError);
             switch (m.Msg)
             {
                 case WM_SEARCH_DUP:
-                    this.SearchDup();
+                    var task = this.SearchDupAsync();
                     return;
                 case WM_FILL_MARCEDITOR_SCRIPT_MENU:
                     // 显示Ctrl+A菜单
@@ -10995,16 +10995,14 @@ out strError);
 #endif
 
         // 查重
-        int SearchDup()
+        async Task<int> SearchDupAsync()
         {
-            string strError = "";
-
             // 获得书目记录XML格式
             int nRet = this.GetBiblioXml(
                 "", // 迫使从记录路径中看marc格式
                 true,   // 包含资源ID
                 out string strXmlBody,
-                out strError);
+                out string strError);
             if (nRet == -1)
             {
                 strError = "GetBiblioXml() error: " + strError;
@@ -11030,11 +11028,14 @@ out strError);
             form.Show();
             form.WaitSearchFinish();
              * */
+            this.TryInvoke(() => {
             Global.Activate(form);
-            nRet = form.DoSearch(out strError);
-            if (nRet == -1)
+            });
+            // nRet = form.DoSearch(out strError);
+            var result = await form.DoSearchAsync();
+            if (result.Value == -1)
             {
-                MessageBox.Show(form, "DoSearch() error: " + strError);
+                this.MessageBoxShow("DoSearchAsync() error: " + result.ErrorInfo);
                 return -1;
             }
 
@@ -11043,17 +11044,23 @@ out strError);
                 if (bExistDupForm == true)
                 {
                     // 把查重窗压到下面
-                    this.Activate();
+                    this.TryInvoke(() =>
+                    {
+                        this.Activate();
+                    });
                 }
                 else
                 {
                     // 关掉查重窗
-                    form.Close();
+                    this.TryInvoke(() =>
+                    {
+                        form.Close();
+                    });
                 }
                 return 0;
             }
 
-            MessageBox.Show(form, "保存记录时经自动查重，发现重复记录");
+            this.MessageBoxShow("保存记录时经自动查重，发现重复记录");
             return 1;
         ERROR1:
             this.Activate();

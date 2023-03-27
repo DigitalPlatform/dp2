@@ -1370,6 +1370,13 @@ out string strError)
         {
             strOutputNumber = "";
 
+            if (string.IsNullOrEmpty(strTestNumber) == false
+                && strTestNumber.Contains("/") == true)
+            {
+                strError = $"strTestNumber 参数值中不应包含 '/' ('{strTestNumber}')";
+                return -1;
+            }
+
             // EnableControls(false);
 
             Debug.Assert(strAction == "protect" || strAction == "unmemo", "");

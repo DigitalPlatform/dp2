@@ -6,12 +6,12 @@ using System.Windows.Forms;
 using System.IO;
 // using System.Windows.Forms.VisualStyles;
 using System.Drawing;
+using System.Diagnostics;
 
 using ClosedXML.Excel;
 
 using DigitalPlatform.Xml;
 using DigitalPlatform.Core;
-using System.Diagnostics;
 
 namespace DigitalPlatform.dp2.Statis
 {

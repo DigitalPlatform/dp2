@@ -11,6 +11,9 @@ namespace TestMarcKernel
     [TestClass]
     public class MarcKernelUnitTest
     {
+        // 权限足够时的 null 头标区内容
+        public const string CONTROL_NULL = "*???????????????????????";
+
         // 测试 MarcDiff.MergeOldNew() 方法
         // 模拟前端用户权限不足，获取到缺少一个 856 字段的记录，然后修改其中一个字段以后保存
         // 要点：要保护好旧记录中的第一个 856 字段，并允许前端修改第二个
@@ -70,6 +73,7 @@ namespace TestMarcKernel
 #endif
 
             MarcRecord target_record = new MarcRecord();
+            target_record.Header[0, 24] = CONTROL_NULL;
             // 结果记录有三个 856 字段
             // 结果记录的第二个 856 字段兑现了修改，增加了 $zZZZ。旧记录的第一个 856 字段得到了保护
             target_record.add(new MarcField("001A1234567"));
@@ -142,6 +146,7 @@ namespace TestMarcKernel
             new_record.add(new MarcField('$', "701  $aauthor"));
 
             MarcRecord target_record = new MarcRecord();
+            target_record.Header[0, 24] = CONTROL_NULL;
             // 结果记录有三个 856 字段
             target_record.add(new MarcField("001A1234567"));
             target_record.add(new MarcField('$', "2001 $atitle$fauthor"));
@@ -187,6 +192,7 @@ namespace TestMarcKernel
             new_record.add(new MarcField('$', "701  $aauthor"));
 
             MarcRecord target_record = new MarcRecord();
+            target_record.Header[0, 24] = CONTROL_NULL;
             // 结果记录有三个 856 字段
             target_record.add(new MarcField("001A1234567"));
             target_record.add(new MarcField('$', "2001 $atitle$fauthor"));
@@ -232,6 +238,7 @@ namespace TestMarcKernel
             new_record.add(new MarcField('$', "701  $aauthor"));
 
             MarcRecord target_record = new MarcRecord();
+            target_record.Header[0, 24] = CONTROL_NULL;
             // 结果记录有三个 856 字段
             target_record.add(new MarcField("001A1234567"));
             target_record.add(new MarcField('$', "2001 $atitle$fauthor"));
@@ -277,6 +284,7 @@ namespace TestMarcKernel
             new_record.add(new MarcField('$', "701  $aauthor"));
 
             MarcRecord target_record = new MarcRecord();
+            target_record.Header[0, 24] = CONTROL_NULL;
             // 结果记录有三个 856 字段。第一个字段没有允许修改
             target_record.add(new MarcField("001A1234567"));
             target_record.add(new MarcField('$', "2001 $atitle$fauthor"));
@@ -321,6 +329,7 @@ namespace TestMarcKernel
             new_record.add(new MarcField('$', "701  $aauthor"));
 
             MarcRecord target_record = new MarcRecord();
+            target_record.Header[0, 24] = CONTROL_NULL;
             // 结果记录有二个 856 字段
             target_record.add(new MarcField("001A1234567"));
             target_record.add(new MarcField('$', "2001 $atitle$fauthor"));
@@ -364,6 +373,7 @@ namespace TestMarcKernel
             new_record.add(new MarcField('$', "701  $aauthor"));
 
             MarcRecord target_record = new MarcRecord();
+            target_record.Header[0, 24] = CONTROL_NULL;
             // 结果记录有二个 856 字段
             target_record.add(new MarcField("001A1234567"));
             target_record.add(new MarcField('$', "2001 $atitle$fauthor"));
@@ -407,6 +417,7 @@ namespace TestMarcKernel
             new_record.add(new MarcField('$', "701  $aauthor"));
 
             MarcRecord target_record = new MarcRecord();
+            target_record.Header[0, 24] = CONTROL_NULL;
             // 结果记录有二个 856 字段
             target_record.add(new MarcField("001A1234567"));
             target_record.add(new MarcField('$', "2001 $atitle$fauthor"));
@@ -446,6 +457,7 @@ namespace TestMarcKernel
             new_record.add(new MarcField('$', "701  $aauthor"));
 
             MarcRecord target_record = new MarcRecord();
+            target_record.Header[0, 24] = CONTROL_NULL;
             // 结果记录有一个 856 字段
             target_record.add(new MarcField("001A1234567"));
             target_record.add(new MarcField('$', "2001 $atitle$fauthor"));
@@ -485,6 +497,7 @@ namespace TestMarcKernel
             new_record.add(new MarcField('$', "701  $aauthor"));
 
             MarcRecord target_record = new MarcRecord();
+            target_record.Header[0, 24] = CONTROL_NULL;
             // 结果记录有二个 856 字段
             target_record.add(new MarcField("001A1234567"));
             target_record.add(new MarcField('$', "2001 $atitle$fauthor"));
@@ -526,6 +539,7 @@ namespace TestMarcKernel
             new_record.add(new MarcField('$', "701  $aauthor"));
 
             MarcRecord target_record = new MarcRecord();
+            target_record.Header[0, 24] = CONTROL_NULL;
             // 结果记录有三个 856 字段
             target_record.add(new MarcField("001A1234567"));
             target_record.add(new MarcField('$', "2001 $atitle$fauthor"));
@@ -568,6 +582,7 @@ namespace TestMarcKernel
             new_record.add(new MarcField('$', "701  $aauthor"));
 
             MarcRecord target_record = new MarcRecord();
+            target_record.Header[0, 24] = CONTROL_NULL;
             // 结果记录有二个 856 字段
             target_record.add(new MarcField("001A1234567"));
             target_record.add(new MarcField('$', "2001 $atitle$fauthor"));
@@ -610,6 +625,7 @@ namespace TestMarcKernel
             new_record.add(new MarcField('$', "701  $aauthor"));
 
             MarcRecord target_record = new MarcRecord();
+            target_record.Header[0, 24] = CONTROL_NULL;
             // 结果记录有三个 856 字段
             target_record.add(new MarcField("001A1234567"));
             target_record.add(new MarcField('$', "2001 $atitle$fauthor"));
@@ -651,6 +667,7 @@ namespace TestMarcKernel
             new_record.add(new MarcField('$', "701  $aauthor"));
 
             MarcRecord target_record = new MarcRecord();
+            target_record.Header[0, 24] = CONTROL_NULL;
             // 结果记录没有 856 字段
             target_record.add(new MarcField("001A1234567"));
             target_record.add(new MarcField('$', "2001 $atitle$fauthor"));
@@ -689,6 +706,7 @@ namespace TestMarcKernel
             new_record.add(new MarcField('$', "701  $aauthor"));
 
             MarcRecord target_record = new MarcRecord();
+            target_record.Header[0, 24] = CONTROL_NULL;
             // 结果记录有一个 856 字段。其中一个打算增加的被拒绝了
             target_record.add(new MarcField("001A1234567"));
             target_record.add(new MarcField('$', "2001 $atitle$fauthor"));
@@ -728,6 +746,7 @@ namespace TestMarcKernel
             new_record.add(new MarcField('$', "701  $aauthor"));
 
             MarcRecord target_record = new MarcRecord();
+            target_record.Header[0, 24] = CONTROL_NULL;
             // 结果记录有一个 856 字段。其中一个打算增加的被拒绝了
             target_record.add(new MarcField("001A1234567"));
             target_record.add(new MarcField('$', "2001 $atitle$fauthor"));
@@ -768,6 +787,7 @@ namespace TestMarcKernel
             new_record.add(new MarcField('$', "701  $aauthor"));
 
             MarcRecord target_record = new MarcRecord();
+            target_record.Header[0, 24] = CONTROL_NULL;
             // 结果记录有二个 856 字段。其中一个打算增加的被拒绝了
             target_record.add(new MarcField("001A1234567"));
             target_record.add(new MarcField('$', "2001 $atitle$fauthor"));
@@ -809,6 +829,7 @@ namespace TestMarcKernel
             new_record.add(new MarcField('$', "701  $aauthor"));
 
             MarcRecord target_record = new MarcRecord();
+            target_record.Header[0, 24] = CONTROL_NULL;
             // 结果记录有二个 856 字段。其中一个打算增加的被拒绝了
             target_record.add(new MarcField("001A1234567"));
             target_record.add(new MarcField('$', "2001 $atitle$fauthor"));
@@ -850,6 +871,7 @@ namespace TestMarcKernel
             new_record.add(new MarcField('$', "701  $aauthor"));
 
             MarcRecord target_record = new MarcRecord();
+            target_record.Header[0, 24] = CONTROL_NULL;
             // 结果记录有二个 856 字段。其中一个打算增加的被拒绝了
             target_record.add(new MarcField("001A1234567"));
             target_record.add(new MarcField('$', "2001 $atitle$fauthor"));
@@ -986,7 +1008,7 @@ namespace TestMarcKernel
         [TestMethod]
         public void MarcDiff_MergeOldNew_addField()
         {
-            string[] fieldnamelist_values = new string [] {
+            string[] fieldnamelist_values = new string[] {
             "*:***-***", // 所有字段都允许操作
             "205",
             "200-205",
@@ -994,7 +1016,7 @@ namespace TestMarcKernel
             "200,205",
             };
 
-            foreach(string strFieldNameList in fieldnamelist_values)
+            foreach (string strFieldNameList in fieldnamelist_values)
             {
                 string strUserRights = ""; // "level-1";
 
@@ -1012,6 +1034,8 @@ namespace TestMarcKernel
                 new_record.add(new MarcField('$', "701  $aauthor"));
 
                 MarcRecord target_record = new MarcRecord();
+                if (strFieldNameList == "*:***-***")
+                    target_record.Header[0, 24] = CONTROL_NULL;
                 // 打算增加 205 字段被兑现
                 target_record.add(new MarcField("001A1234567"));
                 target_record.add(new MarcField('$', "2001 $atitle$fauthor"));

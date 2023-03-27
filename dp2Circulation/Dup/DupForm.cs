@@ -12,6 +12,8 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.CommonControl;
+using System.Threading.Tasks;
+using System.Linq;
 
 namespace dp2Circulation
 {
@@ -302,6 +304,7 @@ this.checkBox_returnSearchDetail.Checked);
             EventFinish.Set();
         }
 
+        // 注：此函数主要为保持兼容之用。请尽可能改用 DoSearchAsync()
         /// <summary>
         /// 启动检索
         /// </summary>
@@ -333,6 +336,21 @@ this.checkBox_returnSearchDetail.Checked);
             return 0;
         }
 
+        public Task<SearchResult> DoSearchAsync()
+        {
+            var projectName = this.TryGet(() =>
+            {
+                return this.comboBox_projectName.Text;
+            });
+            var recordPath = this.TryGet(() =>
+            {
+                return this.textBox_recordPath.Text;
+            });
+            return DoSearchAsync(projectName,
+                recordPath,
+                this.XmlRecord);
+        }
+
         private void button_search_Click(object sender, EventArgs e)
         {
             int nRet = this.DoSearch(out string strError);
@@ -353,6 +371,7 @@ this.checkBox_returnSearchDetail.Checked);
 
 
         // 检索
+        // 注：此函数主要为保持兼容之用。请尽可能改用 DoSearchAsync()
         // return:
         //      -1  error
         //      0   succeed
@@ -371,14 +390,69 @@ this.checkBox_returnSearchDetail.Checked);
             out string strUsedProjectName,
             out string strError)
         {
-            strError = "";
-            strUsedProjectName = "";
+            var task = DoSearchAsync(strProjectName,
+            strRecPath,
+            strXml);
+            while (task.IsCompleted == false)
+            {
+                Application.DoEvents();
+            }
+            var result = task.Result;
+            strUsedProjectName = result.UsedProjectName;
+            strError = result.ErrorInfo;
+            return result.Value;
+        }
+
+        public Task<SearchResult> DoSearchAsync(string strProjectName,
+            string strRecPath,
+            string strXml)
+        {
+            return Task.Factory.StartNew(
+                () =>
+                {
+                    try
+                    {
+                        return _doSearch(strProjectName,
+            strRecPath,
+            strXml);
+                    }
+                    catch (Exception ex)
+                    {
+                        return new SearchResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"_doSearch() 异常: {ExceptionUtil.GetDebugText(ex)}"
+                        };
+                    }
+                },
+    this.CancelToken,
+    TaskCreationOptions.LongRunning,
+    TaskScheduler.Default);
+        }
+
+
+        public class SearchResult : NormalResult
+        {
+            public string UsedProjectName { get; set; }
+        }
+
+        SearchResult _doSearch(string strProjectName,
+            string strRecPath,
+            string strXml)
+        {
+            string strError = "";
+            string strUsedProjectName = "";
 
             if (strProjectName == "<默认>"
                 || strProjectName == "<default>")
                 strProjectName = "";
 
             EventFinish.Reset();
+
+            var return_all_records = this.TryGet(() =>
+            {
+                return checkBox_returnAllRecords.Checked;
+            });
 
             /*
             EnableControls(false);
@@ -399,10 +473,13 @@ this.checkBox_returnSearchDetail.Checked);
             {
                 this.ClearDupState();
 
-                this.listView_browse.Items.Clear();
-                // 2008/11/22 
-                this.SortColumns.Clear();
-                SortColumns.ClearColumnSortDisplay(this.listView_browse.Columns);
+                this.TryInvoke(() =>
+                {
+                    this.listView_browse.Items.Clear();
+                    // 2008/11/22 
+                    this.SortColumns.Clear();
+                    SortColumns.ClearColumnSortDisplay(this.listView_browse.Columns);
+                });
 
                 string strBrowseStyle = "cols";
                 if (this.checkBox_includeLowCols.Checked == false)
@@ -420,8 +497,13 @@ this.checkBox_returnSearchDetail.Checked);
                     out strError);
                 if (lRet == -1)
                 {
-                    strError = "channel.SearchDup() error: " + strError;
-                    return -1;
+                    strError = "channel.SearchDupAsync() error: " + strError;
+                    return new SearchResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError,
+                        UsedProjectName = strUsedProjectName
+                    };
                 }
 
                 long lHitCount = lRet;
@@ -437,12 +519,17 @@ this.checkBox_returnSearchDetail.Checked);
                 // 装入浏览格式
                 for (; ; )
                 {
-                    Application.DoEvents();	// 出让界面控制权
+                    // Application.DoEvents();	// 出让界面控制权
 
                     if (looping.Stopped)
                     {
                         strError = "用户中断";
-                        return -1;
+                        return new SearchResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError,
+                            UsedProjectName = strUsedProjectName
+                        };
                     }
 
                     looping.Progress.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
@@ -457,7 +544,12 @@ this.checkBox_returnSearchDetail.Checked);
                     if (lRet == -1)
                     {
                         strError = "channel.GetDupSearchResult() error: " + strError;
-                        return -1;
+                        return new SearchResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError,
+                            UsedProjectName = strUsedProjectName
+                        };
                     }
 
                     if (lRet == 0)
@@ -474,44 +566,47 @@ this.checkBox_returnSearchDetail.Checked);
                             2 + (result.Cols == null ? 0 : result.Cols.Length),
                             200);
 
-                        if (this.checkBox_returnAllRecords.Checked == false)
+                        if (return_all_records == false)
                         {
                             // 遇到第一个权值较低的，就中断全部获取浏览过程
                             if (result.Weight < result.Threshold)
                                 goto END1;
                         }
 
-                        ListViewItem item = new ListViewItem
+                        this.TryInvoke(() =>
                         {
-                            Text = result.Path,
-                            Tag = result
-                        };
-                        item.SubItems.Add(result.Weight.ToString());
-                        if (result.Cols != null)
-                        {
-                            for (int j = 0; j < result.Cols.Length; j++)
+                            ListViewItem item = new ListViewItem
                             {
-                                item.SubItems.Add(result.Cols[j]);
+                                Text = result.Path,
+                                Tag = result
+                            };
+                            item.SubItems.Add(result.Weight.ToString());
+                            if (result.Cols != null)
+                            {
+                                for (int j = 0; j < result.Cols.Length; j++)
+                                {
+                                    item.SubItems.Add(result.Cols[j]);
+                                }
                             }
-                        }
-                        this.listView_browse.Items.Add(item);
+                            this.listView_browse.Items.Add(item);
 
-                        if (item.Text == this.RecordPath)
-                        {
-                            // 如果就是发起记录自己  2008/2/29 
-                            item.ImageIndex = ITEMTYPE_OVERTHRESHOLD;
-                            item.BackColor = Color.LightGoldenrodYellow;
-                            item.ForeColor = SystemColors.GrayText; // 表示就是发起记录自己
-                        }
-                        else if (result.Weight >= result.Threshold)
-                        {
-                            item.ImageIndex = ITEMTYPE_OVERTHRESHOLD;
-                            item.BackColor = Color.LightGoldenrodYellow;
-                        }
-                        else
-                        {
-                            item.ImageIndex = ITEMTYPE_NORMAL;
-                        }
+                            if (item.Text == this.RecordPath)
+                            {
+                                // 如果就是发起记录自己  2008/2/29 
+                                item.ImageIndex = ITEMTYPE_OVERTHRESHOLD;
+                                item.BackColor = Color.LightGoldenrodYellow;
+                                item.ForeColor = SystemColors.GrayText; // 表示就是发起记录自己
+                            }
+                            else if (result.Weight >= result.Threshold)
+                            {
+                                item.ImageIndex = ITEMTYPE_OVERTHRESHOLD;
+                                item.BackColor = Color.LightGoldenrodYellow;
+                            }
+                            else
+                            {
+                                item.ImageIndex = ITEMTYPE_NORMAL;
+                            }
+                        });
 
                         if (looping != null)
                             looping.Progress.SetProgressValue(lStart + i + 1);
@@ -525,7 +620,11 @@ this.checkBox_returnSearchDetail.Checked);
             END1:
                 this.SetDupState();
 
-                return (int)lHitCount;
+                return new SearchResult
+                {
+                    Value = (int)lHitCount,
+                    UsedProjectName = strUsedProjectName
+                };
             }
             finally
             {
@@ -607,7 +706,7 @@ this.checkBox_returnSearchDetail.Checked);
 
         void ClearDupState()
         {
-            this.label_dupMessage.Text = "尚未查重";
+            this.DupMessage = "尚未查重";
         }
 
         /// <summary>
@@ -617,13 +716,26 @@ this.checkBox_returnSearchDetail.Checked);
         public int GetDupCount()
         {
             int nCount = 0;
-            for (int i = 0; i < this.listView_browse.Items.Count; i++)
-            {
-                ListViewItem item = this.listView_browse.Items[i];
 
-                if (item.Text == this.RecordPath)
+            var items = this.TryGet(() =>
+            {
+                return new List<ListViewItem>(this.listView_browse.Items.Cast<ListViewItem>());
+            });
+
+            // for (int i = 0; i < this.listView_browse.Items.Count; i++)
+            foreach (ListViewItem item in items)
+            {
+                // ListViewItem item = this.listView_browse.Items[i];
+
+                if (ListViewUtil.GetItemText(item, 0) == this.RecordPath)
                     continue;   // 不包含发起记录自己 2008/2/29 
 
+                /*
+                var image_index = this.TryGet(() =>
+                {
+                    return item.ImageIndex;
+                });
+                */
                 if (item.ImageIndex == ITEMTYPE_OVERTHRESHOLD)
                     nCount++;
                 else
@@ -655,10 +767,27 @@ this.checkBox_returnSearchDetail.Checked);
             int nCount = GetDupCount();
 
             if (nCount > 0)
-                this.label_dupMessage.Text = "有 " + Convert.ToString(nCount) + " 条重复记录。";
+                this.DupMessage = "有 " + Convert.ToString(nCount) + " 条重复记录。";
             else
-                this.label_dupMessage.Text = "没有重复记录。";
+                this.DupMessage = "没有重复记录。";
+        }
 
+        public string DupMessage
+        {
+            get
+            {
+                return this.TryGet(() =>
+                {
+                    return this.label_dupMessage.Text;
+                });
+            }
+            set
+            {
+                this.TryInvoke(() =>
+                {
+                    this.label_dupMessage.Text = value;
+                });
+            }
         }
 
         // 双击

@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.80.*")]
-[assembly: AssemblyFileVersion("3.80.0.0")]
+[assembly: AssemblyVersion("3.81.*")]
+[assembly: AssemblyFileVersion("3.81.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -167,3 +167,4 @@ using System.Runtime.InteropServices;
 // 3.79 2023/3/9 异步方式重构部分界面处理代码
 // 3.80 2023/3/16 种册窗检索命中一条时出现窗口冻结的 bug 已经消除
 //              订单打印的时候，如果同时包含打印出版社表或者分类表，ProgressBar 相关代码会抛出异常。这个 bug 已经消除
+// 3.81 2023/3/27 种册窗查重按钮功能，改造为异步方式进行查重检索

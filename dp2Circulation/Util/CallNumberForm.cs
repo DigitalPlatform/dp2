@@ -1638,6 +1638,12 @@ COLUMN_CALLNUMBER);
         {
             strOutputNumber = "";
 
+            if (string.IsNullOrEmpty(strTailNumber) == false
+    && strTailNumber.Contains("/") == true)
+            {
+                strError = $"strTailNumber 参数值中不应包含 '/' ('{strTailNumber}')";
+                return -1;
+            }
             /*
             EnableControls(false);
 
@@ -1802,6 +1808,12 @@ COLUMN_CALLNUMBER);
         {
             strOutputNumber = "";
 
+            if (string.IsNullOrEmpty(strTestNumber) == false
+    && strTestNumber.Contains("/") == true)
+            {
+                strError = $"strTestNumber 参数值中不应包含 '/' ('{strTestNumber}')";
+                return -1;
+            }
             /*
             EnableControls(false);
 
@@ -1861,6 +1873,13 @@ COLUMN_CALLNUMBER);
             out string strError)
         {
             strOutputNumber = "";
+
+            if (string.IsNullOrEmpty(strDefaultNumber) == false
+    && strDefaultNumber.Contains("/") == true)
+            {
+                strError = $"strDefaultNumber 参数值中不应包含 '/' ('{strDefaultNumber}')";
+                return -1;
+            }
 
             /*
             EnableControls(false);
