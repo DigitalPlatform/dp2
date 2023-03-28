@@ -140,6 +140,8 @@ namespace DigitalPlatform.CommonControl
 
         public static string GetLeftPart(string strText)
         {
+            if (strText == null)
+                return null;
             int nRet = strText.IndexOf("\t");
             if (nRet == -1)
                 return strText;

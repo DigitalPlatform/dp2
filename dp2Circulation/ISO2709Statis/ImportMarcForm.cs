@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -8,6 +9,7 @@ using System.Windows.Forms;
 using System.Xml;
 
 using DigitalPlatform;
+using DigitalPlatform.CommonControl;
 using DigitalPlatform.Core;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Marc;
@@ -70,6 +72,9 @@ Program.MainForm.UserDir,
     "ImportMarcForm",
     "overwrite_by_g01",
     false);
+
+            BeginListProjectNames();
+            tabComboBox_dupProject_SelectedIndexChanged(null, null);
         }
 
         private void ImportMarcForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -108,7 +113,63 @@ Program.MainForm.UserDir,
 "overwrite_by_g01",
 this.checkBox_overwriteByG01.Checked);
             }
+        }
 
+        // 检查列表。如果 .Text 中的值没有在列表中找到，则清除 .Text
+        bool ClearProjectNameIfNeed()
+        {
+            var name = this.tabComboBox_dupProject.Text;
+            if (string.IsNullOrEmpty(name))
+                return false;
+            foreach (string s in this.tabComboBox_dupProject.Items)
+            {
+                if (name == s)
+                    return false;
+            }
+
+            this.tabComboBox_dupProject.Text = "[不查重]";
+            return true;
+        }
+
+        void BeginListProjectNames()
+        {
+            this.TryInvoke(() =>
+            {
+                this.tabComboBox_dupProject.Items.Clear();
+                this.tabComboBox_dupProject.Items.Add("[不查重]");
+            });
+
+            var dbName = this.TryGet(() =>
+            {
+                return this.comboBox_targetDbName.Text;
+            });
+
+            dbName = TabComboBox.GetLeftPart(dbName);
+
+            if (string.IsNullOrEmpty(dbName))
+            {
+                this.TryInvoke(() =>
+                {
+                    ClearProjectNameIfNeed();
+                });
+                return;
+            }
+
+            // -1: 出错; >=0: 成功
+            int nRet = ListProjectNames(dbName + "/?",
+                out string[] projectnames,
+                out string strError);
+            if (nRet == -1)
+            {
+                this.MessageBoxShow(strError);
+                return;
+            }
+
+            this.TryInvoke(() =>
+            {
+                this.tabComboBox_dupProject.Items.AddRange(projectnames);
+                ClearProjectNameIfNeed();
+            });
         }
 
         private void comboBox_targetDbName_DropDown(object sender, EventArgs e)
@@ -135,19 +196,20 @@ this.checkBox_overwriteByG01.Checked);
 
         async Task<NormalResult> ImportAsync(string strTargetDbName)
         {
-            return await Task<NormalResult>.Run(() => DoImport(strTargetDbName));
+            return await Task<NormalResult>.Run(async () =>
+            {
+                return await _doImportAsync(strTargetDbName);
+            });
         }
 
         public string InputFileName
         {
             get
             {
-                string value = "";
-                this.Invoke((Action)(() =>
+                return this.TryGet(() =>
                 {
-                    value = this._openMarcFileDialog.FileName;
-                }));
-                return value;
+                    return this._openMarcFileDialog.FileName;
+                });
             }
         }
 
@@ -155,12 +217,10 @@ this.checkBox_overwriteByG01.Checked);
         {
             get
             {
-                string value = "";
-                this.Invoke((Action)(() =>
+                return this.TryGet(() =>
                 {
-                    value = this._openMarcFileDialog.EncodingName;
-                }));
-                return value;
+                    return this._openMarcFileDialog.EncodingName;
+                });
             }
         }
 
@@ -168,19 +228,28 @@ this.checkBox_overwriteByG01.Checked);
         {
             get
             {
-                string value = "";
-                this.Invoke((Action)(() =>
+                return this.TryGet(() =>
                 {
-                    value = this._openMarcFileDialog.MarcSyntax;
-                }));
-                return value;
+                    return this._openMarcFileDialog.MarcSyntax;
+                });
+            }
+        }
+
+        public bool InputMode880
+        {
+            get
+            {
+                return this.TryGet(() =>
+                {
+                    return this._openMarcFileDialog.Mode880;
+                });
             }
         }
 
         // return:
         //      0   普通返回
         //      1   要全部中断
-        NormalResult DoImport(string strTargetDbName)
+        async Task<NormalResult> _doImportAsync(string strTargetDbName)
         {
             string strError = "";
             Encoding encoding = null;
@@ -197,6 +266,29 @@ this.checkBox_overwriteByG01.Checked);
                 encoding = Encoding.GetEncoding(this.InputEncodingName);
 
             ClearErrorInfoForm();
+
+            DupForm dup_form = null;
+
+            var dup_project_name = this.TryGet(() =>
+            {
+                return this.tabComboBox_dupProject.Text;
+            });
+            var dont_import_dup = this.TryGet(() =>
+            {
+                return this.checkBox_dontImportDupRecords.Checked;
+            });
+            if (string.IsNullOrEmpty(dup_project_name)
+                || dup_project_name == "[不查重]")
+            {
+
+            }
+            else
+            {
+                this.TryInvoke(() =>
+                {
+                    dup_form = Program.MainForm.EnsureDupForm();
+                });
+            }
 
             // 2021/4/8
             bool overwrite = (bool)this.Invoke(new Func<bool>(() =>
@@ -297,16 +389,19 @@ this.checkBox_overwriteByG01.Checked);
 
                 for (int i = 0; ; i++)
                 {
-                    Application.DoEvents(); // 出让界面控制权
+                    // Application.DoEvents(); // 出让界面控制权
 
                     if (looping.Stopped)
                     {
-                        DialogResult result = MessageBox.Show(this,
+                        DialogResult result = this.TryGet(() =>
+                        {
+                            return MessageBox.Show(this,
                             "准备中断。\r\n\r\n确实要中断全部操作? (Yes 全部中断；No 中断循环，但是继续收尾处理；Cancel 放弃中断，继续操作)",
                             "ImportMarcForm",
                             MessageBoxButtons.YesNoCancel,
                             MessageBoxIcon.Question,
                             MessageBoxDefaultButton.Button3);
+                        });
 
                         if (result == DialogResult.Yes)
                         {
@@ -335,12 +430,15 @@ this.checkBox_overwriteByG01.Checked);
                         out strError);
                     if (nRet == -2 || nRet == -1)
                     {
-                        DialogResult result = MessageBox.Show(this,
+                        DialogResult result = this.TryGet(() =>
+                        {
+                            return MessageBox.Show(this,
                             "读入MARC记录(" + nIndex.ToString() + ")出错: " + strError + "\r\n\r\n确实要中断当前批处理操作?",
                             "ImportMarcForm",
                             MessageBoxButtons.YesNo,
                             MessageBoxIcon.Question,
                             MessageBoxDefaultButton.Button2);
+                        });
                         if (result == DialogResult.Yes)
                         {
                             break;
@@ -375,8 +473,8 @@ this.checkBox_overwriteByG01.Checked);
                         || strMARC.Length <= 24)
                         continue;
 
-                    if (this._openMarcFileDialog.Mode880 == true
-                        && (this._openMarcFileDialog.MarcSyntax == "usmarc" || this._openMarcFileDialog.MarcSyntax == "<自动>"))
+                    if (this.InputMode880 == true
+                        && (this.InputMarcSyntax == "usmarc" || this.InputMarcSyntax == "<自动>"))
                     {
                         MarcRecord temp = new MarcRecord(strMARC);
                         MarcQuery.ToParallel(temp);
@@ -513,6 +611,73 @@ out strError);
                             goto ERROR1;
                     }
 
+                    string summary = "";
+                    {
+                        List<NameValueLine> results = null;
+
+                        if (strBiblioSyntax == "usmarc")
+                            nRet = MarcTable.ScriptMarc21("",
+                                strMARC,
+                                "title_area",
+                                null,
+                                out results,
+                                out strError);
+                        else if (strBiblioSyntax == "unimarc")
+                            nRet = MarcTable.ScriptUnimarc("",
+                                strMARC,
+                                "title_area",
+                                null,
+                                out results,
+                                out strError);
+                        else
+                            throw new Exception($"未知的 MARC 格式 '{strBiblioSyntax}'");
+
+                        if (results != null && results.Count > 0)
+                            summary = results[0].Value;
+                    }
+
+
+
+                    if (dup_form != null
+                        && overwrite == false)
+                    {
+                        // form.Activate();
+                        var result = await dup_form.DoSearchAsync(dup_project_name,
+                            strBiblioRecPath,
+                            new_xml);
+                        if (result.Value == -1)
+                        {
+                            strError = result.ErrorInfo;
+                            goto ERROR1;
+                        }
+
+                        if (dup_form.GetDupCount() > 0)
+                        {
+                            if (dont_import_dup)
+                            {
+                                // TODO: 增加题名与责任者显示
+                                strError = $"记录 { (i + 1) }) {summary} 因为重复而没有导入";
+                                Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(strError) + "</div>");
+                                GetErrorInfoForm().WriteHtml(strError + "\r\n");
+                                continue;
+                            }
+
+                            // 为 998$s 写入重复状态
+                            {
+                                MarcRecord temp = new MarcRecord(strMARC);
+                                var old_value = temp.select($"field[@name='998']/subfield[@name='s']").FirstContent;
+                                StringUtil.SetInList(ref old_value, "重", true);
+                                temp.setFirstSubfield("998", "s", old_value);
+                                nRet = MarcUtil.Marc2Xml(temp.Text,
+                strBiblioSyntax,
+                out new_xml,
+                out strError);
+                                if (nRet == -1)
+                                    goto ERROR1;
+                            }
+                        }
+                    }
+
                     lRet = channel.SetBiblioInfo(
                         looping.Progress,
                         overwrite ? "change" : "new",
@@ -588,6 +753,14 @@ out strError);
                     }
 
                     nIndex++;
+                }
+
+                if (dup_form != null)
+                {
+                    this.TryInvoke(() => {
+                        dup_form.Close();
+                        dup_form = null;
+                    });
                 }
 
                 string message = "";
@@ -730,13 +903,13 @@ out strError);
 
             if (this.tabControl_main.SelectedTab == this.tabPage_source)
             {
-                if (string.IsNullOrEmpty(this._openMarcFileDialog.FileName) == true)
+                if (string.IsNullOrEmpty(this.InputFileName) == true)
                 {
                     strError = "尚未指定输入的 ISO2709 文件名";
                     goto ERROR1;
                 }
 
-                if (string.IsNullOrEmpty(this._openMarcFileDialog.EncodingName) == true)
+                if (string.IsNullOrEmpty(this.InputEncodingName) == true)
                 {
                     strError = "尚未选定 ISO2709 文件的编码方式";
                     goto ERROR1;
@@ -821,6 +994,21 @@ out strError);
         private void checkBox_overwriteByG01_CheckedChanged(object sender, EventArgs e)
         {
             this.comboBox_targetDbName.Enabled = !this.checkBox_overwriteByG01.Checked;
+        }
+
+        private void comboBox_targetDbName_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            BeginListProjectNames();
+        }
+
+        private void tabComboBox_dupProject_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var name = this.tabComboBox_dupProject.Text;
+            if (string.IsNullOrEmpty(name)
+                || name == "[不查重]")
+                this.checkBox_dontImportDupRecords.Visible = false;
+            else
+                this.checkBox_dontImportDupRecords.Visible = true;
         }
     }
 }

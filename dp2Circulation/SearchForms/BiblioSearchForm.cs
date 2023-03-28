@@ -838,7 +838,7 @@ Keys keyData)
                 if (nRet == -1)
                     goto ERROR1;
 
-                string strResultSetName = GetResultSetName();
+                string strResultSetName = GetResultSetName(false);
 
                 channel.Timeout = new TimeSpan(0, 5, 0);
                 long lRet = channel.Search(looping.Progress,
@@ -1586,7 +1586,7 @@ out strError);
                         }
                     }
 
-                    string strResultSetName = GetResultSetName();
+                    string strResultSetName = GetResultSetName(multiline);
 
                     channel.Timeout = new TimeSpan(0, 15, 0);
 
@@ -1997,8 +1997,10 @@ out strError);
 
         string _resultSetName = "";
 
-        string GetResultSetName()
+        string GetResultSetName(bool multiline_search)
         {
+            if (multiline_search)
+                return "multiline";
             if (string.IsNullOrEmpty(_resultSetName))
                 _resultSetName = "#" + Guid.NewGuid().ToString();
             return _resultSetName;
@@ -11412,7 +11414,7 @@ message,
                 {
                     string strError = "";
 
-                    string strResultSetName = GetResultSetName();
+                    string strResultSetName = GetResultSetName(false);
 
                     long lHitCount = this.m_lHitCount;
                     if (this.listView_records.Items.Count >= lHitCount)

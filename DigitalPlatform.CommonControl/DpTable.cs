@@ -1149,6 +1149,8 @@ namespace DigitalPlatform.CommonControl
                                 // 将第一个已经选定的对象作为 shiftStartObject
                                 if (this.SelectedRows.Count > 0)
                                     this.m_shiftStartObj = this.SelectedRows[0];
+                                else
+                                    this.m_shiftStartObj = this.Rows[0];
                             }
 
                             bool bChanged = SelectRange(this.m_shiftStartObj, result_line, true);
@@ -1618,7 +1620,6 @@ Color.FromArgb(100, this.m_hoverBackColor)
                 {
                     ExpireSelectedLines();
                     TriggerSelectionChanged();  // 2014/11/11
-
                 }
             }
 
@@ -2521,16 +2522,20 @@ Color.FromArgb(100, this.m_hoverBackColor)
                     {
                         if (this.m_shiftStartObj == null)
                         {
-
                             // 将第一个已经选定的对象作为 shiftStartObject
                             if (this.m_bFullRowSelect == true)
                             {
                                 if (this.SelectedRows.Count > 0)
                                     this.m_shiftStartObj = this.SelectedRows[0];
+                                else
+                                    this.m_shiftStartObj = this.Rows[0];
                             }
                             else
                             {
                                 // TODO:
+                                // 2023/3/27
+                                if (this.Rows.Count > 0 && this.Rows[0].Count > 0)
+                                    this.m_shiftStartObj = this.Rows[0][0];
                             }
                         }
 

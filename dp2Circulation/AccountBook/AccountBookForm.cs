@@ -3257,8 +3257,8 @@ strTotalPrice);
                 sw,
                 sheet);
 
-            stop?.SetProgressValue(0);
             stop?.SetProgressRange(0, items.Count);
+            stop?.SetProgressValue(0);
 
             // 表格行循环
             for (int i = 0; i < items.Count; i++)

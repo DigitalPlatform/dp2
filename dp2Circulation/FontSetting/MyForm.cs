@@ -1683,7 +1683,7 @@ out string strError)
         /// <summary>
         /// 列出可用的查重方案名
         /// </summary>
-        /// <param name="strRecPath">发起记录路径</param>
+        /// <param name="strRecPath">发起记录路径。null 表示希望获取所有查重方案名</param>
         /// <param name="projectnames">返回可用的查重方案名字符串数组</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错; >=0: 成功</returns>
@@ -1708,8 +1708,8 @@ out string strError)
                 "disableControl");
             try
             {
-                // string strBiblioDbName = Global.GetDbName(strRecPath);
-                string strBiblioDbName = null;
+                string strBiblioDbName = Global.GetDbName(strRecPath);
+                // string strBiblioDbName = null;
 
                 long lRet = channel.ListDupProjectInfos(
                     looping.Progress,

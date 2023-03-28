@@ -71,6 +71,11 @@ namespace dp2Circulation
             set
             {
                 this.textBox_recordPath.Text = value;
+
+                // 2023/3/28
+                // 迫使查重方案名列表更新
+                this.comboBox_projectName.Items.Clear();
+
                 this.Text = "查重: " + value;
             }
         }
@@ -497,7 +502,7 @@ this.checkBox_returnSearchDetail.Checked);
                     out strError);
                 if (lRet == -1)
                 {
-                    strError = "channel.SearchDupAsync() error: " + strError;
+                    strError = "channel.SearchDup() error: " + strError;
                     return new SearchResult
                     {
                         Value = -1,

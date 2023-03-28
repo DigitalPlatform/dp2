@@ -8553,8 +8553,8 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
             }
 
 
-            stop?.SetProgressValue(0);
             stop?.SetProgressRange(0, items.Count);
+            stop?.SetProgressValue(0);
 
             stop?.SetMessage("正在遍历原始数据行 ...");
             for (int i = 0; i < items.Count; i++)

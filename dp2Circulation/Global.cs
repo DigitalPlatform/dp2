@@ -3240,6 +3240,10 @@ namespace dp2Circulation
         /// <returns>返回库名部分</returns>
         public static string GetDbName(string strPath)
         {
+            // 2023/3/28
+            if (strPath == null)
+                return null;
+
             int nRet = strPath.LastIndexOf("/");
             if (nRet == -1)
                 return strPath;
