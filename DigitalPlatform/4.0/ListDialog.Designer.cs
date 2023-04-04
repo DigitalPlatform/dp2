@@ -91,6 +91,8 @@
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
             this.Name = "ListDialog";
+            this.ShowIcon = false;
+            this.ShowInTaskbar = false;
             this.Text = "ListDialog";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ListDialog_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ListDialog_FormClosed);

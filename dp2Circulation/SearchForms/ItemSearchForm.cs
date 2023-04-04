@@ -3414,7 +3414,7 @@ dlg.UiState);
                 ListViewPatronLoader loader = new ListViewPatronLoader(channel,
     looping.Progress,
     items,
-    this.m_biblioTable);
+    this.BiblioTable);
                 loader.DbTypeCaption = this.DbTypeCaption;
 
                 loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
@@ -6214,7 +6214,7 @@ Program.MainForm.DefaultFont);
                 ListViewPatronLoader loader = new ListViewPatronLoader(channel,
     looping.Progress,
     items,
-    this.m_biblioTable);
+    this.BiblioTable);
                 loader.DbTypeCaption = this.DbTypeCaption;
 
                 loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
@@ -7207,7 +7207,7 @@ out strError);
                 ListViewPatronLoader loader = new ListViewPatronLoader(channel,
     looping.Progress,
     items,
-    this.m_biblioTable);
+    this.BiblioTable);
                 loader.DbTypeCaption = this.DbTypeCaption;
 
                 loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
@@ -10179,7 +10179,7 @@ MessageBoxDefaultButton.Button1);
                 ListViewPatronLoader loader = new ListViewPatronLoader(channel,
 looping.Progress,
 items,
-this.m_biblioTable);
+this.BiblioTable);
                 loader.DbTypeCaption = this.DbTypeCaption;
 
                 loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
@@ -12318,10 +12318,12 @@ TaskScheduler.Default);
             BiblioInfo info,
             string strStyle,
             out byte[] baNewTimestamp,
+            out string strOutputResPath,
             out string strError)
         {
             strError = "";
             baNewTimestamp = null;
+            strOutputResPath = "";
 
             List<EntityInfo> entityArray = new List<EntityInfo>();
 
@@ -12411,7 +12413,11 @@ TaskScheduler.Default);
                 }
 #endif
                 if (i == 0)
+                {
                     baNewTimestamp = errorinfos[i].NewTimestamp;
+                    // 2023/4/1
+                    strOutputResPath = errorinfos[i].NewRecPath;
+                }
 
                 // 正常信息处理
                 if (errorinfos[i].ErrorCode == ErrorCodeValue.NoError)
@@ -12422,6 +12428,11 @@ TaskScheduler.Default);
 
             if (baNewTimestamp != null) // 2016/9/3
                 info.Timestamp = baNewTimestamp;    // 2013/10/17
+            
+            // 2023/4/1
+            if (string.IsNullOrEmpty(strOutputResPath) == false
+                && info.RecPath != null && info.RecPath.Contains("?"))
+                info.RecPath = strOutputResPath;
 
             if (String.IsNullOrEmpty(strError) == false)
                 return -1;
@@ -12540,10 +12551,12 @@ TaskScheduler.Default);
                 goto ERROR1;
             }
 
+            /*
             // 读者信息缓存
             // 如果已经初始化，则保持
             if (this.m_biblioTable == null)
                 this.m_biblioTable = new Hashtable();
+            */
 
             RunScriptDialog dlg = null;
 
@@ -12692,7 +12705,7 @@ TaskScheduler.Default);
                 ListViewPatronLoader loader = new ListViewPatronLoader(channel,
                     null,   // looping.Progress,
                     items,
-                    this.m_biblioTable);
+                    this.BiblioTable);
                 loader.DbTypeCaption = this.DbTypeCaption;
 
                 loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
@@ -12791,8 +12804,11 @@ MessageBoxDefaultButton.Button2);
 
                         this.TryInvoke(() =>
                         {
+                            /*
                             item.ListViewItem.BackColor = SystemColors.Info;
                             item.ListViewItem.ForeColor = SystemColors.InfoText;
+                            */
+                            SetChangedColor(item.ListViewItem);
                         });
                     }
 
@@ -13854,12 +13870,12 @@ out strError);
                 looping.Progress.SetProgressRange(0, items.Count);
 
                 // 注意，如果 m_biblioTable 里面没有命中记录，则 ListViewPatronLoader 获得的册记录会没有 oi 元素
-                this.m_biblioTable.Clear();
+                this.BiblioTable.Clear();
 
                 ListViewPatronLoader loader = new ListViewPatronLoader(channel,
     looping.Progress,
     items,
-    this.m_biblioTable);
+    this.BiblioTable);
                 loader.DbTypeCaption = this.DbTypeCaption;
 
                 loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);

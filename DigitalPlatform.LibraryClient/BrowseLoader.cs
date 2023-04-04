@@ -60,8 +60,9 @@ namespace DigitalPlatform.LibraryClient
                 batch.Add(s);
 
                 // 每100个一批，或者最后一次
-                if (batch.Count >= 100 ||
-                    (index == m_recpaths.Count - 1 && batch.Count > 0))
+                if (batch.Count >= 100
+                    || GetBatchChars(batch) >= 50 * 1024
+                    || (index == m_recpaths.Count - 1 && batch.Count > 0))
                 {
                 REDO:
 #if NO
@@ -113,7 +114,7 @@ namespace DigitalPlatform.LibraryClient
                     for (int i = 0; i < searchresults.Length; i++)
                     {
                         DigitalPlatform.LibraryClient.localhost.Record record = searchresults[i];
-                        
+
                         /*
                         // 2021/5/19
                         if (record.RecordBody != null && record.RecordBody.Result != null
@@ -123,11 +124,12 @@ namespace DigitalPlatform.LibraryClient
                         }
                         */
 
-                        if (batch[i] != record.Path)
+                        var path = GetPath(batch[i]);
+                        if (path != record.Path)
                         {
                             throw new Exception("(2)下标 " + i + " 的 batch 元素 '" + batch[i] + "' 和返回的该下标位置 GetBrowseRecords() 结果路径 '" + record.Path + "' 不匹配。有可能是账户权限不足");
                         }
-                        Debug.Assert(batch[i] == record.Path, "");
+                        Debug.Assert(path == record.Path, "");
                         yield return record;
                     }
 
@@ -146,7 +148,28 @@ namespace DigitalPlatform.LibraryClient
                 }
             }
         }
+
+        public static string GetPath(string text)
+        {
+            if (text == null)
+                return null;
+            int index = text.IndexOf(":");
+            if (index == -1)
+                return text;
+            return text.Substring(0, index);
+        }
+
+        static int GetBatchChars(List<string> batch)
+        {
+            int count = 0;
+            foreach(var s in batch)
+            {
+                if (string.IsNullOrEmpty(s))
+                    continue;
+                count += s.Length;
+            }
+
+            return count;
+        }
     }
-
-
 }

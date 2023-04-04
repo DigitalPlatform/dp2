@@ -47,6 +47,7 @@
             this.webBrowser1_running = new System.Windows.Forms.WebBrowser();
             this.tabPage_print = new System.Windows.Forms.TabPage();
             this.button_print = new System.Windows.Forms.Button();
+            this.checkBox_lockTargetDbName = new System.Windows.Forms.CheckBox();
             this.tabControl_main.SuspendLayout();
             this.tabPage_selectTarget.SuspendLayout();
             this.tabPage_runImport.SuspendLayout();
@@ -93,6 +94,7 @@
             // 
             // tabPage_selectTarget
             // 
+            this.tabPage_selectTarget.Controls.Add(this.checkBox_lockTargetDbName);
             this.tabPage_selectTarget.Controls.Add(this.checkBox_dontImportDupRecords);
             this.tabPage_selectTarget.Controls.Add(this.tabComboBox_dupProject);
             this.tabPage_selectTarget.Controls.Add(this.label4);
@@ -269,6 +271,17 @@
             this.button_print.Text = "打印统计结果(&P)";
             this.button_print.UseVisualStyleBackColor = true;
             // 
+            // checkBox_lockTargetDbName
+            // 
+            this.checkBox_lockTargetDbName.AutoSize = true;
+            this.checkBox_lockTargetDbName.Location = new System.Drawing.Point(561, 21);
+            this.checkBox_lockTargetDbName.Name = "checkBox_lockTargetDbName";
+            this.checkBox_lockTargetDbName.Size = new System.Drawing.Size(78, 25);
+            this.checkBox_lockTargetDbName.TabIndex = 10;
+            this.checkBox_lockTargetDbName.Text = "锁定";
+            this.checkBox_lockTargetDbName.UseVisualStyleBackColor = true;
+            this.checkBox_lockTargetDbName.CheckedChanged += new System.EventHandler(this.checkBox_lockTargetDbName_CheckedChanged);
+            // 
             // ImportMarcForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
@@ -312,5 +325,6 @@
         private DigitalPlatform.CommonControl.TabComboBox tabComboBox_dupProject;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.CheckBox checkBox_dontImportDupRecords;
+        private System.Windows.Forms.CheckBox checkBox_lockTargetDbName;
     }
 }

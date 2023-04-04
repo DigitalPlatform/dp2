@@ -264,6 +264,9 @@ namespace DigitalPlatform.CommonControl
 
                     combobox.Text = strValue;
 
+                    // 2023/3/29
+                    // combobox.DropDownStyle = style;
+
                     if (combobox.Text != strValue)
                     {
                         combobox.Items.Add(strValue);

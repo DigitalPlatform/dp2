@@ -34,6 +34,9 @@
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripButton_load = new System.Windows.Forms.ToolStripButton();
+            this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
+            this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
+            this.toolStripButton_stop = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -75,6 +78,8 @@
             this.dataGridView1.RowTemplate.Height = 33;
             this.dataGridView1.Size = new System.Drawing.Size(772, 375);
             this.dataGridView1.TabIndex = 5;
+            this.dataGridView1.ColumnHeaderMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridView1_ColumnHeaderMouseClick);
+            this.dataGridView1.RowHeaderMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridView1_RowHeaderMouseClick);
             // 
             // toolStrip1
             // 
@@ -82,10 +87,13 @@
             this.toolStrip1.Dock = System.Windows.Forms.DockStyle.None;
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripButton_load});
-            this.toolStrip1.Location = new System.Drawing.Point(13, 398);
+            this.toolStripButton_load,
+            this.toolStripButton_stop,
+            this.toolStripProgressBar1,
+            this.toolStripLabel1});
+            this.toolStrip1.Location = new System.Drawing.Point(13, 392);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(154, 38);
+            this.toolStrip1.Size = new System.Drawing.Size(298, 44);
             this.toolStrip1.TabIndex = 6;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -95,9 +103,28 @@
             this.toolStripButton_load.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_load.Image")));
             this.toolStripButton_load.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_load.Name = "toolStripButton_load";
-            this.toolStripButton_load.Size = new System.Drawing.Size(79, 32);
+            this.toolStripButton_load.Size = new System.Drawing.Size(79, 38);
             this.toolStripButton_load.Text = "装载 ...";
             this.toolStripButton_load.Click += new System.EventHandler(this.toolStripButton_load_Click);
+            // 
+            // toolStripProgressBar1
+            // 
+            this.toolStripProgressBar1.Name = "toolStripProgressBar1";
+            this.toolStripProgressBar1.Size = new System.Drawing.Size(100, 38);
+            // 
+            // toolStripLabel1
+            // 
+            this.toolStripLabel1.Name = "toolStripLabel1";
+            this.toolStripLabel1.Size = new System.Drawing.Size(0, 38);
+            // 
+            // toolStripButton_stop
+            // 
+            this.toolStripButton_stop.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButton_stop.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_stop.Image")));
+            this.toolStripButton_stop.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
+            this.toolStripButton_stop.Name = "toolStripButton_stop";
+            this.toolStripButton_stop.Size = new System.Drawing.Size(40, 38);
+            this.toolStripButton_stop.Text = "停止";
             // 
             // ImportPatronDialog
             // 
@@ -111,7 +138,9 @@
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
             this.Name = "ImportPatronDialog";
-            this.Text = "ImportPatronDialog";
+            this.ShowIcon = false;
+            this.ShowInTaskbar = false;
+            this.Text = "导入读者记录";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ImportPatronDialog_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ImportPatronDialog_FormClosed);
             this.Load += new System.EventHandler(this.ImportPatronDialog_Load);
@@ -130,5 +159,8 @@
         private System.Windows.Forms.DataGridView dataGridView1;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripButton toolStripButton_load;
+        private System.Windows.Forms.ToolStripProgressBar toolStripProgressBar1;
+        private System.Windows.Forms.ToolStripLabel toolStripLabel1;
+        private System.Windows.Forms.ToolStripButton toolStripButton_stop;
     }
 }

@@ -540,7 +540,7 @@ namespace dp2Circulation
                 ListViewPatronLoader loader = new ListViewPatronLoader(channel,
     looping.Progress,
     items,
-    this.m_biblioTable);
+    this.BiblioTable);
                 loader.DbTypeCaption = this.DbTypeCaption;
 
                 looping.Progress.SetProgressRange(0, items.Count);
@@ -588,7 +588,7 @@ namespace dp2Circulation
                         }
                         old_xml = xml;
                         info.OldXml = old_xml;
-                        ChangeInfoRecPath(this.m_biblioTable,
+                        ChangeInfoRecPath(this.BiblioTable,
 info,
 item_recpath);
                         info.Timestamp = timestamp;
@@ -639,7 +639,7 @@ item_recpath);
                                 old_xml = xml;
                                 old_dom.LoadXml(old_xml);
                                 info.OldXml = old_xml;
-                                ChangeInfoRecPath(this.m_biblioTable,
+                                ChangeInfoRecPath(this.BiblioTable,
     info,
     item_recpath);
                                 info.Timestamp = timestamp;
@@ -663,8 +663,11 @@ item_recpath);
                     info.NewXml = changed_xml;
 
                     this.m_nChangedCount++;
+                    /*
                     item.ListViewItem.BackColor = SystemColors.Info;
                     item.ListViewItem.ForeColor = SystemColors.InfoText;
+                    */
+                    SetChangedColor(item.ListViewItem);
 
                 CONTINUE:
                     i++;

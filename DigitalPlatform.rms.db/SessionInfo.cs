@@ -369,7 +369,7 @@ namespace DigitalPlatform.rms
             int nLength = 0;
 
             if (record == null)
-                return 0;
+                return PACKAGE_UNIT_SIZE;
 
             if (record.Path != null)
             {
@@ -426,7 +426,7 @@ namespace DigitalPlatform.rms
             // 2017/8/23
             if (resultSet.Count == 0 && lLength > 0)
             {
-                strError = "结果集为空，无法取出任何记录";
+                strError = $"结果集 '{resultSet.Name}' 为空，无法取出任何记录(请求的 lLength={lLength})";
                 return -1;
             }
 
@@ -1154,10 +1154,17 @@ out strError);
                 // 2021/9/12
                 if (string.IsNullOrEmpty(strPath))
                 {
+                    // 2023/4/3
+                    // 保持 searchresults 和 paths 元素下标一一对应
+                    record = null;
                     goto CONTINUE;
                 }
 
-                DatabaseCollection.PathInfo info = null;
+                // 2023/4/2
+                var parts = StringUtil.ParseTwoPart(strPath, ":");
+                strPath = parts[0];
+                string client_xml = parts[1];
+
                 // 解析资源路径
                 // return:
                 //      -1  一般性错误
@@ -1165,7 +1172,7 @@ out strError);
                 //		-7	路径不合法
                 //      0   成功
                 nRet = this.app.Dbs.ParsePath(strPath,
-    out info,
+    out DatabaseCollection.PathInfo info,
     out strError);
                 if (nRet < 0)
                     return -1;
@@ -1176,7 +1183,8 @@ out strError);
                     return -1;
                 }
 
-                if (info.IsConfigFilePath == true)
+                if (string.IsNullOrEmpty(client_xml) == true
+                    && info.IsConfigFilePath == true)
                 {
                     strError = "路径 '" + strPath + "' 不是记录型的路径";
                     return -1;
@@ -1200,8 +1208,7 @@ out strError);
                     nRet = info.Database.GetCols(
                         strFormat,
                         info.RecordID10,    // path.ID10,
-                        "",
-                        //0,
+                        client_xml, // "",
                         strStyle,   // TODO: 可以考虑削减 titles:type1|type2 以外的其他子参数
                         out string [] cols,
                         out strError);
@@ -1244,17 +1251,27 @@ out strError);
                     (bXml == true || bTimestamp == true || bMetadata == true)
                     )
                 {
-                    long lRet = GetXmlBody(
-info.Database,  // db,
-info.RecordID,  // path.ID,
-bXml,
-bTimestamp,
-bMetadata,
-bWithResMetadata,
-out strXml,
-out strMetadata,
-out baTimestamp,
-out strError);
+                    long lRet = 0;
+                    if (string.IsNullOrEmpty(client_xml) == false)
+                    {
+                        strXml = client_xml;
+                        strMetadata = null;
+                        baTimestamp = null;
+                    }
+                    else
+                    {
+                        lRet = GetXmlBody(
+    info.Database,  // db,
+    info.RecordID,  // path.ID,
+    bXml,
+    bTimestamp,
+    bMetadata,
+    bWithResMetadata,
+    out strXml,
+    out strMetadata,
+    out baTimestamp,
+    out strError);
+                    }
 
                     record.RecordBody = new RecordBody();
                     record.RecordBody.Xml = strXml;

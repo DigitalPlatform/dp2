@@ -5327,6 +5327,7 @@ namespace DigitalPlatform.rms
             {
                 if (StringUtil.IsPureNumber(paths[1]) == true
                     || paths[1] == "?"
+                    || paths[1].StartsWith("?") // 2023/4/2
                     || paths[1] == "-1")
                 {
                     return true;

@@ -10,6 +10,9 @@ using System.Xml;
 using System.Web;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Threading;
+using System.Runtime.CompilerServices;
+using System.Linq;
 
 using ClosedXML.Excel;
 
@@ -30,10 +33,7 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.LibraryServer;
-using System.Threading;
-using System.Runtime.CompilerServices;
-// using dp2Circulation.Reader;
-
+using dp2Circulation.Reader;
 
 namespace dp2Circulation
 {
@@ -690,28 +690,31 @@ out strError);
             BiblioInfo info,
             string strStyle,
             out byte[] baNewTimestamp,
+            out string strOutputPath,
             out string strError)
         {
             strError = "";
 
-            ErrorCodeValue kernel_errorcode;
-            string strOutputPath = "";
+            bool append = (info.RecPath != null && info.RecPath.Contains("?"));
 
+            string action = StringUtil.IsInList("force", strStyle) ? "changereaderbarcode" : "change";
+            if (append)
+                action = "new";
+
+            strOutputPath = "";
             baNewTimestamp = null;
-            string strExistingXml = "";
-            string strSavedXml = "";
             long lRet = channel.SetReaderInfo(
 null, // looping.stop,
-StringUtil.IsInList("force", strStyle) ? "changereaderbarcode" : "change",
+action,
 strRecPath,
 info.NewXml,
-info.OldXml,
+action == "new" ? null : info.OldXml,
 info.Timestamp,
-out strExistingXml,
-out strSavedXml,
+out string strExistingXml,
+out string strSavedXml,
 out strOutputPath,
 out baNewTimestamp,
-out kernel_errorcode,
+out ErrorCodeValue kernel_errorcode,
 out strError);
             if (lRet == -1)
             {
@@ -721,6 +724,9 @@ out strError);
             }
 
             info.Timestamp = baNewTimestamp;    // 2013/10/17
+            // 2023/4/1
+            if (append)
+                info.RecPath = strOutputPath;
             return 0;
         }
 
@@ -1406,6 +1412,22 @@ out strError);
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
+            menuItem = new MenuItem("从 Excel 文件中导入(&E)...");
+            menuItem.Click += new System.EventHandler(this.menu_importFromExcelFile_Click);
+            if (bSearching == true)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("从 Excel 文件中合并(&M)...");
+            menuItem.Click += new System.EventHandler(this.menu_mergeFromExcelFile_Click);
+            if (bSearching == true)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
             menuItem = new MenuItem("刷新 [" + this.listView_records.SelectedItems.Count.ToString() + "] (&R)");
             menuItem.Click += new System.EventHandler(this.menu_refreshSelectedItems_Click);
             if (this.listView_records.SelectedItems.Count == 0
@@ -1660,10 +1682,12 @@ MessageBoxDefaultButton.Button2);
                 goto ERROR1;
             }
 
+            /*
             // 读者信息缓存
             // 如果已经初始化，则保持
             if (this.m_biblioTable == null)
                 this.m_biblioTable = new Hashtable();
+            */
 
             int nCount = 0;
 
@@ -1700,7 +1724,7 @@ MessageBoxDefaultButton.Button2);
                 ListViewPatronLoader loader = new ListViewPatronLoader(channel,
                     looping.Progress,
                     items,
-                    this.m_biblioTable)
+                    this.BiblioTable)
                 {
                     DbTypeCaption = this.DbTypeCaption
                 };
@@ -2297,6 +2321,421 @@ TaskScheduler.Default);
         }
 
 #endif
+
+        // "读者/?1" 之中的 ID 种子
+        int _append_id_seed = 1;
+
+        void menu_importFromExcelFile_Click(object sender, EventArgs e)
+        {
+            _ = Task.Factory.StartNew(() =>
+            {
+                _importFromExcelFile(false);
+            },
+default,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
+
+        void menu_mergeFromExcelFile_Click(object sender, EventArgs e)
+        {
+            _ = Task.Factory.StartNew(() =>
+            {
+                _importFromExcelFile(true);
+            },
+default,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
+
+        void _importFromExcelFile(bool merge)
+        {
+            string strError = "";
+
+            ImportPatronDialog import_dlg = null;
+            var dialog_result = this.TryGet(() =>
+            {
+                import_dlg = new ImportPatronDialog();
+                import_dlg.Font = this.Font;
+                import_dlg.MergeMode = merge;
+                if (merge)
+                    import_dlg.Text = "导入读者记录，合并到读者库";
+                else
+                    import_dlg.Text = "导入读者记录";
+                return import_dlg.ShowDialog(this);
+            });
+
+            if (dialog_result != DialogResult.OK)
+                return;
+
+            string strReaderDbName = "";
+            {
+                var current_readerDbName = this.TryGet(() =>
+                {
+                    return this.comboBox_readerDbName.Text;
+                });
+
+                if (current_readerDbName.StartsWith("<"))
+                    current_readerDbName = "";
+                dialog_result = this.TryGet(() =>
+                {
+                    GetDbNameDlg name_dlg = new GetDbNameDlg();
+                    MainForm.SetControlFont(name_dlg, this.Font, false);
+                    name_dlg.DbType = "reader";
+                    name_dlg.DbName = current_readerDbName;
+                    name_dlg.Text = "请选择目标读者库名";
+                    name_dlg.StartPosition = FormStartPosition.CenterScreen;
+                    var result = name_dlg.ShowDialog(this);
+                    strReaderDbName = name_dlg.DbName;
+                    return result;
+                });
+                if (dialog_result != DialogResult.OK)
+                    return;
+            }
+
+            this.TryInvoke(() =>
+            {
+                this.listView_records.BeginUpdate();
+            });
+            try
+            {
+                bool dont_prompt = false;
+                DialogResult append_dialog_result = DialogResult.No;
+                string key_field_name = import_dlg.GetMergeKeyName();
+
+                // var merge = (string.IsNullOrEmpty(key_field_name) == false);
+
+                using (var looping = Looping(
+                    out LibraryChannel channel,
+                    "正在导入读者数据 ...",
+                    "disableControl"))
+                {
+                    List<ListViewItem> items = new List<ListViewItem>();
+                    var rows = import_dlg.Rows.ToArray();
+                    looping.Progress.SetProgressRange(0, rows.Length);
+                    int i = 0;
+                    foreach (var row in rows)
+                    {
+                        if (row.IsNewRow)
+                            continue;
+
+                        if (looping.Stopped)
+                        {
+                            strError = "用户中断";
+                            goto ERROR1;
+                        }
+
+                        looping.Progress.SetMessage($"正在导入读者数据 {i + 1}/{rows.Length}...");
+
+                        var dom = import_dlg.BuildPatronXml(row);
+
+                        string merge_key = DomUtil.GetElementText(dom.DocumentElement, key_field_name);
+                        if (string.IsNullOrEmpty(merge_key))
+                        {
+                            strError = $"合并键不允许为空。(第 {i + 1} 行)";
+                            goto ERROR1;
+                        }
+
+                        // 这里使用一种 GUID 式的路径，等保存后再转为实际路径
+                        var path = strReaderDbName + "/?" + GetTempId();   //  Guid.NewGuid().ToString();
+
+                        string existing_xml = null;
+                        byte[] existing_timestamp = null;
+
+                        if (merge)
+                        {
+                            // return:
+                            //      -1  出错
+                            //      0   没有找到
+                            //      1   找到
+                            int nRet = GetMergeRecord(
+                                looping.Progress,
+                                channel,
+                                strReaderDbName,
+                                key_field_name,
+                                merge_key,
+                                out string existing_recpath,
+                                out existing_xml,
+                                out existing_timestamp,
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                            if (nRet == 0)
+                            {
+                                // 询问是否改为追加新记录?
+                                if (dont_prompt == false)
+                                {
+                                    append_dialog_result = this.TryGet(() =>
+                                    {
+                                        return MessageDlg.Show(this,
+                                        $"根据 '{merge_key}'({key_field_name}) 检索读者记录未命中，此行无法进行数据合并。\r\n---\r\n\r\n是否改为追加?\r\n\r\n注：\r\n[追加] 改为追加\r\n[跳过] 跳过当前行，但继续后面的处理\r\n[中断] 中断整个批处理",
+                                        "合并读者数据",
+                                        MessageBoxButtons.YesNoCancel,
+                                        MessageBoxDefaultButton.Button1,
+                                        ref dont_prompt,
+                                        new string[] { "追加", "跳过", "中断" },
+                                        "下次不再询问，按照本次选择自动处理");
+                                    });
+                                }
+
+                                if (append_dialog_result == DialogResult.Cancel)
+                                {
+                                    strError = "中断处理";
+                                    goto ERROR1;
+                                }
+
+                                if (append_dialog_result == DialogResult.No)
+                                {
+                                    // 跳过
+                                    Program.MainForm.OperHistory.AppendHtml("<div class='debug yellow'>"
+                                        + HttpUtility.HtmlEncode($"跳过 {i + 1} {dom.OuterXml}")
+                                        + "</div>");
+                                    goto CONTINUE;
+                                }
+
+                                Program.MainForm.OperHistory.AppendHtml("<div class='debug yellow'>"
+    + HttpUtility.HtmlEncode($"改为追加 {i + 1} {dom.OuterXml}")
+    + "</div>");
+
+                                existing_xml = null;
+                                existing_timestamp = null;
+                            }
+                            else
+                            {
+                                // 合并
+                                XmlDocument target_dom = new XmlDocument();
+                                target_dom.LoadXml(existing_xml);
+                                Merge(key_field_name, dom, target_dom);
+                                dom = target_dom;
+                                path = existing_recpath;
+
+                                Program.MainForm.OperHistory.AppendHtml("<div class='debug green'>"
++ HttpUtility.HtmlEncode($"合并 {i + 1} {path} {target_dom.OuterXml}")
++ "</div>");
+                            }
+                        }
+
+                        var info = new BiblioInfo
+                        {
+                            RecPath = path,
+                            OldXml = string.IsNullOrEmpty(existing_xml) ? "<patron />" : existing_xml,
+                            NewXml = dom.OuterXml,
+                            Timestamp = existing_timestamp
+                        };
+                        this.BiblioTable[path] = info;
+                        this.m_nChangedCount++;
+
+                        string strBarcode = DomUtil.GetElementText(dom.DocumentElement,
+                            "barcode");
+
+                        this.TryInvoke(() =>
+                        {
+                            ListViewItem item = new ListViewItem();
+                            ListViewUtil.ChangeItemText(item, 0, path);
+                            ListViewUtil.ChangeItemText(item, 1, strBarcode);
+                            SetChangedColor(item);
+                            this.listView_records.Items.Add(item);
+
+                            items.Add(item);
+                        });
+
+                    CONTINUE:
+                        i++;
+                        looping.Progress.SetProgressValue(i);
+
+                        if ((i % 100) == 0)
+                            this.TryInvoke(() =>
+                            {
+                                this.listView_records.EndUpdate();
+                                this.listView_records.Update();
+                                this.listView_records.BeginUpdate();
+                            });
+
+                        if (items.Count >= 100
+                            || (i % 100) == 0)
+                        {
+                            int nRet = RefreshListViewLines(
+                                looping.Progress,
+                                channel,
+                                items,
+                                "",
+                                "clearRestColumns",
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                            items.Clear();
+                        }
+
+                        // TODO: 对读者 XML 进行查重。查重可以使用模拟写入 SetReaderInfo() 实现
+                    }
+
+                    if (items.Count > 0)
+                    {
+                        int nRet = RefreshListViewLines(
+                            looping.Progress,
+                            channel,
+                            items,
+                            "",
+                            "clearRestColumns",
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        items.Clear();
+                    }
+                    return;
+                }
+            }
+            finally
+            {
+                this.TryInvoke(() =>
+                {
+                    this.listView_records.EndUpdate();
+                });
+            }
+
+            // TODO: 显示 listview 的各列
+            string GetTempId()
+            {
+                return (++_append_id_seed).ToString();
+            }
+
+        ERROR1:
+            this.MessageBoxShow(strError);
+        }
+
+        // 把 source_dom 里面的字段覆盖到 target_dom
+        void Merge(
+            string merge_field_name,
+            XmlDocument source_dom,
+            XmlDocument target_dom)
+        {
+            var nodes = source_dom.DocumentElement.SelectNodes("*");
+            // 算法的要点是, 把"新记录"中的要害字段, 覆盖到"已存在记录"中
+            foreach (XmlElement source in nodes)
+            {
+                string strElementName = source.Name;
+                if (strElementName == merge_field_name)
+                    continue;
+
+                string strTextNew = DomUtil.GetElementOuterXml(source_dom.DocumentElement,
+                    strElementName);
+
+                // 一般处理
+                DomUtil.SetElementOuterXml(target_dom.DocumentElement,
+                    strElementName,
+                    strTextNew);
+            }
+        }
+
+        // 检索获得合并目标记录
+        // return:
+        //      -1  出错
+        //      0   没有找到
+        //      1   找到
+        int GetMergeRecord(
+            Stop stop,
+            LibraryChannel channel,
+            string dbName,
+            string merge_field,
+            string merge_key,
+            out string recpath,
+            out string xml,
+            out byte[] timestamp,
+            out string strError)
+        {
+            xml = "";
+            timestamp = null;
+            recpath = null;
+            strError = "";
+
+            string strFrom = "";
+            if (merge_field == "barcode")
+                strFrom = "证条码号";
+            else if (merge_field == "name")
+                strFrom = "姓名";
+            else if (merge_field == "idCardNumber")
+                strFrom = "身份证号";
+
+            var ret = channel.SearchReader(stop,
+                dbName,
+                merge_key,
+                100,
+                strFrom,
+                "exact",
+                "zh",
+                "default",
+                "",
+                out strError);
+            if (ret == -1)
+                return -1;
+            if (ret == 0)
+                return 0;
+
+            List<string> paths = new List<string>();
+            ResultSetLoader loader = new ResultSetLoader(channel,
+stop,
+"default",
+"id,xml,timestamp",
+"zh");
+            // loader.Prompt += this.Loader_Prompt;
+            foreach (DigitalPlatform.LibraryClient.localhost.Record record in loader)
+            {
+                if (paths.Count == 0)
+                {
+                    xml = record.RecordBody?.Xml;
+                    timestamp = record.RecordBody?.Timestamp;
+                    recpath = record.Path;
+                }
+                paths.Add(record.Path);
+            }
+
+            if (ret == 1)
+            {
+                return 1;
+            }
+
+            SelectPatronDialog dlg = new SelectPatronDialog();
+
+            dlg.Overflow = paths.Count == 100;
+            int nRet = dlg.Initial(
+                // Program.MainForm,
+                paths,
+                $"请选择一个读者记录('{merge_key}')",
+                out strError);
+            if (nRet == -1)
+                return -1;
+            Program.MainForm.AppInfo.LinkFormState(dlg, "ReaderSearchForm_SelectPatronDialog_state");
+            dlg.ShowDialog(this);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
+
+            if (dlg.DialogResult == DialogResult.Cancel)
+            {
+                strError = "放弃选择";
+                return -1;
+            }
+
+            string path = "@path:" + dlg.SelectedRecPath;
+
+            ret = channel.GetReaderInfo(stop,
+                path,
+                "xml",
+                out string[] results,
+                out recpath,
+                out timestamp,
+                out strError);
+            if (ret == -1)
+                return -1;
+            if (ret == 0)
+                return 0;
+            if (results == null || results.Length == 0)
+            {
+                strError = "results error";
+                return -1;
+            }
+            xml = results[0];
+            Debug.Assert(string.IsNullOrEmpty(recpath) == false);
+            return 1;
+        }
+
 
         void menu_importFromBarcodeFile_Click(object sender, EventArgs e)
         {
@@ -5690,10 +6129,12 @@ TaskScheduler.Default);
                 goto ERROR1;
             }
 
+            /*
             // 读者信息缓存
             // 如果已经初始化，则保持
             if (this.m_biblioTable == null)
                 this.m_biblioTable = new Hashtable();
+            */
 
             string dlg_filename = "";
             var dialog_result = this.TryGet(() =>
@@ -5818,7 +6259,7 @@ TaskScheduler.Default);
                     ListViewPatronLoader loader = new ListViewPatronLoader(channel,
                         looping.Progress,
                         items,
-                        this.m_biblioTable);
+                        this.BiblioTable);
                     loader.DbTypeCaption = this.DbTypeCaption;
 
                     loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
@@ -5874,8 +6315,11 @@ TaskScheduler.Default);
 
                             this.TryInvoke(() =>
                             {
+                                /*
                                 item.ListViewItem.BackColor = SystemColors.Info;
                                 item.ListViewItem.ForeColor = SystemColors.InfoText;
+                                */
+                                SetChangedColor(item.ListViewItem);
                             });
                         }
 
@@ -6735,10 +7179,12 @@ dlg.UiState);
                 return -1;
             }
 
+            /*
             // 读者信息缓存
             // 如果已经初始化，则保持
             if (this.m_biblioTable == null)
                 this.m_biblioTable = new Hashtable();
+            */
 
             Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始进行读者记录校验</div>");
 
@@ -6772,7 +7218,7 @@ dlg.UiState);
                 ListViewPatronLoader loader = new ListViewPatronLoader(channel,
                     looping.Progress,
                     items,
-                    this.m_biblioTable);
+                    this.BiblioTable);
                 loader.DbTypeCaption = this.DbTypeCaption;
 
                 loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);

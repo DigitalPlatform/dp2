@@ -203,27 +203,30 @@ namespace DigitalPlatform
             // _inBeginLoop++;
             if (nRet == 1)
             {
-                nStop = 0;	// 正在处理
-
-                if (_manager != null)
+                this.m_stoplock.AcquireWriterLock(m_nLockTimeout);
+                try
                 {
-                    // bool bIsActive = this.IsActive();
+                    nStop = 0;  // 正在处理
 
-                    if (this.OnBeginLoop != null)
+                    if (_manager != null)
                     {
-                        BeginLoopEventArgs e = new BeginLoopEventArgs();
-                        // TODO: 可以考虑取消 e.IsActive。因为使用者可以从 stop.IsActive 自己探测
-                        // e.IsActive = bIsActive;
-                        this.OnBeginLoop(this, e);
-                    }
+                        // bool bIsActive = this.IsActive();
 
-                    /*
-                    // 只要 Stop 对象属于 active group，就有可能改变显示状态
-                    var belong_active_group = this.Group == _manager.GetActiveGroup();
-                    if (belong_active_group)
+                        if (this.OnBeginLoop != null)
+                        {
+                            BeginLoopEventArgs e = new BeginLoopEventArgs();
+                            // TODO: 可以考虑取消 e.IsActive。因为使用者可以从 stop.IsActive 自己探测
+                            // e.IsActive = bIsActive;
+                            this.OnBeginLoop(this, e);
+                        }
+
+                        /*
+                        // 只要 Stop 对象属于 active group，就有可能改变显示状态
+                        var belong_active_group = this.Group == _manager.GetActiveGroup();
+                        if (belong_active_group)
+                            _manager.UpdateDisplay();
+                        */
                         _manager.UpdateDisplay();
-                    */
-                    _manager.UpdateDisplay();
 
 #if REMOVED
                     if (bIsActive == true)
@@ -240,6 +243,11 @@ namespace DigitalPlatform
                             true);
                     }
 #endif
+                    }
+                }
+                finally
+                {
+                    this.m_stoplock.ReleaseWriterLock();
                 }
             }
         }
@@ -254,33 +262,36 @@ namespace DigitalPlatform
 
             if (nRet == 0)
             {
-                nStop = 2;  // 转为 已经停止 状态
-                this._message = "";
-
-                if (_manager != null)
+                this.m_stoplock.AcquireWriterLock(m_nLockTimeout);
+                try
                 {
-                    // bool bIsActive = this.IsActive();
+                    nStop = 2;  // 转为 已经停止 状态
+                    this._message = "";
 
-                    if (this.OnEndLoop != null)
+                    if (_manager != null)
                     {
-                        EndLoopEventArgs e = new EndLoopEventArgs();
-                        // TODO: 可以考虑取消 e.IsActive。因为使用者可以从 stop.IsActive 自己探测
-                        // e.IsActive = bIsActive;
-                        this.OnEndLoop(this, e);
-                    }
+                        // bool bIsActive = this.IsActive();
 
-                    /*
-                    // 只要 Stop 对象属于 active group，就有可能改变显示状态
-                    var belong_active_group = this.Group == _manager.GetActiveGroup();
-                    if (belong_active_group)
-                    {
+                        if (this.OnEndLoop != null)
+                        {
+                            EndLoopEventArgs e = new EndLoopEventArgs();
+                            // TODO: 可以考虑取消 e.IsActive。因为使用者可以从 stop.IsActive 自己探测
+                            // e.IsActive = bIsActive;
+                            this.OnEndLoop(this, e);
+                        }
+
+                        /*
+                        // 只要 Stop 对象属于 active group，就有可能改变显示状态
+                        var belong_active_group = this.Group == _manager.GetActiveGroup();
+                        if (belong_active_group)
+                        {
+                            _manager.UpdateDisplay();
+                        }
+                        */
                         _manager.UpdateDisplay();
-                    }
-                    */
-                    _manager.UpdateDisplay();
 
-                    // EndLoop() 以后当前 Stop 对象一定不能是活动的状态了
-                    Debug.Assert(_manager.SurfaceStop != this);
+                        // EndLoop() 以后当前 Stop 对象一定不能是活动的状态了
+                        Debug.Assert(_manager.SurfaceStop != this);
 
 #if REMOVED
                     if (bIsActive == true)
@@ -297,6 +308,11 @@ namespace DigitalPlatform
                             true);
                     }
 #endif
+                    }
+                }
+                finally
+                {
+                    this.m_stoplock.ReleaseWriterLock();
                 }
             }
 

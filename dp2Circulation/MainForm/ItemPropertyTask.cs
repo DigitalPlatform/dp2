@@ -57,7 +57,8 @@ namespace dp2Circulation
             BiblioInfo info = this.BiblioInfo;
             string strRecPath = this.BiblioInfo.RecPath;
 
-            if (string.IsNullOrEmpty(info.OldXml) == true)
+            if (string.IsNullOrEmpty(info.OldXml) == true
+                && string.IsNullOrEmpty(info.NewXml) == true)   // 2023/4/1
             {
                 lock (syncRoot)
                 {

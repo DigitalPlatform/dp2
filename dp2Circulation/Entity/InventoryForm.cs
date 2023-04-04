@@ -3159,7 +3159,7 @@ MessageBoxDefaultButton.Button1);
                 ListViewPatronLoader loader = new ListViewPatronLoader(channel,
     looping.Progress,
     items,
-    this.m_biblioTable);
+    this.BiblioTable);
                 loader.DbTypeCaption = "实体库";
 
                 List<ListViewItem> changed_items = new List<ListViewItem>();
@@ -3777,7 +3777,7 @@ MessageBoxDefaultButton.Button1);
             if (string.IsNullOrEmpty(strRecPath) == true)
                 return;
 
-            BiblioInfo info = (BiblioInfo)this.m_biblioTable[strRecPath];
+            BiblioInfo info = (BiblioInfo)this.BiblioTable[strRecPath];
             if (info == null)
                 return;
 
@@ -3793,7 +3793,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             if (bClearBiblioInfo == true)
-                this.m_biblioTable.Remove(strRecPath);
+                this.BiblioTable.Remove(strRecPath);
         }
 
         // 统计运算的结果
@@ -3916,7 +3916,7 @@ MessageBoxDefaultButton.Button2);
                 ListViewPatronLoader loader = new ListViewPatronLoader(channel,
     looping.Progress,
     items,
-    this.m_biblioTable);
+    this.BiblioTable);
                 loader.DbTypeCaption = "盘点";
 
                 int i = 0;

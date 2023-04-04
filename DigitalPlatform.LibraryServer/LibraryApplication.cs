@@ -122,6 +122,11 @@ namespace DigitalPlatform.LibraryServer
         /// </summary>
         public string GlobalAddRights { get; set; }
 
+        /// <summary>
+        /// 登录时，如果报错，是否采用模糊报错方式
+        /// </summary>
+        public bool PublicError { get; set; }
+
         string _outgoingQueue = "";
 
         /// <summary>
@@ -951,6 +956,7 @@ namespace DigitalPlatform.LibraryServer
                     // login/@patronPasswordExpireLength 属性
                     // login/@patronPasswordStyle 属性
                     // login/@tempPasswordExpireLength 属性
+                    // login/@publicError 属性
                     _patronPasswordExpirePeriod = TimeSpan.MaxValue;
                     _patronPasswordStyle = "";
                     _tempPasswordExpirePeriod = new TimeSpan(1, 0, 0); // 一小时
@@ -991,11 +997,17 @@ namespace DigitalPlatform.LibraryServer
                         {
                             app.WriteErrorLog($"library.xml 中 login/@tempPasswordExpireLength 属性值 '{patronPasswordExpireLength}' 格式不合法: {ex.Message}");
                         }
+
+                        // 2023/4/3
+                        this.PublicError = DomUtil.GetBooleanParam(node,
+    "publicError",
+    false);
                     }
                     else
                     {
                         this.CheckClientVersion = false;
                         this.GlobalAddRights = "";
+                        this.PublicError = false;
                     }
 
                     // <circulation>

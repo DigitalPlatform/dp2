@@ -73,6 +73,11 @@ Program.MainForm.UserDir,
     "overwrite_by_g01",
     false);
 
+            this.UiState = Program.MainForm.AppInfo.GetString(
+"ImportMarcForm",
+"uiState",
+"");
+
             BeginListProjectNames();
             tabComboBox_dupProject_SelectedIndexChanged(null, null);
         }
@@ -112,8 +117,65 @@ Program.MainForm.UserDir,
 "ImportMarcForm",
 "overwrite_by_g01",
 this.checkBox_overwriteByG01.Checked);
+
+                Program.MainForm.AppInfo.SetString(
+"ImportMarcForm",
+"uiState",
+this.UiState);
             }
         }
+
+        public string UiState
+        {
+            get
+            {
+                List<object> controls = new List<object>
+                {
+                    this.tabControl_main,
+                    this.comboBox_targetDbName,
+                    this.checkBox_lockTargetDbName,
+                    this.checkBox_overwriteByG01,
+                    this.textBox_importRange,
+                    this.textBox_batchNo,
+                    this.tabComboBox_dupProject,
+                    this.checkBox_dontImportDupRecords,
+                    /*
+                    new ControlWrapper(this.checkBox_cfg_autoChangePassword, true),
+                    new ControlWrapper(this.checkBox_forceCreate, false),
+                    */
+                };
+                return GuiState.GetUiState(controls);
+            }
+            set
+            {
+                List<object> controls = new List<object>
+                {
+                    this.tabControl_main,
+                    this.comboBox_targetDbName,
+                    this.checkBox_lockTargetDbName,
+                    this.checkBox_overwriteByG01,
+                    this.textBox_importRange,
+                    this.textBox_batchNo,
+                    this.tabComboBox_dupProject,
+                    this.checkBox_dontImportDupRecords,
+                    /*
+                    new ControlWrapper(this.checkBox_cfg_autoChangePassword, true),
+                    new ControlWrapper(this.checkBox_forceCreate, false),
+                    */
+                };
+                _inSetUiState++;
+                try
+                {
+                    GuiState.SetUiState(controls, value);
+                }
+                finally
+                {
+                    _inSetUiState--;
+                }
+            }
+        }
+
+        int _inSetUiState = 0;
 
         // 检查列表。如果 .Text 中的值没有在列表中找到，则清除 .Text
         bool ClearProjectNameIfNeed()
@@ -277,18 +339,7 @@ this.checkBox_overwriteByG01.Checked);
             {
                 return this.checkBox_dontImportDupRecords.Checked;
             });
-            if (string.IsNullOrEmpty(dup_project_name)
-                || dup_project_name == "[不查重]")
-            {
 
-            }
-            else
-            {
-                this.TryInvoke(() =>
-                {
-                    dup_form = Program.MainForm.EnsureDupForm();
-                });
-            }
 
             // 2021/4/8
             bool overwrite = (bool)this.Invoke(new Func<bool>(() =>
@@ -329,8 +380,16 @@ this.checkBox_overwriteByG01.Checked);
             RangeList range = null;
             if (string.IsNullOrEmpty(strRange) == false)
             {
-                range = new RangeList(strRange);
-                range.Sort();
+                try
+                {
+                    range = new RangeList(strRange);
+                    range.Sort();
+                }
+                catch(Exception ex)
+                {
+                    strError = $"导入记录范围 '{strRange}' 不合法: {ex.Message}";
+                    goto ERROR1;
+                }
             }
 
             // 编目批次号
@@ -382,6 +441,19 @@ this.checkBox_overwriteByG01.Checked);
                 "disableControl");
             try
             {
+                if (string.IsNullOrEmpty(dup_project_name)
+    || dup_project_name == "[不查重]")
+                {
+
+                }
+                else
+                {
+                    this.TryInvoke(() =>
+                    {
+                        dup_form = Program.MainForm.EnsureDupForm();
+                    });
+                }
+
                 // 读入 ISO2709 记录的索引
                 int nIndex = 0;
 
@@ -656,7 +728,7 @@ out strError);
                             if (dont_import_dup)
                             {
                                 // TODO: 增加题名与责任者显示
-                                strError = $"记录 { (i + 1) }) {summary} 因为重复而没有导入";
+                                strError = $"记录 {(i + 1)}) {summary} 因为重复而没有导入";
                                 Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(strError) + "</div>");
                                 GetErrorInfoForm().WriteHtml(strError + "\r\n");
                                 continue;
@@ -757,7 +829,8 @@ out strError);
 
                 if (dup_form != null)
                 {
-                    this.TryInvoke(() => {
+                    this.TryInvoke(() =>
+                    {
                         dup_form.Close();
                         dup_form = null;
                     });
@@ -773,6 +846,14 @@ out strError);
                 {
                     Value = 0,
                     ErrorInfo = message
+                };
+            }
+            catch (Exception ex)
+            {
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = ExceptionUtil.GetDebugText(ex)
                 };
             }
             finally
@@ -793,6 +874,15 @@ out strError);
 
                 if (file != null)
                     file.Close();
+
+                if (dup_form != null)
+                {
+                    this.TryInvoke(() =>
+                    {
+                        dup_form.Close();
+                        dup_form = null;
+                    });
+                }
             }
         ERROR1:
             Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(strError) + "</div>");
@@ -979,7 +1069,12 @@ out strError);
         {
             this._openMarcFileDialog.MainPanel.Enabled = bEnable;
 
-            this.comboBox_targetDbName.Enabled = this.checkBox_overwriteByG01.Checked == true ? false : bEnable;
+            if (bEnable == false)
+                this.comboBox_targetDbName.Enabled = false;
+            else
+                ChangeTargetDbNameEnabled();
+
+            // this.comboBox_targetDbName.Enabled = this.checkBox_overwriteByG01.Checked == true ? false : bEnable;
 
             this.button_next.Enabled = bEnable;
         }
@@ -993,7 +1088,7 @@ out strError);
 
         private void checkBox_overwriteByG01_CheckedChanged(object sender, EventArgs e)
         {
-            this.comboBox_targetDbName.Enabled = !this.checkBox_overwriteByG01.Checked;
+            ChangeTargetDbNameEnabled();
         }
 
         private void comboBox_targetDbName_SelectedIndexChanged(object sender, EventArgs e)
@@ -1009,6 +1104,20 @@ out strError);
                 this.checkBox_dontImportDupRecords.Visible = false;
             else
                 this.checkBox_dontImportDupRecords.Visible = true;
+        }
+
+        private void checkBox_lockTargetDbName_CheckedChanged(object sender, EventArgs e)
+        {
+            ChangeTargetDbNameEnabled();
+        }
+
+        void ChangeTargetDbNameEnabled()
+        {
+            if (this.checkBox_overwriteByG01.Checked
+                || this.checkBox_lockTargetDbName.Checked)
+                this.comboBox_targetDbName.Enabled = false;
+            else
+                this.comboBox_targetDbName.Enabled = true;
         }
     }
 }

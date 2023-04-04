@@ -139,7 +139,7 @@ namespace DigitalPlatform
                     if (existing == null)
                         return null;
                     _groups.Remove(existing);
-                    _groups.Add(existing);
+                    _groups.Add(existing);  // 注: 在 _group 数组中靠后的元素，在显示角度更“顶层”
                     // TODO: 判断一下 existing 是否已经是 active 状态
                     found = true;
                     return existing;
@@ -1159,7 +1159,6 @@ string strText)
             this.m_collectionlock.AcquireWriterLock(Stop.m_nLockTimeout);
             try
             {
-
                 m_stopButton = button;
 
                 /*
@@ -1171,6 +1170,9 @@ string strText)
 
                 m_messageBar = statusBar;
                 m_progressBar = progressBar;
+
+                // 2023/4/4
+                EnableStopButtons(false);
             }
             finally
             {

@@ -14445,7 +14445,7 @@ out strError);
 
         internal static string GetTimestampHtml(byte[] timestamp)
         {
-            return "<p>书目记录时间戳: " + ByteArray.GetHexTimeStampString(timestamp) + "</p>";
+            return "<p>记录时间戳: " + ByteArray.GetHexTimeStampString(timestamp) + "</p>";
         }
 
         List<string> GetExistCatalogingRules()

@@ -18,6 +18,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.LibraryClient;
+using DocumentFormat.OpenXml.EMMA;
 
 namespace dp2Circulation
 {
@@ -41,7 +42,28 @@ namespace dp2Circulation
 
         CommentViewerForm m_commentViewer = null;
 
-        internal Hashtable m_biblioTable = new Hashtable(); // 读者记录路径 --> 读者信息
+        Hashtable m_biblioTable = new Hashtable(); // 读者记录路径 --> 读者信息
+
+        public Hashtable BiblioTable
+        {
+            get
+            {
+                if (m_biblioTable == null)
+                    m_biblioTable = new Hashtable();
+                return m_biblioTable;
+            }
+        }
+
+        // 调用前，info.RecPath 已经变成了新的路径
+        public void ChangeBiblioInfoKey(
+            string old_recpath,
+            BiblioInfo info)
+        {
+            string new_recpath = info.RecPath;
+            this.BiblioTable[new_recpath] = info;
+            this.BiblioTable.Remove(old_recpath);
+        }
+
         int m_nInViewing = 0;
 
         internal virtual bool InSearching
@@ -295,10 +317,12 @@ namespace dp2Circulation
             BiblioInfo info,
             string strStyle,
             out byte[] baNewTimestamp,
+            out string strOutputResPath,
             out string strError)
         {
             strError = "尚未实现";
             baNewTimestamp = null;
+            strOutputResPath = "";
             return -1;
         }
 
@@ -633,7 +657,7 @@ TaskScheduler.Default);
                 goto ERROR1;
             }
 
-            int nChangedCount = 0;
+            // int nChangedCount = 0;
             List<ListViewItem> items = new List<ListViewItem>();
             foreach (ListViewItem item in selected_items)
             {
@@ -643,10 +667,13 @@ TaskScheduler.Default);
                     continue;
                 items.Add(item);
 
+                /*
                 if (IsItemChanged(item) == true)
                     nChangedCount++;
+                */
             }
 
+            /*
             // 警告未保存的内容会丢失
             if (nChangedCount > 0)
             {
@@ -662,6 +689,7 @@ TaskScheduler.Default);
                 if (result == System.Windows.Forms.DialogResult.Cancel)
                     return;
             }
+            */
 
             nRet = RefreshListViewLines(
                 //null,
@@ -741,6 +769,25 @@ out strError);
         }
 #endif
 
+        // 兼容原来的参数
+        public int RefreshListViewLines(
+    Stop stop,
+    LibraryChannel channel,
+    List<ListViewItem> items_param,
+    string strFormat,
+    // bool bBeginLoop,
+    bool bClearRestColumns,
+    out string strError)
+        {
+            return RefreshListViewLines(
+    stop,
+    channel,
+    items_param,
+    strFormat,
+    bClearRestColumns ? "clearRestColumns,progressRange" : "progressRange",
+    out strError);
+        }
+
         // TODO: 检查是否有脚本调用过没有 channel_param 参数的版本
         /// <summary>
         /// 刷新浏览行
@@ -749,7 +796,7 @@ out strError);
         /// <param name="channel">通讯通道。可以为空</param>
         /// <param name="items_param">要刷新的 ListViewItem 集合</param>
         /// <param name="strFormat">浏览格式。供调用 GetSearchResult() 时 strStyle 参数之用 </param>
-        /// <param name="bClearRestColumns">是否清除右侧多余的列内容</param>
+        /// <param name="style">风格</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错; 0: 成功</returns>
         public int RefreshListViewLines(
@@ -758,7 +805,7 @@ out strError);
             List<ListViewItem> items_param,
             string strFormat,
             // bool bBeginLoop,
-            bool bClearRestColumns,
+            string style,
             out string strError)
         {
             strError = "";
@@ -768,6 +815,9 @@ out strError);
             if (items_param.Count == 0)
                 return 0;
 
+            // 是否清除右侧多余的列内容
+            bool bClearRestColumns = StringUtil.IsInList("clearRestColumns", style);
+            bool progressRange = StringUtil.IsInList("progressRange", style);
 #if REMOVED
             Looping looping = null;
             if (/*_stop != null && */bBeginLoop == true)
@@ -796,13 +846,35 @@ out strError);
                         || recpath.StartsWith("error:"))
                         continue;
                     items.Add(item);
-                    recpaths.Add(recpath);
+
+                    // 2023/4/3
+                    var info = (BiblioInfo)this.m_biblioTable[recpath];
+
+                    // 没有 BiblioInfo，或者处在未修改状态
+                    if (info == null || info.Changed == false)
+                        recpaths.Add(recpath);
+                    else
+                    {
+                        Debug.Assert(info != null);
+                        /*
+                        if (info == null)
+                        {
+                            strError = $"在 biblioTable 缓存中没有找到路径为 '{recpath}' 的 XML 记录";
+                            return -1;
+                        }
+                        */
+                        string xml = info.NewXml;
+                        if (string.IsNullOrEmpty(xml))
+                            xml = info.OldXml;
+                        recpaths.Add(recpath + ":" + xml);
+                    }
 
                     // TODO: 对出错状态的行不要清除修改状态
-                    ClearOneChange(item, true);
+                    // ClearOneChange(item, true);
                 }
 
-                stop?.SetProgressRange(0, items.Count);
+                if (progressRange)
+                    stop?.SetProgressRange(0, items.Count);
 
                 BrowseLoader loader = new BrowseLoader();
                 loader.Channel = channel;
@@ -816,28 +888,29 @@ out strError);
                 int i = 0;
                 foreach (DigitalPlatform.LibraryClient.localhost.Record record in loader)
                 {
-                    Application.DoEvents();	// 出让界面控制权
+                    if (this.InvokeRequired)
+                        Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null
-                        && stop.State != 0)
+                    if (stop != null && stop.State != 0)
                     {
                         strError = "用户中断";
                         return -1;
                     }
 
-                    Debug.Assert(record.Path == recpaths[i], "");
+                    Debug.Assert(record.Path == BrowseLoader.GetPath(recpaths[i]), "");
 
                     if (stop != null)
                     {
                         stop?.SetMessage("正在刷新浏览行 " + record.Path + " ...");
-                        stop?.SetProgressValue(i);
+                        if (progressRange)
+                            stop?.SetProgressValue(i);
                     }
 
                     ListViewItem item = items[i];
 
                     this.Invoke((Action)(() =>
                     {
-                        // TODO: 注意保护好事项的背景色?
+                        // 注意保护好事项的背景色
                         // TODO: 注意处理好 record.RecordBody.Result 带有出错信息的情形
                         RefreshOneLine(item, record.Cols, bClearRestColumns);
                     }));
@@ -1307,17 +1380,36 @@ TaskScheduler.Default);
                         byte[] baNewTimestamp = null;
 
                     REDO_SAVE:
+                        string old_recpath = info.RecPath;
                         // return:
                         //      -2  时间戳不匹配
                         //      -1  出错
                         //      0   成功
                         nRet = SaveRecord(
                             channel,
-                            strRecPath,
+                            BiblioInfo.GetPath(strRecPath),
                             info,
                             strStyle,
                             out baNewTimestamp,
+                            out _,
                             out strError);
+                        string new_recpath = info.RecPath;
+                        // 修改 BiblioTable 中的 Key
+                        if (new_recpath != old_recpath)
+                        {
+                            this.ChangeBiblioInfoKey(old_recpath, info);
+                            /*
+                            this.BiblioTable[new_recpath] = info;
+                            this.BiblioTable.Remove(old_recpath);
+                            */
+                            this.TryInvoke(() =>
+                            {
+                                item.Text = info.RecPath;
+                                strRecPath = item.Text;
+                            });
+
+                        }
+
                         if (nRet == -1)
                         {
                             Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode("保存" + this.DbTypeCaption + "记录 " + strRecPath + " 时出错: " + strError) + "</div>");
@@ -1989,8 +2081,11 @@ TaskScheduler.Default);
                             info.NewXml = strXml;
                         }
 
+                        /*
                         item.ListViewItem.BackColor = SystemColors.Info;
                         item.ListViewItem.ForeColor = SystemColors.InfoText;
+                        */
+                        SetChangedColor(item.ListViewItem);
                     }
 
                     i++;
@@ -2019,6 +2114,12 @@ TaskScheduler.Default);
             DoViewComment(false);
             strError = "修改" + this.DbTypeCaption + "记录 " + nChangedCount.ToString() + " 条 (共处理 " + nProcessCount.ToString() + " 条)\r\n\r\n(注意修改并未自动保存。请在观察确认后，使用保存命令将修改保存回" + this.DbTypeCaption + "库)";
             return 1;
+        }
+
+        public static void SetChangedColor(ListViewItem item)
+        {
+            item.BackColor = SystemColors.Info;
+            item.ForeColor = SystemColors.InfoText;
         }
 
         void loader_Prompt(object sender, MessagePromptEventArgs e)

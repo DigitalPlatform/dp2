@@ -812,8 +812,8 @@ namespace dp2Library
                 string strGetToken = (string)parameters["gettoken"];
 
                 // 2022/4/2
-                // 需要需要模糊报错信息(中的用户名和密码错误)
-                bool public_error = parameters.ContainsKey("publicError");
+                // 表示需要模糊报错信息(中的用户名和密码错误)
+                bool public_error = app.PublicError || parameters.ContainsKey("publicError");
 
                 // TODO: 图书馆代码列表需要和当前 sessioninfo 的馆代码列表交叉，排除可能多余的部分
 
@@ -886,8 +886,6 @@ namespace dp2Library
                         // 第一阶段：先用 manager 用户名和密码验证
                         try
                         {
-                            string strTemp = "";
-                            List<string> temp_list = null;
                             // 工作人员登录(代理者登录)
                             nRet = sessioninfo.Login(info.ManagerUserName,
                                  info.ManagerPassword,
@@ -897,9 +895,9 @@ namespace dp2Library
                                  "*",
                                  null,
                                  out bool passwordExpired1,
-                                 out temp_list,
+                                 out List<string> temp_list,
                                  out strRights,
-                                 out strTemp,
+                                 out string strTemp,
                                  out strError);
                             if (nRet != 1)
                             {
@@ -1030,9 +1028,6 @@ namespace dp2Library
                         // 第一阶段：先用manager用户名和密码验证
                         try
                         {
-                            string strTemp = "";
-                            List<string> temp_list = null;
-
                             // 工作人员登录
                             nRet = sessioninfo.Login(info.ManagerUserName,
                                  info.ManagerPassword,
@@ -1042,9 +1037,9 @@ namespace dp2Library
                                  "*",
                                  null,
                                  out bool passwordExpired3,
-                                 out temp_list,
+                                 out List<string> temp_list,
                                  out strRights,
-                                 out strTemp,
+                                 out string strTemp,
                                  out strError);
                             if (nRet != 1)
                             {
@@ -1784,7 +1779,7 @@ namespace dp2Library
                     if (app.IsCurrentChangeableReaderPath(strOutputPath,
             sessioninfo.LibraryCodeList) == false)
                     {
-                        strError = $"读者记录路径 '{ strOutputPath}' 从属的读者库不在{SessionInfo.GetCurrentUserName(sessioninfo)}管辖范围内";
+                        strError = $"读者记录路径 '{strOutputPath}' 从属的读者库不在{SessionInfo.GetCurrentUserName(sessioninfo)}管辖范围内";
                         goto ERROR1;
                     }
                 }
@@ -2426,7 +2421,7 @@ namespace dp2Library
 
                     if (notmatches.Count > 0)
                     {
-                        strError = $"读者库 { StringUtil.MakePathList(notmatches)} 因为馆代码(及馆际互借权限)限制，不允许{SessionInfo.GetCurrentUserName(sessioninfo)}检索";
+                        strError = $"读者库 {StringUtil.MakePathList(notmatches)} 因为馆代码(及馆际互借权限)限制，不允许{SessionInfo.GetCurrentUserName(sessioninfo)}检索";
                         result.Value = -1;
                         result.ErrorInfo = strError;
                         result.ErrorCode = ErrorCode.AccessDenied;
@@ -3607,11 +3602,42 @@ namespace dp2Library
             return modified_style;
         }
 
+        // 2023/4/2
+        // 根据 string [] 构造 Record 集合
+        // 每个路径的格式为: path:xml
+        Record[] BuildSearchResults(string[] paths)
+        {
+            List<Record> results = new List<Record>();
+            foreach (var s in paths)
+            {
+                var parts = StringUtil.ParseTwoPart(s, ":");
+                var record = new Record
+                {
+                    Path = parts[0],
+                    RecordBody = new RecordBody
+                    {
+                        Xml = parts[1]
+                    }
+                };
+                results.Add(record);
+            }
+
+            return results.ToArray();
+        }
+
         // 2022/11/29 从 GetSearchResult() 处理中转移到此处。可能和 GetBrowseRecords() 中的旧代码有差异
         // 对 XML 记录进行过滤或者修改
+        // parameters:
+        //      client_xmls 一个 bool 集合，表示每个 Record 是否为前端提供的 XML
         void FilterResultSet(Record[] searchresults,
-            string strBrowseInfoStyle)
+            string strBrowseInfoStyle,
+            List<bool> client_xmls = null)
         {
+            if (client_xmls != null && client_xmls.Count != searchresults.Length)
+            {
+                throw new ArgumentException($"client_xmls 内元素数({client_xmls.Count}) 和 searchresults 内元素数({searchresults.Length})应该相等");
+            }
+
             // 2012/9/15
             // 当前用户是否能管辖一个读者库。key 为数据库名，value 为 true 或 false
             Hashtable table = new Hashtable();  // 加快运算速度
@@ -3626,12 +3652,18 @@ namespace dp2Library
 
             bool bHasGetBiblioInfoRight = StringUtil.IsInList($"{InfoRight("getbiblioinfo")}", sessioninfo.RightsOrigin);
 
+            int i = 0;
             foreach (Record record in searchresults)
             {
+                bool client_xml = false;
+                if (client_xmls != null)
+                    client_xml = client_xmls[i];
+
                 // 2023/1/29
                 if (string.IsNullOrEmpty(record.Path))
                 {
                     ClearRecord(record, $"因缺乏 record.Path 部分，无法进行过滤。请在 strBrowseStyle 中包含 id");
+                    i++;
                     continue;
                 }
 
@@ -3688,7 +3720,8 @@ namespace dp2Library
                         FilterPatronRecord(record,
 strDbName,
 read_level,
-strBrowseInfoStyle);
+strBrowseInfoStyle,
+client_xml);
                     }
                 }
                 else if (app.IsBiblioDbName(strDbName))
@@ -3703,7 +3736,8 @@ strBrowseInfoStyle);
                         strDbName,
                         bHasGetBiblioInfoRight,
                         sessioninfo.Access,
-                        strBrowseInfoStyle);
+                        strBrowseInfoStyle,
+                        client_xml);
                 }
                 else if (app.IsItemDbName(strDbName)
                     || app.IsIssueDbName(strDbName)
@@ -3833,6 +3867,8 @@ strDbName);
 
                 // 2023/1/29
                 ClearWorkingFields(record, strBrowseInfoStyle);
+
+                i++;
             }
         }
 
@@ -4027,7 +4063,8 @@ strDbName);
             string strBiblioDbName,
             bool has_getbiblioinfo_right,
             string access,
-            string strBrowseInfoStyle)
+            string strBrowseInfoStyle,
+            bool client_xml = false)
         {
             bool bHasCols = StringUtil.IsInList("cols", strBrowseInfoStyle)
                 || (StringUtil.GetParameterByPrefix(strBrowseInfoStyle, "format", ":") != null);
@@ -4055,42 +4092,51 @@ strDbName);
 
             string xml = null;
 
-            // Result.Value -1出错 0没有找到 1找到
-            var ret = app.GetBiblioInfos(
-sessioninfo,
-record.Path,
-origin_xml,
-new string[] { "xml" },
-out string[] results,
-out byte[] _);
-            if (ret.Value == -1 || ret.Value > 1)
+            if (client_xml)
             {
-                SetRecordBodyError(record, ret.ErrorInfo, ErrorCodeValue.CommonError);
-                ClearCols(record, LibraryApplication.FILTERED + ret.ErrorInfo);
-                ClearXml(record);
-            }
-            else if (ret.Value == 0)
-            {
-                SetRecordBodyError(record, ret.ErrorInfo, ErrorCodeValue.NotFound);
-                ClearCols(record, LibraryApplication.FILTERED + ret.ErrorInfo);
-                ClearXml(record);
+                xml = origin_xml;
+                bXmlChanged = true;
             }
             else
             {
-                if (results == null || results.Length == 0)
+                // Result.Value -1出错 0没有找到 1找到
+                var ret = app.GetBiblioInfos(
+    sessioninfo,
+    record.Path,
+    origin_xml,
+    new string[] { "xml" },
+    out string[] results,
+    out byte[] _);
+                if (ret.Value == -1 || ret.Value > 1)
                 {
-                    SetRecordBodyError(record, "results error", ErrorCodeValue.CommonError);
-                    ClearCols(record, LibraryApplication.FILTERED + "GetBiblioInfo() results error");
+                    SetRecordBodyError(record, ret.ErrorInfo, ErrorCodeValue.CommonError);
+                    ClearCols(record, LibraryApplication.FILTERED + ret.ErrorInfo);
+                    ClearXml(record);
+                }
+                else if (ret.Value == 0)
+                {
+                    SetRecordBodyError(record, ret.ErrorInfo, ErrorCodeValue.NotFound);
+                    ClearCols(record, LibraryApplication.FILTERED + ret.ErrorInfo);
                     ClearXml(record);
                 }
                 else
                 {
-                    xml = results[0];
+                    if (results == null || results.Length == 0)
+                    {
+                        SetRecordBodyError(record, "results error", ErrorCodeValue.CommonError);
+                        ClearCols(record, LibraryApplication.FILTERED + "GetBiblioInfo() results error");
+                        ClearXml(record);
+                    }
+                    else
+                    {
+                        xml = results[0];
 
-                    record.RecordBody.Xml = xml;
+                        record.RecordBody.Xml = xml;
 
-                    bXmlChanged = true;
+                        bXmlChanged = true;
+                    }
                 }
+
             }
 
             if (bXmlChanged)  // XML 记录发生过改变，也要重新创建 Cols
@@ -4279,7 +4325,8 @@ out byte[] _);
         void FilterPatronRecord(Record record,
             string strPatronDbName,
             string read_level,
-            string strBrowseInfoStyle)
+            string strBrowseInfoStyle,
+            bool client_xml = false)
         {
             bool bHasCols = StringUtil.IsInList("cols", strBrowseInfoStyle)
                 || (StringUtil.GetParameterByPrefix(strBrowseInfoStyle, "format", ":") != null);
@@ -4312,42 +4359,50 @@ out byte[] _);
 
             string xml = null;
 
-            // Result.Value -1出错 0没有找到 1找到 >1命中多于1条
-            var ret = app.GetReaderInfo(
-sessioninfo,
-"@path:" + record.Path,
-origin_xml,
-"xml",
-out string[] results,
-out string _,
-out byte[] _);
-            if (ret.Value == -1 || ret.Value > 1)
+            if (client_xml)
             {
-                SetRecordBodyError(record, ret.ErrorInfo, ErrorCodeValue.CommonError);
-                ClearCols(record, LibraryApplication.FILTERED + ret.ErrorInfo);
-                ClearXml(record);
-            }
-            else if (ret.Value == 0)
-            {
-                SetRecordBodyError(record, ret.ErrorInfo, ErrorCodeValue.NotFound);
-                ClearCols(record, LibraryApplication.FILTERED + ret.ErrorInfo);
-                ClearXml(record);
+                xml = origin_xml;
+                bXmlChanged = true;
             }
             else
             {
-                if (results == null || results.Length == 0)
+                // Result.Value -1出错 0没有找到 1找到 >1命中多于1条
+                var ret = app.GetReaderInfo(
+    sessioninfo,
+    "@path:" + record.Path,
+    origin_xml,
+    "xml",
+    out string[] results,
+    out string _,
+    out byte[] _);
+                if (ret.Value == -1 || ret.Value > 1)
                 {
-                    SetRecordBodyError(record, "results error", ErrorCodeValue.CommonError);
-                    ClearCols(record, LibraryApplication.FILTERED + "GetBiblioInfo() results error");
+                    SetRecordBodyError(record, ret.ErrorInfo, ErrorCodeValue.CommonError);
+                    ClearCols(record, LibraryApplication.FILTERED + ret.ErrorInfo);
+                    ClearXml(record);
+                }
+                else if (ret.Value == 0)
+                {
+                    SetRecordBodyError(record, ret.ErrorInfo, ErrorCodeValue.NotFound);
+                    ClearCols(record, LibraryApplication.FILTERED + ret.ErrorInfo);
                     ClearXml(record);
                 }
                 else
                 {
-                    xml = results[0];
+                    if (results == null || results.Length == 0)
+                    {
+                        SetRecordBodyError(record, "results error", ErrorCodeValue.CommonError);
+                        ClearCols(record, LibraryApplication.FILTERED + "GetBiblioInfo() results error");
+                        ClearXml(record);
+                    }
+                    else
+                    {
+                        xml = results[0];
 
-                    record.RecordBody.Xml = xml;
+                        record.RecordBody.Xml = xml;
 
-                    bXmlChanged = true;
+                        bXmlChanged = true;
+                    }
                 }
             }
 
@@ -4384,7 +4439,8 @@ out byte[] _);
         // 过滤各种(书目库之)下级库记录
         void FilterItemRecord(Record record,
             string strItemDbName,
-            string strBrowseInfoStyle)
+            string strBrowseInfoStyle,
+            bool client_xml = false)
         {
             bool bHasCols = StringUtil.IsInList("cols", strBrowseInfoStyle)
                 || (StringUtil.GetParameterByPrefix(strBrowseInfoStyle, "format", ":") != null);
@@ -4417,6 +4473,12 @@ out byte[] _);
             }
 
             string xml = "";
+
+            if (client_xml)
+            {
+                xml = origin_xml;
+            }
+            else
             {
                 // 按照当前账户的权限，来过滤掉原始册记录中的一些敏感字段
                 // return:
@@ -5032,12 +5094,18 @@ out timestamp);
                     return result;
                 }
 
-                string strError = "";
+                // 建立一个 paths 和 searchresults 的对照表，体现前端提供的 XML 特性
+                List<bool> client_xmls = new List<bool>();
+                foreach (string p in paths)
+                {
+                    client_xmls.Add(p.Contains(":"));
+                }
 
+                string strError = "";
                 long lRet = channel.GetBrowseRecords(paths,
-                    GetModifiedStyle(strBrowseInfoStyle), // 为了过滤需要，确保获得 xml 和 id 
-                    out searchresults,
-                    out strError);
+                        GetModifiedStyle(strBrowseInfoStyle), // 为了过滤需要，确保获得 xml 和 id 
+                        out searchresults,
+                        out strError);
                 if (lRet == -1)
                 {
                     result.Value = -1;
@@ -5131,7 +5199,8 @@ out timestamp);
                 if (searchresults != null)
                 {
                     FilterResultSet(searchresults,
-    strBrowseInfoStyle);
+    strBrowseInfoStyle,
+    client_xmls);
                 }
 #if OLD
                 // 对 XML 记录进行过滤或者修改
@@ -11562,7 +11631,7 @@ Stack:
                     if (StringUtil.IsInList("managedatabase,getsystemparameter,order", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = $"管理数据库的操作 '{ strAction}' 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 getsystemparameter 或 order 或 managedatabase 权限。";
+                        result.ErrorInfo = $"管理数据库的操作 '{strAction}' 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 getsystemparameter 或 order 或 managedatabase 权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -11582,7 +11651,7 @@ Stack:
                     if (StringUtil.IsInList("managedatabase", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = $"管理数据库的操作 '{ strAction}' 被拒绝。不具备managedatabase权限。";
+                        result.ErrorInfo = $"管理数据库的操作 '{strAction}' 被拒绝。不具备managedatabase权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -12015,7 +12084,7 @@ Stack:
                     if (StringUtil.IsInList("supervisor", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = $"当前登录用户 { sessioninfo.UserID} 不具备 supervisor 权限，无法修改 kernel 密码";
+                        result.ErrorInfo = $"当前登录用户 {sessioninfo.UserID} 不具备 supervisor 权限，无法修改 kernel 密码";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -12048,7 +12117,7 @@ true);
                     if (StringUtil.IsInList("supervisor", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = $"当前登录用户 { sessioninfo.UserID} 不具备 supervisor 权限，无法修改 library.xml 中的馆代码定义";
+                        result.ErrorInfo = $"当前登录用户 {sessioninfo.UserID} 不具备 supervisor 权限，无法修改 library.xml 中的馆代码定义";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -16127,10 +16196,17 @@ out baOutputTimestamp);
                                 result.ErrorCode = ErrorCode.SystemError;
                                 return result;
                             }
+                            /*
                             var append_ret = WriteResForAppend(channel,
 strResPath,
 lTotalLength,
 baInputTimestamp,
+out byte[] output_timestamp,
+out string temp_recpath,
+out strError);
+                            */
+                            var append_ret = GetTempPath(
+strResPath,
 out byte[] output_timestamp,
 out string temp_recpath,
 out strError);
@@ -16460,6 +16536,24 @@ out baOutputTimestamp);
         }
 
         // 为获得真实记录路径而追加写入一次
+        // parameters:
+        //      strOutputResPath    返回一个临时路径。形态为 "数据库名/?xxxxx"，其中 xxxxx 代表 GUID
+        long GetTempPath(
+            string strResPath,
+            out byte[] baOutputTimestamp,
+            out string strOutputResPath,
+            out string strError)
+        {
+            baOutputTimestamp = Guid.NewGuid().ToByteArray();
+            strOutputResPath = ResPath.GetDbName(strResPath) + "/#" + Guid.NewGuid().ToString();
+            strError = "";
+            return 0;
+        }
+
+#if OLD_CODE
+        // 为获得真实记录路径而追加写入一次
+        // parameters:
+        //      strOutputResPath    返回一个临时路径。形态为 "数据库名/?xxxxx"，其中 xxxxx 代表 GUID
         long WriteResForAppend(RmsChannel channel,
             string strResPath,
             long lTotalLength,
@@ -16488,6 +16582,8 @@ out strError);
             strError = "";
             return 0;
         }
+
+#endif
 
         /// *** 评注相关功能
         /// 

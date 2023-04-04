@@ -1433,7 +1433,8 @@ out strError);
             _stop.Initial("正在检索 '" + first_query_word + "' ...");
             _stop.BeginLoop();
             */
-            var looping = BeginLoop(Stop_OnStop1, "正在检索 '" + first_query_word + "' ...");
+            var looping = BeginLoop(Stop_OnStop1,
+                "正在检索 '" + first_query_word + "' ...");
 
             Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
     + " 开始书目检索</div>");
@@ -1995,6 +1996,7 @@ out strError);
             }
         }
 
+        // 存储全局结果集名
         string _resultSetName = "";
 
         string GetResultSetName(bool multiline_search)
@@ -2066,6 +2068,13 @@ out strError);
             out string strError)
         {
             strError = "";
+
+            // 2023/3/29
+            if (lHitCount == 0)
+            {
+                _query = null;
+                return 0;
+            }
 
             bool bPushFillingBrowse = PushFillingBrowse;
             bool multiline = this.MultiLine;
@@ -5596,13 +5605,36 @@ bQuickLoad);
                 List<string> recpaths = new List<string>();
                 foreach (ListViewItem item in items_param)
                 {
-                    if (string.IsNullOrEmpty(item.Text) == true
-                        || item.Text.StartsWith("error:"))
+                    var recpath = ListViewUtil.GetItemText(item, 0);
+                    if (string.IsNullOrEmpty(recpath) == true
+                        || recpath.StartsWith("error:"))
                         continue;
                     items.Add(item);
-                    recpaths.Add(item.Text);
+                    // recpaths.Add(recpath);
 
-                    ClearOneChange(item, true);
+                    // 2023/4/3
+                    var info = (BiblioInfo)this.m_biblioTable[recpath];
+
+                    // 没有 BiblioInfo，或者处在未修改状态
+                    if (info == null || info.Changed == false)
+                        recpaths.Add(recpath);
+                    else
+                    {
+                        Debug.Assert(info != null);
+                        /*
+                        if (info == null)
+                        {
+                            strError = $"在 biblioTable 缓存中没有找到路径为 '{recpath}' 的 XML 记录";
+                            return -1;
+                        }
+                        */
+                        string xml = info.NewXml;
+                        if (string.IsNullOrEmpty(xml))
+                            xml = info.OldXml;
+                        recpaths.Add(recpath + ":" + xml);
+                    }
+
+                    // ClearOneChange(item, true);
                 }
 
                 if (looping.Progress != null)
@@ -5625,7 +5657,7 @@ bQuickLoad);
                         return -1;
                     }
 
-                    Debug.Assert(record.Path == recpaths[i], "");
+                    Debug.Assert(record.Path == BrowseLoader.GetPath(recpaths[i]), "");
 
                     if (looping.Progress != null)
                     {
@@ -5778,7 +5810,7 @@ bQuickLoad);
                 goto ERROR1;
             }
 
-            int nChangedCount = 0;
+            // int nChangedCount = 0;
             List<ListViewItem> items = new List<ListViewItem>();
             foreach (ListViewItem item in this.listView_records.SelectedItems)
             {
@@ -5786,10 +5818,13 @@ bQuickLoad);
                     continue;
                 items.Add(item);
 
+                /*
                 if (IsItemChanged(item) == true)
                     nChangedCount++;
+                */
             }
 
+            /*
             if (nChangedCount > 0)
             {
                 DialogResult result = MessageBox.Show(this,
@@ -5801,6 +5836,7 @@ bQuickLoad);
                 if (result == System.Windows.Forms.DialogResult.Cancel)
                     return;
             }
+            */
 
             nRet = RefreshListViewLines(items,
                 out strError);
@@ -11430,6 +11466,7 @@ message,
                     var looping = Looping(out LibraryChannel channel,
                         "正在继续装入浏览信息 ...",
                         "timeout:0:2:0,halfstop");
+                    this.EnableControlsInSearching(false);
                     try
                     {
                         long lTotalHitCount = lHitCount;
@@ -11470,6 +11507,7 @@ message,
                     }
                     finally
                     {
+                        this.EnableControlsInSearching(true);
                         looping.Dispose();
                     }
                 ERROR1:
@@ -13118,6 +13156,27 @@ message,
             this.OldXml = ref_obj.OldXml;
             this.NewXml = ref_obj.NewXml;
             this.Timestamp = ref_obj.Timestamp;
+        }
+
+        public bool Changed
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(this.NewXml) == false)
+                    return true;
+                return false;
+            }
+        }
+
+        // 获得问号前的部分。例如，针对 "读者/?1" 返回 "读者/?"
+        public static string GetPath(string path)
+        {
+            if (path == null)
+                return null;
+            int index = path.IndexOf("?");
+            if (index == -1)
+                return path;
+            return path.Substring(0, index+1);
         }
 
     }
