@@ -505,7 +505,10 @@ namespace dp2Circulation.Reader
             ContextMenu contextMenu = new ContextMenu();
             MenuItem menuItem = null;
 
+            var current_row = this.dataGridView1.Rows[e.RowIndex];
             menuItem = new MenuItem("移除行");
+            if (current_row.IsNewRow)
+                menuItem.Enabled = false;
             menuItem.Tag = e.RowIndex;
             menuItem.Click += new System.EventHandler(this.menu_removeSelectedLine_Click);
             contextMenu.MenuItems.Add(menuItem);
@@ -531,6 +534,9 @@ namespace dp2Circulation.Reader
             MenuItem menu = sender as MenuItem;
             int row_index = (int)menu.Tag;
 
+            var row = this.dataGridView1.Rows[row_index];
+            if (row.IsNewRow)
+                return;
             this.dataGridView1.Rows.RemoveAt(row_index);
         }
 

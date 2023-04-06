@@ -2428,12 +2428,7 @@ TaskScheduler.Default);
 
                         var dom = import_dlg.BuildPatronXml(row);
 
-                        string merge_key = DomUtil.GetElementText(dom.DocumentElement, key_field_name);
-                        if (string.IsNullOrEmpty(merge_key))
-                        {
-                            strError = $"合并键不允许为空。(第 {i + 1} 行)";
-                            goto ERROR1;
-                        }
+
 
                         // 这里使用一种 GUID 式的路径，等保存后再转为实际路径
                         var path = strReaderDbName + "/?" + GetTempId();   //  Guid.NewGuid().ToString();
@@ -2443,6 +2438,13 @@ TaskScheduler.Default);
 
                         if (merge)
                         {
+                            string merge_key = merge ? DomUtil.GetElementText(dom.DocumentElement, key_field_name) : null;
+                            if (string.IsNullOrEmpty(merge_key))
+                            {
+                                strError = $"{key_field_name} (合并键)这一列的内容不允许为空。(第 {i + 1} 行)";
+                                goto ERROR1;
+                            }
+
                             // return:
                             //      -1  出错
                             //      0   没有找到
