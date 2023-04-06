@@ -1120,10 +1120,10 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
         /// <param name="e">事件参数</param>
         protected override void OnLoad(EventArgs e)
         {
+            this.LoadFontSetting();
             this.OnMyFormLoad();
             base.OnLoad(e);
 
-            this.LoadFontSetting();
 
             // 设置窗口尺寸状态
             // 一般派生类会在 EntityForm_Load() 函数中

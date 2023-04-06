@@ -2628,6 +2628,8 @@ TaskScheduler.Default);
             }
         }
 
+        static int MAX_READER_COUNT = 100;
+
         // 检索获得合并目标记录
         // return:
         //      -1  出错
@@ -2660,7 +2662,7 @@ TaskScheduler.Default);
             var ret = channel.SearchReader(stop,
                 dbName,
                 merge_key,
-                100,
+                MAX_READER_COUNT,
                 strFrom,
                 "exact",
                 "zh",
@@ -2695,25 +2697,49 @@ stop,
                 return 1;
             }
 
-            SelectPatronDialog dlg = new SelectPatronDialog();
 
-            dlg.Overflow = paths.Count == 100;
-            int nRet = dlg.Initial(
-                // Program.MainForm,
-                paths,
-                $"请选择一个读者记录('{merge_key}')",
-                out strError);
-            if (nRet == -1)
-                return -1;
-            Program.MainForm.AppInfo.LinkFormState(dlg, "ReaderSearchForm_SelectPatronDialog_state");
-            dlg.ShowDialog(this);
-            Program.MainForm.AppInfo.UnlinkFormState(dlg);
+            SelectPatronDialog dlg = null;
 
-            if (dlg.DialogResult == DialogResult.Cancel)
+            string error = strError;
+            var select_ret = this.TryGet(() =>
             {
-                strError = "放弃选择";
+                dlg = new SelectPatronDialog();
+                dlg.Load += (o, e) => {
+                    // 注: UiState 必须在窗口尺寸到位以后再设置
+                    dlg.UiState = Program.MainForm.AppInfo.GetString(
+        "ReaderSearchForm",
+        "SelectPatronDialog_uiState",
+        "");
+                };
+                dlg.FormClosed += (o, e) => {
+                    Program.MainForm.AppInfo.SetString(
+    "ReaderSearchForm",
+    "SelectPatronDialog_uiState",
+    dlg.UiState);
+                };
+                
+                dlg.Overflow = paths.Count >= MAX_READER_COUNT;
+                int nRet = dlg.Initial(
+                    // Program.MainForm,
+                    paths,
+                    $"'{merge_key}'({strFrom}) 命中多条读者记录。\r\n请选择一个读者记录 ...",
+                    out error);
+                if (nRet == -1)
+                    return -1;
+                Program.MainForm.AppInfo.LinkFormState(dlg, "ReaderSearchForm_SelectPatronDialog_state");
+                dlg.ShowDialog(this);
+
+                if (dlg.DialogResult == DialogResult.Cancel)
+                {
+                    error = "放弃选择";
+                    return -1;
+                }
+
+                return 0;
+            });
+            strError = error;
+            if (select_ret == -1)
                 return -1;
-            }
 
             string path = "@path:" + dlg.SelectedRecPath;
 

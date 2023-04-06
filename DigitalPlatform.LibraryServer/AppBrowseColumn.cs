@@ -175,6 +175,22 @@ namespace DigitalPlatform.LibraryServer
         // key: browseName, value: BrowseCfg
         Hashtable _browse_table = new Hashtable();
 
+        public bool ClearBrowseCfgCache(
+    string strBrowseName)
+        {
+            strBrowseName = strBrowseName.ToLower();
+
+            lock (_browse_table.SyncRoot)
+            {
+                if (this._browse_table.ContainsKey(strBrowseName))
+                {
+                    this._browse_table.Remove(strBrowseName);
+                    return true;
+                }
+                return false;
+            }
+        }
+
         // 得到浏览格式内存对象
         // parameters:
         //      strBrowseName   浏览文件的文件名或者全路径
@@ -184,11 +200,11 @@ namespace DigitalPlatform.LibraryServer
         //      0   not found
         //      1   found
         public int GetBrowseCfg(
-            RmsChannel channel,
-            // string strDbName,
-            string strBrowseName,
-            out BrowseCfg browseCfg,
-            out string strError)
+        RmsChannel channel,
+        // string strDbName,
+        string strBrowseName,
+        out BrowseCfg browseCfg,
+        out string strError)
         {
             strError = "";
             browseCfg = null;

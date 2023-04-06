@@ -204,6 +204,30 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
+        // return:
+        //      -1  error
+        //      0   not found
+        //      1   found
+        public bool ClearBrowseCfgCache(string strBrowseName)
+        {
+            /*
+            // 尝试从 cache 里面取得
+            strBrowseName = strBrowseName.ToLower();
+            var browseCfg = (BrowseCfg)this.browse_table[strBrowseName];
+            if (browseCfg != null)
+            {
+                browseCfg.Clear();
+                return true;
+            }
+            */
+            if (this.browse_table.ContainsKey(strBrowseName))
+            {
+                this.browse_table.Remove(strBrowseName);
+                return true;
+            }
+            return false;
+        }
+
         // 得到浏览格式内存对象
         // parameters:
         //      strBrowseName   浏览文件的文件名或者全路径
@@ -220,6 +244,7 @@ namespace DigitalPlatform.rms
             strError = "";
             browseCfg = null;
 
+#if REMOVED
             strBrowseName = strBrowseName.ToLower();
             /*
             if (this.m_bHasBrowse == false)
@@ -272,8 +297,34 @@ namespace DigitalPlatform.rms
             {
                 return -1;
             }
+#endif
+            // 先尝试从 cache 里面取得
+            strBrowseName = strBrowseName.ToLower();
+            browseCfg = (BrowseCfg)this.browse_table[strBrowseName];
+            if (browseCfg != null)
+            {
+                return 1;
+            }
 
+            // 获得 browse 配置文件的物理文件名
+            // return:
+            //      -1  error
+            //      0   not found
+            //      1   found
+            int nRet = FindBrowseFileName(
+                strBrowseName,
+                out string strBrowseFileName,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            if (nRet == 0)
+                return 0;
+            if (nRet == 1)
+            {
+                Debug.Assert(string.IsNullOrEmpty(strBrowseFileName) == false);
+            }
 
+            // 新创建一个 BrowseCfg 对象
             browseCfg = new BrowseCfg();
             nRet = browseCfg.Initial(strBrowseFileName,
                 this.container.BinDir,
@@ -284,9 +335,62 @@ namespace DigitalPlatform.rms
                 return -1;
             }
 
+            // 加入缓存
             this.browse_table[strBrowseName] = browseCfg;
             return 1;
         }
+
+        // return:
+        //      -1  error
+        //      0   not found
+        //      1   found
+        public int FindBrowseFileName(
+            string strBrowseName,
+            out string strBrowseFileName,
+            out string strError)
+        {
+            strError = "";
+            strBrowseFileName = "";
+
+            strBrowseName = strBrowseName.ToLower();
+
+            /*
+            browseCfg = (BrowseCfg)this.browse_table[strBrowseName];
+            if (browseCfg != null)
+            {
+                return 1;
+            }
+            */
+
+            string strBrowsePath = this.GetCaption("zh") + "/" + strBrowseName;
+
+            // return:
+            //		-1	一般性错误，比如调用错误，参数不合法等
+            //		-2	没找到节点
+            //		-3	localname属性未定义或为值空
+            //		-4	localname在本地不存在
+            //		-5	存在多个节点
+            //		0	成功
+            int nRet = this.container.GetFileCfgItemLocalPath(strBrowsePath,
+                out strBrowseFileName,
+                out strError);
+            if (nRet == -2 || nRet == -4)
+            {
+                return 0;
+            }
+            else
+            {
+            }
+
+            if (nRet != 0)
+            {
+                return -1;
+            }
+
+            return 1;
+        }
+
+
 
         // 时间戳种子
         public long GetTimestampSeed()
@@ -476,7 +580,7 @@ namespace DigitalPlatform.rms
         {
             //***********对数据库加读锁******GetCaption可能会抛出异常，所以用try,catch
             m_db_lock.AcquireReaderLock(m_nTimeOut);
-#if DEBUG_LOCK		
+#if DEBUG_LOCK
 			this.container.WriteDebugInfo("GetAllLangCaptionSafety()，对'" + this.GetCaption("zh-CN") + "'数据库加读锁。");
 #endif
             try
@@ -514,7 +618,7 @@ namespace DigitalPlatform.rms
         {
             //***********对数据库加读锁******GetCaption可能会抛出异常，所以用try,catch
             m_db_lock.AcquireReaderLock(m_nTimeOut);
-#if DEBUG_LOCK		
+#if DEBUG_LOCK
 			this.container.WriteDebugInfo("GetCaptionSafety()，对'" + this.GetCaption("zh-CN") + "'数据库加读锁。");
 #endif
             try
@@ -969,7 +1073,7 @@ namespace DigitalPlatform.rms
                     // this.m_TailNolock.ReleaseReaderLock();
                     this.m_TailNolock.ReleaseUpgradeableReaderLock();
 
-#if DEBUG_LOCK					
+#if DEBUG_LOCK
 					this.container.WriteDebugInfo("SetIfGreaten()，对'" + this.GetCaption("zh-CN") + "'数据库尾号解读锁。");
 #endif
                 }
@@ -978,7 +1082,7 @@ namespace DigitalPlatform.rms
 
         #endregion
 
-#if  NO
+#if NO
         // 将数据库多个表的标签信息，转换成TableInfo对象数组
         // 并检查检索途径中是否包含id，如果检索途径为空，表示按全部检索点进行检索(不包含id)
         // parameter:
@@ -1932,7 +2036,7 @@ namespace DigitalPlatform.rms
             {
                 //****************对数据库解读锁**************
                 this.m_db_lock.ReleaseReaderLock();
-#if DEBUG_LOCK		
+#if DEBUG_LOCK
 				this.container.WriteDebugInfo("GetCols()，对'" + this.GetCaption("zh-CN") + "'数据库解读锁。");
 #endif
             }
@@ -2269,7 +2373,7 @@ namespace DigitalPlatform.rms
             {
                 //****************对数据库解读锁**************
                 this.m_db_lock.ReleaseReaderLock();
-#if DEBUG_LOCK		
+#if DEBUG_LOCK
 				this.container.WriteDebugInfo("PretendWrite()，对'" + this.GetCaption("zh-CN") + "'数据库解读锁。");
 #endif
             }
@@ -2597,7 +2701,7 @@ namespace DigitalPlatform.rms
             {
                 //****************对数据库解读锁**************
                 this.m_db_lock.ReleaseReaderLock();
-#if DEBUG_LOCK		
+#if DEBUG_LOCK
 				this.container.WriteDebugInfo("GetInfo()，对'" + this.GetCaption("zh-CN") + "'数据库解读锁。");
 #endif
             }

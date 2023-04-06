@@ -15,6 +15,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
+using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation
 {
@@ -51,6 +52,8 @@ namespace dp2Circulation
         public SelectPatronDialog()
         {
             this.UseLooping = true; // 2022/11/3
+
+            this.Floating = true;   // 2023/4/6
 
             InitializeComponent();
         }
@@ -576,5 +579,24 @@ namespace dp2Circulation
                     this.splitContainer_rightMain.SplitterDistance = 43;
             }
         }
+
+        public string UiState
+        {
+            get
+            {
+                List<object> controls = new List<object>();
+                controls.Add(this.splitContainer_rightMain);
+                controls.Add(this.splitContainer_itemInfoMain);
+                return GuiState.GetUiState(controls);
+            }
+            set
+            {
+                List<object> controls = new List<object>();
+                controls.Add(this.splitContainer_rightMain);
+                controls.Add(this.splitContainer_itemInfoMain);
+                GuiState.SetUiState(controls, value);
+            }
+        }
+
     }
 }

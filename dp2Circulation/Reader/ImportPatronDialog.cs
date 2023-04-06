@@ -107,18 +107,29 @@ namespace dp2Circulation.Reader
 
         private void button_OK_Click(object sender, EventArgs e)
         {
+            string strError = "";
+
             if (this.MergeMode)
             {
                 var merge_key_columns = _columns.Where(o => o.IsMergeKey).ToList();
                 if (merge_key_columns.Count == 0)
                 {
-                    MessageBox.Show(this, "尚未指定合并键列");
-                    return;
+                    strError = "尚未指定合并键列";
+                    goto ERROR1;
                 }
+            }
+
+            if (this.dataGridView1.Rows.Count == 0)
+            {
+                strError = "请先装载数据";
+                goto ERROR1;
             }
 
             this.DialogResult = DialogResult.OK;
             this.Close();
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
 
         private void button_Cancel_Click(object sender, EventArgs e)

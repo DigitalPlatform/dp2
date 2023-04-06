@@ -16403,6 +16403,11 @@ out baOutputTimestamp);
                             }
                         }
 
+                        // 2023/4/6
+                        if (LibraryApplication.IsBrowseCfgPath(strResPath))
+                        {
+                            app.ClearBrowseCfgCache(strResPath);
+                        }
 
                         lRet = channel.WriteRes(strResPath,
                             strRanges,

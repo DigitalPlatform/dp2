@@ -16519,6 +16519,19 @@ out string db_type);
             return IsRestObjectPath(strPath);
         }
 
+        public static bool IsBrowseCfgPath(string strPath)
+        {
+            string strDbName = StringUtil.GetFirstPartPath(ref strPath);
+            string strDirectory = StringUtil.GetFirstPartPath(ref strPath);
+
+            // cfgs
+            if (strDirectory != "cfgs")
+                return false;
+            if (strPath != null && strPath.StartsWith("browse"))
+                return true;
+            return false;
+        }
+
         // 检查数据库名以右的部分字符串是否为对象路径形态
         // parameters:
         //      strPath 数据库名以右的部分。例如 "1/object/0"
