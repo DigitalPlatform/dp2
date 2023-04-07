@@ -156,13 +156,21 @@ namespace dp2Circulation.Reader
             _ = Task.Factory.StartNew(
                 () =>
                 {
-                    _loadExcel(dlg.FileName);
+                    try
+                    {
+                        _loadExcel(dlg.FileName);
+                    }
+                    catch(Exception ex)
+                    {
+                        this.MessageBoxShow($"_loadExcel() 出现异常: {ex.Message}");
+                    }
                 },
                 default,
                 TaskCreationOptions.LongRunning,
                 TaskScheduler.Default);
         }
 
+        // 异常: 可能会抛出异常。尤其是当即将被打开的 Excel 文件被别的应用锁定的时候
         public void _loadExcel(string filename)
         {
             using (var looping = Looping("正在从 Excel 文件装载数据 ...",
