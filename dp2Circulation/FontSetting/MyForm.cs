@@ -25,6 +25,9 @@ using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Interfaces;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Core;
+using DigitalPlatform.GUI;
+using System.Linq;
+using System.Data.SqlTypes;
 // using DocumentFormat.OpenXml.Wordprocessing;
 
 // 2013/3/16 添加 XML 注释
@@ -3328,6 +3331,132 @@ out strError);
             }
         }
 
+        // 获得 table 格式，里面包含通过 javascript 脚本产生的列
+        // return:
+        //      -1  出错
+        //      0   没有找到
+        //      1   找到
+        public int GetTable(
+            string strRecPath,
+            // string strStyleList,
+            List<Order.ColumnProperty> titles,
+            out string strTableXml,
+            out string strError)
+        {
+            strError = "";
+            strTableXml = "";
+
+            string strStyleList = StringUtil.MakePathList(Order.ColumnProperty.GetTypeList(titles));
+
+            // 先统计一下是否至少有一个 Evalue 列。只有这时才需要同时获得书目 xml 和 table xml
+            var exists_evalue = titles.Exists(o => string.IsNullOrEmpty(o.Evalue) == false);
+
+            string strBiblioXml = "";
+
+            string strFormat = "table";
+            if (string.IsNullOrEmpty(strStyleList) == false)
+                strFormat += ":" + strStyleList.Replace(",", "|");
+
+            string[] formats = new string[] { strFormat };
+            if (exists_evalue)
+                formats = new string[] { strFormat, "xml" };
+
+            LibraryChannel channel = this.GetChannel();
+            try
+            {
+            REDO:
+                long lRet = channel.GetBiblioInfos(
+                    null,   // looping.Progress,
+                    strRecPath,
+                    "",
+                    formats,   // formats
+                    out string[] results,
+                    out byte[] baNewTimestamp,
+                    out strError);
+                if (lRet == 0)
+                    return 0;
+                if (lRet == -1)
+                {
+                    // 2021/9/23
+                    bool bHideMessageBox = true;
+                    string error = strError;
+                    DialogResult result = this.TryGet(() =>
+                    {
+                        return MessageDialog.Show(this,
+                        error + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
+        MessageBoxButtons.YesNoCancel,
+        MessageBoxDefaultButton.Button1,
+        null,
+        ref bHideMessageBox,
+        new string[] { "重试", "跳过", "放弃" },
+        20);
+                    });
+                    if (result == DialogResult.Cancel)
+                        return -1;
+                    else if (result == System.Windows.Forms.DialogResult.No)
+                        return 0;
+                    else
+                        goto REDO;
+
+                    // return -1;
+                }
+                if (results == null || results.Length == 0)
+                {
+                    strError = "results error";
+                    return -1;
+                }
+                if (results.Length > 0)
+                    strTableXml = results[0];
+                if (results.Length > 1)
+                    strBiblioXml = results[1];
+
+                // 加入 javascript 创建的内容
+                if (exists_evalue)
+                {
+                    int nRet = MarcUtil.Xml2Marc(strBiblioXml,
+    true,
+    null,
+    out string strMarcSyntax,
+    out string strMARC,
+    out strError);
+                    if (nRet == -1)
+                        return -1;
+
+                    XmlDocument dom = new XmlDocument();
+                    try
+                    {
+                        dom.LoadXml(string.IsNullOrEmpty(strTableXml) ? "<table />" : strTableXml);
+                    }
+                    catch(Exception ex)
+                    {
+                        strError = $"table xml 装入 DOM 时出现异常: {ex.Message}";
+                        return -1;
+                    }
+
+                    foreach(var column in titles)
+                    {
+                        if (string.IsNullOrEmpty(column.Evalue))
+                            continue;
+                        var result = AccountBookForm.RunScript(strMARC,
+    strMarcSyntax,
+    column.Evalue);
+                        var line = dom.CreateElement("line");
+                        line.SetAttribute("type", column.Type);
+                        line.SetAttribute("name", column.Caption);
+                        line.SetAttribute("value", result);
+                        dom.DocumentElement.AppendChild(line);
+                    }
+
+                    strTableXml = dom.OuterXml;
+                }
+                return 1;
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+            }
+        }
+
         public void OnLoaderPrompt(object sender, MessagePromptEventArgs e)
         {
             // TODO: 不再出现此对话框。不过重试有个次数限制，同一位置失败多次后总要出现对话框才好
@@ -3564,7 +3693,7 @@ Keys keyData)
             if (bEnable == false)
             {
                 _enableControlsLevel++;
-                Debug.Assert(_enableControlsLevel >= 0, 
+                Debug.Assert(_enableControlsLevel >= 0,
                     $"++ 后 _enableControlsLevel({_enableControlsLevel}) 应该 >=0");
                 if (_enableControlsLevel == 1)
                     return true;

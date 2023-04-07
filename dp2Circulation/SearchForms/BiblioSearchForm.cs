@@ -30,6 +30,7 @@ using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.Z3950.UI;
 using DigitalPlatform.Z3950;
+using static dp2Circulation.Order.ExportExcelFile;
 
 namespace dp2Circulation
 {
@@ -3830,8 +3831,14 @@ bQuickLoad);
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
 
-                subMenuItem = new MenuItem("详情到 Excel 文件 [" + nSelectedItemCount.ToString() + "] (&E)...");
+                subMenuItem = new MenuItem("详情到 Excel 文件 竖向 [" + nSelectedItemCount.ToString() + "] (&E)...");
                 subMenuItem.Click += new System.EventHandler(this.menu_exportDetailExcelFile_Click);
+                if (nSelectedItemCount == 0)
+                    subMenuItem.Enabled = false;
+                menuItem.MenuItems.Add(subMenuItem);
+
+                subMenuItem = new MenuItem("详情到 Excel 文件 横向 [" + nSelectedItemCount.ToString() + "] (&E)...");
+                subMenuItem.Click += new System.EventHandler(this.menu_exportDetailExcelFile_1_Click);
                 if (nSelectedItemCount == 0)
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
@@ -4089,7 +4096,10 @@ bQuickLoad);
                     XmlDocument itemdom = new XmlDocument();
                     try
                     {
-                        itemdom.LoadXml(info.OldXml);
+                        string xml = info.OldXml;
+                        if (string.IsNullOrEmpty(xml))
+                            xml = "<root />";
+                        itemdom.LoadXml(xml);
                     }
                     catch (Exception ex)
                     {
@@ -4338,7 +4348,10 @@ bQuickLoad);
                     XmlDocument itemdom = new XmlDocument();
                     try
                     {
-                        itemdom.LoadXml(info.OldXml);
+                        string xml = info.OldXml;
+                        if (string.IsNullOrEmpty(xml))
+                            xml = "<root />";
+                        itemdom.LoadXml(xml);
                     }
                     catch (Exception ex)
                     {
@@ -4927,8 +4940,186 @@ bQuickLoad);
             this.MessageBoxShow(strError);
         }
 
+        // 2023/4/7
+        // 导出详情到 Excel 文件。横向。可配置列
+        void menu_exportDetailExcelFile_1_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            if (this.listView_records.SelectedItems.Count == 0)
+            {
+                strError = "尚未选定要导出的事项";
+                goto ERROR1;
+            }
+
+            var dlg = new SaveBiblioExcelFileDialog();
+            MainForm.SetControlFont(dlg, this.Font);
+
+            dlg.UiState = Program.MainForm.AppInfo.GetString(
+"BiblioSearchForm",
+"ExportExcelFileDialog_uiState",
+"");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "bibliosearchform_ExportExcelFileDialog");
+            dlg.ShowDialog(this);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.SetString(
+"BiblioSearchForm",
+"ExportExcelFileDialog_uiState",
+dlg.UiState);
+            if (dlg.DialogResult != System.Windows.Forms.DialogResult.OK)
+                return;
+
+            if (File.Exists(dlg.OutputFileName))
+            {
+                DialogResult result = MessageBox.Show(this,
+$"文件 {dlg.OutputFileName} 已经存在。\r\n\r\n继续处理将会覆盖它。要继续处理么? (是：继续; 否: 放弃处理)",
+"BiblioSearchForm",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+                if (result == System.Windows.Forms.DialogResult.No)
+                    return;
+            }
+
+            bool bLaunchExcel = true;
+
+            XLWorkbook doc = null;
+            try
+            {
+                doc = new XLWorkbook(XLEventTracking.Disabled);
+                File.Delete(dlg.OutputFileName);
+            }
+            catch (Exception ex)
+            {
+                strError = "BiblioSearchForm new XLWorkbook() exception(2): " + ExceptionUtil.GetAutoText(ex);
+                goto ERROR1;
+            }
+
+            IXLWorksheet sheet = null;
+            sheet = doc.Worksheets.Add("表格");
+
+            // 准备书目列标题
+            Order.ExportBiblioColumnOption biblio_column_option = new Order.ExportBiblioColumnOption(Program.MainForm.UserDir);
+            biblio_column_option.LoadData(Program.MainForm.AppInfo,
+            SaveBiblioExcelFileDialog.BiblioDefPath);
+
+            List<Order.ColumnProperty> biblio_title_list = Order.DistributeExcelFile.BuildList(biblio_column_option);
+
+            // 每个列的最大字符数
+            List<int> column_max_chars = new List<int>();
+            int nLineNumber = 0;    // 序号            
+
+            try
+            {
+                var context = new dp2Circulation.Order.ExportExcelFile
+                {
+                    Sheet = sheet,
+                    BiblioColList = biblio_title_list,
+                    OrderColList = null,
+                    ColumnMaxChars = column_max_chars,
+                    RowIndex = 2,
+                };
+
+                // 输出标题行
+                context.OutputDistributeInfoTitleLine(
+""
+);
+
+
+                int nRet = ProcessBiblio(
+                    "正在导出详情到 Excel 文件",
+                    null,
+                    (strRecPath, dom, timestamp, item) =>
+                    {
+                        this.ShowMessage("正在处理书目记录 " + strRecPath);
+
+                        string strTableXml = "";
+                        {
+                            // return:
+                            //      -1  出错
+                            //      0   没有找到
+                            //      1   找到
+                            nRet = this.GetTable(
+                                strRecPath,
+                                biblio_title_list,
+                                out strTableXml,
+                                out string strError1);
+                            if (nRet == -1)
+                                throw new Exception(strError1);
+                        }
+
+                        context.OutputDistributeInfo(
+                                this,
+                                strRecPath,
+                                ref nLineNumber,
+                                strTableXml,
+                                "", // strStyle,
+                                null,   // strEntityRecPath,
+                                (biblio_recpath, order_recpath) =>
+                                {
+                                    return null;
+                                }
+                                );
+
+                        /*
+                        OutputBiblioInfoNew(sheet,
+                            dom,
+                            strRecPath,
+                            nBiblioIndex++,
+                            "",
+                            ref nRowIndex);
+                        */
+                        context.RowIndex++;
+                        return true;
+                    },
+                out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                context.ContentEndRow = context.RowIndex - 1;
+                Order.DistributeExcelFile.AdjectColumnWidth(sheet, column_max_chars, 20);
+            
+            }
+            catch (Exception ex)
+            {
+                strError = "导出详情到 Excel 出现异常: " + ExceptionUtil.GetExceptionText(ex);
+                goto ERROR1;
+            }
+            finally
+            {
+                /*
+                if (_stop != null)
+                    _stop.SetMessage("");
+                */
+
+                this.ClearMessage();
+
+                if (doc != null)
+                {
+                    doc.SaveAs(dlg.OutputFileName);
+                    doc.Dispose();
+                }
+
+                if (bLaunchExcel)
+                {
+                    try
+                    {
+                        System.Diagnostics.Process.Start(dlg.OutputFileName);
+                    }
+                    catch
+                    {
+
+                    }
+                }
+            }
+
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
         // 2017/3/17
-        // 导出详情到 Excel 文件
+        // 导出详情到 Excel 文件。竖向
         void menu_exportDetailExcelFile_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -5033,14 +5224,15 @@ bQuickLoad);
             MessageBox.Show(this, strError);
         }
 
+        // 输出书目 Excel 内容。纵向 OPAC 方式
         void OutputBiblioInfo(IXLWorksheet sheet,
-            XmlDocument dom,
-            string strRecPath,
-            int nBiblioIndex,
-            string strStyle,
-            ref int nRowIndex
-            // ref List<int> column_max_chars
-            )
+    XmlDocument dom,
+    string strRecPath,
+    int nBiblioIndex,
+    string strStyle,
+    ref int nRowIndex
+    // ref List<int> column_max_chars
+    )
         {
             string strError = "";
 

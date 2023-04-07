@@ -1376,7 +1376,7 @@ namespace DigitalPlatform.LibraryServer
                 {
                     if (String.IsNullOrEmpty(strBiblioXml) == true)
                     {
-                        strBiblio = "XML记录为空";
+                        strBiblio = ""; // "XML记录为空";
                         goto CONTINUE;
                     }
 
@@ -1412,7 +1412,7 @@ namespace DigitalPlatform.LibraryServer
                 {
                     if (String.IsNullOrEmpty(strBiblioXml) == true)
                     {
-                        strBiblio = "XML记录为空";
+                        strBiblio = ""; // "XML记录为空";
                         goto CONTINUE;
                     }
 
@@ -1469,7 +1469,7 @@ namespace DigitalPlatform.LibraryServer
                 {
                     if (String.IsNullOrEmpty(strBiblioXml) == true)
                     {
-                        strBiblio = "XML记录为空";
+                        strBiblio = ""; // "XML记录为空";
                         goto CONTINUE;
                     }
 

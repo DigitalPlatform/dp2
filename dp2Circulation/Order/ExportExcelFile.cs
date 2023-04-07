@@ -75,8 +75,10 @@ namespace dp2Circulation.Order
             List<ColumnProperty> cols = new List<ColumnProperty>() {
                 new ColumnProperty("序号", "no")
             };
-            cols.AddRange(context.BiblioColList);
-            cols.AddRange(context.OrderColList);
+            if (context.BiblioColList != null)
+                cols.AddRange(context.BiblioColList);
+            if (context.OrderColList != null)
+                cols.AddRange(context.OrderColList);
 
             {
                 // 输出书目记录列标题和订购记录列标题
@@ -105,9 +107,12 @@ namespace dp2Circulation.Order
             }
 
             // 把订购列做成一个 Group
-            context.Sheet.Columns(nStartColIndex + 1 + 1 + context.BiblioColList.Count,
-                nStartColIndex + 1 + 1 + context.BiblioColList.Count + context.OrderColList.Count - 1)
-                .Group();
+            if (context.OrderColList != null)
+            {
+                context.Sheet.Columns(nStartColIndex + 1 + 1 + context.BiblioColList.Count,
+                    nStartColIndex + 1 + 1 + context.BiblioColList.Count + context.OrderColList.Count - 1)
+                    .Group();
+            }
 
             context.Sheet.Row(context.RowIndex + 1).Height = 0;
             context.Sheet.SheetView.FreezeRows(context.RowIndex + 1 + 1);
@@ -141,6 +146,7 @@ GetOrderRecord procGetOrderRecord)
 
             int nOldStartColIndex = nStartColIndex;
 
+            if (string.IsNullOrEmpty(strTableXml))
             {
                 // return:
                 //      -1  出错
@@ -186,8 +192,6 @@ GetOrderRecord procGetOrderRecord)
             EntityInfo order = procGetOrderRecord(strBiblioRecPath, strOrderRecPath);
 
             // 把订购记录中的 copy 元素进一步拆分为 copyNumber 和 copyItems 元素。注意拆分时只处理订购部分，不处理验收部分
-            // order.OldRecord = SplitCopyString(order.OldRecord);
-            string strOrderState = GetState(order.OldRecord);
 
             IXLCell copyNumberCell = null;
             // 输出订购信息列
@@ -206,31 +210,37 @@ XLColor.NoColor,
 out copyNumberCell);
             }
 
-            nStartColIndex += context.OrderColList.Count;
-
-            // 记载 cell 最大宽度
-            for (int j = 0; j < nStartColIndex - nOldStartColIndex; j++)
             {
-                // string col = biblio_col_list[j];
-                //if (col == "recpath" || col == "书目记录路径")
-                //    continue;
+                // order.OldRecord = SplitCopyString(order.OldRecord);
+                string strOrderState = order == null ? null : GetState(order.OldRecord);
 
-                IXLCell cell = context.Sheet.Cell(context.RowIndex + 1, nOldStartColIndex + j + 1);
+                if (context.OrderColList != null)
+                    nStartColIndex += context.OrderColList.Count;
 
-                last_cell = cell;   // 2019/12/3
+                // 记载 cell 最大宽度
+                for (int j = 0; j < nStartColIndex - nOldStartColIndex; j++)
+                {
+                    // string col = biblio_col_list[j];
+                    //if (col == "recpath" || col == "书目记录路径")
+                    //    continue;
 
-                // 最大字符数
-                ClosedXmlUtil.SetMaxChars(context.ColumnMaxChars,
-                nOldStartColIndex + j,
-                ReaderSearchForm.GetCharWidth(cell.GetValue<string>()));
-            }
+                    IXLCell cell = context.Sheet.Cell(context.RowIndex + 1, nOldStartColIndex + j + 1);
 
-            // 订购记录状态不为空的行底色为灰色
-            if (first_cell != null && last_cell != null
-                && string.IsNullOrEmpty(strOrderState) == false)
-            {
-                var range = context.Sheet.Range(first_cell, last_cell);
-                range.Style.Fill.BackgroundColor = XLColor.DarkGray;
+                    last_cell = cell;   // 2019/12/3
+
+                    // 最大字符数
+                    ClosedXmlUtil.SetMaxChars(context.ColumnMaxChars,
+                    nOldStartColIndex + j,
+                    ReaderSearchForm.GetCharWidth(cell.GetValue<string>()));
+                }
+
+                // 订购记录状态不为空的行底色为灰色
+                if (first_cell != null && last_cell != null
+                    && string.IsNullOrEmpty(strOrderState) == false)
+                {
+                    var range = context.Sheet.Range(first_cell, last_cell);
+                    range.Style.Fill.BackgroundColor = XLColor.DarkGray;
+                }
             }
 
             nLineIndex++;

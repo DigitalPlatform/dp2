@@ -4336,13 +4336,13 @@ strTotalPrice);
         static string GetString(Engine engine, string name, string default_value)
         {
             var result_obj = engine.GetValue(name);
-            string value = result_obj.IsUndefined() ? default_value : result_obj.ToObject().ToString();
+            string value = result_obj.IsUndefined() ? default_value : result_obj.ToObject()?.ToString();
             if (value == null)
                 value = "";
             return value;
         }
 
-        static string RunScript(string strMARC,
+        public static string RunScript(string strMARC,
             string strOutMarcSyntax,
             string strScript)
         {

@@ -945,6 +945,13 @@ int MAX_CHARS = 50)
                 string strClass = StringUtil.GetLeft(column.Name);
 
                 ColumnProperty prop = new ColumnProperty(strCaption, strClass);
+                prop.Evalue = column.Evalue;
+
+                // 2023/4/7
+                // 为具有 .Evalue 的列修改 .Type 名字，增加一个前缀，以便和普通 Column 区别
+                if (string.IsNullOrEmpty(prop.Evalue) == false)
+                    prop.Type = "evalue-" + prop.Type.Replace("_", "-");
+
                 results.Add(prop);
             }
 
@@ -1017,6 +1024,10 @@ int MAX_CHARS = 50)
         // 可用值列表
         public List<string> ValueList { get; set; }
 
+        // 2023/4/7
+        // 脚本代码
+        public string Evalue { get; set; }
+
         public ColumnProperty(string caption, string type)
         {
             this.Caption = caption;
@@ -1025,6 +1036,9 @@ int MAX_CHARS = 50)
 
         public static List<string> GetDropDownList(List<ColumnProperty> property_list)
         {
+            // 2023/4/7
+            if (property_list == null)
+                return null;
             List<string> results = new List<string>();
             property_list.ForEach((o) =>
             {
@@ -1037,6 +1051,9 @@ int MAX_CHARS = 50)
         public static List<string> GetTypeList(List<ColumnProperty> property_list,
             bool bRemovePrefix = true)
         {
+            // 2023/4/7
+            if (property_list == null)
+                return null;
             List<string> results = new List<string>();
             property_list.ForEach((o) =>
             {

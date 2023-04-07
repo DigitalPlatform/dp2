@@ -2703,6 +2703,9 @@
     <EmbeddedResource Include="SearchForms\RunScriptDialog.resx">
       <DependentUpon>RunScriptDialog.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="SearchForms\SaveBiblioExcelFileDialog.resx">
+      <DependentUpon>SaveBiblioExcelFileDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="SearchForms\VerifyEntityDialog.resx">
       <DependentUpon>VerifyEntityDialog.cs</DependentUpon>
     </EmbeddedResource>
@@ -2933,6 +2936,12 @@
     </Compile>
     <Compile Include="SearchForms\RunScriptDialog.Designer.cs">
       <DependentUpon>RunScriptDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SearchForms\SaveBiblioExcelFileDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SearchForms\SaveBiblioExcelFileDialog.Designer.cs">
+      <DependentUpon>SaveBiblioExcelFileDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="SearchForms\SearchFormBase.cs">
       <SubType>Form</SubType>
