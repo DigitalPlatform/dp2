@@ -554,13 +554,13 @@ namespace dp2Circulation
         }
 
         // TODO: OnEnd()有可能抛出异常，要能够截获和处理
-        public override int RunScript(string strProjectName,
-    string strProjectLocate,
-    string strInitialParamString,
-    out string strError,
-    out string strWarning)
+        public override RunScriptResult RunScript(string strProjectName,
+            string strProjectLocate,
+            string strInitialParamString/*,
+            out string strError,
+            out string strWarning*/)
         {
-            strWarning = "";
+            string strWarning = "";
 
             /*
             EnableControls(false);
@@ -583,9 +583,8 @@ namespace dp2Circulation
 
             try
             {
-
                 int nRet = 0;
-                strError = "";
+                string strError = "";
 
                 // 2009/11/5
                 // 防止以前残留的打开的文件依然没有关闭
@@ -619,7 +618,12 @@ namespace dp2Circulation
                     goto ERROR1;
 
                 if (strInitialParamString == "test_compile")
-                    return 0;
+                    return new RunScriptResult
+                    {
+                        Value = 0,
+                        ErrorInfo = strError,
+                        Warning = strWarning
+                    };
 
                 //
                 if (filter != null)
@@ -677,16 +681,31 @@ namespace dp2Circulation
                     objStatis.OnEnd(this, args);
                 }
 
-                return 0;
+                return new RunScriptResult
+                {
+                    Value = 0,
+                    ErrorInfo = strError,
+                    Warning = strWarning
+                };
 
             ERROR1:
-                return -1;
-
+                return new RunScriptResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError,
+                    Warning = strWarning
+                };
             }
             catch (Exception ex)
             {
-                strError = "脚本 '" + strProjectName + "' 执行过程抛出异常: \r\n" + ExceptionUtil.GetDebugText(ex);
-                return -1;
+                string error = "脚本 '" + strProjectName + "' 执行过程抛出异常: \r\n" + ExceptionUtil.GetDebugText(ex);
+                return new RunScriptResult
+                {
+                    Value = -1,
+                    ErrorInfo = error,
+                    Warning = strWarning
+
+                };
             }
             finally
             {
@@ -1654,11 +1673,9 @@ namespace dp2Circulation
                 this.Running = true;
                 try
                 {
-
                     nRet = RunScript(strProjectName,
                         strProjectLocate,
                         out strError);
-
                     if (nRet == -1)
                         goto ERROR1;
                 }

@@ -9,6 +9,7 @@ using System.IO;
 using System.Xml;
 using System.Reflection;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 
 using DigitalPlatform;
@@ -32,8 +33,8 @@ namespace dp2Circulation
         public ScriptManager ScriptManager = new ScriptManager();
 #endif
 
-        OperLogStatis objStatis = null;
-        Assembly AssemblyMain = null;
+        OperLogStatis _objStatis = null;
+        Assembly _assemblyMain = null;
 
 #if NO
         int AssemblyVersion 
@@ -286,13 +287,13 @@ namespace dp2Circulation
             this.button_projectManage.Enabled = bEnable;
         }
 
-        public override int RunScript(string strProjectName,
-    string strProjectLocate,
-    string strInitialParamString,
-    out string strError,
-    out string strWarning)
+        public override RunScriptResult RunScript(string strProjectName,
+            string strProjectLocate,
+            string strInitialParamString/*,
+            out string strError,
+            out string strWarning*/)
         {
-            strWarning = "";
+            string strWarning = "";
 
             /*
             EnableControls(false);
@@ -315,12 +316,13 @@ namespace dp2Circulation
             try
             {
                 int nRet = 0;
-                strError = "";
+                string strError = "";
+                var mainForm = Program.MainForm;
 
                 // Assembly assemblyMain = null;
 
-                this.objStatis = null;
-                this.AssemblyMain = null;
+                this._objStatis = null;
+                this._assemblyMain = null;
 
                 // 2009/11/5 changed
                 // 防止以前残留的打开的文件依然没有关闭
@@ -334,14 +336,18 @@ namespace dp2Circulation
                 nRet = PrepareScript(strProjectName,
                     strProjectLocate,
                     // out assemblyMain,
-                    out objStatis,
+                    out _objStatis,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
                 if (strInitialParamString == "test_compile")
-                    return 0;
-
+                    return new RunScriptResult
+                    {
+                        Value = 0,
+                        ErrorInfo = strError,
+                        Warning = strWarning
+                    };
 
                 /*
                  * 
@@ -369,29 +375,37 @@ namespace dp2Circulation
 
                 // this.AssemblyMain = assemblyMain;
 
-                objStatis.ProjectDir = strProjectLocate;
-                objStatis.Console = this.Console;
-                objStatis.StartDate = this.dateControl_start.Value;
-                objStatis.EndDate = this.dateControl_end.Value;
+                _objStatis.ProjectDir = strProjectLocate;
+                _objStatis.Console = this.Console;
+                _objStatis.StartDate = this.dateControl_start.Value;
+                _objStatis.EndDate = this.dateControl_end.Value;
 
                 // 执行脚本的OnInitial()
 
                 // 触发Script中OnInitial()代码
                 // OnInitial()和OnBegin的本质区别, 在于OnInitial()适合检查和设置面板参数
-                if (objStatis != null)
+                if (_objStatis != null)
                 {
                     StatisEventArgs args = new StatisEventArgs();
-                    objStatis.OnInitial(this, args);
+                    mainForm.TryInvoke(_objStatis.UseUiThread, () =>
+                    {
+                        _objStatis.OnInitial(this, args);
+                    });
                     if (args.Continue == ContinueType.SkipAll)
                         goto END1;
                 }
 
                 // 触发Script中OnBegin()代码
                 // OnBegin()中仍然有修改MainForm面板的自由
-                if (objStatis != null)
+                if (_objStatis != null)
                 {
                     StatisEventArgs args = new StatisEventArgs();
-                    objStatis.OnBegin(this, args);
+                    // 注: 这里用 mainForm.TryInvoke() 而不用 this.TryInvoke() 的原因是:
+                    // 假如脚本代码中有 dlg.ShowDialog() (注意不是 dlg.ShowDialog(owner))，后者用法会弹不出对话框
+                    mainForm.TryInvoke(_objStatis.UseUiThread, () =>
+                    {
+                        _objStatis.OnBegin(this, args);
+                    });
                     if (args.Continue == ContinueType.SkipAll)
                         goto END1;
                 }
@@ -409,28 +423,56 @@ namespace dp2Circulation
 
                 END1:
                 // 触发Script的OnEnd()代码
-                if (objStatis != null)
+                if (_objStatis != null)
                 {
                     StatisEventArgs args = new StatisEventArgs();
-                    objStatis.OnEnd(this, args);
+                    mainForm.TryInvoke(_objStatis.UseUiThread, () =>
+                    {
+                        _objStatis.OnEnd(this, args);
+                    });
                 }
 
                 // 2020/3/30
                 if (nRet == 1)
-                    return -1;
-                return 0;
+                    return new RunScriptResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError,
+                        Warning = strWarning
+                    };
+                return new RunScriptResult
+                {
+                    Value = 0,
+                    ErrorInfo = strError,
+                    Warning = strWarning
+                };
             ERROR1:
-                return -1;
+                return new RunScriptResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError,
+                    Warning = strWarning
+                };
             }
             catch (Exception ex)
             {
-                strError = "脚本执行过程抛出异常: \r\n" + ExceptionUtil.GetDebugText(ex);
-                return -1;
+                string error = "脚本执行过程抛出异常: \r\n" + ExceptionUtil.GetDebugText(ex);
+                return new RunScriptResult
+                {
+                    Value = -1,
+                    ErrorInfo = error,
+                    Warning = strWarning
+                };
             }
             finally
             {
-                if (objStatis != null)
-                    objStatis.FreeResources();
+                if (_objStatis != null)
+                {
+                    Program.MainForm.TryInvoke(_objStatis.UseUiThread, () =>
+                    {
+                        _objStatis.FreeResources();
+                    });
+                }
 
                 looping.Dispose();
                 /*
@@ -442,7 +484,7 @@ namespace dp2Circulation
                 EnableControls(true);
                 */
 
-                this.AssemblyMain = null;
+                this._assemblyMain = null;
                 AppDomain.CurrentDomain.AssemblyResolve -= new ResolveEventHandler(CurrentDomain_AssemblyResolve);
             }
         }
@@ -486,15 +528,18 @@ namespace dp2Circulation
             // strXml中为日志记录
 
             // 触发Script中OnRecord()代码
-            if (objStatis != null)
+            if (_objStatis != null)
             {
-                objStatis.Xml = strXml;
-                objStatis.CurrentDate = currentDate;
-                objStatis.CurrentLogFileName = strLogFileName;
-                objStatis.CurrentRecordIndex = lIndex;
+                _objStatis.Xml = strXml;
+                _objStatis.CurrentDate = currentDate;
+                _objStatis.CurrentLogFileName = strLogFileName;
+                _objStatis.CurrentRecordIndex = lIndex;
 
                 StatisEventArgs args = new StatisEventArgs();
-                objStatis.OnRecord(this, args);
+                Program.MainForm.TryInvoke(_objStatis.UseUiThread, () =>
+                {
+                    _objStatis.OnRecord(this, args);
+                });
                 if (args.Continue == ContinueType.SkipAll)
                     return 1;
             }
@@ -552,7 +597,6 @@ namespace dp2Circulation
 
             string strStartDate = DateTimeUtil.DateTimeToString8(this.dateControl_start.Value);
             string strEndDate = DateTimeUtil.DateTimeToString8(this.dateControl_end.Value);
-
 
             // 根据日期范围，发生日志文件名
             // parameters:
@@ -664,7 +708,7 @@ namespace dp2Circulation
             out OperLogStatis objStatis,
             out string strError)
         {
-            this.AssemblyMain = null;
+            this._assemblyMain = null;
 
             objStatis = null;
 
@@ -721,8 +765,8 @@ namespace dp2Circulation
             }
 
 
-            this.AssemblyMain = Assembly.LoadFrom(strMainCsDllName);
-            if (this.AssemblyMain == null)
+            this._assemblyMain = Assembly.LoadFrom(strMainCsDllName);
+            if (this._assemblyMain == null)
             {
                 strError = "LoadFrom " + strMainCsDllName + " fail";
                 goto ERROR1;
@@ -730,7 +774,7 @@ namespace dp2Circulation
 
             // 得到Assembly中Statis派生类Type
             Type entryClassType = ScriptManager.GetDerivedClassType(
-                this.AssemblyMain,
+                this._assemblyMain,
                 "dp2Circulation.OperLogStatis");
 
             if (entryClassType == null)
@@ -787,7 +831,7 @@ namespace dp2Circulation
             out string strMainCsDllName,
             out string strError)
         {
-            this.AssemblyMain = null;
+            this._assemblyMain = null;
             string strWarning = "";
 
             strMainCsDllName = strProjectLocate + "\\~main_" + Convert.ToString(AssemblyVersion) + ".dll";    // ++
@@ -849,7 +893,7 @@ namespace dp2Circulation
         }
 
         // 下一步 按钮
-        private void button_next_Click(object sender, EventArgs e)
+        private async void button_next_Click(object sender, EventArgs e)
         {
             string strError = "";
             int nRet = 0;
@@ -918,10 +962,10 @@ namespace dp2Circulation
                     // 内置方案
                     if (strProjectName == "#典藏移交清单")
                     {
-                        nRet = TransferList(out strError);
-                        if (nRet == -1)
+                        var result = await TransferListAsync();
+                        if (result.Value == -1)
                         {
-                            strError = $"TransferList() 出错: {strError}";
+                            strError = $"TransferList() 出错: {result.ErrorInfo}";
                             goto ERROR1;
                         }
                     }
@@ -955,11 +999,18 @@ namespace dp2Circulation
                     this.Running = true;
                     try
                     {
+                        /*
                         nRet = RunScript(strProjectName,
                             strProjectLocate,
                             out strError);
-
                         if (nRet == -1)
+                            goto ERROR1;
+                        */
+                        var result = await RunScriptAsync(strProjectName,
+                            strProjectLocate,
+                            "");
+                        strError = result.ErrorInfo;
+                        if (result.Value == -1)
                             goto ERROR1;
                     }
                     finally
@@ -970,7 +1021,6 @@ namespace dp2Circulation
 
                 this.tabControl_main.SelectedTab = this.tabPage_runStatis;
                 MessageBox.Show(this, "统计完成。");
-
                 return;
             }
 
@@ -1022,7 +1072,7 @@ namespace dp2Circulation
 
         private void button_print_Click(object sender, EventArgs e)
         {
-            if (this.objStatis == null)
+            if (this._objStatis == null)
             {
                 MessageBox.Show(this, "尚未执行统计，无法打印");
                 return;
@@ -1033,8 +1083,8 @@ namespace dp2Circulation
             printform.Text = "打印统计结果";
             // printform.MainForm = Program.MainForm;
 
-            Debug.Assert(this.objStatis != null, "");
-            printform.Filenames = this.objStatis.OutputFileNames;
+            Debug.Assert(this._objStatis != null, "");
+            printform.Filenames = this._objStatis.OutputFileNames;
             Program.MainForm.AppInfo.LinkFormState(printform, "printform_state");
             printform.ShowDialog(this);
             Program.MainForm.AppInfo.UnlinkFormState(printform);

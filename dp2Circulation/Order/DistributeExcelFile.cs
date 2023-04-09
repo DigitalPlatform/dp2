@@ -296,7 +296,8 @@ context.ContentEndRow + 1 + 1, context.DistributeEndColumn + 1);
                 //      1   找到
                 int nRet = form.GetTable(
                     strBiblioRecPath,
-                    StringUtil.MakePathList(ColumnProperty.GetTypeList(context.BiblioColList)),
+                    context.BiblioColList,
+                    // StringUtil.MakePathList(ColumnProperty.GetTypeList(context.BiblioColList)),
                     out strTableXml,
                     out string strError);
                 if (nRet == -1)
@@ -427,6 +428,7 @@ GetOrderRecord procGetOrderRecord)
 
             int nOldStartColIndex = nStartColIndex;
 
+            if (string.IsNullOrEmpty(strTableXml))
             {
                 // return:
                 //      -1  出错
@@ -434,7 +436,8 @@ GetOrderRecord procGetOrderRecord)
                 //      1   找到
                 int nRet = form.GetTable(
                     strBiblioRecPath,
-                    StringUtil.MakePathList(ColumnProperty.GetTypeList(context.BiblioColList)),
+                    context.BiblioColList,
+                    // StringUtil.MakePathList(ColumnProperty.GetTypeList(context.BiblioColList)),
                     out strTableXml,
                     out string strError);
                 if (nRet == -1)

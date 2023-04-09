@@ -154,7 +154,8 @@ GetOrderRecord procGetOrderRecord)
                 //      1   找到
                 int nRet = form.GetTable(
                     strBiblioRecPath,
-                    StringUtil.MakePathList(ColumnProperty.GetTypeList(context.BiblioColList)),
+                    context.BiblioColList,
+                    // StringUtil.MakePathList(ColumnProperty.GetTypeList(context.BiblioColList)),
                     out strTableXml,
                     out string strError);
                 if (nRet == -1)

@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.UI.HtmlControls;
 using System.Windows.Forms;
 using System.Xml;
 
@@ -21,14 +22,25 @@ namespace dp2Circulation
     {
         #region “典藏移交”内置统计方案
 
+        public Task<NormalResult> TransferListAsync()
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                return TransferList();
+            },
+default,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
+
         // 典藏移交清单。内置统计方案
         // return:
         //      -1  出错
         //      0   成功
         //      1   用户中断
-        int TransferList(out string strError)
+        NormalResult TransferList()
         {
-            strError = "";
+            string strError = "";
 
             var items = new List<TransferItem>();
 
@@ -112,8 +124,11 @@ namespace dp2Circulation
                 },
                     out strError);
                 if (nRet == -1 || nRet == 1)
-                    return nRet;
-
+                    return new NormalResult
+                    {
+                        Value = nRet,
+                        ErrorInfo = strError
+                    };
             }
             finally
             {
@@ -140,88 +155,102 @@ namespace dp2Circulation
 
             List<TransferGroup> groups = null;
             bool output_one_sheet = true;
-            using (var dlg = new SelectOutputRangeDialog())
+
+            var ret = this.TryGet(() =>
             {
-                dlg.Font = this.Font;
-                dlg.Groups = list;
+                using (var dlg = new SelectOutputRangeDialog())
+                {
+                    dlg.Font = this.Font;
+                    dlg.Groups = list;
 
+                    dlg.UiState = Program.MainForm.AppInfo.GetString(
+    "OperLogStatisForm",
+    "SelectOutputRangeDialog_uiState",
+    "");
+                    Program.MainForm.AppInfo.LinkFormState(dlg, "SelectOutputRangeDialog_formstate");
+                    dlg.ShowDialog(this);
 
-                dlg.UiState = Program.MainForm.AppInfo.GetString(
-"OperLogStatisForm",
-"SelectOutputRangeDialog_uiState",
-"");
-                Program.MainForm.AppInfo.LinkFormState(dlg, "SelectOutputRangeDialog_formstate");
-                dlg.ShowDialog(this);
+                    Program.MainForm.AppInfo.SetString(
+    "OperLogStatisForm",
+    "SelectOutputRangeDialog_uiState",
+    dlg.UiState);
 
-                Program.MainForm.AppInfo.SetString(
-"OperLogStatisForm",
-"SelectOutputRangeDialog_uiState",
-dlg.UiState);
-
-                if (dlg.DialogResult == DialogResult.Cancel)
-                    return 1;
-                groups = dlg.SelectedGroups;
-                output_one_sheet = dlg.OutputOneSheet;
-            }
+                    if (dlg.DialogResult == DialogResult.Cancel)
+                        return new NormalResult { Value = 1 };
+                    groups = dlg.SelectedGroups;
+                    output_one_sheet = dlg.OutputOneSheet;
+                    return new NormalResult();
+                }
+            });
+            if (ret.Value == 1)
+                return ret;
 
             this.ShowMessage("正在创建 Excel 报表 ...");
 
             string fileName = "";
-            // 创建 Excel 报表
-            // 询问文件名
-            using (SaveFileDialog dlg = new SaveFileDialog
+            ret = this.TryGet(() =>
             {
-                Title = "请指定要输出的 Excel 文件名",
-                CreatePrompt = false,
-                OverwritePrompt = true,
-                // dlg.FileName = this.ExportExcelFilename;
-                // dlg.InitialDirectory = Environment.CurrentDirectory;
-                Filter = "Excel 文件 (*.xlsx)|*.xlsx|All files (*.*)|*.*",
-                RestoreDirectory = true
-            })
+                // 创建 Excel 报表
+                // 询问文件名
+                using (SaveFileDialog dlg = new SaveFileDialog
+                {
+                    Title = "请指定要输出的 Excel 文件名",
+                    CreatePrompt = false,
+                    OverwritePrompt = true,
+                    // dlg.FileName = this.ExportExcelFilename;
+                    // dlg.InitialDirectory = Environment.CurrentDirectory;
+                    Filter = "Excel 文件 (*.xlsx)|*.xlsx|All files (*.*)|*.*",
+                    RestoreDirectory = true
+                })
+                {
+                    if (dlg.ShowDialog() != DialogResult.OK)
+                        return new NormalResult { Value = 1 };
+
+                    fileName = dlg.FileName;
+                    return new NormalResult();
+                }
+            });
+            if (ret.Value == 1)
+                return ret;
+
+            XLWorkbook doc = null;
+            try
             {
-                if (dlg.ShowDialog() != DialogResult.OK)
-                    return 0;
-
-                fileName = dlg.FileName;
-
-                XLWorkbook doc = null;
-                try
+                doc = new XLWorkbook(XLEventTracking.Disabled);
+                File.Delete(fileName);
+            }
+            catch (Exception ex)
+            {
+                strError = ExceptionUtil.GetAutoText(ex);
+                return new NormalResult
                 {
-                    doc = new XLWorkbook(XLEventTracking.Disabled);
-                    File.Delete(dlg.FileName);
-                }
-                catch (Exception ex)
-                {
-                    strError = ExceptionUtil.GetAutoText(ex);
-                    return -1;
-                }
-
-                if (output_one_sheet)
-                {
-                    CreateSheet(doc,
-    "典藏移交清单",
-    groups);
-                }
-                else
-                {
-                    int count = groups.Count;
-                    int i = 0;
-                    foreach (var group in groups)
-                    {
-                        CreateSheet(doc,
-                            $"{++i} {count} {group.BatchNo}-{group.TargetLocation}",
-                            // Cut($"({++i} of {count})", 31),
-                            new List<TransferGroup> { group });
-                    }
-                }
-
-                doc.SaveAs(dlg.FileName);
-
+                    Value = -1,
+                    ErrorInfo = strError
+                };
             }
 
-            this.ClearMessage();
+            if (output_one_sheet)
+            {
+                CreateSheet(doc,
+"典藏移交清单",
+groups);
+            }
+            else
+            {
+                int count = groups.Count;
+                int i = 0;
+                foreach (var group in groups)
+                {
+                    CreateSheet(doc,
+                        $"{++i} {count} {group.BatchNo}-{group.TargetLocation}",
+                        // Cut($"({++i} of {count})", 31),
+                        new List<TransferGroup> { group });
+                }
+            }
 
+            doc.SaveAs(fileName);
+
+            this.ClearMessage();
             try
             {
                 System.Diagnostics.Process.Start(fileName);
@@ -230,7 +259,7 @@ dlg.UiState);
             {
 
             }
-            return 0;
+            return new NormalResult { Value = 0 };
         }
 
         static string Cut(string text, int length)
@@ -264,10 +293,13 @@ dlg.UiState);
     "item",
     strEntityRecPath,
     strParentID);
+            // 注：当实体库名没有找到对应的书目库的时候，strBiblioRecPath 为空
+            /*
             if (string.IsNullOrEmpty(strBiblioRecPath))
             {
                 throw new Exception("获取对应的书目记录路径时出错");
             }
+            */
 
             List<string> type_list1 = new List<string>();
             List<string> type_list2 = new List<string>();
@@ -284,17 +316,28 @@ dlg.UiState);
             });
             string styleList = StringUtil.MakePathList(type_list1);
 
-            // return:
-            //      -1  出错
-            //      0   没有找到
-            //      1   找到
-            int nRet = this.GetTable(
-                strBiblioRecPath,
-                styleList,
-                out string strTableXml,
-                out string strError1);
-            if (nRet == -1)
-                throw new Exception(strError1);
+            string strTableXml = "";
+            if (string.IsNullOrEmpty(strBiblioRecPath))
+            {
+                // 注：当实体库名没有找到对应的书目库的时候，strBiblioRecPath 为空
+                // TODO: 可以把报错信息写入追加一个 line 元素
+                strTableXml = "<table />";
+            }
+            else
+            {
+                // return:
+                //      -1  出错
+                //      0   没有找到
+                //      1   找到
+                int nRet = this.GetTable(
+                    strBiblioRecPath,
+                    biblio_title_list,
+                    // styleList,
+                    out strTableXml,
+                    out string strError1);
+                if (nRet == -1)
+                    throw new Exception(strError1);
+            }
 
             // 输出一行书目信息
             var cells = ExcelUtility.OutputBiblioLine(

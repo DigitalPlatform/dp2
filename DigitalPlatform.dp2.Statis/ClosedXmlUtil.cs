@@ -4,14 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
-// using System.Windows.Forms.VisualStyles;
 using System.Drawing;
 using System.Diagnostics;
 
 using ClosedXML.Excel;
 
 using DigitalPlatform.Xml;
-using DigitalPlatform.Core;
 
 namespace DigitalPlatform.dp2.Statis
 {
@@ -19,28 +17,31 @@ namespace DigitalPlatform.dp2.Statis
     {
         public static double GetAverageCharPixelWidth(Control control)
         {
-            StringBuilder sb = new StringBuilder();
-
-            // Using the typical printable range
-            for (int i = 32; i < 127; i++)
+            return control.TryGet(() =>
             {
-                sb.Append((char)i);
-            }
+                StringBuilder sb = new StringBuilder();
 
-            string printableChars = sb.ToString();
+                // Using the typical printable range
+                for (int i = 32; i < 127; i++)
+                {
+                    sb.Append((char)i);
+                }
 
-            // Choose your font
-            Font stringFont = control.Font;
+                string printableChars = sb.ToString();
 
-            // Now pass printableChars into MeasureString
-            SizeF stringSize = new SizeF();
-            using (Graphics g = Graphics.FromHwnd(control.Handle))
-            {
-                stringSize = g.MeasureString(printableChars, stringFont);
-            }
+                // Choose your font
+                Font stringFont = control.Font;
 
-            // Work out average width of printable characters
-            return stringSize.Width / (double)printableChars.Length;
+                // Now pass printableChars into MeasureString
+                SizeF stringSize = new SizeF();
+                using (Graphics g = Graphics.FromHwnd(control.Handle))
+                {
+                    stringSize = g.MeasureString(printableChars, stringFont);
+                }
+
+                // Work out average width of printable characters
+                return stringSize.Width / (double)printableChars.Length;
+            });
         }
 
 

@@ -4676,7 +4676,7 @@ bQuickLoad);
                     }
                 }
 
-                Order.DistributeExcelFile context = new Order.DistributeExcelFile
+                var context = new Order.DistributeExcelFile
                 {
                     Sheet = sheet,
                     LocationList = location_list,

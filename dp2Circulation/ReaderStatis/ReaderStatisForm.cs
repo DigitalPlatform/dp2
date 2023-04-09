@@ -393,13 +393,13 @@ namespace dp2Circulation
             this.button_projectManage.Enabled = bEnable;
         }
 
-        public override int RunScript(string strProjectName,
+        public override RunScriptResult RunScript(string strProjectName,
     string strProjectLocate,
-    string strInitialParamString,
+    string strInitialParamString/*,
     out string strError,
-    out string strWarning)
+    out string strWarning*/)
         {
-            strWarning = "";
+            string strWarning = "";
 
             /*
             EnableControls(false);
@@ -423,7 +423,7 @@ namespace dp2Circulation
             try
             {
                 int nRet = 0;
-                strError = "";
+                string strError = "";
 
                 this.objStatis = null;
                 this.AssemblyMain = null;
@@ -440,7 +440,12 @@ namespace dp2Circulation
                     goto ERROR1;
 
                 if (strInitialParamString == "test_compile")
-                    return 0;
+                    return new RunScriptResult
+                    {
+                        Value = 0,
+                        ErrorInfo = strError,
+                        Warning = strWarning
+                    };
 
                 objStatis.ProjectDir = strProjectLocate;
                 objStatis.Console = this.Console;
@@ -494,15 +499,30 @@ namespace dp2Circulation
                     objStatis.OnEnd(this, args);
                 }
 
-                return 0;
+                return new RunScriptResult
+                {
+                    Value = 0,
+                    ErrorInfo = strError,
+                    Warning = strWarning
+                };
 
             ERROR1:
-                return -1;
+                return new RunScriptResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError,
+                    Warning = strWarning
+                };
             }
             catch (Exception ex)
             {
-                strError = "脚本执行过程抛出异常: \r\n" + ExceptionUtil.GetDebugText(ex);
-                return -1;
+                string error = "脚本执行过程抛出异常: \r\n" + ExceptionUtil.GetDebugText(ex);
+                return new RunScriptResult
+                {
+                    Value = -1,
+                    ErrorInfo = error,
+                    Warning = strWarning
+                };
             }
             finally
             {

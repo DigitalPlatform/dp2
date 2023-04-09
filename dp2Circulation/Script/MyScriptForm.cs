@@ -11,6 +11,8 @@ using DigitalPlatform;
 using DigitalPlatform.IO;
 using DigitalPlatform.Script;
 using DigitalPlatform.Core;
+using System.Threading.Tasks;
+using DigitalPlatform.CirculationClient;
 
 namespace dp2Circulation
 {
@@ -171,16 +173,18 @@ namespace dp2Circulation
             string strWarning = "";
 
             // TODO: 增加一个参数表示这是测试编译
-            nRet = RunScript(strProjectName,
+            var result = RunScript(strProjectName,
                 strProjectLocate,
-                "test_compile", // strInitialParamString
+                "test_compile"/*, // strInitialParamString
                 out strError,
-                out strWarning);
-            if (nRet == -1)
+                out strWarning*/);
+            strError = result.ErrorInfo;
+            strWarning = result.Warning;
+            if (result.Value == -1)
                 goto ERROR1;
 
             return;
-            ERROR1:
+        ERROR1:
             throw new Exception(strError);
         }
 
@@ -190,23 +194,55 @@ namespace dp2Circulation
             out string strError)
         {
             string strWarning = "";
-            return RunScript(strProjectName,
+            var result = RunScript(strProjectName,
             strProjectLocate,
-            "",
+            ""/*,
             out strError,
-            out strWarning);
+            out strWarning*/);
+            strError = result.ErrorInfo;
+            strWarning = result.Warning;
+            return result.Value;
         }
 
-        public virtual int RunScript(string strProjectName,
+        // 2023/4/8
+        public Task<RunScriptResult> RunScriptAsync(string strProjectName,
             string strProjectLocate,
-            string strInitialParamString,
-            out string strError,
-            out string strWarning)
+            string strInitialParamString)
         {
+            return Task.Factory.StartNew(() =>
+            {
+                return RunScript(strProjectName,
+            strProjectLocate,
+            strInitialParamString);
+            },
+default,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+
+        }
+
+        public class RunScriptResult : NormalResult
+        {
+            public string Warning { get; set; }
+        }
+
+        public virtual RunScriptResult RunScript(string strProjectName,
+            string strProjectLocate,
+            string strInitialParamString/*,
+            out string strError,
+            out string strWarning*/)
+        {
+            /*
             strError = "尚未重载 RunScript() 函数";
             strWarning = "";
 
             return -1;
+            */
+            return new RunScriptResult
+            {
+                Value = -1,
+                ErrorInfo = "尚未重载 RunScript() 函数"
+            };
         }
 
         /// <summary>

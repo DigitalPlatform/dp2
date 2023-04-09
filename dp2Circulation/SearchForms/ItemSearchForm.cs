@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Linq;
 
 using ClosedXML.Excel;
 using Newtonsoft.Json;
@@ -28,9 +29,6 @@ using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryServer;
-using DocumentFormat.OpenXml.Math;
-using System.Linq;
-using System.Web.UI.HtmlControls;
 
 
 // 2013/3/16 添加 XML 注释
@@ -6796,6 +6794,7 @@ out strError);
 
                     string strTableXml = "";
 
+                    /*
                     {
                         // return:
                         //      -1  出错
@@ -6803,12 +6802,14 @@ out strError);
                         //      1   找到
                         nRet = this.GetTable(
                             strBiblioRecPath,
-                            StringUtil.MakePathList(Order.ColumnProperty.GetTypeList(biblio_title_list)),
+                            biblio_title_list,
+                            // StringUtil.MakePathList(Order.ColumnProperty.GetTypeList(biblio_title_list)),
                             out strTableXml,
                             out string strError1);
                         if (nRet == -1)
                             throw new Exception(strError1);
                     }
+                    */
 
                     {
                         EntityInfo order = new EntityInfo();
@@ -7075,6 +7076,7 @@ out strError);
 
                         string strTableXml = "";
 
+                        /*
                         {
                             // return:
                             //      -1  出错
@@ -7088,6 +7090,7 @@ out strError);
                             if (nRet == -1)
                                 throw new Exception(strError1);
                         }
+                        */
 
                         {
                             EntityInfo entity = new EntityInfo();

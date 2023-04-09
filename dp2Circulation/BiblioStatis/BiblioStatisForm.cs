@@ -359,14 +359,14 @@ Stack:
 在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
 
          * */
-        public override int RunScript(string strProjectName,
+        public override RunScriptResult RunScript(string strProjectName,
             string strProjectLocate,
-            string strInitialParamString,
+            string strInitialParamString/*,
             out string strError,
-            out string strWarning)
+            out string strWarning*/)
         {
-            strError = "";
-            strWarning = "";
+            string strError = "";
+            string strWarning = "";
 
             /*
             EnableControls(false);
@@ -435,7 +435,12 @@ Stack:
                 }
 
                 if (strInitialParamString == "test_compile")
-                    return 0;
+                    return new RunScriptResult
+                    {
+                        Value = 0,
+                        ErrorInfo = strError,
+                        Warning = strWarning
+                    };
 
                 //
                 if (filter != null)
@@ -465,7 +470,12 @@ Stack:
                     if (args.Continue == ContinueType.Error)
                     {
                         strError = args.ParamString;
-                        return -1;
+                        return new RunScriptResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError,
+                            Warning = strWarning
+                        };
                     }
                     if (args.Continue == ContinueType.SkipAll)
                         goto END1;
@@ -480,7 +490,12 @@ Stack:
                     if (args.Continue == ContinueType.Error)
                     {
                         strError = args.ParamString;
-                        return -1;
+                        return new RunScriptResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError,
+                            Warning = strWarning
+                        };
                     }
                     if (args.Continue == ContinueType.SkipAll)
                         goto END1;
@@ -506,17 +521,37 @@ Stack:
                     if (args.Continue == ContinueType.Error)
                     {
                         strError = args.ParamString;
-                        return -1;
+                        return new RunScriptResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError,
+                            Warning = strWarning
+                        };
                     }
                 }
-                return 0;
+                return new RunScriptResult
+                {
+                    Value = 0,
+                    ErrorInfo = strError,
+                    Warning = strWarning
+                };
             ERROR1:
-                return -1;
+                return new RunScriptResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError,
+                    Warning = strWarning
+                };
             }
             catch (Exception ex)
             {
-                strError = "脚本执行过程抛出异常: \r\n" + ExceptionUtil.GetDebugText(ex);
-                return -1;
+                string error = "脚本执行过程抛出异常: \r\n" + ExceptionUtil.GetDebugText(ex);
+                return new RunScriptResult
+                {
+                    Value = -1,
+                    ErrorInfo = error,
+                    Warning = strWarning
+                };
             }
             finally
             {
@@ -1402,13 +1437,14 @@ Stack:
                 try
                 {
 
-                    nRet = RunScript(strProjectName,
+                    var result = RunScript(strProjectName,
                         strProjectLocate,
-                        "", // strInitialParamString
+                        ""/*, // strInitialParamString
                         out strError,
-                        out strWarning);
-
-                    if (nRet == -1)
+                        out strWarning*/);
+                    strError = result.ErrorInfo;
+                    strWarning = result.Warning;
+                    if (result.Value == -1)
                         goto ERROR1;
                 }
                 finally
@@ -1755,13 +1791,14 @@ Stack:
             this.Running = true;
             try
             {
-                nRet = RunScript(strProjectName,
+                var result = RunScript(strProjectName,
                     strProjectLocate,
-                    strInitialParamString,
+                    strInitialParamString/*,
                     out strError,
-                    out strWarning);
-
-                if (nRet == -1)
+                    out strWarning*/);
+                strError = result.ErrorInfo;
+                strWarning = result.Warning;
+                if (result.Value == -1)
                     goto ERROR1;
             }
             finally
