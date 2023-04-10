@@ -20,27 +20,26 @@ namespace TestDp2Library
     {
         // TP311 TP32
         [TestMethod]
-        public void Test_accessUtility_classline_01()
+        public void Test_anu_classline_01()
         {
-            string[] list = new string[] {
-            "TP311",
-            "TP32"
-            };
-            test_first_line_case(list);
+            string list = @"
+TP311
+TP32";
+            test_class_line_case(list);
         }
 
         // F-1 F0
         [TestMethod]
-        public void Test_accessUtility_classline_02()
+        public void Test_anu_classline_02()
         {
             string list = @"
 F-1
 F0";
-            test_first_line_case(list);
+            test_class_line_case(list);
         }
 
         [TestMethod]
-        public void Test_accessUtility_classline_03()
+        public void Test_anu_classline_03()
         {
             string list = @"
 B2
@@ -49,12 +48,12 @@ E27
 E512
 TM92
 TU201";
-            test_first_line_case(list);
+            test_class_line_case(list);
         }
 
 
         [TestMethod]
-        public void Test_accessUtility_classline_04()
+        public void Test_anu_classline_04()
         {
             string list = @"
 B
@@ -67,11 +66,11 @@ TM92
 TU201
 X799
 ";
-            test_first_line_case(list);
+            test_class_line_case(list);
         }
 
         [TestMethod]
-        public void Test_accessUtility_classline_05()
+        public void Test_anu_classline_05()
         {
             string list = @"
 B021
@@ -82,11 +81,11 @@ C54
 D035.37
 D035.4
 ";
-            test_first_line_case(list);
+            test_class_line_case(list);
         }
 
         [TestMethod]
-        public void Test_accessUtility_classline_06()
+        public void Test_anu_classline_06()
         {
             string list = @"
 B021
@@ -97,11 +96,11 @@ D035.4
 TM101
 TM90
 ";
-            test_first_line_case(list);
+            test_class_line_case(list);
         }
 
         [TestMethod]
-        public void Test_accessUtility_classline_07()
+        public void Test_anu_classline_07()
         {
             string list = @"
 TP312
@@ -112,21 +111,21 @@ TP312AL
 TP312BA
 TP312CO
 ";
-            test_first_line_case(list);
+            test_class_line_case(list);
         }
 
         [TestMethod]
-        public void Test_accessUtility_classline_08()
+        public void Test_anu_classline_08()
         {
             string list = @"
 F-43
 F0
 ";
-            test_first_line_case(list);
+            test_class_line_case(list);
         }
 
         [TestMethod]
-        public void Test_accessUtility_classline_09()
+        public void Test_anu_classline_09()
         {
             string list = @"
 B-49
@@ -137,11 +136,11 @@ B0-0
 B0-53
 B1
 ";
-            test_first_line_case(list);
+            test_class_line_case(list);
         }
 
         [TestMethod]
-        public void Test_accessUtility_classline_10()
+        public void Test_anu_classline_10()
         {
             string list = @"
 TP3
@@ -151,11 +150,11 @@ TP30
 TP301
 TP301.1
 ";
-            test_first_line_case(list);
+            test_class_line_case(list);
         }
 
         [TestMethod]
-        public void Test_accessUtility_classline_11()
+        public void Test_anu_classline_11()
         {
             string list = @"
 Z88:C
@@ -165,21 +164,21 @@ Z89:H
 Z89:K
 Z89:T
 ";
-            test_first_line_case(list);
+            test_class_line_case(list);
         }
 
         [TestMethod]
-        public void Test_accessUtility_classline_12()
+        public void Test_anu_classline_12()
         {
             string list = @"
 H319.4-43
 H319.4:I234
 ";
-            test_first_line_case(list);
+            test_class_line_case(list);
         }
 
         [TestMethod]
-        public void Test_accessUtility_classline_13()
+        public void Test_anu_classline_13()
         {
             string list = @"
 H319-43
@@ -189,11 +188,11 @@ H319:TP311
 H319:X256
 H319:X256-42
 ";
-            test_first_line_case(list);
+            test_class_line_case(list);
         }
 
         [TestMethod]
-        public void Test_accessUtility_classline_14()
+        public void Test_anu_classline_14()
         {
             string list = @"
 H319:A112
@@ -205,11 +204,11 @@ H319:U312
 H319:V311
 H319:Z256
 ";
-            test_first_line_case(list);
+            test_class_line_case(list);
         }
 
         [TestMethod]
-        public void Test_accessUtility_classline_15()
+        public void Test_anu_classline_15()
         {
             string list = @"
 B-49
@@ -217,12 +216,12 @@ B0
 B0-0
 B0-53
 ";
-            test_first_line_case(list);
+            test_class_line_case(list);
         }
 
         // 测试索取号中的其它行(所谓“其它行”就是第一行分类号以外的其它行)
         [TestMethod]
-        public void Test_accessUtility_restline_01()
+        public void Test_anu_restline_01()
         {
             string list = @"
 J559B(1)2
@@ -236,7 +235,7 @@ J559AJ(2)
 
         // 完整的索取号比较
         [TestMethod]
-        public void Test_accessUtility_01()
+        public void Test_anu_01()
         {
             string list = @"
 I247.5/A001
@@ -249,7 +248,7 @@ I247.5/Z256
         }
 
         [TestMethod]
-        public void Test_accessUtility_02()
+        public void Test_anu_02()
         {
             string list = @"
 I247.5/2
@@ -259,7 +258,7 @@ I247.5/1234
         }
 
         [TestMethod]
-        public void Test_accessUtility_03()
+        public void Test_anu_03()
         {
             string list = @"
 J333/G251
@@ -269,7 +268,7 @@ J333(512)/G251
         }
 
         [TestMethod]
-        public void Test_accessUtility_04()
+        public void Test_anu_04()
         {
             string list = @"
 K835.617/E43A
@@ -281,7 +280,7 @@ K835.617=43/S894
         }
 
         [TestMethod]
-        public void Test_accessUtility_06()
+        public void Test_anu_06()
         {
             string list = @"
 K827/Z763A
@@ -293,7 +292,7 @@ K827/Z763AA
         }
 
         [TestMethod]
-        public void Test_accessUtility_07()
+        public void Test_anu_07()
         {
             string list = @"
 O13-43/S623
@@ -305,7 +304,7 @@ O13-43/S623-2(2)
         }
 
         [TestMethod]
-        public void Test_accessUtility_08()
+        public void Test_anu_08()
         {
             string list = @"
 I247.58/J822-2(14)
@@ -316,7 +315,7 @@ I247.58/J822-2(32)
         }
 
         [TestMethod]
-        public void Test_accessUtility_09()
+        public void Test_anu_09()
         {
             string list = @"
 H360.41-42/l338(1)1
@@ -328,15 +327,15 @@ H360.41-42/l338(2)2
 
         #region 服务函数
 
-        void test_first_line_case(string list)
+        void test_class_line_case(string list)
         {
             var lines = new List<string>(list.Replace("\n", "").Split('\r'));
             StringUtil.RemoveBlank(ref lines);
 
-            test_first_line_case(lines.ToArray());
+            test_class_line_case(lines.ToArray());
         }
 
-        void test_first_line_case(string[] list)
+        void test_class_line_case(string[] list)
         {
             List<string> results = new List<string>();
             results.AddRange(list);
@@ -415,7 +414,7 @@ H360.41-42/l338(2)2
 
         // L412      L412-2    L412x    L412(x2)  L412.2    L412.2-2   L412.2p   L412.2(p2)
         [TestMethod]
-        public void Test_accessUtility_line_01()
+        public void Test_anu_line_01()
         {
             string s1 = "L412";
             string s2 = "L412-2";
@@ -425,7 +424,7 @@ H360.41-42/l338(2)2
         }
 
         [TestMethod]
-        public void Test_accessUtility_line_02()
+        public void Test_anu_line_02()
         {
             string s1 = "L412-2";
             string s2 = "L412x";
@@ -436,7 +435,7 @@ H360.41-42/l338(2)2
 
 
         [TestMethod]
-        public void Test_accessUtility_line_03()
+        public void Test_anu_line_03()
         {
             string s1 = "L412x";
             string s2 = "L412(x2)";

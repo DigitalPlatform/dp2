@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.140.*")]
-[assembly: AssemblyFileVersion("3.140.0.0")]
+[assembly: AssemblyVersion("3.141.*")]
+[assembly: AssemblyFileVersion("3.141.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -359,3 +359,4 @@ ItemCanReturn()
 //						注: loose 在先前版本中表示复制或移动下级记录的时候，不要求目标书目记录相应的下级库一定存在。当然，这样宽松的结果，可能会造成下级记录在移动或者复制后发生丢失。最新版也继承了这个效果
 //		3.139 (2023/3/23) 改进 SetBiblioInfo() 和 CopyBiblioInfo() 用到的 MARC 记录头标区的 null 概念。有 ?????(权限不足) 和 *????(权限足够) 两种
 //		3.140 (2023/4/3) 改进 GetBrowseRecords() API，在 paths 中可以使用一种新的格式 "读者/1?:<root />" 表示前端直接提供记录 XML
+//		3.141 (2023/4/10) WriteRes() API 修改数据库 browse 配置文件后，会自动清除(dp2library自己的)浏览列创建的相关缓存

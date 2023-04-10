@@ -154,6 +154,18 @@ I've been trying to disable the DPI awareness on a ClickOnce application.
                     Application.EnableVisualStyles();
                     Application.SetCompatibleTextRenderingDefault(false);
                     _mainForm = new MainForm();
+
+                    // 防止调试态运行时打开系统管理窗(用到了 WPF 控件)时抛出异常
+                    // https://stackoverflow.com/questions/28723685/application-object-is-being-shut-down-exception
+                    System.Windows.Application app = new System.Windows.Application()
+                    {
+                        ShutdownMode = System.Windows.ShutdownMode.OnExplicitShutdown
+                    };
+                    _mainForm.Closed += (o, e) =>
+                    {
+                        app.Shutdown();
+                    };
+
                     Application.Run(_mainForm);
                 }
                 else
