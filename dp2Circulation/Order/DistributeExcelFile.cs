@@ -932,6 +932,37 @@ int MAX_CHARS = 50)
             }
         }
 
+        internal static List<ColumnProperty> BuildList(
+            List<Column> columns,
+            bool change_evalue_type = true)
+        {
+            List<ColumnProperty> results = new List<ColumnProperty>();
+            foreach (var column in columns)
+            {
+                string strCaption = column.Caption;
+
+                // 如果没有caption定义，就挪用name定义
+                if (String.IsNullOrEmpty(strCaption) == true)
+                    strCaption = column.Name;
+
+                string strClass = StringUtil.GetLeft(column.Name);
+
+                ColumnProperty prop = new ColumnProperty(strCaption, strClass);
+                prop.Evalue = column.Evalue;
+
+                // 2023/4/7
+                // 为具有 .Evalue 的列修改 .Type 名字，增加一个前缀，以便和普通 Column 区别
+                if (change_evalue_type
+                    && string.IsNullOrEmpty(prop.Evalue) == false)
+                    prop.Type = "evalue-" + prop.Type.Replace("_", "-");
+
+                results.Add(prop);
+            }
+
+            return results;
+        }
+
+#if REMOVED
         internal static List<ColumnProperty> BuildList(PrintOption option)
         {
             List<ColumnProperty> results = new List<ColumnProperty>();
@@ -960,6 +991,8 @@ int MAX_CHARS = 50)
 
             return results;
         }
+
+#endif
 
         static string SplitCopyString(string strXml)
         {
@@ -1051,6 +1084,42 @@ int MAX_CHARS = 50)
             return results;
         }
 
+        // parameters:
+        //      bRemovePrefix   是否移除 xxx_ 这样的前缀
+        //      bRemoveEvalue   是否移除 .Evalue 为非空的值
+        public static List<string> GetTypeListEx(List<ColumnProperty> property_list,
+    bool bRemovePrefix = true,
+    bool bRemoveEvalue = true)
+        {
+            // 2023/4/7
+            if (property_list == null)
+                return null;
+            List<string> results = new List<string>();
+            property_list.ForEach((o) =>
+            {
+                // 2023/4/11
+                if (bRemoveEvalue && string.IsNullOrEmpty(o.Evalue) == false)
+                    return;
+
+                string type = o.Type;
+
+                if (bRemovePrefix)
+                {
+                    // 如果为 "xxxx_xxxxx" 形态，则取 _ 右边的部分
+                    int nRet = type.IndexOf("_");
+                    if (nRet != -1)
+                        type = type.Substring(nRet + 1).Trim();
+                }
+                results.Add(type);
+            });
+
+            return results;
+        }
+
+
+        // parameters:
+        //      bRemovePrefix   是否移除 xxx_ 这样的前缀
+        //      bRemoveEvalue   是否移除 .Evalue 为非空的值
         public static List<string> GetTypeList(List<ColumnProperty> property_list,
             bool bRemovePrefix = true)
         {
@@ -1061,6 +1130,7 @@ int MAX_CHARS = 50)
             property_list.ForEach((o) =>
             {
                 string type = o.Type;
+
                 if (bRemovePrefix)
                 {
                     // 如果为 "xxxx_xxxxx" 形态，则取 _ 右边的部分

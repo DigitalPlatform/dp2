@@ -3346,7 +3346,7 @@ out strError);
             strError = "";
             strTableXml = "";
 
-            string strStyleList = StringUtil.MakePathList(Order.ColumnProperty.GetTypeList(titles));
+            string strStyleList = StringUtil.MakePathList(Order.ColumnProperty.GetTypeListEx(titles));
 
             // 先统计一下是否至少有一个 Evalue 列。只有这时才需要同时获得书目 xml 和 table xml
             var exists_evalue = titles.Exists(o => string.IsNullOrEmpty(o.Evalue) == false);

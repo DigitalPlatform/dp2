@@ -20,6 +20,8 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.Script;
 using DigitalPlatform.LibraryClient;
 using System.Threading.Tasks;
+using dp2Circulation.Order;
+using System.Linq;
 
 namespace dp2Circulation
 {
@@ -2311,6 +2313,10 @@ strPubType);
 
             // string strBiblioRecPath = ListViewUtil.GetItemText(item, COLUMN_BIBLIORECPATH);
 
+            // 2023/4/11
+            var columns = secondary_option.Columns.Where(o => o.Name.StartsWith("bindingbiblio_")).ToList();
+            List<Order.ColumnProperty> biblio_title_list = Order.DistributeExcelFile.BuildList(columns, false);
+
             // 添加书目 table 格式列
             {
                 string strBiblioRecPath = ListViewUtil.GetItemText(item, COLUMN_BIBLIORECPATH);
@@ -2318,7 +2324,8 @@ strPubType);
                 Debug.Assert(String.IsNullOrEmpty(strBiblioRecPath) == false, "strBiblioRecPath值不能为空");
 
                 nRet = GetTable(strBiblioRecPath,
-                    "",
+                    biblio_title_list,
+                    // "",
                     out string strTableXml,
                     out strError);
                 if (nRet == -1)
@@ -2326,6 +2333,29 @@ strPubType);
 
                 XmlDocument dom = new XmlDocument();
                 dom.LoadXml(strTableXml);
+                int i = 0;
+                foreach (var title in biblio_title_list)
+                {
+                    string col = StringUtil.GetLeft(title.Type);
+                    if (col.StartsWith("bindingbiblio_") == false)
+                        continue;
+                    string key = col.Substring("bindingbiblio_".Length);
+                    string strValue = "";
+                    if (key == "recpath" || key.EndsWith("_recpath"))
+                        strValue = strBiblioRecPath;
+                    else
+                    {
+                        if (string.IsNullOrEmpty(title.Evalue) == false)
+                            strValue = FindBiblioTableContent(dom, col);
+                        else
+                            strValue = FindBiblioTableContent(dom, key);
+                    }
+
+                    macro_table.Remove("%" + col + "%");
+                    macro_table.Add("%" + col + "%", strValue);
+                }
+
+#if REMOVED
                 int i = 0;
                 foreach (Column column in secondary_option.Columns)
                 {
@@ -2342,6 +2372,9 @@ strPubType);
                     macro_table.Remove("%" + col + "%");
                     macro_table.Add("%" + col + "%", strValue);
                 }
+
+#endif
+
             }
 
             if (this.MarcFilter != null)

@@ -1658,7 +1658,7 @@ namespace dp2Circulation
                 biblio_column_option.LoadData(Program.MainForm.AppInfo,
                     GetBiblioColumnPath());
 
-                _biblioColumns = Order.DistributeExcelFile.BuildList(biblio_column_option);
+                _biblioColumns = Order.DistributeExcelFile.BuildList(biblio_column_option.Columns);
                 m_nBiblioSummaryColumn = _biblioColumns.Count;
             }
 
@@ -6646,7 +6646,7 @@ out strError);
                 biblio_column_option.LoadData(Program.MainForm.AppInfo,
                 typeof(Order.BiblioColumnOption).ToString());
 
-                List<Order.ColumnProperty> biblio_title_list = Order.DistributeExcelFile.BuildList(biblio_column_option);
+                List<Order.ColumnProperty> biblio_title_list = Order.DistributeExcelFile.BuildList(biblio_column_option.Columns);
 
                 // 准备订购列标题
                 Order.OrderColumnOption order_column_option = new Order.OrderColumnOption(Program.MainForm.UserDir,
@@ -6654,7 +6654,7 @@ out strError);
                 order_column_option.LoadData(Program.MainForm.AppInfo,
                 typeof(Order.OrderColumnOption).ToString());
 
-                List<Order.ColumnProperty> order_title_list = Order.DistributeExcelFile.BuildList(order_column_option);
+                List<Order.ColumnProperty> order_title_list = Order.DistributeExcelFile.BuildList(order_column_option.Columns);
                 // 附加某些列的值列表
                 {
                     LibraryChannel channel = this.GetChannel();
@@ -6990,7 +6990,7 @@ out strError);
                 biblio_column_option.LoadData(Program.MainForm.AppInfo,
                 SaveEntityExcelFileDialog.BiblioDefPath);
 
-                List<Order.ColumnProperty> biblio_title_list = Order.DistributeExcelFile.BuildList(biblio_column_option);
+                List<Order.ColumnProperty> biblio_title_list = Order.DistributeExcelFile.BuildList(biblio_column_option.Columns);
 
                 // 准备册信息列标题
                 Order.EntityColumnOption entity_column_option = new Order.EntityColumnOption(Program.MainForm.UserDir,
@@ -6998,7 +6998,7 @@ out strError);
                 entity_column_option.LoadData(Program.MainForm.AppInfo,
                 SaveEntityExcelFileDialog.EntityDefPath);
 
-                List<Order.ColumnProperty> entity_title_list = Order.DistributeExcelFile.BuildList(entity_column_option);
+                List<Order.ColumnProperty> entity_title_list = Order.DistributeExcelFile.BuildList(entity_column_option.Columns);
                 // 附加某些列的值列表
                 {
                     LibraryChannel channel = this.GetChannel();

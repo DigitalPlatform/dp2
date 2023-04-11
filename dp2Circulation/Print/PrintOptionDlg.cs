@@ -6,10 +6,13 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using System.IO;
 
+using Ionic.Zip;
+
 using DigitalPlatform.GUI;
 using DigitalPlatform.IO;
 using DigitalPlatform.CommonControl;
-using Ionic.Zip;
+using DigitalPlatform;
+using DigitalPlatform.Text;
 
 // 2013/3/16 添加 XML 注释
 
@@ -334,7 +337,8 @@ namespace dp2Circulation
                 return;
 
             // 名称查重
-            ListViewItem dup = ListViewUtil.FindItem(this.listView_columns, dlg.ColumnName, 0);
+            string left = StringUtil.GetLeft(dlg.ColumnName);
+            ListViewItem dup = FindItem(this.listView_columns, left, 0);
             if (dup != null)
             {
                 // 让操作者能看见已经存在的行
@@ -342,7 +346,7 @@ namespace dp2Circulation
                 dup.EnsureVisible();
 
                 DialogResult result = MessageBox.Show(this,
-                    "当前已经存在名为 '" + dlg.ColumnName + "' 的栏目。继续新增?",
+                    "当前已经存在名为 '" + left + "' 的栏目。继续新增?",
                     "PrintOptionDlg",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question,
@@ -374,6 +378,24 @@ namespace dp2Circulation
             listView_columns_SelectedIndexChanged(sender, null);
         }
 
+        ListViewItem FindItem(ListView list,
+            string left,
+            int column_index)
+        {
+            if (left.Contains("--"))
+                throw new ArgumentException($"left 参数值中不应该包含 -- 。('{left}')");
+            return this.TryGet(() =>
+            {
+                foreach (ListViewItem item in list.Items)
+                {
+                    var text = StringUtil.GetLeft(ListViewUtil.GetItemText(item, column_index));
+                    if (left == text)
+                        return item;
+                }
+                return null;
+            });
+        }
+
         // 修改栏目
         private void button_columns_modify_Click(object sender, EventArgs e)
         {
@@ -383,6 +405,7 @@ namespace dp2Circulation
                 return;
             }
 
+        REDO_INPUT:
             PrintColumnDlg dlg = new PrintColumnDlg();
             MainForm.SetControlFont(dlg, this.Font, false);
 
@@ -426,6 +449,27 @@ namespace dp2Circulation
             if (dlg.DialogResult != DialogResult.OK)
                 return;
 
+            // 名称查重
+            string left = StringUtil.GetLeft(dlg.ColumnName);
+            ListViewItem dup = FindItem(this.listView_columns, left, 0);
+            if (dup != null && dup != item)
+            {
+                /*
+                MessageBox.Show(this,
+                    "当前已经存在另一个名为 '" + left + "' 的栏目。请修改栏目名");
+                goto REDO_INPUT;
+                */
+                DialogResult result = MessageBox.Show(this,
+    "当前已经存在另一个名为 '" + left + "' 的栏目。继续完成修改?",
+    "PrintOptionDlg",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+                if (result == DialogResult.No)
+                    return;
+            }
+
+
             // ListViewItem item = this.listView_columns.SelectedItems[0];
 #if NO
             item.Text = dlg.ColumnName;
@@ -437,7 +481,6 @@ namespace dp2Circulation
             ListViewUtil.ChangeItemText(item, COLUMN_WIDTHCHARS, dlg.WidthChars.ToString());
             ListViewUtil.ChangeItemText(item, COLUMN_MAXCHARS, dlg.MaxChars.ToString());
             ListViewUtil.ChangeItemText(item, COLUMN_EVALUE, dlg.ColumnEvalue);
-
         }
 
         // 删除栏目
@@ -658,7 +701,7 @@ namespace dp2Circulation
 
                 this.m_bTemplateFileContentChanged = false;
                 return;
-                ERROR1:
+            ERROR1:
                 this.m_bTemplateFileContentChanged = false;
                 MessageBox.Show(this, strError);
             }
@@ -777,7 +820,7 @@ namespace dp2Circulation
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -869,7 +912,7 @@ namespace dp2Circulation
             MessageBox.Show(this, "导入模板成功。点确定将自动关闭本对话框");
             button_OK_Click(this, new EventArgs());
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -891,7 +934,7 @@ namespace dp2Circulation
                 System.Diagnostics.Process.Start("notepad.exe", strFilePath);
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
 
         }
@@ -901,7 +944,7 @@ namespace dp2Circulation
         {
             string strError = "";
 
-            REDO_INPUT:
+        REDO_INPUT:
             string strName = DigitalPlatform.InputDlg.GetInput(
                 this,
                 "请指定模板名",
@@ -969,7 +1012,7 @@ namespace dp2Circulation
             this.m_newCreateTemplateFiles.Add(strFilePath);
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1022,7 +1065,7 @@ namespace dp2Circulation
 
             SaveTemplatesChanges(); // 修改无法撤销
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1061,7 +1104,7 @@ namespace dp2Circulation
 
             this.m_bTemplateFileContentChanged = false;
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 

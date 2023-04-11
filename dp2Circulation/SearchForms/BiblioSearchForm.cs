@@ -4649,7 +4649,7 @@ bQuickLoad);
                 biblio_column_option.LoadData(Program.MainForm.AppInfo,
                 typeof(Order.BiblioColumnOption).ToString());
 
-                List<Order.ColumnProperty> biblio_title_list = Order.DistributeExcelFile.BuildList(biblio_column_option);
+                List<Order.ColumnProperty> biblio_title_list = Order.DistributeExcelFile.BuildList(biblio_column_option.Columns);
 
                 // 准备订购列标题
                 Order.OrderColumnOption order_column_option = new Order.OrderColumnOption(Program.MainForm.UserDir,
@@ -4657,7 +4657,7 @@ bQuickLoad);
                 order_column_option.LoadData(Program.MainForm.AppInfo,
                 typeof(Order.OrderColumnOption).ToString());
 
-                List<Order.ColumnProperty> order_title_list = Order.DistributeExcelFile.BuildList(order_column_option);
+                List<Order.ColumnProperty> order_title_list = Order.DistributeExcelFile.BuildList(order_column_option.Columns);
                 // 附加某些列的值列表
                 {
                     // LibraryChannel channel = this.GetChannel();
@@ -5003,7 +5003,7 @@ MessageBoxDefaultButton.Button2);
             biblio_column_option.LoadData(Program.MainForm.AppInfo,
             SaveBiblioExcelFileDialog.BiblioDefPath);
 
-            List<Order.ColumnProperty> biblio_title_list = Order.DistributeExcelFile.BuildList(biblio_column_option);
+            List<Order.ColumnProperty> biblio_title_list = Order.DistributeExcelFile.BuildList(biblio_column_option.Columns);
 
             // 每个列的最大字符数
             List<int> column_max_chars = new List<int>();

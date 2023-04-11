@@ -369,7 +369,7 @@ groups);
             biblio_column_option.LoadData(Program.MainForm.AppInfo,
             ColumnDefPath);
 
-            List<Order.ColumnProperty> biblio_title_list = Order.DistributeExcelFile.BuildList(biblio_column_option);
+            List<Order.ColumnProperty> biblio_title_list = Order.DistributeExcelFile.BuildList(biblio_column_option.Columns);
 
             List<string> headers = new List<string>();
             biblio_title_list.ForEach(o => headers.Add(o.Caption));
