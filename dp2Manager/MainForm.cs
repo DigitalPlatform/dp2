@@ -1220,7 +1220,10 @@ namespace dp2Manager
         {
             if (e.Button == toolBarButton_stop)
             {
+                // 2023/4/11 StopManager::Initial() 中已经自动添加了 .Click 事件
+                /*
                 stopManager.DoStopActive();
+                */
             }
         }
 

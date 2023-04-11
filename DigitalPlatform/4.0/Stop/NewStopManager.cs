@@ -1141,7 +1141,7 @@ string strText)
     object progressBar)
         {
             Initial(Application.OpenForms[0],
-                button, 
+                button,
                 statusBar,
                 progressBar);
         }
@@ -1161,6 +1161,7 @@ string strText)
             {
                 m_stopButton = button;
 
+                AddStopButtonEvent(button);
                 /*
 				if (m_stopButton != null)
 					m_strTipsSave = m_stopToolButton.ToolTipText;
@@ -1179,7 +1180,39 @@ string strText)
                 this.m_collectionlock.ReleaseWriterLock();
                 WriteDebugInfo("collection write unlock 1\r\n");
             }
+        }
 
+        // 2023/4/11
+        void AddStopButtonEvent(object button)
+        {
+            if (button is Control)
+            {
+                var control = (Control)button;
+
+                control.Click += (o, e) =>
+                {
+                    if (Control.ModifierKeys == Keys.Control)
+                        this.DoStopAll(null);    // 2012/3/25
+                    else
+                        this.DoStopActive();
+                };
+            }
+            else if (button is ToolBarButton)
+            {
+                var control = (ToolBarButton)button;
+                // 没有 control.Click
+            }
+            else if (button is ToolStripItem)
+            {
+                var control = (ToolStripItem)button;
+                control.Click += (o, e) =>
+                {
+                    if (Control.ModifierKeys == Keys.Control)
+                        this.DoStopAll(null);
+                    else
+                        this.DoStopActive();
+                };
+            }
         }
 
         public void RegisterStop(Stop stop,

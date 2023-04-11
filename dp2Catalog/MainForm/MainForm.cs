@@ -1073,7 +1073,10 @@ string strError)
 
         private void toolButton_stop_Click(object sender, EventArgs e)
         {
+            // 2023/4/11 StopManager::Initial() 中已经自动添加了 .Click 事件
+            /*
             stopManager.DoStopActive();
+            */
         }
 
         private void toolButton_prev_Click(object sender, EventArgs e)

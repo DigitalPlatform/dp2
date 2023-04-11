@@ -3015,11 +3015,13 @@ TaskScheduler.Default);
 
         private void toolButton_stop_Click(object sender, EventArgs e)
         {
+            // 2023/4/11 StopManager::Initial() 中已经自动添加了 .Click 事件
+            /*
             if (Control.ModifierKeys == Keys.Control)
                 stopManager.DoStopAll(null);    // 2012/3/25
             else
                 stopManager.DoStopActive();
-
+            */
         }
 
         private void ToolStripMenuItem_stopAll_Click(object sender, EventArgs e)

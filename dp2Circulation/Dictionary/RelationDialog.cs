@@ -2015,8 +2015,11 @@ strHtml2 +
 
         private void toolStripButton_stop_Click(object sender, EventArgs e)
         {
+            // 2023/4/11 StopManager::Initial() 中已经自动添加了 .Click 事件
+            /*
             if (this._stopManager != null)
                 this._stopManager.DoStopAll(null);
+            */
         }
 
     }

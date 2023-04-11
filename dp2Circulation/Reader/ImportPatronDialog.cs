@@ -160,7 +160,7 @@ namespace dp2Circulation.Reader
                     {
                         _loadExcel(dlg.FileName);
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         this.MessageBoxShow($"_loadExcel() 出现异常: {ex.Message}");
                     }
@@ -176,6 +176,11 @@ namespace dp2Circulation.Reader
             using (var looping = Looping("正在从 Excel 文件装载数据 ...",
                 "disableControl"))
             {
+                this.TryInvoke(() =>
+                {
+                    this.toolStrip1.Focus();
+                });
+
                 var doc = new XLWorkbook(filename);
 
                 string sheet_name = null;
@@ -500,11 +505,11 @@ namespace dp2Circulation.Reader
             }
             info.Column.PatronFieldName = info.Name;
             info.Column.ViewColumn.Name = info.Name;
-            
+
             // 如果是不适合作为合并键的字段，要清除 IsMergeKey 状态
             if (Array.IndexOf(_mergekey_field_names, info.Column.PatronFieldName) == -1)
                 info.Column.IsMergeKey = false;
-            
+
             info.Column.ViewColumn.HeaderText = BuildHeaderText(info.Name, info.Caption, info.Column.IsMergeKey);
         }
 

@@ -415,7 +415,6 @@ namespace DigitalPlatform.rms.Client
             {
                 channel.Abort();
             }
-
         }
 
         void EnableControls(bool bEnable)
