@@ -935,6 +935,14 @@ namespace dp2Library
                                 result.ErrorCode = ErrorCode.AccessDenied;
                                 return result;
                             }
+
+                            // 2023/4/13
+                            // 对 strRights 进行检查
+                            {
+                                string token_content = StringUtil.GetParameterByPrefix(strRights, "token");
+                                if (token_content != null)
+                                    throw new Exception($"(1)sessioninfo.Login() 在 strGetToken 为 null 的情况下，在返回的 strRights ('{strRights}') 中设置了 token:xxx 子参数，这是错误的");
+                            }
                         }
                         finally
                         {
@@ -986,6 +994,19 @@ namespace dp2Library
                         result.ErrorInfo = strError;
                         result.ErrorCode = ErrorCode.PasswordExpired;
                         return result;
+                    }
+
+                    // 2023/4/13
+                    // 对 strRights 进行检查
+                    if (nRet == 1)
+                    {
+                        string token_content = StringUtil.GetParameterByPrefix(strRights, "token");
+                        if (strGetToken != null
+                            && string.IsNullOrEmpty(token_content) == true)
+                            throw new Exception($"(2)sessioninfo.LoginForReader() 在 strGetToken 不为 null 的情况下('{strGetToken}')，并未在返回的 strRights ('{strRights}') 中设置 token:xxx 子参数");
+                        if (strGetToken == null
+        && token_content != null)
+                            throw new Exception($"(2)sessioninfo.Login() 在 strGetToken 为 null 的情况下，在返回的 strRights ('{strRights}') 中设置了 token:xxx 子参数，这是错误的");
                     }
                 }
                 else
@@ -1073,6 +1094,14 @@ namespace dp2Library
                                 result.ErrorCode = ErrorCode.PasswordExpired;
                                 return result;
                             }
+
+                            // 2023/4/13
+                            // 对 strRights 进行检查
+                            {
+                                string token_content = StringUtil.GetParameterByPrefix(strRights, "token");
+                                if (token_content != null)
+                                    throw new Exception($"(3)sessioninfo.Login() 在 strGetToken 为 null 的情况下，在返回的 strRights ('{strRights}') 中设置了 token:xxx 子参数，这是错误的");
+                            }
                         }
                         finally
                         {
@@ -1123,6 +1152,20 @@ namespace dp2Library
                         result.ErrorInfo = strError;
                         result.ErrorCode = ErrorCode.PasswordExpired;
                         return result;
+                    }
+
+                    // 2023/4/13
+                    // 对 strRights 进行检查
+                    if (nRet == 1)
+                    {
+                        string token_content = StringUtil.GetParameterByPrefix(strRights, "token");
+                        if (strGetToken != null
+                            && string.IsNullOrEmpty(token_content) == true)
+                            throw new Exception($"sessioninfo.LoginForReader() 在 strGetToken 不为 null 的情况下('{strGetToken}')，并未在返回的 strRights ('{strRights}') 中设置 token:xxx 子参数");
+                        if (strGetToken == null
+        && token_content != null)
+                            throw new Exception($"sessioninfo.LoginForReader() 在 strGetToken 为 null 的情况下，在返回的 strRights ('{strRights}') 中设置了 token:xxx 子参数，这是错误的");
+
                     }
                 }
 
@@ -1488,7 +1531,14 @@ namespace dp2Library
             if (string.IsNullOrEmpty(strRight) == false)
             {
                 if (StringUtil.HasHead(strRight, "token:") == true)
-                    info.UserToken = strRight.Substring("token:".Length);
+                {
+                    info.UserToken = StringUtil.UnescapeString(strRight.Substring("token:".Length));    // 2023/4/12 增加 UnescapeString()
+                    if (string.IsNullOrEmpty(info.UserToken))
+                    {
+                        // 2023/4/12
+                        throw new Exception($"strParameters 参数值不合法：token: 后面内容部分不允许为空");
+                    }
+                }
             }
 
             strText = strLeft;

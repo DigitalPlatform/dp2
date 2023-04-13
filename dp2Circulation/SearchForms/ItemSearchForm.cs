@@ -787,6 +787,8 @@ namespace dp2Circulation
             strError = "";
             results = new List<string>();
 
+            string resultSetName = "default";
+
             long lRet = channel.SearchItem(
                 stop,
                 "<all>",
@@ -795,7 +797,7 @@ namespace dp2Circulation
                 "馆藏地点",
                 "left", // this.textBox_queryWord.Text == "" ? "left" : "exact",    // 原来为left 2007/10/18 changed
                 "zh",
-                null,   // strResultSetName
+                resultSetName,   // strResultSetName
                 "",    // strSearchStyle
                 "", //strOutputStyle, // (bOutputKeyCount == true ? "keycount" : ""),
                 out strError);
@@ -840,7 +842,7 @@ namespace dp2Circulation
 
                 lRet = channel.GetSearchResult(
                     stop,
-                    null,   // strResultSetName
+                    resultSetName,   // strResultSetName
                     lStart,
                     lCount,
                     strStyle, // bOutputKeyCount == true ? "keycount" : "id,cols",

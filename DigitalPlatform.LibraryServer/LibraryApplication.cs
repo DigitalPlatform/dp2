@@ -6033,8 +6033,9 @@ out strError);
             }
 #endif
 
+            string resultSetName = "temp";
             long lRet = channel.DoSearch(strQueryXml,
-                "default",
+                resultSetName,
                 "", // strOuputStyle
                 out strError);
             if (lRet == -1)
@@ -6049,7 +6050,7 @@ out strError);
             long lHitCount = lRet;
 
             lRet = channel.DoGetSearchResult(
-                "default",
+                resultSetName,
                 0,
                 1,
                 "zh",
@@ -6113,9 +6114,9 @@ out strError);
                 return -1;
             }
 #endif
-
+            string resultSetName = "temp";
             long lRet = channel.DoSearch(strQueryXml,
-                "default",
+                resultSetName,
                 "", // strOuputStyle
                 out strError);
             if (lRet == -1)
@@ -6131,7 +6132,7 @@ out strError);
             long lHitCount = lRet;
 
             lRet = channel.DoGetSearchResult(
-                "default",
+                resultSetName,
                 0,
                 Math.Min(nMax, lHitCount),
                 "zh",
@@ -6247,8 +6248,9 @@ out strError);
             }
 #endif
 
+            string resultSetName = "temp";
             long lRet = channel.DoSearch(strQueryXml,
-                "default",
+                resultSetName,
                 "", // strOuputStyle
                 out strError);
             if (lRet == -1)
@@ -6265,7 +6267,7 @@ out strError);
 
             // List<string> aPath = null;
             lRet = channel.DoGetSearchResult(
-                "default",
+                resultSetName,
                 0,
                 Math.Min(nMax, lHitCount),
                 "zh",
@@ -6645,8 +6647,12 @@ out strError);
             }
 #endif
 
+            // 2023/4/11
+            // TODO: 这里最好使用一个随机的结果集名字，使用完以后主动删除这个结果集
+            // 通用的临时检索记录的时候，都有类似问题，即，可能会摧毁调主正在使用的 default 名字的结果集
+            string resultSetName = "temp";
             long lRet = channel.DoSearchEx(strQueryXml,
-                "default",
+                resultSetName,
                 "", // strOuputStyle
                 1,
                 "zh",
@@ -6692,7 +6698,7 @@ out strError);
             {
                 // List<string> temp = null;
                 lRet = channel.DoGetSearchResult(
-                    "default",
+                    resultSetName,
                     0,
                     Math.Min(nMax, lHitCount),
                     "zh",
@@ -7152,14 +7158,14 @@ out strError);
             }
 #endif
 
-            Record[] records = null;
+            string resultSetName = "temp";
             long lRet = channel.DoSearchEx(strQueryXml,
-                "default",
+                resultSetName,
                 "", // strOuputStyle
                 1,
                 "zh",
                 "id,xml,timestamp",
-                out records,
+                out Record[] records,
                 out strError);
             if (lRet == -1)
                 goto ERROR1;
@@ -7192,7 +7198,7 @@ out strError);
             {
                 // List<string> temp = null;
                 lRet = channel.DoGetSearchResult(
-                    "default",
+                    resultSetName,
                     0,
                     Math.Min(nMax, lHitCount),
                     "zh",
@@ -8034,8 +8040,9 @@ out strError);
             if (strStyle == "parent" && strOwnerInstitution == null)
                 strBrowseStyle = "id,cols,format:@coldef://parent";
 
+            string resultSetName = "temp";
             long lRet = channel.DoSearchEx(strQueryXml,
-                "default",
+                resultSetName,
                 "", // strOuputStyle
                 1,
                 "zh",
@@ -8608,15 +8615,14 @@ out strError);
             if (strStyle == "parent")
                 strBrowseStyle = "id,cols,format:@coldef://parent";
 
-
-            Record[] records = null;
+            string resultSetName = "temp";
             long lRet = channel.DoSearchEx(strQueryXml,
-                "default",
+                resultSetName,
                 "", // strOuputStyle
                 1,
                 "zh",
                 strBrowseStyle,    // "id,xml,timestamp",
-                out records,
+                out Record[] records,
                 out strError);
             if (lRet == -1)
                 goto ERROR1;
@@ -8661,7 +8667,7 @@ out strError);
             if (lHitCount > 1)  // TODO: && nMax > 1
             {
                 lRet = channel.DoGetSearchResult(
-                    "default",
+                    resultSetName,
                     0,
                     Math.Min(nMax, lHitCount),
                     "zh",
@@ -9260,14 +9266,14 @@ out strError);
             if (channel == null)
                 throw new ArgumentException("channel 参数值不能为空", "channel");
 
-            Record[] records = null;
+            string resultSetName = "temp";
             long lRet = channel.DoSearchEx(strQueryXml,
-                "default",
+                resultSetName,
                 strStyle, // strOuputStyle
                 nMax,
                 "zh",
                 strStyle + ",id",    // "id,xml,timestamp",
-                out records,
+                out Record[] records,
                 out strError);
             if (lRet == -1)
                 goto ERROR1;
@@ -9307,7 +9313,7 @@ out strError);
                 for (; ; )
                 {
                     lRet = channel.DoGetSearchResult(
-                    "default",
+                    resultSetName,
                     lStart,
                     lCount,
                     strStyle + ",id",    // "id,xml,timestamp",
@@ -9430,8 +9436,9 @@ out strError);
             }
 #endif
 
+            string resultSetName = "temp";
             long lRet = channel.DoSearch(strQueryXml,
-                "default",
+                resultSetName,
                 "", // strOuputStyle
                 out strError);
             if (lRet == -1)
@@ -9447,7 +9454,7 @@ out strError);
             long lHitCount = lRet;
 
             lRet = channel.DoGetSearchResult(
-                "default",
+                resultSetName,
                 0,
                 1,
                 "zh",
@@ -9555,8 +9562,9 @@ out strError);
              * */
             Debug.Assert(channel != null, "");
 
+            string resultSetName = "temp";
             long lRet = channel.DoSearch(strQueryXml,
-                "default",
+                resultSetName,
                 "", // strOuputStyle
                 out strError);
             if (lRet == -1)
@@ -9576,7 +9584,7 @@ out strError);
             long lHitCount = lRet;
 
             lRet = channel.DoGetSearchResult(
-                "default",
+                resultSetName,
                 0,
                 nMax,
                 "zh",
@@ -9655,8 +9663,9 @@ out strError);
 
             Debug.Assert(channel != null, "");
 
+            string resultSetName = "temp";
             long lRet = channel.DoSearch(strQueryXml,
-                "default",
+                resultSetName,
                 "", // strOuputStyle
                 out strError);
             if (lRet == -1)
@@ -9676,7 +9685,7 @@ out strError);
             long lHitCount = lRet;
 
             lRet = channel.DoGetSearchResult(
-                "default",
+                resultSetName,
                 0,
                 nMax,
                 "zh",
@@ -9896,8 +9905,9 @@ out strError);
                 return -1;
             }
 
+            string resultSetName = "temp";
             long lRet = channel.DoSearch(strQueryXml,
-                "default",
+                resultSetName,
                 "", // strOuputStyle
                 out strError);
             if (lRet == -1)
@@ -9925,7 +9935,7 @@ out strError);
             {
                 SearchResultLoader loader = new SearchResultLoader(channel,
                 null,
-                "default",
+                resultSetName,
                 strFormatList);
 
                 foreach (KernelRecord record in loader)
@@ -10172,8 +10182,9 @@ out strError);
             }
 #endif
 
+            string resultSetName = "temp";
             long lRet = channel.DoSearch(strQueryXml,
-                "default",
+                resultSetName,
                 "", // strOuputStyle
                 out strError);
             if (lRet == -1)
@@ -10201,7 +10212,7 @@ out strError);
             lHitCount = Math.Min(lHitCount, 100);
 
             lRet = channel.DoGetSearchResult(
-                "default",
+                resultSetName,
                 0,
                 lHitCount,
                 "zh",
@@ -11301,7 +11312,8 @@ out strError);
                 return -1;
             }
 
-            if (this.LoginCache != null)
+            if (this.LoginCache != null
+                && strGetToken == null) // 2023/4/12
             {
                 Account temp_account = this.LoginCache.Get(strLoginName) as Account;
                 if (temp_account != null)
@@ -11561,7 +11573,8 @@ out strError);
             // 2015/1/15
             if (string.IsNullOrEmpty(strToken) == false)
             {
-                account.Rights += ",token:" + strToken;  // 如果保存在缓存中，如何决定何时失效?
+                account.Rights += ",token:" + StringUtil.EscapeString(strToken, ",:"); // 2023/4/12 增加 EscapeString 
+                // 如果保存在缓存中，如何决定何时失效?
                 // adds.Add($"token:{strToken}");
             }
 
@@ -11665,7 +11678,8 @@ out strError);
             }
 
             if (this.LoginCache != null && string.IsNullOrEmpty(account.LoginName) == false
-                && account.Password != null)    // 防止 null password 进入 cache 引起其他问题 2014/12/20
+                && account.Password != null // 防止 null password 进入 cache 引起其他问题 2014/12/20
+                && strGetToken == null) // 2023/4/12    
             {
                 DateTimeOffset offset = DateTimeOffset.Now.AddMinutes(20);
                 this.LoginCache.Set(account.Barcode, account, offset);
