@@ -137,7 +137,7 @@ namespace dp2Circulation
 
                 if (list.Count > 0)
                 {
-                    search_form.RefreshAllLines();
+                    search_form._refreshAllLines();
 
                     // 2022/1/28
                     // 确保固定面板被显示出来

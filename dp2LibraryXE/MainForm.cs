@@ -15,6 +15,7 @@ using System.Threading;
 using System.Web;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Text;
 
 using Ionic.Zip;
 
@@ -28,8 +29,6 @@ using DigitalPlatform.Install;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
-using System.Text;
-using System.Runtime.InteropServices.ComTypes;
 
 namespace dp2LibraryXE
 {
@@ -257,6 +256,8 @@ FormWindowState.Normal);
 
             AutoStartDp2circulation = AutoStartDp2circulation;
 
+#if REMOVED
+            // dp2libraryxe.exe 不是 ClickOnce 方式运行，无法进行后台自动更新
             // 2019/2/15
             // 后台自动检查更新
             Task.Run(() =>
@@ -281,6 +282,8 @@ FormWindowState.Normal);
                 AppendString(message + "\r\n");
                 SetUpdateMessage(message);
             });
+
+#endif
         }
 
         void SetStatusMessage(string text)

@@ -4083,7 +4083,8 @@ bQuickLoad);
                 int i = 0;
                 foreach (LoaderItem item in loader)
                 {
-                    Application.DoEvents(); // 出让界面控制权
+                    if (this.InvokeRequired)
+                        Application.DoEvents(); // 出让界面控制权
 
                     if (looping.Stopped)
                     {
@@ -5078,7 +5079,7 @@ MessageBoxDefaultButton.Button2);
 
                 context.ContentEndRow = context.RowIndex - 1;
                 Order.DistributeExcelFile.AdjectColumnWidth(sheet, column_max_chars, 20);
-            
+
             }
             catch (Exception ex)
             {
@@ -5454,7 +5455,7 @@ MessageBoxDefaultButton.Button2);
         }
 
         // 保存选定事项的修改
-        void menu_saveSelectedChangedRecords_Click(object sender, EventArgs e)
+        async void menu_saveSelectedChangedRecords_Click(object sender, EventArgs e)
         {
             if (this.m_nChangedCount == 0)
             {
@@ -5470,20 +5471,28 @@ MessageBoxDefaultButton.Button2);
                 items.Add(item);
             }
 
+            /*
             int nRet = SaveChangedRecords(items,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
+            */
+            var result = await SaveChangedRecordsAsync(items);
+            if (result.Value == -1)
+            {
+                strError = result.ErrorInfo;
+                goto ERROR1;
+            }
 
             strError = "处理完成。\r\n\r\n" + strError;
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         // 保存全部修改事项
-        void menu_saveAllChangedRecords_Click(object sender, EventArgs e)
+        async void menu_saveAllChangedRecords_Click(object sender, EventArgs e)
         {
             // TODO: 确实要?
 
@@ -5501,22 +5510,53 @@ MessageBoxDefaultButton.Button2);
                 items.Add(item);
             }
 
+            /*
             int nRet = SaveChangedRecords(items,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
+            */
+            var result = await SaveChangedRecordsAsync(items);
+            if (result.Value == -1)
+            {
+                strError = result.ErrorInfo;
+                goto ERROR1;
+            }
 
             strError = "处理完成。\r\n\r\n" + strError;
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
-        int SaveChangedRecords(List<ListViewItem> items,
-            out string strError)
+        Task<NormalResult> SaveChangedRecordsAsync(List<ListViewItem> items)
         {
-            strError = "";
+            return Task.Factory.StartNew<NormalResult>(
+                () =>
+                {
+                    try
+                    {
+                        return _saveChangedRecords(items);
+                    }
+                    catch (Exception ex)
+                    {
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"_saveChangedRecords() 异常: {ExceptionUtil.GetDebugText(ex)}"
+                        };
+                    }
+                },
+    default,
+    TaskCreationOptions.LongRunning,
+    TaskScheduler.Default);
+        }
+
+
+        NormalResult _saveChangedRecords(List<ListViewItem> items)
+        {
+            string strError = "";
 
             int nReloadCount = 0;
             // int nSavedCount = 0;
@@ -5539,7 +5579,10 @@ MessageBoxDefaultButton.Button2);
             var looping = BeginLoop(this.DoStop, "正在保存书目记录 ...", "halfstop");
 
             this.EnableControlsInSearching(false);
-            this.listView_records.Enabled = false;
+            this.TryInvoke(() =>
+            {
+                this.listView_records.Enabled = false;
+            });
             try
             {
                 looping.Progress.SetProgressRange(0, items.Count);
@@ -5548,11 +5591,15 @@ MessageBoxDefaultButton.Button2);
                     if (looping.Stopped)
                     {
                         strError = "已中断";
-                        return -1;
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError
+                        };
                     }
 
                     ListViewItem item = items[i];
-                    string strRecPath = item.Text;
+                    string strRecPath = ListViewUtil.GetItemText(item, 0);  //  item.Text;
                     if (string.IsNullOrEmpty(strRecPath) == true)
                     {
                         looping.Progress.SetProgressValue(i);
@@ -5570,7 +5617,6 @@ MessageBoxDefaultButton.Button2);
                     // TODO: 此时警告不能保存?
                     if (info.RecPath.IndexOf("@") != -1)
                         goto CONTINUE;
-
 
                     looping.Progress.SetMessage("正在保存书目记录 " + strRecPath);
 
@@ -5619,14 +5665,26 @@ MessageBoxDefaultButton.Button2);
                             if (lRet == 0)
                             {
                                 // TODO: 警告后，把 item 行移除？
-                                return -1;
+                                return new NormalResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = strError
+                                };
                             }
                             if (lRet == -1)
-                                return -1;
+                                return new NormalResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = strError
+                                };
                             if (results == null || results.Length == 0)
                             {
                                 strError = "results error";
-                                return -1;
+                                return new NormalResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = strError
+                                };
                             }
                             info.OldXml = results[0];
                             info.Timestamp = baNewTimestamp;
@@ -5639,7 +5697,7 @@ MessageBoxDefaultButton.Button2);
                         {
                             bool temp = bDontPrompt;
                             string message = $"保存书目记录 {strRecPath} 时出错:\r\n{strError}\r\n---\r\n\r\n是否重试?\r\n\r\n注：\r\n[重试] 重试保存\r\n[跳过] 放弃保存当前记录，但继续后面的处理\r\n[中断] 中断整批操作";
-                            dialog_result = (DialogResult)Application.OpenForms[0].Invoke(new Func<DialogResult>(() =>
+                            dialog_result = this.TryGet(() =>
                             {
                                 return MessageDlg.Show(this,
                                 message,
@@ -5649,7 +5707,7 @@ MessageBoxDefaultButton.Button2);
                                 ref temp,
                                 new string[] { "重试", "跳过", "中断" },
                                 "下次不再询问");
-                            }));
+                            });
                             bDontPrompt = temp;
                         }
                         if (dialog_result == DialogResult.Yes)
@@ -5660,7 +5718,11 @@ MessageBoxDefaultButton.Button2);
                         if (dialog_result == DialogResult.No)
                             continue;
 
-                        return -1;
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError
+                        };
                     }
 
                     // 检查是否有部分字段被拒绝
@@ -5692,14 +5754,26 @@ MessageBoxDefaultButton.Button2);
                         if (lRet == 0)
                         {
                             // TODO: 警告后，把 item 行移除？
-                            return -1;
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = strError
+                            };
                         }
                         if (lRet == -1)
-                            return -1;
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = strError
+                            };
                         if (results == null || results.Length == 0)
                         {
                             strError = "results error";
-                            return -1;
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = strError
+                            };
                         }
                         info.OldXml = results[0];
                         info.Timestamp = baNewTimestamp;
@@ -5739,14 +5813,22 @@ MessageBoxDefaultButton.Button2);
                 this.ReturnChannel(channel);
 
                 this.EnableControlsInSearching(true);
-                this.listView_records.Enabled = true;
+                this.TryInvoke(() =>
+                {
+                    this.listView_records.Enabled = true;
+                });
             }
 
+            /*
             // 2013/10/22
             int nRet = RefreshListViewLines(saved_items,
         out strError);
             if (nRet == -1)
                 return -1;
+            */
+            var ret = _refreshListViewLines(saved_items);
+            if (ret.Value == -1)
+                return ret;
 
             RefreshPropertyView(false);
 
@@ -5760,7 +5842,7 @@ MessageBoxDefaultButton.Button2);
                 strError += "有 " + nReloadCount + " 条书目记录因为时间戳不匹配或部分字段被拒绝而重新装载旧记录部分(请观察后重新保存)";
             }
 
-            return 0;
+            return new NormalResult();
         }
 
         /// <summary>
@@ -5772,10 +5854,46 @@ MessageBoxDefaultButton.Button2);
         public int RefreshListViewLines(List<ListViewItem> items_param,
             out string strError)
         {
-            strError = "";
+            var task = RefreshListViewLinesAsync(items_param);
+            while (task.IsCompleted)
+            {
+                Application.DoEvents();
+                Thread.Sleep(1);
+            }
+            var result = task.Result;
+            strError = result.ErrorInfo;
+            return result.Value;
+        }
+
+        Task<NormalResult> RefreshListViewLinesAsync(List<ListViewItem> items_param)
+        {
+            return Task.Factory.StartNew<NormalResult>(
+                () =>
+                {
+                    try
+                    {
+                        return _refreshListViewLines(items_param);
+                    }
+                    catch (Exception ex)
+                    {
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"_refreshListViewLines() 异常: {ExceptionUtil.GetDebugText(ex)}"
+                        };
+                    }
+                },
+    default,
+    TaskCreationOptions.LongRunning,
+    TaskScheduler.Default);
+        }
+
+        NormalResult _refreshListViewLines(List<ListViewItem> items_param)
+        {
+            string strError = "";
 
             if (items_param.Count == 0)
-                return 0;
+                return new NormalResult();
 
             LibraryChannel channel = this.GetChannel();
 
@@ -5841,12 +5959,17 @@ MessageBoxDefaultButton.Button2);
                 int i = 0;
                 foreach (DigitalPlatform.LibraryClient.localhost.Record record in loader)
                 {
-                    Application.DoEvents(); // 出让界面控制权
+                    if (this.InvokeRequired)
+                        Application.DoEvents(); // 出让界面控制权
 
                     if (looping.Stopped)
                     {
                         strError = "用户中断";
-                        return -1;
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError
+                        };
                     }
 
                     Debug.Assert(record.Path == BrowseLoader.GetPath(recpaths[i]), "");
@@ -5889,12 +6012,16 @@ MessageBoxDefaultButton.Button2);
                     i++;
                 }
 
-                return 0;
+                return new NormalResult();
             }
             catch (Exception ex)
             {
                 strError = "BiblioSearchForm RefreshListViewLines() exception: " + ExceptionUtil.GetAutoText(ex);
-                return -1;
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError
+                };
             }
             finally
             {
@@ -5946,14 +6073,29 @@ MessageBoxDefaultButton.Button2);
         /// <summary>
         /// 刷新全部行
         /// </summary>
-        public void RefreshAllLines()
+        public async Task RefreshAllLinesAsync()
+        {
+            await Task.Factory.StartNew(
+            () =>
+            {
+                _refreshAllLines();
+            },
+default,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
+
+        public void _refreshAllLines()
         {
             string strError = "";
             int nRet = 0;
 
             int nChangedCount = 0;
             List<ListViewItem> items = new List<ListViewItem>();
-            foreach (ListViewItem item in this.listView_records.Items)
+            var all_items = this.TryGet(() => {
+                return new List<ListViewItem>(this.listView_records.Items.Cast<ListViewItem>());
+            });
+            foreach (ListViewItem item in all_items/*this.listView_records.Items*/)
             {
                 if (string.IsNullOrEmpty(item.Text) == true)
                     continue;
@@ -5978,10 +6120,18 @@ MessageBoxDefaultButton.Button2);
                     return;
             }
 
+            /*
             nRet = RefreshListViewLines(items,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
+            */
+            var ret = _refreshListViewLines(items);
+            if (ret.Value == -1)
+            {
+                strError = ret.ErrorInfo;
+                goto ERROR1;
+            }
 
             RefreshPropertyView(false);
             return;
@@ -5991,7 +6141,7 @@ MessageBoxDefaultButton.Button2);
 
 
         // 刷新所选择的浏览行。也就是重新从数据库中装载浏览列
-        void menu_refreshSelectedItems_Click(object sender, EventArgs e)
+        async void menu_refreshSelectedItems_Click(object sender, EventArgs e)
         {
             string strError = "";
             int nRet = 0;
@@ -6030,10 +6180,18 @@ MessageBoxDefaultButton.Button2);
             }
             */
 
+            /*
             nRet = RefreshListViewLines(items,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
+            */
+            var result = await RefreshListViewLinesAsync(items);
+            if (result.Value == -1)
+            {
+                strError = result.ErrorInfo;
+                goto ERROR1;
+            }
 
             RefreshPropertyView(false);
             return;
@@ -8435,7 +8593,7 @@ out string strError)
         }
 
         // 从记录路径文件中导入
-        void menu_importFromRecPathFile_Click(object sender, EventArgs e)
+        async void menu_importFromRecPathFile_Click(object sender, EventArgs e)
         {
             int nRet = 0;
             OpenFileDialog dlg = new OpenFileDialog();
@@ -8505,7 +8663,8 @@ out string strError)
 
                 for (; ; )
                 {
-                    Application.DoEvents(); // 出让界面控制权
+                    if (this.InvokeRequired)
+                        Application.DoEvents(); // 出让界面控制权
 
                     if (looping.Stopped)
                     {
@@ -8610,10 +8769,18 @@ out string strError)
 
             if (items.Count > 0)
             {
+                /*
                 nRet = RefreshListViewLines(items,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
+                */
+                var result = await RefreshListViewLinesAsync(items);
+                if (result.Value == -1)
+                {
+                    strError = result.ErrorInfo;
+                    goto ERROR1;
+                }
             }
 
             return;
@@ -9977,7 +10144,7 @@ message,
                 {
                     item_dom.LoadXml(info.OldRecord);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     strError = "路径为 '" + info.OldRecPath + "' 的册记录 XML 装载到 XMLDOM 中时发生错误: " + ex.Message;
 
@@ -12866,7 +13033,7 @@ message,
             return list.SelectedItems[0];
         }
 
-#region 停靠
+        #region 停靠
 
         List<Control> _freeControls = new List<Control>();
 
@@ -12935,7 +13102,7 @@ message,
             Program.MainForm._dockedBiblioSearchForm = null;
         }
 
-#endregion
+        #endregion
 
         private void BiblioSearchForm_VisibleChanged(object sender, EventArgs e)
         {
@@ -13368,7 +13535,7 @@ message,
             int index = path.IndexOf("?");
             if (index == -1)
                 return path;
-            return path.Substring(0, index+1);
+            return path.Substring(0, index + 1);
         }
 
     }

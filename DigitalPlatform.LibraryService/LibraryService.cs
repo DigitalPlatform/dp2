@@ -3683,9 +3683,10 @@ namespace dp2Library
             string strBrowseInfoStyle,
             List<bool> client_xmls = null)
         {
-            if (client_xmls != null && client_xmls.Count != searchresults.Length)
+            // 注: searchresults 集合中实际得到的元素数，比希望获取的数量可能会少，这是 dp2kernel 一段(根据各种因素动态)决定的
+            if (client_xmls != null && client_xmls.Count < searchresults.Length)
             {
-                throw new ArgumentException($"client_xmls 内元素数({client_xmls.Count}) 和 searchresults 内元素数({searchresults.Length})应该相等");
+                throw new ArgumentException($"client_xmls 内元素数({client_xmls.Count}) 应该大于等于 searchresults 内元素数({searchresults.Length})");
             }
 
             // 2012/9/15

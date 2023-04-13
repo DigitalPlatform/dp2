@@ -6008,7 +6008,7 @@ Program.MainForm.DefaultFont);
 
         // TODO: 优化后，和导出书目记录路径文件合并代码
         // 将从属的书目记录装入书目查询窗
-        void menu_exportToBiblioSearchForm_Click(object sender, EventArgs e)
+        async void menu_exportToBiblioSearchForm_Click(object sender, EventArgs e)
         {
             string strError = "";
             int nRet = 0;
@@ -6122,7 +6122,7 @@ Program.MainForm.DefaultFont);
                 EndLoop(looping);
             }
 
-            form.RefreshAllLines();
+            await form.RefreshAllLinesAsync();
 
             string strText = "";
             if (nWarningLineCount > 0)
