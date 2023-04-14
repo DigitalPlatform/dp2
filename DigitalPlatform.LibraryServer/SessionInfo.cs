@@ -408,6 +408,14 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
+            // 2023/4/14
+            if (strGetToken != null
+                && StringUtil.HasHead(strPassword, "token:") == true)
+            {
+                strError = "strParameters 中的 gettoken 子参数和 strPassword 中使用 token 登录，两者不允许在同一次请求中混用";
+                return -1;
+            }
+
             int nRet = this.App.GetAccount(strUserID,
                 out Account account,
                 out strError);
@@ -499,6 +507,7 @@ namespace DigitalPlatform.LibraryServer
                         strError = "内部错误";
                         return -1;
                     }
+                    var debugInfo = this.App.DebugMode ? new StringBuilder() : null;
                     // return:
                     //      -1  出错
                     //      0   验证不匹配
@@ -509,6 +518,8 @@ namespace DigitalPlatform.LibraryServer
                         strHashedPassword,
                         (StringBuilder)null,
                         out strError);
+                    if (this.App.DebugMode)
+                        this.App.WriteErrorLog($"SessionInfo::Login() 调用 VerifyToken()，返回 {nRet}, debugInfo='{debugInfo.ToString()}'");
                     if (nRet != 1)
                         return nRet;
                 }
@@ -619,16 +630,18 @@ namespace DigitalPlatform.LibraryServer
                     return -1;
                 }
                 string strToken = "";
-                StringBuilder debugInfo = null; // new StringBuilder();
+                StringBuilder debugInfo = this.App.DebugMode ? new StringBuilder() : null;
                 nRet = LibraryApplication.MakeToken(strClientIP,
                     LibraryApplication.GetTimeRangeByStyle(strGetToken),
                     strHashedPassword,
                     debugInfo,
                     out strToken,
                     out strError);
+                if (this.App.DebugMode)
+                    this.App.WriteErrorLog($"SessionInfo:Login() 中 MakeToken() return {nRet}, debugInfo='{debugInfo?.ToString()}'");
                 if (nRet == -1)
                     return -1;
-                // this.App.WriteErrorLog($"(sessioninfo) MakeToken() return {nRet}, debugInfo='{debugInfo?.ToString()}'");
+
                 if (string.IsNullOrEmpty(strToken) == false)
                     strRights += ",token:" + strToken;
             }
@@ -653,7 +666,7 @@ namespace DigitalPlatform.LibraryServer
             strError = "";
 
             var list = librarycode_list.Split(',');
-            foreach(var librarycode in list)
+            foreach (var librarycode in list)
             {
                 // 获得一个分馆的当前状态
                 // return:

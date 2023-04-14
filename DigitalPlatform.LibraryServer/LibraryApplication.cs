@@ -10338,7 +10338,7 @@ out strError);
                         }
                     }
 
-                    StringBuilder debugInfo = null; // new StringBuilder();
+                    StringBuilder debugInfo = this.DebugMode ? new StringBuilder() : null;
                     string strHashedPassword = DomUtil.GetElementInnerText(readerdom.DocumentElement, "password");
                     nRet = MakeToken(strClientIP,
                         GetTimeRangeByStyle(strGetToken),
@@ -10346,6 +10346,8 @@ out strError);
                         debugInfo,
                         out strToken,
                         out strError);
+                    if (this.DebugMode)
+                        this.WriteErrorLog($"LibraryApplication::GetReaderRecXmlForLogin() 中 MakeToken() return {nRet}, debugInfo='{debugInfo?.ToString()}'");
                     if (nRet == -1)
                         return -1;
                     // WriteErrorLog($"MakeToken() return {nRet}, strDebugInfo='{debugInfo?.ToString()}'");
@@ -11312,8 +11314,17 @@ out strError);
                 return -1;
             }
 
+            // 2023/4/14
+            if (strGetToken != null
+                && StringUtil.HasHead(strPassword, "token:") == true)
+            {
+                strError = "strParameters 中的 gettoken 子参数和 strPassword 中使用 token 登录，两者不允许在同一次请求中混用";
+                return -1;
+            }
+
             if (this.LoginCache != null
-                && strGetToken == null) // 2023/4/12
+                && strGetToken == null // 2023/4/12
+                && StringUtil.HasHead(strPassword, "token:") == false)  // 2023/4/14
             {
                 Account temp_account = this.LoginCache.Get(strLoginName) as Account;
                 if (temp_account != null)
@@ -12387,12 +12398,19 @@ out strError);
             {
                 string strToken = strPassword.Substring("token:".Length);
                 debugInfo?.AppendLine($"token={strToken}");
-                return VerifyToken(
+
+                var current_debugInfo = (debugInfo != null || this.DebugMode) ? new StringBuilder() : null;
+                int ret = VerifyToken(
                     strClientIP,
                     strToken,
                     strSha1Text,
-                    debugInfo,
+                    current_debugInfo,
                     out strError);
+                if (debugInfo != null)
+                    debugInfo.Append(current_debugInfo);
+                if (this.DebugMode)
+                    this.WriteErrorLog($"LibraryApplication::VerifyReaderNormalPassword() 调用 VerifyToken()，返回 {ret}, debugInfo='{current_debugInfo.ToString()}'");
+                return ret;
             }
 
             /*
