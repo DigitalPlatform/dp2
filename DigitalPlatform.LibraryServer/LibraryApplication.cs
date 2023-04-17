@@ -11322,9 +11322,10 @@ out strError);
                 return -1;
             }
 
+            var token_login = StringUtil.HasHead(strPassword, "token:");
             if (this.LoginCache != null
                 && strGetToken == null // 2023/4/12
-                && StringUtil.HasHead(strPassword, "token:") == false)  // 2023/4/14
+                && token_login == false)  // 2023/4/14
             {
                 Account temp_account = this.LoginCache.Get(strLoginName) as Account;
                 if (temp_account != null)
@@ -11690,7 +11691,8 @@ out strError);
 
             if (this.LoginCache != null && string.IsNullOrEmpty(account.LoginName) == false
                 && account.Password != null // 防止 null password 进入 cache 引起其他问题 2014/12/20
-                && strGetToken == null) // 2023/4/12    
+                && strGetToken == null // 2023/4/12
+                && token_login == false)
             {
                 DateTimeOffset offset = DateTimeOffset.Now.AddMinutes(20);
                 this.LoginCache.Set(account.Barcode, account, offset);
