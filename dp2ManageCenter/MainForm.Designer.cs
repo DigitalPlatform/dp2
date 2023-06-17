@@ -79,14 +79,16 @@
             this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader7 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader8 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.tabPage_history = new System.Windows.Forms.TabPage();
-            this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             this.tabPage_kernelErrorLogTasks = new System.Windows.Forms.TabPage();
             this.listView_kernelErrorLogTasks = new System.Windows.Forms.ListView();
             this.columnHeader9 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader10 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader11 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader12 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.tabPage_history = new System.Windows.Forms.TabPage();
+            this.webBrowser1 = new System.Windows.Forms.WebBrowser();
+            this.ToolStripMenuItem_compactShelf = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem_sendCommand = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.tabControl_main.SuspendLayout();
@@ -97,8 +99,8 @@
             this.splitContainer_backupTasks.SuspendLayout();
             this.tabPage_operLogTasks.SuspendLayout();
             this.tabPage_errorLogTasks.SuspendLayout();
-            this.tabPage_history.SuspendLayout();
             this.tabPage_kernelErrorLogTasks.SuspendLayout();
+            this.tabPage_history.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -113,7 +115,7 @@
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(7, 3, 0, 3);
-            this.menuStrip1.Size = new System.Drawing.Size(978, 38);
+            this.menuStrip1.Size = new System.Drawing.Size(978, 42);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -126,7 +128,7 @@
             this.toolStripSeparator1,
             this.MenuItem_exit});
             this.MenuItem_file.Name = "MenuItem_file";
-            this.MenuItem_file.Size = new System.Drawing.Size(97, 32);
+            this.MenuItem_file.Size = new System.Drawing.Size(97, 36);
             this.MenuItem_file.Text = "文件(&F)";
             // 
             // MenuItem_serversSetting
@@ -195,7 +197,7 @@
             this.MenuItem_changePassword,
             this.MenuItem_refreshServerName});
             this.MenuItem_management.Name = "MenuItem_management";
-            this.MenuItem_management.Size = new System.Drawing.Size(107, 32);
+            this.MenuItem_management.Size = new System.Drawing.Size(107, 36);
             this.MenuItem_management.Text = "管理(&M)";
             // 
             // MenuItem_newBackupTasks
@@ -237,43 +239,45 @@
             this.toolStripMenuItem_message.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ToolStripMenuItem_searchShelf,
             this.toolStripMenuItem_getFile,
+            this.toolStripMenuItem_sendCommand,
             this.toolStripSeparator3,
             this.ToolStripMenuItem_messageAccounts,
-            this.ToolStripMenuItem_chat});
+            this.ToolStripMenuItem_chat,
+            this.ToolStripMenuItem_compactShelf});
             this.toolStripMenuItem_message.Name = "toolStripMenuItem_message";
-            this.toolStripMenuItem_message.Size = new System.Drawing.Size(72, 32);
+            this.toolStripMenuItem_message.Size = new System.Drawing.Size(72, 36);
             this.toolStripMenuItem_message.Text = "消息";
             // 
             // ToolStripMenuItem_searchShelf
             // 
             this.ToolStripMenuItem_searchShelf.Name = "ToolStripMenuItem_searchShelf";
-            this.ToolStripMenuItem_searchShelf.Size = new System.Drawing.Size(255, 40);
+            this.ToolStripMenuItem_searchShelf.Size = new System.Drawing.Size(315, 40);
             this.ToolStripMenuItem_searchShelf.Text = "书柜查询(&S)";
             this.ToolStripMenuItem_searchShelf.Click += new System.EventHandler(this.ToolStripMenuItem_searchShelf_Click);
             // 
             // toolStripMenuItem_getFile
             // 
             this.toolStripMenuItem_getFile.Name = "toolStripMenuItem_getFile";
-            this.toolStripMenuItem_getFile.Size = new System.Drawing.Size(255, 40);
+            this.toolStripMenuItem_getFile.Size = new System.Drawing.Size(315, 40);
             this.toolStripMenuItem_getFile.Text = "获取文件(&G)";
             this.toolStripMenuItem_getFile.Click += new System.EventHandler(this.toolStripMenuItem_getFile_Click);
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(252, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(312, 6);
             // 
             // ToolStripMenuItem_messageAccounts
             // 
             this.ToolStripMenuItem_messageAccounts.Name = "ToolStripMenuItem_messageAccounts";
-            this.ToolStripMenuItem_messageAccounts.Size = new System.Drawing.Size(255, 40);
+            this.ToolStripMenuItem_messageAccounts.Size = new System.Drawing.Size(315, 40);
             this.ToolStripMenuItem_messageAccounts.Text = "设置消息账户";
             this.ToolStripMenuItem_messageAccounts.Click += new System.EventHandler(this.ToolStripMenuItem_messageAccounts_Click);
             // 
             // ToolStripMenuItem_chat
             // 
             this.ToolStripMenuItem_chat.Name = "ToolStripMenuItem_chat";
-            this.ToolStripMenuItem_chat.Size = new System.Drawing.Size(255, 40);
+            this.ToolStripMenuItem_chat.Size = new System.Drawing.Size(315, 40);
             this.ToolStripMenuItem_chat.Text = "聊天";
             this.ToolStripMenuItem_chat.Click += new System.EventHandler(this.ToolStripMenuItem_chat_Click);
             // 
@@ -284,7 +288,7 @@
             this.MenuItem_openDataFolder,
             this.MenuItem_openProgramFolder});
             this.MenuItem_help.Name = "MenuItem_help";
-            this.MenuItem_help.Size = new System.Drawing.Size(102, 32);
+            this.MenuItem_help.Size = new System.Drawing.Size(102, 36);
             this.MenuItem_help.Text = "帮助(&H)";
             // 
             // MenuItem_openUserFolder
@@ -311,9 +315,9 @@
             // toolStrip1
             // 
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
-            this.toolStrip1.Location = new System.Drawing.Point(0, 38);
+            this.toolStrip1.Location = new System.Drawing.Point(0, 42);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(978, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(978, 44);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -343,11 +347,11 @@
             this.tabControl_main.Controls.Add(this.tabPage_kernelErrorLogTasks);
             this.tabControl_main.Controls.Add(this.tabPage_history);
             this.tabControl_main.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControl_main.Location = new System.Drawing.Point(0, 63);
+            this.tabControl_main.Location = new System.Drawing.Point(0, 86);
             this.tabControl_main.Margin = new System.Windows.Forms.Padding(4);
             this.tabControl_main.Name = "tabControl_main";
             this.tabControl_main.SelectedIndex = 0;
-            this.tabControl_main.Size = new System.Drawing.Size(978, 500);
+            this.tabControl_main.Size = new System.Drawing.Size(978, 477);
             this.tabControl_main.TabIndex = 2;
             // 
             // tabPage_backupTasks
@@ -357,7 +361,7 @@
             this.tabPage_backupTasks.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_backupTasks.Name = "tabPage_backupTasks";
             this.tabPage_backupTasks.Padding = new System.Windows.Forms.Padding(4);
-            this.tabPage_backupTasks.Size = new System.Drawing.Size(970, 459);
+            this.tabPage_backupTasks.Size = new System.Drawing.Size(970, 436);
             this.tabPage_backupTasks.TabIndex = 0;
             this.tabPage_backupTasks.Text = "大备份任务";
             this.tabPage_backupTasks.UseVisualStyleBackColor = true;
@@ -376,7 +380,7 @@
             // splitContainer_backupTasks.Panel2
             // 
             this.splitContainer_backupTasks.Panel2.Controls.Add(this.webBrowser_backupTask);
-            this.splitContainer_backupTasks.Size = new System.Drawing.Size(962, 451);
+            this.splitContainer_backupTasks.Size = new System.Drawing.Size(962, 428);
             this.splitContainer_backupTasks.SplitterDistance = 514;
             this.splitContainer_backupTasks.SplitterWidth = 10;
             this.splitContainer_backupTasks.TabIndex = 1;
@@ -396,7 +400,7 @@
             this.listView_backupTasks.Margin = new System.Windows.Forms.Padding(4);
             this.listView_backupTasks.Name = "listView_backupTasks";
             this.listView_backupTasks.ShowItemToolTips = true;
-            this.listView_backupTasks.Size = new System.Drawing.Size(514, 451);
+            this.listView_backupTasks.Size = new System.Drawing.Size(514, 428);
             this.listView_backupTasks.TabIndex = 0;
             this.listView_backupTasks.UseCompatibleStateImageBehavior = false;
             this.listView_backupTasks.View = System.Windows.Forms.View.Details;
@@ -435,7 +439,7 @@
             this.webBrowser_backupTask.Margin = new System.Windows.Forms.Padding(5);
             this.webBrowser_backupTask.MinimumSize = new System.Drawing.Size(29, 36);
             this.webBrowser_backupTask.Name = "webBrowser_backupTask";
-            this.webBrowser_backupTask.Size = new System.Drawing.Size(438, 451);
+            this.webBrowser_backupTask.Size = new System.Drawing.Size(438, 428);
             this.webBrowser_backupTask.TabIndex = 4;
             // 
             // tabPage_operLogTasks
@@ -540,28 +544,6 @@
             this.columnHeader8.Text = "进度";
             this.columnHeader8.Width = 196;
             // 
-            // tabPage_history
-            // 
-            this.tabPage_history.Controls.Add(this.webBrowser1);
-            this.tabPage_history.Location = new System.Drawing.Point(4, 37);
-            this.tabPage_history.Margin = new System.Windows.Forms.Padding(4);
-            this.tabPage_history.Name = "tabPage_history";
-            this.tabPage_history.Padding = new System.Windows.Forms.Padding(4);
-            this.tabPage_history.Size = new System.Drawing.Size(970, 459);
-            this.tabPage_history.TabIndex = 1;
-            this.tabPage_history.Text = "操作历史";
-            this.tabPage_history.UseVisualStyleBackColor = true;
-            // 
-            // webBrowser1
-            // 
-            this.webBrowser1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.webBrowser1.Location = new System.Drawing.Point(4, 4);
-            this.webBrowser1.Margin = new System.Windows.Forms.Padding(5);
-            this.webBrowser1.MinimumSize = new System.Drawing.Size(29, 36);
-            this.webBrowser1.Name = "webBrowser1";
-            this.webBrowser1.Size = new System.Drawing.Size(962, 451);
-            this.webBrowser1.TabIndex = 3;
-            // 
             // tabPage_kernelErrorLogTasks
             // 
             this.tabPage_kernelErrorLogTasks.Controls.Add(this.listView_kernelErrorLogTasks);
@@ -572,7 +554,7 @@
             this.tabPage_kernelErrorLogTasks.Text = "dp2kernel 错误日志";
             this.tabPage_kernelErrorLogTasks.UseVisualStyleBackColor = true;
             // 
-            // listView_kernelOperLogTasks
+            // listView_kernelErrorLogTasks
             // 
             this.listView_kernelErrorLogTasks.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader9,
@@ -584,7 +566,7 @@
             this.listView_kernelErrorLogTasks.HideSelection = false;
             this.listView_kernelErrorLogTasks.Location = new System.Drawing.Point(0, 0);
             this.listView_kernelErrorLogTasks.Margin = new System.Windows.Forms.Padding(4);
-            this.listView_kernelErrorLogTasks.Name = "listView_kernelOperLogTasks";
+            this.listView_kernelErrorLogTasks.Name = "listView_kernelErrorLogTasks";
             this.listView_kernelErrorLogTasks.ShowItemToolTips = true;
             this.listView_kernelErrorLogTasks.Size = new System.Drawing.Size(970, 459);
             this.listView_kernelErrorLogTasks.TabIndex = 3;
@@ -611,6 +593,42 @@
             // 
             this.columnHeader12.Text = "进度";
             this.columnHeader12.Width = 196;
+            // 
+            // tabPage_history
+            // 
+            this.tabPage_history.Controls.Add(this.webBrowser1);
+            this.tabPage_history.Location = new System.Drawing.Point(4, 37);
+            this.tabPage_history.Margin = new System.Windows.Forms.Padding(4);
+            this.tabPage_history.Name = "tabPage_history";
+            this.tabPage_history.Padding = new System.Windows.Forms.Padding(4);
+            this.tabPage_history.Size = new System.Drawing.Size(970, 459);
+            this.tabPage_history.TabIndex = 1;
+            this.tabPage_history.Text = "操作历史";
+            this.tabPage_history.UseVisualStyleBackColor = true;
+            // 
+            // webBrowser1
+            // 
+            this.webBrowser1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.webBrowser1.Location = new System.Drawing.Point(4, 4);
+            this.webBrowser1.Margin = new System.Windows.Forms.Padding(5);
+            this.webBrowser1.MinimumSize = new System.Drawing.Size(29, 36);
+            this.webBrowser1.Name = "webBrowser1";
+            this.webBrowser1.Size = new System.Drawing.Size(962, 451);
+            this.webBrowser1.TabIndex = 3;
+            // 
+            // ToolStripMenuItem_compactShelf
+            // 
+            this.ToolStripMenuItem_compactShelf.Name = "ToolStripMenuItem_compactShelf";
+            this.ToolStripMenuItem_compactShelf.Size = new System.Drawing.Size(315, 40);
+            this.ToolStripMenuItem_compactShelf.Text = "密集书架(&C)";
+            this.ToolStripMenuItem_compactShelf.Click += new System.EventHandler(this.ToolStripMenuItem_compactShelf_Click);
+            // 
+            // toolStripMenuItem_sendCommand
+            // 
+            this.toolStripMenuItem_sendCommand.Name = "toolStripMenuItem_sendCommand";
+            this.toolStripMenuItem_sendCommand.Size = new System.Drawing.Size(315, 40);
+            this.toolStripMenuItem_sendCommand.Text = "发送命令(&M)";
+            this.toolStripMenuItem_sendCommand.Click += new System.EventHandler(this.toolStripMenuItem_sendCommand_Click);
             // 
             // MainForm
             // 
@@ -642,8 +660,8 @@
             this.splitContainer_backupTasks.ResumeLayout(false);
             this.tabPage_operLogTasks.ResumeLayout(false);
             this.tabPage_errorLogTasks.ResumeLayout(false);
-            this.tabPage_history.ResumeLayout(false);
             this.tabPage_kernelErrorLogTasks.ResumeLayout(false);
+            this.tabPage_history.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -710,6 +728,8 @@
         private System.Windows.Forms.ColumnHeader columnHeader10;
         private System.Windows.Forms.ColumnHeader columnHeader11;
         private System.Windows.Forms.ColumnHeader columnHeader12;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_compactShelf;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_sendCommand;
     }
 }
 

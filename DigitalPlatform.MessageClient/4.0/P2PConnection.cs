@@ -106,6 +106,15 @@ namespace DigitalPlatform.MessageClient
                     _handlers.Add(handler);
                 }
 
+                // *** setInfo
+                {
+                    var handler = HubProxy.On<SetInfoRequest>("setInfo",
+                    (param) => OnSetInfoRecieved(param)
+                    );
+                    _handlers.Add(handler);
+                }
+
+
                 // *** close
                 {
                     var handler = HubProxy.On<CloseRequest>("close",
@@ -753,6 +762,26 @@ IList<MessageRecord> messages)
             }
         }
 
+        public virtual void OnSetInfoRecieved(SetInfoRequest param)
+        {
+            SetInfoEventArgs e = new SetInfoEventArgs();
+            e.Request = param;
+            this.TriggerSetInfo(this, e);
+        }
+
+        public event SetInfoEventHandler SetInfo = null;
+
+        // 触发 SetInfo 通知事件
+        public virtual void TriggerSetInfo(P2PConnection connection,
+            SetInfoEventArgs e)
+        {
+            SetInfoEventHandler handler = this.SetInfo;
+            if (handler != null)
+            {
+                handler(connection, e);
+            }
+        }
+
         #region SetInfo() API
 
         public class SetInfoResult : MessageResult
@@ -835,6 +864,35 @@ CancellationToken token)
                 }
             }
         }
+
+        // 调用 server 端 ResponseSetInfo
+        // TODO: 要考虑发送失败的问题
+        public async Task<MessageResult> ResponseSetInfo(
+            string taskID,
+            long resultValue,
+            IList<DigitalPlatform.MessageClient.Entity> results,
+            string errorInfo)
+        {
+            return await HubProxy.Invoke<MessageResult>("ResponseSetInfo",
+        taskID,
+        resultValue,
+        results,
+        errorInfo).ConfigureAwait(false);
+        }
+
+        public async Task TryResponseSetInfo(
+        string taskID,
+        long resultValue,
+        IList<DigitalPlatform.MessageClient.Entity> results,
+        string errorInfo)
+        {
+            await HubProxy.Invoke<MessageResult>("ResponseSetInfo",
+    taskID,
+    resultValue,
+    results,
+    errorInfo).ConfigureAwait(false);
+        }
+
 
         #endregion
 

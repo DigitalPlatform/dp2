@@ -325,6 +325,477 @@ H360.41-42/l338(2)2
             test_case(list);
         }
 
+        // ~
+
+        [TestMethod]
+        public void Test_anu_10()
+        {
+            string list = @"
+K20-42
+K20-42/15
+";
+            test_case(list);
+        }
+
+        /*
+         * 
+R711 妇科学
+R711-62 妇科学手册
+R711(711) 加拿大妇科学
+R711(711)=535 八十年代的加拿大妇科学
+R711=6 二十一世纪妇科学展望
+R711＜326＞ 国外妇科学
+R711：R83 航海妇科学
+R711+R173 妇科学和妇女卫生
+R711.1 女性生殖器畸形
+         * 
+         * */
+
+        [TestMethod]
+        public void Test_anu_11()
+        {
+            string list = @"
+R711
+R711-62
+R711(711)
+R711(711)=535
+R711=6
+R711<326>
+R711:R83
+R711+R173
+R711.1
+";
+            test_case(list);
+        }
+
+        // 字母部分字符数不等的案例
+        [TestMethod]
+        public void Test_anu_12()
+        {
+            string list = @"
+T1
+TP1
+";
+            test_case(list);
+        }
+
+        // 字母和数字会被分为两个 segment
+        [TestMethod]
+        public void Test_segment_01()
+        {
+            var segments = CompareSegment.ParseLine("T1");
+            Assert.AreEqual(2, segments.Count);
+            Assert.AreEqual("T", segments[0].Text);
+            Assert.AreEqual("1", segments[1].Text);
+        }
+
+        // 字母和数字会被分为两个 segment
+        [TestMethod]
+        public void Test_segment_02()
+        {
+            var segments = CompareSegment.ParseLine("TP1");
+            Assert.AreEqual(2, segments.Count);
+            Assert.AreEqual("TP", segments[0].Text);
+            Assert.AreEqual("1", segments[1].Text);
+        }
+
+        // 字母、横杠、数字会被分为三个 segment
+        [TestMethod]
+        public void Test_segment_03()
+        {
+            var segments = CompareSegment.ParseLine("F-1");
+            Assert.AreEqual(3, segments.Count);
+            Assert.AreEqual("F", segments[0].Text);
+            Assert.AreEqual("1", segments[2].Text);
+        }
+
+        [TestMethod]
+        public void Test_segment_04()
+        {
+            var segments = CompareSegment.ParseLine("TP12");
+            Assert.AreEqual(2, segments.Count);
+            Assert.AreEqual("TP", segments[0].Text);
+            Assert.AreEqual("12", segments[1].Text);
+        }
+
+        [TestMethod]
+        public void Test_matchRange_01()
+        {
+            string accessNo = "TP311";
+            string range = "TP311~TP312";
+            // return:
+            //      -1  出错
+            //      0   没有匹配上
+            //      1   匹配上了
+            var ret = AccessNoUtility.MatchRange(range,
+                accessNo,
+                out string strError);
+            Assert.AreEqual(1, ret);
+        }
+
+
+        // 检测 range 错误
+        [TestMethod]
+        public void Test_matchRange_12()
+        {
+            string accessNo = "TP311";
+            string range = "TP312~TP311";
+            // return:
+            //      -1  出错
+            //      0   没有匹配上
+            //      1   匹配上了
+            var ret = AccessNoUtility.MatchRange(range,
+                accessNo,
+                out string strError);
+            Assert.AreEqual(-1, ret);
+        }
+
+        // 检测 range 错误
+        [TestMethod]
+        public void Test_matchRange_13()
+        {
+            string accessNo = "TP311";
+            string range = "TP311~TP311`";
+            // return:
+            //      -1  出错
+            //      0   没有匹配上
+            //      1   匹配上了
+            var ret = AccessNoUtility.MatchRange(range,
+                accessNo,
+                out string strError);
+            Assert.AreEqual(-1, ret);
+        }
+
+        // 检测 range 错误
+        [TestMethod]
+        public void Test_matchRange_14()
+        {
+            string accessNo = "TP311";
+            string range = "`TP311~TP311`";
+            // return:
+            //      -1  出错
+            //      0   没有匹配上
+            //      1   匹配上了
+            var ret = AccessNoUtility.MatchRange(range,
+                accessNo,
+                out string strError);
+            Assert.AreEqual(-1, ret);
+        }
+
+        // 检测 range 错误
+        [TestMethod]
+        public void Test_matchRange_15()
+        {
+            string accessNo = "TP311";
+            string range = "`TP311~TP311";
+            // return:
+            //      -1  出错
+            //      0   没有匹配上
+            //      1   匹配上了
+            var ret = AccessNoUtility.MatchRange(range,
+                accessNo,
+                out string strError);
+            Assert.AreEqual(-1, ret);
+        }
+
+        [TestMethod]
+        public void Test_matchRange_21()
+        {
+            string accessNo = "TP311";
+            string range = "TP311~TP311";
+            // return:
+            //      -1  出错
+            //      0   没有匹配上
+            //      1   匹配上了
+            var ret = AccessNoUtility.MatchRange(range,
+                accessNo,
+                out string strError);
+            Assert.AreEqual(1, ret);
+        }
+
+
+        [TestMethod]
+        public void Test_matchRange_22()
+        {
+            string accessNo = "TP311";
+            string range = "`TP311~TP312";
+            // return:
+            //      -1  出错
+            //      0   没有匹配上
+            //      1   匹配上了
+            var ret = AccessNoUtility.MatchRange(range,
+                accessNo,
+                out string strError);
+            Assert.AreEqual(0, ret);
+        }
+
+        [TestMethod]
+        public void Test_matchRange_23()
+        {
+            string accessNo = "TP312";
+            string range = "`TP311~TP312";
+            // return:
+            //      -1  出错
+            //      0   没有匹配上
+            //      1   匹配上了
+            var ret = AccessNoUtility.MatchRange(range,
+                accessNo,
+                out string strError);
+            Assert.AreEqual(1, ret);
+        }
+
+        [TestMethod]
+        public void Test_matchRange_24()
+        {
+            string accessNo = "TP313";
+            string range = "`TP311~TP312";
+            // return:
+            //      -1  出错
+            //      0   没有匹配上
+            //      1   匹配上了
+            var ret = AccessNoUtility.MatchRange(range,
+                accessNo,
+                out string strError);
+            Assert.AreEqual(0, ret);
+        }
+
+        [TestMethod]
+        public void Test_matchRange_25()
+        {
+            string accessNo = "TP311";
+            string range = "TP311~TP312`";
+            // return:
+            //      -1  出错
+            //      0   没有匹配上
+            //      1   匹配上了
+            var ret = AccessNoUtility.MatchRange(range,
+                accessNo,
+                out string strError);
+            Assert.AreEqual(1, ret);
+        }
+
+        [TestMethod]
+        public void Test_matchRange_26()
+        {
+            string accessNo = "TP312";
+            string range = "TP311~TP312`";
+            // return:
+            //      -1  出错
+            //      0   没有匹配上
+            //      1   匹配上了
+            var ret = AccessNoUtility.MatchRange(range,
+                accessNo,
+                out string strError);
+            Assert.AreEqual(0, ret);
+        }
+
+        [TestMethod]
+        public void Test_matchRange_27()
+        {
+            string accessNo = "TP313";
+            string range = "TP311~TP312`";
+            // return:
+            //      -1  出错
+            //      0   没有匹配上
+            //      1   匹配上了
+            var ret = AccessNoUtility.MatchRange(range,
+                accessNo,
+                out string strError);
+            Assert.AreEqual(0, ret);
+        }
+
+        [TestMethod]
+        public void Test_matchRange_28()
+        {
+            string accessNo = "TP311";
+            string range = "`TP311~TP312`";
+            // return:
+            //      -1  出错
+            //      0   没有匹配上
+            //      1   匹配上了
+            var ret = AccessNoUtility.MatchRange(range,
+                accessNo,
+                out string strError);
+            Assert.AreEqual(0, ret);
+        }
+
+        [TestMethod]
+        public void Test_matchRange_29()
+        {
+            string accessNo = "TP311";
+            string range = "`TP311~TP312`";
+            // return:
+            //      -1  出错
+            //      0   没有匹配上
+            //      1   匹配上了
+            var ret = AccessNoUtility.MatchRange(range,
+                accessNo,
+                out string strError);
+            Assert.AreEqual(0, ret);
+        }
+
+        [TestMethod]
+        public void Test_matchRange_30()
+        {
+            string accessNo = "TP311/1";
+            string range = "`TP311~TP312`";
+            // return:
+            //      -1  出错
+            //      0   没有匹配上
+            //      1   匹配上了
+            var ret = AccessNoUtility.MatchRange(range,
+                accessNo,
+                out string strError);
+            Assert.AreEqual(1, ret);
+        }
+
+        // 不交叉
+        [TestMethod]
+        public void Test_hasCross_01()
+        {
+            string range1 = "A1~A2";
+            string range2 = "A3~A4";
+
+            {
+                var ret = AccessNoUtility.HasCross(range1, range2);
+                Assert.AreEqual(false, ret);
+            }
+
+            {
+                var ret = AccessNoUtility.HasCross(range2, range1);
+                Assert.AreEqual(false, ret);
+            }
+        }
+
+        // 交叉部分
+        [TestMethod]
+        public void Test_hasCross_02()
+        {
+            string range1 = "TP312~TP315";
+            string range2 = "TP31~TP312";
+
+            {
+                var ret = AccessNoUtility.HasCross(range1, range2);
+                Assert.AreEqual(true, ret);
+            }
+
+            {
+                var ret = AccessNoUtility.HasCross(range2, range1);
+                Assert.AreEqual(true, ret);
+            }
+        }
+
+        // 一个完整包含另外一个
+        [TestMethod]
+        public void Test_hasCross_03()
+        {
+            string range1 = "A1~A5";
+            string range2 = "A2~A4";
+
+            {
+                var ret = AccessNoUtility.HasCross(range1, range2);
+                Assert.AreEqual(true, ret);
+            }
+
+            {
+                var ret = AccessNoUtility.HasCross(range2, range1);
+                Assert.AreEqual(true, ret);
+            }
+        }
+
+        // (头尾不包含)不交叉
+        [TestMethod]
+        public void Test_hasCross_11()
+        {
+            string range1 = "A1~A2`";
+            string range2 = "`A3~A4";
+
+            {
+                var ret = AccessNoUtility.HasCross(range1, range2);
+                Assert.AreEqual(false, ret);
+            }
+
+            {
+                var ret = AccessNoUtility.HasCross(range2, range1);
+                Assert.AreEqual(false, ret);
+            }
+        }
+
+        // (头尾不包含)不交叉
+        [TestMethod]
+        public void Test_hasCross_12()
+        {
+            string range1 = "A1~A2`";
+            string range2 = "`A2~A4";
+
+            {
+                var ret = AccessNoUtility.HasCross(range1, range2);
+                Assert.AreEqual(false, ret);
+            }
+
+            {
+                var ret = AccessNoUtility.HasCross(range2, range1);
+                Assert.AreEqual(false, ret);
+            }
+        }
+
+        // (头尾不包含)交叉部分
+        [TestMethod]
+        public void Test_hasCross_13()
+        {
+            string range1 = "A1~A8`";
+            string range2 = "`A7~A9";
+            // 注：至少 A75 算是一个交叉点
+
+            {
+                var ret = AccessNoUtility.HasCross(range1, range2);
+                Assert.AreEqual(true, ret);
+            }
+
+            {
+                var ret = AccessNoUtility.HasCross(range2, range1);
+                Assert.AreEqual(true, ret);
+            }
+        }
+
+        // (头尾不包含)一个包含另外一个
+        [TestMethod]
+        public void Test_hasCross_14()
+        {
+            string range1 = "A1~A9`";
+            string range2 = "`A7~A8";
+            // 注：至少 A75 算是一个交叉点
+
+            {
+                var ret = AccessNoUtility.HasCross(range1, range2);
+                Assert.AreEqual(true, ret);
+            }
+
+            {
+                var ret = AccessNoUtility.HasCross(range2, range1);
+                Assert.AreEqual(true, ret);
+            }
+        }
+
+        // (头尾不包含)常见接续情况
+        [TestMethod]
+        public void Test_hasCross_15()
+        {
+            string range1 = "A1~B`";
+            string range2 = "B~C";
+            // 注：至少 A75 算是一个交叉点
+
+            {
+                var ret = AccessNoUtility.HasCross(range1, range2);
+                Assert.AreEqual(false, ret);
+            }
+
+            {
+                var ret = AccessNoUtility.HasCross(range2, range1);
+                Assert.AreEqual(false, ret);
+            }
+        }
+
         #region 服务函数
 
         void test_class_line_case(string list)

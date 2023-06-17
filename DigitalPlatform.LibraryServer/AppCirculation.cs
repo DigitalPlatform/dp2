@@ -16852,7 +16852,7 @@ sessioninfo.ExpandLibraryCodeList);
             // 还书时候，把 currentLocation 修改，不过可能被写入临时性模糊的内容。这样直到下次图书上架后盘点，currentLcation 才真正到位
             if (string.IsNullOrEmpty(strAccountLocation) == false)
             {
-                bool warning = true;
+                bool warning = false;   // 遇到不合法的馆藏地当作报错处理
 
                 // 2022/10/25
                 strAccountLocation = strAccountLocation.Replace("[空]", "").Replace("[Empty]", "");

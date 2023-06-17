@@ -1629,6 +1629,18 @@ Stack:
             }
         }
 
+        // 密集书架 dp2mserver 账户名
+        public string MessageShelfAccount
+        {
+            get
+            {
+                return this.AppInfo.GetString(
+    "message",
+    "shelfAccount",
+    "");
+            }
+        }
+
         // 系统参数配置
         private async void MenuItem_configuration_Click(object sender, EventArgs e)
         {
@@ -10371,6 +10383,23 @@ out strError);
         private void MainForm_Leave(object sender, EventArgs e)
         {
             Speak("Leave");
+        }
+
+        private void toolStripButton_messageHub_command_Click(object sender, EventArgs e)
+        {
+            CommandDialog dlg = new CommandDialog();
+            MainForm.SetControlFont(dlg, this.DefaultFont);
+            dlg.UiState = this.AppInfo.GetString(
+        "main_form",
+        "CommandDialog_uiState",
+        "");
+            this.AppInfo.LinkFormState(dlg,
+                "main_form_command_dialog_state");
+            dlg.ShowDialog(this);
+            this.AppInfo.SetString(
+        "main_form",
+        "CommandDialog_uiState",
+        dlg.UiState);
         }
     }
 

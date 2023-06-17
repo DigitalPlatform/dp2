@@ -133,6 +133,11 @@
             this.label17 = new System.Windows.Forms.Label();
             this.textBox_addCrLf_sourceFilename = new System.Windows.Forms.TextBox();
             this.button_addCrLf_getSourceFileName = new System.Windows.Forms.Button();
+            this.tabPage_accessNo = new System.Windows.Forms.TabPage();
+            this.button_accessNo_sort = new System.Windows.Forms.Button();
+            this.label20 = new System.Windows.Forms.Label();
+            this.textBox_accessNo_lines = new System.Windows.Forms.TextBox();
+            this.button_accessNo_removeRangeEnd = new System.Windows.Forms.Button();
             this.tabControl_main.SuspendLayout();
             this.tabPage_sjhm.SuspendLayout();
             this.tabPage_xmlEditor.SuspendLayout();
@@ -166,6 +171,7 @@
             this.tabPage_worToIso.SuspendLayout();
             this.tabPage_biblioTable.SuspendLayout();
             this.tabPage_addCrLf.SuspendLayout();
+            this.tabPage_accessNo.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl_main
@@ -182,6 +188,7 @@
             this.tabControl_main.Controls.Add(this.tabPage_worToIso);
             this.tabControl_main.Controls.Add(this.tabPage_biblioTable);
             this.tabControl_main.Controls.Add(this.tabPage_addCrLf);
+            this.tabControl_main.Controls.Add(this.tabPage_accessNo);
             this.tabControl_main.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl_main.Location = new System.Drawing.Point(0, 0);
             this.tabControl_main.Margin = new System.Windows.Forms.Padding(5);
@@ -217,7 +224,7 @@
             this.textBox_sjhm_result.Name = "textBox_sjhm_result";
             this.textBox_sjhm_result.ReadOnly = true;
             this.textBox_sjhm_result.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_sjhm_result.Size = new System.Drawing.Size(951, 392);
+            this.textBox_sjhm_result.Size = new System.Drawing.Size(918, 392);
             this.textBox_sjhm_result.TabIndex = 4;
             // 
             // label2
@@ -233,7 +240,7 @@
             // button_sjhm_getOriginInfo
             // 
             this.button_sjhm_getOriginInfo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_sjhm_getOriginInfo.Location = new System.Drawing.Point(670, 72);
+            this.button_sjhm_getOriginInfo.Location = new System.Drawing.Point(637, 72);
             this.button_sjhm_getOriginInfo.Margin = new System.Windows.Forms.Padding(5);
             this.button_sjhm_getOriginInfo.Name = "button_sjhm_getOriginInfo";
             this.button_sjhm_getOriginInfo.Size = new System.Drawing.Size(296, 40);
@@ -259,7 +266,7 @@
             this.textBox_sjhm_source.Location = new System.Drawing.Point(122, 31);
             this.textBox_sjhm_source.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_sjhm_source.Name = "textBox_sjhm_source";
-            this.textBox_sjhm_source.Size = new System.Drawing.Size(844, 31);
+            this.textBox_sjhm_source.Size = new System.Drawing.Size(811, 31);
             this.textBox_sjhm_source.TabIndex = 0;
             // 
             // tabPage_xmlEditor
@@ -370,13 +377,13 @@
             this.textBox_xmlEditor_content.Multiline = true;
             this.textBox_xmlEditor_content.Name = "textBox_xmlEditor_content";
             this.textBox_xmlEditor_content.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_xmlEditor_content.Size = new System.Drawing.Size(949, 357);
+            this.textBox_xmlEditor_content.Size = new System.Drawing.Size(918, 357);
             this.textBox_xmlEditor_content.TabIndex = 7;
             // 
             // button_xmlEditor_save
             // 
             this.button_xmlEditor_save.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_xmlEditor_save.Location = new System.Drawing.Point(827, 116);
+            this.button_xmlEditor_save.Location = new System.Drawing.Point(796, 116);
             this.button_xmlEditor_save.Margin = new System.Windows.Forms.Padding(5);
             this.button_xmlEditor_save.Name = "button_xmlEditor_save";
             this.button_xmlEditor_save.Size = new System.Drawing.Size(137, 40);
@@ -388,7 +395,7 @@
             // button_xmlEditor_load
             // 
             this.button_xmlEditor_load.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_xmlEditor_load.Location = new System.Drawing.Point(827, 66);
+            this.button_xmlEditor_load.Location = new System.Drawing.Point(796, 66);
             this.button_xmlEditor_load.Margin = new System.Windows.Forms.Padding(5);
             this.button_xmlEditor_load.Name = "button_xmlEditor_load";
             this.button_xmlEditor_load.Size = new System.Drawing.Size(137, 40);
@@ -404,7 +411,7 @@
             this.textBox_xmlEditor_xmlFilename.Location = new System.Drawing.Point(171, 19);
             this.textBox_xmlEditor_xmlFilename.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_xmlEditor_xmlFilename.Name = "textBox_xmlEditor_xmlFilename";
-            this.textBox_xmlEditor_xmlFilename.Size = new System.Drawing.Size(793, 31);
+            this.textBox_xmlEditor_xmlFilename.Size = new System.Drawing.Size(762, 31);
             this.textBox_xmlEditor_xmlFilename.TabIndex = 1;
             // 
             // label3
@@ -435,7 +442,7 @@
             // 
             this.button_webCamera_copyToClipboard.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_webCamera_copyToClipboard.Enabled = false;
-            this.button_webCamera_copyToClipboard.Location = new System.Drawing.Point(811, 181);
+            this.button_webCamera_copyToClipboard.Location = new System.Drawing.Point(768, 183);
             this.button_webCamera_copyToClipboard.Margin = new System.Windows.Forms.Padding(5);
             this.button_webCamera_copyToClipboard.Name = "button_webCamera_copyToClipboard";
             this.button_webCamera_copyToClipboard.Size = new System.Drawing.Size(165, 87);
@@ -448,7 +455,7 @@
             // 
             this.button_webCamera_stop.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_webCamera_stop.Enabled = false;
-            this.button_webCamera_stop.Location = new System.Drawing.Point(811, 66);
+            this.button_webCamera_stop.Location = new System.Drawing.Point(768, 66);
             this.button_webCamera_stop.Margin = new System.Windows.Forms.Padding(5);
             this.button_webCamera_stop.Name = "button_webCamera_stop";
             this.button_webCamera_stop.Size = new System.Drawing.Size(165, 40);
@@ -460,7 +467,7 @@
             // button_webCamera_start
             // 
             this.button_webCamera_start.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_webCamera_start.Location = new System.Drawing.Point(811, 16);
+            this.button_webCamera_start.Location = new System.Drawing.Point(768, 16);
             this.button_webCamera_start.Margin = new System.Windows.Forms.Padding(5);
             this.button_webCamera_start.Name = "button_webCamera_start";
             this.button_webCamera_start.Size = new System.Drawing.Size(165, 40);
@@ -477,7 +484,7 @@
             this.panel_camera_preview.Location = new System.Drawing.Point(15, 16);
             this.panel_camera_preview.Margin = new System.Windows.Forms.Padding(5);
             this.panel_camera_preview.Name = "panel_camera_preview";
-            this.panel_camera_preview.Size = new System.Drawing.Size(786, 553);
+            this.panel_camera_preview.Size = new System.Drawing.Size(743, 553);
             this.panel_camera_preview.TabIndex = 4;
             // 
             // tabPage_currency
@@ -547,7 +554,7 @@
             this.textBox_currency_source.Multiline = true;
             this.textBox_currency_source.Name = "textBox_currency_source";
             this.textBox_currency_source.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_currency_source.Size = new System.Drawing.Size(352, 542);
+            this.textBox_currency_source.Size = new System.Drawing.Size(335, 542);
             this.textBox_currency_source.TabIndex = 0;
             // 
             // tableLayoutPanel_currency_target
@@ -601,7 +608,7 @@
             this.textBox_currency_target.Multiline = true;
             this.textBox_currency_target.Name = "textBox_currency_target";
             this.textBox_currency_target.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_currency_target.Size = new System.Drawing.Size(430, 542);
+            this.textBox_currency_target.Size = new System.Drawing.Size(404, 542);
             this.textBox_currency_target.TabIndex = 2;
             // 
             // tabPage_textLines
@@ -652,7 +659,7 @@
             // 
             this.splitContainer_textLines_up.Panel2.Controls.Add(this.tableLayoutPanel_text_source2);
             this.splitContainer_textLines_up.Size = new System.Drawing.Size(943, 287);
-            this.splitContainer_textLines_up.SplitterDistance = 461;
+            this.splitContainer_textLines_up.SplitterDistance = 442;
             this.splitContainer_textLines_up.SplitterWidth = 15;
             this.splitContainer_textLines_up.TabIndex = 5;
             // 
@@ -669,7 +676,7 @@
             this.tableLayoutPanel_text_source1.RowCount = 2;
             this.tableLayoutPanel_text_source1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_text_source1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_text_source1.Size = new System.Drawing.Size(461, 287);
+            this.tableLayoutPanel_text_source1.Size = new System.Drawing.Size(442, 287);
             this.tableLayoutPanel_text_source1.TabIndex = 2;
             // 
             // label7
@@ -709,7 +716,7 @@
             this.tableLayoutPanel_text_source2.RowCount = 2;
             this.tableLayoutPanel_text_source2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_text_source2.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_text_source2.Size = new System.Drawing.Size(467, 287);
+            this.tableLayoutPanel_text_source2.Size = new System.Drawing.Size(486, 287);
             this.tableLayoutPanel_text_source2.TabIndex = 4;
             // 
             // label8
@@ -978,7 +985,7 @@
             this.textBox_isbn_text.Multiline = true;
             this.textBox_isbn_text.Name = "textBox_isbn_text";
             this.textBox_isbn_text.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_isbn_text.Size = new System.Drawing.Size(971, 483);
+            this.textBox_isbn_text.Size = new System.Drawing.Size(928, 483);
             this.textBox_isbn_text.TabIndex = 2;
             // 
             // tabPage_health
@@ -1073,7 +1080,7 @@
             // button_findClientFilePath
             // 
             this.button_findClientFilePath.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_findClientFilePath.Location = new System.Drawing.Point(866, 198);
+            this.button_findClientFilePath.Location = new System.Drawing.Point(843, 198);
             this.button_findClientFilePath.Margin = new System.Windows.Forms.Padding(5);
             this.button_findClientFilePath.Name = "button_findClientFilePath";
             this.button_findClientFilePath.Size = new System.Drawing.Size(90, 40);
@@ -1089,7 +1096,7 @@
             this.textBox_clientFilePath.Location = new System.Drawing.Point(20, 205);
             this.textBox_clientFilePath.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_clientFilePath.Name = "textBox_clientFilePath";
-            this.textBox_clientFilePath.Size = new System.Drawing.Size(836, 31);
+            this.textBox_clientFilePath.Size = new System.Drawing.Size(813, 31);
             this.textBox_clientFilePath.TabIndex = 3;
             // 
             // label11
@@ -1109,7 +1116,7 @@
             this.textBox_serverFilePath.Location = new System.Drawing.Point(20, 72);
             this.textBox_serverFilePath.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_serverFilePath.Name = "textBox_serverFilePath";
-            this.textBox_serverFilePath.Size = new System.Drawing.Size(936, 31);
+            this.textBox_serverFilePath.Size = new System.Drawing.Size(913, 31);
             this.textBox_serverFilePath.TabIndex = 1;
             // 
             // label10
@@ -1142,7 +1149,7 @@
             this.button_systemInfo_getClientIP.Location = new System.Drawing.Point(20, 91);
             this.button_systemInfo_getClientIP.Margin = new System.Windows.Forms.Padding(5);
             this.button_systemInfo_getClientIP.Name = "button_systemInfo_getClientIP";
-            this.button_systemInfo_getClientIP.Size = new System.Drawing.Size(940, 40);
+            this.button_systemInfo_getClientIP.Size = new System.Drawing.Size(913, 40);
             this.button_systemInfo_getClientIP.TabIndex = 2;
             this.button_systemInfo_getClientIP.Text = "显示本机(相对于 dp2library 服务器)的 IP 地址";
             this.button_systemInfo_getClientIP.UseVisualStyleBackColor = true;
@@ -1156,7 +1163,7 @@
             this.textBox_systemInfo_mac.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_systemInfo_mac.Name = "textBox_systemInfo_mac";
             this.textBox_systemInfo_mac.ReadOnly = true;
-            this.textBox_systemInfo_mac.Size = new System.Drawing.Size(736, 31);
+            this.textBox_systemInfo_mac.Size = new System.Drawing.Size(709, 31);
             this.textBox_systemInfo_mac.TabIndex = 1;
             // 
             // label12
@@ -1209,7 +1216,7 @@
             this.textBox_worToIso_preview.Name = "textBox_worToIso_preview";
             this.textBox_worToIso_preview.ReadOnly = true;
             this.textBox_worToIso_preview.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_worToIso_preview.Size = new System.Drawing.Size(949, 343);
+            this.textBox_worToIso_preview.Size = new System.Drawing.Size(918, 343);
             this.textBox_worToIso_preview.TabIndex = 9;
             // 
             // label14
@@ -1249,14 +1256,14 @@
             this.textBox_worToIso_worFilename.Location = new System.Drawing.Point(15, 52);
             this.textBox_worToIso_worFilename.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_worToIso_worFilename.Name = "textBox_worToIso_worFilename";
-            this.textBox_worToIso_worFilename.Size = new System.Drawing.Size(885, 31);
+            this.textBox_worToIso_worFilename.Size = new System.Drawing.Size(847, 31);
             this.textBox_worToIso_worFilename.TabIndex = 3;
             this.textBox_worToIso_worFilename.TextChanged += new System.EventHandler(this.textBox_worToIso_worFilename_TextChanged);
             // 
             // button_worToIso_findFileName
             // 
             this.button_worToIso_findFileName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_worToIso_findFileName.Location = new System.Drawing.Point(903, 46);
+            this.button_worToIso_findFileName.Location = new System.Drawing.Point(872, 46);
             this.button_worToIso_findFileName.Margin = new System.Windows.Forms.Padding(5);
             this.button_worToIso_findFileName.Name = "button_worToIso_findFileName";
             this.button_worToIso_findFileName.Size = new System.Drawing.Size(61, 38);
@@ -1283,7 +1290,7 @@
             // button_getBiblioTable
             // 
             this.button_getBiblioTable.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_getBiblioTable.Location = new System.Drawing.Point(792, 95);
+            this.button_getBiblioTable.Location = new System.Drawing.Point(764, 95);
             this.button_getBiblioTable.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button_getBiblioTable.Name = "button_getBiblioTable";
             this.button_getBiblioTable.Size = new System.Drawing.Size(170, 33);
@@ -1299,13 +1306,13 @@
             this.textBox_biblioTableStyle.Location = new System.Drawing.Point(188, 58);
             this.textBox_biblioTableStyle.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.textBox_biblioTableStyle.Name = "textBox_biblioTableStyle";
-            this.textBox_biblioTableStyle.Size = new System.Drawing.Size(774, 31);
+            this.textBox_biblioTableStyle.Size = new System.Drawing.Size(746, 31);
             this.textBox_biblioTableStyle.TabIndex = 4;
             // 
             // label16
             // 
             this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(11, 62);
+            this.label16.Location = new System.Drawing.Point(5, 61);
             this.label16.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label16.Name = "label16";
             this.label16.Size = new System.Drawing.Size(76, 21);
@@ -1317,12 +1324,12 @@
             this.textBox_biblioTableXml.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_biblioTableXml.Location = new System.Drawing.Point(15, 156);
+            this.textBox_biblioTableXml.Location = new System.Drawing.Point(9, 156);
             this.textBox_biblioTableXml.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.textBox_biblioTableXml.Multiline = true;
             this.textBox_biblioTableXml.Name = "textBox_biblioTableXml";
             this.textBox_biblioTableXml.ReadOnly = true;
-            this.textBox_biblioTableXml.Size = new System.Drawing.Size(947, 409);
+            this.textBox_biblioTableXml.Size = new System.Drawing.Size(925, 409);
             this.textBox_biblioTableXml.TabIndex = 2;
             // 
             // textBox_biblioRecPath
@@ -1336,7 +1343,7 @@
             // label15
             // 
             this.label15.AutoSize = true;
-            this.label15.Location = new System.Drawing.Point(11, 22);
+            this.label15.Location = new System.Drawing.Point(5, 22);
             this.label15.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label15.Name = "label15";
             this.label15.Size = new System.Drawing.Size(136, 21);
@@ -1367,9 +1374,9 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.label19.BackColor = System.Drawing.Color.AntiqueWhite;
             this.label19.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label19.Location = new System.Drawing.Point(23, 275);
+            this.label19.Location = new System.Drawing.Point(10, 275);
             this.label19.Name = "label19";
-            this.label19.Size = new System.Drawing.Size(941, 300);
+            this.label19.Size = new System.Drawing.Size(923, 300);
             this.label19.TabIndex = 13;
             this.label19.Text = "温馨提示：\r\n\r\n1) 标准的 ISO2709 文件里面是没有回车换行符号的；\r\n\r\n2) 本功能是为了让那些不能接受标准的 ISO2709 文件的图书馆软件能导" +
     "入数据，给 ISO2709 文件内的每一条记录的记录结束符后面添加一个回车和一个换行符号；\r\n\r\n3) 请务必提醒这些接口不标准的图书馆软件的开发者，尽早修改软" +
@@ -1377,7 +1384,7 @@
             // 
             // button_addCrLf_begin
             // 
-            this.button_addCrLf_begin.Location = new System.Drawing.Point(23, 197);
+            this.button_addCrLf_begin.Location = new System.Drawing.Point(10, 197);
             this.button_addCrLf_begin.Name = "button_addCrLf_begin";
             this.button_addCrLf_begin.Size = new System.Drawing.Size(268, 49);
             this.button_addCrLf_begin.TabIndex = 12;
@@ -1388,7 +1395,7 @@
             // label18
             // 
             this.label18.AutoSize = true;
-            this.label18.Location = new System.Drawing.Point(19, 90);
+            this.label18.Location = new System.Drawing.Point(6, 90);
             this.label18.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label18.Name = "label18";
             this.label18.Size = new System.Drawing.Size(247, 21);
@@ -1399,16 +1406,16 @@
             // 
             this.textBox_addCrLf_targetFilename.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_addCrLf_targetFilename.Location = new System.Drawing.Point(23, 116);
+            this.textBox_addCrLf_targetFilename.Location = new System.Drawing.Point(10, 116);
             this.textBox_addCrLf_targetFilename.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_addCrLf_targetFilename.Name = "textBox_addCrLf_targetFilename";
-            this.textBox_addCrLf_targetFilename.Size = new System.Drawing.Size(882, 31);
+            this.textBox_addCrLf_targetFilename.Size = new System.Drawing.Size(852, 31);
             this.textBox_addCrLf_targetFilename.TabIndex = 9;
             // 
             // button_addCrLf_getTargetFileName
             // 
             this.button_addCrLf_getTargetFileName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_addCrLf_getTargetFileName.Location = new System.Drawing.Point(915, 110);
+            this.button_addCrLf_getTargetFileName.Location = new System.Drawing.Point(872, 110);
             this.button_addCrLf_getTargetFileName.Margin = new System.Windows.Forms.Padding(5);
             this.button_addCrLf_getTargetFileName.Name = "button_addCrLf_getTargetFileName";
             this.button_addCrLf_getTargetFileName.Size = new System.Drawing.Size(61, 38);
@@ -1419,7 +1426,7 @@
             // label17
             // 
             this.label17.AutoSize = true;
-            this.label17.Location = new System.Drawing.Point(19, 17);
+            this.label17.Location = new System.Drawing.Point(6, 17);
             this.label17.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label17.Name = "label17";
             this.label17.Size = new System.Drawing.Size(226, 21);
@@ -1430,22 +1437,81 @@
             // 
             this.textBox_addCrLf_sourceFilename.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_addCrLf_sourceFilename.Location = new System.Drawing.Point(23, 43);
+            this.textBox_addCrLf_sourceFilename.Location = new System.Drawing.Point(10, 43);
             this.textBox_addCrLf_sourceFilename.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_addCrLf_sourceFilename.Name = "textBox_addCrLf_sourceFilename";
-            this.textBox_addCrLf_sourceFilename.Size = new System.Drawing.Size(882, 31);
+            this.textBox_addCrLf_sourceFilename.Size = new System.Drawing.Size(852, 31);
             this.textBox_addCrLf_sourceFilename.TabIndex = 6;
             // 
             // button_addCrLf_getSourceFileName
             // 
             this.button_addCrLf_getSourceFileName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_addCrLf_getSourceFileName.Location = new System.Drawing.Point(915, 37);
+            this.button_addCrLf_getSourceFileName.Location = new System.Drawing.Point(872, 37);
             this.button_addCrLf_getSourceFileName.Margin = new System.Windows.Forms.Padding(5);
             this.button_addCrLf_getSourceFileName.Name = "button_addCrLf_getSourceFileName";
             this.button_addCrLf_getSourceFileName.Size = new System.Drawing.Size(61, 38);
             this.button_addCrLf_getSourceFileName.TabIndex = 7;
             this.button_addCrLf_getSourceFileName.Text = "...";
             this.button_addCrLf_getSourceFileName.Click += new System.EventHandler(this.button_addCrLf_getSourceFileName_Click);
+            // 
+            // tabPage_accessNo
+            // 
+            this.tabPage_accessNo.Controls.Add(this.button_accessNo_removeRangeEnd);
+            this.tabPage_accessNo.Controls.Add(this.button_accessNo_sort);
+            this.tabPage_accessNo.Controls.Add(this.label20);
+            this.tabPage_accessNo.Controls.Add(this.textBox_accessNo_lines);
+            this.tabPage_accessNo.Location = new System.Drawing.Point(4, 31);
+            this.tabPage_accessNo.Name = "tabPage_accessNo";
+            this.tabPage_accessNo.Size = new System.Drawing.Size(943, 592);
+            this.tabPage_accessNo.TabIndex = 12;
+            this.tabPage_accessNo.Text = "索取号";
+            this.tabPage_accessNo.UseVisualStyleBackColor = true;
+            // 
+            // button_accessNo_sort
+            // 
+            this.button_accessNo_sort.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.button_accessNo_sort.Location = new System.Drawing.Point(9, 547);
+            this.button_accessNo_sort.Name = "button_accessNo_sort";
+            this.button_accessNo_sort.Size = new System.Drawing.Size(123, 37);
+            this.button_accessNo_sort.TabIndex = 5;
+            this.button_accessNo_sort.Text = "排序";
+            this.button_accessNo_sort.UseVisualStyleBackColor = true;
+            this.button_accessNo_sort.Click += new System.EventHandler(this.button_accessNo_sort_Click);
+            // 
+            // label20
+            // 
+            this.label20.AutoSize = true;
+            this.label20.Location = new System.Drawing.Point(3, 29);
+            this.label20.Name = "label20";
+            this.label20.Size = new System.Drawing.Size(253, 21);
+            this.label20.TabIndex = 4;
+            this.label20.Text = "索取号[每行一个索取号]:";
+            // 
+            // textBox_accessNo_lines
+            // 
+            this.textBox_accessNo_lines.AcceptsReturn = true;
+            this.textBox_accessNo_lines.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_accessNo_lines.Location = new System.Drawing.Point(7, 55);
+            this.textBox_accessNo_lines.Margin = new System.Windows.Forms.Padding(5);
+            this.textBox_accessNo_lines.MaxLength = 0;
+            this.textBox_accessNo_lines.Multiline = true;
+            this.textBox_accessNo_lines.Name = "textBox_accessNo_lines";
+            this.textBox_accessNo_lines.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.textBox_accessNo_lines.Size = new System.Drawing.Size(928, 483);
+            this.textBox_accessNo_lines.TabIndex = 3;
+            // 
+            // button_accessNo_removeRangeEnd
+            // 
+            this.button_accessNo_removeRangeEnd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.button_accessNo_removeRangeEnd.Location = new System.Drawing.Point(138, 546);
+            this.button_accessNo_removeRangeEnd.Name = "button_accessNo_removeRangeEnd";
+            this.button_accessNo_removeRangeEnd.Size = new System.Drawing.Size(173, 37);
+            this.button_accessNo_removeRangeEnd.TabIndex = 6;
+            this.button_accessNo_removeRangeEnd.Text = "删除范围末尾";
+            this.button_accessNo_removeRangeEnd.UseVisualStyleBackColor = true;
+            this.button_accessNo_removeRangeEnd.Click += new System.EventHandler(this.button_accessNo_removeRangeEnd_Click);
             // 
             // UtilityForm
             // 
@@ -1510,6 +1576,8 @@
             this.tabPage_biblioTable.PerformLayout();
             this.tabPage_addCrLf.ResumeLayout(false);
             this.tabPage_addCrLf.PerformLayout();
+            this.tabPage_accessNo.ResumeLayout(false);
+            this.tabPage_accessNo.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -1620,5 +1688,10 @@
         private System.Windows.Forms.Button button_addCrLf_getSourceFileName;
         private System.Windows.Forms.Label label19;
         private System.Windows.Forms.ToolStripButton toolStripButton_textLines_getBiblioSummary;
+        private System.Windows.Forms.TabPage tabPage_accessNo;
+        private System.Windows.Forms.TextBox textBox_accessNo_lines;
+        private System.Windows.Forms.Label label20;
+        private System.Windows.Forms.Button button_accessNo_sort;
+        private System.Windows.Forms.Button button_accessNo_removeRangeEnd;
     }
 }

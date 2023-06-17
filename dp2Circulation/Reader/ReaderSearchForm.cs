@@ -776,10 +776,32 @@ out strError);
         async Task LoadRecordToReaderInfoForm(string strOpenStyle,
             string strIdType)
         {
+            string strError = "";
+
             if (this.listView_records.SelectedItems.Count == 0)
             {
                 this.MessageBoxShow("尚未选定要装入读者窗的事项");
                 return;
+            }
+
+            // 2023/6/17
+            // 探测 BiblioInfo 对象状态
+            {
+                var recpath = this.listView_records.SelectedItems[0].SubItems[0].Text;
+                var info = this.GetBiblioInfo(recpath);
+                if (info != null)
+                {
+                    if (info.RecPath.Contains("?"))
+                    {
+                        strError = "追加状态的记录尚未保存，无法装入读者窗";
+                        goto ERROR1;
+                    }
+                    if (string.IsNullOrEmpty(info.NewXml) == false)
+                    {
+                        strError = "记录修改后尚未保存，无法装入读者窗";
+                        goto ERROR1;
+                    }
+                }
             }
 
             string strBarcodeOrRecPath = "";
@@ -839,6 +861,10 @@ out strError);
                 // form.LoadRecord("@path:" + strRecPath, false);   // 这个办法有问题，ReaderInfoForm.ReaderBarcode有误
                 await form.LoadRecordByRecPathAsync(strBarcodeOrRecPath, "");
             }
+
+            return;
+        ERROR1:
+            this.MessageBoxShow(strError);
         }
 
         // 2021/10/9
@@ -2704,20 +2730,22 @@ stop,
             var select_ret = this.TryGet(() =>
             {
                 dlg = new SelectPatronDialog();
-                dlg.Load += (o, e) => {
+                dlg.Load += (o, e) =>
+                {
                     // 注: UiState 必须在窗口尺寸到位以后再设置
                     dlg.UiState = Program.MainForm.AppInfo.GetString(
         "ReaderSearchForm",
         "SelectPatronDialog_uiState",
         "");
                 };
-                dlg.FormClosed += (o, e) => {
+                dlg.FormClosed += (o, e) =>
+                {
                     Program.MainForm.AppInfo.SetString(
     "ReaderSearchForm",
     "SelectPatronDialog_uiState",
     dlg.UiState);
                 };
-                
+
                 dlg.Overflow = paths.Count >= MAX_READER_COUNT;
                 int nRet = dlg.Initial(
                     // Program.MainForm,

@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.143.*")]
-[assembly: AssemblyFileVersion("3.143.0.0")]
+[assembly: AssemblyVersion("3.145.*")]
+[assembly: AssemblyFileVersion("3.145.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -364,3 +364,5 @@ ItemCanReturn()
 //						Login() API 的 strRights 返回 token:内容的时候，增加了 StringUtil.EscapeString() 步骤；strPassword 参数中的 |||token:内容在 dp2library 使用前增加了 StringUtil.UnescapeString() 步骤
 //		3.143 (2023/4/14) 消除 Login() API 中使用 token 登录的几处 bug
 //						消除 GetBrowseRecords() 中一处检查 client_xmls 时的 bug
+//		3.144 (2023/6/14) 消除 GetSearchResult() API 中忘记去除 Cols 中 l: 前缀的一处 bug
+//		3.145 (2023/6/16) Return() API 在自动修改册的 currentLocation 元素时，如果遇到字符串为不合法的馆藏地名称，原先版本是返回警告，现在改为报错

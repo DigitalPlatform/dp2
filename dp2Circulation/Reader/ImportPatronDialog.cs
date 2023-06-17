@@ -395,6 +395,8 @@ namespace dp2Circulation.Reader
                     string caption = StringUtil.SplitList(captions).FirstOrDefault();
 
                     MenuItem subMenuItem = new MenuItem(name + "\t" + caption);
+                    if (HasFieldNameUsed(name))
+                        subMenuItem.Enabled = false;
                     subMenuItem.Tag = new MenuInfo
                     {
                         Caption = caption,
@@ -412,7 +414,8 @@ namespace dp2Circulation.Reader
                         Caption = "<清除>",
                         Name = "<清除>",
                         Column = _columns[e.ColumnIndex]
-                    }; subMenuItem.Click += new System.EventHandler(this.menu_setFieldName_Click);
+                    }; 
+                    subMenuItem.Click += new System.EventHandler(this.menu_setFieldName_Click);
                     menuItem.MenuItems.Add(subMenuItem);
                 }
             }
@@ -423,16 +426,19 @@ namespace dp2Circulation.Reader
 
             var current_column = _columns[e.ColumnIndex];
 
-            menuItem = new MenuItem("合并键");
-            if (current_column.IsMergeKey)
-                menuItem.Checked = true;
-            if (string.IsNullOrEmpty(current_column.PatronFieldName)
-                || Array.IndexOf(_mergekey_field_names, current_column.PatronFieldName) == -1)
-                menuItem.Enabled = false;
-            menuItem.Tag = current_column;
-            menuItem.Click += new System.EventHandler(this.menu_toggleMergeKey_Click);
-            contextMenu.MenuItems.Add(menuItem);
-
+            if (this.MergeMode)
+            {
+                menuItem = new MenuItem("合并键");
+                // menuItem.Enabled = this.MergeMode;
+                if (current_column.IsMergeKey)
+                    menuItem.Checked = true;
+                if (string.IsNullOrEmpty(current_column.PatronFieldName)
+                    || Array.IndexOf(_mergekey_field_names, current_column.PatronFieldName) == -1)
+                    menuItem.Enabled = false;
+                menuItem.Tag = current_column;
+                menuItem.Click += new System.EventHandler(this.menu_toggleMergeKey_Click);
+                contextMenu.MenuItems.Add(menuItem);
+            }
 
             contextMenu.Show(this.dataGridView1, this.dataGridView1.PointToClient(Control.MousePosition));
             // contextMenu.Show(this.dataGridView1, new Point(e.X, e.Y));
@@ -568,6 +574,7 @@ namespace dp2Circulation.Reader
         {
             this.TryInvoke(() =>
             {
+                this.dataGridView1.Columns.Clear(); // 2023/6/17
                 this.dataGridView1.Rows.Clear();
             });
             this._columns.Clear();
@@ -631,6 +638,11 @@ namespace dp2Circulation.Reader
             return null;
         }
 
+        // 查看一个字段名是否已经被 _columns 中使用过了
+        bool HasFieldNameUsed(string field_name)
+        {
+            return _columns.Where(o=>o.PatronFieldName == field_name).Any();
+        }
     }
 
     // 存储一个列的配置参数

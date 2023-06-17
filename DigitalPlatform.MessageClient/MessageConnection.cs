@@ -1146,6 +1146,130 @@ request).Result;
         }
 
         #endregion
+
+        #region SetInfo() API
+
+        public class SetInfoResult : MessageResult
+        {
+            public List<Entity> Entities { get; set; }
+        }
+
+        public static Task<TResult> TaskRun<TResult>(
+    Func<TResult> function,
+    CancellationToken cancellationToken)
+        {
+            return Task.Factory.StartNew<TResult>(
+                function,
+                cancellationToken,
+                TaskCreationOptions.LongRunning,
+                TaskScheduler.Default);
+        }
+
+        public Task<SetInfoResult> SetInfoTaskAsync(
+string strRemoteUserName,
+SetInfoRequest request,
+TimeSpan timeout,
+CancellationToken token)
+        {
+            return TaskRun<SetInfoResult>(() =>
+            {
+                return SetInfoAsyncLite(strRemoteUserName, request, timeout, token).Result;
+            }, token);
+        }
+
+        public async Task<SetInfoResult> SetInfoAsyncLite(
+    string strRemoteUserName,
+    SetInfoRequest request,
+    TimeSpan timeout,
+    CancellationToken token)
+        {
+            SetInfoResult result = new SetInfoResult();
+            if (result.Entities == null)
+                result.Entities = new List<Entity>();
+
+            if (string.IsNullOrEmpty(request.TaskID) == true)
+                request.TaskID = Guid.NewGuid().ToString();
+
+            using (WaitEvents wait_events = new WaitEvents())
+            {
+                using (var handler = HubProxy.On<
+                    string, long, IList<Entity>, string>(
+                    "responseSetInfo",
+                    (taskID, resultValue, entities, errorInfo) =>
+                    {
+                        if (taskID != request.TaskID)
+                            return;
+
+                        // 装载命中结果
+                        if (entities != null)
+                            result.Entities.AddRange(entities);
+                        result.Value = resultValue;
+                        result.ErrorInfo = errorInfo;
+                        wait_events.finish_event.Set();
+                    }))
+                {
+                    MessageResult message = await HubProxy.Invoke<MessageResult>(
+        "RequestSetInfo",
+        strRemoteUserName,
+        request).ConfigureAwait(false);
+                    if (message.Value == -1
+                        || message.Value == 0)
+                    {
+                        result.ErrorInfo = message.ErrorInfo;
+                        result.Value = -1;
+                        result.String = message.String;
+                        return result;
+                    }
+
+                    await WaitAsync(
+    request.TaskID,
+    wait_events,
+    timeout,
+    token).ConfigureAwait(false);
+                    return result;
+                }
+            }
+        }
+
+        Task WaitAsync(string taskID,
+WaitEvents wait_events,
+TimeSpan timeout,
+CancellationToken cancellation_token)
+        {
+            return TaskRunAction(
+    () =>
+    {
+        Wait(taskID, wait_events, timeout, cancellation_token);
+    },
+cancellation_token);
+        }
+
+        public static Task TaskRunAction(Action function,
+            CancellationToken cancellationToken)
+        {
+            return Task.Factory.StartNew(
+                function,
+                cancellationToken,
+                TaskCreationOptions.LongRunning,
+                TaskScheduler.Default);
+        }
+
+        public async Task TryResponseSetInfo(
+        string taskID,
+        long resultValue,
+        IList<DigitalPlatform.MessageClient.Entity> results,
+        string errorInfo)
+        {
+            await HubProxy.Invoke<MessageResult>("ResponseSetInfo",
+    taskID,
+    resultValue,
+    results,
+    errorInfo).ConfigureAwait(false);
+        }
+
+
+        #endregion
+
     }
 
     public class MessageResult
@@ -1851,5 +1975,21 @@ request).Result;
     public class ConnectionEventArgs : EventArgs
     {
         public string Action = "";
+    }
+
+    /// <summary>
+    /// SetInfo事件
+    /// </summary>
+    /// <param name="sender">发送者</param>
+    /// <param name="e">事件参数</param>
+    public delegate void SetInfoEventHandler(object sender,
+        SetInfoEventArgs e);
+
+    /// <summary>
+    /// SetInfo事件的参数
+    /// </summary>
+    public class SetInfoEventArgs : EventArgs
+    {
+        public SetInfoRequest Request { get; set; }
     }
 }

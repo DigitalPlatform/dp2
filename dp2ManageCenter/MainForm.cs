@@ -5733,5 +5733,62 @@ dlg.UiState);
 
             contextMenu.Show(listView, new Point(e.X, e.Y));
         }
+
+        CompactShelfForm _compactShelfDialog = null;
+
+        private void ToolStripMenuItem_compactShelf_Click(object sender, EventArgs e)
+        {
+            if (_compactShelfDialog == null)
+            {
+                _compactShelfDialog = new CompactShelfForm();
+                _compactShelfDialog.FormClosing += (o1, e1) =>
+                {
+                    if (e1.CloseReason == CloseReason.ApplicationExitCall
+                    || e1.CloseReason == CloseReason.FormOwnerClosing)
+                        return;
+                    _compactShelfDialog.Visible = false;
+                    e1.Cancel = true;
+                };
+                _compactShelfDialog.Font = this.Font;
+                _compactShelfDialog.Show(this);
+            }
+            else
+            {
+                _compactShelfDialog.Visible = true;
+                if (_compactShelfDialog.WindowState == FormWindowState.Minimized)
+                    _compactShelfDialog.WindowState = FormWindowState.Normal;
+
+                _compactShelfDialog.Activate();
+            }
+        }
+
+        private void toolStripMenuItem_sendCommand_Click(object sender, EventArgs e)
+        {
+            CommandDialog dlg = new CommandDialog();
+            dlg.FormClosed += (s1, e1) =>
+            {
+                ClientInfo.Config.Set(
+"CommandDialog",
+"ui_state",
+dlg.UiState);
+                var state = FormProperty.GetProperty(dlg);
+                ClientInfo.Config.Set("CommandDialog", "state", state);
+
+            };
+            dlg.StartPosition = FormStartPosition.CenterParent;
+
+            dlg.UiState = ClientInfo.Config.Get(
+                "CommandDialog",
+                "ui_state",
+                "");
+            dlg.Show(this);
+            {
+                var state = ClientInfo.Config.Get("CommandDialog", "state", "");
+                if (string.IsNullOrEmpty(state) == false)
+                {
+                    FormProperty.SetProperty(state, dlg);
+                }
+            }
+        }
     }
 }

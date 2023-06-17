@@ -65,6 +65,11 @@ namespace dp2Circulation
             this.BiblioTable.Remove(old_recpath);
         }
 
+        public BiblioInfo GetBiblioInfo(string recpath)
+        {
+            return this.BiblioTable[recpath] as BiblioInfo;
+        }
+
         int m_nInViewing = 0;
 
         internal virtual bool InSearching

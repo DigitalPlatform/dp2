@@ -141,69 +141,6 @@ namespace dp2Circulation
                 "正在导入读者 XML 记录",
                 "timeout:0:2:0,disableControl");
 
-            ProcessInfo info = new ProcessInfo();
-            {
-                info.Channel = channel; // this.GetChannel();
-                info.stop = looping.Progress;   // _stop;
-                info.TargetDbName = this.comboBox_targetDbName.Text;
-                info.AppendMode = this.comboBox_appendMode.Text;
-                info.NewRefID = (bool)this.Invoke(new Func<bool>(() =>
-                {
-                    return this.checkBox_refreshRefID.Checked;
-                }));
-                info.AutoPostfix = (bool)this.Invoke(new Func<bool>(() =>
-                {
-                    return this.checkBox_autoPostfix.Checked;
-                }));
-                info.RestoreMode = (bool)this.Invoke(new Func<bool>(() =>
-                {
-                    return this.checkBox_restoreMode.Checked;
-                }));
-                info.IncludeSubObjects = (bool)this.Invoke(new Func<bool>(() =>
-                {
-                    return this.checkBox_object.Checked;
-                }));
-                info.ObjectDirectoryName = (string)this.Invoke(new Func<string>(() =>
-                {
-                    return this.textBox_objectDirectoryName.Text;
-                }));
-
-                if ((info.TargetDbName == "<覆盖到原有路径>"
-                    && info.AppendMode != "覆盖到原有路径")
-                    ||
-                    (info.TargetDbName != "<覆盖到原有路径>"
-                    && info.AppendMode == "覆盖到原有路径"))
-                {
-                    strError = "导入方式和目标库，只要其中一个为“覆盖到原有路径”，另一个也必须是“覆盖到原有路径”";
-                    goto ERROR1;
-                }
-            }
-
-            // TODO: 根据危险性出现提示
-            // 如果是 覆盖到原有路径，最好先把所有路径统计一下，然后显示出来
-            // 建议做一个把 XML 文件导入读者查询窗内存的功能，便于查看其中的每一条读者记录
-            if (info.TargetDbName == "<覆盖到原有路径>")
-            {
-                DialogResult result = MessageBox.Show(this,
-    "您现在采用的是“覆盖到原有路径”导入方式，将采用读者 XML 文件中每条记录记载的原有路径来导入，假设文件中包含了不同读者库的记录，那么会分别导入到这些不同的读者库中的原有 ID 位置。\r\n\r\n确实要进行导入?",
-    "BinaryResControl",
-    MessageBoxButtons.YesNo,
-    MessageBoxIcon.Question,
-    MessageBoxDefaultButton.Button2);
-                if (result != DialogResult.Yes)
-                    return;
-            }
-
-            var strSourceFileName = this.textBox_patronXmlFileName.Text;
-
-            /*
-            this.Invoke((Action)(() =>
-    EnableControls(false)
-    ));
-            */
-
-            OutputText($"{DateTime.Now.ToString()} 开始导入读者 XML 记录", 0);
-
             /*
             _stop.Style = StopStyle.EnableHalfStop;
             _stop.OnStop += new StopEventHandler(this.DoStop);
@@ -217,6 +154,69 @@ namespace dp2Circulation
             */
             try
             {
+                ProcessInfo info = new ProcessInfo();
+                {
+                    info.Channel = channel; // this.GetChannel();
+                    info.stop = looping.Progress;   // _stop;
+                    info.TargetDbName = this.comboBox_targetDbName.Text;
+                    info.AppendMode = this.comboBox_appendMode.Text;
+                    info.NewRefID = (bool)this.Invoke(new Func<bool>(() =>
+                    {
+                        return this.checkBox_refreshRefID.Checked;
+                    }));
+                    info.AutoPostfix = (bool)this.Invoke(new Func<bool>(() =>
+                    {
+                        return this.checkBox_autoPostfix.Checked;
+                    }));
+                    info.RestoreMode = (bool)this.Invoke(new Func<bool>(() =>
+                    {
+                        return this.checkBox_restoreMode.Checked;
+                    }));
+                    info.IncludeSubObjects = (bool)this.Invoke(new Func<bool>(() =>
+                    {
+                        return this.checkBox_object.Checked;
+                    }));
+                    info.ObjectDirectoryName = (string)this.Invoke(new Func<string>(() =>
+                    {
+                        return this.textBox_objectDirectoryName.Text;
+                    }));
+
+                    if ((info.TargetDbName == "<覆盖到原有路径>"
+                        && info.AppendMode != "覆盖到原有路径")
+                        ||
+                        (info.TargetDbName != "<覆盖到原有路径>"
+                        && info.AppendMode == "覆盖到原有路径"))
+                    {
+                        strError = "导入方式和目标库，只要其中一个为“覆盖到原有路径”，另一个也必须是“覆盖到原有路径”";
+                        goto ERROR1;
+                    }
+                }
+
+                // TODO: 根据危险性出现提示
+                // 如果是 覆盖到原有路径，最好先把所有路径统计一下，然后显示出来
+                // 建议做一个把 XML 文件导入读者查询窗内存的功能，便于查看其中的每一条读者记录
+                if (info.TargetDbName == "<覆盖到原有路径>")
+                {
+                    DialogResult result = MessageBox.Show(this,
+        "您现在采用的是“覆盖到原有路径”导入方式，将采用读者 XML 文件中每条记录记载的原有路径来导入，假设文件中包含了不同读者库的记录，那么会分别导入到这些不同的读者库中的原有 ID 位置。\r\n\r\n确实要进行导入?",
+        "BinaryResControl",
+        MessageBoxButtons.YesNo,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button2);
+                    if (result != DialogResult.Yes)
+                        return;
+                }
+
+                var strSourceFileName = this.textBox_patronXmlFileName.Text;
+
+                /*
+                this.Invoke((Action)(() =>
+        EnableControls(false)
+        ));
+                */
+
+                OutputText($"{DateTime.Now.ToString()} 开始导入读者 XML 记录", 0);
+
                 // 用 FileStream 方式打开，主要是为了能在中途观察进度
                 using (FileStream file = File.Open(strSourceFileName,
     FileMode.Open,

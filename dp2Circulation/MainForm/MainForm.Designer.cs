@@ -251,6 +251,7 @@
             this.toolStripButton_close = new System.Windows.Forms.ToolStripButton();
             this.splitter_fixed = new System.Windows.Forms.Splitter();
             this.timer_operHistory = new System.Windows.Forms.Timer(this.components);
+            this.toolStripButton_messageHub_command = new System.Windows.Forms.ToolStripButton();
             this.menuStrip_main.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
             this.toolStrip_main.SuspendLayout();
@@ -1789,7 +1790,7 @@
             this.tabPage_property.Location = new System.Drawing.Point(4, 40);
             this.tabPage_property.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_property.Name = "tabPage_property";
-            this.tabPage_property.Size = new System.Drawing.Size(354, 464);
+            this.tabPage_property.Size = new System.Drawing.Size(354, 465);
             this.tabPage_property.TabIndex = 1;
             this.tabPage_property.Text = "属性";
             this.tabPage_property.UseVisualStyleBackColor = true;
@@ -1799,7 +1800,7 @@
             this.tabPage_verifyResult.Location = new System.Drawing.Point(4, 40);
             this.tabPage_verifyResult.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_verifyResult.Name = "tabPage_verifyResult";
-            this.tabPage_verifyResult.Size = new System.Drawing.Size(354, 464);
+            this.tabPage_verifyResult.Size = new System.Drawing.Size(354, 465);
             this.tabPage_verifyResult.TabIndex = 2;
             this.tabPage_verifyResult.Text = "校验结果";
             this.tabPage_verifyResult.UseVisualStyleBackColor = true;
@@ -1809,7 +1810,7 @@
             this.tabPage_generateData.Location = new System.Drawing.Point(4, 40);
             this.tabPage_generateData.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_generateData.Name = "tabPage_generateData";
-            this.tabPage_generateData.Size = new System.Drawing.Size(354, 464);
+            this.tabPage_generateData.Size = new System.Drawing.Size(354, 465);
             this.tabPage_generateData.TabIndex = 3;
             this.tabPage_generateData.Text = "创建数据";
             this.tabPage_generateData.UseVisualStyleBackColor = true;
@@ -1819,7 +1820,7 @@
             this.tabPage_camera.Location = new System.Drawing.Point(4, 40);
             this.tabPage_camera.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_camera.Name = "tabPage_camera";
-            this.tabPage_camera.Size = new System.Drawing.Size(354, 464);
+            this.tabPage_camera.Size = new System.Drawing.Size(354, 465);
             this.tabPage_camera.TabIndex = 4;
             this.tabPage_camera.Text = "QR 识别";
             this.tabPage_camera.UseVisualStyleBackColor = true;
@@ -1829,7 +1830,7 @@
             this.tabPage_accept.Location = new System.Drawing.Point(4, 40);
             this.tabPage_accept.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_accept.Name = "tabPage_accept";
-            this.tabPage_accept.Size = new System.Drawing.Size(354, 464);
+            this.tabPage_accept.Size = new System.Drawing.Size(354, 465);
             this.tabPage_accept.TabIndex = 5;
             this.tabPage_accept.Text = "验收";
             this.tabPage_accept.UseVisualStyleBackColor = true;
@@ -1841,7 +1842,7 @@
             this.tabPage_share.Controls.Add(this.tableLayoutPanel_messageHub);
             this.tabPage_share.Location = new System.Drawing.Point(4, 40);
             this.tabPage_share.Name = "tabPage_share";
-            this.tabPage_share.Size = new System.Drawing.Size(354, 464);
+            this.tabPage_share.Size = new System.Drawing.Size(354, 465);
             this.tabPage_share.TabIndex = 6;
             this.tabPage_share.Text = "分享";
             this.tabPage_share.UseVisualStyleBackColor = true;
@@ -1860,7 +1861,7 @@
             this.tableLayoutPanel_messageHub.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel_messageHub.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_messageHub.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 0F));
-            this.tableLayoutPanel_messageHub.Size = new System.Drawing.Size(354, 464);
+            this.tableLayoutPanel_messageHub.Size = new System.Drawing.Size(354, 465);
             this.tableLayoutPanel_messageHub.TabIndex = 2;
             // 
             // webBrowser_messageHub
@@ -1870,7 +1871,7 @@
             this.webBrowser_messageHub.Margin = new System.Windows.Forms.Padding(5);
             this.webBrowser_messageHub.MinimumSize = new System.Drawing.Size(35, 35);
             this.webBrowser_messageHub.Name = "webBrowser_messageHub";
-            this.webBrowser_messageHub.Size = new System.Drawing.Size(344, 416);
+            this.webBrowser_messageHub.Size = new System.Drawing.Size(344, 411);
             this.webBrowser_messageHub.TabIndex = 0;
             // 
             // toolStrip_messageHub
@@ -1879,11 +1880,12 @@
             this.toolStrip_messageHub.ImageScalingSize = new System.Drawing.Size(32, 32);
             this.toolStrip_messageHub.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton_messageHub_userManage,
-            this.toolStripButton_messageHub_relogin});
-            this.toolStrip_messageHub.Location = new System.Drawing.Point(0, 426);
+            this.toolStripButton_messageHub_relogin,
+            this.toolStripButton_messageHub_command});
+            this.toolStrip_messageHub.Location = new System.Drawing.Point(0, 421);
             this.toolStrip_messageHub.Name = "toolStrip_messageHub";
             this.toolStrip_messageHub.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            this.toolStrip_messageHub.Size = new System.Drawing.Size(354, 38);
+            this.toolStrip_messageHub.Size = new System.Drawing.Size(354, 44);
             this.toolStrip_messageHub.TabIndex = 1;
             this.toolStrip_messageHub.Text = "toolStrip1";
             // 
@@ -1893,7 +1895,7 @@
             this.toolStripButton_messageHub_userManage.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_messageHub_userManage.Image")));
             this.toolStripButton_messageHub_userManage.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_messageHub_userManage.Name = "toolStripButton_messageHub_userManage";
-            this.toolStripButton_messageHub_userManage.Size = new System.Drawing.Size(100, 32);
+            this.toolStripButton_messageHub_userManage.Size = new System.Drawing.Size(100, 36);
             this.toolStripButton_messageHub_userManage.Text = "用户管理";
             this.toolStripButton_messageHub_userManage.Click += new System.EventHandler(this.toolStripButton_messageHub_userManage_Click);
             // 
@@ -1903,7 +1905,7 @@
             this.toolStripButton_messageHub_relogin.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_messageHub_relogin.Image")));
             this.toolStripButton_messageHub_relogin.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_messageHub_relogin.Name = "toolStripButton_messageHub_relogin";
-            this.toolStripButton_messageHub_relogin.Size = new System.Drawing.Size(100, 32);
+            this.toolStripButton_messageHub_relogin.Size = new System.Drawing.Size(100, 36);
             this.toolStripButton_messageHub_relogin.Text = "重新登录";
             this.toolStripButton_messageHub_relogin.Click += new System.EventHandler(this.toolStripButton_messageHub_relogin_Click);
             // 
@@ -1912,7 +1914,7 @@
             this.tabPage_browse.Location = new System.Drawing.Point(4, 40);
             this.tabPage_browse.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_browse.Name = "tabPage_browse";
-            this.tabPage_browse.Size = new System.Drawing.Size(354, 464);
+            this.tabPage_browse.Size = new System.Drawing.Size(354, 465);
             this.tabPage_browse.TabIndex = 7;
             this.tabPage_browse.Text = "浏览";
             this.tabPage_browse.UseVisualStyleBackColor = true;
@@ -1950,6 +1952,16 @@
             this.splitter_fixed.Size = new System.Drawing.Size(3, 534);
             this.splitter_fixed.TabIndex = 6;
             this.splitter_fixed.TabStop = false;
+            // 
+            // toolStripButton_messageHub_command
+            // 
+            this.toolStripButton_messageHub_command.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_messageHub_command.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_messageHub_command.Image")));
+            this.toolStripButton_messageHub_command.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_messageHub_command.Name = "toolStripButton_messageHub_command";
+            this.toolStripButton_messageHub_command.Size = new System.Drawing.Size(100, 38);
+            this.toolStripButton_messageHub_command.Text = "执行命令";
+            this.toolStripButton_messageHub_command.Click += new System.EventHandler(this.toolStripButton_messageHub_command_Click);
             // 
             // MainForm
             // 
@@ -2199,6 +2211,7 @@
         private System.Windows.Forms.ToolStripMenuItem MenuItem_palmprint_restartPalmCenter;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_importFromPatronXml;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_displayPalmprintDialog;
+        private System.Windows.Forms.ToolStripButton toolStripButton_messageHub_command;
     }
 }
 

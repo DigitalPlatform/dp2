@@ -4556,6 +4556,9 @@ strDbName);
                 }
             }
 
+            // 2023/6/13
+            AddItemOI(app, sessioninfo, record, "filter_borrower");
+
             if (string.IsNullOrEmpty(xml) == false)  // XML 记录发生过改变，也要重新创建 Cols
             {
                 if (bHasCols)

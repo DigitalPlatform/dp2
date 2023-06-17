@@ -33,7 +33,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>43</ApplicationRevision>
+    <ApplicationRevision>45</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -62,10 +62,10 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>3EC46D6B99520A1DCDAD027B726C38528625A83D</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>8A609FAD04B89DDF14832D49A2DD957EC2628C66</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>数字平台（北京）软件有限责任公司.pfx</ManifestKeyFile>
+    <ManifestKeyFile>数字平台（北京）软件有限责任公司苏州分公司.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestTimestampUrl>http://timestamp.digicert.com</ManifestTimestampUrl>
@@ -215,7 +215,19 @@
     <Compile Include="Message\ChatForm.Designer.cs">
       <DependentUpon>ChatForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Message\CompactShelfForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Message\CompactShelfForm.Designer.cs">
+      <DependentUpon>CompactShelfForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Message\ConnectionPool.cs" />
+    <Compile Include="Message\CommandDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Message\CommandDialog.Designer.cs">
+      <DependentUpon>CommandDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Message\GetFileDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -253,6 +265,12 @@
     <EmbeddedResource Include="Message\ChatForm.resx">
       <DependentUpon>ChatForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Message\CompactShelfForm.resx">
+      <DependentUpon>CompactShelfForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Message\CommandDialog.resx">
+      <DependentUpon>CommandDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Message\GetFileDialog.resx">
       <DependentUpon>GetFileDialog.cs</DependentUpon>
     </EmbeddedResource>
@@ -288,11 +306,17 @@
     <None Include="代码签名证书-2019.pfx" />
     <None Include="代码签名证书-2020.pfx" />
     <None Include="数字平台（北京）软件有限责任公司.pfx" />
+    <None Include="数字平台（北京）软件有限责任公司_2022.pfx" />
+    <None Include="数字平台（北京）软件有限责任公司苏州分公司.pfx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\CompactShelfDriver.First\CompactShelfDriver.First.csproj">
+      <Project>{58fb65cc-bfb7-4ba7-8b91-350d54b4ff8e}</Project>
+      <Name>CompactShelfDriver.First</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.CirculationClient\DigitalPlatform.CirculationClient.csproj">
       <Project>{397BB898-88E0-41D6-8D01-09233C7FFC75}</Project>
       <Name>DigitalPlatform.CirculationClient</Name>

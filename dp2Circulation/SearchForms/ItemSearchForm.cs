@@ -29,6 +29,7 @@ using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryServer;
+// using DocumentFormat.OpenXml.Spreadsheet;
 
 
 // 2013/3/16 添加 XML 注释
@@ -2746,8 +2747,18 @@ out strError);
                         subMenuItem.Enabled = false;
                     menuItem.MenuItems.Add(subMenuItem);
 
-                }
 
+                    // ---
+                    subMenuItem = new MenuItem("-");
+                    menuItem.MenuItems.Add(subMenuItem);
+
+                    subMenuItem = new MenuItem("打开密集架 (&R)");
+                    subMenuItem.Click += new System.EventHandler(this.menu_openCompactShelf_Click);
+                    if (this.listView_records.SelectedItems.Count != 1 || bLooping == true)
+                        subMenuItem.Enabled = false;
+                    menuItem.MenuItems.Add(subMenuItem);
+
+                }
 
                 if (this.DbType == "issue")
                 {
@@ -2872,6 +2883,15 @@ out strError);
                 if (this.listView_records.SelectedItems.Count == 0
                     || this.InSearching == true)
                     subMenuItem.Enabled = false;
+                menuItem.MenuItems.Add(subMenuItem);
+
+
+                // ---
+                subMenuItem = new MenuItem("-");
+                menuItem.MenuItems.Add(subMenuItem);
+
+                subMenuItem = new MenuItem("校验架位对照表文件正确性");
+                subMenuItem.Click += new System.EventHandler(this.menu_verifyMapShelfNoFile_Click);
                 menuItem.MenuItems.Add(subMenuItem);
 
                 menuItem = null;
@@ -3070,6 +3090,165 @@ out strError);
             contextMenu.MenuItems.Add(menuItem);
 
             contextMenu.Show(this.listView_records, new Point(e.X, e.Y));
+        }
+
+        string _used_nearCode = null;
+
+        async void menu_openCompactShelf_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            // 检查 message 账户是否配置
+            if (string.IsNullOrEmpty(Program.MainForm.MessageShelfAccount))
+            {
+                strError = "尚未配置密集书架消息账户";
+                goto ERROR1;
+            }
+
+
+            // 获得当前册的 shelfNo 字段内容
+            var list_item = this.listView_records.SelectedItems[0];
+            BiblioInfo info = null;
+
+            var looping = Looping(out LibraryChannel channel,
+                "disableControl");
+            try
+            {
+                ListViewPatronLoader loader = new ListViewPatronLoader(
+                    channel,
+    looping.Progress,
+    new List<ListViewItem> { list_item },
+    this.BiblioTable);
+                loader.DbTypeCaption = this.DbTypeCaption;
+
+                loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
+                loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
+
+                foreach (LoaderItem item in loader)
+                {
+                    info = item.BiblioInfo;
+                    break;
+                }
+            }
+            finally
+            {
+                looping.Dispose();
+            }
+
+            if (info == null)
+            {
+                strError = "info == null";
+                goto ERROR1;
+            }
+
+            XmlDocument itemdom = new XmlDocument();
+            try
+            {
+                itemdom.LoadXml(info.OldXml);
+                if (string.IsNullOrEmpty(info.NewXml) == false)
+                    itemdom.LoadXml(info.NewXml);
+                else
+                    itemdom.LoadXml(info.OldXml);
+            }
+            catch (Exception ex)
+            {
+                strError = "记录 '" + info.RecPath + "' 的 XML 装入 DOM 时出错: " + ex.Message;
+                goto ERROR1;
+            }
+
+            string shelfNo = DomUtil.GetElementText(itemdom.DocumentElement, "shelfNo");
+            if (string.IsNullOrEmpty(shelfNo))
+            {
+                strError = $"册记录 {info.RecPath} 的 shelfNo 元素为空，无法打开密集书架";
+                goto ERROR1;
+            }
+
+            string accessNo = DomUtil.GetElementText(itemdom.DocumentElement, "accessNo");
+
+            // 询问现场码
+            string near_code = null;
+            using (CompactShelfDialog dlg = new CompactShelfDialog())
+            {
+                dlg.Font = this.Font;
+                dlg.Text = "请输入现场码";
+                dlg.NearCode = _used_nearCode;
+                dlg.AccessNo = accessNo;
+                dlg.ShelfNo = shelfNo;
+                dlg.StartPosition = FormStartPosition.CenterParent;
+                dlg.ShowDialog(this);
+                if (dlg.DialogResult == DialogResult.Cancel)
+                    return;
+                near_code = dlg.NearCode;
+                _used_nearCode = near_code;
+            }
+
+            using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(this.CancelToken))
+            using (FileDownloadDialog dlg = new FileDownloadDialog())
+            {
+                dlg.Text = "正在执行打开命令 ...";
+                dlg.FormClosed += new FormClosedEventHandler(delegate (object o1, FormClosedEventArgs e1)
+                {
+                    cancel.Cancel();
+                });
+                dlg.StartMarquee();
+                dlg.StartPosition = FormStartPosition.CenterParent;
+                dlg.Show(this);
+
+                var result = await CommandDialog.CommandAsync(
+    Program.MainForm.MessageShelfAccount,
+    $"compactShelf open {shelfNo} {near_code}",
+    cancel.Token);
+                if (result.Value == -1)
+                {
+                    strError = result.ErrorInfo;
+                    goto ERROR1;
+                }
+                if (result.ErrorCode == "\"0\"")
+                {
+                    strError = "设备出错: " + result.ErrorInfo;
+                    goto ERROR1;
+                }
+            }
+
+            MessageBox.Show(this, "打开成功");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        void menu_verifyMapShelfNoFile_Click(object sender, EventArgs e)
+        {
+            // 是否按下了 Ctrl 键
+            var control = (Control.ModifierKeys & Keys.Control) == Keys.Control;
+
+            OpenFileDialog dlg = new OpenFileDialog();
+
+            dlg.Title = "请指定要校验的架位对照表文件";
+            dlg.FileName = this.m_strUsedBarcodeFilename;
+            dlg.Filter = "架位对照表文件 (*.xml)|*.xml|All files (*.*)|*.*";
+            dlg.RestoreDirectory = true;
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            string mode = control ? "宽松模式" : "严格模式";
+
+            // 检查“索取号-架位号”对照文件的正确性
+            // return:
+            //      -1  检查过程出现错误
+            //      0   正确
+            //      1   有错
+            int ret = AccessNoUtility.VerifyMapShelfNoFile(dlg.FileName,
+                control ? "loose" : "",
+                out string strError);
+            if (ret != 0)
+                MessageDlg.Show(this,
+                    $"({mode})\r\n{strError}",
+                    dlg.FileName);
+            else
+                MessageDlg.Show(this,
+                    $"({mode})\r\n没有发现任何错误",
+                    dlg.FileName);
         }
 
         void menu_defBiblioColumns_Click(object sender, EventArgs e)
@@ -12433,7 +12612,7 @@ TaskScheduler.Default);
 
             if (baNewTimestamp != null) // 2016/9/3
                 info.Timestamp = baNewTimestamp;    // 2013/10/17
-            
+
             // 2023/4/1
             if (string.IsNullOrEmpty(strOutputResPath) == false
                 && info.RecPath != null && info.RecPath.Contains("?"))

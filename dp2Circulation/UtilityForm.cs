@@ -2059,5 +2059,49 @@ MessageBoxDefaultButton.Button2);
                 ShowMessageBox(strError);
             });
         }
+
+        private void button_accessNo_sort_Click(object sender, EventArgs e)
+        {
+            List<string> results = new List<string>(this.textBox_accessNo_lines.Lines);
+            StringUtil.RemoveBlank(ref results);
+            results.Sort((a, b) =>
+            {
+                return AccessNoUtility.CompareAccessNo(a, b);
+            });
+
+            this.textBox_accessNo_lines.Text = StringUtil.MakePathList(results, "\r\n");
+        }
+
+        private void button_accessNo_removeRangeEnd_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog dlg = new OpenFileDialog();
+
+            dlg.Title = "请指定要打开的对照表XML文件名";
+            // dlg.FileName = ;
+            // dlg.InitialDirectory = 
+            dlg.Filter = "XML文件 (*.xml)|*.xml|All files (*.*)|*.*";
+            dlg.RestoreDirectory = true;
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            DialogResult result = MessageBox.Show(this,
+"对照表文件 '" + dlg.FileName + "' 即将被修改存在。\r\n\r\n请问是否继续?",
+"UtilityForm",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+            if (result != DialogResult.Yes)
+                return;
+
+            XmlDocument dom = new XmlDocument();
+            dom.Load(dlg.FileName);
+
+            AccessNoUtility.RemoveRangeEnd(dom);
+
+            dom.Save(dlg.FileName);
+
+            MessageBox.Show(this, "OK");
+        }
     }
 }

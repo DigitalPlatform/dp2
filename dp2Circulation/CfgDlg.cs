@@ -759,6 +759,12 @@ false);
                 this.textBox_message_password.Text = strPassword;
             }
 
+            this.textBox_message_shelfAccount.Text =
+ap.GetString(
+"message",
+"shelfAccount",
+"");
+
             checkBox_charging_isbnBorrow_CheckedChanged(this, null);
             checkBox_quickCharging_isbnBorrow_CheckedChanged(this, null);
 
@@ -1418,6 +1424,11 @@ this.checkBox_patron_disableBioKeyboardSimulation.Checked);
                         "password",
                         strPassword);
                 }
+
+                ap.SetString(
+"message",
+"shelfAccount",
+this.textBox_message_shelfAccount.Text);
 
                 if (m_bServerCfgChanged == true
                     && Program.MainForm != null)

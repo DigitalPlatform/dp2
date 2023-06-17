@@ -69,4 +69,7 @@
   <col title="操作日期" convert="rfc1123tolocaltimeu" type="operTime">
     <xpath>*/operations/operation[last()]/@time</xpath>
   </col>
+  <col title="预约队列" type="reservationCount">
+    <xpath>count(*/reservations/request)</xpath>
+  </col>
 </root>

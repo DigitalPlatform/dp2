@@ -216,6 +216,7 @@
             this.button_palmprint_setDefaulValue = new System.Windows.Forms.Button();
             this.textBox_palmprint_readerUrl = new System.Windows.Forms.TextBox();
             this.groupBox10 = new System.Windows.Forms.GroupBox();
+            this.checkBox_face_savePhotoWhileRegister = new System.Windows.Forms.CheckBox();
             this.linkLabel_installFaceCenter = new System.Windows.Forms.LinkLabel();
             this.button_face_setDefaultValue = new System.Windows.Forms.Button();
             this.textBox_face_readerUrl = new System.Windows.Forms.TextBox();
@@ -246,7 +247,9 @@
             this.button_z3950_servers = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
             this.button_Cancel = new System.Windows.Forms.Button();
-            this.checkBox_face_savePhotoWhileRegister = new System.Windows.Forms.CheckBox();
+            this.textBox_message_shelfAccount = new System.Windows.Forms.TextBox();
+            this.label38 = new System.Windows.Forms.Label();
+            this.groupBox_message_compactShelf = new System.Windows.Forms.GroupBox();
             this.tabControl_main.SuspendLayout();
             this.tabPage_server.SuspendLayout();
             this.toolStrip_server.SuspendLayout();
@@ -293,6 +296,7 @@
             this.tabPage_labelPrint.SuspendLayout();
             this.tabPage_message.SuspendLayout();
             this.tabPage_z3950.SuspendLayout();
+            this.groupBox_message_compactShelf.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl_main
@@ -2527,7 +2531,7 @@
             this.groupBox_palmprintUrl.Margin = new System.Windows.Forms.Padding(5);
             this.groupBox_palmprintUrl.Name = "groupBox_palmprintUrl";
             this.groupBox_palmprintUrl.Padding = new System.Windows.Forms.Padding(5);
-            this.groupBox_palmprintUrl.Size = new System.Drawing.Size(715, 147);
+            this.groupBox_palmprintUrl.Size = new System.Drawing.Size(685, 147);
             this.groupBox_palmprintUrl.TabIndex = 4;
             this.groupBox_palmprintUrl.TabStop = false;
             this.groupBox_palmprintUrl.Text = "掌纹阅读器接口 URL ";
@@ -2535,7 +2539,7 @@
             // button_fingerprint_setDefaultValue_new
             // 
             this.button_fingerprint_setDefaultValue_new.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_fingerprint_setDefaultValue_new.Location = new System.Drawing.Point(309, 76);
+            this.button_fingerprint_setDefaultValue_new.Location = new System.Drawing.Point(279, 76);
             this.button_fingerprint_setDefaultValue_new.Margin = new System.Windows.Forms.Padding(5);
             this.button_fingerprint_setDefaultValue_new.Name = "button_fingerprint_setDefaultValue_new";
             this.button_fingerprint_setDefaultValue_new.Size = new System.Drawing.Size(193, 40);
@@ -2547,7 +2551,7 @@
             // button_palmprint_setDefaulValue
             // 
             this.button_palmprint_setDefaulValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_palmprint_setDefaulValue.Location = new System.Drawing.Point(512, 76);
+            this.button_palmprint_setDefaulValue.Location = new System.Drawing.Point(482, 76);
             this.button_palmprint_setDefaulValue.Margin = new System.Windows.Forms.Padding(5);
             this.button_palmprint_setDefaulValue.Name = "button_palmprint_setDefaulValue";
             this.button_palmprint_setDefaulValue.Size = new System.Drawing.Size(193, 40);
@@ -2563,7 +2567,7 @@
             this.textBox_palmprint_readerUrl.Location = new System.Drawing.Point(11, 35);
             this.textBox_palmprint_readerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_palmprint_readerUrl.Name = "textBox_palmprint_readerUrl";
-            this.textBox_palmprint_readerUrl.Size = new System.Drawing.Size(690, 31);
+            this.textBox_palmprint_readerUrl.Size = new System.Drawing.Size(660, 31);
             this.textBox_palmprint_readerUrl.TabIndex = 0;
             // 
             // groupBox10
@@ -2578,10 +2582,20 @@
             this.groupBox10.Margin = new System.Windows.Forms.Padding(5);
             this.groupBox10.Name = "groupBox10";
             this.groupBox10.Padding = new System.Windows.Forms.Padding(5);
-            this.groupBox10.Size = new System.Drawing.Size(715, 147);
+            this.groupBox10.Size = new System.Drawing.Size(685, 147);
             this.groupBox10.TabIndex = 3;
             this.groupBox10.TabStop = false;
             this.groupBox10.Text = "人脸识别接口 URL ";
+            // 
+            // checkBox_face_savePhotoWhileRegister
+            // 
+            this.checkBox_face_savePhotoWhileRegister.AutoSize = true;
+            this.checkBox_face_savePhotoWhileRegister.Location = new System.Drawing.Point(9, 73);
+            this.checkBox_face_savePhotoWhileRegister.Name = "checkBox_face_savePhotoWhileRegister";
+            this.checkBox_face_savePhotoWhileRegister.Size = new System.Drawing.Size(258, 25);
+            this.checkBox_face_savePhotoWhileRegister.TabIndex = 3;
+            this.checkBox_face_savePhotoWhileRegister.Text = "注册时保留人脸照片(&S)";
+            this.checkBox_face_savePhotoWhileRegister.UseVisualStyleBackColor = true;
             // 
             // linkLabel_installFaceCenter
             // 
@@ -2597,7 +2611,7 @@
             // button_face_setDefaultValue
             // 
             this.button_face_setDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_face_setDefaultValue.Location = new System.Drawing.Point(512, 73);
+            this.button_face_setDefaultValue.Location = new System.Drawing.Point(482, 73);
             this.button_face_setDefaultValue.Margin = new System.Windows.Forms.Padding(5);
             this.button_face_setDefaultValue.Name = "button_face_setDefaultValue";
             this.button_face_setDefaultValue.Size = new System.Drawing.Size(193, 40);
@@ -2613,7 +2627,7 @@
             this.textBox_face_readerUrl.Location = new System.Drawing.Point(11, 35);
             this.textBox_face_readerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_face_readerUrl.Name = "textBox_face_readerUrl";
-            this.textBox_face_readerUrl.Size = new System.Drawing.Size(690, 31);
+            this.textBox_face_readerUrl.Size = new System.Drawing.Size(660, 31);
             this.textBox_face_readerUrl.TabIndex = 0;
             // 
             // groupBox9
@@ -2680,7 +2694,7 @@
             this.groupBox_fingerprint.Margin = new System.Windows.Forms.Padding(5);
             this.groupBox_fingerprint.Name = "groupBox_fingerprint";
             this.groupBox_fingerprint.Padding = new System.Windows.Forms.Padding(5);
-            this.groupBox_fingerprint.Size = new System.Drawing.Size(715, 147);
+            this.groupBox_fingerprint.Size = new System.Drawing.Size(685, 147);
             this.groupBox_fingerprint.TabIndex = 0;
             this.groupBox_fingerprint.TabStop = false;
             this.groupBox_fingerprint.Text = " 指纹阅读器接口 URL ";
@@ -2699,7 +2713,7 @@
             // button_fingerprint_setDefaultValue
             // 
             this.button_fingerprint_setDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(512, 71);
+            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(482, 71);
             this.button_fingerprint_setDefaultValue.Margin = new System.Windows.Forms.Padding(5);
             this.button_fingerprint_setDefaultValue.Name = "button_fingerprint_setDefaultValue";
             this.button_fingerprint_setDefaultValue.Size = new System.Drawing.Size(193, 40);
@@ -2715,7 +2729,7 @@
             this.textBox_fingerprint_readerUrl.Location = new System.Drawing.Point(11, 35);
             this.textBox_fingerprint_readerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_fingerprint_readerUrl.Name = "textBox_fingerprint_readerUrl";
-            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(690, 31);
+            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(660, 31);
             this.textBox_fingerprint_readerUrl.TabIndex = 0;
             // 
             // button_fingerprint_clearLocalCacheFiles
@@ -2768,6 +2782,7 @@
             // tabPage_message
             // 
             this.tabPage_message.AutoScroll = true;
+            this.tabPage_message.Controls.Add(this.groupBox_message_compactShelf);
             this.tabPage_message.Controls.Add(this.button_message_setDefaultUrl);
             this.tabPage_message.Controls.Add(this.textBox_message_password);
             this.tabPage_message.Controls.Add(this.textBox_message_userName);
@@ -2788,7 +2803,7 @@
             // button_message_setDefaultUrl
             // 
             this.button_message_setDefaultUrl.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_message_setDefaultUrl.Location = new System.Drawing.Point(702, 168);
+            this.button_message_setDefaultUrl.Location = new System.Drawing.Point(672, 168);
             this.button_message_setDefaultUrl.Margin = new System.Windows.Forms.Padding(5);
             this.button_message_setDefaultUrl.Name = "button_message_setDefaultUrl";
             this.button_message_setDefaultUrl.Size = new System.Drawing.Size(180, 40);
@@ -2800,7 +2815,7 @@
             // textBox_message_password
             // 
             this.textBox_message_password.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBox_message_password.Location = new System.Drawing.Point(196, 310);
+            this.textBox_message_password.Location = new System.Drawing.Point(212, 312);
             this.textBox_message_password.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_message_password.Name = "textBox_message_password";
             this.textBox_message_password.PasswordChar = '*';
@@ -2810,7 +2825,7 @@
             // textBox_message_userName
             // 
             this.textBox_message_userName.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBox_message_userName.Location = new System.Drawing.Point(196, 262);
+            this.textBox_message_userName.Location = new System.Drawing.Point(212, 265);
             this.textBox_message_userName.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_message_userName.Name = "textBox_message_userName";
             this.textBox_message_userName.Size = new System.Drawing.Size(283, 31);
@@ -2841,7 +2856,7 @@
             this.textBox_message_dp2MServerUrl.Location = new System.Drawing.Point(20, 215);
             this.textBox_message_dp2MServerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_message_dp2MServerUrl.Name = "textBox_message_dp2MServerUrl";
-            this.textBox_message_dp2MServerUrl.Size = new System.Drawing.Size(858, 31);
+            this.textBox_message_dp2MServerUrl.Size = new System.Drawing.Size(828, 31);
             this.textBox_message_dp2MServerUrl.TabIndex = 18;
             // 
             // label29
@@ -2861,7 +2876,7 @@
             this.label_comment.Location = new System.Drawing.Point(20, 82);
             this.label_comment.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label_comment.Name = "label_comment";
-            this.label_comment.Size = new System.Drawing.Size(633, 77);
+            this.label_comment.Size = new System.Drawing.Size(603, 77);
             this.label_comment.TabIndex = 16;
             this.label_comment.Text = "共享书目数据，将允许 Internet 上他人检索获取您的全部书目数据，同时也允许您检索获取他人的书目数据";
             // 
@@ -2924,15 +2939,34 @@
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
-            // checkBox_face_savePhotoWhileRegister
+            // textBox_message_shelfAccount
             // 
-            this.checkBox_face_savePhotoWhileRegister.AutoSize = true;
-            this.checkBox_face_savePhotoWhileRegister.Location = new System.Drawing.Point(9, 73);
-            this.checkBox_face_savePhotoWhileRegister.Name = "checkBox_face_savePhotoWhileRegister";
-            this.checkBox_face_savePhotoWhileRegister.Size = new System.Drawing.Size(258, 25);
-            this.checkBox_face_savePhotoWhileRegister.TabIndex = 3;
-            this.checkBox_face_savePhotoWhileRegister.Text = "注册时保留人脸照片(&S)";
-            this.checkBox_face_savePhotoWhileRegister.UseVisualStyleBackColor = true;
+            this.textBox_message_shelfAccount.ImeMode = System.Windows.Forms.ImeMode.Off;
+            this.textBox_message_shelfAccount.Location = new System.Drawing.Point(192, 45);
+            this.textBox_message_shelfAccount.Margin = new System.Windows.Forms.Padding(5);
+            this.textBox_message_shelfAccount.Name = "textBox_message_shelfAccount";
+            this.textBox_message_shelfAccount.Size = new System.Drawing.Size(283, 31);
+            this.textBox_message_shelfAccount.TabIndex = 25;
+            // 
+            // label38
+            // 
+            this.label38.Location = new System.Drawing.Point(8, 48);
+            this.label38.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.label38.Name = "label38";
+            this.label38.Size = new System.Drawing.Size(174, 31);
+            this.label38.TabIndex = 24;
+            this.label38.Text = "书架账户(&A)：";
+            // 
+            // groupBox_message_compactShelf
+            // 
+            this.groupBox_message_compactShelf.Controls.Add(this.textBox_message_shelfAccount);
+            this.groupBox_message_compactShelf.Controls.Add(this.label38);
+            this.groupBox_message_compactShelf.Location = new System.Drawing.Point(20, 377);
+            this.groupBox_message_compactShelf.Name = "groupBox_message_compactShelf";
+            this.groupBox_message_compactShelf.Size = new System.Drawing.Size(552, 117);
+            this.groupBox_message_compactShelf.TabIndex = 26;
+            this.groupBox_message_compactShelf.TabStop = false;
+            this.groupBox_message_compactShelf.Text = "密集书架";
             // 
             // CfgDlg
             // 
@@ -3031,6 +3065,8 @@
             this.tabPage_message.ResumeLayout(false);
             this.tabPage_message.PerformLayout();
             this.tabPage_z3950.ResumeLayout(false);
+            this.groupBox_message_compactShelf.ResumeLayout(false);
+            this.groupBox_message_compactShelf.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -3255,5 +3291,8 @@
         private System.Windows.Forms.CheckBox checkBox_patron_disableBioKeyboardSimulation;
         private System.Windows.Forms.Button button_fingerprint_setDefaultValue_new;
         private System.Windows.Forms.CheckBox checkBox_face_savePhotoWhileRegister;
+        private System.Windows.Forms.GroupBox groupBox_message_compactShelf;
+        public System.Windows.Forms.TextBox textBox_message_shelfAccount;
+        private System.Windows.Forms.Label label38;
     }
 }
