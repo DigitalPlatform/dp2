@@ -81,6 +81,7 @@
     <Compile Include="Install\TestInstall.cs" />
     <Compile Include="LoanParam\TestLoanParam.cs" />
     <Compile Include="MarcDiff\TestFieldNameList.cs" />
+    <Compile Include="NumberConvert\TestNumberConvert.cs" />
     <Compile Include="ResultSet\TestResultSet.cs" />
     <Compile Include="TestAccessNoUtility.cs" />
     <Compile Include="TestAdjustOverflow.cs" />

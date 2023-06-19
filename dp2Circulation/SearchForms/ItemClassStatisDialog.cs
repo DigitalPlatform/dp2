@@ -13,6 +13,7 @@ using DigitalPlatform;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
+using DigitalPlatform.Drawing;
 
 namespace dp2Circulation
 {
@@ -414,15 +415,26 @@ Z";
         //      true    发生了修改
         public static bool CorrectPrice(ref string strText)
         {
+            string strSaved = strText;
+
             strText = strText.Trim();
 
             //2017/6/17
             strText = strText.Replace("￥", "CNY");
 
             // 2017/6/17
-            strText = strText.Replace("精装", "").Replace("平装", "").Replace("每册", "");
+            strText = strText.Replace("精装", "")
+                .Replace("平装", "")
+                .Replace("每册", "");
+
+            // 2023/6/19
+            strText = strText.Replace("元", "");
 
             strText = StringUtil.ToDBC(strText);
+
+            // 2023/6/19
+            strText = strText.Replace("(精)", "")
+    .Replace("(平)", "");
 
             // 截掉逗号右侧的部分
             List<string> parts = StringUtil.ParseTwoPart(strText, ",");
@@ -448,40 +460,75 @@ Z";
             {
                 bool bChanged = false;
 
-                if (strFragment == "上下册")
+                if (strFragment == "上下册"
+                    || strFragment == "上下"
+                    || strFragment == "上下卷"
+                    || strFragment == "上下编"
+                    || strFragment == "两册")
                 {
                     strText += "/2";
                     bChanged = true;
                 }
-                else if (strFragment == "上中下册")
+                else if (strFragment == "上中下册"
+                    || strFragment == "上中下")
                 {
                     strText += "/3";
                     bChanged = true;
                 }
-                else if (strFragment.EndsWith("册"))
+                else if (strFragment.EndsWith("册")
+                    || strFragment.EndsWith("卷"))
                 {
+                    /*
+                    if (strFragment.StartsWith("全"))
+                        strFragment = strFragment.Substring(1);
+                    */
+
                     // 数字+册
                     string strNumber = strFragment.Substring(0, strFragment.Length - 1).Trim();
+
                     int v = 0;
-                    if (StringUtil.IsPureNumber(strNumber) && Int32.TryParse(strNumber, out v))
+                    if (TryParseNumber(strNumber, out string value))
                     {
-                        strText += "/" + strNumber;
+                        strText += "/" + value;
                         bChanged = true;
                     }
                 }
-                
+
                 if (bChanged == false)
                 {
-                    string strNumber = StringUtil.Unquote(strFragment, "全册共册全卷共卷");
+                    // 2023/6/19
+                    // 全套三卷
+                    strFragment = strFragment.Replace("全套", "全").Replace("全套共", "全");
+
+                    string strNumber = StringUtil.Unquote(strFragment, "全册共册全卷共卷全编");
                     if (strNumber != strFragment)
                     {
                         int v = 0;
-                        if (StringUtil.IsPureNumber(strNumber) && Int32.TryParse(strNumber, out v))
+                        if (TryParseNumber(strNumber, out string value))
                         {
-                            strText += "/" + strNumber;
+                            strText += "/" + value;
                             // strError = "被变换为每册平均价格形态";
+                            bChanged = true;
                         }
                     }
+                }
+
+                // 2023/6/19
+                // CNY???(?币)
+                if (bChanged == false 
+                    && strFragment.EndsWith("币")
+                    && strText.Contains("CNY"))
+                {
+                    strText = strText.Replace("CNY", "");
+                    strText = strFragment + strText;
+                    bChanged = true;
+                }
+
+                // 2023/6/19
+                if (bChanged == false && string.IsNullOrEmpty(strFragment) == false)
+                {
+                    strText = strSaved;
+                    return false;
                 }
             }
 
@@ -491,5 +538,30 @@ Z";
 
             return true;
         }
+
+        static bool TryParseNumber(string strNumber,
+            out string number)
+        {
+            number = "";
+            try
+            {
+                var value = NumberConvert.ParseCnToInt(strNumber);
+                number = value.ToString();
+                return true;
+            }
+            catch
+            {
+
+            }
+
+            if (StringUtil.IsPureNumber(strNumber) && Int32.TryParse(strNumber, out int v))
+            {
+                number = strNumber;
+                return true;
+            }
+
+            return false;
+        }
+
     }
 }

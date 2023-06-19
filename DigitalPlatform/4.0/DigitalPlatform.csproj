@@ -318,6 +318,7 @@
     <Compile Include="ListDialog.Designer.cs">
       <DependentUpon>ListDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="NumberConvert.cs" />
     <Compile Include="ProgramUtil.cs" />
     <Compile Include="Result.cs" />
     <Compile Include="ScriptUtility.cs" />
