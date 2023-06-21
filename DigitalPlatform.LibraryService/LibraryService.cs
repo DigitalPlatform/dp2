@@ -18782,8 +18782,14 @@ false);
 
         [DataMember]
         public string Operator { get; set; }  // 操作者(访问者)
+
         [DataMember]
         public string OperTime { get; set; } // 操作时间。? 格式
+
+        // 2023/6/20
+        [DataMember]
+        public string BorrowDate { get; set; } // 借阅时间(仅对还书动作有效)。? 格式
+
 
         public ChargingItem(ChargingOperItem item)
         {
@@ -18800,6 +18806,9 @@ false);
             this.ClientAddress = item.ClientAddress;
             this.Operator = item.Operator;
             this.OperTime = item.OperTime.ToString("G");
+            // 2023/6/20
+            if (item.BorrowDate != DateTime.MinValue)
+                this.BorrowDate = item.BorrowDate.ToString("G");
         }
     }
 

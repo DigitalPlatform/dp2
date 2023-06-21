@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DigitalPlatform.LibraryServer
@@ -34,7 +36,7 @@ namespace DigitalPlatform.LibraryServer
         DateTime _locationResultsetLastTime = new DateTime(0);  // 最近一次执行结果集更新的时间
 
         // 一次操作循环
-        public override void Worker()
+        public override async Task WorkerAsync()
         {
             // 首次自动启动创建馆藏地结果集的任务。以后就靠固定时间启动，或者 _request 触发
             if (_createLocationResultsetCount == 0)
@@ -265,7 +267,7 @@ namespace DigitalPlatform.LibraryServer
                 {
                     this.App.CleanIdleGlobalMemorySets(TimeSpan.FromHours(24));
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     string strErrorText = "DefaultTread中 清除本地全局结果集时 出现异常: " + ExceptionUtil.GetDebugText(ex);
                     this.App.WriteErrorLog(strErrorText);
@@ -302,11 +304,25 @@ namespace DigitalPlatform.LibraryServer
 
             // 2021/11/21
             // 确保连接到 dp2mserver
+            if (this.App.AppDownToken.IsCancellationRequested == false)
             {
-                var result = this.App.EnsureConnectMessageServerAsync().Result;
-                if (result.Value == -1 && result.ErrorCode != "notEnabled")
+                try
                 {
-                    this.App.WriteErrorLog($"尝试连接到 dp2mserver 服务器时出错: {result.ErrorInfo}");
+                    int timeout = 60 * 1000;
+                    var result = await this.App.EnsureConnectMessageServerAsync(timeout, this.App.AppDownToken);
+                    if (result.Value == -1 && result.ErrorCode != "notEnabled")
+                    {
+                        this.App.WriteErrorLog($"尝试连接到 dp2mserver 服务器时出错: {result.ErrorInfo}");
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+
+                }
+                catch (Exception ex)
+                {
+                    string strErrorText = "DefaultTread中 等待消息通道连接 时 出现异常: " + ExceptionUtil.GetDebugText(ex);
+                    this.App.WriteErrorLog(strErrorText);
                 }
             }
         }

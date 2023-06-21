@@ -1,5 +1,6 @@
 ﻿using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
+using Jint.Parser.Ast;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -427,7 +428,9 @@ namespace DigitalPlatform.LibraryServer
 
             string strOperation = DomUtil.GetElementText(domOperLog.DocumentElement,
                 "operation");
-            if (strOperation == "borrow" || strOperation == "return")
+            if (strOperation == "borrow"
+                || strOperation == "return"
+                || strOperation == "lost"/*2023/6/20*/)
             {
                 nRet = AppendOperationBorrowReturn(this.App,
                     domOperLog,
@@ -513,6 +516,26 @@ namespace DigitalPlatform.LibraryServer
             {
                 strError = "operTime 元素内容 '" + strOperTime + "' 格式错误:" + ex.Message;
                 return -1;
+            }
+
+            // 2023/6/20
+            // 从日志记录中提取 borrowDate 元素
+            if (strAction == "return" || strAction == "lost")
+            {
+                string strBorrowDate = DomUtil.GetElementText(domOperLog.DocumentElement,
+    "borrowDate");
+                if (string.IsNullOrEmpty(strBorrowDate) == false)
+                {
+                    try
+                    {
+                        item.BorrowDate = DateTimeUtil.FromRfc1123DateTimeString(strBorrowDate).ToLocalTime();
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = $"AppendOperationBorrowReturn() 中 borrowDate 元素内容 '{ strOperTime}' 格式错误:{ ex.Message}\r\n日志记录 XML 如下:\r\n{domOperLog.OuterXml}";
+                        app.WriteErrorLog(strError);
+                    }
+                }
             }
 
             app.ChargingOperDatabase.Add(item);

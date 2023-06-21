@@ -6,6 +6,7 @@ using System.Xml;
 using System.IO;
 using System.Diagnostics;
 using System.Web;
+using System.Threading.Tasks;
 
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.Xml;
@@ -562,7 +563,7 @@ namespace DigitalPlatform.LibraryServer
         // 2017/11/28
         internal void AppendErrorText(string strText)
         {
-            AppendResultText("{error}"+ strText);
+            AppendResultText("{error}" + strText);
         }
 
         // 追加结果文本
@@ -616,7 +617,7 @@ namespace DigitalPlatform.LibraryServer
             try
             {
                 var next_activate_time = this.NextActivateTime;
-                
+
                 BatchTaskInfo info = new BatchTaskInfo();
                 info.Name = this.Name;
                 if (this.m_bClosed == false)
@@ -738,7 +739,7 @@ namespace DigitalPlatform.LibraryServer
 
                 long lLength = lTotalLength - lStart;
 
-                if (lLength <= 0 
+                if (lLength <= 0
                     || lStart == -1)   //2017/11/14
                 {
                     lEndOffset = lTotalLength;
@@ -841,6 +842,8 @@ namespace DigitalPlatform.LibraryServer
                         // 超时
                         eventActive.Reset();
                         Worker();
+                        // 2023/6/20
+                        WorkerAsync().GetAwaiter().GetResult();
                         eventActive.Reset();    // 2013/11/23 只让堵住的时候发挥作用
                     }
                     else if (index == 0)
@@ -852,6 +855,8 @@ namespace DigitalPlatform.LibraryServer
                         // 得到激活信号
                         eventActive.Reset();
                         Worker();
+                        // 2023/6/20
+                        WorkerAsync().GetAwaiter().GetResult();
                         eventActive.Reset();    // 2013/11/23 只让堵住的时候发挥作用
                     }
 
@@ -897,6 +902,12 @@ namespace DigitalPlatform.LibraryServer
         public virtual void Worker()
         {
 
+        }
+
+        // (异步版本)工作线程每一轮循环的实质性工作
+        public virtual Task WorkerAsync()
+        {
+            return Task.CompletedTask;
         }
 
         // 执行一个日志记录的恢复动作

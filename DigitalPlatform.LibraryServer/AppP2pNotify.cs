@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 using DigitalPlatform.MessageClient;
@@ -75,19 +76,33 @@ userNameAndUrl);
             };
         }
 #endif
+        public void CloseMessageConnection()
+        {
+            if (_connection != null)
+            {
+                _connection.CloseConnection();
+                _connection.AddMessage -= _connection_AddMessage;
+                _connection = null;
+            }
+        }
 
         // 确保连接到消息服务器
-        public async Task<NormalResult> EnsureConnectMessageServerAsync()
+        public async Task<NormalResult> EnsureConnectMessageServerAsync(
+            int timeout,
+            CancellationToken token)
         {
             if (string.IsNullOrEmpty(_mserverUrl)
                 || string.IsNullOrEmpty(_mserverUserName))
             {
+                /*
                 if (_connection != null)
                 {
                     _connection.CloseConnection();
                     _connection.AddMessage -= _connection_AddMessage;
                     _connection = null;
                 }
+                */
+                CloseMessageConnection();
 
                 return new NormalResult
                 {
@@ -108,7 +123,9 @@ userNameAndUrl);
                 return await _connection.ConnectAsync(_mserverUrl,
     _mserverUserName,
     _mserverPassword,
-    "");
+    "",
+    timeout,
+    token);
             }
 
             return new NormalResult();

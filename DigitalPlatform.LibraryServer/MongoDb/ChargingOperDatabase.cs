@@ -577,8 +577,13 @@ return { None : '' };
         public string ClientAddress { get; set; }  // 访问者的IP地址
 
         public string Operator { get; set; }  // 操作者(访问者)
+        
         [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
         public DateTime OperTime { get; set; } // 操作时间
+
+        // 2023/6/20
+        [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
+        public DateTime BorrowDate { get; set; }    // 借书时间。仅用于还书动作。作为对“关联借书记录”找不到时的补充
     }
 
 }

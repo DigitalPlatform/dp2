@@ -76,7 +76,9 @@ namespace DigitalPlatform.MessageClient
         public async Task<NormalResult> ConnectAsync(string url,
             string userName,
             string password,
-            string parameters)
+            string parameters,
+            int timeout = -1,
+            CancellationToken token = default)
         {
             lock (_syncRoot)
             {
@@ -129,7 +131,9 @@ namespace DigitalPlatform.MessageClient
                                         await ConnectAsync(url,
                                             userName,
                                             password,
-                                            parameters);
+                                            parameters,
+                                            timeout,
+                                            token);
                                     }
                                     catch
                                     {
@@ -170,7 +174,14 @@ namespace DigitalPlatform.MessageClient
 
             try
             {
-                await Connection.Start().ConfigureAwait(false);
+                var tasks = new Task[] { Connection.Start(),
+                    Task.Delay(timeout, token)};
+                var complete_task = await Task.WhenAny(tasks).ConfigureAwait(false);
+                token.ThrowIfCancellationRequested();   // token Cancelled
+                if (complete_task == tasks[1])  // 超时
+                    throw new TimeoutException();
+                await complete_task.ConfigureAwait(false);  // 迫使抛出 Connection 过程中的异常
+                // await Connection.Start().ConfigureAwait(false);
 
                 _userName = userName;
 

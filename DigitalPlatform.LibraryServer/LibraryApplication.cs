@@ -74,7 +74,7 @@ namespace DigitalPlatform.LibraryServer
 
         public DailyItemCountTable DailyItemCountTable = new DailyItemCountTable();
 
-        internal static DateTime _expire = new DateTime(2023, 9, 15); 
+        internal static DateTime _expire = new DateTime(2023, 9, 15);
         // 上一个版本是 2023/6/15 2023/3/15 2022/11/15 2022/9/15 2022/7/15 2022/5/15 2022/3/15 2021/12/15 2021/9/15 2021/7/15 2021/3/15 2020/11/15 2020/7/15 2019/2/15 2019/10/15 2019/7/15 2019/5/15 2019/2/15 2018/11/15 2018/9/15 2018/7/15 2018/5/15 2018/3/15 2017/1/15 2017/12/1 2017/9/1 2017/6/1 2017/3/1 2016/11/1
 
 #if NO
@@ -4454,11 +4454,18 @@ out strError);
                 // 2014/12/3
                 this.Flush();
 
+                // ---
+                // this.WriteErrorLog("Flush() 完成");
+
                 if (this.OperLog != null)
                 {
                     this.OperLog.Close(true);   // 自动进入小文件模式，对象依然有效
                     // this.OperLog = null; // 对象不要释放，依然起作用
                 }
+
+                // ---
+                // this.WriteErrorLog("OperLog.Close() 完成");
+
 
                 if (this.Garden != null)
                 {
@@ -4467,11 +4474,18 @@ out strError);
                     this.Garden = null;
                 }
 
+                // ---
+                // this.WriteErrorLog("Gardon.ClearPersons() 完成");
+
+
                 if (this.Statis != null)
                 {
                     this.Statis.Close();
                     this.Statis = null;
                 }
+
+                // ---
+                // this.WriteErrorLog("Statis.Close() 完成");
 
                 /*
                 if (this.ArriveMonitor != null)
@@ -4483,11 +4497,21 @@ out strError);
                     this.BatchTasks = null;
                 }
 
+                // ---
+                // this.WriteErrorLog("BatchTasks.Close() 完成");
+
                 // 2019/4/26
                 this._physicalFileCache.Dispose();
 
+                // ---
+                // this.WriteErrorLog("_physicalFileCache.Dispose() 完成");
+
+
                 // 2022/11/10
                 this.RemoveAllMemorySet();
+
+                // ---
+                // this.WriteErrorLog("RemoveAllMemorySet() 完成");
             }
             catch (Exception ex)
             {
@@ -17070,7 +17094,7 @@ out string db_type);
                 }
                 else
                 {
-                    if (StringUtil.IsInList(right+",getrecord", sessioninfo.RightsOrigin) == false)
+                    if (StringUtil.IsInList(right + ",getrecord", sessioninfo.RightsOrigin) == false)
                         return $"{SessionInfo.GetCurrentUserName(sessioninfo)} 获取数据库 {strDbName} 内资源被拒绝。不具备 {right} 权限。";
                 }
             }
@@ -17160,7 +17184,7 @@ out string db_type);
                     {
                         bOwnerOnly = true;
                     }
-                    else if (IsInAccessList(strAction, 
+                    else if (IsInAccessList(strAction,
                         strAccessActionList,
                         true, // 2023/3/20
                         out strAccessParameters) == false)
@@ -17250,7 +17274,7 @@ out string db_type);
                 }
                 else
                 {
-                    if (IsInAccessList(strAction, 
+                    if (IsInAccessList(strAction,
                         strActionList,
                         true, // 2023/3/20
                         out strAccessParameters) == false)

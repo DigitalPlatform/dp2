@@ -166,7 +166,9 @@ namespace DigitalPlatform.LibraryServer
                 string strOperation = DomUtil.GetElementText(dom.DocumentElement,
     "operation");
                 if (this.ChargingOperEnabled == true
-                    && (strOperation == "borrow" || strOperation == "return"))
+                    && (strOperation == "borrow" 
+                    || strOperation == "return"
+                    || strOperation == "lost"/*2023/6/20*/))
                 {
                     int nRet = BuildMongoOperDatabase.AppendOperationBorrowReturn(this.App,
                         dom,

@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.145.*")]
-[assembly: AssemblyFileVersion("3.145.0.0")]
+[assembly: AssemblyVersion("3.146.*")]
+[assembly: AssemblyFileVersion("3.146.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -366,3 +366,6 @@ ItemCanReturn()
 //						消除 GetBrowseRecords() 中一处检查 client_xmls 时的 bug
 //		3.144 (2023/6/14) 消除 GetSearchResult() API 中忘记去除 Cols 中 l: 前缀的一处 bug
 //		3.145 (2023/6/16) Return() API 在自动修改册的 currentLocation 元素时，如果遇到字符串为不合法的馆藏地名称，原先版本是返回警告，现在改为报错
+//		3.146 (2023/6/20) SearchCharging() API 所返回的 ChargingItemWarpper 内的 ChargingItem 结构增加了一个成员 BorrowDate(string)，表示还书动作的借书时间。
+//						需要用最新版 dp2library 重建 mongodb 借阅历史库，这个 BorrowDate 才会有值，否则为 null
+//						改进 DefaultThread 中连接 dp2mserver 的过程，增加了超时跳过能力，并对 AppDown 敏感(早先版本这里连接 dp2mserver 的过程如果时间较长会阻止 dp2library down)。
