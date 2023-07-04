@@ -10726,6 +10726,7 @@ error + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中
             ShowMessageBox(strError);
         }
 
+
         // 将从属的书目记录保存到MARC文件
         async void menu_saveBiblioRecordToMarcFile_Click(object sender, EventArgs e)
         {

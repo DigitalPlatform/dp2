@@ -16,6 +16,8 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.rms.Client.rmsws_localhost;
+using DigitalPlatform.LibraryClient;
+using Jint.Parser.Ast;
 // using System.Data.SqlClient;
 
 
@@ -2262,6 +2264,190 @@ namespace DigitalPlatform.LibraryServer
             entityinfo.Action = "";
         }
 
+        // 2023/7/4
+        // 兑现 .Cols 中的 {{}} 命令
+        // return:
+        //      -1  出错
+        //      0   cols 没有发生改变
+        //      1   cols 发生了改变
+        public int FilterMacro(
+            SessionInfo sessioninfo,
+            string path,
+            string[] cols,
+            string style,
+            out string strError)
+        {
+            strError = "";
+
+            if (cols == null || cols.Length == 0)
+                return 0;
+
+            int IndexOf(string prefix)
+            {
+                int i = 0;
+                foreach (string s in cols)
+                {
+                    if (s != null && s.StartsWith(prefix))
+                        return i;
+                    i++;
+                }
+                return -1;
+            }
+
+            bool RemoveMacroName()
+            {
+                bool c = false;
+                int i = 0;
+                foreach (string s in cols)
+                {
+                    if (s != null && s.StartsWith("{{"))
+                    {
+                        cols[i] = "";
+                        c = true;
+                    }
+                    i++;
+                }
+
+                return c;
+            }
+
+            bool changed = false;
+
+            /*
+            // 找到 ~p: 前缀
+            int index = IndexOf("~p:");
+            if (index == -1)
+                goto REMOVE_RETURN;
+            string path = cols[index].Substring("~p:".Length);
+            cols[index] = path;
+            changed = true;
+            if (string.IsNullOrEmpty(path))
+                goto REMOVE_RETURN;
+            */
+
+            // 找到 {{fan}}
+            int temp = IndexOf("{{fan}}");
+            if (temp == -1)
+                goto REMOVE_RETURN;
+
+            var error_in_field = StringUtil.IsInList("error_in_field", style);
+            int nRet = GetSubRecords(sessioninfo,
+path,
+"firstAccessNo",
+out string strResult,
+out strError);
+            string accessNo = strResult;
+
+            if (nRet == -1)
+            {
+                if (error_in_field)
+                {
+                    cols[temp] = $"error:{strError}";
+                    return 1;
+                }
+            }
+
+            cols[temp] = accessNo;
+            changed = true;
+
+            if (RemoveMacroName())
+                changed = true;
+
+            return (changed ? 1 : 0);
+        REMOVE_RETURN:
+            return RemoveMacroName() ? 1 : (changed ? 1 : 0);
+        }
+
+        // 获得书目记录的下级记录
+        // parameters:
+        //      strDataName 数据名称。为 firstAccessNo subrecord 之一
+        public int GetSubRecords(SessionInfo sessioninfo,
+    string strRecPath,
+    string strDataName,
+    out string strResult,
+    out string strError)
+        {
+            strError = "";
+            strResult = "";
+
+            var ret = this.GetBiblioInfos(
+                sessioninfo,
+    strRecPath,
+    // "",
+    new string[] { "subrecords:item" },   // "subrecords:item|order"
+    out string[] results,
+    out byte[] baTimestamp);
+            if (ret.Value == -1 || ret.Value == 0)
+                return -1;
+            if (results == null || results.Length == 0)
+                return 0;
+            string strSubRecords = results[0];
+            if (strDataName == "firstAccessNo")
+                strResult = GetFirstAccessNo(strSubRecords);
+            else if (strDataName == "subrecords" || string.IsNullOrEmpty(strDataName))
+                strResult = strSubRecords;
+            return 1;
+        }
+
+        static string GetFirstAccessNo(string strSubRecords)
+        {
+            if (string.IsNullOrEmpty(strSubRecords))
+                return "";
+
+            if (strSubRecords.StartsWith("error:"))
+                return strSubRecords.Substring("error:".Length);
+
+            XmlDocument collection_dom = new XmlDocument();
+            try
+            {
+                collection_dom.LoadXml(strSubRecords);
+
+                {
+                    string errorInfo = "";
+                    string itemTotalCount = collection_dom.DocumentElement.GetAttribute("itemTotalCount");
+                    if (itemTotalCount == "-1")
+                    {
+                        string itemErrorCode = collection_dom.DocumentElement.GetAttribute("itemErrorCode");
+                        string itemErrorInfo = collection_dom.DocumentElement.GetAttribute("itemErrorInfo");
+                        errorInfo = $"{itemErrorCode}:{itemErrorInfo}";
+                        return errorInfo;
+                    }
+
+                    XmlNodeList nodes = collection_dom.DocumentElement.SelectNodes("item");
+                    int i = 0;
+                    foreach (XmlElement item in nodes)
+                    {
+                        string rec_path = item.GetAttribute("recPath");
+                        string location = DomUtil.GetElementText(item, "location");
+                        string price = DomUtil.GetElementText(item, "price");
+                        string seller = DomUtil.GetElementText(item, "seller");
+                        string source = DomUtil.GetElementText(item, "source");
+                        string accessNo = DomUtil.GetElementText(item, "accessNo");
+
+                        if (string.IsNullOrEmpty(accessNo) == false)
+                            return accessNo;
+                        i++;
+                    }
+
+                    /*
+                    Int32.TryParse(itemTotalCount, out int value);
+                    if (i < value)
+                    {
+                        text.AppendLine($"<tr><td colspan='10'>... 有 {value - i} 项被略去 ...</td></tr>");
+                    }
+                    */
+                    return "";  // not found
+                }
+            }
+            catch (Exception ex)
+            {
+                return "strSubRecords 装入 XMLDOM 时出现异常: "
+                    + ex.Message
+                    + "。(strSubRecords='" + StringUtil.CutString(strSubRecords, 300) + "')";
+            }
+        }
+
+
         // 根据当前账户的权限，过滤浏览列中的 borrower 元素内容
         // 注: browse 配置文件的 location 和 borrower 列要增配 prefix 属性，才能实现过滤效果
         // return:
@@ -2365,7 +2551,7 @@ namespace DigitalPlatform.LibraryServer
                 int nRet = IsPatronInControl(null, sessioninfo, strBorrower, out strError);
                 if (nRet == -1 && error_in_field)
                 {
-                    cols[index] = "error:{strError}";
+                    cols[index] = $"error:{strError}";
                     return 1;
                 }
                 if (nRet != 1)

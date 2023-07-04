@@ -4190,6 +4190,7 @@ strDbName);
 
             }
 
+
             if (bXmlChanged)  // XML 记录发生过改变，也要重新创建 Cols
             {
                 if (bHasCols)
@@ -4216,6 +4217,20 @@ strDbName);
                 }
                 else
                     record.Cols = null;
+            }
+
+            // 兑现 .Cols 中的 {{fan}} 命令
+            {
+                // return:
+                //      -1  出错
+                //      0   cols 没有发生改变
+                //      1   cols 发生了改变
+                int nRet = app.FilterMacro(
+    sessioninfo,
+    record.Path,
+    record.Cols,
+    "error_in_field",
+    out string _);
             }
         }
 

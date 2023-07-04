@@ -247,7 +247,7 @@ namespace DigitalPlatform.rms
 
                     string prefix = nodeCol.GetAttribute("prefix");
 
-                    string strText = "";
+                    string strText = nodeCol.GetAttribute("text");
 
                     XPathExpression expr = cache_item.expr;
 

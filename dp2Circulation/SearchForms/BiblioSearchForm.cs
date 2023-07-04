@@ -10521,8 +10521,12 @@ message,
         }
 
         // 构造一个 HTML 新书通报局部。
-        static string BuildHtml(XmlDocument table_dom,
-            string recpath,
+        // parameters:
+        //      biblio_table_dom    书目记录的 table 格式内容
+        //      biblio_recpath      书目记录路径
+        static string BuildHtml(
+            XmlDocument biblio_table_dom,
+            string biblio_recpath,
             string strOpacServerUrl)
         {
             if (string.IsNullOrEmpty(strOpacServerUrl) == false
@@ -10531,7 +10535,7 @@ message,
 
             StringBuilder result = new StringBuilder();
             result.Append("<table>\r\n");
-            XmlNodeList lines = table_dom.DocumentElement.SelectNodes("line");
+            XmlNodeList lines = biblio_table_dom.DocumentElement.SelectNodes("line");
             foreach (XmlElement line in lines)
             {
                 string type = line.GetAttribute("type");
@@ -10551,7 +10555,7 @@ message,
                         url = value;
                     else if (string.IsNullOrEmpty(strOpacServerUrl) == false)
                     {
-                        url = $"{strOpacServerUrl}getobject.aspx?uri={HttpUtility.UrlEncode(ScriptUtil.MakeObjectUrl(recpath, value))}";
+                        url = $"{strOpacServerUrl}getobject.aspx?uri={HttpUtility.UrlEncode(ScriptUtil.MakeObjectUrl(biblio_recpath, value))}";
                     }
                     else
                         continue;
@@ -10563,11 +10567,14 @@ message,
 
             if (string.IsNullOrEmpty(strOpacServerUrl) == false)
             {
-                string url = $"{strOpacServerUrl}book.aspx?BiblioRecPath={HttpUtility.UrlEncode(recpath)}";
-                result.AppendLine($"<tr><td style='width:100pt;color:#aaaaaa;'>{HttpUtility.HtmlEncode("记录路径")}</td><td><a href='{url}'>{HttpUtility.HtmlEncode(recpath)}</a></td></tr>");
+                string url = $"{strOpacServerUrl}book.aspx?BiblioRecPath={HttpUtility.UrlEncode(biblio_recpath)}";
+                result.AppendLine($"<tr><td style='width:100pt;color:#aaaaaa;'>{HttpUtility.HtmlEncode("记录路径")}</td><td><a href='{url}'>{HttpUtility.HtmlEncode(biblio_recpath)}</a></td></tr>");
             }
             else
-                result.AppendLine($"<tr><td style='width:100pt;color:#aaaaaa;'>{HttpUtility.HtmlEncode("记录路径")}</td><td>{HttpUtility.HtmlEncode(recpath)}</td></tr>");
+                result.AppendLine($"<tr><td style='width:100pt;color:#aaaaaa;'>{HttpUtility.HtmlEncode("记录路径")}</td><td>{HttpUtility.HtmlEncode(biblio_recpath)}</td></tr>");
+
+            // items 占位
+            result.AppendLine($"<tr><td style='width:100pt;color:#aaaaaa;'>{HttpUtility.HtmlEncode("册详情")}</td><td>{{items}}</td></tr>");
 
             result.Append("</table>\r\n");
             return result.ToString();

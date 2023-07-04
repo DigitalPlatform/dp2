@@ -215,7 +215,7 @@ namespace DigitalPlatform.LibraryServer
             // 列出所有日志文件
             DirectoryInfo di = new DirectoryInfo(this.App.OperLog.Directory);
 
-            FileInfo[] fis = di.GetFiles("*.log");
+            FileInfo[] fis = di.GetFiles("????????.log");
 
             Array.Sort(fis, (x, y) =>
             {

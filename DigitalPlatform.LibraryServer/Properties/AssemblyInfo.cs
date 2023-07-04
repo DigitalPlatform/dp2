@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.146.*")]
-[assembly: AssemblyFileVersion("3.146.0.0")]
+[assembly: AssemblyVersion("3.147.*")]
+[assembly: AssemblyFileVersion("3.147.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -369,3 +369,7 @@ ItemCanReturn()
 //		3.146 (2023/6/20) SearchCharging() API 所返回的 ChargingItemWarpper 内的 ChargingItem 结构增加了一个成员 BorrowDate(string)，表示还书动作的借书时间。
 //						需要用最新版 dp2library 重建 mongodb 借阅历史库，这个 BorrowDate 才会有值，否则为 null
 //						改进 DefaultThread 中连接 dp2mserver 的过程，增加了超时跳过能力，并对 AppDown 敏感(早先版本这里连接 dp2mserver 的过程如果时间较长会阻止 dp2library down)。
+//		3.147 (2023/7/4) 书目库 browse 配置文件中可以通过下列片段：
+//						<col title="索取号" text="{{fan}}">
+//						</col>
+//						定义一个列，其内容 {{fan}} 会在 dp2library 执行 GetSearchResult() 和 GetBrowseRecords() API 时兑现为书目记录下属册记录的第一个非空的索取号
