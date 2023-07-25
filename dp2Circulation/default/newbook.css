@@ -1,0 +1,46 @@
+
+table.biblio td.name {
+    white-space: nowrap;
+    color:#aaaaaa;
+    vertical-align: text-top;
+}
+
+
+table.biblio td.value {
+    vertical-align: text-top;
+}
+
+table.biblio tr.biblio_recpath td {
+    font-size: 9pt;
+}
+
+TABLE.items {
+    font-size: 9pt;
+    width:auto;
+    border-width: 2px;
+    border-style: solid;
+    border-collapse: collapse;
+    border-color: #999999;
+}
+
+    TABLE.items TD {
+        padding: 4px;
+        padding-left: 8px;
+        padding-right: 8px;
+        border: 1px;
+        border-right: 1px;
+        border-color: #aaaaaa;
+        border-style: solid;
+    }
+
+div.biblio_title span.value {
+    font-weight: bold;
+}
+
+div.biblio_title_area span.value {
+    font-weight: bold;
+}
+
+div.biblio_recpath {
+    font-size: 9pt;
+}

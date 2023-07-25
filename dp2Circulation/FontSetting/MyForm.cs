@@ -11,6 +11,9 @@ using System.Runtime.Remoting.Channels.Ipc;
 using System.Runtime.Remoting.Channels;
 using System.Threading.Tasks;
 using System.Runtime.Remoting;
+using System.Linq;
+using System.Collections;
+using System.Text;
 
 using DigitalPlatform;
 using DigitalPlatform.Text;
@@ -26,9 +29,7 @@ using DigitalPlatform.Interfaces;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Core;
 using DigitalPlatform.GUI;
-using System.Linq;
-using System.Data.SqlTypes;
-// using DocumentFormat.OpenXml.Wordprocessing;
+using DigitalPlatform.Typography;
 
 // 2013/3/16 添加 XML 注释
 
@@ -3383,7 +3384,7 @@ out strError);
                     DialogResult result = this.TryGet(() =>
                     {
                         return MessageDialog.Show(this,
-                        error + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
+                        $"获得书目记录 '{strRecPath}' 的 table 格式时出错: " + error + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
         MessageBoxButtons.YesNoCancel,
         MessageBoxDefaultButton.Button1,
         null,
@@ -3427,13 +3428,13 @@ out strError);
                     {
                         dom.LoadXml(string.IsNullOrEmpty(strTableXml) ? "<table />" : strTableXml);
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         strError = $"table xml 装入 DOM 时出现异常: {ex.Message}";
                         return -1;
                     }
 
-                    foreach(var column in titles)
+                    foreach (var column in titles)
                     {
                         if (string.IsNullOrEmpty(column.Evalue))
                             continue;
@@ -3738,6 +3739,844 @@ Keys keyData)
         public virtual void UpdateEnable(bool bEnable)
         {
             throw new Exception("尚未实现 UpdateEnable()");
+        }
+
+        #endregion
+
+
+        #region html/docx newbook
+
+        // result.Value:
+        //      -1  出错
+        //      0   放弃
+        //      1   成功
+        internal NormalResult _saveToNewBookFile(List<string> biblioRecPathList,
+            Hashtable groupTable)
+        {
+            string strError = "";
+
+            var dlg = new SaveEntityNewBookFileDialog();
+            MainForm.SetControlFont(dlg, this.Font);
+
+            dlg.UiState = Program.MainForm.AppInfo.GetString(
+"BiblioSearchForm",
+"SaveNewBookFileDialog_uiState",
+"");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "myform_SaveNewBookFileDialog");
+            dlg.ShowDialog(this);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.SetString(
+"BiblioSearchForm",
+"SaveNewBookFileDialog_uiState",
+dlg.UiState);
+            if (dlg.DialogResult != DialogResult.OK)
+                return new NormalResult();
+
+            if (File.Exists(dlg.OutputFileName))
+            {
+                DialogResult result = MessageBox.Show(this,
+$"文件 {dlg.OutputFileName} 已经存在。\r\n\r\n继续处理将会覆盖它。要继续处理么? (是：继续; 否: 放弃处理)",
+"BiblioSearchForm",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+                if (result == System.Windows.Forms.DialogResult.No)
+                    return new NormalResult();
+            }
+
+            /*
+    不输出
+    没有册时不输出
+    没有册时输出(无)
+            * */
+            var items_area_style = this.TryGet(() =>
+            {
+                return dlg.ItemsAreaStyle;
+            });
+
+            var layout_style = this.TryGet(() =>
+            {
+                return dlg.LayoutStyle;
+            });
+
+            var hide_biblio_fieldname = this.TryGet(() =>
+            {
+                return dlg.HideBiblioFieldName;
+            });
+
+            string ext = Path.GetExtension(dlg.OutputFileName);
+            string format = "html";
+            if (ext.ToLower() == ".docx")
+                format = "docx";
+
+            string pureCssFileName = "";
+            if (format == "html")
+            {
+                // 拷贝 .css 文件
+                var sourceFileName = Path.Combine(Program.MainForm.DataDir, "default/newbook.css");
+                var cssFileName = Path.Combine(Path.GetDirectoryName(dlg.OutputFileName), Path.GetFileNameWithoutExtension(dlg.OutputFileName) + ".css");
+                File.Copy(sourceFileName, cssFileName, true);
+                pureCssFileName = Path.GetFileName(cssFileName);
+            }
+
+            string SPAN = "span";
+            string DIV = "div";
+            if (format == "docx")
+            {
+                SPAN = "style";
+                DIV = "p";
+            }
+
+
+            // 准备书目列标题
+            Order.ExportBiblioColumnOption biblio_column_option = new Order.ExportBiblioColumnOption(Program.MainForm.UserDir);
+            biblio_column_option.LoadData(Program.MainForm.AppInfo,
+            SaveEntityNewBookFileDialog.BiblioDefPath);
+
+            List<Order.ColumnProperty> biblio_title_list = Order.DistributeExcelFile.BuildList(biblio_column_option.Columns);
+
+            // 准备册信息列标题
+            Order.EntityColumnOption entity_column_option = new Order.EntityColumnOption(Program.MainForm.UserDir,
+"");
+            entity_column_option.LoadData(Program.MainForm.AppInfo,
+            SaveEntityNewBookFileDialog.EntityDefPath);
+
+            List<Order.ColumnProperty> entity_title_list = Order.DistributeExcelFile.BuildList(entity_column_option.Columns);
+
+            this.EnableControls(false);
+            LibraryChannel channel = this.GetChannel();
+
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromMinutes(2);
+
+            var looping = BeginLoop(this.DoStop, "正在导出到 HTML 文件 ...");
+
+            string outputFileName = dlg.OutputFileName;
+            if (format == "docx")
+            {
+                // outputFileName = Program.MainForm.GetTempFileName("newbook_");
+                outputFileName = Path.Combine(Path.GetDirectoryName(outputFileName),
+                    Path.GetFileNameWithoutExtension(outputFileName) + ".xml");
+            }
+            StreamWriter writer = null;
+            try
+            {
+                using (writer = new StreamWriter(outputFileName, false, Encoding.UTF8))
+                {
+                    looping.Progress.SetProgressRange(0,
+                        biblioRecPathList.Count);
+
+                    /*
+                    List<ListViewItem> items = new List<ListViewItem>();
+                    foreach (ListViewItem item in this.listView_records.SelectedItems)
+                    {
+                        if (string.IsNullOrEmpty(item.Text) == true)
+                            continue;
+
+                        items.Add(item);
+                    }
+                    */
+
+                    // writer 开头
+                    if (format == "html")
+                        writer.Write("<html><head>"
+                            + $"<LINK href='{pureCssFileName}' type='text/css' rel='stylesheet' />"
+                            + "</head><body>\r\n");
+                    else if (format == "docx")
+                        writer.Write("<root>");
+
+                    // docx styles
+                    if (format == "docx")
+                    {
+                        writer.Write("<styles>");
+                        writer.Write("<style name='small' size='9pt' font='ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman' color='AAAAAA' style='bold'/>");
+                        writer.Write("<style name='small_name' size='9pt' font='ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman'/>");
+                        writer.Write("<style name='default' font='ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman'/>");
+                        writer.Write("<style name='default' type='character' font='ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman'/>");
+                        writer.Write("<style name='default_name' font='ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman' color='AAAAAA' style='bold' alignment='right'/>");
+                        writer.Write("<style name='default_name' type='character' font='ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman' color='AAAAAA' style='bold'/>");
+                        writer.Write("<style name='hr'>");
+                        writer.Write("<border><bottom value='single' size='0.5pt' color='000000' /></border>");
+                        writer.Write("</style>");
+                        writer.Write("<style name='vl' type='td'>");
+                        writer.Write("<border><right value='dotted' size='1pt' space='2pt' color='999999' /></border>");
+                        writer.Write("</style>");
+                        writer.Write("<style name='val' type='td'>");
+                        writer.Write("<border><left value='nil' space='2pt'/></border>");
+                        writer.Write("</style>"); writer.Write("</styles>");
+                    }
+
+                    if (layout_style == "整体表格")
+                    {
+                        if (format == "docx")
+                        {
+                            writer.Write("<table cellMarginDefault='2pt,2pt,2pt,2pt' class='biblio'>");
+                            writer.Write("<tableGrid>");
+                            writer.Write("<gridColumn gridWidth='23'/>");
+                            if (hide_biblio_fieldname == false)
+                                writer.Write("<gridColumn gridWidth='23'/>");
+                            writer.Write("</tableGrid>");
+                        }
+                        else
+                            writer.Write("<table class='biblio'>");
+                    }
+                    int i = 0;
+                    // foreach (ListViewItem item in items)
+                    foreach (string strRecPath in biblioRecPathList)
+                    {
+                        Application.DoEvents(); // 出让界面控制权
+
+                        if (looping.Stopped)
+                        {
+                            strError = "用户中断";
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = strError
+                            };
+                        }
+
+                        // string strRecPath = item.Text;
+
+                        if (string.IsNullOrEmpty(strRecPath) == true)
+                            continue;
+
+                        looping.Progress.SetMessage("正在获取书目记录 " + strRecPath);
+
+                        /*
+                        long lRet = channel.GetBiblioInfos(
+                            looping.Progress,
+                            strRecPath,
+                            "",
+                            new string[] { "table:areas|coverimageurl|summary|subjects|classes" },   // formats
+                            out string[] results,
+                            out byte[] baTimestamp,
+                            out strError);
+                        if (lRet == 0)
+                            goto ERROR1;
+                        if (lRet == -1)
+                            goto ERROR1;
+                        if (results == null || results.Length == 0)
+                        {
+                            strError = "results error";
+                            goto ERROR1;
+                        }
+
+                        string strXml = results[0];
+                        */
+                        // return:
+                        //      -1  出错
+                        //      0   没有找到
+                        //      1   找到
+                        int nRet = this.GetTable(
+                            strRecPath,
+                            biblio_title_list,
+                            out string strXml,
+                            out strError);
+                        if (nRet == 0)
+                            continue;
+                        if (nRet != 1)
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = strError
+                            };
+                        if (string.IsNullOrEmpty(strXml) == false)
+                        {
+                            XmlDocument dom = new XmlDocument();
+                            try
+                            {
+                                dom.LoadXml(strXml);
+                            }
+                            catch (Exception ex)
+                            {
+                                strError = "XML 装入 DOM 时出错: " + ex.Message;
+                                return new NormalResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = strError
+                                };
+                            }
+
+                            if (dom.DocumentElement != null)
+                            {
+                                string hr = "<hr />";
+                                if (format == "docx")
+                                    hr = "<p style='hr'/>";
+                                if (layout_style == "独立表格")
+                                {
+                                    writer.Write($"{hr}\r\n");
+                                }
+                                else if (layout_style == "整体表格")
+                                {
+                                    writer.Write($"<tr class='biblio_seperator'><td colspan='{(hide_biblio_fieldname ? "1" : "2")}'>{hr}</td></tr>\r\n");
+                                }
+                                else if (layout_style == "自然段")
+                                {
+                                    if (format == "docx")
+                                        writer.Write($"{hr}\r\n");
+                                    else
+                                        writer.Write($"<{DIV} class='biblio_seperator'>{hr}</{DIV}>\r\n");
+                                }
+
+                                string content = BuildBiblioHtml(
+                                    channel,
+                                    looping.Progress,
+                                    biblio_title_list,
+                                    dom,
+                                    strRecPath,
+                                    Program.MainForm.OpacServerUrl,
+                                    layout_style,
+                                    hide_biblio_fieldname,
+                                    format);
+
+                                string items_table = "";
+
+                                List<string> item_recpaths = null;
+                                if (groupTable != null)
+                                    item_recpaths = (List<string>)groupTable[strRecPath];
+
+                                if (items_area_style != "不输出")
+                                    items_table = BuildItemsHtml(
+        channel,
+        looping.Progress,
+        groupTable == null ? strRecPath : null,
+        item_recpaths,
+        entity_title_list,
+        format,
+        layout_style);
+                                string items_line = "";
+                                string caption = "册";
+                                if (layout_style == "自然段")
+                                    caption = "册: ";
+
+                                if (items_area_style == "没有册时不输出")
+                                {
+                                    if (string.IsNullOrEmpty(items_table) == false)
+                                        items_line = BuildItemsLine();
+#if REMOVED
+                                    if (layout_style == "自然段")
+                                    {
+                                        if (string.IsNullOrEmpty(items_table) == false)
+                                        {
+                                            // items_line = $"<div class='items'><span class='name'>{HttpUtility.HtmlEncode(caption)}</span><span class='value'>{items_table}</span></div>";
+                                            items_line = BuildItemsLine();
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // 如果没有册，就这一行都消失
+                                        if (string.IsNullOrEmpty(items_table) == false)
+                                        {
+                                            // items_line = $"<tr class='items'><td class='name'>{HttpUtility.HtmlEncode(caption)}</td><td class='value'>{items_table}</td></tr>";
+                                            items_line = BuildItemsLine();
+                                        }
+                                    }
+#endif
+                                }
+                                else if (items_area_style == "没有册时输出(无)")
+                                {
+                                    if (string.IsNullOrEmpty(items_table))
+                                        items_table = GetNone();
+
+                                    string GetNone()
+                                    {
+                                        if (layout_style == "自然段")
+                                        {
+                                            if (format == "docx")
+                                            {
+                                                return $"<style use='default'>(无)</style>";
+                                            }
+                                            else  // html
+                                            {
+                                                return ($"<{SPAN} class='value'>(无)</{SPAN}>");
+                                            }
+                                        }
+                                        else  // 两种表格形态
+                                        {
+                                            if (format == "docx")
+                                            {
+                                                return ($"<p style='default'>(无)</p>");
+                                            }
+                                            else  // html
+                                            {
+                                                return ($"(无)");
+                                            }
+                                        }
+                                    }
+
+
+                                    /*
+                                    if (layout_style == "自然段")
+                                        items_line = $"<div class='items'><span class='name'>{HttpUtility.HtmlEncode(caption)}</span><span class='value'>{items_table}</span></div>";
+                                    else
+                                        items_line = $"<tr class='items'><td class='name'>{HttpUtility.HtmlEncode(caption)}</td><td class='value'>{items_table}</td></tr>";
+                                    */
+                                    items_line = BuildItemsLine();
+                                }
+                                else
+                                    items_line = "";
+
+                                string BuildItemsLine()
+                                {
+                                    if (layout_style == "自然段")
+                                    {
+                                        if (format == "docx")
+                                        {
+                                            string name_fragment = $"<style use='default_name'>{HttpUtility.HtmlEncode(caption)}</style>";
+                                            if (hide_biblio_fieldname)
+                                                name_fragment = "";
+                                            // return $"<p class='items'>{name_fragment}{items_table}</p>";
+                                            return $"<p class='items'>{name_fragment}</p>{items_table}";    // 注: table 元素不允许放在 p 元素之下。所以只好放在 p 元素之后
+                                        }
+                                        else
+                                        {
+                                            string name_fragment = $"<{SPAN} class='name'>{HttpUtility.HtmlEncode(caption)}</{SPAN}>";
+                                            if (hide_biblio_fieldname)
+                                                name_fragment = "";
+
+                                            return $"<{DIV} class='items'>{name_fragment}<{SPAN} class='value'>{items_table}</{SPAN}></{DIV}>";
+                                        }
+                                    }
+                                    else  // 两种表格
+                                    {
+                                        if (format == "docx")
+                                        {
+                                            string name_fragment = $"<td style='vl' class='name'><p style='default_name'>{HttpUtility.HtmlEncode(caption)}</p></td>";
+                                            if (hide_biblio_fieldname)
+                                                name_fragment = "";
+                                            return $"<tr class='items'>{name_fragment}<td style='val' class='value'>{items_table}</td></tr>";
+                                        }
+                                        else
+                                        {
+                                            string name_fragment = $"<td class='name'>{HttpUtility.HtmlEncode(caption)}</td>";
+                                            if (hide_biblio_fieldname)
+                                                name_fragment = "";
+                                            return $"<tr class='items'>{name_fragment}<td class='value'>{items_table}</td></tr>";
+                                        }
+                                    }
+                                }
+
+                                content = content.Replace("{items}", items_line);
+                                writer.Write(content);
+                                // 给根元素设置几个参数
+                                //DomUtil.SetAttr(dom.DocumentElement, "path", DpNs.dprms, Program.MainForm.LibraryServerUrl + "?" + item.BiblioInfo.RecPath);  // strRecPath
+                                //DomUtil.SetAttr(dom.DocumentElement, "timestamp", DpNs.dprms, ByteArray.GetHexTimeStampString(item.BiblioInfo.Timestamp));   // baTimestamp
+
+                                // dom.DocumentElement.WriteTo(writer);
+                            }
+                        }
+
+                        looping.Progress.SetProgressValue(++i);
+                    }
+
+                    if (layout_style == "整体表格")
+                        writer.Write("</table>");
+
+                    // writer 收尾
+                    if (format == "html")
+                        writer.Write("</body></html>\r\n");
+                    else if (format == "docx")
+                        writer.Write("</root>");
+                }
+
+                if (format == "docx")
+                {
+                    TypoUtility.XmlToWord(outputFileName, dlg.OutputFileName);
+                    /*
+                    try
+                    {
+                        File.Delete(outputFileName);
+                    }
+                    catch
+                    {
+
+                    }
+                    */
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = "写入文件 " + dlg.OutputFileName + " 失败，原因: " + ex.Message;
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError
+                };
+            }
+            finally
+            {
+                /*
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
+                _stop.HideProgress();
+                */
+                EndLoop(looping);
+
+                channel.Timeout = old_timeout;
+                this.ReturnChannel(channel);
+
+                this.EnableControls(true);
+            }
+            MainForm.StatusBarMessage = biblioRecPathList.Count.ToString()
+            + "条记录成功保存到文件 " + dlg.OutputFileName;
+
+            // 打开一个浏览器
+            System.Diagnostics.Process.Start(// "iexplore",
+        dlg.OutputFileName);
+
+            return new NormalResult { Value = 1 };
+        }
+
+
+
+        string BuildItemsHtml(
+            LibraryChannel channel,
+            Stop stop,
+            string biblio_recpath,
+            List<string> item_recpath_list,
+            List<Order.ColumnProperty> entity_title_list,
+            string format,
+            string layout_style)
+        {
+            string strError = "";
+
+            int line_count = 0;
+            StringBuilder result = new StringBuilder();
+            if (format == "docx")
+                result.Append("<table cellMarginDefault='1pt,0,1pt,0' class='items'>"); // cellMarginDefault='1pt,1pt,1pt,1pt'
+            else
+                result.Append("<table class='items'>");
+            result.Append(BuildEntityTitle(entity_title_list, format));
+            if (string.IsNullOrEmpty(biblio_recpath) == false)
+            {
+                /*
+                int nRet = Utility.GetSubRecords(
+    channel,
+    stop,
+    biblio_recpath,
+    "subrecords",
+    out string strResult,
+    out string strError);
+                */
+                SubItemLoader sub_loader = new SubItemLoader();
+                sub_loader.BiblioRecPath = biblio_recpath;
+                sub_loader.Channel = channel;
+                sub_loader.Stop = stop;
+                sub_loader.DbType = "item";
+                sub_loader.ThrowException = false;
+
+                sub_loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
+                sub_loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
+
+                foreach (EntityInfo info in sub_loader)
+                {
+                    if (info.ErrorCode != ErrorCodeValue.NoError)
+                    {
+                        strError = "路径为 '" + info.OldRecPath + "' 的册记录装载中发生错误: " + info.ErrorInfo;  // NewRecPath
+                        goto ERROR1;
+                    }
+                    result.Append(BuildEntityLine(entity_title_list, info.OldRecord, info.OldRecPath, format));
+                    line_count++;
+                }
+            }
+            else
+            {
+                foreach (string path in item_recpath_list)
+                {
+                    var ret = channel.GetItemInfo(stop,
+                        "@path:" + path,
+                        "xml",
+                        out string item_xml,
+                        null,
+                        out _,
+                        out strError);
+                    if (ret == -1)
+                        goto ERROR1;
+                    result.Append(BuildEntityLine(entity_title_list, item_xml, path, format));
+                    line_count++;
+                }
+            }
+
+            result.Append("</table>");
+            /*
+            // https://github.com/jgm/pandoc/issues/6983
+            if (format == "docx" && layout_style != "自然段")
+                result.Append("<p></p>");   // 这是为了避免 word docx 的一个 bug。如果这里没有 p，Word 打开 docx 时会说文件被破坏
+            */
+            if (line_count == 0)
+                return "";
+            return result.ToString();
+        ERROR1:
+            return $"<p>{HttpUtility.HtmlEncode(strError)}</p>";
+        }
+
+        static string BuildEntityLine(List<Order.ColumnProperty> entity_title_list,
+            string item_xml,
+            string item_recpath,
+            string format)
+        {
+            XmlDocument item_dom = new XmlDocument();
+            try
+            {
+                item_dom.LoadXml(item_xml);
+            }
+            catch (Exception ex)
+            {
+                string error = $"册记录 '{item_recpath}' 装入 XMLDOM 失败: {ex.Message}";
+                return $"<tr><td colspan='{entity_title_list.Count}'>{HttpUtility.HtmlEncode("error: " + error)}</td></tr>";
+            }
+
+            StringBuilder text = new StringBuilder();
+            text.Append("<tr>");
+            foreach (var column in entity_title_list)
+            {
+                var type = column.Type;
+                if (type.StartsWith("item_"))
+                    type = type.Substring("item_".Length);
+
+                string content = null;
+                if (type == "recpath")
+                    content = item_recpath;
+                else
+                    content = DomUtil.GetElementText(item_dom.DocumentElement, type);
+                if (format == "docx")
+                    text.Append($"<td class='item_{type}'><p style='small_name'>{HttpUtility.HtmlEncode(content)}</p></td>");
+                else
+                    text.Append($"<td class='item_{type}'>{HttpUtility.HtmlEncode(content)}</td>");
+            }
+            text.Append("</tr>");
+            return text.ToString();
+        }
+
+        static string BuildEntityTitle(List<Order.ColumnProperty> entity_title_list,
+            string format)
+        {
+            StringBuilder text = new StringBuilder();
+            text.Append("<tr>");
+            foreach (var column in entity_title_list)
+            {
+                var caption = column.Caption;
+                if (format == "docx")
+                    text.Append($"<td noWrap='true'><p style='small'>{HttpUtility.HtmlEncode(caption)}</p></td>");
+                else
+                    text.Append($"<td>{HttpUtility.HtmlEncode(caption)}</td>");
+            }
+            text.Append("</tr>");
+            return text.ToString();
+        }
+
+
+        // 构造一个 HTML 新书通报局部。
+        // parameters:
+        //      biblio_table_dom    书目记录的 table 格式内容
+        //      biblio_recpath      书目记录路径
+        //      layout_style        布局风格
+        /* 布局风格:
+         * 独立表格  每个书目单独一个 table
+         * 整体表格  所有书目共用一个 table (方便 paste 到 word 以后改变名字列宽度)
+         * 自然段
+         * */
+        static string BuildBiblioHtml(
+            LibraryChannel channel,
+            Stop stop,
+            List<Order.ColumnProperty> biblio_title_list,
+            XmlDocument biblio_table_dom,
+            string biblio_recpath,
+            string strOpacServerUrl,
+            string layout_style,
+            bool hide_biblio_fieldname,
+            string format)
+        {
+            string SPAN = "span";
+            string DIV = "div";
+            if (format == "docx")
+            {
+                SPAN = "style";
+                DIV = "p";
+            }
+
+            if (string.IsNullOrEmpty(strOpacServerUrl) == false
+                && strOpacServerUrl[strOpacServerUrl.Length - 1] != '/')
+                strOpacServerUrl += "/";
+
+            StringBuilder result = new StringBuilder();
+            if (layout_style == "独立表格")
+            {
+                if (format == "docx")
+                    result.Append("<table cellMarginDefault='2pt,2pt,2pt,2pt' class='biblio'>");
+                else
+                    result.Append("<table class='biblio'>\r\n");
+            }
+
+            // 从 biblio_title_list 中取出 type 对应的 caption
+            string GetCaption(string type)
+            {
+                return biblio_title_list.Where(o => o.Type == "biblio_" + type).FirstOrDefault()?.Caption;
+            }
+
+            XmlNodeList lines = biblio_table_dom.DocumentElement.SelectNodes("line");
+            foreach (XmlElement line in lines)
+            {
+                string type = line.GetAttribute("type");
+                if (// type == "coverimageurl" ||
+                    type == "titlepinyin")
+                    continue;
+
+                string name = GetCaption(type);
+                if (string.IsNullOrEmpty(name))
+                    name = line.GetAttribute("name");   // 实在不行再从 line 元素的 name 属性取
+
+                string value = line.GetAttribute("value");
+                if (string.IsNullOrEmpty(value))
+                    continue;
+
+                if (type == "coverimageurl")
+                {
+                    string url = "";
+                    if (value.StartsWith("http:") || value.StartsWith("https:"))
+                        url = value;
+                    else if (string.IsNullOrEmpty(strOpacServerUrl) == false)
+                    {
+                        url = $"{strOpacServerUrl}getobject.aspx?uri={HttpUtility.UrlEncode(ScriptUtil.MakeObjectUrl(biblio_recpath, value))}";
+                    }
+                    else
+                        continue;
+                    // result.AppendLine($"<tr class='biblio_{type}'><td class='name'></td><td class='value'><img alt='封面图片' src='{url}'></img></td></tr>");   //  style1='width:100pt;'
+                    OutputLineRaw($"biblio_{type}", "", $"<img alt='封面图片' src='{url}'></img>");
+                    continue;
+                }
+                // result.AppendLine($"<tr class='biblio_{type}'><td class='name'>{HttpUtility.HtmlEncode(name)}</td><td class='value'>{HttpUtility.HtmlEncode(value)}</td></tr>");    //  style1='width:100pt;color:#aaaaaa;'
+                OutputLine($"biblio_{type}", name, value);
+            }
+
+            var display_accessNo = biblio_title_list.Where(o => o.Type == "biblio_accessNo").Any();
+            if (display_accessNo)
+            {
+                // return:
+                //      -1  出错
+                //      0   没有找到
+                //      1   成功
+                var ret = Utility.GetSubRecords(
+channel,
+stop,
+biblio_recpath,
+"firstAccessNo",
+out string strResult,
+out string strError);
+                string accessNo = strResult;
+                if (ret == -1)
+                    accessNo = "error:" + strError;
+                OutputLine("biblio_accessNo", GetCaption("accessNo"), accessNo);
+            }
+
+            // items 占位
+            result.AppendLine($"{{items}}");
+
+            var display_recpath = biblio_title_list.Where(o => o.Type == "biblio_recpath").Any();
+            if (display_recpath)
+            {
+                if (string.IsNullOrEmpty(strOpacServerUrl) == false
+                    && format != "docx")
+                {
+                    string url = $"{strOpacServerUrl}book.aspx?BiblioRecPath={HttpUtility.UrlEncode(biblio_recpath)}";
+                    // result.AppendLine($"<tr class=''><td class='name'>{HttpUtility.HtmlEncode("记录路径")}</td><td class='value'></td></tr>");
+                    OutputLineRaw("biblio_recpath", "记录路径", $"<a href='{url}'>{HttpUtility.HtmlEncode(biblio_recpath)}</a>");
+                }
+                else
+                    OutputLine("biblio_recpath", GetCaption("recpath"), biblio_recpath);
+            }
+
+            if (layout_style == "独立表格")
+                result.Append("</table>\r\n");
+            return result.ToString();
+
+            void OutputLine(string line_class,
+                string name,
+                string value)
+            {
+                // result.AppendLine($"<tr class='{line_class}'><td class='name'>{HttpUtility.HtmlEncode(name)}</td><td class='value'>{HttpUtility.HtmlEncode(value)}</td></tr>");
+                OutputLineRaw(line_class, name, HttpUtility.HtmlEncode(value));
+            }
+
+            void OutputLineRaw(string line_class,
+    string name,
+    string value)
+            {
+                if (layout_style == "自然段")
+                {
+                    if (format == "docx")
+                    {
+                        if (string.IsNullOrEmpty(name) == false)
+                            name = name + ": ";
+                        string name_fragment = $"<style use='default_name'>{HttpUtility.HtmlEncode(name)}</style>";
+                        if (hide_biblio_fieldname)
+                            name_fragment = "";
+                        result.AppendLine($"<p class='{line_class}'>{name_fragment}<style use='default'>{value}</style></p>");
+                    }
+                    else  // html
+                    {
+                        if (string.IsNullOrEmpty(name) == false)
+                            name = name + ": ";
+                        string name_fragment = $"<{SPAN} class='name'>{HttpUtility.HtmlEncode(name)}</{SPAN}>";
+                        if (hide_biblio_fieldname)
+                            name_fragment = "";
+                        result.AppendLine($"<{DIV} class='{line_class}'>{name_fragment}<{SPAN} class='value'>{value}</{SPAN}></{DIV}>");
+                    }
+                }
+                else  // 两种表格形态
+                {
+                    if (format == "docx")
+                    {
+                        string name_fragment = $"<td noWrap='true' style='vl' class='name'><p style='default_name'>{HttpUtility.HtmlEncode(name)}</p></td>";
+                        if (hide_biblio_fieldname)
+                            name_fragment = "";
+                        result.AppendLine($"<tr class='{line_class}'>{name_fragment}<td style='val' class='value'><p style='default'>{value}</p></td></tr>");
+                    }
+                    else  // html
+                    {
+                        string name_fragment = $"<td class='name'>{HttpUtility.HtmlEncode(name)}</td>";
+                        if (hide_biblio_fieldname)
+                            name_fragment = "";
+                        result.AppendLine($"<tr class='{line_class}'>{name_fragment}<td class='value'>{value}</td></tr>");
+                    }
+                }
+            }
+        }
+
+
+        void loader_Prompt(object sender, MessagePromptEventArgs e)
+        {
+            // TODO: 不再出现此对话框。不过重试有个次数限制，同一位置失败多次后总要出现对话框才好
+            if (e.Actions == "yes,no,cancel")
+            {
+#if NO
+                DialogResult result = MessageBox.Show(this,
+    e.MessageText + "\r\n\r\n是否重试操作?\r\n\r\n(是: 重试;  否: 跳过本次操作，继续后面的操作; 取消: 停止全部操作)",
+    "ReportForm",
+    MessageBoxButtons.YesNoCancel,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button1);
+                if (result == DialogResult.Yes)
+                    e.ResultAction = "yes";
+                else if (result == DialogResult.Cancel)
+                    e.ResultAction = "cancel";
+                else
+                    e.ResultAction = "no";
+#endif
+                DialogResult result = this.TryGet(() =>
+                {
+                    return AutoCloseMessageBox.Show(this,
+        e.MessageText + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
+        20 * 1000,
+        "MyForm");
+                });
+                if (result == DialogResult.Cancel)
+                    e.ResultAction = "no";
+                else
+                    e.ResultAction = "yes";
+            }
         }
 
         #endregion

@@ -36,13 +36,14 @@
             this.textBox_accessNo = new System.Windows.Forms.TextBox();
             this.textBox_shelfNo = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // button_Cancel
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button_Cancel.Location = new System.Drawing.Point(500, 321);
+            this.button_Cancel.Location = new System.Drawing.Point(500, 585);
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(138, 38);
             this.button_Cancel.TabIndex = 7;
@@ -53,7 +54,7 @@
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_OK.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.button_OK.Location = new System.Drawing.Point(358, 321);
+            this.button_OK.Location = new System.Drawing.Point(358, 585);
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(136, 38);
             this.button_OK.TabIndex = 6;
@@ -118,11 +119,26 @@
             this.label3.TabIndex = 11;
             this.label3.Text = "架位号(&S):";
             // 
+            // label4
+            // 
+            this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.label4.Font = new System.Drawing.Font("微软雅黑", 10.71429F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label4.Location = new System.Drawing.Point(12, 249);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(626, 333);
+            this.label4.TabIndex = 13;
+            this.label4.Text = "安全警告:\r\n\r\n请在打开密集架之前，先确认当前没有任何人在密集架通道内，再进行打开操作，避免发生人身伤害。\r\n\r\n如果您是利用远程操作打开密集架，请务必通过可靠" +
+    "的通讯手段(手机电话等)请求在密集架旁边的同伴确认，当前没有任何人在密集架通道内，再进行打开操作。";
+            this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
             // CompactShelfDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(650, 371);
+            this.ClientSize = new System.Drawing.Size(650, 635);
+            this.Controls.Add(this.label4);
             this.Controls.Add(this.textBox_shelfNo);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.textBox_accessNo);
@@ -150,5 +166,6 @@
         private System.Windows.Forms.TextBox textBox_accessNo;
         private System.Windows.Forms.TextBox textBox_shelfNo;
         private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label4;
     }
 }

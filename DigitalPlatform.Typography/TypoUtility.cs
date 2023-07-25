@@ -49,6 +49,9 @@ namespace DigitalPlatform.Typography
             XmlDocument dom = new XmlDocument();
             dom.Load(xmlFileName);
 
+            // 2023/7/25
+            AdjustTable(dom);
+
             using (WordprocessingDocument doc = WordprocessingDocument.Create(wordFileName, WordprocessingDocumentType.Document))
             {
                 // Add a main document part. 
@@ -100,6 +103,52 @@ namespace DigitalPlatform.Typography
                 var settings_nodes = dom.DocumentElement.SelectSingleNode("settings") as XmlElement;
                 if (settings_nodes != null)
                     CreateSettings(doc, settings_nodes);
+            }
+        }
+
+        // https://github.com/jgm/pandoc/issues/6983
+        // 这是为了避免 word docx 的一个 bug。如果(td 下的 table 后面兄弟)这里没有 p，Word 打开 docx 时会说文件被破坏
+
+        static void AdjustTable(XmlDocument dom)
+        {
+            var nodes = dom.DocumentElement.SelectNodes("//table");
+            foreach(XmlElement table in nodes)
+            {
+                if (IsParentTd(table) == false)
+                    continue;
+                // 判断 table 的兄弟中是否已经有 p 了
+                if (HasSiblingP(table) == false)
+                {
+                    table.ParentNode.InsertAfter(dom.CreateElement("p"), table);
+                }
+            }
+
+            // 判断上级元素是否为 td 元素
+            bool IsParentTd(XmlElement current)
+            {
+                current = current.ParentNode as XmlElement;
+
+                while (current != null)
+                {
+                    if (current.Name == "table" || current.Name == "tr")
+                        return false;   // 已经到上级 table 了，从此不必继续判断了
+                    if (current.Name == "td")
+                        return true;
+                    current = current.ParentNode as XmlElement;
+                }
+                return false;
+            }
+
+            bool HasSiblingP(XmlElement current)
+            {
+                foreach(XmlElement sibling in current.ParentNode.ChildNodes)
+                {
+                    if (sibling == null)
+                        continue;
+                    if (sibling.Name == "p")
+                        return true;
+                }
+                return false;
             }
         }
 
@@ -292,6 +341,25 @@ doc.MainDocumentPart.Document.Body.Elements<SectionProperties>().ToList();
                     continue;
                 }
 
+                // 2023/7/12
+                if (node.Name == "style")
+                {
+                    // 2023/7/13
+                    CreateParagraphIfNeed();
+
+                    EnsureStyles(doc);
+                    var new_style = CreateStyle(doc,
+                        node as XmlElement,
+                        null,
+                        StyleValues.Character);
+                    if (new_style != null)
+                        CreateTextStream(doc,
+                            p,
+                            node.ChildNodes,
+                            new_style);
+                    continue;
+                }
+
                 // 在全局位置创建 styles
                 if (node.Name == "styles")
                 {
@@ -316,6 +384,17 @@ doc.MainDocumentPart.Document.Body.Elements<SectionProperties>().ToList();
                         node as XmlElement);
                     continue;
                 }
+            }
+
+            OpenXmlElement CreateParagraphIfNeed()
+            {
+                if (p == null)
+                {
+                    p = new Paragraph();
+                    body.AppendChild(p);
+                }
+
+                return p;
             }
         }
 
@@ -377,6 +456,12 @@ doc.MainDocumentPart.StyleDefinitionsPart;
             Style base_style,
             StyleValues default_type)
         {
+            EnsureStyles(doc);  // 2023/7/18
+
+            var styletype = style_node.GetAttribute("type");
+            if (styletype == "td")
+                return null;    // td 类型的 style 元素，并不对应 OpenXml 的任何结构
+
             var use_attr = style_node.GetAttribute("use");
             if (string.IsNullOrEmpty(use_attr) == false)
             {
@@ -399,7 +484,6 @@ doc.MainDocumentPart.StyleDefinitionsPart;
             if (string.IsNullOrEmpty(stylename))
                 stylename = NewStyleName();
 
-            var styletype = style_node.GetAttribute("type");
             if (string.IsNullOrEmpty(styletype) == false)
             {
                 type = GetStyleType(styletype);
@@ -433,6 +517,34 @@ doc.MainDocumentPart.StyleDefinitionsPart;
             }
             NextParagraphStyle nextParagraphStyle1 = new NextParagraphStyle() { Val = baseOn_style_id };
             style.Append(nextParagraphStyle1);
+
+            // 2023/7/18
+            if (type == StyleValues.Paragraph)
+            {
+                SetParagraphAttributes(style_node, () =>
+                {
+                    var pProperties = new ParagraphProperties();
+                    style.Append(pProperties);
+                    return pProperties;
+                });
+
+#if REMOVED
+                ParagraphProperties pProperties = new ParagraphProperties();
+                style.Append(pProperties);
+
+                string alignment = style_node.GetAttribute("alignment");
+                if (string.IsNullOrEmpty(alignment) == false)
+                {
+                    if (Enum.TryParse<JustificationValues>(alignment, true, out JustificationValues value) == false)
+                    {
+                        throw new Exception($"alignment 属性值 '{alignment}' 不合法");
+                    }
+                    Justification objJustification =
+        new Justification() { Val = value };
+                    pProperties.Append(objJustification);
+                }
+#endif
+            }
 
             StyleRunProperties styleRunProperties1 = new StyleRunProperties();
             style.Append(styleRunProperties1);
@@ -477,9 +589,18 @@ doc.MainDocumentPart.StyleDefinitionsPart;
             }
 
             /*
-            Color color1 = new Color() { ThemeColor = ThemeColorValues.Accent2 };
+            // Color color1 = new Color() { ThemeColor = ThemeColorValues.Accent2 };
+            Color color1 = new Color() { Val = "0000FF" };
             styleRunProperties1.Append(color1);
             */
+            // 2023/7/15
+            var color = style_node.GetAttribute("color");
+            if (string.IsNullOrEmpty(color) == false)
+            {
+                Color color1 = new Color() { Val = color };
+                styleRunProperties1.Append(color1);
+            }
+
             var size = style_node.GetAttribute("size");
             if (string.IsNullOrEmpty(size) == false)
             {
@@ -551,14 +672,32 @@ doc.MainDocumentPart.StyleDefinitionsPart;
                 */
                 var pPr = EnsureProperty();
 
-                // style name 找到 style id
-                var style_id = GetStyleIdFromStyleName(doc, style_name, StyleValues.Paragraph);
-                if (style_id == null)
-                    throw new Exception($"Style Name '{style_name}' not found");
-
-                pPr.ParagraphStyleId = new ParagraphStyleId() { Val = style_id };
+                // 使用本元素内嵌的 style 元素
+                if (style_name == ".")
+                {
+                    // TODO: 找到内嵌的特定 type 的第一个 style 元素
+                    var style_element = paragraph.SelectSingleNode(".//style") as XmlElement;
+                    var new_style = CreateStyle(doc, style_element, null, StyleValues.Paragraph);
+                    if (new_style == null)
+                        throw new Exception($"创建 style 相关元素失败，可能是 style 元素的 type 属性不正确");
+                    pPr.ParagraphStyleId = new ParagraphStyleId() { Val = new_style.StyleId };
+                }
+                else
+                {
+                    // style name 找到 style id
+                    var style_id = GetStyleIdFromStyleName(doc, style_name, StyleValues.Paragraph);
+                    if (style_id == null)
+                    {
+                        throw new Exception($"Style Name '{style_name}' not found");
+                    }
+                    pPr.ParagraphStyleId = new ParagraphStyleId() { Val = style_id };
+                }
             }
 
+            {
+                SetParagraphAttributes(paragraph, () => EnsureProperty());
+            }
+#if REMOVED
             string alignment = paragraph.GetAttribute("alignment");
             if (string.IsNullOrEmpty(alignment) == false)
             {
@@ -588,6 +727,7 @@ doc.MainDocumentPart.StyleDefinitionsPart;
                 var before = pPr.AppendChild<PageBreakBefore>(new PageBreakBefore());
                 before.Val = DomUtil.IsBooleanTrue(pageBreakBefore);
             }
+#endif
 
             // p 元素的下级节点
             CreateTextStream(doc, p, paragraph.ChildNodes);
@@ -627,6 +767,215 @@ doc.MainDocumentPart.StyleDefinitionsPart;
 #endif
 
             return p;
+        }
+
+        delegate ParagraphProperties delegate_ensureProperty();
+
+        // 给 ParagraphProperties 设置 p 元素或 style 元素的一些属性。这些属性是和 paragraph 有关的
+        // parameters:
+        //      func_ensure 按需确保创建 ParagraphProperties
+        static void SetParagraphAttributes(XmlElement paragraph,
+            delegate_ensureProperty func_ensure)
+        {
+            string alignment = paragraph.GetAttribute("alignment");
+            if (string.IsNullOrEmpty(alignment) == false)
+            {
+                var pPr = func_ensure();
+
+                if (Enum.TryParse<JustificationValues>(alignment, true, out JustificationValues value) == false)
+                {
+                    throw new Exception($"alignment 属性值 '{alignment}' 不合法");
+                }
+                Justification objJustification =
+    new Justification() { Val = value };
+                pPr.Append(objJustification);
+            }
+
+            string spacing = paragraph.GetAttribute("spacing");
+            if (string.IsNullOrEmpty(spacing) == false)
+            {
+                var pPr = func_ensure();
+                SetParagraphSpacing(pPr, spacing);
+            }
+
+            // 2022/8/25
+            string pageBreakBefore = paragraph.GetAttribute("pageBreakBefore");
+            if (string.IsNullOrEmpty(pageBreakBefore) == false)
+            {
+                var pPr = func_ensure();
+                var before = pPr.AppendChild<PageBreakBefore>(new PageBreakBefore());
+                before.Val = DomUtil.IsBooleanTrue(pageBreakBefore);
+            }
+
+            // http://www.officeopenxml.com/WPsectionBorders.php
+            /*
+<border>  
+  <top value="single" size="2" space="1" w:color="FF0000" />   
+  <left value="single" size="2" space="4" w:color="FF0000" />   
+  <bottom value="single" size="2" space="1" w:color="FF0000" />   
+  <right value="single" size="2" space="4" w:color="FF0000" />   
+  <between value="single" size="4" space="1" w:color="4D5D2C" />   
+</border>   
+             * */
+            var border = paragraph.SelectSingleNode("border") as XmlElement;
+            if (border != null)
+            {
+                var pPr = func_ensure();
+                var b = pPr.AppendChild<ParagraphBorders>(new ParagraphBorders());
+                CreateBorderChildren(border, b);
+            }
+        }
+
+        static void CreateBorderChildren(XmlElement border_node,
+            OpenXmlCompositeElement b)
+        {
+            // top
+            {
+                var top_node = border_node.SelectSingleNode("top") as XmlElement;
+                if (top_node != null)
+                {
+                    var top = b.AppendChild<TopBorder>(new TopBorder());
+                    GetBorderAttributes(top_node, top);
+                }
+            }
+
+            // left
+            {
+                var top_node = border_node.SelectSingleNode("left") as XmlElement;
+                if (top_node != null)
+                {
+                    var top = b.AppendChild<LeftBorder>(new LeftBorder());
+                    GetBorderAttributes(top_node, top);
+                }
+            }
+
+            // bottom
+            {
+                var top_node = border_node.SelectSingleNode("bottom") as XmlElement;
+                if (top_node != null)
+                {
+                    var top = b.AppendChild<BottomBorder>(new BottomBorder());
+                    GetBorderAttributes(top_node, top);
+                }
+            }
+
+            // right
+            {
+                var top_node = border_node.SelectSingleNode("right") as XmlElement;
+                if (top_node != null)
+                {
+                    var top = b.AppendChild<RightBorder>(new RightBorder());
+                    GetBorderAttributes(top_node, top);
+                }
+            }
+
+            // between
+            {
+                var top_node = border_node.SelectSingleNode("between") as XmlElement;
+                if (top_node != null)
+                {
+                    var top = b.AppendChild<BetweenBorder>(new BetweenBorder());
+                    GetBorderAttributes(top_node, top);
+                }
+            }
+        }
+
+        static void GetBorderAttributes(XmlElement top_node,
+            BorderType top)
+        {
+            string s = top_node.GetAttribute("value");
+            if (string.IsNullOrEmpty(s) == false)
+            {
+                if (Enum.TryParse<BorderValues>(s, true, out BorderValues v) == false)
+                    throw new ArgumentException($"'{s}' 不是合法的 BorderValues 枚举值");
+                top.Val = v;
+            }
+
+            s = top_node.GetAttribute("size");
+            // top.Size 单位是 1/8 point
+            if (string.IsNullOrEmpty(s) == false)
+            {
+                s = GetEights(s);
+                top.Size = UInt32Value.FromUInt32(Convert.ToUInt32(s));
+            }
+
+            string GetEights(string text)
+            {
+                if (string.IsNullOrEmpty(text))
+                    return text;
+
+                int nRet = ParseUnit(text,
+    out string value,
+    out string unit,
+    out string error);
+                if (nRet == -1)
+                    throw new Exception(error);
+
+                if (string.IsNullOrEmpty(unit) || unit == "pt")
+                {
+                    var v = (int)(Convert.ToDouble(value) * 8D);
+                    return v.ToString();
+                }
+
+                // 2022/10/11
+                if (unit == "cm")
+                {
+                    var v = (int)((Convert.ToDouble(value) * 72D * 20D) / 2.54D);
+                    return v.ToString();
+                }
+
+                if (unit == "ets")
+                {
+                    return value;
+                }
+
+                throw new Exception($"border/@size 属性值 '{text}' 中出现未知的单位 '{unit}'");
+            }
+
+            // top.Space 单位是 pt
+            s = top_node.GetAttribute("space");
+            if (string.IsNullOrEmpty(s) == false)
+            {
+                s = GetPoint(s);
+                top.Space = UInt32Value.FromUInt32(Convert.ToUInt32(s));
+            }
+
+            string GetPoint(string text)
+            {
+                if (string.IsNullOrEmpty(text))
+                    return text;
+
+                int nRet = ParseUnit(text,
+    out string value,
+    out string unit,
+    out string error);
+                if (nRet == -1)
+                    throw new Exception(error);
+
+                if (string.IsNullOrEmpty(unit) || unit == "pt")
+                {
+                    var v = (int)(Convert.ToDouble(value) * 1D);
+                    return v.ToString();
+                }
+
+                if (unit == "cm")
+                {
+                    var v = (int)((Convert.ToDouble(value) * 72D * 1D) / 2.54D);
+                    return v.ToString();
+                }
+
+                if (unit == "hps")  // 二分之一点
+                {
+                    return value;
+                }
+
+                throw new Exception($"space 属性值 {text} 中出现未知的单位 '{unit}'");
+            }
+
+
+            s = top_node.GetAttribute("color");
+            if (string.IsNullOrEmpty(s) == false)
+                top.Color = s;
         }
 
         static void SetParagraphSpacing(ParagraphProperties pPr, string text)
@@ -840,6 +1189,22 @@ out string error);
                     continue;
                 }
 
+                // 2023/7/12
+                if (child_node.Name == "table")
+                {
+                    /*
+                    CreateTable(doc,
+                        p == null ? doc.MainDocumentPart.Document.Body : p,
+                        child_node as XmlElement);
+                    continue;
+                    */
+                    CreateTable(doc,
+                        p == null ? doc.MainDocumentPart.Document.Body : p,
+                        child_node as XmlElement);
+                    // temp_paragraph = null;  // 打断
+                    continue;
+                }
+
                 if (child_node.Name == "br")
                 {
                     Run run = CreateParagraphIfNeed().AppendChild(new Run());
@@ -914,10 +1279,11 @@ out string error);
             doc.MainDocumentPart.StyleDefinitionsPart;
                     part.Styles.Append(new_style);
                     */
-                    CreateTextStream(doc,
-                        p,
-                        child_node.ChildNodes,
-                        new_style);
+                    if (new_style != null)
+                        CreateTextStream(doc,
+                            p,
+                            child_node.ChildNodes,
+                            new_style);
                     /*
                     Run run = p.AppendChild(new Run());
                     run.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Text(child_node.Value));
@@ -944,6 +1310,9 @@ out string error);
             OpenXmlElement body,
             XmlElement table)
         {
+            if (table.ParentNode.Name == "p")
+                throw new ArgumentException($"p 元素下级不允许使用 table 元素");
+
             // Create a table.
             Table tbl = new Table();
             body.AppendChild(tbl);
@@ -1009,61 +1378,88 @@ out string error);
                         tbl_layout.Type = TableLayoutValues.Autofit;
                     else
                         throw new Exception($"table/@layout 属性值 '{layout}' 不合法。应为 'fixed' 'autofit' 之一");
-                    
+
                     tableProp.Append(tbl_layout);
                 }
             }
 
-            // 选择第一个 tr
-            var headers = table.SelectNodes("tr[1]/*[name()='th' or name()='td']");
-            if (headers.Count > 0)
+            /*
+<w:tblGrid>  
+  <w:gridCol w:w="6888"/>  
+  <w:gridCol w:w="248"/>  
+  <w:gridCol w:w="886"/>  
+  <w:gridCol w:w="1554"/>  
+</w:tblGrid>  
+            * */
+            var gridColumns = table.SelectNodes("tableGrid[1]/gridColumn");
+            if (gridColumns.Count > 0)
             {
-                // Add columns to the table.
-                // TableGrid tg = new TableGrid(new GridColumn(), new GridColumn(), new GridColumn());
-                TableGrid tg = new TableGrid();
-                tbl.AppendChild(tg);
-                foreach (XmlElement header in headers)
+                var tg = tbl.AppendChild(new TableGrid());
+                foreach (XmlElement gridColumn in gridColumns)
                 {
                     var column = new GridColumn();
                     // GridColumn:
                     // https://docs.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.gridcolumn?view=openxml-2.8.1
                     tg.AppendChild(column);
 
-                    var width = header.GetAttribute("gridWidth");
+                    var width = gridColumn.GetAttribute("gridWidth");
                     if (string.IsNullOrEmpty(width) == false)
                         column.Width = GetTwentieths(width);
-
-                    string GetTwentieths(string text)
+                }
+            }
+            else
+            {
+                // 选择第一个 tr
+                var headers = table.SelectNodes("tr[1]/*[name()='th' or name()='td']");
+                if (headers.Count > 0)
+                {
+                    // Add columns to the table.
+                    // TableGrid tg = new TableGrid(new GridColumn(), new GridColumn(), new GridColumn());
+                    TableGrid tg = new TableGrid();
+                    tbl.AppendChild(tg);
+                    foreach (XmlElement header in headers)
                     {
-                        if (string.IsNullOrEmpty(text))
-                            return text;
+                        var column = new GridColumn();
+                        // GridColumn:
+                        // https://docs.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.gridcolumn?view=openxml-2.8.1
+                        tg.AppendChild(column);
 
-                        int nRet = ParseUnit(text,
-            out string value,
-            out string unit,
-            out string error);
-                        if (nRet == -1)
-                            throw new Exception(error);
+                        var width = header.GetAttribute("gridWidth");
+                        if (string.IsNullOrEmpty(width) == false)
+                            column.Width = GetTwentieths(width);
 
-                        if (string.IsNullOrEmpty(unit) || unit == "pt")
+                        string GetTwentieths(string text)
                         {
-                            var v = (int)(Convert.ToDouble(value) * 20D);
-                            return v.ToString();
-                        }
+                            if (string.IsNullOrEmpty(text))
+                                return text;
 
-                        // 2022/10/11
-                        if (unit == "cm")
-                        {
-                            var v = (int)((Convert.ToDouble(value) * 72D * 20D) / 2.54D);
-                            return v.ToString();
-                        }
+                            int nRet = ParseUnit(text,
+                out string value,
+                out string unit,
+                out string error);
+                            if (nRet == -1)
+                                throw new Exception(error);
 
-                        if (unit == "dxa")
-                        {
-                            return value;
-                        }
+                            if (string.IsNullOrEmpty(unit) || unit == "pt")
+                            {
+                                var v = (int)(Convert.ToDouble(value) * 20D);
+                                return v.ToString();
+                            }
 
-                        throw new Exception($"{header.Name}/@gridWidth 属性值 '{text}' 中出现未知的单位 '{unit}'");
+                            // 2022/10/11
+                            if (unit == "cm")
+                            {
+                                var v = (int)((Convert.ToDouble(value) * 72D * 20D) / 2.54D);
+                                return v.ToString();
+                            }
+
+                            if (unit == "dxa")
+                            {
+                                return value;
+                            }
+
+                            throw new Exception($"{header.Name}/@gridWidth 属性值 '{text}' 中出现未知的单位 '{unit}'");
+                        }
                     }
                 }
             }
@@ -1099,6 +1495,8 @@ out string error);
                         return tc1.Elements<TableCellProperties>().First();
                     }
 
+                    SetTdAttributes(td, () => EnsureProperty());
+#if REMOVED
                     var width = td.GetAttribute("width");
                     if (string.IsNullOrEmpty(width) == false)
                     {
@@ -1119,13 +1517,17 @@ out string error);
                         var prop = EnsureProperty();
                         prop.AppendChild(new NoWrap());
                     }
+#endif
 
                     // 检查 td 下级是否有 p 元素
                     var p_nodes = td.ChildNodes.Cast<XmlNode>()
                         .Where(n => n.NodeType == XmlNodeType.Element && n.Name == "p")
                         .ToList();
+                    var has_table_nodes = td.ChildNodes.Cast<XmlNode>()
+                        .Where(n => n.NodeType == XmlNodeType.Element && n.Name == "table")
+                        .Any();
                     Paragraph new_paragraph = null;
-                    if (p_nodes.Count == 0)
+                    if (p_nodes.Count == 0 && has_table_nodes == false)
                     {
                         new_paragraph = new Paragraph();
                         tc1.AppendChild(new_paragraph);
@@ -1145,6 +1547,106 @@ td.ChildNodes);
             }
 
             return tbl;
+        }
+
+        delegate TableCellProperties delegate_ensureTcProperty();
+
+        static void SetTdAttributes(XmlElement td,
+    delegate_ensureTcProperty func_ensure)
+        {
+            // 先探测 td 元素是否有 style 属性
+            var style_name = td.GetAttribute("style");
+            if (string.IsNullOrEmpty(style_name) == false)
+            {
+                var style_node = FindStyleNode(td, style_name, "td");
+                if (style_node == null)
+                    throw new Exception($"没有找到类型为 td 的 name 为 '{style_name}' 的 style 元素");
+                SetCellAttributes(style_node, func_ensure);
+            }
+
+            // 然后处理 td 元素自己的各个属性
+            SetCellAttributes(td, func_ensure);
+
+            // 注: 因为 td 元素自己的属性后处理，所以效果上它会覆盖掉 style 元素中的同名属性
+        }
+
+        // 查找指定 type 类型的 style 元素。注意 style 元素的 name 属性值是可能会出现重复的
+        static XmlElement FindStyleNode(XmlElement start,
+            string style_name,
+            string type)
+        {
+            if (style_name == ".")
+                return start.SelectSingleNode(".//style") as XmlElement;
+
+            var style_nodes = start.SelectNodes($"//style[@name='{style_name}']");
+            foreach (XmlElement style_node in style_nodes)
+            {
+                string current_type = style_node.GetAttribute("type");
+                if (string.IsNullOrEmpty(current_type))
+                    current_type = "paragraph";
+                if (type == current_type)
+                    return style_node;
+            }
+
+            return null;
+        }
+
+        // parameters:
+        //      node    可能是 td 元素，或者 style 元素
+        static void SetCellAttributes(XmlElement node,
+            delegate_ensureTcProperty func_ensure)
+        {
+            var width = node.GetAttribute("width");
+            if (string.IsNullOrEmpty(width) == false)
+            {
+                // Specify the width property of the table cell.
+                // Dxa:  Width in Twentieths of a Point. 二十分之一点
+                /*
+                tc1.Append(new TableCellProperties(
+                    GetTableCellWidth(width)));
+                */
+                var prop = func_ensure();
+                prop.AppendChild(GetTableCellWidth(width));
+            }
+
+            /*
+            // 2022/10/11
+            var style = td.GetAttribute("style");
+            if (StringUtil.IsInList("noWrap", style))
+            {
+                var prop = func_ensure();
+                prop.AppendChild(new NoWrap());
+            }
+            */
+            // 2023/7/19
+            if (node.HasAttribute("noWrap"))
+            {
+                var noWrap = node.GetAttribute("noWrap");
+                if (DomUtil.IsBooleanTrue(noWrap, false) == true)
+                {
+                    var prop = func_ensure();
+                    prop.AppendChild(new NoWrap());
+                }
+            }
+
+            // 2023/7/20
+            var span = node.GetAttribute("colspan");
+            if (string.IsNullOrEmpty(span) == false)
+            {
+                var prop = func_ensure();
+                if (Int32.TryParse(span, out Int32 v) == false)
+                    throw new Exception($"colspan 属性值 '{span}' 不合法。应为一个整数");
+                prop.AppendChild(new GridSpan() { Val = v });
+            }
+
+            // 2023/7/19
+            var border = node.SelectSingleNode("border") as XmlElement;
+            if (border != null)
+            {
+                var pPr = func_ensure();
+                var b = pPr.AppendChild<TableCellBorders>(new TableCellBorders());
+                CreateBorderChildren(border, b);
+            }
         }
 
         static LeftMargin GetLeftMargin(string text)

@@ -31,6 +31,8 @@ using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.Z3950.UI;
 using DigitalPlatform.Z3950;
 using static dp2Circulation.Order.ExportExcelFile;
+using DocumentFormat.OpenXml.EMMA;
+using DocumentFormat.OpenXml.Vml.Office;
 
 namespace dp2Circulation
 {
@@ -3860,8 +3862,8 @@ bQuickLoad);
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
 
-                subMenuItem = new MenuItem("导出到 HTML 文件 [" + this.listView_records.SelectedItems.Count.ToString() + " ] (&H)...");
-                subMenuItem.Click += new System.EventHandler(this.menu_saveToHtmlFile_Click);
+                subMenuItem = new MenuItem("导出到新书通报 [" + this.listView_records.SelectedItems.Count.ToString() + " ] (&H)...");
+                subMenuItem.Click += new System.EventHandler(this.menu_saveToNewBookFile_Click);
                 if (this.listView_records.SelectedItems.Count == 0)
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
@@ -6092,7 +6094,8 @@ TaskScheduler.Default);
 
             int nChangedCount = 0;
             List<ListViewItem> items = new List<ListViewItem>();
-            var all_items = this.TryGet(() => {
+            var all_items = this.TryGet(() =>
+            {
                 return new List<ListViewItem>(this.listView_records.Items.Cast<ListViewItem>());
             });
             foreach (ListViewItem item in all_items/*this.listView_records.Items*/)
@@ -10357,8 +10360,8 @@ message,
 
 #endif
 
-        // 输出 HTML 新书通报
-        void menu_saveToHtmlFile_Click(object sender, EventArgs e)
+        // 输出 HTML/docx 新书通报
+        void menu_saveToNewBookFile_Click(object sender, EventArgs e)
         {
             string strError = "";
             if (this.listView_records.SelectedItems.Count == 0)
@@ -10367,218 +10370,34 @@ message,
                 goto ERROR1;
             }
 
-            // 询问文件名
-            SaveFileDialog dlg = new SaveFileDialog();
+            List<string> biblioRecPathList = new List<string>();
 
-            dlg.Title = "请指定要创建的 HTML 文件名";
-            dlg.CreatePrompt = false;
-            dlg.OverwritePrompt = true;
-            dlg.FileName = "";
-            // dlg.InitialDirectory = Environment.CurrentDirectory;
-            dlg.Filter = "HTML 文件 (*.html)|*.html|All files (*.*)|*.*";
-
-            dlg.RestoreDirectory = true;
-
-            if (dlg.ShowDialog() != DialogResult.OK)
-                return;
-
-
-            this.EnableControls(false);
-            LibraryChannel channel = this.GetChannel();
-
-            TimeSpan old_timeout = channel.Timeout;
-            channel.Timeout = TimeSpan.FromMinutes(2);
-
-            /*
-            _stop.OnStop += new StopEventHandler(this.DoStop);
-            _stop.Initial("正在导出到 HTML 文件 ...");
-            _stop.BeginLoop();
-            */
-            var looping = BeginLoop(this.DoStop, "正在导出到 HTML 文件 ...");
-
-
-            StreamWriter writer = null;
-            try
+            List<ListViewItem> items = new List<ListViewItem>();
+            foreach (ListViewItem item in this.listView_records.SelectedItems)
             {
-                using (writer = new StreamWriter(dlg.FileName, false, Encoding.UTF8))
-                {
-                    looping.Progress.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                if (string.IsNullOrEmpty(item.Text) == true)
+                    continue;
 
-                    List<ListViewItem> items = new List<ListViewItem>();
-                    foreach (ListViewItem item in this.listView_records.SelectedItems)
-                    {
-                        if (string.IsNullOrEmpty(item.Text) == true)
-                            continue;
+                string strRecPath = item.Text;
 
-                        items.Add(item);
-                    }
+                if (string.IsNullOrEmpty(strRecPath) == true)
+                    continue;
 
-                    // writer 开头
-                    writer.Write("<html><head></head><body>\r\n");
-
-                    int i = 0;
-                    foreach (ListViewItem item in items)
-                    {
-                        Application.DoEvents(); // 出让界面控制权
-
-                        if (looping.Stopped)
-                        {
-                            strError = "用户中断";
-                            goto ERROR1;
-                        }
-
-                        string strRecPath = item.Text;
-
-                        if (string.IsNullOrEmpty(strRecPath) == true)
-                            continue;
-
-                        looping.Progress.SetMessage("正在获取书目记录 " + strRecPath);
-
-                        long lRet = channel.GetBiblioInfos(
-                            looping.Progress,
-                            strRecPath,
-                            "",
-                            new string[] { "table:areas|coverimageurl|summary|subjects|classes" },   // formats
-                            out string[] results,
-                            out byte[] baTimestamp,
-                            out strError);
-                        if (lRet == 0)
-                            goto ERROR1;
-                        if (lRet == -1)
-                            goto ERROR1;
-
-                        if (results == null || results.Length == 0)
-                        {
-                            strError = "results error";
-                            goto ERROR1;
-                        }
-
-                        string strXml = results[0];
-
-                        if (string.IsNullOrEmpty(strXml) == false)
-                        {
-                            XmlDocument dom = new XmlDocument();
-                            try
-                            {
-                                dom.LoadXml(strXml);
-                            }
-                            catch (Exception ex)
-                            {
-                                strError = "XML 装入 DOM 时出错: " + ex.Message;
-                                goto ERROR1;
-                            }
-
-                            if (dom.DocumentElement != null)
-                            {
-                                writer.Write("<hr />\r\n");
-
-                                writer.Write(BuildHtml(dom, strRecPath, Program.MainForm.OpacServerUrl));
-                                // 给根元素设置几个参数
-                                //DomUtil.SetAttr(dom.DocumentElement, "path", DpNs.dprms, Program.MainForm.LibraryServerUrl + "?" + item.BiblioInfo.RecPath);  // strRecPath
-                                //DomUtil.SetAttr(dom.DocumentElement, "timestamp", DpNs.dprms, ByteArray.GetHexTimeStampString(item.BiblioInfo.Timestamp));   // baTimestamp
-
-                                // dom.DocumentElement.WriteTo(writer);
-                            }
-                        }
-
-                        looping.Progress.SetProgressValue(++i);
-                    }
-
-                    // writer 收尾
-                    writer.Write("</body></html>\r\n");
-                }
+                biblioRecPathList.Add(strRecPath);
             }
-            catch (Exception ex)
+
+            var result = _saveToNewBookFile(biblioRecPathList,
+                null);
+            if (result.Value == -1)
             {
-                strError = "写入文件 " + dlg.FileName + " 失败，原因: " + ex.Message;
+                strError = result.ErrorInfo;
                 goto ERROR1;
             }
-            finally
-            {
-                /*
-                _stop.EndLoop();
-                _stop.OnStop -= new StopEventHandler(this.DoStop);
-                _stop.Initial("");
-                _stop.HideProgress();
-                */
-                EndLoop(looping);
-
-                channel.Timeout = old_timeout;
-                this.ReturnChannel(channel);
-
-                this.EnableControls(true);
-            }
-            MainForm.StatusBarMessage = this.listView_records.SelectedItems.Count.ToString()
-            + "条记录成功保存到文件 " + dlg.FileName;
-
-            // 打开一个浏览器
-            System.Diagnostics.Process.Start(// "iexplore",
-        dlg.FileName);
-
             return;
         ERROR1:
             MessageBox.Show(this, strError);
         }
 
-        // 构造一个 HTML 新书通报局部。
-        // parameters:
-        //      biblio_table_dom    书目记录的 table 格式内容
-        //      biblio_recpath      书目记录路径
-        static string BuildHtml(
-            XmlDocument biblio_table_dom,
-            string biblio_recpath,
-            string strOpacServerUrl)
-        {
-            if (string.IsNullOrEmpty(strOpacServerUrl) == false
-                && strOpacServerUrl[strOpacServerUrl.Length - 1] != '/')
-                strOpacServerUrl += "/";
-
-            StringBuilder result = new StringBuilder();
-            result.Append("<table>\r\n");
-            XmlNodeList lines = biblio_table_dom.DocumentElement.SelectNodes("line");
-            foreach (XmlElement line in lines)
-            {
-                string type = line.GetAttribute("type");
-                if (// type == "coverimageurl" ||
-                    type == "titlepinyin")
-                    continue;
-                string name = line.GetAttribute("name");
-
-                string value = line.GetAttribute("value");
-                if (string.IsNullOrEmpty(value))
-                    continue;
-
-                if (type == "coverimageurl")
-                {
-                    string url = "";
-                    if (value.StartsWith("http:") || value.StartsWith("https:"))
-                        url = value;
-                    else if (string.IsNullOrEmpty(strOpacServerUrl) == false)
-                    {
-                        url = $"{strOpacServerUrl}getobject.aspx?uri={HttpUtility.UrlEncode(ScriptUtil.MakeObjectUrl(biblio_recpath, value))}";
-                    }
-                    else
-                        continue;
-                    result.AppendLine($"<tr><td style='width:100pt;'></td><td><img alt='封面图片' src='{url}'></img></td></tr>");
-                    continue;
-                }
-                result.AppendLine($"<tr><td style='width:100pt;color:#aaaaaa;'>{HttpUtility.HtmlEncode(name)}</td><td>{HttpUtility.HtmlEncode(value)}</td></tr>");
-            }
-
-            if (string.IsNullOrEmpty(strOpacServerUrl) == false)
-            {
-                string url = $"{strOpacServerUrl}book.aspx?BiblioRecPath={HttpUtility.UrlEncode(biblio_recpath)}";
-                result.AppendLine($"<tr><td style='width:100pt;color:#aaaaaa;'>{HttpUtility.HtmlEncode("记录路径")}</td><td><a href='{url}'>{HttpUtility.HtmlEncode(biblio_recpath)}</a></td></tr>");
-            }
-            else
-                result.AppendLine($"<tr><td style='width:100pt;color:#aaaaaa;'>{HttpUtility.HtmlEncode("记录路径")}</td><td>{HttpUtility.HtmlEncode(biblio_recpath)}</td></tr>");
-
-            // items 占位
-            result.AppendLine($"<tr><td style='width:100pt;color:#aaaaaa;'>{HttpUtility.HtmlEncode("册详情")}</td><td>{{items}}</td></tr>");
-
-            result.Append("</table>\r\n");
-            return result.ToString();
-        }
 
         void menu_saveToXmlFile_Click(object sender, EventArgs e)
         {

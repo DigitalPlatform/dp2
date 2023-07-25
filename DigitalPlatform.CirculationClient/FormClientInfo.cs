@@ -64,8 +64,8 @@ namespace DigitalPlatform.CirculationClient
                         out string strError);
                     if (nRet == -1 || nRet == 0)
                     {
-                        ClientInfo.WriteErrorLog($"序列号不正确，{product_name} 退出");
-                        MessageBox.Show(MainForm, $"{product_name}需要先设置序列号才能使用");
+                        ClientInfo.WriteErrorLog($"序列号不正确({strError})，{product_name} 退出");
+                        MessageBox.Show(MainForm, $"{strError}。{product_name}需要先设置序列号才能使用");
                         API.PostMessage(MainForm.Handle, API.WM_CLOSE, 0, 0);
                         return false;
                     }

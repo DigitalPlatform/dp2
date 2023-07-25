@@ -98,7 +98,11 @@ namespace dp2Circulation
             {
                 Writer.WriteStartElement("td");
                 if (string.IsNullOrEmpty(_firstColumnWidth))
-                    Writer.WriteAttributeString("style", "noWrap");
+                {
+                    // Writer.WriteAttributeString("style", "noWrap");
+                    Writer.WriteAttributeString("noWrap", "true");
+                }
+
 
                 /*
                 if (first)
@@ -120,8 +124,10 @@ namespace dp2Circulation
             {
                 Writer.WriteStartElement("td");
                 if (string.IsNullOrEmpty(_secondColumnWidth))
-                    Writer.WriteAttributeString("style", "noWrap");
-
+                {
+                    // Writer.WriteAttributeString("style", "noWrap");
+                    Writer.WriteAttributeString("noWrap", "true");
+                }
                 /*
                 if (first)
                 Writer.WriteAttributeString("gridWidth", string.IsNullOrEmpty(_secondColumnWidth) ? "auto" : _secondColumnWidth);    // "50"

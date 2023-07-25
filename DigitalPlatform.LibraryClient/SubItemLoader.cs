@@ -46,6 +46,19 @@ namespace DigitalPlatform.LibraryClient
             set;
         }
 
+        bool _throwException = true;
+        public bool ThrowException
+        {
+            get
+            {
+                return _throwException;
+            }
+            set
+            {
+                _throwException = value;
+            }
+        }
+
         public long BatchSize { get; set; }
 
         public long TotalCount { get; set; }    // TODO: 可改进为，如果在没有枚举以前访问此成员，则触发一次不返回记录的请求
@@ -199,7 +212,8 @@ namespace DigitalPlatform.LibraryClient
 
                     foreach (EntityInfo info in entities)
                     {
-                        if (info.ErrorCode != ErrorCodeValue.NoError)
+                        if (info.ErrorCode != ErrorCodeValue.NoError
+                            && _throwException == true)
                         {
                             strError = "路径为 '" + info.OldRecPath + "' 的册记录装载中发生错误: " + info.ErrorInfo;
                             throw new Exception(strError);

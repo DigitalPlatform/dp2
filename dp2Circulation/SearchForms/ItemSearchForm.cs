@@ -29,6 +29,7 @@ using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryServer;
+using Microsoft.CodeAnalysis.Operations;
 // using DocumentFormat.OpenXml.Spreadsheet;
 
 
@@ -2968,6 +2969,12 @@ out strError);
                     if (nPathItemCount == 0 || bLooping == true)
                         subMenuItem.Enabled = false;
                     menuItemExport.MenuItems.Add(subMenuItem);
+
+                    subMenuItem = new MenuItem("新书通报文件 [" + (nPathItemCount == -1 ? "?" : nPathItemCount.ToString()) + "] (&H)...");
+                    subMenuItem.Click += new System.EventHandler(this.menu_saveToNewBookFile_Click);
+                    if (nPathItemCount == 0 || bLooping == true)
+                        subMenuItem.Enabled = false;
+                    menuItemExport.MenuItems.Add(subMenuItem);
                 }
 
                 // ---
@@ -3090,6 +3097,47 @@ out strError);
             contextMenu.MenuItems.Add(menuItem);
 
             contextMenu.Show(this.listView_records, new Point(e.X, e.Y));
+        }
+
+        // 输出 HTML/docx 新书通报
+        void menu_saveToNewBookFile_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            if (this.listView_records.SelectedItems.Count == 0)
+            {
+                strError = "尚未选定要导出的事项";
+                goto ERROR1;
+            }
+
+            List<string> biblioRecPathList = new List<string>();
+
+            Hashtable groupTable = new Hashtable();   // 书目记录路径 --> List<string> (册记录路径列表)
+
+            var looping = Looping(out LibraryChannel channel,
+    "正在汇总书目和册记录路径 ...",
+    "disableControl");
+            using (looping)
+            {
+                int nRet = GetSelectedBiblioRecPath(
+                    looping.Progress,
+                    channel,
+                    ref biblioRecPathList,// 按照出现先后的顺序存储书目记录路径
+                    ref groupTable, // 书目记录路径 --> List<string> (册记录路径列表)
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+            }
+
+            var result = _saveToNewBookFile(biblioRecPathList,
+                groupTable);
+            if (result.Value == -1)
+            {
+                strError = result.ErrorInfo;
+                goto ERROR1;
+            }
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
 
         string _used_nearCode = null;
@@ -7090,7 +7138,7 @@ out strError);
                 goto ERROR1;
             }
 
-            SaveEntityExcelFileDialog dlg = new SaveEntityExcelFileDialog();
+            var dlg = new SaveEntityExcelFileDialog();
             MainForm.SetControlFont(dlg, this.Font);
             dlg.LibraryCodeList = Program.MainForm.GetAllLibraryCode();
             dlg.LibraryCode = Program.MainForm.FocusLibraryCode;
@@ -7177,7 +7225,7 @@ out strError);
                 Order.EntityColumnOption entity_column_option = new Order.EntityColumnOption(Program.MainForm.UserDir,
     "");
                 entity_column_option.LoadData(Program.MainForm.AppInfo,
-                SaveEntityExcelFileDialog.EntityDefPath);
+                SaveEntityExcelFileDialog.EntityDefPath); ;
 
                 List<Order.ColumnProperty> entity_title_list = Order.DistributeExcelFile.BuildList(entity_column_option.Columns);
                 // 附加某些列的值列表

@@ -53,7 +53,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>396</ApplicationRevision>
+    <ApplicationRevision>405</ApplicationRevision>
     <ApplicationVersion>3.78.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -1823,6 +1823,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>
+    <Content Include="default\newbook.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="default\item_list.xml" />
     <Content Include="default\inventory.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -2724,6 +2727,9 @@
     <EmbeddedResource Include="SearchForms\SaveBiblioExcelFileDialog.resx">
       <DependentUpon>SaveBiblioExcelFileDialog.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="SearchForms\SaveNewBookFileDialog.resx">
+      <DependentUpon>SaveNewBookFileDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="SearchForms\VerifyEntityDialog.resx">
       <DependentUpon>VerifyEntityDialog.cs</DependentUpon>
     </EmbeddedResource>
@@ -2960,6 +2966,12 @@
     </Compile>
     <Compile Include="SearchForms\SaveBiblioExcelFileDialog.Designer.cs">
       <DependentUpon>SaveBiblioExcelFileDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SearchForms\SaveNewBookFileDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SearchForms\SaveNewBookFileDialog.Designer.cs">
+      <DependentUpon>SaveNewBookFileDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="SearchForms\SearchFormBase.cs">
       <SubType>Form</SubType>
@@ -3798,6 +3810,16 @@
       <FileType>File</FileType>
     </PublishFile>
     <PublishFile Include="default\item_change_actions.xml">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="default\newbook.css">
       <Visible>False</Visible>
       <Group>
       </Group>

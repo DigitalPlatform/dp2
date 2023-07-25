@@ -32,7 +32,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>61</ApplicationRevision>
+    <ApplicationRevision>62</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -63,10 +63,10 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>57CE53D10A26B55C487F4A07A2D6B3BCCB573D75</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>8A609FAD04B89DDF14832D49A2DD957EC2628C66</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>数字平台（北京）软件有限责任公司_2022.pfx</ManifestKeyFile>
+    <ManifestKeyFile>数字平台（北京）软件有限责任公司苏州分公司.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestTimestampUrl>http://timestamp.digicert.com</ManifestTimestampUrl>
@@ -217,6 +217,7 @@
     <None Include="代码签名证书-2020.pfx" />
     <None Include="数字平台（北京）软件有限责任公司.pfx" />
     <None Include="数字平台（北京）软件有限责任公司_2022.pfx" />
+    <None Include="数字平台（北京）软件有限责任公司苏州分公司.pfx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

@@ -123,6 +123,21 @@ namespace CompactShelfDriver.First
             if (side.ToUpper() == "A")
                 shelf_number --;
 
+            // 2023/7/7
+            // 如果是 1 区或者 3 区，则还需要把通道号倒转过来。1-12 倒转为 12-1
+            if (area == "3" || area == "1")
+            {
+                if (shelf_number < 1 || shelf_number > 12)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"shelf_number '{shelf_number}' 越出合法范围 1~12 (addr='{addr}')",
+                        ErrorCode = "argumentError"
+                    };
+
+                shelf_number = 13 - shelf_number;
+            }
+
             return await Command(serverUrl,
                 "OpenColumn",
                 area + "," + shelf_number.ToString());

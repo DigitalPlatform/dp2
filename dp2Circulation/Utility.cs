@@ -15,7 +15,11 @@ namespace dp2Circulation
     {
         // 获得书目记录的下级记录
         // parameters:
-        //      strDataName 数据名称。为 firstAccessNo subrecord 之一
+        //      strDataName 数据名称。为 firstAccessNo subrecords 之一
+        // return:
+        //      -1  出错
+        //      0   没有找到
+        //      1   成功
         public static int GetSubRecords(
     LibraryChannel channel,
     Stop stop,
