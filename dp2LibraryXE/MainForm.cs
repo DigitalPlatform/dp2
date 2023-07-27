@@ -468,7 +468,7 @@ FormWindowState.Normal);
                 {
                 }
             }
-            catch(Exception ex) // 2022/8/23
+            catch (Exception ex) // 2022/8/23
             {
                 string error = $"Initialize() 出现异常: {ExceptionUtil.GetDebugText(ex)}";
                 WriteErrorLog(error);
@@ -1876,7 +1876,7 @@ https://github.com/digitalplatform/dp2"
         // 下载带宽
         NormalResult OnLibraryProperiesChanged()
         {
-                var properties = this.LibraryProperties;
+            var properties = this.LibraryProperties;
             {
                 var bandwidth_string = StringUtil.GetParameterByPrefix(properties, "downloadBandwidth");
                 long bandwidth = -1;
@@ -3974,7 +3974,7 @@ MessageBoxDefaultButton.Button2);
                         }
                     }
                 }
-                catch(FileLoadException ex)
+                catch (FileLoadException ex)
                 {
                     // 2023/3/21
                     if (nRedoCount < 10)
@@ -5733,6 +5733,19 @@ MessageBoxDefaultButton.Button2);
         // 创建绿色更新包
         private async void MenuItem_buildGreenUpdatePack_Click(object sender, EventArgs e)
         {
+            await FormClientInfo.BuildGreenUpdatePack(
+    "dp2libraryxe",
+    this.DataDir,
+    this.TempDir,
+    (text) =>
+    {
+        this.TryInvoke(() =>
+        {
+            this._floatingMessage.Text = text;
+        });
+    });
+
+#if REMOVED
             string strError = "";
 
             var data_dir = this.DataDir;
@@ -5757,7 +5770,7 @@ MessageBoxDefaultButton.Button2);
                 result = await Task.Run<NormalResult>(() =>
                 {
 
-                    int nRet = CompressDirectory(
+                    int nRet = CompressUtil.CompressDirectory(
                 data_dir,
                 data_dir,
                 data_filename,
@@ -5769,7 +5782,7 @@ MessageBoxDefaultButton.Button2);
                             Value = -1,
                             ErrorInfo = strError
                         };
-                    nRet = CompressDirectory(
+                    nRet = CompressUtil.CompressDirectory(
     program_dir,
     program_dir,
     program_filename,
@@ -5833,11 +5846,25 @@ MessageBoxDefaultButton.Button2);
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+#endif
         }
 
         // 安装绿色更新包
-        private async void MenuItem_updateByGreenUpdatePack_Click(object sender, EventArgs e)
+        private void MenuItem_updateByGreenUpdatePack_Click(object sender, EventArgs e)
         {
+            FormClientInfo.UpdateByGreenUpdatePack(
+                "dp2libraryxe",
+                this.DataDir,
+                this.TempDir,
+                (text) =>
+                {
+                    Application.DoEvents();
+                    this.TryInvoke(() =>
+                    {
+                        this._floatingMessage.Text = text;
+                    });
+                });
+#if REMOVED
             string strError = "";
 
             OpenFileDialog dlg = new OpenFileDialog();
@@ -5888,7 +5915,7 @@ MessageBoxDefaultButton.Button2);
                     //      -1  出错
                     //      0   成功。不需要 reboot
                     //      1   成功。需要 reboot
-                    int nRet = ExtractFile(data_filename,
+                    int nRet = CompressUtil.ExtractFile(data_filename,
                             data_dir,
                             true,
                             temp_dir,
@@ -5902,7 +5929,7 @@ MessageBoxDefaultButton.Button2);
                     if (nRet == 1)
                         need_reboot = true;
 
-                    nRet = ExtractFile(program_filename,
+                    nRet = CompressUtil.ExtractFile(program_filename,
             program_dir,
             true,
             temp_dir,
@@ -5937,7 +5964,10 @@ MessageBoxDefaultButton.Button2);
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+#endif
         }
+
+#if REMOVED // 代码移动到 DigitalPlatform.IO 里面 CompressUtil 类中
 
         #region Compression
 
@@ -6174,6 +6204,8 @@ MessageBoxDefaultButton.Button2);
 
 
         #endregion
+
+#endif
 
         // 2021/11/19
         // 配置消息服务器参数

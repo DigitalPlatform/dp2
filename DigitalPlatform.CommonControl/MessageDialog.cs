@@ -184,7 +184,6 @@ namespace DigitalPlatform.CommonControl
                     info.Visible = true;
                     if (this.m_defautButton == MessageBoxDefaultButton.Button2)
                         info.Style = "accept";
-                    StringUtil.SetInList(ref info.Style, "cancel", true);
                     this.m_buttonInfos.Add(info);
 
                     // 按钮3
@@ -194,6 +193,7 @@ namespace DigitalPlatform.CommonControl
                     info.Visible = true;
                     if (this.m_defautButton == MessageBoxDefaultButton.Button3)
                         info.Style = "accept";
+                    StringUtil.SetInList(ref info.Style, "cancel", true);
                     this.m_buttonInfos.Add(info);
                 }
                 else

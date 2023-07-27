@@ -117,6 +117,13 @@ namespace dp2Circulation.Reader
                     strError = "尚未指定合并键列";
                     goto ERROR1;
                 }
+
+                // 2023/7/25
+                if (merge_key_columns.Count > 1)
+                {
+                    strError = $"合并键列不允许超过 1 个。(但现在是 {merge_key_columns.Count} 个)";
+                    goto ERROR1;
+                }
             }
 
             if (this.dataGridView1.Rows.Count == 0)
@@ -124,6 +131,22 @@ namespace dp2Circulation.Reader
                 strError = "请先装载数据";
                 goto ERROR1;
             }
+
+            // 检查有没有重复使用的列名
+            foreach (var column in this._columns)
+            {
+                if (string.IsNullOrEmpty(column.PatronFieldName))
+                    continue;
+
+                var dup_count = this._columns.Where(o => o.PatronFieldName == column.PatronFieldName).Except(new List<PatronColumn>() { column }).Count();
+                if (dup_count > 0)
+                {
+                    strError = $"字段名 '{column.PatronFieldName}' 被多次使用({dup_count + 1})";
+                    goto ERROR1;
+                }
+            }
+
+            // TODO: 当定义了合并列时，检查各行的合并列内容是否出现了重复。如果重复给予警告
 
             this.DialogResult = DialogResult.OK;
             this.Close();
@@ -286,6 +309,9 @@ namespace dp2Circulation.Reader
             return parts[1];
         }
 
+        // return:
+        //      null    空行
+        //      其它      读者记录 XML 格式
         public XmlDocument BuildPatronXml(DataGridViewRow row)
         {
             XmlDocument dom = new XmlDocument();
@@ -297,10 +323,13 @@ namespace dp2Circulation.Reader
                 if (index == -1)
                     continue;
                 var cell = row.Cells[index];
+                string value = (string)cell.Value;
+                if (string.IsNullOrEmpty(value))
+                    continue;
 
-                // email 元素内容特殊处理
                 if (field_name == "email")
                 {
+#if REMOVED
                     string old_value = DomUtil.GetElementText(dom.DocumentElement, "email");
                     StringBuilder text = new StringBuilder();
                     if (string.IsNullOrEmpty(old_value) == false)
@@ -310,14 +339,27 @@ namespace dp2Circulation.Reader
                     {
                         if (text.Length > 0)
                             text.Append(",");
-                        text.Append($"email:{value}");
+                        if (value.Contains(":") == false)
+                            text.Append($"email:{value}");
+                        else
+                            text.Append(value);
                     }
-                    DomUtil.SetElementText(dom.DocumentElement, field_name, text.ToString());
+                    text.ToString()
+#endif
+                    /*
+                    // email 元素内容特殊处理
+                    // "xietao@dp2003.com,weixinid:12345" 被处理为 "email:xietao@dp2003.com,weixinid:12345"
+                    value = PropertyTableDialog.AddDefaultName(value, "email");
+                    */
+
+                    DomUtil.SetElementText(dom.DocumentElement, field_name, value);
                 }
                 else
-                    DomUtil.SetElementText(dom.DocumentElement, field_name, (string)cell.Value);
+                    DomUtil.SetElementText(dom.DocumentElement, field_name, value);
             }
 
+            if (dom.DocumentElement.ChildNodes.Count == 0)
+                return null;
             return dom;
         }
 
@@ -342,7 +384,7 @@ namespace dp2Circulation.Reader
         {
             "barcode:证条码号,条码号",
             "state:状态",
-            "readerType:读者类型",
+            "readerType:读者类型,读者类别",
             "createDate:创建日期,办证日期",
             "expireDate:失效日期",
             "name:姓名",
@@ -355,7 +397,7 @@ namespace dp2Circulation.Reader
             "post:邮政编码,邮编",
             "address:地址",
             "tel:电话号码,电话",
-            "email:Email地址",
+            "email:Email地址,Email,email",
             "comment:注释",
             // "zhengyuan",
             "hire:租金",
@@ -414,7 +456,7 @@ namespace dp2Circulation.Reader
                         Caption = "<清除>",
                         Name = "<清除>",
                         Column = _columns[e.ColumnIndex]
-                    }; 
+                    };
                     subMenuItem.Click += new System.EventHandler(this.menu_setFieldName_Click);
                     menuItem.MenuItems.Add(subMenuItem);
                 }
@@ -535,11 +577,35 @@ namespace dp2Circulation.Reader
             ContextMenu contextMenu = new ContextMenu();
             MenuItem menuItem = null;
 
+            /*
+            int GetSelectedRowCount()
+            {
+                int count = 0;
+                foreach (DataGridViewRow row in dataGridView1.SelectedRows)
+                {
+                    if (row.IsNewRow)
+                        continue;
+                    count++;
+                }
+                return count;
+            }
+            */
+
+            int count = dataGridView1
+                .SelectedRows
+                .Cast<DataGridViewRow>()
+                .Where(o => o.IsNewRow == false)
+                .Count();
+                // GetSelectedRowCount();
+            menuItem = new MenuItem($"移除行[{count}]");
+            /*
             var current_row = this.dataGridView1.Rows[e.RowIndex];
-            menuItem = new MenuItem("移除行");
             if (current_row.IsNewRow)
                 menuItem.Enabled = false;
             menuItem.Tag = e.RowIndex;
+            */
+            if (count == 0)
+                menuItem.Enabled = false;
             menuItem.Click += new System.EventHandler(this.menu_removeSelectedLine_Click);
             contextMenu.MenuItems.Add(menuItem);
 
@@ -561,13 +627,20 @@ namespace dp2Circulation.Reader
 
         void menu_removeSelectedLine_Click(object sender, EventArgs e)
         {
+            foreach(DataGridViewRow row in dataGridView1.SelectedRows)
+            {
+                if (row.IsNewRow)
+                    continue;
+                this.dataGridView1.Rows.Remove(row);
+            }
+            /*
             MenuItem menu = sender as MenuItem;
             int row_index = (int)menu.Tag;
-
             var row = this.dataGridView1.Rows[row_index];
             if (row.IsNewRow)
                 return;
             this.dataGridView1.Rows.RemoveAt(row_index);
+            */
         }
 
         void ClearColumns()
@@ -641,7 +714,7 @@ namespace dp2Circulation.Reader
         // 查看一个字段名是否已经被 _columns 中使用过了
         bool HasFieldNameUsed(string field_name)
         {
-            return _columns.Where(o=>o.PatronFieldName == field_name).Any();
+            return _columns.Where(o => o.PatronFieldName == field_name).Any();
         }
     }
 

@@ -2349,7 +2349,7 @@ TaskScheduler.Default);
 #endif
 
         // "读者/?1" 之中的 ID 种子
-        int _append_id_seed = 1;
+        int _append_id_seed = 0;
 
         void menu_importFromExcelFile_Click(object sender, EventArgs e)
         {
@@ -2430,6 +2430,38 @@ TaskScheduler.Default);
 
                 // var merge = (string.IsNullOrEmpty(key_field_name) == false);
 
+                var actions = new List<FieldMerge>();
+                actions.Add(new FieldMerge
+                {
+                    ElementName = "email"
+                });
+                actions.Add(new FieldMerge
+                {
+                    ElementName = "state"
+                });
+                actions.Add(new FieldMerge
+                {
+                    ElementName = "cardNumber"
+                });
+                actions.Add(new FieldMerge
+                {
+                    ElementName = "comment"
+                });
+
+                // 用于对记录路径进行查重的 hashtable。key 为记录路径
+                Hashtable dup_table = new Hashtable();
+                {
+                    var items = this.TryGet(() =>
+                    {
+                        return this.listView_records.Items.Cast<ListViewItem>().ToList();
+                    });
+                    foreach (ListViewItem item in items)
+                    {
+                        string recpath = ListViewUtil.GetItemText(item, 0);
+                        dup_table[recpath] = 1;
+                    }
+                }
+
                 using (var looping = Looping(
                     out LibraryChannel channel,
                     "正在导入读者数据 ...",
@@ -2453,7 +2485,8 @@ TaskScheduler.Default);
                         looping.Progress.SetMessage($"正在导入读者数据 {i + 1}/{rows.Length}...");
 
                         var dom = import_dlg.BuildPatronXml(row);
-
+                        if (dom == null)
+                            goto CONTINUE;
 
 
                         // 这里使用一种 GUID 式的路径，等保存后再转为实际路径
@@ -2532,7 +2565,10 @@ TaskScheduler.Default);
                                 // 合并
                                 XmlDocument target_dom = new XmlDocument();
                                 target_dom.LoadXml(existing_xml);
-                                Merge(key_field_name, dom, target_dom);
+                                Merge(actions,
+                                    key_field_name,
+                                    dom,
+                                    target_dom);
                                 dom = target_dom;
                                 path = existing_recpath;
 
@@ -2541,6 +2577,31 @@ TaskScheduler.Default);
 + "</div>");
                             }
                         }
+
+                        /*
+                        // 对 this.BiblioTable 查重，避免添加重复路径的事项
+                        // var dup = GetBiblioInfo(path);
+                        */
+                        // 注: 不应用 this.BiblioTable 来查重。因为无法确保所有事项都在里面
+                        // 对记录路径进行查重
+                        if (dup_table.ContainsKey(path))
+                        {
+                            DialogResult result = this.TryGet(() =>
+                            {
+                                return MessageBox.Show(this,
+    $"当前记录列表中已经存在路径为 '{path}' 的事项，不允许重复加入。\r\n\r\n是否继续操作?\r\n\r\n(Yes 跳过，然后继续操作；No 中断批处理)",
+    "ReaderSearchForm",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+                            });
+                            if (result == DialogResult.Yes)
+                                goto CONTINUE;
+                            strError = "用户中断";
+                            goto ERROR1;
+                        }
+
+                        dup_table[path] = 1;
 
                         var info = new BiblioInfo
                         {
@@ -2612,6 +2673,11 @@ TaskScheduler.Default);
                     return;
                 }
             }
+            catch (Exception ex)
+            {
+                strError = ex.Message;
+                goto ERROR1;
+            }
             finally
             {
                 this.TryInvoke(() =>
@@ -2631,7 +2697,9 @@ TaskScheduler.Default);
         }
 
         // 把 source_dom 里面的字段覆盖到 target_dom
+        // source_dom 里面不会有多余的字段
         void Merge(
+            List<FieldMerge> actions,
             string merge_field_name,
             XmlDocument source_dom,
             XmlDocument target_dom)
@@ -2644,14 +2712,160 @@ TaskScheduler.Default);
                 if (strElementName == merge_field_name)
                     continue;
 
-                string strTextNew = DomUtil.GetElementOuterXml(source_dom.DocumentElement,
-                    strElementName);
+                string old_outerxml = DomUtil.GetElementOuterXml(target_dom.DocumentElement,
+    strElementName);
+                if (string.IsNullOrEmpty(old_outerxml))
+                {
+                    string strTextNew = DomUtil.GetElementOuterXml(source_dom.DocumentElement,
+                        strElementName);
 
-                // 一般处理
-                DomUtil.SetElementOuterXml(target_dom.DocumentElement,
-                    strElementName,
-                    strTextNew);
+                    // 一般处理
+                    DomUtil.SetElementOuterXml(target_dom.DocumentElement,
+                        strElementName,
+                        strTextNew);
+                }
+                else
+                {
+                    string old_content = DomUtil.GetElementText(target_dom.DocumentElement,
+    strElementName);
+                    string new_content = DomUtil.GetElementText(source_dom.DocumentElement,
+                        strElementName);
+
+                    if (string.IsNullOrEmpty(old_content) && string.IsNullOrEmpty(new_content))
+                    {
+                        continue;
+                    }
+
+                    // 再精细处理元素的文本部分
+                    // old_content 和 new_content 进行合并处理
+                    var action = FindAction(strElementName);
+                    if (action != null)
+                    {
+                        this.TryInvoke(() =>
+                        {
+                            var content = action.MergeContent(this,
+        old_content,
+        new_content);
+                            DomUtil.SetElementText(target_dom.DocumentElement,
+                                strElementName,
+                                content);
+                        });
+                    }
+                    else
+                        DomUtil.SetElementText(target_dom.DocumentElement,
+                            strElementName,
+                            new_content);
+                }
+
+                DomUtil.RemoveEmptyElements(target_dom.DocumentElement);
             }
+
+            FieldMerge FindAction(string element_name)
+            {
+                return actions.Where(o => o.ElementName == element_name).FirstOrDefault();
+            }
+        }
+
+        class FieldMerge
+        {
+            // 元素名
+            public string ElementName { get; set; }
+
+            // 前一次处理的动作
+            public string LastAction { get; set; }  // overwrite/merge
+
+            // 处理前是否询问
+            public bool DontAsk { get; set; }
+
+            // 合并新旧值
+            public string MergeContent(
+                Form owner,
+                string old_value,
+                string new_value)
+            {
+                if (old_value == new_value)
+                    return new_value;
+
+                bool hide_dialog = this.DontAsk;
+                if (hide_dialog == false)
+                {
+                    var result = MessageDialog.Show(owner,
+    $"字段 {this.ElementName} 的\r\n旧内容为 '{old_value}'，\r\n新内容为 '{new_value}'，\r\n请问如何合并新旧内容?\r\n\r\n[覆盖] 用新内容覆盖旧内容;\r\n[追加] 将新内容添加到旧内容之后并去重;\r\n[中断] 中断批处理",
+    MessageBoxButtons.YesNoCancel,
+    this.LastAction == "overwrite" ? MessageBoxDefaultButton.Button1 : MessageBoxDefaultButton.Button2,
+    "此后不再出现本对话框",
+    ref hide_dialog,
+    new string[] { "覆盖", "追加", "中断" });
+                    if (result == DialogResult.Cancel)
+                        throw new InterruptException("用户中断");
+
+                    if (result == DialogResult.Yes)
+                        this.LastAction = "overwrite";
+                    else
+                        this.LastAction = "merge";
+
+                    this.DontAsk = hide_dialog;
+                }
+
+                if (this.ElementName == "email")
+                    return MergeEmail(this.LastAction, old_value, new_value);
+                if (this.ElementName == "state"
+                    || this.ElementName == "cardNumber")
+                    return MergeState(this.LastAction, old_value, new_value);
+                if (this.ElementName == "comment")
+                    return MergeComment(this.LastAction, old_value, new_value);
+                throw new Exception($"合并时出现未知的元素名 '{this.ElementName}'");
+            }
+
+            static string MergeEmail(string action,
+                string old_value,
+                string new_value)
+            {
+                old_value = PropertyTableDialog.AddDefaultName(old_value, "email");
+                new_value = PropertyTableDialog.AddDefaultName(new_value, "email");
+                return MergeState(action, old_value, new_value);
+            }
+
+            static string MergeState(string action,
+    string old_value,
+    string new_value)
+            {
+                if (action == "overwrite")
+                    return new_value;
+                if (action == "merge")
+                {
+                    var old_list = StringUtil.SplitList(old_value);
+                    var new_list = StringUtil.SplitList(new_value);
+                    var result = new List<string>();
+                    result.AddRange(old_list);
+                    result.AddRange(new_list);
+                    StringUtil.RemoveDupNoSort(ref result);
+                    return string.Join(",", result.ToArray());
+                }
+
+                throw new Exception($"无法识别的 action '{action}'");
+            }
+
+            static string MergeComment(string action,
+string old_value,
+string new_value)
+            {
+                if (action == "overwrite")
+                    return new_value;
+                if (action == "merge")
+                {
+                    var old_list = StringUtil.SplitList(old_value, ';');
+                    var new_list = StringUtil.SplitList(new_value, ';');
+                    var result = new List<string>();
+                    result.AddRange(old_list);
+                    result.AddRange(new_list);
+                    StringUtil.RemoveDupNoSort(ref result);
+                    return string.Join(";", result.ToArray());
+                }
+
+                throw new Exception($"无法识别的 action '{action}'");
+            }
+
         }
 
         static int MAX_READER_COUNT = 100;
@@ -9272,7 +9486,6 @@ out strError);
             Hashtable temp_cacheTable = new Hashtable();
             try
             {
-
                 List<string> recpaths = new List<string>(); // 缓存中没有包含的那些记录
                 foreach (ListViewItem item in this.Items)
                 {

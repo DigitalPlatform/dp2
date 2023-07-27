@@ -419,11 +419,14 @@ namespace dp2Circulation
             menu_moveDown_Click(sender, e);
         }
 
+        // TODO: 测试一下 text 为空时候
         // 处理 "name:value1,value2" 形态的字符串，为缺乏子参数名的添加默认子参数名
         public static string AddDefaultName(
             string text,
             string default_name)
         {
+            if (string.IsNullOrEmpty(text))
+                return "";
             List<string> results = new List<string>();
             var segments = text.Split(',');
             foreach (string s in segments)

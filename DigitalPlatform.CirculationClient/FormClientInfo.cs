@@ -3,9 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Speech.Synthesis;
 using System.Text;
@@ -13,10 +15,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.License;
 using DigitalPlatform.Text;
-
+using Ionic.Zip;
 using static DigitalPlatform.CirculationClient.ClientInfo;
 
 namespace DigitalPlatform.CirculationClient
@@ -959,5 +962,239 @@ delegate_action action)
 
         #endregion
 
+
+        #region 绿色安装包
+
+        // 创建绿色更新包
+        public static async Task BuildGreenUpdatePack(
+            string strProductName,
+            string strDataDir,
+            string strTempDir,
+            IO.CompressUtil.delegate_displayText func_display)
+        {
+            string strError = "";
+
+            var data_dir = strDataDir;
+            var program_dir = Environment.CurrentDirectory;
+
+            if (PathUtil.IsEqual(data_dir, program_dir) == true)
+            {
+                strError = $"此 {strProductName} 为非 ClickOnce 安装方式，无法创建绿色更新包";
+                goto ERROR1;
+            }
+
+            var temp_dir = strTempDir;
+            var data_filename = Path.Combine(strTempDir, "data.zip");
+            var program_filename = Path.Combine(strTempDir, "program.zip");
+
+            var final_filename = Path.Combine(strTempDir, $"{strProductName}_update.zip");
+
+            NormalResult result = null;
+            func_display?.Invoke("正在创建绿色更新包 ...");
+            try
+            {
+                result = await Task.Run<NormalResult>(() =>
+                {
+
+                    int nRet = CompressUtil.CompressDirectory(
+                data_dir,
+                data_dir,
+                data_filename,
+                Encoding.UTF8,
+                out strError);
+                    if (nRet == -1)
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError
+                        };
+                    nRet = CompressUtil.CompressDirectory(
+    program_dir,
+    program_dir,
+    program_filename,
+    Encoding.UTF8,
+    out strError);
+                    if (nRet == -1)
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError
+                        };
+                    // 再压缩到一个文件
+                    if (File.Exists(final_filename))
+                        File.Delete(final_filename);
+
+                    List<string> filenames = new List<string>();
+                    filenames.Add(data_filename);
+                    filenames.Add(program_filename);
+                    using (ZipFile zip = new ZipFile(Encoding.UTF8))
+                    {
+                        zip.ParallelDeflateThreshold = -1;
+
+                        foreach (string filename in filenames)
+                        {
+                            string strShortFileName = filename.Substring(temp_dir.Length + 1);
+                            string directoryPathInArchive = Path.GetDirectoryName(strShortFileName);
+                            zip.AddFile(filename, directoryPathInArchive);
+                        }
+
+                        zip.UseZip64WhenSaving = Zip64Option.AsNecessary;
+                        zip.Save(final_filename);
+                    }
+
+                    File.Delete(data_filename);
+                    File.Delete(program_filename);
+
+                    return new NormalResult();
+                });
+            }
+            finally
+            {
+                func_display?.Invoke("");
+            }
+
+            if (result.Value == -1)
+            {
+                strError = result.ErrorInfo;
+                goto ERROR1;
+            }
+
+            // 打开文件夹
+            try
+            {
+                System.Diagnostics.Process.Start(temp_dir);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(MainForm, ExceptionUtil.GetAutoText(ex));
+            }
+
+            return;
+        ERROR1:
+            MessageBox.Show(MainForm, strError);
+        }
+
+        // 安装绿色更新包
+        public static void UpdateByGreenUpdatePack(
+            string strProductName,
+            string strDataDir,
+            string strTempDir,
+            IO.CompressUtil.delegate_displayText func_display,
+            CancellationToken token = default)
+        {
+            string strError = "";
+
+            var data_dir = strDataDir;
+            var program_dir = Environment.CurrentDirectory;
+
+            if (PathUtil.IsEqual(data_dir, program_dir) == false)
+            {
+                strError = $"此 {strProductName} 为 ClickOnce 安装方式，无法使用绿色更新包进行更新";
+                goto ERROR1;
+            }
+
+            OpenFileDialog dlg = new OpenFileDialog();
+            dlg.Title = $"请指定 {strProductName} 绿色更新包文件名";
+            // dlg.FileName = this.textBox_filename.Text;
+
+            dlg.Filter = $"{strProductName}_update.zip|{strProductName}_update.zip|All files (*.*)|*.*";
+            dlg.RestoreDirectory = true;
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            // 检查文件名
+            if (Path.GetFileName(dlg.FileName) != $"{strProductName}_update.zip")
+            {
+                strError = "文件名不正确";
+                goto ERROR1;
+            }
+
+            // testing
+            // data_dir = "c:\\temp\\data_dir";
+            // program_dir = "c:\\temp\\program_dir";
+
+            var temp_dir = strTempDir;
+            var data_filename = Path.Combine(strTempDir, "data.zip");
+            var program_filename = Path.Combine(strTempDir, "program.zip");
+
+            NormalResult result = null;
+            func_display?.Invoke("正在安装绿色更新包 ...");
+
+            NormalResult Extract()
+            {
+                try
+                {
+                    // 展开到临时目录
+                    using (ZipFile zip = ZipFile.Read(dlg.FileName))
+                    {
+                        foreach (ZipEntry entry in zip)
+                        {
+                            entry.Extract(temp_dir, ExtractExistingFileAction.OverwriteSilently);
+                        }
+                    }
+
+                    bool need_reboot = false;
+                    // return:
+                    //      -1  出错
+                    //      0   成功。不需要 reboot
+                    //      1   成功。需要 reboot
+                    int nRet = CompressUtil.ExtractFile(data_filename,
+                            data_dir,
+                            true,
+                            temp_dir,
+                            func_display,
+                            token,
+                            out strError);
+                    if (nRet == -1)
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError
+                        };
+                    if (nRet == 1)
+                        need_reboot = true;
+
+                    nRet = CompressUtil.ExtractFile(program_filename,
+            program_dir,
+            true,
+            temp_dir,
+            func_display,
+            token,
+            out strError);
+                    if (nRet == -1)
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError
+                        };
+                    if (nRet == 1)
+                        need_reboot = true;
+
+                    return new NormalResult { Value = need_reboot ? 1 : 0 };
+                }
+                finally
+                {
+                    func_display?.Invoke("");
+                }
+            }
+
+            result = Extract();
+            if (result.Value == -1)
+            {
+                strError = result.ErrorInfo;
+                goto ERROR1;
+            }
+
+            if (result.Value == 1)
+                MessageBox.Show(MainForm, "请重新启动 Windows，以完成绿色更新包安装");
+            else
+                MessageBox.Show(MainForm, "绿色更新包安装完成");
+            return;
+        ERROR1:
+            MessageBox.Show(MainForm, strError);
+        }
+
+        #endregion
     }
 }

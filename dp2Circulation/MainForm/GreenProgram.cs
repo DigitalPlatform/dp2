@@ -92,7 +92,7 @@ namespace dp2Circulation
                 writer.Write(strVersion);
             }
 
-            return 0;
+            return 1;
         }
 
         static bool FileNameFilter(FileSystemInfo fi)

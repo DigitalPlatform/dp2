@@ -22,6 +22,7 @@ using System.Reflection;
 using System.Drawing.Text;
 using System.Speech.Synthesis;
 using System.Threading.Tasks;
+using System.Security.Principal;
 
 using log4net;
 
@@ -438,7 +439,7 @@ namespace dp2Circulation
             }
         }
 
-        private void MainForm_Load(object sender, EventArgs e)
+        private async void MainForm_Load(object sender, EventArgs e)
         {
             ClientInfo.SettingsFileName = "dp2circulation.xml";
             FormClientInfo.SerialNumberMode = "loose";   // "must";
@@ -2439,7 +2440,7 @@ false);
             }
         }
 
-#endregion
+        #endregion
 
         private void toolButton_stop_Click(object sender, EventArgs e)
         {
@@ -3318,7 +3319,7 @@ false);
             _channelList.Remove(channel);
         }
 
-#region looping
+        #region looping
 
         // 三种动作: GetChannel() BeginLoop() 和 EnableControl()
         // parameters:
@@ -3438,7 +3439,7 @@ string style = null)
             }
         }
 
-#endregion
+        #endregion
 
 
 
@@ -4332,7 +4333,7 @@ Stack:
             }
         }
 
-#region EnsureXXXForm ...
+        #region EnsureXXXForm ...
 
         /// <summary>
         /// 获得最顶层的 UtilityForm 窗口，如果没有，则新创建一个
@@ -4620,7 +4621,7 @@ Stack:
             return EnsureChildForm<BiblioStatisForm>();
         }
 
-#endregion
+        #endregion
 
         private void toolButton_borrow_Click(object sender, EventArgs e)
         {
@@ -8387,7 +8388,7 @@ Keys keyData)
             OpenWindow<MessageForm>();
         }
 
-#region 序列号机制
+        #region 序列号机制
 
         bool _testMode = false;
 
@@ -8740,7 +8741,7 @@ Keys keyData)
 
 #endif
 
-#endregion
+        #endregion
 
 #if REMOVED
         private void MenuItem_resetSerialCode_Click(object sender, EventArgs e)
@@ -8869,7 +8870,7 @@ Keys keyData)
             return Path.Combine(this.UserTempDir, "~" + strPrefix + Guid.NewGuid().ToString());
         }
 
-#region servers.xml
+        #region servers.xml
 
         // HnbUrl.HnbUrl
 
@@ -9213,7 +9214,7 @@ Keys keyData)
             return null;
         }
 
-#endregion // servers.xml
+        #endregion // servers.xml
 
 #if !NEWFINGER
         void EnableFingerprintSendKey(bool enable)
@@ -9372,7 +9373,7 @@ Keys keyData)
 #endif
         }
 
-#region 消息过滤
+        #region 消息过滤
 
 #if NO
         public event MessageFilterEventHandler MessageFilter = null;
@@ -9402,7 +9403,7 @@ Keys keyData)
 
 #endif
 
-#endregion
+        #endregion
 
         /// <summary>
         /// 获得当前 dp2library 服务器相关的本地配置目录路径。这是在用户目录中用 URL 映射出来的子目录名
@@ -9715,10 +9716,26 @@ Keys keyData)
             }
         }
 
+        // 创建备用绿色安装目录。所谓“备用绿色安装目录”，是一个在特殊情况下备用的绿色内务可执行文件目录，一般位于 c:\dp2circulation。一般由每次内务正常启动时自动复制创建
         private void MenuItem_createGreenApplication_Click(object sender, EventArgs e)
         {
             // TODO: 需要加入判断，如果当前已经是绿色位置启动的，就隐藏此菜单
-            Task.Factory.StartNew(() => CopyGreen(true));
+
+            // TODO: 先关闭所有 MDI 子窗口，让背景窗口显露出来
+            _ = Task.Factory.StartNew(
+    () =>
+    {
+        CopyGreen(true);
+        this.TryInvoke(() =>
+        {
+            MessageBox.Show(this, "“创建备用绿色安装目录”执行完成。执行过程信息可在背景窗看到");
+        });
+    },
+this._cancel.Token,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+            // Task.Factory.StartNew(() => CopyGreen(true));
+
         }
 
         // 获得 MARC HTML 对照显示的头部字符串
@@ -10400,6 +10417,68 @@ out strError);
         "main_form",
         "CommandDialog_uiState",
         dlg.UiState);
+        }
+
+        private async void MenuItem_buildGreenUpdatePack_Click(object sender, EventArgs e)
+        {
+            await FormClientInfo.BuildGreenUpdatePack(
+"dp2circulation",
+this.DataDir,
+this.UserTempDir,
+(text) =>
+{
+    this.TryInvoke(() =>
+    {
+        this.StatusBarMessage = text;
+    });
+});
+        }
+
+        private async void MenuItem_updateByGreenUpdatePack_Click(object sender, EventArgs e)
+        {
+            /*
+            await FormClientInfo.UpdateByGreenUpdatePack(
+    "dp2circulation",
+    this.DataDir,
+    this.UserTempDir,
+    (text) =>
+    {
+        this.TryInvoke(() =>
+        {
+            this.StatusBarMessage = text;
+        });
+    });
+            */
+            var wi = WindowsIdentity.GetCurrent();
+            var wp = new WindowsPrincipal(wi);
+
+            bool runAsAdmin = wp.IsInRole(WindowsBuiltInRole.Administrator);
+
+            if (true/*!runAsAdmin*/)
+            {
+                // var processInfo = new ProcessStartInfo(Assembly.GetExecutingAssembly().CodeBase);
+                var processInfo = new ProcessStartInfo();
+
+                // The following properties run the new process as administrator
+                processInfo.UseShellExecute = true;
+                processInfo.WorkingDirectory = Environment.CurrentDirectory;
+                processInfo.FileName = Application.ExecutablePath;
+                processInfo.Verb = "runas";
+                processInfo.Arguments = " action=update \"datadir=" + this.DataDir
+                    + "\" \"tempdir=" + this.UserTempDir + "\"";
+
+                // Start the new process
+                try
+                {
+                    Process.Start(processInfo);
+                }
+                catch (Exception ex)
+                {
+                    // The user did not allow the application to run as administrator
+                    MessageBox.Show(this,
+                        $"dp2circulation (Administrator) 无法运行({ex.Message})。\r\n\r\n因为安装升级文件的需要，必须在 Administrator 权限下才能运行");
+                }
+            }
         }
     }
 

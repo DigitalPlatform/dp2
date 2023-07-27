@@ -60,6 +60,7 @@ namespace dp2Circulation
             this.imageList_lineType = new System.Windows.Forms.ImageList(this.components);
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.panel_up = new System.Windows.Forms.Panel();
+            this.label_nextButtonTips = new System.Windows.Forms.Label();
             this.tabControl_main.SuspendLayout();
             this.tabPage_load.SuspendLayout();
             this.tabPage_sort.SuspendLayout();
@@ -83,10 +84,10 @@ namespace dp2Circulation
             this.tabControl_main.Controls.Add(this.tabPage_sort);
             this.tabControl_main.Controls.Add(this.tabPage_print);
             this.tabControl_main.Location = new System.Drawing.Point(0, 0);
-            this.tabControl_main.Margin = new System.Windows.Forms.Padding(2);
+            this.tabControl_main.Margin = new System.Windows.Forms.Padding(4);
             this.tabControl_main.Name = "tabControl_main";
             this.tabControl_main.SelectedIndex = 0;
-            this.tabControl_main.Size = new System.Drawing.Size(510, 144);
+            this.tabControl_main.Size = new System.Drawing.Size(935, 251);
             this.tabControl_main.TabIndex = 0;
             this.tabControl_main.SelectedIndexChanged += new System.EventHandler(this.tabControl_main_SelectedIndexChanged);
             // 
@@ -100,11 +101,11 @@ namespace dp2Circulation
             this.tabPage_load.Controls.Add(this.comboBox_load_type);
             this.tabPage_load.Controls.Add(this.button_load_loadFromBatchNo);
             this.tabPage_load.Controls.Add(this.button_load_loadFromBarcodeFile);
-            this.tabPage_load.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_load.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPage_load.Location = new System.Drawing.Point(4, 31);
+            this.tabPage_load.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_load.Name = "tabPage_load";
-            this.tabPage_load.Padding = new System.Windows.Forms.Padding(2);
-            this.tabPage_load.Size = new System.Drawing.Size(502, 118);
+            this.tabPage_load.Padding = new System.Windows.Forms.Padding(4);
+            this.tabPage_load.Size = new System.Drawing.Size(927, 216);
             this.tabPage_load.TabIndex = 0;
             this.tabPage_load.Text = "装载";
             this.tabPage_load.UseVisualStyleBackColor = true;
@@ -112,9 +113,10 @@ namespace dp2Circulation
             // checkBox_load_fillBiblioSummary
             // 
             this.checkBox_load_fillBiblioSummary.AutoSize = true;
-            this.checkBox_load_fillBiblioSummary.Location = new System.Drawing.Point(6, 63);
+            this.checkBox_load_fillBiblioSummary.Location = new System.Drawing.Point(11, 110);
+            this.checkBox_load_fillBiblioSummary.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.checkBox_load_fillBiblioSummary.Name = "checkBox_load_fillBiblioSummary";
-            this.checkBox_load_fillBiblioSummary.Size = new System.Drawing.Size(114, 16);
+            this.checkBox_load_fillBiblioSummary.Size = new System.Drawing.Size(195, 25);
             this.checkBox_load_fillBiblioSummary.TabIndex = 3;
             this.checkBox_load_fillBiblioSummary.Text = "包含书目摘要(&B)";
             this.checkBox_load_fillBiblioSummary.UseVisualStyleBackColor = true;
@@ -122,19 +124,20 @@ namespace dp2Circulation
             // checkBox_load_fillOrderInfo
             // 
             this.checkBox_load_fillOrderInfo.AutoSize = true;
-            this.checkBox_load_fillOrderInfo.Location = new System.Drawing.Point(5, 44);
+            this.checkBox_load_fillOrderInfo.Location = new System.Drawing.Point(9, 77);
+            this.checkBox_load_fillOrderInfo.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.checkBox_load_fillOrderInfo.Name = "checkBox_load_fillOrderInfo";
-            this.checkBox_load_fillOrderInfo.Size = new System.Drawing.Size(114, 16);
+            this.checkBox_load_fillOrderInfo.Size = new System.Drawing.Size(195, 25);
             this.checkBox_load_fillOrderInfo.TabIndex = 2;
             this.checkBox_load_fillOrderInfo.Text = "包含订购信息(&O)";
             this.checkBox_load_fillOrderInfo.UseVisualStyleBackColor = true;
             // 
             // button_load_loadFromRecPathFile
             // 
-            this.button_load_loadFromRecPathFile.Location = new System.Drawing.Point(160, 32);
-            this.button_load_loadFromRecPathFile.Margin = new System.Windows.Forms.Padding(2);
+            this.button_load_loadFromRecPathFile.Location = new System.Drawing.Point(293, 56);
+            this.button_load_loadFromRecPathFile.Margin = new System.Windows.Forms.Padding(4);
             this.button_load_loadFromRecPathFile.Name = "button_load_loadFromRecPathFile";
-            this.button_load_loadFromRecPathFile.Size = new System.Drawing.Size(170, 22);
+            this.button_load_loadFromRecPathFile.Size = new System.Drawing.Size(312, 38);
             this.button_load_loadFromRecPathFile.TabIndex = 5;
             this.button_load_loadFromRecPathFile.Text = "从记录路径文件装载(&R)...";
             this.button_load_loadFromRecPathFile.UseVisualStyleBackColor = true;
@@ -143,10 +146,10 @@ namespace dp2Circulation
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(2, 5);
-            this.label4.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label4.Location = new System.Drawing.Point(4, 9);
+            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(89, 12);
+            this.label4.Size = new System.Drawing.Size(159, 21);
             this.label4.TabIndex = 0;
             this.label4.Text = "出版物类型(&T):";
             // 
@@ -156,19 +159,19 @@ namespace dp2Circulation
             this.comboBox_load_type.Items.AddRange(new object[] {
             "图书",
             "连续出版物"});
-            this.comboBox_load_type.Location = new System.Drawing.Point(6, 19);
-            this.comboBox_load_type.Margin = new System.Windows.Forms.Padding(2);
+            this.comboBox_load_type.Location = new System.Drawing.Point(11, 33);
+            this.comboBox_load_type.Margin = new System.Windows.Forms.Padding(4);
             this.comboBox_load_type.Name = "comboBox_load_type";
-            this.comboBox_load_type.Size = new System.Drawing.Size(116, 20);
+            this.comboBox_load_type.Size = new System.Drawing.Size(209, 29);
             this.comboBox_load_type.TabIndex = 1;
             this.comboBox_load_type.Text = "图书";
             // 
             // button_load_loadFromBatchNo
             // 
-            this.button_load_loadFromBatchNo.Location = new System.Drawing.Point(160, 59);
-            this.button_load_loadFromBatchNo.Margin = new System.Windows.Forms.Padding(2);
+            this.button_load_loadFromBatchNo.Location = new System.Drawing.Point(293, 103);
+            this.button_load_loadFromBatchNo.Margin = new System.Windows.Forms.Padding(4);
             this.button_load_loadFromBatchNo.Name = "button_load_loadFromBatchNo";
-            this.button_load_loadFromBatchNo.Size = new System.Drawing.Size(170, 22);
+            this.button_load_loadFromBatchNo.Size = new System.Drawing.Size(312, 38);
             this.button_load_loadFromBatchNo.TabIndex = 6;
             this.button_load_loadFromBatchNo.Text = "根据批次号检索装载(&B)...";
             this.button_load_loadFromBatchNo.UseVisualStyleBackColor = true;
@@ -176,10 +179,10 @@ namespace dp2Circulation
             // 
             // button_load_loadFromBarcodeFile
             // 
-            this.button_load_loadFromBarcodeFile.Location = new System.Drawing.Point(160, 5);
-            this.button_load_loadFromBarcodeFile.Margin = new System.Windows.Forms.Padding(2);
+            this.button_load_loadFromBarcodeFile.Location = new System.Drawing.Point(293, 9);
+            this.button_load_loadFromBarcodeFile.Margin = new System.Windows.Forms.Padding(4);
             this.button_load_loadFromBarcodeFile.Name = "button_load_loadFromBarcodeFile";
-            this.button_load_loadFromBarcodeFile.Size = new System.Drawing.Size(170, 22);
+            this.button_load_loadFromBarcodeFile.Size = new System.Drawing.Size(312, 38);
             this.button_load_loadFromBarcodeFile.TabIndex = 4;
             this.button_load_loadFromBarcodeFile.Text = "从条码号文件装载(&F)...";
             this.button_load_loadFromBarcodeFile.UseVisualStyleBackColor = true;
@@ -189,10 +192,10 @@ namespace dp2Circulation
             // 
             this.tabPage_sort.Controls.Add(this.comboBox_sort_sortStyle);
             this.tabPage_sort.Controls.Add(this.label2);
-            this.tabPage_sort.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_sort.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPage_sort.Location = new System.Drawing.Point(4, 31);
+            this.tabPage_sort.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_sort.Name = "tabPage_sort";
-            this.tabPage_sort.Size = new System.Drawing.Size(498, 115);
+            this.tabPage_sort.Size = new System.Drawing.Size(927, 216);
             this.tabPage_sort.TabIndex = 3;
             this.tabPage_sort.Text = "排序";
             this.tabPage_sort.UseVisualStyleBackColor = true;
@@ -206,19 +209,19 @@ namespace dp2Circulation
             "登录号",
             "渠道",
             "经费来源"});
-            this.comboBox_sort_sortStyle.Location = new System.Drawing.Point(98, 8);
-            this.comboBox_sort_sortStyle.Margin = new System.Windows.Forms.Padding(2);
+            this.comboBox_sort_sortStyle.Location = new System.Drawing.Point(180, 14);
+            this.comboBox_sort_sortStyle.Margin = new System.Windows.Forms.Padding(4);
             this.comboBox_sort_sortStyle.Name = "comboBox_sort_sortStyle";
-            this.comboBox_sort_sortStyle.Size = new System.Drawing.Size(184, 20);
+            this.comboBox_sort_sortStyle.Size = new System.Drawing.Size(334, 29);
             this.comboBox_sort_sortStyle.TabIndex = 21;
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(6, 10);
-            this.label2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label2.Location = new System.Drawing.Point(11, 18);
+            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(77, 12);
+            this.label2.Size = new System.Drawing.Size(138, 21);
             this.label2.TabIndex = 20;
             this.label2.Text = "排序策略(&S):";
             // 
@@ -230,19 +233,20 @@ namespace dp2Circulation
             this.tabPage_print.Controls.Add(this.groupBox3);
             this.tabPage_print.Controls.Add(this.groupBox2);
             this.tabPage_print.Controls.Add(this.groupBox1);
-            this.tabPage_print.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_print.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPage_print.Location = new System.Drawing.Point(4, 31);
+            this.tabPage_print.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_print.Name = "tabPage_print";
-            this.tabPage_print.Size = new System.Drawing.Size(498, 115);
+            this.tabPage_print.Size = new System.Drawing.Size(927, 216);
             this.tabPage_print.TabIndex = 2;
             this.tabPage_print.Text = "打印";
             this.tabPage_print.UseVisualStyleBackColor = true;
             // 
             // button_print_createNewScriptFile
             // 
-            this.button_print_createNewScriptFile.Location = new System.Drawing.Point(19, 122);
+            this.button_print_createNewScriptFile.Location = new System.Drawing.Point(35, 214);
+            this.button_print_createNewScriptFile.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.button_print_createNewScriptFile.Name = "button_print_createNewScriptFile";
-            this.button_print_createNewScriptFile.Size = new System.Drawing.Size(152, 23);
+            this.button_print_createNewScriptFile.Size = new System.Drawing.Size(279, 40);
             this.button_print_createNewScriptFile.TabIndex = 4;
             this.button_print_createNewScriptFile.Text = "创建新的脚本文件(&C) ...";
             this.button_print_createNewScriptFile.UseVisualStyleBackColor = true;
@@ -250,9 +254,10 @@ namespace dp2Circulation
             // 
             // button_print_runScript
             // 
-            this.button_print_runScript.Location = new System.Drawing.Point(19, 95);
+            this.button_print_runScript.Location = new System.Drawing.Point(35, 166);
+            this.button_print_runScript.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.button_print_runScript.Name = "button_print_runScript";
-            this.button_print_runScript.Size = new System.Drawing.Size(152, 23);
+            this.button_print_runScript.Size = new System.Drawing.Size(279, 40);
             this.button_print_runScript.TabIndex = 3;
             this.button_print_runScript.Text = "执行脚本(&S) ...";
             this.button_print_runScript.UseVisualStyleBackColor = true;
@@ -262,21 +267,21 @@ namespace dp2Circulation
             // 
             this.groupBox3.Controls.Add(this.button_print_optionWordXml);
             this.groupBox3.Controls.Add(this.button_print_outputWordXmlFile);
-            this.groupBox3.Location = new System.Drawing.Point(394, 3);
-            this.groupBox3.Margin = new System.Windows.Forms.Padding(2);
+            this.groupBox3.Location = new System.Drawing.Point(722, 5);
+            this.groupBox3.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Padding = new System.Windows.Forms.Padding(2);
-            this.groupBox3.Size = new System.Drawing.Size(180, 75);
+            this.groupBox3.Padding = new System.Windows.Forms.Padding(4);
+            this.groupBox3.Size = new System.Drawing.Size(330, 131);
             this.groupBox3.TabIndex = 2;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = " WordML ";
             // 
             // button_print_optionWordXml
             // 
-            this.button_print_optionWordXml.Location = new System.Drawing.Point(12, 43);
-            this.button_print_optionWordXml.Margin = new System.Windows.Forms.Padding(2);
+            this.button_print_optionWordXml.Location = new System.Drawing.Point(22, 75);
+            this.button_print_optionWordXml.Margin = new System.Windows.Forms.Padding(4);
             this.button_print_optionWordXml.Name = "button_print_optionWordXml";
-            this.button_print_optionWordXml.Size = new System.Drawing.Size(152, 22);
+            this.button_print_optionWordXml.Size = new System.Drawing.Size(279, 38);
             this.button_print_optionWordXml.TabIndex = 1;
             this.button_print_optionWordXml.Text = "输出配置(&C)...";
             this.button_print_optionWordXml.UseVisualStyleBackColor = true;
@@ -284,10 +289,10 @@ namespace dp2Circulation
             // 
             // button_print_outputWordXmlFile
             // 
-            this.button_print_outputWordXmlFile.Location = new System.Drawing.Point(12, 16);
-            this.button_print_outputWordXmlFile.Margin = new System.Windows.Forms.Padding(2);
+            this.button_print_outputWordXmlFile.Location = new System.Drawing.Point(22, 28);
+            this.button_print_outputWordXmlFile.Margin = new System.Windows.Forms.Padding(4);
             this.button_print_outputWordXmlFile.Name = "button_print_outputWordXmlFile";
-            this.button_print_outputWordXmlFile.Size = new System.Drawing.Size(152, 22);
+            this.button_print_outputWordXmlFile.Size = new System.Drawing.Size(279, 38);
             this.button_print_outputWordXmlFile.TabIndex = 0;
             this.button_print_outputWordXmlFile.Text = "输出到 WordML 文件(&X)...";
             this.button_print_outputWordXmlFile.UseVisualStyleBackColor = true;
@@ -298,21 +303,21 @@ namespace dp2Circulation
             this.groupBox2.Controls.Add(this.button_print_outputExcelFile);
             this.groupBox2.Controls.Add(this.button_print_optionText);
             this.groupBox2.Controls.Add(this.button_print_outputTextFile);
-            this.groupBox2.Location = new System.Drawing.Point(200, 3);
-            this.groupBox2.Margin = new System.Windows.Forms.Padding(2);
+            this.groupBox2.Location = new System.Drawing.Point(367, 5);
+            this.groupBox2.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Padding = new System.Windows.Forms.Padding(2);
-            this.groupBox2.Size = new System.Drawing.Size(180, 97);
+            this.groupBox2.Padding = new System.Windows.Forms.Padding(4);
+            this.groupBox2.Size = new System.Drawing.Size(330, 170);
             this.groupBox2.TabIndex = 1;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = " 纯文本 ";
             // 
             // button_print_outputExcelFile
             // 
-            this.button_print_outputExcelFile.Location = new System.Drawing.Point(12, 42);
-            this.button_print_outputExcelFile.Margin = new System.Windows.Forms.Padding(2);
+            this.button_print_outputExcelFile.Location = new System.Drawing.Point(22, 74);
+            this.button_print_outputExcelFile.Margin = new System.Windows.Forms.Padding(4);
             this.button_print_outputExcelFile.Name = "button_print_outputExcelFile";
-            this.button_print_outputExcelFile.Size = new System.Drawing.Size(152, 22);
+            this.button_print_outputExcelFile.Size = new System.Drawing.Size(279, 38);
             this.button_print_outputExcelFile.TabIndex = 1;
             this.button_print_outputExcelFile.Text = "输出到 Excel 文件(&E)...";
             this.button_print_outputExcelFile.UseVisualStyleBackColor = true;
@@ -320,10 +325,10 @@ namespace dp2Circulation
             // 
             // button_print_optionText
             // 
-            this.button_print_optionText.Location = new System.Drawing.Point(12, 71);
-            this.button_print_optionText.Margin = new System.Windows.Forms.Padding(2);
+            this.button_print_optionText.Location = new System.Drawing.Point(22, 124);
+            this.button_print_optionText.Margin = new System.Windows.Forms.Padding(4);
             this.button_print_optionText.Name = "button_print_optionText";
-            this.button_print_optionText.Size = new System.Drawing.Size(152, 22);
+            this.button_print_optionText.Size = new System.Drawing.Size(279, 38);
             this.button_print_optionText.TabIndex = 2;
             this.button_print_optionText.Text = "输出配置(&N)...";
             this.button_print_optionText.UseVisualStyleBackColor = true;
@@ -331,10 +336,10 @@ namespace dp2Circulation
             // 
             // button_print_outputTextFile
             // 
-            this.button_print_outputTextFile.Location = new System.Drawing.Point(12, 16);
-            this.button_print_outputTextFile.Margin = new System.Windows.Forms.Padding(2);
+            this.button_print_outputTextFile.Location = new System.Drawing.Point(22, 28);
+            this.button_print_outputTextFile.Margin = new System.Windows.Forms.Padding(4);
             this.button_print_outputTextFile.Name = "button_print_outputTextFile";
-            this.button_print_outputTextFile.Size = new System.Drawing.Size(152, 22);
+            this.button_print_outputTextFile.Size = new System.Drawing.Size(279, 38);
             this.button_print_outputTextFile.TabIndex = 0;
             this.button_print_outputTextFile.Text = "输出到文本文件(&T)...";
             this.button_print_outputTextFile.UseVisualStyleBackColor = true;
@@ -344,21 +349,21 @@ namespace dp2Circulation
             // 
             this.groupBox1.Controls.Add(this.button_print_printNormalList);
             this.groupBox1.Controls.Add(this.button_print_optionHTML);
-            this.groupBox1.Location = new System.Drawing.Point(7, 3);
-            this.groupBox1.Margin = new System.Windows.Forms.Padding(2);
+            this.groupBox1.Location = new System.Drawing.Point(13, 5);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Padding = new System.Windows.Forms.Padding(2);
-            this.groupBox1.Size = new System.Drawing.Size(180, 75);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(4);
+            this.groupBox1.Size = new System.Drawing.Size(330, 131);
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = " HTML ";
             // 
             // button_print_printNormalList
             // 
-            this.button_print_printNormalList.Location = new System.Drawing.Point(12, 16);
-            this.button_print_printNormalList.Margin = new System.Windows.Forms.Padding(2);
+            this.button_print_printNormalList.Location = new System.Drawing.Point(22, 28);
+            this.button_print_printNormalList.Margin = new System.Windows.Forms.Padding(4);
             this.button_print_printNormalList.Name = "button_print_printNormalList";
-            this.button_print_printNormalList.Size = new System.Drawing.Size(152, 22);
+            this.button_print_printNormalList.Size = new System.Drawing.Size(279, 38);
             this.button_print_printNormalList.TabIndex = 0;
             this.button_print_printNormalList.Text = "打印(&P)...";
             this.button_print_printNormalList.UseVisualStyleBackColor = true;
@@ -366,10 +371,10 @@ namespace dp2Circulation
             // 
             // button_print_optionHTML
             // 
-            this.button_print_optionHTML.Location = new System.Drawing.Point(12, 43);
-            this.button_print_optionHTML.Margin = new System.Windows.Forms.Padding(2);
+            this.button_print_optionHTML.Location = new System.Drawing.Point(22, 75);
+            this.button_print_optionHTML.Margin = new System.Windows.Forms.Padding(4);
             this.button_print_optionHTML.Name = "button_print_optionHTML";
-            this.button_print_optionHTML.Size = new System.Drawing.Size(152, 22);
+            this.button_print_optionHTML.Size = new System.Drawing.Size(279, 38);
             this.button_print_optionHTML.TabIndex = 1;
             this.button_print_optionHTML.Text = "打印配置(&O)...";
             this.button_print_optionHTML.UseVisualStyleBackColor = true;
@@ -379,10 +384,10 @@ namespace dp2Circulation
             // 
             this.button_next.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_next.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.button_next.Location = new System.Drawing.Point(427, 148);
-            this.button_next.Margin = new System.Windows.Forms.Padding(2);
+            this.button_next.Location = new System.Drawing.Point(783, 258);
+            this.button_next.Margin = new System.Windows.Forms.Padding(4);
             this.button_next.Name = "button_next";
-            this.button_next.Size = new System.Drawing.Size(83, 22);
+            this.button_next.Size = new System.Drawing.Size(152, 38);
             this.button_next.TabIndex = 1;
             this.button_next.Text = "下一步(&N)";
             this.button_next.UseVisualStyleBackColor = true;
@@ -395,9 +400,9 @@ namespace dp2Circulation
             this.listView_in.HideSelection = false;
             this.listView_in.LargeImageList = this.imageList_lineType;
             this.listView_in.Location = new System.Drawing.Point(0, 0);
-            this.listView_in.Margin = new System.Windows.Forms.Padding(2);
+            this.listView_in.Margin = new System.Windows.Forms.Padding(4);
             this.listView_in.Name = "listView_in";
-            this.listView_in.Size = new System.Drawing.Size(510, 132);
+            this.listView_in.Size = new System.Drawing.Size(935, 231);
             this.listView_in.SmallImageList = this.imageList_lineType;
             this.listView_in.TabIndex = 2;
             this.listView_in.UseCompatibleStateImageBehavior = false;
@@ -419,6 +424,7 @@ namespace dp2Circulation
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer1.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer1.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.splitContainer1.Name = "splitContainer1";
             this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -429,30 +435,41 @@ namespace dp2Circulation
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.listView_in);
-            this.splitContainer1.Size = new System.Drawing.Size(510, 310);
-            this.splitContainer1.SplitterDistance = 170;
-            this.splitContainer1.SplitterWidth = 8;
+            this.splitContainer1.Size = new System.Drawing.Size(935, 542);
+            this.splitContainer1.SplitterDistance = 297;
+            this.splitContainer1.SplitterWidth = 14;
             this.splitContainer1.TabIndex = 3;
             // 
             // panel_up
             // 
+            this.panel_up.Controls.Add(this.label_nextButtonTips);
             this.panel_up.Controls.Add(this.tabControl_main);
             this.panel_up.Controls.Add(this.button_next);
             this.panel_up.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel_up.Location = new System.Drawing.Point(0, 0);
             this.panel_up.Margin = new System.Windows.Forms.Padding(0);
             this.panel_up.Name = "panel_up";
-            this.panel_up.Size = new System.Drawing.Size(510, 170);
+            this.panel_up.Size = new System.Drawing.Size(935, 297);
             this.panel_up.TabIndex = 2;
+            // 
+            // label_nextButtonTips
+            // 
+            this.label_nextButtonTips.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.label_nextButtonTips.Location = new System.Drawing.Point(3, 275);
+            this.label_nextButtonTips.Name = "label_nextButtonTips";
+            this.label_nextButtonTips.Size = new System.Drawing.Size(773, 23);
+            this.label_nextButtonTips.TabIndex = 2;
+            this.label_nextButtonTips.Text = "label1";
             // 
             // AccountBookForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(510, 310);
+            this.ClientSize = new System.Drawing.Size(935, 542);
             this.Controls.Add(this.splitContainer1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(2);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "AccountBookForm";
             this.Text = "打印财产账";
             this.Activated += new System.EventHandler(this.AccountBookForm_Activated);
@@ -509,5 +526,6 @@ namespace dp2Circulation
         private System.Windows.Forms.Button button_print_outputExcelFile;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.Panel panel_up;
+        private System.Windows.Forms.Label label_nextButtonTips;
     }
 }

@@ -2220,6 +2220,8 @@ MessageBoxDefaultButton.Button1);
         bool _copyGreenError = false;   // 第一次 CopyGreen() 是否出错
 
         // 复制出一个绿色安装包
+        // parameters:
+        //      bForce  是否要在无论任何状态(包括本来就是绿色运行状态)下都强制创建？
         // return:
         //      false   没有启动
         //      true    启动了。注意，有可能会启动了但后来出错了。
@@ -2230,7 +2232,10 @@ MessageBoxDefaultButton.Button1);
 
             // 本身如果是绿色安装包，没有必要再次复制出绿色安装包
             if (bForce == false && ApplicationDeployment.IsNetworkDeployed == false)
+            {
+                // this.DisplayBackgroundTextLn("当前已经处在绿色运行状态，无法创建备用绿色安装包");
                 return false;
+            }
 
             string strProgramDir = Environment.CurrentDirectory;
             string strTargetDir = "c:\\dp2circulation";
@@ -2284,7 +2289,15 @@ MessageBoxDefaultButton.Button1);
 #endif
             }
             else if (nRet == -2)
+            {
+                this.DisplayBackgroundTextLn("创建备用绿色安装包时出错: " + strError);
                 return false;
+            }
+            else if (nRet == 0)
+            {
+                this.DisplayBackgroundTextLn("没有必要创建: " + strError);
+                return false;
+            }
             else
             {
                 try
@@ -3156,7 +3169,17 @@ Culture=neutral, PublicKeyToken=null
 
                 // 若第一次复制绿色版本失败，则需要再进行一次
                 if (_copyGreenError == true)
-                    _ = Task.Factory.StartNew(() => CopyGreen());
+                {
+                    _ = Task.Factory.StartNew(
+    () =>
+    {
+        CopyGreen();
+    },
+this._cancel.Token,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+                    // _ = Task.Factory.StartNew(() => CopyGreen());
+                }
 
                 BeginUpdateClickOnceApplication();    // 自动探测更新 dp2circulation
 

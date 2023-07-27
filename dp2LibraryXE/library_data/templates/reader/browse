@@ -21,8 +21,14 @@
   <col title="证号">
     <xpath>*/cardNumber</xpath>
   </col>
+  <col title="Email">
+    <xpath>*/email</xpath>
+  </col>
   <col title="失效期" convert="rfc1123tolocaltimeu">
     <xpath>*/expireDate</xpath>
+  </col>
+  <col title="注释">
+    <xpath>*/comment</xpath>
   </col>
   <col title="人脸时间戳">
     <xpath>*/face/@timestamp</xpath>

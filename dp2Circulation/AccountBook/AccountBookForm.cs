@@ -575,8 +575,11 @@ namespace dp2Circulation
 
                     if (info.Record.RecordBody == null)
                     {
+                        /*
                         strError = "请升级 dp2Kernel 到最新版本";
                         return -1;
+                        */
+                        continue;   // 2023/7/25
                     }
 
                     string strOutputItemRecPath = "";
@@ -584,6 +587,29 @@ namespace dp2Circulation
 
                     if (items != null)
                         item = items[i];
+
+                    // 2023/7/25
+                    // 跳过合订成员册记录
+                    {
+                        // 检测合订成员册
+                        // return:
+                        //      -1  检测过程出错
+                        //      0   不是合订成员册
+                        //      1   是合订成员册
+                        nRet = DetectMemberEntity(info.Record.RecordBody.Xml,
+                            out strError);
+                        if (nRet == -1 || nRet == 1)
+                        {
+                            // TODO: 统计数字，完成后显示
+                            if (nRet == 1)
+                                strError = "合订成员册不参与财产账统计打印";
+                            SetError(this.listView_in,
+                                ref item,
+                                info.Record.Path,
+                                strError);
+                            continue;
+                        }
+                    }
 
                     // 根据册条码号，装入册记录
                     // return: 
@@ -636,6 +662,31 @@ namespace dp2Circulation
                     return -1;
             }
 
+            return 0;
+        }
+
+        // 检测合订成员册
+        // return:
+        //      -1  检测过程出错
+        //      0   不是合订成员册
+        //      1   是合订成员册
+        int DetectMemberEntity(string item_xml,
+            out string strError)
+        {
+            strError = "";
+            XmlDocument item_dom = new XmlDocument();
+            try
+            {
+                item_dom.LoadXml(item_xml);
+            }
+            catch (Exception ex)
+            {
+                strError = $"册记录XML 装入 XMLDOM 出错: {ex.Message}";
+                return -1;
+            }
+            XmlNode nodeParentItem = item_dom.DocumentElement.SelectSingleNode("binding/bindingParent");
+            if (nodeParentItem != null)
+                return 1;
             return 0;
         }
 
@@ -1918,22 +1969,37 @@ namespace dp2Circulation
                 if (nState != 1)
                 {
                     this.button_next.Enabled = false;
+                    // 显示原因
+                    SetNextButtonTips(strError);
                 }
                 else
+                {
                     this.button_next.Enabled = true;
+                    SetNextButtonTips("");
+                }
             }
             else if (this.tabControl_main.SelectedTab == this.tabPage_sort)
             {
                 this.button_next.Enabled = true;
+                SetNextButtonTips("可排序");
             }
             else if (this.tabControl_main.SelectedTab == this.tabPage_print)
             {
                 this.button_next.Enabled = false;
+                SetNextButtonTips("已到达最后一个属性页");
             }
             else
             {
                 Debug.Assert(false, "未知的tabpage状态");
             }
+        }
+
+        void SetNextButtonTips(string message)
+        {
+            this.TryInvoke(() =>
+            {
+                this.label_nextButtonTips.Text = message;
+            });
         }
 
         // 下一步
@@ -1944,7 +2010,7 @@ namespace dp2Circulation
             if (this.tabControl_main.SelectedTab == this.tabPage_load)
             {
                 this.tabControl_main.SelectedTab = this.tabPage_sort;
-                this.button_next.Enabled = true;
+                //this.button_next.Enabled = true;
                 this.comboBox_sort_sortStyle.Focus();
             }
             else if (this.tabControl_main.SelectedTab == this.tabPage_sort)
@@ -1960,7 +2026,7 @@ namespace dp2Circulation
                     goto ERROR1;
 
                 this.tabControl_main.SelectedTab = this.tabPage_print;
-                this.button_next.Enabled = false;
+                //this.button_next.Enabled = false;
                 this.button_print_printNormalList.Focus();
             }
             else if (this.tabControl_main.SelectedTab == this.tabPage_print)
@@ -1971,6 +2037,7 @@ namespace dp2Circulation
                 Debug.Assert(false, "未知的tabpage状态");
             }
 
+            // 似乎重复调用了
             this.SetNextButtonEnable();
             return;
         ERROR1:
@@ -2017,6 +2084,8 @@ namespace dp2Circulation
 
         private void tabControl_main_SelectedIndexChanged(object sender, EventArgs e)
         {
+            SetNextButtonEnable();
+            /*
             if (this.tabControl_main.SelectedTab == this.tabPage_load)
             {
                 this.button_next.Enabled = true;
@@ -2033,6 +2102,7 @@ namespace dp2Circulation
             {
                 Debug.Assert(false, "未知的tabpage状态");
             }
+            */
         }
 
 
@@ -5031,6 +5101,10 @@ null,
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
+            menuItem = new MenuItem("移除所有错误行 (&E)");
+            menuItem.Tag = this.listView_in;
+            menuItem.Click += new System.EventHandler(this.menu_removeErrorLines_Click);
+            contextMenu.MenuItems.Add(menuItem);
 
             contextMenu.Show(this.listView_in, new Point(e.X, e.Y));
         }
@@ -5099,6 +5173,44 @@ MessageBoxDefaultButton.Button2);
                 return;
 
             RemoveLines(items);
+
+            SetNextButtonEnable();
+        }
+
+        // 2023/7/25
+        // 移除所有错误状态的行
+        // 可以用于快速移除那些报错为“合订成员册”的行
+        void menu_removeErrorLines_Click(object sender, EventArgs e)
+        {
+            ListView list = (ListView)((MenuItem)sender).Tag;
+
+            List<ListViewItem> items = new List<ListViewItem>();
+            foreach (ListViewItem item in list.Items)
+            {
+                if (item.ImageIndex == TYPE_ERROR)
+                    items.Add(item);
+            }
+
+            if (items.Count == 0)
+            {
+                MessageBox.Show(this, "当前没有任何错误状态(红色)的事项可供移除");
+                return;
+            }
+
+            DialogResult result = MessageBox.Show(this,
+"确实要移除 " + items.Count.ToString() + " 个错误状态(红色)的事项?",
+"AccountBookForm",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+            if (result != DialogResult.Yes)
+                return;
+
+            RemoveLines(items);
+
+            SetNextButtonEnable();
+
+            MessageBox.Show(this, $"已成功移除错误状态(红色)的事项 {items.Count} 个");
         }
 
         static void RemoveLines(List<ListViewItem> items)

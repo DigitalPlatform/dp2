@@ -14,6 +14,8 @@ using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Core;
 using DigitalPlatform.CirculationClient;
+using System.Threading.Tasks;
+using System.Data.Sql;
 
 namespace dp2Circulation
 {
@@ -47,6 +49,68 @@ namespace dp2Circulation
             }
         }
 
+        // Administrator 方式启动，action=update
+        static bool TryUpdate(string[] args)
+        {
+            string action = "";
+            string data_dir = "";
+            string temp_dir = "";
+
+            if (args != null && args.Length >= 3)
+            {
+                foreach (string strArg in args)
+                {
+                    // MessageBox.Show($"strArg='{strArg}'");
+
+                    if (strArg.StartsWith("datadir=") == true)
+                    {
+                        data_dir = strArg.Substring("datadir=".Length);
+                    }
+                    else if (strArg.StartsWith("tempdir=") == true)
+                    {
+                        temp_dir = strArg.Substring("tempdir=".Length);
+                    }
+                    else if (strArg.StartsWith("action="))
+                    {
+                        action = strArg.Substring("action=".Length);
+                    }
+                }
+
+                if (action != "update")
+                    return false;
+
+                // MessageBox.Show("enter update");
+
+                CancellationTokenSource cancel = new CancellationTokenSource();
+                using (FileDownloadDialog dlg = new FileDownloadDialog
+                {
+                    Text = "正在安装绿色文件"
+                })
+                {
+                    dlg.FormClosed += new FormClosedEventHandler(delegate (object o1, FormClosedEventArgs e1)
+                    {
+                        cancel.Cancel();
+                    });
+                    dlg.StartMarquee();
+                    dlg.StartPosition = FormStartPosition.CenterParent;
+                    dlg.Show();
+                    FormClientInfo.UpdateByGreenUpdatePack(
+                        "dp2circulation",
+                        data_dir,
+                        temp_dir,
+                        (text) =>
+                        {
+                            Application.DoEvents();
+                            dlg.SetMessage(text);
+                        });
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -60,6 +124,12 @@ namespace dp2Circulation
             ClientVersion = Assembly.GetAssembly(typeof(Program)).GetName().Version.ToString();
 
             List<string> args = StringUtil.GetCommandLineArgs();
+
+            // MessageBox.Show($"test args.Count={args.Count}");
+
+            var ret = TryUpdate(args.ToArray());
+            if (ret == true)
+                return;
 
             // TODO: 检查 Windows 环境，如果可行就提示安装更高版本(如果更高版本的菜单事项还没有的话)
 

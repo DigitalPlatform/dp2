@@ -143,6 +143,9 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Ionic.Zip">
+      <HintPath>..\Ionic.Zip.dll</HintPath>
+    </Reference>
     <Reference Include="System">
       <Name>System</Name>
     </Reference>
@@ -165,6 +168,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="BarcodeCapture.cs" />
+    <Compile Include="Compress.cs" />
     <Compile Include="DateTimeUtil.cs" />
     <Compile Include="DigitalPlatform.IO.cs">
       <SubType>Code</SubType>

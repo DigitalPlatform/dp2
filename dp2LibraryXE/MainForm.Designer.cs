@@ -306,28 +306,28 @@
             // MenuItem_dp2library_globalSetting
             // 
             this.MenuItem_dp2library_globalSetting.Name = "MenuItem_dp2library_globalSetting";
-            this.MenuItem_dp2library_globalSetting.Size = new System.Drawing.Size(508, 40);
+            this.MenuItem_dp2library_globalSetting.Size = new System.Drawing.Size(666, 40);
             this.MenuItem_dp2library_globalSetting.Text = "全局参数";
             this.MenuItem_dp2library_globalSetting.Click += new System.EventHandler(this.MenuItem_dp2library_globalSetting_Click);
             // 
             // MenuItem_enableWindowsMsmq
             // 
             this.MenuItem_enableWindowsMsmq.Name = "MenuItem_enableWindowsMsmq";
-            this.MenuItem_enableWindowsMsmq.Size = new System.Drawing.Size(508, 40);
+            this.MenuItem_enableWindowsMsmq.Size = new System.Drawing.Size(666, 40);
             this.MenuItem_enableWindowsMsmq.Text = "为 Windows 启用 MSMQ";
             this.MenuItem_enableWindowsMsmq.Click += new System.EventHandler(this.MenuItem_enableWindowsMsmq_Click);
             // 
             // MenuItem_configLibraryXmlMq
             // 
             this.MenuItem_configLibraryXmlMq.Name = "MenuItem_configLibraryXmlMq";
-            this.MenuItem_configLibraryXmlMq.Size = new System.Drawing.Size(508, 40);
+            this.MenuItem_configLibraryXmlMq.Size = new System.Drawing.Size(666, 40);
             this.MenuItem_configLibraryXmlMq.Text = "为 library.xml 首次配置 MQ 参数";
             this.MenuItem_configLibraryXmlMq.Click += new System.EventHandler(this.MenuItem_configLibraryXmlMq_Click);
             // 
             // toolStripSeparator10
             // 
             this.toolStripSeparator10.Name = "toolStripSeparator10";
-            this.toolStripSeparator10.Size = new System.Drawing.Size(505, 6);
+            this.toolStripSeparator10.Size = new System.Drawing.Size(663, 6);
             // 
             // MenuItem_dp2library_setupMongoDB
             // 
@@ -340,52 +340,52 @@
             // MenuItem_configLibraryXmlMongoDB
             // 
             this.MenuItem_configLibraryXmlMongoDB.Name = "MenuItem_configLibraryXmlMongoDB";
-            this.MenuItem_configLibraryXmlMongoDB.Size = new System.Drawing.Size(508, 40);
+            this.MenuItem_configLibraryXmlMongoDB.Size = new System.Drawing.Size(666, 40);
             this.MenuItem_configLibraryXmlMongoDB.Text = "为 library.xml 首次配置 MongoDB 参数";
             this.MenuItem_configLibraryXmlMongoDB.Click += new System.EventHandler(this.MenuItem_configLibraryXmlMongoDB_Click);
             // 
             // toolStripSeparator13
             // 
             this.toolStripSeparator13.Name = "toolStripSeparator13";
-            this.toolStripSeparator13.Size = new System.Drawing.Size(505, 6);
+            this.toolStripSeparator13.Size = new System.Drawing.Size(663, 6);
             // 
             // MenuItem_configMessageServer
             // 
             this.MenuItem_configMessageServer.Name = "MenuItem_configMessageServer";
-            this.MenuItem_configMessageServer.Size = new System.Drawing.Size(508, 40);
+            this.MenuItem_configMessageServer.Size = new System.Drawing.Size(666, 40);
             this.MenuItem_configMessageServer.Text = "配置消息服务器参数";
             this.MenuItem_configMessageServer.Click += new System.EventHandler(this.MenuItem_configMessageServer_Click);
             // 
             // toolStripSeparator9
             // 
             this.toolStripSeparator9.Name = "toolStripSeparator9";
-            this.toolStripSeparator9.Size = new System.Drawing.Size(505, 6);
+            this.toolStripSeparator9.Size = new System.Drawing.Size(663, 6);
             // 
             // MenuItem_startIISExpress
             // 
             this.MenuItem_startIISExpress.Name = "MenuItem_startIISExpress";
-            this.MenuItem_startIISExpress.Size = new System.Drawing.Size(508, 40);
+            this.MenuItem_startIISExpress.Size = new System.Drawing.Size(666, 40);
             this.MenuItem_startIISExpress.Text = "启动 IIS Express";
             this.MenuItem_startIISExpress.Click += new System.EventHandler(this.MenuItem_startIISExpress_Click);
             // 
             // MenuItem_iisExpressVersion
             // 
             this.MenuItem_iisExpressVersion.Name = "MenuItem_iisExpressVersion";
-            this.MenuItem_iisExpressVersion.Size = new System.Drawing.Size(508, 40);
+            this.MenuItem_iisExpressVersion.Size = new System.Drawing.Size(666, 40);
             this.MenuItem_iisExpressVersion.Text = "察看 IIS Express 版本";
             this.MenuItem_iisExpressVersion.Click += new System.EventHandler(this.MenuItem_iisExpressVersion_Click);
             // 
             // MenuItem_registerWebApp
             // 
             this.MenuItem_registerWebApp.Name = "MenuItem_registerWebApp";
-            this.MenuItem_registerWebApp.Size = new System.Drawing.Size(508, 40);
+            this.MenuItem_registerWebApp.Size = new System.Drawing.Size(666, 40);
             this.MenuItem_registerWebApp.Text = "注册 dp2OPAC 为 WebApp";
             this.MenuItem_registerWebApp.Click += new System.EventHandler(this.MenuItem_registerWebApp_Click);
             // 
             // toolStripSeparator6
             // 
             this.toolStripSeparator6.Name = "toolStripSeparator6";
-            this.toolStripSeparator6.Size = new System.Drawing.Size(505, 6);
+            this.toolStripSeparator6.Size = new System.Drawing.Size(663, 6);
             // 
             // MenuItem_help
             // 
