@@ -298,6 +298,7 @@ context.ContentEndRow + 1 + 1, context.DistributeEndColumn + 1);
                     strBiblioRecPath,
                     context.BiblioColList,
                     // StringUtil.MakePathList(ColumnProperty.GetTypeList(context.BiblioColList)),
+                    null,
                     out strTableXml,
                     out string strError);
                 if (nRet == -1)
@@ -438,6 +439,7 @@ GetOrderRecord procGetOrderRecord)
                     strBiblioRecPath,
                     context.BiblioColList,
                     // StringUtil.MakePathList(ColumnProperty.GetTypeList(context.BiblioColList)),
+                    null,
                     out strTableXml,
                     out string strError);
                 if (nRet == -1)
@@ -1105,10 +1107,13 @@ int MAX_CHARS = 50)
 
                 if (bRemovePrefix)
                 {
+                    /*
                     // 如果为 "xxxx_xxxxx" 形态，则取 _ 右边的部分
                     int nRet = type.IndexOf("_");
                     if (nRet != -1)
                         type = type.Substring(nRet + 1).Trim();
+                    */
+                    type = MyForm.RemovePrefix(type);
                 }
                 results.Add(type);
             });

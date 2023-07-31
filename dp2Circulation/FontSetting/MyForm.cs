@@ -14,6 +14,10 @@ using System.Runtime.Remoting;
 using System.Linq;
 using System.Collections;
 using System.Text;
+using System.Xml.Linq;
+
+using Jint;
+using Jint.Native;
 
 using DigitalPlatform;
 using DigitalPlatform.Text;
@@ -3332,7 +3336,19 @@ out strError);
             }
         }
 
+        public static string RemovePrefix(string type)
+        {
+            // 如果为 "xxxx_xxxxx" 形态，则取 _ 右边的部分
+            int nRet = type.IndexOf("_");
+            if (nRet != -1)
+                type = type.Substring(nRet + 1).Trim();
+
+            return type;
+        }
+
         // 获得 table 格式，里面包含通过 javascript 脚本产生的列
+        // parameters:
+        //      style   null 相当于 remove_prefix,remove_evalue
         // return:
         //      -1  出错
         //      0   没有找到
@@ -3341,13 +3357,20 @@ out strError);
             string strRecPath,
             // string strStyleList,
             List<Order.ColumnProperty> titles,
+            string style,
             out string strTableXml,
             out string strError)
         {
             strError = "";
             strTableXml = "";
 
-            string strStyleList = StringUtil.MakePathList(Order.ColumnProperty.GetTypeListEx(titles));
+            if (style == null)
+                style = "remove_prefix,remove_evalue";
+
+            bool remove_prefix = StringUtil.IsInList("remove_prefix", style);
+            bool remove_evalue = StringUtil.IsInList("remove_evalue", style);
+
+            string strStyleList = StringUtil.MakePathList(Order.ColumnProperty.GetTypeListEx(titles, remove_prefix, remove_evalue));
 
             // 先统计一下是否至少有一个 Evalue 列。只有这时才需要同时获得书目 xml 和 table xml
             var exists_evalue = titles.Exists(o => string.IsNullOrEmpty(o.Evalue) == false);
@@ -3438,13 +3461,30 @@ out strError);
                     {
                         if (string.IsNullOrEmpty(column.Evalue))
                             continue;
-                        var result = AccountBookForm.RunScript(strMARC,
-    strMarcSyntax,
-    column.Evalue);
-                        var line = dom.CreateElement("line");
-                        line.SetAttribute("type", column.Type);
+
+                        string type = column.Type;
+                        if (remove_prefix)
+                            type = RemovePrefix(type);
+
+                        var existing_line = dom.DocumentElement
+                            .SelectSingleNode($"line[@type='{type}']") as XmlElement;
+                        string result = null;
+                        if (existing_line != null)
+                            result = existing_line.GetAttribute("value");
+                        result = AccountBookForm.RunBiblioScript(
+                            result,
+                            strMARC,
+                            strMarcSyntax,
+                            column.Evalue);
+                        XmlElement line = existing_line;
+                        if (line == null
+                            || string.IsNullOrEmpty(column.Evalue) == false)    // Evalue 列需要重新创建一个 line 元素
+                            line = dom.CreateElement("line");
+                        line.SetAttribute("type", type); // column.Type
                         line.SetAttribute("name", column.Caption);
                         line.SetAttribute("value", result);
+                        if (string.IsNullOrEmpty(column.Evalue) == false)
+                            line.SetAttribute("evalue", column.Evalue);
                         dom.DocumentElement.AppendChild(line);
                     }
 
@@ -3833,7 +3873,7 @@ MessageBoxDefaultButton.Button2);
             biblio_column_option.LoadData(Program.MainForm.AppInfo,
             SaveEntityNewBookFileDialog.BiblioDefPath);
 
-            List<Order.ColumnProperty> biblio_title_list = Order.DistributeExcelFile.BuildList(biblio_column_option.Columns);
+            List<Order.ColumnProperty> biblio_title_list = Order.DistributeExcelFile.BuildList(biblio_column_option.Columns, false);
 
             // 准备册信息列标题
             Order.EntityColumnOption entity_column_option = new Order.EntityColumnOption(Program.MainForm.UserDir,
@@ -3841,7 +3881,7 @@ MessageBoxDefaultButton.Button2);
             entity_column_option.LoadData(Program.MainForm.AppInfo,
             SaveEntityNewBookFileDialog.EntityDefPath);
 
-            List<Order.ColumnProperty> entity_title_list = Order.DistributeExcelFile.BuildList(entity_column_option.Columns);
+            List<Order.ColumnProperty> entity_title_list = Order.DistributeExcelFile.BuildList(entity_column_option.Columns, false);
 
             this.EnableControls(false);
             LibraryChannel channel = this.GetChannel();
@@ -3971,6 +4011,7 @@ MessageBoxDefaultButton.Button2);
                         int nRet = this.GetTable(
                             strRecPath,
                             biblio_title_list,
+                            "remove_prefix",    // 不包含 remove_evalue
                             out string strXml,
                             out strError);
                         if (nRet == 0)
@@ -4341,6 +4382,13 @@ MessageBoxDefaultButton.Button2);
                     content = item_recpath;
                 else
                     content = DomUtil.GetElementText(item_dom.DocumentElement, type);
+
+                // 2023/7/29
+                if (string.IsNullOrEmpty(column.Evalue) == false)
+                {
+                    content = RunItemScript(content, item_xml, column.Evalue);
+                }
+
                 if (format == "docx")
                     text.Append($"<td class='item_{type}'><p style='small_name'>{HttpUtility.HtmlEncode(content)}</p></td>");
                 else
@@ -4349,6 +4397,88 @@ MessageBoxDefaultButton.Button2);
             text.Append("</tr>");
             return text.ToString();
         }
+
+        #region JavaScript 脚本
+
+#if REMOVED
+        // 执行 JavaScript 脚本
+        public static string RunItemScript(string strItemXml,
+            string strScript)
+        {
+            Engine engine = new Engine(cfg => cfg.AllowClr(typeof(XmlDocument).Assembly));
+            XmlDocument item = new XmlDocument();
+            item.LoadXml(strItemXml);
+
+            SetValue(engine,
+"item",
+item);
+            engine.Execute("var DigitalPlatform = importNamespace('DigitalPlatform');\r\n"
+                + strScript) // execute a statement
+                ?.GetCompletionValue() // get the latest statement completion value
+                ?.ToObject()?.ToString() // converts the value to .NET
+                ;
+            string result = GetString(engine, "result", "(请返回 result)");
+            string message = GetString(engine, "message", "");
+
+            return result;
+        }
+#endif
+
+        // 执行 JavaScript 脚本
+        // parameters:
+        //      result 待处理的字符串内容。本函数用对象名 result 提供给脚本处理
+        //      strItemXml  待处理的册记录 XML 内容。本函数用对象名 item 提供给脚本处理
+        /* 脚本举例:
+        1)
+        result = item.Root.Elements("barcode").FirstInnerText; 
+        
+        2)
+        // (栏目名请使用 "item_barcode")
+        result = "(" + result + ")";
+        * */
+        public static string RunItemScript(
+            string result,
+            string strItemXml,
+            string strScript)
+        {
+            Engine engine = new Engine(cfg => cfg
+            .AllowClr(typeof(XDoc).Assembly));
+            var item = XDoc.Parse(strItemXml);
+
+            SetValue(engine,
+"result",
+result);
+            SetValue(engine,
+"item",
+item);
+            engine.Execute("var DigitalPlatform = importNamespace('DigitalPlatform');\r\n"
+                + strScript) // execute a statement
+                ?.GetCompletionValue() // get the latest statement completion value
+                ?.ToObject()?.ToString() // converts the value to .NET
+                ;
+            result = GetString(engine, "result", "(请返回 result)");
+            string message = GetString(engine, "message", "");
+
+            return result;
+        }
+        static void SetValue(Engine engine, string name, object o)
+        {
+            if (o == null)
+                engine.SetValue(name, JsValue.Null);
+            else
+                engine.SetValue(name, o);
+        }
+
+        static string GetString(Engine engine, string name, string default_value)
+        {
+            var result_obj = engine.GetValue(name);
+            string value = result_obj.IsUndefined() ? default_value : result_obj.ToObject()?.ToString();
+            if (value == null)
+                value = "";
+            return value;
+        }
+
+        #endregion
 
         static string BuildEntityTitle(List<Order.ColumnProperty> entity_title_list,
             string format)
@@ -4411,9 +4541,11 @@ MessageBoxDefaultButton.Button2);
             }
 
             // 从 biblio_title_list 中取出 type 对应的 caption
-            string GetCaption(string type)
+            string GetCaption(string type, string evalue = null)
             {
-                return biblio_title_list.Where(o => o.Type == "biblio_" + type).FirstOrDefault()?.Caption;
+                if (evalue == null)
+                    return biblio_title_list.Where(o => o.Type == "biblio_" + type).FirstOrDefault()?.Caption;
+                return biblio_title_list.Where(o => o.Type == "biblio_" + type && o.Evalue == evalue).FirstOrDefault()?.Caption;
             }
 
             XmlNodeList lines = biblio_table_dom.DocumentElement.SelectNodes("line");
@@ -4424,7 +4556,11 @@ MessageBoxDefaultButton.Button2);
                     type == "titlepinyin")
                     continue;
 
-                string name = GetCaption(type);
+                string evalue = null;
+                if (line.GetAttributeNode("evalue") != null)
+                    evalue = line.GetAttribute("evalue");
+
+                string name = GetCaption(type, evalue);
                 if (string.IsNullOrEmpty(name))
                     name = line.GetAttribute("name");   // 实在不行再从 line 元素的 name 属性取
 

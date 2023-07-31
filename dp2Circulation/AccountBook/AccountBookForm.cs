@@ -2763,9 +2763,11 @@ null,
                     // 改用 Jint
                     try
                     {
-                        strContent = RunScript(strMARC,
-        strOutMarcSyntax,
-        column.Evalue);
+                        strContent = RunBiblioScript(
+                            null,
+                            strMARC,
+                            strOutMarcSyntax,
+                            column.Evalue);
                     }
                     catch (Exception ex)
                     {
@@ -3567,9 +3569,11 @@ strTotalPrice);
                     // 改用 Jint
                     try
                     {
-                        strContent = RunScript(strMARC,
-        strOutMarcSyntax,
-        column.Evalue);
+                        strContent = RunBiblioScript(
+                            null,
+                            strMARC,
+                            strOutMarcSyntax,
+                            column.Evalue);
                     }
                     catch (Exception ex)
                     {
@@ -4300,9 +4304,11 @@ strTotalPrice);
                     // 改用 Jint
                     try
                     {
-                        strContent = RunScript(strMARC,
-        strOutMarcSyntax,
-        column.Evalue);
+                        strContent = RunBiblioScript(
+                            null,
+                            strMARC,
+                            strOutMarcSyntax,
+                            column.Evalue);
                     }
                     catch (Exception ex)
                     {
@@ -4412,12 +4418,21 @@ strTotalPrice);
             return value;
         }
 
-        public static string RunScript(string strMARC,
+        // 执行 JavaScript 脚本
+        // parameters:
+        //      result 待处理的字符串内容。本函数用对象名 result 提供给脚本处理
+        //      strItemXml  待处理的册记录 XML 内容。本函数用对象名 item 提供给脚本处理
+        public static string RunBiblioScript(
+            string result,
+            string strMARC,
             string strOutMarcSyntax,
             string strScript)
         {
             Engine engine = new Engine(cfg => cfg.AllowClr(typeof(MarcQuery).Assembly));
 
+            SetValue(engine,
+"result",
+result);
             SetValue(engine,
 "biblio",
 new MarcRecord(strMARC));
@@ -4431,7 +4446,7 @@ new MarcRecord(strMARC));
                 ?.GetCompletionValue() // get the latest statement completion value
                 ?.ToObject()?.ToString() // converts the value to .NET
                 ;
-            string result = GetString(engine, "result", "(请返回 result)");
+            result = GetString(engine, "result", "(请返回 result)");
             string message = GetString(engine, "message", "");
 
             return result;

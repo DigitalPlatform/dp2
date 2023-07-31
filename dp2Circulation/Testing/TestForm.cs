@@ -35,6 +35,7 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Drawing;
 using DigitalPlatform.Core;
 using DigitalPlatform.Typography;
+using System.Xml.Linq;
 
 namespace dp2Circulation
 {
@@ -2024,6 +2025,13 @@ this,
             File.WriteAllText(fileName, this.textBox_typography_xml.Text, Encoding.UTF8);
             TypoUtility.XmlToWord(fileName, outputFileName);
             Process.Start(outputFileName);
+        }
+
+        private void button_xml_testXDocument_Click(object sender, EventArgs e)
+        {
+            var doc = XDocument.Parse("<root><barcode>0000001</barcode></root>");
+            var value = doc.Root.Elements("barcode").FirstOrDefault()?.Value;
+            MessageBox.Show(this, value);
         }
     }
 }

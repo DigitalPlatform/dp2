@@ -5852,10 +5852,12 @@ MessageBoxDefaultButton.Button2);
         // 安装绿色更新包
         private void MenuItem_updateByGreenUpdatePack_Click(object sender, EventArgs e)
         {
+            var temp_dir = Path.Combine(this.TempDir, "pending");
+            PathUtil.CreateDirIfNeed(temp_dir);
             FormClientInfo.UpdateByGreenUpdatePack(
                 "dp2libraryxe",
                 this.DataDir,
-                this.TempDir,
+                temp_dir,
                 (text) =>
                 {
                     Application.DoEvents();

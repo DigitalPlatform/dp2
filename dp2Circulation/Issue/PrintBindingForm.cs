@@ -2326,6 +2326,7 @@ strPubType);
                 nRet = GetTable(strBiblioRecPath,
                     biblio_title_list,
                     // "",
+                    null,
                     out string strTableXml,
                     out strError);
                 if (nRet == -1)

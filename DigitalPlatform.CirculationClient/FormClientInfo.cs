@@ -1062,7 +1062,11 @@ delegate_action action)
             // 打开文件夹
             try
             {
-                System.Diagnostics.Process.Start(temp_dir);
+                // https://stackoverflow.com/questions/1073353/c-how-to-open-windows-explorer-windows-with-a-number-of-files-selected
+                // Process.Start("explorer.exe",
+                // "/select,Z:\Music\Thursday Blues\01. I wish it was friday.mp3")
+                System.Diagnostics.Process.Start("explorer.exe",
+                    $"/select,{final_filename}"); // temp_dir
             }
             catch (Exception ex)
             {
@@ -1075,6 +1079,9 @@ delegate_action action)
         }
 
         // 安装绿色更新包
+        // parameters:
+        //      strTempDir  临时目录。
+        //                  注: 可能在这个临时目录内留下一些名字为 GUID 形态的临时文件，直到 Windows 重启以后才自动删除。所以最好用一个专用的临时目录，避免干扰其它临时文件所在目录
         public static void UpdateByGreenUpdatePack(
             string strProductName,
             string strDataDir,
@@ -1114,9 +1121,9 @@ delegate_action action)
             // data_dir = "c:\\temp\\data_dir";
             // program_dir = "c:\\temp\\program_dir";
 
-            var temp_dir = strTempDir;
             var data_filename = Path.Combine(strTempDir, "data.zip");
             var program_filename = Path.Combine(strTempDir, "program.zip");
+            var temp_dir = strTempDir;  
 
             NormalResult result = null;
             func_display?.Invoke("正在安装绿色更新包 ...");

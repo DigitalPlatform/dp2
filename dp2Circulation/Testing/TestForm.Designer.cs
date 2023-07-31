@@ -232,8 +232,9 @@
             this.textBox_login_userName = new System.Windows.Forms.TextBox();
             this.label35 = new System.Windows.Forms.Label();
             this.tabPage_typography = new System.Windows.Forms.TabPage();
-            this.textBox_typography_xml = new System.Windows.Forms.TextBox();
             this.button_typography_convertToWordML = new System.Windows.Forms.Button();
+            this.textBox_typography_xml = new System.Windows.Forms.TextBox();
+            this.button_xml_testXDocument = new System.Windows.Forms.Button();
             this.tabControl_main.SuspendLayout();
             this.tabPage_diskSpace.SuspendLayout();
             this.tabPage_windowsEventLog.SuspendLayout();
@@ -1582,6 +1583,7 @@
             // 
             // tabPage_xml
             // 
+            this.tabPage_xml.Controls.Add(this.button_xml_testXDocument);
             this.tabPage_xml.Controls.Add(this.textBox_xml_content);
             this.tabPage_xml.Controls.Add(this.button_xml_loadToDom);
             this.tabPage_xml.Controls.Add(this.button_xml_getXmlFilename);
@@ -2668,6 +2670,17 @@
             this.tabPage_typography.Text = "Typography";
             this.tabPage_typography.UseVisualStyleBackColor = true;
             // 
+            // button_typography_convertToWordML
+            // 
+            this.button_typography_convertToWordML.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.button_typography_convertToWordML.Location = new System.Drawing.Point(4, 440);
+            this.button_typography_convertToWordML.Name = "button_typography_convertToWordML";
+            this.button_typography_convertToWordML.Size = new System.Drawing.Size(179, 36);
+            this.button_typography_convertToWordML.TabIndex = 11;
+            this.button_typography_convertToWordML.Text = "to WordML";
+            this.button_typography_convertToWordML.UseVisualStyleBackColor = true;
+            this.button_typography_convertToWordML.Click += new System.EventHandler(this.button_typography_convertToWordML_Click);
+            // 
             // textBox_typography_xml
             // 
             this.textBox_typography_xml.AcceptsReturn = true;
@@ -2683,16 +2696,15 @@
             this.textBox_typography_xml.Size = new System.Drawing.Size(705, 418);
             this.textBox_typography_xml.TabIndex = 10;
             // 
-            // button_typography_convertToWordML
+            // button_xml_testXDocument
             // 
-            this.button_typography_convertToWordML.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.button_typography_convertToWordML.Location = new System.Drawing.Point(4, 440);
-            this.button_typography_convertToWordML.Name = "button_typography_convertToWordML";
-            this.button_typography_convertToWordML.Size = new System.Drawing.Size(179, 36);
-            this.button_typography_convertToWordML.TabIndex = 11;
-            this.button_typography_convertToWordML.Text = "to WordML";
-            this.button_typography_convertToWordML.UseVisualStyleBackColor = true;
-            this.button_typography_convertToWordML.Click += new System.EventHandler(this.button_typography_convertToWordML_Click);
+            this.button_xml_testXDocument.Location = new System.Drawing.Point(4, 68);
+            this.button_xml_testXDocument.Name = "button_xml_testXDocument";
+            this.button_xml_testXDocument.Size = new System.Drawing.Size(221, 39);
+            this.button_xml_testXDocument.TabIndex = 10;
+            this.button_xml_testXDocument.Text = "test XDocument";
+            this.button_xml_testXDocument.UseVisualStyleBackColor = true;
+            this.button_xml_testXDocument.Click += new System.EventHandler(this.button_xml_testXDocument_Click);
             // 
             // TestForm
             // 
@@ -2973,5 +2985,6 @@
         private System.Windows.Forms.TabPage tabPage_typography;
         private System.Windows.Forms.TextBox textBox_typography_xml;
         private System.Windows.Forms.Button button_typography_convertToWordML;
+        private System.Windows.Forms.Button button_xml_testXDocument;
     }
 }

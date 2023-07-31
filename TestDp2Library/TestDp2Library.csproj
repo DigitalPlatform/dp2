@@ -108,6 +108,7 @@
     <Compile Include="TestRemoveConflictName.cs" />
     <Compile Include="TestRfid.cs" />
     <Compile Include="TestString.cs" />
+    <Compile Include="XDoc\TestXDoc.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DigitalPlatform.Install\DigitalPlatform.Install.csproj">

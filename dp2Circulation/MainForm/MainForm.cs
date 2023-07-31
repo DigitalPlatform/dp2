@@ -10434,27 +10434,16 @@ this.UserTempDir,
 });
         }
 
-        private async void MenuItem_updateByGreenUpdatePack_Click(object sender, EventArgs e)
+        private void MenuItem_updateByGreenUpdatePack_Click(object sender, EventArgs e)
         {
-            /*
-            await FormClientInfo.UpdateByGreenUpdatePack(
-    "dp2circulation",
-    this.DataDir,
-    this.UserTempDir,
-    (text) =>
-    {
-        this.TryInvoke(() =>
-        {
-            this.StatusBarMessage = text;
-        });
-    });
-            */
+            var temp_dir = Path.Combine(this.UserTempDir, "pending");
+            PathUtil.CreateDirIfNeed(temp_dir);
+
             var wi = WindowsIdentity.GetCurrent();
             var wp = new WindowsPrincipal(wi);
 
             bool runAsAdmin = wp.IsInRole(WindowsBuiltInRole.Administrator);
-
-            if (true/*!runAsAdmin*/)
+            if (!runAsAdmin)
             {
                 // var processInfo = new ProcessStartInfo(Assembly.GetExecutingAssembly().CodeBase);
                 var processInfo = new ProcessStartInfo();
@@ -10465,7 +10454,7 @@ this.UserTempDir,
                 processInfo.FileName = Application.ExecutablePath;
                 processInfo.Verb = "runas";
                 processInfo.Arguments = " action=update \"datadir=" + this.DataDir
-                    + "\" \"tempdir=" + this.UserTempDir + "\"";
+                    + "\" \"tempdir=" + temp_dir + "\"";
 
                 // Start the new process
                 try
@@ -10478,6 +10467,20 @@ this.UserTempDir,
                     MessageBox.Show(this,
                         $"dp2circulation (Administrator) 无法运行({ex.Message})。\r\n\r\n因为安装升级文件的需要，必须在 Administrator 权限下才能运行");
                 }
+            }
+            else
+            {
+                FormClientInfo.UpdateByGreenUpdatePack(
+                    "dp2circulation",
+                    this.DataDir,
+                    temp_dir,
+                    (text) =>
+                    {
+                        this.TryInvoke(() =>
+                        {
+                            this.StatusBarMessage = text;
+                        });
+                    });
             }
         }
     }

@@ -2111,6 +2111,4 @@ namespace DigitalPlatform.Xml
 
 
     } // DomUtil类结束
-
-
 }
