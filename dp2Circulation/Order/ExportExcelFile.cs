@@ -157,6 +157,7 @@ GetOrderRecord procGetOrderRecord)
                     context.BiblioColList,
                     // StringUtil.MakePathList(ColumnProperty.GetTypeList(context.BiblioColList)),
                     null,
+                    null,
                     out strTableXml,
                     out string strError);
                 if (nRet == -1)

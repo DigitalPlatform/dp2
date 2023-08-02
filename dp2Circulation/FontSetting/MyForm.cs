@@ -3346,9 +3346,22 @@ out strError);
             return type;
         }
 
+        [Flags]
+        public enum ProcessParts
+        {
+            None = 0x00,
+            Basic = 0x01,
+            Evalue = 0x02,
+        }
+
+        // 尝试获得一个列的内容值
+        public delegate ProcessParts delegate_getColumnValue(Order.ColumnProperty property, out string value);
+
         // 获得 table 格式，里面包含通过 javascript 脚本产生的列
         // parameters:
         //      style   null 相当于 remove_prefix,remove_evalue
+        //              remove_prefix 构造 format 名的时候，去掉 type 前方的 biblio_ 这样的部分
+        //              remove_evalue 在 GetBiblioInfos() 的 formats 列表中不包含 evalue 列名
         // return:
         //      -1  出错
         //      0   没有找到
@@ -3358,6 +3371,7 @@ out strError);
             // string strStyleList,
             List<Order.ColumnProperty> titles,
             string style,
+            delegate_getColumnValue func_getValue,
             out string strTableXml,
             out string strError)
         {
@@ -3434,22 +3448,28 @@ out strError);
                 if (results.Length > 1)
                     strBiblioXml = results[1];
 
-                // 加入 javascript 创建的内容
-                if (exists_evalue)
                 {
-                    int nRet = MarcUtil.Xml2Marc(strBiblioXml,
+                    string strMarcSyntax = "";
+                    string strMARC = "";
+
+                    // 加入 javascript 创建的内容
+                    if (exists_evalue)
+                    {
+                        int nRet = MarcUtil.Xml2Marc(strBiblioXml,
     true,
     null,
-    out string strMarcSyntax,
-    out string strMARC,
+    out strMarcSyntax,
+    out strMARC,
     out strError);
-                    if (nRet == -1)
-                        return -1;
+                        if (nRet == -1)
+                            return -1;
+                    }
 
-                    XmlDocument dom = new XmlDocument();
+                    // 源。table xml
+                    XmlDocument source_dom = new XmlDocument();
                     try
                     {
-                        dom.LoadXml(string.IsNullOrEmpty(strTableXml) ? "<table />" : strTableXml);
+                        source_dom.LoadXml(string.IsNullOrEmpty(strTableXml) ? "<table />" : strTableXml);
                     }
                     catch (Exception ex)
                     {
@@ -3457,38 +3477,94 @@ out strError);
                         return -1;
                     }
 
+                    // 目标：处理后的 line 元素
+                    XmlDocument target_dom = new XmlDocument();
+                    target_dom.LoadXml("<table />");
+
                     foreach (var column in titles)
                     {
-                        if (string.IsNullOrEmpty(column.Evalue))
-                            continue;
-
                         string type = column.Type;
                         if (remove_prefix)
                             type = RemovePrefix(type);
+                        var existing_line = source_dom.DocumentElement
+    .SelectSingleNode($"line[@type='{type}']") as XmlElement;
 
-                        var existing_line = dom.DocumentElement
-                            .SelectSingleNode($"line[@type='{type}']") as XmlElement;
+                        bool processed = false;
+                        ProcessParts parts = ProcessParts.None;
+
                         string result = null;
-                        if (existing_line != null)
-                            result = existing_line.GetAttribute("value");
-                        result = AccountBookForm.RunBiblioScript(
-                            result,
-                            strMARC,
-                            strMarcSyntax,
-                            column.Evalue);
-                        XmlElement line = existing_line;
-                        if (line == null
-                            || string.IsNullOrEmpty(column.Evalue) == false)    // Evalue 列需要重新创建一个 line 元素
-                            line = dom.CreateElement("line");
-                        line.SetAttribute("type", type); // column.Type
-                        line.SetAttribute("name", column.Caption);
-                        line.SetAttribute("value", result);
-                        if (string.IsNullOrEmpty(column.Evalue) == false)
-                            line.SetAttribute("evalue", column.Evalue);
-                        dom.DocumentElement.AppendChild(line);
+                        string value = null;
+                        if (func_getValue != null)
+                        {
+                            parts = func_getValue.Invoke(column, out value);
+                            if ((parts & ProcessParts.Basic) == ProcessParts.Basic)
+                            {
+                                // func 已经处理过基本步骤
+                                result = value;
+                                processed = true;
+                            }
+                            if ((parts & ProcessParts.Evalue) == ProcessParts.Evalue)
+                            {
+                                // func 已经处理过 Evalue 步骤
+                                result = value;
+                                processed = true;
+                            }
+                        }
+
+                        // 本函数自行处理 Evalue 步骤
+                        if ((parts & ProcessParts.Evalue) != ProcessParts.Evalue
+                            && string.IsNullOrEmpty(column.Evalue) == false)
+                        {
+                            if (existing_line != null)
+                                result = existing_line.GetAttribute("value");
+                            result = AccountBookForm.RunBiblioScript(
+                                result,
+                                strMARC,
+                                strMarcSyntax,
+                                column.Evalue);
+                            processed = true;
+                        }
+
+                        // 写入 XML
+                        if (processed)
+                        {
+                            /*
+                            XmlElement line = existing_line;
+                            if (line == null
+                                || string.IsNullOrEmpty(column.Evalue) == false)    // Evalue 列需要重新创建一个 line 元素
+                            {
+                                line = source_dom.CreateElement("line");
+                                source_dom.DocumentElement.AppendChild(line);
+                            }
+                            line.SetAttribute("type", type); // column.Type
+                            line.SetAttribute("name", column.Caption);
+                            line.SetAttribute("value", result);
+                            if (string.IsNullOrEmpty(column.Evalue) == false)
+                                line.SetAttribute("evalue", column.Evalue);
+                            */
+                            XmlElement line = target_dom.CreateElement("line");
+                            target_dom.DocumentElement.AppendChild(line);
+                            line.SetAttribute("type", type); // column.Type
+                            line.SetAttribute("name", column.Caption);
+                            line.SetAttribute("value", result);
+                            if (string.IsNullOrEmpty(column.Evalue) == false)
+                                line.SetAttribute("evalue", column.Evalue);
+                        }
+                        else
+                        {
+                            // 没有经过处理的，原本从 table xml 中得到的行
+                            if (existing_line != null)
+                            {
+                                // 原样转移到 target_dom 中
+                                var fragment = target_dom.CreateDocumentFragment();
+                                fragment.InnerXml = existing_line.OuterXml;
+                                target_dom.DocumentElement.AppendChild(fragment);
+                            }
+                        }
                     }
 
-                    strTableXml = dom.OuterXml;
+                    // strTableXml = source_dom.OuterXml;
+                    strTableXml = target_dom.OuterXml;
                 }
                 return 1;
             }
@@ -4012,6 +4088,54 @@ MessageBoxDefaultButton.Button2);
                             strRecPath,
                             biblio_title_list,
                             "remove_prefix",    // 不包含 remove_evalue
+                            (Order.ColumnProperty c, out string v) =>
+                            {
+                                v = null;
+                                if (c.Type == "biblio_accessNo")
+                                {
+                                    /*
+                                    // return:
+                                    //      -1  出错
+                                    //      0   没有找到
+                                    //      1   成功
+                                    var ret = Utility.GetSubRecords(
+                    channel,
+                    looping.Progress,
+                    strRecPath,
+                    "firstAccessNo",
+                    out string strResult,
+                    out string error);
+                                    */
+                                    // return:
+                                    //      -1  出错
+                                    //      0   没有找到
+                                    //      1   成功
+                                    var ret = Utility.GetFirstAccessNo(
+                                        channel,
+                                        looping.Progress,
+                                        strRecPath,
+                                        out string strResult,
+                                        out string error);
+                                    v = strResult;
+                                    if (ret == -1)
+                                        v = "error:" + error;
+                                    return ProcessParts.Basic;
+                                }
+
+                                if (c.Type == "biblio_recpath")
+                                {
+                                    v = strRecPath;
+                                    return ProcessParts.Basic;
+                                }
+
+                                if (c.Type == "biblio_items"
+                                || c.Type == "items")
+                                {
+                                    v = "placeholder";
+                                    return ProcessParts.Basic;
+                                }
+                                return ProcessParts.None;
+                            },
                             out string strXml,
                             out strError);
                         if (nRet == 0)
@@ -4061,8 +4185,8 @@ MessageBoxDefaultButton.Button2);
                                 }
 
                                 string content = BuildBiblioHtml(
-                                    channel,
-                                    looping.Progress,
+                                    //channel,
+                                    //looping.Progress,
                                     biblio_title_list,
                                     dom,
                                     strRecPath,
@@ -4286,7 +4410,7 @@ MessageBoxDefaultButton.Button2);
             int line_count = 0;
             StringBuilder result = new StringBuilder();
             if (format == "docx")
-                result.Append("<table cellMarginDefault='1pt,0,1pt,0' class='items'>"); // cellMarginDefault='1pt,1pt,1pt,1pt'
+                result.Append("<table cellMarginDefault='1pt,0,1pt,0' width='100%' class='items'>"); // cellMarginDefault='1pt,1pt,1pt,1pt'
             else
                 result.Append("<table class='items'>");
             result.Append(BuildEntityTitle(entity_title_list, format));
@@ -4509,8 +4633,8 @@ item);
          * 自然段
          * */
         static string BuildBiblioHtml(
-            LibraryChannel channel,
-            Stop stop,
+            //LibraryChannel channel,
+            //Stop stop,
             List<Order.ColumnProperty> biblio_title_list,
             XmlDocument biblio_table_dom,
             string biblio_recpath,
@@ -4535,7 +4659,7 @@ item);
             if (layout_style == "独立表格")
             {
                 if (format == "docx")
-                    result.Append("<table cellMarginDefault='2pt,2pt,2pt,2pt' class='biblio'>");
+                    result.Append("<table cellMarginDefault='2pt,2pt,2pt,2pt' width='100%' class='biblio'>");
                 else
                     result.Append("<table class='biblio'>\r\n");
             }
@@ -4547,6 +4671,8 @@ item);
                     return biblio_title_list.Where(o => o.Type == "biblio_" + type).FirstOrDefault()?.Caption;
                 return biblio_title_list.Where(o => o.Type == "biblio_" + type && o.Evalue == evalue).FirstOrDefault()?.Caption;
             }
+
+            bool items_outputed = false;
 
             XmlNodeList lines = biblio_table_dom.DocumentElement.SelectNodes("line");
             foreach (XmlElement line in lines)
@@ -4583,10 +4709,34 @@ item);
                     OutputLineRaw($"biblio_{type}", "", $"<img alt='封面图片' src='{url}'></img>");
                     continue;
                 }
+
+                if (type == "recpath")
+                {
+                    if (string.IsNullOrEmpty(strOpacServerUrl) == false
+                        && format != "docx")
+                    {
+                        string url = $"{strOpacServerUrl}book.aspx?BiblioRecPath={HttpUtility.UrlEncode(biblio_recpath)}";
+                        // result.AppendLine($"<tr class=''><td class='name'>{HttpUtility.HtmlEncode("记录路径")}</td><td class='value'></td></tr>");
+                        OutputLineRaw("biblio_recpath", "记录路径", $"<a href='{url}'>{HttpUtility.HtmlEncode(biblio_recpath)}</a>");
+                    }
+                    else
+                        OutputLine("biblio_recpath", GetCaption("recpath"), biblio_recpath);
+                    continue;
+                }
+
+                if (type == "items")
+                {
+                    // items 占位
+                    result.AppendLine($"{{items}}");
+                    items_outputed = true;
+                    continue;
+                }
+
                 // result.AppendLine($"<tr class='biblio_{type}'><td class='name'>{HttpUtility.HtmlEncode(name)}</td><td class='value'>{HttpUtility.HtmlEncode(value)}</td></tr>");    //  style1='width:100pt;color:#aaaaaa;'
                 OutputLine($"biblio_{type}", name, value);
             }
 
+            /*
             var display_accessNo = biblio_title_list.Where(o => o.Type == "biblio_accessNo").Any();
             if (display_accessNo)
             {
@@ -4606,10 +4756,18 @@ out string strError);
                     accessNo = "error:" + strError;
                 OutputLine("biblio_accessNo", GetCaption("accessNo"), accessNo);
             }
+            */
 
-            // items 占位
-            result.AppendLine($"{{items}}");
+#if REMOVED
+            // 如果没有明确占位，则输出到最后一项
+            if (items_outputed == false)
+            {
+                // items 占位
+                result.AppendLine($"{{items}}");
+            }
+#endif
 
+            /*
             var display_recpath = biblio_title_list.Where(o => o.Type == "biblio_recpath").Any();
             if (display_recpath)
             {
@@ -4623,6 +4781,7 @@ out string strError);
                 else
                     OutputLine("biblio_recpath", GetCaption("recpath"), biblio_recpath);
             }
+            */
 
             if (layout_style == "独立表格")
                 result.Append("</table>\r\n");

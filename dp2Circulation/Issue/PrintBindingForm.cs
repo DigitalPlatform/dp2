@@ -2327,6 +2327,7 @@ strPubType);
                     biblio_title_list,
                     // "",
                     null,
+                    null,
                     out string strTableXml,
                     out strError);
                 if (nRet == -1)

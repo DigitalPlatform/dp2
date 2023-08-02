@@ -5046,6 +5046,7 @@ MessageBoxDefaultButton.Button2);
                                 strRecPath,
                                 biblio_title_list,
                                 null,
+                                null,
                                 out strTableXml,
                                 out string strError1);
                             if (nRet == -1)

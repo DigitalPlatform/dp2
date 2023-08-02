@@ -299,6 +299,7 @@ context.ContentEndRow + 1 + 1, context.DistributeEndColumn + 1);
                     context.BiblioColList,
                     // StringUtil.MakePathList(ColumnProperty.GetTypeList(context.BiblioColList)),
                     null,
+                    null,
                     out strTableXml,
                     out string strError);
                 if (nRet == -1)
@@ -439,6 +440,7 @@ GetOrderRecord procGetOrderRecord)
                     strBiblioRecPath,
                     context.BiblioColList,
                     // StringUtil.MakePathList(ColumnProperty.GetTypeList(context.BiblioColList)),
+                    null,
                     null,
                     out strTableXml,
                     out string strError);

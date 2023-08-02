@@ -8,6 +8,9 @@ using System.Xml.Linq;
 using System.Text;
 using System.IO;
 
+using A = DocumentFormat.OpenXml.Drawing;
+using DW = DocumentFormat.OpenXml.Drawing.Wordprocessing;
+using PIC = DocumentFormat.OpenXml.Drawing.Pictures;
 
 using DocumentFormat.OpenXml.VariantTypes;
 using DocumentFormat.OpenXml;
@@ -17,6 +20,8 @@ using DocumentFormat.OpenXml.Wordprocessing;
 
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
+using System.Net.Http;
+// using SixLabors.ImageSharp;
 
 namespace DigitalPlatform.Typography
 {
@@ -112,7 +117,7 @@ namespace DigitalPlatform.Typography
         static void AdjustTable(XmlDocument dom)
         {
             var nodes = dom.DocumentElement.SelectNodes("//table");
-            foreach(XmlElement table in nodes)
+            foreach (XmlElement table in nodes)
             {
                 if (IsParentTd(table) == false)
                     continue;
@@ -141,7 +146,7 @@ namespace DigitalPlatform.Typography
 
             bool HasSiblingP(XmlElement current)
             {
-                foreach(XmlElement sibling in current.ParentNode.ChildNodes)
+                foreach (XmlElement sibling in current.ParentNode.ChildNodes)
                 {
                     if (sibling == null)
                         continue;
@@ -1205,6 +1210,49 @@ out string error);
                     continue;
                 }
 
+                if (child_node.Name == "img")
+                {
+                    XmlElement e = child_node as XmlElement;
+                    string src = e.GetAttribute("src");
+
+                    HttpClient client = new HttpClient();
+                    var response = client.GetAsync(src).Result;
+
+                    var contentType = response.Content.Headers.ContentType?.MediaType;
+
+                    int width = 0;
+                    int height = 0;
+                    ImagePart imagePart = null;
+                    using (var stream = response.Content.ReadAsStreamAsync().Result)
+                    {
+                        //    Stream theStream = client.GetStreamAsync(src).Result;
+
+                        /*
+                        var ext = Path.GetExtension(imageFileName);
+                        ImagePartType type = ImagePartType.Jpeg;
+                        Enum.TryParse<ImagePartType>(ext, true, out type);
+                        */
+                        var type = GetImageType(contentType);
+                        imagePart = doc.MainDocumentPart.AddImagePart(type);
+
+                        using (var image = SixLabors.ImageSharp.Image.Load(stream))
+                        {
+                            width = image.Width;
+                            height = image.Height;
+                        }
+                    }
+
+                    response = client.GetAsync(src).Result;
+                    using (var stream = response.Content.ReadAsStreamAsync().Result)
+                    {
+                        imagePart.FeedData(stream);
+                    }
+                    var relationshipId = doc.MainDocumentPart.GetIdOfPart(imagePart);
+                    var d = NewDrawing(relationshipId, width, height);
+                    Run run = CreateParagraphIfNeed().AppendChild(new Run(d));
+                    continue;
+                }
+
                 if (child_node.Name == "br")
                 {
                     Run run = CreateParagraphIfNeed().AppendChild(new Run());
@@ -1995,5 +2043,142 @@ out string error);
         }
 
         #endregion
+
+
+        #region Image
+
+        /*
+        public static void InsertAPicture(
+            MainDocumentPart mainPart,
+            string imageFileName)
+        {
+            ImagePart imagePart = mainPart.AddImagePart(ImagePartType.Jpeg);
+
+            using (FileStream stream = new FileStream(imageFileName, FileMode.Open))
+            {
+                imagePart.FeedData(stream);
+            }
+
+            AddImageToBody(mainPart, mainPart.GetIdOfPart(imagePart));
+        }
+        */
+        static ImagePartType GetImageType(string content_type)
+        {
+            var parts = StringUtil.ParseTwoPart(content_type, "/");
+            string ext = parts[1];
+            if (Enum.TryParse<ImagePartType>(ext, true, out ImagePartType type) == true)
+                return type;
+            if (ext.ToLower() == "jpeg" || ext.ToLower() == "jpg")
+                return ImagePartType.Jpeg;
+            if (ext.ToLower() == "x-png" || ext.ToLower() == "png")
+                return ImagePartType.Png;
+            throw new Exception($"无法识别 Content-Type '{content_type}' 的图像文件类型");
+        }
+
+
+#if REMOVED
+        static ImagePartType GetImageType(string imageFileName)
+        {
+            var ext = Path.GetExtension(imageFileName).Substring(1);
+            ImagePartType type = ImagePartType.Jpeg;
+            if (Enum.TryParse<ImagePartType>(ext, true, out type) == true)
+                return type;
+            if (ext.ToLower() == "jpeg" || ext.ToLower() == "jpg")
+                return ImagePartType.Jpeg;
+            throw new Exception($"无法识别文件 '{imageFileName}' 的图像文件类型");
+        }
+#endif
+
+        // https://learn.microsoft.com/en-us/office/open-xml/how-to-insert-a-picture-into-a-word-processing-document
+        private static Drawing NewDrawing(// MainDocumentPart mainPart, 
+            string relationshipId,
+            int w,
+            int h)
+        {
+            // https://riptutorial.com/openxml/example/29113/refer-to-the-image-in-the-word-document
+            Int64Value width = w * 9525;
+            Int64Value height = h * 9525;
+
+            // Define the reference of the image.
+            var element =
+                 new Drawing(
+                     new DW.Inline(
+                         new DW.Extent() { Cx = width/*990000L*/, Cy = height/*792000L*/ },
+                         new DW.EffectExtent()
+                         {
+                             LeftEdge = 0L,
+                             TopEdge = 0L,
+                             RightEdge = 0L,
+                             BottomEdge = 0L
+                         },
+                         new DW.DocProperties()
+                         {
+                             Id = (UInt32Value)1U,
+                             Name = "Picture 1"
+                         },
+                         new DW.NonVisualGraphicFrameDrawingProperties(
+                             new A.GraphicFrameLocks() { NoChangeAspect = true }),
+                         new A.Graphic(
+                             new A.GraphicData(
+                                 new PIC.Picture(
+                                     new PIC.NonVisualPictureProperties(
+                                         new PIC.NonVisualDrawingProperties()
+                                         {
+                                             Id = (UInt32Value)0U,
+                                             Name = "New Bitmap Image.jpg"
+                                         },
+                                         new PIC.NonVisualPictureDrawingProperties()),
+                                     new PIC.BlipFill(
+                                         new A.Blip(
+                                             new A.BlipExtensionList(
+                                                 new A.BlipExtension()
+                                                 {
+                                                     Uri =
+                                                        "{28A0092B-C50C-407E-A947-70E740481C1C}"
+                                                 })
+                                         )
+                                         {
+                                             Embed = relationshipId,
+                                             CompressionState =
+                                             A.BlipCompressionValues.Print
+                                         },
+                                         new A.Stretch(
+                                             new A.FillRectangle())),
+                                     new PIC.ShapeProperties(
+                                         new A.Transform2D(
+                                             new A.Offset() { X = 0L, Y = 0L },
+                                             new A.Extents() { Cx = width/*990000L*/, Cy = height/*792000L*/ }),
+                                         new A.PresetGeometry(
+                                             new A.AdjustValueList()
+                                         )
+                                         { Preset = A.ShapeTypeValues.Rectangle }))
+                             )
+                             { Uri = "http://schemas.openxmlformats.org/drawingml/2006/picture" })
+                     )
+                     {
+                         DistanceFromTop = (UInt32Value)0U,
+                         DistanceFromBottom = (UInt32Value)0U,
+                         DistanceFromLeft = (UInt32Value)0U,
+                         DistanceFromRight = (UInt32Value)0U,
+                         EditId = "50D07946"
+                     });
+
+            return element;
+            // Append the reference to body, the element should be in a Run.
+            // mainPart.Document.Body.AppendChild(new Paragraph(new Run(element)));
+        }
+
+        #endregion
     }
+
+    /*
+DigitalPlatform.Typography
+
+因安装 SixLabors.ImageSharp 连带更新:
+
+System.Buffers.4.4.0 -> System.Buffers.4.5.1
+System.Memory.4.5.0 -> System.Memory.4.5.4
+System.Numerics.Vectors.4.4.0 -> System.Numerics.Vectors.4.5.0
+System.Runtime.CompilerServices.Unsafe.4.5.0 -> System.Runtime.CompilerServices.Unsafe.5.0.0
+    * */
 }

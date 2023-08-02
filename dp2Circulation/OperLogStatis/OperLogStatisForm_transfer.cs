@@ -334,6 +334,7 @@ groups);
                     biblio_title_list,
                     // styleList,
                     null,
+                    null,
                     out strTableXml,
                     out string strError1);
                 if (nRet == -1)

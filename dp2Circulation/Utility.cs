@@ -1,7 +1,5 @@
-﻿using DigitalPlatform;
-using DigitalPlatform.LibraryClient;
-using DigitalPlatform.Text;
-using DigitalPlatform.Xml;
+﻿
+using Microsoft.CodeAnalysis.Operations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,10 +7,62 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 
+using DigitalPlatform;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
+
 namespace dp2Circulation
 {
     public static class Utility
     {
+        // 获得一个书目记录下属的所有册记录中第一个非空的索取号
+        // return:
+        //      -1  出错
+        //      0   没有找到
+        //      1   成功
+        public static int GetFirstAccessNo(
+    LibraryChannel channel,
+    Stop stop,
+    string strRecPath,
+    out string strResult,
+    out string strError)
+        {
+            strError = "";
+            strResult = "";
+
+            SubItemLoader sub_loader = new SubItemLoader();
+            sub_loader.BiblioRecPath = strRecPath;
+            sub_loader.Channel = channel;
+            sub_loader.Stop = stop;
+            sub_loader.DbType = "item";
+
+            // sub_loader.Prompt
+
+            foreach (EntityInfo info in sub_loader)
+            {
+                if (info.ErrorCode != ErrorCodeValue.NoError)
+                {
+                    strError = "路径为 '" + info.OldRecPath + "' 的订购记录装载中发生错误: " + info.ErrorInfo;  // NewRecPath
+                    return -1;
+                }
+
+                XmlDocument item_dom = new XmlDocument();
+                item_dom.LoadXml(info.OldRecord);
+                string accessNo = DomUtil.GetElementText(item_dom.DocumentElement,
+                    "accessNo");
+
+                if (string.IsNullOrEmpty(accessNo) == false)
+                {
+                    strResult = accessNo;
+                    return 1;
+                }
+            }
+
+            return 0;
+        }
+
         // 获得书目记录的下级记录
         // parameters:
         //      strDataName 数据名称。为 firstAccessNo subrecords 之一
@@ -31,6 +81,7 @@ namespace dp2Circulation
             strError = "";
             strResult = "";
 
+            // 注: 最多获得 10 条册记录
             long lRet = channel.GetBiblioInfos(
     stop,
     strRecPath,

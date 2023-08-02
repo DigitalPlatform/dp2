@@ -197,7 +197,6 @@
             this.comboBox_items_style.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_items_style.FormattingEnabled = true;
             this.comboBox_items_style.Items.AddRange(new object[] {
-            "不输出",
             "没有册时不输出",
             "没有册时输出(无)"});
             this.comboBox_items_style.Location = new System.Drawing.Point(23, 246);

@@ -849,8 +849,11 @@ out strError);
                     // TODO: 处理 backspace
                     if (passwordChar == '\b')
                     {
-                        Console.Write("\b \b"); // 回退，覆盖一个空格，再次回退。起到抹掉最后一个字符的作用
-                        password.Remove(password.Length - 1, 1);
+                        if (password.Length > 0)
+                        {
+                            Console.Write("\b \b"); // 回退，覆盖一个空格，再次回退。起到抹掉最后一个字符的作用
+                            password.Remove(password.Length - 1, 1);
+                        }
                     }
                     else
                     {

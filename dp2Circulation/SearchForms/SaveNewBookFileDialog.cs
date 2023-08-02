@@ -93,7 +93,7 @@ namespace dp2Circulation
             {
                 string value = this.comboBox_items_style.Text;
                 if (string.IsNullOrEmpty(value))
-                    return "不输出";
+                    return "没有册时输出(无)";
                 return value;
             }
         }
@@ -259,8 +259,27 @@ dlg.UiState);
 
             if (bDefault == false)
             {
+                {
+                    Column column = new Column();
+                    column.Name = "biblio_accessNo -- 索取号";
+                    column.Caption = GetRightPart(column.Name);
+                    column.MaxChars = -1;
+                    results.Add(column);
+                }
+
+            }
+
+            {
                 Column column = new Column();
-                column.Name = "biblio_accessNo -- 索取号";
+                column.Name = "biblio_coverimageurl -- 封面图像";
+                column.Caption = GetRightPart(column.Name);
+                column.MaxChars = -1;
+                results.Insert(0, column);
+            }
+
+            {
+                Column column = new Column();
+                column.Name = "biblio_items -- 册";
                 column.Caption = GetRightPart(column.Name);
                 column.MaxChars = -1;
                 results.Add(column);
