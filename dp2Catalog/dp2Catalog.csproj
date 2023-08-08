@@ -11,8 +11,8 @@
     <RootNamespace>dp2Catalog</RootNamespace>
     <AssemblyName>dp2Catalog</AssemblyName>
     <IsWebBootstrapper>true</IsWebBootstrapper>
-    <ManifestCertificateThumbprint>57CE53D10A26B55C487F4A07A2D6B3BCCB573D75</ManifestCertificateThumbprint>
-    <ManifestKeyFile>数字平台（北京）软件有限责任公司_2022.pfx</ManifestKeyFile>
+    <ManifestCertificateThumbprint>8A609FAD04B89DDF14832D49A2DD957EC2628C66</ManifestCertificateThumbprint>
+    <ManifestKeyFile>数字平台（北京）软件有限责任公司苏州分公司.pfx</ManifestKeyFile>
     <GenerateManifests>false</GenerateManifests>
     <SignManifests>true</SignManifests>
     <SccProjectName>
@@ -52,7 +52,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>39</ApplicationRevision>
+    <ApplicationRevision>40</ApplicationRevision>
     <ApplicationVersion>3.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -777,6 +777,7 @@
     <None Include="代码签名证书-2020.pfx" />
     <None Include="数字平台（北京）软件有限责任公司.pfx" />
     <None Include="数字平台（北京）软件有限责任公司_2022.pfx" />
+    <None Include="数字平台（北京）软件有限责任公司苏州分公司.pfx" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DigitalPlatform.AmazonInterface\DigitalPlatform.AmazonInterface.csproj">

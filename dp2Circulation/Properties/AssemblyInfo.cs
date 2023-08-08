@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.83.*")]
-[assembly: AssemblyFileVersion("3.83.0.0")]
+[assembly: AssemblyVersion("3.84.*")]
+[assembly: AssemblyFileVersion("3.84.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -171,3 +171,7 @@ using System.Runtime.InteropServices;
 // 3.82 2023/3/28 固定面板区“创建数据” dpTable 控件中 Shift+鼠标点选择行 一处 bug 消除
 //              书目查询窗多行检索时改为使用通道结果集(此前的版本用了全局结果集，会造成大量检索的时候 dp2library 被迫不断清理结果集，导致检索过程报错)
 // 3.83 2023/4/12 读者查询窗增加从 Excel 导入(追加和合并)两个功能
+// 3.84 2023/8/7 书目查询窗输出新书通报功能改进，增加输出 docx 格式; 实体查询窗增加输出新书通报(html/docx格式)功能。
+//              读者查询窗“从 Excel 文件导入”功能改进，增加重复判断功能，某些字段增加内容替换方式选择
+//              增加制作绿色 zip 包功能；增加从绿色 zip 包更新功能
+//              打印财产帐窗功能改进，装入合订成员册会报错，增加了移除所有报错行的菜单功能。Next 按钮状态刷新算法做了改进，采用立即重新计算条件的方式

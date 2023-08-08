@@ -2064,6 +2064,30 @@ out string error);
         */
         static ImagePartType GetImageType(string content_type)
         {
+            switch (content_type)
+            {
+                case "image/pjpeg":
+                case "image/jpeg":
+                    return ImagePartType.Jpeg;
+                case "image/gif":
+                    return ImagePartType.Gif;
+                case "image/bmp":
+                    return ImagePartType.Bmp;
+                case "image/tiff":
+                    return ImagePartType.Tiff;
+                case "image/x-icon":
+                    return ImagePartType.Icon;
+                case "image/x-png":
+                case "image/png":
+                    return ImagePartType.Png;
+                case "image/x-emf":
+                    return ImagePartType.Emf;
+                case "image/x-wmf":
+                    return ImagePartType.Wmf;
+                case "image/x-pcx":
+                    return ImagePartType.Pcx;
+            }
+
             var parts = StringUtil.ParseTwoPart(content_type, "/");
             string ext = parts[1];
             if (Enum.TryParse<ImagePartType>(ext, true, out ImagePartType type) == true)
