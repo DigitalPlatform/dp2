@@ -17,6 +17,7 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.Core;
+using System.Globalization;
 
 namespace dp2ManageCenter.Message
 {
@@ -547,7 +548,16 @@ TaskScheduler.Default);
 
                 if (string.IsNullOrEmpty(value))
                     return TimeSpan.Zero;
-                if (TimeSpan.TryParse(value, out TimeSpan length) == false)
+                // https://learn.microsoft.com/zh-cn/dotnet/standard/base-types/custom-timespan-format-strings
+                if (TimeSpan.TryParseExact(value, 
+                    new string[] {
+                    "%d\\.%h\\:%m\\:%s",
+                    "%h\\:%m\\:%s",
+                    "%m\\:%s",
+                    "%s",
+                    }, 
+                    CultureInfo.InvariantCulture,
+                    out TimeSpan length) == false)
                     throw new ArgumentException($"时间长度值 '{value}' 不合法");
                 return length;
             }
