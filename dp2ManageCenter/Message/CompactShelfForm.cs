@@ -16,11 +16,14 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.Text;
+using DigitalPlatform.Core;
 
 namespace dp2ManageCenter.Message
 {
     public partial class CompactShelfForm : Form
     {
+        ErrorTable _errorTable = null;
+
         CancellationTokenSource _cancel = new CancellationTokenSource();
 
         string _userNameAndUrl = "";
@@ -47,6 +50,40 @@ namespace dp2ManageCenter.Message
         public CompactShelfForm()
         {
             InitializeComponent();
+
+            _errorTable = new ErrorTable((s) =>
+            {
+                try
+                {
+                    this.TryInvoke(() =>
+                    {
+                        var error1 = _errorTable.GetError("nearCode");
+                        var error2 = _errorTable.GetError("connect");
+                        bool error = (error1 != null && error1.StartsWith(" "))
+                        || (error2 != null && error2.StartsWith(" "));
+                        if (string.IsNullOrEmpty(s) == false)
+                        {
+                            string text = s.Replace(";", "\r\n");
+                            // string text = s.Replace("\r\n", "\n").Replace("\r", "\n").Replace("\n", "。");   // .Replace(";", "\r\n");
+                            if (text != GetStatusMessage())
+                            {
+                                if (error)
+                                    this.SetStatusMessage(text, "red");
+                                else
+                                    this.SetStatusMessage(text);
+
+                                // ClientInfo.WriteErrorLog(text);
+                            }
+                        }
+                        else
+                            this.SetStatusMessage("");
+                    });
+                }
+                catch (ObjectDisposedException)
+                {
+
+                }
+            });
         }
 
         private void CompactShelfForm_Load(object sender, EventArgs e)
@@ -74,14 +111,15 @@ namespace dp2ManageCenter.Message
         {
             bool succeed = false;
             StopUpdateNearCode();
-            SetStatusMessage($"正在连接 '{this.UserNameAndUrl}' ...");
+            _errorTable.SetError("nearCode", null);
+            _errorTable.SetError("connect", $"正在连接 '{this.UserNameAndUrl}' ...");
             try
             {
                 // 挂接事件
                 var get_result = await ConnectionPool.OpenConnectionAsync(this.UserNameAndUrl);
                 if (get_result.Value == -1)
                 {
-                    SetStatusMessage($"连接 '{this.UserNameAndUrl}' 时出错: {get_result.ErrorInfo}", "red");
+                    _errorTable.SetError("connect", $" 连接 '{this.UserNameAndUrl}' 时出错: {get_result.ErrorInfo}");
                     MessageBox.Show(this, $"连接 '{this.UserNameAndUrl}' 时出错: {get_result.ErrorInfo}");
                     return;
                 }
@@ -105,7 +143,7 @@ namespace dp2ManageCenter.Message
             finally
             {
                 if (succeed)
-                    SetStatusMessage($"");
+                    _errorTable.SetError("connect", null);
             }
         }
 
@@ -331,12 +369,21 @@ strError);
         {
             //this.UiState = ClientInfo.Config.Get("chat", "uiState", "");
             this.UserNameAndUrl = ClientInfo.Config.Get("compactShelf", "userNameAndUrl", "");
+            this.TryInvoke(() =>
+            {
+                this.toolStripTextBox_codeExpireLength.Text = ClientInfo.Config.Get("compactShelf", "codeExpireLength", "24:00:00");
+            });
         }
 
         void SaveSettings()
         {
             //ClientInfo.Config.Set("chat", "uiState", this.UiState);
             ClientInfo.Config.Set("compactShelf", "userNameAndUrl", this.UserNameAndUrl);
+            var value = this.TryGet(() =>
+            {
+                return this.toolStripTextBox_codeExpireLength.Text;
+            });
+            ClientInfo.Config.Set("compactShelf", "codeExpireLength", value);
         }
 
         CancellationTokenSource _cancelSearch = new CancellationTokenSource();
@@ -464,7 +511,8 @@ strError);
         }
 
         // 上一次现场码所对应的时间
-        string _lastTime = null;
+        // string _lastTime = null;
+        DateTime _lastTime = DateTime.MinValue;
         // 现场码
         static string _nearCode = null;
 
@@ -488,10 +536,60 @@ TaskCreationOptions.LongRunning,
 TaskScheduler.Default);
         }
 
+        TimeSpan CodeExpireLength
+        {
+            get
+            {
+                string value = this.TryGet(() =>
+                {
+                    return this.toolStripTextBox_codeExpireLength.Text;
+                });
+
+                if (string.IsNullOrEmpty(value))
+                    return TimeSpan.Zero;
+                if (TimeSpan.TryParse(value, out TimeSpan length) == false)
+                    throw new ArgumentException($"时间长度值 '{value}' 不合法");
+                return length;
+            }
+            set
+            {
+                this.TryInvoke(() =>
+                {
+                    if (value == TimeSpan.Zero)
+                        this.toolStripTextBox_codeExpireLength.Text = "";
+                    else
+                        this.toolStripTextBox_codeExpireLength.Text = value.ToString();
+                });
+            }
+        }
+
         void UpdateNearCode(CancellationToken token)
         {
             while (token.IsCancellationRequested == false)
             {
+                var delta = DateTime.Now - _lastTime;
+                try
+                {
+                    var length = CodeExpireLength;
+
+                    if (delta > length)
+                    {
+                        _lastTime = DateTime.Now;
+                        NewNearCode();
+                    }
+                    _errorTable.SetError("nearCode", null);
+                }
+                catch (ArgumentException ex)
+                {
+                    _errorTable.SetError("nearCode", " " + ex.Message);
+                    /*
+                    this.TryInvoke(() =>
+                    {
+                        MessageBox.Show(this, ex.Message);
+                    });
+                    */
+                }
+#if REMOVED
                 var time_string = DateTime.Now.ToString("yyyyMMdd_HH"); // 每小时变化一次
                 // DateTime.Now.ToString("yyyyMMdd_HHmm");   // DateTimeUtil.DateTimeToString8(DateTime.Now);
                 if (time_string != _lastTime)
@@ -500,6 +598,7 @@ TaskScheduler.Default);
 
                     NewNearCode();
                 }
+#endif
 
                 Thread.Sleep(1000);
             }
@@ -518,7 +617,7 @@ TaskScheduler.Default);
 
         void ClearNearCode()
         {
-            _lastTime = null;
+            _lastTime = DateTime.MinValue;
             _nearCode = null;
             this.TryInvoke(() =>
             {
@@ -533,6 +632,14 @@ TaskScheduler.Default);
             {
                 return _nearCode;
             }
+        }
+
+        string GetStatusMessage()
+        {
+            return this.TryGet(() =>
+            {
+                return this.toolStripStatusLabel1.Text;
+            });
         }
 
         void SetStatusMessage(string text, string color = "")
@@ -551,7 +658,17 @@ TaskScheduler.Default);
                     this.toolStripStatusLabel1.ForeColor = SystemColors.ControlText;
                 }
             });
+        }
 
+        private void toolStripTextBox_codeExpireLength_Validating(object sender, CancelEventArgs e)
+        {
+            var value = this.toolStripTextBox_codeExpireLength.Text;
+            if (string.IsNullOrEmpty(value) == false
+                && TimeSpan.TryParse(value, out TimeSpan length) == false)
+            {
+                MessageBox.Show(this, $"时间长度值 '{value}' 格式错误。请重新输入");
+                e.Cancel = true;
+            }
         }
 
         /*

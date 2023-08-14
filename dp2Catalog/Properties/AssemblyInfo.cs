@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.8.*")]
-[assembly: AssemblyFileVersion("3.8.0.0")]
+[assembly: AssemblyVersion("3.9.*")]
+[assembly: AssemblyFileVersion("3.9.0.0")]
 
 // 2.5 (2015/12/11) 调用 dp2library Login() API 的时候发送了 client 参数
 // 3.0 (2018/6/23) 改用 .NET Framework 4.6.1 编译
@@ -44,3 +44,6 @@ using System.Runtime.InteropServices;
 //                  dp2 检索窗在检索装入浏览框的中途点浏览行，现在可以在固定面板区“属性”属性页看到书目记录详细信息(此前版本检索中途是无法看到的)
 // 3.7 (2022/7/11) dp2 检索窗追加保存记录到指定的书目库，如果书目库是 dp2catalog 启动以后在内务里面新创建的一个书目库，则追加保存的时候有可能把书目库的 MARC 格式搞错。这个 bug 已经修复
 // 3.8 (2022/7/18) Marc8Encoding 类里面增加了处理 Kf}ujxlm&#x03ac; kf&#x03ac;xury 这样的在 MARC-8 中无法表达的字符的处理能力
+// 3.9 (2023/8/10) dp2 检索窗的单行属性页的一个 textbox 和 combobox 控件在 Windows 7 下尺寸不正确；多行属性页的一个 combobox 也有这个问题。这两个问题已经修正
+//                  记录窗的一个 textbox 的尺寸在 Windows 7 下，反复修改记录窗尺寸的时候会导致 textbox 宽度只能收缩不能重新扩大。此问题已经修正
+//                  MarcQueryHost 类增加几个从 MarcQuery 类复制过来的 static 定义

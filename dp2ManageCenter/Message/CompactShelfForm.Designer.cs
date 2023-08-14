@@ -35,6 +35,9 @@
             this.toolStripDropDownButton_utility = new System.Windows.Forms.ToolStripDropDownButton();
             this.ToolStripMenuItem_clearConnection = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripButton_setControlParameters = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
+            this.toolStripTextBox_codeExpireLength = new System.Windows.Forms.ToolStripTextBox();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.label_code = new System.Windows.Forms.Label();
@@ -49,7 +52,10 @@
             this.toolStripButton_selectAccount,
             this.toolStripSeparator1,
             this.toolStripDropDownButton_utility,
-            this.toolStripButton_setControlParameters});
+            this.toolStripButton_setControlParameters,
+            this.toolStripSeparator2,
+            this.toolStripLabel1,
+            this.toolStripTextBox_codeExpireLength});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(800, 44);
@@ -98,11 +104,31 @@
             this.toolStripButton_setControlParameters.Text = "设置控制参数";
             this.toolStripButton_setControlParameters.Click += new System.EventHandler(this.toolStripButton_setControlParameters_Click);
             // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 44);
+            // 
+            // toolStripLabel1
+            // 
+            this.toolStripLabel1.Name = "toolStripLabel1";
+            this.toolStripLabel1.Size = new System.Drawing.Size(117, 38);
+            this.toolStripLabel1.Text = "现场码失效";
+            // 
+            // toolStripTextBox_codeExpireLength
+            // 
+            this.toolStripTextBox_codeExpireLength.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
+            this.toolStripTextBox_codeExpireLength.Name = "toolStripTextBox_codeExpireLength";
+            this.toolStripTextBox_codeExpireLength.Size = new System.Drawing.Size(100, 44);
+            this.toolStripTextBox_codeExpireLength.ToolTipText = "现场码自动失效时间长度";
+            this.toolStripTextBox_codeExpireLength.Validating += new System.ComponentModel.CancelEventHandler(this.toolStripTextBox_codeExpireLength_Validating);
+            // 
             // statusStrip1
             // 
             this.statusStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel1});
+            this.statusStrip1.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
             this.statusStrip1.Location = new System.Drawing.Point(0, 413);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(800, 37);
@@ -111,9 +137,12 @@
             // 
             // toolStripStatusLabel1
             // 
+            this.toolStripStatusLabel1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
+            this.toolStripStatusLabel1.Overflow = System.Windows.Forms.ToolStripItemOverflow.Never;
             this.toolStripStatusLabel1.Size = new System.Drawing.Size(27, 28);
             this.toolStripStatusLabel1.Text = "...";
+            this.toolStripStatusLabel1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // label_code
             // 
@@ -161,5 +190,8 @@
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.Label label_code;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripLabel toolStripLabel1;
+        private System.Windows.Forms.ToolStripTextBox toolStripTextBox_codeExpireLength;
     }
 }

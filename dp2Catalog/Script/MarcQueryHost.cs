@@ -3,19 +3,47 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Web;
+using System.IO;
 
 using DigitalPlatform.Marc;
 using DigitalPlatform.Script;
-using System.IO;
 
+/* 2023/8/10
+ * 脚本中可以用这样一句:
+using static DigitalPlatform.Marc.MarcQuery;
+实现直接使用 SUBFLD 定义的效果。
+*/
 namespace dp2Catalog
 {
     /// <summary>
     /// MarcQuery 宿主类。
     /// 继承了MarcQuery类，具有一些全局的函数
     /// </summary>
-    public class MarcQueryHost// : MarcQuery
+    public class MarcQueryHost // : MarcQuery
     {
+        // 2023/8/9
+        #region 从 MarcQuery 类复制过来的一些常量定义
+
+        /// <summary>
+        /// MARC 子字段符号
+        /// </summary>
+        public static string SUBFLD = new string((char)31, 1);
+        /// <summary>
+        /// MARC 字段结束符
+        /// </summary>
+        public static string FLDEND = new string((char)30, 1);
+        /// <summary>
+        /// MARC 记录结束符
+        /// </summary>
+        public static string RECEND = new string((char)29, 1);
+
+        /// <summary>
+        /// 缺省字符
+        /// </summary>
+        public static char DefaultChar = '?';
+
+        #endregion
+
         public MainForm MainForm = null;
         public string RecordPath = "";
         public MarcRecord MarcRecord = null;

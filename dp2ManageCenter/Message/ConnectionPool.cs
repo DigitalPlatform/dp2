@@ -39,7 +39,7 @@ namespace dp2ManageCenter.Message
         }
 
         // 确保连接到消息服务器
-        public static async Task EnsureConnectMessageServerAsync(
+        public static async Task<NormalResult> EnsureConnectMessageServerAsync(
             P2PConnection connection,
             string userNameAndUrl)
         {
@@ -48,13 +48,21 @@ namespace dp2ManageCenter.Message
                 var accounts = MessageAccountForm.GetAccounts();
                 var account = FindAccount(accounts, userNameAndUrl);
                 if (account == null)
-                    return;
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"账户 '{userNameAndUrl}' 没有找到",
+                        ErrorCode = "accountNotFound"
+                    };
 
-                var result = await connection.ConnectAsync(account.ServerUrl,
+                return await connection.ConnectAsync(account.ServerUrl,
     account.UserName,
     account.Password,
     "");
             }
+
+            // 已经连接
+            return new NormalResult();
         }
 
         // 获得一个连接
@@ -68,9 +76,16 @@ namespace dp2ManageCenter.Message
                     // 尝试连接一次
                     if (connection.IsDisconnected == true)
                     {
-                        await EnsureConnectMessageServerAsync(
+                        var ret = await EnsureConnectMessageServerAsync(
     connection,
     userNameAndUrl);
+                        if (ret.Value == -1)
+                            return new OpenConnectionResult
+                            {
+                                Value = -1,
+                                ErrorInfo = ret.ErrorInfo,
+                                ErrorCode = ret.ErrorCode
+                            };
                     }
                     return new OpenConnectionResult
                     {

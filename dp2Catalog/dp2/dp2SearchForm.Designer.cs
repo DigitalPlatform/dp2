@@ -56,20 +56,21 @@ namespace dp2Catalog
             this.splitContainer_queryAndResultInfo = new System.Windows.Forms.SplitContainer();
             this.tabControl_query = new System.Windows.Forms.TabControl();
             this.tabPage_simple = new System.Windows.Forms.TabPage();
+            this.tableLayoutPanel_simpleQuery = new System.Windows.Forms.TableLayoutPanel();
             this.comboBox_simple_matchStyle = new System.Windows.Forms.ComboBox();
-            this.label3 = new System.Windows.Forms.Label();
             this.button_searchSimple = new System.Windows.Forms.Button();
+            this.label3 = new System.Windows.Forms.Label();
             this.textBox_simple_queryWord = new System.Windows.Forms.TextBox();
             this.label_simple_queryWord = new System.Windows.Forms.Label();
             this.tabPage_multiline = new System.Windows.Forms.TabPage();
             this.panel_multiline = new System.Windows.Forms.Panel();
-            this.label4 = new System.Windows.Forms.Label();
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.comboBox_multiline_matchStyle = new System.Windows.Forms.ComboBox();
+            this.label4 = new System.Windows.Forms.Label();
             this.textBox_mutiline_queryContent = new System.Windows.Forms.TextBox();
             this.tabPage_logic = new System.Windows.Forms.TabPage();
             this.dp2QueryControl1 = new DigitalPlatform.CommonControl.dp2QueryControl();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.tableLayoutPanel_simpleQuery = new System.Windows.Forms.TableLayoutPanel();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).BeginInit();
             this.splitContainer_main.Panel1.SuspendLayout();
             this.splitContainer_main.Panel2.SuspendLayout();
@@ -86,10 +87,11 @@ namespace dp2Catalog
             this.splitContainer_queryAndResultInfo.SuspendLayout();
             this.tabControl_query.SuspendLayout();
             this.tabPage_simple.SuspendLayout();
+            this.tableLayoutPanel_simpleQuery.SuspendLayout();
             this.tabPage_multiline.SuspendLayout();
             this.panel_multiline.SuspendLayout();
+            this.tableLayoutPanel1.SuspendLayout();
             this.tabPage_logic.SuspendLayout();
-            this.tableLayoutPanel_simpleQuery.SuspendLayout();
             this.SuspendLayout();
             // 
             // columnHeader_1
@@ -144,7 +146,7 @@ namespace dp2Catalog
             this.listView_browse.Location = new System.Drawing.Point(0, 0);
             this.listView_browse.Margin = new System.Windows.Forms.Padding(4);
             this.listView_browse.Name = "listView_browse";
-            this.listView_browse.Size = new System.Drawing.Size(750, 256);
+            this.listView_browse.Size = new System.Drawing.Size(750, 258);
             this.listView_browse.TabIndex = 1;
             this.listView_browse.UseCompatibleStateImageBehavior = false;
             this.listView_browse.View = System.Windows.Forms.View.Details;
@@ -200,7 +202,7 @@ namespace dp2Catalog
             // splitContainer_main.Panel2
             // 
             this.splitContainer_main.Panel2.Controls.Add(this.listView_browse);
-            this.splitContainer_main.Size = new System.Drawing.Size(750, 497);
+            this.splitContainer_main.Size = new System.Drawing.Size(750, 499);
             this.splitContainer_main.SplitterDistance = 231;
             this.splitContainer_main.SplitterWidth = 10;
             this.splitContainer_main.TabIndex = 2;
@@ -310,6 +312,27 @@ namespace dp2Catalog
             this.tabPage_simple.Text = "简单";
             this.tabPage_simple.UseVisualStyleBackColor = true;
             // 
+            // tableLayoutPanel_simpleQuery
+            // 
+            this.tableLayoutPanel_simpleQuery.ColumnCount = 3;
+            this.tableLayoutPanel_simpleQuery.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel_simpleQuery.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel_simpleQuery.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel_simpleQuery.Controls.Add(this.comboBox_simple_matchStyle, 1, 1);
+            this.tableLayoutPanel_simpleQuery.Controls.Add(this.button_searchSimple, 2, 0);
+            this.tableLayoutPanel_simpleQuery.Controls.Add(this.label3, 0, 1);
+            this.tableLayoutPanel_simpleQuery.Controls.Add(this.textBox_simple_queryWord, 1, 0);
+            this.tableLayoutPanel_simpleQuery.Controls.Add(this.label_simple_queryWord, 0, 0);
+            this.tableLayoutPanel_simpleQuery.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel_simpleQuery.Location = new System.Drawing.Point(4, 4);
+            this.tableLayoutPanel_simpleQuery.Name = "tableLayoutPanel_simpleQuery";
+            this.tableLayoutPanel_simpleQuery.RowCount = 3;
+            this.tableLayoutPanel_simpleQuery.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel_simpleQuery.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel_simpleQuery.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel_simpleQuery.Size = new System.Drawing.Size(344, 77);
+            this.tableLayoutPanel_simpleQuery.TabIndex = 5;
+            // 
             // comboBox_simple_matchStyle
             // 
             this.comboBox_simple_matchStyle.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -329,18 +352,6 @@ namespace dp2Catalog
             this.comboBox_simple_matchStyle.SizeChanged += new System.EventHandler(this.comboBox_matchStyle_SizeChanged);
             this.comboBox_simple_matchStyle.TextChanged += new System.EventHandler(this.comboBox_matchStyle_TextChanged);
             // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label3.Location = new System.Drawing.Point(4, 42);
-            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(138, 37);
-            this.label3.TabIndex = 3;
-            this.label3.Text = "匹配方式(&M):";
-            this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
             // button_searchSimple
             // 
             this.button_searchSimple.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -353,6 +364,18 @@ namespace dp2Catalog
             this.button_searchSimple.Text = "检索";
             this.button_searchSimple.UseVisualStyleBackColor = true;
             this.button_searchSimple.Click += new System.EventHandler(this.button_searchSimple_Click);
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label3.Location = new System.Drawing.Point(4, 42);
+            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(138, 37);
+            this.label3.TabIndex = 3;
+            this.label3.Text = "匹配方式(&M):";
+            this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // textBox_simple_queryWord
             // 
@@ -384,38 +407,41 @@ namespace dp2Catalog
             this.tabPage_multiline.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_multiline.Name = "tabPage_multiline";
             this.tabPage_multiline.Padding = new System.Windows.Forms.Padding(4);
-            this.tabPage_multiline.Size = new System.Drawing.Size(454, 141);
+            this.tabPage_multiline.Size = new System.Drawing.Size(352, 85);
             this.tabPage_multiline.TabIndex = 1;
             this.tabPage_multiline.Text = "多行";
             this.tabPage_multiline.UseVisualStyleBackColor = true;
             // 
             // panel_multiline
             // 
-            this.panel_multiline.Controls.Add(this.label4);
-            this.panel_multiline.Controls.Add(this.comboBox_multiline_matchStyle);
+            this.panel_multiline.Controls.Add(this.tableLayoutPanel1);
             this.panel_multiline.Controls.Add(this.textBox_mutiline_queryContent);
             this.panel_multiline.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel_multiline.Location = new System.Drawing.Point(4, 4);
             this.panel_multiline.Margin = new System.Windows.Forms.Padding(4);
             this.panel_multiline.Name = "panel_multiline";
-            this.panel_multiline.Size = new System.Drawing.Size(446, 133);
+            this.panel_multiline.Size = new System.Drawing.Size(344, 77);
             this.panel_multiline.TabIndex = 7;
             // 
-            // label4
+            // tableLayoutPanel1
             // 
-            this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(-6, 108);
-            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(138, 21);
-            this.label4.TabIndex = 5;
-            this.label4.Text = "匹配方式(&M):";
+            this.tableLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tableLayoutPanel1.ColumnCount = 2;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel1.Controls.Add(this.comboBox_multiline_matchStyle, 1, 0);
+            this.tableLayoutPanel1.Controls.Add(this.label4, 0, 0);
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 45);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.RowCount = 1;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(344, 37);
+            this.tableLayoutPanel1.TabIndex = 8;
             // 
             // comboBox_multiline_matchStyle
             // 
-            this.comboBox_multiline_matchStyle.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.comboBox_multiline_matchStyle.Dock = System.Windows.Forms.DockStyle.Fill;
             this.comboBox_multiline_matchStyle.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.comboBox_multiline_matchStyle.FormattingEnabled = true;
             this.comboBox_multiline_matchStyle.Items.AddRange(new object[] {
@@ -423,11 +449,23 @@ namespace dp2Catalog
             "中间一致",
             "后方一致",
             "精确一致"});
-            this.comboBox_multiline_matchStyle.Location = new System.Drawing.Point(139, 105);
+            this.comboBox_multiline_matchStyle.Location = new System.Drawing.Point(150, 4);
             this.comboBox_multiline_matchStyle.Margin = new System.Windows.Forms.Padding(4);
             this.comboBox_multiline_matchStyle.Name = "comboBox_multiline_matchStyle";
-            this.comboBox_multiline_matchStyle.Size = new System.Drawing.Size(306, 29);
+            this.comboBox_multiline_matchStyle.Size = new System.Drawing.Size(190, 29);
             this.comboBox_multiline_matchStyle.TabIndex = 6;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label4.Location = new System.Drawing.Point(4, 0);
+            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(138, 37);
+            this.label4.TabIndex = 5;
+            this.label4.Text = "匹配方式(&M):";
+            this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // textBox_mutiline_queryContent
             // 
@@ -442,7 +480,7 @@ namespace dp2Catalog
             this.textBox_mutiline_queryContent.Multiline = true;
             this.textBox_mutiline_queryContent.Name = "textBox_mutiline_queryContent";
             this.textBox_mutiline_queryContent.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_mutiline_queryContent.Size = new System.Drawing.Size(445, 97);
+            this.textBox_mutiline_queryContent.Size = new System.Drawing.Size(343, 41);
             this.textBox_mutiline_queryContent.TabIndex = 0;
             // 
             // tabPage_logic
@@ -451,7 +489,7 @@ namespace dp2Catalog
             this.tabPage_logic.Location = new System.Drawing.Point(4, 34);
             this.tabPage_logic.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.tabPage_logic.Name = "tabPage_logic";
-            this.tabPage_logic.Size = new System.Drawing.Size(328, 85);
+            this.tabPage_logic.Size = new System.Drawing.Size(352, 85);
             this.tabPage_logic.TabIndex = 2;
             this.tabPage_logic.Text = "逻辑";
             this.tabPage_logic.UseVisualStyleBackColor = true;
@@ -462,7 +500,7 @@ namespace dp2Catalog
             this.dp2QueryControl1.Location = new System.Drawing.Point(0, 0);
             this.dp2QueryControl1.Margin = new System.Windows.Forms.Padding(11, 9, 11, 9);
             this.dp2QueryControl1.Name = "dp2QueryControl1";
-            this.dp2QueryControl1.Size = new System.Drawing.Size(328, 85);
+            this.dp2QueryControl1.Size = new System.Drawing.Size(352, 85);
             this.dp2QueryControl1.TabIndex = 0;
             this.dp2QueryControl1.GetList += new DigitalPlatform.CommonControl.GetListEventHandler(this.dp2QueryControl1_GetList);
             this.dp2QueryControl1.ViewXml += new System.EventHandler(this.dp2QueryControl1_ViewXml);
@@ -472,32 +510,11 @@ namespace dp2Catalog
             this.timer1.Interval = 1000;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
-            // tableLayoutPanel_simpleQuery
-            // 
-            this.tableLayoutPanel_simpleQuery.ColumnCount = 3;
-            this.tableLayoutPanel_simpleQuery.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel_simpleQuery.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel_simpleQuery.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel_simpleQuery.Controls.Add(this.comboBox_simple_matchStyle, 1, 1);
-            this.tableLayoutPanel_simpleQuery.Controls.Add(this.button_searchSimple, 2, 0);
-            this.tableLayoutPanel_simpleQuery.Controls.Add(this.label3, 0, 1);
-            this.tableLayoutPanel_simpleQuery.Controls.Add(this.textBox_simple_queryWord, 1, 0);
-            this.tableLayoutPanel_simpleQuery.Controls.Add(this.label_simple_queryWord, 0, 0);
-            this.tableLayoutPanel_simpleQuery.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel_simpleQuery.Location = new System.Drawing.Point(4, 4);
-            this.tableLayoutPanel_simpleQuery.Name = "tableLayoutPanel_simpleQuery";
-            this.tableLayoutPanel_simpleQuery.RowCount = 3;
-            this.tableLayoutPanel_simpleQuery.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_simpleQuery.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_simpleQuery.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel_simpleQuery.Size = new System.Drawing.Size(344, 77);
-            this.tableLayoutPanel_simpleQuery.TabIndex = 5;
-            // 
             // dp2SearchForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(750, 497);
+            this.ClientSize = new System.Drawing.Size(750, 499);
             this.Controls.Add(this.splitContainer_main);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(4);
@@ -526,12 +543,14 @@ namespace dp2Catalog
             this.splitContainer_queryAndResultInfo.ResumeLayout(false);
             this.tabControl_query.ResumeLayout(false);
             this.tabPage_simple.ResumeLayout(false);
+            this.tableLayoutPanel_simpleQuery.ResumeLayout(false);
+            this.tableLayoutPanel_simpleQuery.PerformLayout();
             this.tabPage_multiline.ResumeLayout(false);
             this.panel_multiline.ResumeLayout(false);
             this.panel_multiline.PerformLayout();
+            this.tableLayoutPanel1.ResumeLayout(false);
+            this.tableLayoutPanel1.PerformLayout();
             this.tabPage_logic.ResumeLayout(false);
-            this.tableLayoutPanel_simpleQuery.ResumeLayout(false);
-            this.tableLayoutPanel_simpleQuery.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -570,5 +589,6 @@ namespace dp2Catalog
         private DigitalPlatform.CommonControl.dp2QueryControl dp2QueryControl1;
         private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_simpleQuery;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
     }
 }

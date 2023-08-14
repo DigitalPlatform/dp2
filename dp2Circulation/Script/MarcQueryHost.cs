@@ -17,6 +17,29 @@ namespace dp2Circulation
     /// </summary>
     public class MarcQueryHost /*: MarcQuery */
     {
+        // 2023/8/9
+        #region 从 MarcQuery 类复制过来的一些常量定义
+
+        /// <summary>
+        /// MARC 子字段符号
+        /// </summary>
+        public static string SUBFLD = new string((char)31, 1);
+        /// <summary>
+        /// MARC 字段结束符
+        /// </summary>
+        public static string FLDEND = new string((char)30, 1);
+        /// <summary>
+        /// MARC 记录结束符
+        /// </summary>
+        public static string RECEND = new string((char)29, 1);
+
+        /// <summary>
+        /// 缺省字符
+        /// </summary>
+        public static char DefaultChar = '?';
+
+        #endregion
+
         // 是否使用 UI 线程
         private bool _useUiThread = true;
         public bool UseUiThread
