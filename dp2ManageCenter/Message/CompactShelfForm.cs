@@ -555,6 +555,9 @@ TaskScheduler.Default);
                     "%h\\:%m\\:%s",
                     "%m\\:%s",
                     "%s",
+                    "%d\\.%h\\:%m",
+                    "%d\\.%h",
+                    "%d\\.",
                     }, 
                     CultureInfo.InvariantCulture,
                     out TimeSpan length) == false)

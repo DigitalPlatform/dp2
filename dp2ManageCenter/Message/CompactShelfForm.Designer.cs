@@ -119,7 +119,7 @@
             // 
             this.toolStripTextBox_codeExpireLength.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
             this.toolStripTextBox_codeExpireLength.Name = "toolStripTextBox_codeExpireLength";
-            this.toolStripTextBox_codeExpireLength.Size = new System.Drawing.Size(100, 44);
+            this.toolStripTextBox_codeExpireLength.Size = new System.Drawing.Size(140, 44);
             this.toolStripTextBox_codeExpireLength.ToolTipText = "现场码自动失效时间长度";
             this.toolStripTextBox_codeExpireLength.Validating += new System.ComponentModel.CancelEventHandler(this.toolStripTextBox_codeExpireLength_Validating);
             // 
