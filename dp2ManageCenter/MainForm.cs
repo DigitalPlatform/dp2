@@ -2399,7 +2399,7 @@ string strHtml)
                                     server_name = channel.Url;
 
                                 DialogResult result = MessageDialog.Show(this,
-                                    $"服务器 '{server_name}': { e1.MessageText}\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
+                                    $"服务器 '{server_name}': {e1.MessageText}\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
                     MessageBoxButtons.YesNoCancel,
                     MessageBoxDefaultButton.Button1,
                     null,
@@ -2664,7 +2664,7 @@ string strHtml)
                             server_name = channel.Url;
 
                         DialogResult result = MessageDialog.Show(this,
-                            $"服务器 '{server_name}': { e1.MessageText}\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
+                            $"服务器 '{server_name}': {e1.MessageText}\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
             MessageBoxButtons.YesNoCancel,
             MessageBoxDefaultButton.Button1,
             null,
@@ -5743,11 +5743,16 @@ dlg.UiState);
                 _compactShelfDialog = new CompactShelfForm();
                 _compactShelfDialog.FormClosing += (o1, e1) =>
                 {
+                    /*
                     if (e1.CloseReason == CloseReason.ApplicationExitCall
                     || e1.CloseReason == CloseReason.FormOwnerClosing)
                         return;
                     _compactShelfDialog.Visible = false;
                     e1.Cancel = true;
+                    */
+                    // 2023/8/17 
+                    // 真正关闭
+                    _compactShelfDialog = null;
                 };
                 _compactShelfDialog.Font = this.Font;
                 _compactShelfDialog.Show(this);

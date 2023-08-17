@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Threading;
+using System.Globalization;
 
 using Microsoft.VisualStudio.Threading;
 
@@ -17,7 +18,6 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.Core;
-using System.Globalization;
 
 namespace dp2ManageCenter.Message
 {
@@ -51,6 +51,7 @@ namespace dp2ManageCenter.Message
         public CompactShelfForm()
         {
             InitializeComponent();
+            this.toolStripStatusLabel_alive.Alignment = ToolStripItemAlignment.Right;
 
             _errorTable = new ErrorTable((s) =>
             {
@@ -95,12 +96,31 @@ namespace dp2ManageCenter.Message
 
         private void CompactShelfForm_FormClosing(object sender, FormClosingEventArgs e)
         {
+            if (e.CloseReason == CloseReason.ApplicationExitCall
+|| e.CloseReason == CloseReason.FormOwnerClosing)
+            {
+            }
+            else
+            {
+                var result = MessageBox.Show(this,
+                    "关闭此对话框，意味着停止密集书架服务。\r\n\r\n确实要关闭?",
+                    "CompactShelfForm",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question,
+                    MessageBoxDefaultButton.Button2);
+                if (result != DialogResult.Yes)
+                {
+                    e.Cancel = true;
+                    return;
+                }
+            }
+
             SaveSettings();
-            _cancel?.Cancel();
         }
 
         private void CompactShelfForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+            _cancel?.Cancel();
             RemoveEvents();
         }
 
@@ -522,6 +542,7 @@ strError);
             _cancel?.Cancel();
             _cancel = null;
             ClearNearCode();
+            ClearAnimation();
         }
 
         void StartUpdateNearCode()
@@ -549,7 +570,7 @@ TaskScheduler.Default);
                 if (string.IsNullOrEmpty(value))
                     return TimeSpan.Zero;
                 // https://learn.microsoft.com/zh-cn/dotnet/standard/base-types/custom-timespan-format-strings
-                if (TimeSpan.TryParseExact(value, 
+                if (TimeSpan.TryParseExact(value,
                     new string[] {
                     "%d\\.%h\\:%m\\:%s",
                     "%h\\:%m\\:%s",
@@ -558,7 +579,7 @@ TaskScheduler.Default);
                     "%d\\.%h\\:%m",
                     "%d\\.%h",
                     "%d\\.",
-                    }, 
+                    },
                     CultureInfo.InvariantCulture,
                     out TimeSpan length) == false)
                     throw new ArgumentException($"时间长度值 '{value}' 不合法");
@@ -576,10 +597,37 @@ TaskScheduler.Default);
             }
         }
 
+        public string AnimationText
+        {
+            get
+            {
+                return this.TryGet(() =>
+                {
+                    return this.toolStripStatusLabel_alive.Text;
+                });
+            }
+            set
+            {
+                this.TryInvoke(() =>
+                {
+                    this.toolStripStatusLabel_alive.Text = value;
+                });
+            }
+        }
+
+        void ClearAnimation()
+        {
+            AnimationText = " ";
+        }
+
+        CharAnimation _animation = new CharAnimation("▁▂▃▅▆▇▉");
+
         void UpdateNearCode(CancellationToken token)
         {
             while (token.IsCancellationRequested == false)
             {
+                // 动画
+                AnimationText = _animation.Rotate();
                 var delta = DateTime.Now - _lastTime;
                 try
                 {
@@ -675,6 +723,9 @@ TaskScheduler.Default);
 
         private void toolStripTextBox_codeExpireLength_Validating(object sender, CancelEventArgs e)
         {
+            // 2023/8/16
+            // 这里的验证其实要到对话框关闭时候才被触发，意义不大了，因此注释掉了
+            /*
             var value = this.toolStripTextBox_codeExpireLength.Text;
             if (string.IsNullOrEmpty(value) == false
                 && TimeSpan.TryParse(value, out TimeSpan length) == false)
@@ -682,6 +733,7 @@ TaskScheduler.Default);
                 MessageBox.Show(this, $"时间长度值 '{value}' 格式错误。请重新输入");
                 e.Cancel = true;
             }
+            */
         }
 
         /*
@@ -709,5 +761,52 @@ TaskScheduler.Default);
             }
         }
         */
+    }
+
+    public class CharAnimation
+    {
+        int _index = 0; // -1 表示不进行字符动画
+        char[] movingChars = new char[] { '/', '-', '\\', '|' };
+
+        public CharAnimation()
+        {
+            _index = 0;
+        }
+
+        public CharAnimation(string chars)
+        {
+            _index = 0;
+            SetChars(chars);
+        }
+
+
+        public void Enable()
+        {
+            _index = 0;
+        }
+
+        public void Disable()
+        {
+            _index = -1;
+        }
+
+        public void SetChars(string chars)
+        {
+            movingChars = chars.ToArray();
+        }
+
+        public string Rotate()
+        {
+            if (_index != -1)
+            {
+                var text = new string(movingChars[_index], 1);
+                _index++;
+                if (_index > movingChars.Length - 1)
+                    _index = 0;
+                return text;
+            }
+
+            return null;
+        }
     }
 }

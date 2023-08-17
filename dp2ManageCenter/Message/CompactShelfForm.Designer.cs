@@ -41,6 +41,7 @@
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.label_code = new System.Windows.Forms.Label();
+            this.toolStripStatusLabel_alive = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -58,7 +59,7 @@
             this.toolStripTextBox_codeExpireLength});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(800, 44);
+            this.toolStrip1.Size = new System.Drawing.Size(800, 38);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -68,7 +69,7 @@
             this.toolStripButton_selectAccount.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_selectAccount.Image")));
             this.toolStripButton_selectAccount.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_selectAccount.Name = "toolStripButton_selectAccount";
-            this.toolStripButton_selectAccount.Size = new System.Drawing.Size(142, 38);
+            this.toolStripButton_selectAccount.Size = new System.Drawing.Size(142, 32);
             this.toolStripButton_selectAccount.Text = "选择书架账户";
             this.toolStripButton_selectAccount.Click += new System.EventHandler(this.toolStripButton_selectAccount_Click);
             // 
@@ -127,6 +128,7 @@
             // 
             this.statusStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripStatusLabel_alive,
             this.toolStripStatusLabel1});
             this.statusStrip1.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
             this.statusStrip1.Location = new System.Drawing.Point(0, 413);
@@ -148,12 +150,20 @@
             // 
             this.label_code.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label_code.Font = new System.Drawing.Font("微软雅黑", 42F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label_code.Location = new System.Drawing.Point(0, 44);
+            this.label_code.Location = new System.Drawing.Point(0, 38);
             this.label_code.Name = "label_code";
-            this.label_code.Size = new System.Drawing.Size(800, 369);
+            this.label_code.Size = new System.Drawing.Size(800, 375);
             this.label_code.TabIndex = 4;
             this.label_code.Text = "现场码";
             this.label_code.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // toolStripStatusLabel_alive
+            // 
+            this.toolStripStatusLabel_alive.AutoSize = false;
+            this.toolStripStatusLabel_alive.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripStatusLabel_alive.Name = "toolStripStatusLabel_alive";
+            this.toolStripStatusLabel_alive.Size = new System.Drawing.Size(21, 28);
+            this.toolStripStatusLabel_alive.Text = "-";
             // 
             // CompactShelfForm
             // 
@@ -166,7 +176,7 @@
             this.Name = "CompactShelfForm";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
-            this.Text = "密集书架";
+            this.Text = "密集书架服务";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.CompactShelfForm_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.CompactShelfForm_FormClosed);
             this.Load += new System.EventHandler(this.CompactShelfForm_Load);
@@ -193,5 +203,6 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripLabel toolStripLabel1;
         private System.Windows.Forms.ToolStripTextBox toolStripTextBox_codeExpireLength;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel_alive;
     }
 }
