@@ -13,6 +13,7 @@ using System.Xml;
 using ClosedXML.Excel;
 
 using DigitalPlatform;
+using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 // using DocumentFormat.OpenXml.Wordprocessing;
@@ -253,7 +254,10 @@ namespace dp2Circulation.Reader
                         if (this.dataGridView1.ColumnCount < col + 1)
                             this.dataGridView1.ColumnCount = col + 1;
                         */
-                        grid_row.Cells[col].Value = cell.GetString();
+                        if (cell.DataType == XLDataType.DateTime)
+                            grid_row.Cells[col].Value = ((DateTime)cell.Value);
+                        else
+                            grid_row.Cells[col].Value = cell.GetString();
                     }
 
                     if (first_row == false)
@@ -323,7 +327,19 @@ namespace dp2Circulation.Reader
                 if (index == -1)
                     continue;
                 var cell = row.Cells[index];
-                string value = (string)cell.Value;
+
+                string value = null;
+                if (field_name == "dateOfBirth"
+                    || field_name == "expireDate")
+                {
+                    if (cell.Value is DateTime)
+                        value = DateTimeUtil.Rfc1123DateTimeStringEx((DateTime)cell.Value);
+                    else
+                        value = cell.Value?.ToString();
+                }
+                else
+                    value = (string)cell.Value;
+
                 if (string.IsNullOrEmpty(value))
                     continue;
 
@@ -391,7 +407,7 @@ namespace dp2Circulation.Reader
             "namePinyin:姓名拼音",   // 姓名拼音
             "gender:性别",
             // "birthday:",     // 注：逐步废止这个元素，用 dateOfBirth 替代
-            "dateOfBirth:生日",
+            "dateOfBirth:生日,出生日期,出生年月日",
             "idCardNumber:身份证号",
             "department:单位,部门,班级",
             "post:邮政编码,邮编",
@@ -596,7 +612,7 @@ namespace dp2Circulation.Reader
                 .Cast<DataGridViewRow>()
                 .Where(o => o.IsNewRow == false)
                 .Count();
-                // GetSelectedRowCount();
+            // GetSelectedRowCount();
             menuItem = new MenuItem($"移除行[{count}]");
             /*
             var current_row = this.dataGridView1.Rows[e.RowIndex];
@@ -627,7 +643,7 @@ namespace dp2Circulation.Reader
 
         void menu_removeSelectedLine_Click(object sender, EventArgs e)
         {
-            foreach(DataGridViewRow row in dataGridView1.SelectedRows)
+            foreach (DataGridViewRow row in dataGridView1.SelectedRows)
             {
                 if (row.IsNewRow)
                     continue;

@@ -347,7 +347,7 @@ groups);
             strTableXml,
             sheet,
             col,
-            type_list2,
+            biblio_title_list,  // type_list2,
             row);
 
             foreach (var cell in cells)

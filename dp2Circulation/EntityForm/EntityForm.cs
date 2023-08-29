@@ -8122,7 +8122,8 @@ out strError);
 
         void SwitchFocus(int target)
         {
-            var enabled = this.TryGet(() => {
+            var enabled = this.TryGet(() =>
+            {
                 return this.textBox_queryWord.Enabled;
             });
             // 暂存起来
@@ -11028,8 +11029,9 @@ out strError);
             form.Show();
             form.WaitSearchFinish();
              * */
-            this.TryInvoke(() => {
-            Global.Activate(form);
+            this.TryInvoke(() =>
+            {
+                Global.Activate(form);
             });
             // nRet = form.DoSearch(out strError);
             var result = await form.DoSearchAsync();
@@ -13030,15 +13032,31 @@ out strError);
                 return true;
             }
 
-            if (keyData == Keys.F2)
+            if (keyData == Keys.F2
+                || keyData == (Keys.Control | Keys.Shift | Keys.S))
             {
                 this.DoSaveAll();
                 return true;
             }
 
+            // 另存
             if (keyData == Keys.F3)
             {
                 this.toolStripButton1_marcEditor_saveTo_Click(this, null);
+                return true;
+            }
+
+            // 移动
+            if (keyData == (Keys.Alt | Keys.M))
+            {
+                toolStripButton_marcEditor_moveTo_Click(this, null);
+                return true;
+            }
+
+            // 保存(非“全部保存”)
+            if (keyData == (Keys.Control | Keys.S))
+            {
+                toolStripButton_marcEditor_save_Click(this, null);
                 return true;
             }
 
@@ -15569,6 +15587,35 @@ out strError);
             if (bEnable == true)
                 PlayPendingSwitchFocusCommands();
         }
+
+#if REMOVED
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            switch (keyData)
+            {
+                // Ctrl+S
+                // 保存
+                case (Keys.Control | Keys.S):
+                    break;
+                // Ctrl+Shift+S
+                // 全部保存
+                case (Keys.Control | Keys.Shift | Keys.S):
+                    button_save_Click(this, new EventArgs());
+                    break;
+
+                // Ctrl+M
+                // 移动
+                case (Keys.Control | Keys.M):
+                    break;
+
+                // Ctrl+U
+                // 复制
+                case (Keys.Control | Keys.U):
+                    break;
+            }
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+#endif
 
 #if NO
         void TryStartDrag(Point start)

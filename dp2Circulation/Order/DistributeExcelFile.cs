@@ -470,7 +470,7 @@ GetOrderRecord procGetOrderRecord)
             // ref nLineIndex,
             context.Sheet,
             nStartColIndex,  // nColIndex,
-            ColumnProperty.GetTypeList(context.BiblioColList),
+            context.BiblioColList,
             context.RowIndex);
 
             nStartColIndex += context.BiblioColList.Count;
@@ -492,7 +492,8 @@ order.OldRecord,
 0,
 context.Sheet,
 nStartColIndex,  // nColIndex,
-ColumnProperty.GetTypeList(context.OrderColList),
+context.OrderColList,
+// ColumnProperty.GetTypeList(context.OrderColList),
 ColumnProperty.GetDropDownList(context.OrderColList),
 context.RowIndex,
 XLColor.NoColor,
@@ -938,7 +939,7 @@ int MAX_CHARS = 50)
 
         internal static List<ColumnProperty> BuildList(
             List<Column> columns,
-            bool change_evalue_type = true)
+            bool change_evalue_type = false)
         {
             List<ColumnProperty> results = new List<ColumnProperty>();
             foreach (var column in columns)

@@ -392,7 +392,7 @@ strError);
             this.UserNameAndUrl = ClientInfo.Config.Get("compactShelf", "userNameAndUrl", "");
             this.TryInvoke(() =>
             {
-                this.toolStripTextBox_codeExpireLength.Text = ClientInfo.Config.Get("compactShelf", "codeExpireLength", "24:00:00");
+                this.toolStripTextBox_codeExpireLength.Text = ClientInfo.Config.Get("compactShelf", "codeExpireLength", "1.00:00:00");
             });
         }
 

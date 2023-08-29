@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.84.*")]
-[assembly: AssemblyFileVersion("3.84.0.0")]
+[assembly: AssemblyVersion("3.85.*")]
+[assembly: AssemblyFileVersion("3.85.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -175,3 +175,7 @@ using System.Runtime.InteropServices;
 //              读者查询窗“从 Excel 文件导入”功能改进，增加重复判断功能，某些字段增加内容替换方式选择
 //              增加制作绿色 zip 包功能；增加从绿色 zip 包更新功能
 //              打印财产帐窗功能改进，装入合订成员册会报错，增加了移除所有报错行的菜单功能。Next 按钮状态刷新算法做了改进，采用立即重新计算条件的方式
+// 3.85 2023/8/24 读者查询窗从 Excel 导入(追加和合并)功能改进:
+//              1) 合并时，state cardNumber email 这几个字段会弹出对话框询问新旧值如何合并;
+//              2) dateOfBirth expireDate 这两个字段如果不是 Excel 的事件类型列，会弹出对话框询问时间格式;
+//              3) 种册窗工具条上的几个按钮的快捷键会显示在 button tips 小窗口中。

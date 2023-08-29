@@ -180,13 +180,14 @@ GetOrderRecord procGetOrderRecord)
 
 
             // 输出一行书目信息
+            // 
             ExcelUtility.OutputBiblioLine(
             strBiblioRecPath,
             strTableXml,
             // ref nLineIndex,
             context.Sheet,
             nStartColIndex,  // nColIndex,
-            ColumnProperty.GetTypeList(context.BiblioColList),
+            context.BiblioColList,
             context.RowIndex);
 
             nStartColIndex += context.BiblioColList.Count;
@@ -200,13 +201,15 @@ GetOrderRecord procGetOrderRecord)
             // 输出订购信息列
             if (order != null)
             {
+                // TODO: 增加利用册信息列中的 javascript 脚本的功能
                 ExcelUtility.OutputItemLine(
 order.OldRecPath,
 order.OldRecord,
 0,
 context.Sheet,
 nStartColIndex,  // nColIndex,
-ColumnProperty.GetTypeList(context.OrderColList),
+context.OrderColList,
+// ColumnProperty.GetTypeList(context.OrderColList),
 ColumnProperty.GetDropDownList(context.OrderColList),
 context.RowIndex,
 XLColor.NoColor,

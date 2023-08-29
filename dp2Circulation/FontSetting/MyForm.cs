@@ -4565,8 +4565,10 @@ item);
             string strItemXml,
             string strScript)
         {
-            Engine engine = new Engine(cfg => cfg
-            .AllowClr(typeof(XDoc).Assembly));
+            Engine engine = new Engine(cfg => 
+            cfg
+            .AllowClr(typeof(XDoc)
+            .Assembly));
             var item = XDoc.Parse(strItemXml);
 
             SetValue(engine,

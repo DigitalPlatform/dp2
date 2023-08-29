@@ -130,6 +130,18 @@ namespace dp2Circulation
             }
         }
 
+        public string CurrentLocation
+        {
+            get
+            {
+                return this.textBox_currentLocation.Text;
+            }
+            set
+            {
+                this.textBox_currentLocation.Text = value;
+            }
+        }
+
         /// <summary>
         /// 渠道。经销商
         /// </summary>
@@ -1139,7 +1151,7 @@ namespace dp2Circulation
             this.Volume = DomUtil.GetElementText(this._dataDom.DocumentElement, "volume");
             this.AccessNo = DomUtil.GetElementText(this._dataDom.DocumentElement, "accessNo");
             this.ShelfNo = DomUtil.GetElementText(this._dataDom.DocumentElement, "shelfNo");
-
+            this.CurrentLocation = DomUtil.GetElementText(this._dataDom.DocumentElement, "currentLocation");
 
             this.Borrower = DomUtil.GetElementText(this._dataDom.DocumentElement, "borrower");
             this.BorrowDate = DomUtil.GetElementText(this._dataDom.DocumentElement, "borrowDate");
@@ -1191,6 +1203,7 @@ namespace dp2Circulation
             this.Volume = "";
             this.AccessNo = "";
             this.ShelfNo = "";
+            this.CurrentLocation = "";
 
             this.Borrower = "";
             this.BorrowDate = "";
@@ -1242,6 +1255,7 @@ namespace dp2Circulation
             DomUtil.SetElementText(this._dataDom.DocumentElement, "volume", this.Volume);
             DomUtil.SetElementText(this._dataDom.DocumentElement, "accessNo", this.AccessNo);
             DomUtil.SetElementText(this._dataDom.DocumentElement, "shelfNo", this.ShelfNo);
+            DomUtil.SetElementText(this._dataDom.DocumentElement, "currentLocation", this.CurrentLocation);
 
             DomUtil.SetElementText(this._dataDom.DocumentElement, "borrower", this.Borrower);
             DomUtil.SetElementText(this._dataDom.DocumentElement, "borrowDate", this.BorrowDate);
@@ -1735,6 +1749,7 @@ namespace dp2Circulation
                 this.textBox_volume.ReadOnly = true;
                 this.textBox_accessNo.ReadOnly = true;
                 this.textBox_shelfNo.ReadOnly = true;
+                this.textBox_currentLocation.ReadOnly = true;
                 this.textBox_borrower.ReadOnly = true;
                 this.textBox_borrowDate.ReadOnly = true;
                 this.textBox_borrowPeriod.ReadOnly = true;
@@ -1768,6 +1783,7 @@ namespace dp2Circulation
             this.textBox_volume.ReadOnly = false;
             this.textBox_accessNo.ReadOnly = false;
             this.textBox_shelfNo.ReadOnly = false;
+            this.textBox_currentLocation.ReadOnly = false;
 
             this.textBox_borrower.ReadOnly = false;
             this.textBox_borrowDate.ReadOnly = false;
@@ -2079,6 +2095,9 @@ namespace dp2Circulation
             if (this.ShelfNo != refControl.ShelfNo)
                 this.label_shelfNo_color.BackColor = this.ColorDifference;
 
+            if (this.CurrentLocation != refControl.CurrentLocation)
+                this.label_currentLocation_color.BackColor = this.ColorDifference;
+
             if (this.Borrower != refControl.Borrower)
                 this.label_borrower_color.BackColor = this.ColorDifference;
 
@@ -2164,6 +2183,8 @@ namespace dp2Circulation
                     e1.Name = "AccessNo";
                 else if (sender == (object)this.textBox_shelfNo)
                     e1.Name = "ShelfNo";
+                else if (sender == (object)this.textBox_currentLocation)
+                    e1.Name = "CurrentLocation";
                 else if (sender == (object)this.textBox_intact)
                     e1.Name = "Intact";
                 else if (sender == (object)this.textBox_binding)
@@ -2240,6 +2261,8 @@ namespace dp2Circulation
                     e1.Name = "AccessNo";
                 else if (sender == (object)this.textBox_shelfNo)
                     e1.Name = "ShelfNo";
+                else if (sender == (object)this.textBox_currentLocation)
+                    e1.Name = "CurrentLocation";
                 else if (sender == (object)this.textBox_intact)
                     e1.Name = "Intact";
                 else if (sender == (object)this.textBox_binding)

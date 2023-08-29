@@ -100,6 +100,7 @@
             this.toolStripButton_setTargetRecord = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_marcEditor_moveTo = new System.Windows.Forms.ToolStripButton();
             this.toolStripSplitButton_searchDup = new System.Windows.Forms.ToolStripSplitButton();
+            this.ToolStripMenuItem_searchDupBySelected = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_searchDupInExistWindow = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_searchDupInNewWindow = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_checkUnique = new System.Windows.Forms.ToolStripMenuItem();
@@ -134,7 +135,6 @@
             this.toolStripMenuItem_itemArea_ensureDisplay = new System.Windows.Forms.ToolStripMenuItem();
             this.imageList_itemType = new System.Windows.Forms.ImageList(this.components);
             this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.ToolStripMenuItem_searchDupBySelected = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip_selectRegisterType.SuspendLayout();
             this.contextMenuStrip_option.SuspendLayout();
             this.tableLayoutPanel_main.SuspendLayout();
@@ -636,6 +636,7 @@
             this.toolStripButton_saveAll.Name = "toolStripButton_saveAll";
             this.toolStripButton_saveAll.Size = new System.Drawing.Size(40, 32);
             this.toolStripButton_saveAll.Text = "全部保存";
+            this.toolStripButton_saveAll.ToolTipText = "全部保存 F2";
             this.toolStripButton_saveAll.Click += new System.EventHandler(this.toolStripButton_saveAll_Click);
             // 
             // toolStripButton_marcEditor_save
@@ -647,6 +648,7 @@
             this.toolStripButton_marcEditor_save.Name = "toolStripButton_marcEditor_save";
             this.toolStripButton_marcEditor_save.Size = new System.Drawing.Size(40, 32);
             this.toolStripButton_marcEditor_save.Text = "保存书目记录(不保存册信息)";
+            this.toolStripButton_marcEditor_save.ToolTipText = "保存书目记录(不保存册信息) Ctrl+S";
             this.toolStripButton_marcEditor_save.Click += new System.EventHandler(this.toolStripButton_marcEditor_save_Click);
             // 
             // toolStripButton_marcEditor_loadTemplate
@@ -876,6 +878,7 @@
             this.toolStripButton_marcEditor_moveTo.Name = "toolStripButton_marcEditor_moveTo";
             this.toolStripButton_marcEditor_moveTo.Size = new System.Drawing.Size(40, 32);
             this.toolStripButton_marcEditor_moveTo.Text = "移动书目记录";
+            this.toolStripButton_marcEditor_moveTo.ToolTipText = "移动书目记录 Alt+M";
             this.toolStripButton_marcEditor_moveTo.Click += new System.EventHandler(this.toolStripButton_marcEditor_moveTo_Click);
             // 
             // toolStripSplitButton_searchDup
@@ -893,6 +896,13 @@
             this.toolStripSplitButton_searchDup.Size = new System.Drawing.Size(46, 32);
             this.toolStripSplitButton_searchDup.Text = "查重 (Ctrl+D)";
             this.toolStripSplitButton_searchDup.ButtonClick += new System.EventHandler(this.toolStripSplitButton_searchDup_ButtonClick);
+            // 
+            // ToolStripMenuItem_searchDupBySelected
+            // 
+            this.ToolStripMenuItem_searchDupBySelected.Name = "ToolStripMenuItem_searchDupBySelected";
+            this.ToolStripMenuItem_searchDupBySelected.Size = new System.Drawing.Size(407, 40);
+            this.ToolStripMenuItem_searchDupBySelected.Text = "按照指定方案查重 ...";
+            this.ToolStripMenuItem_searchDupBySelected.DropDownOpening += new System.EventHandler(this.ToolStripMenuItem_searchDupBySelected_DropDownOpening);
             // 
             // ToolStripMenuItem_searchDupInExistWindow
             // 
@@ -1261,13 +1271,6 @@
             // timer1
             // 
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
-            // 
-            // ToolStripMenuItem_searchDupBySelected
-            // 
-            this.ToolStripMenuItem_searchDupBySelected.Name = "ToolStripMenuItem_searchDupBySelected";
-            this.ToolStripMenuItem_searchDupBySelected.Size = new System.Drawing.Size(407, 40);
-            this.ToolStripMenuItem_searchDupBySelected.Text = "按照指定方案查重 ...";
-            this.ToolStripMenuItem_searchDupBySelected.DropDownOpening += new System.EventHandler(this.ToolStripMenuItem_searchDupBySelected_DropDownOpening);
             // 
             // EntityForm
             // 

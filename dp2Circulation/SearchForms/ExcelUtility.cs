@@ -5,6 +5,7 @@ using System.Text;
 using System.Xml;
 
 using ClosedXML.Excel;
+using DigitalPlatform.GUI;
 using DigitalPlatform.Text;
 
 namespace dp2Circulation
@@ -118,6 +119,71 @@ namespace dp2Circulation
     // int nBiblioIndex,
     IXLWorksheet sheet,
     int nStartColIndex,     // 从 0 开始计数
+    List<dp2Circulation.Order.ColumnProperty> col_list1,
+    int nRowIndex)  // 从 0 开始计数。
+        {
+            string strError = "";
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(strXml);
+            }
+            catch (Exception ex)
+            {
+                // 2019/12/3
+                strError = $"!error: 装载书目记录 XML 到 DOM 时出错: {ex.Message}";
+                dom.LoadXml("<root />");
+            }
+
+            List<IXLCell> cells = new List<IXLCell>();
+
+            int i = 0;
+            foreach (var column in col_list1)
+            {
+                var col = GetColumnPropertyType(column);
+                // 2020/10/13
+                if (column == null || string.IsNullOrEmpty(column.Type))
+                {
+                    i++;
+                    continue;
+                }
+                string strValue = "";
+                if (col == "recpath" || col.EndsWith("_recpath"))
+                    strValue = strBiblioRecPath;
+                else
+                {
+                    if (string.IsNullOrEmpty(strError) == false)
+                        strValue = strError;
+                    else
+                        strValue = FindBiblioTableContent(dom, column);
+                }
+
+                {
+                    IXLCell cell = sheet.Cell(nRowIndex + 1, nStartColIndex + (i++) + 1).SetValue(strValue);
+                    cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                    if (col == "recpath" || col.EndsWith("_recpath"))
+                        cell.Style.Font.FontColor = XLColor.LightGray;
+                    else if (string.IsNullOrEmpty(strError) == false)
+                    {
+                        cell.Style.Fill.SetBackgroundColor(XLColor.DarkRed);
+                        cell.Style.Font.SetFontColor(XLColor.White);
+                    }
+
+                    cells.Add(cell);
+                }
+            }
+
+            return cells;
+        }
+
+        // (即将废弃的版本。缺点是处理不好 .Evalue 有内容的列)
+        // 输出一行书目信息
+        public static List<IXLCell> OutputBiblioLine(
+    string strBiblioRecPath,
+    string strXml,
+    // int nBiblioIndex,
+    IXLWorksheet sheet,
+    int nStartColIndex,     // 从 0 开始计数
     List<string> col_list,
     int nRowIndex)  // 从 0 开始计数。
         {
@@ -175,6 +241,43 @@ namespace dp2Circulation
         }
 
         // 根据 type 在 Table XML 中获得一个内容值
+        static string FindBiblioTableContent(XmlDocument dom, 
+            dp2Circulation.Order.ColumnProperty property)
+        {
+            var type_text = GetColumnPropertyType(property);
+
+            // TODO: 可以用 XPath 直接找到特定的 line 元素
+            XmlNodeList nodes = dom.DocumentElement.SelectNodes("line");
+            int i = 0;
+            foreach (XmlElement line in nodes)
+            {
+                string strName = line.GetAttribute("name");
+                string strValue = line.GetAttribute("value");
+                string strType = line.GetAttribute("type");
+
+                if (strName == "_coverImage")
+                    continue;
+
+                // 2023/8/28
+                if (string.IsNullOrEmpty(property.Evalue) == false)
+                {
+                    string strEvalue = line.GetAttribute("evalue");
+                    if (strType == type_text
+                        && strEvalue == property.Evalue)
+                        return strValue;
+                }
+                else
+                {
+                    if (strType == type_text)
+                        return strValue;
+                }
+            }
+
+            return "";
+        }
+
+
+        // 根据 type 在 Table XML 中获得一个内容值
         static string FindBiblioTableContent(XmlDocument dom, string type)
         {
             // TODO: 可以用 XPath 直接找到特定的 line 元素
@@ -196,6 +299,21 @@ namespace dp2Circulation
             return "";
         }
 
+        static string GetColumnPropertyType(dp2Circulation.Order.ColumnProperty o,
+            bool bRemovePrefix = true)
+        {
+            string type = o.Type;
+
+            if (bRemovePrefix)
+            {
+                // 如果为 "xxxx_xxxxx" 形态，则取 _ 右边的部分
+                int nRet = type.IndexOf("_");
+                if (nRet != -1)
+                    type = type.Substring(nRet + 1).Trim();
+            }
+            return type;
+        }
+
         // 输出一行实体/订购/期刊/评注信息
         // parameters:
         //      dropdown_list   下拉列表内容数组。每个元素为这样的格式：value1,value2,value3
@@ -206,7 +324,8 @@ namespace dp2Circulation
     int nBiblioIndex,
     IXLWorksheet sheet,
     int nStartColIndex,     // 从 0 开始计数
-    List<string> col_list,
+    List<dp2Circulation.Order.ColumnProperty> col_list1,
+    // List<string> col_list,
     List<string> dropdown_list,
     int nRowIndex,  // 从 0 开始计数。
     XLColor backColor,
@@ -221,8 +340,9 @@ namespace dp2Circulation
             dom.LoadXml(strXml);
 
             int i = 0;
-            foreach (string col in col_list)
+            foreach (var col1 in col_list1)
             {
+                var col = GetColumnPropertyType(col1);
                 List<string> value_list = null;
                 if (dropdown_list != null)
                     value_list = StringUtil.SplitList(dropdown_list[i]);
@@ -231,7 +351,7 @@ namespace dp2Circulation
                 if (col == "recpath" || col.EndsWith("_recpath"))
                     strValue = strRecPath;
                 else
-                    strValue = FindItemContent(dom, col);
+                    strValue = FindItemContent(dom, col1);
 
                 //if (col == "state" || col.EndsWith("_state"))
                 //    strState = strValue;
@@ -262,7 +382,7 @@ namespace dp2Circulation
                         cell.Style.Border.SetLeftBorderColor(XLColor.Black);
                         cell.Style.Border.SetLeftBorder(XLBorderStyleValues.Medium);
                     }
-                    if (i == col_list.Count - 1)
+                    if (i == col_list1.Count - 1)
                     {
                         cell.Style.Border.SetRightBorderColor(XLColor.Black);
                         cell.Style.Border.SetRightBorder(XLBorderStyleValues.Medium);
@@ -293,9 +413,30 @@ namespace dp2Circulation
 
                 i++;
             }
-
         }
 
+        static string FindItemContent(XmlDocument dom,
+            dp2Circulation.Order.ColumnProperty property)
+        {
+            string content = null;
+            {
+                var element_name = GetColumnPropertyType(property);
+                XmlElement element = dom.DocumentElement.SelectSingleNode(element_name) as XmlElement;
+
+                if (element == null)
+                    content = "";
+                else
+                    content = element.InnerText.Trim();
+            }
+            if (string.IsNullOrEmpty(property.Evalue) == true)
+                return content;
+            else
+            {
+                return MyForm.RunItemScript(content, dom.DocumentElement?.OuterXml, property.Evalue);
+            }
+        }
+
+#if REMOVED
         static string FindItemContent(XmlDocument dom, string element_name)
         {
             XmlElement element = dom.DocumentElement.SelectSingleNode(element_name) as XmlElement;
@@ -304,6 +445,7 @@ namespace dp2Circulation
                 return "";
             return element.InnerText.Trim();
         }
+#endif
     }
 
 }

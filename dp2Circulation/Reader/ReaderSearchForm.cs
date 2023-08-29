@@ -34,6 +34,7 @@ using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.LibraryServer;
 using dp2Circulation.Reader;
+using System.Globalization;
 
 namespace dp2Circulation
 {
@@ -2430,23 +2431,39 @@ TaskScheduler.Default);
 
                 // var merge = (string.IsNullOrEmpty(key_field_name) == false);
 
-                var actions = new List<FieldMerge>();
-                actions.Add(new FieldMerge
-                {
-                    ElementName = "email"
-                });
-                actions.Add(new FieldMerge
-                {
-                    ElementName = "state"
-                });
-                actions.Add(new FieldMerge
-                {
-                    ElementName = "cardNumber"
-                });
-                actions.Add(new FieldMerge
-                {
-                    ElementName = "comment"
-                });
+                // 用于合并的动作
+                var merge_actions = new FieldMerge[] {
+                        new FieldMerge
+                        {
+                            ElementName = "email"
+                        },
+                        new FieldMerge
+                        {
+                            ElementName = "state"
+                        },
+                        new FieldMerge
+                        {
+                            ElementName = "cardNumber"
+                        },
+                        new FieldMerge
+                        {
+                            ElementName = "comment"
+                        }
+                    };
+
+                // 用于转换时间格式的动作
+                var time_actions = new FieldMerge[] {
+                        new FieldMerge
+                        {
+                            ElementName = "dateOfBirth",
+                            TargetTimeFormat = "rfc1123",
+                        },
+                        new FieldMerge
+                        {
+                            ElementName = "expireDate",
+                            TargetTimeFormat = "rfc1123",
+                        },
+                    };
 
                 // 用于对记录路径进行查重的 hashtable。key 为记录路径
                 Hashtable dup_table = new Hashtable();
@@ -2494,6 +2511,7 @@ TaskScheduler.Default);
 
                         string existing_xml = null;
                         byte[] existing_timestamp = null;
+                        bool time_actions_used = false; // time_actions 是否已经被用过了
 
                         if (merge)
                         {
@@ -2565,10 +2583,18 @@ TaskScheduler.Default);
                                 // 合并
                                 XmlDocument target_dom = new XmlDocument();
                                 target_dom.LoadXml(existing_xml);
-                                Merge(actions,
+                                List<FieldMerge> all_actions = new List<FieldMerge>();
+                                all_actions.AddRange(merge_actions);
+                                all_actions.AddRange(time_actions);
+                                time_actions_used = true;
+                                var result = Merge(
+                                    existing_recpath,
+                                    all_actions,
                                     key_field_name,
                                     dom,
                                     target_dom);
+                                if (result == FieldMerge.SKIP)
+                                    goto CONTINUE;
                                 dom = target_dom;
                                 path = existing_recpath;
 
@@ -2599,6 +2625,25 @@ TaskScheduler.Default);
                                 goto CONTINUE;
                             strError = "用户中断";
                             goto ERROR1;
+                        }
+
+                        // 改变时间字段的格式
+                        if (time_actions_used == false)
+                        {
+                            XmlDocument target_dom = new XmlDocument();
+                            target_dom.LoadXml(dom.OuterXml);
+                            if (time_actions.Length > 0)
+                            {
+                                var result = Merge(
+                                    path,
+                                    time_actions,
+                                    null,
+                                    dom,
+                                    target_dom);
+                                if (result == FieldMerge.SKIP)
+                                    goto CONTINUE;
+                                dom = target_dom;
+                            }
                         }
 
                         dup_table[path] = 1;
@@ -2698,8 +2743,13 @@ TaskScheduler.Default);
 
         // 把 source_dom 里面的字段覆盖到 target_dom
         // source_dom 里面不会有多余的字段
-        void Merge(
-            List<FieldMerge> actions,
+        // parameters:
+        //      summary 正在处理的读者记录摘要描述。用于显示在对话框文字中
+        // return:
+        //      [跳过]    跳过本条读者记录处理
+        string Merge(
+            string summary,
+            IEnumerable<FieldMerge> actions,
             string merge_field_name,
             XmlDocument source_dom,
             XmlDocument target_dom)
@@ -2716,11 +2766,23 @@ TaskScheduler.Default);
     strElementName);
                 if (string.IsNullOrEmpty(old_outerxml))
                 {
+                    // 一般处理
                     string strTextNew = DomUtil.GetElementOuterXml(source_dom.DocumentElement,
                         strElementName);
 
-                    // 一般处理
-                    DomUtil.SetElementOuterXml(target_dom.DocumentElement,
+                    string new_content = DomUtil.GetElementText(source_dom.DocumentElement,
+        strElementName);
+
+                    // 先查找看看是否需要进行 time 格式变换
+                    var action = FindTimeAction(strElementName);
+                    if (action != null && string.IsNullOrEmpty(new_content) == false)
+                    {
+                        var ret = DoAction(action, strElementName);
+                        if (ret == FieldMerge.SKIP)
+                            return ret;
+                    }
+                    else
+                        DomUtil.SetElementOuterXml(target_dom.DocumentElement,
                         strElementName,
                         strTextNew);
                 }
@@ -2741,15 +2803,27 @@ TaskScheduler.Default);
                     var action = FindAction(strElementName);
                     if (action != null)
                     {
-                        this.TryInvoke(() =>
+                        /*
+                        var result = this.TryGet(() =>
                         {
                             var content = action.MergeContent(this,
-        old_content,
-        new_content);
+                                summary,
+                                old_content,
+                                new_content);
                             DomUtil.SetElementText(target_dom.DocumentElement,
                                 strElementName,
                                 content);
+
+                            if (content == FieldMerge.SKIP)
+                                return content;
+                            return null;
                         });
+                        if (result == FieldMerge.SKIP)
+                            return result;
+                        */
+                        var ret = DoAction(action, strElementName);
+                        if (ret == FieldMerge.SKIP)
+                            return ret;
                     }
                     else
                         DomUtil.SetElementText(target_dom.DocumentElement,
@@ -2760,9 +2834,41 @@ TaskScheduler.Default);
                 DomUtil.RemoveEmptyElements(target_dom.DocumentElement);
             }
 
+            return null;
+
+            string DoAction(FieldMerge action, string strElementName)
+            {
+                string old_content = DomUtil.GetElementText(target_dom.DocumentElement,
+strElementName);
+                string new_content = DomUtil.GetElementText(source_dom.DocumentElement,
+                    strElementName);
+                var result = this.TryGet(() =>
+                {
+                    var content = action.MergeContent(this,
+                        summary,
+                        old_content,
+                        new_content);
+                    DomUtil.SetElementText(target_dom.DocumentElement,
+                        strElementName,
+                        content);
+
+                    if (content == FieldMerge.SKIP)
+                        return content;
+                    return null;
+                });
+                if (result == FieldMerge.SKIP)
+                    return result;
+                return null;
+            }
+
             FieldMerge FindAction(string element_name)
             {
                 return actions.Where(o => o.ElementName == element_name).FirstOrDefault();
+            }
+
+            FieldMerge FindTimeAction(string element_name)
+            {
+                return actions.Where(o => o.ElementName == element_name && o.TargetTimeFormat != null).FirstOrDefault();
             }
         }
 
@@ -2777,20 +2883,189 @@ TaskScheduler.Default);
             // 处理前是否询问
             public bool DontAsk { get; set; }
 
+            // 目标时间格式。如果为 null，表示不需要进行时间格式转换
+            public string TargetTimeFormat { get; set; }
+
+            // 源头时间格式
+            public string SourceTimeFormat { get; set; }
+
+            // https://learn.microsoft.com/zh-cn/dotnet/standard/base-types/custom-date-and-time-format-strings
+            static string[] _time_formats = new string[]
+            {
+                "yyyy.MM.dd",
+                "yyyy.MM.dd HH:mm:ss",
+                "yyyy.M.d",
+                "yyyy.M.d H:mm:ss",
+                "yyyy-MM-dd",
+                "yyyy-MM-dd HH:mm:ss",
+                "yyyy-M-d",
+                "yyyy-M-d H:mm:ss",
+                "yyyy/MM/dd",
+                "yyyy/MM/dd HH:mm:ss",
+                "yyyy/M/d",
+                "yyyy/M/d H:mm:ss", // 2023/1/30 0:00:00
+                "[自动]",
+                "[跳过]",
+            };
+
+            public static string SKIP = "[跳过]";
+
+            static bool TryParse(string text,
+                out DateTime value)
+            {
+                value = DateTime.MinValue;
+                var ret = DateTime.TryParse(text,
+CultureInfo.InvariantCulture,
+System.Globalization.DateTimeStyles.None,
+out value);
+                if (ret == true)
+                    return true;
+                try
+                {
+                    // 尝试 RFC1123
+                    value = DateTimeUtil.FromRfc1123DateTimeString(text);
+                    return true;
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+
+            static bool IsRfc1123(string text, out DateTime value)
+            {
+                try
+                {
+                    value = DateTimeUtil.FromRfc1123DateTimeString(text);
+                    return true;
+                }
+                catch
+                {
+                    value = DateTime.MinValue;
+                    return false;
+                }
+            }
+
             // 合并新旧值
+            // parameters:
+            //      summary 正在处理的读者记录摘要描述。用于显示在对话框文字中
+            // return:
+            //      [跳过]    希望跳过本条读者记录处理
             public string MergeContent(
                 Form owner,
+                string summary,
                 string old_value,
                 string new_value)
             {
+                // 时间格式转换
+                if (this.TargetTimeFormat != null)
+                {
+                    if (string.IsNullOrEmpty(new_value))
+                        return new_value;
+
+                    if (this.TargetTimeFormat == "rfc1123"
+                        && IsRfc1123(new_value, out _))
+                        return new_value;
+                    if (this.TargetTimeFormat != "rfc1123")
+                    {
+                        if (DateTime.TryParseExact(new_value,
+        this.TargetTimeFormat,
+        CultureInfo.InvariantCulture,
+        System.Globalization.DateTimeStyles.None,
+        out _) == true)
+                            return new_value;
+                    }
+
+                    REDO_SELECT:
+                    if (this.SourceTimeFormat == null)
+                    {
+                        // 尝试匹配模式
+                        int MatchFormat(string time_string)
+                        {
+                            int i = 0;
+                            foreach (string f in _time_formats)
+                            {
+                                if (f.StartsWith("["))
+                                {
+                                    i++;
+                                    continue;
+                                }
+                                if (DateTime.TryParseExact(time_string,
+                                    f,
+                                    CultureInfo.InvariantCulture,
+                                    System.Globalization.DateTimeStyles.None,
+                                    out _) == true)
+                                    return i;
+                                i++;
+                            }
+                            return -1;
+                        }
+
+                        // 源时间格式识别和选择
+                        var source_format = ListDialog.GetInput(
+                            owner,
+                            $"选择 {this.ElementName} 的时间格式",
+                            $"即将为读者记录 {summary} 填入字段 {this.ElementName} 的内容为 '{new_value}'，请选择匹配的时间格式:",
+                            _time_formats,
+                            MatchFormat(new_value),  // 尝试先自动匹配一下，然后预先选定好一个
+                            "或者直接输入时间格式:",
+                            "",
+                            out string hand_input,
+                            owner.Font);
+                        if (source_format == null
+                            && string.IsNullOrEmpty(hand_input))
+                            throw new Exception($"放弃选择 '{this.ElementName}' 的时间格式");
+
+                        if (string.IsNullOrEmpty(hand_input) == false)
+                            source_format = hand_input;
+
+                        if (source_format == FieldMerge.SKIP)
+                            return source_format;
+
+                        this.SourceTimeFormat = source_format;
+                    }
+
+                    DateTime value = DateTime.MinValue;
+                    if (this.SourceTimeFormat == "[自动]")
+                    {
+                        if (TryParse(new_value,
+    out value) == false)
+                        {
+                            MessageBox.Show(owner,
+                                $"时间字符串 '{new_value}' 的格式无法被自动识别。请重新选择一个具体的格式");
+                            this.SourceTimeFormat = null;
+                            goto REDO_SELECT;
+                        }
+                    }
+                    else
+                    {
+                        if (DateTime.TryParseExact(new_value,
+                            this.SourceTimeFormat,
+                            CultureInfo.InvariantCulture,
+                            System.Globalization.DateTimeStyles.None,
+                            out value) == false)
+                        {
+                            MessageBox.Show(owner,
+                                $"时间字符串 '{new_value}' 不匹配 '{this.SourceTimeFormat}' 格式。请重新选择");
+                            this.SourceTimeFormat = null;
+                            goto REDO_SELECT;
+                        }
+                    }
+
+                    if (this.TargetTimeFormat == "rfc1123")
+                        return DateTimeUtil.Rfc1123DateTimeStringEx(value);
+                    return value.ToString(this.TargetTimeFormat); ;
+                }
+
                 if (old_value == new_value)
                     return new_value;
 
                 bool hide_dialog = this.DontAsk;
                 if (hide_dialog == false)
                 {
+                    // 合并方式选择
                     var result = MessageDialog.Show(owner,
-    $"字段 {this.ElementName} 的\r\n旧内容为 '{old_value}'，\r\n新内容为 '{new_value}'，\r\n请问如何合并新旧内容?\r\n\r\n[覆盖] 用新内容覆盖旧内容;\r\n[追加] 将新内容添加到旧内容之后并去重;\r\n[中断] 中断批处理",
+    $"读者记录 {summary} 字段 {this.ElementName} 的\r\n旧内容为 '{old_value}'，\r\n新内容为 '{new_value}'，\r\n请问如何合并新旧内容?\r\n\r\n[覆盖] 用新内容覆盖旧内容;\r\n[追加] 将新内容添加到旧内容之后并去重;\r\n[中断] 中断批处理",
     MessageBoxButtons.YesNoCancel,
     this.LastAction == "overwrite" ? MessageBoxDefaultButton.Button1 : MessageBoxDefaultButton.Button2,
     "此后不再出现本对话框",
@@ -2816,6 +3091,19 @@ TaskScheduler.Default);
                     return MergeComment(this.LastAction, old_value, new_value);
                 throw new Exception($"合并时出现未知的元素名 '{this.ElementName}'");
             }
+
+            /*
+            // 将时间字符串转换为指定的格式
+            // parameters:
+            //      target_format   目标时间格式。目前是 "rfc1123"
+            static string MergeTime(string target_format,
+                string old_value,
+                string new_value)
+            {
+
+                return new_value;
+            }
+            */
 
             static string MergeEmail(string action,
                 string old_value,
@@ -2865,7 +3153,6 @@ string new_value)
 
                 throw new Exception($"无法识别的 action '{action}'");
             }
-
         }
 
         static int MAX_READER_COUNT = 100;

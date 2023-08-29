@@ -31,7 +31,9 @@
             this.button_Cancel = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
             this.listBox1 = new System.Windows.Forms.ListBox();
-            this.label1 = new System.Windows.Forms.Label();
+            this.label_listBox = new System.Windows.Forms.Label();
+            this.label_textbox = new System.Windows.Forms.Label();
+            this.textBox1 = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // button_Cancel
@@ -65,19 +67,42 @@
             this.listBox1.FormattingEnabled = true;
             this.listBox1.IntegralHeight = false;
             this.listBox1.ItemHeight = 21;
-            this.listBox1.Location = new System.Drawing.Point(13, 39);
+            this.listBox1.Location = new System.Drawing.Point(13, 73);
             this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(775, 355);
+            this.listBox1.Size = new System.Drawing.Size(775, 242);
             this.listBox1.TabIndex = 6;
             // 
-            // label1
+            // label_listBox
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(9, 15);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(126, 21);
-            this.label1.TabIndex = 7;
-            this.label1.Text = "请选择事项:";
+            this.label_listBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.label_listBox.Location = new System.Drawing.Point(9, 15);
+            this.label_listBox.Name = "label_listBox";
+            this.label_listBox.Size = new System.Drawing.Size(779, 55);
+            this.label_listBox.TabIndex = 7;
+            this.label_listBox.Text = "请选择事项:";
+            this.label_listBox.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
+            // 
+            // label_textbox
+            // 
+            this.label_textbox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.label_textbox.AutoSize = true;
+            this.label_textbox.Location = new System.Drawing.Point(9, 329);
+            this.label_textbox.Name = "label_textbox";
+            this.label_textbox.Size = new System.Drawing.Size(168, 21);
+            this.label_textbox.TabIndex = 8;
+            this.label_textbox.Text = "请输入文字内容:";
+            this.label_textbox.Visible = false;
+            // 
+            // textBox1
+            // 
+            this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox1.Location = new System.Drawing.Point(13, 353);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(775, 31);
+            this.textBox1.TabIndex = 9;
+            this.textBox1.Visible = false;
             // 
             // ListDialog
             // 
@@ -86,7 +111,9 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
             this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.label1);
+            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.label_textbox);
+            this.Controls.Add(this.label_listBox);
             this.Controls.Add(this.listBox1);
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
@@ -107,6 +134,8 @@
         private System.Windows.Forms.Button button_Cancel;
         private System.Windows.Forms.Button button_OK;
         private System.Windows.Forms.ListBox listBox1;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label_listBox;
+        private System.Windows.Forms.Label label_textbox;
+        private System.Windows.Forms.TextBox textBox1;
     }
 }
