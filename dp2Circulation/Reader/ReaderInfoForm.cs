@@ -2053,6 +2053,26 @@ strXml);
                         strAction = "forcechange";
                     }
 
+                    // 2023/9/16
+                    // 检查是否为“针对已有的读者记录修改姓名后重新保存”情形，警告一下如果意图原本是追加，则不应才用这种方法保存
+                    if (strAction == "change" || strAction == "forcechange")
+                    {
+                        if (HasNameChanged(this.readerEditControl1.OldRecord, strNewXml))
+                        {
+                            var dialog_result = this.TryGet(() =>
+                            {
+                                return MessageBox.Show(this,
+"警告: 本次操作，软件注意到您修改了读者的姓名，点了“保存”按钮覆盖原有读者记录。\r\n善意提醒一下，若您意图是在原有记录基础上修改某些字段，然后追加保存一条新的读者记录，那不能用目前这种覆盖保存方式，因为这样操作的结果会直接覆盖您的前一条读者记录。\r\n\r\n(那么想要新增读者记录如何操作呢？请点读者窗工具条上的“新增”按钮)\r\n\r\n确实要以覆盖方式保存这条读者信息? \r\n[Yes] 继续用覆盖方式保存 [No] 放弃本次保存(以便再用“新增”按钮保存)",
+"ReaderInfoForm",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+                            });
+                            if (dialog_result == DialogResult.No)
+                                return 0;
+                        }
+                    }
+
                     // 调试
                     // MessageBoxShow("1 this.m_strSetAction='"+this.m_strSetAction+"'");
 
@@ -2306,6 +2326,40 @@ strXml);
             this.MessageBoxShow(strError);
             Program.MainForm.StatusBarMessage = strError;
             return -1;
+        }
+
+        // 检查两条记录之间 name 元素内容是否发生了变化
+        static bool HasNameChanged(string old_xml, string new_xml)
+        {
+            var old_dom = new XmlDocument();
+            try
+            {
+                old_dom.LoadXml(string.IsNullOrEmpty(old_xml) ?
+                    "<root /> " : old_xml);
+            }
+            catch
+            {
+                return false;
+            }
+
+            var new_dom = new XmlDocument();
+            try
+            {
+                new_dom.LoadXml(string.IsNullOrEmpty(new_xml) ?
+                    "<root /> " : new_xml);
+            }
+            catch
+            {
+                return false;
+            }
+
+            string old_name = DomUtil.GetElementText(
+                old_dom.DocumentElement,
+                "name");
+            string new_name = DomUtil.GetElementText(
+new_dom.DocumentElement,
+"name");
+            return (old_name != new_name);
         }
 
         int DoVerifyPatronBarcode(string strTargetRecPath,

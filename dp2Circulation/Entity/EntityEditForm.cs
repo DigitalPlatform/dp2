@@ -783,7 +783,8 @@ namespace dp2Circulation
 
         void DisplayRfidPanel(bool display)
         {
-            this.splitContainer_back.Panel2Collapsed = !display;
+            if (this.splitContainer_back.Panel2Collapsed != !display)
+                this.splitContainer_back.Panel2Collapsed = !display;
             // this.panel_rfid.Visible = display;
         }
 
@@ -962,7 +963,18 @@ namespace dp2Circulation
             // 写入以前，装载标签内容到左侧，然后调整右侧(中间可能会警告)。然后再保存
 
             // string pii = this.chipEditor_editing.LogicChipItem.FindElement(ElementOID.PII).Text;
-            string pii = GetPII(this.Item.OldRecord);   // 从修改前的册记录中获得册条码号
+            string pii = this.Item.ItemDisplayState == ItemDisplayState.New ?
+                "" : GetPII(this.Item.OldRecord);   // 从修改前的册记录中获得册条码号
+
+            // 注: 如果 this.Item.OldRecord 中旧记录的册条码号和新记录中的不同，
+            // 这种情况下装载读写器上的标签的原有内容，如果：
+            // 1) 标签的 PII 和旧记录中的册条码号相同，意味着操作者把这册图书的标签(本次改写标签之前的状态)放到读写器上了，那么这种情况不应该警告;
+            // 2) 标签的 PII 和新记录中的册条码号相同，意味着操作者在别的什么地方抢先把标签修改到位了(但比较可疑)，那么这种情况似乎也不应该警告;
+            // 3) 标签的 PII 和上述册条码号两种值都不相同，那么应该警告。
+            // 不过需要注意一种情况，就是操作者通过定义册登记的默认值中的“册条码号”为一个具体的号码，这个时候 this.Item.OldRecord 中的册条码号只是这个默认模板内容的号码，而并不是什么实体库中的册记录的册条码号。其实这个时候册记录还是新增编辑状态，根本没有创建保存过
+            // 似乎可以通过判断 EntitEditForm 对话框是否为“新增册”状态来甄别这种情况(通过 this.Item.ItemDisplayState 是否为 New 可以判断)
+
+
 
             // 看左侧是否装载过。如果没有装载过则自动装载
             if (_leftLoaded == false)
@@ -1085,7 +1097,8 @@ MessageBoxDefaultButton.Button2);
             // 如果装入的元素里面有锁定状态的元素，要警告以后，覆盖右侧编辑器中的同名元素(右侧这些元素也要显示为只读状态)
             _leftLoaded = false;
             // string pii = this.chipEditor_editing.LogicChipItem.FindElement(ElementOID.PII).Text;
-            string pii = GetPII(this.Item.OldRecord);   // 从修改前的册记录中获得册条码号
+            string pii = this.Item.ItemDisplayState == ItemDisplayState.New ?
+                "" : GetPII(this.Item.OldRecord);   // 从修改前的册记录中获得册条码号
             // return:
             //      -1  出错
             //      0   放弃装载

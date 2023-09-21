@@ -330,7 +330,8 @@ namespace dp2Circulation.Reader
 
                 string value = null;
                 if (field_name == "dateOfBirth"
-                    || field_name == "expireDate")
+                    || field_name == "expireDate"
+                    || field_name == "createDate")
                 {
                     if (cell.Value is DateTime)
                         value = DateTimeUtil.Rfc1123DateTimeStringEx((DateTime)cell.Value);
@@ -393,6 +394,7 @@ namespace dp2Circulation.Reader
             "barcode",
             "name",
             "idCardNumber",
+            "recpath",  // 2023/9/12
         };
 
         // 读者字段名列表
@@ -431,6 +433,7 @@ namespace dp2Circulation.Reader
             "access:存取定义",   // 存取定义
             "refID:参考ID", // 参考 ID
             "face:人脸", // 人脸数据
+            "recpath:记录路径,路径,读者记录路径",
         };
 
         private void dataGridView1_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)

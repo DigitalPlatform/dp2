@@ -9716,7 +9716,7 @@ Keys keyData)
             }
         }
 
-        // 创建备用绿色安装目录。所谓“备用绿色安装目录”，是一个在特殊情况下备用的绿色内务可执行文件目录，一般位于 c:\dp2circulation。一般由每次内务正常启动时自动复制创建
+        // 创建应急绿色安装目录。所谓“应急绿色安装目录”，是一个在特殊情况下应急的绿色内务可执行文件目录，一般位于 c:\dp2circulation。一般由每次内务正常启动时自动复制创建
         private void MenuItem_createGreenApplication_Click(object sender, EventArgs e)
         {
             // TODO: 需要加入判断，如果当前已经是绿色位置启动的，就隐藏此菜单
@@ -9728,7 +9728,7 @@ Keys keyData)
         CopyGreen(true);
         this.TryInvoke(() =>
         {
-            MessageBox.Show(this, "“创建备用绿色安装目录”执行完成。执行过程信息可在背景窗看到");
+            MessageBox.Show(this, "“创建应急绿色安装目录”执行完成。执行过程信息可在背景窗看到");
         });
     },
 this._cancel.Token,

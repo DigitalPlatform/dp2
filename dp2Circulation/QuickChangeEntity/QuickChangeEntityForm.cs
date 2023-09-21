@@ -421,16 +421,21 @@ namespace dp2Circulation
                 {
                     // 自动修改
                     AutoChangeData();
-                    nRet = TryWriteToRfidTag();
-                    if (nRet == 1)
+                    // return:
+                    // return:
+                    //      -1  出错
+                    //      0   没有发生写入(如果 ErrorCode == "cancel" 表示希望中断批处理)
+                    //      1   发生了写入
+                    var ret = TryWriteToRfidTag();
+                    if (ret.Value == 1)
                     {
                         Console.Beep();
                         Program.MainForm.Speak($"标签 {this.textBox_barcode.Text} 写入成功");
                     }
                     // 2022/11/15
-                    if (nRet == -1)
+                    if (ret.Value == -1)
                     {
-                        MessageBoxAndSpeak(strError);
+                        MessageBoxAndSpeak(ret.ErrorInfo);
                         goto SETFOCUS;
                     }
                 }
@@ -502,16 +507,16 @@ namespace dp2Circulation
 
         // return:
         //      -1  出错
-        //      0   没有发生写入
+        //      0   没有发生写入(如果 ErrorCode == "cancel" 表示希望中断批处理)
         //      1   发生了写入
-        int TryWriteToRfidTag()
+        NormalResult TryWriteToRfidTag()
         {
             var need = Program.MainForm.AppInfo.GetBoolean(
 "change_param",
 "writeToRfidTag",
 false);
             if (need == false)
-                return 0;
+                return new NormalResult();
 
             string strError = "";
 
@@ -637,7 +642,7 @@ MessageBoxDefaultButton.Button2);
                     NewTagInfo = new_tag_info
                 };
                 AddWritingLog(log);
-                return 1;
+                return new NormalResult { Value = 1 };
             }
             finally
             {
@@ -645,11 +650,20 @@ MessageBoxDefaultButton.Button2);
             }
         CANCEL0:
             MessageBoxAndSpeak(strError);
-            return 0;
+            return new NormalResult
+            {
+                Value = 0,
+                ErrorInfo = strError,
+                ErrorCode = "cancel",
+            };
         ERROR1:
             Program.MainForm.Speak(strError);
             this.ShowMessage(strError, "red", true);
-            return -1;
+            return new NormalResult
+            {
+                Value = -1,
+                ErrorInfo = strError
+            };
         }
 
         // return:
@@ -1637,20 +1651,24 @@ false);
                         //      1   有实质性改变
                         AutoChangeData();
                         // TODO: 如何中断处理?
-                        nRet = TryWriteToRfidTag();
-                        if (nRet == 1)
+                        // return:
+                        //      -1  出错
+                        //      0   没有发生写入(如果 ErrorCode == "cancel" 表示希望中断批处理)
+                        //      1   发生了写入
+                        var ret = TryWriteToRfidTag();
+                        if (ret.Value == 1)
                         {
                             Console.Beep();
                             Program.MainForm.Speak($"标签 {this.textBox_barcode.Text} 写入成功");
                         }
                         // 2022/11/15
-                        if (nRet == 0 || nRet == -1)
+                        if (ret.Value == 0 || ret.Value == -1)
                         {
                             var result = AskStopAndSpeak("");
                             if (result == DialogResult.Yes)
                             {
                                 strError = "中断批处理";
-                                this.textBox_outputBarcodes.Text += "# " + strLine + " " + strError + "\r\n";
+                                this.textBox_outputBarcodes.Text += "# " + strLine + " " + ret.ErrorInfo + "\r\n";
                                 return -1;
                             }
                         }

@@ -4505,7 +4505,17 @@ MessageBoxDefaultButton.Button2);
                 if (type == "recpath")
                     content = item_recpath;
                 else
-                    content = DomUtil.GetElementText(item_dom.DocumentElement, type);
+                {
+                    try
+                    {
+                        content = DomUtil.GetElementText(item_dom.DocumentElement, type);
+                    }
+                    catch(Exception ex)
+                    {
+                        // column.Type 名称不适合作为 XML Element Name 使用
+                        content = $"列名称 '{type}' (原始值为 '{column.Type}') 不适合作为 XML 元素名使用";
+                    }
+                }
 
                 // 2023/7/29
                 if (string.IsNullOrEmpty(column.Evalue) == false)

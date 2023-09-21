@@ -241,7 +241,7 @@ namespace dp2Circulation
         }
 
         // 根据 type 在 Table XML 中获得一个内容值
-        static string FindBiblioTableContent(XmlDocument dom, 
+        static string FindBiblioTableContent(XmlDocument dom,
             dp2Circulation.Order.ColumnProperty property)
         {
             var type_text = GetColumnPropertyType(property);
@@ -421,12 +421,20 @@ namespace dp2Circulation
             string content = null;
             {
                 var element_name = GetColumnPropertyType(property);
-                XmlElement element = dom.DocumentElement.SelectSingleNode(element_name) as XmlElement;
 
-                if (element == null)
-                    content = "";
-                else
-                    content = element.InnerText.Trim();
+                try
+                {
+                    XmlElement element = dom.DocumentElement.SelectSingleNode(element_name) as XmlElement;
+
+                    if (element == null)
+                        content = "";
+                    else
+                        content = element.InnerText.Trim();
+                }
+                catch (Exception)
+                {
+                    content = $"列名称 '{element_name}' (原始值为 '{property.Type}') 不适合作为 XML 元素名使用";
+                }
             }
             if (string.IsNullOrEmpty(property.Evalue) == true)
                 return content;

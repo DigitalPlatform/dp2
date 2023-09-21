@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.85.*")]
-[assembly: AssemblyFileVersion("3.85.0.0")]
+[assembly: AssemblyVersion("3.86.*")]
+[assembly: AssemblyFileVersion("3.86.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -179,3 +179,4 @@ using System.Runtime.InteropServices;
 //              1) 合并时，state cardNumber email 这几个字段会弹出对话框询问新旧值如何合并;
 //              2) dateOfBirth expireDate 这两个字段如果不是 Excel 的事件类型列，会弹出对话框询问时间格式;
 //              3) 种册窗工具条上的几个按钮的快捷键会显示在 button tips 小窗口中。
+// 3.86 2023/9/16 读者窗覆盖保存读者记录的时候，增加了检查读者姓名是否在保存前后发生变化的功能。如果检测到读者姓名发生了变化，为了预防操作者误用覆盖保存功能(操作者的意图本来是希望修改后追加保存一条新的读者记录)，会弹出警告对话框

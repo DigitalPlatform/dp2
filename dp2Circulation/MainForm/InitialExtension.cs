@@ -2233,7 +2233,7 @@ MessageBoxDefaultButton.Button1);
             // 本身如果是绿色安装包，没有必要再次复制出绿色安装包
             if (bForce == false && ApplicationDeployment.IsNetworkDeployed == false)
             {
-                // this.DisplayBackgroundTextLn("当前已经处在绿色运行状态，无法创建备用绿色安装包");
+                // this.DisplayBackgroundTextLn("当前已经处在绿色运行状态，无法创建应急绿色安装包");
                 return false;
             }
 
@@ -2243,7 +2243,7 @@ MessageBoxDefaultButton.Button1);
             if (PathUtil.IsEqual(strProgramDir, strTargetDir) == true)
                 return false;
 
-            this.DisplayBackgroundTextLn("正在创建备用绿色安装包 ...");
+            this.DisplayBackgroundTextLn("正在创建应急绿色安装包 ...");
 
             StringBuilder debugInfo = new StringBuilder();
             // return:
@@ -2260,10 +2260,10 @@ MessageBoxDefaultButton.Button1);
                 out strError);
             if (nRet == -1)
             {
-                ShowMessageBox("创建备用绿色安装包时出错: " + strError);
+                ShowMessageBox("创建应急绿色安装包时出错: " + strError);
                 this.DisplayBackgroundTextLn(strError);
                 // 发送给 dp2003.com
-                ReportError("dp2circulation 创建备用绿色安装包时出错", strError + "\r\n\r\nDebug Info:\r\n" + debugInfo.ToString());
+                ReportError("dp2circulation 创建应急绿色安装包时出错", strError + "\r\n\r\nDebug Info:\r\n" + debugInfo.ToString());
                 _copyGreenError = true;
 #if NO
                 string strText = strError;
@@ -2290,7 +2290,7 @@ MessageBoxDefaultButton.Button1);
             }
             else if (nRet == -2)
             {
-                this.DisplayBackgroundTextLn("创建备用绿色安装包时出错: " + strError);
+                this.DisplayBackgroundTextLn("创建应急绿色安装包时出错: " + strError);
                 return false;
             }
             else if (nRet == 0)
@@ -2303,18 +2303,18 @@ MessageBoxDefaultButton.Button1);
                 try
                 {
                     GreenProgram.CreateShortcutToDesktop(
-                       "内务绿色",
+                       "内务",  // "内务绿色"
                        Path.Combine(strTargetDir, "dp2circulation.exe"),
                        false);
                 }
                 catch (Exception ex)
                 {
-                    strError = "dp2circulation 创建备用绿色安装包快捷方式时出现异常: " + ExceptionUtil.GetDebugText(ex);
-                    this.ReportError("dp2circulation 创建备用绿色安装包快捷方式时出现异常", "(安静报错)" + strError);
+                    strError = "dp2circulation 创建应急绿色安装包快捷方式时出现异常: " + ExceptionUtil.GetDebugText(ex);
+                    this.ReportError("dp2circulation 创建应急绿色安装包快捷方式时出现异常", "(安静报错)" + strError);
                     this.DisplayBackgroundTextLn(strError);
                 }
 
-                this.DisplayBackgroundTextLn("备用绿色安装包已经成功创建于 " + strTargetDir + "。");
+                this.DisplayBackgroundTextLn("应急绿色安装包已经成功创建于 " + strTargetDir + "。");
             }
 
             return true;

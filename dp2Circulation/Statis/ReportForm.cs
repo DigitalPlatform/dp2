@@ -8327,11 +8327,16 @@ out strError);
 
                     try
                     {
+                        // 2023/9/1
+                        if (command_text.Length == 0)
+                            return 0;
                         command.CommandText = command_text.ToString();
                         int nCount = command.ExecuteNonQuery();
                     }
                     catch (Exception ex)
                     {
+                        // 2023/9/1
+                        MainForm.WriteErrorLog($"CommiteUpdateBiblioRecord() 出现异常: {ExceptionUtil.GetDebugText(ex)}\r\ncommand_text='{command_text.ToString()}'\r\nupdates.Count={updates.Count}");
                         strError = "更新 biblio 表时出错.\r\n"
                             + ex.Message + "\r\n"
                             + "SQL 命令:\r\n"
@@ -9947,7 +9952,7 @@ Stack:
             return strLibraryCode;
         }
 
-        // 获得内部用的官代码形态
+        // 获得内部用的馆代码形态
         public static string GetOriginLibraryCode(string strDisplayText)
         {
             if (strDisplayText == "[全局]")

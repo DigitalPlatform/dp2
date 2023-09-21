@@ -1399,7 +1399,7 @@
             // 
             this.MenuItem_createGreenApplication.Name = "MenuItem_createGreenApplication";
             this.MenuItem_createGreenApplication.Size = new System.Drawing.Size(339, 40);
-            this.MenuItem_createGreenApplication.Text = "创建备用绿色安装目录";
+            this.MenuItem_createGreenApplication.Text = "创建应急绿色安装目录";
             this.MenuItem_createGreenApplication.Click += new System.EventHandler(this.MenuItem_createGreenApplication_Click);
             // 
             // MenuItem_upgradeFromDisk

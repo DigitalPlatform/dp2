@@ -797,7 +797,7 @@ idElementName="barcode"
             Account account = new Account();
             account.LoginName = "~replication";
             account.Password = "";
-            account.Rights = "setreaderinfo,devolvereaderinfo";
+            account.Rights = "getreaderinfo,setreaderinfo,devolvereaderinfo";
 
             account.Type = "";
             account.Barcode = "";

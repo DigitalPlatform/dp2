@@ -2463,6 +2463,11 @@ TaskScheduler.Default);
                             ElementName = "expireDate",
                             TargetTimeFormat = "rfc1123",
                         },
+                        new FieldMerge
+                        {
+                            ElementName = "createDate",
+                            TargetTimeFormat = "rfc1123",
+                        },
                     };
 
                 // 用于对记录路径进行查重的 hashtable。key 为记录路径
@@ -2645,6 +2650,9 @@ TaskScheduler.Default);
                                 dom = target_dom;
                             }
                         }
+
+                        // 2023/9/12
+                        DomUtil.DeleteElement(dom.DocumentElement, "recpath");
 
                         dup_table[path] = 1;
 
@@ -2976,7 +2984,7 @@ out value);
                             return new_value;
                     }
 
-                    REDO_SELECT:
+                REDO_SELECT:
                     if (this.SourceTimeFormat == null)
                     {
                         // 尝试匹配模式
@@ -3178,6 +3186,24 @@ string new_value)
             recpath = null;
             strError = "";
 
+            // 2023/9/12
+            if (merge_field == "recpath")
+            {
+                var ret0 = channel.GetReaderInfo(stop,
+                    "@path:" + merge_key,
+                    "xml",
+                    out string[] results,
+                    out recpath,
+                    out timestamp,
+                    out strError);
+                if (ret0 == -1)
+                    return -1;
+                if (ret0 == 0)
+                    return 0;
+                xml = results[0];
+                return 1;
+            }
+
             string strFrom = "";
             if (merge_field == "barcode")
                 strFrom = "证条码号";
@@ -3223,7 +3249,6 @@ stop,
             {
                 return 1;
             }
-
 
             SelectPatronDialog dlg = null;
 
@@ -3272,25 +3297,27 @@ stop,
 
             string path = "@path:" + dlg.SelectedRecPath;
 
-            ret = channel.GetReaderInfo(stop,
-                path,
-                "xml",
-                out string[] results,
-                out recpath,
-                out timestamp,
-                out strError);
-            if (ret == -1)
-                return -1;
-            if (ret == 0)
-                return 0;
-            if (results == null || results.Length == 0)
             {
-                strError = "results error";
-                return -1;
+                ret = channel.GetReaderInfo(stop,
+                    path,
+                    "xml",
+                    out string[] results,
+                    out recpath,
+                    out timestamp,
+                    out strError);
+                if (ret == -1)
+                    return -1;
+                if (ret == 0)
+                    return 0;
+                if (results == null || results.Length == 0)
+                {
+                    strError = "results error";
+                    return -1;
+                }
+                xml = results[0];
+                Debug.Assert(string.IsNullOrEmpty(recpath) == false);
+                return 1;
             }
-            xml = results[0];
-            Debug.Assert(string.IsNullOrEmpty(recpath) == false);
-            return 1;
         }
 
 
