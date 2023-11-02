@@ -1034,12 +1034,27 @@ namespace DigitalPlatform.RFID
         #endregion
 
         // 根据 LogicChip 对象构造标签内容
+        // 注: 1) 本函数构造的 result.UserBank 是 User Bank 内容，因此里面不会包含 PII ContentParameter 元素
+        // 2) 调用前要协调好 UII(在 chip 的 PII 元素中) 和 OI(AOI)的关系。如果 UII 中已经包含了 OI 部分(即 xxx.xxx 格式)，那么 chip 中就不应该包含 OI 或者 AOI 元素了
+        // 3) build_user_bank 为 false 的情况下，OI(AOI) 会被迫放到 result.EpcBank 的 UII 中返回
+        // 4) 如果 chip 中同时包含了 PII 和 OI(AOI)，并且 build_user_bank == true，那么机构代码会放到 User Bank 中返回，EPC Bank 中只是不包含点的 PII。这是为了兼容高校联盟的做法(EPC 中不是 UII 形态)
+        // 5) chip 中的 TypeOfUsage 元素内是通用值，在写入 UHF 高校联盟格式时要先映射转换为其私有值
         // parameters:
         //      build_user_bank 是否要构造 User Bank 内容。如果不构造的话，Content Parameter 中就不会包含任何 index 信息
         public static BuildTagResult BuildTag(LogicChip chip,
             bool build_user_bank,
             bool eas = true)
         {
+            // 2023/10/24
+            // 把 AOI 变为 OI
+            var element_aoi = chip.FindElement(ElementOID.AOI);
+            var element_oi = chip.FindElement(ElementOID.OI);
+            if (element_aoi != null && element_oi == null)
+            {
+                chip.SetElement(ElementOID.OI, element_aoi.Text, false);
+                chip.RemoveElement(ElementOID.AOI);
+            }
+
             List<GaoxiaoUserElement> user_elements = new List<GaoxiaoUserElement>();
             foreach (var element in chip.Elements)
             {
@@ -1057,13 +1072,26 @@ namespace DigitalPlatform.RFID
                         element.OID = (ElementOID)27;
                 }
 
+                // 2023/10/24
+                // 高校联盟的 AOI 只能用 27
+                if (element.OID == ElementOID.AOI)
+                    element.OID = (ElementOID)27;
+
                 var user_element = new GaoxiaoUserElement
                 {
                     OID = (int)element.OID,
                     Content = element.Text,
                 };
 
-                // TODO: 要从国标元素内容映射到高校联盟形态
+                // 2023/10/28
+                // 要从国标元素内容映射到高校联盟形态
+                if (user_element.OID == (int)ElementOID.TypeOfUsage)
+                {
+                    // 国标 --> 中立
+                    var neutral = TypeOfUsage_GBToNeutral(user_element.Content);
+                    // 中立 --> 高校
+                    user_element.Content = TypeOfUsage_NeutralToGaoxiao(neutral);
+                }
 
                 user_elements.Add(user_element);
             }
@@ -1080,6 +1108,25 @@ namespace DigitalPlatform.RFID
             else
                 epc_info.ContentParameters = new int[0];
             epc_info.PII = chip.FindElement(ElementOID.PII)?.Text;
+
+            // 重新获取一次
+            element_aoi = chip.FindElement(ElementOID.AOI);
+            element_oi = chip.FindElement(ElementOID.OI);
+
+            string oi = element_oi?.Text;
+            if (string.IsNullOrEmpty(oi))
+                oi = element_aoi?.Text;
+
+            // 2023/10/24
+            // 如果不让写入 user_bank，但又想要写入机构代码，那就只能包含在 PII 之内了
+            if (build_user_bank == false && string.IsNullOrEmpty(oi) == false)
+            {
+                if (epc_info.PII.Contains("."))
+                    throw new ArgumentException($"chip 中的 PII 元素包含了点字符，然而 chip 同时又具备 OI 或者 AOI 元素，这是不允许的。只能二者选其一");
+                epc_info.PII = oi + "." + epc_info.PII;
+
+                throw new ArgumentException("又要写入 OI 字段，又不让写入 User Bank，这种组合不被支持。因为高校联盟格式的 EPC 册号码中不允许出现字符 '.'，所以机构代码无法以 UII 部件方式进入 EPC Bank");
+            }
 
             // 编码高校联盟 EPC bank。注意返回的内容没有包含前 4 bytes(校验码和 PC)
             var epc_payload = EncodeGaoxiaoEpcPayload(epc_info);
@@ -1106,6 +1153,7 @@ namespace DigitalPlatform.RFID
             };
         }
 
+        // 验证字符串是否符合高校联盟 OI 的形态要求
         static bool VerifyOI(string oi)
         {
             if (oi == null)
@@ -1239,7 +1287,7 @@ namespace DigitalPlatform.RFID
                             return new ParseGaoxiaoResult
                             {
                                 Value = -1,
-                                ErrorInfo = "标签内容无法解析。ECP UMI 位和(高校联盟) ContentParameters 不符",
+                                ErrorInfo = "标签内容无法解析。EPC UMI 位和(高校联盟) ContentParameters 不符",
                                 ErrorCode = "parseEpcError",
                                 EpcInfo = epc_info,
                                 UserElements = new List<GaoxiaoUserElement>(),
@@ -1250,27 +1298,47 @@ namespace DigitalPlatform.RFID
                     }
                 }
 
+                var convert_value_to_gb = StringUtil.IsInList("convertValueToGB", style);
+
                 List<GaoxiaoUserElement> elements = null;
-                LogicChip chip = null;
+                LogicChip chip = new LogicChip();
                 if (user_bank != null)
                 {
                     elements = DecodeUserBank(user_bank);
 
-                    chip = new LogicChip();
                     if (epc_info != null)
                         chip.SetElement(ElementOID.PII, epc_info.PII);
                     foreach (var element in elements)
                     {
                         var oid = (ElementOID)element.OID;
-                        /*
-                        if (oid == ElementOID.SetInformation)
+
+                        if (convert_value_to_gb)
                         {
-                            // TODO: 将 1/1 规范化为国标形态
-                            continue;
+                            /*
+                            if (oid == ElementOID.SetInformation)
+                            {
+                                // TODO: 将 1/1 规范化为国标形态
+                                continue;
+                            }
+                            */
+                            // 从高校值转换为国标值
+                            if (oid == ElementOID.TypeOfUsage)
+                            {
+                                // 高校 --> 中立
+                                var neutral = TypeOfUsage_GaoxiaoToNeutral(element.Content);
+                                // 中立 --> 国标
+                                element.Content = TypeOfUsage_NeutralToGB(neutral);
+                            }
                         }
-                        */
+
                         chip.SetElement(oid, element.Content, false);
                     }
+                }
+                else
+                {
+                    // 2023/10/24
+                    if (epc_info != null)
+                        chip.SetElement(ElementOID.PII, epc_info.PII);
                 }
 
                 var result = new ParseGaoxiaoResult
@@ -1299,14 +1367,239 @@ namespace DigitalPlatform.RFID
             }
         }
 
-        /*
-        // 将元素值从高校联盟标准转换为国标形态
-        public static NormalResult ToGB(List<GaoxiaoUserElement> elements)
+        public class ConvertResult : NormalResult
         {
-
+            public List<GaoxiaoUserElement> Elements { get; set; }
         }
-        */
 
+        #if DEVELOPING
+
+        // 将元素值从高校联盟标准转换为国标形态
+        public static ConvertResult ToGB(List<GaoxiaoUserElement> elements)
+        {
+            List<GaoxiaoUserElement> results = new List<GaoxiaoUserElement>();
+            foreach (var element in elements)
+            {
+                if (element.OID == (int)ElementOID.TypeOfUsage)
+                {
+                }
+
+            }
+
+            return new ConvertResult { Elements = results };
+        }
+
+#endif
+
+        // TypeOfUsage: 高校 --> 中立
+        static string TypeOfUsage_GaoxiaoToNeutral(string gaoxiao)
+        {
+            // xxx.xxx
+            var parts = StringUtil.ParseTwoPart(gaoxiao, ".");
+            string pimary = parts[0];
+            string secondary = parts[1];
+            string neutral = "gx:" + pimary;
+            switch (pimary)
+            {
+                /*
+* 附录 B：馆藏类别与状态参考代码
+主限定标识(应用类别) 取值(数字) 
+----次限定标识(馆藏状态) 取值(数字)
+文献 0
+----可外借 0
+----不可外借 1
+----剔旧 2
+----处理中 3
+----自定义 4-255
+光盘 1
+----可外借 0
+----不可外借 1
+----处理中 2
+----自定义 3-255
+架标/层标 2 
+----自定义 0-255
+证件 3 
+----自定义 0-255
+设备 4 
+----自定义 0-255
+预留 5-255 
+----自定义 0-255
+* */
+                case "0":
+                    neutral = "{馆藏}";
+                    break;
+                case "1":
+                    neutral = "{光盘}";
+                    break;
+                case "2":
+                    neutral = "{层架标}";
+                    break;
+                case "3":
+                    neutral = "{读者证}";
+                    break;
+                case "4":
+                    neutral = "{设备}";
+                    break;
+            }
+            return neutral;
+        }
+
+        // TypeOfUsage: 中立 --> 高校
+        static string TypeOfUsage_NeutralToGaoxiao(string neutral)
+        {
+            // 无法转换的值
+            if (neutral.Contains(":"))
+                return neutral;
+
+            if (neutral.Contains("{") == false)
+            {
+                throw new ArgumentException($"neutral 参数值 '{neutral}' 中没有花括号，不符合中立格式 TypeOfUsage 值的形态要求");
+            }
+
+            // {xxx.xxx}
+            string temp = StringUtil.Unquote(neutral, "{}");
+            var parts = StringUtil.ParseTwoPart(temp, ".");
+            string pimary = parts[0];
+            string secondary = parts[1];
+            string result = "neutral:" + pimary;
+            switch (pimary)
+            {
+
+                /*
+* 附录 B：馆藏类别与状态参考代码
+主限定标识(应用类别) 取值(数字) 
+----次限定标识(馆藏状态) 取值(数字)
+文献 0
+----可外借 0
+----不可外借 1
+----剔旧 2
+----处理中 3
+----自定义 4-255
+光盘 1
+----可外借 0
+----不可外借 1
+----处理中 2
+----自定义 3-255
+架标/层标 2 
+----自定义 0-255
+证件 3 
+----自定义 0-255
+设备 4 
+----自定义 0-255
+预留 5-255 
+----自定义 0-255
+* */
+                case "馆藏":
+                    result = "0";
+                    break;
+                case "光盘":
+                    result = "1";
+                    break;
+                case "层架标":
+                    result = "2";
+                    break;
+                case "读者证":
+                    result = "3";
+                    break;
+                case "设备":
+                    result = "4";
+                    break;
+            }
+            return result;
+        }
+
+        // TypeOfUsage: 中立 --> 国标
+        static string TypeOfUsage_NeutralToGB(string neutral)
+        {
+            // 无法转换的值
+            if (neutral.Contains(":"))
+                return neutral;
+
+            if (neutral.Contains("{") == false)
+            {
+                throw new ArgumentException($"neutral 参数值 '{neutral}' 中没有花括号，不符合中立格式 TypeOfUsage 值的形态要求");
+            }
+
+            // {xxx.xxx}
+            string temp = StringUtil.Unquote(neutral, "{}");
+            var parts = StringUtil.ParseTwoPart(temp, ".");
+            string pimary = parts[0];
+            string secondary = parts[1];
+            string result = "neutral:" + pimary;
+            switch (pimary)
+            {
+
+                case "馆藏":
+                    result = "1";
+                    break;
+                case "光盘":
+                    result = "4";
+                    break;
+                case "层架标":
+                    result = "3";
+                    break;
+                case "读者证":
+                    result = "8";
+                    break;
+                case "设备":
+                    result = "9";
+                    break;
+            }
+            return result + "0";
+        }
+
+        // TypeOfUsage: 国标 --> 中立
+        static string TypeOfUsage_GBToNeutral(string gb)
+        {
+            /* 国标 TypeOfUsage 值定义:
+             * 
+             * 
+             * */
+            string primary = "";
+            string secondary = "";
+
+            if (gb.Length > 0)
+                primary = gb.Substring(0, 1);
+            if (gb.Length > 1)
+                secondary = gb.Substring(1, 1);
+
+            string neutral = "gb:" + gb;
+            switch (primary)
+            {
+                case "1":
+                    neutral = "{馆藏}";
+                    break;
+                case "4":
+                    neutral = "{光盘}";
+                    break;
+                case "3":
+                    neutral = "{层架标}";
+                    break;
+                case "8":
+                    neutral = "{读者证}";
+                    break;
+                case "9":
+                    neutral = "{设备}";
+                    break;
+            }
+            return neutral;
+        }
+
+#if DEVELOPING
+        // 将元素值从国标形态转换为高校标准
+        public static ConvertResult ToGaoxiao(List<GaoxiaoUserElement> elements)
+        {
+            List<GaoxiaoUserElement> results = new List<GaoxiaoUserElement>();
+            foreach (var element in elements)
+            {
+
+            }
+
+            return new ConvertResult { Elements = results };
+        }
+#endif
+
+#if DEVELOPING
 
         // 将元素值从高校联盟形态转换为中立形态
         public static List<GaoxiaoUserElement> ToNeutral(List<GaoxiaoUserElement> elements)
@@ -1401,7 +1694,7 @@ namespace DigitalPlatform.RFID
                         var parts = StringUtil.ParseTwoPart(temp, ".");
                         string pimary = parts[0];
                         string secondary = parts[1];
-                        string neutral = "origin:" + pimary;
+                        string neutral = "neutral:" + pimary;
                         switch (pimary)
                         {
 
@@ -1457,6 +1750,8 @@ namespace DigitalPlatform.RFID
             }
             return results;
         }
+
+#endif
     }
 
     // User Bank 内容元素(高校联盟标准)

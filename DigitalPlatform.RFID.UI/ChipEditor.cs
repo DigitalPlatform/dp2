@@ -141,17 +141,40 @@ namespace DigitalPlatform.RFID.UI
             }
             set
             {
+                var old_value = this.label_titile.Visible;
                 if (this.label_titile != null)
                     this.label_titile.Visible = value;
 
-                if (this.propertyGrid1 != null)
+                if (this.propertyGrid1 != null/*
+                    && old_value != value*/)
                 {
                     if (value == false)
                         this.propertyGrid1.Dock = DockStyle.Fill;
                     else
+                    {
                         this.propertyGrid1.Dock = DockStyle.None;
+                        /*
+                        var title_height = this.label_titile.Height;
+                        this.propertyGrid1.Location = new Point(0, title_height);
+                        this.propertyGrid1.Size = new Size(this.ClientSize.Width, this.ClientSize.Height - title_height);
+                        */
+                        ChangeGridSize();
+                    }
                 }
             }
+        }
+
+        void ChangeGridSize()
+        {
+            var title_height = this.label_titile.Height;
+            this.propertyGrid1.Location = new Point(0, title_height);
+            this.propertyGrid1.Size = new Size(this.ClientSize.Width, this.ClientSize.Height - title_height);
+        }
+
+        private void ChipEditor_SizeChanged(object sender, EventArgs e)
+        {
+            // this.propertyGrid1.Size = this.ClientSize;
+            ChangeGridSize();
         }
     }
 }

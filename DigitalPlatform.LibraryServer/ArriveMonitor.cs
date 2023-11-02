@@ -23,6 +23,9 @@ namespace DigitalPlatform.LibraryServer
             : base(app, strName)
         {
             this.Loop = true;
+
+            // testing
+            // this.PerTime = 60 * 1000;    // 1分钟
         }
 
         public override string DefaultName
@@ -49,16 +52,47 @@ namespace DigitalPlatform.LibraryServer
             return dom.OuterXml;
         }
 
+        // 去掉 start 参数字符串中的 activate 参数
+        static string ClearActivate(string start)
+        {
+            if (string.IsNullOrEmpty(start))
+                return "";
+            if (start == "activate")
+                return "";
+
+            if (start.StartsWith("!"))
+                return "";
+
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(start);
+            }
+            catch (Exception ex)
+            {
+                return "";
+            }
+
+            if (dom.DocumentElement == null)
+                return "";
+
+            dom.DocumentElement.RemoveAttribute("activate");
+            return dom.DocumentElement.OuterXml;
+        }
+
         // 解析 开始 参数
         // parameters:
         //      strStart    启动字符串。格式为XML
         //                  如果自动字符串为"!breakpoint"，表示从服务器记忆的断点信息开始
+        //      activate    [out] 是否要激活当前任务？(激活的意思是当前任务还没有到预定的开始时间，就提前让它运行)
         int ParseArriveMonitorStart(string strStart,
             out string strRecordID,
+            out bool activate,  // 2023/10/25
             out string strError)
         {
             strError = "";
             strRecordID = "";
+            activate = false;
 
             int nRet = 0;
 
@@ -67,6 +101,15 @@ namespace DigitalPlatform.LibraryServer
                 // strError = "启动参数不能为空";
                 // return -1;
                 strRecordID = "1";
+                return 0;
+            }
+
+            // 2023/10/25
+            // 兼容粗暴用法
+            if (strStart == "activate")
+            {
+                strRecordID = "1";
+                activate = true;
                 return 0;
             }
 
@@ -118,6 +161,9 @@ namespace DigitalPlatform.LibraryServer
                 strRecordID = DomUtil.GetAttr(nodeLoop, "recordid");
             }
 
+            activate = DomUtil.GetBooleanParam(dom.DocumentElement,
+    "activate",
+    false);
             return 0;
         }
 
@@ -137,10 +183,11 @@ namespace DigitalPlatform.LibraryServer
         // 解析通用启动参数
         // 格式
         /*
-         * <root loop='...'/>
+         * <root loop='...' activate='false'/>
          * loop缺省为true
          * 
          * */
+        // parameters:
         public static int ParseArriveMonitorParam(string strParam,
             out bool bLoop,
             out string strError)
@@ -163,6 +210,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
             // 缺省为true
+            /*
             string strLoop = DomUtil.GetAttr(dom.DocumentElement,
     "loop");
             if (strLoop.ToLower() == "no"
@@ -170,6 +218,10 @@ namespace DigitalPlatform.LibraryServer
                 bLoop = false;
             else
                 bLoop = true;
+            */
+            bLoop = DomUtil.GetBooleanParam(dom.DocumentElement,
+                "loop",
+                true);
 
             return 0;
         }
@@ -212,9 +264,9 @@ namespace DigitalPlatform.LibraryServer
 
             this.Loop = bLoop;
 
-            string strID = "";
             nRet = ParseArriveMonitorStart(startinfo.Start,
-                out strID,
+                out string strID,
+                out bool activate,
                 out strError);
             if (nRet == -1)
             {
@@ -275,6 +327,12 @@ namespace DigitalPlatform.LibraryServer
                 if (nRet == 0)
                 {
 
+                }
+                else if (nRet == 1 && (startinfo.Start == "activate" || activate == true))
+                {
+                    // 2023/10/25
+                    // 虽然 library.xml 中定义了每日定时启动，但被前端要求立即启动
+                    this.AppendResultText("任务 '" + this.Name + "' 被立即启动\r\n");
                 }
                 else if (nRet == 1)
                 {
@@ -412,11 +470,21 @@ namespace DigitalPlatform.LibraryServer
                 if (nRet == -1)
                     goto ERROR1;
 
-            CONTINUE:
+                CONTINUE:
                 continue;
             } // end of for
 
             this.AppendResultText("循环结束。共处理 " + nRecCount.ToString() + " 条记录。\r\n");
+
+            if (bLoop)
+            {
+                // 2023/10/25
+                // 让前端激活的任务，只执行一次。如果配置了每日激活时间，后面要再执行，除非是每日激活时间已到
+                startinfo.Start = ClearActivate(startinfo.Start);
+            }
+            else
+                startinfo.Start = "";
+
 
             {
                 Debug.Assert(this.App != null);
@@ -427,7 +495,6 @@ namespace DigitalPlatform.LibraryServer
                     strLastTime);
                 string strErrorText = (bPerDayStart == true ? "(定时)" : "(不定时)") + strMonitorName + "结束。共处理记录 " + nRecCount.ToString() + " 个。";
                 this.App.WriteErrorLog(strErrorText);
-
             }
 
             return;
@@ -721,6 +788,7 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
+            // 超过保留期限情形的处理
             if (nRet == 1)
             {
                 string strItemBarcode = DomUtil.GetElementText(dom.DocumentElement,
@@ -730,7 +798,7 @@ namespace DigitalPlatform.LibraryServer
                 string strNotifyDate = DomUtil.GetElementText(dom.DocumentElement,
                     "notifyDate");
                 nRet = AddReaderOutOfReservationInfo(
-                    // this.RmsChannels,
+                        // this.RmsChannels,
                         channel,
                         strReaderBarcode,
                         strItemBarcode,

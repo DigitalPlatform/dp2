@@ -729,6 +729,10 @@ out string strError);
     tagInfo,
     new_tag_info);
                 ShelfData.PatronTagList.ClearTagTable(new_tag_info.UID);
+                // 2023/10/31
+                if (tagInfo.Protocol == InventoryInfo.ISO18000P6C)
+                    ShelfData.PatronTagList.ClearTagTable(new_tag_info.UID);
+
                 // 迫使所有标签都重新获取和显示一次
                 // ShelfData.PatronTagList.Clear();
 

@@ -3385,8 +3385,8 @@ out Reader reader);
                             try
                             {
                                 // 高校联盟
-                                // 跳过 2 个 byte
-                                var parse_result = GaoxiaoUtility.ParseTag(Element.FromHexString(info.UID.Substring(4)), null);
+                                var parse_result = GaoxiaoUtility.ParseTag(Element.FromHexString(info.UID), null, "dontCheckUMI");
+                                // GaoxiaoUtility.ParseTag(Element.FromHexString(info.UID.Substring(4)), null);
                                 if (parse_result.Value == -1)
                                     continue;
                                 /*
@@ -3784,7 +3784,7 @@ out Reader reader);
         // return result.Value
         //      -1  出错
         //      0   成功
-        public NormalResult SetEAS(
+        public SetEasResult SetEAS(
     string reader_name,
     string uid,
     uint antenna_id,
@@ -3798,7 +3798,7 @@ out Reader reader);
                 */
             var readers = GetReadersByName(reader_name);
             if (readers.Count == 0)
-                return new NormalResult { Value = -1, ErrorInfo = $"没有找到名为 {reader_name} 的读卡器" };
+                return new SetEasResult { Value = -1, ErrorInfo = $"没有找到名为 {reader_name} 的读卡器" };
 
             // 锁定所有读卡器
             Lock();
@@ -3821,7 +3821,7 @@ out Reader reader);
                             (byte)antenna_id);
                         if (hr != 0)
                         {
-                            return new NormalResult
+                            return new SetEasResult
                             {
                                 Value = -1,
                                 ErrorInfo = $"2 RDR_SetAcessAntenna() error. hr:{hr},reader_name:{reader.Name},antenna_id:{antenna_id}",
@@ -3846,7 +3846,7 @@ out Reader reader);
                             var epc_bank = Element.FromHexString(uid);
                             if (UhfUtility.IsBlankEpcBank(epc_bank) == true)
                             {
-                                return new NormalResult
+                                return new SetEasResult
                                 {
                                     Value = -1,
                                     ErrorInfo = "对空白的 UHF 标签无法修改 EAS"
@@ -3859,7 +3859,7 @@ out Reader reader);
                             if (isGB)
                             {
                                 if (pc_bytes.Length != 2)
-                                    return new NormalResult
+                                    return new SetEasResult
                                     {
                                         Value = -1,
                                         ErrorInfo = "UID 中解析的 PC bytes 数必须为 2"
@@ -3879,14 +3879,29 @@ out Reader reader);
             new_pc_bytes,
             (UInt32)new_pc_bytes.Length);
                                 if (iret != 0)
-                                    return new NormalResult
+                                    return new SetEasResult
                                     {
                                         Value = -1,
                                         ErrorInfo = $"ISO18000p6C_Write() EPC Bank (gb) error. iret:{iret},reader_name:{reader_name},uid:{uid},antenna_id:{antenna_id}",
                                         ErrorCode = GetErrorCode(iret, reader.ReaderHandle)
                                     };
 
-                                return new NormalResult { ErrorInfo = "设置国标 UHF EAS 成功" };
+                                // 更新 epc_bank
+                                List<byte> content = null;
+                                {
+                                    for (int i = 0; i < new_pc_bytes.Length; i++)
+                                    {
+                                        epc_bank[2 + i] = new_pc_bytes[i];
+                                    }
+                                    content = epc_bank.ToList();
+                                    content.RemoveRange(0, 2);
+                                }
+
+                                return new SetEasResult
+                                {
+                                    ChangedUID = UhfUtility.EpcBankHex(content.ToArray()),
+                                    ErrorInfo = "设置国标 UHF EAS 成功"
+                                };
                             }
                             else
                             {
@@ -3908,14 +3923,29 @@ out Reader reader);
                                     payload,
                                     (UInt32)payload.Length);
                                 if (iret != 0)
-                                    return new NormalResult
+                                    return new SetEasResult
                                     {
                                         Value = -1,
                                         ErrorInfo = $"ISO18000p6C_Write() EPC Bank (gaoxiao) error. iret:{iret},reader_name:{reader_name},uid:{uid},antenna_id:{antenna_id}",
                                         ErrorCode = GetErrorCode(iret, reader.ReaderHandle)
                                     };
 
-                                return new NormalResult { ErrorInfo = "设置高校联盟 UHF EAS 成功" };
+                                // 更新 epc_bank
+                                List<byte> content = null;
+                                {
+                                    for (int i = 0; i < payload.Length; i++)
+                                    {
+                                        epc_bank[4 + i] = payload[i];
+                                    }
+                                    content = epc_bank.ToList();
+                                    content.RemoveRange(0, 2);
+                                }
+
+                                return new SetEasResult
+                                {
+                                    ChangedUID = UhfUtility.EpcBankHex(content.ToArray()),
+                                    ErrorInfo = "设置高校联盟 UHF EAS 成功"
+                                };
                             }
                         }
 
@@ -3941,7 +3971,7 @@ out Reader reader);
                             }
                         }
 
-                        return new NormalResult();
+                        return new SetEasResult();
                     }
                     finally
                     {
@@ -3951,9 +3981,18 @@ out Reader reader);
 
                 // 循环中曾经出现过报错
                 if (error_results.Count > 0)
-                    return error_results[0];
+                {
+                    // return error_results[0];
+                    var first_error = error_results[0];
+                    return new SetEasResult
+                    {
+                        Value = first_error.Value,
+                        ErrorCode = first_error.ErrorCode,
+                        ErrorInfo = first_error.ErrorInfo
+                    };
+                }
 
-                return new NormalResult
+                return new SetEasResult
                 {
                     Value = -1,
                     ErrorInfo = $"没有找到 UID 为 {uid} 的标签",
@@ -4034,7 +4073,13 @@ out Reader reader);
             debugInfo.AppendLine($"new_tag_info={new_tag_info.ToString()}");
             WriteDebugLog(debugInfo.ToString());
 
-            if (old_tag_info.Protocol != InventoryInfo.ISO18000P6C)
+            if (old_tag_info.Protocol == InventoryInfo.ISO18000P6C)
+            {
+                // 2023/11/2
+                // 确保 new_tag_info.Bytes 足够覆盖原先标签 User Bank 内容中的全部非 0 部分
+                new_tag_info.Bytes = UhfUtility.OverwriteBank(old_tag_info.Bytes, new_tag_info.Bytes, true);
+            }
+            else
             {
                 // 要确保 new_tag_info.Bytes 包含全部 byte，避免以前标签的内容在保存后出现残留
                 EnsureBytes(new_tag_info);

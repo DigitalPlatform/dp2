@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.86.*")]
-[assembly: AssemblyFileVersion("3.86.0.0")]
+[assembly: AssemblyVersion("3.88.*")]
+[assembly: AssemblyFileVersion("3.88.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -180,3 +180,6 @@ using System.Runtime.InteropServices;
 //              2) dateOfBirth expireDate 这两个字段如果不是 Excel 的事件类型列，会弹出对话框询问时间格式;
 //              3) 种册窗工具条上的几个按钮的快捷键会显示在 button tips 小窗口中。
 // 3.86 2023/9/16 读者窗覆盖保存读者记录的时候，增加了检查读者姓名是否在保存前后发生变化的功能。如果检测到读者姓名发生了变化，为了预防操作者误用覆盖保存功能(操作者的意图本来是希望修改后追加保存一条新的读者记录)，会弹出警告对话框
+//                  (2023/9/25)在 Windows 10 较旧的版本上册登记对话框的右侧 RFID 显示区，原本左右两个 RFID 控件，右边的被推到窗口显示范围以外的地方。这个问题已经修正
+// 3.87 2023/10/10 读者窗写入 RFID 读者卡的对话框中，两个 RFID 内容控件的大小不能跟随窗口大小自动适应。此 bug 已经修正
+// 3.88 2023/11/2 增加 UHF 标签相关功能。快捷出纳窗、册登记对话框、RFID 工具窗、批修改册窗都有涉及

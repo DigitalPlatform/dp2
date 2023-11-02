@@ -54,6 +54,7 @@
     <Compile Include="TestChip.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestChip2.cs" />
+    <Compile Include="TestCrc16.cs" />
     <Compile Include="TestDriver.cs" />
     <Compile Include="TestGaoxiao.cs" />
     <Compile Include="TestGaoxiao1.cs" />

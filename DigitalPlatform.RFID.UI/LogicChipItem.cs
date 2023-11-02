@@ -3,8 +3,13 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+
+using DigitalPlatform;
+using DigitalPlatform.Text;
 
 namespace DigitalPlatform.RFID.UI
 {
@@ -706,22 +711,30 @@ namespace DigitalPlatform.RFID.UI
 
         // 构造 LogicChipItem
         // 除了基本数据外，也包括 DSFID EAS AFI
+        // 注: 可以处理 HF 和 UHF 标签
         public static LogicChipItem FromTagInfo(TagInfo tag_info)
         {
-            var chip = LogicChipItem.From(tag_info.Bytes,
-    (int)tag_info.BlockSize,
-    tag_info.LockStatus);
+            if (tag_info.Protocol == InventoryInfo.ISO18000P6C)
+            {
+                return FromUhfTagInfo(tag_info,
+    out string uhfProtocol);
+            }
+            else
+            {
+                var chip = LogicChipItem.From(tag_info.Bytes,
+        (int)tag_info.BlockSize,
+        tag_info.LockStatus);
 
-            chip.SetSystemValues(
-                tag_info.Bytes,
-                tag_info.LockStatus,
-                (int)tag_info.MaxBlockCount,
-                (int)tag_info.BlockSize,
-                tag_info.UID,
-                tag_info.DSFID,
-                tag_info.AFI,
-                tag_info.EAS,
-                tag_info.AntennaID);
+                chip.SetSystemValues(
+                    tag_info.Bytes,
+                    tag_info.LockStatus,
+                    (int)tag_info.MaxBlockCount,
+                    (int)tag_info.BlockSize,
+                    tag_info.UID,
+                    tag_info.DSFID,
+                    tag_info.AFI,
+                    tag_info.EAS,
+                    tag_info.AntennaID);
 #if NO
             chip.DSFID = tag_info.DSFID;
             chip.AFI = tag_info.AFI;
@@ -730,8 +743,125 @@ namespace DigitalPlatform.RFID.UI
             // 2019/1/25
             chip.SetChanged(false);
 #endif
-            return chip;
+                return chip;
+            }
         }
+
+        public static LogicChipItem FromUhfTagInfo(TagInfo taginfo,
+            out string uhfProtocol)
+        {
+            var epc_bank = Element.FromHexString(taginfo.UID);
+
+            LogicChip chip = null;
+            string pii = "";
+            string oi = "";
+            uhfProtocol = null;
+            if (UhfUtility.IsBlankTag(epc_bank, taginfo.Bytes) == true)
+            {
+                // 空白标签
+                pii = null;
+            }
+            else
+            {
+                var isGB = UhfUtility.IsISO285604Format(epc_bank, taginfo.Bytes);
+                if (isGB)
+                {
+                    // *** 国标 UHF
+                    var parse_result = UhfUtility.ParseTag(epc_bank,
+        taginfo.Bytes,
+        4);
+                    if (parse_result.Value == -1)
+                        throw new Exception(parse_result.ErrorInfo);
+                    chip = parse_result.LogicChip;
+                    taginfo.EAS = false;    // TODO
+                    uhfProtocol = "gb";
+                    pii = GetPiiPart(parse_result.UII);
+                    oi = GetOiPart(parse_result.UII, false);
+                }
+                else
+                {
+                    // *** 高校联盟 UHF
+                    var parse_result = GaoxiaoUtility.ParseTag(
+        epc_bank,
+        taginfo.Bytes,
+        "convertValueToGB");
+                    if (parse_result.Value == -1)
+                        throw new Exception(parse_result.ErrorInfo);
+                    chip = parse_result.LogicChip;
+                    taginfo.EAS = !parse_result.EpcInfo.Lending;
+                    uhfProtocol = "gxlm";
+                    pii = GetPiiPart(parse_result.EpcInfo.PII);
+                    oi = GetOiPart(parse_result.EpcInfo.PII, false);
+                }
+            }
+
+            var result = FromElements(chip);
+            result.SetElement(ElementOID.PII, pii, false);
+            if (string.IsNullOrEmpty(oi) == false)
+                result.SetElement(ElementOID.OI, oi, false);
+
+            result.SetSystemValues(
+    taginfo.Bytes,
+    taginfo.LockStatus,
+    0, // (int)taginfo.MaxBlockCount,
+    0, // (int)taginfo.BlockSize,
+    taginfo.UID,
+    taginfo.DSFID,
+    taginfo.AFI,
+    taginfo.EAS,
+    taginfo.AntennaID);
+
+            if (chip != null)
+            {
+                chip.Protocol = InventoryInfo.ISO18000P6C;
+                if (string.IsNullOrEmpty(uhfProtocol))
+                    chip.Protocol += ":" + uhfProtocol;
+            }
+            return result;
+        }
+
+        // 根据 chip 的元素构造一个新的 LogicChipItem 对象
+        static LogicChipItem FromElements(LogicChip chip)
+        {
+            LogicChipItem item = new LogicChipItem();
+            if (chip != null)
+                item.Elements.AddRange(chip.Elements);
+            return item;
+        }
+
+        static string BuildUii(string pii, string oi, string aoi)
+        {
+            if (string.IsNullOrEmpty(oi) && string.IsNullOrEmpty(aoi))
+                return pii;
+            if (string.IsNullOrEmpty(oi) == false)
+                return oi + "." + pii;
+            if (string.IsNullOrEmpty(aoi) == false)
+                return aoi + "." + pii;
+            return pii;
+        }
+
+        // 获得 oi.pii 的 oi 部分
+        public static string GetOiPart(string oi_pii, bool return_null)
+        {
+            if (oi_pii.IndexOf(".") == -1)
+            {
+                if (return_null)
+                    return null;
+                return "";
+            }
+            var parts = StringUtil.ParseTwoPart(oi_pii, ".");
+            return parts[0];
+        }
+
+        // 获得 oi.pii 的 pii 部分
+        public static string GetPiiPart(string oi_pii)
+        {
+            if (oi_pii.IndexOf(".") == -1)
+                return oi_pii;
+            var parts = StringUtil.ParseTwoPart(oi_pii, ".");
+            return parts[1];
+        }
+
 
         public static TagInfo ToTagInfo(TagInfo existing,
             LogicChipItem chip)
@@ -812,6 +942,77 @@ namespace DigitalPlatform.RFID.UI
         }
 
         public string GetDescription()
+        {
+            if (this.Protocol == InventoryInfo.ISO15693)
+                return GetHfDescription();
+            return GetUhfDescription();
+        }
+
+        // 2023/10/26
+        // UHF 标签的 Description
+        public string GetUhfDescription()
+        {
+            StringBuilder text = new StringBuilder();
+            text.Append($"UID:\t{UID}\r\n");
+            text.Append($"AFI:\t{Element.GetHexString(AFI)}\r\n");
+            text.Append($"DSFID:\t{Element.GetHexString(DSFID)}\r\n");
+            text.Append($"EAS:\t{EAS}\r\n");
+            //text.Append($"MaxBlockCount:\t{MaxBlockCount}\r\n");
+            //text.Append($"BlockSize:\t{BlockSize}\r\n");
+
+            if (this.OriginBytes != null)
+            {
+                text.Append($"\r\n初始 User Bank 字节内容:\r\n{ByteArray.GetHexTimeStampString(this.OriginBytes)}\r\n");
+            }
+
+            text.Append($"\r\n锁定位置:\r\n{this.OriginLockStatus}\r\n\r\n");
+
+            /*
+            if (this.OriginBytes != null)
+            {
+                text.Append($"初始 User Bank 元素:(共 {temp_chip.Elements.Count} 个)\r\n");
+                int i = 0;
+                foreach (Element element in temp_chip.Elements)
+                {
+                    text.Append($"{++i}) {element.ToString()}\r\n");
+                }
+            }
+            */
+
+            {
+                text.Append($"当前 Chip 元素:(共 {this.Elements.Count} 个)\r\n");
+                int i = 0;
+                foreach (Element element in this.Elements)
+                {
+                    text.Append($"{++i}) {element.ToString()}\r\n");
+                }
+            }
+
+            //
+            try
+            {
+
+                bool eas = true;    // TODO
+                bool build_user_bank = true;    // TODO
+                var result = GaoxiaoUtility.BuildTag(this, build_user_bank, eas);
+                if (result.Value == -1)
+                    throw new Exception(result.ErrorInfo);
+
+                string epc = UhfUtility.EpcBankHex(result.EpcBank);    //  this.UID.Substring(0, 4) + Element.GetHexString(result.EpcBank);
+                text.Append($"\r\n尝试按照 Chip 构造 EPC Bank 字节内容:\r\n{epc}\r\n");
+
+                var bytes = result.UserBank;
+                text.Append($"\r\n尝试按照 Chip 构造 User Bank 字节内容:\r\n{ByteArray.GetHexTimeStampString(bytes)}\r\n");
+            }
+            catch (Exception ex)
+            {
+                text.Append($"\r\n当前字节内容:\r\n构造 Bytes 过程出现异常: {ex.Message}\r\n");
+            }
+
+            return text.ToString();
+        }
+
+        public string GetHfDescription()
         {
             StringBuilder text = new StringBuilder();
             text.Append($"UID:\t{UID}\r\n");

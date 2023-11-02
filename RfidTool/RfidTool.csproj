@@ -15,7 +15,7 @@
     <IsWebBootstrapper>true</IsWebBootstrapper>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <PublishUrl>c:\publish\rfidtool\v1\</PublishUrl>
+    <PublishUrl>c:\publish\rfidtool\v1_dev\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Web</InstallFrom>
     <UpdateEnabled>true</UpdateEnabled>
@@ -25,14 +25,13 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <InstallUrl>http://dp2003.com/rfidtool/v1/</InstallUrl>
-    <UpdateUrl>http://dp2003.com/rfidtool/v1/</UpdateUrl>
+    <InstallUrl>http://dp2003.com/rfidtool/v1_dev/</InstallUrl>
     <ProductName>dp2-RFID工具箱</ProductName>
     <PublisherName>DigitalPlatform</PublisherName>
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>62</ApplicationRevision>
+    <ApplicationRevision>66</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -242,6 +241,10 @@
     <ProjectReference Include="..\DigitalPlatform.LibraryServer.Common\DigitalPlatform.LibraryServer.Common.csproj">
       <Project>{2f085431-027a-4ddf-9b3d-83219e629fa1}</Project>
       <Name>DigitalPlatform.LibraryServer.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.RFID.UI\DigitalPlatform.RFID.UI.csproj">
+      <Project>{fe5b6586-85f4-4850-a66d-5607ecb08f9b}</Project>
+      <Name>DigitalPlatform.RFID.UI</Name>
     </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.RFID\DigitalPlatform.RFID.csproj">
       <Project>{9d26d2ad-eabb-4c32-8706-fb9e323faf01}</Project>

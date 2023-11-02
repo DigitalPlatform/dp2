@@ -1049,6 +1049,28 @@ bool enable)
                 "");
         }
 
+        // 兼容原先的 API
+        public NormalResult SetEAS(
+string reader_name,
+string tag_name,
+uint antenna_id,
+bool enable,
+string style)
+        {
+            var result = SetEAS1(
+reader_name,
+tag_name,
+antenna_id,
+enable,
+style);
+            return new NormalResult
+            {
+                Value = result.Value,
+                ErrorCode = result.ErrorCode,
+                ErrorInfo = result.ErrorInfo
+            };
+        }
+
         // parameters:
         //      reader_name 读卡器名字。也可以为 "*"，表示所有读卡器
         //      tag_name    标签名字。为 pii:xxxx 或者 uid:xxxx 形态。若没有冒号，则默认为是 UID
@@ -1057,7 +1079,7 @@ bool enable)
         //      -1  出错
         //      0   没有找到指定的标签
         //      1   找到，并成功修改 EAS
-        public NormalResult SetEAS(
+        public SetEasResult SetEAS1(
 string reader_name,
 string tag_name,
 uint antenna_id,
@@ -1078,19 +1100,19 @@ string style)
                     FindTagResult result = null;
                     if (Program.MainForm.InSimuReader)
                         result = _simuReader.FindTagByPII(
-    reader_name,
-    InventoryInfo.ISO15693, // 只有 ISO15693 才有 EAS (2019/8/28)
-    antenna_id.ToString(),
-    parts[1]);
+                            reader_name,
+                            InventoryInfo.ISO15693 + "," + InventoryInfo.ISO18000P6C, // 只有 ISO15693 才有 EAS (2019/8/28) UHF 也有 EAS (2023/11/1)
+                            antenna_id.ToString(),
+                            parts[1]);
                     else
                         result = Program.Rfid.FindTagByPII(
                             reader_name,
-                            InventoryInfo.ISO15693, // 只有 ISO15693 才有 EAS (2019/8/28)
+                            InventoryInfo.ISO15693 + "," + InventoryInfo.ISO18000P6C, // 只有 ISO15693 才有 EAS (2019/8/28) UHF 也有 EAS (2023/11/1)
                             antenna_id.ToString(),
                             parts[1]);
 
                     if (result.Value != 1)
-                        return new NormalResult
+                        return new SetEasResult
                         {
                             Value = result.Value,
                             ErrorInfo = result.ErrorInfo,
@@ -1102,7 +1124,7 @@ string style)
                 else if (parts[0] == "uid" || string.IsNullOrEmpty(parts[0]))
                     uid = parts[1];
                 else
-                    return new NormalResult
+                    return new SetEasResult
                     {
                         Value = -1,
                         ErrorInfo = $"未知的 tag_name 前缀 '{parts[0]}'",
@@ -1115,7 +1137,7 @@ string style)
                     // return result.Value
                     //      -1  出错
                     //      0   成功
-                    NormalResult result = null;
+                    SetEasResult result = null;
                     if (Program.MainForm.InSimuReader)
                         result = _simuReader.SetEAS(
     reader_name,
@@ -1132,7 +1154,11 @@ string style)
         style);
                     if (result.Value == -1)
                         return result;
-                    return new NormalResult { Value = 1 };
+                    return new SetEasResult
+                    {
+                        Value = 1,
+                        ChangedUID = result.ChangedUID
+                    };
                 }
             }
             finally

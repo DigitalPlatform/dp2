@@ -568,10 +568,31 @@ false);
     "rfidCenterUrl",
     "");  // 常用值 "ipc://RfidChannel/RfidServer"
 
+            // 2023/10/27
+            // 超高频标签数据格式
+            this.comboBox_uhf_dataFormat.Text =
+                ap.GetString("uhf",
+    "dataFormat",
+    "国标格式");
+            // 超高频标签是否要写入 User Bank 内容
+            this.checkBox_uhf_writeUserBank.Checked =
+                ap.GetBoolean("uhf",
+    "writeUserBank",
+    true);
+            // 超高频标签当遇到不同内容格式覆盖的时候是否警告?
+            this.checkBox_uhf_warningWhenDataFormatMismatch.Checked = 
+                ap.GetBoolean("uhf",
+    "warningWhenDataFormatMismatch",
+    true);
+
             if (StringUtil.IsInList("client_disablerfid", Program.MainForm._currentUserRights))
             {
                 this.textBox_cardReader_rfidCenterUrl.Enabled = false;
                 this.button_cardReader_setRfidUrlDefaultValue.Enabled = false;
+
+                this.comboBox_uhf_dataFormat.Enabled = false;
+                this.checkBox_uhf_writeUserBank.Enabled = false;
+                this.checkBox_uhf_warningWhenDataFormatMismatch.Enabled = false;
             }
 
             // *** 指纹
@@ -1263,6 +1284,21 @@ ap.GetString(
                     "rfidCenterUrl",
                     this.textBox_cardReader_rfidCenterUrl.Text);  // 常用值 "ipc://RfidChannel/RfidServer"
 
+                // 2023/10/27
+                // 超高频标签数据格式
+                ap.SetString("uhf",
+        "dataFormat",
+        this.comboBox_uhf_dataFormat.Text);
+
+                // 超高频标签是否要写入 User Bank 内容
+                ap.SetBoolean("uhf",
+        "writeUserBank",
+        this.checkBox_uhf_writeUserBank.Checked);
+
+                // 超高频标签当遇到不同内容格式覆盖的时候是否警告?
+                ap.GetBoolean("uhf",
+        "warningWhenDataFormatMismatch",
+        this.checkBox_uhf_warningWhenDataFormatMismatch.Checked);
 
                 // ** 指纹
                 // 指纹阅读器URL

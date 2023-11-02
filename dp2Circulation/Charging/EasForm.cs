@@ -177,7 +177,7 @@ namespace dp2Circulation.Charging
         }
 
         // 设置 EAS 状态。如果失败，会在 ListView 里面自动添加一行，以备后面用户在读卡器上放标签时候自动修正
-        internal NormalResult SetEAS(
+        internal SetEasResult SetEAS(
             object task,
             string reader_name,
             string tag_name,
@@ -192,7 +192,7 @@ namespace dp2Circulation.Charging
             else if (parts[0] == "uid" || string.IsNullOrEmpty(parts[0]))
                 uid = parts[1];
             else
-                return new NormalResult
+                return new SetEasResult
                 {
                     Value = -1,
                     ErrorInfo = $"未知的 tag_name 前缀 '{parts[0]}'",
@@ -224,10 +224,15 @@ namespace dp2Circulation.Charging
                     // 加入一个新行
                     AddLine(uid, pii, task);
                 }));
-                return antenna_result;
+                return new SetEasResult
+                {
+                    Value = antenna_result.Value,
+                    ErrorCode = antenna_result.ErrorCode,
+                    ErrorInfo = antenna_result.ErrorInfo
+                };
             }
 
-            NormalResult result = null;
+            SetEasResult result = null;
             for (int i = 0; i < 2; i++)
             {
                 result = RfidManager.SetEAS(reader_name,
@@ -237,6 +242,17 @@ namespace dp2Circulation.Charging
                 if (result.Value == 1)
                     break;
             }
+            RfidTagList.ClearTagTable(uid);
+            // 2023/10/30
+            if (string.IsNullOrEmpty(result.ChangedUID) == false)
+            {
+                // 修改 _piiTable 中的有关条目
+                if (string.IsNullOrEmpty(uid) == false)
+                    UpdateUID(uid, result.ChangedUID);
+                uid = result.ChangedUID;
+            }
+            // 2023/10/30
+            // 再次清除缓存
             RfidTagList.ClearTagTable(uid);
             TaskList.FillTagList();
 
@@ -277,7 +293,7 @@ namespace dp2Circulation.Charging
             OnItemChanged();
 
             // 自动填充书目摘要列
-            Task.Run(() =>
+            _ = Task.Run(() =>
             {
                 FillBiblioSummary(new List<ListViewItem>() { item });
             });
@@ -432,7 +448,10 @@ out string strError);
             if (result.Value == -1)
                 this.ShowMessage($"尝试自动修正册 '{pii}' EAS 时出错 '{result.ErrorInfo}'", "red", true);
             else if (result.Value == 1)
+            {
                 this.ShowMessage($"册 '{pii}' EAS 修正成功", "green", true);
+                // TODO: 注意 UHF 标签 EAS 修正以后，EPC(=TagInfo.UID) 会发生变化
+            }
 
             return result;
         }
@@ -486,17 +505,33 @@ out string strError);
 
             // 检查册记录外借状态和 EAS 状态是否符合
             // 检测 EAS 是否正确
-            NormalResult seteas_result = new NormalResult { Value = 1 };
-
+            SetEasResult seteas_result = new SetEasResult { Value = 1 };
             if (nRet == 1 && tag_info.EAS == true)
             {
-                seteas_result = RfidManager.SetEAS("*", "uid:" + tag_info.UID, tag_info.AntennaID, false);
+                seteas_result = RfidManager.SetEAS("*",
+                    "uid:" + tag_info.UID,
+                    tag_info.AntennaID,
+                    false);
+                if (string.IsNullOrEmpty(seteas_result.ChangedUID) == false)
+                {
+                    UpdateUID(tag_info.UID, seteas_result.ChangedUID);
+                    tag_info.UID = seteas_result.ChangedUID;
+                }
                 RfidTagList.SetEasData(tag_info.UID, false);
             }
             else if (nRet == 0 && tag_info.EAS == false)
             {
-                seteas_result = RfidManager.SetEAS("*", "uid:" + tag_info.UID, tag_info.AntennaID, true);
-                RfidTagList.SetEasData(tag_info.UID, true);
+                seteas_result = RfidManager.SetEAS("*",
+                    "uid:" + tag_info.UID,
+                    tag_info.AntennaID,
+                    true);
+                if (string.IsNullOrEmpty(seteas_result.ChangedUID) == false)
+                {
+                    UpdateUID(tag_info.UID, seteas_result.ChangedUID);
+                    tag_info.UID = seteas_result.ChangedUID;
+                }
+                RfidTagList.SetEasData(tag_info.UID,
+                    true);
             }
             else
             {
@@ -516,6 +551,10 @@ out string strError);
                     ErrorInfo = seteas_result.ErrorInfo
                 };
             }
+
+            // 2023/10/30
+            // 注意 UHF 标签的 uid 会发生变化
+            uid = tag_info.UID;
 
             ItemInfo info = (ItemInfo)item.Tag;
 
@@ -627,6 +666,24 @@ out string strError);
 
         // PII --> UID 对照表
         Hashtable _piiTable = new Hashtable();
+
+        // 2023/10/30
+        // 修改 _piiTable 中的 UID。假定 PII 并没有变化，只是 UID 变化了(UHF标签有这个特点，修改 EAS 以后 UID 通常会发生变化)
+        public void UpdateUID(string old_uid, string new_uid)
+        {
+            lock (_piiTable.SyncRoot)
+            {
+                foreach (var pii in _piiTable.Keys)
+                {
+                    string uid = _piiTable[pii] as string;
+                    if (uid == old_uid)
+                    {
+                        _piiTable[pii] = new_uid;
+                        return;
+                    }
+                }
+            }
+        }
 
         // 保存对照关系
         public void SetUID(string pii, string uid)

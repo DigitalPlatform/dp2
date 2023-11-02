@@ -2305,6 +2305,16 @@ namespace dp2Circulation
             int nRet = 0;
 
             List<string> types = StringUtil.SplitList(strQufenhaoTypes);
+            
+            // 2023/10/16
+            // 如果 types 中同时含有 GCAT 和 Cutter，GCAT 应该放到 Cutter 前面处理
+            if (types.Count > 1 
+                && types.IndexOf("GCAT") != -1
+                && types[0] != "GCAT")
+            {
+                types.Remove("GCAT");
+                types.Insert(0, "GCAT");
+            }
 
             List<AuthorLevel> authors = new List<AuthorLevel>();
 
@@ -2822,6 +2832,7 @@ namespace dp2Circulation
                     fLevel = 0;
                     return 0;
                     FOUND:
+                    // TODO: 检查内容中是否有 "(美)"这样的开头部分，如果有，则报错
                     Debug.Assert(results.Count > 0, "");
                     strAuthor = results[0];
                 }

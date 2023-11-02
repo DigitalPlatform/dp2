@@ -31,7 +31,6 @@
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
     <InstallUrl>http://dp2003.com/dp2ssl/v1/</InstallUrl>
-    <UpdateUrl>http://dp2003.com/dp2ssl/v1/</UpdateUrl>
     <ProductName>dp2SSL-自助借还</ProductName>
     <PublisherName>DigitalPlatform</PublisherName>
     <SuiteName>dp2 V3</SuiteName>

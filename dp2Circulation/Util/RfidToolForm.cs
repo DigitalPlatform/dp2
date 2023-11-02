@@ -64,6 +64,8 @@ namespace dp2Circulation
             }
         }
 
+        // RFID 协议过滤
+        // 如果为 null，表示不过滤，任意协议都显示出来
         public string ProtocolFilter = null;    //  InventoryInfo.ISO15693 + "," + InventoryInfo.ISO14443A;
 
         public string MessageText { get; set; }
@@ -321,10 +323,18 @@ this.toolStripButton_autoFixEas.Checked);
                                 tag.UID);
                             if (item == null)
                             {
+                                // 2023/10/25
+                                string protocol = tag.Protocol;
+                                string uhfProtocol = RfidTagList.GetUhfProtocol(tag.TagInfo);
+                                if (uhfProtocol == "gb")
+                                    protocol += ":国标";
+                                else if (uhfProtocol == "gxlm")
+                                    protocol += ":高校联盟";
+
                                 item = new ListViewItem();
                                 ListViewUtil.ChangeItemText(item, COLUMN_UID, tag.UID);
                                 ListViewUtil.ChangeItemText(item, COLUMN_READERNAME, tag.ReaderName);
-                                ListViewUtil.ChangeItemText(item, COLUMN_PROTOCOL, tag.Protocol);
+                                ListViewUtil.ChangeItemText(item, COLUMN_PROTOCOL, /*tag.Protocol*/protocol);
                                 ListViewUtil.ChangeItemText(item, COLUMN_ANTENNA, tag.AntennaID.ToString());
                                 item.Tag = new ItemInfo { OneTag = tag };
                                 this.listView_tags.Items.Add(item);
@@ -977,7 +987,13 @@ this.toolStripButton_autoFixEas.Checked);
 
                     this.chipEditor1.LogicChipItem = item_info.LogicChipItem;
 
-                    if (string.IsNullOrEmpty(item_info.Xml) == false)
+                    if (string.IsNullOrEmpty(item_info.XmlErrorInfo) == false)
+                    {
+                        BookItem book_item = new BookItem();
+                        book_item.Barcode = "error:" + item_info.XmlErrorInfo;
+                        this.propertyGrid_record.SelectedObject = book_item;
+                    }
+                    else if (string.IsNullOrEmpty(item_info.Xml) == false)
                     {
                         BookItem book_item = new BookItem();
                         int nRet = book_item.SetData("",
@@ -987,9 +1003,10 @@ this.toolStripButton_autoFixEas.Checked);
                         if (nRet == -1)
                         {
                             // 如何报错?
+                            book_item.Barcode = "error:" + strError;
                         }
-                        else
-                            this.propertyGrid_record.SelectedObject = book_item;
+
+                        this.propertyGrid_record.SelectedObject = book_item;
                     }
                     else
                         this.propertyGrid_record.SelectedObject = null;
@@ -1019,11 +1036,11 @@ this.toolStripButton_autoFixEas.Checked);
             {
                 // TODO: 还要通过 typeOfUsage 判断是否读者证卡，如果是，要用 GetReaderInfo() 获得读者记录
                 var items = (List<ListViewItem>)this.Invoke(new Func<List<ListViewItem>>(() =>
-            {
-                List<ListViewItem> results = new List<ListViewItem>();
-                results.AddRange(this.listView_tags.Items.Cast<ListViewItem>());
-                return results;
-            }));
+                {
+                    List<ListViewItem> results = new List<ListViewItem>();
+                    results.AddRange(this.listView_tags.Items.Cast<ListViewItem>());
+                    return results;
+                }));
 
                 foreach (ListViewItem item in items)
                 {
@@ -1036,14 +1053,40 @@ this.toolStripButton_autoFixEas.Checked);
                     if (string.IsNullOrEmpty(item_info.Xml) == false)
                         continue;
 
+                    // 2023/10/25
+                    // 先前已经报错了。避免重复请求 dp2library
+                    // TODO: 可以为 ListViewItem 实现一个上下文菜单命令，刷新和重新装载 XML
+                    if (string.IsNullOrEmpty(item_info.XmlErrorInfo) == false)
+                        continue;
+
                     var tag_info = item_info.OneTag.TagInfo;
                     if (tag_info == null)
                         continue;
-                    // Exception:
-                    //      可能会抛出异常 ArgumentException TagDataException
-                    LogicChip chip = LogicChip.From(tag_info.Bytes,
-                        (int)tag_info.BlockSize);
-                    string pii = chip.FindElement(ElementOID.PII)?.Text;
+
+                    string pii = "";
+                    string oi = "";
+                    if (tag_info.Protocol == InventoryInfo.ISO18000P6C)
+                    {
+                        var chip_info = RfidTagList.GetUhfChipInfo(tag_info);
+                        pii = chip_info.PII;
+                        oi = chip_info.OI;
+                        // TODO: OI?
+                    }
+                    else
+                    {
+                        // *** ISO15693 HF
+
+                        // Exception:
+                        //      可能会抛出异常 ArgumentException TagDataException
+                        var chip = LogicChip.From(tag_info.Bytes,
+                            (int)tag_info.BlockSize);
+                        // string pii = chip.FindElement(ElementOID.PII)?.Text;
+                        pii = chip.FindElement(ElementOID.PII)?.Text;
+                        oi = chip.FindElement(ElementOID.OI)?.Text;
+                        if (string.IsNullOrEmpty(oi))
+                            oi = chip.FindElement(ElementOID.AOI)?.Text;
+                    }
+
                     if (string.IsNullOrEmpty(pii))
                         continue;
 
@@ -1056,7 +1099,7 @@ this.toolStripButton_autoFixEas.Checked);
                         token.ThrowIfCancellationRequested();
 
                         long lRet = channel.GetItemInfo(looping.Progress,
-                            pii,
+                            BuildUii(pii, oi, null),
                             "xml",
                             out string xml,
                             "",
@@ -1065,11 +1108,22 @@ this.toolStripButton_autoFixEas.Checked);
 
                         if (lRet == -1)
                         {
+                            item_info.Xml = xml;
                             // TODO: 给 item 设置出错状态
+                            // 注意要防止 “馆外机构”等报错，导致这里被反复执行 API 请求，让 server 非常繁忙
+                            item_info.XmlErrorInfo = strError;
                             continue;
                         }
-
-                        item_info.Xml = xml;
+                        else if (lRet == 0)
+                        {
+                            item_info.Xml = xml;
+                            item_info.XmlErrorInfo = string.IsNullOrEmpty(strError) ? "not found" : strError;
+                        }
+                        else
+                        {
+                            item_info.Xml = xml;
+                            item_info.XmlErrorInfo = null;
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -1084,6 +1138,122 @@ this.toolStripButton_autoFixEas.Checked);
                     }
                 }
             }
+        }
+
+#if REMOVED
+
+        public class ChipInfo
+        {
+            public LogicChip Chip { get; set; }
+
+            public string OI { get; set; }
+
+            public string PII { get; set; }
+
+            public string UhfProtocol { get; set; }
+        }
+
+        static ChipInfo GetHfChipInfo(TagInfo tag_info)
+        {
+            ChipInfo result = new ChipInfo();
+
+            // Exception:
+            //      可能会抛出异常 ArgumentException TagDataException
+            result.Chip = LogicChip.From(tag_info.Bytes,
+                (int)tag_info.BlockSize);
+            // string pii = chip.FindElement(ElementOID.PII)?.Text;
+            result.PII = GetPIICaption(result.Chip.FindElement(ElementOID.PII)?.Text);
+
+            return result;
+        }
+
+        static ChipInfo GetUhfChipInfo(TagInfo taginfo)
+        {
+            ChipInfo result = new ChipInfo();
+
+            var epc_bank = Element.FromHexString(taginfo.UID);
+
+            if (UhfUtility.IsBlankTag(epc_bank, taginfo.Bytes) == true)
+            {
+                // 空白标签
+                result.PII = GetPIICaption(null);
+            }
+            else
+            {
+                var isGB = UhfUtility.IsISO285604Format(epc_bank, taginfo.Bytes);
+                if (isGB)
+                {
+                    // *** 国标 UHF
+                    var parse_result = UhfUtility.ParseTag(epc_bank,
+        taginfo.Bytes,
+        4);
+                    if (parse_result.Value == -1)
+                        throw new Exception(parse_result.ErrorInfo);
+                    result.Chip = parse_result.LogicChip;
+                    taginfo.EAS = false;    // TODO
+                    result.UhfProtocol = "gb";
+                    result.PII = GetPIICaption(GetPiiPart(parse_result.UII));
+                    result.OI = GetOiPart(parse_result.UII, false);
+                }
+                else
+                {
+                    // *** 高校联盟 UHF
+                    var parse_result = GaoxiaoUtility.ParseTag(
+        epc_bank,
+        taginfo.Bytes);
+                    if (parse_result.Value == -1)
+                        throw new Exception(parse_result.ErrorInfo);
+                    result.Chip = parse_result.LogicChip;
+                    taginfo.EAS = !parse_result.EpcInfo.Lending;
+                    result.UhfProtocol = "gxlm";
+                    result.PII = GetPIICaption(GetPiiPart(parse_result.EpcInfo.PII));
+                    result.OI = GetOiPart(parse_result.EpcInfo.PII, false);
+                }
+            }
+
+            return result;
+        }
+
+        // 获得 oi.pii 的 oi 部分
+        public static string GetOiPart(string oi_pii, bool return_null)
+        {
+            if (oi_pii.IndexOf(".") == -1)
+            {
+                if (return_null)
+                    return null;
+                return "";
+            }
+            var parts = StringUtil.ParseTwoPart(oi_pii, ".");
+            return parts[0];
+        }
+
+        // 获得 oi.pii 的 pii 部分
+        public static string GetPiiPart(string oi_pii)
+        {
+            if (oi_pii.IndexOf(".") == -1)
+                return oi_pii;
+            var parts = StringUtil.ParseTwoPart(oi_pii, ".");
+            return parts[1];
+        }
+
+        public static string GetPIICaption(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return "(空)";
+            return text;
+        }
+        
+#endif
+
+        static string BuildUii(string pii, string oi, string aoi)
+        {
+            if (string.IsNullOrEmpty(oi) && string.IsNullOrEmpty(aoi))
+                return pii;
+            if (string.IsNullOrEmpty(oi) == false)
+                return oi + "." + pii;
+            if (string.IsNullOrEmpty(aoi) == false)
+                return aoi + "." + pii;
+            return pii;
         }
 
         // 自动修复 EAS
@@ -1114,11 +1284,24 @@ this.toolStripButton_autoFixEas.Checked);
                     var tag_info = item_info.OneTag.TagInfo;
                     if (tag_info == null)
                         goto CONTINUE;
-                    // Exception:
-                    //      可能会抛出异常 ArgumentException TagDataException
-                    LogicChip chip = LogicChip.From(tag_info.Bytes,
+
+                    string pii = "";
+                    if (tag_info.Protocol == InventoryInfo.ISO18000P6C)
+                    {
+                        var chip_info = RfidTagList.GetUhfChipInfo(tag_info);
+                        pii = chip_info.PII;
+                        // oi = chip_info.OI;
+                        // TODO: OI?
+                    }
+                    else
+                    {
+                        // Exception:
+                        //      可能会抛出异常 ArgumentException TagDataException
+                        LogicChip chip = LogicChip.From(tag_info.Bytes,
                         (int)tag_info.BlockSize);
-                    string pii = chip.FindElement(ElementOID.PII)?.Text;
+                        pii = chip.FindElement(ElementOID.PII)?.Text;
+                    }
+
                     if (info == null
                         || (info.Prefix == "pii" && pii == info.Text)
                         || (info.Prefix == "uid" && uid == info.Text))
@@ -1139,7 +1322,7 @@ this.toolStripButton_autoFixEas.Checked);
                         // Thread.Sleep(2000);
 
                         // 检测 EAS 是否正确
-                        NormalResult result = null;
+                        SetEasResult result = null;
                         // TODO: 这里发现不一致的时候，是否要出现明确提示，让操作者知晓？
                         // TODO: 要迫使界面刷新，因为 EAS 值可能发生了变化
                         if (nRet == 1 && tag_info.EAS == true)
@@ -1147,8 +1330,15 @@ this.toolStripButton_autoFixEas.Checked);
                             result = SetEAS(channel, "*", "uid:" + tag_info.UID, false, out strError);
 #else
                         {
-                            result = RfidManager.SetEAS("*", "uid:" + tag_info.UID, tag_info.AntennaID, false);
-                            RfidTagList.SetEasData(tag_info.UID, false);
+                            result = RfidManager.SetEAS("*",
+                                "uid:" + tag_info.UID,
+                                tag_info.AntennaID,
+                                false);
+                            if (string.IsNullOrEmpty(result.ChangedUID) == false)
+                                tag_info.UID = result.ChangedUID;
+                            RfidTagList.SetEasData(
+                                tag_info.UID,
+                                false);
                         }
 #endif
                         else if (nRet == 0 && tag_info.EAS == false)
@@ -1156,8 +1346,18 @@ this.toolStripButton_autoFixEas.Checked);
                             result = SetEAS(channel, "*", "uid:" + tag_info.UID, true, out strError);
 #else
                         {
-                            result = RfidManager.SetEAS("*", "uid:" + tag_info.UID, tag_info.AntennaID, true);
-                            RfidTagList.SetEasData(tag_info.UID, true);
+                            result = RfidManager.SetEAS("*", 
+                                "uid:" + tag_info.UID, 
+                                tag_info.AntennaID,
+                                true);
+                            if (string.IsNullOrEmpty(result.ChangedUID) == false)
+                            {
+                                tag_info.UID = result.ChangedUID;
+                                item_info.OneTag.UID = result.ChangedUID;
+                            }
+                            RfidTagList.SetEasData(
+                                tag_info.UID,
+                                true);
                         }
 #endif
                         else
@@ -1336,6 +1536,9 @@ this.toolStripButton_autoFixEas.Checked);
         {
             public OneTag OneTag { get; set; }
             public string Xml { get; set; }
+
+            public string XmlErrorInfo { get; set; }
+
             public LogicChipItem LogicChipItem { get; set; }
 
             // EAS 是否被检查过。检查过就不要重复检查了
@@ -1657,9 +1860,20 @@ this.toolStripButton_autoFixEas.Checked);
             listView_tags_SelectedIndexChanged(this, new EventArgs());
         }
 
+        async Task<NormalResult> ClearTagContentAsync(
+    ListViewItem item,
+    bool lock_as_error)
+        {
+            ItemInfo item_info = (ItemInfo)item.Tag;
+            if (item_info.OneTag.Protocol == InventoryInfo.ISO18000P6C)
+                return await ClearUhfTagContentAsync(item, lock_as_error);
+            else
+                return await ClearHfTagContentAsync(item, lock_as_error);
+        }
+
         // parameters:
         //      lock_as_error   == true 如果有锁定块，则不清除，报错返回; == false 有锁定块依然会执行清除
-        async Task<NormalResult> ClearTagContentAsync(
+        async Task<NormalResult> ClearHfTagContentAsync(
             ListViewItem item,
             bool lock_as_error)
         {
@@ -1719,6 +1933,12 @@ this.toolStripButton_autoFixEas.Checked);
                 var result = RfidManager.WriteTagInfo(item_info.OneTag.ReaderName,
     old_tag_info,
     new_tag_info);
+                // 2023/10/31
+                if (old_tag_info.Protocol == InventoryInfo.ISO18000P6C)
+                {
+                    RfidTagList.ClearTagTable(new_tag_info.UID);
+                    UpdateUID(item_info, new_tag_info.UID);
+                }
 #endif
                 if (result.Value == -1)
                 {
@@ -1733,7 +1953,7 @@ this.toolStripButton_autoFixEas.Checked);
             }
             catch (Exception ex)
             {
-                strError = "ClearTagContent() 出现异常: " + ex.Message;
+                strError = "ClearHfTagContent() 出现异常: " + ex.Message;
                 goto ERROR1;
             }
             finally
@@ -1757,6 +1977,99 @@ this.toolStripButton_autoFixEas.Checked);
                 ErrorInfo = strError
             };
         }
+
+        // parameters:
+        //      lock_as_error   == true 如果有锁定块，则不清除，报错返回; == false 有锁定块依然会执行清除
+        async Task<NormalResult> ClearUhfTagContentAsync(
+            ListViewItem item,
+            bool lock_as_error)
+        {
+            string strError = "";
+
+            try
+            {
+                ItemInfo item_info = (ItemInfo)item.Tag;
+                var old_tag_info = item_info.OneTag.TagInfo;
+
+                /*
+                // 检查标签是否有 block 被锁定
+                if (lock_as_error
+                    && old_tag_info.LockStatus != null
+                    && old_tag_info.LockStatus.Contains("l"))
+                {
+                    strError = $"标签 {old_tag_info.UID} 有被锁定的块({old_tag_info.LockStatus})，放弃进行清除";
+                    goto ERROR1;
+                }
+                */
+
+                var new_tag_info = old_tag_info.Clone();
+                // 制造一套空内容
+                {
+                    new_tag_info.AFI = 0;
+                    new_tag_info.DSFID = 0;
+                    new_tag_info.EAS = false;
+                    /*
+                    List<byte> bytes = new List<byte>();
+                    for (int i = 0; i < new_tag_info.BlockSize * new_tag_info.MaxBlockCount; i++)
+                    {
+                        bytes.Add(0);
+                    }
+                    new_tag_info.Bytes = bytes.ToArray();
+                    new_tag_info.LockStatus = "";
+                    */
+                    /*
+                    // 对 byte[] 内容执行清除。锁定的块不会被清除
+                    new_tag_info.Bytes = new byte[old_tag_info.Bytes.Length];
+                    for(int i =0;i<new_tag_info.Bytes.Length;i++)
+                    {
+                        new_tag_info.Bytes[i] = 0;
+                    }
+                    */
+
+                    new_tag_info.UID = "0000" + Element.GetHexString(UhfUtility.BuildBlankEpcBank());
+                    new_tag_info.Bytes = null;  // 这样可使得 User Bank 被清除
+                }
+                RfidTagList.ClearTagTable(item_info.OneTag.UID);
+                var result = RfidManager.WriteTagInfo(item_info.OneTag.ReaderName,
+    old_tag_info,
+    new_tag_info);
+                // 2023/10/31
+                if (old_tag_info.Protocol == InventoryInfo.ISO18000P6C)
+                {
+                    RfidTagList.ClearTagTable(new_tag_info.UID);
+                    UpdateUID(item_info, new_tag_info.UID);
+                }
+
+                if (result.Value == -1)
+                {
+                    strError = result.ErrorInfo;
+                    goto ERROR1;
+                }
+
+
+                strError = await Task.Run(() => { return GetTagInfo(item); });
+                if (strError != null)
+                    goto ERROR1;
+
+                /*
+                // 注: 这里不用专门去刷新。自然会被刷新。
+                // 专门刷新很困难，因为 UHF 标签 EPC 内容修改后，暂时无法获知其 UID，最好是等待自动探测刷新
+                */
+                return new NormalResult();
+            }
+            catch (Exception ex)
+            {
+                strError = "ClearUhfTagContent() 出现异常: " + ex.Message;
+                goto ERROR1;
+            }
+        ERROR1:
+            return new NormalResult
+            {
+                Value = -1,
+                ErrorInfo = strError
+            };
+        }
+
 
         async void menu_saveSelectedTagContent_Click(object sender, EventArgs e)
         {
@@ -1807,8 +2120,8 @@ this.toolStripButton_autoFixEas.Checked);
             UpdateSaveButton();
 
             // if (count > 0)
-                this.ShowMessage($"保存完全成功:{count} {(errors.Count > 0 ? ("警告或错误:"+errors.Count) : "")}", 
-                    errors.Count == 0 ? "green" : "yellow", true);
+            this.ShowMessage($"保存完全成功:{count} {(errors.Count > 0 ? ("警告或错误:" + errors.Count) : "")}",
+                errors.Count == 0 ? "green" : "yellow", true);
             //else
             //    this.ShowMessage("没有需要保存的事项", "yellow", true);
 
@@ -1818,7 +2131,7 @@ this.toolStripButton_autoFixEas.Checked);
 
         async void menu_saveSelectedErrorTagContent_1_Click(object sender, EventArgs e)
         {
-            await SaveItemChangeAsync (async (item) => await SaveBlankPiiTagContentAsync(item));
+            await SaveItemChangeAsync(async (item) => await SaveBlankPiiTagContentAsync(item));
 
 #if OLD
             int count = 0;
@@ -1867,7 +2180,7 @@ this.toolStripButton_autoFixEas.Checked);
                     // 删除 PII
                     item_info.LogicChipItem.RemoveElement(ElementOID.PII);
 
-                    new_tag_info = BuildNewTagInfo(
+                    new_tag_info = BuildNewHfTagInfo(
         old_tag_info,
         item_info.LogicChipItem);
                 }
@@ -1885,6 +2198,12 @@ this.toolStripButton_autoFixEas.Checked);
                 var result = RfidManager.WriteTagInfo(item_info.OneTag.ReaderName,
                     old_tag_info,
                     new_tag_info);
+                // 2023/10/31
+                if (old_tag_info.Protocol == InventoryInfo.ISO18000P6C)
+                {
+                    RfidTagList.ClearTagTable(new_tag_info.UID);
+                    UpdateUID(item_info, new_tag_info.UID);
+                }
                 if (result.Value == -1)
                 {
                     strError = result.ErrorInfo;
@@ -1995,6 +2314,13 @@ this.toolStripButton_autoFixEas.Checked);
                 var result = RfidManager.WriteTagInfo(item_info.OneTag.ReaderName,
                     old_tag_info,
                     new_tag_info);
+                // 2023/10/31
+                if (old_tag_info.Protocol == InventoryInfo.ISO18000P6C)
+                {
+                    RfidTagList.ClearTagTable(new_tag_info.UID);
+                    UpdateUID(item_info, new_tag_info.UID);
+
+                }
                 if (result.Value == -1)
                 {
                     strError = result.ErrorInfo;
@@ -2061,6 +2387,13 @@ this.toolStripButton_autoFixEas.Checked);
                 var result = RfidManager.WriteTagInfo(item_info.OneTag.ReaderName,
                     old_tag_info,
                     new_tag_info);
+                // 2023/10/31
+                if (old_tag_info.Protocol == InventoryInfo.ISO18000P6C)
+                {
+                    RfidTagList.ClearTagTable(new_tag_info.UID);
+                    UpdateUID(item_info, new_tag_info.UID);
+
+                }
                 if (result.Value == -1)
                 {
                     strError = result.ErrorInfo;
@@ -2092,10 +2425,135 @@ this.toolStripButton_autoFixEas.Checked);
             return strError;
         }
 
+        async Task<string> SaveTagContentAsync(ListViewItem item)
+        {
+            ItemInfo item_info = (ItemInfo)item.Tag;
+            if (item_info.OneTag.Protocol == InventoryInfo.ISO18000P6C)
+                return await SaveUhfTagContentAsync(item);
+            else
+                return await SaveHfTagContentAsync(item);
+        }
+
+        // 保存超高频标签内容
+        async Task<string> SaveUhfTagContentAsync(ListViewItem item)
+        {
+            ItemInfo item_info = (ItemInfo)item.Tag;
+            if (item_info.LogicChipItem == null)
+                return "item_info.LogicChipItem == null";
+            if (item_info.LogicChipItem.Changed == false)
+                return "没有发生修改";
+
+            string strError = "";
+
+            try
+            {
+                var old_tag_info = item_info.OneTag.TagInfo;
+
+                var new_tag_info = BuildWritingTagInfo(old_tag_info,
+                    item_info.LogicChipItem,
+                    item_info.LogicChipItem.EAS,
+                    "auto", // gb/gxlm/auto
+                    (initial_format) =>
+                    {
+                        // 如果是空白标签，需要弹出对话框提醒选择格式
+                        var ret = this.TryGet(() =>
+                        {
+                            return ListDialog.GetInput(
+                                this,
+                                "请选择写入超高频标签的内容格式",
+                                "请选择一个内容格式",
+                                new string[] { "国标", "高校联盟" },
+                                initial_format == "gb" ? 0 : 1,
+                                this.Font);
+                        });
+                        if (ret == "国标")
+                            return "gb";
+                        if (ret == "高校联盟")
+                            return "gxlm";
+                        return null;
+                    },
+                    (new_format, old_format) =>
+                    {
+                        string warning = $"警告：即将用{GetUhfFormatCaption(new_format)}格式覆盖原有{GetUhfFormatCaption(old_format)}格式";
+                        DialogResult dialog_result = this.TryGet(() =>
+                        {
+                            return MessageBox.Show(this,
+    $"{warning}\r\n\r\n确实要覆盖？",
+    $"RfidToolForm",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+                        });
+                        if (dialog_result == DialogResult.Yes)
+                            return true;
+                        return false;
+                    },
+                    true);
+
+                RfidTagList.ClearTagTable(item_info.OneTag.UID);
+                var result = RfidManager.WriteTagInfo(item_info.OneTag.ReaderName,
+                    old_tag_info,
+                    new_tag_info);
+                // 2023/10/31
+                if (old_tag_info.Protocol == InventoryInfo.ISO18000P6C)
+                {
+                    RfidTagList.ClearTagTable(new_tag_info.UID);
+                    UpdateUID(item_info, new_tag_info.UID);
+                }
+                if (result.Value == -1)
+                {
+                    strError = result.ErrorInfo;
+                    goto ERROR1;
+                }
+
+                strError = await Task.Run(() => { return GetTagInfo(item); });
+                if (strError == null)
+                {
+                    UpdateChanged(item_info.LogicChipItem);
+                    return null;
+                }
+                else
+                    strError = $"保存成功。重新读入时出错: {strError}";
+                return strError;
+            }
+            catch (Exception ex)
+            {
+                strError = "SaveUhfTagContent() 出现异常: " + ex.Message;
+                goto ERROR1;
+            }
+        ERROR1:
+            this.Invoke((Action)(() =>
+            {
+                ListViewUtil.ChangeItemText(item, COLUMN_PII, "error:" + strError);
+                // 把 item 修改为红色背景，表示出错的状态
+                SetItemColor(item, "error");
+            }));
+            return strError;
+        }
+
+        static void UpdateUID(ItemInfo item_info,
+            string uid)
+        {
+            if (item_info.OneTag != null)
+                item_info.OneTag.UID = uid;
+
+            if (item_info.OneTag != null && item_info.OneTag.TagInfo != null)
+                item_info.OneTag.TagInfo.UID = uid;
+        }
+
+        public static string GetUhfFormatCaption(string format)
+        {
+            if (format == "gb")
+                return "国标";
+            if (format == "gxlm")
+                return "高校联盟";
+            throw new ArgumentException($"无法识别的格式名 '{format}'");
+        }
+
         // return:
         //      null    没有出错
         //      其他      出错信息
-        async Task<string> SaveTagContentAsync(ListViewItem item)
+        async Task<string> SaveHfTagContentAsync(ListViewItem item)
         {
             ItemInfo item_info = (ItemInfo)item.Tag;
             if (item_info.LogicChipItem == null)
@@ -2118,7 +2576,7 @@ this.toolStripButton_autoFixEas.Checked);
             try
             {
                 var old_tag_info = item_info.OneTag.TagInfo;
-                var new_tag_info = BuildNewTagInfo(
+                var new_tag_info = BuildNewHfTagInfo(
     old_tag_info,
     item_info.LogicChipItem);
 #if OLD_CODE
@@ -2130,6 +2588,13 @@ this.toolStripButton_autoFixEas.Checked);
                 var result = RfidManager.WriteTagInfo(item_info.OneTag.ReaderName,
                     old_tag_info,
                     new_tag_info);
+                // 2023/10/31
+                if (old_tag_info.Protocol == InventoryInfo.ISO18000P6C)
+                {
+                    RfidTagList.ClearTagTable(new_tag_info.UID);
+                    UpdateUID(item_info, new_tag_info.UID);
+
+                }
 #endif
                 if (result.Value == -1)
                 {
@@ -2149,7 +2614,7 @@ this.toolStripButton_autoFixEas.Checked);
             }
             catch (Exception ex)
             {
-                strError = "SaveTagContent() 出现异常: " + ex.Message;
+                strError = "SaveHfTagContent() 出现异常: " + ex.Message;
                 goto ERROR1;
             }
             finally
@@ -2168,7 +2633,8 @@ this.toolStripButton_autoFixEas.Checked);
             return strError;
         }
 
-        static TagInfo BuildNewTagInfo(TagInfo old_tag_info,
+
+        static TagInfo BuildNewHfTagInfo(TagInfo old_tag_info,
     LogicChipItem chip)
         {
             TagInfo new_tag_info = old_tag_info.Clone();
@@ -2184,6 +2650,259 @@ this.toolStripButton_autoFixEas.Checked);
             new_tag_info.EAS = chip.EAS;
             return new_tag_info;
         }
+
+        static TagInfo BuildNewUhfTagInfo(TagInfo old_tag_info,
+LogicChipItem chip)
+        {
+            if (chip.Protocol.Contains(":") == false)
+            {
+                // 需要弹出对话框询问，是要写入 gb 还是 gxlm 格式
+            }
+
+
+            TagInfo new_tag_info = old_tag_info.Clone();
+            new_tag_info.Bytes = chip.GetBytes(
+                (int)new_tag_info.MaxBlockCount * (int)new_tag_info.BlockSize,
+                (int)new_tag_info.BlockSize,
+                LogicChip.GetBytesStyle.None,
+                out string block_map);
+            new_tag_info.LockStatus = block_map;
+
+            new_tag_info.DSFID = chip.DSFID;
+            new_tag_info.AFI = chip.AFI;
+            new_tag_info.EAS = chip.EAS;
+            return new_tag_info;
+        }
+
+        // 询问超高频内容格式
+        // parameters:
+        //      initial_format  选择对话框初始显示的格式。为 null/gb/html 之一
+        // return:
+        //      null    放弃选择
+        //      其它      返回选择的格式。为 gb/gxlm 之一
+        public delegate string delegate_askUhfDataFormat(string initial_format);
+
+        // 询问是否覆盖不同内容格式的标签
+        // parameters:
+        //      new_format  新格式。为 gb/gxlm 之一
+        //      old_format  老格式。为 gb/gxlm 之一
+        // return:
+        //      true    要覆盖
+        //      false   放弃覆盖
+        public delegate bool delegate_askOverwriteDifference(string new_format, string old_format);
+
+        // 构造写入用的 TagInfo
+        // TODO: 要留意 高校联盟 格式的 TOU 写入前翻译是否正确
+        public static TagInfo BuildWritingTagInfo(TagInfo existing,
+LogicChip chip,
+bool eas,
+string uhfProtocol = "auto", // gb/gxlm/auto/select auto 表示自动探测格式，select 表示强制弹出对话框选择格式
+delegate_askUhfDataFormat func_askFormat = null,
+delegate_askOverwriteDifference func_askOverwrite = null,
+bool WriteUhfUserBank = true)
+        {
+            if (existing.Protocol == InventoryInfo.ISO15693)
+            {
+                // SetTypeOfUsage("", chip, "gb");
+
+                TagInfo new_tag_info = existing.Clone();
+                new_tag_info.Bytes = chip.GetBytes(
+                    (int)(new_tag_info.MaxBlockCount * new_tag_info.BlockSize),
+                    (int)new_tag_info.BlockSize,
+                    LogicChip.GetBytesStyle.None,
+                    out string block_map);
+                new_tag_info.LockStatus = block_map;
+                new_tag_info.DSFID = LogicChip.DefaultDSFID;  // 图书
+                new_tag_info.SetEas(eas);
+                return new_tag_info;
+            }
+
+            if (existing.Protocol == InventoryInfo.ISO18000P6C)
+            {
+                var build_user_bank = WriteUhfUserBank;
+
+                /*
+                // 读者卡和层架标必须有 User Bank，不然 TU 字段没有地方放
+                if (build_user_bank == false
+    && this.TypeOfUsage != "10")
+                    throw new Exception($"{GetCaption(this.TypeOfUsage)}必须写入 User Bank");
+                */
+
+                // TODO: 判断标签内容是空白/国标/高校联盟格式，采取不同的写入格式
+                /*
+高校联盟格式
+国标格式
+* */
+
+
+                var isExistingGB = UhfUtility.IsISO285604Format(Element.FromHexString(existing.UID), existing.Bytes);
+
+                if (uhfProtocol == "auto")
+                {
+                    var epc_bank = Element.FromHexString(existing.UID);
+                    if (UhfUtility.IsBlankTag(epc_bank, existing.Bytes) == true)
+                    {
+                        /*
+                        // 如果是空白标签，需要弹出对话框提醒选择格式
+                        var result = this.TryGet(() =>
+                        {
+                            return ListDialog.GetInput(
+this,
+$"请选择写入超高频标签的内容格式",
+"请选择一个内容格式",
+new string[] { "国标", "高校联盟" },
+isExistingGB ? 0 : 1,
+this.Font);
+                        });
+                        */
+                        if (func_askFormat == null)
+                            throw new ArgumentException($"当需要选择格式时，func_askFormat 为 null");
+
+                        var result = func_askFormat.Invoke(isExistingGB ? "gb" : "gxlm");
+
+                        if (result == null)
+                            throw new InterruptException("放弃写入标签");
+                        if (result == "gb")
+                            uhfProtocol = "gb";
+                        else
+                            uhfProtocol = "gxlm";
+                    }
+                    else
+                    {
+                        if (isExistingGB)
+                            uhfProtocol = "gb";
+                        else
+                            uhfProtocol = "gxlm";
+                    }
+                }
+                else if (uhfProtocol == "select")
+                {
+                    /*
+                    var result = this.TryGet(() =>
+                    {
+                        return ListDialog.GetInput(
+this,
+$"请选择写入超高频标签的内容格式",
+"请选择一个内容格式",
+new string[] { "国标", "高校联盟" },
+isExistingGB ? 0 : 1,
+this.Font);
+                    });
+                    */
+                    if (func_askFormat == null)
+                        throw new ArgumentException($"当需要选择格式时，func_askFormat 为 null");
+
+                    var result = func_askFormat.Invoke(isExistingGB ? "gb" : "gxlm");
+
+                    if (result == null)
+                        throw new InterruptException("放弃写入标签");
+                    if (result == "gb")
+                        uhfProtocol = "gb";
+                    else
+                        uhfProtocol = "gxlm";
+                }
+
+                TagInfo new_tag_info = existing.Clone();
+                if (uhfProtocol == "gxlm")
+                {
+                    // 写入高校联盟数据格式
+                    if (isExistingGB)
+                    {
+                        /*
+                        string warning = $"警告：即将用高校联盟格式覆盖原有国标格式";
+                        DialogResult dialog_result = MessageBox.Show(this,
+$"{warning}\r\n\r\n确实要覆盖？",
+$"RfidToolForm",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+                        if (dialog_result == DialogResult.No)
+                            throw new Exception("放弃写入");
+                        */
+                        var ret = func_askOverwrite.Invoke("gxlm", "gb");
+                        if (ret == false)
+                            throw new Exception("放弃写入");
+                    }
+
+                    // SetTypeOfUsage(chip, "gxlm");
+
+                    var result = GaoxiaoUtility.BuildTag(chip, build_user_bank, eas);
+                    if (result.Value == -1)
+                        throw new Exception(result.ErrorInfo);
+                    new_tag_info.Bytes = build_user_bank ? result.UserBank : null;
+                    new_tag_info.UID = UhfUtility.EpcBankHex(result.EpcBank);    //  existing.UID.Substring(0, 4) + Element.GetHexString(result.EpcBank);
+                }
+                else
+                {
+                    // 写入国标数据格式
+                    if (isExistingGB == false)
+                    {
+                        /*
+                        string warning = $"警告：即将用国标格式覆盖原有高校联盟格式";
+                        DialogResult dialog_result = MessageBox.Show(this,
+$"{warning}\r\n\r\n确实要覆盖？",
+$"ScanDialog",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+                        if (dialog_result == DialogResult.No)
+                            throw new Exception("放弃写入");
+                        */
+                        var ret = func_askOverwrite.Invoke("gb", "gxlm");
+                        if (ret == false)
+                            throw new Exception("放弃写入");
+                    }
+                    // SetTypeOfUsage(chip, "gb");
+
+                    var result = UhfUtility.BuildTag(chip,
+                        true,
+                        eas ? "afi_eas_on" : "");
+                    if (result.Value == -1)
+                        throw new Exception(result.ErrorInfo);
+                    new_tag_info.Bytes = build_user_bank ? result.UserBank : null;
+                    new_tag_info.UID = UhfUtility.EpcBankHex(result.EpcBank);  // existing.UID.Substring(0, 4) + Element.GetHexString(result.EpcBank);
+                }
+                return new_tag_info;
+            }
+
+            throw new ArgumentException($"目前暂不支持 {existing.Protocol} 协议标签的写入操作");
+        }
+
+        // 设置 TU 字段。注意 国标和高校联盟的取值表完全不同
+        // parameters:
+        //      data_format gb/gxlm
+        void SetTypeOfUsage(
+            string tou,
+            LogicChip chip,
+            string data_format)
+        {
+            // string tou = this.TypeOfUsage;
+            if (string.IsNullOrEmpty(tou))
+                tou = "10"; // 默认图书
+
+            // 高校联盟
+            if (data_format == "gxlm")
+            {
+                switch (tou)
+                {
+                    case "10":  // 图书
+                        tou = "0.0";
+                        break;
+                    case "80":  // 读者证
+                        tou = "3.0";
+                        break;
+                    case "30":  // 层架标
+                        tou = "2.0";
+                        break;
+                    default:
+                        throw new Exception($"高校联盟不支持的国标 TU 值 '{tou}'");
+                }
+                chip.SetElement(ElementOID.TypeOfUsage, tou, false);
+            }
+            else
+                chip.SetElement(ElementOID.TypeOfUsage, tou);
+        }
+
 
         private async void toolStripButton_saveRfid_Click(object sender, EventArgs e)
         {

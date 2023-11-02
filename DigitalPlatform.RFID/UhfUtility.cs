@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,6 +16,53 @@ namespace DigitalPlatform.RFID
     /// </summary>
     public static class UhfUtility
     {
+        // 2023/11/2
+        // 用 new_bytes 覆盖 old_bytes 内容，清除 new_bytes 末尾延伸出来的较长部分的内容为 0
+        // return:
+        //      返回一个足以实现覆盖效果的 byte []。也就是说，不会造成覆盖后最后末尾还残留了一些脏内容
+        public static byte[] OverwriteBank(byte[] old_bytes,
+            byte[] new_bytes,
+            bool force_even_bytes = false)
+        {
+            if (old_bytes == null || old_bytes.Length == 0)
+                return new_bytes;
+
+            if (new_bytes == null)
+                new_bytes = new byte[0];
+
+            // new_bytes 内容较长
+            if (old_bytes.Length <= new_bytes.Length)
+                return new_bytes;
+
+            // 探测延展部分是否包含非 0 的 bytes
+            int last_none_zero_offset = -1;    // 最后非 0 byte 的偏移
+            for (int i = new_bytes.Length; i < old_bytes.Length; i++)
+            {
+                if (old_bytes[i] != 0)
+                    last_none_zero_offset = i;
+            }
+
+            // 延展部分 没有发现非 0 byte
+            if (last_none_zero_offset == -1)
+                return new_bytes;   // 沿用 new_bytes。这样写入内容更少，效率高
+
+            Debug.Assert(last_none_zero_offset >= 0);
+
+            // 在 new_bytes 末尾延展若干 0 byte，确保实现清空覆盖效果
+            var results = new List<byte>(new_bytes);
+            for (int i = new_bytes.Length; i <= last_none_zero_offset; i++)
+            {
+                results.Add(0);
+            }
+            Debug.Assert(results.Count <= Math.Max(old_bytes.Length, new_bytes.Length));
+
+            // 确保偶数个 bytes
+            if (force_even_bytes && (results.Count % 2) != 0)
+                results.Add(0);
+
+            return results.ToArray();
+        }
+
         public static bool IsBlankTag(byte[] epc_bank,
             byte[] user_bank)
         {
@@ -88,7 +136,7 @@ namespace DigitalPlatform.RFID
         }
 
         // 根据指定的 PC 创建空的 EPC Bank 内容
-        public static byte [] BuildBlankEpcBank()
+        public static byte[] BuildBlankEpcBank()
         {
             ProtocolControlWord pc = new ProtocolControlWord();
             pc.UMI = false;
@@ -829,7 +877,14 @@ namespace DigitalPlatform.RFID
 
         #endregion
 
-
+        // 根据 EPC 内容 bytes 构造包括 CRC bytes 的全部 hex string
+        public static string EpcBankHex(byte[] epc_content)
+        {
+            var crc_bytes = CRC16.crc16x25(epc_content);
+            Debug.Assert(crc_bytes.Length == 2);
+            var crc_hex = ByteArray.GetHexTimeStampString(crc_bytes).ToUpper();
+            return crc_hex + Element.GetHexString(epc_content);
+        }
     }
 
     public class ParseEpcBankResult : NormalResult

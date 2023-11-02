@@ -38,6 +38,14 @@ namespace DigitalPlatform.RFID
     /// </summary>
     public class LogicChip
     {
+        /*
+        public const string ISO15693 = "ISO15693";
+        public const string ISO14443A = "ISO14443A";
+        public const string ISO18000P6C = "ISO18000P6C";
+        * */
+        // "ISO15693" "ISO14443A" "ISO18000P6C:gb" "ISO18000P6C:gxlm"
+        public string Protocol { get; set; }
+
         // 默认的 GB 35660 DSFID 值
         public static byte DefaultDSFID = 0x06;
 
@@ -222,6 +230,7 @@ namespace DigitalPlatform.RFID
         {
             this._isNew = false;
             this._elements.Clear();
+            this.Protocol = InventoryInfo.ISO15693;
 
             // 2020/12/9
             if (block_size == 0)

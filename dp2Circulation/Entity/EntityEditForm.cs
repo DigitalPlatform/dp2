@@ -41,6 +41,15 @@ namespace dp2Circulation
         {
             InitializeComponent();
 
+            /*
+            // 补丁。解决 _rfidArea 大小伸出去的问题
+            {
+                this.splitContainer_rfidArea.Dock = DockStyle.None;
+                this.splitContainer_rfidArea.Size = new System.Drawing.Size(1,1);
+            }
+            */
+            BeginDockFill(this.splitContainer_rfidArea);
+
             _editing = this.entityEditControl_editing;
             _existing = this.entityEditControl_existing;
 
@@ -159,7 +168,27 @@ namespace dp2Circulation
             this.entityEditControl_editing.LocationStringChanged -= new TextChangeEventHandler(entityEditControl_editing_LocationStringChanged);
             this.entityEditControl_editing.LocationStringChanged += new TextChangeEventHandler(entityEditControl_editing_LocationStringChanged);
 
-            //
+            /*
+            // 补丁。解决 _rfidArea 大小伸出去的问题
+            // this.splitContainer_rfidArea.Dock = DockStyle.None;
+            this.splitContainer_rfidArea.Dock = DockStyle.Fill;
+            //this.splitContainer_rfidArea.PerformAutoScale();
+            //this.splitContainer_rfidArea.PerformLayout();
+            */
+            EndDockFill(this.splitContainer_rfidArea);
+        }
+
+        // 补丁。解决 _rfidArea 大小伸出去的问题
+        public static void BeginDockFill(Control control)
+        {
+            control.Dock = DockStyle.None;
+            control.Size = new System.Drawing.Size(1, 1);
+        }
+
+        // 补丁。解决 _rfidArea 大小伸出去的问题
+        public static void EndDockFill(Control control)
+        {
+            control.Dock = DockStyle.Fill;
         }
 
         void LoadExternalFields()
@@ -1007,10 +1036,16 @@ MessageBoxDefaultButton.Button2);
 
             // 然后保存
             {
-                int nRet = SaveNewChip(item, out strError);
+                int nRet = SaveNewChip(item, 
+                    out string new_tag_uid,
+                    out strError);
                 if (nRet == -1)
                     goto ERROR1;
+                // 2023/10/28
+                if (new_tag_uid != null)
+                    _tagExisting.TagInfo.UID = new_tag_uid;
             }
+
 
             // TODO: 改成类似 ShowMessage() 效果
             MessageBox.Show(this, "RFID 标签保存成功");
@@ -1025,6 +1060,7 @@ MessageBoxDefaultButton.Button2);
                 // 2019/9/30
                 Debug.Assert(_tagExisting.AntennaID == _tagExisting.TagInfo.AntennaID, $"1 _tagExisting.AntennaID({_tagExisting.AntennaID}) 应该 == _tagExisting.TagInfo.AntennaID({_tagExisting.TagInfo.AntennaID})");
 
+                // TODO: 超高频标签保存后 UID 会发生变化，不能用“根据 UID 读取标签刷新”的方式。要改为盘点方式，寻找 UID 相同的标签
                 // 用保存后的确定了的 UID 重新装载
                 int nRet = LoadChipByUID(
                     _tagExisting.ReaderName,
@@ -1157,7 +1193,7 @@ MessageBoxDefaultButton.Button2);
                     dialog.AutoCloseDialog = auto_close_dialog;
                     dialog.SelectedPII = auto_select_pii;
                     dialog.AutoSelectCondition = "auto_or_blankPII";    // 2019/1/30
-                    dialog.ProtocolFilter = InventoryInfo.ISO15693;
+                    dialog.ProtocolFilter = InventoryInfo.ISO15693 + "," + InventoryInfo.ISO18000P6C;
                     Program.MainForm.AppInfo.LinkFormState(dialog, "selectTagDialog_formstate");
                     dialog.ShowDialog(this);
 
@@ -1344,9 +1380,12 @@ MessageBoxDefaultButton.Button2);
 
         // parameters:
         //      item    只用于写入统计日志
-        int SaveNewChip(BookItem item, out string strError)
+        int SaveNewChip(BookItem item, 
+            out string new_tag_uid,
+            out string strError)
         {
             strError = "";
+            new_tag_uid = null;
 
 #if SN
             string filename = Path.Combine(Program.MainForm.UserDir, $"daily_counter_{"rfid"}.txt");
@@ -1414,15 +1453,52 @@ out strError);
                     return -1;
                 }
 
-                TagInfo new_tag_info = LogicChipItem.ToTagInfo(
-                    _tagExisting.TagInfo,
-                    this.chipEditor_editing.LogicChipItem);
+                TagInfo new_tag_info = null;
+                if (_tagExisting.Protocol == InventoryInfo.ISO15693)
+                {
+
+                    new_tag_info = LogicChipItem.ToTagInfo(
+                        _tagExisting.TagInfo,
+                        this.chipEditor_editing.LogicChipItem);
 #if OLD_CODE
                 NormalResult result = channel.Object.WriteTagInfo(
                     _tagExisting.ReaderName,
                     _tagExisting.TagInfo,
                     new_tag_info);
 #else
+                }
+                else if (_tagExisting.Protocol == InventoryInfo.ISO18000P6C)
+                {
+                    new_tag_info = RfidToolForm.BuildWritingTagInfo(_tagExisting.TagInfo,
+    this.chipEditor_editing.LogicChipItem,
+    true,   // this.chipEditor_editing.LogicChipItem.EAS,
+    Program.MainForm.UhfDataFormat, // gb/gxlm/auto
+    (initial_format) =>
+    {
+        throw new Exception("意外触发格式选择回调函数");
+        // 如果是空白标签，需要弹出对话框提醒选择格式
+    },
+                        (new_format, old_format) =>
+                        {
+                            string warning = $"警告：即将用{RfidToolForm.GetUhfFormatCaption(new_format)}格式覆盖原有{RfidToolForm.GetUhfFormatCaption(old_format)}格式";
+                            DialogResult dialog_result = MessageBox.Show(this,
+    $"{warning}\r\n\r\n确实要覆盖？",
+    $"RfidToolForm",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+                            if (dialog_result == DialogResult.Yes)
+                                return true;
+                            return false;
+                        },
+                        true);
+                }
+                else
+                {
+                    strError = $"无法识别的 RFID 格式 '{_tagExisting.Protocol}'";
+                    return -1;
+                }
+
                 Debug.Assert(_tagExisting != null, "");
 
                 Debug.WriteLine("111 " + (_tagExisting.TagInfo != null ? "!=null" : "==null"));
@@ -1435,13 +1511,27 @@ out strError);
     _tagExisting.ReaderName,
     _tagExisting.TagInfo,
     new_tag_info);
-                RfidTagList.ClearTagTable(_tagExisting.UID);
+                if (_tagExisting.Protocol == InventoryInfo.ISO15693)
+                    RfidTagList.ClearTagTable(_tagExisting.UID);
+                // 2023/10/31
+                if (_tagExisting.Protocol == InventoryInfo.ISO18000P6C)
+                {
+                    RfidTagList.ClearTagTable(_tagExisting.UID);
+                    RfidTagList.ClearTagTable(new_tag_info.UID);
+                }
+
 #endif
                 if (result.Value == -1)
                 {
                     strError = result.ErrorInfo;
                     return -1;
                 }
+
+                if (_tagExisting.Protocol == InventoryInfo.ISO18000P6C)
+                {
+                    new_tag_uid = new_tag_info.UID;
+                }
+
 
                 // 写入统计日志
                 if (item != null)
@@ -1626,7 +1716,6 @@ out strError);
                 GuiState.SetUiState(controls, value);
             }
         }
-
 
 #if NO
         // 装入以前的标签信息

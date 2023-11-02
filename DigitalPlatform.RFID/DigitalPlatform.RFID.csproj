@@ -47,6 +47,8 @@
     <Compile Include="ChipMemory.cs" />
     <Compile Include="Compact.cs" />
     <Compile Include="ComUtil.cs" />
+    <Compile Include="CRC16.cs" />
+    <Compile Include="Crc16Ccitt.cs" />
     <Compile Include="Element.cs" />
     <Compile Include="GaoxiaoUtility.cs" />
     <Compile Include="ILedDriver.cs" />

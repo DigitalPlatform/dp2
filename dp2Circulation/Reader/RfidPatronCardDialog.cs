@@ -237,7 +237,7 @@ MessageBoxDefaultButton.Button2);
                     dialog.AutoCloseDialog = auto_close_dialog;
                     dialog.SelectedPII = auto_select_pii;
                     dialog.AutoSelectCondition = "auto_or_blankPII";    // 2019/1/30
-                    dialog.ProtocolFilter = InventoryInfo.ISO15693;
+                    dialog.ProtocolFilter = InventoryInfo.ISO15693 + "," + InventoryInfo.ISO18000P6C;
                     Program.MainForm.AppInfo.LinkFormState(dialog, "selectTagDialog_formstate");
                     dialog.ShowDialog(this);
 
@@ -434,6 +434,9 @@ out strError);
     _tagExisting.TagInfo,
     new_tag_info);
                 RfidTagList.ClearTagTable(_tagExisting.UID);
+                // 2023/10/31
+                if (_tagExisting.Protocol == InventoryInfo.ISO18000P6C)
+                    RfidTagList.ClearTagTable(new_tag_info.UID);
 #endif
                 if (result.Value == -1)
                 {

@@ -11559,7 +11559,7 @@ MessageBoxDefaultButton.Button1);
             return strText;
         }
 
-        // 分管的管部馆藏地点 cache
+        // 分馆的全部馆藏地点 cache
         ObjectCache<List<string>> _libraryLocationCache = new ObjectCache<List<string>>();
 
 
@@ -11829,6 +11829,7 @@ MessageBoxDefaultButton.Button1);
                             out strError);
                         if (nRet == -1)
                             return -1;
+                        // 注：因为这里 nAdd 为 0，所以走到最后不会再次调用 WriteIndexXml() 函数
                     }
                 }
                 else if (strReportType == "201" || strReportType == "9201"
@@ -12421,6 +12422,8 @@ MessageBoxDefaultButton.Button1);
             {
                 try
                 {
+                    // 2023/9/25
+                    // TODO: strReportFileName 有可能表达一个目录，而不是文件。这里需要判断一下，然后根据文件还是目录分别进行删除
                     File.Delete(strReportFileName);
                 }
                 catch (DirectoryNotFoundException)

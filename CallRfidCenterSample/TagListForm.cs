@@ -383,7 +383,7 @@ bool eas)
 #endif
                     TagInfo new_tag_info = existing.Clone();
                     new_tag_info.Bytes = result.UserBank;
-                    new_tag_info.UID = existing.UID.Substring(0, 4) + Element.GetHexString(result.EpcBank);
+                    new_tag_info.UID = UhfUtility.EpcBankHex(result.EpcBank);  // existing.UID.Substring(0, 4) + Element.GetHexString(result.EpcBank);
                     return new_tag_info;
                 }
                 else if (data_format == "gb")
@@ -393,7 +393,7 @@ bool eas)
                         eas ? "afi_eas_on" : "");
                     TagInfo new_tag_info = existing.Clone();
                     new_tag_info.Bytes = result.UserBank;
-                    new_tag_info.UID = existing.UID.Substring(0, 4) + Element.GetHexString(result.EpcBank);
+                    new_tag_info.UID = UhfUtility.EpcBankHex(result.EpcBank);  // existing.UID.Substring(0, 4) + Element.GetHexString(result.EpcBank);
                     return new_tag_info;
                 }
                 else
@@ -455,6 +455,9 @@ bool eas)
 
             // 清掉标签缓冲，迫使刷新列表显示
             Form1.TagList.ClearTagTable(tag.UID);
+            // 2023/10/31
+            if (tag.TagInfo.Protocol == InventoryInfo.ISO18000P6C)
+                Form1.TagList.ClearTagTable(new_tag_info.UID);
             MessageBox.Show(this, "写入成功 (高校联盟，无 User Bank)");
             return;
         ERROR1:
@@ -499,6 +502,9 @@ bool eas)
 
             // 清掉标签缓冲，迫使刷新列表显示
             Form1.TagList.ClearTagTable(tag.UID);
+            // 2023/10/31
+            if (tag.TagInfo.Protocol == InventoryInfo.ISO18000P6C)
+                Form1.TagList.ClearTagTable(new_tag_info.UID);
             MessageBox.Show(this, "写入成功 (高校联盟，有 User Bank)");
             return;
         ERROR1:
@@ -542,6 +548,9 @@ bool eas)
 
             // 清掉标签缓冲，迫使刷新列表显示
             Form1.TagList.ClearTagTable(tag.UID);
+            // 2023/10/31
+            if (tag.TagInfo.Protocol == InventoryInfo.ISO18000P6C)
+                Form1.TagList.ClearTagTable(new_tag_info.UID);
             MessageBox.Show(this, "写入成功 (国标，无 User Bank)");
             return;
         ERROR1:
@@ -586,6 +595,10 @@ bool eas)
 
             // 清掉标签缓冲，迫使刷新列表显示
             Form1.TagList.ClearTagTable(tag.UID);
+            // 2023/10/31
+            if (tag.TagInfo.Protocol == InventoryInfo.ISO18000P6C)
+                Form1.TagList.ClearTagTable(new_tag_info.UID);
+
             MessageBox.Show(this, "写入成功(国标，有 User Bank)");
             return;
         ERROR1:
@@ -638,6 +651,14 @@ bool eas)
                 }
 
                 // 清掉标签缓冲，迫使刷新列表显示
+                Form1.TagList.ClearTagTable(data.OneTag.UID);
+
+                // 2023/10/30
+                if (string.IsNullOrEmpty(write_result.ChangedUID) == false)
+                    data.OneTag.UID = write_result.ChangedUID;
+
+                // 2023/10/30
+                // 再次清掉标签缓冲，迫使刷新列表显示
                 Form1.TagList.ClearTagTable(data.OneTag.UID);
             }
 

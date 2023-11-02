@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
+using DigitalPlatform.Text;
+
 namespace DigitalPlatform.RFID
 {
 
@@ -76,6 +78,28 @@ namespace DigitalPlatform.RFID
                         data.OneTag.TagInfo = null;
                 }
             }
+
+            ClearTypeTable(uid);
+        }
+
+        static void ClearTypeTable(string uid)
+        {
+            lock (_sync_typeTable)
+            {
+                if (string.IsNullOrEmpty(uid))
+                    _typeTable.Clear();
+                else
+                    _typeTable.Remove(uid);
+            }
+        }
+
+        // 从缓存中尝试查找 TypeOfUsage
+        static string FindUsageFromTypeTable(string uid)
+        {
+            lock (_sync_typeTable)
+            {
+                return (string)_typeTable[uid];
+            }
         }
 
         static TagAndData FindBookTag(string uid)
@@ -124,6 +148,7 @@ namespace DigitalPlatform.RFID
         // TODO: 维持一个 UID --> typeOfUsage 的对照表，加快对图书和读者类型标签的分离判断过程
         // UID --> typeOfUsage string
         static Hashtable _typeTable = new Hashtable();
+        static object _sync_typeTable = new object();
 
         // TODO: 可以把 readerNameList 先 Parse 到一个结构来加快 match 速度
         static bool InRange(TagAndData data, string readerNameList)
@@ -231,9 +256,12 @@ namespace DigitalPlatform.RFID
                     else
                     {
                         // 根据缓存的 typeOfUsage 来判断
-                        string typeOfUsage = (string)_typeTable[tag.UID];
+                        // string typeOfUsage = (string)_typeTable[tag.UID];
+                        string typeOfUsage = FindUsageFromTypeTable(tag.UID);
+
                         if (typeOfUsage != null && typeOfUsage.StartsWith("8"))
                         {
+                            // TODO: 这里有个问题就是 TagInfo 为 null。需要专门获得一次 TagInfo
                             patron = new TagAndData { OneTag = tag, Type = "patron" };
                             new_patrons.Add(patron);
                             found_books.Remove(patron);
@@ -413,22 +441,33 @@ namespace DigitalPlatform.RFID
                             {
                                 LogicChip chip = null;
                                 string typeOfUsage = "";
-                                try
-                                {
-                                    // 观察 typeOfUsage 元素
-                                    // Exception:
-                                    //      可能会抛出异常 ArgumentException TagDataException
-                                    chip = LogicChip.From(info.Bytes,
-                (int)info.BlockSize,
-                "");
-                                    typeOfUsage = chip.FindElement(ElementOID.TypeOfUsage)?.Text;
-                                }
-                                catch (TagDataException ex)
-                                {
-                                    // throw new TagInfoException(ex.Message, info);
 
-                                    // 解析错误的标签，当作图书标签处理
-                                    typeOfUsage = "";
+                                if (tag.Protocol == InventoryInfo.ISO18000P6C)
+                                {
+                                    // UHF
+                                    var chip_info = GetUhfChipInfo(info);
+                                    typeOfUsage = chip_info.Chip?.FindElement(ElementOID.TypeOfUsage)?.Text;
+                                }
+                                else
+                                {
+                                    // HF
+                                    try
+                                    {
+                                        // 观察 typeOfUsage 元素
+                                        // Exception:
+                                        //      可能会抛出异常 ArgumentException TagDataException
+                                        chip = LogicChip.From(info.Bytes,
+                    (int)info.BlockSize,
+                    "");
+                                        typeOfUsage = chip.FindElement(ElementOID.TypeOfUsage)?.Text;
+                                    }
+                                    catch (TagDataException ex)
+                                    {
+                                        // throw new TagInfoException(ex.Message, info);
+
+                                        // 解析错误的标签，当作图书标签处理
+                                        typeOfUsage = "";
+                                    }
                                 }
 
                                 if (typeOfUsage != null && typeOfUsage.StartsWith("8"))
@@ -450,9 +489,12 @@ namespace DigitalPlatform.RFID
                                 // 保存到缓存
                                 if (typeOfUsage != null)
                                 {
-                                    if (_typeTable.Count > 1000)
-                                        _typeTable.Clear();
-                                    _typeTable[data.OneTag.UID] = typeOfUsage;
+                                    lock (_sync_typeTable)
+                                    {
+                                        if (_typeTable.Count > 1000)
+                                            _typeTable.Clear();
+                                        _typeTable[data.OneTag.UID] = typeOfUsage;
+                                    }
                                 }
                             }
                         }
@@ -508,6 +550,208 @@ namespace DigitalPlatform.RFID
                 // _dataReady = true;
             }
         }
+
+        public class ChipInfo
+        {
+            public LogicChip Chip { get; set; }
+
+            // 注意这里是 OI 或者 AOI 合并到一个字段
+            public string OI { get; set; }
+
+            public string PII { get; set; }
+
+            public string UII { get; set; }
+
+            public string UhfProtocol { get; set; }
+
+            public string ErrorInfo { get; set; }
+        }
+
+        // 注: taginfo.EAS 在调用后可能被修改
+        // parameters:
+        //      style   解析高校 UHF 格式时的 style。
+        //              dontCheckUMI 表示不检查 PC UMI 标志位。这常用于解析一些缺失 User Bank 内容的畸形标签内容
+        public static ChipInfo GetUhfChipInfo(TagInfo taginfo,
+            string style = "")
+        {
+            ChipInfo result = new ChipInfo();
+
+            var epc_bank = Element.FromHexString(taginfo.UID);
+
+            if (UhfUtility.IsBlankTag(epc_bank, taginfo.Bytes) == true)
+            {
+                // 空白标签
+                result.UII = null;
+            }
+            else
+            {
+                var isGB = UhfUtility.IsISO285604Format(epc_bank, taginfo.Bytes);
+                if (isGB)
+                {
+                    // *** 国标 UHF
+                    var parse_result = UhfUtility.ParseTag(epc_bank,
+        taginfo.Bytes,
+        4,
+        style);
+                    if (parse_result.Value == -1)
+                        throw new Exception(parse_result.ErrorInfo);
+                    result.Chip = parse_result.LogicChip;
+                    taginfo.EAS = false;    // TODO
+                    result.UhfProtocol = "gb";
+                    result.UII = parse_result.UII;
+                    result.PII = GetPiiPart(parse_result.UII);
+                    result.OI = GetOiPart(parse_result.UII, false);
+                }
+                else
+                {
+                    // *** 高校联盟 UHF
+                    var parse_result = GaoxiaoUtility.ParseTag(
+        epc_bank,
+        taginfo.Bytes,
+        "convertValueToGB");
+                    if (parse_result.Value == -1)
+                    {
+                        if (parse_result.ErrorCode == "parseEpcError"
+                            || parse_result.ErrorCode == "parseError")
+                        {
+                            return new ChipInfo
+                            {
+                                ErrorInfo = parse_result.ErrorInfo,
+                            };
+                        }
+                        throw new Exception(parse_result.ErrorInfo);
+                    }
+                    result.Chip = parse_result.LogicChip;
+
+                    // TODO: 如果 Chip 为 null，需要 new 一个，并且把 PII 等内容放到其 Elements 中，以便上层可以正常使用
+
+                    taginfo.EAS = !parse_result.EpcInfo.Lending;
+                    result.UhfProtocol = "gxlm";
+
+                    result.PII = GetPiiPart(parse_result.EpcInfo.PII);
+
+                    // 从 User Bank 中取得 OI
+                    string oi = result.Chip?.FindElement(ElementOID.OI)?.Text;
+                    if (string.IsNullOrEmpty(oi))
+                        oi = result.Chip?.FindElement((ElementOID)27)?.Text;    // 注: 高校联盟没有 AOI 字段，只有 27 字段
+                    result.OI = oi;   // GetOiPart(parse_result.EpcInfo.PII, false);
+
+                    // 构造 UII
+                    if (string.IsNullOrEmpty(oi))
+                        result.UII = result.PII;
+                    else
+                        result.UII = oi + "." + result.PII;
+                }
+            }
+
+            return result;
+        }
+
+        // 获得 UHF 标签的 UII 内容
+        // parameters:
+        //      style   风格。如果为 gxlm_pii ，表示不需要返回 oi 部分(因而也不需要解析 .Bytes 部分)
+        // return:
+        //      返回 UII 字符串。如果标签解析出错，或者是空白标签，则返回 "uid:xxxx" 形态
+        public static string GetUhfUii(TagInfo taginfo,
+            string style)
+        {
+            string uid = taginfo.UID;
+            var epc_bank = Element.FromHexString(uid);
+
+            if (UhfUtility.IsBlankTag(epc_bank, null) == true)
+            {
+                // 空白标签
+                return "uid:" + uid;
+            }
+            else
+            {
+                var isGB = UhfUtility.IsISO285604Format(epc_bank, null);
+                if (isGB)
+                {
+                    // *** 国标 UHF
+                    var parse_result = UhfUtility.ParseTag(epc_bank,
+        null,
+        4);
+                    if (parse_result.Value == -1)
+                        return "uid:" + uid;
+
+                    return parse_result.UII;
+                }
+                else
+                {
+                    var use_gxlm_pii = StringUtil.IsInList("gxlm_pii", style);
+                    // *** 高校联盟 UHF
+                    var parse_result = GaoxiaoUtility.ParseTag(
+        epc_bank,
+        use_gxlm_pii ? null : taginfo.Bytes,
+        "");  // "convertValueToGB"
+                    if (parse_result.Value == -1)
+                    {
+                        return "uid:" + uid;
+                    }
+
+                    string pii = GetPiiPart(parse_result.EpcInfo.PII);
+
+                    if (use_gxlm_pii)
+                        return pii;
+
+                    // 从 User Bank 中取得 OI
+                    string oi = parse_result.LogicChip?.FindElement(ElementOID.OI)?.Text;
+                    if (string.IsNullOrEmpty(oi))
+                        oi = parse_result.LogicChip?.FindElement((ElementOID)27)?.Text;    // 注: 高校联盟没有 AOI 字段，只有 27 字段
+
+                    // 构造 UII
+                    if (string.IsNullOrEmpty(oi))
+                        return pii;
+                    else
+                        return oi + "." + pii;
+                }
+            }
+        }
+
+        // 返回 null/"blank"/"gb"/"gxlm"，
+        // 分别表示 "无法判断"/"空白超高频标签"/"国标"/"高校联盟"
+        public static string GetUhfProtocol(TagInfo taginfo)
+        {
+            if (taginfo == null)
+                return null;
+            if (taginfo.Protocol == InventoryInfo.ISO18000P6C)
+            {
+                var epc_bank = Element.FromHexString(taginfo.UID);
+                if (UhfUtility.IsBlankTag(epc_bank, taginfo.Bytes) == true)
+                    return "blank"; // 空白超高频标签内容
+                var isGB = UhfUtility.IsISO285604Format(epc_bank, taginfo.Bytes);
+                if (isGB)
+                    return "gb";
+                else
+                    return "gxlm";
+            }
+            return null;    // 表示不是超高频标签
+        }
+
+        // 获得 oi.pii 的 oi 部分
+        public static string GetOiPart(string oi_pii, bool return_null)
+        {
+            if (oi_pii.IndexOf(".") == -1)
+            {
+                if (return_null)
+                    return null;
+                return "";
+            }
+            var parts = StringUtil.ParseTwoPart(oi_pii, ".");
+            return parts[0];
+        }
+
+        // 获得 oi.pii 的 pii 部分
+        public static string GetPiiPart(string oi_pii)
+        {
+            if (oi_pii.IndexOf(".") == -1)
+                return oi_pii;
+            var parts = StringUtil.ParseTwoPart(oi_pii, ".");
+            return parts[1];
+        }
+
+
 
         // 填充 Books 和 Patrons 每个元素的 .TagInfo
         public static int FillTagInfo(BaseChannel<IRfid> channel)
@@ -1007,6 +1251,7 @@ namespace DigitalPlatform.RFID
         public static bool SetEasData(string uid, bool enable)
         {
             _tagTable.Remove(uid);
+
             // 找到对应事项，修改 EAS 和 AFI
             var data = FindBookTag(uid);
             if (data == null)

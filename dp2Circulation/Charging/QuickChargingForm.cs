@@ -22,6 +22,8 @@ using DigitalPlatform.RFID;
 using DigitalPlatform.Core;
 
 using dp2Circulation.Charging;
+using DocumentFormat.OpenXml.EMMA;
+using System.Data.Entity.Core.Metadata.Edm;
 
 namespace dp2Circulation
 {
@@ -267,7 +269,7 @@ namespace dp2Circulation
                         foreach (var tag in e.RemovePatrons)
                         {
                             if (tag.OneTag != null)
-                                SetLastTime(tag.OneTag.UID, now);
+                                SetLastTime(tag.OneTag, now);
                         }
                 }
 
@@ -281,7 +283,7 @@ namespace dp2Circulation
                         foreach (var tag in e.RemoveBooks)
                         {
                             if (tag.OneTag != null)
-                                SetLastTime(tag.OneTag.UID, now);
+                                SetLastTime(tag.OneTag, now);
                         }
                     if (e.UpdateBooks != null)
                         foreach (var tag in e.UpdateBooks)
@@ -355,27 +357,49 @@ namespace dp2Circulation
             CheckMultiPatronCard();
         }
 
-
+        // 从 TagInfo 中获取标签内容 PII
         public static string GetPII(TagInfo tagInfo)
         {
-            // Exception:
-            //      可能会抛出异常 ArgumentException TagDataException
-            LogicChip chip = LogicChip.From(tagInfo.Bytes,
-(int)tagInfo.BlockSize,
-"" // tagInfo.LockStatus
-);
-            return chip.FindElement(ElementOID.PII)?.Text;
+            // 2023/10/30
+            if (tagInfo.Protocol == InventoryInfo.ISO18000P6C)
+            {
+                // UHF
+                var chip_info = RfidTagList.GetUhfChipInfo(tagInfo);
+                // return chip_info.Chip?.FindElement(ElementOID.PII)?.Text;
+                return chip_info.PII;
+            }
+            else
+            {
+                // Exception:
+                //      可能会抛出异常 ArgumentException TagDataException
+                LogicChip chip = LogicChip.From(tagInfo.Bytes,
+    (int)tagInfo.BlockSize,
+    "" // tagInfo.LockStatus
+    );
+                return chip.FindElement(ElementOID.PII)?.Text;
+            }
         }
 
+        // 从 TagInfo 中获取标签内容 TOU
         public static string GetTOU(TagInfo tagInfo)
         {
-            // Exception:
-            //      可能会抛出异常 ArgumentException TagDataException
-            LogicChip chip = LogicChip.From(tagInfo.Bytes,
+            // 2023/10/30
+            if (tagInfo.Protocol == InventoryInfo.ISO18000P6C)
+            {
+                // UHF
+                var chip_info = RfidTagList.GetUhfChipInfo(tagInfo);
+                return chip_info.Chip?.FindElement(ElementOID.TypeOfUsage)?.Text;
+            }
+            else
+            {
+                // Exception:
+                //      可能会抛出异常 ArgumentException TagDataException
+                LogicChip chip = LogicChip.From(tagInfo.Bytes,
 (int)tagInfo.BlockSize,
 "" // tagInfo.LockStatus
 );
-            return chip.FindElement(ElementOID.TypeOfUsage)?.Text;
+                return chip.FindElement(ElementOID.TypeOfUsage)?.Text;
+            }
         }
 
         // UID --> 最近出现时间 的对照表
@@ -385,21 +409,64 @@ namespace dp2Circulation
 
         static TimeSpan _minDelay = TimeSpan.FromMilliseconds(500);
 
-        DateTime GetLastTime(string uid)
+        /* 注: 对于 UHF 标签，不能直接用 UID 作为检查重复的 key。
+         * 一个方法是将 UID 加工处理，抽掉其中表达 EAS 的 bit，构成一个可用的专用于判重的 UID 字符串
+         * 另外一个方法是，把 UID 解析为 UII 以后，用 UII 作为判重字符串
+         * */
+        static string GetTimeKey(OneTag tag)
         {
+            if (tag.Protocol == InventoryInfo.ISO18000P6C)
+            {
+                if (tag.TagInfo == null)
+                {
+                    var taginfo = new TagInfo
+                    {
+                        Protocol = InventoryInfo.ISO18000P6C,
+                        UID = tag.UID,
+                        Bytes = null,
+                    };
+                    return RfidTagList.GetUhfUii(taginfo, "gxlm_pii");
+                    // return "uid:" + tag.UID;
+                }
+                return RfidTagList.GetUhfUii(tag.TagInfo, "gxlm_pii");
+            }
+            return tag.UID;
+        }
+
+
+        DateTime GetLastTime(OneTag tag)
+        {
+            var uid = GetTimeKey(tag);
             lock (_uidTable.SyncRoot)
             {
                 if (_uidTable.ContainsKey(uid) == false)
                     return DateTime.MinValue;
                 DateTime time = (DateTime)_uidTable[uid];
+                // Debug.WriteLine($"GetLastTime: uid={uid}, return time={time.ToString()}");
                 return time;
             }
         }
 
-        void SetLastTime(string uid, DateTime now)
+        internal void SetLastTime(
+            string type,
+            string uid,
+            DateTime now)
+        {
+            if (type == "uid")
+                SetLastTime(new OneTag { UID = uid }, now);
+            else if (type == "pii")
+                _setLastTime(uid, now);
+            else
+                throw new ArgumentException($"未知的 type 值 '{type}'");
+        }
+
+        void _setLastTime(string uid, DateTime now)
         {
             if (string.IsNullOrEmpty(uid))
+            {
+                // Debug.WriteLine("SetLastTime() skip 2");
                 return;
+            }
 
             lock (_uidTable.SyncRoot)
             {
@@ -407,6 +474,33 @@ namespace dp2Circulation
                     _uidTable.Clear();  // TODO: 可以优化为每隔一段时间自动清除太旧的事项
                 _uidTable[uid] = now;
             }
+        }
+
+        void SetLastTime(OneTag tag, DateTime now)
+        {
+            if (string.IsNullOrEmpty(tag.UID))
+            {
+                // Debug.WriteLine("SetLastTime() skip 1");
+                return;
+            }
+            var uid = GetTimeKey(tag);
+            // Debug.WriteLine($"SetLastTime: uid={uid}, time={now.ToString()}");
+
+            /*
+            if (string.IsNullOrEmpty(uid))
+            {
+                Debug.WriteLine("SetLastTime() skip 2");
+                return;
+            }
+
+            lock (_uidTable.SyncRoot)
+            {
+                if (_uidTable.Count > 1000)
+                    _uidTable.Clear();  // TODO: 可以优化为每隔一段时间自动清除太旧的事项
+                _uidTable[uid] = now;
+            }
+            */
+            _setLastTime(uid, now);
         }
 
         public bool PauseRfid = true;
@@ -422,7 +516,7 @@ namespace dp2Circulation
             {
                 // 检查时间差额
                 {
-                    DateTime last_time = GetLastTime(data.OneTag.UID);
+                    DateTime last_time = GetLastTime(data.OneTag);
                     if (now - last_time < _minDelay)
                     {
                         Debug.WriteLine("smooth ISO14443A");
@@ -430,7 +524,7 @@ namespace dp2Circulation
                     }
                 }
 
-                SetLastTime(data.OneTag.UID, DateTime.Now);
+                SetLastTime(data.OneTag, DateTime.Now);
 
                 TaskList.Sound(0);
 
@@ -443,6 +537,7 @@ namespace dp2Circulation
                 return;
             }
 
+            // 注: 第一阶段通知的时候 .TagInfo 为 null，只要忽略这一次即可。等后面第二轮通知再到来时候就有 TagInfo 了
             if (data.OneTag.TagInfo == null)
             {
                 //Debug.WriteLine("TagInfo == null");
@@ -459,23 +554,27 @@ namespace dp2Circulation
                 return;
             }
 
+            /* 注: 这里可能有读者卡，而读者卡不需要缓存到 _easForm
             // 缓存起来
             if (_easForm != null)
                 _easForm.SetUID(pii, data.OneTag.UID);
+            */
 
             Debug.WriteLine($"pii={pii}");
 
             // 检查时间差额
             {
-                DateTime last_time = GetLastTime(data.OneTag.UID);
+
+
+                DateTime last_time = GetLastTime(data.OneTag);
                 if (now - last_time < _minDelay)
                 {
-                    Debug.WriteLine("smooth ISO15693");
+                    Debug.WriteLine($"smooth {data.OneTag.Protocol}");
                     return;
                 }
             }
 
-            SetLastTime(data.OneTag.UID, now);
+            SetLastTime(data.OneTag, now);
 
             string strTypeOfUsage = GetTOU(data.OneTag.TagInfo);
             if (string.IsNullOrEmpty(strTypeOfUsage))
@@ -494,6 +593,10 @@ namespace dp2Circulation
                 // && _easForm.ErrorCount > 0
                 )
             {
+                // 缓存起来
+                if (_easForm != null)
+                    _easForm.SetUID(pii, data.OneTag.UID);
+
                 // 尝试自动修正 EAS
                 // result.Value
                 //      -1  出错
@@ -620,7 +723,7 @@ namespace dp2Circulation
             return _easForm.GetEAS(reader_name, tag_name);
         }
 
-        internal NormalResult SetEAS(
+        internal SetEasResult SetEAS(
             ChargingTask task,
             string reader_name,
             string tag_name,

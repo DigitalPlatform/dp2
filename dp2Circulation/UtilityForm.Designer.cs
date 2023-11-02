@@ -134,10 +134,10 @@
             this.textBox_addCrLf_sourceFilename = new System.Windows.Forms.TextBox();
             this.button_addCrLf_getSourceFileName = new System.Windows.Forms.Button();
             this.tabPage_accessNo = new System.Windows.Forms.TabPage();
+            this.button_accessNo_removeRangeEnd = new System.Windows.Forms.Button();
             this.button_accessNo_sort = new System.Windows.Forms.Button();
             this.label20 = new System.Windows.Forms.Label();
             this.textBox_accessNo_lines = new System.Windows.Forms.TextBox();
-            this.button_accessNo_removeRangeEnd = new System.Windows.Forms.Button();
             this.tabControl_main.SuspendLayout();
             this.tabPage_sjhm.SuspendLayout();
             this.tabPage_xmlEditor.SuspendLayout();
@@ -1004,7 +1004,7 @@
             // button_health_tryLogin
             // 
             this.button_health_tryLogin.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.button_health_tryLogin.Location = new System.Drawing.Point(302, 362);
+            this.button_health_tryLogin.Location = new System.Drawing.Point(297, 529);
             this.button_health_tryLogin.Margin = new System.Windows.Forms.Padding(5);
             this.button_health_tryLogin.Name = "button_health_tryLogin";
             this.button_health_tryLogin.Size = new System.Drawing.Size(275, 40);
@@ -1022,14 +1022,14 @@
             this.label_health_message.Location = new System.Drawing.Point(17, 30);
             this.label_health_message.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label_health_message.Name = "label_health_message";
-            this.label_health_message.Size = new System.Drawing.Size(699, 327);
+            this.label_health_message.Size = new System.Drawing.Size(916, 494);
             this.label_health_message.TabIndex = 1;
             this.label_health_message.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // button_health_speedTest
             // 
             this.button_health_speedTest.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.button_health_speedTest.Location = new System.Drawing.Point(17, 362);
+            this.button_health_speedTest.Location = new System.Drawing.Point(12, 529);
             this.button_health_speedTest.Margin = new System.Windows.Forms.Padding(5);
             this.button_health_speedTest.Name = "button_health_speedTest";
             this.button_health_speedTest.Size = new System.Drawing.Size(275, 40);
@@ -1467,6 +1467,17 @@
             this.tabPage_accessNo.Text = "索取号";
             this.tabPage_accessNo.UseVisualStyleBackColor = true;
             // 
+            // button_accessNo_removeRangeEnd
+            // 
+            this.button_accessNo_removeRangeEnd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.button_accessNo_removeRangeEnd.Location = new System.Drawing.Point(138, 546);
+            this.button_accessNo_removeRangeEnd.Name = "button_accessNo_removeRangeEnd";
+            this.button_accessNo_removeRangeEnd.Size = new System.Drawing.Size(173, 37);
+            this.button_accessNo_removeRangeEnd.TabIndex = 6;
+            this.button_accessNo_removeRangeEnd.Text = "删除范围末尾";
+            this.button_accessNo_removeRangeEnd.UseVisualStyleBackColor = true;
+            this.button_accessNo_removeRangeEnd.Click += new System.EventHandler(this.button_accessNo_removeRangeEnd_Click);
+            // 
             // button_accessNo_sort
             // 
             this.button_accessNo_sort.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
@@ -1501,17 +1512,6 @@
             this.textBox_accessNo_lines.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.textBox_accessNo_lines.Size = new System.Drawing.Size(928, 483);
             this.textBox_accessNo_lines.TabIndex = 3;
-            // 
-            // button_accessNo_removeRangeEnd
-            // 
-            this.button_accessNo_removeRangeEnd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.button_accessNo_removeRangeEnd.Location = new System.Drawing.Point(138, 546);
-            this.button_accessNo_removeRangeEnd.Name = "button_accessNo_removeRangeEnd";
-            this.button_accessNo_removeRangeEnd.Size = new System.Drawing.Size(173, 37);
-            this.button_accessNo_removeRangeEnd.TabIndex = 6;
-            this.button_accessNo_removeRangeEnd.Text = "删除范围末尾";
-            this.button_accessNo_removeRangeEnd.UseVisualStyleBackColor = true;
-            this.button_accessNo_removeRangeEnd.Click += new System.EventHandler(this.button_accessNo_removeRangeEnd_Click);
             // 
             // UtilityForm
             // 

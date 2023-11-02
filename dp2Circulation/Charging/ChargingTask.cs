@@ -37,7 +37,7 @@ namespace dp2Circulation
 
         public string ReaderBarcodeRfidType = "";
         // 册条码号是否为 rfid 类型。值为 "pii" "uid" 和 "" 之一
-        // 如果是 "pii" 或 "uid"，则完成借书和还书操作最后一步要修改 RFID 标签的 EAS 标指
+        // 如果是 "pii" 或 "uid"，则完成借书和还书操作最后一步要修改 RFID 标签的 EAS
         public string ItemBarcodeEasType = "";
 
         const int IMAGEINDEX_WAITING = 0;
@@ -907,7 +907,10 @@ namespace dp2Circulation
                 // 修改 EAS
                 if (string.IsNullOrEmpty(task.ItemBarcodeEasType) == false)
                 {
-                    if (SetEAS(task, false, out strError) == false)
+                    if (SetEAS(task, 
+                        false, 
+                        out string changed_uid,
+                        out strError) == false)
                     {
                         // TODO: 要 undo 刚才进行的操作
                         // lRet = -1;
@@ -916,6 +919,8 @@ namespace dp2Circulation
                             task.ErrorInfo += "; ";
                         task.ErrorInfo += strError;
                     }
+
+                    // TODO: 需要压制一次 UID 引起的借还操作(changed_uid)
                 }
             }
 
@@ -1100,10 +1105,12 @@ end_time);
         bool PreSetEAS(ChargingTask task,
     bool enable,
     out bool old_state,
+    out string changed_uid,
     out string strError)
         {
             strError = "";
             old_state = false;
+            changed_uid = null;
             try
             {
                 string tag_name = ToLower(task.ItemBarcodeEasType) + ":" + task.ItemBarcode;
@@ -1136,8 +1143,18 @@ end_time);
                 if (old_state == enable)
                     return true;
 
+                // 2023/11/1
+                if (string.IsNullOrEmpty(task.ItemBarcode) == false)
                 {
-                    NormalResult result = null;
+                    // Debug.WriteLine("PreSetEAS() call SetLastTime()");
+                    this.Container.SetLastTime(
+                        task.ItemBarcodeEasType,
+                        task.ItemBarcode,
+                        DateTime.Now);
+                }
+
+                {
+                    SetEasResult result = null;
                     // 修改 EAS。带有重试功能 // 2019/9/2
                     for (int i = 0; i < 2; i++)
                     {
@@ -1152,6 +1169,8 @@ end_time);
                         if (result.Value == 1)
                             break;
                     }
+
+                    changed_uid = result.ChangedUID;
 
                     RfidTagList.ClearTagTable("");
                     FillTagList();
@@ -1197,13 +1216,15 @@ end_time);
         bool SetEAS(ChargingTask task,
             bool enable,
             // bool preprocess,
+            out string changed_uid,
             out string strError)
         {
             string prefix = "";
             strError = "";
+            changed_uid = null;
             try
             {
-                NormalResult result = null;
+                SetEasResult result = null;
                 /*
                 if (preprocess == true)
                 {
@@ -1219,11 +1240,24 @@ end_time);
                 else
                 */
                 {
+                    // 2023/11/1
+                    if (string.IsNullOrEmpty(task.ItemBarcode) == false)
+                    {
+                        // Debug.WriteLine("SetEAS() call SetLastTime()");
+                        this.Container.SetLastTime(
+                            task.ItemBarcodeEasType,
+                            task.ItemBarcode, 
+                            DateTime.Now);
+                    }
+
                     result = this.Container.SetEAS(
                         task,
                         "*",
                         ToLower(task.ItemBarcodeEasType) + ":" + task.ItemBarcode,
                         enable);
+                    changed_uid = result.ChangedUID;
+
+
                 }
 
                 // testing
@@ -1518,12 +1552,18 @@ end_time);
                 // 修改 EAS
                 if (string.IsNullOrEmpty(task.ItemBarcodeEasType) == false)
                 {
-                    if (PreSetEAS(task, true, out bool old_eas, out strError) == false)
+                    if (PreSetEAS(task, 
+                        true, 
+                        out bool old_eas,
+                        out string changed_uid,
+                        out strError) == false)
                     {
                         // task.ErrorInfo = $"{strError}\r\n还书操作没有执行，EAS 不需要修正";
                         task.ErrorInfo = $"{strError}\r\n还书操作失败";   // EAS 不需要额外修正
                         goto ERROR1;
                     }
+
+                    // TODO: 需要压制一次 UID 引起的借还操作(changed_uid)
 
                     if (old_eas == false)
                         eas_changed = true;
@@ -1615,7 +1655,10 @@ end_time);
                 else
                 {
                     // Undo 早先的 EAS 修改
-                    if (SetEAS(task, false, out strError) == false)
+                    if (SetEAS(task,
+                        false, 
+                        out string changed_uid,
+                        out strError) == false)
                     {
                         // lRet = -1;
                         lRet = 1;
@@ -1623,6 +1666,8 @@ end_time);
                             task.ErrorInfo += "; ";
                         task.ErrorInfo += $"回滚 EAS 阶段: {strError}";
                     }
+
+                    // TODO: 需要压制一次 UID 引起的借还操作(changed_uid)
                 }
             }
 

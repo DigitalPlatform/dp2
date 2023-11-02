@@ -481,7 +481,7 @@
             // 
             this.splitContainer_rfidArea.Panel2.Controls.Add(this.chipEditor_editing);
             this.splitContainer_rfidArea.Size = new System.Drawing.Size(396, 492);
-            this.splitContainer_rfidArea.SplitterDistance = 205;
+            this.splitContainer_rfidArea.SplitterDistance = 203;
             this.splitContainer_rfidArea.SplitterWidth = 5;
             this.splitContainer_rfidArea.TabIndex = 0;
             // 
@@ -492,7 +492,7 @@
             this.chipEditor_existing.LogicChipItem = null;
             this.chipEditor_existing.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
             this.chipEditor_existing.Name = "chipEditor_existing";
-            this.chipEditor_existing.Size = new System.Drawing.Size(205, 492);
+            this.chipEditor_existing.Size = new System.Drawing.Size(203, 492);
             this.chipEditor_existing.TabIndex = 0;
             this.chipEditor_existing.TitleVisible = true;
             // 
@@ -503,7 +503,7 @@
             this.chipEditor_editing.LogicChipItem = null;
             this.chipEditor_editing.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
             this.chipEditor_editing.Name = "chipEditor_editing";
-            this.chipEditor_editing.Size = new System.Drawing.Size(186, 492);
+            this.chipEditor_editing.Size = new System.Drawing.Size(188, 492);
             this.chipEditor_editing.TabIndex = 1;
             this.chipEditor_editing.TitleVisible = true;
             // 
@@ -543,8 +543,8 @@
             // EntityEditForm
             // 
             this.AcceptButton = this.button_OK;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
+            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.CancelButton = this.button_Cancel;
             this.ClientSize = new System.Drawing.Size(1009, 641);
             this.Controls.Add(this.tableLayoutPanel_main);

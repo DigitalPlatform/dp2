@@ -519,7 +519,7 @@ out Reader reader);
         // return result.Value
         //      -1  出错
         //      0   成功
-        public NormalResult SetEAS(
+        public SetEasResult SetEAS(
     string reader_name,
     string uid,
     uint antenna_id,
@@ -528,7 +528,7 @@ out Reader reader);
         {
             var readers = GetReadersByName(reader_name);
             if (readers.Count == 0)
-                return new NormalResult { Value = -1, ErrorInfo = $"没有找到名为 {reader_name} 的读卡器" };
+                return new SetEasResult { Value = -1, ErrorInfo = $"没有找到名为 {reader_name} 的读卡器" };
 
             // 锁定所有读卡器
             Lock();
@@ -575,7 +575,7 @@ out Reader reader);
 
                         // 设置 EAS 状态
                         tag.TagInfo.EAS = enable;
-                        return new NormalResult();
+                        return new SetEasResult();
                     }
                     finally
                     {
@@ -585,9 +585,18 @@ out Reader reader);
 
                 // 循环中曾经出现过报错
                 if (error_results.Count > 0)
-                    return error_results[0];
+                {
+                    // return error_results[0];
+                    var first_error = error_results[0];
+                    return new SetEasResult
+                    {
+                        Value = first_error.Value,
+                        ErrorCode = first_error.ErrorCode,
+                        ErrorInfo = first_error.ErrorInfo
+                    };
+                }
 
-                return new NormalResult
+                return new SetEasResult
                 {
                     Value = -1,
                     ErrorInfo = $"没有找到 UID 为 {uid} 的标签",

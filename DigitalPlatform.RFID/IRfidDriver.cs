@@ -510,6 +510,15 @@ uint new_password);
         public UIntPtr LockHandle { get; set; }
     }
 
+    // 2023/10/30
+    [Serializable()]
+    public class SetEasResult : NormalResult
+    {
+        // 修改后的 UID
+        // 注: UHF 标签在修改 EAS 以后，UID 会发生变化
+        public string ChangedUID { get; set; }
+    }
+
 #if OLD_SHELFLOCK
 
     [Serializable()]

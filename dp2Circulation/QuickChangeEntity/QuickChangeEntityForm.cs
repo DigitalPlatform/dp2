@@ -724,7 +724,7 @@ MessageBoxDefaultButton.Button2);
                         e.Text = $"准备将 PII '{auto_select_pii}' 写入 RFID 标签，请在读写器上放置贴有标签的图书 ...";
                     };
 
-                    dialog.ProtocolFilter = InventoryInfo.ISO15693;
+                    dialog.ProtocolFilter = InventoryInfo.ISO15693 + "," + InventoryInfo.ISO18000P6C;
                     Program.MainForm.AppInfo.LinkFormState(dialog, "selectTagDialog_formstate");
                     dialog.ShowDialog(this);
 
@@ -821,9 +821,45 @@ out strError);
 #endif
             try
             {
-                new_tag_info = LogicChipItem.ToTagInfo(
+
+                if (_tagExisting.Protocol == InventoryInfo.ISO15693)
+                {
+                    new_tag_info = LogicChipItem.ToTagInfo(
                     _tagExisting.TagInfo,
                     _right);
+                }
+                else if (_tagExisting.Protocol == InventoryInfo.ISO18000P6C)
+                {
+                    new_tag_info = RfidToolForm.BuildWritingTagInfo(_tagExisting.TagInfo,
+                        _right,
+                        true,
+                        Program.MainForm.UhfDataFormat, // gb/gxlm/auto
+                        (initial_format) =>
+                        {
+                            throw new Exception("意外触发格式选择回调函数");
+                            // 如果是空白标签，需要弹出对话框提醒选择格式
+                        },
+                        (new_format, old_format) =>
+                        {
+                            string warning = $"警告：即将用{RfidToolForm.GetUhfFormatCaption(new_format)}格式覆盖原有{RfidToolForm.GetUhfFormatCaption(old_format)}格式";
+                            DialogResult dialog_result = MessageBox.Show(this,
+    $"{warning}\r\n\r\n确实要覆盖？",
+    $"QuickChangeEntityForm",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+                            if (dialog_result == DialogResult.Yes)
+                                return true;
+                            return false;
+                        },
+                        true);
+                }
+                else
+                {
+                    strError = $"无法识别的 RFID 格式 '{_tagExisting.Protocol}'";
+                    return -1;
+                }
+
 #if OLD_CODE
                 NormalResult result = channel.Object.WriteTagInfo(
                     _tagExisting.ReaderName,
@@ -835,6 +871,9 @@ out strError);
     _tagExisting.TagInfo,
     new_tag_info);
                 RfidTagList.ClearTagTable(_tagExisting.UID);
+                // 2023/10/31
+                if (_tagExisting.Protocol == InventoryInfo.ISO18000P6C)
+                    RfidTagList.ClearTagTable(new_tag_info.UID);
 #endif
                 if (result.Value == -1)
                 {

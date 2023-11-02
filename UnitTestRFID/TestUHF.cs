@@ -430,5 +430,90 @@ USR 000879030000845600000C022808100400010001000000000000000000000000000000000000
 
             Debug.WriteLine(result.ToString());
         }
+
+
+        [TestMethod]
+        public void test_overwriteBank_01()
+        {
+            var old_bytes = new byte[] { 0, 0 };
+            var new_bytes = new byte[] { 1, 1 };
+            var result_bytes = UhfUtility.OverwriteBank(old_bytes, new_bytes);
+            Assert.AreEqual(2, result_bytes.Length);
+            AssertBytes(result_bytes, new_bytes);
+        }
+
+        // old 延展部分多出来一些 0 byte。不影响 new
+        [TestMethod]
+        public void test_overwriteBank_02()
+        {
+            var old_bytes = new byte[] { 0, 0, 0 };
+            var new_bytes = new byte[] { 1, 1 };
+            var result_bytes = UhfUtility.OverwriteBank(old_bytes, new_bytes);
+            Assert.AreEqual(2, result_bytes.Length);
+            AssertBytes(result_bytes, new_bytes);
+        }
+
+        // old 延展部分多出来一些非 0 byte。new 因此要延长一部分，以便可以有效覆盖这部分 old 内容
+        [TestMethod]
+        public void test_overwriteBank_03()
+        {
+            var old_bytes = new byte[] { 0, 0, 3 };
+            var new_bytes = new byte[] { 1, 2 };
+            var correct_bytes = new byte[] { 1, 2, 0 };
+            var result_bytes = UhfUtility.OverwriteBank(old_bytes, new_bytes);
+            AssertBytes(correct_bytes, result_bytes);
+        }
+
+        // old 延展部分多出来一些非 0 byte。new 因此要延长一部分，以便可以有效覆盖这部分 old 内容
+        [TestMethod]
+        public void test_overwriteBank_04()
+        {
+            var old_bytes = new byte[] { 0, 0, 3, 0 };
+            var new_bytes = new byte[] { 1, 2 };
+            var correct_bytes = new byte[] { 1, 2, 0 };
+            var result_bytes = UhfUtility.OverwriteBank(old_bytes, new_bytes);
+            AssertBytes(correct_bytes, result_bytes);
+        }
+
+        // old 延展部分多出来一些非 0 byte。new 因此要延长一部分，以便可以有效覆盖这部分 old 内容
+        [TestMethod]
+        public void test_overwriteBank_05()
+        {
+            var old_bytes = new byte[] { 0, 0, 0, 4 };
+            var new_bytes = new byte[] { 1, 2 };
+            var correct_bytes = new byte[] { 1, 2, 0, 0 };
+            var result_bytes = UhfUtility.OverwriteBank(old_bytes, new_bytes);
+            AssertBytes(correct_bytes, result_bytes);
+        }
+
+        // 特殊情况测试
+        [TestMethod]
+        public void test_overwriteBank_11()
+        {
+            byte[] old_bytes = null;
+            var new_bytes = new byte[] { 1, 2 };
+            var correct_bytes = new byte[] { 1, 2 };
+            var result_bytes = UhfUtility.OverwriteBank(old_bytes, new_bytes);
+            AssertBytes(correct_bytes, result_bytes);
+        }
+
+        [TestMethod]
+        public void test_overwriteBank_12()
+        {
+            byte[] old_bytes = new byte[] { 1, 2 };
+            byte[] new_bytes = null;
+            var correct_bytes = new byte[] { 0, 0 };
+            var result_bytes = UhfUtility.OverwriteBank(old_bytes, new_bytes);
+            AssertBytes(correct_bytes, result_bytes);
+        }
+
+        void AssertBytes(byte[] bytes1, byte[] bytes2)
+        {
+            Assert.AreEqual(bytes1.Length, bytes2.Length);
+            for (int i = 0; i < bytes1.Length; i++)
+            {
+                Assert.AreEqual(bytes1[i], bytes2[i]);
+            }
+        }
     }
 }

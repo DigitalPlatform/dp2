@@ -18,6 +18,7 @@ using DigitalPlatform.Core;
 using DigitalPlatform.GUI;
 using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.RFID;
+using DigitalPlatform.RFID.UI;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 
@@ -354,6 +355,15 @@ namespace RfidTool
             */
         }
 
+        // 刷新 ListViewItem 的显示。常用于 item_info.TagData 发生改变后
+        void RefreshItem(ListViewItem item)
+        {
+            var item_info = item.Tag as ItemInfo;
+            if (item_info == null)
+                return;
+            RefreshItem(item, item_info.TagData);
+        }
+
         void RemoveTags(List<TagAndData> tags)
         {
             foreach (var tag in tags)
@@ -401,6 +411,27 @@ namespace RfidTool
 
                     if (taginfo.Protocol == InventoryInfo.ISO18000P6C)
                     {
+                        var uhf_info = RfidTagList.GetUhfChipInfo(taginfo, ""); // "dontCheckUMI"
+
+                        if (string.IsNullOrEmpty(uhf_info.ErrorInfo) == false)
+                        {
+                            var ex = new Exception(uhf_info.ErrorInfo);
+                            iteminfo.Exception = ex;
+                            ListViewUtil.ChangeItemText(item, COLUMN_PII, "error:" + ex.Message);
+                            SetItemColor(item, "error");
+                            return;
+                        }
+
+                        // TODO: 对于 .Bytes 缺失的畸形 UHF 标签，最好是尽量解析内容，然后给出警告信息解释问题所在
+                        // 单独严格解析一次标签内容
+
+                        chip = uhf_info.Chip;
+                        // taginfo.EAS 可能会被修改
+                        iteminfo.UhfProtocol = uhf_info.UhfProtocol;
+                        pii = uhf_info.PII;
+                        oi = uhf_info.OI;
+
+#if REMOVED
                         var epc_bank = Element.FromHexString(taginfo.UID);
 
                         if (UhfUtility.IsBlankTag(epc_bank, taginfo.Bytes) == true)
@@ -440,6 +471,7 @@ namespace RfidTool
                                 oi = GetOiPart(parse_result.EpcInfo.PII, false);
                             }
                         }
+#endif
                     }
                     else
                     {
@@ -730,13 +762,15 @@ namespace RfidTool
                     return;
                 }
 
+                bool localStore = this.UseLocalStoreage();
+#if REMOVED
                 // TODO: 本地存储情况下，直接使用册记录中的 OI
                 // 还可以提供一种强制使用 OiSetting 中的 OI 的方法
 
-                bool localStore = this.UseLocalStoreage();
 
                 if (localStore == false)
                 {
+                    // TODO: 如果是写入超高频标签的高校联盟格式，并且不允许写入 User Bank，这时候应该允许 OI 为空
                     string error = VerifyOiSetting();
                     if (error != null)
                     {
@@ -754,6 +788,7 @@ namespace RfidTool
                         return;
                     }
                 }
+#endif
 
                 string oi = DataModel.DefaultOiString;
                 string aoi = DataModel.DefaultAoiString;
@@ -844,6 +879,48 @@ namespace RfidTool
                         return;
                 }
 
+                // 检查 settings 中配置的 OI
+                {
+                    // TODO: 本地存储情况下，直接使用册记录中的 OI
+                    // 还可以提供一种强制使用 OiSetting 中的 OI 的方法
+
+                    string error = null;
+                    // 如果是写入超高频标签的高校联盟格式，并且不允许写入 User Bank，这时候应该允许 OI 为空
+                    // (并且只能为空)
+                    if (tag.TagInfo.Protocol == InventoryInfo.ISO18000P6C
+                        && DataModel.UhfWriteFormat == "高校联盟格式"
+                        && DataModel.WriteUhfUserBank == false)
+                    {
+                        // 检查
+                        var default_oi = DataModel.DefaultOiString;
+                        var default_aoi = DataModel.DefaultAoiString;
+                        if (string.IsNullOrEmpty(default_oi) == false
+                            || string.IsNullOrEmpty(default_aoi) == false)
+                            error = "当尝试写入高校联盟格式超高频标签的时候，配置了不写入 User Bank，那么配置的 O I (所属机构代码) 或 A O I (非标准所属机构代码) 无法写入标签。请重新配置";
+                    }
+                    else if (localStore == false)
+                    {
+                        // 其它情况的验证
+                        error = VerifyOiSetting();
+                    }
+
+                    if (error != null)
+                    {
+                        FormClientInfo.Speak(error);
+                        MessageBox.Show(this, error.Replace(" ", ""));
+                        using (SettingDialog dlg = new SettingDialog())
+                        {
+                            GuiUtil.SetControlFont(dlg, this.Font);
+                            ClientInfo.MemoryState(dlg, "settingDialog", "state");
+
+                            dlg.ShowDialog(this);
+                            if (dlg.DialogResult == DialogResult.OK)
+                                DataModel.TagList.EnableTagCache = DataModel.EnableTagCache;
+                        }
+                        return;
+                    }
+                }
+
                 var uid = tag.UID;
                 var tou = this.TypeOfUsage;
                 if (string.IsNullOrEmpty(tou))
@@ -928,7 +1005,7 @@ namespace RfidTool
         {
             StringBuilder text = new StringBuilder();
             int i = 0;
-            foreach(var ch in number)
+            foreach (var ch in number)
             {
                 if (i > 0)
                     text.Append(" ");
@@ -1031,7 +1108,7 @@ namespace RfidTool
             string oi = DataModel.DefaultOiString;
             string aoi = DataModel.DefaultAoiString;
             if (string.IsNullOrEmpty(oi) && string.IsNullOrEmpty(aoi))
-                return "OI(所属机构代码) 和 AOI(非标准所属机构代码) 尚未配置";
+                return "O I (所属机构代码) 和 A O I (非标准所属机构代码) 尚未配置";
             return null;
         }
 
@@ -1143,11 +1220,24 @@ MessageBoxDefaultButton.Button2);
                     // chip.SetElement(ElementOID.TypeOfUsage, tou);
                     SetTypeOfUsage(chip, "gxlm");
 
+                    /*
+                    // 2023/10/24
+                    // chip 中的 AOI 改到 OI 中。这是由“设置”对话框的局限造成的麻烦。(设置对话框中不允许非规范的机构代码填入 OI 文字框，只能填入 AOI 文字框)
+                    {
+                        var element_aoi = chip.FindElement(ElementOID.AOI);
+                        if (element_aoi != null && string.IsNullOrEmpty(element_aoi.Text) == false)
+                        {
+                            chip.SetElement(ElementOID.OI, element_aoi.Text, false);
+                            chip.RemoveElement(ElementOID.AOI);
+                        }
+                    }
+                    */
+
                     var result = GaoxiaoUtility.BuildTag(chip, build_user_bank, eas);
                     if (result.Value == -1)
                         throw new Exception(result.ErrorInfo);
                     new_tag_info.Bytes = build_user_bank ? result.UserBank : null;
-                    new_tag_info.UID = existing.UID.Substring(0, 4) + Element.GetHexString(result.EpcBank);
+                    new_tag_info.UID = UhfUtility.EpcBankHex(result.EpcBank);  // existing.UID.Substring(0, 4) + Element.GetHexString(result.EpcBank);
                 }
                 else
                 {
@@ -1172,7 +1262,7 @@ MessageBoxDefaultButton.Button2);
                     if (result.Value == -1)
                         throw new Exception(result.ErrorInfo);
                     new_tag_info.Bytes = build_user_bank ? result.UserBank : null;
-                    new_tag_info.UID = existing.UID.Substring(0, 4) + Element.GetHexString(result.EpcBank);
+                    new_tag_info.UID = UhfUtility.EpcBankHex(result.EpcBank);  // existing.UID.Substring(0, 4) + Element.GetHexString(result.EpcBank);
                 }
                 return new_tag_info;
             }
@@ -1231,6 +1321,12 @@ MessageBoxDefaultButton.Button2);
 
             menuItem = new MenuItem("清除标签内容 [" + this.listView_tags.SelectedItems.Count.ToString() + "] (&C)");
             menuItem.Click += new System.EventHandler(this.menu_clearSelectedTagContent_Click);
+            if (this.listView_tags.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("创建标签内容 [" + this.listView_tags.SelectedItems.Count.ToString() + "] (&R) ...");
+            menuItem.Click += new System.EventHandler(this.menu_createSelectedTagContent_Click);
             if (this.listView_tags.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
@@ -1387,6 +1483,8 @@ MessageBoxDefaultButton.Button2);
                     goto ERROR1;
                 }
 
+                UpdateItemInfo(item_info, new_tag_info);
+
                 // await Task.Run(() => { GetTagInfo(item); });
                 return;
             }
@@ -1471,6 +1569,144 @@ MessageBoxDefaultButton.Button2);
             return 0;
         }
 
+        void menu_createSelectedTagContent_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            if (this.listView_tags.SelectedItems.Count == 0)
+            {
+                strError = "请选择要创建覆盖的标签";
+                goto ERROR1;
+            }
+
+            // 从第一个 ListViewItem 对象获得数据
+            strError = GetUhfTagRowInfo(this.listView_tags.SelectedItems[0],
+    out byte[] user_bank,
+    out string epc_bank_hex);
+            if (strError != null)
+                goto ERROR1;
+
+            DuplicateUhfTagDialog dlg = new DuplicateUhfTagDialog();
+            dlg.EpcBankHex = epc_bank_hex;
+            dlg.UserBankHex = ByteArray.GetHexTimeStampString(user_bank)?.ToUpper(); ;
+            if (dlg.ShowDialog(this) != DialogResult.OK)
+                return;
+            epc_bank_hex = dlg.EpcBankHex;
+            string user_bank_hex = dlg.UserBankHex;
+            foreach (ListViewItem item in this.listView_tags.SelectedItems)
+            {
+                CreateTagContent(item, epc_bank_hex, user_bank_hex);
+            }
+
+            ShowMessage("创建完成");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        string GetUhfTagRowInfo(ListViewItem item,
+            out byte[] user_bank,
+            out string epc_bank_hex)
+        {
+            user_bank = null;
+            epc_bank_hex = null;
+
+            ItemInfo item_info = (ItemInfo)item.Tag;
+
+            if (item_info.TagData.OneTag.Protocol != InventoryInfo.ISO18000P6C)
+            {
+                return "GetUhfTagRowInfo() 仅支持 UHF 标签";
+            }
+
+            user_bank = item_info.TagData?.OneTag?.TagInfo?.Bytes;
+            epc_bank_hex = item_info.TagData?.OneTag?.UID;
+            return null;
+        }
+
+        void CreateTagContent(ListViewItem item,
+            string epc_bank_hex,
+            string user_bank_hex)
+        {
+            string strError = "";
+
+            try
+            {
+                ItemInfo item_info = (ItemInfo)item.Tag;
+
+                if (item_info.TagData.OneTag.Protocol != InventoryInfo.ISO18000P6C)
+                {
+                    strError = "CreateTagContent() 目前仅支持 UHF 标签";
+                    this.Invoke((Action)(() =>
+                    {
+                        MessageBox.Show(this, strError);
+                    }));
+                    return;
+                }
+
+                // var epc_bank = ByteArray.GetTimeStampByteArray(epc_bank_hex);
+                var user_bank = ByteArray.GetTimeStampByteArray(user_bank_hex);
+
+                var old_tag_info = item_info.TagData.OneTag.TagInfo;
+                var new_tag_info = old_tag_info.Clone();
+
+                new_tag_info.Bytes = user_bank;
+                new_tag_info.UID = epc_bank_hex;    // UhfUtility.EpcBankHex(result.EpcBank);
+
+                var result = DataModel.WriteTagInfo(item_info.TagData.OneTag.ReaderName,
+    old_tag_info,
+    new_tag_info);
+                if (result.Value == -1)
+                {
+                    strError = result.ErrorInfo;
+                    goto ERROR1;
+                }
+
+                UpdateItemInfo(item_info, new_tag_info);
+
+                /*
+                // 更新 ListView.Tag
+                item_info.TagData.OneTag.TagInfo = new_tag_info;
+
+                this.TryInvoke(() =>
+                {
+                    UpdateTags(new List<TagAndData> { item_info.TagData });
+                    // RefreshItem(item);
+                });
+                */
+                // await Task.Run(() => { GetTagInfo(item); });
+                return;
+            }
+            catch (Exception ex)
+            {
+                strError = "CreateTagContent() 出现异常: " + ex.Message;
+                goto ERROR1;
+            }
+            finally
+            {
+            }
+        ERROR1:
+            this.Invoke((Action)(() =>
+            {
+                ListViewUtil.ChangeItemText(item, COLUMN_PII, "error:" + strError);
+                // 把 item 修改为红色背景，表示出错的状态
+                SetItemColor(item, "error");
+                MessageBox.Show(this, strError);
+            }));
+        }
+
+        void UpdateItemInfo(ItemInfo item_info,
+            TagInfo new_tag_info)
+        {
+            // 更新 ListView.Tag
+            item_info.TagData.OneTag.TagInfo = new_tag_info;
+
+            this.TryInvoke(() =>
+            {
+                UpdateTags(new List<TagAndData> { item_info.TagData });
+            });
+        }
+
+
         void menu_clearSelectedTagContent_Click(object sender, EventArgs e)
         {
             DialogResult result = MessageBox.Show(this,
@@ -1532,6 +1768,8 @@ MessageBoxDefaultButton.Button2);
                     strError = result.ErrorInfo;
                     goto ERROR1;
                 }
+
+                UpdateItemInfo(item_info, new_tag_info);
 
                 // await Task.Run(() => { GetTagInfo(item); });
                 return;

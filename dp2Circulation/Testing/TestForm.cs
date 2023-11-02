@@ -36,6 +36,7 @@ using DigitalPlatform.Drawing;
 using DigitalPlatform.Core;
 using DigitalPlatform.Typography;
 using System.Xml.Linq;
+using DigitalPlatform.RFID;
 
 namespace dp2Circulation
 {
@@ -2032,6 +2033,19 @@ this,
             var doc = XDocument.Parse("<root><barcode>0000001</barcode></root>");
             var value = doc.Root.Elements("barcode").FirstOrDefault()?.Value;
             MessageBox.Show(this, value);
+        }
+
+        private void button_rfid_crc16ccitt_Click(object sender, EventArgs e)
+        {
+            /*
+            var computer = new Crc16Ccitt(InitialCrcValue.NonZero1);
+            var bytes = ByteArray.GetTimeStampByteArray(this.textBox_rfid_hexString.Text);
+            var results = computer.ComputeChecksumBytes(bytes);
+            MessageBox.Show(this, ByteArray.GetHexTimeStampString(results));
+            */
+            var bytes = ByteArray.GetTimeStampByteArray(this.textBox_rfid_hexString.Text);
+            var value = CRC16.crc16x25(bytes);
+            MessageBox.Show(this, ByteArray.GetHexTimeStampString(value));
         }
     }
 }

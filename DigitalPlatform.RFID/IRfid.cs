@@ -78,6 +78,14 @@ uint antenna_id,
 bool enable,
 string style);
 
+        // 2023/10/30 新增加的版本，将返回类型改为 SetEasResult
+        SetEasResult SetEAS1(
+string reader_name,
+string tag_name,
+uint antenna_id,
+bool enable,
+string style);
+
         NormalResult ChangePassword(string reader_name,
 string uid,
 string type,

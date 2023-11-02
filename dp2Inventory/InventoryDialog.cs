@@ -2284,8 +2284,17 @@ bool eas)
     old_tag_info,
     new_tag_info);
             */
-            // 第二种方法，直接修改缓存中的内容为新内容
-            SetCacheTagInfo(new_tag_info.UID, new_tag_info);
+            // 2023/10/31
+            if (old_tag_info.Protocol == InventoryInfo.ISO18000P6C)
+            {
+                ClearCacheTagTable(old_tag_info.UID);
+                ClearCacheTagTable(new_tag_info.UID);
+            }
+            else
+            {
+                // 第二种方法，直接修改缓存中的内容为新内容
+                SetCacheTagInfo(new_tag_info.UID, new_tag_info);
+            }
             return result;
         }
 

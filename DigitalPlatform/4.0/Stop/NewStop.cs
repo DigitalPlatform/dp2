@@ -290,9 +290,11 @@ namespace DigitalPlatform
                         */
                         _manager.UpdateDisplay();
 
+                        /*
+                        // TODO: (2023/10/10)这里 Assert() 需要仔细测试一下
                         // EndLoop() 以后当前 Stop 对象一定不能是活动的状态了
                         Debug.Assert(_manager.SurfaceStop != this);
-
+                        */
 #if REMOVED
                     if (bIsActive == true)
                     {

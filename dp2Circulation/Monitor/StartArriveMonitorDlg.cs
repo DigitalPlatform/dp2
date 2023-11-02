@@ -138,6 +138,19 @@ namespace dp2Circulation
 
         private void button_OK_Click(object sender, EventArgs e)
         {
+            // 警告一下“循环执行”被清除的后果。一般来说，不要这样启动“预约到书”后台任务
+            if (this.checkBox_loop.Checked == false)
+            {
+                DialogResult result = MessageBox.Show(this,
+    "确实要清除“循环执行”? \r\n\r\n注: 如果清除了“循环执行”，则本轮后台批处理任务执行完成后，不会自动定时运行。这将导致预约到书后台任务无法及时处理(除非手动启动预约到书后台任务, 或者重启 dp2library 服务器模块)",
+    "StartArriveMonitorDlg",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+                if (result == DialogResult.No)
+                    return;
+            }
+
             // 合成参数
             this.StartInfo.Start = MakeBreakPointString(this.textBox_startIndex.Text);
 
@@ -167,6 +180,8 @@ namespace dp2Circulation
 
             DomUtil.SetAttr(nodeLoop, "recordid", strRecordID);
 
+            // 2023/10/25
+            dom.DocumentElement.SetAttribute("activate", "true");
             return dom.OuterXml;
         }
 
@@ -179,7 +194,6 @@ bool bLoop)
 
             DomUtil.SetAttr(dom.DocumentElement, "loop",
                 bLoop == true ? "yes" : "no");
-
             return dom.OuterXml;
         }
     }

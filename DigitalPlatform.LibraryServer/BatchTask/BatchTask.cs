@@ -862,7 +862,12 @@ namespace DigitalPlatform.LibraryServer
 
                     // 是否循环?
                     if (this.Loop == false)
+                    {
+                        string strErrorText = $"this.Loop 为 false，退出 BatchTask ({this.Name}) 主线程";
+                        this.App.WriteErrorLog(strErrorText);
+                        this.AppendResultText(strErrorText + "\r\n");
                         break;
+                    }
                 }
                 this.ManualStart = false;   // 这个变量只在一轮处理中管用
             }

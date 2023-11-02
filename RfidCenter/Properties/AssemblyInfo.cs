@@ -32,7 +32,7 @@ using System.Runtime.InteropServices;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.14.16")]   // 1.11.*
+[assembly: AssemblyVersion("1.14.17")]   // 1.11.*
 [assembly: AssemblyFileVersion("1.14.0.0")]
 
 // V1.1 2019/2/21 支持 32-bit Windows 环境
@@ -68,5 +68,7 @@ using System.Runtime.InteropServices;
 //      1.14.9 (2022/1/20) 增加 RD5200 型号的元数据 (<sub_id>680601</sub_id>)
 //      1.14.10
 //      1.14.16 NET 类型在 driverName 为空时候尝试用 RD5100 探测
+//      1.14.17 (2023/11/2) RfidCenter 增加了一个 API SetEAS1()，在原来 SetEAS() 基础上修改了返回对象的结构，强加了一个 ChangedUID 字段。用于 UHF 标签修改 EAS 等以后引起 UID 变化时方便前端获知新的 UID
+//                          增加了 UM200 这个 UHF 读写器型号的驱动(注: 厂家说 UM200 的驱动也可以用来打开原来的 M60 型号的读写器)
 
 

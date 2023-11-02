@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            DigitalPlatform.CirculationClient.PatronCardStyle patronCardStyle3 = new DigitalPlatform.CirculationClient.PatronCardStyle();
+            DigitalPlatform.CirculationClient.PatronCardStyle patronCardStyle2 = new DigitalPlatform.CirculationClient.PatronCardStyle();
             this.tabControl_main = new System.Windows.Forms.TabControl();
             this.tabPage_diskSpace = new System.Windows.Forms.TabPage();
             this.button_createDirectory = new System.Windows.Forms.Button();
@@ -139,6 +139,7 @@
             this.dpColumn1 = new DigitalPlatform.CommonControl.DpColumn();
             this.dpColumn2 = new DigitalPlatform.CommonControl.DpColumn();
             this.tabPage_xml = new System.Windows.Forms.TabPage();
+            this.button_xml_testXDocument = new System.Windows.Forms.Button();
             this.textBox_xml_content = new System.Windows.Forms.TextBox();
             this.button_xml_loadToDom = new System.Windows.Forms.Button();
             this.button_xml_getXmlFilename = new System.Windows.Forms.Button();
@@ -234,7 +235,10 @@
             this.tabPage_typography = new System.Windows.Forms.TabPage();
             this.button_typography_convertToWordML = new System.Windows.Forms.Button();
             this.textBox_typography_xml = new System.Windows.Forms.TextBox();
-            this.button_xml_testXDocument = new System.Windows.Forms.Button();
+            this.tabPage_rfid = new System.Windows.Forms.TabPage();
+            this.button_rfid_crc16ccitt = new System.Windows.Forms.Button();
+            this.textBox_rfid_hexString = new System.Windows.Forms.TextBox();
+            this.label38 = new System.Windows.Forms.Label();
             this.tabControl_main.SuspendLayout();
             this.tabPage_diskSpace.SuspendLayout();
             this.tabPage_windowsEventLog.SuspendLayout();
@@ -271,6 +275,7 @@
             this.tabPage_setBiblioInfo.SuspendLayout();
             this.tabPage_login.SuspendLayout();
             this.tabPage_typography.SuspendLayout();
+            this.tabPage_rfid.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl_main
@@ -311,6 +316,7 @@
             this.tabControl_main.Controls.Add(this.tabPage_setBiblioInfo);
             this.tabControl_main.Controls.Add(this.tabPage_login);
             this.tabControl_main.Controls.Add(this.tabPage_typography);
+            this.tabControl_main.Controls.Add(this.tabPage_rfid);
             this.tabControl_main.Location = new System.Drawing.Point(17, 19);
             this.tabControl_main.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabControl_main.Name = "tabControl_main";
@@ -1597,6 +1603,16 @@
             this.tabPage_xml.Text = "XML";
             this.tabPage_xml.UseVisualStyleBackColor = true;
             // 
+            // button_xml_testXDocument
+            // 
+            this.button_xml_testXDocument.Location = new System.Drawing.Point(4, 68);
+            this.button_xml_testXDocument.Name = "button_xml_testXDocument";
+            this.button_xml_testXDocument.Size = new System.Drawing.Size(221, 39);
+            this.button_xml_testXDocument.TabIndex = 10;
+            this.button_xml_testXDocument.Text = "test XDocument";
+            this.button_xml_testXDocument.UseVisualStyleBackColor = true;
+            this.button_xml_testXDocument.Click += new System.EventHandler(this.button_xml_testXDocument_Click);
+            // 
             // textBox_xml_content
             // 
             this.textBox_xml_content.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -2047,7 +2063,7 @@
             this.patronCardControl1.Location = new System.Drawing.Point(7, 79);
             this.patronCardControl1.Margin = new System.Windows.Forms.Padding(5);
             this.patronCardControl1.Name = "patronCardControl1";
-            this.patronCardControl1.PatronCardStyle = patronCardStyle3;
+            this.patronCardControl1.PatronCardStyle = patronCardStyle2;
             this.patronCardControl1.Size = new System.Drawing.Size(286, 208);
             this.patronCardControl1.TabIndex = 0;
             this.patronCardControl1.Text = "patronCardControl1";
@@ -2696,15 +2712,49 @@
             this.textBox_typography_xml.Size = new System.Drawing.Size(705, 418);
             this.textBox_typography_xml.TabIndex = 10;
             // 
-            // button_xml_testXDocument
+            // tabPage_rfid
             // 
-            this.button_xml_testXDocument.Location = new System.Drawing.Point(4, 68);
-            this.button_xml_testXDocument.Name = "button_xml_testXDocument";
-            this.button_xml_testXDocument.Size = new System.Drawing.Size(221, 39);
-            this.button_xml_testXDocument.TabIndex = 10;
-            this.button_xml_testXDocument.Text = "test XDocument";
-            this.button_xml_testXDocument.UseVisualStyleBackColor = true;
-            this.button_xml_testXDocument.Click += new System.EventHandler(this.button_xml_testXDocument_Click);
+            this.tabPage_rfid.Controls.Add(this.button_rfid_crc16ccitt);
+            this.tabPage_rfid.Controls.Add(this.textBox_rfid_hexString);
+            this.tabPage_rfid.Controls.Add(this.label38);
+            this.tabPage_rfid.Location = new System.Drawing.Point(4, 31);
+            this.tabPage_rfid.Name = "tabPage_rfid";
+            this.tabPage_rfid.Size = new System.Drawing.Size(713, 493);
+            this.tabPage_rfid.TabIndex = 33;
+            this.tabPage_rfid.Text = "RFID";
+            this.tabPage_rfid.UseVisualStyleBackColor = true;
+            // 
+            // button_rfid_crc16ccitt
+            // 
+            this.button_rfid_crc16ccitt.Location = new System.Drawing.Point(571, 93);
+            this.button_rfid_crc16ccitt.Margin = new System.Windows.Forms.Padding(5);
+            this.button_rfid_crc16ccitt.Name = "button_rfid_crc16ccitt";
+            this.button_rfid_crc16ccitt.Size = new System.Drawing.Size(137, 40);
+            this.button_rfid_crc16ccitt.TabIndex = 23;
+            this.button_rfid_crc16ccitt.Text = "CRC-16";
+            this.button_rfid_crc16ccitt.UseVisualStyleBackColor = true;
+            this.button_rfid_crc16ccitt.Click += new System.EventHandler(this.button_rfid_crc16ccitt_Click);
+            // 
+            // textBox_rfid_hexString
+            // 
+            this.textBox_rfid_hexString.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_rfid_hexString.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.textBox_rfid_hexString.Location = new System.Drawing.Point(21, 54);
+            this.textBox_rfid_hexString.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.textBox_rfid_hexString.Name = "textBox_rfid_hexString";
+            this.textBox_rfid_hexString.Size = new System.Drawing.Size(688, 31);
+            this.textBox_rfid_hexString.TabIndex = 22;
+            // 
+            // label38
+            // 
+            this.label38.AutoSize = true;
+            this.label38.Location = new System.Drawing.Point(16, 22);
+            this.label38.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label38.Name = "label38";
+            this.label38.Size = new System.Drawing.Size(233, 21);
+            this.label38.TabIndex = 21;
+            this.label38.Text = "要计算的内容[16进制]:";
             // 
             // TestForm
             // 
@@ -2775,6 +2825,8 @@
             this.tabPage_login.PerformLayout();
             this.tabPage_typography.ResumeLayout(false);
             this.tabPage_typography.PerformLayout();
+            this.tabPage_rfid.ResumeLayout(false);
+            this.tabPage_rfid.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -2986,5 +3038,9 @@
         private System.Windows.Forms.TextBox textBox_typography_xml;
         private System.Windows.Forms.Button button_typography_convertToWordML;
         private System.Windows.Forms.Button button_xml_testXDocument;
+        private System.Windows.Forms.TabPage tabPage_rfid;
+        private System.Windows.Forms.Button button_rfid_crc16ccitt;
+        private System.Windows.Forms.TextBox textBox_rfid_hexString;
+        private System.Windows.Forms.Label label38;
     }
 }

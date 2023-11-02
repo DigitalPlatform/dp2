@@ -769,17 +769,18 @@ new SetErrorEventArgs
             }
         }
 
-        public static NormalResult SetEAS(string reader_name,
+        public static SetEasResult SetEAS(string reader_name,
             string tag_name,
             uint antenna_id,
-            bool enable)
+            bool enable,
+            string style = "")
         {
             try
             {
                 BaseChannel<IRfid> channel = Base.GetChannel();
                 try
                 {
-                    var result = channel.Object.SetEAS(reader_name, tag_name, antenna_id, enable);
+                    var result = channel.Object.SetEAS1(reader_name, tag_name, antenna_id, enable, style);
                     if (result.Value == -1)
                         Base.TriggerSetError(result,
                             new SetErrorEventArgs { Error = result.ErrorInfo });
@@ -803,20 +804,21 @@ new SetErrorEventArgs
                     {
                         Error = $"RFID 中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
                     });
-                return new NormalResult { Value = -1, ErrorInfo = ex.Message };
+                return new SetEasResult { Value = -1, ErrorInfo = ex.Message };
             }
         }
 
-        public static NormalResult SetEAS(string uid,
+        public static SetEasResult SetEAS(string uid,
             uint antenna_id,
-            bool enable)
+            bool enable,
+            string style = "")
         {
             try
             {
                 BaseChannel<IRfid> channel = Base.GetChannel();
                 try
                 {
-                    var result = channel.Object.SetEAS("*", $"uid:{uid}", antenna_id, enable);
+                    var result = channel.Object.SetEAS1("*", $"uid:{uid}", antenna_id, enable, style);
                     if (result.Value == -1)
                         Base.TriggerSetError(result,
                             new SetErrorEventArgs { Error = result.ErrorInfo });
@@ -841,7 +843,7 @@ new SetErrorEventArgs
                     {
                         Error = $"RFID 中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
                     });
-                return new NormalResult { Value = -1, ErrorInfo = ex.Message };
+                return new SetEasResult { Value = -1, ErrorInfo = ex.Message };
             }
         }
 

@@ -28,38 +28,42 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.propertyGrid1 = new System.Windows.Forms.PropertyGrid();
             this.label_titile = new System.Windows.Forms.Label();
+            this.propertyGrid1 = new System.Windows.Forms.PropertyGrid();
             this.SuspendLayout();
-            // 
-            // propertyGrid1
-            // 
-            this.propertyGrid1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.propertyGrid1.Location = new System.Drawing.Point(0, 34);
-            this.propertyGrid1.Name = "propertyGrid1";
-            this.propertyGrid1.Size = new System.Drawing.Size(314, 215);
-            this.propertyGrid1.TabIndex = 1;
-            this.propertyGrid1.PropertyValueChanged += new System.Windows.Forms.PropertyValueChangedEventHandler(this.propertyGrid1_PropertyValueChanged);
             // 
             // label_titile
             // 
             this.label_titile.AutoSize = true;
             this.label_titile.Dock = System.Windows.Forms.DockStyle.Top;
             this.label_titile.Location = new System.Drawing.Point(0, 0);
+            this.label_titile.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label_titile.Name = "label_titile";
-            this.label_titile.Size = new System.Drawing.Size(0, 18);
+            this.label_titile.Size = new System.Drawing.Size(0, 21);
             this.label_titile.TabIndex = 0;
+            // 
+            // propertyGrid1
+            // 
+            this.propertyGrid1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.propertyGrid1.Location = new System.Drawing.Point(0, 0);
+            this.propertyGrid1.Margin = new System.Windows.Forms.Padding(4);
+            this.propertyGrid1.Name = "propertyGrid1";
+            this.propertyGrid1.Size = new System.Drawing.Size(626, 525);
+            this.propertyGrid1.TabIndex = 1;
+            this.propertyGrid1.PropertyValueChanged += new System.Windows.Forms.PropertyValueChangedEventHandler(this.propertyGrid1_PropertyValueChanged);
             // 
             // ChipEditor
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.label_titile);
             this.Controls.Add(this.propertyGrid1);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "ChipEditor";
-            this.Size = new System.Drawing.Size(314, 249);
+            this.Size = new System.Drawing.Size(626, 525);
+            this.SizeChanged += new System.EventHandler(this.ChipEditor_SizeChanged);
             this.ResumeLayout(false);
             this.PerformLayout();
 

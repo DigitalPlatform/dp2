@@ -8015,6 +8015,76 @@ value);  // 常用值 "ipc://RfidChannel/RfidServer"
             }
         }
 
+        // 2023/10/27
+        // 超高频标签数据格式
+        public string UhfDataFormatHanzi
+        {
+            get
+            {
+                return this.AppInfo?.GetString("uhf",
+    "dataFormat",
+    "国标格式");
+            }
+            set
+            {
+                this.AppInfo?.SetString("uhf",
+    "dataFormat",
+    value);
+
+            }
+        }
+
+        public string UhfDataFormat
+        {
+            get
+            {
+                var hanzi = UhfDataFormatHanzi;
+                if (hanzi == "国标格式")
+                    return "gb";
+                if (hanzi == "高校联盟格式")
+                    return "gxlm";
+                throw new Exception($"无法识别的汉字格式名 {hanzi}");
+            }
+        }
+
+        // 超高频标签是否要写入 User Bank 内容
+        public bool UhfWriteUserBank
+        {
+            get
+            {
+                if (this.AppInfo == null)
+                    return true;
+                return this.AppInfo.GetBoolean("uhf",
+    "writeUserBank",
+    true);
+            }
+            set
+            {
+                this.AppInfo?.SetBoolean("uhf",
+                    "writeUserBank",
+                    value);
+            }
+        }
+
+        // 超高频标签当遇到不同内容格式覆盖的时候是否警告?
+        public bool UhfWarningWhenDataFormatMismatch
+        {
+            get
+            {
+                if (this.AppInfo == null)
+                    return true;
+                return this.AppInfo.GetBoolean("uhf",
+    "warningWhenDataFormatMismatch",
+    true);
+            }
+            set
+            {
+                this.AppInfo?.SetBoolean("uhf",
+                    "warningWhenDataFormatMismatch",
+                    value);
+            }
+        }
+
 #if !NEWFINGER
         /// <summary>
         /// 指纹阅读器 URL
