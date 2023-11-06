@@ -137,14 +137,26 @@ namespace dp2Circulation.Charging
                 else
                     tag_info = data.OneTag.TagInfo;
 
-                string current_pii = QuickChargingForm.GetPII(tag_info);
-                if (current_pii == pii)
+                try
+                {
+                    // Exception: 可能会抛出异常
+                    string current_pii = QuickChargingForm.GetPII(tag_info);
+                    if (current_pii == pii)
+                    {
+                        return new GetEasStateResult
+                        {
+                            Value = tag_info.EAS ? 1 : 0,
+                            AntennaID = tag_info.AntennaID,
+                            ReaderName = tag_info.ReaderName
+                        };
+                    }
+                }
+                catch(Exception ex)
                 {
                     return new GetEasStateResult
                     {
-                        Value = tag_info.EAS ? 1 : 0,
-                        AntennaID = tag_info.AntennaID,
-                        ReaderName = tag_info.ReaderName
+                        Value = -1,
+                        ErrorInfo = $"PII 为 '{pii}' 的标签获得其 EAS 状态时出现异常: {ex.Message}"
                     };
                 }
             }

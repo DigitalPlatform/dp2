@@ -358,13 +358,19 @@ namespace dp2Circulation
         }
 
         // 从 TagInfo 中获取标签内容 PII
+        // Exception: 可能会抛出异常
         public static string GetPII(TagInfo tagInfo)
         {
             // 2023/10/30
             if (tagInfo.Protocol == InventoryInfo.ISO18000P6C)
             {
                 // UHF
+                // 注1: taginfo.EAS 在调用后可能被修改
+                // 注2: 本函数不再抛出异常。会在 ErrorInfo 中报错
                 var chip_info = RfidTagList.GetUhfChipInfo(tagInfo);
+                // 2023/11/3
+                if (string.IsNullOrEmpty(chip_info.ErrorInfo) == false)
+                    return null;
                 // return chip_info.Chip?.FindElement(ElementOID.PII)?.Text;
                 return chip_info.PII;
             }
@@ -381,13 +387,20 @@ namespace dp2Circulation
         }
 
         // 从 TagInfo 中获取标签内容 TOU
+        // Exception: 可能会抛出异常
         public static string GetTOU(TagInfo tagInfo)
         {
             // 2023/10/30
             if (tagInfo.Protocol == InventoryInfo.ISO18000P6C)
             {
                 // UHF
+                // 注1: taginfo.EAS 在调用后可能被修改
+                // 注2: 本函数不再抛出异常。会在 ErrorInfo 中报错
                 var chip_info = RfidTagList.GetUhfChipInfo(tagInfo);
+                // 2023/11/3
+                if (string.IsNullOrEmpty(chip_info.ErrorInfo) == false)
+                    return null;
+                
                 return chip_info.Chip?.FindElement(ElementOID.TypeOfUsage)?.Text;
             }
             else
@@ -544,13 +557,26 @@ namespace dp2Circulation
                 return;
             }
 
-            string pii = GetPII(data.OneTag.TagInfo);
+            // Exception: 可能会抛出异常
+            string pii = null;
+
+            try
+            {
+                pii = GetPII(data.OneTag.TagInfo);
+            }
+            catch(Exception ex)
+            {
+                // 2023/11/3
+                SetError("sendKey", $"此标签(UID={data.OneTag.UID})解析 PII 元素时出现异常。已写入错误日志");
+                MainForm.WriteErrorLog($"此标签(UID={data.OneTag.UID})解析 PII 元素时出现异常({ex.Message})。bytes='{Element.GetHexString(data.OneTag?.TagInfo?.Bytes)}'");
+                return;
+            }
 
             if (string.IsNullOrEmpty(pii))
             {
                 // TODO: 改进显示方式
                 SetError("sendKey", $"此标签(UID={data.OneTag.UID})无法解析出 PII 元素。已写入错误日志");
-                MainForm.WriteErrorLog($"此标签(UID={data.OneTag.UID})无法解析出 PII 元素。bytes='{Element.GetHexString(data.OneTag.TagInfo.Bytes)}'");
+                MainForm.WriteErrorLog($"此标签(UID={data.OneTag.UID})无法解析出 PII 元素。bytes='{Element.GetHexString(data.OneTag?.TagInfo?.Bytes)}'");
                 return;
             }
 

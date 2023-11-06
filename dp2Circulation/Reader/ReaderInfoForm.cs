@@ -9068,5 +9068,9 @@ MessageBoxDefaultButton.Button1);
             return "." + ext;
         }
 
+        private void toolStripMenuItem_clearPhoto_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

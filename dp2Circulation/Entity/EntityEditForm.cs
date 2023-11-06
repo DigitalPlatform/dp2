@@ -894,10 +894,14 @@ namespace dp2Circulation
         }
 
         // 根据 BookItem 对象构造一个 LogicChipItem 对象
-        public static LogicChipItem BuildChip(BookItem book_item)
+        public static LogicChipItem BuildChip(BookItem book_item,
+            string elements = "SetInformation,OwnerInstitution,TypeOfUsage,ShelfLocation")
         {
             if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.11") < 0)
                 throw new Exception("当前连接的 dp2library 必须为 3.11 或以上版本，才能使用 RFID 有关功能");
+
+            // "SetInformation,OwnerInstitution,TypeOfUsage,ShelfLocation"
+            // string elements = Program.MainForm.UhfUserBankElements;
 
             LogicChipItem result = new LogicChipItem();
 
@@ -908,40 +912,47 @@ namespace dp2Circulation
             // barcode --> PII
             result.NewElement(ElementOID.PII, book_item.Barcode);
 
-            string pure_location = StringUtil.GetPureLocation(book_item.Location);
-            // location --> OwnerInstitution 要配置映射关系
-            // 定义一系列前缀对应的 ISIL 编码。如果 location 和前缀前方一致比对成功，则得到 ISIL 编码
-            MainForm.GetOwnerInstitution(
-                Program.MainForm.RfidCfgDom,
-                pure_location,
-                out string isil,
-                out string alternative);
-            if (string.IsNullOrEmpty(isil) == false)
+            if (StringUtil.IsInList("OwnerInstitution", elements))
             {
-                result.NewElement(ElementOID.OwnerInstitution, isil);
-            }
-            else if (string.IsNullOrEmpty(alternative) == false)
-            {
-                result.NewElement(ElementOID.AlternativeOwnerInstitution, alternative);
-            }
-            else
-            {
-                // 2021/2/1
-                // 当前册记录没有找到对应的机构代码。不适合创建 RFID 标签
-                throw new Exception($"馆藏地 '{pure_location}' 没有定义机构代码，无法创建 RFID 标签");
+                string pure_location = StringUtil.GetPureLocation(book_item.Location);
+                // location --> OwnerInstitution 要配置映射关系
+                // 定义一系列前缀对应的 ISIL 编码。如果 location 和前缀前方一致比对成功，则得到 ISIL 编码
+                MainForm.GetOwnerInstitution(
+                    Program.MainForm.RfidCfgDom,
+                    pure_location,
+                    out string isil,
+                    out string alternative);
+                if (string.IsNullOrEmpty(isil) == false)
+                {
+                    result.NewElement(ElementOID.OwnerInstitution, isil);
+                }
+                else if (string.IsNullOrEmpty(alternative) == false)
+                {
+                    result.NewElement(ElementOID.AlternativeOwnerInstitution, alternative);
+                }
+                else
+                {
+                    // 2021/2/1
+                    // 当前册记录没有找到对应的机构代码。不适合创建 RFID 标签
+                    throw new Exception($"馆藏地 '{pure_location}' 没有定义机构代码，无法创建 RFID 标签");
+                }
             }
 
-            // SetInformation？
-            // 可以考虑用 volume 元素映射过来。假设 volume 元素内容符合 (xx,xx) 格式
-            string value = MainForm.GetSetInformation(book_item.Volume);
-            if (value != null)
-                result.NewElement(ElementOID.SetInformation, value);
+            if (StringUtil.IsInList("SetInformation", elements))
+            {
+                // SetInformation？
+                // 可以考虑用 volume 元素映射过来。假设 volume 元素内容符合 (xx,xx) 格式
+                string value = MainForm.GetSetInformation(book_item.Volume);
+                if (value != null)
+                    result.NewElement(ElementOID.SetInformation, value);
+            }
 
             // TypeOfUsage?
             // (十六进制两位数字)
             // 10 一般流通馆藏
             // 20 非流通馆藏。保存本库? 加工中?
             // 70 被剔旧的馆藏。和 state 元素应该有某种对应关系，比如“注销”
+            if (StringUtil.IsInList("TypeOfUsage", elements))
             {
                 string typeOfUsage = "";
                 if (StringUtil.IsInList("注销", book_item.State) == true
@@ -956,11 +967,14 @@ namespace dp2Circulation
                 result.NewElement(ElementOID.TypeOfUsage, typeOfUsage);
             }
 
-            // AccessNo --> ShelfLocation
-            // 注意去掉 {ns} 部分
-            result.NewElement(ElementOID.ShelfLocation,
-                StringUtil.GetPlainTextCallNumber(book_item.AccessNo)
-                );
+            if (StringUtil.IsInList("ShelfLocation", elements))
+            {
+                // AccessNo --> ShelfLocation
+                // 注意去掉 {ns} 部分
+                result.NewElement(ElementOID.ShelfLocation,
+                    StringUtil.GetPlainTextCallNumber(book_item.AccessNo)
+                    );
+            }
 
             return result;
         }
@@ -1523,7 +1537,7 @@ out strError);
 #endif
                 if (result.Value == -1)
                 {
-                    strError = result.ErrorInfo;
+                    strError = result.ErrorInfo + $" errorCode={result.ErrorCode}";
                     return -1;
                 }
 

@@ -110,6 +110,9 @@
             this.toolStripTextBox_barcode = new System.Windows.Forms.ToolStripTextBox();
             this.toolStripButton_load = new System.Windows.Forms.ToolStripButton();
             this.tableLayoutPanel_main = new System.Windows.Forms.TableLayoutPanel();
+            this.toolStripSeparator9 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripMenuItem_clearPhoto = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator10 = new System.Windows.Forms.ToolStripSeparator();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_normal)).BeginInit();
             this.splitContainer_normal.Panel1.SuspendLayout();
             this.splitContainer_normal.Panel2.SuspendLayout();
@@ -710,6 +713,9 @@
             this.ToolStripMenuItem_exportBorrowingBarcode,
             this.toolStripSeparator7,
             this.toolStripMenuItem_moveRecord,
+            this.toolStripSeparator10,
+            this.toolStripMenuItem_clearPhoto,
+            this.toolStripSeparator9,
             this.toolStripMenuItem_clearFaceFeature,
             this.toolStripMenuItem_clearFingerprint,
             this.toolStripMenuItem_clearPalmprint,
@@ -735,61 +741,61 @@
             // toolStripMenuItem_loadBlankRecord
             // 
             this.toolStripMenuItem_loadBlankRecord.Name = "toolStripMenuItem_loadBlankRecord";
-            this.toolStripMenuItem_loadBlankRecord.Size = new System.Drawing.Size(443, 40);
+            this.toolStripMenuItem_loadBlankRecord.Size = new System.Drawing.Size(608, 40);
             this.toolStripMenuItem_loadBlankRecord.Text = "装载空白记录";
             this.toolStripMenuItem_loadBlankRecord.Visible = false;
             // 
             // toolStripMenuItem_notifyRecall
             // 
             this.toolStripMenuItem_notifyRecall.Name = "toolStripMenuItem_notifyRecall";
-            this.toolStripMenuItem_notifyRecall.Size = new System.Drawing.Size(443, 40);
+            this.toolStripMenuItem_notifyRecall.Size = new System.Drawing.Size(608, 40);
             this.toolStripMenuItem_notifyRecall.Text = "立即发出召回通知 ...";
             this.toolStripMenuItem_notifyRecall.Click += new System.EventHandler(this.toolStripMenuItem_notifyRecall_Click);
             // 
             // toolStripMenuItem_notifyOverdue
             // 
             this.toolStripMenuItem_notifyOverdue.Name = "toolStripMenuItem_notifyOverdue";
-            this.toolStripMenuItem_notifyOverdue.Size = new System.Drawing.Size(443, 40);
+            this.toolStripMenuItem_notifyOverdue.Size = new System.Drawing.Size(608, 40);
             this.toolStripMenuItem_notifyOverdue.Text = "立即发出超期通知";
             this.toolStripMenuItem_notifyOverdue.Click += new System.EventHandler(this.toolStripMenuItem_notifyOverdue_Click);
             // 
             // toolStripSeparator8
             // 
             this.toolStripSeparator8.Name = "toolStripSeparator8";
-            this.toolStripSeparator8.Size = new System.Drawing.Size(440, 6);
+            this.toolStripSeparator8.Size = new System.Drawing.Size(605, 6);
             // 
             // toolStripMenuItem_createRfidCard
             // 
             this.toolStripMenuItem_createRfidCard.Name = "toolStripMenuItem_createRfidCard";
-            this.toolStripMenuItem_createRfidCard.Size = new System.Drawing.Size(443, 40);
-            this.toolStripMenuItem_createRfidCard.Text = "创建 RFID 读者卡 (ISO15693) ...";
+            this.toolStripMenuItem_createRfidCard.Size = new System.Drawing.Size(608, 40);
+            this.toolStripMenuItem_createRfidCard.Text = "创建 RFID 读者卡 (ISO15693 和 ISO180000P6C) ...";
             this.toolStripMenuItem_createRfidCard.Click += new System.EventHandler(this.toolStripMenuItem_createRfidCard_Click);
             // 
             // toolStripMenuItem_bindCardNumber
             // 
             this.toolStripMenuItem_bindCardNumber.Name = "toolStripMenuItem_bindCardNumber";
-            this.toolStripMenuItem_bindCardNumber.Size = new System.Drawing.Size(443, 40);
+            this.toolStripMenuItem_bindCardNumber.Size = new System.Drawing.Size(608, 40);
             this.toolStripMenuItem_bindCardNumber.Text = "绑定卡号 ...";
             this.toolStripMenuItem_bindCardNumber.Click += new System.EventHandler(this.toolStripMenuItem_bindCardNumber_Click);
             // 
             // toolStripMenuItem_editXML
             // 
             this.toolStripMenuItem_editXML.Name = "toolStripMenuItem_editXML";
-            this.toolStripMenuItem_editXML.Size = new System.Drawing.Size(443, 40);
+            this.toolStripMenuItem_editXML.Size = new System.Drawing.Size(608, 40);
             this.toolStripMenuItem_editXML.Text = "编辑读者记录 XML ...";
             this.toolStripMenuItem_editXML.Click += new System.EventHandler(this.toolStripMenuItem_editXML_Click);
             // 
             // toolStripMenuItem_exportDetailToExcelFile
             // 
             this.toolStripMenuItem_exportDetailToExcelFile.Name = "toolStripMenuItem_exportDetailToExcelFile";
-            this.toolStripMenuItem_exportDetailToExcelFile.Size = new System.Drawing.Size(443, 40);
+            this.toolStripMenuItem_exportDetailToExcelFile.Size = new System.Drawing.Size(608, 40);
             this.toolStripMenuItem_exportDetailToExcelFile.Text = "导出读者信息到 Excel 文件(&E)...";
             this.toolStripMenuItem_exportDetailToExcelFile.Click += new System.EventHandler(this.toolStripMenuItem_exportDetailToExcelFile_Click);
             // 
             // toolStripMenuItem_exportExcel
             // 
             this.toolStripMenuItem_exportExcel.Name = "toolStripMenuItem_exportExcel";
-            this.toolStripMenuItem_exportExcel.Size = new System.Drawing.Size(443, 40);
+            this.toolStripMenuItem_exportExcel.Size = new System.Drawing.Size(608, 40);
             this.toolStripMenuItem_exportExcel.Text = "导出到 Excel 文件(&X)...";
             this.toolStripMenuItem_exportExcel.Visible = false;
             this.toolStripMenuItem_exportExcel.Click += new System.EventHandler(this.toolStripMenuItem_exportExcel_Click);
@@ -797,19 +803,19 @@
             // ToolStripMenuItem_exportBorrowingBarcode
             // 
             this.ToolStripMenuItem_exportBorrowingBarcode.Name = "ToolStripMenuItem_exportBorrowingBarcode";
-            this.ToolStripMenuItem_exportBorrowingBarcode.Size = new System.Drawing.Size(443, 40);
+            this.ToolStripMenuItem_exportBorrowingBarcode.Size = new System.Drawing.Size(608, 40);
             this.ToolStripMenuItem_exportBorrowingBarcode.Text = "导出在借册条码号到文本文件(&E)...";
             this.ToolStripMenuItem_exportBorrowingBarcode.Click += new System.EventHandler(this.ToolStripMenuItem_exportBorrowingBarcode_Click);
             // 
             // toolStripSeparator7
             // 
             this.toolStripSeparator7.Name = "toolStripSeparator7";
-            this.toolStripSeparator7.Size = new System.Drawing.Size(440, 6);
+            this.toolStripSeparator7.Size = new System.Drawing.Size(605, 6);
             // 
             // toolStripMenuItem_moveRecord
             // 
             this.toolStripMenuItem_moveRecord.Name = "toolStripMenuItem_moveRecord";
-            this.toolStripMenuItem_moveRecord.Size = new System.Drawing.Size(443, 40);
+            this.toolStripMenuItem_moveRecord.Size = new System.Drawing.Size(608, 40);
             this.toolStripMenuItem_moveRecord.Text = "移动读者记录(&M)";
             this.toolStripMenuItem_moveRecord.ToolTipText = "在读者库之间移动记录";
             this.toolStripMenuItem_moveRecord.Click += new System.EventHandler(this.toolStripMenuItem_moveRecord_Click);
@@ -817,28 +823,28 @@
             // toolStripMenuItem_clearFaceFeature
             // 
             this.toolStripMenuItem_clearFaceFeature.Name = "toolStripMenuItem_clearFaceFeature";
-            this.toolStripMenuItem_clearFaceFeature.Size = new System.Drawing.Size(443, 40);
+            this.toolStripMenuItem_clearFaceFeature.Size = new System.Drawing.Size(608, 40);
             this.toolStripMenuItem_clearFaceFeature.Text = "清除人脸特征和图片";
             this.toolStripMenuItem_clearFaceFeature.Click += new System.EventHandler(this.toolStripMenuItem_clearFaceFeature_Click);
             // 
             // toolStripMenuItem_clearFingerprint
             // 
             this.toolStripMenuItem_clearFingerprint.Name = "toolStripMenuItem_clearFingerprint";
-            this.toolStripMenuItem_clearFingerprint.Size = new System.Drawing.Size(443, 40);
+            this.toolStripMenuItem_clearFingerprint.Size = new System.Drawing.Size(608, 40);
             this.toolStripMenuItem_clearFingerprint.Text = "清除指纹特征";
             this.toolStripMenuItem_clearFingerprint.Click += new System.EventHandler(this.toolStripMenuItem_clearFingerprint_Click);
             // 
             // toolStripMenuItem_clearPalmprint
             // 
             this.toolStripMenuItem_clearPalmprint.Name = "toolStripMenuItem_clearPalmprint";
-            this.toolStripMenuItem_clearPalmprint.Size = new System.Drawing.Size(443, 40);
+            this.toolStripMenuItem_clearPalmprint.Size = new System.Drawing.Size(608, 40);
             this.toolStripMenuItem_clearPalmprint.Text = "清除掌纹特征";
             this.toolStripMenuItem_clearPalmprint.Click += new System.EventHandler(this.toolStripMenuItem_clearPalmprint_Click);
             // 
             // toolStripSeparator6
             // 
             this.toolStripSeparator6.Name = "toolStripSeparator6";
-            this.toolStripSeparator6.Size = new System.Drawing.Size(440, 6);
+            this.toolStripSeparator6.Size = new System.Drawing.Size(605, 6);
             // 
             // toolStripButton_option
             // 
@@ -912,6 +918,23 @@
             this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_main.Size = new System.Drawing.Size(1118, 500);
             this.tableLayoutPanel_main.TabIndex = 6;
+            // 
+            // toolStripSeparator9
+            // 
+            this.toolStripSeparator9.Name = "toolStripSeparator9";
+            this.toolStripSeparator9.Size = new System.Drawing.Size(605, 6);
+            // 
+            // toolStripMenuItem_clearPhoto
+            // 
+            this.toolStripMenuItem_clearPhoto.Name = "toolStripMenuItem_clearPhoto";
+            this.toolStripMenuItem_clearPhoto.Size = new System.Drawing.Size(608, 40);
+            this.toolStripMenuItem_clearPhoto.Text = "清除读者照片";
+            this.toolStripMenuItem_clearPhoto.Click += new System.EventHandler(this.toolStripMenuItem_clearPhoto_Click);
+            // 
+            // toolStripSeparator10
+            // 
+            this.toolStripSeparator10.Name = "toolStripSeparator10";
+            this.toolStripSeparator10.Size = new System.Drawing.Size(605, 6);
             // 
             // ReaderInfoForm
             // 
@@ -1033,5 +1056,8 @@
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_notifyRecall;
         private System.Windows.Forms.ToolStripSplitButton toolStripSplitButton_delete;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_forceDelete;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator10;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_clearPhoto;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator9;
     }
 }

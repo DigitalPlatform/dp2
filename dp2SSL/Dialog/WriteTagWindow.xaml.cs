@@ -738,7 +738,7 @@ out string strError);
 
                 if (result.Value == -1)
                 {
-                    strError = result.ErrorInfo;
+                    strError = result.ErrorInfo + $" errorCode={result.ErrorCode}";
                     return -1;
                 }
 

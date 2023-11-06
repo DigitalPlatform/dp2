@@ -3395,7 +3395,7 @@ out Reader reader);
                                 */
                                 var epc_info = parse_result.EpcInfo;
                                 // TODO: 要考虑适应 xxx.xxx 形态的 PII
-                                if (pii == epc_info.PII)
+                                if (epc_info != null && pii == epc_info.PII)
                                     return new FindTagResult
                                     {
                                         Value = 1,
@@ -4199,6 +4199,10 @@ out Reader reader);
                         // TODO: 确保写入的 length 为偶数
                         if (new_tag_info.UID != old_tag_info.UID)
                         {
+                            // 2023/11/3
+                            if (new_tag_info.UID == "00000000")
+                                throw new Exception("危险操作，会损坏 UHF 标签");
+
                             var epc_bytes = Element.FromHexString(new_tag_info.UID);
 
                             if ((epc_bytes.Length % 2) != 0)
@@ -4283,7 +4287,10 @@ out Reader reader);
                                     (uint)range.BlockCount,
                                     range.Bytes);
                                 if (result0.Value == -1)
-                                    return new NormalResult { Value = -1, ErrorInfo = result0.ErrorInfo, ErrorCode = result0.ErrorCode };
+                                    return new NormalResult {
+                                        Value = -1, 
+                                        ErrorInfo = result0.ErrorInfo, 
+                                        ErrorCode = result0.ErrorCode };
                             }
 
                             current_block_count += range.BlockCount;
@@ -4316,7 +4323,9 @@ out Reader reader);
                                     (uint)current_block_count,
                                     (uint)range.BlockCount);
                                 if (string.IsNullOrEmpty(error_code) == false)
-                                    return new NormalResult { Value = -1, ErrorInfo = "LockBlocks error", ErrorCode = error_code };
+                                    return new NormalResult { Value = -1,
+                                        ErrorInfo = "LockBlocks error", 
+                                        ErrorCode = error_code };
                             }
 
                             current_block_count += range.BlockCount;

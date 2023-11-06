@@ -13,3 +13,6 @@
 弹出一个对话框(提示文字加倒计时)，如果读者点一下确定按钮，对话框消失，固定读者信息的状态继续维持。
 如果读者没有点确定按钮，则固定的读者信息会被自动清除，对话框也自动消失。
 对话框文字可以是“确认您还在机器前面”
+
+http://yuezhizizhang.github.io/wpf/2017/09/27/drop-shadow-on-chromeless-wpf-window.html
+Drop Shadow on a Chromeless WPF Window

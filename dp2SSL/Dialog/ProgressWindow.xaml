@@ -5,13 +5,16 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:dp2SSL"
         mc:Ignorable="d"
-        Title="ProgressWindow" Width="400" Height="240" 
+        Title="ProgressWindow" Width="500" Height="280" 
         Background="Black" Foreground="White"
         WindowStyle="None"
     AllowsTransparency="True"
     ResizeMode="CanResizeWithGrip" ShowInTaskbar="False">
+    <Window.Effect>
+        <DropShadowEffect Color="Gray" BlurRadius="20" Direction="-45" RenderingBias="Quality" ShadowDepth="14"/>
+    </Window.Effect>
     <Border BorderThickness="1" BorderBrush="Gray">
-        <Grid Background="Transparent" Margin="10">
+        <Grid Background="Transparent" Margin="30">
             <Grid.RowDefinitions>
                 <RowDefinition Height="60"/>
                 <RowDefinition Height="*"/>
@@ -39,13 +42,13 @@
 
                 <Button Name="okButton" 
                     Style="{DynamicResource RoundedButtonStyle}" 
-                    Width="120" Height="60" 
+                    Width="160" Height="60" 
                     FontSize="30" FontWeight="ExtraBold" 
                     Foreground="White" 
                     Click="OkButton_Click">关闭</Button>
                 <Button Name="cancelButton" 
                     Style="{DynamicResource RoundedButtonStyle}" 
-                    Width="120" Height="60" 
+                    Width="160" Height="60" 
                     FontSize="30" FontWeight="ExtraBold" 
                     Foreground="White" 
                     Visibility="Collapsed"

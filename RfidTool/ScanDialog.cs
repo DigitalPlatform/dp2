@@ -411,6 +411,8 @@ namespace RfidTool
 
                     if (taginfo.Protocol == InventoryInfo.ISO18000P6C)
                     {
+                        // 注1: taginfo.EAS 在调用后可能被修改
+                        // 注2: 本函数不再抛出异常。会在 ErrorInfo 中报错
                         var uhf_info = RfidTagList.GetUhfChipInfo(taginfo, ""); // "dontCheckUMI"
 
                         if (string.IsNullOrEmpty(uhf_info.ErrorInfo) == false)
@@ -451,7 +453,7 @@ namespace RfidTool
                                 if (parse_result.Value == -1)
                                     throw new Exception(parse_result.ErrorInfo);
                                 chip = parse_result.LogicChip;
-                                taginfo.EAS = false;    // TODO
+                                taginfo.EAS = parse_result.PC.AFI == 0x07;
                                 iteminfo.UhfProtocol = "gb";
                                 pii = GetPIICaption(GetPiiPart(parse_result.UII));
                                 oi = GetOiPart(parse_result.UII, false);
@@ -1070,6 +1072,21 @@ namespace RfidTool
                 barcode);
         }
 
+        // 注: 这里都是设置为国标语义中的 TypeOfUsage。
+        // 最后创建标签内容的时候，相关模块会自动翻译不同格式的内容语义到具体格式要求
+        void SetTypeOfUsage(LogicChip chip)
+        {
+            string tou = this.TypeOfUsage;
+
+            // TODO: 如果是图书类型，是否可以根本不写入 TypeOfUsage 元素？
+            // 似乎可以建立一个配置参数，决定默认的图书 TypeOfUsage 是否明确写入
+            if (string.IsNullOrEmpty(tou))
+                tou = "10"; // 默认图书
+
+            chip.SetElement(ElementOID.TypeOfUsage, tou);
+        }
+
+#if REMOVED
         // 设置 TU 字段。注意 国标和高校联盟的取值表完全不同
         // parameters:
         //      data_format gb/gxlm
@@ -1101,6 +1118,8 @@ namespace RfidTool
             else
                 chip.SetElement(ElementOID.TypeOfUsage, tou);
         }
+
+#endif
 
         // 校验 OI 和 AOI 参数是否正确设置了
         public static string VerifyOiSetting()
@@ -1154,7 +1173,7 @@ namespace RfidTool
         {
             if (existing.Protocol == InventoryInfo.ISO15693)
             {
-                SetTypeOfUsage(chip, "gb");
+                SetTypeOfUsage(chip/*, "gb"*/);
 
                 TagInfo new_tag_info = existing.Clone();
                 new_tag_info.Bytes = chip.GetBytes(
@@ -1218,7 +1237,7 @@ MessageBoxDefaultButton.Button2);
                     }
 
                     // chip.SetElement(ElementOID.TypeOfUsage, tou);
-                    SetTypeOfUsage(chip, "gxlm");
+                    SetTypeOfUsage(chip/*, "gxlm"*/);
 
                     /*
                     // 2023/10/24
@@ -1254,7 +1273,7 @@ MessageBoxDefaultButton.Button2);
                         if (dialog_result == DialogResult.No)
                             throw new Exception("放弃写入");
                     }
-                    SetTypeOfUsage(chip, "gb");
+                    SetTypeOfUsage(chip/*, "gb"*/);
 
                     var result = UhfUtility.BuildTag(chip,
                         true,
@@ -1331,6 +1350,12 @@ MessageBoxDefaultButton.Button2);
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
+            menuItem = new MenuItem("探测标签 User Bank 容量 [" + this.listView_tags.SelectedItems.Count.ToString() + "] (&U) ...");
+            menuItem.Click += new System.EventHandler(this.menu_detectSelectedTagUserBankCapacity_Click);
+            if (this.listView_tags.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
             menuItem = new MenuItem("修改标签 EAS [" + this.listView_tags.SelectedItems.Count.ToString() + "] (&E)");
             // menuItem.Click += new System.EventHandler(this.menu_changeSelectedTagEas_Click);
             if (this.listView_tags.SelectedItems.Count == 0)
@@ -1398,7 +1423,7 @@ MessageBoxDefaultButton.Button2);
         void menu_saveSelectedErrorTagContent_Click(object sender, EventArgs e)
         {
             DialogResult result = MessageBox.Show(this,
-    $"确实要写入错误内容到选定的 {this.listView_tags.SelectedItems.Count} 个标签中?",
+    $"确实要写入错误内容到选定的 {this.listView_tags.SelectedItems.Count} 个标签中?\r\n\r\n(注: 本功能是为了模拟测试某些 RFID 标签厂家出厂的带有脏内容的标签)",
     "RfidTool",
     MessageBoxButtons.YesNo,
     MessageBoxIcon.Question,
@@ -1406,15 +1431,30 @@ MessageBoxDefaultButton.Button2);
             if (result != DialogResult.Yes)
                 return;
 
+            List<ListViewItem> skip_items = new List<ListViewItem>();
+            List<ListViewItem> succeed_items = new List<ListViewItem>();
             foreach (ListViewItem item in this.listView_tags.SelectedItems)
             {
-                SaveErrorTagContent(item);
+                ItemInfo item_info = (ItemInfo)item.Tag;
+                if (item_info.TagData.OneTag.Protocol == InventoryInfo.ISO15693)
+                {
+                    SaveHfErrorTagContent(item);
+                    succeed_items.Add(item);
+                }
+                else
+                    skip_items.Add(item);
             }
+
+            if (succeed_items.Count > 0)
+                MessageBox.Show(this, $"成功写入 {succeed_items.Count} 个标签");
+
+            if (skip_items.Count > 0)
+                MessageBox.Show(this, $"有 {skip_items.Count} 个标签因为不是 ISO15693 协议，无法写入错误内容，被跳过处理");
         }
 
         // 2022/7/23
-        // 写入错误标签内容
-        void SaveErrorTagContent(ListViewItem item)
+        // 写入(高频)错误标签内容
+        void SaveHfErrorTagContent(ListViewItem item)
         {
             string strError = "";
 
@@ -1567,6 +1607,70 @@ MessageBoxDefaultButton.Button2);
             }
 
             return 0;
+        }
+
+        // 检测 UHF 标签 User Bank 容量
+        void menu_detectSelectedTagUserBankCapacity_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            List<string> results = new List<string>();
+            foreach (ListViewItem item in this.listView_tags.SelectedItems)
+            {
+                string line = DetectUserBankCapacity(item);
+                results.Add(line);
+            }
+
+            MessageBox.Show(this, StringUtil.MakePathList(results, "\r\n"));
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        static string DetectUserBankCapacity(ListViewItem item)
+        {
+            ItemInfo item_info = (ItemInfo)item.Tag;
+            if (item_info.TagData.OneTag.Protocol != InventoryInfo.ISO18000P6C)
+                return $"{item_info.TagData.OneTag.UID} 不是 UHF 标签";
+
+            var old_tag_info = item_info.TagData.OneTag.TagInfo;
+            var old_bytes = old_tag_info.Bytes;
+
+            var new_tag_info = old_tag_info.Clone();
+
+            List<byte> bytes = new List<byte>();
+            if (old_bytes != null)
+                bytes.AddRange(old_bytes);
+            int capacity = bytes.Count;
+            bool changed = false;
+            for (int delta = 0; delta < 4096; delta++)
+            {
+                bytes.Add(11);
+                bytes.Add(22);
+                new_tag_info.Bytes = bytes.ToArray();
+
+                var result = DataModel.WriteTagInfo(item_info.TagData.OneTag.ReaderName,
+old_tag_info,
+new_tag_info);
+                if (result.Value == -1)
+                    break;
+                capacity = bytes.Count;
+                changed = true;
+            }
+
+            // 还原初始的 User Bank 内容
+            if (changed == true)
+            {
+                // 注意原始标签的 EPC PC 中 UMI 为 false 的情形
+                new_tag_info.Bytes = old_bytes;
+                var result = DataModel.WriteTagInfo(item_info.TagData.OneTag.ReaderName,
+    old_tag_info,
+    new_tag_info);
+                if (result.Value == -1)
+                    return $"还原 {item_info.TagData.OneTag.UID} 的 User Bank 原始内容时出错";
+            }
+
+            return $"{item_info.TagData.OneTag.UID} 的 User Bank 容量为 {capacity} bytes 或 {(capacity * 8)} bit";
         }
 
         void menu_createSelectedTagContent_Click(object sender, EventArgs e)
@@ -1755,7 +1859,7 @@ MessageBoxDefaultButton.Button2);
                     else if (old_tag_info.Protocol == InventoryInfo.ISO18000P6C)
                     {
                         // var pc = UhfUtility.ParsePC(Element.FromHexString(old_tag_info.UID), 2);
-                        new_tag_info.UID = "0000" + Element.GetHexString(UhfUtility.BuildBlankEpcBank());
+                        new_tag_info.UID = UhfUtility.EpcBankHex(UhfUtility.BuildBlankEpcBank());    // "0000" + Element.GetHexString(UhfUtility.BuildBlankEpcBank());
                         new_tag_info.Bytes = null;  // 这样可使得 User Bank 被清除
                     }
                 }

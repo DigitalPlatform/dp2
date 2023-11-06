@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
+
 using DigitalPlatform;
 using DigitalPlatform.RFID;
 using DigitalPlatform.RFID.UI;
@@ -19,6 +20,30 @@ namespace dp2Circulation
 {
     public partial class RfidPatronCardDialog : Form
     {
+        string _protocolFilter = InventoryInfo.ISO15693 + "," + InventoryInfo.ISO18000P6C;
+
+        public string ProtocolFilter
+        {
+            get
+            {
+                return _protocolFilter;
+            }
+            set
+            {
+                _protocolFilter = value;
+
+                SetTitle();
+            }
+        }
+
+        void SetTitle()
+        {
+            this.TryInvoke(() =>
+            {
+                this.Text = $"RFID 读者卡 ({_protocolFilter})";
+            });
+        }
+
         // 左侧编辑器是否成功装载过
         bool _leftLoaded = false;
 
@@ -237,7 +262,7 @@ MessageBoxDefaultButton.Button2);
                     dialog.AutoCloseDialog = auto_close_dialog;
                     dialog.SelectedPII = auto_select_pii;
                     dialog.AutoSelectCondition = "auto_or_blankPII";    // 2019/1/30
-                    dialog.ProtocolFilter = InventoryInfo.ISO15693 + "," + InventoryInfo.ISO18000P6C;
+                    dialog.ProtocolFilter = this.ProtocolFilter;
                     Program.MainForm.AppInfo.LinkFormState(dialog, "selectTagDialog_formstate");
                     dialog.ShowDialog(this);
 
@@ -418,9 +443,45 @@ out strError);
             {
                 TagInfo new_tag_info = null;
                 if (this.chipEditor_editing.LogicChipItem != null)
-                    new_tag_info = LogicChipItem.ToTagInfo(
+                {
+                    if (_tagExisting.Protocol == InventoryInfo.ISO15693)
+                    {
+                        new_tag_info = LogicChipItem.ToTagInfo(
                         _tagExisting.TagInfo,
                         this.chipEditor_editing.LogicChipItem);
+                    }
+                    else if (_tagExisting.Protocol == InventoryInfo.ISO18000P6C)
+                    {
+                        new_tag_info = RfidToolForm.BuildWritingTagInfo(_tagExisting.TagInfo,
+                            this.chipEditor_editing.LogicChipItem,
+                            false,   // 这是读者卡，EAS 应该为 false
+                            Program.MainForm.UhfDataFormat, // gb/gxlm/auto
+                            (initial_format) =>
+                            {
+                                throw new Exception("意外触发格式选择回调函数");
+                                // 如果是空白标签，需要弹出对话框提醒选择格式
+                            },
+                            (new_format, old_format) =>
+                            {
+                                string warning = $"警告：即将用{RfidToolForm.GetUhfFormatCaption(new_format)}格式覆盖原有{RfidToolForm.GetUhfFormatCaption(old_format)}格式";
+                                DialogResult dialog_result = MessageBox.Show(this,
+        $"{warning}\r\n\r\n确实要覆盖？",
+        $"RfidPatronCardDialog",
+        MessageBoxButtons.YesNo,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button2);
+                                if (dialog_result == DialogResult.Yes)
+                                    return true;
+                                return false;
+                            },
+                            true);
+                    }
+                    else
+                    {
+                        strError = $"无法识别的 RFID 格式 '{_tagExisting.Protocol}'";
+                        return -1;
+                    }
+                }
                 else
                     new_tag_info = _tagExisting.TagInfo.Clone();
 #if OLD_CODE
@@ -440,7 +501,7 @@ out strError);
 #endif
                 if (result.Value == -1)
                 {
-                    strError = result.ErrorInfo;
+                    strError = result.ErrorInfo + $" errorCode={result.ErrorCode}";
                     return -1;
                 }
 
@@ -511,6 +572,11 @@ out strError);
                 EndRfidChannel(channel);
 #endif
             }
+        }
+
+        private void RfidPatronCardDialog_Load(object sender, EventArgs e)
+        {
+            SetTitle();
         }
     }
 }

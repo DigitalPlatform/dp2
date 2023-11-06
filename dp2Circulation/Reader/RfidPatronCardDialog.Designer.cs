@@ -33,8 +33,8 @@
             this.toolStripButton_saveRfid = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_loadRfid = new System.Windows.Forms.ToolStripButton();
             this.splitContainer_rfidArea = new System.Windows.Forms.SplitContainer();
-            this.chipEditor_editing = new DigitalPlatform.RFID.UI.ChipEditor();
             this.chipEditor_existing = new DigitalPlatform.RFID.UI.ChipEditor();
+            this.chipEditor_editing = new DigitalPlatform.RFID.UI.ChipEditor();
             this.toolStrip_rfid.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_rfidArea)).BeginInit();
             this.splitContainer_rfidArea.Panel1.SuspendLayout();
@@ -51,7 +51,7 @@
             this.toolStripButton_loadRfid});
             this.toolStrip_rfid.Location = new System.Drawing.Point(0, 0);
             this.toolStrip_rfid.Name = "toolStrip_rfid";
-            this.toolStrip_rfid.Size = new System.Drawing.Size(56, 579);
+            this.toolStrip_rfid.Size = new System.Drawing.Size(42, 579);
             this.toolStrip_rfid.TabIndex = 0;
             this.toolStrip_rfid.Text = "toolStrip2";
             // 
@@ -61,7 +61,7 @@
             this.toolStripButton_saveRfid.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_saveRfid.Image")));
             this.toolStripButton_saveRfid.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_saveRfid.Name = "toolStripButton_saveRfid";
-            this.toolStripButton_saveRfid.Size = new System.Drawing.Size(51, 28);
+            this.toolStripButton_saveRfid.Size = new System.Drawing.Size(37, 28);
             this.toolStripButton_saveRfid.Text = "写入标签";
             this.toolStripButton_saveRfid.Click += new System.EventHandler(this.toolStripButton_saveRfid_Click);
             // 
@@ -78,7 +78,7 @@
             // splitContainer_rfidArea
             // 
             this.splitContainer_rfidArea.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer_rfidArea.Location = new System.Drawing.Point(56, 0);
+            this.splitContainer_rfidArea.Location = new System.Drawing.Point(42, 0);
             this.splitContainer_rfidArea.Margin = new System.Windows.Forms.Padding(4);
             this.splitContainer_rfidArea.Name = "splitContainer_rfidArea";
             // 
@@ -89,23 +89,10 @@
             // splitContainer_rfidArea.Panel2
             // 
             this.splitContainer_rfidArea.Panel2.Controls.Add(this.chipEditor_editing);
-            this.splitContainer_rfidArea.Size = new System.Drawing.Size(779, 579);
-            this.splitContainer_rfidArea.SplitterDistance = 372;
+            this.splitContainer_rfidArea.Size = new System.Drawing.Size(793, 579);
+            this.splitContainer_rfidArea.SplitterDistance = 378;
             this.splitContainer_rfidArea.SplitterWidth = 8;
             this.splitContainer_rfidArea.TabIndex = 0;
-            // 
-            // chipEditor_editing
-            // 
-            this.chipEditor_editing.AutoSize = true;
-            this.chipEditor_editing.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.chipEditor_editing.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chipEditor_editing.Location = new System.Drawing.Point(0, 0);
-            this.chipEditor_editing.LogicChipItem = null;
-            this.chipEditor_editing.Margin = new System.Windows.Forms.Padding(5);
-            this.chipEditor_editing.Name = "chipEditor_editing";
-            this.chipEditor_editing.Size = new System.Drawing.Size(399, 579);
-            this.chipEditor_editing.TabIndex = 1;
-            this.chipEditor_editing.TitleVisible = true;
             // 
             // chipEditor_existing
             // 
@@ -116,9 +103,22 @@
             this.chipEditor_existing.LogicChipItem = null;
             this.chipEditor_existing.Margin = new System.Windows.Forms.Padding(5);
             this.chipEditor_existing.Name = "chipEditor_existing";
-            this.chipEditor_existing.Size = new System.Drawing.Size(372, 579);
+            this.chipEditor_existing.Size = new System.Drawing.Size(378, 579);
             this.chipEditor_existing.TabIndex = 0;
             this.chipEditor_existing.TitleVisible = true;
+            // 
+            // chipEditor_editing
+            // 
+            this.chipEditor_editing.AutoSize = true;
+            this.chipEditor_editing.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.chipEditor_editing.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.chipEditor_editing.Location = new System.Drawing.Point(0, 0);
+            this.chipEditor_editing.LogicChipItem = null;
+            this.chipEditor_editing.Margin = new System.Windows.Forms.Padding(5);
+            this.chipEditor_editing.Name = "chipEditor_editing";
+            this.chipEditor_editing.Size = new System.Drawing.Size(407, 579);
+            this.chipEditor_editing.TabIndex = 1;
+            this.chipEditor_editing.TitleVisible = true;
             // 
             // RfidPatronCardDialog
             // 
@@ -127,11 +127,12 @@
             this.ClientSize = new System.Drawing.Size(835, 579);
             this.Controls.Add(this.splitContainer_rfidArea);
             this.Controls.Add(this.toolStrip_rfid);
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "RfidPatronCardDialog";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.Text = "Rfid 读者卡";
+            this.Load += new System.EventHandler(this.RfidPatronCardDialog_Load);
             this.toolStrip_rfid.ResumeLayout(false);
             this.toolStrip_rfid.PerformLayout();
             this.splitContainer_rfidArea.Panel1.ResumeLayout(false);

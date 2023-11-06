@@ -697,6 +697,9 @@ new SetErrorEventArgs
             string uid,
             uint antenna_id)
         {
+            if (uid == "00000000")
+                throw new Exception($"uid 错误！");
+
             try
             {
                 BaseChannel<IRfid> channel = Base.GetChannel();
@@ -731,10 +734,35 @@ new SetErrorEventArgs
             }
         }
 
-        public static NormalResult WriteTagInfo(string reader_name,
-            TagInfo oldTagInfo,
+        // 校验超高频标签的 User Bank 新旧尺寸。要求新尺寸不应大于旧尺寸
+        public static string VerifyOldNewUserBankCapacity(TagInfo oldTagInfo,
             TagInfo newTagInfo)
         {
+            if (oldTagInfo.Protocol != InventoryInfo.ISO18000P6C)
+                return null;
+            if (newTagInfo.Bytes == null)
+                return null;
+            if (newTagInfo.Bytes.Length > oldTagInfo.Bytes.Length)
+                return $"UHF 标签的即将写入的 User Bank 内容字节数 {newTagInfo.Bytes.Length} 大于最大字节数 {oldTagInfo.Bytes.Length}，无法写入";
+            return null;
+        }
+
+        public static NormalResult WriteTagInfo(string reader_name,
+            TagInfo oldTagInfo,
+            TagInfo newTagInfo,
+            bool verify_user_bank_capacity = true)
+        {
+            if (verify_user_bank_capacity)
+            {
+                var error = VerifyOldNewUserBankCapacity(oldTagInfo, newTagInfo);
+                if (error != null)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = error,
+                        ErrorCode = "userBankOverflow"
+                    };
+            }
             try
             {
                 BaseChannel<IRfid> channel = Base.GetChannel();

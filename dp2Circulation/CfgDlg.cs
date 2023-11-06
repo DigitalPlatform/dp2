@@ -584,6 +584,14 @@ false);
                 ap.GetBoolean("uhf",
     "warningWhenDataFormatMismatch",
     true);
+            // 超高频标签内容 User Bank 应写入的元素名列表
+            this.checkedComboBox_uhf_elements.Items.AddRange(
+    new string[] { "OwnerInstitution\t机构代码", "TypeOfUsage\t用途", "SetInformation\t集合信息", "ShelfLocation\t架位号" });
+
+            this.checkedComboBox_uhf_elements.Text =
+                ap.GetString("uhf",
+    "elements",
+    "SetInformation,OwnerInstitution,TypeOfUsage,ShelfLocation");
 
             if (StringUtil.IsInList("client_disablerfid", Program.MainForm._currentUserRights))
             {
@@ -593,6 +601,7 @@ false);
                 this.comboBox_uhf_dataFormat.Enabled = false;
                 this.checkBox_uhf_writeUserBank.Enabled = false;
                 this.checkBox_uhf_warningWhenDataFormatMismatch.Enabled = false;
+                this.checkedComboBox_uhf_elements.Enabled = false;
             }
 
             // *** 指纹
@@ -818,6 +827,21 @@ ap.GetString(
 
         private void button_OK_Click(object sender, EventArgs e)
         {
+            List<string> errors = new List<string>();
+
+            if (this.checkBox_uhf_writeUserBank.Checked
+                && string.IsNullOrEmpty(this.checkedComboBox_uhf_elements.Text))
+            {
+                errors.Add("当选择了“超高频标签要写入 User Bank 内容”时，必须选择至少一个应写入的元素名");
+                this.tabControl_main.SelectedTab = this.tabPage_cardReader;
+            }
+
+            if (errors.Count > 0)
+            {
+                MessageBox.Show(this, StringUtil.MakePathList(errors, "\r\n"));
+                return;
+            }
+
             ap.AppInfoChanged += Ap_AppInfoChanged;
             try
             {
@@ -1296,9 +1320,14 @@ ap.GetString(
         this.checkBox_uhf_writeUserBank.Checked);
 
                 // 超高频标签当遇到不同内容格式覆盖的时候是否警告?
-                ap.GetBoolean("uhf",
+                ap.SetBoolean("uhf",
         "warningWhenDataFormatMismatch",
         this.checkBox_uhf_warningWhenDataFormatMismatch.Checked);
+
+                // 超高频标签内容 User Bank 应写入的元素名列表
+                ap.SetString("uhf",
+        "elements",
+        this.checkedComboBox_uhf_elements.Text);
 
                 // ** 指纹
                 // 指纹阅读器URL

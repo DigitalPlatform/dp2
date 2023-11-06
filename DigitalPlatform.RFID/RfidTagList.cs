@@ -362,7 +362,7 @@ namespace DigitalPlatform.RFID
                     List<TagAndData> update_books = new List<TagAndData>();
                     List<TagAndData> update_patrons = new List<TagAndData>();
 
-                    // 逐个获得新发现的 ISO15693 标签的详细数据，用于判断图书/读者类型
+                    // 逐个获得新发现的 ISO15693/ISO18000P6C 标签的详细数据，用于判断图书/读者类型
                     foreach (TagAndData data in news)
                     {
                         OneTag tag = data.OneTag;
@@ -445,8 +445,15 @@ namespace DigitalPlatform.RFID
                                 if (tag.Protocol == InventoryInfo.ISO18000P6C)
                                 {
                                     // UHF
-                                    var chip_info = GetUhfChipInfo(info);
-                                    typeOfUsage = chip_info.Chip?.FindElement(ElementOID.TypeOfUsage)?.Text;
+                                    try
+                                    {
+                                        var chip_info = GetUhfChipInfo(info);
+                                        typeOfUsage = chip_info.Chip?.FindElement(ElementOID.TypeOfUsage)?.Text;
+                                    }
+                                    catch
+                                    {
+                                        typeOfUsage = "";
+                                    }
                                 }
                                 else
                                 {
@@ -567,7 +574,60 @@ namespace DigitalPlatform.RFID
             public string ErrorInfo { get; set; }
         }
 
-        // 注: taginfo.EAS 在调用后可能被修改
+        public static ChipInfo GetChipInfo(TagInfo taginfo,
+            string style = "")
+        {
+            if (taginfo.Protocol == InventoryInfo.ISO15693)
+            {
+                return GetHfChipInfo(taginfo, style);
+            }
+            else if (taginfo.Protocol == InventoryInfo.ISO18000P6C)
+            {
+                return GetUhfChipInfo(taginfo, style);
+            }
+            
+            throw new ArgumentException($"GetChipInfo() 无法识别的 RFID 协议 '{taginfo.Protocol}'");
+        }
+
+        public static ChipInfo GetHfChipInfo(TagInfo taginfo,
+            string style = "")
+        {
+            ChipInfo result = new ChipInfo();
+
+            try
+            {
+                // Exception:
+                //      可能会抛出异常 ArgumentException TagDataException
+                result.Chip = LogicChip.From(taginfo.Bytes,
+        (int)taginfo.BlockSize,
+        ""  // taginfo.LockStatus
+        );
+                result.UhfProtocol = null;
+
+                result.PII = result.Chip?.FindElement(ElementOID.PII)?.Text;
+
+                string oi = result.Chip?.FindElement(ElementOID.OI)?.Text;
+                if (string.IsNullOrEmpty(oi))
+                    oi = result.Chip?.FindElement(ElementOID.AOI)?.Text;
+                result.OI = oi;
+
+                // 构造 UII
+                if (string.IsNullOrEmpty(oi))
+                    result.UII = result.PII;
+                else
+                    result.UII = oi + "." + result.PII;
+
+                return result;
+            }
+            catch(Exception ex)
+            {
+                result.ErrorInfo = ex.Message;
+                return result;
+            }
+        }
+
+        // 注1: taginfo.EAS 在调用后可能被修改
+        // 注2: 本函数不再抛出异常。会在 ErrorInfo 中报错
         // parameters:
         //      style   解析高校 UHF 格式时的 style。
         //              dontCheckUMI 表示不检查 PC UMI 标志位。这常用于解析一些缺失 User Bank 内容的畸形标签内容
@@ -594,9 +654,14 @@ namespace DigitalPlatform.RFID
         4,
         style);
                     if (parse_result.Value == -1)
-                        throw new Exception(parse_result.ErrorInfo);
+                    {
+                        // throw new Exception(parse_result.ErrorInfo);
+                        result.ErrorInfo = parse_result.ErrorInfo;
+                        return result;
+                    }
                     result.Chip = parse_result.LogicChip;
-                    taginfo.EAS = false;    // TODO
+                    // pc.AFI = enable ? 0x07 : 0xc2;
+                    taginfo.EAS = parse_result.PC.AFI == 0x07;
                     result.UhfProtocol = "gb";
                     result.UII = parse_result.UII;
                     result.PII = GetPiiPart(parse_result.UII);
@@ -617,18 +682,22 @@ namespace DigitalPlatform.RFID
                             return new ChipInfo
                             {
                                 ErrorInfo = parse_result.ErrorInfo,
+                                // TODO: 为 result 增加 ErrorCode
                             };
                         }
-                        throw new Exception(parse_result.ErrorInfo);
+
+                        // throw new Exception(parse_result.ErrorInfo);
+                        result.ErrorInfo = parse_result.ErrorInfo;
+                        return result;
                     }
                     result.Chip = parse_result.LogicChip;
 
                     // TODO: 如果 Chip 为 null，需要 new 一个，并且把 PII 等内容放到其 Elements 中，以便上层可以正常使用
 
-                    taginfo.EAS = !parse_result.EpcInfo.Lending;
+                    taginfo.EAS = parse_result.EpcInfo == null ? false : !parse_result.EpcInfo.Lending;
                     result.UhfProtocol = "gxlm";
 
-                    result.PII = GetPiiPart(parse_result.EpcInfo.PII);
+                    result.PII = GetPiiPart(parse_result.EpcInfo?.PII);
 
                     // 从 User Bank 中取得 OI
                     string oi = result.Chip?.FindElement(ElementOID.OI)?.Text;
@@ -690,7 +759,7 @@ namespace DigitalPlatform.RFID
                         return "uid:" + uid;
                     }
 
-                    string pii = GetPiiPart(parse_result.EpcInfo.PII);
+                    string pii = GetPiiPart(parse_result.EpcInfo?.PII);
 
                     if (use_gxlm_pii)
                         return pii;
@@ -732,6 +801,14 @@ namespace DigitalPlatform.RFID
         // 获得 oi.pii 的 oi 部分
         public static string GetOiPart(string oi_pii, bool return_null)
         {
+            // 2023/11/6
+            if (oi_pii == null)
+            {
+                if (return_null)
+                    return null;
+                return "";
+            }
+
             if (oi_pii.IndexOf(".") == -1)
             {
                 if (return_null)
@@ -745,6 +822,9 @@ namespace DigitalPlatform.RFID
         // 获得 oi.pii 的 pii 部分
         public static string GetPiiPart(string oi_pii)
         {
+            // 2023/11/6
+            if (oi_pii == null)
+                return null;
             if (oi_pii.IndexOf(".") == -1)
                 return oi_pii;
             var parts = StringUtil.ParseTwoPart(oi_pii, ".");
@@ -1300,6 +1380,7 @@ namespace DigitalPlatform.RFID
 
             if (info == null)
             {
+                // 注: 对于 UHF 标签，Driver 程序已经做到了从 UID 中解析出 EPC 中的 PC.UMI，这样如果标签本来就没有 User Bank 内容，则只需要用 UID 构造出 TagInfo 对象即可，不必从读写器去真的请求读标签了
                 var result = channel.Object.GetTagInfo(reader_name, uid, antenna);
                 if (result.Value == -1)
                     return result;

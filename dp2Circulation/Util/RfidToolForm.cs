@@ -24,6 +24,7 @@ using DigitalPlatform.RFID;
 using DigitalPlatform.RFID.UI;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
+// using DocumentFormat.OpenXml.Drawing;
 
 namespace dp2Circulation
 {
@@ -763,7 +764,7 @@ this.toolStripButton_autoFixEas.Checked);
             }
             catch (Exception ex)
             {
-                strError = "GetTagInfo() 出现异常: " + ex.Message;
+                strError = "FillTagInfo() 出现异常: " + ex.Message;
                 goto ERROR1;
             }
 
@@ -798,6 +799,8 @@ this.toolStripButton_autoFixEas.Checked);
             if (tag.Protocol == InventoryInfo.ISO14443A)
                 return null; // 暂时还不支持对 14443A 的卡进行 GetTagInfo() 操作
 
+            if (tag.UID == "00000000")
+                throw new Exception($"UID 错误！");
 #if OLD_CODE
             RfidChannel channel = GetRfidChannel(
     out string strError);
@@ -1067,7 +1070,13 @@ this.toolStripButton_autoFixEas.Checked);
                     string oi = "";
                     if (tag_info.Protocol == InventoryInfo.ISO18000P6C)
                     {
+                        // 注1: taginfo.EAS 在调用后可能被修改
+                        // 注2: 本函数不再抛出异常。会在 ErrorInfo 中报错
                         var chip_info = RfidTagList.GetUhfChipInfo(tag_info);
+                        // 2023/11/3
+                        if (string.IsNullOrEmpty(chip_info.ErrorInfo) == false)
+                            continue;
+
                         pii = chip_info.PII;
                         oi = chip_info.OI;
                         // TODO: OI?
@@ -1190,7 +1199,7 @@ this.toolStripButton_autoFixEas.Checked);
                     if (parse_result.Value == -1)
                         throw new Exception(parse_result.ErrorInfo);
                     result.Chip = parse_result.LogicChip;
-                    taginfo.EAS = false;    // TODO
+                    taginfo.EAS = parse_result.PC.AFI == 0x07;
                     result.UhfProtocol = "gb";
                     result.PII = GetPIICaption(GetPiiPart(parse_result.UII));
                     result.OI = GetOiPart(parse_result.UII, false);
@@ -1288,7 +1297,12 @@ this.toolStripButton_autoFixEas.Checked);
                     string pii = "";
                     if (tag_info.Protocol == InventoryInfo.ISO18000P6C)
                     {
+                        // 注1: taginfo.EAS 在调用后可能被修改
+                        // 注2: 本函数不再抛出异常。会在 ErrorInfo 中报错
                         var chip_info = RfidTagList.GetUhfChipInfo(tag_info);
+                        if (string.IsNullOrEmpty(chip_info.ErrorInfo) == false)
+                            goto ERROR1;
+
                         pii = chip_info.PII;
                         // oi = chip_info.OI;
                         // TODO: OI?
@@ -1346,8 +1360,8 @@ this.toolStripButton_autoFixEas.Checked);
                             result = SetEAS(channel, "*", "uid:" + tag_info.UID, true, out strError);
 #else
                         {
-                            result = RfidManager.SetEAS("*", 
-                                "uid:" + tag_info.UID, 
+                            result = RfidManager.SetEAS("*",
+                                "uid:" + tag_info.UID,
                                 tag_info.AntennaID,
                                 true);
                             if (string.IsNullOrEmpty(result.ChangedUID) == false)
@@ -1942,7 +1956,7 @@ this.toolStripButton_autoFixEas.Checked);
 #endif
                 if (result.Value == -1)
                 {
-                    strError = result.ErrorInfo;
+                    strError = result.ErrorInfo + $" errorCode={result.ErrorCode}";
                     goto ERROR1;
                 }
 
@@ -2026,7 +2040,7 @@ this.toolStripButton_autoFixEas.Checked);
                     }
                     */
 
-                    new_tag_info.UID = "0000" + Element.GetHexString(UhfUtility.BuildBlankEpcBank());
+                    new_tag_info.UID = UhfUtility.EpcBankHex(UhfUtility.BuildBlankEpcBank()); // "0000" + Element.GetHexString(UhfUtility.BuildBlankEpcBank());
                     new_tag_info.Bytes = null;  // 这样可使得 User Bank 被清除
                 }
                 RfidTagList.ClearTagTable(item_info.OneTag.UID);
@@ -2042,7 +2056,7 @@ this.toolStripButton_autoFixEas.Checked);
 
                 if (result.Value == -1)
                 {
-                    strError = result.ErrorInfo;
+                    strError = result.ErrorInfo + $" errorCode={result.ErrorCode}";
                     goto ERROR1;
                 }
 
@@ -2206,7 +2220,7 @@ this.toolStripButton_autoFixEas.Checked);
                 }
                 if (result.Value == -1)
                 {
-                    strError = result.ErrorInfo;
+                    strError = result.ErrorInfo + $" errorCode={result.ErrorCode}";
                     goto ERROR1;
                 }
 
@@ -2323,7 +2337,7 @@ this.toolStripButton_autoFixEas.Checked);
                 }
                 if (result.Value == -1)
                 {
-                    strError = result.ErrorInfo;
+                    strError = result.ErrorInfo + $" errorCode={result.ErrorCode}";
                     goto ERROR1;
                 }
 
@@ -2396,7 +2410,7 @@ this.toolStripButton_autoFixEas.Checked);
                 }
                 if (result.Value == -1)
                 {
-                    strError = result.ErrorInfo;
+                    strError = result.ErrorInfo + $" errorCode={result.ErrorCode}";
                     goto ERROR1;
                 }
 
@@ -2502,7 +2516,7 @@ this.toolStripButton_autoFixEas.Checked);
                 }
                 if (result.Value == -1)
                 {
-                    strError = result.ErrorInfo;
+                    strError = result.ErrorInfo + $" errorCode={result.ErrorCode}";
                     goto ERROR1;
                 }
 
@@ -2598,7 +2612,7 @@ this.toolStripButton_autoFixEas.Checked);
 #endif
                 if (result.Value == -1)
                 {
-                    strError = result.ErrorInfo;
+                    strError = result.ErrorInfo + $" errorCode={result.ErrorCode}";
                     goto ERROR1;
                 }
 
@@ -2721,6 +2735,7 @@ bool WriteUhfUserBank = true)
             {
                 var build_user_bank = WriteUhfUserBank;
 
+
                 /*
                 // 读者卡和层架标必须有 User Bank，不然 TU 字段没有地方放
                 if (build_user_bank == false
@@ -2800,6 +2815,34 @@ this.Font);
                         uhfProtocol = "gb";
                     else
                         uhfProtocol = "gxlm";
+                }
+
+                // 2023/11/6
+                // 过滤不需要的元素
+                if (build_user_bank)
+                {
+                    var elements = Program.MainForm.UhfUserBankElements;
+                    List<Element> all = new List<Element>(chip.Elements);
+                    foreach (var element in all)
+                    {
+                        // "SetInformation,OwnerInstitution,TypeOfUsage,ShelfLocation"
+                        if (element.OID == ElementOID.SetInformation
+                            && StringUtil.IsInList("SetInformation", elements) == false)
+                            chip.RemoveElement(element.OID);
+
+                        else if (element.OID == ElementOID.OwnerInstitution
+    && StringUtil.IsInList("OwnerInstitution", elements) == false
+    && uhfProtocol == "gxlm"/*国标不让去除 OI*/)
+                            chip.RemoveElement(element.OID);
+
+                        else if (element.OID == ElementOID.TypeOfUsage
+    && StringUtil.IsInList("TypeOfUsage", elements) == false)
+                            chip.RemoveElement(element.OID);
+
+                        else if (element.OID == ElementOID.ShelfLocation
+    && StringUtil.IsInList("ShelfLocation", elements) == false)
+                            chip.RemoveElement(element.OID);
+                    }
                 }
 
                 TagInfo new_tag_info = existing.Clone();

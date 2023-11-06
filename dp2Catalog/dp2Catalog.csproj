@@ -339,9 +339,7 @@
     <Compile Include="dp2\DbSelectListDialog.Designer.cs">
       <DependentUpon>DbSelectListDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="dp2\dp2SearchForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="dp2\dp2SearchForm.cs" />
     <Compile Include="dp2\dp2SearchForm.Designer.cs">
       <DependentUpon>dp2SearchForm.cs</DependentUpon>
     </Compile>

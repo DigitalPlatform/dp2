@@ -136,6 +136,7 @@ namespace DigitalPlatform.RFID
         }
 
         // 根据指定的 PC 创建空的 EPC Bank 内容
+        // 注: 不包含最开始的 CRC word
         public static byte[] BuildBlankEpcBank()
         {
             ProtocolControlWord pc = new ProtocolControlWord();

@@ -98,7 +98,8 @@ namespace dp2SSL
                     Owner = Application.Current.MainWindow,
                     WindowStartupLocation = WindowStartupLocation.CenterOwner
                 };
-                videoRecognition.Closed += (s1, e1) => {
+                videoRecognition.Closed += (s1, e1) =>
+                {
                     FaceManager.CancelRecognitionFace();
                     _stopVideo = true;
                     RemoveLayer();
@@ -1691,18 +1692,37 @@ out string strError);
 
                         Debug.Assert(entity.TagInfo != null);
 
-                        // Exception:
-                        //      可能会抛出异常 ArgumentException TagDataException
-                        LogicChip chip = LogicChip.From(entity.TagInfo.Bytes,
-(int)entity.TagInfo.BlockSize,
-"" // tag.TagInfo.LockStatus
-);
-                        string pii = chip.FindElement(ElementOID.PII)?.Text;
+                        LogicChip chip = null;
+
+                        if (entity.TagInfo.Protocol == InventoryInfo.ISO15693)
+                        {
+                            // Exception:
+                            //      可能会抛出异常 ArgumentException TagDataException
+                            chip = LogicChip.From(entity.TagInfo.Bytes,
+    (int)entity.TagInfo.BlockSize,
+    "" // tag.TagInfo.LockStatus
+    );
+                        }
+                        else if (entity.TagInfo.Protocol == InventoryInfo.ISO18000P6C)
+                        {
+                            // 2023/11/3
+                            // 注1: taginfo.EAS 在调用后可能被修改
+                            // 注2: 本函数不再抛出异常。会在 ErrorInfo 中报错
+                            var chip_info = RfidTagList.GetUhfChipInfo(entity.TagInfo);
+                            chip = chip_info.Chip;
+                        }
+                        else
+                        {
+                            // 无法识别的 RFID 标签协议
+                            // TODO: 抛出异常?
+                        }
+
+                        string pii = chip?.FindElement(ElementOID.PII)?.Text;
                         entity.PII = GetCaption(pii);
 
                         // 2021/4/2
-                        entity.OI = chip.FindElement(ElementOID.OI)?.Text;
-                        entity.AOI = chip.FindElement(ElementOID.AOI)?.Text;
+                        entity.OI = chip?.FindElement(ElementOID.OI)?.Text;
+                        entity.AOI = chip?.FindElement(ElementOID.AOI)?.Text;
                     }
 
                     bool clearError = true;
@@ -1929,7 +1949,7 @@ out string strError);
             }));
 
             // 检查读者卡状态是否 OK
-            if (IsPatronOK(action, out string check_message) == false)
+            if (IsPatronOK(action, false, out string check_message) == false)
             {
                 if (string.IsNullOrEmpty(check_message))
                     check_message = $"读卡器上的当前读者卡状态不正确。无法进行{action_name}操作";
@@ -2375,7 +2395,7 @@ out string strError);
                         {
                             time_string = DateTimeUtil.FromRfc1123DateTimeString(returning_date).ToLocalTime().ToLongDateString();
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
                             WpfClientInfo.WriteErrorLog($"PosPrint() FromRfc1123DateTimeString({returning_date}) 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                             time_string = returning_date;
@@ -2473,6 +2493,12 @@ out string strError);
                 {
                     RfidTagList.SetEasData(uid, enable);
                     _entities.SetEasData(uid, enable);
+                    if (result.ChangedUID != null)
+                    {
+                        uid = result.ChangedUID;
+                        RfidTagList.SetEasData(uid, enable);
+                        _entities.SetEasData(uid, enable);
+                    }
                 }
                 return result;
             }
@@ -2485,7 +2511,9 @@ out string strError);
 
         // 当前读者卡状态是否 OK?
         // 注：如果卡片虽然放上去了，但无法找到读者记录，这种状态就不是 OK 的。此时应该拒绝进行流通操作
-        bool IsPatronOK(string action, out string message)
+        bool IsPatronOK(string action, 
+            bool show_debug_info,
+            out string message)
         {
             message = "";
 
@@ -2510,14 +2538,14 @@ out string strError);
             if (IsVerticalCard()/*App.PatronReaderVertical*/)
                 fang = "扫";
 
-            string debug_info = $"uid:[{_patron.UID}],barcode:[{_patron.Barcode}]";
+            string debug_info = $"(uid:[{_patron.UID}],barcode:[{_patron.Barcode}])";
             if (action == "borrow")
             {
                 // 提示信息要考虑到应用了指纹的情况
                 if (string.IsNullOrEmpty(App.FingerprintUrl) == false)
-                    message = $"请先{fang}读者卡，或扫入一次指纹，然后再进行借书操作({debug_info})";
+                    message = $"请先{fang}读者卡，或扫入一次指纹，然后再进行借书操作{(show_debug_info? debug_info : "")}";
                 else
-                    message = $"请先{fang}读者卡，然后再进行借书操作({debug_info})";
+                    message = $"请先{fang}读者卡，然后再进行借书操作{(show_debug_info ? debug_info : "")}";
             }
             else if (action == "registerFace"
                 || action == "deleteFace")
@@ -2528,9 +2556,9 @@ out string strError);
 
                 // 提示信息要考虑到应用了指纹的情况
                 if (string.IsNullOrEmpty(App.FingerprintUrl) == false)
-                    message = $"请先{fang}读者卡，或扫入一次指纹，然后再进行{action_name}操作({debug_info})";
+                    message = $"请先{fang}读者卡，或扫入一次指纹，然后再进行{action_name}操作{(show_debug_info ? debug_info : "")}";
                 else
-                    message = $"请先{fang}读者卡，然后再进行{action_name}操作({debug_info})";
+                    message = $"请先{fang}读者卡，然后再进行{action_name}操作{(show_debug_info ? debug_info : "")}";
             }
             else if (action == "bindPatronCard"
                 || action == "releasePatronCard")
@@ -2565,7 +2593,7 @@ out string strError);
             else
             {
                 // 调试用
-                message = $"读卡器上的当前读者卡状态不正确。无法进行 {action} 操作({debug_info})";
+                message = $"读卡器上的当前读者卡状态不正确。无法进行 {action} 操作{(show_debug_info ? debug_info : "")}";
             }
             return false;
         }
@@ -2678,7 +2706,7 @@ out string strError);
                         this.NavigationService?.Navigate(PageMenu.MenuPage);
                     }));
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     WpfClientInfo.WriteErrorLog($"TryBackMenuPage() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
@@ -3085,7 +3113,8 @@ out string strError);
                     Owner = Application.Current.MainWindow,
                     WindowStartupLocation = WindowStartupLocation.CenterOwner
                 };
-                videoRegister.Closed += (s, e)=> {
+                videoRegister.Closed += (s, e) =>
+                {
                     FaceManager.CancelGetFeatureString();
                     _stopVideo = true;
                     RemoveLayer();
@@ -3095,7 +3124,7 @@ out string strError);
             }));
             try
             {
-                if (IsPatronOK(action, out string check_message) == false)
+                if (IsPatronOK(action, false, out string check_message) == false)
                 {
                     if (string.IsNullOrEmpty(check_message))
                         check_message = $"读卡器上的当前读者卡状态不正确。无法进行{action_name}操作";
@@ -4001,7 +4030,7 @@ string usage)
                         }
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     WpfClientInfo.WriteErrorLog($"BeginWarningCard() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
@@ -4205,7 +4234,7 @@ string usage)
             catch (Exception ex)
             {
                 WpfClientInfo.WriteErrorLog($"Get14443ACardUIDAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
-                
+
                 if (token.IsCancellationRequested)
                     return new NormalResult
                     {
@@ -4370,7 +4399,7 @@ string usage)
             _skipTagChanged++;
             try
             {
-                if (IsPatronOK(action, out string check_message) == false)
+                if (IsPatronOK(action, false, out string check_message) == false)
                 {
                     if (string.IsNullOrEmpty(check_message))
                         check_message = $"读卡器上的当前读者卡状态不正确。无法进行{action_name}副卡的操作";

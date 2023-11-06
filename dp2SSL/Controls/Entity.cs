@@ -76,7 +76,7 @@ namespace dp2SSL
             return entity.SetEasData(enable);
         }
 
-        // 根据已知的 PII 在结合中添加一个 Entity 元素
+        // 根据已知的 PII 在集合中添加一个 Entity 元素
         public Entity Add(string pii, string oi, string aoi, bool auto_update = true)
         {
             // 查重
@@ -245,17 +245,36 @@ namespace dp2SSL
 
         public static GetPIIResult GetPII(TagInfo tagInfo)
         {
-            // Exception:
-            //      可能会抛出异常 ArgumentException TagDataException
-            LogicChip chip = LogicChip.From(tagInfo.Bytes,
-(int)tagInfo.BlockSize,
-"" // tagInfo.LockStatus
-);
+            LogicChip chip = null;
+
+            if (tagInfo.Protocol == InventoryInfo.ISO15693)
+            {
+                // Exception:
+                //      可能会抛出异常 ArgumentException TagDataException
+                chip = LogicChip.From(tagInfo.Bytes,
+    (int)tagInfo.BlockSize,
+    "" // tagInfo.LockStatus
+    );
+            }
+            else if (tagInfo.Protocol == InventoryInfo.ISO18000P6C)
+            {
+                // 2023/11/3
+                // 注1: taginfo.EAS 在调用后可能被修改
+                // 注2: 本函数不再抛出异常。会在 ErrorInfo 中报错
+                var chip_info = RfidTagList.GetUhfChipInfo(tagInfo);
+                chip = chip_info.Chip;
+            }
+            else
+            {
+                // 无法识别的 RFID 标签格式
+                // TODO: 抛出异常？
+            }
+
             return new GetPIIResult
             {
-                PII = chip.FindElement(ElementOID.PII)?.Text,
-                OI = chip.FindElement(ElementOID.OI)?.Text,
-                AOI = chip.FindElement(ElementOID.AOI)?.Text,
+                PII = chip?.FindElement(ElementOID.PII)?.Text,
+                OI = chip?.FindElement(ElementOID.OI)?.Text,
+                AOI = chip?.FindElement(ElementOID.AOI)?.Text,
             };
         }
 
@@ -279,17 +298,37 @@ namespace dp2SSL
 
                 try
                 {
-                    // Exception:
-                    //      可能会抛出异常 ArgumentException TagDataException
-                    LogicChip chip = LogicChip.From(entity.TagInfo.Bytes,
-        (int)entity.TagInfo.BlockSize,
-        "" // tag.TagInfo.LockStatus
-        );
-                    pii = chip.FindElement(ElementOID.PII)?.Text;
+                    LogicChip chip = null;
+                    // 2023/11/3
+                    if (entity.TagInfo.Protocol == InventoryInfo.ISO15693)
+                    {
+                        // Exception:
+                        //      可能会抛出异常 ArgumentException TagDataException
+                        chip = LogicChip.From(entity.TagInfo.Bytes,
+            (int)entity.TagInfo.BlockSize,
+            "" // tag.TagInfo.LockStatus
+            );
+                        pii = chip.FindElement(ElementOID.PII)?.Text;
+                    }
+                    else if (entity.TagInfo.Protocol == InventoryInfo.ISO18000P6C)
+                    {
+                        // 注1: taginfo.EAS 在调用后可能被修改
+                        // 注2: 本函数不再抛出异常。会在 ErrorInfo 中报错
+                        var chip_info = RfidTagList.GetUhfChipInfo(entity.TagInfo);
+                        pii = chip_info.PII;
+                        chip = chip_info.Chip;
+                    }
+                    else
+                    {
+                        // 2023/11/3
+                        entity.SetError($"无法识别的 RFID 标签协议 '{entity.TagInfo.Protocol}'");
+                        return;
+                    }
+
                     entity.PII = pii;
                     // 2021/4/2
-                    entity.OI = chip.FindElement(ElementOID.OI)?.Text;
-                    entity.AOI = chip.FindElement(ElementOID.AOI)?.Text;
+                    entity.OI = chip?.FindElement(ElementOID.OI)?.Text;
+                    entity.AOI = chip?.FindElement(ElementOID.AOI)?.Text;
                 }
                 catch (TagInfoException ex)
                 {
@@ -356,18 +395,35 @@ namespace dp2SSL
                 string aoi = "";
                 if (tag.TagInfo != null)
                 {
-                    // Exception:
-                    //      可能会抛出异常 ArgumentException TagDataException
-                    LogicChip chip = LogicChip.From(tag.TagInfo.Bytes,
-        (int)tag.TagInfo.BlockSize,
-        "" // tag.TagInfo.LockStatus
-        );
-                    pii = chip.FindElement(ElementOID.PII)?.Text;
+                    LogicChip chip = null;
+                    if (tag.Protocol == InventoryInfo.ISO15693)
+                    {
+                        // Exception:
+                        //      可能会抛出异常 ArgumentException TagDataException
+                        chip = LogicChip.From(tag.TagInfo.Bytes,
+            (int)tag.TagInfo.BlockSize,
+            "" // tag.TagInfo.LockStatus
+            );
+                    }
+                    else if (tag.Protocol == InventoryInfo.ISO18000P6C)
+                    {
+                        // 2023/11/3
+                        // 注1: taginfo.EAS 在调用后可能被修改
+                        // 注2: 本函数不再抛出异常。会在 ErrorInfo 中报错
+                        var chip_info = RfidTagList.GetUhfChipInfo(tag.TagInfo);
+                        chip = chip_info.Chip;
+                    }
+                    else
+                    {
+                        // 无法识别的 RFID 标签协议
+                        // TODO: 抛出异常？
+                    }
+
+                    pii = chip?.FindElement(ElementOID.PII)?.Text;
 
                     // 2021/4/2
-                    oi = chip.FindElement(ElementOID.OI)?.Text;
-                    aoi = chip.FindElement(ElementOID.AOI)?.Text;
-
+                    oi = chip?.FindElement(ElementOID.OI)?.Text;
+                    aoi = chip?.FindElement(ElementOID.AOI)?.Text;
                 }
                 else
                 {

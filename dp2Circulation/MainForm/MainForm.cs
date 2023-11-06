@@ -8066,6 +8066,32 @@ value);  // 常用值 "ipc://RfidChannel/RfidServer"
             }
         }
 
+        /*
+            this.checkedComboBox_uhf_elements.Text =
+                ap.GetString("uhf",
+    "elements",
+    "SetInformation,OwnerInstitution,TypeOfUsage,ShelfLocation");
+         * */
+
+        // 超高频标签要写入 User Bank 的元素名列表
+        public string UhfUserBankElements
+        {
+            get
+            {
+                if (this.AppInfo == null)
+                    return "SetInformation,OwnerInstitution,TypeOfUsage,ShelfLocation";
+                return this.AppInfo.GetString("uhf",
+    "elements",
+    "SetInformation,OwnerInstitution,TypeOfUsage,ShelfLocation");
+            }
+            set
+            {
+                this.AppInfo?.SetString("uhf",
+                    "elements",
+                    value);
+            }
+        }
+
         // 超高频标签当遇到不同内容格式覆盖的时候是否警告?
         public bool UhfWarningWhenDataFormatMismatch
         {

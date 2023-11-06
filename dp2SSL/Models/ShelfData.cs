@@ -2259,9 +2259,9 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                     debugInfo?.AppendLine($"thisTypeCount={thisTypeCount} 加 1 大于 {max_result.Max}，具体图书类型超额了");
 
                     if (bLibraryCodeMismatch)   // 2020/9/14
-                        borrow_info.Overflows = new string[] { $"读者 '{ patron_pii}' 的馆代码 '{patronLibraryCode}' 和册的馆代码 '{ info_result.LibraryCode}' 不匹配" };
+                        borrow_info.Overflows = new string[] { $"读者 '{patron_pii}' 的馆代码 '{patronLibraryCode}' 和册的馆代码 '{info_result.LibraryCode}' 不匹配" };
                     else
-                        borrow_info.Overflows = new string[] { $"读者 '{ patron_pii}' 所借 '{ info_result.BookType }' 类图书数量将超过 馆代码 '{ info_result.LibraryCode}' 中 该读者类型 '{ patron_type }' 对该图书类型 '{ info_result.BookType }' 的最多 可借册数 值 '{max_result.Max}'" };
+                        borrow_info.Overflows = new string[] { $"读者 '{patron_pii}' 所借 '{info_result.BookType}' 类图书数量将超过 馆代码 '{info_result.LibraryCode}' 中 该读者类型 '{patron_type}' 对该图书类型 '{info_result.BookType}' 的最多 可借册数 值 '{max_result.Max}'" };
                     // 一天以后还书
                     SetReturning(1, "day");
                     overflow = true;
@@ -2278,7 +2278,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                     {
                         debugInfo?.AppendLine($"piis.Count={piis.Count} 加 1 大于 {total_max_result.Max}，读者类型总限额超额了");
 
-                        borrow_info.Overflows = new string[] { $"读者 '{ patron_pii}' 所借图书数量将超过 馆代码 '{ info_result.LibraryCode}' 中 该读者类型 '{ patron_type }' 对所有图书类型的最多 可借册数 值 '{total_max_result.Max}'" };
+                        borrow_info.Overflows = new string[] { $"读者 '{patron_pii}' 所借图书数量将超过 馆代码 '{info_result.LibraryCode}' 中 该读者类型 '{patron_type}' 对所有图书类型的最多 可借册数 值 '{total_max_result.Max}'" };
                         // 一天以后还书
                         SetReturning(1, "day");
                         overflow = true;
@@ -3351,9 +3351,9 @@ ShelfData.LibraryNetworkCondition == "OK" ? "" : "offline");
 
             StringBuilder text = new StringBuilder();
             int i = 0;
-            foreach(string error in errors)
+            foreach (string error in errors)
             {
-                text.AppendLine($"{(i+1)}) {error}");
+                text.AppendLine($"{(i + 1)}) {error}");
                 i++;
             }
 
@@ -3909,12 +3909,28 @@ ShelfData.LibraryNetworkCondition == "OK" ? "" : "offline");
 
             if (string.IsNullOrEmpty(data.Type))
             {
+#if OLD
                 // Exception:
                 //      可能会抛出异常 ArgumentException TagDataException
                 chip = LogicChip.From(data.OneTag.TagInfo.Bytes,
-        (int)data.OneTag.TagInfo.BlockSize,
-        "" // tag.TagInfo.LockStatus
-        );
+            (int)data.OneTag.TagInfo.BlockSize,
+            "" // tag.TagInfo.LockStatus
+            );
+#endif
+
+                // 2023/11/3
+                // 注1: taginfo.EAS 在调用后可能被修改
+                // 注2: 本函数不再抛出异常。会在 ErrorInfo 中报错
+                var chip_info = RfidTagList.GetChipInfo(data.OneTag.TagInfo);
+                
+                if (string.IsNullOrEmpty(chip_info.ErrorInfo) == false)
+                {
+                    data.Type = ""; // 表示类型不确定
+                    return;
+                }
+
+                chip = chip_info.Chip;
+
                 pii = chip.FindElement(ElementOID.PII)?.Text;
 
 #if AUTO_TEST
@@ -4121,16 +4137,32 @@ ShelfData.LibraryNetworkCondition == "OK" ? "" : "offline");
             {
                 if (chip == null)
                 {
-                    // Exception:
-                    //      可能会抛出异常 ArgumentException TagDataException
-                    chip = LogicChip.From(tag.OneTag.TagInfo.Bytes,
-            (int)tag.OneTag.TagInfo.BlockSize,
-            "" // tag.TagInfo.LockStatus
-            );
+                    if (tag.OneTag.Protocol == InventoryInfo.ISO15693)
+                    {
+                        // Exception:
+                        //      可能会抛出异常 ArgumentException TagDataException
+                        chip = LogicChip.From(tag.OneTag.TagInfo.Bytes,
+                (int)tag.OneTag.TagInfo.BlockSize,
+                "" // tag.TagInfo.LockStatus
+                );
+                    }
+                    else if (tag.OneTag.Protocol == InventoryInfo.ISO18000P6C)
+                    {
+                        // 2023/11/3
+                        // 注1: taginfo.EAS 在调用后可能被修改
+                        // 注2: 本函数不再抛出异常。会在 ErrorInfo 中报错
+                        var chip_info = RfidTagList.GetUhfChipInfo(tag.OneTag.TagInfo);
+                        chip = chip_info.Chip;
+                    }
+                    else
+                    {
+                        // 无法识别的 RFID 标签协议
+                        // TODO: 抛出异常?
+                    }
                 }
 
-                string oi = chip.FindElement(ElementOID.OI)?.Text;
-                string aoi = chip.FindElement(ElementOID.AOI)?.Text;
+                string oi = chip?.FindElement(ElementOID.OI)?.Text;
+                string aoi = chip?.FindElement(ElementOID.AOI)?.Text;
 
                 result.OI = oi;
                 result.AOI = aoi;
@@ -5788,12 +5820,28 @@ ShelfData.LibraryNetworkCondition == "OK" ? "" : "offline");
                     LogicChip chip = null;
                     try
                     {
-                        // Exception:
-                        //      可能会抛出异常 ArgumentException TagDataException
-                        chip = LogicChip.From(entity.TagInfo.Bytes,
-        (int)entity.TagInfo.BlockSize,
-        "" // tag.TagInfo.LockStatus
-        );
+                        if (entity.TagInfo.Protocol == InventoryInfo.ISO15693)
+                        {
+                            // Exception:
+                            //      可能会抛出异常 ArgumentException TagDataException
+                            chip = LogicChip.From(entity.TagInfo.Bytes,
+            (int)entity.TagInfo.BlockSize,
+            "" // tag.TagInfo.LockStatus
+            );
+                        }
+                        else if (entity.TagInfo.Protocol == InventoryInfo.ISO18000P6C)
+                        {
+                            // 2023/11/3
+                            // 注1: taginfo.EAS 在调用后可能被修改
+                            // 注2: 本函数不再抛出异常。会在 ErrorInfo 中报错
+                            var chip_info = RfidTagList.GetUhfChipInfo(entity.TagInfo);
+                            chip = chip_info.Chip;
+                        }
+                        else
+                        {
+                            // 无法识别的 RFID 标签协议
+                            // TODO: 抛出异常?
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -5802,7 +5850,7 @@ ShelfData.LibraryNetworkCondition == "OK" ? "" : "offline");
                         continue;
                     }
 
-                    string pii = chip.FindElement(ElementOID.PII)?.Text;
+                    string pii = chip?.FindElement(ElementOID.PII)?.Text;
                     if (string.IsNullOrEmpty(pii))
                     {
                         // 报错
@@ -5817,8 +5865,8 @@ ShelfData.LibraryNetworkCondition == "OK" ? "" : "offline");
                     entity.PII = PageBorrow.GetCaption(pii);
 
                     // 2020/9/5
-                    entity.OI = chip.FindElement(ElementOID.OI)?.Text;
-                    entity.AOI = chip.FindElement(ElementOID.AOI)?.Text;
+                    entity.OI = chip?.FindElement(ElementOID.OI)?.Text;
+                    entity.AOI = chip?.FindElement(ElementOID.AOI)?.Text;
                 }
 
                 // 获得 Title

@@ -254,6 +254,10 @@ namespace DigitalPlatform.RFID
         // 验证 128 bit 编码的输入字符串的合法性
         public static string VerifyIpc128bitString(string text)
         {
+            // 2023/11/6
+            if (text == null)
+                return $"字符串 '{text}' 长度 0 不符合 128-bit 编码的要求(应为 1-14 字符)";
+
             if (text.Length < 1 || text.Length > 14)
                 return $"字符串 '{text}' 长度 {text.Length} 不符合 128-bit 编码的要求(应为 1-14 字符)";
 
@@ -420,6 +424,10 @@ namespace DigitalPlatform.RFID
         // 验证 96 bit 编码的输入字符串的合法性
         public static string VerifyIpc96bitString(string text)
         {
+            // 2023/11/6
+            if (text == null)
+                return $"字符串 '{text}' 长度 0 不符合 96-bit 编码的要求(应为 1-14 字符)";
+
             if (text.Length < 1 || text.Length > 14)
                 return $"字符串 '{text}' 长度 {text.Length} 不符合 96-bit 编码的要求(应为 1-14 字符)";
 
@@ -727,6 +735,12 @@ namespace DigitalPlatform.RFID
         // 解码 User Bank
         public static List<GaoxiaoUserElement> DecodeUserBank(byte[] data)
         {
+            /*
+            // testing
+            if (data.Length > 0)
+                data[0] = 0;
+            */
+
             List<GaoxiaoUserElement> results = new List<GaoxiaoUserElement>();
             int start = 0;
             for (; ; )
@@ -1034,7 +1048,8 @@ namespace DigitalPlatform.RFID
         #endregion
 
         // 根据 LogicChip 对象构造标签内容
-        // 注: 1) 本函数构造的 result.UserBank 是 User Bank 内容，因此里面不会包含 PII ContentParameter 元素
+        // 本函数实现注:
+        // 1) 本函数构造的 result.UserBank 是 User Bank 内容，因此里面不会包含 PII ContentParameter 元素
         // 2) 调用前要协调好 UII(在 chip 的 PII 元素中) 和 OI(AOI)的关系。如果 UII 中已经包含了 OI 部分(即 xxx.xxx 格式)，那么 chip 中就不应该包含 OI 或者 AOI 元素了
         // 3) build_user_bank 为 false 的情况下，OI(AOI) 会被迫放到 result.EpcBank 的 UII 中返回
         // 4) 如果 chip 中同时包含了 PII 和 OI(AOI)，并且 build_user_bank == true，那么机构代码会放到 User Bank 中返回，EPC Bank 中只是不包含点的 PII。这是为了兼容高校联盟的做法(EPC 中不是 UII 形态)

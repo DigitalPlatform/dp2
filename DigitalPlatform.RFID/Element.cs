@@ -910,6 +910,9 @@ namespace DigitalPlatform.RFID
         // 2019/7/6
         static string DisplayText(string text)
         {
+            // 2023/11/6
+            if (text == null)
+                return null;
             StringBuilder result = new StringBuilder();
             foreach (char ch in text)
             {

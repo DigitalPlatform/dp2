@@ -773,7 +773,7 @@ namespace DigitalPlatform.RFID.UI
                     if (parse_result.Value == -1)
                         throw new Exception(parse_result.ErrorInfo);
                     chip = parse_result.LogicChip;
-                    taginfo.EAS = false;    // TODO
+                    taginfo.EAS = parse_result.PC.AFI == 0x07;
                     uhfProtocol = "gb";
                     pii = GetPiiPart(parse_result.UII);
                     oi = GetOiPart(parse_result.UII, false);
@@ -788,10 +788,10 @@ namespace DigitalPlatform.RFID.UI
                     if (parse_result.Value == -1)
                         throw new Exception(parse_result.ErrorInfo);
                     chip = parse_result.LogicChip;
-                    taginfo.EAS = !parse_result.EpcInfo.Lending;
+                    taginfo.EAS = parse_result.EpcInfo == null ? false : !parse_result.EpcInfo.Lending;
                     uhfProtocol = "gxlm";
-                    pii = GetPiiPart(parse_result.EpcInfo.PII);
-                    oi = GetOiPart(parse_result.EpcInfo.PII, false);
+                    pii = GetPiiPart(parse_result.EpcInfo?.PII);
+                    oi = GetOiPart(parse_result.EpcInfo?.PII, false);
                 }
             }
 
@@ -843,6 +843,14 @@ namespace DigitalPlatform.RFID.UI
         // 获得 oi.pii 的 oi 部分
         public static string GetOiPart(string oi_pii, bool return_null)
         {
+            // 2023/11/6
+            if (oi_pii == null)
+            {
+                if (return_null)
+                    return null;
+                return "";
+            }
+
             if (oi_pii.IndexOf(".") == -1)
             {
                 if (return_null)
@@ -856,13 +864,16 @@ namespace DigitalPlatform.RFID.UI
         // 获得 oi.pii 的 pii 部分
         public static string GetPiiPart(string oi_pii)
         {
+            // 2023/11/6
+            if (oi_pii == null)
+                return null;
             if (oi_pii.IndexOf(".") == -1)
                 return oi_pii;
             var parts = StringUtil.ParseTwoPart(oi_pii, ".");
             return parts[1];
         }
 
-
+        // 构造 ISO15693 的 TagInfo
         public static TagInfo ToTagInfo(TagInfo existing,
             LogicChipItem chip)
         {

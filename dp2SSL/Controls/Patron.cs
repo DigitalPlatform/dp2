@@ -955,20 +955,35 @@ readerType);
                 return new FillResult { Value = 0 };
             }
 
-            if (tag.TagInfo != null && tag.Protocol == InventoryInfo.ISO15693)
+            if (tag.TagInfo != null
+                && (tag.Protocol == InventoryInfo.ISO15693 || tag.Protocol == InventoryInfo.ISO18000P6C))
             {
-                // Exception:
-                //      可能会抛出异常 ArgumentException TagDataException
-                LogicChip chip = LogicChip.From(tag.TagInfo.Bytes,
-    (int)tag.TagInfo.BlockSize,
-    "" // tag.TagInfo.LockStatus
-    );
-                pii = chip.FindElement(ElementOID.PII)?.Text;
+                LogicChip chip = null;
 
-                oi = chip.FindElement(ElementOID.OI)?.Text;
-                aoi = chip.FindElement(ElementOID.AOI)?.Text;
+                if (tag.Protocol == InventoryInfo.ISO15693)
+                {
+                    // Exception:
+                    //      可能会抛出异常 ArgumentException TagDataException
+                    chip = LogicChip.From(tag.TagInfo.Bytes,
+        (int)tag.TagInfo.BlockSize,
+        "" // tag.TagInfo.LockStatus
+        );
+                }
+                else if (tag.Protocol == InventoryInfo.ISO18000P6C)
+                {
+                    // 2023/11/3
+                    // 注1: taginfo.EAS 在调用后可能被修改
+                    // 注2: 本函数不再抛出异常。会在 ErrorInfo 中报错
+                    var chip_info = RfidTagList.GetUhfChipInfo(tag.TagInfo);
+                    chip = chip_info.Chip;
+                }
 
-                string typeOfUsage = chip.FindElement(ElementOID.TypeOfUsage)?.Text;
+                pii = chip?.FindElement(ElementOID.PII)?.Text;
+
+                oi = chip?.FindElement(ElementOID.OI)?.Text;
+                aoi = chip?.FindElement(ElementOID.AOI)?.Text;
+
+                string typeOfUsage = chip?.FindElement(ElementOID.TypeOfUsage)?.Text;
                 if (typeOfUsage != null && typeOfUsage.StartsWith("8"))
                 {
 
