@@ -334,3 +334,18 @@ MessageBoxDefaultButton.Button2);
         ERROR1:
             MessageBox.Show(this, strError);
         }
+
+
+        ~~~
+        当 CfgDlg 中没有选择 OI 元素写入，但 library.xml 中配置了 OI，这种情况要警告
+
+        ~~~
+        UHF 标签的 User Bank 规格也可以考虑从 TID 中的厂家代码和批次等信息推断
+
+        ~~~
+        探测 UHF 标签的 User Bank Capacity 的功能，当初始时标签的 EPC PC 中的 UMI 标志位为 false 时，
+        就涉及到要主动改变 UMI 位为 true。需要记住最后完成探测后，要把 EPC 写回原来的值
+
+        ~~~
+        写入图书标签的时候如果遇到选择的标签原内容是读者类型；或者反之写入读者标签的时候如果遇到选择的标签原内容
+        是图书类型，需要进行警告

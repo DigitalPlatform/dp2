@@ -896,7 +896,18 @@ namespace DigitalPlatform.LibraryServer
 
             if (String.Compare(strFunction, "delete", true) == 0)
             {
-                if (nodeRequest != null)
+                // 2023/11/8
+                if (nodeRequest == null)
+                {
+                    var itemBarcode = DomUtil.GetElementText(itemdom.DocumentElement,
+                        "barcode");
+                    if (string.IsNullOrEmpty(itemBarcode))
+                        itemBarcode = "@refID:" + DomUtil.GetElementText(itemdom.DocumentElement,
+                        "refID");
+                    strError = $"册 '{itemBarcode}' 中并不存在读者 '{strReaderBarcode}' 请求过的预约事项";
+                    return -1;
+                }
+                else
                 {
                     // 删除前要检查状态，是不是arrived
                     string strState = DomUtil.GetAttr(nodeRequest, "state");

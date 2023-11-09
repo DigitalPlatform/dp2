@@ -174,9 +174,17 @@ MessageBoxDefaultButton.Button2);
 
             // 然后保存
             {
-                int nRet = SaveNewChip(out strError);
+                int nRet = SaveNewChip(
+                    out string new_tag_uid,
+                    out strError);
                 if (nRet == -1)
                     goto ERROR1;
+                // 2023/11/7
+                if (new_tag_uid != null)
+                {
+                    _tagExisting.UID = new_tag_uid;
+                    _tagExisting.TagInfo.UID = new_tag_uid;
+                }
             }
 
             MessageBox.Show(this, "保存成功");
@@ -425,9 +433,14 @@ MessageBoxDefaultButton.Button2);
             return 0;
         }
 
-        int SaveNewChip(out string strError)
+        // parameters:
+        //      new_tag_uid 更新后的 UID。目前 UHF 标签有这个特性
+        int SaveNewChip(
+            out string new_tag_uid,
+            out string strError)
         {
             strError = "";
+            new_tag_uid = null;
 
 #if OLD_CODE
             RfidChannel channel = StartRfidChannel(
@@ -474,7 +487,8 @@ out strError);
                                     return true;
                                 return false;
                             },
-                            true);
+                            null,
+                            true);  // 要写入 User Bank
                     }
                     else
                     {
@@ -505,6 +519,19 @@ out strError);
                     return -1;
                 }
 
+                if (_tagExisting.Protocol == InventoryInfo.ISO18000P6C)
+                {
+                    new_tag_uid = new_tag_info.UID;
+                }
+                /*
+                // 更新 _tagExisting 中的两处 UID，以便后继刷新操作可以顺利完成
+                if (_tagExisting.Protocol == InventoryInfo.ISO18000P6C)
+                {
+                    _tagExisting.UID = new_tag_info.UID;
+                    if (_tagExisting.TagInfo != null)
+                        _tagExisting.TagInfo.UID = new_tag_info.UID;
+                }
+                */
                 return 0;
             }
             catch (Exception ex)

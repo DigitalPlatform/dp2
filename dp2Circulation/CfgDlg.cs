@@ -575,9 +575,9 @@ false);
     "dataFormat",
     "国标格式");
             // 超高频标签是否要写入 User Bank 内容
-            this.checkBox_uhf_writeUserBank.Checked =
+            this.checkBox_uhf_bookTagWriteUserBank.Checked =
                 ap.GetBoolean("uhf",
-    "writeUserBank",
+    "bookTagWriteUserBank",
     true);
             // 超高频标签当遇到不同内容格式覆盖的时候是否警告?
             this.checkBox_uhf_warningWhenDataFormatMismatch.Checked = 
@@ -593,13 +593,15 @@ false);
     "elements",
     "SetInformation,OwnerInstitution,TypeOfUsage,ShelfLocation");
 
+            checkBox_uhf_bookTagWriteUserBank_CheckedChanged(this, new EventArgs());
+
             if (StringUtil.IsInList("client_disablerfid", Program.MainForm._currentUserRights))
             {
                 this.textBox_cardReader_rfidCenterUrl.Enabled = false;
                 this.button_cardReader_setRfidUrlDefaultValue.Enabled = false;
 
                 this.comboBox_uhf_dataFormat.Enabled = false;
-                this.checkBox_uhf_writeUserBank.Enabled = false;
+                this.checkBox_uhf_bookTagWriteUserBank.Enabled = false;
                 this.checkBox_uhf_warningWhenDataFormatMismatch.Enabled = false;
                 this.checkedComboBox_uhf_elements.Enabled = false;
             }
@@ -829,7 +831,7 @@ ap.GetString(
         {
             List<string> errors = new List<string>();
 
-            if (this.checkBox_uhf_writeUserBank.Checked
+            if (this.checkBox_uhf_bookTagWriteUserBank.Checked
                 && string.IsNullOrEmpty(this.checkedComboBox_uhf_elements.Text))
             {
                 errors.Add("当选择了“超高频标签要写入 User Bank 内容”时，必须选择至少一个应写入的元素名");
@@ -1316,8 +1318,8 @@ ap.GetString(
 
                 // 超高频标签是否要写入 User Bank 内容
                 ap.SetBoolean("uhf",
-        "writeUserBank",
-        this.checkBox_uhf_writeUserBank.Checked);
+        "bookTagWriteUserBank",
+        this.checkBox_uhf_bookTagWriteUserBank.Checked);
 
                 // 超高频标签当遇到不同内容格式覆盖的时候是否警告?
                 ap.SetBoolean("uhf",
@@ -2029,6 +2031,12 @@ MessageBoxDefaultButton.Button2);
                 return;
 
             this.textBox_palmprint_readerUrl.Text = strDefaultValue;
+        }
+
+        private void checkBox_uhf_bookTagWriteUserBank_CheckedChanged(object sender, EventArgs e)
+        {
+            this.checkedComboBox_uhf_elements.Visible = this.checkBox_uhf_bookTagWriteUserBank.Checked;
+            this.label_uhf_elements.Visible = this.checkBox_uhf_bookTagWriteUserBank.Checked;
         }
     }
 

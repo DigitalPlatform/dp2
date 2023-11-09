@@ -302,6 +302,7 @@ namespace dp2Circulation
         //          style 可以有如下子参数:
         //              disableControl
         //              timeout:hh:mm:ss 确保超时参数在 hh:mm:ss 以长
+        //              settimeout:hh:mm:ss 直接设置超时参数为 hh:mm:ss。注意，和 timeout 子参数效果不同
         // https://learn.microsoft.com/en-us/dotnet/api/system.timespan.parse?view=net-6.0
         // [ws][-]{ d | [d.]hh:mm[:ss[.ff]] }[ws]
         public Looping Looping(
@@ -4121,6 +4122,27 @@ MessageBoxDefaultButton.Button2);
                                         v = "error:" + error;
                                     return ProcessParts.Basic;
                                 }
+
+                                // 2023/11/9
+                                if (c.Type == "biblio_itemCount")
+                                {
+                                    // return:
+                                    //      -1  出错
+                                    //      0   没有找到
+                                    //      1   成功
+                                    var ret = Utility.GetSubRecords(
+                    channel,
+                    looping.Progress,
+                    strRecPath,
+                    "itemCount",
+                    out string strResult,
+                    out string error);
+                                    v = strResult;
+                                    if (ret == -1)
+                                        v = "error:" + error;
+                                    return ProcessParts.Basic;
+                                }
+
 
                                 if (c.Type == "biblio_recpath")
                                 {

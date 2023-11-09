@@ -65,7 +65,8 @@ namespace dp2Circulation
 
         // 获得书目记录的下级记录
         // parameters:
-        //      strDataName 数据名称。为 firstAccessNo subrecords 之一
+        //      strDataName 数据名称。为 firstAccessNo subrecords itemCount之一
+        //                  itemCount 即下属册记录数。注意和当前 dp2library 账户管辖的馆代码有关，只计算能管辖的册记录数
         // return:
         //      -1  出错
         //      0   没有找到
@@ -81,12 +82,16 @@ namespace dp2Circulation
             strError = "";
             strResult = "";
 
+            string[] formats = new string[] { "subrecords:item" };
+            if (strDataName == "itemCount")
+                formats = new string[] { "subcount:item" };
+
             // 注: 最多获得 10 条册记录
             long lRet = channel.GetBiblioInfos(
     stop,
     strRecPath,
     "",
-    new string[] { "subrecords:item" },   // "subrecords:item|order"
+    formats,   // "subrecords:item|order"
     out string[] results,
     out byte[] baTimestamp,
     out strError);
@@ -97,6 +102,8 @@ namespace dp2Circulation
             string strSubRecords = results[0];
             if (strDataName == "firstAccessNo")
                 strResult = GetFirstAccessNo(strSubRecords);
+            else if (strDataName == "itemCount")
+                strResult = strSubRecords;
             else if (strDataName == "subrecords" || string.IsNullOrEmpty(strDataName))
                 strResult = strSubRecords;
             return 1;
@@ -160,5 +167,67 @@ namespace dp2Circulation
             }
         }
 
+#if REMOVED
+        static string GetItemCount(string strSubRecords)
+        {
+            if (string.IsNullOrEmpty(strSubRecords))
+                return "0";
+
+            if (strSubRecords.StartsWith("error:"))
+                return strSubRecords.Substring("error:".Length);
+
+            XmlDocument collection_dom = new XmlDocument();
+            try
+            {
+                collection_dom.LoadXml(strSubRecords);
+
+                {
+                    string errorInfo = "";
+                    string itemTotalCount = collection_dom.DocumentElement.GetAttribute("itemTotalCount");
+                    if (itemTotalCount == "-1")
+                    {
+                        string itemErrorCode = collection_dom.DocumentElement.GetAttribute("itemErrorCode");
+                        string itemErrorInfo = collection_dom.DocumentElement.GetAttribute("itemErrorInfo");
+                        errorInfo = $"{itemErrorCode}:{itemErrorInfo}";
+                        return errorInfo;
+                    }
+
+                    return itemTotalCount;
+
+                    XmlNodeList nodes = collection_dom.DocumentElement.SelectNodes("item");
+                    int i = 0;
+                    foreach (XmlElement item in nodes)
+                    {
+                        string rec_path = item.GetAttribute("recPath");
+                        string location = DomUtil.GetElementText(item, "location");
+                        string price = DomUtil.GetElementText(item, "price");
+                        string seller = DomUtil.GetElementText(item, "seller");
+                        string source = DomUtil.GetElementText(item, "source");
+                        string accessNo = DomUtil.GetElementText(item, "accessNo");
+
+                        if (string.IsNullOrEmpty(accessNo) == false)
+                            return accessNo;
+                        i++;
+                    }
+
+                    /*
+                    Int32.TryParse(itemTotalCount, out int value);
+                    if (i < value)
+                    {
+                        text.AppendLine($"<tr><td colspan='10'>... 有 {value - i} 项被略去 ...</td></tr>");
+                    }
+                    */
+                    return "";  // not found
+                }
+            }
+            catch (Exception ex)
+            {
+                return "strSubRecords 装入 XMLDOM 时出现异常: "
+                    + ex.Message
+                    + "。(strSubRecords='" + StringUtil.CutString(strSubRecords, 300) + "')";
+            }
+        }
+
+#endif
     }
 }

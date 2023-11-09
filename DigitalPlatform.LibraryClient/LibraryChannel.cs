@@ -4197,6 +4197,9 @@ out strError);
             }
         }
 
+        // 最短的超时时间长度
+        public static TimeSpan MinTimeout = TimeSpan.FromSeconds(10);
+
         // 获得书目摘要
         /// <summary>
         /// 获得书目摘要
@@ -4231,7 +4234,7 @@ out strError);
             return 0;
 #endif
             TimeSpan old_timeout = this.Timeout;
-            this.Timeout = new TimeSpan(0, 0, 5);
+            this.Timeout = MinTimeout;
             try
             {
                 while (true)

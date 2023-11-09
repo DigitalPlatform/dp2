@@ -799,6 +799,7 @@ namespace RfidCenter
                     ErrorCode = $"state:{Program.MainForm.ErrorState}"
                 };
 
+            /*
             if (uid == "00000000")
                 return new GetTagInfoResult
                 {
@@ -806,6 +807,7 @@ namespace RfidCenter
                     ErrorInfo = $"uid 为 {uid} 进行 inventory 会损坏标签",
                     ErrorCode = $"uidError"
                 };
+            */
 
             Program.Rfid.IncApiCount();
             try

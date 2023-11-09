@@ -724,7 +724,7 @@ namespace DigitalPlatform.RFID.UI
                 var chip = LogicChipItem.From(tag_info.Bytes,
         (int)tag_info.BlockSize,
         tag_info.LockStatus);
-
+                chip.Protocol = tag_info.Protocol;
                 chip.SetSystemValues(
                     tag_info.Bytes,
                     tag_info.LockStatus,
@@ -973,10 +973,12 @@ namespace DigitalPlatform.RFID.UI
 
             if (this.OriginBytes != null)
             {
-                text.Append($"\r\n初始 User Bank 字节内容:\r\n{ByteArray.GetHexTimeStampString(this.OriginBytes)}\r\n");
+                text.Append($"\r\nUser Bank 字节内容:\r\n{ByteArray.GetHexTimeStampString(this.OriginBytes)}\r\n");
             }
+            else
+                text.Append($"\r\nUser Bank 字节内容:\r\n(null)\r\n");
 
-            text.Append($"\r\n锁定位置:\r\n{this.OriginLockStatus}\r\n\r\n");
+            // text.Append($"\r\n锁定位置:\r\n{this.OriginLockStatus}\r\n\r\n");
 
             /*
             if (this.OriginBytes != null)
@@ -1002,15 +1004,13 @@ namespace DigitalPlatform.RFID.UI
             //
             try
             {
-
-                bool eas = true;    // TODO
                 bool build_user_bank = true;    // TODO
-                var result = GaoxiaoUtility.BuildTag(this, build_user_bank, eas);
+                var result = GaoxiaoUtility.BuildTag(this, build_user_bank, this.EAS);
                 if (result.Value == -1)
                     throw new Exception(result.ErrorInfo);
 
                 string epc = UhfUtility.EpcBankHex(result.EpcBank);    //  this.UID.Substring(0, 4) + Element.GetHexString(result.EpcBank);
-                text.Append($"\r\n尝试按照 Chip 构造 EPC Bank 字节内容:\r\n{epc}\r\n");
+                text.Append($"\r\n尝试按照 Chip 构造 EPC Bank 字节内容(EAS 为 {this.EAS}):\r\n{epc}\r\n");
 
                 var bytes = result.UserBank;
                 text.Append($"\r\n尝试按照 Chip 构造 User Bank 字节内容:\r\n{ByteArray.GetHexTimeStampString(bytes)}\r\n");

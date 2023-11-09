@@ -1323,9 +1323,9 @@ int MAX_CHARS = 50)
             {
                 var results = base.GetAllColumns(false);
 
-                /*
                 string[] lines = new string[] {
-                    "biblio_isbd -- 书目摘要",
+            "biblio_accessNo -- 索取号",   // 2023/11/9
+            "biblio_itemCount -- 册数",   // 2023/11/9
                 };
 
                 foreach (string line in lines)
@@ -1336,7 +1336,6 @@ int MAX_CHARS = 50)
                     column.MaxChars = -1;
                     results.Add(column);
                 }
-                */
 
                 return results;
             }

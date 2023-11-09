@@ -77,7 +77,7 @@ namespace dp2Circulation
                     string strXml = "";
 
                     // 获得记录
-                    channel.Timeout = new TimeSpan(0, 0, 5);
+                    channel.Timeout = LibraryChannel.MinTimeout;
                     long lRet = 0;
                     if (this.DbType == "item")
                     {

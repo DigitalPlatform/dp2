@@ -52,6 +52,17 @@ ref sessioninfo) == false)
             return;
         }
 
+        // 2011/9/2
+        this.Response.AddHeader("Pragma", "no-cache");
+        this.Response.AddHeader("Cache-Control", "no-store, no-cache, must-revalidate, post-check=0, pre-check=0");
+        this.Response.AddHeader("Expires", "0");
+
+        string strBarcode = this.Request["barcode"];
+        if (string.IsNullOrEmpty(strBarcode) == false)
+        {
+            this.ReservationInfoControl1.ReaderBarcode = strBarcode;
+            this.FellBackInfoControl1.ReaderBarcode = strBarcode;
+        }
     }
 
 }

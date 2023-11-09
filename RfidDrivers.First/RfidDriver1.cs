@@ -4188,20 +4188,26 @@ out Reader reader);
                         }
 
                         if (iret != 0)
+                        {
+                            // TODO: 尝试恢复以前的 User Bank 内容?
+
                             return new NormalResult
                             {
                                 Value = -1,
                                 ErrorInfo = $"ISO18000p6C_Write() User Bank error. iret:{iret},reader_name:{one_reader_name},uid:{old_tag_info.UID},antenna_id:{old_tag_info.AntennaID}",
                                 ErrorCode = GetErrorCode(iret, reader.ReaderHandle)
                             };
+                        }
 
                         // 写入 EPC Bank
                         // TODO: 确保写入的 length 为偶数
                         if (new_tag_info.UID != old_tag_info.UID)
                         {
+                            /*
                             // 2023/11/3
                             if (new_tag_info.UID == "00000000")
                                 throw new Exception("危险操作，会损坏 UHF 标签");
+                            */
 
                             var epc_bytes = Element.FromHexString(new_tag_info.UID);
 
@@ -4716,11 +4722,36 @@ out Reader reader);
 
                         Byte[] readData = null;
 
+                        // 注: uid_string 可能表达的是 HF 标签的 UID，
+                        // 这时候不要优化为完全不读，而是要尝试至少读一下 EPC Bank，这样可以暴露出报错
+                        // 
                         // PC.UMI 如果为 false 就不需要读入 User Bank 了
                         var pc_bytes = GetPcBytes(uid_string);
                         var pc = UhfUtility.ParsePC(pc_bytes, 0);
                         if (pc.UMI == false)
                         {
+                            // 2023/11/9
+                            // 再尝试读一下 EPC Bank。从而可以检验 uid_string 是否真的是一个 UHF 标签的 EPC
+                            //int WordPointer = 0;
+                            //int WordCnt = 2;    // 0 表示读全部
+                            var temp_data = new Byte[256];
+                            UInt32 nSize = (UInt32)temp_data.Length;
+                            iret = RFIDLIB.rfidlib_aip_iso18000p6C.ISO18000p6C_Read(reader.ReaderHandle,
+hTag,
+(Byte)RFIDLIB.rfidlib_def.ISO18000p6C_MEM_BANK_EPC,
+(UInt32)0,
+(UInt32)2,
+temp_data,
+ref nSize);
+                            if (iret != 0)
+                                return new GetTagInfoResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = $"readEpcBankError. ISO18000p6C_Read() error 2. iret:{iret},reader_name:{one_reader_name},uid:{uid_string},antenna_id:{antenna_id}",
+                                    ErrorCode = "readEpcBankError:" + GetErrorCode(iret, reader.ReaderHandle),
+                                    TagInfo = taginfo,
+                                };
+
                             readData = null;
                         }
                         else

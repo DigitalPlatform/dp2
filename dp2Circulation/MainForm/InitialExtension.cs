@@ -2300,17 +2300,18 @@ MessageBoxDefaultButton.Button1);
             }
             else
             {
+                string path = Path.Combine(strTargetDir, "dp2circulation.exe");
                 try
                 {
                     GreenProgram.CreateShortcutToDesktop(
                        "内务",  // "内务绿色"
-                       Path.Combine(strTargetDir, "dp2circulation.exe"),
+                       path,
                        false);
                 }
                 catch (Exception ex)
                 {
-                    strError = "dp2circulation 创建应急绿色安装包快捷方式时出现异常: " + ExceptionUtil.GetDebugText(ex);
-                    this.ReportError("dp2circulation 创建应急绿色安装包快捷方式时出现异常", "(安静报错)" + strError);
+                    strError = $"dp2circulation 创建应急绿色安装包快捷方式时出现异常(path='{path}'): {ExceptionUtil.GetDebugText(ex)}";
+                    this.ReportError("dp2circulation 创建应急绿色安装包快捷方式时出现异常", $"(安静报错){strError} (path='{path}')");
                     this.DisplayBackgroundTextLn(strError);
                 }
 
@@ -2446,8 +2447,8 @@ MessageBoxDefaultButton.Button1);
                 }
                 */
                 // m_backgroundForm.AppendHtml(HttpUtility.HtmlEncode(strText).Replace("\r\n", "<br/>"));
-                var lines = strText.Replace("\r\n","\n").Split('\n');
-                foreach(var line in lines)
+                var lines = strText.Replace("\r\n", "\n").Split('\n');
+                foreach (var line in lines)
                 {
                     m_backgroundForm.AppendHtml("<div>" + HttpUtility.HtmlEncode(line) + "</div>");
                 }

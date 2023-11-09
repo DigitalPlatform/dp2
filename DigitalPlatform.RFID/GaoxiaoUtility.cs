@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 using DigitalPlatform.Text;
@@ -1060,6 +1061,36 @@ namespace DigitalPlatform.RFID
             bool build_user_bank,
             bool eas = true)
         {
+            // 2023/11/7
+            // 对于不写入 User Bank 的情况进行检查
+            if (build_user_bank == false)
+            {
+                var tou = chip.FindElement(ElementOID.TypeOfUsage)?.Text;
+                if (IsNormalBookTou(tou) == false)
+                {
+                    // 如果具有非 '1?' 的 TypeOfUsage，这表明不应缺乏 User Bank。
+                    // 因为如果缺了 User Bank，则会被默认为图书类型，这样就令读出标签的人产生误会了
+                    throw new ArgumentException($"又要写入 TypeOfUsage 元素(内容为 '{tou}')，又不让写入 User Bank，这种组合不被支持。因为这样会被读出时误当作图书类型标签");
+                }
+            }
+
+            // 是否普通图书类型?
+            bool IsNormalBookTou(string value)
+            {
+                /*
+                if (string.IsNullOrEmpty(value)
+    || value.StartsWith("1")
+    || value.StartsWith("2")
+    || value.StartsWith("7"))
+                    return true;
+                */
+                // 注: 20 和 70 是特殊的图书，不被当作普通图书
+                if (string.IsNullOrEmpty(value)
+|| value.StartsWith("1"))
+                    return true;
+                return false;
+            }
+
             // 2023/10/24
             // 把 AOI 变为 OI
             var element_aoi = chip.FindElement(ElementOID.AOI);
@@ -1108,12 +1139,23 @@ namespace DigitalPlatform.RFID
                     user_element.Content = TypeOfUsage_NeutralToGaoxiao(neutral);
                 }
 
+                // 2023/11/7
+                // 要从国标元素内容映射到高校联盟形态
+                if (user_element.OID == (int)ElementOID.SetInformation)
+                {
+                    // 国标 --> 中立
+                    var neutral = SetInformation_GBToNeutral(user_element.Content);
+                    // 中立 --> 高校
+                    user_element.Content = SetInformation_NeutralToGaoxiao(neutral);
+                }
+
                 user_elements.Add(user_element);
             }
+
             byte[] user_bank = null;
 
             if (build_user_bank)
-                user_bank = EncodeUserBank(user_elements, true);
+                user_bank = EncodeUserBank(user_elements, false);   // true
 
             var epc_info = new GaoxiaoEpcInfo();
             epc_info.Lending = !eas;
@@ -1344,6 +1386,16 @@ namespace DigitalPlatform.RFID
                                 // 中立 --> 国标
                                 element.Content = TypeOfUsage_NeutralToGB(neutral);
                             }
+
+                            // 2023/11/7
+                            // 从高校值转换为国标值
+                            if (oid == ElementOID.SetInformation)
+                            {
+                                // 高校 --> 中立
+                                var neutral = SetInformation_GaoxiaoToNeutral(element.Content);
+                                // 中立 --> 国标
+                                element.Content = SetInformation_NeutralToGB(neutral);
+                            }
                         }
 
                         chip.SetElement(oid, element.Content, false);
@@ -1387,7 +1439,7 @@ namespace DigitalPlatform.RFID
             public List<GaoxiaoUserElement> Elements { get; set; }
         }
 
-        #if DEVELOPING
+#if DEVELOPING
 
         // 将元素值从高校联盟标准转换为国标形态
         public static ConvertResult ToGB(List<GaoxiaoUserElement> elements)
@@ -1441,7 +1493,12 @@ namespace DigitalPlatform.RFID
 ----自定义 0-255
 * */
                 case "0":
-                    neutral = "{馆藏}";
+                    if (secondary == "1")
+                        neutral = "{非流通馆藏}";
+                    else if (secondary == "2")
+                        neutral = "{被剔除馆藏}";
+                    else
+                        neutral = "{馆藏}";
                     break;
                 case "1":
                     neutral = "{光盘}";
@@ -1505,13 +1562,19 @@ namespace DigitalPlatform.RFID
 ----自定义 0-255
 * */
                 case "馆藏":
-                    result = "0";
+                    result = "0.0";
+                    break;
+                case "非流通馆藏":
+                    result = "0.1";
                     break;
                 case "光盘":
                     result = "1";
                     break;
                 case "层架标":
                     result = "2";
+                    break;
+                case "被剔除馆藏":
+                    result = "0.2";
                     break;
                 case "读者证":
                     result = "3";
@@ -1543,15 +1606,20 @@ namespace DigitalPlatform.RFID
             string result = "neutral:" + pimary;
             switch (pimary)
             {
-
                 case "馆藏":
                     result = "1";
+                    break;
+                case "非流通馆藏":
+                    result = "2";
                     break;
                 case "光盘":
                     result = "4";
                     break;
                 case "层架标":
                     result = "3";
+                    break;
+                case "被剔除馆藏":
+                    result = "7";
                     break;
                 case "读者证":
                     result = "8";
@@ -1566,8 +1634,60 @@ namespace DigitalPlatform.RFID
         // TypeOfUsage: 国标 --> 中立
         static string TypeOfUsage_GBToNeutral(string gb)
         {
+            if (string.IsNullOrEmpty(gb))
+                throw new ArgumentException($"参数 gb 的值不应为空");
+
             /* 国标 TypeOfUsage 值定义:
-             * 
+主限定符(HEX) 类别 次限定符(hex) 用途
+-------------------------------------------------------
+0 订购馆藏
+		0 订购馆藏,没有特别说明
+		1 订购馆藏,用于自动处理
+		2 订购馆藏,用于手工处理
+		3~F 用于未来使用
+1 流通馆藏
+		0 流通馆藏,没有特别说明
+		1 流通馆藏,用于自动分拣
+		2 流通馆藏,不能用于自动分拣
+		3 流通馆藏,不能用于脱机事务
+		4 流通馆藏,脱机不能归还
+		5 流通馆藏,脱机无作业或不能归还
+		6~F 用于未来使用
+2 非流通馆藏
+		0 非流通馆藏,没有特别说明
+		1~F 用于未来使用
+3~4 本地自定义
+		0 本地应用,没有子类说明
+		1~F 用于未来使用
+5 用于未来使用
+		0 未来应用,没有子类说明
+		1~F 用于未来使用
+6 没有标签用途信息
+		0 未定义用途。当数据元素被锁定时,可以使用此值
+		1~F 不用
+7 被剔除馆藏
+		0 被剔除馆藏,没有特别说明
+		1 被剔除馆藏,用于出售
+		2 被剔除馆藏,用于已出售的文献
+		3 被剔除馆藏,要处理的文献
+		4~F 用于未来使用
+8 读者证
+		0 读者证,没有特别说明
+		1 读者证,成人证
+		2 读者证,青少年证
+		3 读者证,儿童证
+		4~F 用于未来此子类使用
+9 图书馆设备
+		0 图书馆设备,没有特别说明
+		1 个人计算机
+		2 视频放映机
+		3 投影仪
+		4 白板
+		5~F 用于未来使用
+A~F 未来使用
+		0 用于未来使用,未定义子类
+		1~F 用于未来使用
+
              * 
              * */
             string primary = "";
@@ -1584,11 +1704,17 @@ namespace DigitalPlatform.RFID
                 case "1":
                     neutral = "{馆藏}";
                     break;
+                case "2":
+                    neutral = "{非流通馆藏}";
+                    break;
                 case "4":
                     neutral = "{光盘}";
                     break;
                 case "3":
                     neutral = "{层架标}";
+                    break;
+                case "7":
+                    neutral = "{被剔除馆藏}";
                     break;
                 case "8":
                     neutral = "{读者证}";
@@ -1598,6 +1724,38 @@ namespace DigitalPlatform.RFID
                     break;
             }
             return neutral;
+        }
+
+        static string SetInformation_GBToNeutral(string gb)
+        {
+            var error = DigitalPlatform.RFID.Element.VerifySetInformation(gb);
+            if (error != null)
+                throw new ArgumentException($"SetInformation 元素内容 '{gb}' 不合法: {error}");
+            // 中间位置加一个 '/'
+            if ((gb.Length % 2) == 1)
+                throw new ArgumentException($"SetInformation 元素内容 '{gb}' 不合法。应该为偶数字符数");
+            int center_offs = gb.Length / 2;
+            var text = gb.Insert(center_offs, "/");
+            return "{" + text + "}";
+        }
+
+        static string SetInformation_NeutralToGB(string neutral)
+        {
+            var text = StringUtil.Unquote(neutral, "{}");
+            var parts = StringUtil.ParseTwoPart(text, "/");
+            int max_len = Math.Max(parts[0].Length, parts[1].Length);
+            return parts[0].PadLeft(max_len, '0')
+                + parts[1].PadLeft(max_len, '0');
+        }
+
+        static string SetInformation_GaoxiaoToNeutral(string gaoxiao)
+        {
+            return "{" + gaoxiao + "}";
+        }
+
+        static string SetInformation_NeutralToGaoxiao(string nuetral)
+        {
+            return StringUtil.Unquote(nuetral, "{}");
         }
 
 #if DEVELOPING

@@ -99,6 +99,9 @@
             this.ToolStripMenuItem_exportBorrowingBarcode = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripMenuItem_moveRecord = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator10 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripMenuItem_clearPhoto = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator9 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripMenuItem_clearFaceFeature = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_clearFingerprint = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_clearPalmprint = new System.Windows.Forms.ToolStripMenuItem();
@@ -110,9 +113,7 @@
             this.toolStripTextBox_barcode = new System.Windows.Forms.ToolStripTextBox();
             this.toolStripButton_load = new System.Windows.Forms.ToolStripButton();
             this.tableLayoutPanel_main = new System.Windows.Forms.TableLayoutPanel();
-            this.toolStripSeparator9 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripMenuItem_clearPhoto = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator10 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripMenuItem_cancelReservation = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_normal)).BeginInit();
             this.splitContainer_normal.Panel1.SuspendLayout();
             this.splitContainer_normal.Panel2.SuspendLayout();
@@ -143,8 +144,8 @@
             // splitContainer_normal.Panel2
             // 
             this.splitContainer_normal.Panel2.Controls.Add(this.webBrowser_readerInfo);
-            this.splitContainer_normal.Size = new System.Drawing.Size(1094, 377);
-            this.splitContainer_normal.SplitterDistance = 585;
+            this.splitContainer_normal.Size = new System.Drawing.Size(1055, 501);
+            this.splitContainer_normal.SplitterDistance = 564;
             this.splitContainer_normal.SplitterWidth = 5;
             this.splitContainer_normal.TabIndex = 5;
             // 
@@ -188,7 +189,7 @@
             this.readerEditControl1.RecPath = "";
             this.readerEditControl1.RefID = "";
             this.readerEditControl1.Rights = "";
-            this.readerEditControl1.Size = new System.Drawing.Size(585, 377);
+            this.readerEditControl1.Size = new System.Drawing.Size(564, 501);
             this.readerEditControl1.State = "";
             this.readerEditControl1.TabIndex = 0;
             this.readerEditControl1.Tel = "";
@@ -205,7 +206,7 @@
             this.webBrowser_readerInfo.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.webBrowser_readerInfo.MinimumSize = new System.Drawing.Size(27, 28);
             this.webBrowser_readerInfo.Name = "webBrowser_readerInfo";
-            this.webBrowser_readerInfo.Size = new System.Drawing.Size(504, 377);
+            this.webBrowser_readerInfo.Size = new System.Drawing.Size(486, 501);
             this.webBrowser_readerInfo.TabIndex = 0;
             this.webBrowser_readerInfo.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.webBrowser_readerInfo_DocumentCompleted);
             // 
@@ -223,7 +224,7 @@
             this.tabControl_readerInfo.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabControl_readerInfo.Name = "tabControl_readerInfo";
             this.tabControl_readerInfo.SelectedIndex = 0;
-            this.tabControl_readerInfo.Size = new System.Drawing.Size(1110, 418);
+            this.tabControl_readerInfo.Size = new System.Drawing.Size(1071, 542);
             this.tabControl_readerInfo.TabIndex = 0;
             this.tabControl_readerInfo.SelectedIndexChanged += new System.EventHandler(this.tabControl_readerInfo_SelectedIndexChanged);
             // 
@@ -234,7 +235,7 @@
             this.tabPage_normal.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabPage_normal.Name = "tabPage_normal";
             this.tabPage_normal.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.tabPage_normal.Size = new System.Drawing.Size(1102, 383);
+            this.tabPage_normal.Size = new System.Drawing.Size(1063, 507);
             this.tabPage_normal.TabIndex = 0;
             this.tabPage_normal.Text = "常规";
             this.tabPage_normal.UseVisualStyleBackColor = true;
@@ -373,9 +374,9 @@
             this.toolStripDropDownButton_otherFunc,
             this.toolStripSeparator2});
             this.toolStrip1.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.HorizontalStackWithOverflow;
-            this.toolStrip1.Location = new System.Drawing.Point(0, 462);
+            this.toolStrip1.Location = new System.Drawing.Point(0, 586);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1118, 38);
+            this.toolStrip1.Size = new System.Drawing.Size(1079, 38);
             this.toolStrip1.TabIndex = 4;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -692,7 +693,7 @@
             this.toolStripButton_clearOutofReservationCount.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_clearOutofReservationCount.Image")));
             this.toolStripButton_clearOutofReservationCount.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_clearOutofReservationCount.Name = "toolStripButton_clearOutofReservationCount";
-            this.toolStripButton_clearOutofReservationCount.Size = new System.Drawing.Size(40, 32);
+            this.toolStripButton_clearOutofReservationCount.Size = new System.Drawing.Size(40, 28);
             this.toolStripButton_clearOutofReservationCount.Text = "清除预约到书后未取次数";
             this.toolStripButton_clearOutofReservationCount.Click += new System.EventHandler(this.toolStripButton_clearOutofReservationCount_Click);
             // 
@@ -704,6 +705,7 @@
             this.toolStripMenuItem_loadBlankRecord,
             this.toolStripMenuItem_notifyRecall,
             this.toolStripMenuItem_notifyOverdue,
+            this.toolStripMenuItem_cancelReservation,
             this.toolStripSeparator8,
             this.toolStripMenuItem_createRfidCard,
             this.toolStripMenuItem_bindCardNumber,
@@ -820,6 +822,23 @@
             this.toolStripMenuItem_moveRecord.ToolTipText = "在读者库之间移动记录";
             this.toolStripMenuItem_moveRecord.Click += new System.EventHandler(this.toolStripMenuItem_moveRecord_Click);
             // 
+            // toolStripSeparator10
+            // 
+            this.toolStripSeparator10.Name = "toolStripSeparator10";
+            this.toolStripSeparator10.Size = new System.Drawing.Size(605, 6);
+            // 
+            // toolStripMenuItem_clearPhoto
+            // 
+            this.toolStripMenuItem_clearPhoto.Name = "toolStripMenuItem_clearPhoto";
+            this.toolStripMenuItem_clearPhoto.Size = new System.Drawing.Size(608, 40);
+            this.toolStripMenuItem_clearPhoto.Text = "清除读者照片";
+            this.toolStripMenuItem_clearPhoto.Click += new System.EventHandler(this.toolStripMenuItem_clearPhoto_Click);
+            // 
+            // toolStripSeparator9
+            // 
+            this.toolStripSeparator9.Name = "toolStripSeparator9";
+            this.toolStripSeparator9.Size = new System.Drawing.Size(605, 6);
+            // 
             // toolStripMenuItem_clearFaceFeature
             // 
             this.toolStripMenuItem_clearFaceFeature.Name = "toolStripMenuItem_clearFaceFeature";
@@ -916,32 +935,22 @@
             this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_main.Size = new System.Drawing.Size(1118, 500);
+            this.tableLayoutPanel_main.Size = new System.Drawing.Size(1079, 624);
             this.tableLayoutPanel_main.TabIndex = 6;
             // 
-            // toolStripSeparator9
+            // toolStripMenuItem_cancelReservation
             // 
-            this.toolStripSeparator9.Name = "toolStripSeparator9";
-            this.toolStripSeparator9.Size = new System.Drawing.Size(605, 6);
-            // 
-            // toolStripMenuItem_clearPhoto
-            // 
-            this.toolStripMenuItem_clearPhoto.Name = "toolStripMenuItem_clearPhoto";
-            this.toolStripMenuItem_clearPhoto.Size = new System.Drawing.Size(608, 40);
-            this.toolStripMenuItem_clearPhoto.Text = "清除读者照片";
-            this.toolStripMenuItem_clearPhoto.Click += new System.EventHandler(this.toolStripMenuItem_clearPhoto_Click);
-            // 
-            // toolStripSeparator10
-            // 
-            this.toolStripSeparator10.Name = "toolStripSeparator10";
-            this.toolStripSeparator10.Size = new System.Drawing.Size(605, 6);
+            this.toolStripMenuItem_cancelReservation.Name = "toolStripMenuItem_cancelReservation";
+            this.toolStripMenuItem_cancelReservation.Size = new System.Drawing.Size(608, 40);
+            this.toolStripMenuItem_cancelReservation.Text = "取消预约 ...";
+            this.toolStripMenuItem_cancelReservation.Click += new System.EventHandler(this.toolStripMenuItem_cancelReservation_Click);
             // 
             // ReaderInfoForm
             // 
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1118, 500);
+            this.ClientSize = new System.Drawing.Size(1079, 624);
             this.Controls.Add(this.tableLayoutPanel_main);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(5);
@@ -1059,5 +1068,6 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator10;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_clearPhoto;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator9;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_cancelReservation;
     }
 }

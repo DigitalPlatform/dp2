@@ -8047,7 +8047,7 @@ value);  // 常用值 "ipc://RfidChannel/RfidServer"
             }
         }
 
-        // 超高频标签是否要写入 User Bank 内容
+        // 超高频图书标签是否要写入 User Bank 内容
         public bool UhfWriteUserBank
         {
             get
@@ -8055,13 +8055,13 @@ value);  // 常用值 "ipc://RfidChannel/RfidServer"
                 if (this.AppInfo == null)
                     return true;
                 return this.AppInfo.GetBoolean("uhf",
-    "writeUserBank",
-    true);
+                    "bookTagWriteUserBank",
+                    true);
             }
             set
             {
                 this.AppInfo?.SetBoolean("uhf",
-                    "writeUserBank",
+                    "bookTagWriteUserBank",
                     value);
             }
         }
@@ -8073,7 +8073,7 @@ value);  // 常用值 "ipc://RfidChannel/RfidServer"
     "SetInformation,OwnerInstitution,TypeOfUsage,ShelfLocation");
          * */
 
-        // 超高频标签要写入 User Bank 的元素名列表
+        // 超高频图书标签要写入 User Bank 的元素名列表
         public string UhfUserBankElements
         {
             get

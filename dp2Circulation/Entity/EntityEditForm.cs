@@ -1055,9 +1055,12 @@ MessageBoxDefaultButton.Button2);
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
-                // 2023/10/28
+                // 2023/11/7
                 if (new_tag_uid != null)
+                {
+                    _tagExisting.UID = new_tag_uid;
                     _tagExisting.TagInfo.UID = new_tag_uid;
+                }
             }
 
 
@@ -1394,6 +1397,7 @@ MessageBoxDefaultButton.Button2);
 
         // parameters:
         //      item    只用于写入统计日志
+        //      new_tag_uid 更新后的 UID。目前 UHF 标签有这个特性
         int SaveNewChip(BookItem item, 
             out string new_tag_uid,
             out string strError)
@@ -1505,7 +1509,12 @@ out strError);
                                 return true;
                             return false;
                         },
-                        true);
+                        (chip, element) => 
+                        {
+                            MessageBox.Show(this, "当前系统参数定义了不写入超高频标签的 User Bank，但当前 library.xml 又配置了相应馆藏地的 OI(机构代码)，这是矛盾的。请修改参数配置");
+                            return false;
+                        },
+                        Program.MainForm.UhfWriteUserBank);
                 }
                 else
                 {

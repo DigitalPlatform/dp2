@@ -697,9 +697,10 @@ new SetErrorEventArgs
             string uid,
             uint antenna_id)
         {
+            /*
             if (uid == "00000000")
                 throw new Exception($"uid 错误！");
-
+            */
             try
             {
                 BaseChannel<IRfid> channel = Base.GetChannel();
@@ -734,6 +735,7 @@ new SetErrorEventArgs
             }
         }
 
+        // 2023/11/6
         // 校验超高频标签的 User Bank 新旧尺寸。要求新尺寸不应大于旧尺寸
         public static string VerifyOldNewUserBankCapacity(TagInfo oldTagInfo,
             TagInfo newTagInfo)
@@ -742,6 +744,12 @@ new SetErrorEventArgs
                 return null;
             if (newTagInfo.Bytes == null)
                 return null;
+
+            // 当 old_bytes_length == 0 时，无法判断当前标签 User Bank 能容纳的最大字节数
+            // TODO: 或者，更加准确地可能要从 EPC PC 中的 UMI 位来判断
+            if (oldTagInfo.Bytes == null)
+                return null;
+
             if (newTagInfo.Bytes.Length > oldTagInfo.Bytes.Length)
                 return $"UHF 标签的即将写入的 User Bank 内容字节数 {newTagInfo.Bytes.Length} 大于最大字节数 {oldTagInfo.Bytes.Length}，无法写入";
             return null;
@@ -1325,6 +1333,7 @@ new SetErrorEventArgs
         public static NormalResult SelectAntenna(string reader_name,
             uint antenna_id)
         {
+            // 特殊用法
             return GetTagInfo(reader_name, "00000000", antenna_id);
         }
 

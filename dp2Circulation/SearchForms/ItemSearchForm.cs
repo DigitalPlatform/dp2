@@ -7305,8 +7305,8 @@ out strError);
 
                         string strTableXml = "";
 
-                        /*
                         {
+                            /*
                             // return:
                             //      -1  出错
                             //      0   没有找到
@@ -7316,10 +7316,82 @@ out strError);
                                 StringUtil.MakePathList(Order.ColumnProperty.GetTypeList(biblio_title_list)),
                                 out strTableXml,
                                 out string strError1);
+                            */
+                            // return:
+                            //      -1  出错
+                            //      0   没有找到
+                            //      1   找到
+                            nRet = this.GetTable(
+                                strBiblioRecPath,
+                                biblio_title_list,
+                                null,
+                                (Order.ColumnProperty c, out string v) =>
+                                {
+                                    v = null;
+                                    if (c.Type == "biblio_accessNo")
+                                    {
+                                        /*
+                                        // return:
+                                        //      -1  出错
+                                        //      0   没有找到
+                                        //      1   成功
+                                        var ret = Utility.GetSubRecords(
+                        channel,
+                        looping.Progress,
+                        strRecPath,
+                        "firstAccessNo",
+                        out string strResult,
+                        out string error);
+                                        */
+                                        // return:
+                                        //      -1  出错
+                                        //      0   没有找到
+                                        //      1   成功
+                                        var ret = Utility.GetFirstAccessNo(
+                                            channel,
+                                            stop,
+                                            strBiblioRecPath,
+                                            out string strResult,
+                                            out string error);
+                                        v = strResult;
+                                        if (ret == -1)
+                                            v = "error:" + error;
+                                        return ProcessParts.Basic;
+                                    }
+
+                                    // 2023/11/9
+                                    if (c.Type == "biblio_itemCount")
+                                    {
+                                        // return:
+                                        //      -1  出错
+                                        //      0   没有找到
+                                        //      1   成功
+                                        var ret = Utility.GetSubRecords(
+                        channel,
+                        stop,
+                        strBiblioRecPath,
+                        "itemCount",
+                        out string strResult,
+                        out string error);
+                                        v = strResult;
+                                        if (ret == -1)
+                                            v = "error:" + error;
+                                        return ProcessParts.Basic;
+                                    }
+
+                                    if (c.Type == "biblio_recpath")
+                                    {
+                                        v = strBiblioRecPath;
+                                        return ProcessParts.Basic;
+                                    }
+
+                                    return ProcessParts.None;
+                                },
+                                out strTableXml,
+                                out string strError1);
                             if (nRet == -1)
                                 throw new Exception(strError1);
                         }
-                        */
 
                         {
                             EntityInfo entity = new EntityInfo();

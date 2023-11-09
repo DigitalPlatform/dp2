@@ -24,6 +24,7 @@ using DigitalPlatform.Core;
 using dp2Circulation.Charging;
 using DocumentFormat.OpenXml.EMMA;
 using System.Data.Entity.Core.Metadata.Edm;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -1585,7 +1586,7 @@ out strError);
             this._summaryChannel.PrepareSearch("正在获取书目摘要 ...");
             try
             {
-                this._summaryChannel.Channel.Timeout = new TimeSpan(0, 0, 5);
+                this._summaryChannel.Channel.Timeout = LibraryChannel.MinTimeout;
                 long lRet = this._summaryChannel.Channel.GetBiblioSummary(
                     this._summaryChannel.stop,
                     strItemBarcode,

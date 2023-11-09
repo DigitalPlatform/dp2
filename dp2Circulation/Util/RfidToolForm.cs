@@ -799,8 +799,10 @@ this.toolStripButton_autoFixEas.Checked);
             if (tag.Protocol == InventoryInfo.ISO14443A)
                 return null; // 暂时还不支持对 14443A 的卡进行 GetTagInfo() 操作
 
+            /*
             if (tag.UID == "00000000")
                 throw new Exception($"UID 错误！");
+            */
 #if OLD_CODE
             RfidChannel channel = GetRfidChannel(
     out string strError);
@@ -814,6 +816,7 @@ this.toolStripButton_autoFixEas.Checked);
 #endif
             try
             {
+                // TODO: 判断重新获取前后的 Protocol 是否一致
 #if OLD_CODE
                 GetTagInfoResult result = channel.Object.GetTagInfo("*", tag.UID);
 #else
@@ -827,7 +830,7 @@ this.toolStripButton_autoFixEas.Checked);
 
                 tag.TagInfo = result.TagInfo;
 
-                string hex_string = Element.GetHexString(result.TagInfo.Bytes, "4");
+                // string hex_string = Element.GetHexString(result.TagInfo.Bytes, "4");
 
                 string chip_parse_error = "";
                 try
@@ -2463,6 +2466,31 @@ this.toolStripButton_autoFixEas.Checked);
             {
                 var old_tag_info = item_info.OneTag.TagInfo;
 
+                // 询问是否写入 User Bank
+                bool build_user_bank = true;
+                if (old_tag_info.Protocol == InventoryInfo.ISO18000P6C)
+                {
+                    var ret = this.TryGet(() =>
+                    {
+                        return ListDialog.GetInput(
+                            this,
+                            "请选择写入超高频标签时",
+                            "是否要写入 User Bank",
+                            new string[] { "要写入", "不写入" },
+                            0,
+                            this.Font);
+                    });
+                    if (ret == "要写入")
+                        build_user_bank = true;
+                    else if (ret == "不写入")
+                        build_user_bank = false;
+                    else
+                    {
+                        strError = "放弃保存标签内容";
+                        goto ERROR1;
+                    }
+                }
+
                 var new_tag_info = BuildWritingTagInfo(old_tag_info,
                     item_info.LogicChipItem,
                     item_info.LogicChipItem.EAS,
@@ -2502,7 +2530,22 @@ this.toolStripButton_autoFixEas.Checked);
                             return true;
                         return false;
                     },
-                    true);
+                    (chip, element) =>
+                    {
+                        if (build_user_bank == false)
+                        {
+                            var dlg_result = MessageBox.Show(this,
+    "刚才您选择了不写入超高频标签的 User Bank，然而即将写入的内容又有 OI(机构代码) 元素。\r\n\r\n请问是否继续写入? (警告: 继续写入会导致 OI 元素发生丢失)",
+    "RfidToolForm",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+                            if (dlg_result == DialogResult.No)
+                                return false;
+                        }
+                        return true;
+                    },
+                    build_user_bank);
 
                 RfidTagList.ClearTagTable(item_info.OneTag.UID);
                 var result = RfidManager.WriteTagInfo(item_info.OneTag.ReaderName,
@@ -2665,6 +2708,7 @@ this.toolStripButton_autoFixEas.Checked);
             return new_tag_info;
         }
 
+#if REMOVED
         static TagInfo BuildNewUhfTagInfo(TagInfo old_tag_info,
 LogicChipItem chip)
         {
@@ -2687,6 +2731,7 @@ LogicChipItem chip)
             new_tag_info.EAS = chip.EAS;
             return new_tag_info;
         }
+#endif
 
         // 询问超高频内容格式
         // parameters:
@@ -2713,7 +2758,8 @@ bool eas,
 string uhfProtocol = "auto", // gb/gxlm/auto/select auto 表示自动探测格式，select 表示强制弹出对话框选择格式
 delegate_askUhfDataFormat func_askFormat = null,
 delegate_askOverwriteDifference func_askOverwrite = null,
-bool WriteUhfUserBank = true)
+delegate_warningRemoveOI func_askRemoveOI = null,
+bool build_user_bank = true)
         {
             if (existing.Protocol == InventoryInfo.ISO15693)
             {
@@ -2733,9 +2779,6 @@ bool WriteUhfUserBank = true)
 
             if (existing.Protocol == InventoryInfo.ISO18000P6C)
             {
-                var build_user_bank = WriteUhfUserBank;
-
-
                 /*
                 // 读者卡和层架标必须有 User Bank，不然 TU 字段没有地方放
                 if (build_user_bank == false
@@ -2821,6 +2864,8 @@ this.Font);
                 // 过滤不需要的元素
                 if (build_user_bank)
                 {
+                    FilterUserBankElements(chip, uhfProtocol);
+#if REMOVED
                     var elements = Program.MainForm.UhfUserBankElements;
                     List<Element> all = new List<Element>(chip.Elements);
                     foreach (var element in all)
@@ -2842,6 +2887,15 @@ this.Font);
                         else if (element.OID == ElementOID.ShelfLocation
     && StringUtil.IsInList("ShelfLocation", elements) == false)
                             chip.RemoveElement(element.OID);
+                    }
+#endif
+                }
+                else
+                {
+                    if (uhfProtocol == "gxlm")
+                    {
+                        if (RemoveOI(chip, func_askRemoveOI) == false)
+                            throw new Exception("放弃写入");
                     }
                 }
 
@@ -2911,13 +2965,78 @@ MessageBoxDefaultButton.Button2);
             throw new ArgumentException($"目前暂不支持 {existing.Protocol} 协议标签的写入操作");
         }
 
+        // 过滤掉 User Bank 中的不需要的元素。
+        // Program.MainForm.UhfUserBankElements 中定义了不该被过滤的元素名列表。其余的元素名就应该被过滤掉
+        static void FilterUserBankElements(LogicChip chip,
+            string uhfProtocol)
+        {
+            var elements = Program.MainForm.UhfUserBankElements;
+            List<Element> all = new List<Element>(chip.Elements);
+            foreach (var element in all)
+            {
+                // 2023/11/9
+                // 顺便把空内容的元素删除
+                if (string.IsNullOrEmpty(element.Text))
+                    chip.RemoveElement(element.OID);
+
+                // "SetInformation,OwnerInstitution,TypeOfUsage,ShelfLocation"
+                else if (element.OID == ElementOID.SetInformation
+                    && StringUtil.IsInList("SetInformation", elements) == false)
+                    chip.RemoveElement(element.OID);
+
+                else if (element.OID == ElementOID.OwnerInstitution
+&& StringUtil.IsInList("OwnerInstitution", elements) == false
+&& uhfProtocol == "gxlm"/*国标不让去除 OI*/)
+                    chip.RemoveElement(element.OID);
+
+                else if (element.OID == ElementOID.TypeOfUsage
+&& StringUtil.IsInList("TypeOfUsage", elements) == false)
+                    chip.RemoveElement(element.OID);
+
+                else if (element.OID == ElementOID.ShelfLocation
+&& StringUtil.IsInList("ShelfLocation", elements) == false)
+                    chip.RemoveElement(element.OID);
+
+            }
+        }
+
+        // return:
+        //      true    同意
+        //      false   不同意，并终止处理
+        public delegate bool delegate_warningRemoveOI(LogicChip chip, Element element);
+
+        // 过滤掉 OI 元素。只针对 高校联盟格式。
+        // 这是为了避免在“不写入 User Bank”情况下后面 BuildTag 时发生矛盾
+        static bool RemoveOI(LogicChip chip,
+            delegate_warningRemoveOI func_askRemoveOI)
+        {
+            List<Element> all = new List<Element>(chip.Elements);
+            foreach (var element in all)
+            {
+                if (element.OID == ElementOID.OwnerInstitution
+                    || element.OID == ElementOID.AOI
+                    || (int)element.OID == 27)
+                {
+                    if (func_askRemoveOI != null)
+                    {
+                        if (func_askRemoveOI(chip, element) == false)
+                            return false;
+                    }
+                    chip.RemoveElement(element.OID);
+                }
+            }
+
+            return true;
+        }
+
+
         // 设置 TU 字段。注意 国标和高校联盟的取值表完全不同
         // parameters:
         //      data_format gb/gxlm
         void SetTypeOfUsage(
-            string tou,
-            LogicChip chip,
-            string data_format)
+                    string tou,
+                    LogicChip chip,
+                    string data_format)
         {
             // string tou = this.TypeOfUsage;
             if (string.IsNullOrEmpty(tou))

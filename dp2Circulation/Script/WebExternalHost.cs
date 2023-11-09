@@ -474,7 +474,7 @@ namespace dp2Circulation
 
                     LibraryChannel channel = this.GetChannel();
                     TimeSpan old_timeout = channel.Timeout;
-                    channel.Timeout = new TimeSpan(0, 0, 5);
+                    channel.Timeout = LibraryChannel.MinTimeout;
                     try
                     {
                         string strItemText = "";
@@ -924,7 +924,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
                             string[] results = null;
                             byte[] baTimestamp = null;
 
-                            channel.Timeout = new TimeSpan(0, 0, 5);
+                            channel.Timeout = LibraryChannel.MinTimeout;
                             lRet = channel.GetReaderInfo(_stop,
                                 strPatronBarcode,
                                 "xml",
@@ -1155,7 +1155,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
                 {
                     string strXml = "";
                     string[] results = null;
-                    channel.Timeout = new TimeSpan(0, 0, 5);
+                    channel.Timeout = LibraryChannel.MinTimeout;
                     long lRet = channel.GetReaderInfo(_stop,
                         strPatronBarcode,
                         "xml",

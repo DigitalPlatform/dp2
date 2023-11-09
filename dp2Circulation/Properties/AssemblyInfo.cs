@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.90.*")]
-[assembly: AssemblyFileVersion("3.90.0.0")]
+[assembly: AssemblyVersion("3.92.*")]
+[assembly: AssemblyFileVersion("3.92.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -183,3 +183,7 @@ using System.Runtime.InteropServices;
 //                  (2023/9/25)在 Windows 10 较旧的版本上册登记对话框的右侧 RFID 显示区，原本左右两个 RFID 控件，右边的被推到窗口显示范围以外的地方。这个问题已经修正
 // 3.87 2023/10/10 读者窗写入 RFID 读者卡的对话框中，两个 RFID 内容控件的大小不能跟随窗口大小自动适应。此 bug 已经修正
 // 3.88 2023/11/2 增加 UHF 标签相关功能。快捷出纳窗、册登记对话框、RFID 工具窗、批修改册窗都有涉及
+// 3.89 2023/11/8 为读者窗增加“取消预约”功能
+// 3.90 2023/11/10 为书目查询窗的“导出 Excel(横向)”增加 biblio_accessNo 和 biblio_itemCount 书目列;
+//                  为书目查询窗“导出新书通报”增加 biblio_itemCount 书目列(早先版本已有 biblio_accessNo 书目列);
+//                  为实体查询窗的“导出 Excel”增加 biblio_access 和 biblio_itemCount 书目列。

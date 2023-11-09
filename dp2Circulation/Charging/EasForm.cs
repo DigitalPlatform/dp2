@@ -372,7 +372,7 @@ out string strError);
                         */
                         var looping = Looping(out LibraryChannel channel,
                             "正在获得书目摘要 ...",
-                            "settimeout:0:0:5");    // TODO: 实现 settimeout:
+                            "settimeout:0:0:10");    // TODO: 实现 settimeout:
                         try
                         {
                             long lRet = channel.GetBiblioSummary(

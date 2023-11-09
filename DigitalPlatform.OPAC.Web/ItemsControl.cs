@@ -990,8 +990,14 @@ namespace DigitalPlatform.OPAC.Web
             }
             else
             {
+                // 2023/11/9
+                if (loginstate == LoginState.Librarian)
+                {
+                    // 没有姓名
+                    reservationbutton.Text = this.GetString("加入预约列表");
+                }
                 // Debug.Assert(sessioninfo.ReaderInfo != null);
-                if (sessioninfo.ReaderInfo == null
+                else if (sessioninfo.ReaderInfo == null
                     || String.IsNullOrEmpty(sessioninfo.ReaderInfo.Name) == true)
                 {
                     // 没有姓名
@@ -1023,12 +1029,15 @@ namespace DigitalPlatform.OPAC.Web
 
                 // 放入可能的内容 2008/9/27
                 if (sessioninfo.ReaderInfo != null
-                    && String.IsNullOrEmpty(sessioninfo.ReaderInfo.ReaderDomBarcode) == false)
+                    // && String.IsNullOrEmpty(sessioninfo.ReaderInfo.ReaderDomBarcode) == false
+                    && String.IsNullOrEmpty(sessioninfo.ReaderInfo.Barcode) == false
+                    )
                 {
                     TextBox reservationreaderbarcode = (TextBox)this.FindControl("reservationreaderbarcode");
                     Debug.Assert(reservationreaderbarcode != null, "");
 
-                    reservationreaderbarcode.Text = sessioninfo.ReaderInfo.ReaderDomBarcode;
+                    // reservationreaderbarcode.Text = sessioninfo.ReaderInfo.ReaderDomBarcode;
+                    reservationreaderbarcode.Text = sessioninfo.ReaderInfo.Barcode;
                 }
             }
             else

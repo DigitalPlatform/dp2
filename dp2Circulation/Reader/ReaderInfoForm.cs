@@ -9070,7 +9070,77 @@ MessageBoxDefaultButton.Button1);
 
         private void toolStripMenuItem_clearPhoto_Click(object sender, EventArgs e)
         {
+            MessageBox.Show(this, "本功能正在开发中 ...");
+        }
 
+        private void toolStripMenuItem_cancelReservation_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            if (this.ReaderXmlChanged == true
+    || this.ObjectChanged == true)
+            {
+                // 警告尚未保存
+                DialogResult result = this.TryGet(() =>
+                {
+                    return MessageBox.Show(this,
+"当前有信息被修改后尚未保存。建议先保存修改，然后再进行“取消预约”的操作。否则若此时进行“取消预约”操作，现有未保存信息在将来保存时会遇到时间戳不匹配报错。\r\n\r\n确实要进行“取消预约”的操作? ",
+"ReaderInfoForm",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+                });
+                if (result != DialogResult.Yes)
+                    return;   // cancelled
+            }
+
+            var itemBarcode = InputDlg.GetInput(this,
+                "取消预约",
+                "册条码号(可用逗号间隔输入多个):",
+                "",
+                this.Font);
+            if (itemBarcode == null)
+                return;
+
+            string strRecPath = this.readerEditControl1.RecPath;
+            string strPatronBarcode = this.readerEditControl1.Barcode;
+
+            var looping = Looping(
+                out LibraryChannel channel,
+                $"正在针对读者记录 {strRecPath} 取消对册 {itemBarcode} 的预约 ...",
+                "disableControl:settimeout:0:0:10");
+            try
+            {
+                long lRet = channel.Reservation(
+                    looping.Progress,
+                    "delete",
+                    strPatronBarcode,
+                    itemBarcode,
+                    out strError);
+                if (lRet == -1)
+                    goto ERROR1;
+                if (this.ReaderXmlChanged == true
+|| this.ObjectChanged == true)
+                {
+                    // 再次警告?
+                    MessageBox.Show(this, $"取消预约成功。{strError}\r\n\r\n(当前读者窗内容还是旧内容)请注意重新装载一次当前读者窗的内容");
+                }
+                else
+                {
+                    // reload patron info
+                    LoadRecordByRecPath(strRecPath);
+                    MessageBox.Show(this, $"取消预约成功。{strError}\r\n\r\n当前读者窗内容已重新装载");
+                }
+                return;
+            }
+            finally
+            {
+                looping.Dispose();
+            }
+
+        ERROR1:
+            MessageBox.Show(this, strError);
+            return;
         }
     }
 }

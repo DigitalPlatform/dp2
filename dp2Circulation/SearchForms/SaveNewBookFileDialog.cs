@@ -259,6 +259,7 @@ dlg.UiState);
 
             if (bDefault == false)
             {
+                /*
                 {
                     Column column = new Column();
                     column.Name = "biblio_accessNo -- 索取号";
@@ -267,6 +268,15 @@ dlg.UiState);
                     results.Add(column);
                 }
 
+                {
+                    // 2023/11/9
+                    Column column = new Column();
+                    column.Name = "biblio_itemCount -- 册数";
+                    column.Caption = GetRightPart(column.Name);
+                    column.MaxChars = -1;
+                    results.Add(column);
+                }
+                */
             }
 
             {

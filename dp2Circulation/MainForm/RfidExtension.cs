@@ -393,21 +393,27 @@ TaskScheduler.Default);
     "itemRefID", log.BookItem.RefID);
 
             DomUtil.SetElementText(dom.DocumentElement,
-"tagProtocol", "ISO15693");
+"tagProtocol", log.NewTagInfo.Protocol);    // "ISO15693"
             DomUtil.SetElementText(dom.DocumentElement,
 "tagReaderName", log.ReaderName);
             DomUtil.SetElementText(dom.DocumentElement,
     "tagAFI", Element.GetHexString(log.NewTagInfo.AFI));
-            DomUtil.SetElementText(dom.DocumentElement,
-    "tagBlockSize", log.NewTagInfo.BlockSize.ToString());
-            DomUtil.SetElementText(dom.DocumentElement,
-"tagMaxBlockCount", log.NewTagInfo.MaxBlockCount.ToString());
+
+            if (log.NewTagInfo.Protocol == InventoryInfo.ISO15693)
+            {
+                DomUtil.SetElementText(dom.DocumentElement,
+        "tagBlockSize", log.NewTagInfo.BlockSize.ToString());
+                DomUtil.SetElementText(dom.DocumentElement,
+        "tagMaxBlockCount", log.NewTagInfo.MaxBlockCount.ToString());
+            }
+
             DomUtil.SetElementText(dom.DocumentElement,
     "tagDSFID", Element.GetHexString(log.NewTagInfo.DSFID));
             DomUtil.SetElementText(dom.DocumentElement,
     "tagUID", log.NewTagInfo.UID);
             DomUtil.SetElementText(dom.DocumentElement,
-    "tagBytes", Convert.ToBase64String(log.NewTagInfo.Bytes));
+    "tagBytes", log.NewTagInfo.Bytes == null ? "(null)" :
+    Convert.ToBase64String(log.NewTagInfo.Bytes));
 
             log.Xml = dom.OuterXml;
             lock (_lockStatis)
