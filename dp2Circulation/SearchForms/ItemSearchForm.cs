@@ -8304,13 +8304,17 @@ TaskScheduler.Default);
 
                     string strRecPath = ListViewUtil.GetItemText(item, 0);
 
+                    // TODO: 是否先清除 EntityForm 中的原有内容？
+
                     // parameters:
                     //      bAutoSavePrev   是否自动提交保存先前发生过的修改？如果==true，是；如果==false，则要出现MessageBox提示
                     // return:
                     //      -1  error
                     //      0   not found
                     //      1   found
-                    await form.LoadItemByRecPathAsync("item", strRecPath, true);
+                    nRet = await form.LoadItemByRecPathAsync("item", strRecPath, true);
+
+                    // TODO: 判断 nRet 值
 
                     // 为当前选定的事项创建索取号
                     // return:

@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.149.*")]
-[assembly: AssemblyFileVersion("3.149.0.0")]
+[assembly: AssemblyVersion("3.150.*")]
+[assembly: AssemblyFileVersion("3.150.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -375,3 +375,6 @@ ItemCanReturn()
 //						定义一个列，其内容 {{fan}} 会在 dp2library 执行 GetSearchResult() 和 GetBrowseRecords() API 时兑现为书目记录下属册记录的第一个非空的索取号
 //		3.148 (2023/9/6) ~replication 临时账户增加了 getreaderinfo 权限
 //		3.149 (2023/11/8) Reservation() API 的 "delete" 功能修正了当册记录中没有找到和请求的读者有关的预约事项时缺乏报错的 bug
+//		3.150 (2023/11/10) SetEntities() API 的 "transfer" 功能，除了原先普通权限具备 setiteminfo 或 order 以外，增加了
+//						一种用存取定义的 circulation=transfer 定义的情形。此时就账户不需要定义 setiteminfo 或 order 权限了
+//			  (2023/11/11) Borrow() 和 Return() API 中判断存取定义的时候，会用实体库名和书目库名联合起来去搜寻存取定义片段。这样管理员配置存取定义的时候比较方便，使用书目库或者实体库都能匹配上

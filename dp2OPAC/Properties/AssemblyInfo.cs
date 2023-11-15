@@ -44,3 +44,5 @@ using System.Runtime.InteropServices;
 // 3.4 (2021/9/28) searchbiblio.aspx 中，修正(虚拟库)所选检索途径被程序误识别为“<全部>”的 bug
 // 3.5 (2023/11/8) reservationinfo.aspx 增加 URL 参数 barcode，供工作人员管理读者的预约请求。
 //                  注: borrowinfo.aspx 原来就已经实现了 barcode 参数
+//                  几个 Web Control 的 ReaderBarcode 设置的时候增加了清除 ReaderDom 缓存的动作
+//                  (先前版本没有清除缓存，会造成 http://localhost:8081/dp2OPAC/reservationinfo.aspx?barcode=P0000006 当barcode参数不断改变重新装载页面的时候，预约控件和交费控件的内容滞留一两分钟才能更新的结果)

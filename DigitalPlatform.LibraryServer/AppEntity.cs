@@ -3482,21 +3482,21 @@ out strError);
 
             LibraryServerResult result = new LibraryServerResult();
 
-            // 权限字符串
+            // 普通权限字符串
+            // 如果不满足，则令 result.Value = -1，但不立即返回报错，要等待后面存取定义判断以后再报错
             if (StringUtil.IsInList("setiteminfo,writerecord,order", sessioninfo.RightsOrigin) == false)
             {
                 result.Value = -1;
                 result.ErrorInfo = $"修改册信息 操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 setiteminfo、writerecord 或 order 权限。";
                 result.ErrorCode = ErrorCode.AccessDenied;
-                return result;
+                // return result;
             }
-
-            if (StringUtil.IsInList($"{GetInfoRight("getiteminfo")}", sessioninfo.RightsOrigin) == false)
+            else if (StringUtil.IsInList($"{GetInfoRight("getiteminfo")}", sessioninfo.RightsOrigin) == false)
             {
                 result.Value = -1;
                 result.ErrorInfo = $"修改册信息 操作被拒绝。虽然{SessionInfo.GetCurrentUserName(sessioninfo)}具备写入册的权限，但不具备 getiteminfo 权限。请修改账户权限";
                 result.ErrorCode = ErrorCode.AccessDenied;
-                return result;
+                // return result;
             }
 
             // 个人书斋名
@@ -3601,6 +3601,79 @@ out strError);
                 //if (bAutoPostfix)
                 //    StringUtil.SetInList(ref strStyle, "autopostfix", true);
 
+                // 2023/11/10
+                // 对 transfer 动作检查存取定义
+                if (info.Action == "transfer")
+                {
+                    // 检查存取权限
+                    string strAccessParameters = "";
+                    string strActionName = "转移";
+                    {
+
+                        // 检查存取权限
+                        if (String.IsNullOrEmpty(sessioninfo.Access) == false)
+                        {
+                            string strAccessActionList = "";
+                            strAccessActionList = GetDbOperRights(sessioninfo.Access,
+                                strItemDbName,
+                                "circulation");
+                            if (strAccessActionList == null)
+                            {
+                                strAccessActionList = GetDbOperRights(sessioninfo.Access,
+            "", // 此时还不知道实体库名，先取得当前帐户关于任意一个实体库的存取定义
+            "circulation");
+                                if (strAccessActionList == null)
+                                {
+                                    // 对所有实体库都没有定义任何存取权限，这时候要退而使用普通权限
+                                    strAccessActionList = sessioninfo.Rights;
+
+                                    // 注：其实此时 result_save == null 即表明普通权限检查已经通过了的
+                                }
+                                else
+                                {
+                                    // 对其他实体库定义了存取权限，但对 strItemDbName 没有定义
+                                    strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{strItemDbName}' 执行 出纳 操作的存取权限";
+                                    result.Value = -1;
+                                    result.ErrorInfo = strError;
+                                    result.ErrorCode = ErrorCode.AccessDenied;
+                                    return result;
+                                }
+                            }
+
+                            if (strAccessActionList == "*")
+                            {
+                                // 通配
+                            }
+                            else
+                            {
+                                if (IsInAccessList(strAction,
+                                    strAccessActionList,
+                                    true,
+                                    out strAccessParameters) == false)
+                                {
+                                    strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{strItemDbName}' 执行 出纳 {strActionName} 操作的存取权限";
+                                    result.Value = -1;
+                                    result.ErrorInfo = strError;
+                                    result.ErrorCode = ErrorCode.AccessDenied;
+                                    return result;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // 然后检查常规权限
+                            if (result.Value == -1)
+                                return result;
+                        }
+                    }
+                }
+                else
+                {
+                    // 对于非 transfer 操作，延迟返回 result
+                    if (result.Value == -1)
+                        return result;
+                }
+
                 if (info.Action == "forcenew"
                     || info.Action == "forcechange"
                     || info.Action == "forcedelete")
@@ -3622,7 +3695,7 @@ out strError);
                     if (sessioninfo.GlobalUser == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "修改册信息的" + strAction + "操作被拒绝。只有全局用户并具备restore权限才能进行这样的操作。";
+                        result.ErrorInfo = "修改册信息的" + strAction + "操作被拒绝。只有全局用户并具备 restore 权限才能进行这样的操作。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -5935,8 +6008,10 @@ out strError);
 
             if (bExist == true)
             {
+                // *** 非工作库情形判断
                 // 只有order权限(并且没有 setiteminfo writerecord)的情况
-                if (StringUtil.IsInList("setiteminfo,writerecord", sessioninfo.RightsOrigin) == false
+                if (strAction != "transfer" // transfer 动作例外。transfer 动作不需要判断“非工作库”情形
+                    && StringUtil.IsInList("setiteminfo,writerecord", sessioninfo.RightsOrigin) == false
                     && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == true)
                 {
                     // 2009/11/26 changed

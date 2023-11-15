@@ -32,7 +32,7 @@ using System.Runtime.InteropServices;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.14.21")]   // 1.11.*
+[assembly: AssemblyVersion("1.14.23")]   // 1.11.*
 [assembly: AssemblyFileVersion("1.14.0.0")]
 
 // V1.1 2019/2/21 支持 32-bit Windows 环境
@@ -71,5 +71,7 @@ using System.Runtime.InteropServices;
 //      1.14.17 (2023/11/2) RfidCenter 增加了一个 API SetEAS1()，在原来 SetEAS() 基础上修改了返回对象的结构，强加了一个 ChangedUID 字段。用于 UHF 标签修改 EAS 等以后引起 UID 变化时方便前端获知新的 UID
 //                          增加了 UM200 这个 UHF 读写器型号的驱动(注: 厂家说 UM200 的驱动也可以用来打开原来的 M60 型号的读写器)
 //              (2023/11/9) RfidDriver.First 中 GetTagInfo() 有一处优化读取 EPC 中 UMI 为 off 的 UHF 标签的 User Bank 的情形出现了 bug，把原本 HF 标签的 UID 当作 EPC Bank 进行了判断。此 bug 已经修正
+//              (2023/11/13) OneTag 结构增加了 RSSI 成员。TagInfo 增加了 RSSI 成员
+//                          新增加两种型号的 UHF 读写器的 XML 元数据。product id 对应于 900003 和 900007
 
 

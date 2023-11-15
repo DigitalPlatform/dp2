@@ -580,7 +580,7 @@ false);
     "bookTagWriteUserBank",
     true);
             // 超高频标签当遇到不同内容格式覆盖的时候是否警告?
-            this.checkBox_uhf_warningWhenDataFormatMismatch.Checked = 
+            this.checkBox_uhf_warningWhenDataFormatMismatch.Checked =
                 ap.GetBoolean("uhf",
     "warningWhenDataFormatMismatch",
     true);
@@ -593,6 +593,12 @@ false);
     "elements",
     "SetInformation,OwnerInstitution,TypeOfUsage,ShelfLocation");
 
+            // RSSI
+            this.numericUpDown_uhf_rssi.Value =
+                ap.GetInt("uhf",
+    "rssi",
+    0);
+
             checkBox_uhf_bookTagWriteUserBank_CheckedChanged(this, new EventArgs());
 
             if (StringUtil.IsInList("client_disablerfid", Program.MainForm._currentUserRights))
@@ -604,7 +610,27 @@ false);
                 this.checkBox_uhf_bookTagWriteUserBank.Enabled = false;
                 this.checkBox_uhf_warningWhenDataFormatMismatch.Enabled = false;
                 this.checkedComboBox_uhf_elements.Enabled = false;
+                this.numericUpDown_uhf_rssi.Enabled = false;
             }
+
+            this.checkBox_rfidTest_borrowEAS.Checked =
+                ap.GetBoolean("rfidTest",
+    "borrowEAS",
+    false);
+            this.checkBox_rfidTest_returnPreEAS.Checked =
+    ap.GetBoolean("rfidTest",
+"returnPreEAS",
+false);
+
+            this.checkBox_rfidTest_returnAPI.Checked =
+                    ap.GetBoolean("rfidTest",
+"returnAPI",
+false);
+
+            this.checkBox_rfidTest_returnPostUndoEAS.Checked =
+                ap.GetBoolean("rfidTest",
+"returnPostUndoEAS",
+false);
 
             // *** 指纹
 
@@ -1330,6 +1356,27 @@ ap.GetString(
                 ap.SetString("uhf",
         "elements",
         this.checkedComboBox_uhf_elements.Text);
+
+                // RSSI
+                ap.SetInt("uhf",
+        "rssi",
+        (int)this.numericUpDown_uhf_rssi.Value);
+
+                ap.SetBoolean("rfidTest",
+            "borrowEAS",
+            this.checkBox_rfidTest_borrowEAS.Checked);
+
+                ap.SetBoolean("rfidTest",
+            "returnPreEAS",
+            this.checkBox_rfidTest_returnPreEAS.Checked);
+
+                ap.SetBoolean("rfidTest",
+        "returnAPI",
+        this.checkBox_rfidTest_returnAPI.Checked);
+
+                ap.SetBoolean("rfidTest",
+            "returnPostUndoEAS",
+            this.checkBox_rfidTest_returnPostUndoEAS.Checked);
 
                 // ** 指纹
                 // 指纹阅读器URL

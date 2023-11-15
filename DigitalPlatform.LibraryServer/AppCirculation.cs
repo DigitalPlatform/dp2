@@ -1150,15 +1150,16 @@ namespace DigitalPlatform.LibraryServer
                         // 检查存取权限 circulation
                         if (String.IsNullOrEmpty(sessioninfo.Access) == false)
                         {
+                            string dbname_list = GetItemBiblioDbNameList(strItemDbName);
                             string strAccessActionList = "";
                             strAccessActionList = GetDbOperRights(sessioninfo.Access,
-                                strItemDbName,
+                                dbname_list,
                                 "circulation");
 #if NO
                             if (String.IsNullOrEmpty(strAccessActionList) == true && result_save != null)
                             {
                                 // TODO: 也可以直接返回 result_save
-                                strError = "当前用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strItemDbName + "' 执行 出纳 操作的存取权限";
+                                strError = "当前用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + dbname_list + "' 执行 出纳 操作的存取权限";
                                 result.Value = -1;
                                 result.ErrorInfo = strError;
                                 result.ErrorCode = ErrorCode.AccessDenied;
@@ -1180,7 +1181,7 @@ namespace DigitalPlatform.LibraryServer
                                 else
                                 {
                                     // 对其他实体库定义了存取权限，但对 strItemDbName 没有定义
-                                    strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{strItemDbName}' 执行 出纳 操作的存取权限";
+                                    strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{dbname_list}' 执行 出纳 操作的存取权限";
                                     result.Value = -1;
                                     result.ErrorInfo = strError;
                                     result.ErrorCode = ErrorCode.AccessDenied;
@@ -1199,7 +1200,7 @@ namespace DigitalPlatform.LibraryServer
                                     true, // 2023/3/20
                                     out strAccessParameters) == false)
                                 {
-                                    strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{strItemDbName}' 执行 出纳 {strActionName} 操作的存取权限";
+                                    strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{dbname_list}' 执行 出纳 {strActionName} 操作的存取权限";
                                     result.Value = -1;
                                     result.ErrorInfo = strError;
                                     result.ErrorCode = ErrorCode.AccessDenied;
@@ -6027,6 +6028,25 @@ out _);
             }
         }
 
+        // 根据实体库名字，找到书目库名字，并返回两者一起构成的列表字符串
+        string GetItemBiblioDbNameList(string strItemDbName)
+        {
+            if (string.IsNullOrEmpty(strItemDbName))
+                throw new ArgumentException("GetItemBiblioDbNameList() 的 strItemDbName 参数值不应为空");
+            
+            // 根据实体库名, 找到对应的书目库名
+            // return:
+            //      -1  出错
+            //      0   没有找到
+            //      1   找到
+            int nRet = this.GetBiblioDbNameByItemDbName(strItemDbName,
+                out string strBiblioDbName,
+                out string strError);
+            if (nRet == 1 && string.IsNullOrEmpty(strBiblioDbName) == false)
+                return strItemDbName + "," + strBiblioDbName;
+            return strItemDbName;
+        }
+
         // API: 还书
         // 权限：  工作人员需要return权限，如果是丢失处理需要lost权限；所有读者均不具备还书操作权限。盘点需要 inventory 权限
         // parameters:
@@ -6695,7 +6715,7 @@ out _);
                     // 2008/6/4
                     string strItemDbName = "";
                     bool bItemDbInCirculation = true;
-                    if (strAction != "inventory" && strAction != "transfer")
+                    if (strAction != "inventory" /*&& strAction != "transfer"*/)
                     {
                         if (String.IsNullOrEmpty(strOutputItemRecPath) == false)
                         {
@@ -6716,9 +6736,10 @@ out _);
                         // 检查存取权限
                         if (String.IsNullOrEmpty(sessioninfo.Access) == false)
                         {
+                            string dbname_list = GetItemBiblioDbNameList(strItemDbName);
                             string strAccessActionList = "";
                             strAccessActionList = GetDbOperRights(sessioninfo.Access,
-                                strItemDbName,
+                                dbname_list,
                                 "circulation");
 #if NO
                             if (String.IsNullOrEmpty(strAccessActionList) == true && result_save != null)
@@ -6746,7 +6767,7 @@ out _);
                                 else
                                 {
                                     // 对其他实体库定义了存取权限，但对 strItemDbName 没有定义
-                                    strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{strItemDbName}' 执行 出纳 操作的存取权限";
+                                    strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{dbname_list}' 执行 出纳 操作的存取权限";
                                     result.Value = -1;
                                     result.ErrorInfo = strError;
                                     result.ErrorCode = ErrorCode.AccessDenied;
@@ -6765,7 +6786,7 @@ out _);
                                     true, // 2023/3/20
                                     out strAccessParameters) == false)
                                 {
-                                    strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{strItemDbName}' 执行 出纳 {strActionName} 操作的存取权限";
+                                    strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{dbname_list}' 执行 出纳 {strActionName} 操作的存取权限";
                                     result.Value = -1;
                                     result.ErrorInfo = strError;
                                     result.ErrorCode = ErrorCode.AccessDenied;

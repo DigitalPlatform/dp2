@@ -58,7 +58,7 @@ ref sessioninfo) == false)
         this.Response.AddHeader("Expires", "0");
 
         string strBarcode = this.Request["barcode"];
-        if (string.IsNullOrEmpty(strBarcode) == false)
+        // if (string.IsNullOrEmpty(strBarcode) == false)
         {
             this.ReservationInfoControl1.ReaderBarcode = strBarcode;
             this.FellBackInfoControl1.ReaderBarcode = strBarcode;

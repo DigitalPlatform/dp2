@@ -70,6 +70,14 @@ namespace DigitalPlatform.OPAC.Web
 
             set
             {
+                // 2023/11/11
+                // 清除 ReaderDom 缓存
+                {
+                    SessionInfo sessioninfo = (SessionInfo)this.Page.Session["sessioninfo"];
+                    if (sessioninfo != null)
+                        sessioninfo.RefreshLoginReaderDomCache(value);
+                }
+
                 this.Page.Session[this.ID + "ReservationInfoControl_readerbarcode"] = value;
             }
         }
@@ -134,6 +142,7 @@ namespace DigitalPlatform.OPAC.Web
                 + "<td class='left'></td>"
                 + "<td class='middle'>"
                 + this.GetString("预约请求")
+                + " " + HttpUtility.HtmlEncode(this.ReaderBarcode)
                 + "</td>"
                 + "<td class='right'></td>"
                 + "</tr>";
@@ -460,7 +469,6 @@ Control insertbefore)
 
             if (nodes.Count == 0)
             {
-
                 Control insertpos = reservation.FindControl("reservation_insertpos");
                 int pos = insertpos.Parent.Controls.IndexOf(insertpos);
                 if (pos == -1)
@@ -475,7 +483,6 @@ Control insertbefore)
                     + "<td></tr>";
 
                 insertpos.Parent.Controls.AddAt(pos, literal);
-
             }
         }
 

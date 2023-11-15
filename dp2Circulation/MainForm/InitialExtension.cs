@@ -1658,6 +1658,7 @@ MessageBoxDefaultButton.Button1);
                 _cancelRfidManager = new CancellationTokenSource();
                 RfidManager.Base.Name = "RFID 中心";
                 RfidManager.Url = this.RfidCenterUrl;
+                RfidManager.GetRSSI = this.UhfRSSI == 0 ? false : true;
                 // RfidManager.AntennaList = "1|2|3|4";    // testing
                 // RfidManager.SetError += RfidManager_SetError;
                 RfidManager.ListTags += RfidManager_ListTags;
@@ -1698,9 +1699,14 @@ MessageBoxDefaultButton.Button1);
             // 标签总数显示
             if (e.Result.Results != null)
             {
+                List<OneTag> results = null;
+                if (RfidManager.GetRSSI)
+                    results = RfidTagList.FilterByRSSI(e.Result.Results, (byte)this.UhfRSSI);
+                else
+                    results = e.Result.Results;
                 RfidTagList.Refresh(sender as BaseChannel<IRfid>,
                     e.ReaderNameList,
-                    e.Result.Results,
+                    results,    // e.Result.Results,
                         (add_books, update_books, remove_books, add_patrons, update_patrons, remove_patrons) =>
                         {
                             TagChanged?.Invoke(sender, new TagChangedEventArgs
@@ -1718,6 +1724,16 @@ MessageBoxDefaultButton.Button1);
                             RfidManager.TriggerSetError(this, new SetErrorEventArgs { Error = text });
                             // TagSetError?.Invoke(this, new SetErrorEventArgs { Error = text });
                         });
+
+                // 2023/11/13
+                // 单独触发一次 TagChanged
+                if (RfidManager.GetRSSI && results.Count > 0)
+                {
+                    TagChanged?.Invoke(sender, new TagChangedEventArgs
+                    {
+                        UpdateRssiTags = results
+                    });
+                }
 
                 // 标签总数显示 图书+读者卡
                 // this.Number = $"{TagList.Books.Count}:{TagList.Patrons.Count}";
@@ -5803,6 +5819,11 @@ TagChangedEventArgs e);
         public List<TagAndData> AddPatrons { get; set; }
         public List<TagAndData> UpdatePatrons { get; set; }
         public List<TagAndData> RemovePatrons { get; set; }
+
+        // 2023/11/13
+        // RSSI 发生改变的标签
+        public List<OneTag> UpdateRssiTags { get; set; }
+
     }
 
 }

@@ -92,7 +92,7 @@ namespace DigitalPlatform.OPAC.Web
             XmlNodeList nodes = ReaderDom.DocumentElement.SelectNodes("overdues/overdue");
 
             strResult += this.GetPrefixString(
-                this.GetString("违约交费信息"),    // "违约/交费信息"
+                this.GetString("违约交费信息") + " " + HttpUtility.HtmlEncode(this.ReaderBarcode),    // "违约/交费信息"
                 null);
             strResult += "<table class='fellbackinfo'>";
             strResult += "<tr class='columntitle'><td>"

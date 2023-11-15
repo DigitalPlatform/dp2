@@ -19,6 +19,9 @@ namespace DigitalPlatform.RFID
 {
     public static class RfidManager
     {
+        // 是否要在 Inventory 阶段获得 UHF 标签的 RSSI
+        public static bool GetRSSI { get; set; }
+
         static List<OneTag> _lastTags = null;
 
         // 以前获取过的 Tag 列表。当第一次添加 ListTags 事件时，要考虑立即处理一次这些以前的 Tag 列表
@@ -305,6 +308,10 @@ new SetErrorEventArgs
                         && string.IsNullOrEmpty(LockCommands) == false))
                 {
                     string style = $"session:{Base2.GetHashCode()}";
+
+                    if (GetRSSI)
+                        style += ",rssi";
+
                     // 2019/12/6
                     if (_lockThread == "base2"
                         && string.IsNullOrEmpty(LockCommands) == false)
@@ -468,6 +475,10 @@ new SetErrorEventArgs
                 || (_lockThread != "base2" && string.IsNullOrEmpty(LockCommands) == false))
                 {
                     string style = $"session:{Base.GetHashCode()}";
+
+                    if (GetRSSI)
+                        style += ",rssi";
+
                     // 2019/12/4
                     if (_lockThread != "base2"
                         && string.IsNullOrEmpty(LockCommands) == false)
@@ -693,6 +704,7 @@ new SetErrorEventArgs
 
 #endif
 
+        // 旧版本
         public static GetTagInfoResult GetTagInfo(string reader_name,
             string uid,
             uint antenna_id)
@@ -734,6 +746,58 @@ new SetErrorEventArgs
                 return new GetTagInfoResult { Value = -1, ErrorInfo = ex.Message };
             }
         }
+
+        // 2023/11/11
+        // 最新版
+        public static GetTagInfoResult GetTagInfo(
+            string reader_name,
+            string uid,
+            uint antenna_id,
+            string protocol,
+            string style)
+        {
+            /*
+            if (uid == "00000000")
+                throw new Exception($"uid 错误！");
+            */
+            try
+            {
+                BaseChannel<IRfid> channel = Base.GetChannel();
+                try
+                {
+                    var result = channel.Object.GetTagInfo(reader_name,
+                        uid,
+                        antenna_id,
+                        protocol,
+                        style);
+                    if (result.Value == -1)
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = result.ErrorInfo });
+                    else
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = null }); // 清除以前的报错
+
+                    return result;
+                }
+                finally
+                {
+                    Base.ReturnChannel(channel);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Base.Clear();
+                _ = Base.ClearAsync();
+
+                Base.TriggerSetError(ex,
+                    new SetErrorEventArgs
+                    {
+                        Error = $"RFID 中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
+                    });
+                return new GetTagInfoResult { Value = -1, ErrorInfo = ex.Message };
+            }
+        }
+
 
         // 2023/11/6
         // 校验超高频标签的 User Bank 新旧尺寸。要求新尺寸不应大于旧尺寸
@@ -1339,6 +1403,9 @@ new SetErrorEventArgs
 
         public static ListTagsResult CallListTags(string reader_name, string style)
         {
+            if (GetRSSI)
+                style += ",rssi";
+
             try
             {
                 BaseChannel<IRfid> channel = Base.GetChannel();

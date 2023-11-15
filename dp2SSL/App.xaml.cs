@@ -2256,9 +2256,15 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
                     if (isBorrow == true/* || numberShown == false*/)
                     {
+                        List<OneTag> results = null;
+                        if (RfidManager.GetRSSI)
+                            results = RfidTagList.FilterByRSSI(e.Result.Results, 0);
+                        else
+                            results = e.Result.Results;
+
                         RfidTagList.Refresh(sender as BaseChannel<IRfid>,
                             e.ReaderNameList,
-                            e.Result.Results,
+                            results,    // e.Result.Results,
                                 (add_books, update_books, remove_books, add_patrons, update_patrons, remove_patrons) =>
                                 {
                                     TagChanged?.Invoke(sender, new TagChangedEventArgs

@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.92.*")]
-[assembly: AssemblyFileVersion("3.92.0.0")]
+[assembly: AssemblyVersion("3.94.*")]
+[assembly: AssemblyFileVersion("3.94.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -187,3 +187,7 @@ using System.Runtime.InteropServices;
 // 3.90 2023/11/10 为书目查询窗的“导出 Excel(横向)”增加 biblio_accessNo 和 biblio_itemCount 书目列;
 //                  为书目查询窗“导出新书通报”增加 biblio_itemCount 书目列(早先版本已有 biblio_accessNo 书目列);
 //                  为实体查询窗的“导出 Excel”增加 biblio_access 和 biblio_itemCount 书目列。
+//                  RFID 工具窗中把 ChipItemControl 中一个元素的内容修改为空的时候，自动删除这个元素(以前是保留这个元素，把内容修改为空，这样不合理)
+//      2023/11/13 内务 RFID 工具窗实现了 RSSI 过滤。快捷出纳窗尚未测试 RSSI 过滤功能
+//      2023/11/15 内务快捷出纳窗中关于 EAS 自动修正的功能解决 bug。对于超高频和高频都解决了一些 bug
+//                  系统参数对话框“读写器”属性页增加了四个用于模拟 EAS 相关出错的参数 checkbox

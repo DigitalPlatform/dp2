@@ -28,7 +28,8 @@ namespace dp2Circulation
         public string Parameters = "";  // 附加的参数。simulate_reservation_arrive 等
         public string State = "";   // 空 / begin / finish / error
         public string Color = "";   // 颜色
-        public string ErrorInfo = "";   // 出错信息
+        public string ErrorInfo = "";   // 出错信息。指 API 出错信息
+        public string EasErrorInfo = "";    // EAS 出错信息 (2023/11/15)
 
         public string ReaderName = "";  // 读者姓名
         public string ItemSummary = ""; // 册的书目摘要
@@ -73,10 +74,35 @@ namespace dp2Circulation
                 if (strSpeakStyle == "状态")
                     return strText;
                 // 状态+内容
-                return strText + this.ErrorInfo;
+                return strText + this.WholeErrorInfo;
             }
 
             return "";
+        }
+
+        // 2023/11/15
+        public string WholeErrorInfo
+        {
+            get
+            {
+                List<string> errors = new List<string>();
+                if (string.IsNullOrEmpty(this.ErrorInfo) == false)
+                    errors.Add(this.ErrorInfo);
+                if (string.IsNullOrEmpty(this.EasErrorInfo) == false)
+                    errors.Add(this.EasErrorInfo);
+                if (errors.Count == 0)
+                    return "";
+                return StringUtil.MakePathList(errors, "; ");
+            }
+        }
+
+        // 2023/11/15
+        // 在 ErrorInfo 现有内容后面追加
+        public void AppendErrorInfo(string text)
+        {
+            if (string.IsNullOrEmpty(this.ErrorInfo) == false)
+                this.ErrorInfo += "; ";
+            this.ErrorInfo += text;
         }
 
         public void RefreshDisplay(DpRow row)
@@ -177,8 +203,9 @@ namespace dp2Circulation
                 strText = GetOperText("配书");
             }
 
-            if (string.IsNullOrEmpty(this.ErrorInfo) == false)
-                strText += "\r\n===\r\n" + this.ErrorInfo;
+            var wholeErrorInfo = this.WholeErrorInfo;
+            if (string.IsNullOrEmpty(wholeErrorInfo) == false)
+                strText += "\r\n===\r\n" + wholeErrorInfo;
 
             row[2].Text = strText;
 
@@ -706,9 +733,9 @@ namespace dp2Circulation
             task.Color = "red";
             this.CurrentReaderBarcode = ""; // 及时清除上下文,避免后面错误借到先前的读者名下
             if (this.Container.IsCardMode == true)
-                this.Container.SetReaderCardString(task.ErrorInfo);
+                this.Container.SetReaderCardString(task.WholeErrorInfo);
             else
-                this.Container.SetReaderTextString(task.ErrorInfo);
+                this.Container.SetReaderTextString(task.WholeErrorInfo);
             // 兑现显示
             this.Container.DisplayTask("refresh", task);
             this.Container.SetColorList();
@@ -907,17 +934,17 @@ namespace dp2Circulation
                 // 修改 EAS
                 if (string.IsNullOrEmpty(task.ItemBarcodeEasType) == false)
                 {
-                    if (SetEAS(task, 
-                        false, 
+
+                    if (SetEAS(task,
+                        false,
+                        Program.MainForm.RfidTestBorrowEAS == false ? null : "测试触发修改 EAS 报错(借书操作末段)",   // 测试触发报错
                         out string changed_uid,
                         out strError) == false)
                     {
                         // TODO: 要 undo 刚才进行的操作
                         // lRet = -1;
                         lRet = 1;   // 相当于黄色状态 // 红色状态，但填充 ItemSummary
-                        if (string.IsNullOrEmpty(task.ErrorInfo) == false)
-                            task.ErrorInfo += "; ";
-                        task.ErrorInfo += strError;
+                        task.EasErrorInfo += strError;
                     }
 
                     // TODO: 需要压制一次 UID 引起的借还操作(changed_uid)
@@ -1102,6 +1129,7 @@ end_time);
             return text.ToLower();
         }
 
+        // TODO: 增加测试机制，允许制造修改 EAS 失败的场景
         bool PreSetEAS(ChargingTask task,
     bool enable,
     out bool old_state,
@@ -1175,6 +1203,8 @@ end_time);
                     RfidTagList.ClearTagTable("");
                     FillTagList();
 
+                    // 注: 从此以后 UHF 标签也立即刷新了，修改以后的 EPC 发生了变化
+
                     // testing
                     // NormalResult result = new NormalResult { Value = -1, ErrorInfo = "testing" };
 
@@ -1212,10 +1242,11 @@ end_time);
             }
         }
 
-
+        // TODO: 增加测试机制，允许制造修改 EAS 失败的场景
         bool SetEAS(ChargingTask task,
             bool enable,
             // bool preprocess,
+            string simulate_error,
             out string changed_uid,
             out string strError)
         {
@@ -1246,7 +1277,7 @@ end_time);
                         // Debug.WriteLine("SetEAS() call SetLastTime()");
                         this.Container.SetLastTime(
                             task.ItemBarcodeEasType,
-                            task.ItemBarcode, 
+                            task.ItemBarcode,
                             DateTime.Now);
                     }
 
@@ -1254,10 +1285,9 @@ end_time);
                         task,
                         "*",
                         ToLower(task.ItemBarcodeEasType) + ":" + task.ItemBarcode,
-                        enable);
+                        enable,
+                        simulate_error);
                     changed_uid = result.ChangedUID;
-
-
                 }
 
                 // testing
@@ -1552,21 +1582,40 @@ end_time);
                 // 修改 EAS
                 if (string.IsNullOrEmpty(task.ItemBarcodeEasType) == false)
                 {
-                    if (PreSetEAS(task, 
-                        true, 
-                        out bool old_eas,
-                        out string changed_uid,
-                        out strError) == false)
+                    // 测试触发报错
+                    if (Program.MainForm.RfidTestReturnPreEAS)
                     {
-                        // task.ErrorInfo = $"{strError}\r\n还书操作没有执行，EAS 不需要修正";
-                        task.ErrorInfo = $"{strError}\r\n还书操作失败";   // EAS 不需要额外修正
+                        task.EasErrorInfo = "测试触发修改 EAS 报错(还书操作前段)";
+                        task.AppendErrorInfo("还书操作失败");   // EAS 不需要额外修正
                         goto ERROR1;
                     }
+                    else
+                    {
+                        if (PreSetEAS(task,
+                            true,
+                            out bool old_eas,
+                            out string changed_uid,
+                            out strError) == false)
+                        {
+                            // task.ErrorInfo = $"{strError}\r\n还书操作没有执行，EAS 不需要修正";
+                            task.ErrorInfo = $"{strError}\r\n还书操作失败";   // EAS 不需要额外修正
+                            goto ERROR1;
+                        }
 
-                    // TODO: 需要压制一次 UID 引起的借还操作(changed_uid)
+                        // 2023/11/15
+                        if (string.IsNullOrEmpty(changed_uid) == false)
+                        {
+                            if (task.ItemBarcodeEasType == "pii")
+                                this.Container.UpdateUidByPII(task.ItemBarcode, changed_uid);
+                            if (task.ItemBarcodeEasType == "uid")
+                                this.Container.UpdateUID(task.ItemBarcode, changed_uid);
+                        }
 
-                    if (old_eas == false)
-                        eas_changed = true;
+                        // TODO: 需要压制一次 UID 引起的借还操作(changed_uid)
+
+                        if (old_eas == false)
+                            eas_changed = true;
+                    }
                 }
             }
 
@@ -1589,6 +1638,13 @@ end_time);
             LibraryChannel channel = this.GetChannel();
             try
             {
+                // 测试触发报错
+                if (Program.MainForm.RfidTestReturnAPI)
+                {
+                    lRet = -1;
+                    strError = "测试触发还书 API 报错(还书操作中段)，注意此时还书并没有成功";
+                }
+
 #if OLD_CHARGING_CHANNEL
                                 lRet = Channel.Return(
                      stop,
@@ -1609,24 +1665,27 @@ end_time);
                      out return_info,
                      out strError);
 #else
-                lRet = channel.Return(
-                     null,
-                     strAction,
-                     strReaderBarcode,
-                     task.ItemBarcode,
-                     strConfirmItemRecPath,
-                     false,
-                     strStyle,   // "reader,item,biblio",    //// this.NoBiblioAndItemInfo == false ? "reader,item,biblio" : "reader",
-                     strItemReturnFormats,
-                     out item_records,
-                     strReaderFormatList,    // this.Container.PatronRenderFormat + ",xml" + GetPostFix(), // "html",
-                     out reader_records,
-                     strBiblioReturnFormats,
-                     out biblio_records,
-                     out aDupPath,
-                     out strOutputReaderBarcode,
-                     out return_info,
-                     out strError);
+                else
+                {
+                    lRet = channel.Return(
+                         null,
+                         strAction,
+                         strReaderBarcode,
+                         task.ItemBarcode,
+                         strConfirmItemRecPath,
+                         false,
+                         strStyle,   // "reader,item,biblio",    //// this.NoBiblioAndItemInfo == false ? "reader,item,biblio" : "reader",
+                         strItemReturnFormats,
+                         out item_records,
+                         strReaderFormatList,    // this.Container.PatronRenderFormat + ",xml" + GetPostFix(), // "html",
+                         out reader_records,
+                         strBiblioReturnFormats,
+                         out biblio_records,
+                         out aDupPath,
+                         out strOutputReaderBarcode,
+                         out return_info,
+                         out strError);
+                }
 #endif
             }
             finally
@@ -1648,23 +1707,20 @@ end_time);
                     Debug.Assert(eas_changed == true, "");
                     // 此时正好顺便修正了以前此册的 EAS 问题，所以也不需要回滚了
                     // TODO: 是否需要提示一下操作者？
-                    if (string.IsNullOrEmpty(task.ErrorInfo) == false)
-                        task.ErrorInfo += "; ";
-                    task.ErrorInfo += $"(前置 EAS 修改顺便把以前遗留的 Off 状态修正为 On)";
+                    task.AppendErrorInfo($"(前置 EAS 修改顺便把以前遗留的 Off 状态修正为 On)");
                 }
                 else
                 {
                     // Undo 早先的 EAS 修改
                     if (SetEAS(task,
-                        false, 
+                        false,
+                        Program.MainForm.RfidTestReturnPostUndoEAS == false ? null : "测试触发修改 EAS 报错(还书操作末段，回滚 EAS 时)",
                         out string changed_uid,
                         out strError) == false)
                     {
                         // lRet = -1;
-                        lRet = 1;
-                        if (string.IsNullOrEmpty(task.ErrorInfo) == false)
-                            task.ErrorInfo += "; ";
-                        task.ErrorInfo += $"回滚 EAS 阶段: {strError}";
+                        // lRet = 1;
+                        task.EasErrorInfo = $"回滚 EAS 阶段: {strError}";
                     }
 
                     // TODO: 需要压制一次 UID 引起的借还操作(changed_uid)
@@ -1733,9 +1789,7 @@ end_time);
                 if (Container.FilterLocations.IndexOf(strLocation) == -1)
                 {
                     lRet = 1;
-                    if (string.IsNullOrEmpty(task.ErrorInfo) == false)
-                        task.ErrorInfo += "; ";
-                    task.ErrorInfo += "册记录中的馆藏地 '" + strLocation + "' 不在当前盘点要求的范围 '" + StringUtil.MakePathList(Container.FilterLocations) + "'。请及时处理";
+                    task.AppendErrorInfo("册记录中的馆藏地 '" + strLocation + "' 不在当前盘点要求的范围 '" + StringUtil.MakePathList(Container.FilterLocations) + "'。请及时处理");
                 }
             }
 

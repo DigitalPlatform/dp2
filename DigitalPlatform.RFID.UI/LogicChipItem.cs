@@ -160,6 +160,15 @@ namespace DigitalPlatform.RFID.UI
             if (element != null && element.Text == value)
                 return;
 
+            // 2023/11/10
+            // 空值等于删除元素
+            if (string.IsNullOrEmpty(value))
+            {
+                RemoveElement(oid);
+                SetChanged(true);
+                return;
+            }
+
             // 检查 value 是否合法
             if (verify)
             {
@@ -712,6 +721,8 @@ namespace DigitalPlatform.RFID.UI
         // 构造 LogicChipItem
         // 除了基本数据外，也包括 DSFID EAS AFI
         // 注: 可以处理 HF 和 UHF 标签
+        // Exception:
+        //      可能会抛出异常 ArgumentException TagDataException
         public static LogicChipItem FromTagInfo(TagInfo tag_info)
         {
             if (tag_info.Protocol == InventoryInfo.ISO18000P6C)
@@ -747,6 +758,8 @@ namespace DigitalPlatform.RFID.UI
             }
         }
 
+        // Exception:
+        //      可能会抛出异常 ArgumentException TagDataException
         public static LogicChipItem FromUhfTagInfo(TagInfo taginfo,
             out string uhfProtocol)
         {
@@ -771,7 +784,7 @@ namespace DigitalPlatform.RFID.UI
         taginfo.Bytes,
         4);
                     if (parse_result.Value == -1)
-                        throw new Exception(parse_result.ErrorInfo);
+                        throw new TagDataException(parse_result.ErrorInfo);
                     chip = parse_result.LogicChip;
                     taginfo.EAS = parse_result.PC.AFI == 0x07;
                     uhfProtocol = "gb";
@@ -786,7 +799,7 @@ namespace DigitalPlatform.RFID.UI
         taginfo.Bytes,
         "convertValueToGB");
                     if (parse_result.Value == -1)
-                        throw new Exception(parse_result.ErrorInfo);
+                        throw new TagDataException(parse_result.ErrorInfo);
                     chip = parse_result.LogicChip;
                     taginfo.EAS = parse_result.EpcInfo == null ? false : !parse_result.EpcInfo.Lending;
                     uhfProtocol = "gxlm";

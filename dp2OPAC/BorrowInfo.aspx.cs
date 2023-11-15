@@ -75,7 +75,7 @@ ref sessioninfo) == false)
         this.Response.AddHeader("Expires", "0");
 
         string strBarcode = this.Request["barcode"];
-        if (string.IsNullOrEmpty(strBarcode) == false)
+        // if (string.IsNullOrEmpty(strBarcode) == false)
         {
             this.BorrowHistoryControl1.ReaderBarcode = strBarcode;
             this.BorrowInfoControl1.ReaderBarcode = strBarcode;

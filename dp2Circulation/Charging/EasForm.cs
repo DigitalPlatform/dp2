@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Data.Entity.Core.Metadata.Edm;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -151,7 +152,7 @@ namespace dp2Circulation.Charging
                         };
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     return new GetEasStateResult
                     {
@@ -193,7 +194,8 @@ namespace dp2Circulation.Charging
             object task,
             string reader_name,
             string tag_name,
-            bool enable)
+            bool enable,
+            string simulate_error = null)
         {
             // 解析 tag_name 里面的 UID 或者 PII
             string uid = "";
@@ -245,14 +247,28 @@ namespace dp2Circulation.Charging
             }
 
             SetEasResult result = null;
-            for (int i = 0; i < 2; i++)
+
+            // 模拟出错
+            if (simulate_error != null)
             {
-                result = RfidManager.SetEAS(reader_name,
-    tag_name,
-    (uint)antenna_result.Value,
-    enable);
-                if (result.Value == 1)
-                    break;
+                result = new SetEasResult
+                {
+                    Value = -1,
+                    ErrorInfo = simulate_error,
+                    ErrorCode = "simulateError"
+                };
+            }
+            else
+            {
+                for (int i = 0; i < 2; i++)
+                {
+                    result = RfidManager.SetEAS(reader_name,
+        tag_name,
+        (uint)antenna_result.Value,
+        enable);
+                    if (result.Value == 1)
+                        break;
+                }
             }
             RfidTagList.ClearTagTable(uid);
             // 2023/10/30
@@ -515,6 +531,22 @@ out string strError);
 
             var tag_info = gettag_result.TagInfo;
 
+            // 2023/11/15
+            // 把 tag_info.EAS 设置到位
+            {
+                if (tag_info.Protocol == InventoryInfo.ISO18000P6C)
+                {
+                    try
+                    {
+                        // UHF 和 HF 标签不一样，需要专门把 TagInfo.EAS 设置到位
+                        var chip_info = RfidTagList.GetUhfChipInfo(tag_info);
+                    }
+                    catch
+                    {
+                    }
+                }
+            }
+
             // 检查册记录外借状态和 EAS 状态是否符合
             // 检测 EAS 是否正确
             SetEasResult seteas_result = new SetEasResult { Value = 1 };
@@ -548,6 +580,8 @@ out string strError);
             else
             {
                 // 没有发生修改
+                // 2023/11/15
+                // TODO: 没有发生修改也要提示一下
             }
 
             // set_result
@@ -696,6 +730,7 @@ out string strError);
                 }
             }
         }
+
 
         // 保存对照关系
         public void SetUID(string pii, string uid)

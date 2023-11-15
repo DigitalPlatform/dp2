@@ -413,7 +413,7 @@ namespace RfidTool
                     {
                         // 注1: taginfo.EAS 在调用后可能被修改
                         // 注2: 本函数不再抛出异常。会在 ErrorInfo 中报错
-                        var uhf_info = RfidTagList.GetUhfChipInfo(taginfo, ""); // "dontCheckUMI"
+                        var uhf_info = RfidTagList.GetUhfChipInfo(taginfo, "convertValueToGB"); // "dontCheckUMI"
 
                         if (string.IsNullOrEmpty(uhf_info.ErrorInfo) == false)
                         {

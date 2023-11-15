@@ -184,6 +184,28 @@ namespace DigitalPlatform.RFID
             return bytes;
         }
 
+        // 2023/11/12
+        // 根据 RSSI 过滤信号强度低于阈值的 tag
+        public static List<OneTag> FilterByRSSI(List<OneTag> tags,
+            byte rssi)
+        {
+            if (tags == null || tags.Count == 0)
+                return tags;
+            List<OneTag> results = new List<OneTag>();
+            foreach (OneTag tag in tags)
+            {
+                if (tag.Protocol != InventoryInfo.ISO18000P6C)
+                {
+                    results.Add(tag);
+                    continue;
+                }
+                if (tag.RSSI < rssi)
+                    continue;
+                results.Add(tag);
+            }
+            return results;
+        }
+
         // parameters:
         //      readerNameList  list中包含的内容的读卡器名(列表)。注意 list 中包含的标签，可能并不是全部读卡器的标签。对没有包含在其中的标签，本函数需要注意跳过(维持现状)，不要当作被删除处理
         // 异常：
@@ -222,12 +244,15 @@ namespace DigitalPlatform.RFID
                     {
                         found_books.Add(book);
                         if (book.OneTag.AntennaID != tag.AntennaID
-                            || book.OneTag.ReaderName != tag.ReaderName)    // // 2020/10/17
+                            || book.OneTag.ReaderName != tag.ReaderName    // // 2020/10/17
+                            /*|| book.OneTag.RSSI != tag.RSSI*/)    // 2023/11/12 RSSI 变动很频繁，如果 update 信号给到内务快捷出纳窗会造成触发条码输入的结果
                         {
                             // 修改 AntennaID
                             book.OneTag.AntennaID = tag.AntennaID;
                             // 修改 ReaderName
                             book.OneTag.ReaderName = tag.ReaderName;
+                            // 修改 RSSI
+                            // book.OneTag.RSSI = tag.RSSI;
                             changed_books.Add(book);
 
                             // 只清理缓存
@@ -383,9 +408,10 @@ namespace DigitalPlatform.RFID
                                 */
                             // 自动重试一次
                             GetTagInfoResult gettaginfo_result = null;
-                            for (int i = 0; i < 2; i++)
+                            int i = 0;
+                            for (i = 0; i < 2; i++)
                             {
-                                gettaginfo_result = GetTagInfo(channel, tag.ReaderName, tag.UID, tag.AntennaID);
+                                gettaginfo_result = GetTagInfo(channel, tag.ReaderName, tag.UID, tag.AntennaID, tag.Protocol);
                                 if (gettaginfo_result.Value != -1)
                                     break;
                             }
@@ -575,7 +601,7 @@ namespace DigitalPlatform.RFID
         }
 
         public static ChipInfo GetChipInfo(TagInfo taginfo,
-            string style = "")
+            string style = "convertValueToGB")
         {
             if (taginfo.Protocol == InventoryInfo.ISO15693)
             {
@@ -585,7 +611,7 @@ namespace DigitalPlatform.RFID
             {
                 return GetUhfChipInfo(taginfo, style);
             }
-            
+
             throw new ArgumentException($"GetChipInfo() 无法识别的 RFID 协议 '{taginfo.Protocol}'");
         }
 
@@ -619,7 +645,7 @@ namespace DigitalPlatform.RFID
 
                 return result;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 result.ErrorInfo = ex.Message;
                 return result;
@@ -629,10 +655,10 @@ namespace DigitalPlatform.RFID
         // 注1: taginfo.EAS 在调用后可能被修改
         // 注2: 本函数不再抛出异常。会在 ErrorInfo 中报错
         // parameters:
-        //      style   解析高校 UHF 格式时的 style。
+        //      style   解析高校联盟 UHF 格式时的 style。缺省为 "convertValueToGB"
         //              dontCheckUMI 表示不检查 PC UMI 标志位。这常用于解析一些缺失 User Bank 内容的畸形标签内容
         public static ChipInfo GetUhfChipInfo(TagInfo taginfo,
-            string style = "")
+            string style = "convertValueToGB")
         {
             ChipInfo result = new ChipInfo();
 
@@ -652,7 +678,7 @@ namespace DigitalPlatform.RFID
                     var parse_result = UhfUtility.ParseTag(epc_bank,
         taginfo.Bytes,
         4,
-        style);
+        "");
                     if (parse_result.Value == -1)
                     {
                         // throw new Exception(parse_result.ErrorInfo);
@@ -673,7 +699,7 @@ namespace DigitalPlatform.RFID
                     var parse_result = GaoxiaoUtility.ParseTag(
         epc_bank,
         taginfo.Bytes,
-        "convertValueToGB");
+        style);  // "convertValueToGB"
                     if (parse_result.Value == -1)
                     {
                         if (parse_result.ErrorCode == "parseEpcError"
@@ -855,7 +881,7 @@ namespace DigitalPlatform.RFID
                     GetTagInfoResult gettaginfo_result = null;
                     for (int i = 0; i < 2; i++)
                     {
-                        gettaginfo_result = GetTagInfo(channel, tag.ReaderName, tag.UID, tag.AntennaID);
+                        gettaginfo_result = GetTagInfo(channel, tag.ReaderName, tag.UID, tag.AntennaID, tag.Protocol);
                         if (gettaginfo_result.Value != -1)
                             break;
                     }
@@ -1356,7 +1382,8 @@ namespace DigitalPlatform.RFID
         static GetTagInfoResult GetTagInfo(BaseChannel<IRfid> channel,
             string reader_name,
             string uid,
-            uint antenna)
+            uint antenna,
+            string protocol)
         {
             // 2019/5/21
             if (channel.Started == false)
@@ -1369,12 +1396,29 @@ namespace DigitalPlatform.RFID
 
             // 2020/10/17
             // 检查 reader_name 和 antenna
+            /*
             if (info != null)
             {
                 if (info.ReaderName != reader_name || info.AntennaID != antenna)
                 {
                     info = null;
                     _tagTable.Remove(uid);
+                }
+            }
+            */
+
+            // 直接利用原先的 TagInfo，把 readername 和 antennaid 改成所需要的就可以了
+            if (info != null)
+            {
+                if (info.Protocol != protocol)
+                {
+                    info = null;
+                    _tagTable.Remove(uid);
+                }
+                else if (info.ReaderName != reader_name || info.AntennaID != antenna)
+                {
+                    info.ReaderName = reader_name;
+                    info.AntennaID = antenna;
                 }
             }
 

@@ -1032,6 +1032,15 @@ namespace DigitalPlatform.OPAC.Server
             this.ClearTempFiles();
         }
 
+        // 如果证条码号发生变化，则清理 ReaderDom Cache 事项
+        public void RefreshLoginReaderDomCache(string readerBarcode)
+        {
+            if (this.ReaderInfo == null)
+                return;
+            if (this.ReaderInfo.Barcode != readerBarcode)
+                ClearLoginReaderDomCache();
+        }
+
         // 清除当前已经登录的读者类型用户的读者记录DOM cache
         public void ClearLoginReaderDomCache()
         {

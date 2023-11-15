@@ -196,5 +196,11 @@ bool bLoop)
                 bLoop == true ? "yes" : "no");
             return dom.OuterXml;
         }
+
+        private void textBox_startIndex_Click(object sender, EventArgs e)
+        {
+            if ((Control.ModifierKeys & Keys.Control) != 0)
+                this.textBox_startIndex.ReadOnly = false;
+        }
     }
 }

@@ -488,7 +488,11 @@ out strError);
                                 return false;
                             },
                             null,
-                            true);  // 要写入 User Bank
+                            // true  // 要写入 User Bank
+                            (chip, uhfProtocol) =>
+                            {
+                                return true;
+                            });
                     }
                     else
                     {

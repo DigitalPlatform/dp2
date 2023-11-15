@@ -180,6 +180,9 @@ uint new_password);
 
         public TagInfo TagInfo { get; set; }
 
+        // 2023/11/12
+        public byte RSSI { get; set; }
+
         public OneTag()
         {
             this.LastActive = DateTime.Now;

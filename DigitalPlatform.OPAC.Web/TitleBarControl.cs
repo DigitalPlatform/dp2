@@ -115,6 +115,13 @@ namespace DigitalPlatform.OPAC.Web
 
             set
             {
+                // 2023/11/11
+                // 清除 ReaderDom 缓存
+                {
+                    SessionInfo sessioninfo = (SessionInfo)this.Page.Session["sessioninfo"];
+                    if (sessioninfo != null)
+                        sessioninfo.RefreshLoginReaderDomCache(value);
+                }
                 this.Page.Session[this.ID + "TitleBarControl_readerbarcode"] = value;
             }
         }

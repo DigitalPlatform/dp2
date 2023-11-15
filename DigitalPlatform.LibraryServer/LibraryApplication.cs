@@ -5139,6 +5139,12 @@ out strError);
         {
             strError = "";
             strBiblioDbName = "";
+            
+            if (string.IsNullOrEmpty(strItemDbName))
+            {
+                strError = "GetBiblioDbNameByItemDbName() 的 strItemDbName 参数不应为空";
+                return -1;
+            }
 
             // 2007/5/25 new changed
             XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//itemdbgroup/database[@name='" + strItemDbName + "']");

@@ -259,12 +259,12 @@ namespace dp2Circulation
                     if (e.AddPatrons != null)
                         foreach (var tag in e.AddPatrons)
                         {
-                            SendKey(tag, now);
+                            SendKey(tag, now, "add,patron");
                         }
                     if (e.UpdatePatrons != null)
                         foreach (var tag in e.UpdatePatrons)
                         {
-                            SendKey(tag, now);
+                            SendKey(tag, now, "update,patron");
                         }
                     if (e.RemovePatrons != null)
                         foreach (var tag in e.RemovePatrons)
@@ -278,18 +278,18 @@ namespace dp2Circulation
                     if (e.AddBooks != null)
                         foreach (var tag in e.AddBooks)
                         {
-                            SendKey(tag, now);
+                            SendKey(tag, now, "add,book");
+                        }
+                    if (e.UpdateBooks != null)
+                        foreach (var tag in e.UpdateBooks)
+                        {
+                            SendKey(tag, now, "update,book");
                         }
                     if (e.RemoveBooks != null)
                         foreach (var tag in e.RemoveBooks)
                         {
                             if (tag.OneTag != null)
                                 SetLastTime(tag.OneTag, now);
-                        }
-                    if (e.UpdateBooks != null)
-                        foreach (var tag in e.UpdateBooks)
-                        {
-                            SendKey(tag, now);
                         }
                 }
 
@@ -341,7 +341,7 @@ namespace dp2Circulation
             {
                 foreach (var tag in books)
                 {
-                    SendKey(tag, now);
+                    SendKey(tag, now, "add,book");
                 }
             }
 
@@ -350,7 +350,7 @@ namespace dp2Circulation
             {
                 foreach (var tag in patrons)
                 {
-                    SendKey(tag, now);
+                    SendKey(tag, now, "add,patron");
                 }
             }
 
@@ -401,7 +401,7 @@ namespace dp2Circulation
                 // 2023/11/3
                 if (string.IsNullOrEmpty(chip_info.ErrorInfo) == false)
                     return null;
-                
+
                 return chip_info.Chip?.FindElement(ElementOID.TypeOfUsage)?.Text;
             }
             else
@@ -519,7 +519,11 @@ namespace dp2Circulation
 
         public bool PauseRfid = true;
 
-        void SendKey(TagAndData data, DateTime now)
+        // parameters:
+        //      source  信号来源。为 "add" "update" 和 "book" "patron" 组合
+        void SendKey(TagAndData data,
+            DateTime now,
+            string source)
         {
             if (this.PauseRfid)
                 return;
@@ -565,7 +569,7 @@ namespace dp2Circulation
             {
                 pii = GetPII(data.OneTag.TagInfo);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 // 2023/11/3
                 SetError("sendKey", $"此标签(UID={data.OneTag.UID})解析 PII 元素时出现异常。已写入错误日志");
@@ -698,7 +702,7 @@ namespace dp2Circulation
         // TODO: 针对同一个 task 对象的线程同一时间只能允许一个运行
         void FlashTask(ChargingTask task, int count)
         {
-            Task.Run(() =>
+            _ = Task.Run(() =>
             {
                 try
                 {
@@ -740,6 +744,17 @@ namespace dp2Circulation
             SetError("rfid", e.Error);
         }
 
+
+        internal void UpdateUID(string old_uid, string new_uid)
+        {
+            _easForm.UpdateUID(old_uid, new_uid);
+        }
+
+        internal void UpdateUidByPII(string pii, string new_uid)
+        {
+            _easForm.SetUID(pii, new_uid);
+        }
+
         // result.Value:
         //      -1  出错
         //      0   Off
@@ -754,9 +769,14 @@ namespace dp2Circulation
             ChargingTask task,
             string reader_name,
             string tag_name,
-            bool enable)
+            bool enable,
+            string simulate_error = null)
         {
-            var result = _easForm.SetEAS(task, reader_name, tag_name, enable);
+            var result = _easForm.SetEAS(task,
+                reader_name,
+                tag_name,
+                enable,
+                simulate_error);
             if (result.Value != 1)
             {
                 _easForm.ShowMessage($"请把图书放回读卡器以修正 EAS\r\n拿放动作不要太快，给读卡器一点时间", "yellow", true);
@@ -4807,6 +4827,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
                     ChargingTask task = e.Param as ChargingTask;
                     if (task != null)
                     {
+#if REMOVED
                         task.Color = "green";
                         {
                             DpRow line = FindTaskLine(task);
@@ -4816,6 +4837,20 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
                         task.State = "finish";
                         task.ErrorInfo = "";
                         // task.ErrorInfo = "\r\nEAS 修正成功";
+#endif
+                        // 2023/11/15
+                        // 修正 EAS 完成后，并不意味着以前 API 请求的错误次消除了，注意还应还原当初的报错状态
+                        // 也就是说可以清掉里面的关于 EAS 修正失败的错误信息，但不应该清掉最初的报错信息
+                        // task.Color = "green";
+                        {
+                            DpRow line = FindTaskLine(task);
+                            if (line != null)
+                                line.BackColor = this.TaskBackColor;
+                        }
+                        // task.State = "finish";
+                        // task.ErrorInfo = "";
+                        task.EasErrorInfo = "EAS 修正成功";
+
                         this.DisplayTask("refresh_and_visible", task);
                         this.SetColorList();
                     }

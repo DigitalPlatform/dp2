@@ -1820,6 +1820,15 @@ Stack:
                         this.DisablePalmSendKey();
                 }
             }
+
+            // 2023/11/13
+            // 当 RSSI 参数变化后，需要立即进行的一些更新动作
+            if (e.Section == "uhf"
+                && e.Entry == "rssi")
+            {
+                Program.MainForm._cachedRSSI = -1;  // clear cache
+                RfidManager.GetRSSI = this.UhfRSSI != 0;
+            }
         }
 
         public bool PrintLabelMode
@@ -8066,12 +8075,30 @@ value);  // 常用值 "ipc://RfidChannel/RfidServer"
             }
         }
 
-        /*
-            this.checkedComboBox_uhf_elements.Text =
-                ap.GetString("uhf",
-    "elements",
-    "SetInformation,OwnerInstitution,TypeOfUsage,ShelfLocation");
-         * */
+        internal int _cachedRSSI = -1;
+
+        // 超高频标签读取时过滤的 RSSI 阈值(低于此值的被丢弃)。0 表示不使用 RSSI 过滤功能
+        public int UhfRSSI
+        {
+            get
+            {
+                if (this.AppInfo == null)
+                    return 0;
+                if (_cachedRSSI >= 0)
+                    return _cachedRSSI;
+                _cachedRSSI = this.AppInfo.GetInt("uhf",
+                    "rssi",
+                    0);
+                return _cachedRSSI;
+            }
+            set
+            {
+                this.AppInfo?.SetInt("uhf",
+                    "rssi",
+                    value);
+                _cachedRSSI = -1;
+            }
+        }
 
         // 超高频图书标签要写入 User Bank 的元素名列表
         public string UhfUserBankElements
@@ -8108,6 +8135,82 @@ value);  // 常用值 "ipc://RfidChannel/RfidServer"
                 this.AppInfo?.SetBoolean("uhf",
                     "warningWhenDataFormatMismatch",
                     value);
+            }
+        }
+
+        // 测试触发报错
+        public bool RfidTestBorrowEAS
+        {
+            get
+            {
+                if (this.AppInfo == null)
+                    return false;
+                return this.AppInfo.GetBoolean("rfidTest",
+    "borrowEAS",
+    false);
+            }
+            set
+            {
+                this.AppInfo?.SetBoolean("rfidTest",
+    "borrowEAS",
+    value);
+            }
+        }
+
+        // 测试触发报错
+        public bool RfidTestReturnPreEAS
+        {
+            get
+            {
+                if (this.AppInfo == null)
+                    return false;
+                return this.AppInfo.GetBoolean("rfidTest",
+    "returnPreEAS",
+    false);
+            }
+            set
+            {
+                this.AppInfo?.SetBoolean("rfidTest",
+    "returnPreEAS",
+    value);
+            }
+        }
+
+        // 测试触发报错
+        public bool RfidTestReturnAPI
+        {
+            get
+            {
+                if (this.AppInfo == null)
+                    return false;
+                return this.AppInfo.GetBoolean("rfidTest",
+    "returnAPI",
+    false);
+            }
+            set
+            {
+                this.AppInfo?.SetBoolean("rfidTest",
+    "returnAPI",
+    value);
+            }
+        }
+
+        // 测试触发报错
+        public bool RfidTestReturnPostUndoEAS
+        {
+            get
+            {
+                if (this.AppInfo == null)
+                    return false;
+                return this.AppInfo.GetBoolean("rfidTest",
+    "returnPostUndoEAS",
+    false);
+            }
+            set
+            {
+                this.AppInfo?.SetBoolean("rfidTest",
+    "returnPostUndoEAS",
+    value);
             }
         }
 

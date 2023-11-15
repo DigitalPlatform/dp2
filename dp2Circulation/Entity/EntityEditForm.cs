@@ -1514,7 +1514,13 @@ out strError);
                             MessageBox.Show(this, "当前系统参数定义了不写入超高频标签的 User Bank，但当前 library.xml 又配置了相应馆藏地的 OI(机构代码)，这是矛盾的。请修改参数配置");
                             return false;
                         },
-                        Program.MainForm.UhfWriteUserBank);
+                        // Program.MainForm.UhfWriteUserBank
+                        (chip, uhfProtocol) => 
+                        {
+                            RfidToolForm.FilterUserBankElements(chip, uhfProtocol);
+                            return Program.MainForm.UhfWriteUserBank;
+                        }
+                        );
                 }
                 else
                 {

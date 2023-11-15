@@ -515,5 +515,37 @@ USR 000879030000845600000C022808100400010001000000000000000000000000000000000000
                 Assert.AreEqual(bytes1[i], bytes2[i]);
             }
         }
+
+        [TestMethod]
+        public void test_parseSTID_01()
+        {
+            // https://www.gs1.org/services/tid-decoder
+            var bytes = ByteArray.GetTimeStampByteArray(
+                "E2FFF0403C00123456789ABC1DD60000090400000904000400C0");
+            var result = ExtendedTagIdentification.Parse(bytes);
+            Assert.AreEqual(0xfff, result.MaskDesignerID);
+            Assert.AreEqual(0x040, result.TagModelNumber);
+            Assert.AreEqual(true, result.XtidIndicator);
+            Assert.AreEqual(true, result.SecurityIndicator);
+            Assert.AreEqual(true, result.FileIndicator);
+            Assert.AreEqual("urn:epc:stid:xFFF.x040.x123456789ABC", result.StidUri);
+            Assert.AreEqual((UInt64)0x123456789ABC, result.SerialNumberInteger);
+        }
+
+        [TestMethod]
+        public void test_parseSTID_02()
+        {
+            var bytes = ByteArray.GetTimeStampByteArray(
+                "e20034120137fd0009f15cdb04190135300d5ffbffffdc60");
+            var result = ExtendedTagIdentification.Parse(bytes);
+            Assert.AreEqual(0x003, result.MaskDesignerID);    // Alien Technology
+            Assert.AreEqual(0x412, result.TagModelNumber);
+            Assert.AreEqual(false, result.XtidIndicator);
+            Assert.AreEqual(false, result.SecurityIndicator);
+            Assert.AreEqual(false, result.FileIndicator);
+            Assert.AreEqual(null, result.StidUri);
+            Assert.AreEqual((UInt64)0x0, result.SerialNumberInteger);
+
+        }
     }
 }

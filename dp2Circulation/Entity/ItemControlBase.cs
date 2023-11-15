@@ -2232,8 +2232,9 @@ dp2Circulation 版本: dp2Circulation, Version=3.6.7270.28358, Culture=neutral, 
         /// <summary>
         /// 根据事项记录的某个检索途径 检索出 书目记录 和全部下属事项记录，装入窗口
         /// </summary>
-        /// <param name="strSearchPrefix">为 空 / @path: / @refID: 等之一</param>
+        /// <param name="strSearchPrefix">为 空 / @path: / @refID: 等之一。空表示 strSearchText 是册条码号</param>
         /// <param name="strSearchText">检索词</param>
+        /// <param name="func_loadBiblioRecord">用于装载书目记录的回调函数</param>
         /// <param name="result_item">返回匹配记录路径的那个事项</param>
         /// <param name="bDisplayWarning">是否显示警告信息</param>
         /// <returns>-1: 出错; 0: 没有找到; 1: 成功</returns>
@@ -2254,6 +2255,25 @@ dp2Circulation 版本: dp2Circulation, Version=3.6.7270.28358, Culture=neutral, 
                 // 对当前窗口内进行册记录路径查重
                 if (this.Items != null)
                 {
+                    // 2023/11/14
+                    // 选上事项
+                    // 注：当 strSearchPrefix 不是 "@path:" 的时候，调用 HilightLineByItemRecPath() 不会命中
+                    result_item = HilightLineByItemRecPath(strSearchText, true);
+                    if (result_item != null)
+                    {
+                        if (bDisplayWarning == true)
+                        {
+                            string strText = "";
+                            if (result_item.ItemDisplayState == ItemDisplayState.Deleted)
+                                strText = this.ItemTypeName + "记录 '" + strSearchText + "' 正好为本种中未提交之一删除" + this.ItemTypeName + "请求。";
+                            else
+                                strText = this.ItemTypeName + "记录 '" + strSearchText + "' 在本种中找到。";
+
+                            MessageBoxShow(/*ForegroundWindow.Instance,*/ strText);
+                        }
+                        return 1;
+                    }
+#if REMOVED
                     T dupitem = this.Items.GetItemByRecPath(strSearchText) as T;
                     if (dupitem != null)
                     {
@@ -2267,8 +2287,11 @@ dp2Circulation 版本: dp2Circulation, Version=3.6.7270.28358, Culture=neutral, 
 
                         if (bDisplayWarning == true)
                             MessageBoxShow(/*ForegroundWindow.Instance,*/ strText);
+                        
+                        // TODO: 填充 result_item
                         return 1;
                     }
+#endif
                 }
 
                 // 向服务器提交检索请求

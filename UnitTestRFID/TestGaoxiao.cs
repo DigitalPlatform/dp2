@@ -685,5 +685,20 @@ namespace UnitTestRFID
 
         }
         */
+
+        // 2023/11/13
+        // TODO: 尝试解析这个标签，甄别到底是高校联盟格式，还是 EPC 格式
+        // C41E3400300833B2DDD9014000000000
+        [TestMethod]
+        public void Test_decode_epc_binary_2()
+        {
+            string source_hex = "C41E3400300833B2DDD9014000000000";
+
+            var source = Element.FromHexString(source_hex);
+            var result = GaoxiaoUtility.DecodeGaoxiaoEpcPayload(source, source.Length);
+            Debug.WriteLine(result);
+        }
+
+        // TODO: 探索内务里面仅读取标签 EPC 的策略，这样可以加快运行速度
     }
 }

@@ -98,9 +98,19 @@ namespace DigitalPlatform.RFID
 
         public static bool IsBlankEpcBank(byte[] epc_bank)
         {
-            // 空白的 EPC
-            if (epc_bank.Length >= 4
-                && epc_bank[2] == 0 && epc_bank[3] == 0)
+            // 彻底空白的 EPC
+            if (epc_bank.Length == 4
+    && epc_bank[2] == 0 && epc_bank[3] == 0)
+                return true;
+
+            var pc = ParsePC(epc_bank, 2);
+
+            // 标签厂家出厂时内容特征
+            // 3000 --> PC Word --> (二进制) 0011 0000 0000 0000
+            // --> Length=6word UMI=0 XPC=0 Toggle=0 attribute=0x00
+            if (pc.LengthIndicator == 6
+                && pc.UMI == false && pc.XPC == false && pc.AFI == 0 && pc.ISO == false
+                && epc_bank[4] == 0xe2/* && epc_bank[5] == 0*/)
                 return true;
 
             return false;
@@ -931,4 +941,111 @@ namespace DigitalPlatform.RFID
         public byte[] EpcBank { get; set; }
         public byte[] UserBank { get; set; }
     }
+
+    // XTID 结构解析
+    // 这个 URL 是 GS1 提供的 Decoder
+    // https://www.gs1.org/services/tid-decoder
+    // https://www.gs1.org/services/epc-encoderdecoder
+    public class ExtendedTagIdentification
+    {
+        // XTID 指示符
+        public bool XtidIndicator { get; set; }
+
+        // 安全指示符
+        public bool SecurityIndicator { get; set; }
+
+        // 文件指示符
+        public bool FileIndicator { get; set; }
+
+        //  Mask 设计者 ID
+        public int MaskDesignerID { get; set; }
+
+        // 标签型号
+        public int TagModelNumber { get; set; }
+
+        // 注: 此前的 Member 为 Short Tag Identification 结构
+
+        // byte [] 形态的 SerialNumber
+        public byte[] SerialNumber { get; set; }
+
+        // STID-URI 字符串
+        public string StidUri { get; set; }
+
+        // UInt64 形态的 SerialNumber
+        public UInt64 SerialNumberInteger
+        {
+            get
+            {
+                if (SerialNumber == null)
+                    return 0;
+                List<byte> results = new List<byte>(SerialNumber);
+                while (results.Count < 8)
+                {
+                    results.Insert(0, 0);
+                }
+                return BitConverter.ToUInt64(Compact.ReverseBytes(results.ToArray()), 0);
+            }
+        }
+
+
+        public static ExtendedTagIdentification Parse(byte[] bytes)
+        {
+            if (bytes == null || bytes.Length < 4)
+                throw new ArgumentException($"bytes 至少要有 4 bytes");
+
+            if (bytes[0] != 0xe2)
+                throw new ArgumentException("第一 byte 不是 0xE2，表明这不是合法的 TID 内容");
+
+            var result = new ExtendedTagIdentification();
+            result.XtidIndicator = (bytes[1] & 0x80) != 0;
+            result.SecurityIndicator = (bytes[1] & 0x40) != 0;
+            result.FileIndicator = (bytes[1] & 0x20) != 0;
+            /*
+            result.MDID = (((int)(bytes[1]) << 5) & 0x1f0)
+                + ((bytes[2] >> 4) & 0x0f);
+            */
+            result.MaskDesignerID = (((int)bytes[2] >> 4) & 0x0f)
+    + (((int)bytes[1] << 4) & 0xff0);
+            // GS1 EPC Tag data standard: page 119, 16.3.2
+            // 3) Consider bits b8...b19 as an 12 bit unsigned integer. This is the Tag Mask Designer ID (MDID).
+
+            result.TagModelNumber = (((int)bytes[2] << 8) & 0xf00)
+                + ((int)bytes[3] & 0xff);
+
+            // 从此开始是 Extended 部分特有结构
+            if (result.XtidIndicator == true)
+            {
+                int v = ((int)bytes[4] >> 5) & 0x07;
+
+                if (v == 0)
+                    throw new ArgumentException("byte offset 4(从零开始计算) 之前 3 bit 值为零，不是合法的 Serial Number Segment 内容");
+
+                int l = 48 + 16 * (v - 1);
+
+                List<byte> numbers = new List<byte>();
+                // 从 6 开始
+                for (int i = 0; i < l / 8; i++)
+                {
+                    byte b = bytes[6 + i];
+                    numbers.Add(b);
+                }
+
+                result.SerialNumber = numbers.ToArray();
+                // urn:epc:stid:xFFF.x040.x123456789ABC
+                result.StidUri = $"urn:epc:stid:x{Hex(result.MaskDesignerID, 3)}.x{Hex(result.TagModelNumber, 3)}.x{Hex(result.SerialNumber)}";
+            }
+            return result;
+        }
+
+        static string Hex(int v, int length)
+        {
+            return Convert.ToString(v, 16).ToUpper().PadLeft(length, '0');
+        }
+
+        static string Hex(byte[] bytes)
+        {
+            return ByteArray.GetHexTimeStampString(bytes).ToUpper();
+        }
+    }
+
 }

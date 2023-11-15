@@ -1447,7 +1447,8 @@ namespace RfidDrivers.First
   <device product='M60'>
     <basic>
       <id>690600</id>
-      <driver>690600</driver>
+      <driver>691200</driver> <!-- 模仿 UM200 -->
+      <!-- <driver>690600</driver> -->
       <type>reader</type>
       <picture>M60.jpg</picture>
       <min_antenna_id>1</min_antenna_id>
@@ -2074,7 +2075,6 @@ namespace RfidDrivers.First
         <temperature_check>true</temperature_check>
       </device_diagnosis>
     </function>
-
   </device>
 
   <!--URD2004-->
@@ -2495,6 +2495,340 @@ namespace RfidDrivers.First
     </function>
   </device>
 
+  <!-- 2023/11/13 新增 -->
+	<device product='UM1201'>
+		<basic>
+			<id>900003</id>
+			<driver>691200</driver>
+			<type>reader</type>
+			<communication com='true' usb='true'/>
+			<description>UM1201</description>
+			<picture>UM1201.jpg</picture>
+			<range>long</range>
+			<cfg_antenna auto_check='true' antenna_cnt='36'/>
+			<min_antenna_id>1</min_antenna_id>
+			<antena_count>0</antena_count>
+		</basic>
+		<protocol>
+			<UHF ISO18000P6C='true'/>
+		</protocol>
+		<upgrade Enable='true' MCU='STM32' EnableTransparent='false'/>
+		<function>
+			<configuration>
+				<save_block>true</save_block>
+			</configuration>
+			<command>
+				<information>true</information>
+				<RF_Operation>true</RF_Operation>
+				<reset_sys>true</reset_sys>
+			</command>
+			<multiple_tags/>
+			<single_tag/>
+			<device_diagnosis>
+				<antennas_check>false</antennas_check>
+				<temperature_check RF_Power='false'>true</temperature_check>
+				<error_check>
+					<DiagnosisFlg>
+						<Content Bit='3' Des='UM501_b3'/>
+						<Content Bit='4' Des='UM501_b4'/>
+						<Content Bit='5' Des='UM501_b5'/>
+					</DiagnosisFlg>
+				</error_check>
+			</device_diagnosis>
+		</function>
+	</device>
+	<device product='UM2101'>
+		<basic>
+			<id>900007</id>
+			<driver>691200</driver>
+			<type>reader</type>
+			<communication com='true' usb='true'/>
+			<description>UM2101</description>
+			<picture>UM2101.jpg</picture>
+			<range>long</range>
+			<cfg_antenna auto_check='true' antenna_cnt='36'/>
+			<min_antenna_id>1</min_antenna_id>
+			<antena_count>0</antena_count>
+		</basic>
+		<protocol>
+			<UHF ISO18000P6C='true'/>
+		</protocol>
+		<upgrade Enable='true' MCU='STM32' EnableTransparent='false'/>
+		<function>
+			<configuration>
+				<save_block>true</save_block>
+			</configuration>
+			<command>
+				<information>true</information>
+				<RF_Operation>true</RF_Operation>
+				<reset_sys>true</reset_sys>
+			</command>
+			<multiple_tags/>
+			<single_tag/>
+			<device_diagnosis>
+				<antennas_check>false</antennas_check>
+				<temperature_check RF_Power='false'>true</temperature_check>
+				<error_check>
+					<DiagnosisFlg>
+						<Content Bit='3' Des='UM501_b3'/>
+						<Content Bit='4' Des='UM501_b4'/>
+						<Content Bit='5' Des='UM501_b5'/>
+					</DiagnosisFlg>
+				</error_check>
+			</device_diagnosis>
+		</function>
+	</device>
+	<device product='UM2200'>
+		<basic>
+			<id>900024</id>
+			<driver>691200</driver>
+			<type>reader</type>
+			<communication com='true' usb='true'/>
+			<description>UM2200</description>
+			<picture>UM2200.jpg</picture>
+			<range>long</range>
+			<cfg_antenna auto_check='true' antenna_cnt='36'/>
+			<min_antenna_id>1</min_antenna_id>
+			<antena_count>0</antena_count>
+		</basic>
+		<protocol>
+			<UHF ISO18000P6C='true'/>
+		</protocol>
+		<upgrade Enable='true' MCU='STM32' EnableTransparent='false'/>
+		<function>
+			<configuration>
+				<save_block>true</save_block>
+			</configuration>
+			<command>
+				<information>true</information>
+				<RF_Operation>true</RF_Operation>
+				<reset_sys>true</reset_sys>
+			</command>
+			<multiple_tags/>
+			<single_tag/>
+			<device_diagnosis>
+				<antennas_check>false</antennas_check>
+				<temperature_check RF_Power='false'>true</temperature_check>
+				<error_check>
+					<DiagnosisFlg>
+						<Content Bit='3' Des='UM501_b3'/>
+						<Content Bit='4' Des='UM501_b4'/>
+						<Content Bit='5' Des='UM501_b5'/>
+					</DiagnosisFlg>
+				</error_check>
+			</device_diagnosis>
+		</function>
+	</device>
+	<!--LSG-UM201-->
+	<device product='LSG-UM201'>
+		<basic>
+			<id>691202</id>
+			<driver>691200</driver>
+			<type>reader</type>
+			<communication com='true' usb='true'/>
+			<description>LSG-UM201</description>
+			<picture>um201.jpg</picture>
+			<range>long</range>
+			<cfg_antenna auto_check='true' antenna_cnt='36'/>
+			<min_antenna_id>1</min_antenna_id>
+			<antena_count>0</antena_count>
+		</basic>
+		<protocol>
+			<UHF ISO18000P6C='true'/>
+		</protocol>
+		<upgrade Enable='true' MCU='STM32' EnableTransparent='false'/>
+		<function>
+			<configuration>
+				<save_block>true</save_block>
+			</configuration>
+			<command>
+				<information>true</information>
+				<RF_Operation>true</RF_Operation>
+				<reset_sys>true</reset_sys>
+			</command>
+			<multiple_tags/>
+			<single_tag/>
+			<device_diagnosis>
+				<antennas_check>true</antennas_check>
+				<temperature_check RF_Power='true'>true</temperature_check>
+			</device_diagnosis>
+		</function>
+	</device>
+	<device product='UM1101'>
+		<basic>
+			<id>691203</id>
+			<driver>691200</driver>
+			<type>reader</type>
+			<communication com='true' usb='true'/>
+			<description>UM1101</description>
+			<picture>UM1101.jpg</picture>
+			<range>long</range>
+			<cfg_antenna auto_check='true' antenna_cnt='36'/>
+			<min_antenna_id>1</min_antenna_id>
+			<antena_count>0</antena_count>
+		</basic>
+		<protocol>
+			<UHF ISO18000P6C='true'/>
+		</protocol>
+		<upgrade Enable='true' MCU='STM32' EnableTransparent='false'/>
+		<function>
+			<configuration>
+				<save_block>true</save_block>
+			</configuration>
+			<command>
+				<information>true</information>
+				<RF_Operation>true</RF_Operation>
+				<reset_sys>true</reset_sys>
+			</command>
+			<multiple_tags/>
+			<single_tag/>
+			<device_diagnosis>
+				<antennas_check>false</antennas_check>
+				<temperature_check RF_Power='false'>false</temperature_check>
+			</device_diagnosis>
+		</function>
+	</device>
+	<device product='URD1101'>
+		<basic>
+			<id>900005</id>
+			<driver>691200</driver>
+			<type>reader</type>
+			<communication com='true' usb='true'/>
+			<description>URL1101</description>
+			<picture>URL1101.jpg</picture>
+			<range>long</range>
+			<cfg_antenna auto_check='true' antenna_cnt='36'/>
+			<min_antenna_id>1</min_antenna_id>
+			<antena_count>0</antena_count>
+		</basic>
+		<protocol>
+			<UHF ISO18000P6C='true'/>
+		</protocol>
+		<upgrade Enable='true' MCU='STM32' EnableTransparent='false'/>
+		<function>
+			<configuration>
+				<save_block>true</save_block>
+			</configuration>
+			<command>
+				<information>true</information>
+				<set_output enable='true'>
+					<port id='1' name='URL105_o1'/>
+				</set_output>
+				<RF_Operation>true</RF_Operation>
+				<reset_sys>true</reset_sys>
+			</command>
+			<multiple_tags/>
+			<single_tag/>
+		</function>
+	</device>
+	<device product='APAD11M2'>
+		<basic>
+			<id>900016</id>
+			<driver>691200</driver>
+			<type>reader</type>
+			<communication com='true' usb='true'/>
+			<description>APAD11M2</description>
+			<picture>APAD11M2.jpg</picture>
+			<range>long</range>
+			<cfg_antenna auto_check='true' antenna_cnt='36'/>
+			<min_antenna_id>1</min_antenna_id>
+			<antena_count>0</antena_count>
+		</basic>
+		<protocol>
+			<UHF ISO18000P6C='true'/>
+		</protocol>
+		<upgrade Enable='true' MCU='STM32' EnableTransparent='false'/>
+		<function>
+			<configuration>
+				<save_block>true</save_block>
+			</configuration>
+			<command>
+				<information>true</information>
+				<set_output enable='true'>
+					<port id='1' name='URL105_o1'/>
+				</set_output>
+				<RF_Operation>true</RF_Operation>
+				<reset_sys>true</reset_sys>
+			</command>
+			<multiple_tags/>
+			<single_tag/>
+		</function>
+	</device>
+	<!--URD5218-->
+	<device product='URD5218'>
+		<basic>
+			<id>681218</id>
+			<driver>691200</driver>
+			<type>reader</type>
+			<cfg_name>URD5218</cfg_name>
+			<communication com='true' usb='true' tcp_ip='true'/>
+			<description>URD5218</description>
+			<picture>URD5218.jpg</picture>
+			<range>long</range>
+			<cfg_antenna auto_check='true' antenna_cnt='16'/>
+			<min_antenna_id>1</min_antenna_id>
+			<antena_count>0</antena_count>
+		</basic>
+		<protocol>
+			<UHF ISO18000P6C='true'/>
+		</protocol>
+		<upgrade Enable='true' MCU='STM32' EnableTransparent='false'/>
+		<function>
+			<configuration>
+				<save_block>true</save_block>
+			</configuration>
+			<command>
+				<information>true</information>
+				<RF_Operation>true</RF_Operation>
+				<reset_sys>true</reset_sys>
+			</command>
+			<multiple_tags/>
+			<single_tag/>
+			<device_diagnosis>
+				<antennas_check>false</antennas_check>
+				<temperature_check RF_Power='true'>true</temperature_check>
+				<error_check>
+					<DiagnosisFlg>
+						<Content Bit='0' Des='UM5218_b0'/>
+						<Content Bit='1' Des='UM5218_b1'/>
+						<Content Bit='8' Des='UM5218_b8'/>
+						<Content Bit='9' Des='UM5218_b9'/>
+						<Content Bit='10' Des='UM5218_b10'/>
+					</DiagnosisFlg>
+				</error_check>
+			</device_diagnosis>
+		</function>
+	</device>
+	<!-- 422 S -->
+	<device product='422/619 S'>
+		<basic>
+			<id>900012</id>
+			<driver>691200</driver>
+			<type>lsg_gate</type>
+			<cfg_name>422619S</cfg_name>
+			<communication com='true' usb='true' tcp_ip='true'/>
+			<description>422/619</description>
+			<picture>URD5218.jpg</picture>
+			<range>long</range>
+			<cfg_antenna auto_check='true' antenna_cnt='16'/>
+			<min_antenna_id>1</min_antenna_id>
+			<antena_count>0</antena_count>
+		</basic>
+		<protocol>
+			<UHF ISO18000P6C='true'/>
+		</protocol>
+		<upgrade Enable='true' MCU='STM32' EnableTransparent='false'/>
+		<function>
+			<configuration>
+				<save_block>true</save_block>
+			</configuration>
+			<command>
+				<information>true</information>
+			</command>
+		</function>
+	</device>
+
+
 </all_device>";
 
 
@@ -2909,7 +3243,11 @@ namespace RfidDrivers.First
             reader = null;
             //2019/9/29
             if (reader_name == "*")
-                return new NormalResult { Value = -1, ErrorInfo = "GetReader() 不应该用通配符的读卡器名" };
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = "GetReader() 不应该用通配符的读写器名"
+                };
             var readers = GetReadersByName(reader_name);
             if (readers.Count == 0)
                 return new NormalResult
@@ -2936,6 +3274,7 @@ namespace RfidDrivers.First
         //      antenna_list    内容为形态 "1|2|3|4"。如果为空，相当于 1(注: ListTags() API 当 readername_list 参数为 "*" 时，就会被当作天线列表为空)。
         //      style   可由下列值组成
         //              only_new    每次只列出最新发现的那些标签(否则全部列出)
+        //              rssi    (对于 UHF 标签)在 InventoryInfo 中返回 RSSI 值
         // exception:
         //      可能会抛出 System.AccessViolationException 异常
         public InventoryResult Inventory(string reader_name,
@@ -2981,6 +3320,7 @@ out Reader reader);
                     (byte)antennas.Length,    // 1,
                     antennas,   // new Byte[] { 1 },
                     false,
+                    style,
                     ref nTagCount,
                     out List<InventoryInfo> results);
                 if (ret != 0)
@@ -3361,6 +3701,7 @@ out Reader reader);
                         (byte)antennas.Length,    // 1,
                         antennas,   // new Byte[] { 1 },
                         false,
+                        "",
                         ref nTagCount,
                         out List<InventoryInfo> results);
                     if (ret != 0)
@@ -3798,13 +4139,17 @@ out Reader reader);
                 */
             var readers = GetReadersByName(reader_name);
             if (readers.Count == 0)
-                return new SetEasResult { Value = -1, ErrorInfo = $"没有找到名为 {reader_name} 的读卡器" };
+                return new SetEasResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"没有找到名为 {reader_name} 的读卡器"
+                };
 
             // 锁定所有读卡器
             Lock();
             try
             {
-                List<NormalResult> error_results = new List<NormalResult>();
+                var error_results = new List<SetEasResult>();
 
                 // foreach (UIntPtr hreader in handles)
                 foreach (var reader in readers)
@@ -3832,6 +4177,8 @@ out Reader reader);
 
                     UInt32 tag_type = RFIDLIB.rfidlib_def.RFID_ISO15693_PICC_ICODE_SLI_ID;
                     UIntPtr hTag = UIntPtr.Zero;
+
+                    // TODO: 验算一下 CRC-16 Word，如果不符合，则认为不是合法的 EPC，就可以跳过 UHF 这里的处理，继续处理下一个读写器
                     if (protocol == InventoryInfo.ISO18000P6C)
                         hTag = _connectUhfTag(reader.ReaderHandle,
                             uid);
@@ -3846,11 +4193,13 @@ out Reader reader);
                             var epc_bank = Element.FromHexString(uid);
                             if (UhfUtility.IsBlankEpcBank(epc_bank) == true)
                             {
-                                return new SetEasResult
+                                var result0 = new SetEasResult
                                 {
                                     Value = -1,
                                     ErrorInfo = "对空白的 UHF 标签无法修改 EAS"
                                 };
+                                error_results.Add(result0);
+                                continue;
                             }
                             var pc_bytes = GetPcBytes(uid);
                             var pc = UhfUtility.ParsePC(pc_bytes, 0);
@@ -3859,11 +4208,15 @@ out Reader reader);
                             if (isGB)
                             {
                                 if (pc_bytes.Length != 2)
-                                    return new SetEasResult
+                                {
+                                    var result0 = new SetEasResult
                                     {
                                         Value = -1,
                                         ErrorInfo = "UID 中解析的 PC bytes 数必须为 2"
                                     };
+                                    error_results.Add(result0);
+                                    continue;
+                                }
 
                                 pc.AFI = enable ? 0x07 : 0xc2;
                                 var new_pc_bytes = UhfUtility.EncodePC(pc);
@@ -3879,12 +4232,16 @@ out Reader reader);
             new_pc_bytes,
             (UInt32)new_pc_bytes.Length);
                                 if (iret != 0)
-                                    return new SetEasResult
+                                {
+                                    var result0 = new SetEasResult
                                     {
                                         Value = -1,
-                                        ErrorInfo = $"ISO18000p6C_Write() EPC Bank (gb) error. iret:{iret},reader_name:{reader_name},uid:{uid},antenna_id:{antenna_id}",
+                                        ErrorInfo = $"ISO18000p6C_Write() EPC Bank (gb) error. iret:{iret},reader_name:{reader_name},reader.Name:{reader.Name},uid:{uid},antenna_id:{antenna_id}",
                                         ErrorCode = GetErrorCode(iret, reader.ReaderHandle)
                                     };
+                                    error_results.Add(result0);
+                                    continue;
+                                }
 
                                 // 更新 epc_bank
                                 List<byte> content = null;
@@ -3923,12 +4280,16 @@ out Reader reader);
                                     payload,
                                     (UInt32)payload.Length);
                                 if (iret != 0)
-                                    return new SetEasResult
+                                {
+                                    var result0 = new SetEasResult
                                     {
                                         Value = -1,
-                                        ErrorInfo = $"ISO18000p6C_Write() EPC Bank (gaoxiao) error. iret:{iret},reader_name:{reader_name},uid:{uid},antenna_id:{antenna_id}",
+                                        ErrorInfo = $"ISO18000p6C_Write() EPC Bank (gaoxiao) error. iret:{iret},reader_name:{reader_name},reader.Name:{reader.Name},uid:{uid},antenna_id:{antenna_id}",
                                         ErrorCode = GetErrorCode(iret, reader.ReaderHandle)
                                     };
+                                    error_results.Add(result0);
+                                    continue;
+                                }
 
                                 // 更新 epc_bank
                                 List<byte> content = null;
@@ -3956,7 +4317,13 @@ out Reader reader);
                                 enable ? (byte)0x07 : (byte)0xc2);
                             if (result0.Value == -1)
                             {
-                                error_results.Add(result0);
+                                var result1 = new SetEasResult
+                                {
+                                    Value = result0.Value,
+                                    ErrorInfo = result0.ErrorInfo,
+                                    ErrorCode = result0.ErrorCode,
+                                };
+                                error_results.Add(result1);
                                 continue;
                             }
                         }
@@ -3966,7 +4333,13 @@ out Reader reader);
                             NormalResult result0 = EnableEAS(reader.ReaderHandle, hTag, enable);
                             if (result0.Value == -1)
                             {
-                                error_results.Add(result0);
+                                var result1 = new SetEasResult
+                                {
+                                    Value = result0.Value,
+                                    ErrorInfo = result0.ErrorInfo,
+                                    ErrorCode = result0.ErrorCode,
+                                };
+                                error_results.Add(result1);
                                 continue;
                             }
                         }
@@ -3982,7 +4355,8 @@ out Reader reader);
                 // 循环中曾经出现过报错
                 if (error_results.Count > 0)
                 {
-                    // return error_results[0];
+                    return error_results[0];
+                    /*
                     var first_error = error_results[0];
                     return new SetEasResult
                     {
@@ -3990,6 +4364,7 @@ out Reader reader);
                         ErrorCode = first_error.ErrorCode,
                         ErrorInfo = first_error.ErrorInfo
                     };
+                    */
                 }
 
                 return new SetEasResult
@@ -4293,10 +4668,12 @@ out Reader reader);
                                     (uint)range.BlockCount,
                                     range.Bytes);
                                 if (result0.Value == -1)
-                                    return new NormalResult {
-                                        Value = -1, 
-                                        ErrorInfo = result0.ErrorInfo, 
-                                        ErrorCode = result0.ErrorCode };
+                                    return new NormalResult
+                                    {
+                                        Value = -1,
+                                        ErrorInfo = result0.ErrorInfo,
+                                        ErrorCode = result0.ErrorCode
+                                    };
                             }
 
                             current_block_count += range.BlockCount;
@@ -4329,9 +4706,12 @@ out Reader reader);
                                     (uint)current_block_count,
                                     (uint)range.BlockCount);
                                 if (string.IsNullOrEmpty(error_code) == false)
-                                    return new NormalResult { Value = -1,
-                                        ErrorInfo = "LockBlocks error", 
-                                        ErrorCode = error_code };
+                                    return new NormalResult
+                                    {
+                                        Value = -1,
+                                        ErrorInfo = "LockBlocks error",
+                                        ErrorCode = error_code
+                                    };
                             }
 
                             current_block_count += range.BlockCount;
@@ -4621,9 +5001,20 @@ out Reader reader);
             }
         }
 
+        // 获取前方部分 bytes
+        static byte[] GetPart(byte[] source, uint nSize)
+        {
+            if (source.Length <= nSize)
+                return source;
+            byte[] temp = new byte[nSize];
+            Array.Copy(source, temp, nSize);
+            return temp;
+        }
+
         // parameters:
         //      one_reader_name 不能用通配符
         //      tag_type    如果 uid 为空，则 tag_type 应为 RFIDLIB.rfidlib_def.RFID_ISO15693_PICC_ICODE_SLI_ID
+        //      style       如果包含 "tid"，则要在 TagInfo.Tag 成员中返回一个 byte[] 表示 UHF 标签的 TID
         // result.Value
         //      -1
         //      0
@@ -4638,6 +5029,7 @@ out Reader reader);
                 return new GetTagInfoResult(result);
 
             bool quick = StringUtil.IsInList("quick", style);
+            bool return_tid_bank = StringUtil.IsInList("tid", style);
 
             // 锁定一个读卡器
             LockReader(reader);
@@ -4649,7 +5041,6 @@ out Reader reader);
                     return new GetTagInfoResult(result);
                     */
 
-
 #if DEBUG
                 if (info != null)
                 {
@@ -4659,7 +5050,9 @@ out Reader reader);
                 // 2019/9/27
                 // 选择天线
                 int antenna_id = -1;    // -1 表示尚未使用
-                if (info != null && reader.AntennaCount > 1)
+                // 2023/11/14
+                if (info != null
+                    && reader.AntennaCount > 1)
                 {
                     antenna_id = (int)info.AntennaID;
                     var hr = rfidlib_reader.RDR_SetAcessAntenna(reader.ReaderHandle,
@@ -4680,6 +5073,17 @@ out Reader reader);
                     return new GetTagInfoResult();
 
                 UIntPtr hTag = UIntPtr.Zero;
+
+                // 2023/11/14
+                // 检查 info.Protocol
+                if (StringUtil.IsInList(info.Protocol, reader.Protocols) == false)
+                    return new GetTagInfoResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"info.Protocol ({info.Protocol}) 和 reader.Protocols ({reader.Protocols})不匹配",
+                        ErrorCode = "errorProtocol",
+                    };
+
                 if (info.Protocol == InventoryInfo.ISO18000P6C)
                     hTag = _connectUhfTag(reader.ReaderHandle,
                         info?.UID);
@@ -4719,6 +5123,38 @@ out Reader reader);
                             Bytes = null,
                             AntennaID = (uint)(antenna_id == -1 ? 0 : antenna_id),
                         };
+
+                        // 2023/11/11
+                        // 读取 TID Bank
+                        if (return_tid_bank)
+                        {
+
+
+                            // 2023/11/9
+                            // 再尝试读一下 EPC Bank。从而可以检验 uid_string 是否真的是一个 UHF 标签的 EPC
+                            //int WordPointer = 0;
+                            //int WordCnt = 2;    // 0 表示读全部
+                            var temp_data = new Byte[256];
+                            UInt32 nSize = (UInt32)temp_data.Length;
+                            iret = RFIDLIB.rfidlib_aip_iso18000p6C.ISO18000p6C_Read(reader.ReaderHandle,
+hTag,
+(Byte)RFIDLIB.rfidlib_def.ISO18000p6C_MEM_BANK_TID,
+(UInt32)0,
+(UInt32)0,  // 读全部
+temp_data,
+ref nSize);
+                            if (iret != 0)
+                                return new GetTagInfoResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = $"readTidBankError. ISO18000p6C_Read() error 2. iret:{iret},reader_name:{one_reader_name},uid:{uid_string},antenna_id:{antenna_id}",
+                                    ErrorCode = "readTidBankError:" + GetErrorCode(iret, reader.ReaderHandle),
+                                    TagInfo = taginfo,
+                                };
+
+                            if (return_tid_bank)
+                                taginfo.Tag = GetPart(temp_data, nSize);
+                        }
 
                         Byte[] readData = null;
 
@@ -4978,6 +5414,7 @@ ref nSize);
         // parameters:
         //      AIType  RFIDLIB.rfidlib_def.AI_TYPE_NEW / RFIDLIB.rfidlib_def.AI_TYPE_CONTINUE
         //      AntinnaSel  从 1 开始？
+        //      style   (2023/11/12)如果包含 "rssi"，表示要在 InventoryInfo 中返回 RSSI 值
         // exception:
         //      可能会抛出 Exception 异常
         //      可能会抛出 System.AccessViolationException 异常
@@ -4992,9 +5429,15 @@ ref nSize);
             Byte AntennaSelCount,
             Byte[] AntennaSel,
             bool closeRF,
+            string style,
             ref UInt32 nTagCount,
             out List<InventoryInfo> results)
         {
+            var protocol_iso18000p6c = StringUtil.IsInList("ISO18000P6C", protocols);
+            var protocol_iso15693 = StringUtil.IsInList("ISO15693", protocols);
+            var protocol_iso14443a = StringUtil.IsInList("ISO14443A", protocols);
+
+
             try
             {
                 results = new List<InventoryInfo>();
@@ -5018,7 +5461,7 @@ ref nSize);
                     if (StringUtil.IsInList("ISO14443A", protocols))
                         RFIDLIB.rfidlib_aip_iso14443A.ISO14443A_CreateInvenParam(InvenParamSpecList, 0);
 
-                    if (StringUtil.IsInList("ISO18000P6C", protocols))
+                    if (protocol_iso18000p6c)   // StringUtil.IsInList("ISO18000P6C", protocols)
                     {
                         invenParams = new PARAMETERS();
 
@@ -5027,7 +5470,7 @@ ref nSize);
                             invenParams.m_metaFlags.m_EPC = true;    // ckbMetaEPC.Checked;
                             invenParams.m_metaFlags.m_frequency = true;  // ckbMetaFrequency.Checked;
                             invenParams.m_metaFlags.m_readCnt = false;   // ckbMetaReadCnt.Checked;
-                            invenParams.m_metaFlags.m_RSSI = false;  //  ckbMetaRSS.Checked;
+                            invenParams.m_metaFlags.m_RSSI = StringUtil.IsInList("rssi", style);  //  ckbMetaRSS.Checked;
                             invenParams.m_metaFlags.m_tagData = false;   // ckbMetaTagData.Checked;
                             invenParams.m_metaFlags.m_timestamp = false; // ckbMetaTimestamp.Checked;
                             invenParams.m_metaFlags.m_antennaID = false; // ckbMetaAntennaID.Checked;
@@ -5067,7 +5510,7 @@ ref nSize);
                         Byte[] uid = new Byte[8];  // 16
 
                         /* Parse iso15693 tag report */
-                        if (StringUtil.IsInList("ISO15693", protocols))
+                        if (protocol_iso15693)   // StringUtil.IsInList("ISO15693", protocols)
                         {
                             iret = RFIDLIB.rfidlib_aip_iso15693.ISO15693_ParseTagDataReport(TagDataReport,
                                 ref aip_id,
@@ -5096,7 +5539,7 @@ ref nSize);
                         }
 
                         /* Parse Iso14443A tag report */
-                        if (StringUtil.IsInList("ISO14443A", protocols))
+                        if (protocol_iso14443a)   // StringUtil.IsInList("ISO14443A", protocols)
                         {
                             uid = new Byte[8];
 
@@ -5134,7 +5577,7 @@ ref nSize);
                             }
                         }
 
-                        if (StringUtil.IsInList("ISO18000P6C", protocols))
+                        if (protocol_iso18000p6c)   // StringUtil.IsInList("ISO18000P6C", protocols)
                         {
                             Byte[] tagData = new Byte[256];
                             UInt32 nSize = (UInt32)tagData.Length;
@@ -5191,6 +5634,7 @@ nSize);
                                     AntennaID = ant_id,
                                     DsfID = dsfid,
                                     UID = parse_result.EPC,
+                                    RSSI = parse_result.RSSI,
                                 };
                                 results.Add(result);
 
@@ -5317,7 +5761,6 @@ nSize);
                     //error data size 
                     // return;
                     throw new Exception("error data size 3");
-
                 }
                 frequency = (UInt32)(tagData[idx] | (tagData[idx + 1] << 8 & 0xff00) | (tagData[idx + 2] << 16 & 0xff0000) | (tagData[idx + 3] << 24 & 0xff000000));
                 idx += 4;
@@ -5341,7 +5784,6 @@ nSize);
                     //error data size 
                     // return;
                     throw new Exception("error data size 5");
-
                 }
                 readCnt = tagData[idx];
                 idx += 1;

@@ -42,9 +42,10 @@
             // checkBox_startAtServerBreakPoint
             // 
             this.checkBox_startAtServerBreakPoint.AutoSize = true;
-            this.checkBox_startAtServerBreakPoint.Location = new System.Drawing.Point(11, 12);
+            this.checkBox_startAtServerBreakPoint.Location = new System.Drawing.Point(15, 17);
+            this.checkBox_startAtServerBreakPoint.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.checkBox_startAtServerBreakPoint.Name = "checkBox_startAtServerBreakPoint";
-            this.checkBox_startAtServerBreakPoint.Size = new System.Drawing.Size(245, 19);
+            this.checkBox_startAtServerBreakPoint.Size = new System.Drawing.Size(342, 25);
             this.checkBox_startAtServerBreakPoint.TabIndex = 16;
             this.checkBox_startAtServerBreakPoint.Text = "从服务器保留的断点开始处理(&S)";
             this.checkBox_startAtServerBreakPoint.UseVisualStyleBackColor = true;
@@ -52,41 +53,48 @@
             // checkBox_loop
             // 
             this.checkBox_loop.AutoSize = true;
-            this.checkBox_loop.Location = new System.Drawing.Point(11, 185);
+            this.checkBox_loop.Location = new System.Drawing.Point(15, 259);
+            this.checkBox_loop.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.checkBox_loop.Name = "checkBox_loop";
-            this.checkBox_loop.Size = new System.Drawing.Size(140, 19);
+            this.checkBox_loop.Size = new System.Drawing.Size(195, 25);
             this.checkBox_loop.TabIndex = 21;
             this.checkBox_loop.Text = "任务循环执行(&L)";
             this.checkBox_loop.UseVisualStyleBackColor = true;
             // 
             // groupBox1
             // 
-            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox1.Controls.Add(this.textBox_startIndex);
             this.groupBox1.Controls.Add(this.label2);
-            this.groupBox1.Location = new System.Drawing.Point(11, 46);
+            this.groupBox1.Location = new System.Drawing.Point(15, 64);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(411, 121);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox1.Size = new System.Drawing.Size(565, 169);
             this.groupBox1.TabIndex = 17;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "处理起点 ";
             // 
             // textBox_startIndex
             // 
-            this.textBox_startIndex.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_startIndex.Location = new System.Drawing.Point(155, 66);
+            this.textBox_startIndex.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_startIndex.Location = new System.Drawing.Point(213, 92);
+            this.textBox_startIndex.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.textBox_startIndex.Name = "textBox_startIndex";
-            this.textBox_startIndex.Size = new System.Drawing.Size(151, 25);
+            this.textBox_startIndex.ReadOnly = true;
+            this.textBox_startIndex.Size = new System.Drawing.Size(206, 31);
             this.textBox_startIndex.TabIndex = 3;
+            this.textBox_startIndex.Click += new System.EventHandler(this.textBox_startIndex_Click);
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(16, 69);
+            this.label2.Location = new System.Drawing.Point(22, 97);
+            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(114, 15);
+            this.label2.Size = new System.Drawing.Size(129, 21);
             this.label2.TabIndex = 2;
             this.label2.Text = "记录 ID(&I):";
             // 
@@ -94,9 +102,10 @@
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button_Cancel.Location = new System.Drawing.Point(348, 196);
+            this.button_Cancel.Location = new System.Drawing.Point(478, 274);
+            this.button_Cancel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.button_Cancel.Name = "button_Cancel";
-            this.button_Cancel.Size = new System.Drawing.Size(75, 28);
+            this.button_Cancel.Size = new System.Drawing.Size(103, 39);
             this.button_Cancel.TabIndex = 19;
             this.button_Cancel.Text = "取消";
             this.button_Cancel.UseVisualStyleBackColor = true;
@@ -105,9 +114,10 @@
             // button_OK
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_OK.Location = new System.Drawing.Point(267, 196);
+            this.button_OK.Location = new System.Drawing.Point(367, 274);
+            this.button_OK.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.button_OK.Name = "button_OK";
-            this.button_OK.Size = new System.Drawing.Size(75, 28);
+            this.button_OK.Size = new System.Drawing.Size(103, 39);
             this.button_OK.TabIndex = 18;
             this.button_OK.Text = "确定";
             this.button_OK.UseVisualStyleBackColor = true;
@@ -116,21 +126,22 @@
             // StartArriveMonitorDlg
             // 
             this.AcceptButton = this.button_OK;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
-            this.ClientSize = new System.Drawing.Size(435, 236);
+            this.ClientSize = new System.Drawing.Size(598, 330);
             this.Controls.Add(this.checkBox_startAtServerBreakPoint);
             this.Controls.Add(this.checkBox_loop);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "StartArriveMonitorDlg";
             this.ShowInTaskbar = false;
             this.Text = "启动 预约到书管理 任务";
-            this.Load += new System.EventHandler(this.StartArriveMonitorDlg_Load);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.StartArriveMonitorDlg_FormClosed);
+            this.Load += new System.EventHandler(this.StartArriveMonitorDlg_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.ResumeLayout(false);

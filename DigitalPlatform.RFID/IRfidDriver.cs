@@ -182,6 +182,9 @@ uint new_password);
         public UInt32 AntennaID { get; set; }
         public Byte DsfID { get; set; }
 
+        // 2023/11/12
+        public Byte RSSI { get; set; }
+
         public override string ToString()
         {
             return $"UID={(UID)}";

@@ -627,6 +627,7 @@ namespace RfidCenter
                             DSFID = info.DsfID,
                             AntennaID = info.AntennaID, // 2019/9/25
                             // InventoryInfo = info    // 有些冗余的字段
+                            RSSI = info.RSSI,
                         };
 
                         /*
@@ -891,6 +892,8 @@ namespace RfidCenter
 
         // 2020/12/14
         // 最新版接口
+        // parameters:
+        //      style   "tid" 表示要返回 UHF 标签的 TID Bank 在 TagInfo.Tag 中
         public GetTagInfoResult GetTagInfo(string reader_name,
     string uid,
     uint antenna_id,
