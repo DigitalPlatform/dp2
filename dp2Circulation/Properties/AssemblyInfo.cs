@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.94.*")]
-[assembly: AssemblyFileVersion("3.94.0.0")]
+[assembly: AssemblyVersion("3.96.*")]
+[assembly: AssemblyFileVersion("3.96.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -191,3 +191,6 @@ using System.Runtime.InteropServices;
 //      2023/11/13 内务 RFID 工具窗实现了 RSSI 过滤。快捷出纳窗尚未测试 RSSI 过滤功能
 //      2023/11/15 内务快捷出纳窗中关于 EAS 自动修正的功能解决 bug。对于超高频和高频都解决了一些 bug
 //                  系统参数对话框“读写器”属性页增加了四个用于模拟 EAS 相关出错的参数 checkbox
+//      2023/11/16 高校联盟格式写入较长的机构代码到 27 元素中，但读出的时候有 bug，已修正
+//                  借书末段设置 EAS 失败，然后又把标签放回，EAS 自动修改成功，对应的 Task 事项会从黄色(注: 黄色表示遗留了部分问题也就是 EAS 问题)变为绿色，表示此时借阅已经完全成功。(此前版本最后不会变成绿色)
+//                  参数设置对话框“读写器”属性页增加了一个 checkbox 可以启用“仅读出 EPC”加速借还操作。不过还没有完全实现关于 SendKey 字符串中 tou: 参数部分的合理化构想

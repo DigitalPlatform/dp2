@@ -1659,6 +1659,7 @@ MessageBoxDefaultButton.Button1);
                 RfidManager.Base.Name = "RFID 中心";
                 RfidManager.Url = this.RfidCenterUrl;
                 RfidManager.GetRSSI = this.UhfRSSI == 0 ? false : true;
+                RfidTagList.OnlyReadEPC = this.UhfOnlyEpcCharging;
                 // RfidManager.AntennaList = "1|2|3|4";    // testing
                 // RfidManager.SetError += RfidManager_SetError;
                 RfidManager.ListTags += RfidManager_ListTags;

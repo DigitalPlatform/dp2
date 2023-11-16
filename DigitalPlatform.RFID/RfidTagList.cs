@@ -206,6 +206,10 @@ namespace DigitalPlatform.RFID
             return results;
         }
 
+        // 2023/11/16
+        // 超高频“只读入 EPC”的加速模式
+        public static bool OnlyReadEPC { get; set; }
+
         // parameters:
         //      readerNameList  list中包含的内容的读卡器名(列表)。注意 list 中包含的标签，可能并不是全部读卡器的标签。对没有包含在其中的标签，本函数需要注意跳过(维持现状)，不要当作被删除处理
         // 异常：
@@ -408,12 +412,31 @@ namespace DigitalPlatform.RFID
                                 */
                             // 自动重试一次
                             GetTagInfoResult gettaginfo_result = null;
-                            int i = 0;
-                            for (i = 0; i < 2; i++)
+
+                            // 2023/11/16
+                            // “只读入 EPC”加速模式，直接用 UID 合成 TagInfo 结构
+                            if (OnlyReadEPC && tag.Protocol == InventoryInfo.ISO18000P6C)
                             {
-                                gettaginfo_result = GetTagInfo(channel, tag.ReaderName, tag.UID, tag.AntennaID, tag.Protocol);
-                                if (gettaginfo_result.Value != -1)
-                                    break;
+                                gettaginfo_result = new GetTagInfoResult();
+                                // TODO: 对于疑似非图书类型的标签，是不是还是要走向真正获取一次 User Bank 的分支？
+                                gettaginfo_result.TagInfo = new TagInfo
+                                {
+                                    Protocol = tag.Protocol,
+                                    ReaderName = tag.ReaderName,
+                                    AntennaID = tag.AntennaID,
+                                    UID = tag.UID,
+                                    Bytes = null,
+                                };
+                            }
+                            else
+                            {
+                                int i = 0;
+                                for (i = 0; i < 2; i++)
+                                {
+                                    gettaginfo_result = GetTagInfo(channel, tag.ReaderName, tag.UID, tag.AntennaID, tag.Protocol);
+                                    if (gettaginfo_result.Value != -1)
+                                        break;
+                                }
                             }
 
                             if (gettaginfo_result.Value == -1)
@@ -726,9 +749,12 @@ namespace DigitalPlatform.RFID
                     result.PII = GetPiiPart(parse_result.EpcInfo?.PII);
 
                     // 从 User Bank 中取得 OI
+                    string oi = result.Chip?.FindGaoxiaoOI();
+                    /*
                     string oi = result.Chip?.FindElement(ElementOID.OI)?.Text;
                     if (string.IsNullOrEmpty(oi))
                         oi = result.Chip?.FindElement((ElementOID)27)?.Text;    // 注: 高校联盟没有 AOI 字段，只有 27 字段
+                    */
                     result.OI = oi;   // GetOiPart(parse_result.EpcInfo.PII, false);
 
                     // 构造 UII
@@ -791,10 +817,12 @@ namespace DigitalPlatform.RFID
                         return pii;
 
                     // 从 User Bank 中取得 OI
+                    string oi = parse_result.LogicChip?.FindGaoxiaoOI();
+                    /*
                     string oi = parse_result.LogicChip?.FindElement(ElementOID.OI)?.Text;
                     if (string.IsNullOrEmpty(oi))
                         oi = parse_result.LogicChip?.FindElement((ElementOID)27)?.Text;    // 注: 高校联盟没有 AOI 字段，只有 27 字段
-
+                    */
                     // 构造 UII
                     if (string.IsNullOrEmpty(oi))
                         return pii;

@@ -1188,6 +1188,21 @@ start);
             }
             return text.ToString();
         }
+
+        // 2023/11/16
+        // 尝试从相关元素中寻找机构代码
+        public string FindGaoxiaoOI()
+        {
+            string oi = null;
+            // 2023/11/16
+            if (string.IsNullOrEmpty(oi))
+                oi = this.FindElement(ElementOID.OI)?.Text;
+            if (string.IsNullOrEmpty(oi))
+                oi = this.FindElement(ElementOID.AOI)?.Text;
+            if (string.IsNullOrEmpty(oi))
+                oi = this.FindElement((ElementOID)27)?.Text;
+            return oi;
+        }
     }
 
 #if NO

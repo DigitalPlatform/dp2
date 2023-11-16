@@ -1829,6 +1829,13 @@ Stack:
                 Program.MainForm._cachedRSSI = -1;  // clear cache
                 RfidManager.GetRSSI = this.UhfRSSI != 0;
             }
+
+            // 2023/11/16
+            if (e.Section == "uhf"
+    && e.Entry == "onlyEpcCharging")
+            {
+                RfidTagList.OnlyReadEPC = this.UhfOnlyEpcCharging;
+            }
         }
 
         public bool PrintLabelMode
@@ -8137,6 +8144,32 @@ value);  // 常用值 "ipc://RfidChannel/RfidServer"
                     value);
             }
         }
+
+        // 2023/11/16
+        // 仅读入 EPC Bank 来加速借还操作
+        public bool UhfOnlyEpcCharging
+        {
+            get
+            {
+                if (this.AppInfo == null)
+                    return true;
+                return this.AppInfo.GetBoolean("uhf",
+                    "onlyEpcCharging",
+                    false);
+            }
+            set
+            {
+                this.AppInfo?.SetBoolean("uhf",
+                    "onlyEpcCharging",
+                    value);
+            }
+        }
+        /*
+            this.checkBox_uhf_onlyEpcCharging.Checked =
+            ap.GetBoolean("uhf",
+    "",
+    false);
+        * */
 
         // 测试触发报错
         public bool RfidTestBorrowEAS

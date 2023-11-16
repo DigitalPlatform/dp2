@@ -805,6 +805,18 @@ namespace DigitalPlatform.RFID.UI
                     uhfProtocol = "gxlm";
                     pii = GetPiiPart(parse_result.EpcInfo?.PII);
                     oi = GetOiPart(parse_result.EpcInfo?.PII, false);
+                    // 2023/11/16
+                    if (string.IsNullOrEmpty(oi))
+                        oi = parse_result.LogicChip?.FindGaoxiaoOI();
+
+                    /*
+                    if (string.IsNullOrEmpty(oi))
+                        oi = parse_result.LogicChip?.FindElement(ElementOID.OI)?.Text;
+                    if (string.IsNullOrEmpty(oi))
+                        oi = parse_result.LogicChip?.FindElement(ElementOID.AOI)?.Text;
+                    if (string.IsNullOrEmpty(oi))
+                        oi = parse_result.LogicChip?.FindElement((ElementOID)27)?.Text;
+                    */
                 }
             }
 

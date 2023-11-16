@@ -4850,6 +4850,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
                         // task.State = "finish";
                         // task.ErrorInfo = "";
                         task.EasErrorInfo = "EAS 修正成功";
+                        task.TriggerEasErrorCleared();
 
                         this.DisplayTask("refresh_and_visible", task);
                         this.SetColorList();

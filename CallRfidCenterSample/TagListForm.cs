@@ -189,6 +189,10 @@ namespace CallRfidCenterSample
                                 uhfProtocol = "gxlm";
                                 pii = GetPIICaption(GetPiiPart(parse_result.EpcInfo?.PII));
                                 oi = GetOiPart(parse_result.EpcInfo?.PII, false);
+                                // 2023/11/16
+                                if (string.IsNullOrEmpty(oi))
+                                    oi = parse_result.LogicChip?.FindGaoxiaoOI();
+
                                 eas = parse_result.EpcInfo?.Lending == false ? "On" : "Off";
                             }
                         }

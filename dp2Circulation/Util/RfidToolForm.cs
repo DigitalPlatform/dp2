@@ -491,7 +491,8 @@ this.toolStripButton_autoFixEas.Checked);
                                 item.Tag = new ItemInfo { OneTag = tag };
                                 this.listView_tags.Items.Add(item);
 
-                                if (tag.TagInfo == null)
+                                if (tag.TagInfo == null
+                                    || UhfNeedGetUserBank(tag.TagInfo))
                                 {
                                     /*
                                     // 启动单独的线程去填充 .TagInfo
@@ -525,7 +526,8 @@ this.toolStripButton_autoFixEas.Checked);
                                 {
                                     // ListViewUtil.ChangeItemText(item, COLUMN_READERNAME, tag.ReaderName);
                                     item.Tag = new ItemInfo { OneTag = tag };
-                                    if (tag.TagInfo == null)
+                                    if (tag.TagInfo == null
+                                    || UhfNeedGetUserBank(tag.TagInfo))
                                     {
                                         /*
                                         // 启动单独的线程去填充 .TagInfo
@@ -695,6 +697,23 @@ this.toolStripButton_autoFixEas.Checked);
             {
                 Interlocked.Decrement(ref _inUpdate);
             }
+        }
+
+        // 是否有必要获取 UHF 标签的 User Bank?
+        static bool UhfNeedGetUserBank(TagInfo taginfo)
+        {
+            if (taginfo == null)
+                return true;
+            if (taginfo.Protocol == InventoryInfo.ISO18000P6C
+                && taginfo.Bytes == null)
+            {
+                var epc_bytes = ByteArray.GetTimeStampByteArray(taginfo.UID);
+                var parse_result = UhfUtility.ParsePC(epc_bytes, 2);
+                if (parse_result.UMI == true)
+                    return true;
+            }
+
+            return false;
         }
 
         bool _asked = false;
@@ -1812,7 +1831,7 @@ this.toolStripButton_autoFixEas.Checked);
 
             Debug.Assert(this.SelectedTag != null);
             if (this.SelectedTag != null
-                && this.SelectedTag.TagInfo == null
+                && (this.SelectedTag.TagInfo == null || UhfNeedGetUserBank(this.SelectedTag.TagInfo))
                 && this.SelectedTag.Protocol == InventoryInfo.ISO15693
                 && this.listView_tags.SelectedItems.Count > 0)
             {
@@ -2074,6 +2093,11 @@ this.toolStripButton_autoFixEas.Checked);
     "tid");
                 if (result.Value == -1)
                     text.Append($"TID:\terror:{result.ErrorInfo}\r\n");
+                else
+                {
+                    // TODO: 核对两个 bytes 是否完全一致，不一致则报错
+                    // tag.TagInfo = result.TagInfo;   // 使用重新获得的数据
+                }
 
                 if (result.TagInfo.Tag != null)
                 {

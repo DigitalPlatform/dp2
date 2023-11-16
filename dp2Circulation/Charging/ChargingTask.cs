@@ -29,7 +29,46 @@ namespace dp2Circulation
         public string State = "";   // 空 / begin / finish / error
         public string Color = "";   // 颜色
         public string ErrorInfo = "";   // 出错信息。指 API 出错信息
-        public string EasErrorInfo = "";    // EAS 出错信息 (2023/11/15)
+
+        string _easErrorInfo = "";
+        // EAS 出错信息 (2023/11/15)
+        public string EasErrorInfo
+        {
+            get
+            {
+                return _easErrorInfo;
+            }
+            set
+            {
+                string old_value = _easErrorInfo;
+                _easErrorInfo = value;
+                if (string.IsNullOrEmpty(old_value) == false
+                    && string.IsNullOrEmpty(value) == true)
+                {
+                    TriggerEasErrorCleared();
+                }
+            }
+        }
+
+        public void TriggerEasErrorCleared()
+        {
+            this.EasErrorCleared?.Invoke(this, new EasErrorClearedEventArgs());
+        }
+
+        // 2023/11/16
+        // EasErrorInfo 被清除时触发的事件
+        public event EasErrorClearedEventHandler EasErrorCleared;
+
+        public delegate void EasErrorClearedEventHandler(object sender,
+    EasErrorClearedEventArgs e);
+
+        public class EasErrorClearedEventArgs : EventArgs
+        {
+            /*
+            public string OldValue { get; set; }
+            public string NewValue { get; set; }
+            */
+        }
 
         public string ReaderName = "";  // 读者姓名
         public string ItemSummary = ""; // 册的书目摘要
@@ -934,7 +973,6 @@ namespace dp2Circulation
                 // 修改 EAS
                 if (string.IsNullOrEmpty(task.ItemBarcodeEasType) == false)
                 {
-
                     if (SetEAS(task,
                         false,
                         Program.MainForm.RfidTestBorrowEAS == false ? null : "测试触发修改 EAS 报错(借书操作末段)",   // 测试触发报错
@@ -945,6 +983,9 @@ namespace dp2Circulation
                         // lRet = -1;
                         lRet = 1;   // 相当于黄色状态 // 红色状态，但填充 ItemSummary
                         task.EasErrorInfo += strError;
+                        // 添加一个事件函数，以便后面 EasError 被清除后，任务能变成绿色状态
+                        task.EasErrorCleared -= Task_EasErrorCleared;
+                        task.EasErrorCleared += Task_EasErrorCleared;
                     }
 
                     // TODO: 需要压制一次 UID 引起的借还操作(changed_uid)
@@ -1095,6 +1136,19 @@ end_time);
 
         }
 
+        // 2023/11/16
+        private void Task_EasErrorCleared(object sender, ChargingTask.EasErrorClearedEventArgs e)
+        {
+            var task = sender as ChargingTask;
+            // 当 EasErrorInfo 被清理时。将黄色状态修改为绿色状态
+            if (task.Color == "yellow")
+            {
+                task.Color = "green";
+                this.Container.DisplayTask("refresh_and_visible", task);
+                this.Container.SetColorList();
+            }
+        }
+
         static void Sound(CancellationToken token)
         {
             while (token.IsCancellationRequested == false)
@@ -1242,7 +1296,6 @@ end_time);
             }
         }
 
-        // TODO: 增加测试机制，允许制造修改 EAS 失败的场景
         bool SetEAS(ChargingTask task,
             bool enable,
             // bool preprocess,

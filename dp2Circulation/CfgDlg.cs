@@ -598,6 +598,10 @@ false);
                 ap.GetInt("uhf",
     "rssi",
     0);
+            this.checkBox_uhf_onlyEpcCharging.Checked =
+            ap.GetBoolean("uhf",
+    "onlyEpcCharging",
+    false);
 
             checkBox_uhf_bookTagWriteUserBank_CheckedChanged(this, new EventArgs());
 
@@ -1361,6 +1365,10 @@ ap.GetString(
                 ap.SetInt("uhf",
         "rssi",
         (int)this.numericUpDown_uhf_rssi.Value);
+
+                ap.SetBoolean("uhf",
+                    "onlyEpcCharging",
+                    this.checkBox_uhf_onlyEpcCharging.Checked);
 
                 ap.SetBoolean("rfidTest",
             "borrowEAS",
