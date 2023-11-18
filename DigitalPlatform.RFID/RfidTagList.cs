@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using DigitalPlatform.Text;
+using static DigitalPlatform.RFID.GaoxiaoUtility;
 
 namespace DigitalPlatform.RFID
 {
@@ -620,6 +621,9 @@ namespace DigitalPlatform.RFID
 
             public string UhfProtocol { get; set; }
 
+            // (当 taginfo.Byte 为 null 时)根据 UMI 和 Content Parameters 判断是否具备 OI 元素
+            public bool ContainOiElement { get; set; }
+
             public string ErrorInfo { get; set; }
         }
 
@@ -709,6 +713,9 @@ namespace DigitalPlatform.RFID
                         return result;
                     }
                     result.Chip = parse_result.LogicChip;
+
+                    // TODO: result.ContainOiElement
+
                     // pc.AFI = enable ? 0x07 : 0xc2;
                     taginfo.EAS = parse_result.PC.AFI == 0x07;
                     result.UhfProtocol = "gb";
@@ -741,6 +748,10 @@ namespace DigitalPlatform.RFID
                     }
                     result.Chip = parse_result.LogicChip;
 
+                    result.ContainOiElement = parse_result.PC == null ? false
+                        : ParseGaoxiaoResult.ContainUserBankOiElement(
+                        parse_result.PC.UMI,
+                        parse_result.EpcInfo?.ContentParameters);
                     // TODO: 如果 Chip 为 null，需要 new 一个，并且把 PII 等内容放到其 Elements 中，以便上层可以正常使用
 
                     taginfo.EAS = parse_result.EpcInfo == null ? false : !parse_result.EpcInfo.Lending;
@@ -768,6 +779,78 @@ namespace DigitalPlatform.RFID
             return result;
         }
 
+        // 获得 UHF 标签的 UII 内容
+        // parameters:
+        //      style   风格。如果为 gxlm_pii ，表示不需要返回 oi 部分(因而也不需要解析 .Bytes 部分)
+        // return:
+        //      返回 UII 字符串。如果标签解析出错，或者是空白标签，则返回 "uid:xxxx" 形态
+        public static string GetUhfUii(string uid,
+            byte[] user_bank)
+        {
+            /*
+            string uid = taginfo.UID;
+            */
+            var epc_bank = Element.FromHexString(uid);
+
+            if (UhfUtility.IsBlankTag(epc_bank, null) == true)
+            {
+                // 空白标签
+                return "uid:" + uid;
+            }
+            else
+            {
+                var isGB = UhfUtility.IsISO285604Format(epc_bank, null);
+                if (isGB)
+                {
+                    // *** 国标 UHF
+                    var parse_result = UhfUtility.ParseTag(epc_bank,
+        null,
+        4);
+                    if (parse_result.Value == -1)
+                        return "uid:" + uid;
+
+                    return parse_result.UII;
+                }
+                else
+                {
+                    // var use_gxlm_pii = StringUtil.IsInList("gxlm_pii", style);
+                    // *** 高校联盟 UHF
+                    var parse_result = GaoxiaoUtility.ParseTag(
+        epc_bank,
+        user_bank,  // use_gxlm_pii ? null : taginfo.Bytes,
+        "");  // "convertValueToGB"
+                    if (parse_result.Value == -1)
+                    {
+                        return "uid:" + uid;
+                    }
+
+                    string pii = GetPiiPart(parse_result.EpcInfo?.PII);
+
+                    if (user_bank == null)
+                        return pii;
+                    /*
+                    if (use_gxlm_pii)
+                        return pii;
+                    */
+
+                    // 从 User Bank 中取得 OI
+                    string oi = parse_result.LogicChip?.FindGaoxiaoOI();
+                    /*
+                    string oi = parse_result.LogicChip?.FindElement(ElementOID.OI)?.Text;
+                    if (string.IsNullOrEmpty(oi))
+                        oi = parse_result.LogicChip?.FindElement((ElementOID)27)?.Text;    // 注: 高校联盟没有 AOI 字段，只有 27 字段
+                    */
+                    // 构造 UII
+                    if (string.IsNullOrEmpty(oi))
+                        return pii;
+                    else
+                        return oi + "." + pii;
+                }
+            }
+        }
+
+
+#if REMOVED
         // 获得 UHF 标签的 UII 内容
         // parameters:
         //      style   风格。如果为 gxlm_pii ，表示不需要返回 oi 部分(因而也不需要解析 .Bytes 部分)
@@ -831,6 +914,8 @@ namespace DigitalPlatform.RFID
                 }
             }
         }
+
+#endif
 
         // 返回 null/"blank"/"gb"/"gxlm"，
         // 分别表示 "无法判断"/"空白超高频标签"/"国标"/"高校联盟"

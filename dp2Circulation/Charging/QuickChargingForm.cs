@@ -274,6 +274,7 @@ namespace dp2Circulation
                         }
                 }
 
+                /*
                 {
                     if (e.AddBooks != null)
                         foreach (var tag in e.AddBooks)
@@ -292,6 +293,39 @@ namespace dp2Circulation
                                 SetLastTime(tag.OneTag, now);
                         }
                 }
+                */
+
+                // 2023/11/18
+                {
+                    var addbooks = new List<TagAndData>(e.AddBooks == null ? new List<TagAndData>() : e.AddBooks);
+                    var removebooks = new List<TagAndData>(e.RemoveBooks == null ? new List<TagAndData>() : e.RemoveBooks);
+                    // 将 AddBooks 和 RemoveBooks 中的 UHF EPC 改变，但 UII 没有改变的标签分离出来，单独处理
+                    var epc_changed_books = DetectEpcChange(ref addbooks, ref removebooks);
+
+                    if (addbooks.Count > 0)
+                        foreach (var tag in addbooks)
+                        {
+                            SendKey(tag, now, "add,book");
+                        }
+                    if (e.UpdateBooks != null)
+                        foreach (var tag in e.UpdateBooks)
+                        {
+                            SendKey(tag, now, "update,book");
+                        }
+                    if (removebooks.Count > 0)
+                        foreach (var tag in removebooks)
+                        {
+                            if (tag.OneTag != null)
+                                SetLastTime(tag.OneTag, now);
+                        }
+
+                    foreach (var item in epc_changed_books)
+                    {
+                        // TODO: 修改各种缓存
+                        if (item.NewData.OneTag != null)
+                            SetLastTime(item.NewData.OneTag, now);
+                    }
+                }
 
                 RefreshRfidTagNumber();
                 CheckMultiPatronCard();
@@ -300,6 +334,66 @@ namespace dp2Circulation
             {
                 WriteErrorLog($"MainForm_TagChanged exception: {ExceptionUtil.GetDebugText(ex)}");
                 throw new Exception(ex.Message, ex);
+            }
+        }
+
+        class UiiAndTag
+        {
+            public string UII { get; set; }
+            public TagAndData Data { get; set; }
+        }
+
+        class DataChange
+        {
+            public TagAndData OldData { get; set; }
+            public TagAndData NewData { get; set; }
+        }
+
+        // 识别 EPC 变动
+        List<DataChange> DetectEpcChange(ref List<TagAndData> add_datas,
+            ref List<TagAndData> remove_datas)
+        {
+            var list_add = MakeList(add_datas);
+            var list_remove = MakeList(remove_datas);
+            if (list_add.Count == 0 || list_remove.Count == 0)
+                return new List<DataChange>();
+
+            var updates = new List<DataChange>();
+            foreach (var item_add in list_add)
+            {
+                foreach (var item_remove in list_remove)
+                {
+                    if (item_add.UII == item_remove.UII)
+                    {
+                        add_datas.Remove(item_add.Data);
+                        remove_datas.Remove(item_remove.Data);
+                        updates.Add(new DataChange
+                        {
+                            OldData = item_remove.Data,
+                            NewData = item_add.Data,
+                        });
+                    }
+                }
+            }
+
+            return updates;
+
+            List<UiiAndTag> MakeList(List<TagAndData> datas)
+            {
+                var list = new List<UiiAndTag>();
+                foreach (var data in datas)
+                {
+                    if (data.OneTag.Protocol == InventoryInfo.ISO18000P6C)
+                    {
+                        var uii = RfidTagList.GetUhfUii(data.OneTag.UID, null);
+                        list.Add(new UiiAndTag
+                        {
+                            UII = uii,
+                            Data = data
+                        });
+                    }
+                }
+                return list;
             }
         }
 
@@ -388,6 +482,10 @@ namespace dp2Circulation
         }
 
         // 从 TagInfo 中获取标签内容 TOU
+        // return:
+        //      null    表示没有找到 TypeOfUsage 元素
+        //      "?"     表示 TypeOfUsage 元素存在，但暂时无法得到其内容，因而“应用类别”不确定
+        //      其它      应用类别值
         // Exception: 可能会抛出异常
         public static string GetTOU(TagInfo tagInfo)
         {
@@ -401,6 +499,13 @@ namespace dp2Circulation
                 // 2023/11/3
                 if (string.IsNullOrEmpty(chip_info.ErrorInfo) == false)
                     return null;
+
+                // 2023/11/18
+                if (chip_info.UhfProtocol == "gxlm"
+                    && tagInfo.Bytes == null
+                    && chip_info.ContainOiElement == true
+                    && Program.MainForm.UhfOnlyEpcCharging)
+                    return "?"; // 表示 TypeOfUsage 不确定
 
                 return chip_info.Chip?.FindElement(ElementOID.TypeOfUsage)?.Text;
             }
@@ -433,16 +538,10 @@ namespace dp2Circulation
             {
                 if (tag.TagInfo == null)
                 {
-                    var taginfo = new TagInfo
-                    {
-                        Protocol = InventoryInfo.ISO18000P6C,
-                        UID = tag.UID,
-                        Bytes = null,
-                    };
-                    return RfidTagList.GetUhfUii(taginfo, "gxlm_pii");
+                    return RfidTagList.GetUhfUii(tag.UID, null);
                     // return "uid:" + tag.UID;
                 }
-                return RfidTagList.GetUhfUii(tag.TagInfo, "gxlm_pii");
+                return RfidTagList.GetUhfUii(tag.UID, null);
             }
             return tag.UID;
         }
@@ -609,7 +708,9 @@ namespace dp2Circulation
 
             string strTypeOfUsage = GetTOU(data.OneTag.TagInfo);
             if (string.IsNullOrEmpty(strTypeOfUsage))
+            {
                 strTypeOfUsage = "10";
+            }
             // 2019/6/13
             // 注意：特殊处理!
             else if (strTypeOfUsage == "32")
@@ -621,6 +722,7 @@ namespace dp2Circulation
                 TaskList.Sound(1);
 
             if (strTypeOfUsage[0] == '1'
+                || (strTypeOfUsage[0] == '?' && Program.MainForm.UhfOnlyEpcCharging)// TODO: 这里可否提前通过 VerifyBarcode() 探测号码类型?
                 // && _easForm.ErrorCount > 0
                 )
             {
@@ -779,7 +881,7 @@ namespace dp2Circulation
                 simulate_error);
             if (result.Value != 1)
             {
-                _easForm.ShowMessage($"请把图书放回读卡器以修正 EAS\r\n拿放动作不要太快，给读卡器一点时间", "yellow", true);
+                _easForm.ShowMessage($"请把图书放回读卡器以修正 EAS\r\n拿放动作不要太快，给读写器一点时间", "yellow", true);
                 this.Invoke((Action)(() =>
                 {
                     // 显示 EasForm
@@ -1553,6 +1655,12 @@ dlg.UiState);
             try
             {
                 // TODO: 使用回调函数，以决定是否 disable textbox
+
+                // -2  服务器没有配置校验方法，无法校验</para>
+                // -1  出错</para>
+                // 0   不是合法的条码号</para>
+                // 1   是合法的读者证条码号</para>
+                // 2   是合法的册条码号</para>
                 int nRet = Program.MainForm.VerifyBarcode(
                     this._barcodeChannel.stop,
                     this._barcodeChannel.Channel,
@@ -1572,6 +1680,17 @@ dlg.UiState);
                     strError = $"{prefix}引导的号码 {strBarcode} 不符合读者证条码号校验规则: " + strError;
                     return -1;
                 }
+
+                /*
+                if (type_of_usage == "?"
+                    && (nRet == 1 || nRet == 2))
+                {
+                    if (nRet == 2)
+                        type_of_usage = "10";
+                    else
+                        type_of_usage = "80";
+                }
+                */
                 return nRet;
             }
             finally
@@ -2437,6 +2556,22 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                             this.textBox_input.Focus(); // 2020/6/2
                             return;
                         }
+                    }
+
+                    // 将 tou:? 兑现
+                    if (strText.Contains("tou:?")
+                        && (nRet == 1 || nRet == 2))
+                    {
+                        //      1   是合法的读者证条码号
+                        //      2   是合法的册条码号
+                        if (nRet == 1)
+                            strText = strText.Replace("tou:?", "tou:80");
+                        else
+                            strText = strText.Replace("tou:?", "tou:10");
+                        
+                        // 兑现到显示
+                        this.textBox_input.Text = strText;
+                        this.textBox_input.SelectAll();
                     }
                 }
             }

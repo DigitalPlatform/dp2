@@ -1280,6 +1280,23 @@ namespace DigitalPlatform.RFID
             public GaoxiaoEpcInfo EpcInfo { get; set; }
             // user bank 解析出的若干元素
             public List<GaoxiaoUserElement> UserElements { get; set; }
+
+            // 根据 UMI 和 Content Parameter 数组判断 User Bank 是否包含了 OI(或AOI,27) 元素
+            public static bool ContainUserBankOiElement(
+                bool umi,
+                int[] content_parameters)
+            {
+                if (content_parameters == null)
+                    return false;
+                if (umi
+                    && content_parameters != null
+                    && (content_parameters.Contains((int)ElementOID.OI)
+                    // || content_parameters.Contains((int)ElementOID.AOI)
+                    || content_parameters.Contains(27))
+                    )
+                    return true;
+                return false;
+            }
         }
 
         // 解析标签信息。

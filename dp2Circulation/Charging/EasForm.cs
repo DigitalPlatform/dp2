@@ -53,6 +53,28 @@ namespace dp2Circulation.Charging
         }
         */
 
+        // 根据 PII 找到天线编号
+        // 目前只支持 UHF 标签
+        // TODO: 需要实现 HF 标签的 pii 发现
+        NormalResult GetAntennaByPII(string pii)
+        {
+            foreach (var data in RfidTagList.Books)
+            {
+                if (data.OneTag.Protocol != InventoryInfo.ISO18000P6C)
+                    continue;
+                var uii = RfidTagList.GetUhfUii(data.OneTag.UID, null);
+                if (uii == pii) // TODO: 注意里面的点判断
+                    return new NormalResult { Value = (int)data.OneTag.AntennaID };
+            }
+
+            return new NormalResult
+            {
+                Value = -1,
+                ErrorInfo = $"PII 为 '{pii}' 的标签不在读卡器上，无法获得其天线编号"
+            };
+        }
+
+
         // result.Value:
         //      -1  没有找到
         //      其他 天线编号
@@ -228,7 +250,13 @@ namespace dp2Circulation.Charging
             // result.Value:
             //      -1  没有找到
             //      其他 天线编号
-            var antenna_result = GetAntennaByUID(uid);
+            NormalResult antenna_result = null;
+
+            if (string.IsNullOrEmpty(uid) == false)
+                antenna_result = GetAntennaByUID(uid);
+            else
+                antenna_result = GetAntennaByPII(pii);
+
             if (antenna_result.Value == -1)
             {
                 // 2020/6/28
@@ -270,7 +298,8 @@ namespace dp2Circulation.Charging
                         break;
                 }
             }
-            RfidTagList.ClearTagTable(uid);
+            if (string.IsNullOrEmpty(uid) == false)
+                RfidTagList.ClearTagTable(uid);
             // 2023/10/30
             if (string.IsNullOrEmpty(result.ChangedUID) == false)
             {
@@ -281,7 +310,8 @@ namespace dp2Circulation.Charging
             }
             // 2023/10/30
             // 再次清除缓存
-            RfidTagList.ClearTagTable(uid);
+            if (string.IsNullOrEmpty(uid) == false)
+                RfidTagList.ClearTagTable(uid);
             TaskList.FillTagList();
 
             if (result.Value != 1)

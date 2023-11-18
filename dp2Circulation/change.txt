@@ -356,3 +356,9 @@ MessageBoxDefaultButton.Button2);
         SendKey() 发送的字符串，里面 tou: 可以用 (unkown) 或者空缺。这样迫使软件用条码号形态规则判断这是一个什么类型的号码
         什么时候会缺乏 tou: 呢？如果是标签的 EPC 和 User Bank 明确都不存在 TypeOfUsage 元素，则默认为图书，这时候 tou: 是 “10”
         而明明标签存在 TypeOfUsage 元素(比如 EPC 中 OID Mask 标出来了)，但因为不能读出 User Bank 而得不到这个 TypeOfUsage 元素内容，此时 tou: 空缺，表示类型待定，也就是上面说的可以进一步根据号码的形态自动探测确定
+
+
+        ~~~
+        修改 EAS 以后，可以预测修改后的 UID 是什么，后面再来这个 UID 的更新消息可以主动吞掉一次。
+        为了可靠，还可以加上一个这个吞掉的时效(比如半分钟)。
+        和以往的根据 PII 来吞掉近期重复更新消息不同，这种做法是吞掉 UID 变化后的同 PII 消息
