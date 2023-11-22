@@ -65,7 +65,32 @@ namespace dp2Circulation
             strWarning = "";
             try
             {
-                this._barcode = patron.Barcode;
+                this._barcode = "";
+                this.chipEditor_editing.LogicChipItem = null;
+
+                // return:
+                //      -1  出错
+                //      0   没有找到机构代码
+                //      1   获得了机构代码，在 strOwnerInstitution 中返回
+                int nRet = MainForm.GetPatronOI(
+                    Program.MainForm.RfidCfgDom,
+                    library_code,
+                    readerdom,
+                    out string strOwnerInstitution,
+                    out string strError);
+                if (nRet != 1)
+                {
+                    SetMessage(strError);
+                    this._barcode = patron.Barcode;
+                    this.chipEditor_editing.LogicChipItem = BuildChip(patron,
+    library_code,
+    readerdom,
+    out strWarning);
+                    strWarning += " " + strError;
+                    return;
+                }
+
+                this._barcode = RfidToolForm.BuildUii(patron.Barcode, strOwnerInstitution, "");
                 this.chipEditor_editing.LogicChipItem = BuildChip(patron,
                     library_code,
                     readerdom,

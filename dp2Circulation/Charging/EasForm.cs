@@ -52,145 +52,6 @@ namespace dp2Circulation.Charging
             }
         }
         */
-
-        // 根据 PII 找到天线编号
-        // 目前只支持 UHF 标签
-        // TODO: 需要实现 HF 标签的 pii 发现
-        NormalResult GetAntennaByPII(string pii)
-        {
-            foreach (var data in RfidTagList.Books)
-            {
-                if (data.OneTag.Protocol != InventoryInfo.ISO18000P6C)
-                    continue;
-                var uii = RfidTagList.GetUhfUii(data.OneTag.UID, null);
-                if (uii == pii) // TODO: 注意里面的点判断
-                    return new NormalResult { Value = (int)data.OneTag.AntennaID };
-            }
-
-            return new NormalResult
-            {
-                Value = -1,
-                ErrorInfo = $"PII 为 '{pii}' 的标签不在读卡器上，无法获得其天线编号"
-            };
-        }
-
-
-        // result.Value:
-        //      -1  没有找到
-        //      其他 天线编号
-        NormalResult GetAntennaByUID(string uid)
-        {
-            foreach (var data in RfidTagList.Books)
-            {
-                if (data.OneTag.UID != uid)
-                    continue;
-                if (data.OneTag.TagInfo == null)
-                    return new NormalResult
-                    {
-                        Value = -1,
-                        ErrorInfo = $"UID 为 '{uid}' 的标签暂时 TagInfo == null，无法获得天线编号"
-                    };
-                return new NormalResult { Value = (int)data.OneTag.AntennaID };
-            }
-
-            // TODO: 此时可否发起一次 GetTagInfo 请求？
-            return new NormalResult
-            {
-                Value = -1,
-                ErrorInfo = $"UID 为 '{uid}' 的标签不在读卡器上，无法获得其天线编号"
-            };
-        }
-
-        // 从 TagList.Books 中获得一个标签的 EAS 状态
-        // result.Value:
-        //      -1  出错
-        //      0   Off
-        //      1   On
-        GetEasStateResult GetEasStateByUID(string uid)
-        {
-            foreach (var data in RfidTagList.Books)
-            {
-                if (data.OneTag.UID != uid)
-                    continue;
-                if (data.OneTag.TagInfo == null)
-                    return new GetEasStateResult
-                    {
-                        Value = -1,
-                        ErrorInfo = $"UID 为 '{uid}' 的标签暂时 TagInfo == null，无法获得 EAS 状态"
-                    };
-                return new GetEasStateResult
-                {
-                    Value = data.OneTag.TagInfo.EAS ? 1 : 0,
-                    AntennaID = data.OneTag.AntennaID,
-                    ReaderName = data.OneTag.ReaderName
-                };
-            }
-
-            // TODO: 此时可否发起一次 GetTagInfo 请求？
-            return new GetEasStateResult
-            {
-                Value = -1,
-                ErrorInfo = $"UID 为 '{uid}' 的标签不在读卡器上，无法获得其 EAS 状态"
-            };
-        }
-
-        // 从 TagList.Books 中获得一个标签的 EAS 状态
-        // result.Value:
-        //      -1  出错
-        //      0   Off
-        //      1   On
-        GetEasStateResult GetEasStateByPII(string pii)
-        {
-            foreach (var data in RfidTagList.Books)
-            {
-                TagInfo tag_info = null;
-                if (data.OneTag.TagInfo == null)
-                {
-                    // TODO: 出错了考虑重试一下
-                    // result.Value
-                    //      -1
-                    //      0
-                    var result = RfidManager.GetTagInfo("*",
-                        data.OneTag.UID,
-                        data.OneTag.AntennaID);
-                    if (result.Value == -1)
-                        continue;
-                    tag_info = result.TagInfo;
-                }
-                else
-                    tag_info = data.OneTag.TagInfo;
-
-                try
-                {
-                    // Exception: 可能会抛出异常
-                    string current_pii = QuickChargingForm.GetPII(tag_info);
-                    if (current_pii == pii)
-                    {
-                        return new GetEasStateResult
-                        {
-                            Value = tag_info.EAS ? 1 : 0,
-                            AntennaID = tag_info.AntennaID,
-                            ReaderName = tag_info.ReaderName
-                        };
-                    }
-                }
-                catch (Exception ex)
-                {
-                    return new GetEasStateResult
-                    {
-                        Value = -1,
-                        ErrorInfo = $"PII 为 '{pii}' 的标签获得其 EAS 状态时出现异常: {ex.Message}"
-                    };
-                }
-            }
-
-            return new GetEasStateResult
-            {
-                Value = -1,
-                ErrorInfo = $"PII 为 '{pii}' 的标签不在读卡器上，无法获得其 EAS 状态"
-            };
-        }
-
         // result.Value:
         //      -1  出错
         //      0   Off
@@ -298,21 +159,49 @@ namespace dp2Circulation.Charging
                         break;
                 }
             }
+
+#if REMOVED
             if (string.IsNullOrEmpty(uid) == false)
                 RfidTagList.ClearTagTable(uid);
+#endif
+            // 注: 无论 result.ChangedUID 是否为空，都要进行 UpdateUID 操作
+            // HF 标签此时的 result.ChangedUID 是为空的
+            if (string.IsNullOrEmpty(result.OldUID) == false)
+            {
+                if (string.IsNullOrEmpty(result.ChangedUID) == false)
+                    TaskList.ChangeUID(result.OldUID, result.ChangedUID);
+                else
+                    TaskList.ChangeUID(result.OldUID, enable ? "on" : "off");
+            }
+
             // 2023/10/30
             if (string.IsNullOrEmpty(result.ChangedUID) == false)
             {
                 // 修改 _piiTable 中的有关条目
-                if (string.IsNullOrEmpty(uid) == false)
-                    UpdateUID(uid, result.ChangedUID);
+                if (string.IsNullOrEmpty(result.OldUID) == false)
+                {
+                    UpdateUID(result.OldUID, result.ChangedUID);
+                }
                 uid = result.ChangedUID;
             }
+
+#if REMOVED
+            // 2023/11/21
+            // 保险
+            if (string.IsNullOrEmpty(result.OldUID))
+            {
+                RfidTagList.ClearTagTable("");
+                TaskList.FillTagList();
+            }
+#endif
+
+            /*
             // 2023/10/30
             // 再次清除缓存
             if (string.IsNullOrEmpty(uid) == false)
                 RfidTagList.ClearTagTable(uid);
             TaskList.FillTagList();
+            */
 
             if (result.Value != 1)
             {
@@ -737,6 +626,202 @@ out string strError);
                 uid = parts[1];
         }
 
+        #region 从 RfidTagList.Books 中获取信息
+
+        // 根据 PII 找到天线编号
+        // 目前只支持 UHF 标签
+        // TODO: 需要实现 HF 标签的 pii 发现
+        NormalResult GetAntennaByPII(string pii)
+        {
+            foreach (var data in RfidTagList.Books)
+            {
+                if (data.OneTag.Protocol == InventoryInfo.ISO18000P6C)
+                {
+                    var uii = RfidTagList.GetUhfUii(data.OneTag.UID, null);
+                    if (uii == pii || uii.EndsWith("." + pii))
+                        return new NormalResult { Value = (int)data.OneTag.AntennaID };
+                }
+                else if (data.OneTag.Protocol == InventoryInfo.ISO15693)
+                {
+                    var uii = RfidTagList.GetHfUii(data.OneTag.TagInfo);
+                    if (uii == pii || uii.EndsWith("." + pii))
+                        return new NormalResult { Value = (int)data.OneTag.AntennaID };
+                }
+            }
+
+            return new NormalResult
+            {
+                Value = -1,
+                ErrorInfo = $"PII 为 '{pii}' 的标签不在读卡器上，无法获得其天线编号"
+            };
+        }
+
+
+        // result.Value:
+        //      -1  没有找到
+        //      其他 天线编号
+        NormalResult GetAntennaByUID(string uid)
+        {
+            int redo_count = 0;
+        REDO:
+            foreach (var data in RfidTagList.Books)
+            {
+                if (data.OneTag.UID != uid)
+                    continue;
+                /*
+                if (data.OneTag.TagInfo == null)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"UID 为 '{uid}' 的标签暂时 TagInfo == null，无法获得天线编号"
+                    };
+                */
+                return new NormalResult
+                {
+                    Value = (int)data.OneTag.AntennaID
+                };
+            }
+
+            // 可能是后台线程没有来得及更新 .Books 集合。主动更新一次
+            if (redo_count == 0)
+            {
+                string style = $"dont_delay";   // 确保 inventory 并立即返回
+                RfidManager.CallListTags("*", style);
+                redo_count++;
+                goto REDO;
+            }
+
+            return new NormalResult
+            {
+                Value = -1,
+                ErrorInfo = $"UID 为 '{uid}' 的标签不在读卡器上，无法获得其天线编号。"
+            };
+
+            /*
+            // 2023/11/20
+            // 此时发起一次 GetTagInfo 请求？
+            var result = RfidManager.GetTagInfo("*", uid, 0);
+            if (result.Value == -1)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"UID 为 '{uid}' 的标签不在读卡器上，无法获得其天线编号。(曾尝试重新获得此 UID 的标签信息也失败: {result.ErrorInfo})"
+                };
+
+            return new NormalResult
+            {
+                Value = (int)result.TagInfo.AntennaID
+            };
+            */
+        }
+
+        // 注: RfidTagList.Books 可能未来得及更新，本函数不太可靠
+        // 从 TagList.Books 中获得一个标签的 EAS 状态
+        // result.Value:
+        //      -1  出错
+        //      0   Off
+        //      1   On
+        GetEasStateResult GetEasStateByUID(string uid)
+        {
+            foreach (var data in RfidTagList.Books)
+            {
+                if (data.OneTag.UID != uid)
+                    continue;
+                bool eas = false;
+                if (data.OneTag.TagInfo == null)
+                {
+                    if (data.OneTag.Protocol == InventoryInfo.ISO18000P6C)
+                    {
+                        // 可以通过 EPC 得到 EAS，并不需要 User Bank
+                        eas = RfidTagList.GetUhfEas(data.OneTag.UID, out _);
+                    }
+                    else
+                        return new GetEasStateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"UID 为 '{uid}' 的标签暂时 TagInfo == null，无法获得 EAS 状态"
+                        };
+                }
+                else
+                {
+                    eas = data.OneTag.TagInfo.EAS;
+                }
+
+                return new GetEasStateResult
+                {
+                    Value = eas ? 1 : 0,
+                    AntennaID = data.OneTag.AntennaID,
+                    ReaderName = data.OneTag.ReaderName
+                };
+            }
+
+            // TODO: 此时可否发起一次 GetTagInfo 请求？
+            return new GetEasStateResult
+            {
+                Value = -1,
+                ErrorInfo = $"UID 为 '{uid}' 的标签不在读卡器上，无法获得其 EAS 状态"
+            };
+        }
+
+        // 注: RfidTagList.Books 可能未来得及更新，本函数不太可靠
+        // 从 TagList.Books 中获得一个标签的 EAS 状态
+        // result.Value:
+        //      -1  出错
+        //      0   Off
+        //      1   On
+        GetEasStateResult GetEasStateByPII(string pii)
+        {
+            foreach (var data in RfidTagList.Books)
+            {
+                TagInfo tag_info = null;
+                if (data.OneTag.TagInfo == null)
+                {
+                    // TODO: 出错了考虑重试一下
+                    // result.Value
+                    //      -1
+                    //      0
+                    var result = RfidManager.GetTagInfo("*",
+                        data.OneTag.UID,
+                        data.OneTag.AntennaID);
+                    if (result.Value == -1)
+                        continue;
+                    tag_info = result.TagInfo;
+                }
+                else
+                    tag_info = data.OneTag.TagInfo;
+
+                try
+                {
+                    // Exception: 可能会抛出异常
+                    string current_uii = QuickChargingForm.GetUII(tag_info);
+                    if (current_uii == pii || current_uii.EndsWith("." + pii))
+                    {
+                        return new GetEasStateResult
+                        {
+                            Value = tag_info.EAS ? 1 : 0,
+                            AntennaID = tag_info.AntennaID,
+                            ReaderName = tag_info.ReaderName
+                        };
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return new GetEasStateResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"PII 为 '{pii}' 的标签获得其 EAS 状态时出现异常: {ex.Message}"
+                    };
+                }
+            }
+
+            return new GetEasStateResult
+            {
+                Value = -1,
+                ErrorInfo = $"PII 为 '{pii}' 的标签不在读卡器上，无法获得其 EAS 状态"
+            };
+        }
+
+        #endregion
 
         #region PII-->UID 对照表
 
@@ -759,6 +844,8 @@ out string strError);
                     }
                 }
             }
+
+            // UpdateCacheTagUID(old_uid, new_uid);
         }
 
 

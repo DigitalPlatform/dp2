@@ -2090,8 +2090,31 @@ MessageBoxDefaultButton.Button2);
 
         private void checkBox_uhf_bookTagWriteUserBank_CheckedChanged(object sender, EventArgs e)
         {
-            this.checkedComboBox_uhf_elements.Visible = this.checkBox_uhf_bookTagWriteUserBank.Checked;
-            this.label_uhf_elements.Visible = this.checkBox_uhf_bookTagWriteUserBank.Checked;
+            if (this.comboBox_uhf_dataFormat.Text == "望湖洞庭")
+            {
+                this.checkedComboBox_uhf_elements.Visible = false;
+                this.label_uhf_elements.Visible = false;
+            }
+            else
+            {
+                this.checkedComboBox_uhf_elements.Visible = this.checkBox_uhf_bookTagWriteUserBank.Checked;
+                this.label_uhf_elements.Visible = this.checkBox_uhf_bookTagWriteUserBank.Checked;
+            }
+        }
+
+        private void comboBox_uhf_dataFormat_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (this.comboBox_uhf_dataFormat.Text == "望湖洞庭")
+            {
+                this.checkBox_uhf_bookTagWriteUserBank.Visible = false;
+                this.label_uhf_elements.Visible = false;
+                this.checkedComboBox_uhf_elements.Visible = false;
+            }
+            else
+            {
+                this.checkBox_uhf_bookTagWriteUserBank.Visible = true;
+                checkBox_uhf_bookTagWriteUserBank_CheckedChanged(sender, e);
+            }
         }
     }
 

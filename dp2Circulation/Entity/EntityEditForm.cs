@@ -1126,7 +1126,9 @@ MessageBoxDefaultButton.Button2);
             MessageBox.Show(this, strError);
         }
 
-        // 从册记录 XML 中获得册条码号
+        // 从册记录 XML 中获得 UII
+        // Exception:
+        //      可能会抛出异常
         public static string GetPII(string strItemXml)
         {
             if (string.IsNullOrEmpty(strItemXml))
@@ -1141,8 +1143,40 @@ MessageBoxDefaultButton.Button2);
                 return null;
             }
 
-            return DomUtil.GetElementText(dom.DocumentElement, "barcode");
+            var barcode = DomUtil.GetElementText(dom.DocumentElement, "barcode");
+            var location = DomUtil.GetElementText(dom.DocumentElement, "location");
+
+            string oi = "";
+            {
+                string pure_location = StringUtil.GetPureLocation(location);
+                // location --> OwnerInstitution 要配置映射关系
+                // 定义一系列前缀对应的 ISIL 编码。如果 location 和前缀前方一致比对成功，则得到 ISIL 编码
+                MainForm.GetOwnerInstitution(
+                    Program.MainForm.RfidCfgDom,
+                    pure_location,
+                    out string isil,
+                    out string alternative);
+                if (string.IsNullOrEmpty(isil) == false)
+                {
+                    oi = isil;
+                }
+                else if (string.IsNullOrEmpty(alternative) == false)
+                {
+                    oi = alternative;
+                }
+                else
+                {
+                    // 当前册记录没有找到对应的机构代码。不适合创建 RFID 标签
+                    throw new Exception($"馆藏地 '{pure_location}' 没有定义机构代码，无法创建 RFID 标签");
+                }
+            }
+
+            if (string.IsNullOrEmpty(barcode) == false
+                && string.IsNullOrEmpty(oi) == false)
+                return oi + "." + barcode;
+            return barcode;
         }
+
 
         // 从现有标签中装载信息到左侧，供对比使用
         private void toolStripButton_loadRfid_Click(object sender, EventArgs e)

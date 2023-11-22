@@ -1170,6 +1170,7 @@ string style)
                     return new SetEasResult
                     {
                         Value = 1,
+                        OldUID = result.OldUID,
                         ChangedUID = result.ChangedUID
                     };
                 }

@@ -19,6 +19,7 @@ using RFIDLIB;
 using DigitalPlatform;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
+using System.Security.Cryptography;
 
 // 锁定全部读卡器靠一个全局锁来实现。锁定一个读卡器靠 RecordLock 来实现。锁定一个读卡器之前，先尝试用 read 方式获得全局锁
 
@@ -3652,6 +3653,7 @@ out Reader reader);
         // 注：PII 相同，UID 也相同，属于正常情况，这是因为多个读卡器都读到了同一个标签的缘故
         // parameters:
         //      reader_name 可以用通配符
+        //      pii     PII 或者 UII
         // return:
         //      result.Value    -1 出错
         //      result.Value    0   没有找到指定的标签
@@ -3696,7 +3698,7 @@ out Reader reader);
                     UInt32 nTagCount = 0;
                     int ret = tag_inventory(
                         reader.ReaderHandle,
-                        protocols,  // reader.Protocols,
+                        reader.Protocols,   // protocols,
                         ai_type,
                         (byte)antennas.Length,    // 1,
                         antennas,   // new Byte[] { 1 },
@@ -3722,33 +3724,74 @@ out Reader reader);
                         // TODO: UHF 标签可以通过 EPC 直接解析出 PII，不需要再获取 User Bank 内容
                         if (info.Protocol == InventoryInfo.ISO18000P6C)
                         {
-                            // TODO: 需要判断格式为国标还是高校联盟
-                            try
+                            var epc_bank = Element.FromHexString(info.UID);
+                            // RfidTagList.GetUhfUii(info.UID, null);
+
+                            // 判断标签到底是国标还是高校联盟格式
+                            var isGB = UhfUtility.IsISO285604Format(epc_bank, null);
+
+                            if (isGB)
                             {
-                                // 高校联盟
-                                var parse_result = GaoxiaoUtility.ParseTag(Element.FromHexString(info.UID), null, "dontCheckUMI");
-                                // GaoxiaoUtility.ParseTag(Element.FromHexString(info.UID.Substring(4)), null);
-                                if (parse_result.Value == -1)
-                                    continue;
-                                /*
-                                var bytes = Element.FromHexString(info.UID.Substring(8));
-                                var epc_info = GaoxiaoUtility.DecodeGaoxiaoEpcPayload(bytes.ToArray());
-                                */
-                                var epc_info = parse_result.EpcInfo;
-                                // TODO: 要考虑适应 xxx.xxx 形态的 PII
-                                if (epc_info != null && pii == epc_info.PII)
-                                    return new FindTagResult
-                                    {
-                                        Value = 1,
-                                        ReaderName = reader.Name,
-                                        AntennaID = info.AntennaID,
-                                        UID = info.UID
-                                    };
+                                try
+                                {
+                                    // *** 国标 UHF
+                                    var parse_result = UhfUtility.ParseTag(epc_bank,
+                        null,
+                        4);
+                                    if (pii == parse_result.UII
+                                        || pii.EndsWith("." + parse_result.UII)
+                                        )
+                                        return new FindTagResult
+                                        {
+                                            Value = 1,
+                                            ReaderName = reader.Name,
+                                            AntennaID = info.AntennaID,
+                                            UID = info.UID
+                                        };
+                                }
+                                catch
+                                {
+
+                                }
                             }
-                            catch
+                            else
                             {
-                                // 无法解析
+                                // *** 高校联盟 UHF
+                                try
+                                {
+                                    // 高校联盟
+                                    // 注: 这里是不想进一步用 GetTagInfo() 获得标签的 User Bank。
+                                    // 可以观察 Content Parameters 看看是否有必要进一步获得 User Bank 解析出 OI 部分
+                                    // 后面如果改进为获得 User Bank，就可以得到 OI，和 PII 一起构成 UII 进行判断
+                                    var parse_result = GaoxiaoUtility.ParseTag(epc_bank, null, "dontCheckUMI");
+                                    // GaoxiaoUtility.ParseTag(Element.FromHexString(info.UID.Substring(4)), null);
+                                    if (parse_result.Value == -1)
+                                        continue;
+
+                                    /*
+                                    var bytes = Element.FromHexString(info.UID.Substring(8));
+                                    var epc_info = GaoxiaoUtility.DecodeGaoxiaoEpcPayload(bytes.ToArray());
+                                    */
+                                    var epc_info = parse_result.EpcInfo;
+                                    // TODO: 要考虑适应 xxx.xxx 形态的 PII
+                                    if (epc_info != null
+                                        && (pii == epc_info.PII
+                                        || pii.EndsWith("." + epc_info.PII))
+                                        )
+                                        return new FindTagResult
+                                        {
+                                            Value = 1,
+                                            ReaderName = reader.Name,
+                                            AntennaID = info.AntennaID,
+                                            UID = info.UID
+                                        };
+                                }
+                                catch
+                                {
+                                    // 无法解析
+                                }
                             }
+
                             continue;
                         }
 
@@ -3830,13 +3873,21 @@ out Reader reader);
                                 continue;
                             }
 
+                            string current_pii = RfidTagList.GetHfUii(new TagInfo
+                            {
+                                Bytes = result0.Bytes,
+                                BlockSize = blkSize
+                            });
+
+                            /*
                             // 解析出 PII
                             // Exception:
                             //      可能会抛出异常 ArgumentException TagDataException
                             LogicChip chip = LogicChip.From(result0.Bytes,
                                 (int)blkSize);
                             string current_pii = chip.FindElement(ElementOID.PII)?.Text;
-                            if (pii == current_pii)
+                            */
+                            if (pii == current_pii || current_pii.EndsWith("." + pii))
                                 return new FindTagResult
                                 {
                                     Value = 1,
@@ -4142,7 +4193,8 @@ out Reader reader);
                 return new SetEasResult
                 {
                     Value = -1,
-                    ErrorInfo = $"没有找到名为 {reader_name} 的读卡器"
+                    ErrorInfo = $"没有找到名为 {reader_name} 的读卡器",
+                    OldUID = uid,
                 };
 
             // 锁定所有读卡器
@@ -4170,7 +4222,8 @@ out Reader reader);
                             {
                                 Value = -1,
                                 ErrorInfo = $"2 RDR_SetAcessAntenna() error. hr:{hr},reader_name:{reader.Name},antenna_id:{antenna_id}",
-                                ErrorCode = GetErrorCode(hr, reader.ReaderHandle)
+                                ErrorCode = GetErrorCode(hr, reader.ReaderHandle),
+                                OldUID = uid,
                             };
                         }
                     }
@@ -4178,10 +4231,51 @@ out Reader reader);
                     UInt32 tag_type = RFIDLIB.rfidlib_def.RFID_ISO15693_PICC_ICODE_SLI_ID;
                     UIntPtr hTag = UIntPtr.Zero;
 
-                    // TODO: 验算一下 CRC-16 Word，如果不符合，则认为不是合法的 EPC，就可以跳过 UHF 这里的处理，继续处理下一个读写器
                     if (protocol == InventoryInfo.ISO18000P6C)
+                    {
+#if REMOVED
+                        // 验算一下 CRC-16 Word，如果不符合，则认为不是合法的 EPC，就可以跳过 UHF 这里的处理，继续处理下一个读写器
+                        if (uid == null || uid.Length < 8)
+                        {
+                            var result0 = new SetEasResult
+                            {
+                                Value = -1,
+                                ErrorInfo = $"这不是一个合法的 UHF EPC(长度不足): '{uid}'",
+                                OldUID = uid,
+                            };
+                            error_results.Add(result0);
+                            continue;
+                        }
+
+                        var epc_content = ByteArray.GetTimeStampByteArray(uid.Substring(4));
+                        var verify_uid = UhfUtility.EpcBankHex(epc_content);
+                        if (verify_uid != uid)
+                        {
+                            var result0 = new SetEasResult
+                            {
+                                Value = -1,
+                                ErrorInfo = $"这不是一个合法的 UHF EPC: '{uid}'",
+                                OldUID = uid,
+                            };
+                            error_results.Add(result0);
+                            continue;
+                        }
+#endif
+                        var error = VerifyEpcCrc(uid);
+                        if (error != null)
+                        {
+                            var result0 = new SetEasResult
+                            {
+                                Value = -1,
+                                ErrorInfo = error,
+                                OldUID = uid,
+                            };
+                            error_results.Add(result0);
+                            continue;
+                        }
                         hTag = _connectUhfTag(reader.ReaderHandle,
                             uid);
+                    }
                     else
                         hTag = _connectTag(reader.ReaderHandle, uid, tag_type);
                     if (hTag == UIntPtr.Zero)
@@ -4196,7 +4290,8 @@ out Reader reader);
                                 var result0 = new SetEasResult
                                 {
                                     Value = -1,
-                                    ErrorInfo = "对空白的 UHF 标签无法修改 EAS"
+                                    ErrorInfo = "对空白的 UHF 标签无法修改 EAS",
+                                    OldUID = uid,
                                 };
                                 error_results.Add(result0);
                                 continue;
@@ -4212,7 +4307,8 @@ out Reader reader);
                                     var result0 = new SetEasResult
                                     {
                                         Value = -1,
-                                        ErrorInfo = "UID 中解析的 PC bytes 数必须为 2"
+                                        ErrorInfo = "UID 中解析的 PC bytes 数必须为 2",
+                                        OldUID = uid,
                                     };
                                     error_results.Add(result0);
                                     continue;
@@ -4237,7 +4333,8 @@ out Reader reader);
                                     {
                                         Value = -1,
                                         ErrorInfo = $"ISO18000p6C_Write() EPC Bank (gb) error. iret:{iret},reader_name:{reader_name},reader.Name:{reader.Name},uid:{uid},antenna_id:{antenna_id}",
-                                        ErrorCode = GetErrorCode(iret, reader.ReaderHandle)
+                                        ErrorCode = GetErrorCode(iret, reader.ReaderHandle),
+                                        OldUID = uid,
                                     };
                                     error_results.Add(result0);
                                     continue;
@@ -4256,6 +4353,7 @@ out Reader reader);
 
                                 return new SetEasResult
                                 {
+                                    OldUID = uid,
                                     ChangedUID = UhfUtility.EpcBankHex(content.ToArray()),
                                     ErrorInfo = "设置国标 UHF EAS 成功"
                                 };
@@ -4266,8 +4364,29 @@ out Reader reader);
                                 // 跳过 4 个 bytes
                                 var bytes = Element.FromHexString(uid.Substring(8));
 
-                                var epc_info = GaoxiaoUtility.DecodeGaoxiaoEpcPayload(bytes.ToArray(),
-                                    Math.Min(pc.LengthIndicator * 2, bytes.Length));
+                                GaoxiaoEpcInfo epc_info = null;
+                                try
+                                {
+                                    epc_info = GaoxiaoUtility.DecodeGaoxiaoEpcPayload(bytes.ToArray(),
+                                        Math.Min(pc.LengthIndicator * 2, bytes.Length));
+                                }
+                                catch (Exception ex)
+                                {
+                                    // 2023/11/22
+                                    // 不是合法的高校联盟格式内容
+                                    {
+                                        var result0 = new SetEasResult
+                                        {
+                                            Value = -1,
+                                            ErrorInfo = $"ISO18000p6C_Write() EPC Bank (gaoxiao) error. 不是合法的高校联盟格式。reader_name:{reader_name},reader.Name:{reader.Name},uid:{uid},antenna_id:{antenna_id}",
+                                            ErrorCode = "invalidEPC",
+                                            OldUID = uid,
+                                        };
+                                        error_results.Add(result0);
+                                        continue;
+                                    }
+                                }
+
                                 epc_info.Lending = !enable;
                                 var payload = GaoxiaoUtility.EncodeGaoxiaoEpcPayload(epc_info);
                                 // TODO: 可以优化为只写入最小一个 word 范围
@@ -4285,7 +4404,8 @@ out Reader reader);
                                     {
                                         Value = -1,
                                         ErrorInfo = $"ISO18000p6C_Write() EPC Bank (gaoxiao) error. iret:{iret},reader_name:{reader_name},reader.Name:{reader.Name},uid:{uid},antenna_id:{antenna_id}",
-                                        ErrorCode = GetErrorCode(iret, reader.ReaderHandle)
+                                        ErrorCode = GetErrorCode(iret, reader.ReaderHandle),
+                                        OldUID = uid,
                                     };
                                     error_results.Add(result0);
                                     continue;
@@ -4304,6 +4424,7 @@ out Reader reader);
 
                                 return new SetEasResult
                                 {
+                                    OldUID = uid,
                                     ChangedUID = UhfUtility.EpcBankHex(content.ToArray()),
                                     ErrorInfo = "设置高校联盟 UHF EAS 成功"
                                 };
@@ -4322,6 +4443,7 @@ out Reader reader);
                                     Value = result0.Value,
                                     ErrorInfo = result0.ErrorInfo,
                                     ErrorCode = result0.ErrorCode,
+                                    OldUID = uid,
                                 };
                                 error_results.Add(result1);
                                 continue;
@@ -4338,13 +4460,14 @@ out Reader reader);
                                     Value = result0.Value,
                                     ErrorInfo = result0.ErrorInfo,
                                     ErrorCode = result0.ErrorCode,
+                                    OldUID = uid,
                                 };
                                 error_results.Add(result1);
                                 continue;
                             }
                         }
 
-                        return new SetEasResult();
+                        return new SetEasResult { OldUID = uid };
                     }
                     finally
                     {
@@ -4371,13 +4494,29 @@ out Reader reader);
                 {
                     Value = -1,
                     ErrorInfo = $"没有找到 UID 为 {uid} 的标签",
-                    ErrorCode = "tagNotFound"
+                    ErrorCode = "tagNotFound",
+                    OldUID = uid,
                 };
             }
             finally
             {
                 Unlock();
             }
+        }
+
+        // 校验 EPC CRC
+        static string VerifyEpcCrc(string uid)
+        {
+            // 验算一下 CRC-16 Word，如果不符合，则认为不是合法的 EPC，就可以跳过 UHF 这里的处理，继续处理下一个读写器
+            if (uid == null || uid.Length < 8)
+                return $"这不是一个合法的 UHF EPC(长度不足): '{uid}'";
+
+            var epc_content = ByteArray.GetTimeStampByteArray(uid.Substring(4));
+            var verify_uid = UhfUtility.EpcBankHex(epc_content);
+            if (verify_uid != uid)
+                return $"这不是一个合法的 UHF EPC: '{uid}'";
+
+            return null;
         }
 
         // 从 UID hex string 中解析出 PC 两个 Bytes
@@ -4498,8 +4637,20 @@ out Reader reader);
                 UInt32 tag_type = RFIDLIB.rfidlib_def.RFID_ISO15693_PICC_ICODE_SLI_ID;
                 UIntPtr hTag = UIntPtr.Zero;
                 if (old_tag_info.Protocol == InventoryInfo.ISO18000P6C)
+                {
+                    var error = VerifyEpcCrc(old_tag_info.UID);
+                    if (error != null)
+                    {
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = error,
+                            ErrorCode = "invalidEPC",
+                        };
+                    }
                     hTag = _connectUhfTag(reader.ReaderHandle,
                         old_tag_info.UID);
+                }
                 else
                     hTag = _connectTag(reader.ReaderHandle, old_tag_info.UID, tag_type);
                 if (hTag == UIntPtr.Zero)
@@ -5015,6 +5166,8 @@ out Reader reader);
         //      one_reader_name 不能用通配符
         //      tag_type    如果 uid 为空，则 tag_type 应为 RFIDLIB.rfidlib_def.RFID_ISO15693_PICC_ICODE_SLI_ID
         //      style       如果包含 "tid"，则要在 TagInfo.Tag 成员中返回一个 byte[] 表示 UHF 标签的 TID
+        //                  如果包含 "only_eas"，表示仅返回 EAS 和 AFI 成员
+        //                  如果包含 "quick"，表示快速方式，不会获得 EAS、不会在结束时关闭射频
         // result.Value
         //      -1
         //      0
@@ -5030,6 +5183,7 @@ out Reader reader);
 
             bool quick = StringUtil.IsInList("quick", style);
             bool return_tid_bank = StringUtil.IsInList("tid", style);
+            bool only_eas = StringUtil.IsInList("eas", style);
 
             // 锁定一个读卡器
             LockReader(reader);
@@ -5085,8 +5239,21 @@ out Reader reader);
                     };
 
                 if (info.Protocol == InventoryInfo.ISO18000P6C)
+                {
+                    // TODO: 校验 UID CRC 合法性
+                    var error = VerifyEpcCrc(info?.UID);
+                    if (error != null)
+                    {
+                        return new GetTagInfoResult
+                        {
+                            Value = -1,
+                            ErrorInfo = error,
+                            ErrorCode = "invalidEPC",
+                        };
+                    }
                     hTag = _connectUhfTag(reader.ReaderHandle,
                         info?.UID);
+                }
                 else
                     hTag = _connectTag(
                     reader.ReaderHandle,
@@ -5234,23 +5401,25 @@ ref nSize);
                     UInt32 blkSize, blkNum;
                     dsfid = afi = icref = 0;
                     blkSize = blkNum = 0;
-                    iret = RFIDLIB.rfidlib_aip_iso15693.ISO15693_GetSystemInfo(
-                        reader.ReaderHandle,
-                        hTag,
-                        Element.FromHexString(uid_string),
-                        ref dsfid,
-                        ref afi,
-                        ref blkSize,
-                        ref blkNum,
-                        ref icref);
-                    if (iret != 0)
-                        return new GetTagInfoResult
-                        {
-                            Value = -1,
-                            ErrorInfo = $"ISO15693_GetSystemInfo() error 2. iret:{iret},reader_name:{one_reader_name},uid:{uid_string},antenna_id:{antenna_id}",
-                            ErrorCode = GetErrorCode(iret, reader.ReaderHandle)
-                        };
-
+                    if (only_eas == false)
+                    {
+                        iret = RFIDLIB.rfidlib_aip_iso15693.ISO15693_GetSystemInfo(
+                            reader.ReaderHandle,
+                            hTag,
+                            Element.FromHexString(uid_string),
+                            ref dsfid,
+                            ref afi,
+                            ref blkSize,
+                            ref blkNum,
+                            ref icref);
+                        if (iret != 0)
+                            return new GetTagInfoResult
+                            {
+                                Value = -1,
+                                ErrorInfo = $"ISO15693_GetSystemInfo() error 2. iret:{iret},reader_name:{one_reader_name},uid:{uid_string},antenna_id:{antenna_id}",
+                                ErrorCode = GetErrorCode(iret, reader.ReaderHandle)
+                            };
+                    }
 #if NO
                     byte[] block_status = GetLockStatus(
                         hTag,
@@ -5261,27 +5430,36 @@ ref nSize);
                         return new GetTagInfoResult { Value = -1, ErrorInfo = "GetLockStatus error", ErrorCode = error_code };
 #endif
 
-                    ReadBlocksResult result0 = ReadBlocks(
-                        reader.ReaderHandle,
-                        hTag,
-                        0,
-                        blkNum,
-                        blkSize,
-                        true);
-                    if (result0.Value == -1)
-                        return new GetTagInfoResult
-                        {
-                            Value = -1,
-                            ErrorInfo = $"{result0.ErrorInfo},antenna_id:{antenna_id}",
-                            ErrorCode = result0.ErrorCode
-                        };
+                    ReadBlocksResult result0 = new ReadBlocksResult();
+                    if (only_eas == false)
+                    {
+                        result0 = ReadBlocks(
+                            reader.ReaderHandle,
+                            hTag,
+                            0,
+                            blkNum,
+                            blkSize,
+                            true);
+                        if (result0.Value == -1)
+                            return new GetTagInfoResult
+                            {
+                                Value = -1,
+                                ErrorInfo = $"{result0.ErrorInfo},antenna_id:{antenna_id}",
+                                ErrorCode = result0.ErrorCode
+                            };
+                    }
 
                     NormalResult eas_result = new NormalResult();
-                    if (quick == false)
+                    if (quick == false && only_eas == false)
                     {
                         eas_result = CheckEAS(reader.ReaderHandle, hTag);
                         if (eas_result.Value == -1)
-                            return new GetTagInfoResult { Value = -1, ErrorInfo = eas_result.ErrorInfo, ErrorCode = eas_result.ErrorCode };
+                            return new GetTagInfoResult
+                            {
+                                Value = -1,
+                                ErrorInfo = eas_result.ErrorInfo,
+                                ErrorCode = eas_result.ErrorCode
+                            };
                     }
 
                     GetTagInfoResult result1 = new GetTagInfoResult

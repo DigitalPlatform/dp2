@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -25,6 +26,68 @@ namespace dp2Circulation
     /// </summary>
     public partial class MainForm
     {
+        // 2023/11/20
+        // 获得一个读者记录的机构代码
+        // return:
+        //      -1  出错
+        //      0   没有找到机构代码
+        //      1   获得了机构代码，在 strOwnerInstitution 中返回
+        public static int GetPatronOI(
+            XmlDocument cfg_dom,
+            // string strPatronRecPath,
+            string strLibraryCode,
+            XmlDocument readerdom,
+            out string strOwnerInstitution,
+            out string strError)
+        {
+            strOwnerInstitution = "";
+            strError = "";
+
+            // var rfid = cfg_dom.DocumentElement.SelectSingleNode("//rfid") as XmlElement;
+            var rfid = cfg_dom.DocumentElement;
+            if (rfid == null)
+            {
+                // 如果要求必须定义 rfid 元素：
+                strError = $"library.xml 中没有配置 rfid 元素，无法获知读者记录的机构代码";
+                return -1;
+                /*
+                // strError = $"library.xml 中没有配置 rfid 元素，册记录所属机构代码应为空。(但现在是 '{strOwnerInstitution}')";
+                strError = $"当前读者卡来自馆外机构 '{strOwnerInstitution}'";
+                return 0;
+                */
+            }
+
+            try
+            {
+                var ret = LibraryServerUtil.GetOwnerInstitution(
+    rfid,
+    strLibraryCode,
+    readerdom,
+    out string isil,
+    out string alternative);
+                if (ret == false)
+                {
+                    strError = $"(notfound)library.xml 的 rfid 配置参数中没有找到和馆代码 '{strLibraryCode}' 关联的所属机构代码";
+                    return 0;
+                }
+
+                strOwnerInstitution = isil;
+                if (string.IsNullOrEmpty(strOwnerInstitution))
+                    strOwnerInstitution = alternative;
+                if (string.IsNullOrEmpty(strOwnerInstitution))
+                    return 0;
+
+                return 1;
+            }
+            catch (Exception ex)
+            {
+                strError = $"获取读者机构代码过程出现异常: {ex.Message}";
+                return -1;
+            }
+        }
+
+
+
         public static bool GetOwnerInstitution(
     XmlDocument cfg_dom,
     string strLocation,

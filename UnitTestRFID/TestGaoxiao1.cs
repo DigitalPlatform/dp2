@@ -8,6 +8,8 @@ using System.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using DigitalPlatform.RFID;
+using DigitalPlatform;
+using System.Security.Cryptography;
 
 namespace UnitTestRFID
 {
@@ -95,7 +97,7 @@ namespace UnitTestRFID
             // 馆藏类别与状态 type of usage
             // 总 2 字节定长字段，其中：高字节存放馆藏类别(主限定标识)，低字节存放馆藏状态(次限定标识)
             var result = GaoxiaoUtility.EncodeUserElementContent(5, "1.2");
-            byte[] correct = new byte[] { 0x01, 0x02,  };
+            byte[] correct = new byte[] { 0x01, 0x02, };
             Assert.AreEqual(Element.GetHexString(correct), Element.GetHexString(result));
         }
 
@@ -106,7 +108,7 @@ namespace UnitTestRFID
             // 馆藏类别与状态 type of usage
             // 总 2 字节定长字段，其中：高字节存放馆藏类别(主限定标识)，低字节存放馆藏状态(次限定标识)
             var result = GaoxiaoUtility.EncodeUserElementContent(5, "1");
-            byte[] correct = new byte[] { 0x01, 0x00,  };
+            byte[] correct = new byte[] { 0x01, 0x00, };
             Assert.AreEqual(Element.GetHexString(correct), Element.GetHexString(result));
         }
 
@@ -163,7 +165,7 @@ namespace UnitTestRFID
         [TestMethod]
         public void Test_DecodeUserElementContent_tou_1()
         {
-            byte[] source = new byte[] { 0x01, 0x02,  };
+            byte[] source = new byte[] { 0x01, 0x02, };
             var result = GaoxiaoUtility.DecodeUserElementContent(5, source);
             Assert.AreEqual("1.2", result);
         }
@@ -269,6 +271,104 @@ USR 0C0228081004000100010000000000000000000000000000000000000000
             Assert.AreEqual(4, result.EpcInfo.ContentParameters[1]);
 
             // Debug.WriteLine(result.LogicChip.Elements.ToString());
+        }
+
+        // 望湖洞庭
+        [TestMethod]
+        public void test_decode_tag_3()
+        {
+            var epc_bank = Element.FromHexString("FE2A 3400 0104 5300 185304406C0E0000");
+            var user_bank = Element.FromHexString("0c02d9941004000100012c0038000000");
+            var result = GaoxiaoUtility.ParseTag(epc_bank, user_bank);
+
+            /*
+            Assert.AreEqual(true, result.PC.UMI);
+            Assert.AreEqual(false, result.PC.XPC);
+            Assert.AreEqual(false, result.PC.ISO);
+            Assert.AreEqual(0, result.PC.AFI);
+
+            Assert.AreEqual(3, result.LogicChip.Elements.Count);
+            Assert.AreEqual("32103177", result.LogicChip.FindElement(ElementOID.PII)?.Text);
+            Assert.AreEqual("10248", result.LogicChip.FindElement(ElementOID.OI)?.Text);
+            Assert.AreEqual("1/1", result.LogicChip.FindElement(ElementOID.SetInformation)?.Text);
+
+            Assert.AreEqual("32103177", result.EpcInfo.PII);
+            Assert.AreEqual(2, result.EpcInfo.ContentParameters.Length);
+            Assert.AreEqual(3, result.EpcInfo.ContentParameters[0]);
+            Assert.AreEqual(4, result.EpcInfo.ContentParameters[1]);
+
+            // Debug.WriteLine(result.LogicChip.Elements.ToString());
+            */
+        }
+
+        // 验证编码为望湖小学的样本标签 EPC 内容
+        // PII:01519231
+        [TestMethod]
+        public void test_encode_sample_tag_03()
+        {
+            var epc_hex = ("FE2A 3400 0104 5300 185304406C0E0000");
+
+            LogicChip chip = new LogicChip();
+            chip.SetElement(ElementOID.PII, "01519231");
+            var epc_info = new GaoxiaoEpcInfo
+            {
+                Version = 5,
+                Picking = 1,
+                Reserve = 0,
+                ContentParameters = new int[] { 16, 24, 28, 30 },
+            };
+            var result = GaoxiaoUtility.BuildTag(chip, 
+                true,
+                true,
+                epc_info);
+            if (result.Value == -1)
+                throw new Exception(result.ErrorInfo);
+
+            var epc_hex_result = UhfUtility.EpcBankHex(result.EpcBank);
+            Assert.AreEqual(epc_hex.Replace(" ",""), epc_hex_result);
+        }
+
+        // 内务创建
+        [TestMethod]
+        public void test_decode_tag_4()
+        {
+            var epc_bank = Element.FromHexString("D61F340000000003185304406C0E0000");
+            var user_bank = Element.FromHexString("0c02d994100400010001000000000000");
+            var result = GaoxiaoUtility.ParseTag(epc_bank, user_bank);
+
+            /*
+            Assert.AreEqual(true, result.PC.UMI);
+            Assert.AreEqual(false, result.PC.XPC);
+            Assert.AreEqual(false, result.PC.ISO);
+            Assert.AreEqual(0, result.PC.AFI);
+
+            Assert.AreEqual(3, result.LogicChip.Elements.Count);
+            Assert.AreEqual("32103177", result.LogicChip.FindElement(ElementOID.PII)?.Text);
+            Assert.AreEqual("10248", result.LogicChip.FindElement(ElementOID.OI)?.Text);
+            Assert.AreEqual("1/1", result.LogicChip.FindElement(ElementOID.SetInformation)?.Text);
+
+            Assert.AreEqual("32103177", result.EpcInfo.PII);
+            Assert.AreEqual(2, result.EpcInfo.ContentParameters.Length);
+            Assert.AreEqual(3, result.EpcInfo.ContentParameters[0]);
+            Assert.AreEqual(4, result.EpcInfo.ContentParameters[1]);
+
+            // Debug.WriteLine(result.LogicChip.Elements.ToString());
+            */
+        }
+
+
+        [TestMethod]
+        public void Test_decode_epc_binary_3()
+        {
+            string source_hex = "";
+
+            var source = Element.FromHexString(source_hex);
+            var result = GaoxiaoUtility.DecodeGaoxiaoEpcPayload(source, source.Length);
+            Debug.WriteLine(result);
+
+            string user_hex = "";
+            var elements = GaoxiaoUtility.DecodeUserBank(Element.FromHexString(user_hex));
+            Debug.WriteLine(elements);
         }
 
         // 解码高校 Content Parameter

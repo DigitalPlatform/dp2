@@ -1057,9 +1057,12 @@ namespace DigitalPlatform.RFID
         // 5) chip 中的 TypeOfUsage 元素内是通用值，在写入 UHF 高校联盟格式时要先映射转换为其私有值
         // parameters:
         //      build_user_bank 是否要构造 User Bank 内容。如果不构造的话，Content Parameter 中就不会包含任何 index 信息
+        //      epc_info        要创建的 EPC Bank 的一些预定义值。
+        //                      如果 epc_info.ContentParameters 不为 null，则表示直接用它进入 EPC
         public static BuildTagResult BuildTag(LogicChip chip,
             bool build_user_bank,
-            bool eas = true)
+            bool eas = true,
+            GaoxiaoEpcInfo epc_info = null)
         {
             // 2023/11/7
             // 对于不写入 User Bank 的情况进行检查
@@ -1157,13 +1160,19 @@ namespace DigitalPlatform.RFID
             if (build_user_bank)
                 user_bank = EncodeUserBank(user_elements, false);   // true
 
-            var epc_info = new GaoxiaoEpcInfo();
+            if (epc_info == null)
+                epc_info = new GaoxiaoEpcInfo();
             epc_info.Lending = !eas;
-            epc_info.Version = 1;   // ?
-            if (build_user_bank)
-                epc_info.ContentParameters = BuildContentParameter(user_elements);
-            else
-                epc_info.ContentParameters = new int[0];
+            // Version(5) Picking(1) Reserve(1)
+            // epc_info.Version = 1;   // ?
+            
+            if (epc_info.ContentParameters == null)
+            {
+                if (build_user_bank)
+                    epc_info.ContentParameters = BuildContentParameter(user_elements);
+                else
+                    epc_info.ContentParameters = new int[0];
+            }
             epc_info.PII = chip.FindElement(ElementOID.PII)?.Text;
 
             // 重新获取一次

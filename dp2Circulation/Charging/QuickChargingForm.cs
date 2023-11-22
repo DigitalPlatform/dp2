@@ -385,7 +385,7 @@ namespace dp2Circulation
                 {
                     if (data.OneTag.Protocol == InventoryInfo.ISO18000P6C)
                     {
-                        var uii = RfidTagList.GetUhfUii(data.OneTag.UID, null);
+                        var uii = RfidTagList.GetUhfUii(data.OneTag.UID, data.OneTag.TagInfo?.Bytes);
                         list.Add(new UiiAndTag
                         {
                             UII = uii,
@@ -454,7 +454,7 @@ namespace dp2Circulation
 
         // 从 TagInfo 中获取标签内容 PII
         // Exception: 可能会抛出异常
-        public static string GetPII(TagInfo tagInfo)
+        public static string GetUII(TagInfo tagInfo)
         {
             // 2023/10/30
             if (tagInfo.Protocol == InventoryInfo.ISO18000P6C)
@@ -467,10 +467,11 @@ namespace dp2Circulation
                 if (string.IsNullOrEmpty(chip_info.ErrorInfo) == false)
                     return null;
                 // return chip_info.Chip?.FindElement(ElementOID.PII)?.Text;
-                return chip_info.PII;
+                return chip_info.UII;
             }
             else
             {
+                /*
                 // Exception:
                 //      可能会抛出异常 ArgumentException TagDataException
                 LogicChip chip = LogicChip.From(tagInfo.Bytes,
@@ -478,6 +479,8 @@ namespace dp2Circulation
     "" // tagInfo.LockStatus
     );
                 return chip.FindElement(ElementOID.PII)?.Text;
+                */
+                return RfidTagList.GetHfUii(tagInfo);
             }
         }
 
@@ -666,7 +669,7 @@ namespace dp2Circulation
 
             try
             {
-                pii = GetPII(data.OneTag.TagInfo);
+                pii = GetUII(data.OneTag.TagInfo);
             }
             catch (Exception ex)
             {
@@ -721,9 +724,18 @@ namespace dp2Circulation
             else
                 TaskList.Sound(1);
 
+            // 2023/11/19
+            // 如果 tou:? 然而又没有启用条码校验，则只能把 ? 当作 "10" 处理
+            if (strTypeOfUsage[0] == '?'
+                && Program.MainForm.UhfOnlyEpcCharging
+                && this.NeedVerifyBarcode == false)
+            {
+                strTypeOfUsage = "10";
+            }
+
             if (strTypeOfUsage[0] == '1'
                 || (strTypeOfUsage[0] == '?' && Program.MainForm.UhfOnlyEpcCharging)// TODO: 这里可否提前通过 VerifyBarcode() 探测号码类型?
-                // && _easForm.ErrorCount > 0
+                                                                                    // && _easForm.ErrorCount > 0
                 )
             {
                 // 缓存起来
@@ -812,14 +824,14 @@ namespace dp2Circulation
                     _tasklocks.LockForWrite(hashcode);
                     try
                     {
-                        string save_color = task.Color;
+                        // string save_color = task.Color;
                         for (int i = 0; i < count; i++)
                         {
                             Thread.Sleep(500);
-                            task.Color = "";
-                            this.DisplayTask("refresh", task);
+                            //task.Color = "";
+                            this.DisplayTask("refresh_highlight", task);
                             Thread.Sleep(500);
-                            task.Color = save_color;
+                            //task.Color = save_color;
                             this.DisplayTask("refresh", task);
                         }
                         SetColorList(); // 2019/9/4 最后刷新一次 colorlist
@@ -2116,13 +2128,17 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                 }
             }
             else if (strAction == "refresh"
+                || strAction == "refresh_highlight" // 2023/11/21
                 || strAction == "refresh_and_visible")
             {
                 DpRow line = FindTaskLine(task);
                 if (line != null)
                 {
                     // 刷新显示
-                    task.RefreshDisplay(line);
+                    if (strAction == "refresh_highlight")
+                        task.RefreshDisplay(line, "");
+                    else
+                        task.RefreshDisplay(line);
 
                     if (this.StateSpeak != "[不朗读]")
                     {
@@ -2568,7 +2584,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                             strText = strText.Replace("tou:?", "tou:80");
                         else
                             strText = strText.Replace("tou:?", "tou:10");
-                        
+
                         // 兑现到显示
                         this.textBox_input.Text = strText;
                         this.textBox_input.SelectAll();

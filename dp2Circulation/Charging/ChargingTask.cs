@@ -144,7 +144,10 @@ namespace dp2Circulation
             this.ErrorInfo += text;
         }
 
-        public void RefreshDisplay(DpRow row)
+        // parameters:
+        //      color   如果不为 null，表示使用这个颜色，否则用 this.Color
+        public void RefreshDisplay(DpRow row,
+            string color = null)
         {
             // 初始化列
             if (row.Count == 0)
@@ -253,32 +256,45 @@ namespace dp2Circulation
             ////row.ForeColor = SystemColors.WindowText;
 
             DpCell color_cell = row[0];
+
+            // 2023/11/21
+            if (color == null)
+                color = this.Color;
+
+            SetColor(row, color_cell, color);
+        }
+
+        static void SetColor(
+            DpRow row,
+            DpCell color_cell,
+            string color)
+        {
             // row.BackColor = System.Drawing.Color.Transparent;
-            if (this.Color == "red")
+            if (color == "red")
             {
                 color_cell.BackColor = System.Drawing.Color.Red;
                 // row.ForeColor = System.Drawing.Color.White;
             }
-            else if (this.Color == "green")
+            else if (color == "green")
             {
                 color_cell.BackColor = System.Drawing.Color.Green;
                 // row.ForeColor = System.Drawing.Color.White;
             }
-            else if (this.Color == "yellow")
+            else if (color == "yellow")
             {
                 row.BackColor = System.Drawing.Color.Yellow;
                 color_cell.BackColor = System.Drawing.Color.Transparent;
                 // row.ForeColor = System.Drawing.Color.Black;
             }
-            else if (this.Color == "light")
+            else if (color == "light")
             {
                 color_cell.BackColor = System.Drawing.Color.LightGray;
             }
-            else if (this.Color == "purple")
+            else if (color == "purple")
             {
                 color_cell.BackColor = System.Drawing.Color.Purple;
             }
-            else if (this.Color == "black")
+            else if (color == "black")
             {
                 color_cell.BackColor = System.Drawing.Color.Purple;
 #if NO
@@ -1186,7 +1202,7 @@ end_time);
         // TODO: 增加测试机制，允许制造修改 EAS 失败的场景
         bool PreSetEAS(ChargingTask task,
     bool enable,
-    out bool old_state,
+    out bool old_state, // 注: old_state 暂未兑现
     out string changed_uid,
     out string strError)
         {
@@ -1199,6 +1215,8 @@ end_time);
                 // 前置情况下，要小心检查原来标签的 EAS，如果没有必要修改就不要修改
                 uint antenna_id = 0;
                 string reader_name = "";
+
+#if REMOVED
                 {
                     var get_result = this.Container.GetEAS("*", tag_name);
 
@@ -1224,6 +1242,7 @@ end_time);
                 // 如果修改前已经是这个值就不修改了
                 if (old_state == enable)
                     return true;
+#endif
 
                 // 2023/11/1
                 if (string.IsNullOrEmpty(task.ItemBarcode) == false)
@@ -1253,9 +1272,35 @@ end_time);
                     }
 
                     changed_uid = result.ChangedUID;
+                    var old_uid = result.OldUID;
 
-                    RfidTagList.ClearTagTable("");
-                    FillTagList();
+                    // 2023/11/21
+                    // 修改 _piiTable 中的有关条目
+                    if (string.IsNullOrEmpty(old_uid) == false
+                        && string.IsNullOrEmpty(result.ChangedUID) == false)
+                        this.Container.UpdateUID(old_uid, result.ChangedUID);
+
+#if REMOVED
+                    if (string.IsNullOrEmpty(old_uid) == false)
+                        RfidTagList.ClearTagTable(old_uid);
+                    else
+                    {
+                        // 2023/11/21
+                        // 保险
+                        RfidTagList.ClearTagTable("");
+                        FillTagList();
+                    }
+#endif
+
+                    // 2023/11/21
+                    // 精确修改 TagInfo
+                    if (string.IsNullOrEmpty(old_uid) == false)
+                    {
+                        if (string.IsNullOrEmpty(changed_uid) == false)
+                            ChangeUID(old_uid, changed_uid);
+                        else
+                            ChangeUID(old_uid, enable ? "on" : "off");
+                    }
 
                     // 注: 从此以后 UHF 标签也立即刷新了，修改以后的 EPC 发生了变化
 
@@ -1282,6 +1327,24 @@ end_time);
                 return false;
             }
         }
+
+        // parameters:
+        //      old_uid 原先的 UID
+        //      changed_uid 修改后的 UID (对于 UHF 标签)
+        //                  "on" "off" 之一(对于 HF 标签)
+        public static void ChangeUID(string old_uid, string changed_uid)
+        {
+            BaseChannel<IRfid> channel = RfidManager.GetChannel();
+            try
+            {
+                RfidTagList.ChangeUID(channel, old_uid, changed_uid);
+            }
+            finally
+            {
+                RfidManager.ReturnChannel(channel);
+            }
+        }
+
 
         public static void FillTagList()
         {
@@ -1758,9 +1821,11 @@ end_time);
                 if (channel.ErrorCode == ErrorCode.NotBorrowed)
                 {
                     Debug.Assert(eas_changed == true, "");
+                    /*
                     // 此时正好顺便修正了以前此册的 EAS 问题，所以也不需要回滚了
                     // TODO: 是否需要提示一下操作者？
                     task.AppendErrorInfo($"(前置 EAS 修改顺便把以前遗留的 Off 状态修正为 On)");
+                    */
                 }
                 else
                 {

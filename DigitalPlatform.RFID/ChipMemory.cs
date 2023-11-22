@@ -1203,6 +1203,16 @@ start);
                 oi = this.FindElement((ElementOID)27)?.Text;
             return oi;
         }
+
+        public string GetUII()
+        {
+            string pii = this.FindElement(ElementOID.PII)?.Text;
+            string oi = this.FindGaoxiaoOI();
+            if (string.IsNullOrEmpty(pii) == false
+                && string.IsNullOrEmpty(oi) == false)
+                return oi + "." + pii;
+            return pii;
+        }
     }
 
 #if NO

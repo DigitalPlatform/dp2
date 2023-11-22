@@ -779,6 +779,81 @@ namespace DigitalPlatform.RFID
             return result;
         }
 
+        // 2023/11/20
+        // 根据 EPC Bank 获知 UHF 标签的 EAS 状态
+        // parameters:
+        //      gb_afi [out] 返回国标格式的 AFI。注意，针对高校联盟格式会返回 0
+        public static bool GetUhfEas(string uid,
+            out int gb_afi)
+        {
+            gb_afi = 0;
+            var epc_bank = Element.FromHexString(uid);
+
+            if (UhfUtility.IsBlankTag(epc_bank, null) == true)
+            {
+                // 空白标签
+                return false;
+            }
+            else
+            {
+                var isGB = UhfUtility.IsISO285604Format(epc_bank, null);
+                if (isGB)
+                {
+                    // *** 国标 UHF
+                    var pc = UhfUtility.ParsePC(epc_bank, 2);
+                    gb_afi = pc.AFI;
+                    if (pc.AFI == 0x07)
+                        return true;
+                    return false;
+                }
+                else
+                {
+                    // var use_gxlm_pii = StringUtil.IsInList("gxlm_pii", style);
+                    // *** 高校联盟 UHF
+                    var parse_result = GaoxiaoUtility.ParseTag(
+        epc_bank,
+        null,
+        "");
+                    if (parse_result.Value == -1)
+                    {
+                        return false;
+                    }
+                    if (parse_result.EpcInfo == null)
+                        return false;
+                    return !parse_result.EpcInfo.Lending;
+                }
+            }
+        }
+
+        public static string GetHfUii(TagInfo taginfo)
+        {
+            try
+            {
+                // Exception:
+                //      可能会抛出异常 ArgumentException TagDataException
+                var chip = LogicChip.From(taginfo.Bytes,
+        (int)taginfo.BlockSize,
+        ""  // taginfo.LockStatus
+        );
+
+                var pii = chip?.FindElement(ElementOID.PII)?.Text;
+
+                string oi = chip?.FindElement(ElementOID.OI)?.Text;
+                if (string.IsNullOrEmpty(oi))
+                    oi = chip?.FindElement(ElementOID.AOI)?.Text;
+
+                // 构造 UII
+                if (string.IsNullOrEmpty(oi))
+                    return pii;
+                else
+                    return oi + "." + pii;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
+
         // 获得 UHF 标签的 UII 内容
         // parameters:
         //      style   风格。如果为 gxlm_pii ，表示不需要返回 oi 部分(因而也不需要解析 .Bytes 部分)
@@ -970,6 +1045,115 @@ namespace DigitalPlatform.RFID
             return parts[1];
         }
 
+        // 当 EAS 修改后，主动修改 this.Books 中的相关信息
+        // parameters:
+        //      old_uid 原先的 UID
+        //      changed_uid 修改后的 UID (对于 UHF 标签)
+        //                  "on" "off" 之一(对于 HF 标签)
+        public static int ChangeUID(
+            BaseChannel<IRfid> channel,
+            string old_uid,
+            string changed_uid)
+        {
+            if (string.IsNullOrEmpty(old_uid))
+                throw new ArgumentException("old_uid 参数值不应为空");
+
+            var news = Books;
+            int count = 0;
+            foreach (TagAndData data in news)
+            {
+                OneTag tag = data.OneTag;
+                if (tag == null)
+                    continue;
+                //if (tag.TagInfo != null && data.Error == null)
+                //    continue;
+                if (tag.Protocol == InventoryInfo.ISO14443A)
+                    continue;
+
+                if (tag.UID != old_uid)
+                    continue;
+
+                if (tag.Protocol == InventoryInfo.ISO18000P6C)
+                {
+                    if (string.IsNullOrEmpty(changed_uid))
+                        throw new ArgumentException("changed_uid 参数值不应为空(针对 UHF 标签)");
+
+                    tag.UID = changed_uid;
+                    if (tag.TagInfo != null)
+                    {
+                        tag.TagInfo.UID = changed_uid;
+                        tag.TagInfo.EAS = GetUhfEas(changed_uid, out int afi);
+                        if (afi != 0)
+                            tag.TagInfo.AFI = (byte)afi;
+                    }
+                    count++;
+                }
+                else if (tag.Protocol == InventoryInfo.ISO15693)
+                {
+                    // ClearTagTable(tag.UID);
+
+                    if (changed_uid != "on" && changed_uid != "off")
+                        throw new ArgumentException($"针对 HF 标签，changed_uid 参数值应当为 'on' 'off' 之一");
+                    
+                    var eas = changed_uid == "on" ? true : false;
+                    ChangeTagInfoEas(tag.TagInfo, eas);
+
+#if REMOVED
+                    tag.TagInfo = null;
+                    // 尝试重新获取 TagInfo。
+                    // TODO: 也可以优化为直接修改内存对象，而不去访问读写器重新获取标签信息
+
+                    ClearTagTable(tag.UID);
+
+                    // 自动重试一次
+                    GetTagInfoResult gettaginfo_result = null;
+                    for (int i = 0; i < 2; i++)
+                    {
+                        gettaginfo_result = GetTagInfo(channel, tag.ReaderName, tag.UID, tag.AntennaID, tag.Protocol);
+                        if (gettaginfo_result.Value != -1)
+                            break;
+                    }
+
+                    if (gettaginfo_result.Value == -1)
+                    {
+                        data.Error = gettaginfo_result.ErrorInfo;
+                        continue;
+                    }
+                    else
+                    {
+                        if (string.IsNullOrEmpty(data.Error) == false)
+                        {
+                            data.Error = null;
+                        }
+                    }
+
+                    TagInfo info = gettaginfo_result.TagInfo;
+                    tag.TagInfo = info;
+#endif
+
+                    count++;
+                }
+            } // end of foreach
+            return count;
+        }
+
+        static bool ChangeTagInfoEas(TagInfo tag_info,
+            bool eas)
+        {
+            if (tag_info == null) 
+                return false;
+            if (tag_info.EAS == eas)
+                return false;
+
+            tag_info.EAS = eas;
+            // 然后修改 AFI
+            if (tag_info.AFI == 0xc2 || tag_info.AFI == 0x07)
+            {
+                tag_info.AFI = (eas == true ? (byte)0x07 : (byte)0xc2);
+            }
+
+            return true;
+        }
 
 
         // 填充 Books 和 Patrons 每个元素的 .TagInfo
@@ -988,6 +1172,7 @@ namespace DigitalPlatform.RFID
                 if (tag.Protocol == InventoryInfo.ISO14443A)
                     continue;
 
+                // TODO: 根据 OnlyReadEPC，不要填充 ISO18000P6C 协议的 TagInfo 的 Bytes
                 if (tag.TagInfo == null)
                 {
                     // 自动重试一次

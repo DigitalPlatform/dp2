@@ -420,7 +420,7 @@ namespace RfidTool
             }
         }
 
-        public static NormalResult SetEAS(string reader_name,
+        public static SetEasResult SetEAS(string reader_name,
     string uid,
     uint antenna_id,
     bool enable,

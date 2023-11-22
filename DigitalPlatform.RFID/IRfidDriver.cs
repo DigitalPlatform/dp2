@@ -517,6 +517,9 @@ uint new_password);
     [Serializable()]
     public class SetEasResult : NormalResult
     {
+        // 修改前的 UID
+        public string OldUID { get; set; }
+
         // 修改后的 UID
         // 注: UHF 标签在修改 EAS 以后，UID 会发生变化
         public string ChangedUID { get; set; }

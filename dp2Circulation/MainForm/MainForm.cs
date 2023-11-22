@@ -5512,6 +5512,12 @@ barcodes[0],
                 return 1;
             }
 
+            // 2023/11/19
+            // 暂时兼容
+            // TODO: 将来需要包含 OI 部分一起发送给 dp2library 服务器或者校验函数
+            if (strBarcode.Contains("."))
+                strBarcode = RfidTagList.GetPiiPart(strBarcode);
+
             // TODO: 优先利用 BarcodeValidation 进行校验
 
             // 优先进行前端校验
@@ -8059,6 +8065,8 @@ value);  // 常用值 "ipc://RfidChannel/RfidServer"
                     return "gb";
                 if (hanzi == "高校联盟格式")
                     return "gxlm";
+                if (hanzi == "望湖洞庭")
+                    return "gxlm(whdt)";
                 throw new Exception($"无法识别的汉字格式名 {hanzi}");
             }
         }
