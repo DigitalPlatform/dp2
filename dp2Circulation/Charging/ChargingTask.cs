@@ -1294,7 +1294,8 @@ end_time);
 
                     // 2023/11/21
                     // 精确修改 TagInfo
-                    if (string.IsNullOrEmpty(old_uid) == false)
+                    if (string.IsNullOrEmpty(old_uid) == false
+                        && result.Value == 1)
                     {
                         if (string.IsNullOrEmpty(changed_uid) == false)
                             ChangeUID(old_uid, changed_uid);

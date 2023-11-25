@@ -992,22 +992,35 @@ namespace DigitalPlatform.RFID
         }
 
         // 得到 byte[]类型 内容
-        public static byte[] FromHexString(string strHexTimeStamp)
+        // Exception:
+        //      可能会抛出 System.FormatException
+        public static byte[] FromHexString(string strHexTimeStampParam)
         {
+            if (string.IsNullOrEmpty(strHexTimeStampParam) == true)
+                return null;
+
+            var strHexTimeStamp = strHexTimeStampParam.Replace(" ", "").Replace("\r\n", "").ToUpper();
+
+            // 2023/11/24
             if (string.IsNullOrEmpty(strHexTimeStamp) == true)
                 return null;
 
-            strHexTimeStamp = strHexTimeStamp.Replace(" ", "").Replace("\r\n", "").ToUpper();
-
             byte[] result = new byte[strHexTimeStamp.Length / 2];
 
-            for (int i = 0; i < strHexTimeStamp.Length / 2; i++)
+            try
             {
-                string strHex = strHexTimeStamp.Substring(i * 2, 2);
-                result[i] = Convert.ToByte(strHex, 16);
-            }
+                for (int i = 0; i < strHexTimeStamp.Length / 2; i++)
+                {
+                    string strHex = strHexTimeStamp.Substring(i * 2, 2);
+                    result[i] = Convert.ToByte(strHex, 16);
+                }
 
-            return result;
+                return result;
+            }
+            catch(FormatException ex)
+            {
+                throw new FormatException($"十六进制字符串 '{strHexTimeStampParam}' 格式不合法");
+            }
         }
     }
 

@@ -13,7 +13,6 @@ using System.Windows.Forms;
 using System.Xml;
 
 using Microsoft.VisualStudio.Threading;
-using AsyncFriendlyStackTrace;
 
 using DigitalPlatform;
 using DigitalPlatform.Core;
@@ -25,6 +24,7 @@ using DigitalPlatform.RFID.UI;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using static DigitalPlatform.RFID.RfidTagList;
+using System.Data.Sql;
 
 namespace dp2Circulation
 {
@@ -137,10 +137,20 @@ namespace dp2Circulation
                 true);
             if (this.AutoRefresh == false)
             {
+#if REMOVED
+                _ = Task.Factory.StartNew(async () =>
+                {
+                    await UpdateChipListAsync(_cancel.Token, true);
+                },
+default,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+#endif
                 _ = Task.Run(async () =>
                 {
                     await UpdateChipListAsync(_cancel.Token, true);
                 });
+
             }
 
             this.toolStripButton_autoFixEas.Checked = Program.MainForm.AppInfo.GetBoolean("rfidtoolform",
@@ -176,7 +186,22 @@ namespace dp2Circulation
 
         private void RfidToolForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-
+            if (e.CloseReason == CloseReason.UserClosing)
+            {
+                var count = this.ChangedItemCount;
+                if (count > 0)
+                {
+                    // 警告尚未保存
+                    DialogResult result = MessageBox.Show(this,
+        $"当前有 {count} 个标签的信息被修改后尚未保存。\r\n\r\n确实要关闭窗口? ",
+        "RfidToolForm",
+        MessageBoxButtons.YesNo,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button2);
+                    if (result == DialogResult.No)
+                        e.Cancel = true;
+                }
+            }
         }
 
         // CancellationTokenSource _cancel = new CancellationTokenSource();
@@ -230,6 +255,11 @@ this.toolStripButton_autoFixEas.Checked);
 
                 if (auto_refresh && e.UpdateRssiTags != null && e.UpdateRssiTags.Count > 0)
                     await UpdateRssiAsync(e.UpdateRssiTags, _cancel.Token);
+
+#if REMOVED
+                if (AutoRefresh)
+                    BeginUpdateChipList(e);
+#endif
             }
             catch (ObjectDisposedException)
             {
@@ -243,6 +273,21 @@ this.toolStripButton_autoFixEas.Checked);
                 MainForm.WriteErrorLog($"MainForm_TagChanged() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
             }
         }
+
+#if REMOVED
+        void BeginUpdateChipList(TagChangedEventArgs e)
+        {
+            _ = Task.Factory.StartNew(async () =>
+            {
+                await UpdateChipListAsync(_cancel.Token, false);
+                if (e.UpdateRssiTags != null && e.UpdateRssiTags.Count > 0)
+                    await UpdateRssiAsync(e.UpdateRssiTags, _cancel.Token);
+            },
+default,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
+#endif
 
         // 2023/11/13
         // 更新 RSSI 显示
@@ -478,7 +523,12 @@ this.toolStripButton_autoFixEas.Checked);
                                 if (uhfProtocol == "gb")
                                     protocol += ":国标";
                                 else if (uhfProtocol == "gxlm")
-                                    protocol += ":高校联盟";
+                                {
+                                    if (IsWhdt(ByteArray.GetTimeStampByteArray(tag.UID)))
+                                        protocol += ":望湖洞庭";
+                                    else
+                                        protocol += ":高校联盟";
+                                }
 
                                 item = new ListViewItem();
                                 ListViewUtil.ChangeItemText(item, COLUMN_UID, tag.UID);
@@ -486,7 +536,12 @@ this.toolStripButton_autoFixEas.Checked);
                                 ListViewUtil.ChangeItemText(item, COLUMN_PROTOCOL, /*tag.Protocol*/protocol);
                                 ListViewUtil.ChangeItemText(item, COLUMN_ANTENNA, tag.AntennaID.ToString());
                                 ListViewUtil.ChangeItemText(item, COLUMN_RSSI, tag.RSSI.ToString());
-                                item.Tag = new ItemInfo { OneTag = tag };
+
+                                // 2023/11/24
+                                // 让 TagInfo 不可变
+                                if (tag.TagInfo != null)
+                                    tag.TagInfo = tag.TagInfo.Clone();
+                                item.Tag = new ItemInfo(tag);   // { OneTag = tag };
                                 this.listView_tags.Items.Add(item);
 
                                 if (tag.TagInfo == null
@@ -523,7 +578,13 @@ this.toolStripButton_autoFixEas.Checked);
                                 if (old_readername != tag.ReaderName)
                                 {
                                     // ListViewUtil.ChangeItemText(item, COLUMN_READERNAME, tag.ReaderName);
-                                    item.Tag = new ItemInfo { OneTag = tag };
+
+                                    // 2023/11/24
+                                    // 让 TagInfo 不可变
+                                    if (tag.TagInfo != null)
+                                        tag.TagInfo = tag.TagInfo.Clone();
+
+                                    item.Tag = new ItemInfo(tag);  // { OneTag = tag };
                                     if (tag.TagInfo == null
                                     || UhfNeedGetUserBank(tag.TagInfo))
                                     {
@@ -551,7 +612,10 @@ this.toolStripButton_autoFixEas.Checked);
                                 {
                                     ItemInfo info = (ItemInfo)item.Tag;
                                     if (info != null && info.OneTag != null)
-                                        info.OneTag.AntennaID = tag.AntennaID;
+                                    {
+                                        // info.OneTag.AntennaID = tag.AntennaID;
+                                        info.AntennaID = tag.AntennaID; // ???
+                                    }
                                     ListViewUtil.ChangeItemText(item, COLUMN_ANTENNA, tag.AntennaID.ToString());
                                     changed = true;
                                 }
@@ -633,6 +697,8 @@ this.toolStripButton_autoFixEas.Checked);
                                 {
                                     try
                                     {
+                                        AutoFixEas();
+#if REMOVED
                                         this.Invoke((Action)(() =>
                                         {
                                             AutoFixEas(
@@ -641,6 +707,7 @@ this.toolStripButton_autoFixEas.Checked);
 #endif
                                                 );
                                         }));
+#endif
                                     }
                                     catch (ObjectDisposedException)
                                     {
@@ -752,7 +819,19 @@ this.toolStripButton_autoFixEas.Checked);
 
         private void toolStripButton_loadRfid_Click(object sender, EventArgs e)
         {
-            _ = Task.Run(async () => { await UpdateChipListAsync(_cancel.Token, true); });
+#if REMOVED
+            _ = Task.Factory.StartNew(async () =>
+            {
+                await UpdateChipListAsync(_cancel.Token, true);
+            },
+default,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+#endif
+            _ = Task.Run(async () =>
+            {
+                await UpdateChipListAsync(_cancel.Token, true);
+            });
         }
 
         class IdInfo
@@ -865,10 +944,14 @@ this.toolStripButton_autoFixEas.Checked);
             foreach (ListViewItem item in list.Items)
             {
                 ItemInfo item_info = (ItemInfo)item.Tag;
+                /*
                 OneTag tag = item_info.OneTag;
                 if (// tag.ReaderName == reader_name && 
                     tag.UID == uid)
                     return item;
+                */
+                if (item_info.UID == uid)
+                    return item;    // ???
             }
 
             return null;
@@ -880,44 +963,49 @@ this.toolStripButton_autoFixEas.Checked);
         string FillTagInfo(ListViewItem item)
         {
             ItemInfo item_info = (ItemInfo)item.Tag;
-            OneTag tag = item_info.OneTag;
+            var tag = item_info.OneTag;
             if (tag.Protocol == InventoryInfo.ISO14443A)
                 return null; // 暂时还不支持对 14443A 的卡进行 GetTagInfo() 操作
 
             if (tag.TagInfo == null)
                 return null;
 
+            if (tag.TagInfo != null)
+            {
+                Debug.Assert(tag.UID == tag.TagInfo.UID, $"FillTagInfo(ListViewItem) tag.UID({tag.UID}) != tag.TagInfo.UID({tag.TagInfo.UID})");
+            }
+
             string strError = "";
             try
             {
-                string hex_string = Element.GetHexString(tag.TagInfo.Bytes, "4");
+                // string hex_string = Element.GetHexString(tag.TagInfo.Bytes, "4");
 
                 string chip_parse_error = "";
                 try
                 {
-                    item_info.LogicChipItem = LogicChipItem.FromTagInfo(tag.TagInfo);
+                    item_info.SetLogicChipItem(LogicChipItem.FromTagInfo(tag.TagInfo.CloneTagInfo()));  // ???
                     item_info.LogicChipItem.PropertyChanged += LogicChipItem_PropertyChanged;
                 }
                 catch (TagDataException ex)
                 {
                     if (item_info != null)
-                        item_info.LogicChipItem = null;
+                        item_info.SetLogicChipItem(null);
 
-                    if (SetBlankPii(item, tag) == false)
+                    if (SetBlankPii(item, tag.UID) == false)
                         chip_parse_error = ex.Message;
                 }
                 catch (ArgumentException ex)
                 {
                     if (item_info != null)
-                        item_info.LogicChipItem = null;
+                        item_info.SetLogicChipItem(null);
 
-                    if (SetBlankPii(item, tag) == false)
+                    if (SetBlankPii(item, tag.UID) == false)
                         chip_parse_error = ex.Message;
                 }
                 catch (Exception ex)
                 {
                     if (item_info != null)
-                        item_info.LogicChipItem = null;
+                        item_info.SetLogicChipItem(null);
                     chip_parse_error = ex.Message;
                 }
 
@@ -943,6 +1031,16 @@ this.toolStripButton_autoFixEas.Checked);
                         if (this.SelectedPII != null
                             && pii == this.SelectedPII)
                             item.Font = new Font(item.Font, FontStyle.Bold);
+
+                        item_info.LogicChipItem.UID = tag.TagInfo.UID;
+                    }
+
+                    // UID 栏
+                    {
+                        string new_uid = tag.TagInfo.UID;
+                        string old_uid = ListViewUtil.GetItemText(item, COLUMN_UID);
+                        if (old_uid != new_uid)
+                            ListViewUtil.ChangeItemText(item, COLUMN_UID, new_uid);
                     }
                 }));
 
@@ -969,11 +1067,18 @@ this.toolStripButton_autoFixEas.Checked);
             return strError;
         }
 
-        bool SetBlankPii(ListViewItem item, OneTag tag)
+        bool SetBlankPii(ListViewItem item,
+            // OneTag tag
+            string uid
+            )
         {
+            /*
             if (tag.TagInfo == null)
                 return false;
-            byte[] epc_bytes = ByteArray.GetTimeStampByteArray(tag.UID);
+            */
+            if (uid == null)
+                return false;
+            byte[] epc_bytes = ByteArray.GetTimeStampByteArray(/*tag.UID*/uid);
 
             if (epc_bytes == null
                 || epc_bytes.Length < 4)
@@ -998,7 +1103,7 @@ this.toolStripButton_autoFixEas.Checked);
         static bool TagInfoFilled(ListViewItem item)
         {
             ItemInfo item_info = (ItemInfo)item.Tag;
-            OneTag tag = item_info.OneTag;
+            var tag = item_info.OneTag;
             if (tag.Protocol == InventoryInfo.ISO14443A)
                 return true; // 暂时还不支持对 14443A 的卡进行 GetTagInfo() 操作
 
@@ -1011,7 +1116,7 @@ this.toolStripButton_autoFixEas.Checked);
         string GetTagInfo(ListViewItem item)
         {
             ItemInfo item_info = (ItemInfo)item.Tag;
-            OneTag tag = item_info.OneTag;
+            var tag = item_info.OneTag;
             if (tag.Protocol == InventoryInfo.ISO14443A)
                 return null; // 暂时还不支持对 14443A 的卡进行 GetTagInfo() 操作
 
@@ -1048,20 +1153,26 @@ this.toolStripButton_autoFixEas.Checked);
                     goto ERROR1;
                 }
 
-                tag.TagInfo = result.TagInfo;
+                // tag.TagInfo = result.TagInfo;
+                item_info.SetTagInfo(result.TagInfo, false); // ???
+
+                if (tag.TagInfo != null)
+                {
+                    Debug.Assert(tag.UID == tag.TagInfo.UID, $"GetTagInfo(ListViewItem) tag.UID({tag.UID}) != tag.TagInfo.UID({tag.TagInfo.UID})");
+                }
 
                 // string hex_string = Element.GetHexString(result.TagInfo.Bytes, "4");
 
                 string chip_parse_error = "";
                 try
                 {
-                    item_info.LogicChipItem = LogicChipItem.FromTagInfo(result.TagInfo);
+                    item_info.SetLogicChipItem(LogicChipItem.FromTagInfo(tag.TagInfo.CloneTagInfo()));  // ???
                     item_info.LogicChipItem.PropertyChanged += LogicChipItem_PropertyChanged;
                 }
                 catch (Exception ex)
                 {
                     if (item_info != null)
-                        item_info.LogicChipItem = null;
+                        item_info.SetLogicChipItem(null);
                     chip_parse_error = ex.Message;
                 }
 
@@ -1087,6 +1198,16 @@ this.toolStripButton_autoFixEas.Checked);
                         if (this.SelectedPII != null
                             && pii == this.SelectedPII)
                             item.Font = new Font(item.Font, FontStyle.Bold);
+
+                        item_info.LogicChipItem.UID = tag.TagInfo.UID;
+                    }
+
+                    // UID 栏
+                    {
+                        string new_uid = tag.TagInfo.UID;
+                        string old_uid = ListViewUtil.GetItemText(item, COLUMN_UID);
+                        if (old_uid != new_uid)
+                            ListViewUtil.ChangeItemText(item, COLUMN_UID, new_uid);
                     }
                 }));
 
@@ -1127,6 +1248,7 @@ this.toolStripButton_autoFixEas.Checked);
 
         void UpdateSaveButton()
         {
+#if REMOVED
             this.Invoke((Action)(() =>
             {
                 int count = 0;
@@ -1142,6 +1264,34 @@ this.toolStripButton_autoFixEas.Checked);
                 else
                     this.toolStripButton_saveRfid.Enabled = false;
             }));
+#endif
+            var count = ChangedItemCount;
+            this.Invoke((Action)(() =>
+            {
+                if (count > 0)
+                    this.toolStripButton_saveRfid.Enabled = true;
+                else
+                    this.toolStripButton_saveRfid.Enabled = false;
+            }));
+        }
+
+        public int ChangedItemCount
+        {
+            get
+            {
+                return this.TryGet(() =>
+                {
+                    int count = 0;
+                    foreach (ListViewItem item in this.listView_tags.Items)
+                    {
+                        ItemInfo tag_info = (ItemInfo)item.Tag;
+                        if (tag_info.LogicChipItem != null
+                        && tag_info.LogicChipItem.Changed == true)
+                            count++;
+                    }
+                    return count;
+                });
+            }
         }
 
         void UpdateChanged(LogicChipItem chip)
@@ -1199,10 +1349,23 @@ this.toolStripButton_autoFixEas.Checked);
                 if (this.listView_tags.SelectedItems.Count == 1)
                 {
                     ItemInfo item_info = (ItemInfo)this.listView_tags.SelectedItems[0].Tag;
-                    OneTag tag = item_info.OneTag;
+                    var tag = item_info.OneTag;
                     // var tag_info = tag.TagInfo;
 
-                    this.SelectedTag = tag.Clone(); // 最好是深度拷贝
+                    if (tag.TagInfo != null)
+                    {
+                        // 比较两个 UID
+                        Debug.Assert(tag.UID == tag.TagInfo.UID, $"tag.UID({tag.UID}) != tag.TagInfo.UID({tag.TagInfo.UID})");
+                    }
+
+                    if (item_info.LogicChipItem != null)
+                    {
+                        // 比较两个 UID
+                        Debug.Assert(tag.UID == item_info.LogicChipItem.UID, $"tag.UID({tag.UID}) != item_info.LogicChipItem.UID({item_info.LogicChipItem.UID})");
+                    }
+
+                    // this.SelectedTag = tag.Clone(); // 最好是深度拷贝
+                    this.SelectedTag = tag.CloneOneTag();   // ???
 
                     // 2019/9/30
                     // 修正 AntennaID
@@ -1295,7 +1458,7 @@ this.toolStripButton_autoFixEas.Checked);
                     {
                         // 注1: taginfo.EAS 在调用后可能被修改
                         // 注2: 本函数不再抛出异常。会在 ErrorInfo 中报错
-                        var chip_info = RfidTagList.GetUhfChipInfo(tag_info);
+                        var chip_info = RfidTagList.GetUhfChipInfo(tag_info.CloneTagInfo());    // ???
                         // 2023/11/3
                         if (string.IsNullOrEmpty(chip_info.ErrorInfo) == false)
                             continue;
@@ -1497,14 +1660,16 @@ this.toolStripButton_autoFixEas.Checked);
         {
             string strError = "";
 
-
             try
             {
                 // 注：如果 info == null，表示对每一个 List View Item 都尝试去修复一下
                 // TODO: 注意修复后刷新显示
                 IdInfo info = IdInfo.Parse(this.SelectedID);
                 List<string> uids = new List<string>();
-                foreach (ListViewItem item in this.listView_tags.Items)
+
+                var items = ListViewUtil.GetItems(this.listView_tags);
+
+                foreach (ListViewItem item in /*this.listView_tags.Items*/items)
                 {
                     string uid = ListViewUtil.GetItemText(item, COLUMN_UID);
 
@@ -1517,12 +1682,15 @@ this.toolStripButton_autoFixEas.Checked);
                     if (tag_info == null)
                         goto CONTINUE;
 
+                    // 比较两个 UID
+                    Debug.Assert(tag_info.UID == item_info.OneTag.UID, $"AutoFixEas() tag_info.UID({tag_info.UID}) != item_info.OneTag.UID({item_info.OneTag.UID})");
+
                     string pii = "";
                     if (tag_info.Protocol == InventoryInfo.ISO18000P6C)
                     {
                         // 注1: taginfo.EAS 在调用后可能被修改
                         // 注2: 本函数不再抛出异常。会在 ErrorInfo 中报错
-                        var chip_info = RfidTagList.GetUhfChipInfo(tag_info);
+                        var chip_info = RfidTagList.GetUhfChipInfo(tag_info.CloneTagInfo());    // ???
                         if (string.IsNullOrEmpty(chip_info.ErrorInfo) == false)
                             goto ERROR1;
 
@@ -1571,15 +1739,17 @@ this.toolStripButton_autoFixEas.Checked);
                                 "uid:" + tag_info.UID,
                                 tag_info.AntennaID,
                                 false);
-                            if (result.Value != -1)
+                            if (result.Value == 1)
                             {
                                 if (string.IsNullOrEmpty(result.ChangedUID) == false)
                                 {
-                                    tag_info.UID = result.ChangedUID;
-                                    item_info.OneTag.UID = result.ChangedUID;
+                                    // tag_info.UID = result.ChangedUID;
+                                    // item_info.OneTag.UID = result.ChangedUID;
+                                    item_info.UID = result.ChangedUID;  // ???
                                 }
 
-                                if (string.IsNullOrEmpty(result.OldUID) == false)
+                                if (string.IsNullOrEmpty(result.OldUID) == false
+                                    && result.Value == 1)
                                 {
                                     if (string.IsNullOrEmpty(result.ChangedUID) == false)
                                         TaskList.ChangeUID(result.OldUID, result.ChangedUID);
@@ -1599,19 +1769,25 @@ this.toolStripButton_autoFixEas.Checked);
                             result = SetEAS(channel, "*", "uid:" + tag_info.UID, true, out strError);
 #else
                         {
+                            // return result.Value:
+                            //      -1  出错
+                            //      0   没有找到指定的标签
+                            //      1   找到，并成功修改 EAS
                             result = RfidManager.SetEAS("*",
                                 "uid:" + tag_info.UID,
                                 tag_info.AntennaID,
                                 true);
-                            if (result.Value != -1)
+                            if (result.Value == 1)
                             {
                                 if (string.IsNullOrEmpty(result.ChangedUID) == false)
                                 {
-                                    tag_info.UID = result.ChangedUID;
-                                    item_info.OneTag.UID = result.ChangedUID;
+                                    // tag_info.UID = result.ChangedUID;
+                                    // item_info.OneTag.UID = result.ChangedUID;
+                                    item_info.UID = result.ChangedUID;  // ???
                                 }
 
-                                if (string.IsNullOrEmpty(result.OldUID) == false)
+                                if (string.IsNullOrEmpty(result.OldUID) == false
+                                    && result.Value == 1)
                                 {
                                     if (string.IsNullOrEmpty(result.ChangedUID) == false)
                                         TaskList.ChangeUID(result.OldUID, result.ChangedUID);
@@ -1637,6 +1813,19 @@ this.toolStripButton_autoFixEas.Checked);
 
                         // if (tag.TagInfo == null)
                         {
+                            // 2023/11/25 改进写法
+                            // 启动单独的线程去填充 .TagInfo
+                            _ = Task.Run(() =>
+                            {
+                                GetTagInfo(item);
+                                this.Invoke((Action)(() =>
+                                {
+                                    // 如果当前右侧显示了标签内容，也需要刷新
+                                    listView_tags_SelectedIndexChanged(this, new EventArgs());
+                                }));
+                            });
+
+                            /*
                             // 启动单独的线程去填充 .TagInfo
                             Task.Run(() => { GetTagInfo(item); }).ContinueWith((o) =>
                             {
@@ -1646,6 +1835,7 @@ this.toolStripButton_autoFixEas.Checked);
                                     listView_tags_SelectedIndexChanged(this, new EventArgs());
                                 }));
                             });
+                            */
                         }
 
                         if (result.Value == -1)
@@ -1670,7 +1860,12 @@ this.toolStripButton_autoFixEas.Checked);
 
             if (StringUtil.IsInList("auto_fix_eas_and_close", this._mode)
                 && this.EasFixed)
-                this.Close();
+            {
+                this.TryInvoke(() =>
+                {
+                    this.Close();
+                });
+            }
             return;
         ERROR1:
             this.ShowMessage(strError, "red", true);
@@ -1798,14 +1993,271 @@ this.toolStripButton_autoFixEas.Checked);
 
         #endregion
 
+        class ReadonlyTagInfo
+        {
+            public string Protocol
+            {
+                get
+                {
+                    return _tagInfo?.Protocol;
+                }
+            }
+            public string UID
+            {
+                get
+                {
+                    return _tagInfo?.UID;
+                }
+            }
+
+            public string ReaderName
+            {
+                get
+                {
+                    return _tagInfo?.ReaderName;
+                }
+            }
+
+            public byte[] Bytes
+            {
+                get
+                {
+                    return _tagInfo?.Bytes;
+                }
+            }
+
+            public uint BlockSize
+            {
+                get
+                {
+                    if (_tagInfo == null)
+                        return 0;
+                    return _tagInfo.BlockSize;
+                }
+            }
+
+            public uint MaxBlockCount
+            {
+                get
+                {
+                    if (_tagInfo == null)
+                        return 0;
+                    return _tagInfo.MaxBlockCount;
+                }
+            }
+
+            public uint AntennaID
+            {
+                get
+                {
+                    if (_tagInfo == null)
+                        return 0;
+                    return _tagInfo.AntennaID;
+                }
+            }
+
+            public byte AFI
+            {
+                get
+                {
+                    if (_tagInfo == null)
+                        return 0;
+                    return _tagInfo.AFI;
+                }
+            }
+
+            public byte DSFID
+            {
+                get
+                {
+                    if (_tagInfo == null)
+                        return 0;
+                    return _tagInfo.DSFID;
+                }
+            }
+
+            public bool EAS
+            {
+                get
+                {
+                    if (_tagInfo == null)
+                        return false;
+                    return _tagInfo.EAS;
+                }
+            }
+
+            public string LockStatus
+            {
+                get
+                {
+                    return _tagInfo?.LockStatus;
+                }
+            }
+
+            TagInfo _tagInfo = null;
+
+            public ReadonlyTagInfo(TagInfo taginfo)
+            {
+                _tagInfo = taginfo;
+            }
+
+            public TagInfo CloneTagInfo()
+            {
+                return _tagInfo?.Clone();
+            }
+        }
+
+        class ReadonlyOneTag
+        {
+            public string UID
+            {
+                get
+                {
+                    return _oneTag?.UID;
+                }
+            }
+
+            public string Protocol
+            {
+                get
+                {
+                    return _oneTag?.Protocol;
+                }
+            }
+
+            public string ReaderName
+            {
+                get
+                {
+                    return _oneTag?.ReaderName;
+                }
+            }
+
+            public uint AntennaID
+            {
+                get
+                {
+                    if (_oneTag == null)
+                        return 0;
+                    return _oneTag.AntennaID;
+                }
+            }
+
+            public ReadonlyTagInfo TagInfo
+            {
+                get
+                {
+                    if (_oneTag == null || _oneTag.TagInfo == null)
+                        return null;
+                    return new ReadonlyTagInfo(_oneTag.TagInfo);
+                }
+            }
+
+            OneTag _oneTag = null;
+
+            public ReadonlyOneTag(OneTag onetag)
+            {
+                _oneTag = onetag;
+            }
+
+            void SetOneTag(OneTag onetag)
+            {
+                _oneTag = onetag;
+            }
+
+            public OneTag CloneOneTag()
+            {
+                return _oneTag?.Clone();
+            }
+        }
+
         class ItemInfo
         {
-            public OneTag OneTag { get; set; }
+            // public OneTag OneTag { get; set; }
+
+            public uint AntennaID
+            {
+                get
+                {
+                    if (_oneTag == null)
+                        return 0;
+                    return _oneTag.AntennaID;
+                }
+                set
+                {
+                    _oneTag.AntennaID = value;
+                    if (_oneTag.TagInfo != null)
+                        _oneTag.TagInfo.AntennaID = value;
+                }
+            }
+
+            public string UID
+            {
+                get
+                {
+                    return _oneTag.UID;
+                }
+                set
+                {
+                    _oneTag.UID = value;
+                    if (_oneTag.TagInfo != null)
+                        _oneTag.TagInfo.UID = value;
+                    if (this.LogicChipItem != null)
+                        this.LogicChipItem.UID = value;
+                }
+            }
+
+            OneTag _oneTag = null;
+            public ReadonlyOneTag OneTag
+            {
+                get
+                {
+                    return new ReadonlyOneTag(_oneTag);
+                }
+            }
+
+            public ItemInfo(OneTag onetag)
+            {
+                _oneTag = onetag;
+            }
+
+            public void SetOneTag(OneTag onetag)
+            {
+                _oneTag = onetag;
+            }
+
+            public void SetTagInfo(TagInfo taginfo, bool clone)
+            {
+                if (clone)
+                    _oneTag.TagInfo = taginfo.Clone();
+                else
+                    _oneTag.TagInfo = taginfo;
+
+                _oneTag.UID = _oneTag.TagInfo.UID;
+                _oneTag.ReaderName = _oneTag.TagInfo.ReaderName;
+                _oneTag.AntennaID = _oneTag.TagInfo.AntennaID;
+                _oneTag.Protocol = _oneTag.TagInfo.Protocol;
+
+                if (this.LogicChipItem != null)
+                    this.LogicChipItem.UID = _oneTag.UID;
+            }
+
             public string Xml { get; set; }
 
             public string XmlErrorInfo { get; set; }
 
-            public LogicChipItem LogicChipItem { get; set; }
+            LogicChipItem _logicChipItem = null;
+            public LogicChipItem LogicChipItem
+            {
+                get
+                {
+                    return _logicChipItem;
+                }
+            }
+            public void SetLogicChipItem(LogicChipItem chip)
+            {
+                this._logicChipItem = chip;
+            }
 
             // EAS 是否被检查过。检查过就不要重复检查了
             public bool EasChecked { get; set; }
@@ -1831,6 +2283,17 @@ this.toolStripButton_autoFixEas.Checked);
         {
             if (this.PauseRfid)
                 return;
+            // 注: _inUpdate 可以防止叠加调用
+#if REMOVED
+            _ = Task.Factory.StartNew(async () =>
+            {
+                await UpdateChipListAsync(_cancel.Token, false);
+            },
+default,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+#endif
+
             _ = UpdateChipListAsync(_cancel.Token, false);
         }
 
@@ -1935,7 +2398,7 @@ this.toolStripButton_autoFixEas.Checked);
             if (string.IsNullOrEmpty(pii))
             {
                 var item_info = item.Tag as ItemInfo;
-                var ret = SetBlankPii(item, item_info.OneTag);
+                var ret = SetBlankPii(item, item_info.UID/*item_info.OneTag.UID*/);
                 if (ret == true)
                     return;
                 pii = "(空白)";
@@ -2096,13 +2559,13 @@ this.toolStripButton_autoFixEas.Checked);
                 // 超高频
                 if (item_info.OneTag.Protocol == InventoryInfo.ISO18000P6C)
                 {
-                    text.Append(GetUhfTagDescription(item_info.OneTag));
+                    text.Append(GetUhfTagDescription(item_info.OneTag));    // ???
                 }
 
                 if (item_info.LogicChipItem == null)
                 {
                     text.Append("\r\n[LogicChipItem 为空]\r\n");
-                    text.Append(item_info.OneTag.GetDescription());
+                    text.Append(item_info.OneTag.CloneOneTag().GetDescription());   // ???
                 }
                 else
                     text.Append(item_info.LogicChipItem.GetDescription());
@@ -2110,7 +2573,7 @@ this.toolStripButton_autoFixEas.Checked);
             Clipboard.SetDataObject(text.ToString(), true);
         }
 
-        static string GetUhfTagDescription(OneTag tag)
+        static string GetUhfTagDescription(ReadonlyOneTag tag)
         {
             StringBuilder text = new StringBuilder();
 
@@ -2149,7 +2612,7 @@ this.toolStripButton_autoFixEas.Checked);
             else
                 text.Append($"\r\nUser Bank 字节内容:\r\n(null)\r\n");
 
-            var chip_info = RfidTagList.GetUhfChipInfo(taginfo, "");    // 注: 不对高校联盟的元素内容映射到 GB
+            var chip_info = RfidTagList.GetUhfChipInfo(taginfo.CloneTagInfo(), "");    // 注: 不对高校联盟的元素内容映射到 GB
             if (string.IsNullOrEmpty(chip_info.ErrorInfo) == false)
                 text.AppendLine($"解析标签内容时出错: {chip_info.ErrorInfo}");
             // text.Append($"\r\n锁定位置:\r\n{this.OriginLockStatus}\r\n\r\n");
@@ -2254,7 +2717,7 @@ this.toolStripButton_autoFixEas.Checked);
                     goto ERROR1;
                 }
 
-                var new_tag_info = old_tag_info.Clone();
+                var new_tag_info = old_tag_info.CloneTagInfo(); // ???
                 // 制造一套空内容
                 {
                     new_tag_info.AFI = 0;
@@ -2275,11 +2738,8 @@ this.toolStripButton_autoFixEas.Checked);
                         new_tag_info.MaxBlockCount,
                         new_tag_info.LockStatus);
                 }
-#if OLD_CODE
-                var result = channel.Object.WriteTagInfo(item_info.OneTag.ReaderName,
-                    old_tag_info,
-                    new_tag_info);
-#else
+
+#if REMOVED
                 RfidTagList.ClearTagTable(item_info.OneTag.UID);
                 var result = RfidManager.WriteTagInfo(item_info.OneTag.ReaderName,
     old_tag_info,
@@ -2290,7 +2750,6 @@ this.toolStripButton_autoFixEas.Checked);
                     RfidTagList.ClearTagTable(new_tag_info.UID);
                     UpdateUID(item_info, new_tag_info.UID);
                 }
-#endif
                 if (result.Value == -1)
                 {
                     strError = result.ErrorInfo + $" errorCode={result.ErrorCode}";
@@ -2298,6 +2757,10 @@ this.toolStripButton_autoFixEas.Checked);
                 }
 
                 strError = await Task.Run(() => { return GetTagInfo(item); });
+#endif
+                strError = await WriteTagInfo(item,
+old_tag_info,
+new_tag_info);
                 if (strError != null)
                     goto ERROR1;
                 return new NormalResult();
@@ -2353,7 +2816,7 @@ this.toolStripButton_autoFixEas.Checked);
                 }
                 */
 
-                var new_tag_info = old_tag_info.Clone();
+                var new_tag_info = old_tag_info.CloneTagInfo();     // ???
                 // 制造一套空内容
                 {
                     new_tag_info.AFI = 0;
@@ -2380,16 +2843,20 @@ this.toolStripButton_autoFixEas.Checked);
                     new_tag_info.UID = UhfUtility.EpcBankHex(UhfUtility.BuildBlankEpcBank()); // "0000" + Element.GetHexString(UhfUtility.BuildBlankEpcBank());
                     new_tag_info.Bytes = null;  // 这样可使得 User Bank 被清除
                 }
-                RfidTagList.ClearTagTable(item_info.OneTag.UID);
+#if REMOVED
+                if (old_tag_info.Protocol != InventoryInfo.ISO18000P6C)
+                    RfidTagList.ClearTagTable(item_info.OneTag.UID);
                 var result = RfidManager.WriteTagInfo(item_info.OneTag.ReaderName,
     old_tag_info,
     new_tag_info);
+                /*
                 // 2023/10/31
                 if (old_tag_info.Protocol == InventoryInfo.ISO18000P6C)
                 {
                     RfidTagList.ClearTagTable(new_tag_info.UID);
                     UpdateUID(item_info, new_tag_info.UID);
                 }
+                */
 
                 if (result.Value == -1)
                 {
@@ -2397,8 +2864,16 @@ this.toolStripButton_autoFixEas.Checked);
                     goto ERROR1;
                 }
 
-
-                strError = await Task.Run(() => { return GetTagInfo(item); });
+                if (old_tag_info.Protocol != InventoryInfo.ISO18000P6C)
+                {
+                    strError = await Task.Run(() => { return GetTagInfo(item); });
+                    if (strError != null)
+                        goto ERROR1;
+                }
+#endif
+                strError = await WriteTagInfo(item,
+                    old_tag_info,
+                    new_tag_info);
                 if (strError != null)
                     goto ERROR1;
 
@@ -2421,10 +2896,84 @@ this.toolStripButton_autoFixEas.Checked);
             };
         }
 
+        async Task<string> WriteTagInfo(
+            ListViewItem item,
+            ReadonlyTagInfo old_tag_info,
+            TagInfo new_tag_info)
+        {
+            ItemInfo item_info = (ItemInfo)item.Tag;
+
+            string readerName = item_info.OneTag.ReaderName;
+            if (old_tag_info.Protocol != InventoryInfo.ISO18000P6C)
+                RfidTagList.ClearTagTable(old_tag_info.UID);
+            var result = RfidManager.WriteTagInfo(readerName,
+old_tag_info.CloneTagInfo(),    // ???
+new_tag_info);
+            /*
+            // 2023/10/31
+            if (old_tag_info.Protocol == InventoryInfo.ISO18000P6C)
+            {
+                RfidTagList.ClearTagTable(new_tag_info.UID);
+                UpdateUID(item_info, new_tag_info.UID);
+            }
+            */
+
+            if (result.Value == -1)
+            {
+                return result.ErrorInfo + $" errorCode={result.ErrorCode}";
+            }
+
+
+            if (old_tag_info.Protocol != InventoryInfo.ISO18000P6C
+                || (old_tag_info.Protocol == InventoryInfo.ISO18000P6C
+                && old_tag_info.UID == new_tag_info.UID)
+                )
+            {
+                var error = await Task.Run(() => { return GetTagInfo(item); });
+                if (error != null)
+                    return error;
+
+                if (item_info.LogicChipItem != null)
+                {
+                    item_info.LogicChipItem.SetChanged(false);
+                    UpdateChanged(item_info.LogicChipItem);
+                }
+                UpdateSaveButton();
+
+                // 让自动修正 EAS 能够重新进行
+                item_info.EasChecked = false;
+            }
+            else if (old_tag_info.Protocol == InventoryInfo.ISO18000P6C
+                && old_tag_info.UID != new_tag_info.UID
+                && this.AutoRefresh == false)
+            {
+                RfidTagList.ClearTagTable(new_tag_info.UID);
+                UpdateItemInfo(item_info, new_tag_info);
+
+                // 修改视觉显示
+                // TODO: 其实整个 ListViewItem 每一列都可能需要刷新
+                // ListViewUtil.ChangeItemText(item, COLUMN_UID, new_tag_info.UID);
+                FillTagInfo(item);
+
+                if (item_info.LogicChipItem != null)
+                {
+                    item_info.LogicChipItem.SetChanged(false);
+                    UpdateChanged(item_info.LogicChipItem);
+                }
+                UpdateSaveButton();
+
+                // 让自动修正 EAS 能够重新进行
+                item_info.EasChecked = false;
+            }
+            return null;
+        }
 
         async void menu_saveSelectedTagContent_Click(object sender, EventArgs e)
         {
-            await SaveItemChangeAsync(async (item) => await SaveTagContentAsync(item));
+            var control = (Control.ModifierKeys & Keys.Control) != 0;
+            await SaveItemChangeAsync(
+                this.listView_tags.SelectedItems.Cast<ListViewItem>(),
+                async (item) => await SaveTagContentAsync(item, control ? "select_format" : ""));
 #if OLD
             int count = 0;
             List<string> errors = new List<string>();
@@ -2453,17 +3002,24 @@ this.toolStripButton_autoFixEas.Checked);
 
         delegate Task<string> Delegate_save(ListViewItem item);
 
-        async Task SaveItemChangeAsync(Delegate_save proc)
+        async Task SaveItemChangeAsync(
+            IEnumerable<ListViewItem> items,
+            Delegate_save proc)
         {
             int count = 0;
             List<string> errors = new List<string>();
-            foreach (ListViewItem item in this.listView_tags.SelectedItems)
+            List<string> succeeds = new List<string>();
+            foreach (ListViewItem item in /*this.listView_tags.SelectedItems*/items)
             {
                 var error = await proc(item);
-                if (error != null)
+                if (error != null && error.StartsWith("!succeed:") == false)
                     errors.Add(error);
                 else
+                {
+                    if (error != null && error.StartsWith("!succeed:"))
+                        succeeds.Add(error.Substring("!succeed:".Length));
                     count++;
+                }
             }
 
             listView_tags_SelectedIndexChanged(this, new EventArgs());
@@ -2476,13 +3032,18 @@ this.toolStripButton_autoFixEas.Checked);
             //else
             //    this.ShowMessage("没有需要保存的事项", "yellow", true);
 
+            if (succeeds.Count > 0)
+                MessageDlg.Show(this, StringUtil.MakePathList(succeeds, "\r\n"), "保存成功");
+
             if (errors.Count > 0)
                 MessageDlg.Show(this, StringUtil.MakePathList(errors, "\r\n"), "警告或错误");
         }
 
         async void menu_saveSelectedErrorTagContent_1_Click(object sender, EventArgs e)
         {
-            await SaveItemChangeAsync(async (item) => await SaveBlankPiiTagContentAsync(item));
+            await SaveItemChangeAsync(
+                this.listView_tags.SelectedItems.Cast<ListViewItem>(),
+                async (item) => await SaveBlankPiiTagContentAsync(item));
 
 #if OLD
             int count = 0;
@@ -2537,7 +3098,7 @@ this.toolStripButton_autoFixEas.Checked);
                 }
                 else
                 {
-                    new_tag_info = old_tag_info.Clone();
+                    new_tag_info = old_tag_info.CloneTagInfo(); // ???
                     // 对 byte[] 内容执行清除。锁定的块不会被清除
                     new_tag_info.Bytes = LogicChip.ClearBytes(new_tag_info.Bytes,
                         new_tag_info.BlockSize,
@@ -2545,6 +3106,7 @@ this.toolStripButton_autoFixEas.Checked);
                         new_tag_info.LockStatus);
                 }
 
+#if REMOVED
                 RfidTagList.ClearTagTable(item_info.OneTag.UID);
                 var result = RfidManager.WriteTagInfo(item_info.OneTag.ReaderName,
                     old_tag_info,
@@ -2562,9 +3124,13 @@ this.toolStripButton_autoFixEas.Checked);
                 }
 
                 strError = await Task.Run(() => { return GetTagInfo(item); });
+#endif
+                strError = await WriteTagInfo(item,
+old_tag_info,
+new_tag_info);
                 if (strError == null)
                 {
-                    UpdateChanged(item_info.LogicChipItem);
+                    //UpdateChanged(item_info.LogicChipItem);
                     return null;
                 }
                 else
@@ -2589,7 +3155,9 @@ this.toolStripButton_autoFixEas.Checked);
 
         async void menu_saveSelectedErrorTagContent_Click(object sender, EventArgs e)
         {
-            await SaveItemChangeAsync(async (item) => await SaveErrorTagContent1Async(item));
+            await SaveItemChangeAsync(
+                this.listView_tags.SelectedItems.Cast<ListViewItem>(),
+                async (item) => await SaveErrorTagContent1Async(item));
 #if OLD
             int count = 0;
             List<string> errors = new List<string>();
@@ -2629,7 +3197,7 @@ this.toolStripButton_autoFixEas.Checked);
             try
             {
                 var old_tag_info = item_info.OneTag.TagInfo;
-                var new_tag_info = old_tag_info.Clone();
+                var new_tag_info = old_tag_info.CloneTagInfo(); // ???
                 /*
                 var new_tag_info = BuildNewTagInfo(
     old_tag_info,
@@ -2661,6 +3229,7 @@ this.toolStripButton_autoFixEas.Checked);
                     new_tag_info.Bytes = bytes;
                 }
 
+#if REMOVED
                 RfidTagList.ClearTagTable(item_info.OneTag.UID);
                 var result = RfidManager.WriteTagInfo(item_info.OneTag.ReaderName,
                     old_tag_info,
@@ -2679,9 +3248,13 @@ this.toolStripButton_autoFixEas.Checked);
                 }
 
                 strError = await Task.Run(() => { return GetTagInfo(item); });
+#endif
+                strError = await WriteTagInfo(item,
+old_tag_info,
+new_tag_info);
                 if (strError == null)
                 {
-                    UpdateChanged(item_info.LogicChipItem);
+                    //UpdateChanged(item_info.LogicChipItem);
                     return null;
                 }
                 else
@@ -2719,7 +3292,7 @@ this.toolStripButton_autoFixEas.Checked);
             try
             {
                 var old_tag_info = item_info.OneTag.TagInfo;
-                var new_tag_info = old_tag_info.Clone();
+                var new_tag_info = old_tag_info.CloneTagInfo(); // ???
                 /*
                 var new_tag_info = BuildNewTagInfo(
     old_tag_info,
@@ -2734,6 +3307,7 @@ this.toolStripButton_autoFixEas.Checked);
                     new_tag_info.Bytes = temp.ToArray();
                 }
 
+#if REMOVED
                 RfidTagList.ClearTagTable(item_info.OneTag.UID);
                 var result = RfidManager.WriteTagInfo(item_info.OneTag.ReaderName,
                     old_tag_info,
@@ -2752,9 +3326,14 @@ this.toolStripButton_autoFixEas.Checked);
                 }
 
                 strError = await Task.Run(() => { return GetTagInfo(item); });
+#endif
+                strError = await WriteTagInfo(item,
+old_tag_info,
+new_tag_info);
+
                 if (strError == null)
                 {
-                    UpdateChanged(item_info.LogicChipItem);
+                    //UpdateChanged(item_info.LogicChipItem);
                     return null;
                 }
                 else
@@ -2776,23 +3355,24 @@ this.toolStripButton_autoFixEas.Checked);
             return strError;
         }
 
-        async Task<string> SaveTagContentAsync(ListViewItem item)
+        async Task<string> SaveTagContentAsync(ListViewItem item, string style)
         {
             ItemInfo item_info = (ItemInfo)item.Tag;
             if (item_info.OneTag.Protocol == InventoryInfo.ISO18000P6C)
-                return await SaveUhfTagContentAsync(item);
+                return await SaveUhfTagContentAsync(item, style);
             else
                 return await SaveHfTagContentAsync(item);
         }
 
         // 保存超高频标签内容
-        async Task<string> SaveUhfTagContentAsync(ListViewItem item)
+        async Task<string> SaveUhfTagContentAsync(ListViewItem item,
+            string style)
         {
             ItemInfo item_info = (ItemInfo)item.Tag;
             if (item_info.LogicChipItem == null)
                 return "item_info.LogicChipItem == null";
             if (item_info.LogicChipItem.Changed == false)
-                return "没有发生修改";
+                return $"{item_info.LogicChipItem.UID} 没有发生修改";
 
             string strError = "";
 
@@ -2825,10 +3405,12 @@ this.toolStripButton_autoFixEas.Checked);
                     }
                 }
 
-                var new_tag_info = BuildWritingTagInfo(old_tag_info,
+                var select_format = StringUtil.IsInList("select_format", style);
+
+                var build_result = BuildWritingTagInfo(old_tag_info.CloneTagInfo(), // ???
                     item_info.LogicChipItem,
                     item_info.LogicChipItem.EAS,
-                    "auto", // gb/gxlm/auto
+                    select_format ? "select" : "auto", // gb/gxlm/auto
                     (initial_format) =>
                     {
                         // 如果是空白标签，需要弹出对话框提醒选择格式
@@ -2839,7 +3421,7 @@ this.toolStripButton_autoFixEas.Checked);
                                 "请选择写入超高频标签的内容格式",
                                 "请选择一个内容格式",
                                 new string[] { "国标", "高校联盟", "望湖洞庭" },
-                                initial_format == "gb" ? 0 : 1,
+                                initial_format == "gb" ? 0 : (initial_format == "gxlm" ? 1 : (initial_format == "gxlm(whdt)" ? 2 : 0)),
                                 this.Font);
                         });
                         if (ret == "国标")
@@ -2887,7 +3469,9 @@ this.toolStripButton_autoFixEas.Checked);
                         return build_user_bank;
                     }
                     );
+                var new_tag_info = build_result.TagInfo;
 
+#if REMOVED
                 RfidTagList.ClearTagTable(item_info.OneTag.UID);
                 var result = RfidManager.WriteTagInfo(item_info.OneTag.ReaderName,
                     old_tag_info,
@@ -2905,13 +3489,34 @@ this.toolStripButton_autoFixEas.Checked);
                 }
 
                 strError = await Task.Run(() => { return GetTagInfo(item); });
+
+#endif
+                strError = await WriteTagInfo(item,
+old_tag_info,
+new_tag_info);
+
+                string format_string = "";
+                if (string.IsNullOrEmpty(build_result.NewUhfFormat) == false)
+                {
+                    if (build_result.OldUhfFormat != build_result.NewUhfFormat)
+                        format_string = $"(格式:{GetUhfFormatCaption(build_result.OldUhfFormat)}-->{GetUhfFormatCaption(build_result.NewUhfFormat)})";
+                    else
+                        format_string = $"(格式:{GetUhfFormatCaption(build_result.NewUhfFormat)})";
+                }
+
+                string format_warning = "";
+                if (build_result.NewUhfFormat == "gxlm(whdt)")
+                    format_warning = " 注意: 创建“望湖洞庭”格式时，除了 PII 以外的元素会被预置的内容重置";
+
                 if (strError == null)
                 {
-                    UpdateChanged(item_info.LogicChipItem);
-                    return null;
+                    //UpdateChanged(item_info.LogicChipItem);
+                    return $"!succeed:保存成功{format_string} {format_warning}";
                 }
                 else
-                    strError = $"保存成功。重新读入时出错: {strError}";
+                {
+                    strError = $"保存成功{format_string}。重新读入时出错: {strError}";
+                }
                 return strError;
             }
             catch (Exception ex)
@@ -2929,14 +3534,33 @@ this.toolStripButton_autoFixEas.Checked);
             return strError;
         }
 
-        static void UpdateUID(ItemInfo item_info,
-            string uid)
+        // 更新 item_info 中的 TagInfo 和相关数据成员
+        static void UpdateItemInfo(ItemInfo item_info,
+            TagInfo tag_info/*
+            string uid*/)
         {
+            if (item_info == null)
+                throw new ArgumentException("item_info 不应为 null");
+
+            if (tag_info == null)
+                throw new ArgumentException("tag_info 不应为 null");
+
+            item_info.SetTagInfo(tag_info, false);
+            /*
+            string uid = tag_info.UID;
+
             if (item_info.OneTag != null)
                 item_info.OneTag.UID = uid;
 
             if (item_info.OneTag != null && item_info.OneTag.TagInfo != null)
-                item_info.OneTag.TagInfo.UID = uid;
+            {
+                item_info.OneTag.TagInfo = tag_info.Clone();
+            }
+
+            // 2023/11/24
+            if (item_info.LogicChipItem != null)
+                item_info.LogicChipItem.UID = uid;
+            */
         }
 
         public static string GetUhfFormatCaption(string format)
@@ -2947,6 +3571,8 @@ this.toolStripButton_autoFixEas.Checked);
                 return "高校联盟";
             if (format == "gxlm(whdt)")
                 return "望湖洞庭";
+            if (format == "blank")
+                return "空白";
             throw new ArgumentException($"无法识别的格式名 '{format}'");
         }
 
@@ -2959,7 +3585,7 @@ this.toolStripButton_autoFixEas.Checked);
             if (item_info.LogicChipItem == null)
                 return "item_info.LogicChipItem == null";
             if (item_info.LogicChipItem.Changed == false)
-                return "没有发生修改";
+                return $"{item_info.LogicChipItem.UID} 没有发生修改";
 
 #if OLD_CODE
             RfidChannel channel = GetRfidChannel(
@@ -2979,11 +3605,8 @@ this.toolStripButton_autoFixEas.Checked);
                 var new_tag_info = BuildNewHfTagInfo(
     old_tag_info,
     item_info.LogicChipItem);
-#if OLD_CODE
-                var result = channel.Object.WriteTagInfo(item_info.OneTag.ReaderName,
-                    old_tag_info,
-                    new_tag_info);
-#else
+
+#if REMOVED
                 RfidTagList.ClearTagTable(item_info.OneTag.UID);
                 var result = RfidManager.WriteTagInfo(item_info.OneTag.ReaderName,
                     old_tag_info,
@@ -2995,7 +3618,6 @@ this.toolStripButton_autoFixEas.Checked);
                     UpdateUID(item_info, new_tag_info.UID);
 
                 }
-#endif
                 if (result.Value == -1)
                 {
                     strError = result.ErrorInfo + $" errorCode={result.ErrorCode}";
@@ -3003,13 +3625,19 @@ this.toolStripButton_autoFixEas.Checked);
                 }
 
                 strError = await Task.Run(() => { return GetTagInfo(item); });
+#endif
+
+                strError = await WriteTagInfo(item,
+    old_tag_info,
+    new_tag_info);
                 if (strError == null)
                 {
-                    UpdateChanged(item_info.LogicChipItem);
+                    //UpdateChanged(item_info.LogicChipItem);
                     return null;
                 }
                 else
                     strError = $"保存成功。重新读入时出错: {strError}";
+
                 return strError;
             }
             catch (Exception ex)
@@ -3034,10 +3662,10 @@ this.toolStripButton_autoFixEas.Checked);
         }
 
 
-        static TagInfo BuildNewHfTagInfo(TagInfo old_tag_info,
+        static TagInfo BuildNewHfTagInfo(ReadonlyTagInfo old_tag_info,
     LogicChipItem chip)
         {
-            TagInfo new_tag_info = old_tag_info.Clone();
+            TagInfo new_tag_info = old_tag_info.CloneTagInfo(); // ???
             new_tag_info.Bytes = chip.GetBytes(
                 (int)new_tag_info.MaxBlockCount * (int)new_tag_info.BlockSize,
                 (int)new_tag_info.BlockSize,
@@ -3078,10 +3706,10 @@ LogicChipItem chip)
 
         // 询问超高频内容格式
         // parameters:
-        //      initial_format  选择对话框初始显示的格式。为 null/gb/html 之一
+        //      initial_format  选择对话框初始显示的格式。为 blank/gb/gxlm/gxlm(whdt) 之一
         // return:
         //      null    放弃选择
-        //      其它      返回选择的格式。为 gb/gxlm 之一
+        //      其它      返回选择的格式。为 gb/gxlm/gxlm(whdt) 之一
         public delegate string delegate_askUhfDataFormat(string initial_format);
 
         // 过滤 User Bank 中的不需要的元素
@@ -3099,9 +3727,16 @@ LogicChipItem chip)
         //      false   放弃覆盖
         public delegate bool delegate_askOverwriteDifference(string new_format, string old_format);
 
+        public class BuildWritingResult : NormalResult
+        {
+            public TagInfo TagInfo { get; set; }
+
+            public string OldUhfFormat { get; set; }
+            public string NewUhfFormat { get; set; }
+        }
         // 构造写入用的 TagInfo
         // TODO: 要留意 高校联盟 格式的 TOU 写入前翻译是否正确
-        public static TagInfo BuildWritingTagInfo(TagInfo existing,
+        public static BuildWritingResult BuildWritingTagInfo(TagInfo existing,
     LogicChip chip,
     bool eas,
     string uhfProtocol = "auto", // gb/gxlm/gxlm(whdt)/auto/select auto 表示自动探测格式，select 表示强制弹出对话框选择格式
@@ -3125,7 +3760,10 @@ LogicChipItem chip)
                 new_tag_info.LockStatus = block_map;
                 new_tag_info.DSFID = LogicChip.DefaultDSFID;  // 图书
                 new_tag_info.SetEas(eas);
-                return new_tag_info;
+                return new BuildWritingResult
+                {
+                    TagInfo = new_tag_info
+                };
             }
 
             if (existing.Protocol == InventoryInfo.ISO18000P6C)
@@ -3144,11 +3782,26 @@ LogicChipItem chip)
     * */
 
 
-                var isExistingGB = UhfUtility.IsISO285604Format(Element.FromHexString(existing.UID), existing.Bytes);
+                var epc_bank = Element.FromHexString(existing.UID);
+                var isExistingGB = UhfUtility.IsISO285604Format(epc_bank, existing.Bytes);
+                string existingUhfProtocol = "";
+                if (UhfUtility.IsBlankTag(epc_bank, existing.Bytes) == true)
+                    existingUhfProtocol = "blank";
+                else
+                {
+                    if (isExistingGB)
+                        existingUhfProtocol = "gb";
+                    else
+                    {
+                        if (IsWhdt(epc_bank))
+                            existingUhfProtocol = "gxlm(whdt)";
+                        else
+                            existingUhfProtocol = "gxlm";
+                    }
+                }
 
                 if (uhfProtocol == "auto")
                 {
-                    var epc_bank = Element.FromHexString(existing.UID);
                     if (UhfUtility.IsBlankTag(epc_bank, existing.Bytes) == true)
                     {
                         /*
@@ -3209,7 +3862,8 @@ LogicChipItem chip)
                     if (func_askFormat == null)
                         throw new ArgumentException($"当需要选择格式时，func_askFormat 为 null");
 
-                    var result = func_askFormat.Invoke(isExistingGB ? "gb" : "gxlm");
+                    var result = func_askFormat.Invoke(/*isExistingGB ? "gb" : "gxlm"*/
+                        existingUhfProtocol);
 
                     if (result == null)
                         throw new InterruptException("放弃写入标签");
@@ -3267,10 +3921,21 @@ LogicChipItem chip)
                 }
 
                 TagInfo new_tag_info = existing.Clone();
+
+                // 当写入不同格式的时候，警告格式覆盖
+                if (uhfProtocol != existingUhfProtocol
+                    && existingUhfProtocol != "blank")
+                {
+                    var ret = func_askOverwrite.Invoke(uhfProtocol, existingUhfProtocol);
+                    if (ret == false)
+                        throw new Exception("放弃写入");
+                }
+
                 if (uhfProtocol == "gxlm"
                     || uhfProtocol == "gxlm(whdt)")
                 {
                     // 写入高校联盟数据格式
+#if REMVOED
                     if (isExistingGB)
                     {
                         /*
@@ -3288,6 +3953,7 @@ LogicChipItem chip)
                         if (ret == false)
                             throw new Exception("放弃写入");
                     }
+#endif
 
                     // SetTypeOfUsage(chip, "gxlm");
                     var epc_info = new GaoxiaoEpcInfo
@@ -3315,6 +3981,10 @@ LogicChipItem chip)
                     }
                     else
                     {
+                        // 删除空内容元素
+                        // 2023/11/23
+                        chip.RemoveEmptyElements();
+
                         result = GaoxiaoUtility.BuildTag(chip, build_user_bank, eas,
                             epc_info);
                     }
@@ -3333,6 +4003,7 @@ LogicChipItem chip)
                 else
                 {
                     // 写入国标数据格式
+#if REMOVED
                     if (isExistingGB == false)
                     {
                         /*
@@ -3350,6 +4021,7 @@ LogicChipItem chip)
                         if (ret == false)
                             throw new Exception("放弃写入");
                     }
+#endif
                     // SetTypeOfUsage(chip, "gb");
 
                     var result = UhfUtility.BuildTag(chip,
@@ -3360,7 +4032,12 @@ LogicChipItem chip)
                     new_tag_info.Bytes = build_user_bank ? result.UserBank : null;
                     new_tag_info.UID = UhfUtility.EpcBankHex(result.EpcBank);  // existing.UID.Substring(0, 4) + Element.GetHexString(result.EpcBank);
                 }
-                return new_tag_info;
+                return new BuildWritingResult
+                {
+                    TagInfo = new_tag_info,
+                    OldUhfFormat = existingUhfProtocol,
+                    NewUhfFormat = uhfProtocol,
+                };
             }
 
             throw new ArgumentException($"目前暂不支持 {existing.Protocol} 协议标签的写入操作");
@@ -3505,7 +4182,10 @@ LogicChipItem chip)
 
         private async void toolStripButton_saveRfid_Click(object sender, EventArgs e)
         {
-            await SaveItemChangeAsync(async (item) => await SaveTagContentAsync(item));
+            var control = (Control.ModifierKeys & Keys.Control) != 0;
+            await SaveItemChangeAsync(
+                this.listView_tags.Items.Cast<ListViewItem>(),
+                async (item) => await SaveTagContentAsync(item, control ? "select_format" : ""));
 
 #if OLD
             int count = 0;

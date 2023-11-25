@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.99.*")]
-[assembly: AssemblyFileVersion("3.99.0.0")]
+[assembly: AssemblyVersion("3.104.*")]
+[assembly: AssemblyFileVersion("3.104.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -201,3 +201,10 @@ using System.Runtime.InteropServices;
 //                  快捷出纳窗任务列表事项闪动以后常常残留紫色的 bug 消除
 //      2023/11/22  系统参数对话框“读写器”属性页增加了一种 UHF 内容格式“望湖洞庭”，可以强制生成固定的 EPC(部分)内容和 User Bank 内容
 //                  高频和超高频读写器都插上时候的一些 bug 修复
+//      2023/11/23  RFID 工具窗在覆盖写入“望湖洞庭”格式标签的时候不会改变其格式，新增加了保存后明确显示其格式的功能
+//                  RFID 工具窗按住 Ctrl 点保存按钮，可以强制出现选择格式的对话框，这样可以覆盖的时候改变原有格式
+//                  RFID 工具窗有修改尚未保存，关闭时会弹出对话框警告
+//                  RFID 工具窗“全部保存”按钮此前的作用是保存选择的事项(而不是全部事项)。这个 bug 已经修正
+//                  RFID 工具窗中的保存功能，分为 UID 发生改变和不发生改变两种情况。要注意 不自动刷新 状态下，保存以后 listview 显示能正常刷新，并且可以继续进一步修改保存
+//      2023/11/25  快捷出纳窗的红色报错和重复输入 bug 被修正。RfidManager 的 Inventory+ListTag 过程也包含到锁定范围。RfidManager.SetEAS() 函数增加了锁定机制，以便和 Inventory+ListTag 过程互斥。
+//                  RFID 工具窗中的自动修正 EAS 功能做了改进，放到非界面线程驱动，RfidManager.SetEAS() 也新增了锁定机制。

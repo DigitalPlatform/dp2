@@ -862,7 +862,7 @@ out strError);
                         {
                             RfidToolForm.FilterUserBankElements(chip, uhfProtocol);
                             return Program.MainForm.UhfWriteUserBank;
-                        });
+                        }).TagInfo;
                 }
                 else
                 {

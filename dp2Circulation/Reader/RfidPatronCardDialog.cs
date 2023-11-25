@@ -517,7 +517,7 @@ out strError);
                             (chip, uhfProtocol) =>
                             {
                                 return true;
-                            });
+                            }).TagInfo;
                     }
                     else
                     {

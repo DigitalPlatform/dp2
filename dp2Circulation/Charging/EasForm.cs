@@ -166,7 +166,8 @@ namespace dp2Circulation.Charging
 #endif
             // 注: 无论 result.ChangedUID 是否为空，都要进行 UpdateUID 操作
             // HF 标签此时的 result.ChangedUID 是为空的
-            if (string.IsNullOrEmpty(result.OldUID) == false)
+            if (string.IsNullOrEmpty(result.OldUID) == false
+                && result.Value == 1)
             {
                 if (string.IsNullOrEmpty(result.ChangedUID) == false)
                     TaskList.ChangeUID(result.OldUID, result.ChangedUID);
@@ -423,10 +424,10 @@ out string strError);
                 return new NormalResult { Value = 0 };
 
             // 获得册记录 XML
-            var result = GetItemXml(pii);
-            if (result.Value == -1)
+            var getitem_result = GetItemXml(pii);
+            if (getitem_result.Value == -1)
             {
-                return result;
+                return getitem_result;
             }
 
             // 获得册记录的外借状态。
@@ -435,7 +436,7 @@ out string strError);
             //      -1  出错
             //      0   没有被外借
             //      1   在外借状态
-            int nRet = RfidToolForm.GetCirculationState(result.ItemXml,
+            int nRet = RfidToolForm.GetCirculationState(getitem_result.ItemXml,
                 out string strError);
             if (nRet == -1 || nRet == -2)
             {
@@ -480,7 +481,19 @@ out string strError);
                     UpdateUID(tag_info.UID, seteas_result.ChangedUID);
                     tag_info.UID = seteas_result.ChangedUID;
                 }
-                RfidTagList.SetEasData(tag_info.UID, false);
+
+                // 2023/11/25
+                // 注: 无论 result.ChangedUID 是否为空，都要进行 UpdateUID 操作
+                // HF 标签此时的 result.ChangedUID 是为空的
+                if (string.IsNullOrEmpty(seteas_result.OldUID) == false
+                    && seteas_result.Value == 1)
+                {
+                    if (string.IsNullOrEmpty(seteas_result.ChangedUID) == false)
+                        TaskList.ChangeUID(seteas_result.OldUID, seteas_result.ChangedUID);
+                    else
+                        TaskList.ChangeUID(seteas_result.OldUID, "off");
+                }
+                // RfidTagList.SetEasData(tag_info.UID, false);
             }
             else if (nRet == 0 && tag_info.EAS == false)
             {
@@ -493,8 +506,19 @@ out string strError);
                     UpdateUID(tag_info.UID, seteas_result.ChangedUID);
                     tag_info.UID = seteas_result.ChangedUID;
                 }
-                RfidTagList.SetEasData(tag_info.UID,
-                    true);
+
+                // 2023/11/25
+                // 注: 无论 result.ChangedUID 是否为空，都要进行 UpdateUID 操作
+                // HF 标签此时的 result.ChangedUID 是为空的
+                if (string.IsNullOrEmpty(seteas_result.OldUID) == false
+                    && seteas_result.Value == 1)
+                {
+                    if (string.IsNullOrEmpty(seteas_result.ChangedUID) == false)
+                        TaskList.ChangeUID(seteas_result.OldUID, seteas_result.ChangedUID);
+                    else
+                        TaskList.ChangeUID(seteas_result.OldUID, "on");
+                }
+                // RfidTagList.SetEasData(tag_info.UID, true);
             }
             else
             {
@@ -970,6 +994,13 @@ out string strError);
         private void EasForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             _limit.Dispose();
+        }
+
+        // 2023/11/24
+        private void EasForm_VisibleChanged(object sender, EventArgs e)
+        {
+            if (_floatingMessage != null)
+                _floatingMessage.Visible = this.Visible;
         }
     }
 

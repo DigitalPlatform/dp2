@@ -4389,17 +4389,30 @@ out Reader reader);
 
                                 epc_info.Lending = !enable;
                                 var payload = GaoxiaoUtility.EncodeGaoxiaoEpcPayload(epc_info);
-                                // TODO: 可以优化为只写入最小一个 word 范围
+                                /*
+                                {
+                                    Debug.Assert(bytes.Length == payload.Length);
+                                    List<byte> temp1 = new List<byte>(bytes);
+                                    temp1.RemoveRange(0, 2);
+                                    List<byte> temp2 = new List<byte>(payload);
+                                    temp2.RemoveRange(0, 2);
+                                    var ret = ByteArray.Compare(temp1.ToArray(), temp2.ToArray());
+                                    Debug.Assert(ret == 0);
+                                }
+                                */
+
+                                // 优化为只写入最小一个 word 范围
                                 var iret = RFIDLIB.rfidlib_aip_iso18000p6C.ISO18000p6C_Write(
                                     reader.ReaderHandle,
                                     hTag,
                                     (Byte)RFIDLIB.rfidlib_def.ISO18000p6C_MEM_BANK_EPC,
                                     2,
-                                    (UInt32)(payload.Length / 2),
+                                    1,  // (UInt32)(payload.Length / 2),
                                     payload,
                                     (UInt32)payload.Length);
                                 if (iret != 0)
                                 {
+                                    // TODO: 把要写的新内容也包含在报错中
                                     var result0 = new SetEasResult
                                     {
                                         Value = -1,
@@ -4414,7 +4427,7 @@ out Reader reader);
                                 // 更新 epc_bank
                                 List<byte> content = null;
                                 {
-                                    for (int i = 0; i < payload.Length; i++)
+                                    for (int i = 0; i < 2/*payload.Length*/; i++)
                                     {
                                         epc_bank[4 + i] = payload[i];
                                     }

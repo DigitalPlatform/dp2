@@ -57,9 +57,9 @@
             this.listView1.FullRowSelect = true;
             this.listView1.HideSelection = false;
             this.listView1.Location = new System.Drawing.Point(4, 4);
-            this.listView1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.listView1.Margin = new System.Windows.Forms.Padding(4);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(731, 285);
+            this.listView1.Size = new System.Drawing.Size(731, 247);
             this.listView1.TabIndex = 0;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.Details;
@@ -84,10 +84,10 @@
             this.label_message.AutoSize = true;
             this.label_message.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label_message.Font = new System.Drawing.Font("微软雅黑", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label_message.Location = new System.Drawing.Point(4, 293);
+            this.label_message.Location = new System.Drawing.Point(4, 255);
             this.label_message.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label_message.Name = "label_message";
-            this.label_message.Size = new System.Drawing.Size(731, 46);
+            this.label_message.Size = new System.Drawing.Size(731, 55);
             this.label_message.TabIndex = 1;
             // 
             // tableLayoutPanel1
@@ -98,14 +98,14 @@
             this.tableLayoutPanel1.Controls.Add(this.label_message, 0, 1);
             this.tableLayoutPanel1.Controls.Add(this.label_number, 0, 2);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 31);
-            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 38);
+            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 3;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(739, 463);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(739, 456);
             this.tableLayoutPanel1.TabIndex = 2;
             // 
             // label_number
@@ -113,10 +113,10 @@
             this.label_number.AutoSize = true;
             this.label_number.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label_number.Font = new System.Drawing.Font("微软雅黑", 48F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label_number.Location = new System.Drawing.Point(4, 339);
+            this.label_number.Location = new System.Drawing.Point(4, 310);
             this.label_number.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label_number.Name = "label_number";
-            this.label_number.Size = new System.Drawing.Size(731, 124);
+            this.label_number.Size = new System.Drawing.Size(731, 146);
             this.label_number.TabIndex = 2;
             this.label_number.Text = "0";
             this.label_number.TextAlign = System.Drawing.ContentAlignment.TopCenter;
@@ -131,7 +131,7 @@
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            this.toolStrip1.Size = new System.Drawing.Size(739, 31);
+            this.toolStrip1.Size = new System.Drawing.Size(739, 38);
             this.toolStrip1.TabIndex = 3;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -141,7 +141,7 @@
             this.toolStripButton_clearAll.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_clearAll.Image")));
             this.toolStripButton_clearAll.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_clearAll.Name = "toolStripButton_clearAll";
-            this.toolStripButton_clearAll.Size = new System.Drawing.Size(86, 28);
+            this.toolStripButton_clearAll.Size = new System.Drawing.Size(100, 32);
             this.toolStripButton_clearAll.Text = "全部移除";
             this.toolStripButton_clearAll.Click += new System.EventHandler(this.toolStripButton_clearAll_Click);
             // 
@@ -154,7 +154,7 @@
             this.toolStripDropDownButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton1.Image")));
             this.toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDropDownButton1.Name = "toolStripDropDownButton1";
-            this.toolStripDropDownButton1.Size = new System.Drawing.Size(100, 28);
+            this.toolStripDropDownButton1.Size = new System.Drawing.Size(117, 32);
             this.toolStripDropDownButton1.Text = "显示状态";
             // 
             // ToolStripMenuItem_detailMode
@@ -162,20 +162,20 @@
             this.ToolStripMenuItem_detailMode.Checked = true;
             this.ToolStripMenuItem_detailMode.CheckState = System.Windows.Forms.CheckState.Checked;
             this.ToolStripMenuItem_detailMode.Name = "ToolStripMenuItem_detailMode";
-            this.ToolStripMenuItem_detailMode.Size = new System.Drawing.Size(128, 30);
+            this.ToolStripMenuItem_detailMode.Size = new System.Drawing.Size(171, 40);
             this.ToolStripMenuItem_detailMode.Text = "列表";
             this.ToolStripMenuItem_detailMode.Click += new System.EventHandler(this.ToolStripMenuItem_detailMode_Click);
             // 
             // ToolStripMenuItem_numberMode
             // 
             this.ToolStripMenuItem_numberMode.Name = "ToolStripMenuItem_numberMode";
-            this.ToolStripMenuItem_numberMode.Size = new System.Drawing.Size(128, 30);
+            this.ToolStripMenuItem_numberMode.Size = new System.Drawing.Size(171, 40);
             this.ToolStripMenuItem_numberMode.Text = "数字";
             this.ToolStripMenuItem_numberMode.Click += new System.EventHandler(this.ToolStripMenuItem_numberMode_Click);
             // 
             // EasForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 28F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Yellow;
             this.ClientSize = new System.Drawing.Size(739, 494);
@@ -183,7 +183,7 @@
             this.Controls.Add(this.toolStrip1);
             this.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "EasForm";
@@ -194,6 +194,7 @@
             this.Activated += new System.EventHandler(this.EasForm_Activated);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.EasForm_FormClosed);
             this.Load += new System.EventHandler(this.EasForm_Load);
+            this.VisibleChanged += new System.EventHandler(this.EasForm_VisibleChanged);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
             this.toolStrip1.ResumeLayout(false);

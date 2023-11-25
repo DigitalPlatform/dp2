@@ -1078,15 +1078,28 @@ namespace DigitalPlatform.RFID
                     if (string.IsNullOrEmpty(changed_uid))
                         throw new ArgumentException("changed_uid 参数值不应为空(针对 UHF 标签)");
 
+                    if (changed_uid == "on" || changed_uid == "off")
+                        throw new ArgumentException($"changed_uid 参数值不应为 '{changed_uid}' (针对 UHF 标签时)(on off 只能用于 HF 标签)");
+
                     tag.UID = changed_uid;
                     if (tag.TagInfo != null)
                     {
+                        // 脱钩
+                        tag.TagInfo = tag.TagInfo.Clone();
+
+                        // 然后再修改
                         tag.TagInfo.UID = changed_uid;
                         tag.TagInfo.EAS = GetUhfEas(changed_uid, out int afi);
                         if (afi != 0)
                             tag.TagInfo.AFI = (byte)afi;
                     }
                     count++;
+
+                    // !!!
+                    // 2023/11/24
+                    // 清掉 _tagTable 中的事项，但不清除 Books 中的 .TagInfo
+                    // 这样避免下轮 _tagTable 中的事项被原 UID 关联用到
+                    RfidTagList.ClearTagTable(old_uid, false);
                 }
                 else if (tag.Protocol == InventoryInfo.ISO15693)
                 {
@@ -1094,9 +1107,21 @@ namespace DigitalPlatform.RFID
 
                     if (changed_uid != "on" && changed_uid != "off")
                         throw new ArgumentException($"针对 HF 标签，changed_uid 参数值应当为 'on' 'off' 之一");
-                    
-                    var eas = changed_uid == "on" ? true : false;
-                    ChangeTagInfoEas(tag.TagInfo, eas);
+
+                    if (tag.TagInfo != null)
+                    {
+                        // 脱钩
+                        tag.TagInfo = tag.TagInfo.Clone();
+
+                        var eas = changed_uid == "on" ? true : false;
+                        ChangeTagInfoEas(tag.TagInfo, eas);
+                    }
+
+                    // !!!
+                    // 2023/11/24
+                    // 清掉 _tagTable 中的事项，但不清除 Books 中的 .TagInfo
+                    // 这样避免下轮 _tagTable 中的事项被原 UID 关联用到
+                    RfidTagList.ClearTagTable(old_uid, false);
 
 #if REMOVED
                     tag.TagInfo = null;
@@ -1140,7 +1165,7 @@ namespace DigitalPlatform.RFID
         static bool ChangeTagInfoEas(TagInfo tag_info,
             bool eas)
         {
-            if (tag_info == null) 
+            if (tag_info == null)
                 return false;
             if (tag_info.EAS == eas)
                 return false;
@@ -1629,19 +1654,25 @@ namespace DigitalPlatform.RFID
         // uid --> TagInfo
         static Hashtable _tagTable = new Hashtable();
 
-        public static void ClearTagTable(string uid)
+        // parameters:
+        //      clear_tag_info  是否也要连带清除 Books 集合中的 .TagInfo 为 null?
+
+        public static void ClearTagTable(string uid,
+            bool clear_tag_info = true)
         {
             if (string.IsNullOrEmpty(uid))
             {
                 _tagTable.Clear();
                 // 要把 books 集合中相关 uid 的 TagInfo 设置为 null，迫使后面重新从 RfidCenter 获取
-                ClearTagInfo(null);
+                if (clear_tag_info)
+                    ClearTagInfo(null);
             }
             else
             {
                 _tagTable.Remove(uid);
                 // 要把 books 集合中相关 uid 的 TagInfo 设置为 null，迫使后面重新从 RfidCenter 获取
-                ClearTagInfo(uid);
+                if (clear_tag_info)
+                    ClearTagInfo(uid);
             }
         }
 
@@ -1708,7 +1739,14 @@ namespace DigitalPlatform.RFID
             // 直接利用原先的 TagInfo，把 readername 和 antennaid 改成所需要的就可以了
             if (info != null)
             {
-                if (info.Protocol != protocol)
+                if (info.UID != uid)
+                {
+                    // 2023/11/24
+                    // 发现 key 和 info.UID 扭曲的缓存事项，丢弃
+                    info = null;
+                    _tagTable.Remove(uid);
+                }
+                else if (info.Protocol != protocol)
                 {
                     info = null;
                     _tagTable.Remove(uid);

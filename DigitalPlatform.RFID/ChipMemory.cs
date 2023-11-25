@@ -1029,6 +1029,22 @@ start);
             ReserveSequence = 0x02, // 2020/8/3 尽量保留元素的原始顺序
         }
 
+        public void RemoveEmptyElements()
+        {
+            // 删除空元素
+            for (int i = 0; i < this._elements.Count; i++)
+            {
+                Element element = this._elements[i];
+                if (string.IsNullOrEmpty(element.Text)
+                    && element.OID != ElementOID.ContentParameter
+                    && element.Locked == false)
+                {
+                    this._elements.RemoveAt(i);
+                    i--;
+                }
+            }
+        }
+
         // 打包为 byte[] 形态
         // 注意，本函数执行后 this._elements 内各个元素的顺序可能会发生变化
         // 对于修改的情形，要避开已经 lock 的元素，对元素进行空间布局
@@ -1048,6 +1064,8 @@ start);
                 throw new ArgumentException($"max_bytes({max_bytes}) 不是 block_size({block_size}) 的整倍数");
 
             // 删除空元素
+            RemoveEmptyElements();
+#if REMOVED
             for (int i = 0; i < this._elements.Count; i++)
             {
                 Element element = this._elements[i];
@@ -1059,6 +1077,7 @@ start);
                     i--;
                 }
             }
+#endif
 
             // 先对 elements 排序。确保 PII 和 Content Parameter 元素 index 在前两个
             this.Sort(max_bytes,

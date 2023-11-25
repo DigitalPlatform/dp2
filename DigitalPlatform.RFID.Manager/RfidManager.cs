@@ -484,43 +484,85 @@ new SetErrorEventArgs
                         && string.IsNullOrEmpty(LockCommands) == false)
                         style += ",getLockState:" + StringUtil.EscapeString(LockCommands, ":,");
 
-                    var result = channel?.Object?.ListTags(readerNameList, style);
-                    if (result.Value == -1)
-                        Base.TriggerSetError(result,
-                            new SetErrorEventArgs { Error = result.ErrorInfo });
-                    else
-                        Base.TriggerSetError(result,
-                            new SetErrorEventArgs { Error = null }); // 清除以前的报错
+                    // 2023/11/25
+                    if (SyncSetEAS)
+                        style += ",dont_delay";
 
-                    lock_result = result.GetLockStateResult;
+                    DateTime start_time = DateTime.Now;
 
-                    IncLockHeartbeat();
+                    object __lockObj = _syncRoot;
+                    bool __lockWasTaken = false;
+                    try
+                    {
+                        // 外层加锁
+                        if (SyncSetEAS)
+                            System.Threading.Monitor.Enter(__lockObj, ref __lockWasTaken);
 
-                    if (string.IsNullOrEmpty(readerNameList) == false)
+                        var result = channel?.Object?.ListTags(readerNameList, style);
+                        if (result.Value == -1)
+                            Base.TriggerSetError(result,
+                                new SetErrorEventArgs { Error = result.ErrorInfo });
+                        else
+                            Base.TriggerSetError(result,
+                                new SetErrorEventArgs { Error = null }); // 清除以前的报错
+
+                        lock_result = result.GetLockStateResult;
+
+                        IncLockHeartbeat();
+
+                        if (string.IsNullOrEmpty(readerNameList) == false)
+                        {
+                            // using (var releaser = await _limit.EnterAsync().ConfigureAwait(false))
+                            try
+                            {
+#if SYNC_ROOT
+                                // 内层加锁
+                                if (SyncSetEAS == false)
+                                    System.Threading.Monitor.Enter(__lockObj, ref __lockWasTaken);
+#endif
+
+                                if (ListTags != null)
+                                {
+                                    // 先记忆
+                                    _lastTags = result.Results;
+
+                                    // 注意 result.Value == -1 时也会触发这个事件
+                                    ListTags(channel, new ListTagsEventArgs
+                                    {
+                                        ReaderNameList = readerNameList,
+                                        Result = result,
+                                        Source = "base",
+                                    });
+                                }
+                                else
+                                    _lastTags = null;
+
+                                _tagsReady = true;
+                            }
+                            finally
+                            {
+                                if (SyncSetEAS == false && __lockWasTaken)
+                                    System.Threading.Monitor.Exit(__lockObj);
+
+                            }
+                        }
+
+                    }
+                    finally
                     {
 #if SYNC_ROOT
-                        lock (_syncRoot)
+                        if (SyncSetEAS && __lockWasTaken)
+                            System.Threading.Monitor.Exit(__lockObj);
 #endif
-                        // using (var releaser = await _limit.EnterAsync().ConfigureAwait(false))
-                        {
-                            if (ListTags != null)
-                            {
-                                // 先记忆
-                                _lastTags = result.Results;
+                    }
 
-                                // 注意 result.Value == -1 时也会触发这个事件
-                                ListTags(channel, new ListTagsEventArgs
-                                {
-                                    ReaderNameList = readerNameList,
-                                    Result = result,
-                                    Source = "base",
-                                });
-                            }
-                            else
-                                _lastTags = null;
-
-                            _tagsReady = true;
-                        }
+                    // 补充延时
+                    if (SyncSetEAS)
+                    {
+                        var length = DateTime.Now - start_time;
+                        var delta = TimeSpan.FromSeconds(1) - length;
+                        if (delta.Milliseconds > 0)
+                            Thread.Sleep(delta.Milliseconds);
                     }
                 }
 
@@ -718,15 +760,18 @@ new SetErrorEventArgs
                 BaseChannel<IRfid> channel = Base.GetChannel();
                 try
                 {
-                    var result = channel.Object.GetTagInfo(reader_name, uid, antenna_id);
-                    if (result.Value == -1)
-                        Base.TriggerSetError(result,
-                            new SetErrorEventArgs { Error = result.ErrorInfo });
-                    else
-                        Base.TriggerSetError(result,
-                            new SetErrorEventArgs { Error = null }); // 清除以前的报错
+                    // lock (GetLockObject(""))
+                    {
+                        var result = channel.Object.GetTagInfo(reader_name, uid, antenna_id);
+                        if (result.Value == -1)
+                            Base.TriggerSetError(result,
+                                new SetErrorEventArgs { Error = result.ErrorInfo });
+                        else
+                            Base.TriggerSetError(result,
+                                new SetErrorEventArgs { Error = null }); // 清除以前的报错
 
-                    return result;
+                        return result;
+                    }
                 }
                 finally
                 {
@@ -765,19 +810,22 @@ new SetErrorEventArgs
                 BaseChannel<IRfid> channel = Base.GetChannel();
                 try
                 {
-                    var result = channel.Object.GetTagInfo(reader_name,
+                    // lock (GetLockObject(style))
+                    {
+                        var result = channel.Object.GetTagInfo(reader_name,
                         uid,
                         antenna_id,
                         protocol,
                         style);
-                    if (result.Value == -1)
-                        Base.TriggerSetError(result,
-                            new SetErrorEventArgs { Error = result.ErrorInfo });
-                    else
-                        Base.TriggerSetError(result,
-                            new SetErrorEventArgs { Error = null }); // 清除以前的报错
+                        if (result.Value == -1)
+                            Base.TriggerSetError(result,
+                                new SetErrorEventArgs { Error = result.ErrorInfo });
+                        else
+                            Base.TriggerSetError(result,
+                                new SetErrorEventArgs { Error = null }); // 清除以前的报错
 
-                    return result;
+                        return result;
+                    }
                 }
                 finally
                 {
@@ -869,6 +917,18 @@ new SetErrorEventArgs
             }
         }
 
+        // 2022/11/25
+        // 是否要把 SetEAS() 和 ListTag 动作按照先后协调运作?
+        public static bool SyncSetEAS { get; set; }
+
+        static object GetLockObject(string style)
+        {
+            if (SyncSetEAS || StringUtil.IsInList("sync", style))
+                return SyncRoot;
+            return new object();
+        }
+
+
         public static SetEasResult SetEAS(string reader_name,
             string tag_name,
             uint antenna_id,
@@ -880,14 +940,17 @@ new SetErrorEventArgs
                 BaseChannel<IRfid> channel = Base.GetChannel();
                 try
                 {
-                    var result = channel.Object.SetEAS1(reader_name, tag_name, antenna_id, enable, style);
-                    if (result.Value == -1)
-                        Base.TriggerSetError(result,
-                            new SetErrorEventArgs { Error = result.ErrorInfo });
-                    else
-                        Base.TriggerSetError(result,
-                            new SetErrorEventArgs { Error = null }); // 清除以前的报错
-                    return result;
+                    lock (GetLockObject(style))
+                    {
+                        var result = channel.Object.SetEAS1(reader_name, tag_name, antenna_id, enable, style);
+                        if (result.Value == -1)
+                            Base.TriggerSetError(result,
+                                new SetErrorEventArgs { Error = result.ErrorInfo });
+                        else
+                            Base.TriggerSetError(result,
+                                new SetErrorEventArgs { Error = null }); // 清除以前的报错
+                        return result;
+                    }
                 }
                 finally
                 {
@@ -918,15 +981,18 @@ new SetErrorEventArgs
                 BaseChannel<IRfid> channel = Base.GetChannel();
                 try
                 {
-                    var result = channel.Object.SetEAS1("*", $"uid:{uid}", antenna_id, enable, style);
-                    if (result.Value == -1)
-                        Base.TriggerSetError(result,
-                            new SetErrorEventArgs { Error = result.ErrorInfo });
-                    else
-                        Base.TriggerSetError(result,
-                            new SetErrorEventArgs { Error = null }); // 清除以前的报错
+                    lock (GetLockObject(style))
+                    {
+                        var result = channel.Object.SetEAS1("*", $"uid:{uid}", antenna_id, enable, style);
+                        if (result.Value == -1)
+                            Base.TriggerSetError(result,
+                                new SetErrorEventArgs { Error = result.ErrorInfo });
+                        else
+                            Base.TriggerSetError(result,
+                                new SetErrorEventArgs { Error = null }); // 清除以前的报错
 
-                    return result;
+                        return result;
+                    }
                 }
                 finally
                 {

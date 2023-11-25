@@ -44,6 +44,7 @@ namespace DigitalPlatform.RFID
             return true;
         }
 
+        // TODO: Encode 和 Decode 往返 EPC Payload 单元测试
 
         // 编码高校联盟 EPC bank 的载荷部分。
         // return:

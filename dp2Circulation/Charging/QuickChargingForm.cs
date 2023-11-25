@@ -363,7 +363,7 @@ namespace dp2Circulation
             {
                 foreach (var item_remove in list_remove)
                 {
-                    if (item_add.UII == item_remove.UII)
+                    if (WildIsEqual(item_add.UII, item_remove.UII))
                     {
                         add_datas.Remove(item_add.Data);
                         remove_datas.Remove(item_remove.Data);
@@ -377,6 +377,32 @@ namespace dp2Circulation
             }
 
             return updates;
+
+            // TODO: 还可把 OI 和 PII 分离以后单独比较
+            bool WildIsEqual(string uii1, string uii2)
+            {
+                if (uii1 == null)
+                    uii1 = "";
+                if (uii2 == null)
+                    uii2 = "";
+                if (uii1 == uii2)
+                    return true;
+                var dot1 = uii1.Contains(".");
+                var dot2 = uii2.Contains(".");
+                if (dot1 == dot2)
+                    return uii1 == uii2;
+                if (dot1 == true)
+                {
+                    return uii1 == uii2 || uii1.EndsWith("." + uii2);
+                }
+
+                if (dot2 == true)
+                {
+                    return uii1 == uii2 || uii2.EndsWith("." + uii1);
+                }
+
+                return false;
+            }
 
             List<UiiAndTag> MakeList(List<TagAndData> datas)
             {
@@ -697,8 +723,6 @@ namespace dp2Circulation
 
             // 检查时间差额
             {
-
-
                 DateTime last_time = GetLastTime(data.OneTag);
                 if (now - last_time < _minDelay)
                 {

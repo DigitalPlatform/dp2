@@ -32,7 +32,7 @@ using System.Runtime.InteropServices;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.14.26")]   // 1.11.*
+[assembly: AssemblyVersion("1.14.27")]   // 1.11.*
 [assembly: AssemblyFileVersion("1.14.0.0")]
 
 // V1.1 2019/2/21 支持 32-bit Windows 环境
@@ -76,5 +76,6 @@ using System.Runtime.InteropServices;
 //              (2023/11/21) SetEAS() API 返回的结构中增加了一个 OldUID 成员。(此前版本已经增加了 ChangedUI 成员)
 //              (2023/11/22) SetEAS() API 中增加对 UHF EPC 的 CRC-16 校验，跳过一些不必要的尝试动作
 //                          对一些地方的 PII 改为适应 UII
+//              (2023/11/24) SetEAS() 修改高校联盟的 EPC 的时候优化为仅仅改变一个 word
 
 

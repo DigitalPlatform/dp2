@@ -1658,6 +1658,8 @@ MessageBoxDefaultButton.Button1);
                 _cancelRfidManager = new CancellationTokenSource();
                 RfidManager.Base.Name = "RFID 中心";
                 RfidManager.Url = this.RfidCenterUrl;
+                // RfidManager.Base.ShortWaitTime = TimeSpan.FromSeconds(1);
+                RfidManager.SyncSetEAS = true;  // 协调 SetEAS() 时序
                 RfidManager.GetRSSI = this.UhfRSSI == 0 ? false : true;
                 RfidTagList.OnlyReadEPC = this.UhfOnlyEpcCharging;
                 // RfidManager.AntennaList = "1|2|3|4";    // testing
@@ -1722,7 +1724,11 @@ MessageBoxDefaultButton.Button1);
                         },
                         (type, text) =>
                         {
-                            RfidManager.TriggerSetError(this, new SetErrorEventArgs { Error = text });
+                            if (string.IsNullOrEmpty(text) == false)
+                                RfidManager.TriggerSetError(this, new SetErrorEventArgs { Error = text });
+                            else
+                                RfidManager.TriggerSetError(this, new SetErrorEventArgs { Error = text });
+
                             // TagSetError?.Invoke(this, new SetErrorEventArgs { Error = text });
                         });
 
