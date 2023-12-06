@@ -33,6 +33,7 @@
             this.columnHeader_uid = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_pii = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_summary = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_reason = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.label_message = new System.Windows.Forms.Label();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.label_number = new System.Windows.Forms.Label();
@@ -51,7 +52,8 @@
             this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader_uid,
             this.columnHeader_pii,
-            this.columnHeader_summary});
+            this.columnHeader_summary,
+            this.columnHeader_reason});
             this.listView1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView1.Font = new System.Drawing.Font("微软雅黑", 12F);
             this.listView1.FullRowSelect = true;
@@ -78,6 +80,11 @@
             // 
             this.columnHeader_summary.Text = "摘要";
             this.columnHeader_summary.Width = 600;
+            // 
+            // columnHeader_reason
+            // 
+            this.columnHeader_reason.Text = "动机";
+            this.columnHeader_reason.Width = 200;
             // 
             // label_message
             // 
@@ -218,5 +225,6 @@
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_detailMode;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_numberMode;
         private System.Windows.Forms.Label label_number;
+        private System.Windows.Forms.ColumnHeader columnHeader_reason;
     }
 }

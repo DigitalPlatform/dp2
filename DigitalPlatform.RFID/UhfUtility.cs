@@ -66,7 +66,7 @@ namespace DigitalPlatform.RFID
         public static bool IsBlankTag(byte[] epc_bank,
             byte[] user_bank)
         {
-            return IsBlankEpcBank(epc_bank);
+            return IsBlankEpcBank(epc_bank, user_bank);
 
             /*
             if (user_bank != null && user_bank.Length > 0)
@@ -96,12 +96,24 @@ namespace DigitalPlatform.RFID
             */
         }
 
-        public static bool IsBlankEpcBank(byte[] epc_bank)
+        public static bool IsBlankEpcBank(byte[] epc_bank,
+            byte[] user_bank = null)
         {
             // 彻底空白的 EPC
             if (epc_bank.Length == 4
     && epc_bank[2] == 0 && epc_bank[3] == 0)
                 return true;
+
+            bool is_user_bank_empty = false;
+            if (user_bank == null)
+                is_user_bank_empty = true;
+            else
+            {
+                if (user_bank.Where(o => o != 0).Any())
+                    is_user_bank_empty = false;
+                else
+                    is_user_bank_empty = true;
+            }
 
             var pc = ParsePC(epc_bank, 2);
 
@@ -109,7 +121,8 @@ namespace DigitalPlatform.RFID
             // 3000 --> PC Word --> (二进制) 0011 0000 0000 0000
             // --> Length=6word UMI=0 XPC=0 Toggle=0 attribute=0x00
             if (pc.LengthIndicator == 6
-                && pc.UMI == false && pc.XPC == false && pc.AFI == 0 && pc.ISO == false
+                && (pc.UMI == false || (pc.UMI == true && is_user_bank_empty == true))
+                && pc.XPC == false && pc.AFI == 0 && pc.ISO == false
                 && epc_bank[4] == 0xe2/* && epc_bank[5] == 0*/)
                 return true;
 
@@ -149,13 +162,36 @@ namespace DigitalPlatform.RFID
         // 注: 不包含最开始的 CRC word
         public static byte[] BuildBlankEpcBank()
         {
-            ProtocolControlWord pc = new ProtocolControlWord();
-            pc.UMI = false;
-            pc.XPC = false;
-            pc.ISO = false;
-            pc.AFI = 0;
-            pc.LengthIndicator = 0; // 载荷为 0
-            return UhfUtility.EncodePC(pc);
+            List<byte> bytes = new List<byte>();
+            {
+                ProtocolControlWord pc = new ProtocolControlWord();
+                pc.UMI = false;
+                pc.XPC = false;
+                pc.ISO = false;
+                pc.AFI = 0;
+                pc.LengthIndicator = 6; // 载荷为 6
+                bytes.AddRange(UhfUtility.EncodePC(pc));
+            }
+
+            {
+                List<byte> payload = new List<byte>();
+                payload.Add(0xe2);
+                payload.Add(0);
+
+                var guid = Guid.NewGuid().ToByteArray();
+                for (int i = 0; i < 10; i++)
+                {
+                    payload.Add(guid[i]);
+                }
+                while(payload.Count < 12)
+                {
+                    payload.Add(0);
+                }
+                Debug.Assert(payload.Count == 12);
+                bytes.AddRange(payload);
+            }
+
+            return bytes.ToArray();
         }
 
         #region 编码

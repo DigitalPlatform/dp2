@@ -52,10 +52,12 @@
         </Grid.RowDefinitions>
 -->
             <Button 
-                Name="borrowButton" Content="借书" Click="Button_Borrow_Click"
+                Name="borrowButton" Content="借书" 
+                Click="Button_Borrow_Click" 
                 Background="DarkBlue" Foreground="White" FontSize="40" BorderThickness="0"/>
             <Button 
-                Name="returnButton" Content="还书" Click="ReturnButton_Click"
+                Name="returnButton" Content="还书" 
+                Click="ReturnButton_Click"
                 Background="BlueViolet" Foreground="White" FontSize="40" BorderThickness="0"/>
             <TextBlock Name="message"
                    Text="message" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center"
@@ -92,6 +94,9 @@
             <Button 
                 Name="inventory" Content="盘点" Click="inventory_Click"
                 Background="#FF74A484" Foreground="Black" FontSize="40" BorderThickness="0"/>
+            <Button 
+                Name="borrowAndReturn" Content="借+还" Click="borrowAndReturn_Click"
+                Background="#FF4400AA" Foreground="White" FontSize="36" BorderThickness="0"/>
 
             <Button Name="error" Content="错误信息"  Click="Error_Click"
                 Visibility="{Binding Path=Error, Mode=OneWay, Converter={StaticResource StringToVis}}"

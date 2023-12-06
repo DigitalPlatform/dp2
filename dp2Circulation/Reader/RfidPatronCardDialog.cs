@@ -287,8 +287,11 @@ MessageBoxDefaultButton.Button2);
             REDO:
                 // 出现对话框让选择一个
                 // SelectTagDialog dialog = new SelectTagDialog();
-                using (RfidToolForm dialog = new RfidToolForm())
+                using (var dialog = new SelectRfidTagDialog())
                 {
+                    dialog.AutoRefresh = true;
+                    dialog.AutoFixEas = false;
+
                     dialog.Text = "选择 RFID 读者卡";
                     dialog.OkCancelVisible = true;
                     dialog.LayoutVertical = false;
@@ -494,6 +497,7 @@ out strError);
                             this.chipEditor_editing.LogicChipItem,
                             false,   // 这是读者卡，EAS 应该为 false
                             Program.MainForm.UhfDataFormat, // gb/gxlm/auto
+                            "",
                             (initial_format) =>
                             {
                                 throw new Exception("意外触发格式选择回调函数");
@@ -527,12 +531,8 @@ out strError);
                 }
                 else
                     new_tag_info = _tagExisting.TagInfo.Clone();
-#if OLD_CODE
-                NormalResult result = channel.Object.WriteTagInfo(
-                    _tagExisting.ReaderName,
-                    _tagExisting.TagInfo,
-                    new_tag_info);
-#else
+
+#if OLD
                 NormalResult result = RfidManager.WriteTagInfo(
     _tagExisting.ReaderName,
     _tagExisting.TagInfo,
@@ -541,10 +541,18 @@ out strError);
                 // 2023/10/31
                 if (_tagExisting.Protocol == InventoryInfo.ISO18000P6C)
                     RfidTagList.ClearTagTable(new_tag_info.UID);
-#endif
                 if (result.Value == -1)
                 {
                     strError = result.ErrorInfo + $" errorCode={result.ErrorCode}";
+                    return -1;
+                }
+#endif
+                var result = RfidToolForm.WriteTagInfo(_tagExisting.TagInfo,
+                    new_tag_info);
+
+                if (result.Value == -1)
+                {
+                    strError = result.ErrorInfo;
                     return -1;
                 }
 

@@ -729,7 +729,7 @@ namespace DigitalPlatform.RFID
                     var parse_result = GaoxiaoUtility.ParseTag(
         epc_bank,
         taginfo.Bytes,
-        style);  // "convertValueToGB"
+        style/*没有包含 checkUMI，表示允许“望湖洞庭”通过*/);  // "convertValueToGB"
                     if (parse_result.Value == -1)
                     {
                         if (parse_result.ErrorCode == "parseEpcError"
@@ -1050,7 +1050,9 @@ namespace DigitalPlatform.RFID
         //      old_uid 原先的 UID
         //      changed_uid 修改后的 UID (对于 UHF 标签)
         //                  "on" "off" 之一(对于 HF 标签)
-        public static int ChangeUID(
+        // return:
+        //      返回修改后的 OneTag 对象
+        public static OneTag ChangeUID(
             BaseChannel<IRfid> channel,
             string old_uid,
             string changed_uid)
@@ -1058,8 +1060,9 @@ namespace DigitalPlatform.RFID
             if (string.IsNullOrEmpty(old_uid))
                 throw new ArgumentException("old_uid 参数值不应为空");
 
+            List<OneTag> tags = new List<OneTag>();
             var news = Books;
-            int count = 0;
+            // int count = 0;
             foreach (TagAndData data in news)
             {
                 OneTag tag = data.OneTag;
@@ -1093,13 +1096,14 @@ namespace DigitalPlatform.RFID
                         if (afi != 0)
                             tag.TagInfo.AFI = (byte)afi;
                     }
-                    count++;
+                    // count++;
 
                     // !!!
                     // 2023/11/24
                     // 清掉 _tagTable 中的事项，但不清除 Books 中的 .TagInfo
                     // 这样避免下轮 _tagTable 中的事项被原 UID 关联用到
                     RfidTagList.ClearTagTable(old_uid, false);
+                    tags.Add(tag);
                 }
                 else if (tag.Protocol == InventoryInfo.ISO15693)
                 {
@@ -1156,11 +1160,28 @@ namespace DigitalPlatform.RFID
                     tag.TagInfo = info;
 #endif
 
-                    count++;
+                    // count++;
+                    tags.Add(tag);
                 }
             } // end of foreach
-            return count;
+
+            if (tags.Count == 0)
+                return null;
+            return tags[0];
         }
+
+        // 2023/12/6
+        // 清除 _tagTable 中缓存的信息
+        public static void ClearTagTable(List<TagAndData> datas)
+        {
+            if (datas == null || datas.Count == 0)
+                return;
+            foreach(var data in datas)
+            {
+                ClearTagTable(data.OneTag.UID, false);
+            }
+        }
+
 
         static bool ChangeTagInfoEas(TagInfo tag_info,
             bool eas)
@@ -1178,6 +1199,25 @@ namespace DigitalPlatform.RFID
             }
 
             return true;
+        }
+
+        // 根据 EPC 信息把 TagInfo::EAS 设置到位
+        public static bool SetTagInfoEAS(TagInfo tag_info)
+        {
+            // 把 tag_info.EAS 设置到位
+            if (tag_info.Protocol == InventoryInfo.ISO18000P6C)
+            {
+                try
+                {
+                    // UHF 和 HF 标签不一样，需要专门把 TagInfo.EAS 设置到位
+                    var chip_info = RfidTagList.GetUhfChipInfo(tag_info);
+                }
+                catch
+                {
+                }
+            }
+
+            return tag_info.EAS;
         }
 
 
@@ -1651,6 +1691,26 @@ namespace DigitalPlatform.RFID
 
 #endif
 
+        static bool _useTagTable = true;
+
+        /// <summary>
+        /// 是否要启用 _tagTable ?
+        /// 如果不启用，则每次都是直接从读写器 GetTagInfo() 获得标签详细信息
+        /// </summary>
+        public static bool UseTagTable
+        {
+            get
+            {
+                return _useTagTable;
+            }
+            set
+            {
+                _useTagTable = value;
+                _tagTable.Clear();
+            }
+        }
+
+
         // uid --> TagInfo
         static Hashtable _tagTable = new Hashtable();
 
@@ -1716,12 +1776,19 @@ namespace DigitalPlatform.RFID
         {
             // 2019/5/21
             if (channel.Started == false)
-                return new GetTagInfoResult { Value = -1, ErrorInfo = "RFID 通道尚未启动" };
+                return new GetTagInfoResult
+                {
+                    Value = -1,
+                    ErrorInfo = "RFID 通道尚未启动"
+                };
 
             // testing
             // Thread.Sleep(1000);
 
-            TagInfo info = (TagInfo)_tagTable[uid];
+            TagInfo info = null;
+
+            if (_useTagTable)
+                info = (TagInfo)_tagTable[uid];
 
             // 2020/10/17
             // 检查 reader_name 和 antenna
@@ -1765,7 +1832,7 @@ namespace DigitalPlatform.RFID
                 if (result.Value == -1)
                     return result;
                 info = result.TagInfo;
-                if (info != null)
+                if (info != null && _useTagTable)
                 {
                     if (_tagTable.Count > 1000)
                         _tagTable.Clear();
@@ -1805,6 +1872,95 @@ namespace DigitalPlatform.RFID
         }
 
 #endif
+
+        #region 探测因为 EAS 变化引起的 EPC 变化
+
+        public class DataChange
+        {
+            public TagAndData OldData { get; set; }
+            public TagAndData NewData { get; set; }
+        }
+
+        // 识别 EPC 变动
+        public static List<DataChange> DetectEpcChange(ref List<TagAndData> add_datas,
+            ref List<TagAndData> remove_datas)
+        {
+            var list_add = MakeList(add_datas);
+            var list_remove = MakeList(remove_datas);
+            if (list_add.Count == 0 || list_remove.Count == 0)
+                return new List<DataChange>();
+
+            var updates = new List<DataChange>();
+            foreach (var item_add in list_add)
+            {
+                foreach (var item_remove in list_remove)
+                {
+                    if (WildIsEqual(item_add.UII, item_remove.UII))
+                    {
+                        add_datas.Remove(item_add.Data);
+                        remove_datas.Remove(item_remove.Data);
+                        updates.Add(new DataChange
+                        {
+                            OldData = item_remove.Data,
+                            NewData = item_add.Data,
+                        });
+                    }
+                }
+            }
+
+            return updates;
+
+            // TODO: 还可把 OI 和 PII 分离以后单独比较
+            bool WildIsEqual(string uii1, string uii2)
+            {
+                if (uii1 == null)
+                    uii1 = "";
+                if (uii2 == null)
+                    uii2 = "";
+                if (uii1 == uii2)
+                    return true;
+                var dot1 = uii1.Contains(".");
+                var dot2 = uii2.Contains(".");
+                if (dot1 == dot2)
+                    return uii1 == uii2;
+                if (dot1 == true)
+                {
+                    return uii1 == uii2 || uii1.EndsWith("." + uii2);
+                }
+
+                if (dot2 == true)
+                {
+                    return uii1 == uii2 || uii2.EndsWith("." + uii1);
+                }
+
+                return false;
+            }
+
+            List<UiiAndTag> MakeList(List<TagAndData> datas)
+            {
+                var list = new List<UiiAndTag>();
+                foreach (var data in datas)
+                {
+                    if (data.OneTag.Protocol == InventoryInfo.ISO18000P6C)
+                    {
+                        var uii = RfidTagList.GetUhfUii(data.OneTag.UID, data.OneTag.TagInfo?.Bytes);
+                        list.Add(new UiiAndTag
+                        {
+                            UII = uii,
+                            Data = data
+                        });
+                    }
+                }
+                return list;
+            }
+        }
+        class UiiAndTag
+        {
+            public string UII { get; set; }
+            public TagAndData Data { get; set; }
+        }
+
+        #endregion
     }
 
     public class TagAndData

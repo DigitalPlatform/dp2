@@ -432,9 +432,14 @@ out string strError);
                                     string oi = entity.GetOiOrAoi();
                                     if (string.IsNullOrEmpty(oi))
                                     {
-                                        entity.SetError("标签中没有机构代码，被拒绝使用");
-                                        clearError = false;
-                                        goto CONTINUE;
+                                        if (PageBorrow.IsWhdtFormat(entity) == false)
+                                        {
+                                            entity.SetError("标签中没有机构代码，被拒绝使用");
+                                            clearError = false;
+                                            goto CONTINUE;
+                                        }
+                                        else
+                                            strict = false; // 改为不严格模式 2023/12/4
                                     }
                                 }
                                 result = await LibraryChannelUtil.GetEntityDataAsync(entity.GetOiPii(strict), "network"); // 2021/4/2 改为严格模式 OI_PII

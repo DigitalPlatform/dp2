@@ -104,6 +104,17 @@ namespace DigitalPlatform.RFID
             return false;
         }
 
+        // 2023/11/30
+        // 判断一个 HF 标签是否是空白标签
+        public static bool IsBlankHfTag(byte[] bytes)
+        {
+            if (bytes == null)
+                return true;
+            if (bytes.Where(o => o != 0).Any())
+                return false;
+            return true;
+        }
+
         // 查找一个元素
         public Element FindElement(ElementOID oid)
         {

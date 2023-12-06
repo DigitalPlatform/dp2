@@ -29,6 +29,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Core;
 using DigitalPlatform.Face;
 using DigitalPlatform.WPF;
+using System.Linq;
 
 namespace dp2SSL
 {
@@ -452,18 +453,24 @@ namespace dp2SSL
             if (booksControl.Visibility != Visibility.Visible)
                 return;
 
+            var addbooks = new List<TagAndData>(e.AddBooks == null ? new List<TagAndData>() : e.AddBooks);
+            var removebooks = new List<TagAndData>(e.RemoveBooks == null ? new List<TagAndData>() : e.RemoveBooks);
+            // 将 AddBooks 和 RemoveBooks 中的 UHF EPC 改变，但 UII 没有改变的标签分离出来，单独处理
+            var epc_changed_books = RfidTagList.DetectEpcChange(ref addbooks, ref removebooks);
+
+
             bool changed = false;
             List<Entity> update_entities = new List<Entity>();
             App.Invoke(new Action(() =>
             {
                 if (e.AddBooks != null)
-                    foreach (var tag in e.AddBooks)
+                    foreach (var tag in addbooks/*e.AddBooks*/)
                     {
                         var entity = _entities.Add(tag);
                         update_entities.Add(entity);
                     }
                 if (e.RemoveBooks != null)
-                    foreach (var tag in e.RemoveBooks)
+                    foreach (var tag in removebooks/*e.RemoveBooks*/)
                     {
                         _entities.Remove(tag.OneTag.UID);
                         changed = true;
@@ -475,6 +482,13 @@ namespace dp2SSL
                         if (entity != null)
                             update_entities.Add(entity);
                     }
+
+                foreach (var item in epc_changed_books)
+                {
+                    var entity = _entities.Update(item.OldData, item.NewData, true);
+                    if (entity != null)
+                        update_entities.Add(entity);
+                }
             }));
 
             if (update_entities.Count > 0)
@@ -483,8 +497,12 @@ namespace dp2SSL
 
                 Trigger(update_entities);
 
-                // 自动检查 EAS 状态
-                CheckEAS(update_entities);
+                List<Entity> temp = new List<Entity>(update_entities);
+                _ = Task.Run(() =>
+                {
+                    // 自动检查 EAS 状态
+                    CheckEAS(temp);
+                });
             }
             else if (changed)
             {
@@ -593,7 +611,11 @@ namespace dp2SSL
                         }
 
                         // 自动检查 EAS 状态
-                        CheckEAS(update_entities);
+                        List<Entity> temp = new List<Entity>(update_entities);
+                        _ = Task.Run(() =>
+                        {
+                            CheckEAS(temp);
+                        });
                     }
                 }
                 else
@@ -1353,31 +1375,61 @@ namespace dp2SSL
         }
 #endif
 
-        // 检查芯片的 EAS 状态
+        SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+
+        // TODO: 需要和 LoadAsync() 互斥
+        // 检查 RFID 标签的 EAS 状态
         void CheckEAS(List<Entity> entities)
         {
-            foreach (Entity entity in entities)
+            _semaphore.Wait();
+            try
             {
-                if (entity.TagInfo == null)
-                    continue;
+                foreach (Entity entity in entities)
+                {
+                    if (entity.TagInfo == null)
+                        continue;
 
-                // 对状态不明(State == null)册记录暂时不处理修正 EAS
-                if (entity.State == null)
-                    continue;
+                    // 对状态不明(State == null)册记录暂时不处理修正 EAS
+                    if (entity.State == null)
+                        continue;
 
-                // 检测 EAS 是否正确
-                NormalResult result = null;
-                if (StringUtil.IsInList("borrowed", entity.State) && entity.TagInfo.EAS == true)
-                    result = SetEAS(entity.UID, entity.Antenna, false);
-                else if (StringUtil.IsInList("onshelf", entity.State) && entity.TagInfo.EAS == false)
-                    result = SetEAS(entity.UID, entity.Antenna, true);
-                else
-                    continue;
+                    // 2023/11/26
+                    RfidTagList.SetTagInfoEAS(entity.TagInfo);
 
-                if (result.Value == -1)
-                    entity.SetError($"自动修正 EAS 时出错: {result.ErrorInfo}", "red");
-                else
-                    entity.SetError("自动修正 EAS 成功", "green");
+                    // 检测 EAS 是否正确
+                    SetEasResult result = null;
+                    if (StringUtil.IsInList("borrowed", entity.State) && entity.TagInfo.EAS == true)
+                        result = SetEAS(entity.UID,
+                            entity.Antenna,
+                            false,
+                            (uid, enable, seteas_result) =>
+                            {
+                                UpdateEntityUID(entity, enable, seteas_result);
+                            });
+                    else if (StringUtil.IsInList("onshelf", entity.State) && entity.TagInfo.EAS == false)
+                        result = SetEAS(entity.UID,
+                            entity.Antenna,
+                            true,
+                            (uid, enable, seteas_result) =>
+                            {
+                                UpdateEntityUID(entity, enable, seteas_result);
+                            });
+                    else
+                        continue;
+
+                    // UpdateEntityUID(entity, result);
+
+                    // TODO: 报错信息很快被 EPC 变化导致重新显示而消失
+
+                    if (result.Value == -1)
+                        entity.SetError($"自动修正 EAS 时出错: {result.ErrorInfo}", "red");
+                    else
+                        entity.SetError("自动修正 EAS 成功", "green");
+                }
+            }
+            finally
+            {
+                _semaphore.Release();
             }
         }
 
@@ -1750,9 +1802,14 @@ out string strError);
                                     string oi = entity.GetOiOrAoi();
                                     if (string.IsNullOrEmpty(oi))
                                     {
-                                        entity.SetError("标签中没有机构代码，被拒绝使用");
-                                        clearError = false;
-                                        goto CONTINUE;
+                                        if (IsWhdtFormat(entity) == false)
+                                        {
+                                            entity.SetError("标签中没有机构代码，被拒绝使用");
+                                            clearError = false;
+                                            goto CONTINUE;
+                                        }
+                                        else
+                                            strict = false; // 改为不严格模式 2023/12/4
                                     }
                                 }
                                 result = await LibraryChannelUtil.GetEntityDataAsync(entity.GetOiPii(strict), "network"); // 2021/4/2 改为严格模式 OI_PII
@@ -1800,6 +1857,52 @@ out string strError);
                 SetGlobalError("current", $"FillBookFieldsAsync() 发生异常(已写入错误日志): {ex.Message}"); // 2019/9/11 增加 FillBookFields() exception:
             }
         }
+
+        public static bool IsWhdtFormat(Entity entity)
+        {
+            if (entity.Protocol != InventoryInfo.ISO18000P6C)
+                return false;
+            var epc_bank = ByteArray.GetTimeStampByteArray(entity.UID);
+            return IsWhdt(epc_bank);
+        }
+
+        // 根据 EPC Bank 判断是不是“望湖洞庭”格式
+        public static bool IsWhdt(byte[] epc_bank)
+        {
+            var parse_result = GaoxiaoUtility.ParseTag(epc_bank, null, ""); // 注意，没有包含 checkUMI 表示不要检查 UMI 和 ContentParameters 是否具备之间的关系
+            if (parse_result.PC == null
+                || parse_result.EpcInfo == null)
+                return false;
+            var pc = parse_result.PC;
+            // 注: 望湖洞庭有一批标签没有 User Bank 内容，但 EPC 内容和先前的无异
+            if (/*pc.UMI == true
+                && */pc.AFI == 0
+                && pc.XPC == false
+                && pc.ISO == false)
+            {
+
+            }
+            else
+                return false;
+
+            var epc_info = parse_result.EpcInfo;
+
+            // content parameter 16 24 28 30
+            var cp = new int[] { 16, 24, 28, 30 };
+            if (cp.SequenceEqual(epc_info.ContentParameters) == false)
+                return false;
+
+            if (epc_info.Reserve != 0)
+                return false;
+            if (epc_info.Picking != 1)
+                return false;
+            if (epc_info.Version != 5)
+                return false;
+            if (epc_info.EncodingType != 0)
+                return false;
+            return true;
+        }
+
 
         public static string GetCaption(string text)
         {
@@ -1997,6 +2100,8 @@ out string strError);
                 channel.Timeout = TimeSpan.FromSeconds(10);
             }
 
+            await _semaphore.WaitAsync();
+
             try
             {
                 ClearEntitiesError();
@@ -2024,6 +2129,9 @@ out string strError);
                     string returning_date = null;
                     string period = null;
 
+                    // (还书前)预修改 EAS 是否发生了修改
+                    bool eas_changed = false;
+
                     if (action == "borrow" || action == "renew")
                     {
                         if (action == "borrow" && StringUtil.IsInList("borrowed", entity.State))
@@ -2041,24 +2149,44 @@ out string strError);
                     }
                     else if (action == "return")
                     {
-                        if (StringUtil.IsInList("onshelf", entity.State))
+                        var is_onshelf = StringUtil.IsInList("onshelf", entity.State);
+                        if (is_onshelf)
                         {
                             entity.SetError($"本册是在馆状态。{action_name}操作被忽略", "yellow");
                             skip_count++;
                             continue;
                         }
 
-                        // TODO: 增加检查 EAS 现有状态功能，如果已经是 true 则不用修改，后面 API 遇到出错后也不要回滚 EAS
                         // return 操作，提前修改 EAS
                         // 注: 提前修改 EAS 的好处是比较安全。相比 API 执行完以后再修改 EAS，提前修改 EAS 成功后，无论后面发生什么，读者都无法拿着这本书走出门禁
+                        // 检查 EAS 现有状态，如果已经是 true 则不用修改，后面 API 遇到出错后也不要回滚 EAS
+                        if (entity.GetEas() == false)
                         {
-                            var result = SetEAS(entity.UID, entity.Antenna, action == "return");
+                            SetEasResult result;
+                            if (App.RfidTestReturnPreEAS)
+                                result = new SetEasResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = "测试触发修改 EAS 报错(还书操作前段)",
+                                    ErrorCode = "rfidTestError"
+                                };
+                            else
+                                result = SetEAS(entity.UID,
+                                    entity.Antenna,
+                                    action == "return",
+                                    (uid, enable, seteas_result) =>
+                                    {
+                                        UpdateEntityUID(entity, enable, seteas_result);
+                                    });
+                            // UpdateEntityUID(entity, result);
                             if (result.Value == -1)
                             {
                                 entity.SetError($"{action_name}时修改 EAS 动作失败: {result.ErrorInfo}", "red");
                                 errors.Add($"册 '{entity.PII}' {action_name}时修改 EAS 动作失败: {result.ErrorInfo}");
                                 continue;
                             }
+
+                            eas_changed = true;
                         }
                     }
 
@@ -2111,10 +2239,15 @@ out string strError);
                             string oi = entity.GetOiOrAoi();
                             if (string.IsNullOrEmpty(oi))
                             {
-                                strError = "标签中没有机构代码，被拒绝使用";
-                                entity.SetError(strError, "red");
-                                skip_count++;
-                                continue;
+                                if (IsWhdtFormat(entity) == false)
+                                {
+                                    strError = "标签中没有机构代码，被拒绝使用";
+                                    entity.SetError(strError, "red");
+                                    skip_count++;
+                                    continue;
+                                }
+                                else
+                                    strict = false; // 改为不严格模式 2023/12/4
                             }
                         }
 
@@ -2185,24 +2318,32 @@ out string strError);
                             }
                             */
 
-                            //entity.Waiting = true;
-                            lRet = channel.Return(null,
-                                "return",
-                                patron_barcode_or_uii, // _patron.Barcode,
-                                entity.GetOiPii(strict),  // entity.PII,
-                                entity.ItemRecPath,
-                                false,
-                                "item,reader", // style,
-                                "xml", // item_format_list
-                                out item_records,
-                                "xml",
-                                out string[] reader_records,
-                                "",
-                                out string[] biblio_records,
-                                out string[] dup_path,
-                                out string output_reader_barcode,
-                                out ReturnInfo return_info,
-                                out strError);
+                            if (App.RfidTestReturnAPI)
+                            {
+                                lRet = -1;
+                                strError = "测试触发还书 API 报错(还书操作中段)，注意此时还书并没有成功";
+                            }
+                            else
+                            {
+                                //entity.Waiting = true;
+                                lRet = channel.Return(null,
+                                    "return",
+                                    patron_barcode_or_uii, // _patron.Barcode,
+                                    entity.GetOiPii(strict),  // entity.PII,
+                                    entity.ItemRecPath,
+                                    false,
+                                    "item,reader", // style,
+                                    "xml", // item_format_list
+                                    out item_records,
+                                    "xml",
+                                    out string[] reader_records,
+                                    "",
+                                    out string[] biblio_records,
+                                    out string[] dup_path,
+                                    out string output_reader_barcode,
+                                    out ReturnInfo return_info,
+                                    out strError);
+                            }
                         }
                         else
                         {
@@ -2218,10 +2359,27 @@ out string strError);
 
                     if (lRet == -1)
                     {
-                        // return 操作如果 API 失败，则要改回原来的 EAS 状态
-                        if (action == "return")
+                        // return 操作如果 API 失败，则要回滚到原来的 EAS 状态
+                        if (action == "return"
+                            && eas_changed == true)
                         {
-                            var result = SetEAS(entity.UID, entity.Antenna, false);
+                            SetEasResult result;
+                            if (App.RfidTestReturnPostUndoEAS)
+                                result = new SetEasResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = "测试触发修改 EAS 报错(还书操作末段，回滚 EAS 时)",
+                                    ErrorCode = "rfidTestError"
+                                };
+                            else
+                                result = SetEAS(entity.UID,
+                                    entity.Antenna,
+                                    false,
+                                    (uid, enable, seteas_result) =>
+                                    {
+                                        UpdateEntityUID(entity, enable, seteas_result);
+                                    });
+                            // UpdateEntityUID(entity, result);
                             if (result.Value == -1)
                                 strError += $"\r\n并且复原 EAS 状态的动作也失败了: {result.ErrorInfo}";
                         }
@@ -2236,7 +2394,24 @@ out string strError);
                     // 注: 如果 API 成功但修改 EAS 动作失败(可能由于读者从读卡器上过早拿走图书导致)，读者会无法把本册图书拿出门禁。遇到此种情况，读者回来补充修改 EAS 一次即可
                     if (action == "borrow")
                     {
-                        var result = SetEAS(entity.UID, entity.Antenna, action == "return");
+                        SetEasResult result;
+                        if (App.RfidTestBorrowEAS)
+                            result = new SetEasResult
+                            {
+                                Value = -1,
+                                ErrorInfo = "测试触发修改 EAS 报错(借书操作末段)",
+                                ErrorCode = "rfidTestError"
+                            };
+                        else
+                            result = SetEAS(entity.UID,
+                                entity.Antenna,
+                                action == "return",
+                                (uid, enable, seteas_result) =>
+                                {
+                                    UpdateEntityUID(entity, enable, seteas_result);
+                                });
+
+                        // UpdateEntityUID(entity, result);
                         if (result.Value == -1)
                         {
                             entity.SetError($"虽然{action_name}操作成功，但修改 EAS 动作失败: {result.ErrorInfo}", "yellow");
@@ -2358,6 +2533,8 @@ out string strError);
             }
             finally
             {
+                _semaphore.Release();
+
                 if (App.Protocol == "dp2library")
                 {
                     channel.Timeout = old_timeout;
@@ -2477,8 +2654,63 @@ out string strError);
             RemoveLayer();
         }
         */
+        void UpdateEntityUID(Entity entity,
+            bool enable,
+            SetEasResult result)
+        {
+            OneTag changed_tag = null;
+            if (result.Value == 1)
+            {
+                string uid = entity.UID;
+                string changed_uid = result.ChangedUID;
+                // 2023/12/1
+                // 精确修改 TagInfo
+                if (string.IsNullOrEmpty(uid) == false
+                    && result.Value == 1)
+                {
+                    if (string.IsNullOrEmpty(changed_uid) == false)
+                        changed_tag = ChangeUID(uid, changed_uid);
+                    else
+                        changed_tag = ChangeUID(uid, enable ? "on" : "off");
+                }
+            }
 
-        NormalResult SetEAS(string uid, string antenna, bool enable)
+            if (result.Value == 1 && string.IsNullOrEmpty(result.ChangedUID) == false)
+            {
+                /*
+                if (entity.TagInfo != null)
+                    entity.TagInfo.UID = result.ChangedUID;
+                */
+                if (changed_tag?.TagInfo != null)
+                {
+                    entity.TagInfo = changed_tag.TagInfo.Clone();
+                    entity.UID = result.ChangedUID;
+                    Debug.Assert(entity.TagInfo.UID == result.ChangedUID);
+                }
+                else
+                {
+                    // 等待下一轮 Update 自动更新 entity.UID
+                }
+            }
+        }
+
+        delegate void delagate_tagChanged(string uid,
+            bool enable,
+            SetEasResult result);
+
+        /*
+        class ChangeEasResult : SetEasResult
+        {
+            public OneTag ChangedTag { get; set; }
+        }
+        */
+
+        // parameters:
+        //      func_tagChanged 当标签发生修改以后触发。这里可以完成一些在 RfidManager.SyncRoot 锁定范围以内的事情
+        SetEasResult SetEAS(string uid,
+            string antenna,
+            bool enable,
+            delagate_tagChanged func_tagChanged)
         {
             try
             {
@@ -2488,7 +2720,10 @@ out string strError);
                 this.ClearTagTable(uid);
 #endif
                 // TagList.ClearTagTable(uid);
-                var result = RfidManager.SetEAS($"{uid}", antenna_id, enable);
+                var result = RfidManager.SetEAS($"{uid}",
+                    antenna_id,
+                    enable);
+#if REMOVED
                 if (result.Value != -1)
                 {
                     RfidTagList.SetEasData(uid, enable);
@@ -2500,18 +2735,65 @@ out string strError);
                         _entities.SetEasData(uid, enable);
                     }
                 }
-                return result;
+#endif
+                // OneTag changed_tag = null;
+                if (result.Value == 1)
+                {
+                    /*
+                    string changed_uid = result.ChangedUID;
+                    // 2023/12/1
+                    // 精确修改 TagInfo
+                    if (string.IsNullOrEmpty(uid) == false
+                        && result.Value == 1)
+                    {
+                        if (string.IsNullOrEmpty(changed_uid) == false)
+                            changed_tag = ChangeUID(uid, changed_uid);
+                        else
+                            changed_tag = ChangeUID(uid, enable ? "on" : "off");
+                    }
+                    */
+                    func_tagChanged?.Invoke(uid, enable, result);
+                }
+                return new SetEasResult
+                {
+                    Value = result.Value,
+                    ChangedUID = result.ChangedUID,
+                    // ChangedTag = changed_tag,
+                    ErrorInfo = result.ErrorInfo,
+                    ErrorCode = result.ErrorCode
+                };
             }
             catch (Exception ex)
             {
                 WpfClientInfo.WriteErrorLog($"SetEAS() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
-                return new NormalResult { Value = -1, ErrorInfo = ex.Message };
+                return new SetEasResult
+                {
+                    Value = -1,
+                    ErrorInfo = ex.Message
+                };
+            }
+        }
+
+        // parameters:
+        //      old_uid 原先的 UID
+        //      changed_uid 修改后的 UID (对于 UHF 标签)
+        //                  "on" "off" 之一(对于 HF 标签)
+        public static OneTag ChangeUID(string old_uid, string changed_uid)
+        {
+            BaseChannel<IRfid> channel = RfidManager.GetChannel();
+            try
+            {
+                return RfidTagList.ChangeUID(channel, old_uid, changed_uid);
+            }
+            finally
+            {
+                RfidManager.ReturnChannel(channel);
             }
         }
 
         // 当前读者卡状态是否 OK?
         // 注：如果卡片虽然放上去了，但无法找到读者记录，这种状态就不是 OK 的。此时应该拒绝进行流通操作
-        bool IsPatronOK(string action, 
+        bool IsPatronOK(string action,
             bool show_debug_info,
             out string message)
         {
@@ -2543,7 +2825,7 @@ out string strError);
             {
                 // 提示信息要考虑到应用了指纹的情况
                 if (string.IsNullOrEmpty(App.FingerprintUrl) == false)
-                    message = $"请先{fang}读者卡，或扫入一次指纹，然后再进行借书操作{(show_debug_info? debug_info : "")}";
+                    message = $"请先{fang}读者卡，或扫入一次指纹，然后再进行借书操作{(show_debug_info ? debug_info : "")}";
                 else
                     message = $"请先{fang}读者卡，然后再进行借书操作{(show_debug_info ? debug_info : "")}";
             }

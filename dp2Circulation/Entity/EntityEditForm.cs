@@ -1050,7 +1050,7 @@ MessageBoxDefaultButton.Button2);
 
             // 然后保存
             {
-                int nRet = SaveNewChip(item, 
+                int nRet = SaveNewChip(item,
                     out string new_tag_uid,
                     out strError);
                 if (nRet == -1)
@@ -1236,8 +1236,11 @@ MessageBoxDefaultButton.Button2);
             REDO:
                 // 出现对话框让选择一个
                 // SelectTagDialog dialog = new SelectTagDialog();
-                using (RfidToolForm dialog = new RfidToolForm())
+                using (var dialog = new SelectRfidTagDialog())
                 {
+                    dialog.AutoRefresh = true;
+                    dialog.AutoFixEas = false;
+
                     dialog.Text = "选择 RFID 标签";
                     dialog.OkCancelVisible = true;
                     dialog.LayoutVertical = false;
@@ -1432,7 +1435,7 @@ MessageBoxDefaultButton.Button2);
         // parameters:
         //      item    只用于写入统计日志
         //      new_tag_uid 更新后的 UID。目前 UHF 标签有这个特性
-        int SaveNewChip(BookItem item, 
+        int SaveNewChip(BookItem item,
             out string new_tag_uid,
             out string strError)
         {
@@ -1474,6 +1477,10 @@ out strError);
 
             try
             {
+                // int i = 0;
+                string build_style = "";  // testing "noUserBank"
+
+            REDO:
 #if NO
                 TagInfo new_tag_info = _tagExisting.TagInfo.Clone();
                 new_tag_info.Bytes = this.chipEditor_editing.LogicChipItem.GetBytes(
@@ -1506,25 +1513,20 @@ out strError);
                 }
 
                 TagInfo new_tag_info = null;
+                string new_uhfFormat = "";
                 if (_tagExisting.Protocol == InventoryInfo.ISO15693)
                 {
-
                     new_tag_info = LogicChipItem.ToTagInfo(
                         _tagExisting.TagInfo,
                         this.chipEditor_editing.LogicChipItem);
-#if OLD_CODE
-                NormalResult result = channel.Object.WriteTagInfo(
-                    _tagExisting.ReaderName,
-                    _tagExisting.TagInfo,
-                    new_tag_info);
-#else
                 }
                 else if (_tagExisting.Protocol == InventoryInfo.ISO18000P6C)
                 {
-                    new_tag_info = RfidToolForm.BuildWritingTagInfo(_tagExisting.TagInfo,
+                    var build_result = RfidToolForm.BuildWritingTagInfo(_tagExisting.TagInfo,
     this.chipEditor_editing.LogicChipItem,
     true,   // this.chipEditor_editing.LogicChipItem.EAS,
     Program.MainForm.UhfDataFormat, // gb/gxlm/auto
+    build_style,
     (initial_format) =>
     {
         throw new Exception("意外触发格式选择回调函数");
@@ -1543,18 +1545,22 @@ out strError);
                                 return true;
                             return false;
                         },
-                        (chip, element) => 
+                        (chip, element) =>
                         {
+                            if (StringUtil.IsInList("noUserBank", build_style) == true)
+                                return true;
                             MessageBox.Show(this, "当前系统参数定义了不写入超高频标签的 User Bank，但当前 library.xml 又配置了相应馆藏地的 OI(机构代码)，这是矛盾的。请修改参数配置");
                             return false;
                         },
                         // Program.MainForm.UhfWriteUserBank
-                        (chip, uhfProtocol) => 
+                        (chip, uhfProtocol) =>
                         {
                             RfidToolForm.FilterUserBankElements(chip, uhfProtocol);
                             return Program.MainForm.UhfWriteUserBank;
                         }
-                        ).TagInfo;
+                        );
+                    new_tag_info = build_result.TagInfo;
+                    new_uhfFormat = build_result.NewUhfFormat;
                 }
                 else
                 {
@@ -1570,6 +1576,7 @@ out strError);
                 // 2019/9/30
                 Debug.Assert(_tagExisting.AntennaID == _tagExisting.TagInfo.AntennaID, $"2 _tagExisting.AntennaID({_tagExisting.AntennaID}) 应该 == _tagExisting.TagInfo.AntennaID({_tagExisting.TagInfo.AntennaID})");
 
+#if OLD
                 NormalResult result = RfidManager.WriteTagInfo(
     _tagExisting.ReaderName,
     _tagExisting.TagInfo,
@@ -1583,10 +1590,54 @@ out strError);
                     RfidTagList.ClearTagTable(new_tag_info.UID);
                 }
 
-#endif
                 if (result.Value == -1)
                 {
                     strError = result.ErrorInfo + $" errorCode={result.ErrorCode}";
+                    return -1;
+                }
+#endif
+                var result = RfidToolForm.WriteTagInfo(
+                    _tagExisting.TagInfo,
+                    new_tag_info);
+
+                /*
+                {
+                    // testing 
+                    if (i == 0)
+                        result = new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = "test error"
+                        };
+                    i++;
+                }
+                */
+
+                if (result.Value == -1)
+                {
+                    // 2023/12/4
+                    if (StringUtil.IsInList("noUserBank", build_style) == false
+    && new_uhfFormat == "gxlm(whdt)")
+                    {
+                        // 询问是否用“不写入 User Bank 重试一次”
+                        DialogResult dialog_result = this.TryGet(() =>
+                        {
+                            return MessageBox.Show(this,
+        $"写入标签时出错:\r\n{result.ErrorInfo}\r\n\r\n是否要用“不写入 User Bank”方式重试一次?",
+        "EntityEditForm",
+        MessageBoxButtons.YesNo,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button1);
+                        });
+                        if (dialog_result == DialogResult.Yes)
+                        {
+                            StringUtil.SetInList(ref build_style, "noUserBank", true);
+                            goto REDO;
+                        }
+                    }
+
+
+                    strError = result.ErrorInfo;
                     return -1;
                 }
 

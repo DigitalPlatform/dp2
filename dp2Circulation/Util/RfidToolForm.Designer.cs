@@ -165,6 +165,7 @@
             this.listView_tags.UseCompatibleStateImageBehavior = false;
             this.listView_tags.View = System.Windows.Forms.View.Details;
             this.listView_tags.SelectedIndexChanged += new System.EventHandler(this.listView_tags_SelectedIndexChanged);
+            this.listView_tags.DoubleClick += new System.EventHandler(this.listView_tags_DoubleClick);
             this.listView_tags.MouseUp += new System.Windows.Forms.MouseEventHandler(this.listView_tags_MouseUp);
             // 
             // columnHeader_pii

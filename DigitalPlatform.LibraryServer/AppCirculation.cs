@@ -30,6 +30,8 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.Marc;
 using DigitalPlatform.rms.Client.rmsws_localhost;
+using Google.Protobuf.WellKnownTypes;
+using Microsoft.Extensions.Primitives;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -884,7 +886,8 @@ namespace DigitalPlatform.LibraryServer
                 out bReaderDbInCirculation,
                 out readerdom,
                 out strOutputReaderRecPath,
-                out reader_timestamp);
+                out reader_timestamp,
+                out string strHitFrom);
                     if (result1.Value == 0)
                     {
                     }
@@ -3723,6 +3726,7 @@ start_time_1,
 
         // parameters:
         //      strOwnerInstitution 所属机构。如果为 null 表示不使用这个参数。它可能为 RFID 的 OI 或者 AOI 字段
+        //      strHitFrom      实际命中的检索途径
         LibraryServerResult GetReaderRecord(
             SessionInfo sessioninfo,
             string strActionName,
@@ -3735,11 +3739,13 @@ start_time_1,
             out bool bReaderDbInCirculation,
             out XmlDocument readerdom,
             out string strOutputReaderRecPath,
-            out byte[] reader_timestamp)
+            out byte[] reader_timestamp,
+            out string strHitFrom)
         {
             string strError = "";
             int nRet = 0;
             bReaderDbInCirculation = true;
+            strHitFrom = "";
 
             LibraryServerResult result = new LibraryServerResult();
 
@@ -3778,6 +3784,7 @@ start_time_1,
                 // 如果是身份证号，则试探检索“身份证号”途径
                 if (StringUtil.IsIdcardNumber(strReaderBarcode) == true)
                 {
+                    strHitFrom = "身份证号";
                     strIdcardNumber = strReaderBarcode;
                     strReaderBarcode = ""; // 迫使函数返回后，重新获得 reader barcode
 
@@ -3785,7 +3792,7 @@ start_time_1,
                         channel,
                         null,
                         strIdcardNumber,
-                        "身份证号", 
+                        "身份证号",
                         1,
                         sessioninfo.ExpandLibraryCodeList,
                         out List<string> recpaths,
@@ -3844,6 +3851,7 @@ start_time_1,
                     // 如果需要，从读者证号等辅助途径进行检索
                     foreach (string strFrom in this.PatronAdditionalFroms)
                     {
+                        strHitFrom = strFrom;
                         nRet = this.GetReaderRecXmlByFrom(
 // sessioninfo.Channels,
 channel,
@@ -6033,7 +6041,7 @@ out _);
         {
             if (string.IsNullOrEmpty(strItemDbName))
                 throw new ArgumentException("GetItemBiblioDbNameList() 的 strItemDbName 参数值不应为空");
-            
+
             // 根据实体库名, 找到对应的书目库名
             // return:
             //      -1  出错
@@ -6251,6 +6259,8 @@ out _);
             bool bDelayVerifyReaderBarcode = false; // 是否延迟验证
             string strLockReaderBarcode = "";
 
+            string strHitFrom = "";
+
             if (bForce == true)
             {
                 strError = "bForce 参数不能为 true";
@@ -6335,7 +6345,8 @@ out _);
                 out bReaderDbInCirculation,
                 out readerdom,
                 out strOutputReaderRecPath,
-                out reader_timestamp);
+                out reader_timestamp,
+                out strHitFrom);
                     if (result1.Value == 0)
                     {
                     }
@@ -7113,7 +7124,8 @@ out _);
                     out bReaderDbInCirculation,
                     out readerdom,
                     out strOutputReaderRecPath,
-                    out reader_timestamp);
+                    out reader_timestamp,
+                    out strHitFrom);
                         if (result1.Value == 0)
                         {
                         }
@@ -7490,10 +7502,12 @@ out _);
                         {
                             Debug.Assert(string.IsNullOrEmpty(strIdcardNumber) == false, "");
 
-                            string strTempIdcardNumber = DomUtil.GetElementText(readerdom.DocumentElement, "idCardNumber");
-                            if (strIdcardNumber != strTempIdcardNumber)
+                            // string strTempIdcardNumber = DomUtil.GetElementText(readerdom.DocumentElement, "idCardNumber");
+                            string strTempIdcardNumber = GetIdCardNumber(readerdom, strHitFrom);
+                            // if (strIdcardNumber != strTempIdcardNumber)
+                            if (MatchFrom(strHitFrom, strIdcardNumber, strTempIdcardNumber) == false)
                             {
-                                strError = "册记录表明，册 " + strItemBarcode + " 实际被读者(证条码号) " + strOutputReaderBarcode + " 所借阅，此读者的身份证号为 " + strTempIdcardNumber + "，不是您当前输入的(验证用)身份证号 " + strIdcardNumber + "。还书操作被放弃。";
+                                strError = $"册记录表明，册 {strItemBarcode} 实际被读者(证条码号) {strOutputReaderBarcode} 所借阅，此读者的{strHitFrom}为 {strTempIdcardNumber}，不是您当前输入的(验证用){strHitFrom} {strIdcardNumber}。还书操作被放弃。";
                                 goto ERROR1;
                             }
                         }
@@ -8856,6 +8870,38 @@ start_time_1,
             if (result.ErrorCode == ErrorCode.NoError)  // 2017/6/30
                 result.ErrorCode = ErrorCode.SystemError;
             return result;
+        }
+
+        static bool MatchFrom(string strFrom,
+            string value,
+            string values)
+        {
+            if (strFrom == "证号")
+                return StringUtil.IsInList(value, values);
+            if (strFrom == "姓名")
+                return string.Compare(value, values, true) == 0;
+            if (strFrom == "姓名拼音")
+                return string.Compare(value.Replace(" ", ""), values.Replace(" ", ""), true) == 0;
+            return value == values;
+        }
+
+        // TODO: 改为根据 keys 配置文件按照检索点抽取规则提取
+        static string GetIdCardNumber(XmlDocument readerdom,
+            string strFrom)
+        {
+            if (strFrom == "姓名")
+                return DomUtil.GetElementText(readerdom.DocumentElement, "name");
+            if (strFrom == "姓名拼音")
+                return DomUtil.GetElementText(readerdom.DocumentElement, "namePinyin");
+            if (strFrom == "身份证号")
+                return DomUtil.GetElementText(readerdom.DocumentElement, "idCardNumber");
+            if (strFrom == "证号")
+                return DomUtil.GetElementText(readerdom.DocumentElement, "cardNumber");
+            if (strFrom == "证条码号" || strFrom == "证条码")
+                return DomUtil.GetElementText(readerdom.DocumentElement, "barcode");
+            if (strFrom == "参考ID")
+                return DomUtil.GetElementText(readerdom.DocumentElement, "refID");
+            throw new ArgumentException($"无法识别的 strFrom '{strFrom}'");
         }
 
         // 从读者记录中删除 password 元素

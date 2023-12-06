@@ -702,6 +702,8 @@ bool bClickClose = false)
             this._floatingMessage.Text += strText;
         }
 
+        /*
+        // 缺点: 颜色随波逐流
         // 线程安全
         public string FloatingMessage
         {
@@ -717,6 +719,7 @@ bool bClickClose = false)
                     this._floatingMessage.Text = value;
             }
         }
+        */
 
         #region 新风格的 ChannelPool
 

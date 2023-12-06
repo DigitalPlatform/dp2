@@ -416,6 +416,42 @@ new SetErrorEventArgs
             token);
         }
 
+        // 最近一次活动的时间。所谓活动，指发生了标签放入、拿走、更新的动作
+        static DateTime _lastActivateTime = DateTime.MinValue;
+
+        public static void Touch()
+        {
+            _lastActivateTime = DateTime.Now;
+        }
+
+#if REMOVED
+        // 是否处在不活跃的阶段?
+        static bool IsIdle()
+        {
+            // 和最近一次活动间隔 阈值 长度以上，那就算是不活跃时段
+            if (DateTime.Now - _lastActivateTime > TimeSpan.FromMinutes(1))
+                return true;
+            return false;
+        }
+#endif
+
+        // 获得当前间隔时间
+        static TimeSpan GetStandardLength()
+        {
+            /*
+            // testing
+            return TimeSpan.FromMinutes(1);
+            // TODO: 在系统参数对话框上设置一个控制 standart length 的参数，用于测试验证
+            */
+
+            var delta = DateTime.Now - _lastActivateTime;
+            if (delta > TimeSpan.FromMinutes(2))
+                return TimeSpan.FromSeconds(1); // 慢速 CPU 5%
+            if (delta > TimeSpan.FromSeconds(30))
+                return TimeSpan.FromMilliseconds(500);  // 快速 CPU 10%
+            return TimeSpan.FromMilliseconds(100);  // 急迫 CPU 20%
+        }
+
         // 启动后台任务。
         // 后台任务负责监视 RFID 中心的标签
         public static void Start(
@@ -464,6 +500,8 @@ new SetErrorEventArgs
             },
             (channel, loop_style) =>
             {
+                _callLoop(channel, loop_style);
+#if REMOVED
                 /*
                 if (string.IsNullOrEmpty(_antennaList) == false)
                     style += ",antenna:" + _antennaList;
@@ -559,8 +597,12 @@ new SetErrorEventArgs
                     // 补充延时
                     if (SyncSetEAS)
                     {
+                        // 标准间隔
+                        TimeSpan standard_length = GetStandardLength();
+                        // 上一轮盘点实际使用的时间
                         var length = DateTime.Now - start_time;
-                        var delta = TimeSpan.FromSeconds(1) - length;
+                        var delta = standard_length - length;
+                        // 补足差额
                         if (delta.Milliseconds > 0)
                             Thread.Sleep(delta.Milliseconds);
                     }
@@ -616,9 +658,181 @@ new SetErrorEventArgs
                     // 门锁状态就绪
                     _lockReady = true;
                 }
+
+#endif
             },
             token);
         }
+
+        public static int InventoryIdleSeconds { get; set; }
+
+        // parameters:
+        //      sleep   是否需要补充延时
+        static void _callLoop(BaseChannel<IRfid> channel,
+            string loop_style,
+            bool sleep = true)
+        {
+            /*
+            if (string.IsNullOrEmpty(_antennaList) == false)
+                style += ",antenna:" + _antennaList;
+                */
+
+            GetLockStateResult lock_result = null;
+            var readerNameList = _readerNameList;
+            if (string.IsNullOrEmpty(readerNameList) == false
+            || (_lockThread != "base2" && string.IsNullOrEmpty(LockCommands) == false))
+            {
+                string style = $"session:{Base.GetHashCode()}";
+
+                if (GetRSSI)
+                    style += ",rssi";
+
+                // 2019/12/4
+                if (_lockThread != "base2"
+                    && string.IsNullOrEmpty(LockCommands) == false)
+                    style += ",getLockState:" + StringUtil.EscapeString(LockCommands, ":,");
+
+                // 2023/11/25
+                if (SyncSetEAS)
+                    style += ",dont_delay";
+
+                DateTime start_time = DateTime.Now;
+
+                object __lockObj = _syncRoot;
+                bool __lockWasTaken = false;
+                try
+                {
+                    // 外层加锁
+                    if (SyncSetEAS)
+                        System.Threading.Monitor.Enter(__lockObj, ref __lockWasTaken);
+
+                    var result = channel?.Object?.ListTags(readerNameList, style);
+                    if (result.Value == -1)
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs
+                            {
+                                Error = result.ErrorInfo
+                            });
+                    else
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = null }); // 清除以前的报错
+
+                    lock_result = result.GetLockStateResult;
+
+                    IncLockHeartbeat();
+
+                    if (string.IsNullOrEmpty(readerNameList) == false)
+                    {
+                        // using (var releaser = await _limit.EnterAsync().ConfigureAwait(false))
+                        try
+                        {
+#if SYNC_ROOT
+                            // 内层加锁
+                            if (SyncSetEAS == false)
+                                System.Threading.Monitor.Enter(__lockObj, ref __lockWasTaken);
+#endif
+
+                            if (ListTags != null)
+                            {
+                                // 先记忆
+                                _lastTags = result.Results;
+
+                                // 注意 result.Value == -1 时也会触发这个事件
+                                ListTags(channel, new ListTagsEventArgs
+                                {
+                                    ReaderNameList = readerNameList,
+                                    Result = result,
+                                    Source = "base",
+                                });
+                            }
+                            else
+                                _lastTags = null;
+
+                            _tagsReady = true;
+                        }
+                        finally
+                        {
+                            if (SyncSetEAS == false && __lockWasTaken)
+                                System.Threading.Monitor.Exit(__lockObj);
+
+                        }
+                    }
+
+                }
+                finally
+                {
+#if SYNC_ROOT
+                    if (SyncSetEAS && __lockWasTaken)
+                        System.Threading.Monitor.Exit(__lockObj);
+#endif
+                }
+
+                // 补充延时
+                if (sleep && SyncSetEAS)
+                {
+                    // 标准间隔
+                    TimeSpan standard_length = GetStandardLength() + TimeSpan.FromSeconds(InventoryIdleSeconds);
+                    // 上一轮盘点实际使用的时间
+                    var length = DateTime.Now - start_time;
+                    var delta = standard_length - length;
+                    // 补足差额
+                    if (delta.TotalMilliseconds > 0)
+                        Thread.Sleep((int)delta.TotalMilliseconds);
+                }
+            }
+
+            // 检查门状态
+            if (_lockThread != "base2"
+            && lock_result != null)
+            {
+                // List<LockState> states = new List<LockState>();
+                {
+                    // parameters:
+                    //      lockNameParam   为 "锁控板名字.卡编号.锁编号"。
+                    //                      其中卡编号部分可以是 "1" 也可以是 "1|2" 这样的形态
+                    //                      其中锁编号部分可以是 "1" 也可以是 "1|2|3|4" 这样的形态
+                    //                      如果缺乏卡编号和锁编号部分，缺乏的部分默认为 "1"
+                    if (lock_result.Value == -1)
+                        Base.TriggerSetError(lock_result,
+                            new SetErrorEventArgs { Error = lock_result.ErrorInfo });
+                    else
+                        Base.TriggerSetError(lock_result,
+                            new SetErrorEventArgs { Error = null }); // 清除以前的报错
+                    /*
+                    if (lock_result.Value == -1)
+                    {
+                        // 注意 lock_result.Value == -1 时也会触发这个事件
+                        ListLocks?.Invoke(channel, new ListLocksEventArgs
+                        {
+                            Result = lock_result
+                        });
+                    }
+                    if (lock_result.States != null)
+                        states.AddRange(lock_result.States);
+                    */
+                    // 注意 lock_result.Value == -1 时也会触发这个事件
+                    ListLocks?.Invoke(channel, new ListLocksEventArgs
+                    {
+                        Result = lock_result
+                    });
+                }
+
+                /*
+                if (states.Count > 0)
+                {
+                    // 注意 lock_result.Value == -1 时也会触发这个事件
+                    ListLocks?.Invoke(channel, new ListLocksEventArgs
+                    {
+                        Result = new GetLockStateResult { States = states }
+                    });
+                }
+                */
+
+                // 门锁状态就绪
+                _lockReady = true;
+            }
+        }
+
 
         static long _lockHeartbeat = 0;
 
@@ -1467,6 +1681,23 @@ new SetErrorEventArgs
             return GetTagInfo(reader_name, "00000000", antenna_id);
         }
 
+        // 2023/11/28
+        // 立即盘点一次。
+        // 注: 一般情况下，RfidManager 的后台线程会驱动一轮一轮不停盘点。
+        public static void CallInventory(string loop_style)
+        {
+            BaseChannel<IRfid> channel = Base.GetChannel();
+            try
+            {
+                _callLoop(channel, loop_style, false);
+            }
+            finally
+            {
+                Base.ReturnChannel(channel);
+            }
+        }
+
+
         public static ListTagsResult CallListTags(string reader_name, string style)
         {
             if (GetRSSI)
@@ -1550,6 +1781,12 @@ new SetErrorEventArgs
             }
         }
 
+        // 2023/11/30
+        // 注意有死锁的风险
+        public static void ClearChannels()
+        {
+            Base.ClearChannels();
+        }
     }
 
     public delegate void ListTagsEventHandler(object sender,

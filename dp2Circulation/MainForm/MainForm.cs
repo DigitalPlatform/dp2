@@ -1836,6 +1836,15 @@ Stack:
             {
                 RfidTagList.OnlyReadEPC = this.UhfOnlyEpcCharging;
             }
+
+            // 2023/11/29
+            // 当 RSSI 参数变化后，需要立即进行的一些更新动作
+            if (e.Section == "rfid"
+                && e.Entry == "inventoryIdleSeconds")
+            {
+                Program.MainForm._cachedInventoryIdleSeconds = -1;  // clear cache
+                RfidManager.InventoryIdleSeconds = this.RfidInventoryIdleSeconds;
+            }
         }
 
         public bool PrintLabelMode
@@ -8112,6 +8121,31 @@ value);  // 常用值 "ipc://RfidChannel/RfidServer"
                     "rssi",
                     value);
                 _cachedRSSI = -1;
+            }
+        }
+
+        internal int _cachedInventoryIdleSeconds = -1;
+
+        // 超高频标签读取时过滤的 RSSI 阈值(低于此值的被丢弃)。0 表示不使用 RSSI 过滤功能
+        public int RfidInventoryIdleSeconds
+        {
+            get
+            {
+                if (this.AppInfo == null)
+                    return 0;
+                if (_cachedInventoryIdleSeconds >= 0)
+                    return _cachedInventoryIdleSeconds;
+                _cachedInventoryIdleSeconds = this.AppInfo.GetInt("rfid",
+                    "inventoryIdleSeconds",
+                    0);
+                return _cachedInventoryIdleSeconds;
+            }
+            set
+            {
+                this.AppInfo?.SetInt("rfid",
+                    "inventoryIdleSeconds",
+                    value);
+                _cachedInventoryIdleSeconds = -1;
             }
         }
 

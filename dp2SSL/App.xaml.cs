@@ -467,6 +467,16 @@ namespace dp2SSL
                 RfidManager.ListLocks -= ShelfData.RfidManager_ListLocks;
             }
 
+            if (App.Function == "自助借还")
+            {
+                RfidManager.SyncSetEAS = true;
+                /*
+                RfidManager.InventoryIdleSeconds = this.RfidInventoryIdleSeconds;
+                RfidManager.GetRSSI = this.UhfRSSI == 0 ? false : true;
+                RfidTagList.OnlyReadEPC = this.UhfOnlyEpcCharging;
+                */
+            }
+
             RfidManager.Base.Name = "RFID 中心";
             RfidManager.EnableBase2();
             RfidManager.Url = App.RfidUrl;
@@ -1365,6 +1375,50 @@ namespace dp2SSL
 
         #endregion
 
+        #region RFID 测试相关参数
+
+        public static bool RfidTestBorrowEAS
+        {
+            get
+            {
+                var ret = WpfClientInfo.Config?.GetBoolean("rfidTest",
+                "rfidTestBorrowEAS", false);
+                return ret ?? false;
+            }
+        }
+
+        public static bool RfidTestReturnPreEAS
+        {
+            get
+            {
+                var ret = WpfClientInfo.Config?.GetBoolean("rfidTest",
+"rfidTestReturnPreEAS", false);
+                return ret ?? false;
+            }
+        }
+
+        public static bool RfidTestReturnAPI
+        {
+            get
+            {
+                var ret = WpfClientInfo.Config?.GetBoolean("rfidTest",
+"rfidTestReturnAPI", false);
+                return ret ?? false;
+            }
+        }
+
+        public static bool RfidTestReturnPostUndoEAS
+        {
+            get
+            {
+                var ret = WpfClientInfo.Config?.GetBoolean("rfidTest",
+"rfidTestReturnPostUndoEAS", false);
+                return ret ?? false;
+            }
+        }
+
+        #endregion
+
         public static string RfidUrl
         {
             get
@@ -1401,7 +1455,8 @@ namespace dp2SSL
         {
             get
             {
-                return (bool)WpfClientInfo.Config?.GetBoolean("ssl_operation", "auto_trigger", false);
+                return (bool)WpfClientInfo.Config?.GetBoolean("ssl_operation", 
+                    "auto_trigger", false);
             }
         }
 
@@ -1410,7 +1465,8 @@ namespace dp2SSL
         {
             get
             {
-                return (bool)WpfClientInfo.Config?.GetBoolean("ssl_operation", "patron_info_lasting", false);
+                return (bool)WpfClientInfo.Config?.GetBoolean("ssl_operation", 
+                    "patron_info_lasting", false);
             }
         }
 
@@ -1419,7 +1475,8 @@ namespace dp2SSL
         {
             get
             {
-                return (bool)WpfClientInfo.Config?.GetBoolean("ssl_operation", "auto_back_menu_page", false);
+                return (bool)WpfClientInfo.Config?.GetBoolean("ssl_operation",
+                    "auto_back_menu_page", false);
             }
         }
 
@@ -1428,7 +1485,8 @@ namespace dp2SSL
         {
             get
             {
-                return (bool)WpfClientInfo.Config?.GetBoolean("ssl_operation", "patron_info_delay_clear", false);
+                return (bool)WpfClientInfo.Config?.GetBoolean("ssl_operation", 
+        "patron_info_delay_clear", false);
             }
         }
         */
@@ -1438,7 +1496,8 @@ namespace dp2SSL
         {
             get
             {
-                return (bool)WpfClientInfo.Config?.GetBoolean("ssl_operation", "enable_patron_barcode", false);
+                return (bool)WpfClientInfo.Config?.GetBoolean("ssl_operation", 
+        "enable_patron_barcode", false);
             }
         }
         */
@@ -1511,7 +1570,8 @@ namespace dp2SSL
                 if (WpfClientInfo.Config == null)
                     return true;
 
-                return WpfClientInfo.Config.GetBoolean("global", "auto_update_wallpaper", false);
+                return WpfClientInfo.Config.GetBoolean("global", 
+                    "auto_update_wallpaper", false);
             }
         }
 
@@ -1948,6 +2008,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             UpdateHandled();
 
             FingerprintManager.Pause = false;
+            RfidManager.Pause = false;  // 2023/12/6
 
             // 单独线程执行，避免阻塞 OnActivated() 返回
             /*
@@ -1997,6 +2058,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             UpdateHandled();
 
             FingerprintManager.Pause = true;
+            RfidManager.Pause = true;  // 2023/12/6
 
             EnableSendKey(true);    // 2022/9/9
             //SpeakSequence("后台");

@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.104.*")]
-[assembly: AssemblyFileVersion("3.104.0.0")]
+[assembly: AssemblyVersion("3.93.*")]
+[assembly: AssemblyFileVersion("3.93.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -208,3 +208,19 @@ using System.Runtime.InteropServices;
 //                  RFID 工具窗中的保存功能，分为 UID 发生改变和不发生改变两种情况。要注意 不自动刷新 状态下，保存以后 listview 显示能正常刷新，并且可以继续进一步修改保存
 //      2023/11/25  快捷出纳窗的红色报错和重复输入 bug 被修正。RfidManager 的 Inventory+ListTag 过程也包含到锁定范围。RfidManager.SetEAS() 函数增加了锁定机制，以便和 Inventory+ListTag 过程互斥。
 //                  RFID 工具窗中的自动修正 EAS 功能做了改进，放到非界面线程驱动，RfidManager.SetEAS() 也新增了锁定机制。
+//                  快捷出纳窗的 PreSetEAS() 依然加回了感知修改前 EAS 状态的功能。对来自馆外机构的标签的 EAS 尽力不去改变。
+//                  RFID 工具窗当“自动刷新”没有选中的时候保存标签修改，会确保 new_tag_info.Bytes 的字节数足够，避免影响后继修改保存(后面保存的时候会用前一次的 Bytes 字节数作为标签的 User Bank 最大字节数进行判断)
+//      2023/11/26  快捷出纳窗为 rollback 目的修正 EAS 的 EasForm ListViewItem 事项增加了一栏 reason。如果册记录没有找到，则按照这个 reason 进行处理(否则依然按照册记录外借状态进行处理) 
+//                  RFID 工具窗的“自动修正 EAS”功能修正了一处关于 TagInfo.EAS 残留值的 bug。新版本用 RfidTagList.SetTagInfoEAS() 来确保这个值在超高频格式下的正确(从 EPC 解析得到 EAS 值)
+//                  当快捷出纳窗进行多本图书借还的时候，在同时打开的 RFID 工具窗中观察和点选事项会抛出 Assertion 异常。此 bug 已经修正，方法是把 OneTag 对象克隆以后再赋给 ItemInfo
+//                  当快捷出纳窗借书期待输入一个证条码号的时候，输入了一个册条码号，早先版本会弹出 MessageBox。最新版改为使用浮动窗口文字提醒
+//      2023/11/28  在代码中统一 RfidToolForm.WriteTagInfo()。解决批处理写入册窗口写入清空过的标签时报 Write EPC 错误的问题
+//                  RfidManager 增加用于测试的 InventoryIdleSeconds 参数。
+//                  内务中所有调用 RfidManager.WriteTagInfo() 的地方都加了 RfidManager.SyncRoot 锁定。试图解决中途偶尔读卡器红色报错的问题
+//      2023/11/29  清空 UHF 标签功能改为写入一串随机的符号
+//                  RFID 工具窗作为选择标签的对话框出现时，增加了双击鼠标左键选定事项的功能
+//                  支持识别 UMI 始终为 on 的特殊 UHF 标签清空。和辨别。
+//      2023/11/30  快捷出纳窗放上 HF 和 UHF 的空白标签的时候能正确识别和报错。注意这个红色报错显示会在下一个 SendKey 之前被清除。
+// 3.91 2023/12/4   增加识别望湖洞庭一批没有 User Bank 内容的标签
+//                  在 RFID 工具窗、创建册记录时写入标签、批修改册写入标签功能中，创建望湖洞庭格式标签的时候，如果发现写入 User Bank 不成功，会弹出对话框询问是否以“不写入 User Bank”方式重试一次。
+//      2023/12/5   对于“高校联盟”厂家制造时无 User Bank 类型的标签，种册窗册登记对话框写入标签成功后报读出标签失败的 bug 得到修正。原因是高校联盟 BuidTag() 函数里面有一处 pc.UMI 始终为 true 的错误。需要回归测试所有和写入标签有关的事项

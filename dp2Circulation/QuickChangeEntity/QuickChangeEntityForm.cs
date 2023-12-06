@@ -709,8 +709,11 @@ MessageBoxDefaultButton.Button2);
             REDO:
                 // 出现对话框让选择一个
                 // SelectTagDialog dialog = new SelectTagDialog();
-                using (RfidToolForm dialog = new RfidToolForm())
+                using (var dialog = new SelectRfidTagDialog())
                 {
+                    dialog.AutoRefresh = true;
+                    dialog.AutoFixEas = false;
+
                     dialog.Text = "选择 RFID 标签";
                     dialog.OkCancelVisible = true;
                     dialog.LayoutVertical = false;
@@ -821,7 +824,9 @@ out strError);
 #endif
             try
             {
-
+                string build_style = "";
+            REDO:
+                string new_uhfFormat = "";
                 if (_tagExisting.Protocol == InventoryInfo.ISO15693)
                 {
                     new_tag_info = LogicChipItem.ToTagInfo(
@@ -830,10 +835,11 @@ out strError);
                 }
                 else if (_tagExisting.Protocol == InventoryInfo.ISO18000P6C)
                 {
-                    new_tag_info = RfidToolForm.BuildWritingTagInfo(_tagExisting.TagInfo,
+                    var build_result = RfidToolForm.BuildWritingTagInfo(_tagExisting.TagInfo,
                         _right,
                         true,
                         Program.MainForm.UhfDataFormat, // gb/gxlm/auto
+                        build_style,
                         (initial_format) =>
                         {
                             throw new Exception("意外触发格式选择回调函数");
@@ -854,6 +860,8 @@ out strError);
                         },
                         (chip, element) =>
                         {
+                            if (StringUtil.IsInList("noUserBank", build_style) == true)
+                                return true;
                             MessageBox.Show(this, "当前系统参数定义了不写入超高频标签的 User Bank，但当前 library.xml 又配置了相应馆藏地的 OI(机构代码)，这是矛盾的。请修改参数配置");
                             return false;
                         },
@@ -862,7 +870,9 @@ out strError);
                         {
                             RfidToolForm.FilterUserBankElements(chip, uhfProtocol);
                             return Program.MainForm.UhfWriteUserBank;
-                        }).TagInfo;
+                        });
+                    new_tag_info = build_result.TagInfo;
+                    new_uhfFormat = build_result.NewUhfFormat;
                 }
                 else
                 {
@@ -870,12 +880,8 @@ out strError);
                     return -1;
                 }
 
-#if OLD_CODE
-                NormalResult result = channel.Object.WriteTagInfo(
-                    _tagExisting.ReaderName,
-                    _tagExisting.TagInfo,
-                    new_tag_info);
-#else
+
+#if OLD
                 NormalResult result = RfidManager.WriteTagInfo(
     _tagExisting.ReaderName,
     _tagExisting.TagInfo,
@@ -884,13 +890,43 @@ out strError);
                 // 2023/10/31
                 if (_tagExisting.Protocol == InventoryInfo.ISO18000P6C)
                     RfidTagList.ClearTagTable(new_tag_info.UID);
-#endif
+
                 if (result.Value == -1)
                 {
                     strError = result.ErrorInfo + $" errorCode={result.ErrorCode}";
                     return -1;
                 }
+#endif
+                var result = RfidToolForm.WriteTagInfo(
+                    _tagExisting.TagInfo,
+                    new_tag_info);
+                if (result.Value == -1)
+                {
+                    // 2023/12/4
+                    if (StringUtil.IsInList("noUserBank", build_style) == false
+&& new_uhfFormat == "gxlm(whdt)")
+                    {
+                        // 询问是否用“不写入 User Bank 重试一次”
+                        DialogResult dialog_result = this.TryGet(() =>
+                        {
+                            return MessageBox.Show(this,
+        $"写入标签时出错:\r\n{result.ErrorInfo}\r\n\r\n是否要用“不写入 User Bank”方式重试一次?",
+        "QuickChangeEntityForm",
+        MessageBoxButtons.YesNo,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button1);
+                        });
+                        if (dialog_result == DialogResult.Yes)
+                        {
+                            StringUtil.SetInList(ref build_style, "noUserBank", true);
+                            goto REDO;
+                        }
+                    }
 
+
+                    strError = result.ErrorInfo;
+                    return -1;
+                }
                 return 0;
             }
             catch (Exception ex)
@@ -906,7 +942,7 @@ out strError);
             }
         }
 
-        #endregion
+#endregion
 
         static List<string> GetChangeNames()
         {

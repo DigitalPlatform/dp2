@@ -1660,11 +1660,25 @@ MessageBoxDefaultButton.Button1);
                 RfidManager.Url = this.RfidCenterUrl;
                 // RfidManager.Base.ShortWaitTime = TimeSpan.FromSeconds(1);
                 RfidManager.SyncSetEAS = true;  // 协调 SetEAS() 时序
+                RfidManager.InventoryIdleSeconds = this.RfidInventoryIdleSeconds;
                 RfidManager.GetRSSI = this.UhfRSSI == 0 ? false : true;
                 RfidTagList.OnlyReadEPC = this.UhfOnlyEpcCharging;
+                RfidTagList.UseTagTable = true;
                 // RfidManager.AntennaList = "1|2|3|4";    // testing
                 // RfidManager.SetError += RfidManager_SetError;
                 RfidManager.ListTags += RfidManager_ListTags;
+
+                _ = Task.Run(() =>
+                {
+                    RfidManager.ClearChannels(); // 清理以前残留的通道 2022/6/10
+                    var error = CheckRfidCenterVersion();
+                    if (error != null)
+                        this.BeginInvoke((Action)(() =>
+                        {
+                            MessageBox.Show(this, error);
+                        }));
+                });
+
                 RfidManager.Start(_cancelRfidManager.Token);
             }
             else
@@ -1712,6 +1726,7 @@ MessageBoxDefaultButton.Button1);
                     results,    // e.Result.Results,
                         (add_books, update_books, remove_books, add_patrons, update_patrons, remove_patrons) =>
                         {
+                            RfidManager.Touch();
                             TagChanged?.Invoke(sender, new TagChangedEventArgs
                             {
                                 AddBooks = add_books,
@@ -1721,6 +1736,14 @@ MessageBoxDefaultButton.Button1);
                                 UpdatePatrons = update_patrons,
                                 RemovePatrons = remove_patrons
                             });
+                            /* 
+                             * 有两种级别处理 RFID 标签缓存的副作用：
+                             * 1) 将 RfidManager.UseTagTable 设置为 false (注意默认为 true)，这样根本不会用到 _tagTable；
+                             * 2) 保持 RfidManager.UseTagTable 为 true，但在每次 Refresh 的同时调用 RfidTagList>ClearTagTable() 函数清除已经拿走的标签的 _tagTable 缓存事项。
+                             */
+                            // 清除已经拿走的标签对应的 RfidTagList._tagTable 缓存信息
+                            RfidTagList.ClearTagTable(remove_books);
+                            RfidTagList.ClearTagTable(remove_patrons);
                         },
                         (type, text) =>
                         {
@@ -1874,6 +1897,46 @@ MessageBoxDefaultButton.Button1);
                     Program.MainForm?.OperHistory?.AppendHtml($"<div class='debug green'>{HttpUtility.HtmlEncode($"重启{GetPalmName()}中心成功。重启完成可能需要一定时间，请耐心等待")}</div>");
             }
         }
+
+        const string rfidcenter_base_version = "1.14.17";
+
+        public string CheckRfidCenterVersion()
+        {
+            if (string.IsNullOrEmpty(RfidManager.Url) == false)
+            {
+                List<string> errors = new List<string>();
+                var result = RfidManager.GetState("getVersion");
+                if (result.Value == -1)
+                {
+                    // errors.Add("所连接的 RFID 中心版本太低。请升级到最新版本");
+                    Program.MainForm?.OperHistory?.AppendHtml($"<div class='debug error'>{HttpUtility.HtmlEncode($"获得 RFID 中心版本号时出错: {result.ErrorInfo}")}</div>");
+                    return null;
+                }
+                else
+                {
+                    try
+                    {
+                        if (StringUtil.CompareVersion(result.ErrorCode, rfidcenter_base_version) < 0)
+                            errors.Add($"所连接的 RFID 中心版本太低(为 {result.ErrorCode} 版)。请升级到 {rfidcenter_base_version} 以上版本");
+                    }
+                    catch (Exception ex)
+                    {
+                        MainForm.WriteErrorLog($"CheckServerUID() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                        errors.Add($"所连接的 RFID 中心版本太低。请升级到最新版本。({ex.Message})");
+                    }
+                }
+
+                if (errors.Count > 0)
+                {
+                    string error = StringUtil.MakePathList(errors, "; ");
+                    Program.MainForm?.OperHistory?.AppendHtml($"<div class='debug error'>{HttpUtility.HtmlEncode(error)}</div>");
+                    return error;
+                }
+            }
+
+            return null;
+        }
+
 
         const string pamcenter_base_version = "1.1.3";   // "1.0.14";
         const string fingerprint_base_version = "2.3.1";

@@ -2064,6 +2064,10 @@ bool eas)
                     }
 
                     tou = chip?.FindElement(ElementOID.TypeOfUsage)?.Text;
+
+                    // 2023/11/26
+                    RfidTagList.SetTagInfoEAS(taginfo);
+
                     eas = taginfo.EAS ? "On" : "Off";
                     afi = Element.GetHexString(taginfo.AFI);
 

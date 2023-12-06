@@ -176,6 +176,7 @@ namespace dp2SSL
                 Antenna = data.OneTag.AntennaID.ToString(),
                 ReaderName = data.OneTag.ReaderName,
                 TagInfo = data.OneTag.TagInfo,
+                Protocol = data.OneTag.Protocol,    // 2023/12/4
             };
             this.Add(entity);
 
@@ -188,7 +189,60 @@ namespace dp2SSL
             return entity;
         }
 
+        // 2023/12/1
         // 更新一个事项内容
+        // 注: 本函数适用于 UID 发生改变的情况
+        // return:
+        //      null 没有找到(注: 没有更新也返回 null)
+        //      其他    找到并更新了
+        public Entity Update(TagAndData old_data,
+            TagAndData new_data,
+            bool auto_add = true)
+        {
+            // 检查 old_data 和 new_data 的 UID 是否一样
+            if (old_data.OneTag.UID == new_data.OneTag.UID)
+                return Update(new_data, auto_add);
+
+            Entity old_entity = FindEntityByUID(old_data.OneTag.UID);
+            Entity new_entity = FindEntityByUID(new_data.OneTag.UID);
+            if (old_entity == null && new_entity == null)
+            {
+                if (auto_add)
+                    return Add(new_data, false);
+                return null;
+            }
+
+            // new_data 的 UID 已经存在了，但 old_data 的 UID 不存在
+            if (old_entity == null && new_entity != null)
+            {
+                return Update(new_data, auto_add);
+            }
+
+            // old_data 和 new_data 的 UID 都已经存在了
+            if (old_entity != null && new_entity != null)
+            {
+                // 删除 old_entity
+                this.Remove(old_entity);
+                return Update(new_data, auto_add);
+            }
+
+            // 一般情况
+            Debug.Assert(old_entity != null && new_entity == null);
+
+            {
+                // 删除 old_entity
+                this.Remove(old_entity);
+                var result = Update(new_data, auto_add);
+                // 把 old_entity 的 Error 复制给 new_entity
+                result.Error = old_entity.Error;
+                result.ErrorColor = old_entity.ErrorColor;
+                return result;
+            }
+        }
+
+
+        // 更新一个事项内容
+        // 注: 本函数适用于 UID 没有改变的情况
         // return:
         //      null 没有找到
         //      其他    找到并更新了
@@ -894,6 +948,16 @@ Stack:
                 return false;
             RfidTagList.SetTagInfoEAS(this.TagInfo, enable);
             return true;
+        }
+
+        public bool GetEas()
+        {
+            if (this.TagInfo == null)
+                return false;
+
+            if (this.TagInfo.Protocol == InventoryInfo.ISO18000P6C)
+                return RfidTagList.GetUhfEas(this.UID, out _);
+            return this.TagInfo.EAS;
         }
 
         #region 分类错误处理机制

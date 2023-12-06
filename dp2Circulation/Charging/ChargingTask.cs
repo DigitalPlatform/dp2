@@ -989,7 +989,9 @@ namespace dp2Circulation
                 // 修改 EAS
                 if (string.IsNullOrEmpty(task.ItemBarcodeEasType) == false)
                 {
-                    if (SetEAS(task,
+                    if (SetEAS(
+                        "", // 意图是自动根据册记录外借状态修正 EAS
+                        task,
                         false,
                         Program.MainForm.RfidTestBorrowEAS == false ? null : "测试触发修改 EAS 报错(借书操作末段)",   // 测试触发报错
                         out string changed_uid,
@@ -1180,7 +1182,7 @@ end_time);
          * */
         public static void Sound(int tone)
         {
-            Task.Run(() =>
+            _ = Task.Run(() =>
             {
                 if (tone == -1)
                 {
@@ -1216,7 +1218,6 @@ end_time);
                 uint antenna_id = 0;
                 string reader_name = "";
 
-#if REMOVED
                 {
                     var get_result = this.Container.GetEAS("*", tag_name);
 
@@ -1242,7 +1243,6 @@ end_time);
                 // 如果修改前已经是这个值就不修改了
                 if (old_state == enable)
                     return true;
-#endif
 
                 // 2023/11/1
                 if (string.IsNullOrEmpty(task.ItemBarcode) == false)
@@ -1360,7 +1360,9 @@ end_time);
             }
         }
 
-        bool SetEAS(ChargingTask task,
+        bool SetEAS(
+            string reason,
+            ChargingTask task,
             bool enable,
             // bool preprocess,
             string simulate_error,
@@ -1399,6 +1401,7 @@ end_time);
                     }
 
                     result = this.Container.SetEAS(
+                        reason,
                         task,
                         "*",
                         ToLower(task.ItemBarcodeEasType) + ":" + task.ItemBarcode,
@@ -1699,6 +1702,9 @@ end_time);
                 // 修改 EAS
                 if (string.IsNullOrEmpty(task.ItemBarcodeEasType) == false)
                 {
+                    // TODO: 通过请求 dp2library GetItemInfo() API 检查一下册记录是否属于馆外机构。
+                    // 如果来自馆外机构，则不要修改标签的 EAS，直接报错
+
                     // 测试触发报错
                     if (Program.MainForm.RfidTestReturnPreEAS)
                     {
@@ -1822,16 +1828,17 @@ end_time);
                 if (channel.ErrorCode == ErrorCode.NotBorrowed)
                 {
                     Debug.Assert(eas_changed == true, "");
-                    /*
+
                     // 此时正好顺便修正了以前此册的 EAS 问题，所以也不需要回滚了
                     // TODO: 是否需要提示一下操作者？
                     task.AppendErrorInfo($"(前置 EAS 修改顺便把以前遗留的 Off 状态修正为 On)");
-                    */
                 }
                 else
                 {
                     // Undo 早先的 EAS 修改
-                    if (SetEAS(task,
+                    if (SetEAS(
+                        $"rollback:off",    // 表示意图是回滚到 off 状态
+                        task,
                         false,
                         Program.MainForm.RfidTestReturnPostUndoEAS == false ? null : "测试触发修改 EAS 报错(还书操作末段，回滚 EAS 时)",
                         out string changed_uid,

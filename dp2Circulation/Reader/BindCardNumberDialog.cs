@@ -102,8 +102,11 @@ namespace dp2Circulation
 
         private void button_add14443_Click(object sender, EventArgs e)
         {
-            using (RfidToolForm dialog = new RfidToolForm())
+            using (var dialog = new SelectRfidTagDialog())
             {
+                dialog.AutoRefresh = true;
+                dialog.AutoFixEas = false;
+
                 dialog.Text = "选择 ISO14443A 读者卡";
                 dialog.OkCancelVisible = true;
                 dialog.LayoutVertical = false;
@@ -135,8 +138,11 @@ namespace dp2Circulation
 
         private void button_add14443_decimal_Click(object sender, EventArgs e)
         {
-            using (RfidToolForm dialog = new RfidToolForm())
+            using (var dialog = new SelectRfidTagDialog())
             {
+                dialog.AutoRefresh = true;
+                dialog.AutoFixEas = false;
+
                 dialog.Text = "选择 ISO14443A 读者卡";
                 dialog.OkCancelVisible = true;
                 dialog.LayoutVertical = false;

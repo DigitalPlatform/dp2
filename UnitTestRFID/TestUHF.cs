@@ -426,7 +426,7 @@ USR 000879030000845600000C022808100400010001000000000000000000000000000000000000
             var user_bank = Element.FromHexString("000879030000845600000C0228081004000100010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
             var result = GaoxiaoUtility.ParseTag(epc_bank,
                 user_bank,
-                "dontCheckUMI");
+                "");
 
             Debug.WriteLine(result.ToString());
         }

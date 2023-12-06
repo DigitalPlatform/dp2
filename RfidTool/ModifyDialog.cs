@@ -897,6 +897,9 @@ namespace RfidTool
                     changed = true;
                 }
 
+                // 2023/11/26
+                RfidTagList.SetTagInfoEAS(taginfo);
+
                 bool new_eas = taginfo.EAS;
                 if (string.IsNullOrEmpty(_action.ModifyEas) == true
                     || _action.ModifyEas == "不修改")
@@ -1129,6 +1132,10 @@ bool eas)
                     }
 
                     tou = chip?.FindElement(ElementOID.TypeOfUsage)?.Text;
+
+                    // 2023/11/26
+                    RfidTagList.SetTagInfoEAS(taginfo);
+
                     eas = taginfo.EAS ? "On" : "Off";
                     afi = Element.GetHexString(taginfo.AFI);
 

@@ -14,7 +14,7 @@
     <Deterministic>false</Deterministic>
     <IsWebBootstrapper>true</IsWebBootstrapper>
     <TargetFrameworkProfile />
-    <PublishUrl>c:\publish\rfidcenter\v1_dev\</PublishUrl>
+    <PublishUrl>c:\publish\rfidcenter\v1\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Web</InstallFrom>
     <UpdateEnabled>false</UpdateEnabled>
@@ -24,13 +24,13 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <InstallUrl>http://dp2003.com/rfidcenter/v1_dev/</InstallUrl>
+    <InstallUrl>http://dp2003.com/rfidcenter/v1/</InstallUrl>
     <ProductName>RFID中心</ProductName>
     <PublisherName>DigitalPlatform</PublisherName>
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>33</ApplicationRevision>
+    <ApplicationRevision>34</ApplicationRevision>
     <ApplicationVersion>1.14.8.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>

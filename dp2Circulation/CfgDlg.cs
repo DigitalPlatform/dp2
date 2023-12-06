@@ -39,6 +39,19 @@ namespace dp2Circulation
         {
             InitializeComponent();
 
+            // 注: 由于 VS 设计器的 bug，InitializeComponent() 中的 AnchorStyles.Right 控件会被反复压缩直到宽度为 0，所以没办法只好在这里补充
+            this.groupBox_idcardReader.Anchor |= AnchorStyles.Right;
+            this.groupBox_rfidTest.Anchor |= AnchorStyles.Right;
+            this.groupBox_rfidReader.Anchor |= AnchorStyles.Right;
+
+            this.label_message_shareBiblio_comment.Anchor |= AnchorStyles.Right;
+            this.groupBox_dp2mserver.Anchor |= AnchorStyles.Right;
+
+            this.groupBox_fingerprint.Anchor |= AnchorStyles.Right;
+            this.groupBox_palmprintUrl.Anchor |= AnchorStyles.Right;
+            this.groupBox_face.Anchor |= AnchorStyles.Right;
+
+            //
             this.tabControl_main.TabPages.Remove(this.tabPage_charging);
             this.tabPage_charging.Dispose();
         }
@@ -603,6 +616,12 @@ false);
     "onlyEpcCharging",
     false);
 
+            // 2023/11/29
+            this.numericUpDown_rfid_inventoryIdleSeconds.Value =
+                ap.GetInt("rfid",
+    "inventoryIdleSeconds",
+    0);
+
             checkBox_uhf_bookTagWriteUserBank_CheckedChanged(this, new EventArgs());
 
             if (StringUtil.IsInList("client_disablerfid", Program.MainForm._currentUserRights))
@@ -615,6 +634,7 @@ false);
                 this.checkBox_uhf_warningWhenDataFormatMismatch.Enabled = false;
                 this.checkedComboBox_uhf_elements.Enabled = false;
                 this.numericUpDown_uhf_rssi.Enabled = false;
+                this.numericUpDown_rfid_inventoryIdleSeconds.Enabled = false;
             }
 
             this.checkBox_rfidTest_borrowEAS.Checked =
@@ -1370,6 +1390,11 @@ ap.GetString(
                     "onlyEpcCharging",
                     this.checkBox_uhf_onlyEpcCharging.Checked);
 
+                // 2023/11/29
+                ap.SetInt("rfid",
+        "inventoryIdleSeconds",
+        (int)this.numericUpDown_rfid_inventoryIdleSeconds.Value);
+
                 ap.SetBoolean("rfidTest",
             "borrowEAS",
             this.checkBox_rfidTest_borrowEAS.Checked);
@@ -2115,6 +2140,22 @@ MessageBoxDefaultButton.Button2);
                 this.checkBox_uhf_bookTagWriteUserBank.Visible = true;
                 checkBox_uhf_bookTagWriteUserBank_CheckedChanged(sender, e);
             }
+        }
+
+        private void tabPage_cardReader_DoubleClick(object sender, EventArgs e)
+        {
+            this.groupBox_uhf.Enabled = true;
+            this.groupBox_rfidTest.Enabled = true;
+        }
+
+        private void tabPage_cardReader_SizeChanged(object sender, EventArgs e)
+        {
+            /*
+            var new_width = this.tabPage_cardReader.ClientSize.Width - 20;
+            this.groupBox_idcardReader.Width = new_width;
+            this.groupBox_rfidReader.Width = new_width;
+            this.groupBox_rfidTest.Width = new_width;
+            */
         }
     }
 

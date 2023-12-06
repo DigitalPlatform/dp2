@@ -1200,7 +1200,7 @@ namespace DigitalPlatform.RFID
 
             // 构造 PC (Protocal Control Word)
             var pc_info = new ProtocolControlWord();
-            pc_info.UMI = true;
+            pc_info.UMI = build_user_bank;  // 2023/12/5 修改
             pc_info.XPC = false;
             pc_info.ISO = false;
             pc_info.AFI = 0;
@@ -1311,12 +1311,17 @@ namespace DigitalPlatform.RFID
 
         // 解析标签信息。
         // 根据 EPC 和 USR 两个 bank 的信息来进行解析
+        // parameters:
+        //      style   如果包含 "checkUMI"，表示要对 UMI=on 和 ContentParameters 的存在关系进行校验。否则缺省为不校验
         public static ParseGaoxiaoResult ParseTag(
             byte[] epc_bank,
             byte[] user_bank,
             string style = "")
         {
-            bool dontCheckUMI = StringUtil.IsInList("dontCheckUMI", style);
+            if (StringUtil.IsInList("dontCheckUMI", style))
+                throw new ArgumentException("style 参数值的 dontCheckUMI 用法已经废弃。请改用 checkUMI");
+
+            bool checkUMI = StringUtil.IsInList("checkUMI", style);
             List<string> warnings = new List<string>();
 
             ProtocolControlWord pc = null;
@@ -1367,7 +1372,7 @@ namespace DigitalPlatform.RFID
                             };
                         }
 
-                        if (dontCheckUMI == false)
+                        if (checkUMI == true)
                             return new ParseGaoxiaoResult
                             {
                                 Value = -1,
@@ -1423,6 +1428,11 @@ namespace DigitalPlatform.RFID
                                 // 中立 --> 国标
                                 element.Content = SetInformation_NeutralToGB(neutral);
                             }
+
+                            // 2023/11/28
+                            // 将 OID 27 的元素转为国标 AOI
+                            if ((int)oid == 27)
+                                oid = ElementOID.AOI;
                         }
 
                         chip.SetElement(oid, element.Content, false);

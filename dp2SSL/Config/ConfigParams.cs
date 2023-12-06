@@ -94,6 +94,15 @@ namespace dp2SSL
             MessageUserName = _config.Get("global", "messageUserName", "");
             MessagePassword = App.DecryptPasssword(_config.Get("global", "messagePassword", ""));
 
+            RfidTestBorrowEAS = _config.GetBoolean("rfidTest",
+                "rfidTestBorrowEAS", false);
+            RfidTestReturnPreEAS = _config.GetBoolean("rfidTest",
+                "rfidTestReturnPreEAS", false);
+            RfidTestReturnAPI = _config.GetBoolean("rfidTest",
+                "rfidTestReturnAPI", false);
+            RfidTestReturnPostUndoEAS = _config.GetBoolean("rfidTest",
+                "rfidTestReturnPostUndoEAS", false);
+
             _changedParams.Clear();
         }
 
@@ -157,6 +166,15 @@ namespace dp2SSL
                     _ = App.StartMessageSendingAsync("配置界面修改了消息发送相关参数");
                 }
             }
+
+            _config.SetBoolean("rfidTest",
+                "rfidTestBorrowEAS", RfidTestBorrowEAS);
+            _config.SetBoolean("rfidTest",
+                "rfidTestReturnPreEAS", RfidTestReturnPreEAS);
+            _config.SetBoolean("rfidTest",
+                "rfidTestReturnAPI", RfidTestReturnAPI);
+            _config.SetBoolean("rfidTest",
+                "rfidTestReturnPostUndoEAS", RfidTestReturnPostUndoEAS);
 
             // 有错误
             if (errors.Count > 0)
@@ -939,6 +957,100 @@ Description = "用于交换消息的组的名字"
             }
         }
         */
+
+        #endregion
+
+
+        #region 测试相关参数
+
+        // 2023/11/28
+        // 默认值 false
+        [Display(
+Order = 30,
+Name = "Borrow() 末段修改 EAS",
+Description = "Borrow() 末段修改 EAS 为 off"
+)]
+        [Category("RFID 测试")]
+        public bool RfidTestBorrowEAS
+        {
+            get => _rfidTestBorrowEAS;
+            set
+            {
+                if (_rfidTestBorrowEAS != value)
+                {
+                    _rfidTestBorrowEAS = value;
+                    OnPropertyChanged("RfidTestBorrowEAS");
+                }
+            }
+        }
+        private bool _rfidTestBorrowEAS;
+
+        // 2023/11/28
+        // 默认值 false
+        [Display(
+Order = 31,
+Name = "Return() 前段预修改 EAS",
+Description = "Return() 前段预修改 EAS 为 on"
+)]
+        [Category("RFID 测试")]
+        public bool RfidTestReturnPreEAS
+        {
+            get => _rfidTestReturnPreEAS;
+            set
+            {
+                if (_rfidTestReturnPreEAS != value)
+                {
+                    _rfidTestReturnPreEAS = value;
+                    OnPropertyChanged("RfidTestReturnPreEAS");
+                }
+            }
+        }
+        private bool _rfidTestReturnPreEAS;
+
+
+        // 2023/11/28
+        // 默认值 false
+        [Display(
+Order = 32,
+Name = "Return() 中段 API",
+Description = "Return() 中段 API"
+)]
+        [Category("RFID 测试")]
+        public bool RfidTestReturnAPI
+        {
+            get => _rfidTestReturnAPI;
+            set
+            {
+                if (_rfidTestReturnAPI != value)
+                {
+                    _rfidTestReturnAPI = value;
+                    OnPropertyChanged("RfidTestReturnAPI");
+                }
+            }
+        }
+        private bool _rfidTestReturnAPI;
+
+        // 2023/11/28
+        // 默认值 false
+        [Display(
+Order = 33,
+Name = "Return() 末段回滚 EAS",
+Description = "Return() 末段回滚 EAS 为 off"
+)]
+        [Category("RFID 测试")]
+        public bool RfidTestReturnPostUndoEAS
+        {
+            get => _rfidTestReturnPostUndoEAS;
+            set
+            {
+                if (_rfidTestReturnPostUndoEAS != value)
+                {
+                    _rfidTestReturnPostUndoEAS = value;
+                    OnPropertyChanged("RfidTestReturnPostUndoEAS");
+                }
+            }
+        }
+        private bool _rfidTestReturnPostUndoEAS;
 
         #endregion
     }

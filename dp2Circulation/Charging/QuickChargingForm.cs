@@ -22,8 +22,6 @@ using DigitalPlatform.RFID;
 using DigitalPlatform.Core;
 
 using dp2Circulation.Charging;
-using DocumentFormat.OpenXml.EMMA;
-using System.Data.Entity.Core.Metadata.Edm;
 using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
@@ -96,6 +94,7 @@ namespace dp2Circulation
         }
 
         PatronCardControl _cardControl = null;
+        static Color _rectColor = Color.Purple;
 
         private void QuickChargingForm_Load(object sender, EventArgs e)
         {
@@ -141,7 +140,7 @@ namespace dp2Circulation
             // this._summaryList.stop = this.stop;
             this._summaryList.Container = this;
             this._summaryList.BeginThread();
-            this._floatingMessage.RectColor = Color.Purple;
+            this._floatingMessage.RectColor = _rectColor;   // Color.Purple;
 
             this.toolStripButton_enableHanzi.Checked = Program.MainForm.AppInfo.GetBoolean(
                 "quickchargingform",
@@ -170,7 +169,8 @@ namespace dp2Circulation
 
             _errorTable = new ErrorTable((s) =>
             {
-                this.Invoke((Action)(() =>
+                // 2023/11/26 从 Invoke() 改为 BeginInvoke()
+                this.BeginInvoke((Action)(() =>
                 {
                     if (this.label_rfidMessage.Text != s)
                     {
@@ -300,7 +300,7 @@ namespace dp2Circulation
                     var addbooks = new List<TagAndData>(e.AddBooks == null ? new List<TagAndData>() : e.AddBooks);
                     var removebooks = new List<TagAndData>(e.RemoveBooks == null ? new List<TagAndData>() : e.RemoveBooks);
                     // 将 AddBooks 和 RemoveBooks 中的 UHF EPC 改变，但 UII 没有改变的标签分离出来，单独处理
-                    var epc_changed_books = DetectEpcChange(ref addbooks, ref removebooks);
+                    var epc_changed_books = RfidTagList.DetectEpcChange(ref addbooks, ref removebooks);
 
                     if (addbooks.Count > 0)
                         foreach (var tag in addbooks)
@@ -337,91 +337,6 @@ namespace dp2Circulation
             }
         }
 
-        class UiiAndTag
-        {
-            public string UII { get; set; }
-            public TagAndData Data { get; set; }
-        }
-
-        class DataChange
-        {
-            public TagAndData OldData { get; set; }
-            public TagAndData NewData { get; set; }
-        }
-
-        // 识别 EPC 变动
-        List<DataChange> DetectEpcChange(ref List<TagAndData> add_datas,
-            ref List<TagAndData> remove_datas)
-        {
-            var list_add = MakeList(add_datas);
-            var list_remove = MakeList(remove_datas);
-            if (list_add.Count == 0 || list_remove.Count == 0)
-                return new List<DataChange>();
-
-            var updates = new List<DataChange>();
-            foreach (var item_add in list_add)
-            {
-                foreach (var item_remove in list_remove)
-                {
-                    if (WildIsEqual(item_add.UII, item_remove.UII))
-                    {
-                        add_datas.Remove(item_add.Data);
-                        remove_datas.Remove(item_remove.Data);
-                        updates.Add(new DataChange
-                        {
-                            OldData = item_remove.Data,
-                            NewData = item_add.Data,
-                        });
-                    }
-                }
-            }
-
-            return updates;
-
-            // TODO: 还可把 OI 和 PII 分离以后单独比较
-            bool WildIsEqual(string uii1, string uii2)
-            {
-                if (uii1 == null)
-                    uii1 = "";
-                if (uii2 == null)
-                    uii2 = "";
-                if (uii1 == uii2)
-                    return true;
-                var dot1 = uii1.Contains(".");
-                var dot2 = uii2.Contains(".");
-                if (dot1 == dot2)
-                    return uii1 == uii2;
-                if (dot1 == true)
-                {
-                    return uii1 == uii2 || uii1.EndsWith("." + uii2);
-                }
-
-                if (dot2 == true)
-                {
-                    return uii1 == uii2 || uii2.EndsWith("." + uii1);
-                }
-
-                return false;
-            }
-
-            List<UiiAndTag> MakeList(List<TagAndData> datas)
-            {
-                var list = new List<UiiAndTag>();
-                foreach (var data in datas)
-                {
-                    if (data.OneTag.Protocol == InventoryInfo.ISO18000P6C)
-                    {
-                        var uii = RfidTagList.GetUhfUii(data.OneTag.UID, data.OneTag.TagInfo?.Bytes);
-                        list.Add(new UiiAndTag
-                        {
-                            UII = uii,
-                            Data = data
-                        });
-                    }
-                }
-                return list;
-            }
-        }
 
         // 检查当前是否有多张读者卡持续放在读卡器上
         void CheckMultiPatronCard()
@@ -707,9 +622,29 @@ namespace dp2Circulation
 
             if (string.IsNullOrEmpty(pii))
             {
+                var one_tag = data.OneTag;
+                if (one_tag.Protocol == InventoryInfo.ISO15693
+                    && LogicChip.IsBlankHfTag(one_tag.TagInfo?.Bytes))
+                {
+                    TaskList.Sound(-1);
+                    SetError("sendKey", $"此标签(UID={one_tag.UID})为空白标签");
+                    return;
+                }
+                else if (one_tag.Protocol == InventoryInfo.ISO18000P6C)
+                {
+                    var epc_bank = Element.FromHexString(one_tag.UID);
+
+                    if (UhfUtility.IsBlankTag(epc_bank, one_tag.TagInfo?.Bytes))
+                    {
+                        TaskList.Sound(-1);
+                        SetError("sendKey", $"此标签(UID={one_tag.UID})为空白标签");
+                        return;
+                    }
+                }
+
                 // TODO: 改进显示方式
-                SetError("sendKey", $"此标签(UID={data.OneTag.UID})无法解析出 PII 元素。已写入错误日志");
-                MainForm.WriteErrorLog($"此标签(UID={data.OneTag.UID})无法解析出 PII 元素。bytes='{Element.GetHexString(data.OneTag?.TagInfo?.Bytes)}'");
+                SetError("sendKey", $"此标签(UID={one_tag.UID})无法解析出 PII 元素。已写入错误日志");
+                MainForm.WriteErrorLog($"此标签(UID={one_tag.UID})无法解析出 PII 元素。bytes='{Element.GetHexString(one_tag?.TagInfo?.Bytes)}'");
                 return;
             }
 
@@ -904,13 +839,16 @@ namespace dp2Circulation
         }
 
         internal SetEasResult SetEAS(
+            string reason,
             ChargingTask task,
             string reader_name,
             string tag_name,
             bool enable,
             string simulate_error = null)
         {
-            var result = _easForm.SetEAS(task,
+            var result = _easForm.SetEAS(
+                reason,
+                task,
                 reader_name,
                 tag_name,
                 enable,
@@ -2097,6 +2035,23 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             }
         }
 
+        public string FastMessageBox(InfoColor color,
+    string strCaption,
+    string strMessage)
+        {
+            return this.TryGet(() =>
+            {
+                return ChargingInfoDlg.Show(
+                    this.CharingInfoHost,
+                    strMessage,
+                    color,
+                    strCaption,
+                    this.InfoDlgOpacity,
+                    Program.MainForm.DefaultFont);
+            });
+        }
+
+
         #endregion
 
         delegate void Delegate_DisplayTask(string strAction,
@@ -2481,7 +2436,6 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             }
             if (nRet == 1)
             {
-
                 // 2017/1/4
                 nRet = Program.MainForm.TransformBarcode(
                     Program.MainForm.FocusLibraryCode,
@@ -2591,9 +2545,29 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                         if (this.WillLoadReaderInfo == true)
                         {
                             // TODO: 语音提示
-                            MessageBox.Show(this, "这里需要输入 证 条码号，而您输入的 '" + strText + "' 是一个 册 条码号。\r\n\r\n请重新输入");
+                            // MessageBox.Show(this, "这里需要输入 证 条码号，而您输入的 '" + strText + "' 是一个 册 条码号。\r\n\r\n请重新输入");
+                            this.ShowMessage("这里需要输入 证 条码号，而您输入的 '" + strText + "' 是一个 册 条码号。\r\n\r\n请重新输入",
+                                "red", true);
+                            // 发出尖锐声音提示操作者注意被吞掉的号码
+                            TaskList.Sound(-1);
+
                             this.textBox_input.SelectAll();
                             this.textBox_input.Focus(); // 2020/6/2
+#if REMOVED
+                            var input = FastMessageBox(InfoColor.Red,
+    "需要输入证条码号",
+    "这里需要输入 证 条码号，而您输入的 '" + strText + "' 是一个 册 条码号。\r\n\r\n请重新输入");
+                            if (string.IsNullOrEmpty(input))
+                            {
+                                this.textBox_input.SelectAll();
+                                this.textBox_input.Focus(); // 2020/6/2
+                                return;
+                            }
+                            this.BeginInvoke((Action)(() =>
+                            {
+                                _doAction(func, input, strTaskID, strParameters);
+                            }));
+#endif
                             return;
                         }
                     }
@@ -2631,7 +2605,11 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                 // 此处限定只能是读者证条码号
                 if (IsReaderType(strText) == -1)
                 {
-                    MessageBox.Show(this, "请先输入读者证条码号，然后再输入册条码号");
+                    // MessageBox.Show(this, "请先输入读者证条码号，然后再输入册条码号");
+                    this.ShowMessage("请先输入读者证条码号，然后再输入册条码号", "red", true);
+                    // 发出尖锐声音提示操作者注意被吞掉的号码
+                    TaskList.Sound(-1);
+
                     this.textBox_input.SelectAll();
                     this.textBox_input.Focus(); // 2020/6/2
                     return;
@@ -2667,7 +2645,12 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                     WillLoadReaderInfo = true;
                     // 提示请输入读者证条码号
                     // TODO: 这里直接出现对话框搜集读者证条码号
-                    MessageBox.Show(this, "请先输入读者证条码号，然后再输入册条码号");
+                    // MessageBox.Show(this, "请先输入读者证条码号，然后再输入册条码号");
+                    this.ShowMessage("请先输入读者证条码号，然后再输入册条码号", "red", true);
+                    // 发出尖锐声音提示操作者注意被吞掉的号码
+                    TaskList.Sound(-1);
+
+
                     this.textBox_input.SelectAll();
                     this.textBox_input.Focus(); // 2020/6/2
                     return;
@@ -2727,7 +2710,11 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                     WillLoadReaderInfo = true;
                     // 提示请输入读者证条码号
                     // TODO: 这里直接出现对话框搜集读者证条码号
-                    MessageBox.Show(this, "请先输入读者证条码号，然后再输入册条码号");
+                    // MessageBox.Show(this, "请先输入读者证条码号，然后再输入册条码号");
+                    this.ShowMessage("请先输入读者证条码号，然后再输入册条码号", "red", true);
+                    // 发出尖锐声音提示操作者注意被吞掉的号码
+                    TaskList.Sound(-1);
+
                     this.textBox_input.SelectAll();
                     this.textBox_input.Focus(); // 2020/6/2
                     return;
@@ -2751,7 +2738,11 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                 {
                     WillLoadReaderInfo = true;
                     // 提示请输入读者证条码号
-                    MessageBox.Show(this, "请先输入读者证条码号，然后再输入册条码号");
+                    // MessageBox.Show(this, "请先输入读者证条码号，然后再输入册条码号");
+                    this.ShowMessage("请先输入读者证条码号，然后再输入册条码号", "red", true);
+                    // 发出尖锐声音提示操作者注意被吞掉的号码
+                    TaskList.Sound(-1);
+
                     this.textBox_input.SelectAll();
                     this.textBox_input.Focus(); // 2020/6/2
                     return;
@@ -2769,7 +2760,11 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                     WillLoadReaderInfo = true;
                     // 提示请输入读者证条码号
                     // TODO: 这里直接出现对话框搜集读者证条码号
-                    MessageBox.Show(this, "请先输入读者证条码号，然后再输入册条码号");
+                    // MessageBox.Show(this, "请先输入读者证条码号，然后再输入册条码号");
+                    this.ShowMessage("请先输入读者证条码号，然后再输入册条码号", "red", true);
+                    // 发出尖锐声音提示操作者注意被吞掉的号码
+                    TaskList.Sound(-1);
+
                     this.textBox_input.SelectAll();
                     this.textBox_input.Focus(); // 2020/6/2
                     return;
@@ -3544,20 +3539,30 @@ false);
 
             this.colorSummaryControl1.ColorList = text.ToString();
 
+            this._floatingMessage.RectColor = _rectColor;
             // TODO: 是否延迟显示，避免反复出现和隐藏
             if (nWaitingCount > 0)
             {
                 string strState = "";
                 if (this._taskList.Stopped == true)
                     strState = "已暂停任务处理。\r\n";
-                this.FloatingMessage = strState + "有 " + nWaitingCount.ToString() + " 个任务尚未完成 ...";
+                this._floatingMessage.SetMessage(strState + "有 " + nWaitingCount.ToString() + " 个任务尚未完成 ...",
+                    _rectColor, false);
+                // this.FloatingMessage = strState + "有 " + nWaitingCount.ToString() + " 个任务尚未完成 ...";
             }
             else
             {
                 if (this._taskList.Stopped == true)
-                    this.FloatingMessage = "已暂停任务处理。";
+                {
+                    this._floatingMessage.SetMessage("已暂停任务处理。",
+                        _rectColor, false);
+                    // this.FloatingMessage = "已暂停任务处理。";
+                }
                 else
-                    this.FloatingMessage = "";
+                {
+                    this._floatingMessage.Text = "";
+                    // this.FloatingMessage = "";
+                }
             }
 
             // 刷新读者摘要窗口

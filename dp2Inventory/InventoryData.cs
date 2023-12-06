@@ -565,6 +565,10 @@ namespace dp2Inventory
                 }
             }
 
+
+            // 2023/11/26
+            RfidTagList.SetTagInfoEAS(entity.TagInfo);
+
             var afi = entity.TagInfo.AFI;
             if (afi == 0x07)
             {
@@ -710,6 +714,9 @@ namespace dp2Inventory
                         return new NormalResult();  // 没有执行
                     }
                 }
+
+                // 2023/11/26
+                RfidTagList.SetTagInfoEAS(entity.TagInfo);
 
                 // 如果 RFID 标签此时正好在读卡器上，则立即触发处理
                 // if (TagOnReader(entity))

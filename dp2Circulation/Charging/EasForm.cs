@@ -17,6 +17,7 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
 
 namespace dp2Circulation.Charging
 {
@@ -73,7 +74,10 @@ namespace dp2Circulation.Charging
         }
 
         // 设置 EAS 状态。如果失败，会在 ListView 里面自动添加一行，以备后面用户在读卡器上放标签时候自动修正
+        // parameters:
+        //      reason  设置 EAS 的原因。如果为 "rollback"，表示这是回滚先前的 EAS 修改。空则表示借还操作需要。这两种情形在继续重复执行的时候会有区别，当获得册记录发现没有找到的时候，"rollback" 会坚持继续操作，"" 则放弃坚持修改 EAS
         internal SetEasResult SetEAS(
+            string reason,
             object task,
             string reader_name,
             string tag_name,
@@ -125,7 +129,7 @@ namespace dp2Circulation.Charging
                 this.Invoke((Action)(() =>
                 {
                     // 加入一个新行
-                    AddLine(uid, pii, task);
+                    AddLine(uid, pii, reason, task);
                 }));
                 return new SetEasResult
                 {
@@ -209,7 +213,7 @@ namespace dp2Circulation.Charging
                 this.Invoke((Action)(() =>
                 {
                     // 加入一个新行
-                    AddLine(uid, pii, task);
+                    AddLine(uid, pii, reason, task);
                 }));
             }
             else
@@ -228,15 +232,33 @@ namespace dp2Circulation.Charging
             return result;
         }
 
-
+        static int COLUMN_UID = 0;
+        static int COLUMN_PII = 1;
+        static int COLUMN_SUMMARY = 2;
+        static int COLUMN_REASON = 3;
 
         // TODO: 注意查重。避免插入重复的行
-        ListViewItem AddLine(string uid, string pii, object o)
+        ListViewItem AddLine(string uid,
+            string pii,
+            string reason,
+            object o)
         {
+            // 检查 reason 为空，或者 rollback:on/rollback:off
+            if (string.IsNullOrEmpty(reason) == false)
+            {
+                if (reason == "rollback:on" || reason == "rollback:off")
+                {
+                    // 合法
+                }
+                else
+                    throw new ArgumentException($"reason 参数值 '{reason}' 不合法。应为 空、rollback:on、rollback:off 之一");
+            }
+
             ListViewItem item = new ListViewItem();
             item.Tag = new ItemInfo { Param = o };
-            ListViewUtil.ChangeItemText(item, 0, uid);
-            ListViewUtil.ChangeItemText(item, 1, pii);
+            ListViewUtil.ChangeItemText(item, COLUMN_UID, uid);
+            ListViewUtil.ChangeItemText(item, COLUMN_PII, pii);
+            ListViewUtil.ChangeItemText(item, COLUMN_REASON, reason);
             this.listView1.Items.Add(item);
             OnItemChanged();
 
@@ -262,11 +284,11 @@ namespace dp2Circulation.Charging
             {
                 foreach (ListViewItem item in items_param)
                 {
-                    string summary = ListViewUtil.GetItemText(item, 2);
+                    string summary = ListViewUtil.GetItemText(item, COLUMN_SUMMARY);
                     if (string.IsNullOrEmpty(summary) == false)
                         continue;
                     items.Add(item);
-                    piis.Add(ListViewUtil.GetItemText(item, 1));
+                    piis.Add(ListViewUtil.GetItemText(item, COLUMN_PII));
                 }
             }));
 
@@ -357,7 +379,7 @@ out string strError);
                 {
                     ListViewItem item = items[i];
 
-                    ListViewUtil.ChangeItemText(item, 2, summary);
+                    ListViewUtil.ChangeItemText(item, COLUMN_SUMMARY, summary);
                     i++;
                 }
             }));
@@ -371,8 +393,8 @@ out string strError);
         {
             foreach (ListViewItem item in this.listView1.Items)
             {
-                string current_uid = ListViewUtil.GetItemText(item, 0);
-                string current_pii = ListViewUtil.GetItemText(item, 1);
+                string current_uid = ListViewUtil.GetItemText(item, COLUMN_UID);
+                string current_pii = ListViewUtil.GetItemText(item, COLUMN_PII);
                 if (string.IsNullOrEmpty(uid) == false && string.IsNullOrEmpty(current_uid) == false)
                 {
                     if (uid == current_uid)
@@ -423,26 +445,72 @@ out string strError);
             if (item == null)
                 return new NormalResult { Value = 0 };
 
-            // 获得册记录 XML
-            var getitem_result = GetItemXml(pii);
-            if (getitem_result.Value == -1)
+            string reason = ListViewUtil.GetItemText(item, COLUMN_REASON);
+
+            bool enable = false;
+
             {
-                return getitem_result;
+                // 获得册记录 XML
+                var getitem_result = GetItemXml(pii);
+                if (getitem_result.Value == -1)
+                {
+                    // 没有找到册记录，或者册来自馆外机构，(原本)就没有必要修改 EAS。
+                    if (getitem_result.ErrorCode == "NotFound")
+                    {
+                        // 延迟到这时候检查 reason 是否为 rollback
+                        if (reason.StartsWith("rollback:"))
+                        {
+                            // 若 EasForm 这里目的是回滚，那就要确保回滚成功
+                            // 坚持完成
+                            var text = reason.Substring("rollback:".Length);
+                            // 可能会抛出异常
+                            enable = DomUtil.IsBooleanTrue(text);
+                            goto GETTAGINFO;
+                        }
+                        else
+                        {
+                            // 如果 reason 不是 rollback，那么放弃本次更正 EAS 操作
+                            // 消除这一行
+                            // 从 ListView 中删除这一行
+                            this.Invoke((Action)(() =>
+                            {
+                                this.listView1.Items.Remove(item);
+                                OnItemChanged();
+                            }));
+                            //      -1  出错
+                            //      0   没有找到指定的标签
+                            //      1   找到，并成功修改 EAS
+                            return new NormalResult
+                            {
+                                Value = 0
+                            };
+                        }
+                    }
+                    else
+                        return getitem_result;
+                }
+
+                // 获得册记录的外借状态。
+                // return:
+                //      -2  册记录为空，无法判断状态
+                //      -1  出错
+                //      0   没有被外借
+                //      1   在外借状态
+                int nRet = RfidToolForm.GetCirculationState(getitem_result.ItemXml,
+                    out string strError);
+                if (nRet == -1 || nRet == -2)
+                {
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError
+                    };
+                }
+
+                enable = nRet == 0;
             }
 
-            // 获得册记录的外借状态。
-            // return:
-            //      -2  册记录为空，无法判断状态
-            //      -1  出错
-            //      0   没有被外借
-            //      1   在外借状态
-            int nRet = RfidToolForm.GetCirculationState(getitem_result.ItemXml,
-                out string strError);
-            if (nRet == -1 || nRet == -2)
-            {
-                return new NormalResult { Value = -1, ErrorInfo = strError };
-            }
-
+        GETTAGINFO:
             var gettag_result = RfidManager.GetTagInfo("*", uid, antenna_id);
             if (gettag_result.Value == -1)
             {
@@ -453,6 +521,8 @@ out string strError);
 
             // 2023/11/15
             // 把 tag_info.EAS 设置到位
+            RfidTagList.SetTagInfoEAS(tag_info);
+            /*
             {
                 if (tag_info.Protocol == InventoryInfo.ISO18000P6C)
                 {
@@ -466,16 +536,19 @@ out string strError);
                     }
                 }
             }
+            */
 
             // 检查册记录外借状态和 EAS 状态是否符合
             // 检测 EAS 是否正确
             SetEasResult seteas_result = new SetEasResult { Value = 1 };
-            if (nRet == 1 && tag_info.EAS == true)
+            if ((/*nRet == 1*/enable == false && tag_info.EAS == true)
+                || (/*nRet == 0*/enable == true && tag_info.EAS == false)
+                )
             {
                 seteas_result = RfidManager.SetEAS("*",
                     "uid:" + tag_info.UID,
                     tag_info.AntennaID,
-                    false);
+                    enable);
                 if (string.IsNullOrEmpty(seteas_result.ChangedUID) == false)
                 {
                     UpdateUID(tag_info.UID, seteas_result.ChangedUID);
@@ -491,34 +564,9 @@ out string strError);
                     if (string.IsNullOrEmpty(seteas_result.ChangedUID) == false)
                         TaskList.ChangeUID(seteas_result.OldUID, seteas_result.ChangedUID);
                     else
-                        TaskList.ChangeUID(seteas_result.OldUID, "off");
+                        TaskList.ChangeUID(seteas_result.OldUID, enable ? "on" : "off");
                 }
-                // RfidTagList.SetEasData(tag_info.UID, false);
-            }
-            else if (nRet == 0 && tag_info.EAS == false)
-            {
-                seteas_result = RfidManager.SetEAS("*",
-                    "uid:" + tag_info.UID,
-                    tag_info.AntennaID,
-                    true);
-                if (string.IsNullOrEmpty(seteas_result.ChangedUID) == false)
-                {
-                    UpdateUID(tag_info.UID, seteas_result.ChangedUID);
-                    tag_info.UID = seteas_result.ChangedUID;
-                }
-
-                // 2023/11/25
-                // 注: 无论 result.ChangedUID 是否为空，都要进行 UpdateUID 操作
-                // HF 标签此时的 result.ChangedUID 是为空的
-                if (string.IsNullOrEmpty(seteas_result.OldUID) == false
-                    && seteas_result.Value == 1)
-                {
-                    if (string.IsNullOrEmpty(seteas_result.ChangedUID) == false)
-                        TaskList.ChangeUID(seteas_result.OldUID, seteas_result.ChangedUID);
-                    else
-                        TaskList.ChangeUID(seteas_result.OldUID, "on");
-                }
-                // RfidTagList.SetEasData(tag_info.UID, true);
+                // RfidTagList.SetEasData(tag_info.UID, enable);
             }
             else
             {
@@ -593,7 +641,7 @@ out string strError);
                     "xml",
                     out string strBiblio,
                     out string strError);
-                if (lRet == -1)
+                if (lRet == -1 || lRet == 0)
                     return new GetItemXmlResult
                     {
                         Value = -1,
@@ -768,6 +816,9 @@ out string strError);
                 }
                 else
                 {
+                    // 2023/11/26
+                    RfidTagList.SetTagInfoEAS(data.OneTag.TagInfo);
+
                     eas = data.OneTag.TagInfo.EAS;
                 }
 
@@ -813,6 +864,9 @@ out string strError);
                 }
                 else
                     tag_info = data.OneTag.TagInfo;
+
+                // 2023/11/26
+                RfidTagList.SetTagInfoEAS(tag_info);
 
                 try
                 {

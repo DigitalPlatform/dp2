@@ -189,6 +189,7 @@ uint new_password);
         }
 
         // 2019/8/29
+        // 2023/11/26 改为 Deep Clone
         public OneTag Clone()
         {
             OneTag result = new OneTag();
@@ -198,7 +199,8 @@ uint new_password);
             result.LastActive = this.LastActive;
             result.DSFID = this.DSFID;
             result.AntennaID = this.AntennaID;
-            result.TagInfo = this.TagInfo;
+            // DeepClone .TagInfo member
+            result.TagInfo = this.TagInfo?.Clone();  // 2023/11/26 增加的 .Clone()
             return result;
         }
 

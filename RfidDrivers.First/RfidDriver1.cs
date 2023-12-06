@@ -3763,7 +3763,7 @@ out Reader reader);
                                     // 注: 这里是不想进一步用 GetTagInfo() 获得标签的 User Bank。
                                     // 可以观察 Content Parameters 看看是否有必要进一步获得 User Bank 解析出 OI 部分
                                     // 后面如果改进为获得 User Bank，就可以得到 OI，和 PII 一起构成 UII 进行判断
-                                    var parse_result = GaoxiaoUtility.ParseTag(epc_bank, null, "dontCheckUMI");
+                                    var parse_result = GaoxiaoUtility.ParseTag(epc_bank, null, "");
                                     // GaoxiaoUtility.ParseTag(Element.FromHexString(info.UID.Substring(4)), null);
                                     if (parse_result.Value == -1)
                                         continue;
@@ -4708,9 +4708,12 @@ out Reader reader);
                         }
                         else
                         {
+                            //var epc_bytes = Element.FromHexString(new_tag_info.UID);
+                            //var umi = UhfUtility.GetUMI(epc_bytes, 2);
                             // 尝试清除原有的 User Bank 内容
                             if (old_tag_info.Bytes != null
                                 && old_tag_info.Bytes.Length > 0
+                                //&& umi == true  // 只有当 UMI 等于 true 才有必要考虑清理干净 User Bank 
                                 && IsZero(old_tag_info.Bytes) == false)
                             {
                                 var zero_bytes = BuildZeroBytes(old_tag_info.Bytes);
@@ -4726,6 +4729,7 @@ out Reader reader);
                             }
                         }
 
+
                         if (iret != 0)
                         {
                             // TODO: 尝试恢复以前的 User Bank 内容?
@@ -4737,6 +4741,16 @@ out Reader reader);
                                 ErrorCode = GetErrorCode(iret, reader.ReaderHandle)
                             };
                         }
+
+#if TESTING
+                        if (new_tag_info.Bytes != null)
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = $"testing ISO18000p6C_Write() User Bank error. iret:{iret},reader_name:{one_reader_name},uid:{old_tag_info.UID},antenna_id:{old_tag_info.AntennaID}",
+                                ErrorCode = GetErrorCode(iret, reader.ReaderHandle)
+                            };
+#endif
 
                         // 写入 EPC Bank
                         // TODO: 确保写入的 length 为偶数
@@ -4918,8 +4932,6 @@ out Reader reader);
                 UnlockReader(reader);
             }
         }
-
-
 
         // return:
         //      null 或者 "" 表示没有发现错误

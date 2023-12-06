@@ -492,6 +492,10 @@ namespace RfidTool
                     }
 
                     tou = chip?.FindElement(ElementOID.TypeOfUsage)?.Text;
+
+                    // 2023/11/26
+                    RfidTagList.SetTagInfoEAS(taginfo);
+
                     eas = taginfo.EAS ? "On" : "Off";
                     afi = Element.GetHexString(taginfo.AFI);
 
@@ -841,10 +845,13 @@ namespace RfidTool
 
                 OneTag DeepClone(OneTag t)
                 {
+                    /*
                     t = t.Clone();
                     if (t.TagInfo != null)
                         t.TagInfo = t.TagInfo.Clone();
                     return t;
+                    */
+                    return t.Clone();
                 }
 
                 if (tag.TagInfo == null)

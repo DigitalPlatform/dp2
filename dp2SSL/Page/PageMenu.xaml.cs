@@ -135,6 +135,7 @@ namespace dp2SSL
                 this.returnButton.Visibility = Visibility.Collapsed;
                 this.renewButton.Visibility = Visibility.Collapsed;
                 this.inventory.Visibility = Visibility.Collapsed;
+                this.borrowAndReturn.Visibility = Visibility.Collapsed;
 
                 this.bindPatronCard.Visibility = Visibility.Visible;
             }
@@ -146,11 +147,13 @@ namespace dp2SSL
                 this.returnButton.Visibility = Visibility.Visible;
                 this.renewButton.Visibility = Visibility.Visible;
                 this.inventory.Visibility = Visibility.Collapsed;
+                this.borrowAndReturn.Visibility = Visibility.Visible;
 
                 this.bindPatronCard.Visibility = Visibility.Visible;
             }
             else
             {
+                // 盘点
                 this.inventory.Visibility = Visibility.Visible;
 
                 this.shelf.Visibility = Visibility.Collapsed;
@@ -607,6 +610,11 @@ namespace dp2SSL
         {
             _activityTimer?.Stop();
             _activityTimer?.Start();
+        }
+
+        private void borrowAndReturn_Click(object sender, RoutedEventArgs e)
+        {
+            NavigatePageBorrow("borrow,return");
         }
 
         #endregion

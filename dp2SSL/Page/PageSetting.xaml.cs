@@ -658,7 +658,7 @@ string color = "red")
                         try
                         {
                             if (StringUtil.CompareVersion(version_result.ErrorCode, facecenter_base_version) < 0)
-                                errors.Add($"所连接的人脸中心版本太低(为 {version_result.ErrorCode} 版)。请升级到 {rfidcenter_base_version} 以上版本");
+                                errors.Add($"所连接的人脸中心版本太低(为 {version_result.ErrorCode} 版)。请升级到 {facecenter_base_version} 以上版本");
                         }
                         catch (Exception ex)
                         {

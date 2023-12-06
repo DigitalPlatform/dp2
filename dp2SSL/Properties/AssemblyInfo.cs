@@ -51,8 +51,8 @@ using System.Windows;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.8.69")]    // 1.5.*
-[assembly: AssemblyFileVersion("1.8.69.0")]  // 1.5.0.0
+[assembly: AssemblyVersion("1.9.1")]    // 1.5.*
+[assembly: AssemblyFileVersion("1.9.1.0")]  // 1.5.0.0
 
 // 1.0 2019/2/21 第一个版本
 // 1.1 2019/2/26 可以显示版本号了
@@ -165,3 +165,6 @@ using System.Windows;
 //      1.8.67 (2022/3/22) 改进 dp2ssl 退出时自动保存全量下载册记录断点的功能，修正一个 bug
 //      1.8.68 (2022/9/9) dp2ssl 主窗口 Activated 和 Deactivated 的时候，会关闭和打开指纹、RFID 的 SendKey。早先版本只会在 Activated 的时候关闭，不会主动去打开
 //      1.8.69 (2023/1/10) dp2ssl 用到的 dp2library 账户的必备权限检查中，去掉了 setreaderobject 和 setobject 权限，因为人脸登记是依靠 facecenter 的账户进行的
+// 1.9 2023/12/4 增加 UHF 自助借还功能
+//      1.9.0   (2023/12/4) 对“望湖洞庭”增加专门支持。支持缺乏 User Bank 内容的“望湖洞庭”标签，并为此单独放开了 strict 模式，允许没有机构代码的 PII 成功进行借还
+//      1.9.1   (2023/12/6) 当 dp2ssl 主窗口 deactivated 以后，会暂停 RfidManager 的后台盘点进程

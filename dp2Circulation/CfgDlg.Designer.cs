@@ -185,8 +185,10 @@
             this.checkBox_rfidTest_returnAPI = new System.Windows.Forms.CheckBox();
             this.checkBox_rfidTest_returnPreEAS = new System.Windows.Forms.CheckBox();
             this.checkBox_rfidTest_borrowEAS = new System.Windows.Forms.CheckBox();
-            this.groupBox11 = new System.Windows.Forms.GroupBox();
+            this.groupBox_rfidReader = new System.Windows.Forms.GroupBox();
             this.groupBox_uhf = new System.Windows.Forms.GroupBox();
+            this.label42 = new System.Windows.Forms.Label();
+            this.numericUpDown_rfid_inventoryIdleSeconds = new System.Windows.Forms.NumericUpDown();
             this.checkBox_uhf_onlyEpcCharging = new System.Windows.Forms.CheckBox();
             this.label41 = new System.Windows.Forms.Label();
             this.label40 = new System.Windows.Forms.Label();
@@ -199,7 +201,7 @@
             this.label39 = new System.Windows.Forms.Label();
             this.button_cardReader_setRfidUrlDefaultValue = new System.Windows.Forms.Button();
             this.textBox_cardReader_rfidCenterUrl = new System.Windows.Forms.TextBox();
-            this.groupBox8 = new System.Windows.Forms.GroupBox();
+            this.groupBox_idcardReader = new System.Windows.Forms.GroupBox();
             this.button_cardReader_setIdcardUrlDefaultValue = new System.Windows.Forms.Button();
             this.textBox_cardReader_idcardReaderUrl = new System.Windows.Forms.TextBox();
             this.tabPage_patron = new System.Windows.Forms.TabPage();
@@ -231,7 +233,7 @@
             this.button_fingerprint_setDefaultValue_new = new System.Windows.Forms.Button();
             this.button_palmprint_setDefaulValue = new System.Windows.Forms.Button();
             this.textBox_palmprint_readerUrl = new System.Windows.Forms.TextBox();
-            this.groupBox10 = new System.Windows.Forms.GroupBox();
+            this.groupBox_face = new System.Windows.Forms.GroupBox();
             this.checkBox_face_savePhotoWhileRegister = new System.Windows.Forms.CheckBox();
             this.linkLabel_installFaceCenter = new System.Windows.Forms.LinkLabel();
             this.button_face_setDefaultValue = new System.Windows.Forms.Button();
@@ -250,17 +252,18 @@
             this.comboBox_labelPrint_accessNoSource = new System.Windows.Forms.ComboBox();
             this.label28 = new System.Windows.Forms.Label();
             this.tabPage_message = new System.Windows.Forms.TabPage();
+            this.groupBox_dp2mserver = new System.Windows.Forms.GroupBox();
+            this.textBox_message_userName = new System.Windows.Forms.TextBox();
+            this.label33 = new System.Windows.Forms.Label();
+            this.button_message_setDefaultUrl = new System.Windows.Forms.Button();
+            this.label32 = new System.Windows.Forms.Label();
+            this.textBox_message_dp2MServerUrl = new System.Windows.Forms.TextBox();
+            this.textBox_message_password = new System.Windows.Forms.TextBox();
+            this.label29 = new System.Windows.Forms.Label();
             this.groupBox_message_compactShelf = new System.Windows.Forms.GroupBox();
             this.textBox_message_shelfAccount = new System.Windows.Forms.TextBox();
             this.label38 = new System.Windows.Forms.Label();
-            this.button_message_setDefaultUrl = new System.Windows.Forms.Button();
-            this.textBox_message_password = new System.Windows.Forms.TextBox();
-            this.textBox_message_userName = new System.Windows.Forms.TextBox();
-            this.label32 = new System.Windows.Forms.Label();
-            this.label33 = new System.Windows.Forms.Label();
-            this.textBox_message_dp2MServerUrl = new System.Windows.Forms.TextBox();
-            this.label29 = new System.Windows.Forms.Label();
-            this.label_comment = new System.Windows.Forms.Label();
+            this.label_message_shareBiblio_comment = new System.Windows.Forms.Label();
             this.checkBox_message_shareBiblio = new System.Windows.Forms.CheckBox();
             this.tabPage_z3950 = new System.Windows.Forms.TabPage();
             this.button_z3950_servers = new System.Windows.Forms.Button();
@@ -300,20 +303,22 @@
             this.tabPage_accept.SuspendLayout();
             this.tabPage_cardReader.SuspendLayout();
             this.groupBox_rfidTest.SuspendLayout();
-            this.groupBox11.SuspendLayout();
+            this.groupBox_rfidReader.SuspendLayout();
             this.groupBox_uhf.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_rfid_inventoryIdleSeconds)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_uhf_rssi)).BeginInit();
-            this.groupBox8.SuspendLayout();
+            this.groupBox_idcardReader.SuspendLayout();
             this.tabPage_patron.SuspendLayout();
             this.tabPage_operLog.SuspendLayout();
             this.tabPage_global.SuspendLayout();
             this.tabPage_fingerprint.SuspendLayout();
             this.groupBox_palmprintUrl.SuspendLayout();
-            this.groupBox10.SuspendLayout();
+            this.groupBox_face.SuspendLayout();
             this.groupBox9.SuspendLayout();
             this.groupBox_fingerprint.SuspendLayout();
             this.tabPage_labelPrint.SuspendLayout();
             this.tabPage_message.SuspendLayout();
+            this.groupBox_dp2mserver.SuspendLayout();
             this.groupBox_message_compactShelf.SuspendLayout();
             this.tabPage_z3950.SuspendLayout();
             this.SuspendLayout();
@@ -1493,7 +1498,7 @@
             this.groupBox6.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.groupBox6.Name = "groupBox6";
             this.groupBox6.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.groupBox6.Size = new System.Drawing.Size(579, 175);
+            this.groupBox6.Size = new System.Drawing.Size(864, 175);
             this.groupBox6.TabIndex = 6;
             this.groupBox6.TabStop = false;
             this.groupBox6.Text = "评注查询窗 ";
@@ -1558,7 +1563,7 @@
             this.groupBox5.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.groupBox5.Name = "groupBox5";
             this.groupBox5.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.groupBox5.Size = new System.Drawing.Size(579, 175);
+            this.groupBox5.Size = new System.Drawing.Size(864, 175);
             this.groupBox5.TabIndex = 5;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "期查询窗 ";
@@ -1623,7 +1628,7 @@
             this.groupBox4.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.groupBox4.Name = "groupBox4";
             this.groupBox4.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.groupBox4.Size = new System.Drawing.Size(579, 175);
+            this.groupBox4.Size = new System.Drawing.Size(864, 175);
             this.groupBox4.TabIndex = 4;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "订购查询窗 ";
@@ -1700,7 +1705,7 @@
             this.groupBox3.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.groupBox3.Size = new System.Drawing.Size(579, 208);
+            this.groupBox3.Size = new System.Drawing.Size(864, 208);
             this.groupBox3.TabIndex = 3;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "实体查询窗 ";
@@ -1776,7 +1781,7 @@
             this.groupBox2.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.groupBox2.Size = new System.Drawing.Size(579, 161);
+            this.groupBox2.Size = new System.Drawing.Size(864, 161);
             this.groupBox2.TabIndex = 2;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = " 读者查询窗 ";
@@ -1843,7 +1848,7 @@
             this.groupBox1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.groupBox1.Size = new System.Drawing.Size(579, 267);
+            this.groupBox1.Size = new System.Drawing.Size(864, 267);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = " 书目查询窗 ";
@@ -2160,8 +2165,8 @@
             // 
             this.tabPage_cardReader.AutoScroll = true;
             this.tabPage_cardReader.Controls.Add(this.groupBox_rfidTest);
-            this.tabPage_cardReader.Controls.Add(this.groupBox11);
-            this.tabPage_cardReader.Controls.Add(this.groupBox8);
+            this.tabPage_cardReader.Controls.Add(this.groupBox_rfidReader);
+            this.tabPage_cardReader.Controls.Add(this.groupBox_idcardReader);
             this.tabPage_cardReader.Location = new System.Drawing.Point(4, 85);
             this.tabPage_cardReader.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_cardReader.Name = "tabPage_cardReader";
@@ -2169,18 +2174,21 @@
             this.tabPage_cardReader.TabIndex = 12;
             this.tabPage_cardReader.Text = "读卡器";
             this.tabPage_cardReader.UseVisualStyleBackColor = true;
+            this.tabPage_cardReader.SizeChanged += new System.EventHandler(this.tabPage_cardReader_SizeChanged);
+            this.tabPage_cardReader.DoubleClick += new System.EventHandler(this.tabPage_cardReader_DoubleClick);
             // 
             // groupBox_rfidTest
             // 
-            this.groupBox_rfidTest.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox_rfidTest.BackColor = System.Drawing.Color.DarkGray;
             this.groupBox_rfidTest.Controls.Add(this.checkBox_rfidTest_returnPostUndoEAS);
             this.groupBox_rfidTest.Controls.Add(this.checkBox_rfidTest_returnAPI);
             this.groupBox_rfidTest.Controls.Add(this.checkBox_rfidTest_returnPreEAS);
             this.groupBox_rfidTest.Controls.Add(this.checkBox_rfidTest_borrowEAS);
-            this.groupBox_rfidTest.Location = new System.Drawing.Point(5, 692);
+            this.groupBox_rfidTest.Enabled = false;
+            this.groupBox_rfidTest.ForeColor = System.Drawing.Color.White;
+            this.groupBox_rfidTest.Location = new System.Drawing.Point(5, 740);
             this.groupBox_rfidTest.Name = "groupBox_rfidTest";
-            this.groupBox_rfidTest.Size = new System.Drawing.Size(851, 247);
+            this.groupBox_rfidTest.Size = new System.Drawing.Size(865, 247);
             this.groupBox_rfidTest.TabIndex = 3;
             this.groupBox_rfidTest.TabStop = false;
             this.groupBox_rfidTest.Text = "RFID 测试功能";
@@ -2225,26 +2233,26 @@
             this.checkBox_rfidTest_borrowEAS.Text = "借书完成修改 EAS 时刻报错";
             this.checkBox_rfidTest_borrowEAS.UseVisualStyleBackColor = true;
             // 
-            // groupBox11
+            // groupBox_rfidReader
             // 
-            this.groupBox11.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBox11.Controls.Add(this.groupBox_uhf);
-            this.groupBox11.Controls.Add(this.button_cardReader_setRfidUrlDefaultValue);
-            this.groupBox11.Controls.Add(this.textBox_cardReader_rfidCenterUrl);
-            this.groupBox11.Location = new System.Drawing.Point(5, 205);
-            this.groupBox11.Margin = new System.Windows.Forms.Padding(5);
-            this.groupBox11.Name = "groupBox11";
-            this.groupBox11.Padding = new System.Windows.Forms.Padding(5);
-            this.groupBox11.Size = new System.Drawing.Size(851, 470);
-            this.groupBox11.TabIndex = 1;
-            this.groupBox11.TabStop = false;
-            this.groupBox11.Text = " RFID 读写器接口 URL ";
+            this.groupBox_rfidReader.Controls.Add(this.groupBox_uhf);
+            this.groupBox_rfidReader.Controls.Add(this.button_cardReader_setRfidUrlDefaultValue);
+            this.groupBox_rfidReader.Controls.Add(this.textBox_cardReader_rfidCenterUrl);
+            this.groupBox_rfidReader.Location = new System.Drawing.Point(5, 205);
+            this.groupBox_rfidReader.Margin = new System.Windows.Forms.Padding(5);
+            this.groupBox_rfidReader.Name = "groupBox_rfidReader";
+            this.groupBox_rfidReader.Padding = new System.Windows.Forms.Padding(5);
+            this.groupBox_rfidReader.Size = new System.Drawing.Size(865, 527);
+            this.groupBox_rfidReader.TabIndex = 1;
+            this.groupBox_rfidReader.TabStop = false;
+            this.groupBox_rfidReader.Text = " RFID 读写器接口 URL ";
             // 
             // groupBox_uhf
             // 
             this.groupBox_uhf.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox_uhf.Controls.Add(this.label42);
+            this.groupBox_uhf.Controls.Add(this.numericUpDown_rfid_inventoryIdleSeconds);
             this.groupBox_uhf.Controls.Add(this.checkBox_uhf_onlyEpcCharging);
             this.groupBox_uhf.Controls.Add(this.label41);
             this.groupBox_uhf.Controls.Add(this.label40);
@@ -2255,12 +2263,38 @@
             this.groupBox_uhf.Controls.Add(this.checkBox_uhf_warningWhenDataFormatMismatch);
             this.groupBox_uhf.Controls.Add(this.comboBox_uhf_dataFormat);
             this.groupBox_uhf.Controls.Add(this.label39);
+            this.groupBox_uhf.Enabled = false;
             this.groupBox_uhf.Location = new System.Drawing.Point(11, 136);
             this.groupBox_uhf.Name = "groupBox_uhf";
-            this.groupBox_uhf.Size = new System.Drawing.Size(826, 311);
+            this.groupBox_uhf.Size = new System.Drawing.Size(840, 356);
             this.groupBox_uhf.TabIndex = 2;
             this.groupBox_uhf.TabStop = false;
             this.groupBox_uhf.Text = " UHF(超高频)标签 ";
+            // 
+            // label42
+            // 
+            this.label42.AutoSize = true;
+            this.label42.BackColor = System.Drawing.Color.DarkGray;
+            this.label42.ForeColor = System.Drawing.Color.White;
+            this.label42.Location = new System.Drawing.Point(16, 308);
+            this.label42.Name = "label42";
+            this.label42.Size = new System.Drawing.Size(180, 21);
+            this.label42.TabIndex = 10;
+            this.label42.Text = "轮询间隔秒数(&L):";
+            // 
+            // numericUpDown_rfid_inventoryIdleSeconds
+            // 
+            this.numericUpDown_rfid_inventoryIdleSeconds.BackColor = System.Drawing.Color.DarkGray;
+            this.numericUpDown_rfid_inventoryIdleSeconds.ForeColor = System.Drawing.Color.White;
+            this.numericUpDown_rfid_inventoryIdleSeconds.Location = new System.Drawing.Point(215, 306);
+            this.numericUpDown_rfid_inventoryIdleSeconds.Maximum = new decimal(new int[] {
+            360,
+            0,
+            0,
+            0});
+            this.numericUpDown_rfid_inventoryIdleSeconds.Name = "numericUpDown_rfid_inventoryIdleSeconds";
+            this.numericUpDown_rfid_inventoryIdleSeconds.Size = new System.Drawing.Size(155, 31);
+            this.numericUpDown_rfid_inventoryIdleSeconds.TabIndex = 11;
             // 
             // checkBox_uhf_onlyEpcCharging
             // 
@@ -2311,7 +2345,7 @@
             this.checkedComboBox_uhf_elements.Margin = new System.Windows.Forms.Padding(0);
             this.checkedComboBox_uhf_elements.Name = "checkedComboBox_uhf_elements";
             this.checkedComboBox_uhf_elements.ReadOnly = false;
-            this.checkedComboBox_uhf_elements.Size = new System.Drawing.Size(605, 24);
+            this.checkedComboBox_uhf_elements.Size = new System.Drawing.Size(619, 24);
             this.checkedComboBox_uhf_elements.TabIndex = 4;
             // 
             // label_uhf_elements
@@ -2356,7 +2390,7 @@
             "望湖洞庭"});
             this.comboBox_uhf_dataFormat.Location = new System.Drawing.Point(215, 38);
             this.comboBox_uhf_dataFormat.Name = "comboBox_uhf_dataFormat";
-            this.comboBox_uhf_dataFormat.Size = new System.Drawing.Size(605, 29);
+            this.comboBox_uhf_dataFormat.Size = new System.Drawing.Size(619, 29);
             this.comboBox_uhf_dataFormat.TabIndex = 1;
             this.comboBox_uhf_dataFormat.SelectedIndexChanged += new System.EventHandler(this.comboBox_uhf_dataFormat_SelectedIndexChanged);
             // 
@@ -2372,7 +2406,7 @@
             // button_cardReader_setRfidUrlDefaultValue
             // 
             this.button_cardReader_setRfidUrlDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_cardReader_setRfidUrlDefaultValue.Location = new System.Drawing.Point(647, 82);
+            this.button_cardReader_setRfidUrlDefaultValue.Location = new System.Drawing.Point(661, 72);
             this.button_cardReader_setRfidUrlDefaultValue.Margin = new System.Windows.Forms.Padding(5);
             this.button_cardReader_setRfidUrlDefaultValue.Name = "button_cardReader_setRfidUrlDefaultValue";
             this.button_cardReader_setRfidUrlDefaultValue.Size = new System.Drawing.Size(193, 40);
@@ -2388,29 +2422,27 @@
             this.textBox_cardReader_rfidCenterUrl.Location = new System.Drawing.Point(11, 35);
             this.textBox_cardReader_rfidCenterUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_cardReader_rfidCenterUrl.Name = "textBox_cardReader_rfidCenterUrl";
-            this.textBox_cardReader_rfidCenterUrl.Size = new System.Drawing.Size(826, 31);
+            this.textBox_cardReader_rfidCenterUrl.Size = new System.Drawing.Size(840, 31);
             this.textBox_cardReader_rfidCenterUrl.TabIndex = 0;
             this.textBox_cardReader_rfidCenterUrl.TextChanged += new System.EventHandler(this.textBox_cardReader_rfidCenterUrl_TextChanged);
             // 
-            // groupBox8
+            // groupBox_idcardReader
             // 
-            this.groupBox8.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBox8.Controls.Add(this.button_cardReader_setIdcardUrlDefaultValue);
-            this.groupBox8.Controls.Add(this.textBox_cardReader_idcardReaderUrl);
-            this.groupBox8.Location = new System.Drawing.Point(5, 28);
-            this.groupBox8.Margin = new System.Windows.Forms.Padding(5);
-            this.groupBox8.Name = "groupBox8";
-            this.groupBox8.Padding = new System.Windows.Forms.Padding(5);
-            this.groupBox8.Size = new System.Drawing.Size(851, 154);
-            this.groupBox8.TabIndex = 0;
-            this.groupBox8.TabStop = false;
-            this.groupBox8.Text = " 身份证读卡器接口 URL ";
+            this.groupBox_idcardReader.Controls.Add(this.button_cardReader_setIdcardUrlDefaultValue);
+            this.groupBox_idcardReader.Controls.Add(this.textBox_cardReader_idcardReaderUrl);
+            this.groupBox_idcardReader.Location = new System.Drawing.Point(5, 28);
+            this.groupBox_idcardReader.Margin = new System.Windows.Forms.Padding(5);
+            this.groupBox_idcardReader.Name = "groupBox_idcardReader";
+            this.groupBox_idcardReader.Padding = new System.Windows.Forms.Padding(5);
+            this.groupBox_idcardReader.Size = new System.Drawing.Size(865, 154);
+            this.groupBox_idcardReader.TabIndex = 0;
+            this.groupBox_idcardReader.TabStop = false;
+            this.groupBox_idcardReader.Text = " 身份证读卡器接口 URL ";
             // 
             // button_cardReader_setIdcardUrlDefaultValue
             // 
             this.button_cardReader_setIdcardUrlDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_cardReader_setIdcardUrlDefaultValue.Location = new System.Drawing.Point(647, 82);
+            this.button_cardReader_setIdcardUrlDefaultValue.Location = new System.Drawing.Point(661, 72);
             this.button_cardReader_setIdcardUrlDefaultValue.Margin = new System.Windows.Forms.Padding(5);
             this.button_cardReader_setIdcardUrlDefaultValue.Name = "button_cardReader_setIdcardUrlDefaultValue";
             this.button_cardReader_setIdcardUrlDefaultValue.Size = new System.Drawing.Size(193, 40);
@@ -2426,7 +2458,7 @@
             this.textBox_cardReader_idcardReaderUrl.Location = new System.Drawing.Point(11, 35);
             this.textBox_cardReader_idcardReaderUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_cardReader_idcardReaderUrl.Name = "textBox_cardReader_idcardReaderUrl";
-            this.textBox_cardReader_idcardReaderUrl.Size = new System.Drawing.Size(826, 31);
+            this.textBox_cardReader_idcardReaderUrl.Size = new System.Drawing.Size(840, 31);
             this.textBox_cardReader_idcardReaderUrl.TabIndex = 0;
             // 
             // tabPage_patron
@@ -2712,7 +2744,7 @@
             // 
             this.tabPage_fingerprint.AutoScroll = true;
             this.tabPage_fingerprint.Controls.Add(this.groupBox_palmprintUrl);
-            this.tabPage_fingerprint.Controls.Add(this.groupBox10);
+            this.tabPage_fingerprint.Controls.Add(this.groupBox_face);
             this.tabPage_fingerprint.Controls.Add(this.groupBox9);
             this.tabPage_fingerprint.Controls.Add(this.groupBox_fingerprint);
             this.tabPage_fingerprint.Controls.Add(this.button_fingerprint_clearLocalCacheFiles);
@@ -2726,8 +2758,6 @@
             // 
             // groupBox_palmprintUrl
             // 
-            this.groupBox_palmprintUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox_palmprintUrl.Controls.Add(this.button_fingerprint_setDefaultValue_new);
             this.groupBox_palmprintUrl.Controls.Add(this.button_palmprint_setDefaulValue);
             this.groupBox_palmprintUrl.Controls.Add(this.textBox_palmprint_readerUrl);
@@ -2735,7 +2765,7 @@
             this.groupBox_palmprintUrl.Margin = new System.Windows.Forms.Padding(5);
             this.groupBox_palmprintUrl.Name = "groupBox_palmprintUrl";
             this.groupBox_palmprintUrl.Padding = new System.Windows.Forms.Padding(5);
-            this.groupBox_palmprintUrl.Size = new System.Drawing.Size(175, 147);
+            this.groupBox_palmprintUrl.Size = new System.Drawing.Size(865, 147);
             this.groupBox_palmprintUrl.TabIndex = 4;
             this.groupBox_palmprintUrl.TabStop = false;
             this.groupBox_palmprintUrl.Text = "掌纹阅读器接口 URL ";
@@ -2743,7 +2773,7 @@
             // button_fingerprint_setDefaultValue_new
             // 
             this.button_fingerprint_setDefaultValue_new.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_fingerprint_setDefaultValue_new.Location = new System.Drawing.Point(-231, 76);
+            this.button_fingerprint_setDefaultValue_new.Location = new System.Drawing.Point(469, 70);
             this.button_fingerprint_setDefaultValue_new.Margin = new System.Windows.Forms.Padding(5);
             this.button_fingerprint_setDefaultValue_new.Name = "button_fingerprint_setDefaultValue_new";
             this.button_fingerprint_setDefaultValue_new.Size = new System.Drawing.Size(193, 40);
@@ -2755,7 +2785,7 @@
             // button_palmprint_setDefaulValue
             // 
             this.button_palmprint_setDefaulValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_palmprint_setDefaulValue.Location = new System.Drawing.Point(-28, 76);
+            this.button_palmprint_setDefaulValue.Location = new System.Drawing.Point(662, 69);
             this.button_palmprint_setDefaulValue.Margin = new System.Windows.Forms.Padding(5);
             this.button_palmprint_setDefaulValue.Name = "button_palmprint_setDefaulValue";
             this.button_palmprint_setDefaulValue.Size = new System.Drawing.Size(193, 40);
@@ -2771,25 +2801,23 @@
             this.textBox_palmprint_readerUrl.Location = new System.Drawing.Point(11, 35);
             this.textBox_palmprint_readerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_palmprint_readerUrl.Name = "textBox_palmprint_readerUrl";
-            this.textBox_palmprint_readerUrl.Size = new System.Drawing.Size(150, 31);
+            this.textBox_palmprint_readerUrl.Size = new System.Drawing.Size(844, 31);
             this.textBox_palmprint_readerUrl.TabIndex = 0;
             // 
-            // groupBox10
+            // groupBox_face
             // 
-            this.groupBox10.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBox10.Controls.Add(this.checkBox_face_savePhotoWhileRegister);
-            this.groupBox10.Controls.Add(this.linkLabel_installFaceCenter);
-            this.groupBox10.Controls.Add(this.button_face_setDefaultValue);
-            this.groupBox10.Controls.Add(this.textBox_face_readerUrl);
-            this.groupBox10.Location = new System.Drawing.Point(5, 341);
-            this.groupBox10.Margin = new System.Windows.Forms.Padding(5);
-            this.groupBox10.Name = "groupBox10";
-            this.groupBox10.Padding = new System.Windows.Forms.Padding(5);
-            this.groupBox10.Size = new System.Drawing.Size(175, 147);
-            this.groupBox10.TabIndex = 3;
-            this.groupBox10.TabStop = false;
-            this.groupBox10.Text = "人脸识别接口 URL ";
+            this.groupBox_face.Controls.Add(this.checkBox_face_savePhotoWhileRegister);
+            this.groupBox_face.Controls.Add(this.linkLabel_installFaceCenter);
+            this.groupBox_face.Controls.Add(this.button_face_setDefaultValue);
+            this.groupBox_face.Controls.Add(this.textBox_face_readerUrl);
+            this.groupBox_face.Location = new System.Drawing.Point(5, 341);
+            this.groupBox_face.Margin = new System.Windows.Forms.Padding(5);
+            this.groupBox_face.Name = "groupBox_face";
+            this.groupBox_face.Padding = new System.Windows.Forms.Padding(5);
+            this.groupBox_face.Size = new System.Drawing.Size(865, 147);
+            this.groupBox_face.TabIndex = 3;
+            this.groupBox_face.TabStop = false;
+            this.groupBox_face.Text = "人脸识别接口 URL ";
             // 
             // checkBox_face_savePhotoWhileRegister
             // 
@@ -2815,7 +2843,7 @@
             // button_face_setDefaultValue
             // 
             this.button_face_setDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_face_setDefaultValue.Location = new System.Drawing.Point(-28, 73);
+            this.button_face_setDefaultValue.Location = new System.Drawing.Point(662, 67);
             this.button_face_setDefaultValue.Margin = new System.Windows.Forms.Padding(5);
             this.button_face_setDefaultValue.Name = "button_face_setDefaultValue";
             this.button_face_setDefaultValue.Size = new System.Drawing.Size(193, 40);
@@ -2831,7 +2859,7 @@
             this.textBox_face_readerUrl.Location = new System.Drawing.Point(11, 35);
             this.textBox_face_readerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_face_readerUrl.Name = "textBox_face_readerUrl";
-            this.textBox_face_readerUrl.Size = new System.Drawing.Size(150, 31);
+            this.textBox_face_readerUrl.Size = new System.Drawing.Size(844, 31);
             this.textBox_face_readerUrl.TabIndex = 0;
             // 
             // groupBox9
@@ -2889,8 +2917,6 @@
             // 
             // groupBox_fingerprint
             // 
-            this.groupBox_fingerprint.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox_fingerprint.Controls.Add(this.linkLabel_installFingerprintCenter);
             this.groupBox_fingerprint.Controls.Add(this.button_fingerprint_setDefaultValue);
             this.groupBox_fingerprint.Controls.Add(this.textBox_fingerprint_readerUrl);
@@ -2898,7 +2924,7 @@
             this.groupBox_fingerprint.Margin = new System.Windows.Forms.Padding(5);
             this.groupBox_fingerprint.Name = "groupBox_fingerprint";
             this.groupBox_fingerprint.Padding = new System.Windows.Forms.Padding(5);
-            this.groupBox_fingerprint.Size = new System.Drawing.Size(175, 147);
+            this.groupBox_fingerprint.Size = new System.Drawing.Size(865, 147);
             this.groupBox_fingerprint.TabIndex = 0;
             this.groupBox_fingerprint.TabStop = false;
             this.groupBox_fingerprint.Text = " 指纹阅读器接口 URL ";
@@ -2917,7 +2943,7 @@
             // button_fingerprint_setDefaultValue
             // 
             this.button_fingerprint_setDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(-28, 71);
+            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(662, 67);
             this.button_fingerprint_setDefaultValue.Margin = new System.Windows.Forms.Padding(5);
             this.button_fingerprint_setDefaultValue.Name = "button_fingerprint_setDefaultValue";
             this.button_fingerprint_setDefaultValue.Size = new System.Drawing.Size(193, 40);
@@ -2933,7 +2959,7 @@
             this.textBox_fingerprint_readerUrl.Location = new System.Drawing.Point(11, 35);
             this.textBox_fingerprint_readerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_fingerprint_readerUrl.Name = "textBox_fingerprint_readerUrl";
-            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(150, 31);
+            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(844, 31);
             this.textBox_fingerprint_readerUrl.TabIndex = 0;
             // 
             // button_fingerprint_clearLocalCacheFiles
@@ -2986,15 +3012,9 @@
             // tabPage_message
             // 
             this.tabPage_message.AutoScroll = true;
+            this.tabPage_message.Controls.Add(this.groupBox_dp2mserver);
             this.tabPage_message.Controls.Add(this.groupBox_message_compactShelf);
-            this.tabPage_message.Controls.Add(this.button_message_setDefaultUrl);
-            this.tabPage_message.Controls.Add(this.textBox_message_password);
-            this.tabPage_message.Controls.Add(this.textBox_message_userName);
-            this.tabPage_message.Controls.Add(this.label32);
-            this.tabPage_message.Controls.Add(this.label33);
-            this.tabPage_message.Controls.Add(this.textBox_message_dp2MServerUrl);
-            this.tabPage_message.Controls.Add(this.label29);
-            this.tabPage_message.Controls.Add(this.label_comment);
+            this.tabPage_message.Controls.Add(this.label_message_shareBiblio_comment);
             this.tabPage_message.Controls.Add(this.checkBox_message_shareBiblio);
             this.tabPage_message.Location = new System.Drawing.Point(4, 85);
             this.tabPage_message.Margin = new System.Windows.Forms.Padding(5);
@@ -3004,11 +3024,96 @@
             this.tabPage_message.Text = "消息";
             this.tabPage_message.UseVisualStyleBackColor = true;
             // 
+            // groupBox_dp2mserver
+            // 
+            this.groupBox_dp2mserver.Controls.Add(this.textBox_message_userName);
+            this.groupBox_dp2mserver.Controls.Add(this.label33);
+            this.groupBox_dp2mserver.Controls.Add(this.button_message_setDefaultUrl);
+            this.groupBox_dp2mserver.Controls.Add(this.label32);
+            this.groupBox_dp2mserver.Controls.Add(this.textBox_message_dp2MServerUrl);
+            this.groupBox_dp2mserver.Controls.Add(this.textBox_message_password);
+            this.groupBox_dp2mserver.Controls.Add(this.label29);
+            this.groupBox_dp2mserver.Location = new System.Drawing.Point(20, 162);
+            this.groupBox_dp2mserver.Name = "groupBox_dp2mserver";
+            this.groupBox_dp2mserver.Size = new System.Drawing.Size(835, 221);
+            this.groupBox_dp2mserver.TabIndex = 27;
+            this.groupBox_dp2mserver.TabStop = false;
+            this.groupBox_dp2mserver.Text = "消息服务器";
+            // 
+            // textBox_message_userName
+            // 
+            this.textBox_message_userName.ImeMode = System.Windows.Forms.ImeMode.Off;
+            this.textBox_message_userName.Location = new System.Drawing.Point(214, 118);
+            this.textBox_message_userName.Margin = new System.Windows.Forms.Padding(5);
+            this.textBox_message_userName.Name = "textBox_message_userName";
+            this.textBox_message_userName.Size = new System.Drawing.Size(283, 31);
+            this.textBox_message_userName.TabIndex = 20;
+            // 
+            // label33
+            // 
+            this.label33.Location = new System.Drawing.Point(19, 121);
+            this.label33.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.label33.Name = "label33";
+            this.label33.Size = new System.Drawing.Size(137, 31);
+            this.label33.TabIndex = 19;
+            this.label33.Text = "用户名(&U)：";
+            // 
+            // button_message_setDefaultUrl
+            // 
+            this.button_message_setDefaultUrl.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_message_setDefaultUrl.Location = new System.Drawing.Point(632, 24);
+            this.button_message_setDefaultUrl.Margin = new System.Windows.Forms.Padding(5);
+            this.button_message_setDefaultUrl.Name = "button_message_setDefaultUrl";
+            this.button_message_setDefaultUrl.Size = new System.Drawing.Size(180, 40);
+            this.button_message_setDefaultUrl.TabIndex = 23;
+            this.button_message_setDefaultUrl.Text = "设为常用值";
+            this.button_message_setDefaultUrl.UseVisualStyleBackColor = true;
+            this.button_message_setDefaultUrl.Click += new System.EventHandler(this.button_message_setDefaultUrl_Click);
+            // 
+            // label32
+            // 
+            this.label32.Location = new System.Drawing.Point(19, 168);
+            this.label32.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.label32.Name = "label32";
+            this.label32.Size = new System.Drawing.Size(137, 31);
+            this.label32.TabIndex = 21;
+            this.label32.Text = "密码(&P)：";
+            // 
+            // textBox_message_dp2MServerUrl
+            // 
+            this.textBox_message_dp2MServerUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_message_dp2MServerUrl.Location = new System.Drawing.Point(22, 71);
+            this.textBox_message_dp2MServerUrl.Margin = new System.Windows.Forms.Padding(5);
+            this.textBox_message_dp2MServerUrl.Name = "textBox_message_dp2MServerUrl";
+            this.textBox_message_dp2MServerUrl.Size = new System.Drawing.Size(790, 31);
+            this.textBox_message_dp2MServerUrl.TabIndex = 18;
+            // 
+            // textBox_message_password
+            // 
+            this.textBox_message_password.ImeMode = System.Windows.Forms.ImeMode.Off;
+            this.textBox_message_password.Location = new System.Drawing.Point(214, 165);
+            this.textBox_message_password.Margin = new System.Windows.Forms.Padding(5);
+            this.textBox_message_password.Name = "textBox_message_password";
+            this.textBox_message_password.PasswordChar = '*';
+            this.textBox_message_password.Size = new System.Drawing.Size(283, 31);
+            this.textBox_message_password.TabIndex = 22;
+            // 
+            // label29
+            // 
+            this.label29.AutoSize = true;
+            this.label29.Location = new System.Drawing.Point(19, 43);
+            this.label29.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.label29.Name = "label29";
+            this.label29.Size = new System.Drawing.Size(249, 21);
+            this.label29.TabIndex = 17;
+            this.label29.Text = "dp2MServer 服务器 URL:";
+            // 
             // groupBox_message_compactShelf
             // 
             this.groupBox_message_compactShelf.Controls.Add(this.textBox_message_shelfAccount);
             this.groupBox_message_compactShelf.Controls.Add(this.label38);
-            this.groupBox_message_compactShelf.Location = new System.Drawing.Point(20, 377);
+            this.groupBox_message_compactShelf.Location = new System.Drawing.Point(20, 408);
             this.groupBox_message_compactShelf.Name = "groupBox_message_compactShelf";
             this.groupBox_message_compactShelf.Size = new System.Drawing.Size(552, 117);
             this.groupBox_message_compactShelf.TabIndex = 26;
@@ -3033,85 +3138,14 @@
             this.label38.TabIndex = 24;
             this.label38.Text = "书架账户(&A)：";
             // 
-            // button_message_setDefaultUrl
+            // label_message_shareBiblio_comment
             // 
-            this.button_message_setDefaultUrl.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_message_setDefaultUrl.Location = new System.Drawing.Point(162, 168);
-            this.button_message_setDefaultUrl.Margin = new System.Windows.Forms.Padding(5);
-            this.button_message_setDefaultUrl.Name = "button_message_setDefaultUrl";
-            this.button_message_setDefaultUrl.Size = new System.Drawing.Size(180, 40);
-            this.button_message_setDefaultUrl.TabIndex = 23;
-            this.button_message_setDefaultUrl.Text = "设为常用值";
-            this.button_message_setDefaultUrl.UseVisualStyleBackColor = true;
-            this.button_message_setDefaultUrl.Click += new System.EventHandler(this.button_message_setDefaultUrl_Click);
-            // 
-            // textBox_message_password
-            // 
-            this.textBox_message_password.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBox_message_password.Location = new System.Drawing.Point(212, 312);
-            this.textBox_message_password.Margin = new System.Windows.Forms.Padding(5);
-            this.textBox_message_password.Name = "textBox_message_password";
-            this.textBox_message_password.PasswordChar = '*';
-            this.textBox_message_password.Size = new System.Drawing.Size(283, 31);
-            this.textBox_message_password.TabIndex = 22;
-            // 
-            // textBox_message_userName
-            // 
-            this.textBox_message_userName.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBox_message_userName.Location = new System.Drawing.Point(212, 265);
-            this.textBox_message_userName.Margin = new System.Windows.Forms.Padding(5);
-            this.textBox_message_userName.Name = "textBox_message_userName";
-            this.textBox_message_userName.Size = new System.Drawing.Size(283, 31);
-            this.textBox_message_userName.TabIndex = 20;
-            // 
-            // label32
-            // 
-            this.label32.Location = new System.Drawing.Point(17, 315);
-            this.label32.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.label32.Name = "label32";
-            this.label32.Size = new System.Drawing.Size(137, 31);
-            this.label32.TabIndex = 21;
-            this.label32.Text = "密码(&P)：";
-            // 
-            // label33
-            // 
-            this.label33.Location = new System.Drawing.Point(17, 268);
-            this.label33.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.label33.Name = "label33";
-            this.label33.Size = new System.Drawing.Size(137, 31);
-            this.label33.TabIndex = 19;
-            this.label33.Text = "用户名(&U)：";
-            // 
-            // textBox_message_dp2MServerUrl
-            // 
-            this.textBox_message_dp2MServerUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_message_dp2MServerUrl.Location = new System.Drawing.Point(20, 215);
-            this.textBox_message_dp2MServerUrl.Margin = new System.Windows.Forms.Padding(5);
-            this.textBox_message_dp2MServerUrl.Name = "textBox_message_dp2MServerUrl";
-            this.textBox_message_dp2MServerUrl.Size = new System.Drawing.Size(318, 31);
-            this.textBox_message_dp2MServerUrl.TabIndex = 18;
-            // 
-            // label29
-            // 
-            this.label29.AutoSize = true;
-            this.label29.Location = new System.Drawing.Point(17, 187);
-            this.label29.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.label29.Name = "label29";
-            this.label29.Size = new System.Drawing.Size(249, 21);
-            this.label29.TabIndex = 17;
-            this.label29.Text = "dp2MServer 服务器 URL:";
-            // 
-            // label_comment
-            // 
-            this.label_comment.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.label_comment.Location = new System.Drawing.Point(20, 82);
-            this.label_comment.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label_comment.Name = "label_comment";
-            this.label_comment.Size = new System.Drawing.Size(93, 77);
-            this.label_comment.TabIndex = 16;
-            this.label_comment.Text = "共享书目数据，将允许 Internet 上他人检索获取您的全部书目数据，同时也允许您检索获取他人的书目数据";
+            this.label_message_shareBiblio_comment.Location = new System.Drawing.Point(10, 82);
+            this.label_message_shareBiblio_comment.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label_message_shareBiblio_comment.Name = "label_message_shareBiblio_comment";
+            this.label_message_shareBiblio_comment.Size = new System.Drawing.Size(845, 77);
+            this.label_message_shareBiblio_comment.TabIndex = 16;
+            this.label_message_shareBiblio_comment.Text = "共享书目数据，将允许 Internet 上他人检索获取您的全部书目数据，同时也允许您检索获取他人的书目数据";
             // 
             // checkBox_message_shareBiblio
             // 
@@ -3247,13 +3281,14 @@
             this.tabPage_cardReader.ResumeLayout(false);
             this.groupBox_rfidTest.ResumeLayout(false);
             this.groupBox_rfidTest.PerformLayout();
-            this.groupBox11.ResumeLayout(false);
-            this.groupBox11.PerformLayout();
+            this.groupBox_rfidReader.ResumeLayout(false);
+            this.groupBox_rfidReader.PerformLayout();
             this.groupBox_uhf.ResumeLayout(false);
             this.groupBox_uhf.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_rfid_inventoryIdleSeconds)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_uhf_rssi)).EndInit();
-            this.groupBox8.ResumeLayout(false);
-            this.groupBox8.PerformLayout();
+            this.groupBox_idcardReader.ResumeLayout(false);
+            this.groupBox_idcardReader.PerformLayout();
             this.tabPage_patron.ResumeLayout(false);
             this.tabPage_patron.PerformLayout();
             this.tabPage_operLog.ResumeLayout(false);
@@ -3263,8 +3298,8 @@
             this.tabPage_fingerprint.ResumeLayout(false);
             this.groupBox_palmprintUrl.ResumeLayout(false);
             this.groupBox_palmprintUrl.PerformLayout();
-            this.groupBox10.ResumeLayout(false);
-            this.groupBox10.PerformLayout();
+            this.groupBox_face.ResumeLayout(false);
+            this.groupBox_face.PerformLayout();
             this.groupBox9.ResumeLayout(false);
             this.groupBox9.PerformLayout();
             this.groupBox_fingerprint.ResumeLayout(false);
@@ -3273,6 +3308,8 @@
             this.tabPage_labelPrint.PerformLayout();
             this.tabPage_message.ResumeLayout(false);
             this.tabPage_message.PerformLayout();
+            this.groupBox_dp2mserver.ResumeLayout(false);
+            this.groupBox_dp2mserver.PerformLayout();
             this.groupBox_message_compactShelf.ResumeLayout(false);
             this.groupBox_message_compactShelf.PerformLayout();
             this.tabPage_z3950.ResumeLayout(false);
@@ -3418,7 +3455,7 @@
         private System.Windows.Forms.Button button_fingerprint_setDefaultValue;
         private System.Windows.Forms.Button button_fingerprint_clearLocalCacheFiles;
         private System.Windows.Forms.GroupBox groupBox_fingerprint;
-        private System.Windows.Forms.GroupBox groupBox8;
+        private System.Windows.Forms.GroupBox groupBox_idcardReader;
         private System.Windows.Forms.Button button_cardReader_setIdcardUrlDefaultValue;
         private System.Windows.Forms.GroupBox groupBox9;
         public System.Windows.Forms.TextBox textBox_fingerprint_password;
@@ -3452,7 +3489,7 @@
         private System.Windows.Forms.CheckBox checkBox_charging_isbnBorrow;
         private System.Windows.Forms.CheckBox checkBox_quickCharging_isbnBorrow;
         private System.Windows.Forms.TabPage tabPage_message;
-        private System.Windows.Forms.Label label_comment;
+        private System.Windows.Forms.Label label_message_shareBiblio_comment;
         public System.Windows.Forms.CheckBox checkBox_message_shareBiblio;
         private System.Windows.Forms.TextBox textBox_message_dp2MServerUrl;
         private System.Windows.Forms.Label label29;
@@ -3474,10 +3511,10 @@
         private System.Windows.Forms.CheckBox checkBox_global_upperInputBarcode;
         private System.Windows.Forms.Label label_forceVerifyDataComment;
         private System.Windows.Forms.CheckBox checkBox_ui_printLabelMode;
-        private System.Windows.Forms.GroupBox groupBox10;
+        private System.Windows.Forms.GroupBox groupBox_face;
         private System.Windows.Forms.Button button_face_setDefaultValue;
         private System.Windows.Forms.TextBox textBox_face_readerUrl;
-        private System.Windows.Forms.GroupBox groupBox11;
+        private System.Windows.Forms.GroupBox groupBox_rfidReader;
         private System.Windows.Forms.Button button_cardReader_setRfidUrlDefaultValue;
         private System.Windows.Forms.TextBox textBox_cardReader_rfidCenterUrl;
         private System.Windows.Forms.TabPage tabPage_z3950;
@@ -3519,5 +3556,8 @@
         private System.Windows.Forms.CheckBox checkBox_rfidTest_returnAPI;
         private System.Windows.Forms.CheckBox checkBox_rfidTest_returnPostUndoEAS;
         private System.Windows.Forms.CheckBox checkBox_uhf_onlyEpcCharging;
+        private System.Windows.Forms.Label label42;
+        private System.Windows.Forms.NumericUpDown numericUpDown_rfid_inventoryIdleSeconds;
+        private System.Windows.Forms.GroupBox groupBox_dp2mserver;
     }
 }
