@@ -186,6 +186,8 @@
             this.checkBox_rfidTest_returnPreEAS = new System.Windows.Forms.CheckBox();
             this.checkBox_rfidTest_borrowEAS = new System.Windows.Forms.CheckBox();
             this.groupBox_rfidReader = new System.Windows.Forms.GroupBox();
+            this.comboBox_rfid_tagCachePolicy = new System.Windows.Forms.ComboBox();
+            this.label_rfid_tagCachePolicy = new System.Windows.Forms.Label();
             this.groupBox_uhf = new System.Windows.Forms.GroupBox();
             this.label42 = new System.Windows.Forms.Label();
             this.numericUpDown_rfid_inventoryIdleSeconds = new System.Windows.Forms.NumericUpDown();
@@ -2186,7 +2188,7 @@
             this.groupBox_rfidTest.Controls.Add(this.checkBox_rfidTest_borrowEAS);
             this.groupBox_rfidTest.Enabled = false;
             this.groupBox_rfidTest.ForeColor = System.Drawing.Color.White;
-            this.groupBox_rfidTest.Location = new System.Drawing.Point(5, 740);
+            this.groupBox_rfidTest.Location = new System.Drawing.Point(5, 788);
             this.groupBox_rfidTest.Name = "groupBox_rfidTest";
             this.groupBox_rfidTest.Size = new System.Drawing.Size(865, 247);
             this.groupBox_rfidTest.TabIndex = 3;
@@ -2235,6 +2237,8 @@
             // 
             // groupBox_rfidReader
             // 
+            this.groupBox_rfidReader.Controls.Add(this.comboBox_rfid_tagCachePolicy);
+            this.groupBox_rfidReader.Controls.Add(this.label_rfid_tagCachePolicy);
             this.groupBox_rfidReader.Controls.Add(this.groupBox_uhf);
             this.groupBox_rfidReader.Controls.Add(this.button_cardReader_setRfidUrlDefaultValue);
             this.groupBox_rfidReader.Controls.Add(this.textBox_cardReader_rfidCenterUrl);
@@ -2242,10 +2246,34 @@
             this.groupBox_rfidReader.Margin = new System.Windows.Forms.Padding(5);
             this.groupBox_rfidReader.Name = "groupBox_rfidReader";
             this.groupBox_rfidReader.Padding = new System.Windows.Forms.Padding(5);
-            this.groupBox_rfidReader.Size = new System.Drawing.Size(865, 527);
+            this.groupBox_rfidReader.Size = new System.Drawing.Size(865, 575);
             this.groupBox_rfidReader.TabIndex = 1;
             this.groupBox_rfidReader.TabStop = false;
             this.groupBox_rfidReader.Text = " RFID 读写器接口 URL ";
+            // 
+            // comboBox_rfid_tagCachePolicy
+            // 
+            this.comboBox_rfid_tagCachePolicy.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox_rfid_tagCachePolicy.Enabled = false;
+            this.comboBox_rfid_tagCachePolicy.FormattingEnabled = true;
+            this.comboBox_rfid_tagCachePolicy.Items.AddRange(new object[] {
+            "不缓存",
+            "部分缓存",
+            "要缓存"});
+            this.comboBox_rfid_tagCachePolicy.Location = new System.Drawing.Point(226, 126);
+            this.comboBox_rfid_tagCachePolicy.Name = "comboBox_rfid_tagCachePolicy";
+            this.comboBox_rfid_tagCachePolicy.Size = new System.Drawing.Size(387, 29);
+            this.comboBox_rfid_tagCachePolicy.TabIndex = 4;
+            // 
+            // label_rfid_tagCachePolicy
+            // 
+            this.label_rfid_tagCachePolicy.AutoSize = true;
+            this.label_rfid_tagCachePolicy.Enabled = false;
+            this.label_rfid_tagCachePolicy.Location = new System.Drawing.Point(7, 129);
+            this.label_rfid_tagCachePolicy.Name = "label_rfid_tagCachePolicy";
+            this.label_rfid_tagCachePolicy.Size = new System.Drawing.Size(180, 21);
+            this.label_rfid_tagCachePolicy.TabIndex = 3;
+            this.label_rfid_tagCachePolicy.Text = "标签缓存策略(&C):";
             // 
             // groupBox_uhf
             // 
@@ -2264,7 +2292,7 @@
             this.groupBox_uhf.Controls.Add(this.comboBox_uhf_dataFormat);
             this.groupBox_uhf.Controls.Add(this.label39);
             this.groupBox_uhf.Enabled = false;
-            this.groupBox_uhf.Location = new System.Drawing.Point(11, 136);
+            this.groupBox_uhf.Location = new System.Drawing.Point(11, 181);
             this.groupBox_uhf.Name = "groupBox_uhf";
             this.groupBox_uhf.Size = new System.Drawing.Size(840, 356);
             this.groupBox_uhf.TabIndex = 2;
@@ -3559,5 +3587,7 @@
         private System.Windows.Forms.Label label42;
         private System.Windows.Forms.NumericUpDown numericUpDown_rfid_inventoryIdleSeconds;
         private System.Windows.Forms.GroupBox groupBox_dp2mserver;
+        private System.Windows.Forms.ComboBox comboBox_rfid_tagCachePolicy;
+        private System.Windows.Forms.Label label_rfid_tagCachePolicy;
     }
 }

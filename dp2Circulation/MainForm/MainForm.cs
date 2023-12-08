@@ -1845,6 +1845,14 @@ Stack:
                 Program.MainForm._cachedInventoryIdleSeconds = -1;  // clear cache
                 RfidManager.InventoryIdleSeconds = this.RfidInventoryIdleSeconds;
             }
+
+            if (e.Section == "rfid"
+    && e.Entry == "tagCachePolicy")
+            {
+                Program.MainForm._cachedRfidTagCachePolicy = null;  // clear cache
+                SetRfidTagCachePolicy();
+                // RfidManager.InventoryIdleSeconds = this.RfidInventoryIdleSeconds;
+            }
         }
 
         public bool PrintLabelMode
@@ -8099,6 +8107,39 @@ value);  // 常用值 "ipc://RfidChannel/RfidServer"
             }
         }
 
+        internal string _cachedRfidTagCachePolicy = null;
+
+        // RFID 标签缓存策略
+        public string RfidTagCachePolicy
+        {
+            get
+            {
+                if (this.AppInfo == null)
+                    return "不缓存";
+                if (_cachedRfidTagCachePolicy != null)
+                    return _cachedRfidTagCachePolicy;
+                _cachedRfidTagCachePolicy = this.AppInfo.GetString(
+                    "rfid",
+                    "tagCachePolicy",
+                    "不缓存");
+                return _cachedRfidTagCachePolicy;
+            }
+            set
+            {
+                this.AppInfo?.SetString("rfid",
+                    "tagCachePolicy",
+                    value);
+                _cachedRfidTagCachePolicy = null;
+            }
+        }
+
+
+        /*
+            this.comboBox_rfid_tagCachePolicy.Text =
+                ap.GetString(,
+    );
+        * */
+
         internal int _cachedRSSI = -1;
 
         // 超高频标签读取时过滤的 RSSI 阈值(低于此值的被丢弃)。0 表示不使用 RSSI 过滤功能
@@ -9600,7 +9641,12 @@ Keys keyData)
         void SetRfidManagerPause(bool pause)
         {
             RfidManager.Pause = pause;
-            this.toolStripStatusLabel_rfid.Text = pause || string.IsNullOrEmpty(RfidManager.Url) ? "" : "RFID";
+            if (string.IsNullOrEmpty(RfidManager.Url))
+                this.toolStripStatusLabel_rfid.Text = "";
+            else if (pause)
+                this.toolStripStatusLabel_rfid.Text = "RFID(暂停)";
+            else
+                this.toolStripStatusLabel_rfid.Text = "RFID";
         }
 
         void SetPalmManagerPause(bool pause)

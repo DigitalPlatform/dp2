@@ -2129,6 +2129,15 @@ out string strError);
                     string returning_date = null;
                     string period = null;
 
+                    // 2023/12/7
+                    if (string.IsNullOrEmpty(entity.PII)
+                        || entity.PII == "(空)")
+                    {
+                        entity.SetError($"本册的 RFID 标签是空内容。{action_name}操作被忽略", "yellow");
+                        skip_count++;
+                        continue;
+                    }
+
                     // (还书前)预修改 EAS 是否发生了修改
                     bool eas_changed = false;
 

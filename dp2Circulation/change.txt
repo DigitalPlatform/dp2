@@ -1,61 +1,61 @@
-1.0.0.86��
+﻿1.0.0.86版
 
-1) ������ͳ�ƴ�����Ŀͳ�ƴ�
+1) 新增册统计窗和书目统计窗
 
 ---
 
-1.0.0.88��
+1.0.0.88版
 
 2007/10/18
 
-1) ��Ŀ����������ʹ��__id;�����м�¼�����ŷ�Χ�����ˡ��������ơ�1-10�������ļ����ʡ�ע�ⲻ֧�ֶ��ż���ķֶΡ����������Ҫ���°��dp2libraryws֧�֡�
+1) 书目检索窗可以使用__id途径进行记录索引号范围检索了。输入类似“1-10”这样的检索词。注意不支持逗号间隔的分段。这个功能需要最新版的dp2libraryws支持。
 
-2) ��Ŀ������������������¼·���ļ������ܡ�
+2) 书目检索窗新增导出“记录路径文件”功能。
 
-3) �ֲᴰ��һ�����󣺵����á�ɾ����Ŀ��¼����ť������MARC�༭����ʵ���б������Ϊdisabled״̬��������������á�������Ŀ��¼����ť�����¼�����ݿ��disabled״̬������enabled״̬����������Ѿ�������
+3) 种册窗有一个错误：当利用“删除书目记录”按钮操作后，MARC编辑器和实体列表都会变为disabled状态，但当随后立即用“保存书目记录”按钮保存记录回数据库后，disabled状态不会变回enabled状态。这个错误已经改正。
 
-4) ʵ���ѯ��������������¼·���ļ����͡���������ļ������ܡ�
+4) 实体查询窗新增导出“记录路径文件”和“册条码号文件”功能。
 
-5) �˵�������/�������á����򿪵ġ��������á��Ի���������һ��propertypage����������������3�����������Ŀ����������������������߲�ѯ���������������ʵ���ѯ����������������ֱ���Կ���3�ִ��ڵļ����������������
+5) 菜单“帮助/参数设置”所打开的“参数配置”对话框，增加了一个propertypage“检索”。里面有3个配置事项：书目检索窗最大命中条数、读者查询窗最大命中条数、实体查询窗最大命中条数，分别可以控制3种窗口的检索最大命中条数。
 
-��Щ�����������Ϊ-1����ʾ�����ơ��ṩ��Щ���ò�����ǰ��ԭ��3�ִ��ڵ�ȱʡ���ò���Ϊ1000,-1,-1��
+这些参数如果设置为-1，表示不限制。提供这些配置参数以前，原来3种窗口的缺省配置参数为1000,-1,-1。
 
 
 ---
 
-1.0.0.89��
+1.0.0.89版
 
 2007/10/19
 
-1) Ϊ��Ŀ�����������߲�ѯ����ʵ���ѯ�������м�¼�б������������������Ŀ���������Ĺ��ܡ�
+1) 为书目检索窗、读者查询窗、实体查询窗的命中记录列表增加了鼠标左键点击栏目标题后排序的功能。
 
-2) Ϊ�ֲ�������е�ʵ���¼��Ϣ������<volume>Ԫ�أ���ʾ����ľ��š�Ϊ�ˣ�dp2librarywsͼ���Ӧ�÷�����Ҳ������������
+2) 为种册管理窗中的实体记录信息增加了<volume>元素，表示各册的卷号。为此，dp2libraryws图书馆应用服务器也进行了升级。
 
 ---
 
-1.0.0.91��
+1.0.0.91版
 
 2007/10/26
 
-1) Ϊ���㡰�������С�ͳ�Ʒ�����һЩҪ�����OperLogStatisForm(����)�������޸ġ�
+1) 为满足“借阅排行”统计方案的一些要求，针对OperLogStatisForm(宿主)进行了修改。
 
 ---
 
-1.0.0.94��
+1.0.0.94版
 
 2007/11/6
 
-��������汾����������ǩ��֤�飬ֻ�ܰ���ǰ�İ汾�ڿ��������ж�غ󣬲��ܰ�װ�°汾��
+由于这个版本更换了数字签名证书，只能把以前的版本在控制面板中卸载后，才能安装新版本。
 
-���°�װ������ͳ�Ʒ�����dp2circulation�лᶪʧ����Щͳ�Ʒ����������������ַ�ҵ��������µ��룺
+重新安装后，若干统计方案在dp2circulation中会丢失。这些统计方案可在下面这个地址找到，并重新导入：
 
 http://dp2003.com/dp2bbs/article.aspx?board=@__2&id=205
 
-1) ���޸Ĳᴰ�У����ļ�������page�ġ�������ļ�������������һ����...����ť����;�ǲ��������ļ�����
+1) 批修改册窗中，“文件驱动”page的“条码号文件名”旁增加了一个“...”按钮，用途是查找条码文件名。
 
-2) ���޸Ĳᴰ�У���������Ϊ������¼���õ����������������װ������������Ķ�Ӧ��¼ʱ�ᱨ����������Ա��Ҫ�������ظ�ʹ������ų��󣬲����������޸Ĳᴰ�Բ��¼�����޸ġ�
+2) 批修改册窗中，遇到条码为多条记录所用的情况，现在软件在装载这样的条码的对应记录时会报错。工作人员需要将条码重复使用情况排除后，才能利用批修改册窗对册记录进行修改。
 
-3) ��Ŀ��ѯ����ʵ���ѯ�������߲�ѯ���У�������װ�������¼��ʱ��رմ��ڣ��ᱨ�����˴����Ѿ���������
+3) 书目查询窗、实体查询窗、读者查询窗中，当正在装入浏览记录的时候关闭窗口，会报错。此错误已经被改正。
 
 ---
 
@@ -63,13 +63,13 @@ http://dp2003.com/dp2bbs/article.aspx?board=@__2&id=205
 
 2007/11/12
 
-1) ԭ���汾���ߴ��е���հ׹�������Ȼ�󱣴棬API SetReaderInfo()��strOldXml������Ϊ�գ���������Ѿ�������
+1) 原来版本读者窗中调入空白工作单后然后保存，API SetReaderInfo()的strOldXml参数不为空，这个错误已经改正。
 
-ԭ���汾��dp2libraryws�°汾����ʹ�ûᱨ����
+原来版本和dp2libraryws新版本配套使用会报错。
 
-2) ԭ���汾���ߴ���ɾ��һ�����߼�¼�����±��棬API SetReaderInfo()��strAction����ֵΪ"new"�����ԣ�Ӧ��Ϊ"change"����������Ѿ�������
+2) 原来版本读者窗中删除一条读者记录后，重新保存，API SetReaderInfo()的strAction参数值为"new"，不对，应该为"change"。这个错误已经改正。
 
-ԭ���汾��dp2libraryws�°汾����ʹ�ûᱨ����
+原来版本和dp2libraryws新版本配套使用会报错。
 
 ---
 
@@ -77,7 +77,7 @@ http://dp2003.com/dp2bbs/article.aspx?board=@__2&id=205
 
 2007/11/15
 
-1) Ϊ���ο�����������BiblioStatis�����˳�Ա
+1) 为二次开发的宿主类BiblioStatis增加了成员
 
         public List<ItemInfo> ItemInfos
 
@@ -87,7 +87,7 @@ http://dp2003.com/dp2bbs/article.aspx?board=@__2&id=205
 
 2007/11/21
 
-1) �ֲ�����������ˡ�����tabpage�������������ɾ����Ŀ��¼��������Դ����
+1) 种册管理窗增加了“对象”tabpage。在这里可以增删改书目记录所属的资源对象。
 
 ---
 
@@ -95,11 +95,11 @@ http://dp2003.com/dp2bbs/article.aspx?board=@__2&id=205
 
 2007/11/22
 
-1) ԭ���İ汾�����߲�ѯ���У��޷����ظ������¼�к������װ����ߴ��������Ѿ����������������popupmenu������һ�������ݼ�¼·��װ�뵽���ߴ�����������������԰��ظ�����ļ�¼�к������װ����ߴ���
+1) 原来的版本，读者查询窗中，无法将重复条码记录中后面的条装入读者窗。现在已经给浏览框中右鼠标键popupmenu增加了一个“根据记录路径装入到读者窗”命令，用这个命令可以把重复条码的记录中后面的条装入读者窗。
 
-2) ԭ���İ汾�����ߴ������װ�����ظ����������һ�����߼�¼���á�ɾ������ť�޷�ɾ����������Ȼ�������Ч��(һ��ɾ����ʱ�����ü�¼·������ɾ�����������������ɾ������˻����ɾ�����˲����������)������������һ�����ܣ���סCTRL����ͬʱ��ɾ����ť���Ϳ��Ը��ݸü�¼��·��������ɾ�� -- �Ϳ���ɾ���ظ�����ļ�¼�ˡ�
+2) 原来的版本，读者窗中如果装入了重复条码的其中一条读者记录，用“删除”按钮无法删除。现在依然保留这个效果(一般删除的时候不是用记录路径进行删除，而是用条码进行删除，因此会出现删除不了并报警的情况)，但是增加了一个功能：按住CTRL键的同时点删除按钮，就可以根据该记录的路径来进行删除 -- 就可以删除重复条码的记录了。
 
-����ɾ���ĳɹ���Ȼ��ҪһЩǰ��������������ɾ���ļ�¼û����ͨ��Ϣ����û�н軹��Ϣ��ΥԼ������Ϣ���С�
+不过删除的成功仍然需要一些前提条件：即将被删除的记录没有流通信息，即没有借还信息和违约交费信息才行。
 
 ---
 
@@ -107,9 +107,9 @@ http://dp2003.com/dp2bbs/article.aspx?board=@__2&id=205
 
 2007/12/11
 
-1) �ֲ�������У�MARC�༭����CTRL+A���ܣ�ԭ���汾�Ǵ���Ӧ��Ŀ���cfgs/dp2_autogen.cs��cfgs/dp2_autogen.cs.ref�л��C#�ű���ִ�У����ڸ�Ϊ����Ӧ��Ŀ���cfgs/dp2circulation_marc_autogen.cs��cfgs/dp2circulation_marc_autogen.cs.ref�л��C#�ű���ִ�С����ҽű�������Ϊ���漰�Ĳ�����⹦�ܵ�������Ҫ�޸Ĳ���ͨ�����롣
+1) 种册管理窗中，MARC编辑器的CTRL+A功能，原来版本是从相应书目库的cfgs/dp2_autogen.cs和cfgs/dp2_autogen.cs.ref中获得C#脚本并执行，现在改为从相应书目库的cfgs/dp2circulation_marc_autogen.cs和cfgs/dp2circulation_marc_autogen.cs.ref中获得C#脚本并执行。并且脚本代码因为所涉及的部分类库功能调整而需要修改才能通过编译。
 
-2) ������ͨƾ����ӡ���ܡ����Դ�ӡ���ߵĽ衢����ΥԼ�������
+2) 增加流通凭条打印功能。可以打印读者的借、还、违约金情况。
 
 
 ~~~
@@ -125,8 +125,8 @@ http://dp2003.com/dp2bbs/article.aspx?board=@__2&id=205
 
             string strDateRange = InputDlg.GetInput(
     this,
-    "��������",
-    "��ָ��ʱ�䷶Χ: ",
+    "创建报表",
+    "请指定时间范围: ",
     strUsedDateRange,
     this.MainForm.DefaultFont);
             if (strDateRange == null)
@@ -136,10 +136,10 @@ http://dp2003.com/dp2bbs/article.aspx?board=@__2&id=205
                 "borrowlist_daterange",
                 strDateRange);
 
-            // ����ļ�Ŀ¼
+            // 输出文件目录
             FolderBrowserDialog dlg = new FolderBrowserDialog();
 
-            dlg.Description = "�뱨�������Ŀ¼:";
+            dlg.Description = "请报表输出的目录:";
             dlg.RootFolder = Environment.SpecialFolder.MyComputer;
             dlg.SelectedPath = this.MainForm.AppInfo.GetString("reportform",
     "borrowlist_output_dir",
@@ -148,12 +148,12 @@ http://dp2003.com/dp2bbs/article.aspx?board=@__2&id=205
             if (dlg.ShowDialog() != DialogResult.OK)
                 return;
 
-            // ������Ŀ¼�Ƿ���Ϲ���
-            // ����ʹ�ø�Ŀ¼
+            // 检查输出目录是否符合规则
+            // 不能使用根目录
             string strRoot = Directory.GetDirectoryRoot(dlg.SelectedPath);
             if (PathUtil.IsEqual(strRoot, dlg.SelectedPath) == true)
             {
-                strError = "�������Ŀ¼ '" + dlg.SelectedPath + "' ���Ϸ��������Ǹ�Ŀ¼";
+                strError = "报表输出目录 '" + dlg.SelectedPath + "' 不合法。不能是根目录";
                 goto ERROR1;
             }
 
@@ -162,15 +162,15 @@ http://dp2003.com/dp2bbs/article.aspx?board=@__2&id=205
             if (infos.Length > 0)
             {
                 DialogResult temp_result = MessageBox.Show(this,
-"���Ŀ¼  ���Ѿ��������ݡ�\r\n\r\n�Ƿ�Ҫ��������ȫ����Ŀ¼���ļ�?",
+"输出目录  中已经存在内容。\r\n\r\n是否要清除里面的全部子目录和文件?",
 "ReportForm",
 MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,
 MessageBoxDefaultButton.Button2);
                 if (temp_result == System.Windows.Forms.DialogResult.Yes)
                 {
-                    // ���Ŀ¼�е�ȫ������
-                    // ɾ������Ŀ¼��Ȼ���ؽ�
+                    // 清除目录中的全部内容
+                    // 删除对象目录，然后重建
                     try
                     {
                         PathUtil.DeleteDirectory(dlg.SelectedPath);
@@ -178,7 +178,7 @@ MessageBoxDefaultButton.Button2);
                     }
                     catch (Exception ex)
                     {
-                        strError = "��� ���Ŀ¼ '" + dlg.SelectedPath + "' ��ԭ����Ŀ¼���ļ�ʱ�������� " + ex.Message;
+                        strError = "清除 输出目录 '" + dlg.SelectedPath + "' 内原有子目录和文件时发生错误： " + ex.Message;
                         goto ERROR1;
                     }
                 }
@@ -200,13 +200,13 @@ MessageBoxDefaultButton.Button2);
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("���ڴ������� ...");
+            stop.Initial("正在创建报表 ...");
             stop.BeginLoop();
 
             try
             {
                 this._connectionString = GetOperlogConnectionString();  //  SQLiteUtil.GetConnectionString(this.MainForm.UserDir, "operlog.bin");
-                // ���������׶���Ҫ�ĸ�������
+                // 创建报表阶段需要的附加索引
                 nRet = OperLogLine.CreateAdditionalIndex(
                     this._connectionString,
                     out strError);
@@ -220,12 +220,12 @@ MessageBoxDefaultButton.Button2);
                     XmlNode nodeLibrary = this._cfg.GetLibraryNode(strLibraryCode);
                     if (nodeLibrary == null)
                     {
-                        strError = "�������ļ���û���ҵ��ݴ���Ϊ '" + strLibraryCode + "' �� <library> Ԫ��";
+                        strError = "在配置文件中没有找到馆代码为 '" + strLibraryCode + "' 的 <library> 元素";
                         goto ERROR1;
                     }
 
                     string strCfgFile = "";
-                    // ���������ļ����ͣ��ҵ������ļ���
+                    // 根据配置文件类型，找到配置文件名
                     nRet = FindCfgFileByType(nodeLibrary,
                         "131",
                         out strCfgFile,
@@ -234,7 +234,7 @@ MessageBoxDefaultButton.Button2);
                         goto ERROR1;
                     if (nRet == 0)
                     {
-                        strError = "��ǰ�ֹ� '" + strLibraryCode + "' û������ 131 ���͵������ļ�";
+                        strError = "当前分馆 '" + strLibraryCode + "' 没有配置 131 类型的配置文件";
                         goto ERROR1;
                     }
 
@@ -250,7 +250,7 @@ MessageBoxDefaultButton.Button2);
 
                     Table reader_table = null;
 
-                    // ���һ���ֹ��ڶ��߼�¼��֤����ź͵�λ����
+                    // 获得一个分馆内读者记录的证条码号和单位名称
                     nRet = GetAllReaderDepartments(
                             strLibraryCode,
                             ref reader_table,
@@ -266,7 +266,7 @@ MessageBoxDefaultButton.Button2);
                         Application.DoEvents();
                         if (stop != null && stop.State != 0)
                         {
-                            strError = "�û��ж�...";
+                            strError = "用户中断...";
                             goto ERROR1;
                         }
 
@@ -277,14 +277,14 @@ MessageBoxDefaultButton.Button2);
 
                         string strDepartmentName = strDepartment.Replace(" ", "_");
                         if (string.IsNullOrEmpty(strDepartmentName) == true)
-                            strDepartmentName = "��������";
+                            strDepartmentName = "其他部门";
 
                         string strOutputFileName = Path.Combine(strOutputDir,
                             strLibraryCode + "\\" + strDepartmentName + "\\" + strReaderBarcode + "_" + strName.Replace(" ", "")+ ".xlsx");
 
-                        stop.SetMessage("���ڴ��������ļ� " + strOutputFileName + " " + (i + 1).ToString() + "/" + reader_table.Count.ToString() + " ...");
+                        stop.SetMessage("正在创建报表文件 " + strOutputFileName + " " + (i + 1).ToString() + "/" + reader_table.Count.ToString() + " ...");
 
-                        // ȷ��Ŀ¼������
+                        // 确保目录被创建
                         // PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strOutputFileName));
 
                         Table tableList = null;
@@ -298,7 +298,7 @@ MessageBoxDefaultButton.Button2);
                         if (nRet == -1)
                             goto ERROR1;
 
-                        tableList.Sort(strColumnSortStyle);  // "1:a" ���ս���ʱ������
+                        tableList.Sort(strColumnSortStyle);  // "1:a" 按照借书时间排序
 
                         macro_table["%name%"] = strName;
                         macro_table["%department%"] = strDepartment;
@@ -337,31 +337,31 @@ MessageBoxDefaultButton.Button2);
 
 
         ~~~
-        �� CfgDlg ��û��ѡ�� OI Ԫ��д�룬�� library.xml �������� OI���������Ҫ����
+        当 CfgDlg 中没有选择 OI 元素写入，但 library.xml 中配置了 OI，这种情况要警告
 
         ~~~
-        UHF ��ǩ�� User Bank ���Ҳ���Կ��Ǵ� TID �еĳ��Ҵ�������ε���Ϣ�ƶ�
+        UHF 标签的 User Bank 规格也可以考虑从 TID 中的厂家代码和批次等信息推断
 
         ~~~
-        ̽�� UHF ��ǩ�� User Bank Capacity �Ĺ��ܣ�����ʼʱ��ǩ�� EPC PC �е� UMI ��־λΪ false ʱ��
-        ���漰��Ҫ�����ı� UMI λΪ true����Ҫ��ס������̽���Ҫ�� EPC д��ԭ����ֵ
+        探测 UHF 标签的 User Bank Capacity 的功能，当初始时标签的 EPC PC 中的 UMI 标志位为 false 时，
+        就涉及到要主动改变 UMI 位为 true。需要记住最后完成探测后，要把 EPC 写回原来的值
 
         ~~~
-        д��ͼ���ǩ��ʱ���������ѡ��ı�ǩԭ�����Ƕ������ͣ����߷�֮д����߱�ǩ��ʱ���������ѡ��ı�ǩԭ����
-        ��ͼ�����ͣ���Ҫ���о���
+        写入图书标签的时候如果遇到选择的标签原内容是读者类型；或者反之写入读者标签的时候如果遇到选择的标签原内容
+        是图书类型，需要进行警告
 
         ~~~
-        ���һ��ֻ���� EPC ��ģʽ���ӿ���黹���ٶȡ�
-        �������������׶� update �ĵ�һ�׶��źš��ڶ��׶����� bytes ���źſ����跨ʡ�ԡ�
-        SendKey() ���͵��ַ��������� tou: ������ (unkown) ���߿�ȱ��������ʹ�������������̬�����ж�����һ��ʲô���͵ĺ���
-        ʲôʱ���ȱ�� tou: �أ�����Ǳ�ǩ�� EPC �� User Bank ��ȷ�������� TypeOfUsage Ԫ�أ���Ĭ��Ϊͼ�飬��ʱ�� tou: �� ��10��
-        ��������ǩ���� TypeOfUsage Ԫ��(���� EPC �� OID Mask �������)������Ϊ���ܶ��� User Bank ���ò������ TypeOfUsage Ԫ�����ݣ���ʱ tou: ��ȱ����ʾ���ʹ�����Ҳ��������˵�Ŀ��Խ�һ�����ݺ������̬�Զ�̽��ȷ��
+        设计一种只读入 EPC 的模式，加快借书还书速度。
+        方法是利用两阶段 update 的第一阶段信号。第二阶段增加 bytes 的信号可以设法省略。
+        SendKey() 发送的字符串，里面 tou: 可以用 (unkown) 或者空缺。这样迫使软件用条码号形态规则判断这是一个什么类型的号码
+        什么时候会缺乏 tou: 呢？如果是标签的 EPC 和 User Bank 明确都不存在 TypeOfUsage 元素，则默认为图书，这时候 tou: 是 “10”
+        而明明标签存在 TypeOfUsage 元素(比如 EPC 中 OID Mask 标出来了)，但因为不能读出 User Bank 而得不到这个 TypeOfUsage 元素内容，此时 tou: 空缺，表示类型待定，也就是上面说的可以进一步根据号码的形态自动探测确定
 
 
         ~~~
-        �޸� EAS �Ժ󣬿���Ԥ���޸ĺ�� UID ��ʲô������������� UID �ĸ�����Ϣ���������̵�һ�Ρ�
-        Ϊ�˿ɿ��������Լ���һ������̵���ʱЧ(��������)��
-        �������ĸ��� PII ���̵������ظ�������Ϣ��ͬ�������������̵� UID �仯���ͬ PII ��Ϣ
+        修改 EAS 以后，可以预测修改后的 UID 是什么，后面再来这个 UID 的更新消息可以主动吞掉一次。
+        为了可靠，还可以加上一个这个吞掉的时效(比如半分钟)。
+        和以往的根据 PII 来吞掉近期重复更新消息不同，这种做法是吞掉 UID 变化后的同 PII 消息
 
         ~~~
-        CfgDlg �����ڲ��ԵĲ��������Ϻ�ɫ����ʾΣ��
+        CfgDlg 中用于测试的参数都标上红色，表示危险

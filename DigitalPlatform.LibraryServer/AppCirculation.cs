@@ -30,8 +30,6 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.Marc;
 using DigitalPlatform.rms.Client.rmsws_localhost;
-using Google.Protobuf.WellKnownTypes;
-using Microsoft.Extensions.Primitives;
 
 namespace DigitalPlatform.LibraryServer
 {

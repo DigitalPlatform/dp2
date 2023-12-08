@@ -1172,7 +1172,7 @@ namespace DigitalPlatform.RFID
 
         // 2023/12/6
         // 清除 _tagTable 中缓存的信息
-        public static void ClearTagTable(List<TagAndData> datas)
+        public static void ClearTagTableByDatas(List<TagAndData> datas)
         {
             if (datas == null || datas.Count == 0)
                 return;

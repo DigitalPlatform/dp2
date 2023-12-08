@@ -1663,7 +1663,7 @@ MessageBoxDefaultButton.Button1);
                 RfidManager.InventoryIdleSeconds = this.RfidInventoryIdleSeconds;
                 RfidManager.GetRSSI = this.UhfRSSI == 0 ? false : true;
                 RfidTagList.OnlyReadEPC = this.UhfOnlyEpcCharging;
-                RfidTagList.UseTagTable = true;
+                SetRfidTagCachePolicy();    // RfidTagList.UseTagTable = false;
                 // RfidManager.AntennaList = "1|2|3|4";    // testing
                 // RfidManager.SetError += RfidManager_SetError;
                 RfidManager.ListTags += RfidManager_ListTags;
@@ -1688,6 +1688,16 @@ MessageBoxDefaultButton.Button1);
                 RfidManager.ListTags -= RfidManager_ListTags;
             }
         }
+
+        void SetRfidTagCachePolicy()
+        {
+            if (this.RfidTagCachePolicy == "要缓存"
+                || this.RfidTagCachePolicy == "部分缓存")
+                RfidTagList.UseTagTable = true;
+            else
+                RfidTagList.UseTagTable = false;
+        }
+
 
         /*
         private string _error = null;   // "test error line asdljasdkf; ;jasldfjasdjkf aasdfasdf";
@@ -1741,9 +1751,13 @@ MessageBoxDefaultButton.Button1);
                              * 1) 将 RfidManager.UseTagTable 设置为 false (注意默认为 true)，这样根本不会用到 _tagTable；
                              * 2) 保持 RfidManager.UseTagTable 为 true，但在每次 Refresh 的同时调用 RfidTagList>ClearTagTable() 函数清除已经拿走的标签的 _tagTable 缓存事项。
                              */
-                            // 清除已经拿走的标签对应的 RfidTagList._tagTable 缓存信息
-                            RfidTagList.ClearTagTable(remove_books);
-                            RfidTagList.ClearTagTable(remove_patrons);
+
+                            if (this.RfidTagCachePolicy == "部分缓存")
+                            {
+                                // 清除已经拿走的标签对应的 RfidTagList._tagTable 缓存信息
+                                RfidTagList.ClearTagTableByDatas(remove_books);
+                                RfidTagList.ClearTagTableByDatas(remove_patrons);
+                            }
                         },
                         (type, text) =>
                         {

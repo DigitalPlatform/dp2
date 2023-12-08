@@ -581,6 +581,11 @@ false);
     "rfidCenterUrl",
     "");  // 常用值 "ipc://RfidChannel/RfidServer"
 
+            this.comboBox_rfid_tagCachePolicy.Text =
+                ap.GetString("rfid",
+    "tagCachePolicy",
+    "不缓存");
+
             // 2023/10/27
             // 超高频标签数据格式
             this.comboBox_uhf_dataFormat.Text =
@@ -627,6 +632,8 @@ false);
             if (StringUtil.IsInList("client_disablerfid", Program.MainForm._currentUserRights))
             {
                 this.textBox_cardReader_rfidCenterUrl.Enabled = false;
+                this.comboBox_rfid_tagCachePolicy.Enabled = false;
+                
                 this.button_cardReader_setRfidUrlDefaultValue.Enabled = false;
 
                 this.comboBox_uhf_dataFormat.Enabled = false;
@@ -1359,6 +1366,10 @@ ap.GetString(
                 ap.SetString("cardreader",
                     "rfidCenterUrl",
                     this.textBox_cardReader_rfidCenterUrl.Text);  // 常用值 "ipc://RfidChannel/RfidServer"
+
+                ap.SetString("rfid",
+"tagCachePolicy",
+this.comboBox_rfid_tagCachePolicy.Text);
 
                 // 2023/10/27
                 // 超高频标签数据格式
@@ -2146,6 +2157,9 @@ MessageBoxDefaultButton.Button2);
         {
             this.groupBox_uhf.Enabled = true;
             this.groupBox_rfidTest.Enabled = true;
+
+            this.label_rfid_tagCachePolicy.Enabled = true;
+            this.comboBox_rfid_tagCachePolicy.Enabled = true;
         }
 
         private void tabPage_cardReader_SizeChanged(object sender, EventArgs e)
