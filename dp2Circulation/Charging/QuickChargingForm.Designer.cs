@@ -51,6 +51,7 @@
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripMenuItem_renew = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_verifyRenew = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem_specialRenew = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripMenuItem_lost = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_verifyLost = new System.Windows.Forms.ToolStripMenuItem();
@@ -83,7 +84,8 @@
             this.dpTable_tasks = new DigitalPlatform.CommonControl.DpTable();
             this.toolStrip_main = new System.Windows.Forms.ToolStrip();
             this.toolStripLabel_currentPatron = new System.Windows.Forms.ToolStripLabel();
-            this.toolStripButton_faceInput = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSplitButton_face = new System.Windows.Forms.ToolStripSplitButton();
+            this.ToolStripMenuItem_autoTriggerFaceInput = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripButton_openPatronSummaryWindow = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_enableHanzi = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_upperInput = new System.Windows.Forms.ToolStripButton();
@@ -98,7 +100,6 @@
             this.ToolStripMenuItem_special_multiRenew = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripDropDownButton_selectLibraryCode = new System.Windows.Forms.ToolStripDropDownButton();
             this.toolStripButton_selectTargetLocation = new System.Windows.Forms.ToolStripButton();
-            this.toolStripMenuItem_specialRenew = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip_selectFunc.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).BeginInit();
             this.splitContainer_main.Panel1.SuspendLayout();
@@ -145,129 +146,136 @@
             this.toolStripSeparator5,
             this.toolStripMenuItem_read});
             this.contextMenuStrip_selectFunc.Name = "contextMenuStrip_selectFunc";
-            this.contextMenuStrip_selectFunc.Size = new System.Drawing.Size(271, 582);
+            this.contextMenuStrip_selectFunc.Size = new System.Drawing.Size(211, 544);
             this.contextMenuStrip_selectFunc.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip_selectFunc_Opening);
             // 
             // toolStripMenuItem_borrow
             // 
             this.toolStripMenuItem_borrow.Name = "toolStripMenuItem_borrow";
-            this.toolStripMenuItem_borrow.Size = new System.Drawing.Size(270, 34);
+            this.toolStripMenuItem_borrow.Size = new System.Drawing.Size(210, 34);
             this.toolStripMenuItem_borrow.Text = "借";
             this.toolStripMenuItem_borrow.Click += new System.EventHandler(this.toolStripMenuItem_borrow_Click);
             // 
             // toolStripMenuItem_continueBorrow
             // 
             this.toolStripMenuItem_continueBorrow.Name = "toolStripMenuItem_continueBorrow";
-            this.toolStripMenuItem_continueBorrow.Size = new System.Drawing.Size(270, 34);
+            this.toolStripMenuItem_continueBorrow.Size = new System.Drawing.Size(210, 34);
             this.toolStripMenuItem_continueBorrow.Text = "同一读者借";
             this.toolStripMenuItem_continueBorrow.Click += new System.EventHandler(this.toolStripMenuItem_continueBorrow_Click);
             // 
             // toolStripMenuItem_specialBorrow
             // 
             this.toolStripMenuItem_specialBorrow.Name = "toolStripMenuItem_specialBorrow";
-            this.toolStripMenuItem_specialBorrow.Size = new System.Drawing.Size(270, 34);
+            this.toolStripMenuItem_specialBorrow.Size = new System.Drawing.Size(210, 34);
             this.toolStripMenuItem_specialBorrow.Text = "特殊借";
             this.toolStripMenuItem_specialBorrow.Click += new System.EventHandler(this.toolStripMenuItem_specialBorrow_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(267, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(207, 6);
             // 
             // toolStripMenuItem_return
             // 
             this.toolStripMenuItem_return.Name = "toolStripMenuItem_return";
-            this.toolStripMenuItem_return.Size = new System.Drawing.Size(270, 34);
+            this.toolStripMenuItem_return.Size = new System.Drawing.Size(210, 34);
             this.toolStripMenuItem_return.Text = "还";
             this.toolStripMenuItem_return.Click += new System.EventHandler(this.toolStripMenuItem_return_Click);
             // 
             // toolStripMenuItem_verifyReturn
             // 
             this.toolStripMenuItem_verifyReturn.Name = "toolStripMenuItem_verifyReturn";
-            this.toolStripMenuItem_verifyReturn.Size = new System.Drawing.Size(270, 34);
+            this.toolStripMenuItem_verifyReturn.Size = new System.Drawing.Size(210, 34);
             this.toolStripMenuItem_verifyReturn.Text = "验证还";
             this.toolStripMenuItem_verifyReturn.Click += new System.EventHandler(this.toolStripMenuItem_verifyReturn_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(267, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(207, 6);
             // 
             // toolStripMenuItem_renew
             // 
             this.toolStripMenuItem_renew.Name = "toolStripMenuItem_renew";
-            this.toolStripMenuItem_renew.Size = new System.Drawing.Size(270, 34);
+            this.toolStripMenuItem_renew.Size = new System.Drawing.Size(210, 34);
             this.toolStripMenuItem_renew.Text = "续借";
             this.toolStripMenuItem_renew.Click += new System.EventHandler(this.toolStripMenuItem_renew_Click);
             // 
             // toolStripMenuItem_verifyRenew
             // 
             this.toolStripMenuItem_verifyRenew.Name = "toolStripMenuItem_verifyRenew";
-            this.toolStripMenuItem_verifyRenew.Size = new System.Drawing.Size(270, 34);
+            this.toolStripMenuItem_verifyRenew.Size = new System.Drawing.Size(210, 34);
             this.toolStripMenuItem_verifyRenew.Text = "验证续借";
             this.toolStripMenuItem_verifyRenew.Click += new System.EventHandler(this.toolStripMenuItem_verifyRenew_Click);
+            // 
+            // toolStripMenuItem_specialRenew
+            // 
+            this.toolStripMenuItem_specialRenew.Name = "toolStripMenuItem_specialRenew";
+            this.toolStripMenuItem_specialRenew.Size = new System.Drawing.Size(210, 34);
+            this.toolStripMenuItem_specialRenew.Text = "特殊续借";
+            this.toolStripMenuItem_specialRenew.Click += new System.EventHandler(this.toolStripMenuItem_specialRenew_Click);
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(267, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(207, 6);
             // 
             // toolStripMenuItem_lost
             // 
             this.toolStripMenuItem_lost.Name = "toolStripMenuItem_lost";
-            this.toolStripMenuItem_lost.Size = new System.Drawing.Size(270, 34);
+            this.toolStripMenuItem_lost.Size = new System.Drawing.Size(210, 34);
             this.toolStripMenuItem_lost.Text = "丢失";
             this.toolStripMenuItem_lost.Click += new System.EventHandler(this.toolStripMenuItem_lost_Click);
             // 
             // toolStripMenuItem_verifyLost
             // 
             this.toolStripMenuItem_verifyLost.Name = "toolStripMenuItem_verifyLost";
-            this.toolStripMenuItem_verifyLost.Size = new System.Drawing.Size(270, 34);
+            this.toolStripMenuItem_verifyLost.Size = new System.Drawing.Size(210, 34);
             this.toolStripMenuItem_verifyLost.Text = "验证丢失";
             this.toolStripMenuItem_verifyLost.Click += new System.EventHandler(this.toolStripMenuItem_verifyLost_Click);
             // 
             // toolStripSeparator4
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(267, 6);
+            this.toolStripSeparator4.Size = new System.Drawing.Size(207, 6);
             // 
             // toolStripMenuItem_loadPatronInfo
             // 
             this.toolStripMenuItem_loadPatronInfo.Name = "toolStripMenuItem_loadPatronInfo";
-            this.toolStripMenuItem_loadPatronInfo.Size = new System.Drawing.Size(270, 34);
+            this.toolStripMenuItem_loadPatronInfo.Size = new System.Drawing.Size(210, 34);
             this.toolStripMenuItem_loadPatronInfo.Text = "装载读者信息";
             this.toolStripMenuItem_loadPatronInfo.Click += new System.EventHandler(this.toolStripMenuItem_loadPatronInfo_Click);
             // 
             // toolStripMenuItem_inventoryBook
             // 
             this.toolStripMenuItem_inventoryBook.Name = "toolStripMenuItem_inventoryBook";
-            this.toolStripMenuItem_inventoryBook.Size = new System.Drawing.Size(270, 34);
+            this.toolStripMenuItem_inventoryBook.Size = new System.Drawing.Size(210, 34);
             this.toolStripMenuItem_inventoryBook.Text = "盘点图书";
             this.toolStripMenuItem_inventoryBook.Click += new System.EventHandler(this.ToolStripMenuItem_inventoryBook_Click);
             // 
             // toolStripMenuItem_boxing
             // 
             this.toolStripMenuItem_boxing.Name = "toolStripMenuItem_boxing";
-            this.toolStripMenuItem_boxing.Size = new System.Drawing.Size(270, 34);
+            this.toolStripMenuItem_boxing.Size = new System.Drawing.Size(210, 34);
             this.toolStripMenuItem_boxing.Text = "配书";
             this.toolStripMenuItem_boxing.Click += new System.EventHandler(this.ToolStripMenuItem_boxing_Click);
             // 
             // toolStripMenuItem_transfer
             // 
             this.toolStripMenuItem_transfer.Name = "toolStripMenuItem_transfer";
-            this.toolStripMenuItem_transfer.Size = new System.Drawing.Size(270, 34);
+            this.toolStripMenuItem_transfer.Size = new System.Drawing.Size(210, 34);
             this.toolStripMenuItem_transfer.Text = "调拨";
             this.toolStripMenuItem_transfer.Click += new System.EventHandler(this.ToolStripMenuItem_move_Click);
             // 
             // toolStripSeparator5
             // 
             this.toolStripSeparator5.Name = "toolStripSeparator5";
-            this.toolStripSeparator5.Size = new System.Drawing.Size(267, 6);
+            this.toolStripSeparator5.Size = new System.Drawing.Size(207, 6);
             // 
             // toolStripMenuItem_read
             // 
             this.toolStripMenuItem_read.Name = "toolStripMenuItem_read";
-            this.toolStripMenuItem_read.Size = new System.Drawing.Size(270, 34);
+            this.toolStripMenuItem_read.Size = new System.Drawing.Size(210, 34);
             this.toolStripMenuItem_read.Text = "读过";
             this.toolStripMenuItem_read.Click += new System.EventHandler(this.ToolStripMenuItem_read_Click);
             // 
@@ -309,6 +317,7 @@
             this.imageList_progress.Images.SetKeyName(2, "dialog_error_24.png");
             this.imageList_progress.Images.SetKeyName(3, "progress_information.bmp");
             this.imageList_progress.Images.SetKeyName(4, "circle_24.png");
+            this.imageList_progress.Images.SetKeyName(5, "question_mark_PNG24.png");
             // 
             // splitContainer_main
             // 
@@ -324,7 +333,7 @@
             // splitContainer_main.Panel2
             // 
             this.splitContainer_main.Panel2.Controls.Add(this.tableLayoutPanel_right);
-            this.splitContainer_main.Size = new System.Drawing.Size(1093, 590);
+            this.splitContainer_main.Size = new System.Drawing.Size(1093, 587);
             this.splitContainer_main.SplitterDistance = 594;
             this.splitContainer_main.SplitterWidth = 15;
             this.splitContainer_main.TabIndex = 0;
@@ -342,7 +351,7 @@
             this.tableLayoutPanel_left.RowCount = 2;
             this.tableLayoutPanel_left.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel_left.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_left.Size = new System.Drawing.Size(594, 590);
+            this.tableLayoutPanel_left.Size = new System.Drawing.Size(594, 587);
             this.tableLayoutPanel_left.TabIndex = 1;
             // 
             // webBrowser_reader
@@ -352,7 +361,7 @@
             this.webBrowser_reader.Margin = new System.Windows.Forms.Padding(5);
             this.webBrowser_reader.MinimumSize = new System.Drawing.Size(37, 35);
             this.webBrowser_reader.Name = "webBrowser_reader";
-            this.webBrowser_reader.Size = new System.Drawing.Size(584, 530);
+            this.webBrowser_reader.Size = new System.Drawing.Size(584, 527);
             this.webBrowser_reader.TabIndex = 0;
             this.webBrowser_reader.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.webBrowser_reader_DocumentCompleted);
             // 
@@ -362,7 +371,7 @@
             this.label_rfidMessage.ContextMenuStrip = this.contextMenuStrip_rfid;
             this.label_rfidMessage.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label_rfidMessage.Font = new System.Drawing.Font("Consolas", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label_rfidMessage.Location = new System.Drawing.Point(4, 540);
+            this.label_rfidMessage.Location = new System.Drawing.Point(4, 537);
             this.label_rfidMessage.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label_rfidMessage.Name = "label_rfidMessage";
             this.label_rfidMessage.Size = new System.Drawing.Size(586, 50);
@@ -400,7 +409,7 @@
             this.tableLayoutPanel_right.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_right.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 35F));
             this.tableLayoutPanel_right.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_right.Size = new System.Drawing.Size(484, 590);
+            this.tableLayoutPanel_right.Size = new System.Drawing.Size(484, 587);
             this.tableLayoutPanel_right.TabIndex = 0;
             // 
             // panel_input
@@ -413,7 +422,7 @@
             this.panel_input.Controls.Add(this.label_input_message);
             this.panel_input.Controls.Add(this.pictureBox_action);
             this.panel_input.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel_input.Location = new System.Drawing.Point(5, 407);
+            this.panel_input.Location = new System.Drawing.Point(5, 404);
             this.panel_input.Margin = new System.Windows.Forms.Padding(5);
             this.panel_input.Name = "panel_input";
             this.panel_input.Size = new System.Drawing.Size(474, 143);
@@ -527,7 +536,7 @@
             this.dpTable_tasks.MaxTextHeight = 200;
             this.dpTable_tasks.Name = "dpTable_tasks";
             this.dpTable_tasks.Padding = new System.Windows.Forms.Padding(15, 14, 15, 14);
-            this.dpTable_tasks.Size = new System.Drawing.Size(474, 392);
+            this.dpTable_tasks.Size = new System.Drawing.Size(474, 389);
             this.dpTable_tasks.TabIndex = 1;
             this.dpTable_tasks.Text = "dpTable1";
             this.dpTable_tasks.ScrollBarTouched += new DigitalPlatform.CommonControl.ScrollBarTouchedEventHandler(this.dpTable_tasks_ScrollBarTouched);
@@ -541,7 +550,7 @@
             this.toolStrip_main.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.toolStrip_main.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripLabel_currentPatron,
-            this.toolStripButton_faceInput,
+            this.toolStripSplitButton_face,
             this.toolStripButton_openPatronSummaryWindow,
             this.toolStripButton_enableHanzi,
             this.toolStripButton_upperInput,
@@ -549,7 +558,7 @@
             this.toolStripDropDownButton1,
             this.toolStripDropDownButton_selectLibraryCode,
             this.toolStripButton_selectTargetLocation});
-            this.toolStrip_main.Location = new System.Drawing.Point(0, 555);
+            this.toolStrip_main.Location = new System.Drawing.Point(0, 552);
             this.toolStrip_main.Name = "toolStrip_main";
             this.toolStrip_main.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
             this.toolStrip_main.Size = new System.Drawing.Size(484, 35);
@@ -562,15 +571,24 @@
             this.toolStripLabel_currentPatron.Size = new System.Drawing.Size(0, 29);
             this.toolStripLabel_currentPatron.ToolTipText = "当前读者证条码号";
             // 
-            // toolStripButton_faceInput
+            // toolStripSplitButton_face
             // 
-            this.toolStripButton_faceInput.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripButton_faceInput.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_faceInput.Image")));
-            this.toolStripButton_faceInput.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton_faceInput.Name = "toolStripButton_faceInput";
-            this.toolStripButton_faceInput.Size = new System.Drawing.Size(40, 29);
-            this.toolStripButton_faceInput.Text = "人脸识别";
-            this.toolStripButton_faceInput.Click += new System.EventHandler(this.toolStripButton_faceInput_Click);
+            this.toolStripSplitButton_face.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripSplitButton_face.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ToolStripMenuItem_autoTriggerFaceInput});
+            this.toolStripSplitButton_face.Image = ((System.Drawing.Image)(resources.GetObject("toolStripSplitButton_face.Image")));
+            this.toolStripSplitButton_face.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripSplitButton_face.Name = "toolStripSplitButton_face";
+            this.toolStripSplitButton_face.Size = new System.Drawing.Size(48, 29);
+            this.toolStripSplitButton_face.Text = "人脸识别";
+            this.toolStripSplitButton_face.ButtonClick += new System.EventHandler(this.toolStripSplitButton_face_ButtonClick);
+            // 
+            // ToolStripMenuItem_autoTriggerFaceInput
+            // 
+            this.ToolStripMenuItem_autoTriggerFaceInput.Name = "ToolStripMenuItem_autoTriggerFaceInput";
+            this.ToolStripMenuItem_autoTriggerFaceInput.Size = new System.Drawing.Size(315, 40);
+            this.ToolStripMenuItem_autoTriggerFaceInput.Text = "自动触发人脸识别";
+            this.ToolStripMenuItem_autoTriggerFaceInput.Click += new System.EventHandler(this.ToolStripMenuItem_autoTriggerFaceInput_Click);
             // 
             // toolStripButton_openPatronSummaryWindow
             // 
@@ -635,14 +653,14 @@
             // toolStripMenuItem_inventoryFromFile
             // 
             this.toolStripMenuItem_inventoryFromFile.Name = "toolStripMenuItem_inventoryFromFile";
-            this.toolStripMenuItem_inventoryFromFile.Size = new System.Drawing.Size(315, 40);
+            this.toolStripMenuItem_inventoryFromFile.Size = new System.Drawing.Size(297, 40);
             this.toolStripMenuItem_inventoryFromFile.Text = "从文件导入盘点 ...";
             this.toolStripMenuItem_inventoryFromFile.Click += new System.EventHandler(this.ToolStripMenuItem_inventoryFromFile_Click);
             // 
             // ToolStripMenuItem_openEasForm
             // 
             this.ToolStripMenuItem_openEasForm.Name = "ToolStripMenuItem_openEasForm";
-            this.ToolStripMenuItem_openEasForm.Size = new System.Drawing.Size(315, 40);
+            this.ToolStripMenuItem_openEasForm.Size = new System.Drawing.Size(297, 40);
             this.ToolStripMenuItem_openEasForm.Text = "打开 EAS 窗";
             this.ToolStripMenuItem_openEasForm.Click += new System.EventHandler(this.ToolStripMenuItem_openEasForm_Click);
             // 
@@ -650,7 +668,7 @@
             // 
             this.ToolStripMenuItem_testSync.CheckOnClick = true;
             this.ToolStripMenuItem_testSync.Name = "ToolStripMenuItem_testSync";
-            this.ToolStripMenuItem_testSync.Size = new System.Drawing.Size(315, 40);
+            this.ToolStripMenuItem_testSync.Size = new System.Drawing.Size(297, 40);
             this.ToolStripMenuItem_testSync.Text = "测试同步";
             // 
             // ToolStripMenuItem_multipleItem
@@ -660,27 +678,27 @@
             this.ToolStripMenuItem_multiRenew,
             this.ToolStripMenuItem_special_multiRenew});
             this.ToolStripMenuItem_multipleItem.Name = "ToolStripMenuItem_multipleItem";
-            this.ToolStripMenuItem_multipleItem.Size = new System.Drawing.Size(315, 40);
+            this.ToolStripMenuItem_multipleItem.Size = new System.Drawing.Size(297, 40);
             this.ToolStripMenuItem_multipleItem.Text = "复选操作";
             // 
             // ToolStripMenuItem_multiReturn
             // 
             this.ToolStripMenuItem_multiReturn.Name = "ToolStripMenuItem_multiReturn";
-            this.ToolStripMenuItem_multiReturn.Size = new System.Drawing.Size(315, 40);
+            this.ToolStripMenuItem_multiReturn.Size = new System.Drawing.Size(213, 40);
             this.ToolStripMenuItem_multiReturn.Text = "还书";
             this.ToolStripMenuItem_multiReturn.Click += new System.EventHandler(this.ToolStripMenuItem_multiReturn_Click);
             // 
             // ToolStripMenuItem_multiRenew
             // 
             this.ToolStripMenuItem_multiRenew.Name = "ToolStripMenuItem_multiRenew";
-            this.ToolStripMenuItem_multiRenew.Size = new System.Drawing.Size(315, 40);
+            this.ToolStripMenuItem_multiRenew.Size = new System.Drawing.Size(213, 40);
             this.ToolStripMenuItem_multiRenew.Text = "续借";
             this.ToolStripMenuItem_multiRenew.Click += new System.EventHandler(this.ToolStripMenuItem_multiRenew_Click);
             // 
             // ToolStripMenuItem_special_multiRenew
             // 
             this.ToolStripMenuItem_special_multiRenew.Name = "ToolStripMenuItem_special_multiRenew";
-            this.ToolStripMenuItem_special_multiRenew.Size = new System.Drawing.Size(315, 40);
+            this.ToolStripMenuItem_special_multiRenew.Size = new System.Drawing.Size(213, 40);
             this.ToolStripMenuItem_special_multiRenew.Text = "特殊续借";
             this.ToolStripMenuItem_special_multiRenew.Click += new System.EventHandler(this.ToolStripMenuItem_special_multiRenew_Click);
             // 
@@ -701,22 +719,15 @@
             this.toolStripButton_selectTargetLocation.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_selectTargetLocation.Image")));
             this.toolStripButton_selectTargetLocation.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_selectTargetLocation.Name = "toolStripButton_selectTargetLocation";
-            this.toolStripButton_selectTargetLocation.Size = new System.Drawing.Size(142, 29);
+            this.toolStripButton_selectTargetLocation.Size = new System.Drawing.Size(142, 32);
             this.toolStripButton_selectTargetLocation.Text = "选择调拨去向";
             this.toolStripButton_selectTargetLocation.Click += new System.EventHandler(this.toolStripButton_selectTransferTargetLocation_Click);
-            // 
-            // toolStripMenuItem_specialRenew
-            // 
-            this.toolStripMenuItem_specialRenew.Name = "toolStripMenuItem_specialRenew";
-            this.toolStripMenuItem_specialRenew.Size = new System.Drawing.Size(270, 34);
-            this.toolStripMenuItem_specialRenew.Text = "特殊续借";
-            this.toolStripMenuItem_specialRenew.Click += new System.EventHandler(this.toolStripMenuItem_specialRenew_Click);
             // 
             // QuickChargingForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1093, 590);
+            this.ClientSize = new System.Drawing.Size(1093, 587);
             this.Controls.Add(this.splitContainer_main);
             this.Margin = new System.Windows.Forms.Padding(5);
             this.Name = "QuickChargingForm";
@@ -797,7 +808,6 @@
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_transfer;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
         private System.Windows.Forms.ToolStripButton toolStripButton_selectTargetLocation;
-        private System.Windows.Forms.ToolStripButton toolStripButton_faceInput;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_left;
         private System.Windows.Forms.Label label_rfidMessage;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_openEasForm;
@@ -810,5 +820,7 @@
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_specialBorrow;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_special_multiRenew;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_specialRenew;
+        private System.Windows.Forms.ToolStripSplitButton toolStripSplitButton_face;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_autoTriggerFaceInput;
     }
 }

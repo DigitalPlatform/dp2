@@ -2970,7 +2970,7 @@ out string strError)
                     return new NormalResult
                     {
                         Value = -1,
-                        ErrorInfo = ex.Message,
+                        ErrorInfo = $"FaceCenter 没有响应: {ex.Message}",
                         ErrorCode = "RequestError"
                     };
                 }

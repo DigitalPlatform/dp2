@@ -94,6 +94,8 @@ namespace dp2Circulation
             }
         }
 
+        public static float SEP = 1.8F;
+
         public static void DoPaint(
             Graphics g,
             long x,
@@ -119,7 +121,7 @@ namespace dp2Circulation
                     RectangleF rect = new RectangleF();
                     rect.X = (float)offs + x;
                     rect.Y = 0 + y;
-                    rect.Width = (float)cell_width - 1;
+                    rect.Width = (float)cell_width - SEP;
                     if (rect.Width < 1.1F)
                         rect.Width = 1.1F;
                     rect.Height = size.Height;
@@ -178,7 +180,7 @@ namespace dp2Circulation
                     // 黄色(或者白色)的边框容易看不清，补充描边一次
                     if (ch == 'Y' || ch == 'W')
                     {
-                        rect.Width -= 1;
+                        rect.Width -= SEP;
 
                         if (rect.Width > 6)
                         {

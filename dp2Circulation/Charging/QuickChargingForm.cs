@@ -103,7 +103,7 @@ namespace dp2Circulation
 #if SUPPORT_OLD_STOP
             this.ChannelDoEvents = false;
 #endif
-            if (this.DisplayFormat == "卡片")
+            if (QuickChargingForm.DisplayFormat == "卡片")
             {
                 this.splitContainer_main.Panel1.Controls.Remove(this.webBrowser_reader);
                 this.AddFreeControl(this.webBrowser_reader);    // 2015/11/7
@@ -142,6 +142,9 @@ namespace dp2Circulation
             this._summaryList.BeginThread();
             this._floatingMessage.RectColor = _rectColor;   // Color.Purple;
 
+            // 2023/12/9
+            this.ToolStripMenuItem_autoTriggerFaceInput.Checked = AutoTriggerFaceInput;
+
             this.toolStripButton_enableHanzi.Checked = Program.MainForm.AppInfo.GetBoolean(
                 "quickchargingform",
                 "enable_hanzi",
@@ -161,8 +164,8 @@ namespace dp2Circulation
                 }
             }
 
-            this.SetControlsColor(this.DisplayStyle);
-            if (this.DisplayFormat == "HTML")
+            this.SetControlsColor(QuickChargingForm.DisplayStyle);
+            if (QuickChargingForm.DisplayFormat == "HTML")
             {
                 SetReaderHtmlString("(空)");
             }
@@ -687,7 +690,7 @@ namespace dp2Circulation
             // 如果 tou:? 然而又没有启用条码校验，则只能把 ? 当作 "10" 处理
             if (strTypeOfUsage[0] == '?'
                 && Program.MainForm.UhfOnlyEpcCharging
-                && this.NeedVerifyBarcode == false)
+                && QuickChargingForm.NeedVerifyBarcode == false)
             {
                 strTypeOfUsage = "10";
             }
@@ -731,7 +734,7 @@ namespace dp2Circulation
                         }));
                     }
 
-                    if (this.StateSpeak != "[不朗读]")
+                    if (QuickChargingForm.StateSpeak != "[不朗读]")
                         Program.MainForm.Speak("自动修正 EAS 成功");
                     this.ShowMessageAutoClear("自动修正 EAS 成功", "green", 2000, true);
                     // 本次标签触发了自动修正动作，并操作成功，后面就不再继续进行借书或者还书操作了
@@ -1245,7 +1248,7 @@ namespace dp2Circulation
             SelectPatronDialog dlg = new SelectPatronDialog();
 
             MainForm.SetControlFont(dlg, this.Font, false);
-            dlg.NoBorrowHistory = this.NoBorrowHistory;
+            dlg.NoBorrowHistory = QuickChargingForm.NoBorrowHistory;
             dlg.ColorBarVisible = false;
             dlg.MessageVisible = false;
             dlg.Overflow = StringUtil.SplitList(recpath_list).Count < lRet;
@@ -1366,7 +1369,7 @@ namespace dp2Circulation
                 dlg.Text = "请选择要调拨的册";
             }
 
-            dlg.AutoOperSingleItem = this.AutoOperSingleItem;
+            dlg.AutoOperSingleItem = QuickChargingForm.AutoOperSingleItem;
             dlg.AutoSearch = true;
             dlg.MainForm = Program.MainForm;
             dlg.From = "ISBN";
@@ -1508,7 +1511,7 @@ dlg.UiState);
 
             // 把摘要的书名部分朗读出来
             if (bSpeak
-                && this.SpeakBookTitle == true
+                && QuickChargingForm.SpeakBookTitle == true
                 && string.IsNullOrEmpty(strSummary) == false)
             {
                 string strTitle = "";
@@ -1524,7 +1527,7 @@ dlg.UiState);
 
         internal void WriteErrorLog(string strText)
         {
-            if (this.LogOperTime)
+            if (QuickChargingForm.LogOperTime)
             {
                 try
                 {
@@ -1585,6 +1588,7 @@ dlg.UiState);
                 return 2;
             }
 
+#if REMOVED
             // 2019/1/9
             string prefix = ""; //  "pii:";
             string type_of_usage = "";  // "10";    // 10 流通馆藏; 80 读者证
@@ -1605,6 +1609,10 @@ dlg.UiState);
                 if (string.IsNullOrEmpty(type_of_usage))
                     type_of_usage = "10";
             }
+#endif
+            ParseBarcode(ref strBarcode,
+    out string prefix,
+    out string type_of_usage);
 
             // 2015/12/9
             if (strBarcode == "_testreader")
@@ -1670,6 +1678,31 @@ dlg.UiState);
             finally
             {
                 this._barcodeChannel.EndSearch();
+            }
+        }
+
+        void ParseBarcode(ref string strBarcode,
+            out string prefix,
+            out string type_of_usage)
+        {
+            prefix = ""; //  "pii:";
+            type_of_usage = "";  // "10";    // 10 流通馆藏; 80 读者证
+            if (strBarcode.StartsWith("pii:") == true
+                || strBarcode.StartsWith("PII:") == true
+                || strBarcode.StartsWith("uid:") == true
+                || strBarcode.StartsWith("UID:") == true)
+            {
+                // 这是册条码号(RFID 读卡器发来的)。但内容依然需要进行校验
+                Hashtable table = StringUtil.ParseParameters(strBarcode, ',', ':');
+                strBarcode = GetValue(table, "pii");
+                if (string.IsNullOrEmpty(strBarcode))
+                {
+                    strBarcode = GetValue(table, "uid");
+                    prefix = "uid:";
+                }
+                type_of_usage = GetValue(table, "tou");
+                if (string.IsNullOrEmpty(type_of_usage))
+                    type_of_usage = "10";
             }
         }
 
@@ -1924,7 +1957,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                     m_chargingInfoHost = new ChargingInfoHost();
                     m_chargingInfoHost.ap = MainForm.AppInfo;
                     m_chargingInfoHost.window = this;
-                    if (this.StopFillingWhenCloseInfoDlg == true)
+                    if (QuickChargingForm.StopFillingWhenCloseInfoDlg == true)
                     {
                         m_chargingInfoHost.StopGettingSummary -= new EventHandler(m_chargingInfoHost_StopGettingSummary);
                         m_chargingInfoHost.StopGettingSummary += new EventHandler(m_chargingInfoHost_StopGettingSummary);
@@ -1932,7 +1965,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                 }
                 else
                 {
-                    if (this.StopFillingWhenCloseInfoDlg == false)
+                    if (QuickChargingForm.StopFillingWhenCloseInfoDlg == false)
                     {
                         m_chargingInfoHost.StopGettingSummary -= new EventHandler(m_chargingInfoHost_StopGettingSummary);
                     }
@@ -1954,7 +1987,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             this.webBrowser_reader.Stop();
         }
         // 信息对话框的不透明度
-        public double InfoDlgOpacity
+        public static double InfoDlgOpacity
         {
             get
             {
@@ -1968,7 +2001,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
         /// <summary>
         /// 是否要在关闭信息对话框的时候自动停止填充
         /// </summary>
-        public bool StopFillingWhenCloseInfoDlg
+        public static bool StopFillingWhenCloseInfoDlg
         {
             get
             {
@@ -1982,7 +2015,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
         /// <summary>
         /// 自动操作唯一事项
         /// </summary>
-        public bool AutoOperSingleItem
+        public static bool AutoOperSingleItem
         {
             get
             {
@@ -1996,7 +2029,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
         /// <summary>
         /// 是否启用 ISBN 借书还书功能
         /// </summary>
-        public bool UseIsbnBorrow
+        public static bool UseIsbnBorrow
         {
             get
             {
@@ -2024,7 +2057,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                 strMessage,
                 color,
                 strCaption,
-                this.InfoDlgOpacity,
+                QuickChargingForm.InfoDlgOpacity,
                 Program.MainForm.DefaultFont);
 
             // this.SwitchFocus(nTarget, strFastInputText);
@@ -2046,7 +2079,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                     strMessage,
                     color,
                     strCaption,
-                    this.InfoDlgOpacity,
+                    QuickChargingForm.InfoDlgOpacity,
                     Program.MainForm.DefaultFont);
             });
         }
@@ -2119,9 +2152,9 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                     else
                         task.RefreshDisplay(line);
 
-                    if (this.StateSpeak != "[不朗读]")
+                    if (QuickChargingForm.StateSpeak != "[不朗读]")
                     {
-                        string strContent = task.GetSpeakContent(line, this.StateSpeak);
+                        string strContent = task.GetSpeakContent(line, QuickChargingForm.StateSpeak);
                         if (string.IsNullOrEmpty(strContent) == false)
                             Program.MainForm.Speak(strContent);
                     }
@@ -2170,17 +2203,36 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                     if (current_summary != null)
                         current_summary.RefreshColorList();
 
-                    current_summary = new PatronSummary();
-                    current_summary.Name = task.ReaderName;
-                    current_summary.Barcode = task.ReaderBarcode;
-                    current_summary.Tasks.Add(task);
-                    results.Add(current_summary);
-
+                    if (current_summary != null
+                        && task.ReaderBarcode == current_summary.Tasks[0].ReaderBarcode)
+                    {
+                        // load patron 行管辖上方的情形
+                        current_summary.Name = task.ReaderName;
+                        current_summary = null;
+                    }
+                    else
+                    {
+                        // load patron 行管辖下方的情形
+                        current_summary = new PatronSummary();
+                        current_summary.Name = task.ReaderName;
+                        current_summary.Barcode = task.ReaderBarcode;
+                        current_summary.Tasks.Add(task);
+                        results.Add(current_summary);
+                    }
                     continue;
                 }
 
                 if (current_summary != null)
                     current_summary.Tasks.Add(task);
+                else
+                {
+                    // 先遇到了 item borrow 行而不是 patron load 行
+                    current_summary = new PatronSummary();
+                    current_summary.Name = task.ReaderName;
+                    current_summary.Barcode = task.ReaderBarcode;
+                    current_summary.Tasks.Add(task);
+                    results.Add(current_summary);
+                }
             }
 
             if (current_summary != null)
@@ -2388,7 +2440,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             int nRet = 0;
             string strError = "";
 
-            if ((this.UseIsbnBorrow == true && IsISBN(ref strText) == true)
+            if ((QuickChargingForm.UseIsbnBorrow == true && IsISBN(ref strText) == true)
                 || strText.ToLower() == "?b")
             {
                 // return:
@@ -2455,7 +2507,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             }
 
             // 检查条码号，如果是读者证条码号，则 func = LoadPatronInfo
-            if (this.NeedVerifyBarcode == true)
+            if (QuickChargingForm.NeedVerifyBarcode == true)
             {
                 if (StringUtil.IsIdcardNumber(strText) == true
                     || IsName(strText) == true)
@@ -2468,11 +2520,16 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                 {
                     if (this.WillLoadReaderInfo == true)
                     {
-                        // TODO: 语音提示
-                        MessageBox.Show(this, "这里需要输入 证 条码号，而您输入的 '" + strText + "' 是一个 册 条码号。\r\n\r\n请重新输入");
-                        this.textBox_input.SelectAll();
-                        this.textBox_input.Focus(); // 2020/6/2
-                        return;
+                        if (QuickChargingForm.AllowFreeSequence)
+                            this.WillLoadReaderInfo = false;
+                        else
+                        {
+                            // TODO: 语音提示
+                            MessageBox.Show(this, "这里需要输入 证 条码号，而您输入的 '" + strText + "' 是一个 册 条码号。\r\n\r\n请重新输入");
+                            this.textBox_input.SelectAll();
+                            this.textBox_input.Focus(); // 2020/6/2
+                            return;
+                        }
                     }
                 }
                 else
@@ -2544,15 +2601,24 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                         Debug.Assert(nRet == 2, "");
                         if (this.WillLoadReaderInfo == true)
                         {
-                            // TODO: 语音提示
-                            // MessageBox.Show(this, "这里需要输入 证 条码号，而您输入的 '" + strText + "' 是一个 册 条码号。\r\n\r\n请重新输入");
-                            this.ShowMessage("这里需要输入 证 条码号，而您输入的 '" + strText + "' 是一个 册 条码号。\r\n\r\n请重新输入",
-                                "red", true);
-                            // 发出尖锐声音提示操作者注意被吞掉的号码
-                            TaskList.Sound(-1);
+                            if (QuickChargingForm.AllowFreeSequence)
+                            {
+                                // 允许先进入册 task
+                                WillLoadReaderInfo = false;
+                                // pending = true;
+                                goto FREE;
+                            }
+                            else
+                            {
+                                // TODO: 语音提示
+                                // MessageBox.Show(this, "这里需要输入 证 条码号，而您输入的 '" + strText + "' 是一个 册 条码号。\r\n\r\n请重新输入");
+                                this.ShowMessage("这里需要输入 证 条码号，而您输入的 '" + strText + "' 是一个 册 条码号。\r\n\r\n请重新输入",
+                                    "red", true);
+                                // 发出尖锐声音提示操作者注意被吞掉的号码
+                                TaskList.Sound(-1);
 
-                            this.textBox_input.SelectAll();
-                            this.textBox_input.Focus(); // 2020/6/2
+                                this.textBox_input.SelectAll();
+                                this.textBox_input.Focus(); // 2020/6/2
 #if REMOVED
                             var input = FastMessageBox(InfoColor.Red,
     "需要输入证条码号",
@@ -2568,7 +2634,8 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                                 _doAction(func, input, strTaskID, strParameters);
                             }));
 #endif
-                            return;
+                                return;
+                            }
                         }
                     }
 
@@ -2586,6 +2653,42 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                         // 兑现到显示
                         this.textBox_input.Text = strText;
                         this.textBox_input.SelectAll();
+                    }
+                }
+            }
+            else
+            {
+                // 2023/12/11
+                // 根据 tou:xxx 获知号码类型
+                ParseBarcode(ref strText,
+out string prefix,
+out string type_of_usage);
+
+                if (type_of_usage.StartsWith("8"))
+                    WillLoadReaderInfo = true;
+                else if (type_of_usage.StartsWith("1"))
+                {
+                    if (this.WillLoadReaderInfo == true)
+                    {
+                        if (QuickChargingForm.AllowFreeSequence)
+                        {
+                            // 允许先进入册 task
+                            WillLoadReaderInfo = false;
+                            goto FREE;
+                        }
+                        else
+                        {
+                            // TODO: 语音提示
+                            // MessageBox.Show(this, "这里需要输入 证 条码号，而您输入的 '" + strText + "' 是一个 册 条码号。\r\n\r\n请重新输入");
+                            this.ShowMessage("这里需要输入 证 条码号，而您输入的 '" + strText + "' 是一个 册 条码号。\r\n\r\n请重新输入",
+                                "red", true);
+                            // 发出尖锐声音提示操作者注意被吞掉的号码
+                            TaskList.Sound(-1);
+
+                            this.textBox_input.SelectAll();
+                            this.textBox_input.Focus(); // 2020/6/2
+                            return;
+                        }
                     }
                 }
             }
@@ -2640,7 +2743,8 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             }
             else if (func == dp2Circulation.FuncState.ContinueBorrow)
             {
-                if (string.IsNullOrEmpty(this._taskList.CurrentReaderBarcode) == true)
+                if (string.IsNullOrEmpty(this._taskList.CurrentReaderBarcode) == true
+                    && QuickChargingForm.AllowFreeSequence == false)
                 {
                     WillLoadReaderInfo = true;
                     // 提示请输入读者证条码号
@@ -2705,7 +2809,8 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             }
             else if (func == dp2Circulation.FuncState.VerifyReturn)
             {
-                if (string.IsNullOrEmpty(this._taskList.CurrentReaderBarcode) == true)
+                if (string.IsNullOrEmpty(this._taskList.CurrentReaderBarcode) == true
+                    && QuickChargingForm.AllowFreeSequence == false)
                 {
                     WillLoadReaderInfo = true;
                     // 提示请输入读者证条码号
@@ -2734,7 +2839,8 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             }
             else if (func == dp2Circulation.FuncState.VerifyLost)
             {
-                if (string.IsNullOrEmpty(this._taskList.CurrentReaderBarcode) == true)
+                if (string.IsNullOrEmpty(this._taskList.CurrentReaderBarcode) == true
+                    && QuickChargingForm.AllowFreeSequence == false)
                 {
                     WillLoadReaderInfo = true;
                     // 提示请输入读者证条码号
@@ -2755,7 +2861,8 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             }
             else if (func == dp2Circulation.FuncState.Read)
             {
-                if (string.IsNullOrEmpty(this._taskList.CurrentReaderBarcode) == true)
+                if (string.IsNullOrEmpty(this._taskList.CurrentReaderBarcode) == true
+                    && QuickChargingForm.AllowFreeSequence == false)
                 {
                     WillLoadReaderInfo = true;
                     // 提示请输入读者证条码号
@@ -3019,9 +3126,9 @@ false);
         #region 各种配置参数
 
         // 加快响应的记忆变量
-        int _nLogOperTime = 0;  // 0 尚未初始化; -1 false; 1 true
+        static int _nLogOperTime = 0;  // 0 尚未初始化; -1 false; 1 true
         // 日志记载操作耗时
-        public bool LogOperTime
+        public static bool LogOperTime
         {
             get
             {
@@ -3041,7 +3148,7 @@ false);
             }
         }
 
-        public string DisplayFormat
+        public static string DisplayFormat
         {
             get
             {
@@ -3051,7 +3158,7 @@ false);
             }
         }
 
-        public string DisplayStyle
+        public static string DisplayStyle
         {
             get
             {
@@ -3062,7 +3169,7 @@ false);
         }
 
         // 朗读状态
-        public string StateSpeak
+        public static string StateSpeak
         {
             get
             {
@@ -3079,14 +3186,14 @@ false);
             get
             {
                 List<string> styles = new List<string>();
-                string strDisplayStyle = this.DisplayStyle;
+                string strDisplayStyle = QuickChargingForm.DisplayStyle;
                 if (strDisplayStyle != "light")
                     styles.Add("style_" + strDisplayStyle);
 
                 string strFormat = "";
                 if (_cardControl != null)
                 {
-                    if (this.NoBorrowHistory == true
+                    if (QuickChargingForm.NoBorrowHistory == true
                         && StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.25") >= 0)
                     {
                         styles.Add("noborrowhistory");
@@ -3096,7 +3203,7 @@ false);
                 }
                 else
                 {
-                    if (this.NoBorrowHistory == true
+                    if (QuickChargingForm.NoBorrowHistory == true
                         && StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.21") >= 0)
                     {
                         styles.Add("noborrowhistory");
@@ -3112,7 +3219,7 @@ false);
         }
 
         // 读者信息中不显示借阅历史
-        public bool NoBorrowHistory
+        public static bool NoBorrowHistory
         {
             get
             {
@@ -3133,7 +3240,7 @@ false);
         /// <summary>
         /// 是否自动清除输入框中内容
         /// </summary>
-        public bool AutoClearTextbox
+        public static bool AutoClearTextbox
         {
             get
             {
@@ -3150,7 +3257,7 @@ false);
         /// <summary>
         /// 是否自动校验输入的条码号
         /// </summary>
-        public bool NeedVerifyBarcode
+        public static bool NeedVerifyBarcode
         {
             get
             {
@@ -3158,6 +3265,30 @@ false);
                     "quickcharging_form",
                     "verify_barcode",
                     false);
+            }
+        }
+
+        // 借书时允许先输入册条码号
+        public static bool AllowFreeSequence
+        {
+            get
+            {
+                return Program.MainForm.AppInfo.GetBoolean(
+        "quickcharging_form",
+        "allowFreeSequence",
+        false);
+            }
+        }
+
+        // 自动触发人脸识别前的延时秒数
+        public static int AutoTriggerFaceInputDelaySeconds
+        {
+            get
+            {
+                return Program.MainForm.AppInfo.GetInt(
+                        "quickcharging_form",
+                        "autoTriggerFaceInputDelaySeconds",
+                        2);
             }
         }
 
@@ -3176,7 +3307,7 @@ false);
         /// <summary>
         /// 是否要朗读读者姓名
         /// </summary>
-        public bool SpeakPatronName
+        public static bool SpeakPatronName
         {
             get
             {
@@ -3190,7 +3321,7 @@ false);
         /// <summary>
         /// 是否要朗读书名
         /// </summary>
-        public bool SpeakBookTitle
+        public static bool SpeakBookTitle
         {
             get
             {
@@ -3238,7 +3369,7 @@ false);
                 this.toolStripMenuItem_specialBorrow.Checked = false;
                 this.toolStripMenuItem_specialRenew.Checked = false;
 
-                if (this.AutoClearTextbox == true)
+                if (QuickChargingForm.AutoClearTextbox == true)
                 {
                     this.textBox_input.Text = "";
                 }
@@ -3679,7 +3810,7 @@ false);
             // 切换为不同的功能的时候，定位焦点
             if (old_funcstate != this._funcstate)
             {
-                if (this.AutoClearTextbox == true)
+                if (QuickChargingForm.AutoClearTextbox == true)
                 {
                     this.textBox_input.Text = "";
                 }
@@ -3695,7 +3826,7 @@ false);
             }
             else // 重复设置为同样功能，当作清除功能
             {
-                if (this.AutoClearTextbox == true)
+                if (QuickChargingForm.AutoClearTextbox == true)
                 {
                     this.textBox_input.Text = "";
                 }
@@ -4937,50 +5068,6 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
         // 人脸识别
         private async void toolStripButton_faceInput_Click(object sender, EventArgs e)
         {
-            RecognitionFaceResult result = null;
-            EnableControlsForFace(false);
-            try
-            {
-                NormalResult getstate_result = await FaceGetStateAsync("getLibraryServerUID");
-                if (getstate_result.Value == -1)
-                    result = new RecognitionFaceResult
-                    {
-                        Value = -1,
-                        ErrorInfo = getstate_result.ErrorInfo
-                    };
-                else if (getstate_result.ErrorCode != Program.MainForm.ServerUID)
-                    result = new RecognitionFaceResult
-                    {
-                        Value = -1,
-                        ErrorInfo = $"人脸中心所连接的 dp2library 服务器 UID {getstate_result.ErrorCode} 和内务当前所连接的 UID {Program.MainForm.ServerUID} 不同。无法进行人脸识别"
-                    };
-                else
-                    result = await RecognitionFace("ui");
-            }
-            finally
-            {
-                EnableControlsForFace(true);
-            }
-            this.Invoke((Action)(() =>
-            {
-                // 2019/6/13
-                this.Activate();
-                API.SetForegroundWindow(this.Handle);
-
-                if (result.Value == 1)
-                {
-                    this.textBox_input.Text = result.Patron;
-                    this.textBox_input.Focus();
-                    // 触发回车
-                    DoEnter();
-                }
-                else
-                {
-                    MessageBox.Show(this, result.ErrorInfo);
-                    this.textBox_input.SelectAll();
-                    this.textBox_input.Focus();
-                }
-            }));
         }
 
         EasForm _easForm = null;
@@ -5273,6 +5360,124 @@ MessageBoxDefaultButton.Button2);
             SmartSetFuncState(FuncState.SpecialRenew,
 true,
 false);
+        }
+
+        private async void toolStripSplitButton_face_ButtonClick(object sender, EventArgs e)
+        {
+            await FaceInputAsync();
+        }
+
+        async Task FaceInputAsync()
+        {
+            RecognitionFaceResult result = null;
+            EnableControlsForFace(false);
+            try
+            {
+                NormalResult getstate_result = await FaceGetStateAsync("getLibraryServerUID");
+                if (getstate_result.Value == -1)
+                    result = new RecognitionFaceResult
+                    {
+                        Value = -1,
+                        ErrorInfo = getstate_result.ErrorInfo
+                    };
+                else if (getstate_result.ErrorCode != Program.MainForm.ServerUID)
+                    result = new RecognitionFaceResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"人脸中心所连接的 dp2library 服务器 UID {getstate_result.ErrorCode} 和内务当前所连接的 UID {Program.MainForm.ServerUID} 不同。无法进行人脸识别"
+                    };
+                else
+                    result = await RecognitionFace("ui");
+            }
+            finally
+            {
+                EnableControlsForFace(true);
+            }
+            this.Invoke((Action)(() =>
+            {
+                // 2019/6/13
+                this.Activate();
+                API.SetForegroundWindow(this.Handle);
+
+                if (result.Value == 1)
+                {
+                    this.textBox_input.Text = result.Patron;
+                    this.textBox_input.Focus();
+                    // 触发回车
+                    DoEnter();
+                }
+                else
+                {
+                    MessageBox.Show(this, result.ErrorInfo);
+                    this.textBox_input.SelectAll();
+                    this.textBox_input.Focus();
+                }
+            }));
+        }
+
+
+        private void ToolStripMenuItem_autoTriggerFaceInput_Click(object sender, EventArgs e)
+        {
+            AutoTriggerFaceInput = !AutoTriggerFaceInput;
+            this.ToolStripMenuItem_autoTriggerFaceInput.Checked = AutoTriggerFaceInput;
+        }
+
+        public static bool AutoTriggerFaceInput
+        {
+            get
+            {
+                return Program.MainForm.AppInfo.GetBoolean(
+    "charging_form",
+    "autoTriggerFaceInput",
+    false);
+            }
+            set
+            {
+                Program.MainForm.AppInfo.SetBoolean(
+    "charging_form",
+    "autoTriggerFaceInput",
+    value);
+            }
+        }
+
+        Task _taskTriggerFaceInput = null;
+        DateTime _triggerTime = DateTime.MinValue;
+
+        public void BeginTriggerFaceInput()
+        {
+            if (string.IsNullOrEmpty(Program.MainForm.FaceReaderUrl))
+                return;
+
+            if (_taskTriggerFaceInput != null
+                && _taskTriggerFaceInput.IsFaulted)
+            {
+                // _taskTriggerFaceInput.Dispose();
+                _taskTriggerFaceInput = null;
+            }
+
+            _triggerTime = DateTime.Now;
+            if (_taskTriggerFaceInput != null)
+                return;
+            _taskTriggerFaceInput = Task.Run(async () =>
+            {
+                try
+                {
+                    // 一直循环，直到当前时间越过最近一次触发时间 length 以上
+                    var length = TimeSpan.FromSeconds(AutoTriggerFaceInputDelaySeconds);
+                    while (this.CancelToken.IsCancellationRequested == false)
+                    {
+                        await Task.Delay(TimeSpan.FromMilliseconds(250));
+                        if (DateTime.Now > _triggerTime + length)
+                            break;
+                    }
+                    await FaceInputAsync();
+                }
+                finally
+                {
+                    // _taskTriggerFaceInput?.Dispose();    // 会导致抛出异常
+                    _taskTriggerFaceInput = null;
+                }
+            });
         }
     }
 

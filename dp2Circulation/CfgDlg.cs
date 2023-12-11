@@ -283,6 +283,20 @@ ap.GetString("quickcharging_form",
     "quickcharging_form",
     "verify_barcode",
     false);
+
+            // 借书时允许先输入册条码号
+            this.checkBox_quickCharging_allowFreeSequence.Checked = ap.GetBoolean(
+    "quickcharging_form",
+    "allowFreeSequence",
+    false);
+
+            // 自动触发人脸识别前的延时秒数
+            this.numericUpDown_quickCharging_autoTriggerFaceInputDelaySeconds.Value =
+                ap.GetInt(
+                    "quickcharging_form",
+                    "autoTriggerFaceInputDelaySeconds",
+                    2);
+
             // 读者信息中不显示借阅历史
             this.checkBox_quickCharging_noBorrowHistory.Checked = ap.GetBoolean(
                 "quickcharging_form",
@@ -633,7 +647,7 @@ false);
             {
                 this.textBox_cardReader_rfidCenterUrl.Enabled = false;
                 this.comboBox_rfid_tagCachePolicy.Enabled = false;
-                
+
                 this.button_cardReader_setRfidUrlDefaultValue.Enabled = false;
 
                 this.comboBox_uhf_dataFormat.Enabled = false;
@@ -1087,6 +1101,18 @@ ap.GetString(
         "quickcharging_form",
         "verify_barcode",
         this.checkBox_quickCharging_verifyBarcode.Checked);
+
+                // 借书时允许先输入册条码号
+                ap.SetBoolean(
+        "quickcharging_form",
+        "allowFreeSequence",
+        this.checkBox_quickCharging_allowFreeSequence.Checked);
+
+                // 自动触发人脸识别前的延时秒数
+                ap.SetInt(
+                    "quickcharging_form",
+                    "autoTriggerFaceInputDelaySeconds",
+                    (int)this.numericUpDown_quickCharging_autoTriggerFaceInputDelaySeconds.Value);
 
                 // 读者信息中不显示借阅历史
                 ap.SetBoolean(

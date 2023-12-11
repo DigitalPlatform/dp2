@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using System.Linq;
 
 using DigitalPlatform;
 using DigitalPlatform.CommonControl;
@@ -84,6 +85,8 @@ namespace dp2Circulation
         const int IMAGEINDEX_FINISH = 1;
         const int IMAGEINDEX_ERROR = 2;
         const int IMAGEINDEX_INFORMATION = 3;
+        const int IMAGEINDEX_CIRCLE = 4;
+        const int IMAGEINDEX_QUESTION = 5;
 
         public void RefreshPatronCardDisplay(DpRow row)
         {
@@ -188,6 +191,12 @@ namespace dp2Circulation
                 if (bStateText == true)
                     state_cell.Text = "完成";
                 state_cell.ImageIndex = IMAGEINDEX_FINISH;
+            }
+            else if (this.State == "pending")
+            {
+                if (bStateText == true)
+                    state_cell.Text = "等候输入";
+                state_cell.ImageIndex = IMAGEINDEX_QUESTION;
             }
             else
             {
@@ -574,7 +583,7 @@ namespace dp2Circulation
                 this.Container.SetReaderHtmlString("(空)");
 
             string strStyle = this.Container.PatronRenderFormat;
-            if (this.Container.SpeakPatronName == true)
+            if (QuickChargingForm.SpeakPatronName == true)
                 strStyle += ",summary";
             {
                 strStyle += ",xml";
@@ -733,38 +742,10 @@ namespace dp2Circulation
             else
                 this.Container.SetReaderHtmlString(ReplaceMacro(strResult));
 
-            // 如果切换了读者
-            // if (this.CurrentReaderBarcode != task.ReaderBarcode)
-            {
-                // 删除除了本任务以外的其他任务
-                // TODO: 需要检查这些任务中是否有尚未完成的
-                List<ChargingTask> tasks = new List<ChargingTask>();
-                tasks.AddRange(this._tasks);
-                tasks.Remove(task);
+            // //
 
-                int nCount = CountNotFinishTasks(tasks);
-                if (nCount > 0)
-                {
-#if NO
-                        if (this.Container.AskContinue("当前有 " + nCount.ToString()+ " 个任务尚未完成。\r\n\r\n是否清除这些任务并继续?") == DialogResult.Cancel)
-                        {
-                            strError = "装入读者记录的操作被中断";
-                            task.ErrorInfo = strError;
-                            goto ERROR1;
-                        }
-#endif
-                    this.Container.DisplayReaderSummary(task, "前面读者有 " + nCount.ToString() + " 个任务尚未完成，或有提示需要进一步处理。\r\n点击此处查看摘要信息");
-                }
-                else
-                    this.Container.ClearTaskList(tasks);
 
-                // 真正从 _tasks 里面删除
-                ClearTasks(tasks);  // 2019/9/3
-            }
-
-            this.CurrentReaderBarcode = task.ReaderBarcode; // 会自动显示出来
-
-            if (this.Container.SpeakPatronName == true && results.Length >= 2)
+            if (QuickChargingForm.SpeakPatronName == true && results.Length >= 2)
             {
                 string strName = results[1];
                 Program.MainForm.Speak(strName);
@@ -782,6 +763,45 @@ namespace dp2Circulation
                     return true;
                 return false;
 #endif
+            // 2023/12/8
+            _ = Task.Run(() =>
+            {
+                var count = this.ActivatePending(task.ReaderBarcode);
+                if (count > 0)
+                    this.CurrentReaderBarcode = "";
+                else
+                {
+                    // 如果切换了读者
+                    // if (this.CurrentReaderBarcode != task.ReaderBarcode)
+                    {
+                        // 删除除了本任务以外的其他任务
+                        // TODO: 需要检查这些任务中是否有尚未完成的
+                        List<ChargingTask> tasks = new List<ChargingTask>();
+                        tasks.AddRange(this._tasks);
+                        tasks.Remove(task);
+
+                        int nCount = CountNotFinishTasks(tasks);
+                        if (nCount > 0)
+                        {
+#if NO
+                        if (this.Container.AskContinue("当前有 " + nCount.ToString()+ " 个任务尚未完成。\r\n\r\n是否清除这些任务并继续?") == DialogResult.Cancel)
+                        {
+                            strError = "装入读者记录的操作被中断";
+                            task.ErrorInfo = strError;
+                            goto ERROR1;
+                        }
+#endif
+                            this.Container.DisplayReaderSummary(task, "前面读者有 " + nCount.ToString() + " 个任务尚未完成，或有提示需要进一步处理。\r\n点击此处查看摘要信息");
+                        }
+                        else
+                            this.Container.ClearTaskList(tasks);
+
+                        // 真正从 _tasks 里面删除
+                        ClearTasks(tasks);  // 2019/9/3
+                    }
+                    this.CurrentReaderBarcode = task.ReaderBarcode; // 会自动显示出来
+                }
+            });
             return;
         ERROR1:
             task.State = "error";
@@ -867,9 +887,23 @@ namespace dp2Circulation
             {
                 if (string.IsNullOrEmpty(task.ReaderBarcode) == true)
                 {
-                    strError = "证条码号为空，无法进行借书操作";
-                    task.ErrorInfo = strError;
-                    goto ERROR1;
+                    if (QuickChargingForm.AllowFreeSequence)
+                    {
+                        task.State = "pending";
+                        task.Color = "purple";
+                        task.ErrorInfo = "等待输入读者证条码号 ...";
+                        this.Container.DisplayTask("refresh_and_visible", task);
+                        this.Container.SetColorList();
+                        if (QuickChargingForm.AutoTriggerFaceInput && string.IsNullOrEmpty(Program.MainForm.FaceReaderUrl) == false)
+                            this.Container.BeginTriggerFaceInput();
+                        return;
+                    }
+                    else
+                    {
+                        strError = "证条码号为空，无法进行借书操作";
+                        task.ErrorInfo = strError;
+                        goto ERROR1;
+                    }
                 }
             }
 
@@ -1577,9 +1611,23 @@ end_time);
             {
                 if (string.IsNullOrEmpty(strReaderBarcode) == true)
                 {
-                    strError = "尚未输入读者证条码号";
-                    task.ErrorInfo = strError;
-                    goto ERROR1;
+                    if (QuickChargingForm.AllowFreeSequence)
+                    {
+                        task.State = "pending";
+                        task.Color = "purple";
+                        task.ErrorInfo = "等待输入读者证条码号 ...";
+                        this.Container.DisplayTask("refresh_and_visible", task);
+                        this.Container.SetColorList();
+                        if (QuickChargingForm.AutoTriggerFaceInput && string.IsNullOrEmpty(Program.MainForm.FaceReaderUrl) == false)
+                            this.Container.BeginTriggerFaceInput();
+                        return;
+                    }
+                    else
+                    {
+                        strError = "尚未输入读者证条码号";
+                        task.ErrorInfo = strError;
+                        goto ERROR1;
+                    }
                 }
                 strAction = "return";
             }
@@ -1587,9 +1635,23 @@ end_time);
             {
                 if (string.IsNullOrEmpty(strReaderBarcode) == true)
                 {
-                    strError = "尚未输入读者证条码号";
-                    task.ErrorInfo = strError;
-                    goto ERROR1;
+                    if (QuickChargingForm.AllowFreeSequence)
+                    {
+                        task.State = "pending";
+                        task.Color = "purple";
+                        task.ErrorInfo = "等待输入读者证条码号 ...";
+                        this.Container.DisplayTask("refresh_and_visible", task);
+                        this.Container.SetColorList();
+                        if (QuickChargingForm.AutoTriggerFaceInput && string.IsNullOrEmpty(Program.MainForm.FaceReaderUrl) == false)
+                            this.Container.BeginTriggerFaceInput();
+                        return;
+                    }
+                    else
+                    {
+                        strError = "尚未输入读者证条码号";
+                        task.ErrorInfo = strError;
+                        goto ERROR1;
+                    }
                 }
                 strAction = "lost";
             }
@@ -1621,9 +1683,23 @@ end_time);
             {
                 if (string.IsNullOrEmpty(strReaderBarcode) == true)
                 {
-                    strError = "尚未输入读者证条码号";
-                    task.ErrorInfo = strError;
-                    goto ERROR1;
+                    if (QuickChargingForm.AllowFreeSequence)
+                    {
+                        task.State = "pending";
+                        task.Color = "purple";
+                        task.ErrorInfo = "等待输入读者证条码号 ...";
+                        this.Container.DisplayTask("refresh_and_visible", task);
+                        this.Container.SetColorList();
+                        if (QuickChargingForm.AutoTriggerFaceInput && string.IsNullOrEmpty(Program.MainForm.FaceReaderUrl) == false)
+                            this.Container.BeginTriggerFaceInput();
+                        return;
+                    }
+                    else
+                    {
+                        strError = "尚未输入读者证条码号";
+                        task.ErrorInfo = strError;
+                        goto ERROR1;
+                    }
                 }
                 strAction = "read";
             }
@@ -1820,7 +1896,8 @@ end_time);
 
             // 2021/9/1
             if (return_info != null
-                && string.IsNullOrEmpty(return_info.Borrower) == false)
+                && string.IsNullOrEmpty(return_info.Borrower) == false
+                && QuickChargingForm.AllowFreeSequence == false)
                 this.CurrentReaderBarcode = return_info?.Borrower;
 
             if (eas_changed == true && lRet == -1)
@@ -2264,6 +2341,33 @@ end_time);
             // 兑现显示
             this.Container.DisplayTask("remove", task);
             this.Container.SetColorList();
+        }
+
+        // 激活先前曾被延迟的借书任务
+        public int ActivatePending(string readerBarcode)
+        {
+            int count = 0;
+            if (this.m_lock.TryEnterWriteLock(500) == false)   // m_nLockTimeout
+                throw new LockException("锁定尝试中超时");
+            try
+            {
+                var tasks = this._tasks.Where(o => o.State == "pending").ToList();
+                foreach (var task in tasks)
+                {
+                    task.State = "";
+                    task.ReaderBarcode = readerBarcode;
+                    count++;
+                }
+            }
+            finally
+            {
+                this.m_lock.ExitWriteLock();
+            }
+
+            if (count > 0)
+                this.Activate();
+
+            return count;
         }
     }
 
