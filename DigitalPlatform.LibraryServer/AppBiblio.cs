@@ -1408,6 +1408,27 @@ namespace DigitalPlatform.LibraryServer
                     else
                         strBiblio = "";
                 }
+                else if (IsResultType(strBiblioType, "coverImageUrl") == true)
+                {
+                    // 2023/12/13
+                    // *** 获得对象路径
+
+                    var parts = StringUtil.ParseTwoPart(strBiblioType, ":");
+                    string imageType = parts[1];    // .Replace("|", ",");  // style 表达封面图像类型，为 LargeImage MediumImage SmallImage 之一，如果缺省等同于 medium
+                    if (string.IsNullOrEmpty(imageType))
+                        imageType = "MediumImage";
+                    nRet = GetMarc(strBiblioXml,
+    "",
+    out string strMARC,
+    out strError);
+                    if (nRet == -1)
+                    {
+                        AppendErrorText(strError);
+                        goto CONTINUE;
+                    }
+
+                    strBiblio = ScriptUtil.GetCoverImageUrl(strMARC, imageType);
+                }
                 else if (String.Compare(strBiblioType, "html", true) == 0)
                 {
                     if (String.IsNullOrEmpty(strBiblioXml) == true)

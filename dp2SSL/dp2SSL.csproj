@@ -36,7 +36,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>25</ApplicationRevision>
+    <ApplicationRevision>32</ApplicationRevision>
     <ApplicationVersion>1.8.63.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -458,6 +458,8 @@
     </ApplicationDefinition>
     <Compile Include="Centers\FaceManager.cs" />
     <Compile Include="Centers\ProcessManager.cs" />
+    <Compile Include="Controls\AlignableWrapPanel.cs" />
+    <Compile Include="Converter\BitmapConvertor.cs" />
     <Compile Include="Dialog\WriteTagWindow.xaml.cs">
       <DependentUpon>WriteTagWindow.xaml</DependentUpon>
     </Compile>
@@ -800,6 +802,10 @@
     <ProjectReference Include="..\DigitalPlatform.RFID\DigitalPlatform.RFID.csproj">
       <Project>{9d26d2ad-eabb-4c32-8706-fb9e323faf01}</Project>
       <Name>DigitalPlatform.RFID</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Script\DigitalPlatform.Script.csproj">
+      <Project>{5107de16-dda1-4606-b3a3-840b24428329}</Project>
+      <Name>DigitalPlatform.Script</Name>
     </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.SimpleMessageQueue\DigitalPlatform.SimpleMessageQueue.csproj">
       <Project>{f2161fb9-eafb-4667-8830-dc1448c52f32}</Project>

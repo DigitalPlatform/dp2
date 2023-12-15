@@ -2143,7 +2143,8 @@ MessageBoxDefaultButton.Button1);
             {
                 this.Invoke((Action)(() =>
                 {
-                    SendKeys.Send(e.Message + "\r");
+                    // SendKeys.Send(e.Message + "\r");
+                    SendKeys.Send($"pii:{e.Message},tou:80\r");
                     this.SetPalmprintMessage("识别成功 " + e.Message, e.Result?.MessageID);
                 }));
             }

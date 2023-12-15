@@ -13,6 +13,12 @@ using System.Xml;
 using System.Web;
 using System.IO;
 using System.Drawing;
+using System.Drawing.Imaging;
+
+using ZXing;
+using ZXing.QrCode;
+using ZXing.QrCode.Internal;
+using ZXing.Common;
 
 using DigitalPlatform;
 using DigitalPlatform.Xml;
@@ -21,11 +27,6 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.Drawing;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
-using ZXing;
-using ZXing.QrCode;
-using ZXing.QrCode.Internal;
-using ZXing.Common;
-using System.Drawing.Imaging;
 using DigitalPlatform.IO;
 using DigitalPlatform.Core;
 

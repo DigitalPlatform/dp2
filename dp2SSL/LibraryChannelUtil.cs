@@ -19,6 +19,10 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using Xceed.Wpf.Toolkit;
+using System.Net;
+using System.Net.Http;
+using System.IO;
 
 namespace dp2SSL
 {
@@ -35,23 +39,35 @@ namespace dp2SSL
 
             // 2021/4/1
             public byte[] ItemTimestamp { get; set; }
+
+            // 2023/12/13
+            public string CoverImageUrl { get; set; }
+
+            // 2023/12/13
+            public string BiblioRecPath { get; set; }
         }
 
         static bool _cacheDbCreated = false;
 
         static AsyncSemaphore _channelLimit = new AsyncSemaphore(2);
 
+        public delegate void Delegate_itemComplete(GetEntityDataResult result);
+        public delegate void Delegate_summaryComplete(string title);
+
         // 获得册记录信息和书目摘要信息
         // parameters:
         //      style   风格。
         //              network 表示只从网络获取册记录；否则优先从本地获取，本地没有再从网络获取册记录。无论如何，书目摘要都是尽量从本地获取
         //              offline 表示指从本地获取册记录和书目记录
+        //              coverImageUrl   表示希望获得封面图片 URL
         // .Value
         //      -1  出错
         //      0   没有找到
         //      1   找到
         public static async Task<GetEntityDataResult> GetEntityDataAsync(string pii,
-            string style)
+            string style,
+            Delegate_itemComplete func_itemComplete = null,
+            Delegate_summaryComplete func_summaryComplete = null)
         {
             bool network = StringUtil.IsInList("network", style);
 
@@ -59,6 +75,8 @@ namespace dp2SSL
             bool offline = StringUtil.IsInList("offline", style);
 
             bool skip_biblio = StringUtil.IsInList("skip_biblio", style);
+
+            bool getCoverImageUrl = StringUtil.IsInList("coverImageUrl", style);
 
             try
             {
@@ -105,6 +123,7 @@ namespace dp2SSL
                         }
 
                         if (entity_record != null)
+                        {
                             result = new GetEntityDataResult
                             {
                                 Value = 1,
@@ -112,6 +131,8 @@ namespace dp2SSL
                                 ItemRecPath = entity_record.RecPath,
                                 Title = "",
                             };
+                            func_itemComplete?.Invoke(result);
+                        }
                         else if (offline == false)  //
                         {
                             // 再尝试从 dp2library 服务器获取
@@ -126,9 +147,9 @@ namespace dp2SSL
                                 out string item_xml,
                                 out string item_recpath,
                                 out byte[] timestamp,
-                                "",
-                                out _,
-                                out _,
+                                getCoverImageUrl ? "coverImageUrl:LargeImage" : "",    // MediumImage
+                                out string imageUrl,
+                                out string biblio_recpath,
                                 out string strError);
                             if (lRet == -1)
                             {
@@ -171,7 +192,11 @@ namespace dp2SSL
                                     ItemRecPath = item_recpath,
                                     Title = "",
                                     ItemTimestamp = timestamp,
+                                    CoverImageUrl = imageUrl,
+                                    BiblioRecPath = biblio_recpath,
                                 };
+
+                                func_itemComplete?.Invoke(result);
 
                                 // TODO: item_xml 里面最好包含 OI 字符串，便于建立本地缓存
                                 // TODO: 如何做到尽量保存 xxx.xxx 形态的 PII 作为 key?
@@ -223,7 +248,17 @@ namespace dp2SSL
                                 if (result == null)
                                     result = new GetEntityDataResult();
 
+                                // 2023/12/15
+                                // 去掉 \r\n 以后的部分
+                                if (string.IsNullOrEmpty(item.BiblioSummary) == false)
+                                {
+                                    var parts = StringUtil.ParseTwoPart(item.BiblioSummary, "\r\n");
+                                    item.BiblioSummary = parts[0];
+                                }
+
                                 result.Title = item.BiblioSummary;
+
+                                func_summaryComplete?.Invoke(result.Title);
                             }
                             else if (offline == false)
                             {
@@ -265,12 +300,22 @@ namespace dp2SSL
                                 }
                                 else
                                 {
-                                    strSummary = strSummary?.Replace(". -- ", "\r\n");   // .Replace("/", "\r\n");
+                                    // strSummary = strSummary?.Replace(". -- ", "\r\n");   // .Replace("/", "\r\n");
+
+                                    // 2023/12/15
+                                    // 去掉 . -- 以后的部分
+                                    if (string.IsNullOrEmpty(strSummary) == false)
+                                    {
+                                        var parts = StringUtil.ParseTwoPart(strSummary, ". -- ");
+                                        strSummary = parts[0];
+                                    }
 
                                     if (result == null)
                                         result = new GetEntityDataResult();
 
                                     result.Title = strSummary;
+
+                                    func_summaryComplete?.Invoke(result.Title);
 
                                     // 存入数据库备用
                                     if (lRet == 1 && string.IsNullOrEmpty(strSummary) == false)
@@ -953,7 +998,7 @@ namespace dp2SSL
                     // libraryCode + "/",
                     libraryCode,
                     dom,
-                    out string isil, 
+                    out string isil,
                     out string alternative);
                 if (ret == true)
                 {
@@ -2095,7 +2140,7 @@ out string strError);
                 return new NormalResult
                 {
                     Value = 0,
-                    ErrorInfo = $"时间正常。测试时的服务器时间为: { server_time.ToString("yyyy-MM-dd HH:mm:ss.ffff")}  本地时间为: { local_time.ToString("yyyy-MM-dd HH:mm:ss.ffff")}"
+                    ErrorInfo = $"时间正常。测试时的服务器时间为: {server_time.ToString("yyyy-MM-dd HH:mm:ss.ffff")}  本地时间为: {local_time.ToString("yyyy-MM-dd HH:mm:ss.ffff")}"
                 };
             }
             catch (Exception ex)
@@ -2198,6 +2243,72 @@ out string strError);
                         context.SaveChanges();
                     }
                 }
+            }
+        }
+
+        // return.Value:
+        //      -1  错误
+        //      0   没有找到
+        //      1   成功下载
+        public static async Task<NormalResult> GetCoverImageAsync(string object_path,
+            string output_filename)
+        {
+            try
+            {
+                if (object_path.StartsWith("http:")
+                    || object_path.StartsWith("https:"))
+                {
+                    HttpClient client = new HttpClient();
+                    using (var stream = await client.GetStreamAsync(object_path))
+                    using (var output_stream = File.Create(output_filename))
+                    {
+                        await stream.CopyToAsync(output_stream);
+                    }
+                    return new NormalResult { Value = 1 };
+                }
+
+                using (var releaser = await _channelLimit.EnterAsync())
+                {
+                    LibraryChannel channel = App.CurrentApp.GetChannel();
+                    TimeSpan old_timeout = channel.Timeout;
+                    channel.Timeout = TimeSpan.FromSeconds(60);
+                    try
+                    {
+                        long lRet = channel.GetRes(
+    null,
+    object_path,
+    output_filename,
+    "content,data,metadata,timestamp,outputpath,gzip",  // 2017/10/7 增加 gzip
+    out string strMetaData,
+    out byte[] baOutputTimeStamp,
+    out string strTempOutputPath,
+    out string strError);
+                        if (lRet == -1)
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = strError,
+                                ErrorCode = channel.ErrorCode.ToString()
+                            };
+                        return new NormalResult { Value = 1 };
+                    }
+                    finally
+                    {
+                        channel.Timeout = old_timeout;
+                        App.CurrentApp.ReturnChannel(channel);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"GetCoverImageAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"GetCoverImageAsync() 出现异常: {ex.Message}",
+                    ErrorCode = ex.GetType().ToString()
+                };
             }
         }
 

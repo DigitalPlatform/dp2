@@ -290,6 +290,11 @@ namespace dp2SSL
             await Task.Run(() =>
             {
                 DeleteLastTempFiles();
+                var free_bytes = PageBorrow.GetUserDiskFreeSpace();
+                if (free_bytes != -1 && free_bytes < 1024 * 1024 * 1024)
+                    PageBorrow.BeginCleanCoverImagesDirectory(DateTime.Now);
+                else
+                    PageBorrow.BeginCleanCoverImagesDirectory(DateTime.Now - TimeSpan.FromDays(100));   // 清除一百天以前的缓存文件
             });
 
             StartProcessManager();
@@ -1418,6 +1423,17 @@ namespace dp2SSL
         }
 
         #endregion
+
+        // 自助借还界面是否显示图书封面图像
+        public static bool DisplayCoverImage
+        {
+            get
+            {
+                var ret = WpfClientInfo.Config?.GetBoolean("ssl_operation",
+                    "displayCoverImage", false);
+                return ret ?? false;
+            }
+        }
 
         public static string RfidUrl
         {

@@ -3755,7 +3755,9 @@ MessageBoxDefaultButton.Button1);
             }
 
             this.tabControl_main.SelectedTab = this.tabPage_scan;
-            this._chargingForm.ClearTaskList(null);
+            {
+                this._chargingForm.ClearTaskList();
+            }
             nRet = this._chargingForm.DoReturn(barcode_list, out strError);
             if (nRet == -1)
                 goto ERROR1;

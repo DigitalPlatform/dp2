@@ -764,6 +764,7 @@ namespace dp2Circulation
                 return false;
 #endif
             // 2023/12/8
+            // 尝试清除以前残留的 task
             _ = Task.Run(() =>
             {
                 var count = this.ActivatePending(task.ReaderBarcode);
@@ -794,10 +795,12 @@ namespace dp2Circulation
                             this.Container.DisplayReaderSummary(task, "前面读者有 " + nCount.ToString() + " 个任务尚未完成，或有提示需要进一步处理。\r\n点击此处查看摘要信息");
                         }
                         else
-                            this.Container.ClearTaskList(tasks);
+                        {
+                            this.Container.ClearTaskListDisplay(tasks);
 
-                        // 真正从 _tasks 里面删除
-                        ClearTasks(tasks);  // 2019/9/3
+                            // 真正从 _tasks 里面删除
+                            ClearTasks(tasks);  // 2019/9/3
+                        }
                     }
                     this.CurrentReaderBarcode = task.ReaderBarcode; // 会自动显示出来
                 }
@@ -854,6 +857,65 @@ namespace dp2Circulation
             return "";
         }
 
+        // 清除指定的 task 之前的，非 pending 状态的所有 task
+        // return:
+        //      -1  没有清除。并且因为拟清除的部分任务是未完成状态，弹出了读者摘要对话框
+        //      其它  清除的 task 数量
+        int ClearBeforePending(ChargingTask task)
+        {
+            // 寻找需要删除的 tasks
+            var remove_tasks = new List<ChargingTask>();
+
+            var temp = new List<ChargingTask>(this._tasks);
+            bool matched = false;
+            for (int i = temp.Count - 1; i >= 0; i--)
+            {
+                if (temp[i] == task)
+                {
+                    matched = true;
+                    continue;
+                }
+
+                if (matched == true && temp[i].State != "pending")
+                    remove_tasks.Add(temp[i]);
+            }
+
+            if (remove_tasks.Count == 0)
+                return 0;
+
+            int nCount = CountNotFinishTasks(remove_tasks);
+            if (nCount > 0)
+            {
+                this.Container.DisplayReaderSummary(task, "前面读者有 " + nCount.ToString() + " 个任务尚未完成，或有提示需要进一步处理。\r\n点击此处查看摘要信息");
+                return -1;
+            }
+            else
+            {
+                this.Container.ClearTaskListDisplay(remove_tasks);
+
+                // 真正从 _tasks 里面删除
+                ClearTasks(remove_tasks);
+            }
+            return remove_tasks.Count;
+        }
+
+        // 将任务变成 pending 状态
+        void Pending(ChargingTask task)
+        {
+            task.State = "pending";
+            task.Color = "purple";
+            task.ErrorInfo = "等待输入读者证条码号 ...";
+            this.Container.DisplayTask("refresh_and_visible", task);
+            this.Container.SetColorList();
+
+            var count = ClearBeforePending(task);
+            if (count == -1)
+                return; // 不触发人脸识别
+
+            if (QuickChargingForm.AutoTriggerFaceInput && string.IsNullOrEmpty(Program.MainForm.FaceReaderUrl) == false)
+                this.Container.BeginTriggerFaceInput();
+        }
+
         // 借书
         void Borrow(ChargingTask task)
         {
@@ -889,6 +951,8 @@ namespace dp2Circulation
                 {
                     if (QuickChargingForm.AllowFreeSequence)
                     {
+                        Pending(task);
+#if REMVOED
                         task.State = "pending";
                         task.Color = "purple";
                         task.ErrorInfo = "等待输入读者证条码号 ...";
@@ -896,6 +960,7 @@ namespace dp2Circulation
                         this.Container.SetColorList();
                         if (QuickChargingForm.AutoTriggerFaceInput && string.IsNullOrEmpty(Program.MainForm.FaceReaderUrl) == false)
                             this.Container.BeginTriggerFaceInput();
+#endif
                         return;
                     }
                     else
@@ -1613,6 +1678,8 @@ end_time);
                 {
                     if (QuickChargingForm.AllowFreeSequence)
                     {
+                        Pending(task);
+#if REMOVED
                         task.State = "pending";
                         task.Color = "purple";
                         task.ErrorInfo = "等待输入读者证条码号 ...";
@@ -1620,6 +1687,7 @@ end_time);
                         this.Container.SetColorList();
                         if (QuickChargingForm.AutoTriggerFaceInput && string.IsNullOrEmpty(Program.MainForm.FaceReaderUrl) == false)
                             this.Container.BeginTriggerFaceInput();
+#endif
                         return;
                     }
                     else
@@ -1637,6 +1705,8 @@ end_time);
                 {
                     if (QuickChargingForm.AllowFreeSequence)
                     {
+                        Pending(task);
+#if REMOVED
                         task.State = "pending";
                         task.Color = "purple";
                         task.ErrorInfo = "等待输入读者证条码号 ...";
@@ -1644,6 +1714,7 @@ end_time);
                         this.Container.SetColorList();
                         if (QuickChargingForm.AutoTriggerFaceInput && string.IsNullOrEmpty(Program.MainForm.FaceReaderUrl) == false)
                             this.Container.BeginTriggerFaceInput();
+#endif
                         return;
                     }
                     else
@@ -1685,6 +1756,8 @@ end_time);
                 {
                     if (QuickChargingForm.AllowFreeSequence)
                     {
+                        Pending(task);
+#if REMOVED
                         task.State = "pending";
                         task.Color = "purple";
                         task.ErrorInfo = "等待输入读者证条码号 ...";
@@ -1692,6 +1765,7 @@ end_time);
                         this.Container.SetColorList();
                         if (QuickChargingForm.AutoTriggerFaceInput && string.IsNullOrEmpty(Program.MainForm.FaceReaderUrl) == false)
                             this.Container.BeginTriggerFaceInput();
+#endif
                         return;
                     }
                     else

@@ -103,6 +103,9 @@ namespace dp2SSL
             RfidTestReturnPostUndoEAS = _config.GetBoolean("rfidTest",
                 "rfidTestReturnPostUndoEAS", false);
 
+            DisplayCoverImage = _config.GetBoolean("ssl_operation",
+                "displayCoverImage", false);
+
             _changedParams.Clear();
         }
 
@@ -176,6 +179,8 @@ namespace dp2SSL
             _config.SetBoolean("rfidTest",
                 "rfidTestReturnPostUndoEAS", RfidTestReturnPostUndoEAS);
 
+            _config.SetBoolean("ssl_operation",
+                "displayCoverImage", DisplayCoverImage);
             // 有错误
             if (errors.Count > 0)
             {
@@ -1053,6 +1058,27 @@ Description = "Return() 末段回滚 EAS 为 off"
         private bool _rfidTestReturnPostUndoEAS;
 
         #endregion
+
+
+        [Display(
+Order = 40,
+Name = "是否显示图书封面图像",
+Description = "是否显示图书封面图像"
+)]
+        [Category("自助借还操作风格")]
+        public bool DisplayCoverImage
+        {
+            get => _displayCoverImage;
+            set
+            {
+                if (_displayCoverImage != value)
+                {
+                    _displayCoverImage = value;
+                    OnPropertyChanged("DisplayCoverImage");
+                }
+            }
+        }
+        private bool _displayCoverImage = false;
     }
 
     // https://stackoverflow.com/questions/4396205/implementing-validations-in-wpf-propertygrid

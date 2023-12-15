@@ -17,11 +17,12 @@
         <local:InvertCountToVisibilityConverter x:Key="InvertCountToVis" />
         <local:StringToOpacityConverter x:Key="StringToOpacity" />
         <local:EntityStateToBackConverter x:Key="StateToBack" OverdueColor="DarkGoldenrod" OverflowColor="DarkRed"/>
+        <local:StringToBitmapConverter x:Key="StringToBitmap" />
 
         <local:PersonDataTemplateSelector x:Key="personDataTemplateSelector" />
         <DataTemplate x:Key="LargeTemplate">
             <Border BorderThickness="2" BorderBrush="{Binding Path=State, Converter={StaticResource StateToBorder}}"
-                            Margin="6" CornerRadius="8">
+                    Margin="6" CornerRadius="8">
 
                 <Border.Background>
                     <LinearGradientBrush EndPoint="1,1" StartPoint="0,0">
@@ -29,7 +30,7 @@
                         <GradientStop Color="#FF363636" Offset="1"/>
                     </LinearGradientBrush>
                 </Border.Background>
-                <Grid Width="240" MaxHeight="860" Margin="20" 
+                <Grid Width="240" MaxHeight="1860" Margin="20" 
                       Opacity="{Binding Path=ShelfState, Converter={StaticResource StringToOpacity}}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
@@ -49,35 +50,37 @@
                             Icon="Spinner" Spin="true" SpinDuration="5" 
                                          Visibility="{Binding Path=Waiting, Converter={StaticResource BoolToVis}}"
                                          VerticalAlignment="Center"/>
-                    <!--
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding State}" 
-                                       TextAlignment="Left" FontSize="8" Foreground="Gray"/>
-                            -->
-                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding UID}" 
-                                       TextAlignment="Right" FontSize="8" Foreground="Gray"/>
-                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Antenna}" 
-                                       TextAlignment="Left" FontSize="8" Foreground="Gray"/>
 
-                    <fa:ImageAwesome Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Height="20" Foreground="DarkGray"
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding UID}" 
+                                       TextAlignment="Right" FontSize="8" Foreground="Gray"/>
+                    <TextBlock Grid.Row="0" Grid.Column="0"  Grid.ColumnSpan="2" Text="{Binding Antenna}" 
+                                       TextAlignment="Left" FontSize="8" Foreground="Gray"
+                               />
+
+                    <fa:ImageAwesome Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Height="20" Foreground="#FF555555"
                             Icon="{Binding Path=State, Converter={StaticResource StateToIcon}}" 
-                                             HorizontalAlignment="Left"/>
+                                             HorizontalAlignment="Center"/>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Text="{Binding Index}" 
+                                       TextAlignment="Left" FontSize="24" FontWeight="Black" Foreground="#FF444444"/>
 
 
                     <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding UII}" TextAlignment="Right" FontSize="12" FontWeight="Bold" Foreground="DarkOrange"/>
                     <TextBlock Grid.Row="2" Grid.ColumnSpan="2" Text="{Binding Title}" 
-                                       FontSize="20" FontWeight="Bold" Foreground="LightGray"
+                                       FontSize="20" FontWeight="Light" Foreground="LightGray"
                                        MaxWidth="240" TextWrapping="NoWrap"  TextTrimming="CharacterEllipsis"/>
                     <TextBlock Grid.Row="3" Grid.ColumnSpan="2" Text="{Binding BorrowInfo}" 
                                        Visibility="{Binding Path=BorrowInfo, Converter={StaticResource StringToVis}}"
-                                       Foreground="LightGray"
+                                       Foreground="DarkGray"
                                        TextWrapping="Wrap"/>
                     <TextBlock Grid.Row="4" Grid.Column="0" Text="{Binding Location}" 
                                        Visibility="{Binding Path=Location, Converter={StaticResource StringToVis}}"
-                                       Foreground="LightGray"
+                                       Foreground="DarkGray"
                                        TextWrapping="Wrap"/>
                     <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding CurrentLocation}" 
                                        Visibility="{Binding Path=CurrentLocation, Converter={StaticResource StringToVis}}"
-                                       Foreground="LightGray"
+                                       Foreground="DarkGray"
                                        TextWrapping="Wrap" HorizontalAlignment="Right"/>
 
                     <TextBlock Grid.Row="5" Grid.ColumnSpan="2" Text="{Binding Error}"
@@ -85,6 +88,10 @@
                                        Background="{Binding Path=ErrorColor, Converter={StaticResource StringToBrush}}"
                                        Visibility="{Binding Path=Error, Converter={StaticResource StringToVis}}"
                                        TextWrapping="WrapWithOverflow"/>
+                    <Image Grid.Row="6" Grid.ColumnSpan="2" Width="240" Margin="0,10,0,0" 
+                           Visibility="{Binding Path=CoverImageLocalPath, Converter={StaticResource StringToVis}}"
+                           Source="{Binding Path=CoverImageLocalPath, Converter={StaticResource StringToBitmap}}">
+                    </Image>
                 </Grid>
             </Border>
         </DataTemplate>
@@ -169,8 +176,10 @@
                       >
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <WrapPanel Orientation="Horizontal" IsItemsHost="True"
-                                HorizontalAlignment="Left" VerticalAlignment="Top"
+                        <local:CompactWrapPanel Orientation="Horizontal" IsItemsHost="True"
+                                   ItemHeight="Auto"
+                                VerticalContentAlignment="Top"
+                                HorizontalAlignment="Left" VerticalAlignment="Stretch"
                                />
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>

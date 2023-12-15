@@ -3777,6 +3777,10 @@ start_time_1,
                 goto ERROR1;
             }
 
+            // 2023/12/15
+            if (nRet == 1)
+                strHitFrom = "证条码号";
+
             if (nRet == 0)
             {
                 // 如果是身份证号，则试探检索“身份证号”途径

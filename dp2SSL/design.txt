@@ -16,3 +16,16 @@
 
 http://yuezhizizhang.github.io/wpf/2017/09/27/drop-shadow-on-chromeless-wpf-window.html
 Drop Shadow on a Chromeless WPF Window
+
+~~~
+增加启动前自动清除较旧的缓存封面图像文件的功能。
+自动清除半年以前的文件。根据文件创建或最后修改时间计算。
+
+下载图像文件时如果遇到 disk full 报错，自动启动删除全部缓存文件的操作
+
+https://github.com/Simplode/WpfTilePanel/blob/master/TilePanel/TilePanel.cs
+
+https://github.com/dotnet/wpf/blob/371ba5ebe9f14b4f7a2eb940fa7e4667fd24a149/src/Microsoft.DotNet.Wpf/src/PresentationFramework/System/Windows/Controls/WrapPanel.cs#L33
+
+https://social.msdn.microsoft.com/Forums/en-US/54eef117-fe4a-4cc4-b49c-fc75caef2240/bitmapimage-memory-leak?forum=wpf
+

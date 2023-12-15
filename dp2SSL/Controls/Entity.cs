@@ -15,7 +15,6 @@ using DigitalPlatform.RFID;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform;
-using DigitalPlatform.Core;
 
 namespace dp2SSL
 {
@@ -27,11 +26,29 @@ namespace dp2SSL
         {
             for (int i = 0; i < this.Count; i++)
             {
-                if (uid == this[i].UID)
+                var entity = this[i];
+                if (uid == entity.UID)
                 {
                     this.RemoveAt(i);
+                    /*
+                    if (string.IsNullOrEmpty(entity.CoverImageLocalPath) == false)
+                    {
+                        entity.CoverImageLocalPath = null;
+                        GC.Collect();
+                    }
+                    */
+                    this.Reindex();
                     return;
                 }
+            }
+        }
+
+        void Reindex()
+        {
+            for (int i = 0; i < this.Count; i++)
+            {
+                var entity = this[i];
+                entity.Index = (i + 1).ToString();
             }
         }
 
@@ -99,6 +116,7 @@ namespace dp2SSL
                 TagInfo = null
             };
             this.Add(entity);
+            this.Reindex();
 
             entity.FillFinished = false;
 
@@ -179,6 +197,7 @@ namespace dp2SSL
                 Protocol = data.OneTag.Protocol,    // 2023/12/4
             };
             this.Add(entity);
+            this.Reindex();
 
             // Exception:
             //      可能会抛出异常 ArgumentException
@@ -223,6 +242,7 @@ namespace dp2SSL
             {
                 // 删除 old_entity
                 this.Remove(old_entity);
+                this.Reindex();
                 return Update(new_data, auto_add);
             }
 
@@ -232,6 +252,7 @@ namespace dp2SSL
             {
                 // 删除 old_entity
                 this.Remove(old_entity);
+                this.Reindex();
                 var result = Update(new_data, auto_add);
                 // 把 old_entity 的 Error 复制给 new_entity
                 result.Error = old_entity.Error;
@@ -510,6 +531,7 @@ namespace dp2SSL
             if (this.Remove(entity) == true)
             {
                 this.Add(entity);
+                this.Reindex();
             }
         }
     }
@@ -571,12 +593,32 @@ Stack:
             dup.ReaderName = this.ReaderName;
             dup.Antenna = this.Antenna;
             dup.Tag = this.Tag;
+
+            dup.CoverImageLocalPath = this.CoverImageLocalPath;
+            dup.Index = this.Index;
             return dup;
         }
 
         public EntityCollection Container { get; set; }
 
         public TagInfo TagInfo { get; set; }
+
+
+        private string _index;
+
+        // 事项序号
+        public string Index
+        {
+            get => _index;
+            set
+            {
+                if (_index != value)
+                {
+                    _index = value;
+                    OnPropertyChanged("Index");
+                }
+            }
+        }
 
         private string _itemRecPath;
 
@@ -752,6 +794,26 @@ Stack:
                     s = "";
                 StringUtil.SetInList(ref s, "currentshelf", value);
                 this.ShelfState = s;
+            }
+        }
+
+        // 
+        string _coverImageLocalPath = null;
+
+        // 封面图片本地路径
+        public string CoverImageLocalPath
+        {
+            get
+            {
+                return _coverImageLocalPath;
+            }
+            set
+            {
+                if (_coverImageLocalPath != value)
+                {
+                    _coverImageLocalPath = value;
+                    OnPropertyChanged("CoverImageLocalPath");
+                }
             }
         }
 

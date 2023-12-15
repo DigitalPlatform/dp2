@@ -1656,7 +1656,7 @@ dlg.UiState);
                     strError = $"{prefix}引导的号码 {strBarcode} 不符合册条码号校验规则: " + strError;
                     return -1;
                 }
-                if (type_of_usage == "80" && nRet == 2)
+                if (type_of_usage.StartsWith("8") && nRet == 2)
                 {
                     // pii: 或者 uid: 引导的内容居然符合册条码号规则了?
                     strError = $"{prefix}引导的号码 {strBarcode} 不符合读者证条码号校验规则: " + strError;
@@ -1687,10 +1687,11 @@ dlg.UiState);
         {
             prefix = ""; //  "pii:";
             type_of_usage = "";  // "10";    // 10 流通馆藏; 80 读者证
-            if (strBarcode.StartsWith("pii:") == true
+            if (/*strBarcode.StartsWith("pii:") == true
                 || strBarcode.StartsWith("PII:") == true
                 || strBarcode.StartsWith("uid:") == true
-                || strBarcode.StartsWith("UID:") == true)
+                || strBarcode.StartsWith("UID:") == true*/
+                strBarcode.Contains(","))
             {
                 // 这是册条码号(RFID 读卡器发来的)。但内容依然需要进行校验
                 Hashtable table = StringUtil.ParseParameters(strBarcode, ',', ':');
@@ -2660,7 +2661,8 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             {
                 // 2023/12/11
                 // 根据 tou:xxx 获知号码类型
-                ParseBarcode(ref strText,
+                string temp = strText;
+                ParseBarcode(ref temp,
 out string prefix,
 out string type_of_usage);
 
@@ -3557,14 +3559,14 @@ false);
         delegate void Delegate_ClearTaskList(List<ChargingTask> tasks);
         // 清除任务列表显示
         // 注意，并不负责删除 _taskList 中的元素
-        internal void ClearTaskList(List<ChargingTask> tasks)
+        internal void ClearTaskListDisplay(List<ChargingTask> tasks)
         {
             if (this.IsDisposed)
                 return;
 
             if (this.InvokeRequired)
             {
-                Delegate_ClearTaskList d = new Delegate_ClearTaskList(ClearTaskList);
+                Delegate_ClearTaskList d = new Delegate_ClearTaskList(ClearTaskListDisplay);
                 this.Invoke(d, new object[] { tasks });
                 return;
             }
@@ -3586,6 +3588,13 @@ false);
             }
 
             this._bScrollBarTouched = false;
+        }
+
+        // 2023/12/12
+        public void ClearTaskList()
+        {
+            this._taskList.Clear();
+            this.ClearTaskListDisplay(null);
         }
 
         delegate void Delegate_DisplayCurrentReaderBarcode(string strReaderBarcode);
@@ -4858,7 +4867,10 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
         {
             string strError = "";
 
-            this.ClearTaskList(null);
+            {
+                this._taskList.Clear();
+                this.ClearTaskListDisplay(null);
+            }
 
             InventoryFromFileDialog dlg = new InventoryFromFileDialog();
 
@@ -5401,7 +5413,7 @@ false);
 
                 if (result.Value == 1)
                 {
-                    this.textBox_input.Text = result.Patron;
+                    this.textBox_input.Text = $"pii:{result.Patron},tou:80";
                     this.textBox_input.Focus();
                     // 触发回车
                     DoEnter();

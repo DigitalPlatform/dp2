@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.151.*")]
-[assembly: AssemblyFileVersion("3.151.0.0")]
+[assembly: AssemblyVersion("3.153.*")]
+[assembly: AssemblyFileVersion("3.153.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -379,3 +379,5 @@ ItemCanReturn()
 //						一种用存取定义的 circulation=transfer 定义的情形。此时就账户不需要定义 setiteminfo 或 order 权限了
 //			  (2023/11/11) Borrow() 和 Return() API 中判断存取定义的时候，会用实体库名和书目库名联合起来去搜寻存取定义片段。这样管理员配置存取定义的时候比较方便，使用书目库或者实体库都能匹配上
 //		3.151 (2023/11/27) Return() API 的验证还书对于提交证号的会出现报错，这个 bug 已经修正。
+//		3.152 (2023/12/14) GetItemInfo() API 中的书目格式增加了 coverImageUrl:MediumImage 格式。用于获得书目记录的封面图像 856$u
+//		3.153 (2023/12/15) 修正 Return() API 在验证还书时的一个 bug

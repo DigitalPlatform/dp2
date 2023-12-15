@@ -12,7 +12,7 @@ using System.Windows.Documents;
 using System.Xml;
 using System.Windows.Media;
 using System.Text;
-using System.Data.SqlClient;
+using System.Linq;
 
 using dp2SSL.Dialog;
 using dp2SSL.Models;
@@ -29,7 +29,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Core;
 using DigitalPlatform.Face;
 using DigitalPlatform.WPF;
-using System.Linq;
+using DigitalPlatform.Script;
 
 namespace dp2SSL
 {
@@ -439,6 +439,23 @@ namespace dp2SSL
             return false;
         }
 
+        CancellationTokenSource _cancelFillBooks = null;
+        CancellationToken CancelFillBooks(bool new_token)
+        {
+            {
+                _cancelFillBooks?.Cancel();
+                _cancelFillBooks = null;
+            }
+
+            if (new_token)
+            {
+                _cancelFillBooks = new CancellationTokenSource();
+                return _cancelFillBooks.Token;
+            }
+
+            return default;
+        }
+
         // 跟随事件动态更新列表
         async Task ChangeEntitiesAsync(BaseChannel<IRfid> channel,
             TagChangedEventArgs e)
@@ -493,7 +510,10 @@ namespace dp2SSL
 
             if (update_entities.Count > 0)
             {
-                await FillBookFieldsAsync(channel, update_entities);
+                await FillBookFieldsAsync(channel,
+                    update_entities,
+                    App.DisplayCoverImage ? "coverImage" : "",
+                    CancelFillBooks(true));
 
                 Trigger(update_entities);
 
@@ -548,6 +568,10 @@ namespace dp2SSL
                 // TODO: 不过此举对反复拿放图书的响应速度有一定影响。后面也可以考虑继续改进(比如设立一个专门的清除缓存按钮，这里就不要清除缓存了)
                 if (_entities.Count == 0 && RfidTagList.TagTableCount > 0)
                     RfidTagList.ClearTagTable(null);
+
+                // 2023/12/14
+                if (_entities.Count == 0)
+                    CancelFillBooks(false);
             }
         }
 
@@ -593,7 +617,10 @@ namespace dp2SSL
                             BaseChannel<IRfid> channel = RfidManager.GetChannel();
                             try
                             {
-                                await FillBookFieldsAsync(channel, update_entities);
+                                await FillBookFieldsAsync(channel,
+                                    update_entities,
+                                    App.DisplayCoverImage ? "coverImage" : "",
+                                    CancelFillBooks(true));
 
                                 Trigger(update_entities);
                             }
@@ -1125,6 +1152,15 @@ namespace dp2SSL
         // 决定是否隐藏读者信息控件
         void SetPatronControlVisibility()
         {
+            // 只要有借书和注册、绑定读者，读者区就需要显示出来
+            if (borrowButton.Visibility == Visibility.Visible
+                || registerFace.Visibility == Visibility.Visible
+                || bindPatronCard.Visibility == Visibility.Visible)
+                this.patronControl.Visibility = Visibility.Visible;
+            else
+                this.patronControl.Visibility = Visibility.Collapsed;
+
+#if REMOVED
             if (App.Protocol == "sip")
             {
                 if (returnButton.Visibility == Visibility.Visible)
@@ -1147,6 +1183,7 @@ namespace dp2SSL
             else
                 this.patronControl.Visibility = Visibility.Visible; // 2019/9/3
                 */
+#endif
         }
 
 #if OLD_RFID
@@ -1694,10 +1731,21 @@ namespace dp2SSL
             }
         }
 #endif
-        // 第二阶段：填充图书信息的 PII 和 Title 字段
-        async Task FillBookFieldsAsync(BaseChannel<IRfid> channel,
-            List<Entity> entities)
+        class CoverItem
         {
+            public string ObjectPath { get; set; }
+            public Entity Entity { get; set; }
+        }
+
+        // 第二阶段：填充图书信息的 PII 和 Title 字段
+        // parameters:
+        //      style   如果包含 coverImage，会主动获得 Entity.LocalCoverImagePath
+        async Task FillBookFieldsAsync(BaseChannel<IRfid> channel,
+            List<Entity> entities,
+            string style = "",
+            CancellationToken token = default)
+        {
+            var coverImage = StringUtil.IsInList("coverImage", style);
 #if NO
             RfidChannel channel = RFID.StartRfidChannel(App.RfidUrl,
 out string strError);
@@ -1706,8 +1754,11 @@ out string strError);
 #endif
             try
             {
+                List<CoverItem> cover_items = new List<CoverItem>();
                 foreach (Entity entity in entities)
                 {
+                    if (token.IsCancellationRequested)
+                        break;
                     /*
                     if (_cancel == null
                         || _cancel.IsCancellationRequested)
@@ -1784,6 +1835,8 @@ out string strError);
                     if (string.IsNullOrEmpty(entity.Title)
                         && string.IsNullOrEmpty(entity.PII) == false && entity.PII != "(空)")
                     {
+                        bool item_completed = false;
+
                         var waiting = entity.Waiting;
                         entity.Waiting = true;
                         try
@@ -1812,7 +1865,31 @@ out string strError);
                                             strict = false; // 改为不严格模式 2023/12/4
                                     }
                                 }
-                                result = await LibraryChannelUtil.GetEntityDataAsync(entity.GetOiPii(strict), "network"); // 2021/4/2 改为严格模式 OI_PII
+                                result = await LibraryChannelUtil.GetEntityDataAsync(entity.GetOiPii(strict),
+                                    coverImage && string.IsNullOrEmpty(entity.CoverImageLocalPath) ? "network,coverImageUrl" : "network", // 2021/4/2 改为严格模式 OI_PII
+                                    (item_result) =>
+                                    {
+                                        entity.SetData(item_result.ItemRecPath,
+    item_result.ItemXml,
+    DateTime.Now);
+                                        item_completed = true;
+                                    },
+                                    (title) =>
+                                    {
+                                        entity.Title = GetCaption(title);
+                                    });
+
+                                if (coverImage
+                                    && string.IsNullOrEmpty(result.CoverImageUrl) == false
+                                    && string.IsNullOrEmpty(result.BiblioRecPath) == false)
+                                {
+                                    var object_path = ScriptUtil.MakeObjectUrl(result.BiblioRecPath, result.CoverImageUrl);
+                                    cover_items.Add(new CoverItem
+                                    {
+                                        ObjectPath = object_path,
+                                        Entity = entity
+                                    });
+                                }
                             }
 
                             if (result.Value == -1)
@@ -1823,9 +1900,10 @@ out string strError);
                             }
 
                             entity.Title = GetCaption(result.Title);
-                            entity.SetData(result.ItemRecPath,
-                                result.ItemXml,
-                                DateTime.Now);
+                            if (item_completed == false)
+                                entity.SetData(result.ItemRecPath,
+                                    result.ItemXml,
+                                    DateTime.Now);
 
                             // 2020/7/3
                             // 获得册记录阶段出错，但获得书目摘要成功
@@ -1850,6 +1928,33 @@ out string strError);
                 }
 
                 booksControl.SetBorrowable();
+
+                // 获取封面图像
+                if (cover_items.Count > 0)
+                {
+                    string cacheDir = CoverImagesDirectory;
+
+                    foreach (var item in cover_items)
+                    {
+                        if (token.IsCancellationRequested)
+                            break;
+                        string fileName = Path.Combine(cacheDir, GetImageFilePath(item.ObjectPath));
+
+                        if (File.Exists(fileName) == false)
+                        {
+                            var get_result = await LibraryChannelUtil.GetCoverImageAsync(item.ObjectPath, fileName);
+                            if (get_result.Value == 1)
+                                item.Entity.CoverImageLocalPath = fileName;
+                            if (get_result.Value == -1 && get_result.ErrorCode == "System.IO.IOException")
+                            {
+                                // 执行缓存清理任务
+                                BeginCleanCoverImagesDirectory(DateTime.Now);
+                            }
+                        }
+                        else
+                            item.Entity.CoverImageLocalPath = fileName;
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -1858,6 +1963,111 @@ out string strError);
             }
         }
 
+        public static string CoverImagesDirectory
+        {
+            get
+            {
+                string cacheDir = Path.Combine(WpfClientInfo.UserDir, "coverImages");
+                PathUtil.CreateDirIfNeed(cacheDir);
+                return cacheDir;
+            }
+        }
+
+        public static void BeginCleanCoverImagesDirectory(DateTime time)
+        {
+            _ = Task.Factory.StartNew(() =>
+            {
+                var dir = CoverImagesDirectory;
+                try
+                {
+                    ClearDir(dir, time, App.CancelToken);
+                }
+                catch(Exception ex)
+                {
+                    WpfClientInfo.WriteErrorLog($"ClearDir({dir}) 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                }
+            },
+App.CancelToken,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
+
+        // 删除一个目录内的所有文件和目录
+        // 可能会抛出异常
+        // parameters:
+        //      time    要清除这个时间点以前创建、修改过的文件和子目录
+        static void ClearDir(string strDir,
+            DateTime time,
+            CancellationToken token)
+        {
+            DirectoryInfo di = new DirectoryInfo(strDir);
+            if (di.Exists == false)
+                return;
+
+            // 如果 strDir 是根目录，拒绝进行删除
+            if (PathUtil.IsEqual(di.Root.FullName, di.FullName))
+                return;
+
+            // 删除所有的下级目录
+            DirectoryInfo[] dirs = di.GetDirectories();
+            foreach (DirectoryInfo childDir in dirs)
+            {
+                token.ThrowIfCancellationRequested();
+
+                if (childDir.LastWriteTime < time)
+                {
+                    try
+                    {
+                        Directory.Delete(childDir.FullName, true);
+                    }
+                    catch(Exception ex)
+                    {
+                        WpfClientInfo.WriteErrorLog($"ClearDir(删除子目录 '{childDir.FullName}') 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    }
+                }
+            }
+
+            // 删除所有文件
+            FileInfo[] fis = di.GetFiles();
+            foreach (FileInfo fi in fis)
+            {
+                token.ThrowIfCancellationRequested();
+
+                if (fi.LastWriteTime < time)
+                {
+                    try
+                    {
+                        File.Delete(fi.FullName);
+                    }
+                    catch (Exception ex)
+                    {
+                        WpfClientInfo.WriteErrorLog($"ClearDir(删除文件 '{fi.FullName}') 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    }
+                }
+            }
+        }
+
+        // 计算磁盘剩余空间
+        public static long GetUserDiskFreeSpace()
+        {
+            try
+            {
+                var root = Path.GetPathRoot(CoverImagesDirectory);
+                DriveInfo driveInfo = new DriveInfo(root);
+                return driveInfo.AvailableFreeSpace;
+            }
+            catch (System.IO.IOException ex)
+            {
+                return -1;
+            }
+        }
+
+        static string GetImageFilePath(string text)
+        {
+            if (StringUtil.IsHttpUrl(text))
+                return StringUtil.GetMd5(text);
+            return text.Replace("/", "_").Replace("\\", "_");
+        }
         public static bool IsWhdtFormat(Entity entity)
         {
             if (entity.Protocol != InventoryInfo.ISO18000P6C)
