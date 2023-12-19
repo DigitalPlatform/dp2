@@ -247,10 +247,13 @@ namespace dp2SSL
 
             var bitmap = new BitmapImage();
 
+            // using (var stream = File.OpenRead(filename))
             {
-                var stream = new MemoryStream(File.ReadAllBytes(filename));
+                // var stream = new MemoryStream(File.ReadAllBytes(filename));
                 bitmap.BeginInit();
-                bitmap.StreamSource = stream;
+                bitmap.UriSource = new Uri(filename, UriKind.Absolute);
+                // bitmap.StreamSource = stream;
+                bitmap.CacheOption = BitmapCacheOption.OnLoad; // 2023/12/15
                 bitmap.EndInit();
             }
 
@@ -296,6 +299,17 @@ namespace dp2SSL
 
                 return _pageBorrow;
             }
+        }
+
+        public static void ClearPages()
+        {
+            _pageBorrow = null;
+            _pageSetting = null;
+            _pageShelf = null;
+            _pageInventory = null;
+
+            // 注: 有内存泄露问题
+            GC.Collect();
         }
 
         static PageSetting _pageSetting = null;

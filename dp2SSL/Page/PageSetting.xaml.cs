@@ -463,6 +463,8 @@ string color = "red")
                     FaceManager.Url = App.FaceUrl;
                     FaceManager.Clear();
 
+                    App.CurrentApp.ReloadSkin();
+
                     if (App.Function == "智能书柜")
                     {
                         // 迫使 RfidManager.ReaderNameList 反应最新变化

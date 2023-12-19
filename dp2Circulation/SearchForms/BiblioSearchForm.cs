@@ -1846,6 +1846,9 @@ out strError);
                                 _zsearcher.PresentBatchSize = max_count;
                                 // 2021/3/9
                                 _zsearcher.ClearChannelsFetched();
+
+                                // testing
+                                // _zsearcher.Stop();
                             }
                             else
                                 _zsearcher.PresentBatchSize = 10;   // 单行检索还是 10

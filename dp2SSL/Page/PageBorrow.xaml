@@ -14,7 +14,7 @@
         <local:StringToVisibilityConverter x:Key="StringToVis" />
         
     </Page.Resources>
-    <Grid Background="Black" Name="mainGrid">
+    <Grid Background="{StaticResource normalBackground}" Name="mainGrid">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="60" />
             <ColumnDefinition Width="*" />
@@ -161,7 +161,7 @@
                     Style="{DynamicResource RoundedButtonLightStyle}" 
                     Width="160" Height="60" 
                     FontSize="30" FontWeight="ExtraBold" 
-                    Foreground="Black" 
+                    Foreground="#FF995500" 
                      Click="BorrowButton_Click">
                     <Button.Content>
                         <TextBlock><Run Text="借"/><Run FontSize="20" Text=" ("/><Run FontSize="20" Text="{Binding ElementName=booksControl, Path=Borrowable, UpdateSourceTrigger=PropertyChanged}" /><Run FontSize="20" Text=")"/>
@@ -172,7 +172,7 @@
                     Style="{DynamicResource RoundedButtonLightStyle}" 
                     Width="160" Height="60" 
                     FontSize="30" FontWeight="ExtraBold" 
-                    Foreground="Black" 
+                    Foreground="Blue" 
                      Click="ReturnButton_Click">
                     <Button.Content>
                         <TextBlock>

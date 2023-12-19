@@ -78,4 +78,15 @@ namespace dp2SSL
             return sizes;
         }
     }
+
+    public class SkinItemsSource : IItemsSource
+    {
+        public ItemCollection GetValues()
+        {
+            ItemCollection sizes = new ItemCollection();
+            sizes.Add("亮色");
+            sizes.Add("暗色");
+            return sizes;
+        }
+    }
 }

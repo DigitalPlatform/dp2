@@ -1,0 +1,8 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Style TargetType="Border" x:Key="MyBorderStyle">
+        <Setter Property="Background" Value="{StaticResource NormalBackground}"/>
+        <Setter Property="CornerRadius" Value="{StaticResource NormalCornerRadius}"/>
+    </Style>
+    <SolidColorBrush x:Key="MyColor">#FFFF0000</SolidColorBrush>
+</ResourceDictionary>

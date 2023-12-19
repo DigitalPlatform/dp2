@@ -360,6 +360,7 @@ namespace SendFace
             var imageSource = new BitmapImage();
             imageSource.BeginInit();
             imageSource.StreamSource = stream;
+            imageSource.CacheOption = BitmapCacheOption.OnLoad; // 2023/12/15
             imageSource.EndInit();
             this.photo.Source = imageSource;
         }

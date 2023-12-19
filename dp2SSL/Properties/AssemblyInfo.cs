@@ -51,8 +51,8 @@ using System.Windows;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.9.2")]    // 1.5.*
-[assembly: AssemblyFileVersion("1.9.2.0")]  // 1.5.0.0
+[assembly: AssemblyVersion("1.9.3")]    // 1.5.*
+[assembly: AssemblyFileVersion("1.9.3.0")]  // 1.5.0.0
 
 // 1.0 2019/2/21 第一个版本
 // 1.1 2019/2/26 可以显示版本号了
@@ -169,3 +169,4 @@ using System.Windows;
 //      1.9.0   (2023/12/4) 对“望湖洞庭”增加专门支持。支持缺乏 User Bank 内容的“望湖洞庭”标签，并为此单独放开了 strict 模式，允许没有机构代码的 PII 成功进行借还
 //      1.9.1   (2023/12/6) 当 dp2ssl 主窗口 deactivated 以后，会暂停 RfidManager 的后台盘点进程
 //      1.9.2   (2023/12/7) 对空标签跳过借还操作
+//      1.9.3   (2023/12/18) 自助借还界面增加图书封面显示; 改变布局算法

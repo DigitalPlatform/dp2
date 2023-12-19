@@ -1,0 +1,16 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- 通用背景色 -->
+    <SolidColorBrush x:Key="normalBackground" Color="White"/>
+
+    <SolidColorBrush x:Key="redBackground" Color="#ff9999"/>
+    <SolidColorBrush x:Key="greenBackground" Color="LightGreen"/>
+    <SolidColorBrush x:Key="blueBackground" Color="LightBlue"/>
+    <SolidColorBrush x:Key="yellowBackground" Color="#ffff55"/>
+    <SolidColorBrush x:Key="grayBackground" Color="LightGray"/>
+
+    <!-- 通用前景色 -->
+    <SolidColorBrush x:Key="normalForeground" Color="Black"/>
+
+</ResourceDictionary>

@@ -118,28 +118,45 @@ namespace dp2SSL
                 _backColor = value;
                 if (_backColor == "black")
                 {
-                    this.Background = Brushes.Black;
-                    this.Foreground = Brushes.White;
+                    this.Background = null;
+                    this.Foreground = null;
+
+                    this.Background = this.FindResource("normalBackground") as Brush;
+                    this.Foreground = this.FindResource("normalForeground") as Brush;
+
+
+                    /*
+                    if (App.Skin == Skin.Dark)
+                    {
+                        this.Background = Brushes.Black;
+                        this.Foreground = Brushes.White;
+                    }
+                    else
+                    {
+                        this.Background = Brushes.Gray;
+                        this.Foreground = Brushes.Black;
+                    }
+                    */
                 }
                 if (_backColor == "red")
                 {
-                    this.Background = Brushes.DarkRed;
-                    this.Foreground = Brushes.White;
+                    this.Background = this.FindResource("redBackground") as Brush;
+                    //this.Foreground = Brushes.White;
                 }
                 if (_backColor == "yellow")
                 {
-                    this.Background = Brushes.DarkOrange;
-                    this.Foreground = Brushes.White;
+                    this.Background = this.FindResource("yellowBackground") as Brush;
+                    //this.Foreground = Brushes.White;
                 }
                 if (_backColor == "green")
                 {
-                    this.Background = Brushes.DarkGreen;
-                    this.Foreground = Brushes.White;
+                    this.Background = this.FindResource("greenBackground") as Brush;
+                    //this.Foreground = Brushes.White;
                 }
                 if (_backColor == "gray")
                 {
-                    this.Background = Brushes.DarkGray;
-                    this.Foreground = Brushes.White;
+                    this.Background = this.FindResource("grayBackground") as Brush;
+                    //this.Foreground = Brushes.White;
                 }
             }
         }

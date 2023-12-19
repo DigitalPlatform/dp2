@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:dp2SSL"
         mc:Ignorable="d"
         Title="ProgressWindow" Width="500" Height="280" 
-        Background="Black" Foreground="White"
+        Background="{StaticResource normalBackground}" Foreground="{StaticResource normalForeground}"
         WindowStyle="None"
     AllowsTransparency="True"
     ResizeMode="CanResizeWithGrip" ShowInTaskbar="False">
@@ -22,7 +22,7 @@
                 <RowDefinition Height="60"/>
             </Grid.RowDefinitions>
             <TextBox Name="title" Grid.Row="0"
-                     Background="Transparent" Foreground="White"
+                     Background="Transparent" Foreground="{StaticResource normalForeground}"
                      BorderThickness="0" Text="title"
                      FontSize="18" FontWeight="Bold" HorizontalContentAlignment="Center"/>
             <Grid Grid.Row="1">
@@ -32,7 +32,7 @@
                 <TextBox Name="text"  
                    VerticalAlignment="Center" HorizontalAlignment="Center"
                    FontSize="20" TextWrapping="Wrap"
-                 Background="Transparent" Foreground="White" 
+                 Background="Transparent" Foreground="{StaticResource normalForeground}" 
                  VerticalScrollBarVisibility="Auto" BorderThickness="0">Text</TextBox>
             </Grid>
             <ProgressBar Name="progressBar" Grid.Row="2"

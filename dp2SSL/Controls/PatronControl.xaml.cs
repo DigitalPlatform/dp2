@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -209,7 +210,8 @@ namespace dp2SSL
             var imageSource = new BitmapImage();
             imageSource.BeginInit();
             imageSource.StreamSource = stream;
-            imageSource.EndInit();
+            imageSource.CacheOption = BitmapCacheOption.OnLoad; // 2023/12/15
+            imageSource.EndInit();  // 可能会抛出异常。例如 stream.Length 为 0 时
             this.photo.Source = imageSource;
         }
 
@@ -298,6 +300,12 @@ namespace dp2SSL
                     try
                     {
                         stream = new MemoryStream(File.ReadAllBytes(fileName));
+                        if (stream.Length == 0)
+                        {
+                            stream.Close();
+                            stream = null;
+                            File.Delete(fileName);
+                        }
                         // stream = File.OpenRead(fileName);
                     }
                     catch (Exception ex)
@@ -348,6 +356,9 @@ namespace dp2SSL
                                 // return;
                                 throw new Exception($"获取读者照片(path='{photo_path}')时出错: {strError}");
                             }
+
+                            if (stream.Length == 0)
+                                throw new Exception($"获取读者照片(path='{photo_path}')时出错: 图片内容为空");
 
                             // 顺便存储到本地
                             {

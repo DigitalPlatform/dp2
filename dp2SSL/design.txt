@@ -29,3 +29,7 @@ https://github.com/dotnet/wpf/blob/371ba5ebe9f14b4f7a2eb940fa7e4667fd24a149/src/
 
 https://social.msdn.microsoft.com/Forums/en-US/54eef117-fe4a-4cc4-b49c-fc75caef2240/bitmapimage-memory-leak?forum=wpf
 
+***
+https://github.com/Kinnara/ModernWpf
+ModernWPF UI Library
+

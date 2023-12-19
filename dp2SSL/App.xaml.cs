@@ -40,9 +40,6 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Face;
 using DigitalPlatform.WPF;
 
-//using Microsoft.VisualStudio.Shell;
-//using Task = System.Threading.Tasks.Task;
-
 namespace dp2SSL
 {
     /// <summary>
@@ -50,6 +47,9 @@ namespace dp2SSL
     /// </summary>
     public partial class App : Application, INotifyPropertyChanged
     {
+        // 2023/12/19
+        public static Skin Skin { get; set; } = Skin.Dark;
+
         public NetworkUsage _networkUsage = new NetworkUsage();
 
         public static event UpdatedEventHandler Updated = null;
@@ -206,6 +206,8 @@ namespace dp2SSL
             {
                 WpfClientInfo.Initial("dp2SSL");
 
+                ReloadSkin();
+
                 // 2021/8/21
                 // 把错误日志同时也发送给 dp2mserver
                 WpfClientInfo.WriteLogEvent += (o1, e1) =>
@@ -233,6 +235,7 @@ namespace dp2SSL
                 App.Current.Shutdown();
                 return;
             }
+
             base.OnStartup(e);
 
             _channelPool.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -424,6 +427,25 @@ namespace dp2SSL
                 File.WriteAllText(stateFileName, "dp2ssl started");
             }
 
+        }
+
+        void ChangeSkin(Skin newSkin)
+        {
+            Skin = newSkin;
+
+            foreach (ResourceDictionary dict in Resources.MergedDictionaries)
+            {
+                if (dict is SkinResourceDictionary skinDict)
+                    skinDict.UpdateSource();
+                else
+                    dict.Source = dict.Source;
+            }
+        }
+
+        public void ReloadSkin()
+        {
+            PageMenu.ClearPages();
+            ChangeSkin( SkinName == "暗色" ? Skin.Dark : Skin.Light);
         }
 
         static string _libraryName;
@@ -1304,6 +1326,14 @@ namespace dp2SSL
             get
             {
                 return WpfClientInfo.Config.Get("global", "sipInstitution", "");
+            }
+        }
+
+        public static string SkinName
+        {
+            get
+            {
+                return WpfClientInfo.Config.Get("global", "skin", "暗色");
             }
         }
 

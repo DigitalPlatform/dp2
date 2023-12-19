@@ -30,14 +30,10 @@
 
 
     </UserControl.Resources>
-    <Border BorderThickness="2" BorderBrush="Black"
-            Margin="20" CornerRadius="8" MinWidth="200">
-        <Border.Background>
-            <LinearGradientBrush EndPoint="1,1" StartPoint="0,0">
-                <GradientStop Color="Black" Offset="0"/>
-                <GradientStop Color="#FF363636" Offset="1"/>
-            </LinearGradientBrush>
-        </Border.Background>
+    <Border BorderThickness="2" BorderBrush="{StaticResource patronBorder}"
+            Margin="20" CornerRadius="8" MinWidth="200"
+            Background="{StaticResource patronBackBrush}">
+
         <local:MyScrollViewer 
             HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
             <Grid>
@@ -75,29 +71,29 @@
 
                     <TextBlock Grid.Row="1" Grid.Column="1" 
                            Text="UID" 
-                           Foreground="Gray" Margin="6" FontSize="12"  TextAlignment="Right"/>
+                           Foreground="{StaticResource patronNameText}" Margin="6" FontSize="12"  TextAlignment="Right"/>
                     <TextBox Name="uid"  Grid.Row="1" Grid.Column="3"
                          Text="{Binding UID}" 
                          IsReadOnly="True" BorderThickness="0"
-                         Background="Transparent" Foreground="#dddddd" TextWrapping="Wrap" Margin="6" FontSize="12"
+                         Background="Transparent" Foreground="{StaticResource patronValueText}" TextWrapping="Wrap" Margin="6" FontSize="12"
                          />
 
                     <TextBlock Grid.Row="2" Grid.Column="1" 
                            Text="证条码号" 
-                           Foreground="Gray" Margin="6" FontSize="12"  TextAlignment="Right"/>
+                           Foreground="{StaticResource patronNameText}" Margin="6" FontSize="12"  TextAlignment="Right"/>
                     <TextBlock Grid.Row="2" Grid.Column="3" Text="{Binding BarcodeMasked}"
-                       Foreground="#dddddd" TextWrapping="Wrap" Margin="6" FontSize="12"/>
+                       Foreground="{StaticResource patronValueText}" TextWrapping="Wrap" Margin="6" FontSize="12"/>
 
                     <TextBlock Grid.Row="3" Grid.Column="1" 
                            Text="姓名" 
-                           Foreground="Gray" Margin="6" FontSize="24"  TextAlignment="Right"/>
+                           Foreground="{StaticResource patronNameText}" Margin="6" FontSize="24"  TextAlignment="Right"/>
                     <TextBlock Grid.Row="3" Grid.Column="3" Text="{Binding PatronNameMasked}"
-                       Foreground="#eeeeee" TextWrapping="Wrap" Margin="6" FontSize="24" FontWeight="Bold"/>
+                       Foreground="{StaticResource patronHilightText}" TextWrapping="Wrap" Margin="6" FontSize="24" FontWeight="Bold"/>
 
                     <TextBlock Grid.Row="4" Grid.Column="1" Text="单位" 
-                           Foreground="Gray" Margin="6" FontSize="16" TextAlignment="Right"/>
+                           Foreground="{StaticResource patronNameText}" Margin="6" FontSize="16" TextAlignment="Right"/>
                     <TextBlock Grid.Row="4" Grid.Column="3" Text="{Binding DepartmentMasked}"
-                       Foreground="#dddddd" TextWrapping="Wrap" Margin="6" FontSize="16"/>
+                       Foreground="{StaticResource patronValueText}" TextWrapping="Wrap" Margin="6" FontSize="16"/>
 
                     <TextBlock Grid.Row="5" Grid.Column="1"
                        Grid.ColumnSpan="3" Text="{Binding Error}"

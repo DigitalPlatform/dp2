@@ -22,14 +22,11 @@
         <local:PersonDataTemplateSelector x:Key="personDataTemplateSelector" />
         <DataTemplate x:Key="LargeTemplate">
             <Border BorderThickness="2" BorderBrush="{Binding Path=State, Converter={StaticResource StateToBorder}}"
-                    Margin="6" CornerRadius="8">
+                    Margin="6" CornerRadius="8"
+                    Background="{StaticResource entityBackBrush}"
+                    >
 
-                <Border.Background>
-                    <LinearGradientBrush EndPoint="1,1" StartPoint="0,0">
-                        <GradientStop Color="Black" Offset="0"/>
-                        <GradientStop Color="#FF363636" Offset="1"/>
-                    </LinearGradientBrush>
-                </Border.Background>
+
                 <Grid Width="240" MaxHeight="1860" Margin="20" 
                       Opacity="{Binding Path=ShelfState, Converter={StaticResource StringToOpacity}}">
                     <Grid.ColumnDefinitions>
@@ -46,10 +43,10 @@
                         <RowDefinition/>
 
                     </Grid.RowDefinitions>
-                    <fa:ImageAwesome Grid.Row="0" Grid.RowSpan="3" Height="30" Foreground="DarkGray"
+                    <fa:ImageAwesome Grid.Row="0" Grid.RowSpan="3" Height="30" Foreground="LightGreen"
                             Icon="Spinner" Spin="true" SpinDuration="5" 
                                          Visibility="{Binding Path=Waiting, Converter={StaticResource BoolToVis}}"
-                                         VerticalAlignment="Center"/>
+                                         VerticalAlignment="Center" HorizontalAlignment="Left" Margin="18,0,0,0"/>
 
 
                     <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding UID}" 
@@ -58,7 +55,8 @@
                                        TextAlignment="Left" FontSize="8" Foreground="Gray"
                                />
 
-                    <fa:ImageAwesome Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Height="20" Foreground="#FF555555"
+                    <fa:ImageAwesome Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Height="20" 
+                                     Foreground="{Binding Path=State, Converter={StaticResource StateToBorder}}"
                             Icon="{Binding Path=State, Converter={StaticResource StateToIcon}}" 
                                              HorizontalAlignment="Center"/>
 
@@ -68,19 +66,19 @@
 
                     <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding UII}" TextAlignment="Right" FontSize="12" FontWeight="Bold" Foreground="DarkOrange"/>
                     <TextBlock Grid.Row="2" Grid.ColumnSpan="2" Text="{Binding Title}" 
-                                       FontSize="20" FontWeight="Light" Foreground="LightGray"
+                                       FontSize="20" FontWeight="Light" Foreground="{StaticResource entityTitleText}"
                                        MaxWidth="240" TextWrapping="NoWrap"  TextTrimming="CharacterEllipsis"/>
                     <TextBlock Grid.Row="3" Grid.ColumnSpan="2" Text="{Binding BorrowInfo}" 
                                        Visibility="{Binding Path=BorrowInfo, Converter={StaticResource StringToVis}}"
-                                       Foreground="DarkGray"
+                                       Foreground="{StaticResource entityBorrowInfoTextLarge}"
                                        TextWrapping="Wrap"/>
                     <TextBlock Grid.Row="4" Grid.Column="0" Text="{Binding Location}" 
                                        Visibility="{Binding Path=Location, Converter={StaticResource StringToVis}}"
-                                       Foreground="DarkGray"
+                                       Foreground="{StaticResource entityLocation}"
                                        TextWrapping="Wrap"/>
                     <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding CurrentLocation}" 
                                        Visibility="{Binding Path=CurrentLocation, Converter={StaticResource StringToVis}}"
-                                       Foreground="DarkGray"
+                                       Foreground="{StaticResource entityCurrentLocation}"
                                        TextWrapping="Wrap" HorizontalAlignment="Right"/>
 
                     <TextBlock Grid.Row="5" Grid.ColumnSpan="2" Text="{Binding Error}"
@@ -97,14 +95,9 @@
         </DataTemplate>
         <DataTemplate x:Key="SmallTemplate">
             <Border BorderThickness="2" BorderBrush="{Binding Path=State, Converter={StaticResource StateToBorder}}"
-                            Margin="1" CornerRadius="8">
-
-                <Border.Background>
-                    <LinearGradientBrush EndPoint="1,1" StartPoint="0,0">
-                        <GradientStop Color="Black" Offset="0"/>
-                        <GradientStop Color="#FF363636" Offset="1"/>
-                    </LinearGradientBrush>
-                </Border.Background>
+                            Margin="1" CornerRadius="8"
+                    Background="{StaticResource entityBackBrush}"
+                    >
                 <Grid Width="150" MaxHeight="660" Margin="10">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
@@ -132,7 +125,8 @@
                     <StackPanel Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Orientation="Horizontal"
                                 Background="{Binding Path=State, Converter={StaticResource StateToBack}}">
                         <fa:ImageAwesome 
-                                     Height="14" Foreground="DarkGray"
+                                     Height="14" 
+                            Foreground="{Binding Path=State, Converter={StaticResource StateToBorder}}"
                                     Icon="{Binding Path=State, Converter={StaticResource StateToIcon}}" 
                                     HorizontalAlignment="Left" VerticalAlignment="Center"/>
                         <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Margin="4,2,2,2"
@@ -144,13 +138,13 @@
                     <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding PII}" TextAlignment="Right" 
                                FontSize="12" FontWeight="Bold" Foreground="DarkOrange"/>
                     <TextBlock Grid.Row="2" Grid.ColumnSpan="2" Text="{Binding Title}" 
-                                       FontSize="12" FontWeight="Bold" Foreground="LightGray"
+                                       FontSize="12" FontWeight="Bold" Foreground="{StaticResource entityTitleText}"
                                        MaxWidth="240" TextWrapping="NoWrap"  TextTrimming="CharacterEllipsis"/>
                     <!-- 借阅信息 TODO: 背景颜色应该和是否超期相关。已经超期的要显示为黄色 -->
                     <TextBlock Grid.Row="3" Grid.ColumnSpan="2" Text="{Binding BorrowInfo}" 
                                    FontSize="11"    
                                Visibility="{Binding Path=BorrowInfo, Converter={StaticResource StringToVis}}"
-                                       Foreground="LightGray"
+                                       Foreground="{StaticResource entityBorrowInfoTextSmall}"
                                        TextWrapping="Wrap"/>
 
                     <TextBlock Grid.Row="4" Grid.ColumnSpan="2" Text="{Binding Error}"

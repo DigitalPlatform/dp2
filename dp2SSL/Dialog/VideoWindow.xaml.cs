@@ -11,7 +11,6 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace dp2SSL.Dialog
 {
@@ -65,6 +64,62 @@ namespace dp2SSL.Dialog
         }
 
         string _backColor = "black";
+
+        public string BackColor
+        {
+            get
+            {
+                return _backColor;
+            }
+            set
+            {
+                _backColor = value;
+                if (_backColor == "black")
+                {
+                    this.Background = null;
+                    this.Foreground = null;
+
+                    this.Background = this.FindResource("normalBackground") as Brush;
+                    this.Foreground = this.FindResource("normalForeground") as Brush;
+
+
+                    /*
+                    if (App.Skin == Skin.Dark)
+                    {
+                        this.Background = Brushes.Black;
+                        this.Foreground = Brushes.White;
+                    }
+                    else
+                    {
+                        this.Background = Brushes.Gray;
+                        this.Foreground = Brushes.Black;
+                    }
+                    */
+                }
+                if (_backColor == "red")
+                {
+                    this.Background = this.FindResource("redBackground") as Brush;
+                    //this.Foreground = Brushes.White;
+                }
+                if (_backColor == "yellow")
+                {
+                    this.Background = this.FindResource("yellowBackground") as Brush;
+                    //this.Foreground = Brushes.White;
+                }
+                if (_backColor == "green")
+                {
+                    this.Background = this.FindResource("greenBackground") as Brush;
+                    //this.Foreground = Brushes.White;
+                }
+                if (_backColor == "gray")
+                {
+                    this.Background = this.FindResource("grayBackground") as Brush;
+                    //this.Foreground = Brushes.White;
+                }
+            }
+        }
+
+#if OLD
         public string BackColor
         {
             get
@@ -101,7 +156,7 @@ namespace dp2SSL.Dialog
                 }
             }
         }
-
+#endif
 
         public void SetPhoto(Stream stream)
         {
@@ -113,6 +168,7 @@ namespace dp2SSL.Dialog
             var imageSource = new BitmapImage();
             imageSource.BeginInit();
             imageSource.StreamSource = stream;
+            imageSource.CacheOption = BitmapCacheOption.OnLoad; // 2023/12/15
             imageSource.EndInit();
             this.photo.Source = imageSource;
         }

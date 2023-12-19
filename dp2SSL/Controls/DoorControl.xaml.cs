@@ -653,8 +653,9 @@ KeyTime.FromTimeSpan(TimeSpan.FromSeconds(start + _length))) // KeyTime
             {
                 BitmapImage bitmap = new BitmapImage();
                 bitmap.BeginInit();
-                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                // bitmap.CacheOption = BitmapCacheOption.OnLoad;
                 bitmap.UriSource = new Uri(filename, UriKind.Absolute);
+                bitmap.CacheOption = BitmapCacheOption.OnLoad; // 2023/12/15
                 bitmap.EndInit();
 
                 return bitmap;
@@ -961,8 +962,9 @@ this.ActualHeight - (this.Padding.Top + this.Padding.Bottom)));
             {
                 BitmapImage bitmap = new BitmapImage();
                 bitmap.BeginInit();
-                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                // bitmap.CacheOption = BitmapCacheOption.OnLoad;
                 bitmap.UriSource = new Uri(filename, UriKind.Absolute);
+                bitmap.CacheOption = BitmapCacheOption.OnLoad; // 2023/12/15
                 bitmap.EndInit();
 
                 var brush = new ImageBrush(bitmap);

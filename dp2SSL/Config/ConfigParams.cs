@@ -106,6 +106,8 @@ namespace dp2SSL
             DisplayCoverImage = _config.GetBoolean("ssl_operation",
                 "displayCoverImage", false);
 
+            Skin = _config.Get("global", "skin", "暗色");
+
             _changedParams.Clear();
         }
 
@@ -181,6 +183,9 @@ namespace dp2SSL
 
             _config.SetBoolean("ssl_operation",
                 "displayCoverImage", DisplayCoverImage);
+
+            _config.Set("global", "skin", Skin);
+
             // 有错误
             if (errors.Count > 0)
             {
@@ -835,6 +840,26 @@ Description = "是否每日自动更新一次壁纸"
         }
         private bool _autoUpdateWallpaper;
 
+        [Display(
+Order = 17,
+Name = "皮肤",
+Description = "界面显示的颜色风格"
+)]
+        [ItemsSource(typeof(SkinItemsSource))]
+        [Category("全局")]
+        public string Skin
+        {
+            get => _skin;
+            set
+            {
+                if (_skin != value)
+                {
+                    _skin = value;
+                    OnPropertyChanged("Skin");
+                }
+            }
+        }
+        private string _skin;
 
         /*
         // 默认值 空

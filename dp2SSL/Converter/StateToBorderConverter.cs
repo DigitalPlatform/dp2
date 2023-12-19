@@ -16,10 +16,10 @@ namespace dp2SSL
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if ((string)value == "borrowed")
-                return new SolidColorBrush(Colors.Transparent);
+                return new SolidColorBrush(Colors.LightSalmon);    // Transparent
 
             if ((string)value == "onshelf")
-                return new SolidColorBrush(Colors.DarkGreen);
+                return new SolidColorBrush(Colors.LightSeaGreen);
 
             return new SolidColorBrush(Colors.Transparent);
         }
