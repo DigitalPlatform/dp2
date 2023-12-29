@@ -338,6 +338,22 @@ namespace dp2SSL
                 // 注2: 本函数不再抛出异常。会在 ErrorInfo 中报错
                 var chip_info = RfidTagList.GetUhfChipInfo(tagInfo);
                 chip = chip_info.Chip;
+                /*
+                if (chip != null)
+                    return new GetPIIResult
+                    {
+                        PII = chip?.FindElement(ElementOID.PII)?.Text,
+                        OI = chip?.FindElement(ElementOID.OI)?.Text,
+                        AOI = chip?.FindElement(ElementOID.AOI)?.Text,
+                    };
+                else
+                    return new GetPIIResult
+                    {
+                        PII = chip_info.PII,
+                        OI = chip_info.OI,
+                        AOI = null,
+                    };
+                */
             }
             else
             {
@@ -392,6 +408,12 @@ namespace dp2SSL
                         var chip_info = RfidTagList.GetUhfChipInfo(entity.TagInfo);
                         pii = chip_info.PII;
                         chip = chip_info.Chip;
+                        /*
+                        if (chip == null)
+                        {
+                            entity.OI = chip_info.OI;
+                        }
+                        */
                     }
                     else
                     {
@@ -401,9 +423,12 @@ namespace dp2SSL
                     }
 
                     entity.PII = pii;
-                    // 2021/4/2
-                    entity.OI = chip?.FindElement(ElementOID.OI)?.Text;
-                    entity.AOI = chip?.FindElement(ElementOID.AOI)?.Text;
+
+                    if (chip != null)
+                    {
+                        entity.OI = chip?.FindElement(ElementOID.OI)?.Text;
+                        entity.AOI = chip?.FindElement(ElementOID.AOI)?.Text;
+                    }
                 }
                 catch (TagInfoException ex)
                 {
@@ -487,6 +512,10 @@ namespace dp2SSL
                         // 注2: 本函数不再抛出异常。会在 ErrorInfo 中报错
                         var chip_info = RfidTagList.GetUhfChipInfo(tag.TagInfo);
                         chip = chip_info.Chip;
+                        /*
+                        if (chip == null)
+                            oi = chip_info.OI;
+                        */
                     }
                     else
                     {
@@ -496,9 +525,11 @@ namespace dp2SSL
 
                     pii = chip?.FindElement(ElementOID.PII)?.Text;
 
-                    // 2021/4/2
-                    oi = chip?.FindElement(ElementOID.OI)?.Text;
-                    aoi = chip?.FindElement(ElementOID.AOI)?.Text;
+                    if (chip != null)
+                    {
+                        oi = chip?.FindElement(ElementOID.OI)?.Text;
+                        aoi = chip?.FindElement(ElementOID.AOI)?.Text;
+                    }
                 }
                 else
                 {

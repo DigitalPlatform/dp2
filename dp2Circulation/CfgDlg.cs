@@ -72,99 +72,104 @@ namespace dp2Circulation
             }
         }
 
+        int _inLoading = 0;
+
         private void CfgDlg_Load(object sender, EventArgs e)
         {
-            if (Program.MainForm != null
-                && !(Control.ModifierKeys == Keys.Control))
+            _inLoading++;
+            try
             {
-                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
-            }
+                if (Program.MainForm != null
+                    && !(Control.ModifierKeys == Keys.Control))
+                {
+                    MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
+                }
 
 #if NEWFINGER
-            this.groupBox_palmprintUrl.Text = "指纹或掌纹阅读器接口 URL";
-            this.groupBox_fingerprint.Visible = false;
-            this.button_fingerprint_setDefaultValue_new.Visible = true;
+                this.groupBox_palmprintUrl.Text = "指纹或掌纹阅读器接口 URL";
+                this.groupBox_fingerprint.Visible = false;
+                this.button_fingerprint_setDefaultValue_new.Visible = true;
 #else
             this.button_fingerprint_setDefaultValue_new.Visible = false;
 #endif
 
-            // *** 服务器
+                // *** 服务器
 
-            // serverurl
-            this.textBox_server_dp2LibraryServerUrl.Text =
-                ap.GetString("config",
-                "circulation_server_url",
-                "http://localhost:8001/dp2library");
+                // serverurl
+                this.textBox_server_dp2LibraryServerUrl.Text =
+                    ap.GetString("config",
+                    "circulation_server_url",
+                    "http://localhost:8001/dp2library");
 
-            // author number GCAT serverurl
-            this.textBox_server_authorNumber_gcatUrl.Text =
-                ap.GetString("config",
-                "gcat_server_url",
-                "http://dp2003.com/dp2library/");  // "http://dp2003.com/gcatserver/" // "http://dp2003.com/dp2libraryws/gcat.asmx"
+                // author number GCAT serverurl
+                this.textBox_server_authorNumber_gcatUrl.Text =
+                    ap.GetString("config",
+                    "gcat_server_url",
+                    "http://dp2003.com/dp2library/");  // "http://dp2003.com/gcatserver/" // "http://dp2003.com/dp2libraryws/gcat.asmx"
 
-            // pinyin serverurl
-            this.textBox_server_pinyin_gcatUrl.Text =
-                ap.GetString("config",
-                "pinyin_server_url",
-                "http://dp2003.com/dp2library/");   // "http://dp2003.com/gcatserver/"
+                // pinyin serverurl
+                this.textBox_server_pinyin_gcatUrl.Text =
+                    ap.GetString("config",
+                    "pinyin_server_url",
+                    "http://dp2003.com/dp2library/");   // "http://dp2003.com/gcatserver/"
 
-            // 绿色安装包
-            this.textBox_server_greenPackage.Text =
-                ap.GetString("config",
-                "green_package_server_url",
-                "");
+                // 绿色安装包
+                this.textBox_server_greenPackage.Text =
+                    ap.GetString("config",
+                    "green_package_server_url",
+                    "");
 
-            // dp2MServer URL
-            this.textBox_message_dp2MServerUrl.Text =
-                ap.GetString("config",
-                "im_server_url",
-                default_dp2mserver_url);
+                // dp2MServer URL
+                this.textBox_message_dp2MServerUrl.Text =
+                    ap.GetString("config",
+                    "im_server_url",
+                    default_dp2mserver_url);
 
-            // *** 缺省账户
+                // *** 缺省账户
 
-            // 用户名
-            this.textBox_defaultAccount_userName.Text =
-                ap.GetString(
-                "default_account",
-                "username",
-                "");
+                // 用户名
+                this.textBox_defaultAccount_userName.Text =
+                    ap.GetString(
+                    "default_account",
+                    "username",
+                    "");
 
-            this.checkBox_defaulAccount_savePasswordShort.Checked =
-                ap.GetBoolean(
-                "default_account",
-                "savepassword_short",
-                false);
-            this.checkBox_defaulAccount_savePasswordLong.Checked =
-    ap.GetBoolean(
-    "default_account",
-    "savepassword_long",
-    false);
-
-            if (this.checkBox_defaulAccount_savePasswordShort.Checked == true
-                || this.checkBox_defaulAccount_savePasswordLong.Checked == true)
-            {
-                string strPassword = ap.GetString(
+                this.checkBox_defaulAccount_savePasswordShort.Checked =
+                    ap.GetBoolean(
+                    "default_account",
+                    "savepassword_short",
+                    false);
+                this.checkBox_defaulAccount_savePasswordLong.Checked =
+        ap.GetBoolean(
         "default_account",
-        "password",
-        "");
-                strPassword = Program.MainForm.DecryptPasssword(strPassword);
-                this.textBox_defaultAccount_password.Text = strPassword;
-            }
+        "savepassword_long",
+        false);
 
-            this.checkBox_defaultAccount_isReader.Checked =
-                ap.GetBoolean(
-                "default_account",
-                "isreader",
-                false);
-            this.textBox_defaultAccount_location.Text =
-                ap.GetString(
-                "default_account",
-                "location",
-                "");
-            this.checkBox_defaultAccount_occurPerStart.Checked = ap.GetBoolean(
-                "default_account",
-                "occur_per_start",
-                true);
+                if (this.checkBox_defaulAccount_savePasswordShort.Checked == true
+                    || this.checkBox_defaulAccount_savePasswordLong.Checked == true)
+                {
+                    string strPassword = ap.GetString(
+            "default_account",
+            "password",
+            "");
+                    strPassword = Program.MainForm.DecryptPasssword(strPassword);
+                    this.textBox_defaultAccount_password.Text = strPassword;
+                }
+
+                this.checkBox_defaultAccount_isReader.Checked =
+                    ap.GetBoolean(
+                    "default_account",
+                    "isreader",
+                    false);
+                this.textBox_defaultAccount_location.Text =
+                    ap.GetString(
+                    "default_account",
+                    "location",
+                    "");
+                this.checkBox_defaultAccount_occurPerStart.Checked = ap.GetBoolean(
+                    "default_account",
+                    "occur_per_start",
+                    true);
 
 #if REMOVED
             // *** charging
@@ -267,611 +272,622 @@ namespace dp2Circulation
                 false);
 #endif
 
-            // *** 快捷出纳
+                // *** 快捷出纳
 
-            this.comboBox_quickCharging_displayFormat.Text =
-ap.GetString("quickcharging_form",
-"display_format",
-"HTML");
-            this.comboBox_quickCharging_displayStyle.Text =
-ap.GetString("quickcharging_form",
-"display_style",
-"light");
+                this.comboBox_quickCharging_displayFormat.Text =
+    ap.GetString("quickcharging_form",
+    "display_format",
+    "HTML");
+                this.comboBox_quickCharging_displayStyle.Text =
+    ap.GetString("quickcharging_form",
+    "display_style",
+    "light");
 
-            // 验证条码号
-            this.checkBox_quickCharging_verifyBarcode.Checked = ap.GetBoolean(
-    "quickcharging_form",
-    "verify_barcode",
+                // 验证条码号
+                this.checkBox_quickCharging_verifyBarcode.Checked = ap.GetBoolean(
+        "quickcharging_form",
+        "verify_barcode",
+        false);
+
+                // 借书时允许先输入册条码号
+                this.checkBox_quickCharging_allowFreeSequence.Checked = ap.GetBoolean(
+        "quickcharging_form",
+        "allowFreeSequence",
+        false);
+
+                // 自动触发人脸识别前的延时秒数
+                this.numericUpDown_quickCharging_autoTriggerFaceInputDelaySeconds.Value =
+                    ap.GetInt(
+                        "quickcharging_form",
+                        "autoTriggerFaceInputDelaySeconds",
+                        2);
+
+                // 2023/12/29
+                // 人脸识别允许命中命中多个(手动选择)
+                this.checkBox_quickCharging_faceInputMultipleHits.Checked =
+    ap.GetBoolean("quickcharging_form",
+    "faceInputMultipleHits",
     false);
 
-            // 借书时允许先输入册条码号
-            this.checkBox_quickCharging_allowFreeSequence.Checked = ap.GetBoolean(
-    "quickcharging_form",
-    "allowFreeSequence",
-    false);
-
-            // 自动触发人脸识别前的延时秒数
-            this.numericUpDown_quickCharging_autoTriggerFaceInputDelaySeconds.Value =
-                ap.GetInt(
+                // 读者信息中不显示借阅历史
+                this.checkBox_quickCharging_noBorrowHistory.Checked = ap.GetBoolean(
                     "quickcharging_form",
-                    "autoTriggerFaceInputDelaySeconds",
-                    2);
+                    "no_borrow_history",
+                    true);
+                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.20") < 0)
+                    this.checkBox_quickCharging_noBorrowHistory.Enabled = false;
 
-            // 读者信息中不显示借阅历史
-            this.checkBox_quickCharging_noBorrowHistory.Checked = ap.GetBoolean(
-                "quickcharging_form",
-                "no_borrow_history",
-                true);
-            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.20") < 0)
-                this.checkBox_quickCharging_noBorrowHistory.Enabled = false;
+                // 朗读读者姓名
+                this.checkBox_quickCharging_speakNameWhenLoadReaderRecord.Checked = ap.GetBoolean(
+                    "quickcharging_form",
+                    "speak_reader_name",
+                    false);
 
-            // 朗读读者姓名
-            this.checkBox_quickCharging_speakNameWhenLoadReaderRecord.Checked = ap.GetBoolean(
-                "quickcharging_form",
-                "speak_reader_name",
-                false);
+                // 朗读书名
+                this.checkBox_quickCharging_speakBookTitle.Checked = ap.GetBoolean(
+                    "quickcharging_form",
+                    "speak_book_title",
+                    false);
 
-            // 朗读书名
-            this.checkBox_quickCharging_speakBookTitle.Checked = ap.GetBoolean(
-                "quickcharging_form",
-                "speak_book_title",
-                false);
+                // 朗读状态
+                this.comboBox_quickCharging_stateSpeak.Text = ap.GetString("quickcharging_form",
+        "state_speak",
+        "[不朗读]");
 
-            // 朗读状态
-            this.comboBox_quickCharging_stateSpeak.Text = ap.GetString("quickcharging_form",
-    "state_speak",
-    "[不朗读]");
+                // 启用 ISBN 借书还书功能
+                this.checkBox_quickCharging_isbnBorrow.Checked = ap.GetBoolean(
+                    "quickcharging_form",
+                    "isbn_borrow",
+                    true);
 
-            // 启用 ISBN 借书还书功能
-            this.checkBox_quickCharging_isbnBorrow.Checked = ap.GetBoolean(
-                "quickcharging_form",
-                "isbn_borrow",
-                true);
+                // 自动操作唯一事项
+                this.checkBox_quickCharging_autoOperItemDialogSingleItem.Checked = ap.GetBoolean(
+                    "quickcharging_form",
+                    "auto_oper_single_item",
+                    false);
 
-            // 自动操作唯一事项
-            this.checkBox_quickCharging_autoOperItemDialogSingleItem.Checked = ap.GetBoolean(
-                "quickcharging_form",
-                "auto_oper_single_item",
-                false);
+                // 日志记载操作耗时
+                this.checkBox_quickCharging_logOperTime.Checked = ap.GetBoolean(
+                    "quickcharging_form",
+                    "log_opertime",
+                    true);
 
-            // 日志记载操作耗时
-            this.checkBox_quickCharging_logOperTime.Checked = ap.GetBoolean(
-                "quickcharging_form",
-                "log_opertime",
-                true);
+                // *** 种册窗
+                this.checkBox_itemManagement_verifyItemBarcode.Checked = ap.GetBoolean(
+                    "entity_form",
+                    "verify_item_barcode",
+                    false);
 
-            // *** 种册窗
-            this.checkBox_itemManagement_verifyItemBarcode.Checked = ap.GetBoolean(
-                "entity_form",
-                "verify_item_barcode",
-                false);
+                this.checkBox_itemManagement_cataloging.Checked = ap.GetBoolean(
+                    "entity_form",
+                    "cataloging",
+                    true);  // 2007/12/2 修改为 true
 
-            this.checkBox_itemManagement_cataloging.Checked = ap.GetBoolean(
-                "entity_form",
-                "cataloging",
-                true);  // 2007/12/2 修改为 true
+                this.checkBox_itemManagement_searchDupWhenSaving.Checked = ap.GetBoolean(
+                    "entity_form",
+                    "search_dup_when_saving",
+                    false);
 
-            this.checkBox_itemManagement_searchDupWhenSaving.Checked = ap.GetBoolean(
-                "entity_form",
-                "search_dup_when_saving",
-                false);
+                this.checkBox_itemManagement_verifyDataWhenSaving.Checked = ap.GetBoolean(
+        "entity_form",
+        "verify_data_when_saving",
+        false);
 
-            this.checkBox_itemManagement_verifyDataWhenSaving.Checked = ap.GetBoolean(
-    "entity_form",
-    "verify_data_when_saving",
-    false);
+                // 2017/5/25
+                if (StringUtil.IsInList("client_forceverifydata", Program.MainForm._currentUserRights))
+                    this.label_forceVerifyDataComment.Text = "注: 当前账户 " + Program.MainForm._currentUserName + " 的权限中已包含 client_forceverifydata";
 
-            // 2017/5/25
-            if (StringUtil.IsInList("client_forceverifydata", Program.MainForm._currentUserRights))
-                this.label_forceVerifyDataComment.Text = "注: 当前账户 " + Program.MainForm._currentUserName + " 的权限中已包含 client_forceverifydata";
-
-            this.checkBox_itemManagement_showQueryPanel.Checked = ap.GetBoolean(
-"entityform",
-"queryPanel_visibie",
-true);
-            this.checkBox_itemManagement_showItemQuickInputPanel.Checked = ap.GetBoolean(
-"entityform",
-"itemQuickInputPanel_visibie",
-true);
-
-            // 副本书目记录显示为只读状态
-            this.checkBox_itemManagement_linkedRecordReadonly.Checked = ap.GetBoolean(
-"entityform",
-"linkedRecordReadonly",
-true);
-
-            // 显示其他分馆的册记录
-            this.checkBox_itemManagement_displayOtherLibraryItem.Checked = ap.GetBoolean(
-"entityform",
-"displayOtherLibraryItem",
-false);
-
-            // 自动限定paste进入的图像宽度
-            this.textBox_itemManagement_maxPicWidth.Text = Program.MainForm.AppInfo.GetString(
+                this.checkBox_itemManagement_showQueryPanel.Checked = ap.GetBoolean(
     "entityform",
-    "paste_pic_maxwidth",
-    "-1");
-
-            // ui 外观
-
-            // 停靠
-            this.comboBox_ui_fixedPanelDock.Text = Program.MainForm.panel_fixed.Dock.ToString();
-
-            this.checkBox_ui_hideFixedPanel.Checked = ap.GetBoolean(
-                "MainForm",
-                "hide_fixed_panel",
-                false);
-
-            this.checkBox_ui_fixedPanelAnimationEnabled.Checked = ap.GetBoolean(
-                "MainForm",
-                "fixed_panel_animation",
-                false);
-
-            this.textBox_ui_defaultFont.Text = ap.GetString(
-    "Global",
-    "default_font",
-    "");
-
-            // 标签打印模式
-            this.checkBox_ui_printLabelMode.Checked = ap.GetBoolean(
-                "MainForm",
-                "print_label_mode",
-                false);
-
-            // *** 入馆登记
-            // passgate
-            this.numericUpDown_passgate_maxListItemsCount.Value = ap.GetInt(
-                "passgate_form",
-                "max_list_items_count",
-                1000);
-
-            // 检索
-            // search
-            this.checkBox_search_useExistDetailWindow.Checked = ap.GetBoolean(
-                "all_search_form",
-                "load_to_exist_detailwindow",
-                true);
-
-            this.numericUpDown_search_maxBiblioResultCount.Value = ap.GetInt(
-                "biblio_search_form",
-                "max_result_count",
-                -1);
-
-            this.checkBox_search_hideBiblioMatchStyle.Checked = ap.GetBoolean(
-                "biblio_search_form",
-                "hide_matchstyle",
-                false);
-
-            // 2008/1/20 
-            this.checkBox_search_biblioPushFilling.Checked = ap.GetBoolean(
-                "biblio_search_form",
-                "push_filling_browse",
-                false);
-
-            // 2020/10/24
-            this.numericUpDown_search_multiline_maxBiblioResultCount.Value = ap.GetInt(
-    "biblio_search_form",
-    "multiline_max_result_count",
-    10);
-
-            this.numericUpDown_search_maxReaderResultCount.Value = ap.GetInt(
-                "reader_search_form",
-                "max_result_count",
-                -1);
-
-            this.checkBox_search_hideReaderMatchStyle.Checked = ap.GetBoolean(
-                "reader_search_form",
-                "hide_matchstyle",
-                false);
-
-            // 2008/1/20 
-            this.checkBox_search_readerPushFilling.Checked = ap.GetBoolean(
-                "reader_search_form",
-                "push_filling_browse",
-                false);
-
-            // ---
-            this.numericUpDown_search_maxItemResultCount.Value = ap.GetInt(
-                "item_search_form",
-                "max_result_count",
-                -1);
-
-            // 2008/11/21 
-            this.checkBox_search_hideItemMatchStyleAndDbName.Checked = ap.GetBoolean(
-                "item_search_form",
-                "hide_matchstyle_and_dbname",
-                false);
-
-            // 2008/1/20 
-            this.checkBox_search_itemPushFilling.Checked = ap.GetBoolean(
-                "item_search_form",
-                "push_filling_browse",
-                false);
-
-            // 2021/5/27
-            this.checkBox_search_itemFilterLibraryCode.Checked = ap.GetBoolean(
-                "item_search_form",
-                "filter_library_code",
-                false);
-
-            // --- order
-            this.numericUpDown_search_maxOrderResultCount.Value = ap.GetInt(
-    "order_search_form",
-    "max_result_count",
-    -1);
-
-            this.checkBox_search_hideOrderMatchStyleAndDbName.Checked = ap.GetBoolean(
-                "order_search_form",
-                "hide_matchstyle_and_dbname",
-                false);
-
-            this.checkBox_search_orderPushFilling.Checked = ap.GetBoolean(
-                "order_search_form",
-                "push_filling_browse",
-                false);
-
-            // --- issue
-            this.numericUpDown_search_maxIssueResultCount.Value = ap.GetInt(
-    "issue_search_form",
-    "max_result_count",
-    -1);
-
-            this.checkBox_search_hideIssueMatchStyleAndDbName.Checked = ap.GetBoolean(
-                "issue_search_form",
-                "hide_matchstyle_and_dbname",
-                true);
-
-            this.checkBox_search_issuePushFilling.Checked = ap.GetBoolean(
-                "issue_search_form",
-                "push_filling_browse",
-                false);
-
-            // --- comment
-            this.numericUpDown_search_maxCommentResultCount.Value = ap.GetInt(
-    "comment_search_form",
-    "max_result_count",
-    -1);
-
-            this.checkBox_search_hideCommentMatchStyleAndDbName.Checked = ap.GetBoolean(
-                "comment_search_form",
-                "hide_matchstyle_and_dbname",
-                false);
-
-            this.checkBox_search_commentPushFilling.Checked = ap.GetBoolean(
-                "comment_search_form",
-                "push_filling_browse",
-                false);
-
-            // 凭条打印
-            this.comboBox_print_prnPort.Text =
-                ap.GetString("charging_print",
-                "prnPort",
-                "LPT1");
-
-            this.checkBox_print_pausePrint.Checked = ap.GetBoolean(
-                "charging_print",
-                "pausePrint",
-                false);
-
-            this.textBox_print_projectName.Text = ap.GetString(
-                "charging_print",
-                "projectName",
-                "");
-
-            //
-            this.label_print_projectNameMessage.Text = "";
-
-            // amerce
-            this.comboBox_amerce_interface.Text =
-                ap.GetString("config",
-                "amerce_interface",
-                "<无>");
-
-            // 交费窗布局
-            this.comboBox_amerce_layout.Text =
-    ap.GetString("amerce_form",
-    "layout",
-    "左右分布");
-
-
-            // accept
-            this.checkBox_accept_singleClickLoadDetail.Checked =
-                ap.GetBoolean(
-                "accept_form",
-                "single_click_load_detail",
-                false);
-
-            // *** 读卡器
-
-            // 身份证读卡器URL
-            this.textBox_cardReader_idcardReaderUrl.Text =
-    ap.GetString("cardreader",
-    "idcardReaderUrl",
-    "");  // 常用值 "ipc://IdcardChannel/IdcardServer"
-
-            // RFID 读卡器 URL
-            this.textBox_cardReader_rfidCenterUrl.Text =
-                ap.GetString("cardreader",
-    "rfidCenterUrl",
-    "");  // 常用值 "ipc://RfidChannel/RfidServer"
-
-            this.comboBox_rfid_tagCachePolicy.Text =
-                ap.GetString("rfid",
-    "tagCachePolicy",
-    "不缓存");
-
-            // 2023/10/27
-            // 超高频标签数据格式
-            this.comboBox_uhf_dataFormat.Text =
-                ap.GetString("uhf",
-    "dataFormat",
-    "国标格式");
-            // 超高频标签是否要写入 User Bank 内容
-            this.checkBox_uhf_bookTagWriteUserBank.Checked =
-                ap.GetBoolean("uhf",
-    "bookTagWriteUserBank",
+    "queryPanel_visibie",
     true);
-            // 超高频标签当遇到不同内容格式覆盖的时候是否警告?
-            this.checkBox_uhf_warningWhenDataFormatMismatch.Checked =
-                ap.GetBoolean("uhf",
-    "warningWhenDataFormatMismatch",
+                this.checkBox_itemManagement_showItemQuickInputPanel.Checked = ap.GetBoolean(
+    "entityform",
+    "itemQuickInputPanel_visibie",
     true);
-            // 超高频标签内容 User Bank 应写入的元素名列表
-            this.checkedComboBox_uhf_elements.Items.AddRange(
-    new string[] { "OwnerInstitution\t机构代码", "TypeOfUsage\t用途", "SetInformation\t集合信息", "ShelfLocation\t架位号" });
 
-            this.checkedComboBox_uhf_elements.Text =
-                ap.GetString("uhf",
-    "elements",
-    "SetInformation,OwnerInstitution,TypeOfUsage,ShelfLocation");
+                // 副本书目记录显示为只读状态
+                this.checkBox_itemManagement_linkedRecordReadonly.Checked = ap.GetBoolean(
+    "entityform",
+    "linkedRecordReadonly",
+    true);
 
-            // RSSI
-            this.numericUpDown_uhf_rssi.Value =
-                ap.GetInt("uhf",
-    "rssi",
-    0);
-            this.checkBox_uhf_onlyEpcCharging.Checked =
-            ap.GetBoolean("uhf",
-    "onlyEpcCharging",
+                // 显示其他分馆的册记录
+                this.checkBox_itemManagement_displayOtherLibraryItem.Checked = ap.GetBoolean(
+    "entityform",
+    "displayOtherLibraryItem",
     false);
 
-            // 2023/11/29
-            this.numericUpDown_rfid_inventoryIdleSeconds.Value =
-                ap.GetInt("rfid",
-    "inventoryIdleSeconds",
-    0);
+                // 自动限定paste进入的图像宽度
+                this.textBox_itemManagement_maxPicWidth.Text = Program.MainForm.AppInfo.GetString(
+        "entityform",
+        "paste_pic_maxwidth",
+        "-1");
 
-            checkBox_uhf_bookTagWriteUserBank_CheckedChanged(this, new EventArgs());
+                // ui 外观
 
-            if (StringUtil.IsInList("client_disablerfid", Program.MainForm._currentUserRights))
-            {
-                this.textBox_cardReader_rfidCenterUrl.Enabled = false;
-                this.comboBox_rfid_tagCachePolicy.Enabled = false;
+                // 停靠
+                this.comboBox_ui_fixedPanelDock.Text = Program.MainForm.panel_fixed.Dock.ToString();
 
-                this.button_cardReader_setRfidUrlDefaultValue.Enabled = false;
+                this.checkBox_ui_hideFixedPanel.Checked = ap.GetBoolean(
+                    "MainForm",
+                    "hide_fixed_panel",
+                    false);
 
-                this.comboBox_uhf_dataFormat.Enabled = false;
-                this.checkBox_uhf_bookTagWriteUserBank.Enabled = false;
-                this.checkBox_uhf_warningWhenDataFormatMismatch.Enabled = false;
-                this.checkedComboBox_uhf_elements.Enabled = false;
-                this.numericUpDown_uhf_rssi.Enabled = false;
-                this.numericUpDown_rfid_inventoryIdleSeconds.Enabled = false;
-            }
+                this.checkBox_ui_fixedPanelAnimationEnabled.Checked = ap.GetBoolean(
+                    "MainForm",
+                    "fixed_panel_animation",
+                    false);
 
-            this.checkBox_rfidTest_borrowEAS.Checked =
-                ap.GetBoolean("rfidTest",
-    "borrowEAS",
-    false);
-            this.checkBox_rfidTest_returnPreEAS.Checked =
-    ap.GetBoolean("rfidTest",
-"returnPreEAS",
-false);
+                this.textBox_ui_defaultFont.Text = ap.GetString(
+        "Global",
+        "default_font",
+        "");
 
-            this.checkBox_rfidTest_returnAPI.Checked =
+                // 标签打印模式
+                this.checkBox_ui_printLabelMode.Checked = ap.GetBoolean(
+                    "MainForm",
+                    "print_label_mode",
+                    false);
+
+                // *** 入馆登记
+                // passgate
+                this.numericUpDown_passgate_maxListItemsCount.Value = ap.GetInt(
+                    "passgate_form",
+                    "max_list_items_count",
+                    1000);
+
+                // 检索
+                // search
+                this.checkBox_search_useExistDetailWindow.Checked = ap.GetBoolean(
+                    "all_search_form",
+                    "load_to_exist_detailwindow",
+                    true);
+
+                this.numericUpDown_search_maxBiblioResultCount.Value = ap.GetInt(
+                    "biblio_search_form",
+                    "max_result_count",
+                    -1);
+
+                this.checkBox_search_hideBiblioMatchStyle.Checked = ap.GetBoolean(
+                    "biblio_search_form",
+                    "hide_matchstyle",
+                    false);
+
+                // 2008/1/20 
+                this.checkBox_search_biblioPushFilling.Checked = ap.GetBoolean(
+                    "biblio_search_form",
+                    "push_filling_browse",
+                    false);
+
+                // 2020/10/24
+                this.numericUpDown_search_multiline_maxBiblioResultCount.Value = ap.GetInt(
+        "biblio_search_form",
+        "multiline_max_result_count",
+        10);
+
+                this.numericUpDown_search_maxReaderResultCount.Value = ap.GetInt(
+                    "reader_search_form",
+                    "max_result_count",
+                    -1);
+
+                this.checkBox_search_hideReaderMatchStyle.Checked = ap.GetBoolean(
+                    "reader_search_form",
+                    "hide_matchstyle",
+                    false);
+
+                // 2008/1/20 
+                this.checkBox_search_readerPushFilling.Checked = ap.GetBoolean(
+                    "reader_search_form",
+                    "push_filling_browse",
+                    false);
+
+                // ---
+                this.numericUpDown_search_maxItemResultCount.Value = ap.GetInt(
+                    "item_search_form",
+                    "max_result_count",
+                    -1);
+
+                // 2008/11/21 
+                this.checkBox_search_hideItemMatchStyleAndDbName.Checked = ap.GetBoolean(
+                    "item_search_form",
+                    "hide_matchstyle_and_dbname",
+                    false);
+
+                // 2008/1/20 
+                this.checkBox_search_itemPushFilling.Checked = ap.GetBoolean(
+                    "item_search_form",
+                    "push_filling_browse",
+                    false);
+
+                // 2021/5/27
+                this.checkBox_search_itemFilterLibraryCode.Checked = ap.GetBoolean(
+                    "item_search_form",
+                    "filter_library_code",
+                    false);
+
+                // --- order
+                this.numericUpDown_search_maxOrderResultCount.Value = ap.GetInt(
+        "order_search_form",
+        "max_result_count",
+        -1);
+
+                this.checkBox_search_hideOrderMatchStyleAndDbName.Checked = ap.GetBoolean(
+                    "order_search_form",
+                    "hide_matchstyle_and_dbname",
+                    false);
+
+                this.checkBox_search_orderPushFilling.Checked = ap.GetBoolean(
+                    "order_search_form",
+                    "push_filling_browse",
+                    false);
+
+                // --- issue
+                this.numericUpDown_search_maxIssueResultCount.Value = ap.GetInt(
+        "issue_search_form",
+        "max_result_count",
+        -1);
+
+                this.checkBox_search_hideIssueMatchStyleAndDbName.Checked = ap.GetBoolean(
+                    "issue_search_form",
+                    "hide_matchstyle_and_dbname",
+                    true);
+
+                this.checkBox_search_issuePushFilling.Checked = ap.GetBoolean(
+                    "issue_search_form",
+                    "push_filling_browse",
+                    false);
+
+                // --- comment
+                this.numericUpDown_search_maxCommentResultCount.Value = ap.GetInt(
+        "comment_search_form",
+        "max_result_count",
+        -1);
+
+                this.checkBox_search_hideCommentMatchStyleAndDbName.Checked = ap.GetBoolean(
+                    "comment_search_form",
+                    "hide_matchstyle_and_dbname",
+                    false);
+
+                this.checkBox_search_commentPushFilling.Checked = ap.GetBoolean(
+                    "comment_search_form",
+                    "push_filling_browse",
+                    false);
+
+                // 凭条打印
+                this.comboBox_print_prnPort.Text =
+                    ap.GetString("charging_print",
+                    "prnPort",
+                    "LPT1");
+
+                this.checkBox_print_pausePrint.Checked = ap.GetBoolean(
+                    "charging_print",
+                    "pausePrint",
+                    false);
+
+                this.textBox_print_projectName.Text = ap.GetString(
+                    "charging_print",
+                    "projectName",
+                    "");
+
+                //
+                this.label_print_projectNameMessage.Text = "";
+
+                // amerce
+                this.comboBox_amerce_interface.Text =
+                    ap.GetString("config",
+                    "amerce_interface",
+                    "<无>");
+
+                // 交费窗布局
+                this.comboBox_amerce_layout.Text =
+        ap.GetString("amerce_form",
+        "layout",
+        "左右分布");
+
+
+                // accept
+                this.checkBox_accept_singleClickLoadDetail.Checked =
+                    ap.GetBoolean(
+                    "accept_form",
+                    "single_click_load_detail",
+                    false);
+
+                // *** 读卡器
+
+                // 身份证读卡器URL
+                this.textBox_cardReader_idcardReaderUrl.Text =
+        ap.GetString("cardreader",
+        "idcardReaderUrl",
+        "");  // 常用值 "ipc://IdcardChannel/IdcardServer"
+
+                // RFID 读卡器 URL
+                this.textBox_cardReader_rfidCenterUrl.Text =
+                    ap.GetString("cardreader",
+        "rfidCenterUrl",
+        "");  // 常用值 "ipc://RfidChannel/RfidServer"
+
+                this.comboBox_rfid_tagCachePolicy.Text =
+                    ap.GetString("rfid",
+        "tagCachePolicy",
+        "不缓存");
+
+                // 2023/10/27
+                // 超高频标签数据格式
+                this.comboBox_uhf_dataFormat.Text =
+                    ap.GetString("uhf",
+        "dataFormat",
+        "国标格式");
+                // 超高频标签是否要写入 User Bank 内容
+                this.checkBox_uhf_bookTagWriteUserBank.Checked =
+                    ap.GetBoolean("uhf",
+        "bookTagWriteUserBank",
+        true);
+                // 超高频标签当遇到不同内容格式覆盖的时候是否警告?
+                this.checkBox_uhf_warningWhenDataFormatMismatch.Checked =
+                    ap.GetBoolean("uhf",
+        "warningWhenDataFormatMismatch",
+        true);
+                // 超高频标签内容 User Bank 应写入的元素名列表
+                this.checkedComboBox_uhf_elements.Items.AddRange(
+        new string[] { "OwnerInstitution\t机构代码", "TypeOfUsage\t用途", "SetInformation\t集合信息", "ShelfLocation\t架位号" });
+
+                this.checkedComboBox_uhf_elements.Text =
+                    ap.GetString("uhf",
+        "elements",
+        "SetInformation,OwnerInstitution,TypeOfUsage,ShelfLocation");
+
+                // RSSI
+                this.numericUpDown_uhf_rssi.Value =
+                    ap.GetInt("uhf",
+        "rssi",
+        0);
+                this.checkBox_uhf_onlyEpcCharging.Checked =
+                ap.GetBoolean("uhf",
+        "onlyEpcCharging",
+        false);
+
+                // 2023/11/29
+                this.numericUpDown_rfid_inventoryIdleSeconds.Value =
+                    ap.GetInt("rfid",
+        "inventoryIdleSeconds",
+        0);
+
+                checkBox_uhf_bookTagWriteUserBank_CheckedChanged(this, new EventArgs());
+
+                if (StringUtil.IsInList("client_disablerfid", Program.MainForm._currentUserRights))
+                {
+                    this.textBox_cardReader_rfidCenterUrl.Enabled = false;
+                    this.comboBox_rfid_tagCachePolicy.Enabled = false;
+
+                    this.button_cardReader_setRfidUrlDefaultValue.Enabled = false;
+
+                    this.comboBox_uhf_dataFormat.Enabled = false;
+                    this.checkBox_uhf_bookTagWriteUserBank.Enabled = false;
+                    this.checkBox_uhf_warningWhenDataFormatMismatch.Enabled = false;
+                    this.checkedComboBox_uhf_elements.Enabled = false;
+                    this.numericUpDown_uhf_rssi.Enabled = false;
+                    this.numericUpDown_rfid_inventoryIdleSeconds.Enabled = false;
+                }
+
+                this.checkBox_rfidTest_borrowEAS.Checked =
                     ap.GetBoolean("rfidTest",
-"returnAPI",
-false);
-
-            this.checkBox_rfidTest_returnPostUndoEAS.Checked =
-                ap.GetBoolean("rfidTest",
-"returnPostUndoEAS",
-false);
-
-            // *** 指纹
-
-            // 指纹阅读器接口URL
-            this.textBox_fingerprint_readerUrl.Text =
-            ap.GetString("fingerprint",
-            "fingerPrintReaderUrl",
-            "");    // 常用值 "ipc://FingerprintChannel/FingerprintServer"
-
-            // *** 掌纹
-
-            // 掌纹阅读器接口URL
-            this.textBox_palmprint_readerUrl.Text =
-            ap.GetString("palmprint",
-            "palmPrintReaderUrl",
-            "");    // 常用值 "ipc://PalmChannel/PalmServer"
-
-
-            // 人脸识别接口URL
-            this.textBox_face_readerUrl.Text =
-                ap.GetString("face",
-                "faceReaderUrl",
-                "");    // 常用值 "ipc://FaceChannel/FaceServer"
-
-            // 2022/11/9
-            this.checkBox_face_savePhotoWhileRegister.Checked =
-                ap.GetBoolean("face",
-                "savePhotoWhileRegister",
-                true);
-
-
-            // 指纹代理帐户 用户名
-            this.textBox_fingerprint_userName.Text =
-    ap.GetString("fingerprint",
-    "userName",
-    "");
-            // 指纹代理帐户 密码
-            {
-                string strPassword = ap.GetString("fingerprint",
-                "password",
-                "");
-                strPassword = Program.MainForm.DecryptPasssword(strPassword);
-                this.textBox_fingerprint_password.Text = strPassword;
-            }
-
-            // *** 读者
-
-            // 自动重试 当出现读卡对话框时
-            this.checkBox_patron_autoRetryReaderCard.Checked =
-                ap.GetBoolean(
-                "reader_info_form",
-                "autoretry_readcarddialog",
-                true);
-
-            // 出现 用身份证号设置条码号 对话框
-            this.checkBox_patron_displaySetReaderBarcodeDialog.Checked =
-                ap.GetBoolean(
-                "reader_info_form",
-                "display_setreaderbarcode_dialog",
-                true);
-
-            // 校验输入的条码号
-            this.checkBox_patron_verifyBarcode.Checked = ap.GetBoolean(
-    "reader_info_form",
-    "verify_barcode",
+        "borrowEAS",
+        false);
+                this.checkBox_rfidTest_returnPreEAS.Checked =
+        ap.GetBoolean("rfidTest",
+    "returnPreEAS",
     false);
 
-            // 在读者窗范围内自动关闭 身份证读卡器 键盘仿真(&S)
-            this.checkBox_patron_disableIdcardReaderKeyboardSimulation.Checked = ap.GetBoolean(
-    "reader_info_form",
-    "disable_idcardreader_sendkey",
-    true);
+                this.checkBox_rfidTest_returnAPI.Checked =
+                        ap.GetBoolean("rfidTest",
+    "returnAPI",
+    false);
 
-            this.checkBox_patron_disableBioKeyboardSimulation.Checked = ap.GetBoolean(
-    "reader_info_form",
-    "disable_bio_sendkey",
-    true);
+                this.checkBox_rfidTest_returnPostUndoEAS.Checked =
+                    ap.GetBoolean("rfidTest",
+    "returnPostUndoEAS",
+    false);
 
-            // 日志
-            // 显示读者借阅历史
-            this.checkBox_operLog_displayReaderBorrowHistory.Checked =
-                ap.GetBoolean(
-                "operlog_form",
-                "display_reader_borrow_history",
-                true);
-            // 显示册借阅历史
-            this.checkBox_operLog_displayItemBorrowHistory.Checked =
-                ap.GetBoolean(
-                "operlog_form",
-                "display_item_borrow_history",
-                true);
-            // 自动缓存日志文件
-            this.checkBox_operLog_autoCache.Checked =
-                ap.GetBoolean(
-                "global",
-                "auto_cache_operlogfile",
-                true);
+                // *** 指纹
 
-            // 日志详细级别
-            this.comboBox_operLog_level.Text =
-                ap.GetString(
-                "operlog_form",
-                "level",
-                "1 -- 简略");
+                // 指纹阅读器接口URL
+                this.textBox_fingerprint_readerUrl.Text =
+                ap.GetString("fingerprint",
+                "fingerPrintReaderUrl",
+                "");    // 常用值 "ipc://FingerprintChannel/FingerprintServer"
 
-            // 全局
-            // 浏览器控件允许脚本错误对话框(&S)
-            this.checkBox_global_displayScriptErrorDialog.Checked =
-                ap.GetBoolean(
-                "global",
-                "display_webbrowsecontrol_scripterror_dialog",
-                false);
+                // *** 掌纹
 
-            // 加拼音时自动选择多音字
-            this.checkBox_global_autoSelPinyin.Checked =
-                ap.GetBoolean(
-                "global",
-                "auto_select_pinyin",
-                false);
+                // 掌纹阅读器接口URL
+                this.textBox_palmprint_readerUrl.Text =
+                ap.GetString("palmprint",
+                "palmPrintReaderUrl",
+                "");    // 常用值 "ipc://PalmChannel/PalmServer"
 
-            // 保存封面扫描的原始图像
-            this.checkBox_global_saveOriginCoverImage.Checked =
-                ap.GetBoolean(
-                "global",
-                "save_orign_cover_image",
-                false);
 
-            // 将键盘输入的条码号自动转为大写
-            this.checkBox_global_upperInputBarcode.Checked =
-                ap.GetBoolean(
-                "global",
-                "upper_input_barcode",
-                true);
+                // 人脸识别接口URL
+                this.textBox_face_readerUrl.Text =
+                    ap.GetString("face",
+                    "faceReaderUrl",
+                    "");    // 常用值 "ipc://FaceChannel/FaceServer"
 
-            // 附加的馆藏地列表
-            string value = ap.GetString(
-                "global",
-                "additionalLocations",
-                "");
-            if (string.IsNullOrEmpty(value) == false)
-                value = value.Replace(",", "\r\n");
-            this.textBox_global_additionalLocations.Text = value;
+                // 2022/11/9
+                this.checkBox_face_savePhotoWhileRegister.Checked =
+                    ap.GetBoolean("face",
+                    "savePhotoWhileRegister",
+                    true);
 
-            this.checkedComboBox_global_securityProtocol.Items.AddRange(
-                new string[] { "SystemDefault", "Ssl3", "Tls", "Tls11", "Tls12" });
-            this.checkedComboBox_global_securityProtocol.Text = ap.GetString(
+                // 指纹代理帐户 用户名
+                this.textBox_fingerprint_userName.Text =
+        ap.GetString("fingerprint",
+        "userName",
+        "");
+                // 指纹代理帐户 密码
+                {
+                    string strPassword = ap.GetString("fingerprint",
+                    "password",
+                    "");
+                    strPassword = Program.MainForm.DecryptPasssword(strPassword);
+                    this.textBox_fingerprint_password.Text = strPassword;
+                }
+
+                // *** 读者
+
+                // 自动重试 当出现读卡对话框时
+                this.checkBox_patron_autoRetryReaderCard.Checked =
+                    ap.GetBoolean(
+                    "reader_info_form",
+                    "autoretry_readcarddialog",
+                    true);
+
+                // 出现 用身份证号设置条码号 对话框
+                this.checkBox_patron_displaySetReaderBarcodeDialog.Checked =
+                    ap.GetBoolean(
+                    "reader_info_form",
+                    "display_setreaderbarcode_dialog",
+                    true);
+
+                // 校验输入的条码号
+                this.checkBox_patron_verifyBarcode.Checked = ap.GetBoolean(
+        "reader_info_form",
+        "verify_barcode",
+        false);
+
+                // 在读者窗范围内自动关闭 身份证读卡器 键盘仿真(&S)
+                this.checkBox_patron_disableIdcardReaderKeyboardSimulation.Checked = ap.GetBoolean(
+        "reader_info_form",
+        "disable_idcardreader_sendkey",
+        true);
+
+                this.checkBox_patron_disableBioKeyboardSimulation.Checked = ap.GetBoolean(
+        "reader_info_form",
+        "disable_bio_sendkey",
+        true);
+
+                // 日志
+                // 显示读者借阅历史
+                this.checkBox_operLog_displayReaderBorrowHistory.Checked =
+                    ap.GetBoolean(
+                    "operlog_form",
+                    "display_reader_borrow_history",
+                    true);
+                // 显示册借阅历史
+                this.checkBox_operLog_displayItemBorrowHistory.Checked =
+                    ap.GetBoolean(
+                    "operlog_form",
+                    "display_item_borrow_history",
+                    true);
+                // 自动缓存日志文件
+                this.checkBox_operLog_autoCache.Checked =
+                    ap.GetBoolean(
                     "global",
-                    "securityProtocol",
-                    "SystemDefault");
+                    "auto_cache_operlogfile",
+                    true);
 
-            this.checkBox_global_disableSpeak.Checked = ap.GetBoolean(
-                "global",
-                "disableSpeak",
-                false);
+                // 日志详细级别
+                this.comboBox_operLog_level.Text =
+                    ap.GetString(
+                    "operlog_form",
+                    "level",
+                    "1 -- 简略");
 
-            // *** 标签打印
-            // 从何处获取索取号
-            this.comboBox_labelPrint_accessNoSource.Text = ap.GetString(
-                "labelprint",
-                "accessNo_source",
-                "从册记录");
+                // 全局
+                // 浏览器控件允许脚本错误对话框(&S)
+                this.checkBox_global_displayScriptErrorDialog.Checked =
+                    ap.GetBoolean(
+                    "global",
+                    "display_webbrowsecontrol_scripterror_dialog",
+                    false);
 
-            // *** 消息
+                // 加拼音时自动选择多音字
+                this.checkBox_global_autoSelPinyin.Checked =
+                    ap.GetBoolean(
+                    "global",
+                    "auto_select_pinyin",
+                    false);
 
-            // 共享书目数据
-            _disableShareBiblioChangedEvent++;
-            this.checkBox_message_shareBiblio.Checked = ap.GetBoolean(
-                "message",
-                "share_biblio",
-                false);
-            _disableShareBiblioChangedEvent--;
+                // 保存封面扫描的原始图像
+                this.checkBox_global_saveOriginCoverImage.Checked =
+                    ap.GetBoolean(
+                    "global",
+                    "save_orign_cover_image",
+                    false);
 
-            this.textBox_message_userName.Text =
+                // 将键盘输入的条码号自动转为大写
+                this.checkBox_global_upperInputBarcode.Checked =
+                    ap.GetBoolean(
+                    "global",
+                    "upper_input_barcode",
+                    true);
+
+                // 附加的馆藏地列表
+                string value = ap.GetString(
+                    "global",
+                    "additionalLocations",
+                    "");
+                if (string.IsNullOrEmpty(value) == false)
+                    value = value.Replace(",", "\r\n");
+                this.textBox_global_additionalLocations.Text = value;
+
+                this.checkedComboBox_global_securityProtocol.Items.AddRange(
+                    new string[] { "SystemDefault", "Ssl3", "Tls", "Tls11", "Tls12" });
+                this.checkedComboBox_global_securityProtocol.Text = ap.GetString(
+                        "global",
+                        "securityProtocol",
+                        "SystemDefault");
+
+                this.checkBox_global_disableSpeak.Checked = ap.GetBoolean(
+                    "global",
+                    "disableSpeak",
+                    false);
+
+                // *** 标签打印
+                // 从何处获取索取号
+                this.comboBox_labelPrint_accessNoSource.Text = ap.GetString(
+                    "labelprint",
+                    "accessNo_source",
+                    "从册记录");
+
+                // *** 消息
+
+                // 共享书目数据
+                _disableShareBiblioChangedEvent++;
+                this.checkBox_message_shareBiblio.Checked = ap.GetBoolean(
+                    "message",
+                    "share_biblio",
+                    false);
+                _disableShareBiblioChangedEvent--;
+
+                this.textBox_message_userName.Text =
+        ap.GetString(
+        "message",
+        "username",
+        "");
+                {
+                    string strPassword = ap.GetString(
+            "message",
+            "password",
+            "");
+                    strPassword = Program.MainForm.DecryptPasssword(strPassword);
+                    this.textBox_message_password.Text = strPassword;
+                }
+
+                this.textBox_message_shelfAccount.Text =
     ap.GetString(
     "message",
-    "username",
+    "shelfAccount",
     "");
-            {
-                string strPassword = ap.GetString(
-        "message",
-        "password",
-        "");
-                strPassword = Program.MainForm.DecryptPasssword(strPassword);
-                this.textBox_message_password.Text = strPassword;
+
+                checkBox_charging_isbnBorrow_CheckedChanged(this, null);
+                checkBox_quickCharging_isbnBorrow_CheckedChanged(this, null);
+
+                this.m_bServerCfgChanged = false;
             }
-
-            this.textBox_message_shelfAccount.Text =
-ap.GetString(
-"message",
-"shelfAccount",
-"");
-
-            checkBox_charging_isbnBorrow_CheckedChanged(this, null);
-            checkBox_quickCharging_isbnBorrow_CheckedChanged(this, null);
-
-            this.m_bServerCfgChanged = false;
+            finally
+            {
+                _inLoading--;
+            }
         }
 
         private void CfgDlg_FormClosing(object sender, FormClosingEventArgs e)
@@ -1113,6 +1129,11 @@ ap.GetString(
                     "quickcharging_form",
                     "autoTriggerFaceInputDelaySeconds",
                     (int)this.numericUpDown_quickCharging_autoTriggerFaceInputDelaySeconds.Value);
+
+                // 人脸识别允许命中命中多个(手动选择)
+                ap.SetBoolean("quickcharging_form",
+    "faceInputMultipleHits",
+    this.checkBox_quickCharging_faceInputMultipleHits.Checked);
 
                 // 读者信息中不显示借阅历史
                 ap.SetBoolean(
@@ -2162,6 +2183,8 @@ MessageBoxDefaultButton.Button2);
                 this.checkedComboBox_uhf_elements.Visible = this.checkBox_uhf_bookTagWriteUserBank.Checked;
                 this.label_uhf_elements.Visible = this.checkBox_uhf_bookTagWriteUserBank.Checked;
             }
+
+            WarningUhfGbOiPosition();
         }
 
         private void comboBox_uhf_dataFormat_SelectedIndexChanged(object sender, EventArgs e)
@@ -2177,6 +2200,8 @@ MessageBoxDefaultButton.Button2);
                 this.checkBox_uhf_bookTagWriteUserBank.Visible = true;
                 checkBox_uhf_bookTagWriteUserBank_CheckedChanged(sender, e);
             }
+
+            WarningUhfGbOiPosition();
         }
 
         private void tabPage_cardReader_DoubleClick(object sender, EventArgs e)
@@ -2196,6 +2221,23 @@ MessageBoxDefaultButton.Button2);
             this.groupBox_rfidReader.Width = new_width;
             this.groupBox_rfidTest.Width = new_width;
             */
+        }
+
+        private void checkedComboBox_uhf_elements_TextChanged(object sender, EventArgs e)
+        {
+            WarningUhfGbOiPosition();
+        }
+
+        // 验证 UHF 国标格式，OI 元素写入的位置，对非常见用法进行警告
+        void WarningUhfGbOiPosition()
+        {
+            if (_inLoading == 0
+                && StringUtil.IsInList("OwnerInstitution", this.checkedComboBox_uhf_elements.Text)
+                && checkBox_uhf_bookTagWriteUserBank.Checked == true
+                && comboBox_uhf_dataFormat.Text == "国标格式")
+            {
+                MessageBox.Show(this, "警告: 对于超高频标签的国标格式，您选择了将“机构代码”写入 User Bank，这是一种不常见的做法，可能会导致兼容性问题，请仔细斟酌选择。\r\n\r\n一般的做法是将“机构代码”写入到 EPC Bank 中即可，这是默认行为，不需要特意指定");
+            }
         }
     }
 

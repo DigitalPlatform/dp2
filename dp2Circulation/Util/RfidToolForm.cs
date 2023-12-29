@@ -25,6 +25,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using static DigitalPlatform.RFID.RfidTagList;
 using DigitalPlatform.CirculationClient;
+using Accord.IO;
 
 namespace dp2Circulation
 {
@@ -3847,6 +3848,11 @@ new_tag_info);
                     (chip, uhfProtocol) =>
                     {
                         return build_user_bank;
+                    },
+                    () =>
+                    {
+                        // TODO: 可以弹出一个对话框询问一下，是否要把 OI 移动到 User Bank
+                        return false;
                     }
                     );
                 var new_tag_info = build_result.TagInfo;
@@ -4144,10 +4150,16 @@ LogicChipItem chip)
             public string NewUhfFormat { get; set; }
         }
 
+        // return:
+        //      true    OI 要移动到 User Bank 中(EPC 中 UII 里面就没有了 OI)
+        //      false   OI 写入 EPC 中的 UII 中(User Bank 中就没有了 OI 元素)
+        public delegate bool delegate_askOiMoveToUserBank();
+
         // 构造写入用的 TagInfo
         // TODO: 要留意 高校联盟 格式的 TOU 写入前翻译是否正确
         // parameters:
         //          style   包含 "noUserBank" 表示对“望湖洞庭”格式不创建 User Bank
+        //          chip    包含即将写入标签信息的 LogicChip 对象。注意本函数执行过程中对 chip 对象进行了保护，确保不会修改它的内容
         public static BuildWritingResult BuildWritingTagInfo(TagInfo existing,
     LogicChip chip,
     bool eas,
@@ -4157,9 +4169,12 @@ LogicChipItem chip)
     delegate_askOverwriteDifference func_askOverwrite = null,
     delegate_warningRemoveOI func_askRemoveOI = null,
     // bool build_user_bank = true
-    filterUserBankElements func_filterUserBankElements = null
+    filterUserBankElements func_filterUserBankElements = null,
+    delegate_askOiMoveToUserBank func_oiMoveToUserBank = null
             )
         {
+            var working_chip = chip.Clone();
+
             var noUserBank = StringUtil.IsInList("noUserBank", style);
 
             if (existing.Protocol == InventoryInfo.ISO15693)
@@ -4167,7 +4182,7 @@ LogicChipItem chip)
                 // SetTypeOfUsage("", chip, "gb");
 
                 TagInfo new_tag_info = existing.Clone();
-                new_tag_info.Bytes = chip.GetBytes(
+                new_tag_info.Bytes = working_chip.GetBytes(
                     (int)(new_tag_info.MaxBlockCount * new_tag_info.BlockSize),
                     (int)new_tag_info.BlockSize,
                     LogicChip.GetBytesStyle.None,
@@ -4296,7 +4311,7 @@ LogicChipItem chip)
                 {
                     // 注: 如果强制不让创建 User Bank 了，这里就不询问了
                     if (noUserBank == false)
-                        build_user_bank = func_filterUserBankElements(chip, uhfProtocol);
+                        build_user_bank = func_filterUserBankElements(working_chip, uhfProtocol);
                     else
                         build_user_bank = false;    // 强制不让创建 User Bank
                 }
@@ -4336,7 +4351,7 @@ LogicChipItem chip)
                     if (uhfProtocol == "gxlm"
                         || uhfProtocol == "gxlm(whdt)")
                     {
-                        if (RemoveOI(chip, func_askRemoveOI) == false)
+                        if (RemoveOI(working_chip, func_askRemoveOI) == false)
                             throw new Exception("放弃写入");
                     }
                 }
@@ -4394,7 +4409,7 @@ LogicChipItem chip)
                             ContentParameters = new int[] { 16, 24, 28, 30 },   // 强行规定 Content Parameters 值
                         };
                         // chip 中只需要一个 PII 元素。因为其它的都会被样本内容强行设置进入
-                        var pii = chip.FindElement(ElementOID.PII)?.Text;
+                        var pii = working_chip.FindElement(ElementOID.PII)?.Text;
                         var temp_chip = new LogicChip();
                         temp_chip.SetElement(ElementOID.PII, pii);
                         result = GaoxiaoUtility.BuildTag(temp_chip, build_user_bank, eas,
@@ -4404,9 +4419,9 @@ LogicChipItem chip)
                     {
                         // 删除空内容元素
                         // 2023/11/23
-                        chip.RemoveEmptyElements();
+                        working_chip.RemoveEmptyElements();
 
-                        result = GaoxiaoUtility.BuildTag(chip, build_user_bank, eas,
+                        result = GaoxiaoUtility.BuildTag(working_chip, build_user_bank, eas,
                             epc_info);
                     }
 
@@ -4448,9 +4463,27 @@ LogicChipItem chip)
 #endif
                     // SetTypeOfUsage(chip, "gb");
 
-                    var result = UhfUtility.BuildTag(chip,
+
+                    string build_style = eas ? "afi_eas_on" : "";
+
+
+                    // 是否要特意把 OI 写入 User Bank
+                    if (func_oiMoveToUserBank != null 
+                        && build_user_bank)
+                    {
+                        // TODO: 可以进一步判断当 working_chip 中包含了非空的 OI 或者 AOI 元素时，才 invoke() func_oiMoveToUserBank
+                        if (func_oiMoveToUserBank.Invoke() == true)
+                            build_style += ",oi_in_userbank";
+                        /*
+                        if (StringUtil.IsInList("OwnerInstitution", Program.MainForm.UhfUserBankElements)
+                            && build_user_bank == true)
+                            build_style += ",oi_in_userbank";
+                        */
+                    }
+
+                    var result = UhfUtility.BuildTag(working_chip,
                         true,
-                        eas ? "afi_eas_on" : "");
+                        build_style);
                     if (result.Value == -1)
                         throw new Exception(result.ErrorInfo);
                     new_tag_info.Bytes = build_user_bank ? result.UserBank : null;

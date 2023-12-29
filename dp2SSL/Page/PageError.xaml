@@ -11,7 +11,7 @@
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="60" />
+            <ColumnDefinition Width="68" />
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="0" />
         </Grid.ColumnDefinitions>
@@ -26,14 +26,18 @@
         <!-- left bar -->
         <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Vertical">
             <Grid Height="20" />
-            <Button Name="goHome" Background="Transparent" BorderThickness="0" Click="GoHome_Click">
+            <Button Name="goHome" ToolTip="返回主菜单"
+                    Style="{DynamicResource RoundedButtonLightStyle}"
+                    BorderThickness="0" Click="GoHome_Click">
                 <fa:ImageAwesome Icon="Home"
-                             Height="40" Foreground="DarkGray" Margin="4"/>
+                             Height="40" Foreground="{StaticResource buttonForeground}" Margin="6"/>
             </Button>
             <Grid Height="20" />
-            <Button Name="goHelp" Background="Transparent" BorderThickness="0">
+            <Button Name="goHelp" ToolTip="帮助"
+                    Style="{DynamicResource RoundedButtonLightStyle}" 
+                    BorderThickness="0">
                 <fa:ImageAwesome Icon="LightbulbOutline"
-                             Height="40" Foreground="DarkGray" Margin="4"/>
+                             Height="40" Foreground="{StaticResource buttonForeground}" Margin="6"/>
             </Button>
         </StackPanel>
 

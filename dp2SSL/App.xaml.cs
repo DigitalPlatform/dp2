@@ -444,8 +444,12 @@ namespace dp2SSL
 
         public void ReloadSkin()
         {
-            PageMenu.ClearPages();
-            ChangeSkin( SkinName == "暗色" ? Skin.Dark : Skin.Light);
+            var current_cfg_skin = SkinName == "暗色" ? Skin.Dark : Skin.Light;
+            if (App.Skin != current_cfg_skin)
+            {
+                PageMenu.ClearPages();
+                ChangeSkin(current_cfg_skin);
+            }
         }
 
         static string _libraryName;

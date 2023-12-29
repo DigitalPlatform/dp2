@@ -10,7 +10,11 @@
     <SolidColorBrush x:Key="yellowBackground" Color="#ffff55"/>
     <SolidColorBrush x:Key="grayBackground" Color="LightGray"/>
 
+    <SolidColorBrush x:Key="buttonBackground" Color="#FF90CAF9"/>
+    <SolidColorBrush x:Key="buttonForeground" Color="#666666"/>
+
     <!-- 通用前景色 -->
     <SolidColorBrush x:Key="normalForeground" Color="Black"/>
+
 
 </ResourceDictionary>

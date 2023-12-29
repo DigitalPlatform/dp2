@@ -870,7 +870,14 @@ out strError);
                         {
                             RfidToolForm.FilterUserBankElements(chip, uhfProtocol);
                             return Program.MainForm.UhfWriteUserBank;
-                        });
+                        },
+                        () =>
+                        {
+                            if (StringUtil.IsInList("OwnerInstitution", Program.MainForm.UhfUserBankElements))
+                                return true;
+                            return false;
+                        }
+                        );
                     new_tag_info = build_result.TagInfo;
                     new_uhfFormat = build_result.NewUhfFormat;
                 }
@@ -942,7 +949,7 @@ out strError);
             }
         }
 
-#endregion
+        #endregion
 
         static List<string> GetChangeNames()
         {

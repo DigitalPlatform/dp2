@@ -10,6 +10,7 @@ using System.Windows.Media;
 
 namespace dp2SSL
 {
+#if REMOVED
     public class MyScrollViewer : ScrollViewer
     {
         bool isScrolling = false; //Flag
@@ -67,7 +68,6 @@ namespace dp2SSL
             Mouse.Capture(this);
             isScrolling = true;
             PrevPoint = Mouse.GetPosition(this);
-
             base.OnMouseLeftButtonDown(e);
         }
 
@@ -85,7 +85,6 @@ namespace dp2SSL
             }
 
             PrevPoint = Mouse.GetPosition(this);
-
             base.OnMouseMove(e);
         }
 
@@ -96,4 +95,5 @@ namespace dp2SSL
             base.OnMouseLeftButtonUp(e);
         }
     }
+#endif
 }

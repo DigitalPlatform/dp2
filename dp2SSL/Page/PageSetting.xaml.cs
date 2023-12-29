@@ -549,7 +549,7 @@ string color = "red")
             }
         }
 
-        const string dp2library_base_version = "3.52";
+        const string dp2library_base_version = "3.153"; // "3.52";
         const string fingerprintcenter_base_version = "2.3.1";
         const string rfidcenter_base_version = "1.14.17";
         const string facecenter_base_version = "1.3";
@@ -601,6 +601,13 @@ string color = "red")
                 && StringUtil.CompareVersion(version, dp2library_base_version) < 0)
             {
                 errors.Add($"智能书柜功能要求连接的 dp2library 服务器版本在 {dp2library_base_version} 以上(但当前是 {version})");
+            }
+
+            // 2023/12/20
+            if (App.Function == "自助借还"
+                && StringUtil.CompareVersion(version, dp2library_base_version) < 0)
+            {
+                errors.Add($"自助借还功能要求连接的 dp2library 服务器版本在 {dp2library_base_version} 以上(但当前是 {version})");
             }
 
             // 如果没有配置 指纹中心 URL 则不检查

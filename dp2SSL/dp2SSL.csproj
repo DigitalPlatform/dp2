@@ -36,7 +36,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>33</ApplicationRevision>
+    <ApplicationRevision>43</ApplicationRevision>
     <ApplicationVersion>1.8.63.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -459,7 +459,10 @@
     <Compile Include="Centers\FaceManager.cs" />
     <Compile Include="Centers\ProcessManager.cs" />
     <Compile Include="Controls\AlignableWrapPanel.cs" />
+    <Compile Include="Controls\CustomThumb.cs" />
+    <Compile Include="Controls\TouchScrolling.cs" />
     <Compile Include="Converter\BitmapConvertor.cs" />
+    <Compile Include="Converter\ThicknessMaxConverter.cs" />
     <Compile Include="Dialog\WriteTagWindow.xaml.cs">
       <DependentUpon>WriteTagWindow.xaml</DependentUpon>
     </Compile>
@@ -734,11 +737,19 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Content Include="Resources\MyScrollbar.txt">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Content>
     <Page Include="Resources\Patron.Dark.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Resources\Patron.Light.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Resources\Scrollbar.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

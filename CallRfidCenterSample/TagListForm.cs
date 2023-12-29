@@ -156,9 +156,14 @@ namespace CallRfidCenterSample
                                     throw new Exception(parse_result.ErrorInfo);
                                 chip = parse_result.LogicChip;
                                 uhfProtocol = "gb";
-                                pii = GetPIICaption(GetPiiPart(parse_result.UII));
-                                oi = GetOiPart(parse_result.UII, false);
+                                pii = GetPIICaption(GetPiiPart(parse_result.SafetyUII));
+                                oi = GetOiPart(parse_result.SafetyUII, false);
                                 eas = parse_result.PC.AFI == 0x07 ? "On" : "Off";
+
+                                // 2023/12/22
+                                // 为 chip 中添加 PII 和 OI 元素
+                                if (parse_result.LogicChip != null)
+                                    UhfUtility.AddPiiOi(parse_result.SafetyUII, parse_result.LogicChip);
                             }
                             else
                             {

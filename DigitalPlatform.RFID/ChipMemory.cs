@@ -61,7 +61,7 @@ namespace DigitalPlatform.RFID
 
         // 是否为“新创建”状态？
         // 这种状态，表明数据只在内存，还没有写入芯片
-        bool _isNew = true;
+        internal bool _isNew = true;
         public bool IsNew
         {
             get
@@ -72,7 +72,7 @@ namespace DigitalPlatform.RFID
 
         // 内容是否被修改过？
         // 指 IsNew 为 false 的，也就是从芯片中读出信息修改的时候，是否在内存中被修改过某些元素并且还没有来得及保存回芯片
-        bool _changed = false;
+        internal bool _changed = false;
         public bool Changed
         {
             get
@@ -1242,6 +1242,28 @@ start);
                 && string.IsNullOrEmpty(oi) == false)
                 return oi + "." + pii;
             return pii;
+        }
+
+        // 2023/12/22
+        public LogicChip Clone()
+        {
+            LogicChip clone = new LogicChip();
+            clone.Protocol = this.Protocol;
+            clone._isNew = this._isNew;
+            clone._changed = this._changed;
+
+            {
+                var elements = new List<Element>();
+                if (this._elements != null)
+                {
+                    foreach (var element in this._elements)
+                    {
+                        elements.Add(element.Clone());
+                    }
+                }
+                clone._elements = elements;
+            }
+            return clone;
         }
     }
 

@@ -14,13 +14,15 @@
                 <local:SkinResourceDictionary LightSource="./Resources/Patron.Light.xaml" 
                                               DarkSource="./Resources/Patron.Dark.xaml" />
                 <ResourceDictionary Source="./Resources/Common.xaml"/>
+                <ResourceDictionary Source="./Resources/Scrollbar.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
             <Style x:Key="RoundedButtonStyle" TargetType="{x:Type Button}">
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
-                            <Border RenderTransformOrigin="0.5,0.5" x:Name="RootGrid" CornerRadius="30" Background="#FF505050" BorderThickness="1" Padding="2">
+                            <Border RenderTransformOrigin="0.5,0.5" x:Name="RootGrid" CornerRadius="30" Background="#FF505050" BorderThickness="1"
+                                    Padding="2" Margin="6,4,6,4">
                                 <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </Border>
                             <!--
@@ -45,7 +47,7 @@
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
                             <Border RenderTransformOrigin="0.5,0.5" x:Name="RootGrid" CornerRadius="30" 
-                                Background="#FF90CAF9" BorderThickness="1" Padding="2">
+                                Background="#FF90CAF9" BorderThickness="1" Padding="2" Margin="6,2,6,2">
                                 <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </Border>
                             <!--

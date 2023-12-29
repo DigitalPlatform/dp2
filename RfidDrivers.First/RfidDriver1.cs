@@ -3748,6 +3748,13 @@ out Reader reader);
                                             AntennaID = info.AntennaID,
                                             UID = info.UID
                                         };
+
+                                    /*
+                                    // 2023/12/22
+                                    // 为 chip 中添加 PII 和 OI 元素
+                                    if (parse_result.LogicChip != null)
+                                        UhfUtility.AddPiiOi(parse_result.UII, parse_result.LogicChip);
+                                    */
                                 }
                                 catch
                                 {

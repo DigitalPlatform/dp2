@@ -272,6 +272,7 @@ namespace dp2SSL
             return Path.Combine(cacheDir, GetPath(photo_path));
         }
 
+        // Exception: 可能会抛出异常
         public void LoadPhoto(string photo_path)
         {
             if (string.IsNullOrEmpty(photo_path))

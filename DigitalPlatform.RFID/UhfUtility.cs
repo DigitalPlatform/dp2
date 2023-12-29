@@ -183,7 +183,7 @@ namespace DigitalPlatform.RFID
                 {
                     payload.Add(guid[i]);
                 }
-                while(payload.Count < 12)
+                while (payload.Count < 12)
                 {
                     payload.Add(0);
                 }
@@ -200,31 +200,43 @@ namespace DigitalPlatform.RFID
         // parameters:
         //      uii_include_oi  是否要把 OI 装配到 UII 字符串中？
         //      style   如果包含 "afi_eas_on" 表示 AFI 用 0x07(否则用 0xc2)
+        //              如果包含 "oi_in_userbank" 表示把 OI 写入 User Bank, 并且 EPC 中的 UII 里面不包含 OI 部分。否则会在 EPC 中 UII 中包含 OI 部分，而 UserBank 中不会有 OI 元素
         public static BuildTagResult BuildTag(LogicChip chip,
             bool uii_include_oi = true,
             string style = "")
         {
+            var oiInUserBank = StringUtil.IsInList("oi_in_userbank", style);
+
             string pii = chip.FindElement(ElementOID.PII)?.Text;
             string oi = chip.FindElement(ElementOID.OI)?.Text;
             string aoi = chip.FindElement(ElementOID.AOI)?.Text;
 
             string uii = "";
-            if (string.IsNullOrEmpty(oi) == false)
+            if (oiInUserBank)
             {
-                uii = oi + "." + pii;
-                chip.RemoveElement(ElementOID.OI);
-            }
-            else if (string.IsNullOrEmpty(aoi) == false)
-            {
-                uii = aoi + "." + pii;
-                chip.RemoveElement(ElementOID.AOI);
+                uii = pii;
             }
             else
-                uii = pii;
+            {
+                if (string.IsNullOrEmpty(oi) == false)
+                {
+                    uii = oi + "." + pii;
+                    chip.RemoveElement(ElementOID.OI);
+                }
+                else if (string.IsNullOrEmpty(aoi) == false)
+                {
+                    uii = aoi + "." + pii;
+                    chip.RemoveElement(ElementOID.AOI);
+                }
+                else
+                    uii = pii;
+            }
 
             chip.RemoveElement(ElementOID.PII);
 
-            var user_bank = EncodeUserBank(chip,
+            byte[] user_bank = null;
+            if (chip.Elements.Count > 0)
+                user_bank = EncodeUserBank(chip,
                 4 * 52,
                 4,
                 true,
@@ -626,9 +638,29 @@ namespace DigitalPlatform.RFID
 
             // 逻辑标签内容
             public LogicChip LogicChip { get; set; }
+
+            // 返回更安全的 UII。意思是如果 User Bank 中有机构代码，必要时会取它和 PII 一起构造 UII
+            public string SafetyUII
+            {
+                get
+                {
+                    if (UII != null && UII.Contains("."))
+                        return UII;
+                    if (LogicChip == null)
+                        return UII;
+                    var oi = LogicChip.FindElement(ElementOID.OI)?.Text;
+                    if (string.IsNullOrEmpty(oi))
+                        oi = LogicChip.FindElement(ElementOID.AOI)?.Text;
+
+                    if (string.IsNullOrEmpty(oi) == false)
+                        return oi + "." + UII;
+                    return UII;
+                }
+            }
         }
 
         // 解析一个 UHF 国标标签全部内容
+        // 注意，返回的 LogicChip 里面并没有 OI 和 PII 元素。如果需要，可以通过调用 AddPiiOi() 函数添加
         public static ParseGbResult ParseTag(byte[] epc_bank,
             byte[] user_bank,
             int block_size,
@@ -666,6 +698,55 @@ namespace DigitalPlatform.RFID
                 LogicChip = chip,   // chip 如果为空，表示没有 User Bank
             };
         }
+
+        // 为 chip 中添加(从 UII 中得来的) PII 和 OI 元素
+        public static void AddPiiOi(string uii, LogicChip chip)
+        {
+            if (string.IsNullOrEmpty(uii))
+                return;
+
+            var pii = GetPiiPart(uii);
+            var oi = GetOiPart(uii, false);
+
+            if (string.IsNullOrEmpty(pii) == false)
+                chip.SetElement(ElementOID.PII, pii);
+            if (string.IsNullOrEmpty(oi) == false)
+                chip.SetElement(ElementOID.OI, oi);
+        }
+
+        // 获得 oi.pii 的 oi 部分
+        public static string GetOiPart(string oi_pii, bool return_null)
+        {
+            // 2023/11/6
+            if (oi_pii == null)
+            {
+                if (return_null)
+                    return null;
+                return "";
+            }
+
+            if (oi_pii.IndexOf(".") == -1)
+            {
+                if (return_null)
+                    return null;
+                return "";
+            }
+            var parts = StringUtil.ParseTwoPart(oi_pii, ".");
+            return parts[0];
+        }
+
+        // 获得 oi.pii 的 pii 部分
+        public static string GetPiiPart(string oi_pii)
+        {
+            // 2023/11/6
+            if (oi_pii == null)
+                return null;
+            if (oi_pii.IndexOf(".") == -1)
+                return oi_pii;
+            var parts = StringUtil.ParseTwoPart(oi_pii, ".");
+            return parts[1];
+        }
+
 
         // 解析 MB01 数据结构
         // parameters:

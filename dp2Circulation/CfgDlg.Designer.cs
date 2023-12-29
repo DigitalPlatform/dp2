@@ -86,6 +86,8 @@
             this.numericUpDown_charging_infoDlgOpacity = new System.Windows.Forms.NumericUpDown();
             this.checkBox_charging_force = new System.Windows.Forms.CheckBox();
             this.tabPage_quickCharging = new System.Windows.Forms.TabPage();
+            this.numericUpDown_quickCharging_autoTriggerFaceInputDelaySeconds = new System.Windows.Forms.NumericUpDown();
+            this.label43 = new System.Windows.Forms.Label();
             this.checkBox_quickCharging_allowFreeSequence = new System.Windows.Forms.CheckBox();
             this.comboBox_quickCharging_displayFormat = new System.Windows.Forms.ComboBox();
             this.comboBox_quickCharging_stateSpeak = new System.Windows.Forms.ComboBox();
@@ -272,8 +274,7 @@
             this.button_z3950_servers = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
             this.button_Cancel = new System.Windows.Forms.Button();
-            this.label43 = new System.Windows.Forms.Label();
-            this.numericUpDown_quickCharging_autoTriggerFaceInputDelaySeconds = new System.Windows.Forms.NumericUpDown();
+            this.checkBox_quickCharging_faceInputMultipleHits = new System.Windows.Forms.CheckBox();
             this.tabControl_main.SuspendLayout();
             this.tabPage_server.SuspendLayout();
             this.toolStrip_server.SuspendLayout();
@@ -283,6 +284,7 @@
             this.groupBox_charging_selectItemDialog.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_charging_infoDlgOpacity)).BeginInit();
             this.tabPage_quickCharging.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_quickCharging_autoTriggerFaceInputDelaySeconds)).BeginInit();
             this.groupBox_quickCharging_selectItemDialog.SuspendLayout();
             this.tabPage_itemManagement.SuspendLayout();
             this.tabPage_ui.SuspendLayout();
@@ -326,7 +328,6 @@
             this.groupBox_dp2mserver.SuspendLayout();
             this.groupBox_message_compactShelf.SuspendLayout();
             this.tabPage_z3950.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_quickCharging_autoTriggerFaceInputDelaySeconds)).BeginInit();
             this.SuspendLayout();
             // 
             // tabControl_main
@@ -1005,6 +1006,7 @@
             // tabPage_quickCharging
             // 
             this.tabPage_quickCharging.AutoScroll = true;
+            this.tabPage_quickCharging.Controls.Add(this.checkBox_quickCharging_faceInputMultipleHits);
             this.tabPage_quickCharging.Controls.Add(this.numericUpDown_quickCharging_autoTriggerFaceInputDelaySeconds);
             this.tabPage_quickCharging.Controls.Add(this.label43);
             this.tabPage_quickCharging.Controls.Add(this.checkBox_quickCharging_allowFreeSequence);
@@ -1028,6 +1030,22 @@
             this.tabPage_quickCharging.TabIndex = 17;
             this.tabPage_quickCharging.Text = "快捷出纳";
             this.tabPage_quickCharging.UseVisualStyleBackColor = true;
+            // 
+            // numericUpDown_quickCharging_autoTriggerFaceInputDelaySeconds
+            // 
+            this.numericUpDown_quickCharging_autoTriggerFaceInputDelaySeconds.Location = new System.Drawing.Point(339, 333);
+            this.numericUpDown_quickCharging_autoTriggerFaceInputDelaySeconds.Name = "numericUpDown_quickCharging_autoTriggerFaceInputDelaySeconds";
+            this.numericUpDown_quickCharging_autoTriggerFaceInputDelaySeconds.Size = new System.Drawing.Size(145, 31);
+            this.numericUpDown_quickCharging_autoTriggerFaceInputDelaySeconds.TabIndex = 15;
+            // 
+            // label43
+            // 
+            this.label43.AutoSize = true;
+            this.label43.Location = new System.Drawing.Point(18, 335);
+            this.label43.Name = "label43";
+            this.label43.Size = new System.Drawing.Size(315, 21);
+            this.label43.TabIndex = 14;
+            this.label43.Text = "自动触发人脸识别前的延时秒数:";
             // 
             // checkBox_quickCharging_allowFreeSequence
             // 
@@ -1099,7 +1117,7 @@
             // checkBox_quickCharging_logOperTime
             // 
             this.checkBox_quickCharging_logOperTime.AutoSize = true;
-            this.checkBox_quickCharging_logOperTime.Location = new System.Drawing.Point(22, 630);
+            this.checkBox_quickCharging_logOperTime.Location = new System.Drawing.Point(22, 657);
             this.checkBox_quickCharging_logOperTime.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.checkBox_quickCharging_logOperTime.Name = "checkBox_quickCharging_logOperTime";
             this.checkBox_quickCharging_logOperTime.Size = new System.Drawing.Size(279, 25);
@@ -1110,7 +1128,7 @@
             // checkBox_quickCharging_isbnBorrow
             // 
             this.checkBox_quickCharging_isbnBorrow.AutoSize = true;
-            this.checkBox_quickCharging_isbnBorrow.Location = new System.Drawing.Point(22, 387);
+            this.checkBox_quickCharging_isbnBorrow.Location = new System.Drawing.Point(22, 422);
             this.checkBox_quickCharging_isbnBorrow.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.checkBox_quickCharging_isbnBorrow.Name = "checkBox_quickCharging_isbnBorrow";
             this.checkBox_quickCharging_isbnBorrow.Size = new System.Drawing.Size(303, 25);
@@ -1122,7 +1140,7 @@
             // groupBox_quickCharging_selectItemDialog
             // 
             this.groupBox_quickCharging_selectItemDialog.Controls.Add(this.checkBox_quickCharging_autoOperItemDialogSingleItem);
-            this.groupBox_quickCharging_selectItemDialog.Location = new System.Drawing.Point(22, 423);
+            this.groupBox_quickCharging_selectItemDialog.Location = new System.Drawing.Point(22, 464);
             this.groupBox_quickCharging_selectItemDialog.Margin = new System.Windows.Forms.Padding(5);
             this.groupBox_quickCharging_selectItemDialog.Name = "groupBox_quickCharging_selectItemDialog";
             this.groupBox_quickCharging_selectItemDialog.Padding = new System.Windows.Forms.Padding(5);
@@ -2392,6 +2410,7 @@
             this.checkedComboBox_uhf_elements.ReadOnly = false;
             this.checkedComboBox_uhf_elements.Size = new System.Drawing.Size(619, 24);
             this.checkedComboBox_uhf_elements.TabIndex = 4;
+            this.checkedComboBox_uhf_elements.TextChanged += new System.EventHandler(this.checkedComboBox_uhf_elements_TextChanged);
             // 
             // label_uhf_elements
             // 
@@ -3251,21 +3270,15 @@
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
-            // label43
+            // checkBox_quickCharging_faceInputMultipleHits
             // 
-            this.label43.AutoSize = true;
-            this.label43.Location = new System.Drawing.Point(18, 335);
-            this.label43.Name = "label43";
-            this.label43.Size = new System.Drawing.Size(315, 21);
-            this.label43.TabIndex = 14;
-            this.label43.Text = "自动触发人脸识别前的延时秒数:";
-            // 
-            // numericUpDown_quickCharging_autoTriggerFaceInputDelaySeconds
-            // 
-            this.numericUpDown_quickCharging_autoTriggerFaceInputDelaySeconds.Location = new System.Drawing.Point(339, 333);
-            this.numericUpDown_quickCharging_autoTriggerFaceInputDelaySeconds.Name = "numericUpDown_quickCharging_autoTriggerFaceInputDelaySeconds";
-            this.numericUpDown_quickCharging_autoTriggerFaceInputDelaySeconds.Size = new System.Drawing.Size(145, 31);
-            this.numericUpDown_quickCharging_autoTriggerFaceInputDelaySeconds.TabIndex = 15;
+            this.checkBox_quickCharging_faceInputMultipleHits.AutoSize = true;
+            this.checkBox_quickCharging_faceInputMultipleHits.Location = new System.Drawing.Point(22, 368);
+            this.checkBox_quickCharging_faceInputMultipleHits.Name = "checkBox_quickCharging_faceInputMultipleHits";
+            this.checkBox_quickCharging_faceInputMultipleHits.Size = new System.Drawing.Size(300, 25);
+            this.checkBox_quickCharging_faceInputMultipleHits.TabIndex = 16;
+            this.checkBox_quickCharging_faceInputMultipleHits.Text = "人脸识别时允许命中多个(&M)";
+            this.checkBox_quickCharging_faceInputMultipleHits.UseVisualStyleBackColor = true;
             // 
             // CfgDlg
             // 
@@ -3301,6 +3314,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_charging_infoDlgOpacity)).EndInit();
             this.tabPage_quickCharging.ResumeLayout(false);
             this.tabPage_quickCharging.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_quickCharging_autoTriggerFaceInputDelaySeconds)).EndInit();
             this.groupBox_quickCharging_selectItemDialog.ResumeLayout(false);
             this.groupBox_quickCharging_selectItemDialog.PerformLayout();
             this.tabPage_itemManagement.ResumeLayout(false);
@@ -3374,7 +3388,6 @@
             this.groupBox_message_compactShelf.ResumeLayout(false);
             this.groupBox_message_compactShelf.PerformLayout();
             this.tabPage_z3950.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_quickCharging_autoTriggerFaceInputDelaySeconds)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -3626,5 +3639,6 @@
         private System.Windows.Forms.CheckBox checkBox_quickCharging_allowFreeSequence;
         private System.Windows.Forms.Label label43;
         private System.Windows.Forms.NumericUpDown numericUpDown_quickCharging_autoTriggerFaceInputDelaySeconds;
+        private System.Windows.Forms.CheckBox checkBox_quickCharging_faceInputMultipleHits;
     }
 }

@@ -976,12 +976,22 @@ readerType);
                     // 注2: 本函数不再抛出异常。会在 ErrorInfo 中报错
                     var chip_info = RfidTagList.GetUhfChipInfo(tag.TagInfo);
                     chip = chip_info.Chip;
+                    /*
+                    if (chip == null)
+                    {
+                        pii = chip_info.PII;
+                        oi = chip_info.OI;
+                    }
+                    */
                 }
 
-                pii = chip?.FindElement(ElementOID.PII)?.Text;
+                if (chip != null)
+                {
+                    pii = chip?.FindElement(ElementOID.PII)?.Text;
 
-                oi = chip?.FindElement(ElementOID.OI)?.Text;
-                aoi = chip?.FindElement(ElementOID.AOI)?.Text;
+                    oi = chip?.FindElement(ElementOID.OI)?.Text;
+                    aoi = chip?.FindElement(ElementOID.AOI)?.Text;
+                }
 
                 string typeOfUsage = chip?.FindElement(ElementOID.TypeOfUsage)?.Text;
                 if (typeOfUsage != null && typeOfUsage.StartsWith("8"))

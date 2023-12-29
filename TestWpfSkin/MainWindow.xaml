@@ -6,5 +6,53 @@
         xmlns:local="clr-namespace:TestWpfSkin"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
+    <!-- 
     <local:NiceSquare/>
+    -->
+    <local:MyScrollViewer>
+        <StackPanel>
+            <TextBlock>line 1</TextBlock>
+            <TextBlock>line 2</TextBlock>
+            <TextBlock>line 3</TextBlock>
+            <TextBlock>line 4</TextBlock>
+            <TextBlock>line 5</TextBlock>
+            <TextBlock>line 6</TextBlock>
+            <TextBlock>line 7</TextBlock>
+            <TextBlock>line 8</TextBlock>
+            <TextBlock>line 9</TextBlock>
+            <TextBlock>line 10</TextBlock>
+            <TextBlock>line 11</TextBlock>
+            <TextBlock>line 12</TextBlock>
+            <TextBlock>line 13</TextBlock>
+            <TextBlock>line 14</TextBlock>
+            <TextBlock>line 15</TextBlock>
+            <TextBlock>line 16</TextBlock>
+            <TextBlock>line 17</TextBlock>
+            <TextBlock>line 18</TextBlock>
+            <TextBlock>line 19</TextBlock>
+            <TextBlock>line 20</TextBlock>
+            <TextBlock>line 21</TextBlock>
+            <TextBlock>line 22</TextBlock>
+            <TextBlock>line 23</TextBlock>
+            <TextBlock>line 24</TextBlock>
+            <TextBlock>line 25</TextBlock>
+            <TextBlock>line 26</TextBlock>
+            <TextBlock>line 27</TextBlock>
+            <TextBlock>line 28</TextBlock>
+            <TextBlock>line 29</TextBlock>
+            <TextBlock>line 30</TextBlock>
+            <TextBlock>line 31</TextBlock>
+            <TextBlock>line 32</TextBlock>
+            <TextBlock>line 33</TextBlock>
+            <TextBlock>line 34</TextBlock>
+            <TextBlock>line 35</TextBlock>
+            <TextBlock>line 36</TextBlock>
+            <TextBlock>line 37</TextBlock>
+            <TextBlock>line 38</TextBlock>
+            <TextBlock>line 39</TextBlock>
+            <TextBlock>line 40</TextBlock>
+            <TextBlock>line 41</TextBlock>
+            <TextBlock>line 42</TextBlock>
+        </StackPanel>
+    </local:MyScrollViewer>
 </Window>

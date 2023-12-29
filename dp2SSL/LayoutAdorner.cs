@@ -29,7 +29,7 @@ namespace dp2SSL
                 );
 
             // Some arbitrary drawing implements.
-            SolidColorBrush renderBrush = new SolidColorBrush(Color.FromRgb(10, 10, 10));
+            SolidColorBrush renderBrush = new SolidColorBrush(Color.FromRgb(50, 50, 50));   // 10
             renderBrush.Opacity = 0.7;
             Pen renderPen = new Pen(new SolidColorBrush(Colors.Navy), 1.5);
             double renderRadius = 5.0;

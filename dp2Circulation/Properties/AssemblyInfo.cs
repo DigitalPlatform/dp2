@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.91.*")]
-[assembly: AssemblyFileVersion("3.91.0.0")]
+[assembly: AssemblyVersion("3.93.*")]
+[assembly: AssemblyFileVersion("3.93.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -229,3 +229,5 @@ using System.Runtime.InteropServices;
 //                  “参数配置”对话框“快捷出纳”属性页增加“自动触发人脸识别前延迟的秒数”参数。默认为 2 秒。
 //      2023/12/12  快捷出纳窗中人脸识别和指纹、掌纹识别 SendKey 的字符串采用了 pii:xxx,tou:80 格式。
 //                  借书状态先输入册条码号后输入读者证条码号的时候，会自动清除前面的残余 task item。
+//      2023/12/22  当参数为超高频高校联盟格式，不写入 UserBank 时，种册窗册登记对话框写入标签以后，对话框内再次点按钮写入，会报错说 PII 不存在，这个 bug 已经修正
+//      2023/12/26  超高频国标格式，既可以把机构代码写入 UII(EPC Bank) 中，也可以特殊指定写入 User Bank(此时 EPC Bank 中的 UII 中不再包含机构代码)。允许这种特殊写入法主要是考虑到它利于在小尺寸 EPC 标签上使用国标格式

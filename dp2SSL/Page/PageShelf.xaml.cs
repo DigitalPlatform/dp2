@@ -3960,6 +3960,7 @@ namespace dp2SSL
                 {
                     try
                     {
+                        // Exception: 可能会抛出异常
                         this.patronControl.LoadPhoto(_patron.PhotoPath);
                     }
                     catch (Exception ex)

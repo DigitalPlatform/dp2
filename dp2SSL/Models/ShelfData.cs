@@ -4153,6 +4153,14 @@ ShelfData.LibraryNetworkCondition == "OK" ? "" : "offline");
                         // 注2: 本函数不再抛出异常。会在 ErrorInfo 中报错
                         var chip_info = RfidTagList.GetUhfChipInfo(tag.OneTag.TagInfo);
                         chip = chip_info.Chip;
+                        /*
+                        if (chip == null)
+                        {
+                            chip = new LogicChip();
+                            chip.SetElement(ElementOID.PII, chip_info.PII);
+                            chip.SetElement(ElementOID.OI, chip_info.OI);
+                        }
+                        */
                     }
                     else
                     {
@@ -5836,6 +5844,14 @@ ShelfData.LibraryNetworkCondition == "OK" ? "" : "offline");
                             // 注2: 本函数不再抛出异常。会在 ErrorInfo 中报错
                             var chip_info = RfidTagList.GetUhfChipInfo(entity.TagInfo);
                             chip = chip_info.Chip;
+                            /*
+                            if (chip == null)
+                            {
+                                chip = new LogicChip();
+                                chip.SetElement(ElementOID.PII, chip_info.PII);
+                                chip.SetElement(ElementOID.OI, chip_info.OI);
+                            }
+                            */
                         }
                         else
                         {

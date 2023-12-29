@@ -106,6 +106,8 @@ namespace dp2SSL
                     RemoveLayer();
                 };  // VideoRecognition_Closed;
                 videoRecognition.Show();
+                // 2023/12/20
+                AddLayer(); // Closed 事件会 RemoveLayer()
             }));
             _stopVideo = false;
             var task = Task.Run(() =>
@@ -981,7 +983,10 @@ namespace dp2SSL
             try
             {
                 if (App.Protocol == "dp2library")
+                {
+                    // Exception: 可能会抛出异常
                     this.patronControl.LoadPhoto(_patron.PhotoPath);
+                }
 
                 if (App.Protocol == "sip" && string.IsNullOrEmpty(App.FaceUrl) == false)
                 {
@@ -1001,6 +1006,9 @@ namespace dp2SSL
                         }));
                     }
                 }
+
+                // 2023/12/20
+                SetGlobalError("patron", null);
             }
             catch (Exception ex)
             {
@@ -1813,6 +1821,10 @@ out string strError);
                             // 注2: 本函数不再抛出异常。会在 ErrorInfo 中报错
                             var chip_info = RfidTagList.GetUhfChipInfo(entity.TagInfo);
                             chip = chip_info.Chip;
+                            /*
+                            if (chip == null)
+                                entity.OI = chip_info.OI;
+                            */
                         }
                         else
                         {
@@ -1823,9 +1835,11 @@ out string strError);
                         string pii = chip?.FindElement(ElementOID.PII)?.Text;
                         entity.PII = GetCaption(pii);
 
-                        // 2021/4/2
-                        entity.OI = chip?.FindElement(ElementOID.OI)?.Text;
-                        entity.AOI = chip?.FindElement(ElementOID.AOI)?.Text;
+                        if (chip != null)
+                        {
+                            entity.OI = chip?.FindElement(ElementOID.OI)?.Text;
+                            entity.AOI = chip?.FindElement(ElementOID.AOI)?.Text;
+                        }
                     }
 
                     bool clearError = true;

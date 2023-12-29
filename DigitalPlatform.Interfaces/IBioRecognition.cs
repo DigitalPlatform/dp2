@@ -130,6 +130,24 @@ namespace DigitalPlatform.Interfaces
         public Rectangle RgbRect { get; set; }
     }
 
+    // 2023/12/29
+    // 人脸识别命中结果。一个命中纪录
+    [Serializable()]
+    public class RecognitionFaceHit
+    {
+        // [out] 证条码号
+        public string Patron { get; set; }
+        // [out] 分数。0-100
+        public int Score { get; set; }
+
+        public override string ToString()
+        {
+            StringBuilder text = new StringBuilder();
+            text.Append($"Patron={Patron},Score={Score}");
+            return text.ToString();
+        }
+    }
+
     [Serializable()]
     public class RecognitionFaceResult : NormalResult
     {
@@ -138,6 +156,11 @@ namespace DigitalPlatform.Interfaces
         // [out] 分数。0-100
         public int Score { get; set; }
 
+        // 2023/12/29 新增
+        // 人脸识别命中结果集合。多个命中纪录
+        // 注: 其中第一个记录也赋值给 this.Patron 和 this.Score
+        public RecognitionFaceHit[] Hits { get; set; }
+
         public string DebugInfo { get; set; }
 
         public override string ToString()
@@ -145,6 +168,16 @@ namespace DigitalPlatform.Interfaces
             StringBuilder text = new StringBuilder(base.ToString() + "\r\n");
             text.Append($"Patron={Patron}\r\n");
             text.Append($"Score={Score}\r\n");
+            if (Hits != null && Hits.Length > 0)
+            {
+                int i = 0;
+                text.Append($"Hits ({Hits.Length}):\r\n");
+                foreach (var hit in Hits)
+                {
+                    text.Append($"{(i+1)}) {hit.ToString()}\r\n");
+                    i++;
+                }
+            }
             text.Append($"DebugInfo={DebugInfo}\r\n");
             return text.ToString();
         }

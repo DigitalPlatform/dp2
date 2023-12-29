@@ -162,16 +162,18 @@
 
             <ListView Name="listView" 
                   ItemTemplateSelector="{StaticResource personDataTemplateSelector}"
-                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                  ScrollViewer.VerticalScrollBarVisibility="Auto"
-                  Background="Transparent"
+
+                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                      ScrollViewer.VerticalScrollBarVisibility="Auto"
+                          
+                      Background="Transparent"
                   Foreground="White" BorderThickness="0"
                       SelectionChanged="listView_SelectionChanged"
                       >
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <local:CompactWrapPanel Orientation="Horizontal" IsItemsHost="True"
-                                   ItemHeight="Auto"
+                                ItemHeight="Auto"
                                 VerticalContentAlignment="Top"
                                 HorizontalAlignment="Left" VerticalAlignment="Stretch"
                                />
@@ -234,15 +236,38 @@
                 </ItemsControl.ItemTemplate>
                 -->
             </ListView>
+
             <TextBlock Name="error" Visibility="Collapsed">Error Text</TextBlock>
 
         </Grid>
         <!-- -->
-        <TextBlock Name="emptyComment" Text="请放图书 ..."
-                       Padding="10" VerticalAlignment="Center" HorizontalAlignment="Center"
+        <Border BorderThickness="2" Height="60" Width="220" Margin="4"
+                Visibility="{Binding ElementName=listView, Path=Items.Count, Converter={StaticResource InvertCountToVis}}">
+            <Border.Resources>
+                <local:ThicknessMaxConverter x:Key="ThicknessMaxConverter"/>
+            </Border.Resources>
+            <Border.BorderBrush>
+                <VisualBrush>
+                    <VisualBrush.Visual>
+                        <Rectangle StrokeDashArray="1.0 1.0"
+                           Stroke="Gray"
+                           StrokeThickness="{Binding RelativeSource={RelativeSource AncestorType={x:Type Border}},
+                                                     Path=BorderThickness,
+                                                     Converter={StaticResource ThicknessMaxConverter}}"
+                           RadiusX="{Binding RelativeSource={RelativeSource AncestorType={x:Type Border}}, Path=CornerRadius.TopRight}"
+                           RadiusY="{Binding RelativeSource={RelativeSource AncestorType={x:Type Border}}, Path=CornerRadius.BottomLeft}"
+                           Width="{Binding RelativeSource={RelativeSource AncestorType={x:Type Border}}, Path=ActualWidth}"
+                           Height="{Binding RelativeSource={RelativeSource AncestorType={x:Type Border}}, Path=ActualHeight}"/>
+                    </VisualBrush.Visual>
+                </VisualBrush>
+            </Border.BorderBrush>
+
+            <TextBlock Name="emptyComment" Text="请放图书 ..."
+                       Padding="10" Margin="10" VerticalAlignment="Center" HorizontalAlignment="Center"
                        TextAlignment="Center"
-                       FontSize="30" FontWeight="Bold" Foreground="Gray" Background="Transparent"
+                       FontSize="30" FontWeight="Light" Foreground="Gray" Background="Transparent"
                        Visibility="{Binding ElementName=listView, Path=Items.Count, Converter={StaticResource InvertCountToVis}}"
                    TextWrapping="WrapWithOverflow"/>
+        </Border>
     </Grid>
 </UserControl>

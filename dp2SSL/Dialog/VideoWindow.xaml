@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:dp2SSL.Dialog"
         mc:Ignorable="d"
         Title="VideoWindow" Height="500" Width="600"
-        Background="#FF6C6964" Foreground="{StaticResource normalForeground}"
+        Background="{StaticResource grayBackground}" Foreground="{StaticResource normalForeground}"
         WindowStyle="None"
         AllowsTransparency="True"
     ResizeMode="CanResizeWithGrip" ShowInTaskbar="False"

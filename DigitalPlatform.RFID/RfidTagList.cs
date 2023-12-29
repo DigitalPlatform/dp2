@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 using DigitalPlatform.Text;
 using static DigitalPlatform.RFID.GaoxiaoUtility;
+using static DigitalPlatform.RFID.RfidTagList;
 
 namespace DigitalPlatform.RFID
 {
@@ -684,8 +685,9 @@ namespace DigitalPlatform.RFID
         // parameters:
         //      style   解析高校联盟 UHF 格式时的 style。缺省为 "convertValueToGB"
         //              dontCheckUMI 表示不检查 PC UMI 标志位。这常用于解析一些缺失 User Bank 内容的畸形标签内容
+        //              ensureChip 确保返回前创建 LogicChip 对象
         public static ChipInfo GetUhfChipInfo(TagInfo taginfo,
-            string style = "convertValueToGB")
+            string style = "convertValueToGB,ensureChip")
         {
             ChipInfo result = new ChipInfo();
 
@@ -719,9 +721,14 @@ namespace DigitalPlatform.RFID
                     // pc.AFI = enable ? 0x07 : 0xc2;
                     taginfo.EAS = parse_result.PC.AFI == 0x07;
                     result.UhfProtocol = "gb";
-                    result.UII = parse_result.UII;
-                    result.PII = GetPiiPart(parse_result.UII);
-                    result.OI = GetOiPart(parse_result.UII, false);
+                    result.UII = parse_result.SafetyUII;
+                    result.PII = GetPiiPart(parse_result.SafetyUII);
+                    result.OI = GetOiPart(parse_result.SafetyUII, false);
+
+                    // 2023/12/22
+                    // 为 chip 中添加 PII 和 OI 元素
+                    if (parse_result.LogicChip != null)
+                        UhfUtility.AddPiiOi(parse_result.SafetyUII, parse_result.LogicChip);
                 }
                 else
                 {
@@ -776,6 +783,20 @@ namespace DigitalPlatform.RFID
                 }
             }
 
+            // 是否要确保返回前创建 LogicChip 对象
+            var ensure_chip = StringUtil.IsInList("ensureChip", style);
+
+            if (result.Chip == null && ensure_chip)
+            {
+                result.Chip = new LogicChip();
+                if (string.IsNullOrEmpty(result.PII) == false)
+                    result.Chip.SetElement(ElementOID.PII, result.PII, false);
+                if (string.IsNullOrEmpty(result.OI) == false)
+                {
+                    // TODO: 把不是 ISIL 形态的放入 AOI 元素?
+                    result.Chip.SetElement(ElementOID.OI, result.OI, false);
+                }
+            }
             return result;
         }
 
@@ -884,7 +905,7 @@ namespace DigitalPlatform.RFID
                     if (parse_result.Value == -1)
                         return "uid:" + uid;
 
-                    return parse_result.UII;
+                    return parse_result.SafetyUII;
                 }
                 else
                 {
@@ -1176,7 +1197,7 @@ namespace DigitalPlatform.RFID
         {
             if (datas == null || datas.Count == 0)
                 return;
-            foreach(var data in datas)
+            foreach (var data in datas)
             {
                 ClearTagTable(data.OneTag.UID, false);
             }

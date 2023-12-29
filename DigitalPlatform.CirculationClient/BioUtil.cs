@@ -211,8 +211,11 @@ namespace DigitalPlatform.CirculationClient
 
         }
 
+        // parameters:
+        //      style   处理风格。(2023/12/29 新增的此参数)
         public virtual RecognitionFaceResult RecongnitionFace(Image image,
             Image irImage,
+            string style,
             CancellationToken token)
         {
             return new RecognitionFaceResult

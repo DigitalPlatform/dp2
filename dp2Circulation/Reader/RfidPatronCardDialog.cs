@@ -521,6 +521,10 @@ out strError);
                             (chip, uhfProtocol) =>
                             {
                                 return true;
+                            },
+                            () =>
+                            {
+                                return false;
                             }).TagInfo;
                     }
                     else

@@ -1686,14 +1686,28 @@ new SetErrorEventArgs
         // 注: 一般情况下，RfidManager 的后台线程会驱动一轮一轮不停盘点。
         public static void CallInventory(string loop_style)
         {
-            BaseChannel<IRfid> channel = Base.GetChannel();
             try
             {
-                _callLoop(channel, loop_style, false);
+                BaseChannel<IRfid> channel = Base.GetChannel();
+                try
+                {
+                    _callLoop(channel, loop_style, false);
+                }
+                finally
+                {
+                    Base.ReturnChannel(channel);
+                }
             }
-            finally
+            catch (Exception ex)
             {
-                Base.ReturnChannel(channel);
+                // Base.Clear();
+                _ = Base.ClearAsync();
+
+                Base.TriggerSetError(ex,
+                    new SetErrorEventArgs
+                    {
+                        Error = $"RFID 中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
+                    });
             }
         }
 

@@ -270,7 +270,8 @@ namespace DigitalPlatform.RFID
         public Element Clone()
         {
             Element element = new Element(this.StartOffs);
-            element.OriginData = new List<byte>(this.OriginData).ToArray();
+            if (this.OriginData != null)
+                element.OriginData = new List<byte>(this.OriginData).ToArray();
 
             element._precursor = this._precursor;
             element._paddings = this._paddings;
@@ -1017,7 +1018,7 @@ namespace DigitalPlatform.RFID
 
                 return result;
             }
-            catch(FormatException ex)
+            catch (FormatException ex)
             {
                 throw new FormatException($"十六进制字符串 '{strHexTimeStampParam}' 格式不合法");
             }

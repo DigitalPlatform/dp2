@@ -1557,6 +1557,11 @@ out strError);
                         {
                             RfidToolForm.FilterUserBankElements(chip, uhfProtocol);
                             return Program.MainForm.UhfWriteUserBank;
+                        },
+                        () => {
+                            if (StringUtil.IsInList("OwnerInstitution", Program.MainForm.UhfUserBankElements))
+                                return true;
+                            return false;
                         }
                         );
                     new_tag_info = build_result.TagInfo;

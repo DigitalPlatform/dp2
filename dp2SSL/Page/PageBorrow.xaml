@@ -10,13 +10,13 @@
       WindowTitle="借书" Title="借书"
       x:Name="_this" >
     <Page.Resources>
-        
+
         <local:StringToVisibilityConverter x:Key="StringToVis" />
-        
+
     </Page.Resources>
     <Grid Background="{StaticResource normalBackground}" Name="mainGrid">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="60" />
+            <ColumnDefinition Width="68" />
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="0" />
         </Grid.ColumnDefinitions>
@@ -35,15 +35,17 @@
         <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Vertical">
             <Grid Height="20" />
             <Button Name="goHome" ToolTip="返回主菜单"
-                    Background="Transparent" BorderThickness="0" Click="GoHome_Click">
+                    Style="{DynamicResource RoundedButtonLightStyle}"
+                    BorderThickness="0" Click="GoHome_Click">
                 <fa:ImageAwesome Icon="Home"
-                             Height="40" Foreground="DarkGray" Margin="4"/>
+                             Height="40" Foreground="{StaticResource buttonForeground}" Margin="6"/>
             </Button>
             <Grid Height="20" />
             <Button Name="goHelp" ToolTip="帮助"
-                    Background="Transparent" BorderThickness="0">
+                    Style="{DynamicResource RoundedButtonLightStyle}" 
+                    BorderThickness="0">
                 <fa:ImageAwesome Icon="LightbulbOutline"
-                             Height="40" Foreground="DarkGray" Margin="4"/>
+                             Height="40" Foreground="{StaticResource buttonForeground}" Margin="6"/>
             </Button>
             <Grid Height="40" />
             <TextBlock Name="Quality" ToolTip="指纹质量"
@@ -60,7 +62,7 @@
                    FontSize="20" FontWeight="Bold" Foreground="White" Background="DarkRed"
                    Visibility="{Binding Path=Error, Mode=OneWay,Converter={StaticResource StringToVis}}"
                    TextWrapping="WrapWithOverflow"/>
-<!--
+        <!--
         <TextBlock Grid.Row="3" Grid.ColumnSpan="3" Text="{Binding GlobalError}"
                                        FontSize="20" FontWeight="Bold" Foreground="White" Background="DarkRed"
                                        Visibility="{Binding Path=GlobalError, Converter={StaticResource StringToVis}}"
@@ -77,14 +79,18 @@
                 <RowDefinition Height="60"/>
             </Grid.RowDefinitions>
             <!-- 图书信息 -->
-            <Grid  Grid.Column="0">
+            <Grid Grid.Column="0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="20"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <TextBlock Background="Transparent" Foreground="Gray" FontSize="14" TextAlignment="Center"
                     Text="{Binding ElementName=booksControl, Path=ItemCount, StringFormat={}图书 ({0})}"/>
-                <local:EntityListControl x:Name="booksControl" Grid.Row="1"/>
+                <local:MyScrollViewer Grid.Row="1" PanningMode="Both"
+                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                  ScrollViewer.VerticalScrollBarVisibility="Auto">
+                    <local:EntityListControl x:Name="booksControl" />
+                </local:MyScrollViewer>
             </Grid>
             <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" Background="Blue">
                 <!-- 
@@ -108,13 +114,18 @@
                 </Grid.RowDefinitions>
                 <TextBlock Background="Transparent" Foreground="Gray" FontSize="14" TextAlignment="Center"
                     Text="读者"/>
-                <local:PatronControl x:Name="patronControl" Grid.Row="1"/>
+                <local:MyScrollViewer Grid.Row="1" PanningMode="Both"
+                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                  ScrollViewer.VerticalScrollBarVisibility="Auto">
+                    <local:PatronControl x:Name="patronControl"/>
+                </local:MyScrollViewer>
                 <Grid Name="fixAndClear" Grid.Row="2">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <ToggleButton Name="fixPatron" Grid.Column="0" Margin="10,0,10,0"
+                    <ToggleButton Name="fixPatron" Grid.Column="0" 
+                                  Margin="10,2,10,0"
                                   HorizontalAlignment="Left" VerticalAlignment="Stretch"
                                   IsEnabled="False"
                                   Content="固定"
@@ -140,8 +151,9 @@
                         </ToggleButton.Resources>
                     </ToggleButton>
                     <Button Name="clearPatron" Grid.Column="1" 
+                            Margin="0,2,10,0"
                             HorizontalContentAlignment="Center" VerticalAlignment="Stretch"
-                            Background="Transparent" Foreground="LightGray"
+                            Background="{StaticResource buttonBackground}" Foreground="{StaticResource buttonForeground}"
                             Content="清除读者信息" IsEnabled="False"
                         Click="ClearPatron_Click">
                         <Button.Resources>

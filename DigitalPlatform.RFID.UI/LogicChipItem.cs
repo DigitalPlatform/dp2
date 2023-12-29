@@ -788,8 +788,13 @@ namespace DigitalPlatform.RFID.UI
                     chip = parse_result.LogicChip;
                     taginfo.EAS = parse_result.PC.AFI == 0x07;
                     uhfProtocol = "gb";
-                    pii = GetPiiPart(parse_result.UII);
-                    oi = GetOiPart(parse_result.UII, false);
+                    pii = GetPiiPart(parse_result.SafetyUII);
+                    oi = GetOiPart(parse_result.SafetyUII, false);
+
+                    // 2023/12/22
+                    // 为 chip 中添加 PII 和 OI 元素
+                    if (parse_result.LogicChip != null)
+                        UhfUtility.AddPiiOi(parse_result.SafetyUII, parse_result.LogicChip);
                 }
                 else
                 {
@@ -1026,7 +1031,7 @@ namespace DigitalPlatform.RFID.UI
                 }
             }
 
-            //
+            // TODO: 这里有可能是 UHF 国标格式
             try
             {
                 bool build_user_bank = true;    // TODO

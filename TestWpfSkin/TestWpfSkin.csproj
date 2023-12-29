@@ -55,6 +55,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="MyScrollViewer.cs" />
     <Compile Include="NiceSquare.xaml.cs">
       <DependentUpon>NiceSquare.xaml</DependentUpon>
     </Compile>

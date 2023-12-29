@@ -33,3 +33,17 @@ https://social.msdn.microsoft.com/Forums/en-US/54eef117-fe4a-4cc4-b49c-fc75caef2
 https://github.com/Kinnara/ModernWpf
 ModernWPF UI Library
 
+~~~
+在图书小方格上要显示标签数据格式。分为 HF:GB UHF:GB UHF:GXLM 三种
+
+~~~
+http://nui.joshland.org/2010/04/why-wont-wpf-controls-work-with-touch.html
+
+https://stackoverflow.com/questions/3007475/how-to-develop-wpf-multi-touch-application-without-a-touch-screen
+
+https://stackoverflow.com/questions/37283340/how-can-i-combine-touch-and-mouse-event-handlers-without-producing-duplicate-beh
+
+https://stackoverflow.com/questions/37285335/why-my-mouse-event-handlers-are-not-working-when-i-have-touch-event-handlers
+
+
+

@@ -23,6 +23,8 @@ using DigitalPlatform.Core;
 
 using dp2Circulation.Charging;
 using DigitalPlatform.LibraryClient;
+using DigitalPlatform.rms;
+using System.Linq;
 
 namespace dp2Circulation
 {
@@ -1273,6 +1275,82 @@ namespace dp2Circulation
             return 1;
         }
 
+        internal class SelectOnePatronResult : NormalResult
+        {
+            public string strBarcode { get; set; }
+            public string strResult { get; set; }
+        }
+
+        // parameters:
+        //      recpath_list    读者记录路径，多个路径用逗号分隔
+        // result.Value:
+        //      -1  error
+        //      0   放弃
+        //      1   成功
+        internal SelectOnePatronResult SelectOnePatronByBarcodes(
+            string dialog_title,
+            IEnumerable<string> barcode_list)
+        {
+            return this.TryGet(() =>
+            {
+                if (this.IsDisposed)
+                    return new SelectOnePatronResult { Value = 0 };
+
+                using (SelectPatronDialog dlg = new SelectPatronDialog())
+                {
+                    dlg.Load += (o, e) =>
+                    {
+                        // 注: UiState 必须在窗口尺寸到位以后再设置
+                        dlg.UiState = Program.MainForm.AppInfo.GetString(
+            "QuickChargingForm",
+            "SelectPatronDialog_uiState",
+            "");
+                    };
+                    dlg.FormClosed += (o, e) =>
+                    {
+                        Program.MainForm.AppInfo.SetString(
+        "QuickChargingForm",
+        "SelectPatronDialog_uiState",
+        dlg.UiState);
+                    };
+                    MainForm.SetControlFont(dlg, this.Font, false);
+                    dlg.Text = dialog_title;
+                    dlg.NoBorrowHistory = QuickChargingForm.NoBorrowHistory;
+                    dlg.ColorBarVisible = false;
+                    dlg.MessageVisible = false;
+                    dlg.Overflow = false;
+                    int nRet = dlg.InitialByBarcodes(
+                        // Program.MainForm,
+                        barcode_list,
+                        "请选择一个读者记录",
+                        out string strError);
+                    if (nRet == -1)
+                        return new SelectOnePatronResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError
+                        };
+                    // TODO: 保存窗口内的尺寸状态
+                    Program.MainForm.AppInfo.LinkFormState(dlg, "QuickChargingForm_SelectPatronDialog_state");
+                    dlg.ShowDialog(this.SafeWindow);
+
+                    if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                        return new SelectOnePatronResult
+                        {
+                            Value = 0,
+                            ErrorInfo = "放弃选择",
+                            ErrorCode = "cancelSelect"
+                        };
+
+                    return new SelectOnePatronResult
+                    {
+                        Value = 1,
+                        strBarcode = dlg.SelectedBarcode,
+                        strResult = dlg.SelectedHtml
+                    };
+                }
+            });
+        }
 
         //
         delegate int Delegate_SelectOneItem(
@@ -5381,6 +5459,8 @@ false);
 
         async Task FaceInputAsync()
         {
+            var multiple = FaceInputMultipleHits;
+
             RecognitionFaceResult result = null;
             EnableControlsForFace(false);
             try
@@ -5399,12 +5479,40 @@ false);
                         ErrorInfo = $"人脸中心所连接的 dp2library 服务器 UID {getstate_result.ErrorCode} 和内务当前所连接的 UID {Program.MainForm.ServerUID} 不同。无法进行人脸识别"
                     };
                 else
-                    result = await RecognitionFace("ui");
+                    result = await RecognitionFace(multiple ? "ui,multiple_hits" : "ui");
             }
             finally
             {
                 EnableControlsForFace(true);
             }
+
+            // 命中多个的选择
+            if (multiple
+                && result.Hits != null
+                && result.Hits.Length > 1)
+            {
+                var barcodes = result.Hits.OrderByDescending(o => o.Score).Select(o => o.Patron).ToList();
+                var select_result = SelectOnePatronByBarcodes(
+                    $"人脸识别命中 {barcodes.Count} 个读者，请从中选择一个 ...",
+                    barcodes);
+                if (select_result.Value != 1)
+                    result = new RecognitionFaceResult
+                    {
+                        Value = -1,
+                        ErrorInfo = select_result.ErrorInfo
+                    };
+                else
+                    result = new RecognitionFaceResult
+                    {
+                        Value = 1,
+                        Score = result.Hits
+                        .Where(o => o.Patron == select_result.strBarcode)
+                        .Select(o => o.Score)
+                        .FirstOrDefault(),
+                        Patron = select_result.strBarcode
+                    };
+            }
+
             this.Invoke((Action)(() =>
             {
                 // 2019/6/13
@@ -5432,6 +5540,26 @@ false);
         {
             AutoTriggerFaceInput = !AutoTriggerFaceInput;
             this.ToolStripMenuItem_autoTriggerFaceInput.Checked = AutoTriggerFaceInput;
+        }
+
+        // 2023/12/29
+        // 人脸识别允许命中命中多个(手动选择)
+        public static bool FaceInputMultipleHits
+        {
+            get
+            {
+                return Program.MainForm.AppInfo.GetBoolean(
+    "quickcharging_form",
+    "faceInputMultipleHits",
+    false);
+            }
+            set
+            {
+                Program.MainForm.AppInfo.SetBoolean(
+    "quickcharging_form",
+    "faceInputMultipleHits",
+    value);
+            }
         }
 
         public static bool AutoTriggerFaceInput

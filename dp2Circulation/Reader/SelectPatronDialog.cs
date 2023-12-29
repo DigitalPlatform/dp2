@@ -16,6 +16,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.CommonControl;
+using DocumentFormat.OpenXml.InkML;
 
 namespace dp2Circulation
 {
@@ -31,6 +32,10 @@ namespace dp2Circulation
         DigitalPlatform.StopManager stopManager = new DigitalPlatform.StopManager();
 
         List<string> m_recpaths = new List<string>();
+
+        // 2023/12/29
+        // 证条码号列表。_recpaths 和 _barcode 两者，有一个就行了
+        List<string> _barcodes = new List<string>();
 
         const int COLUMN_BARCODE = 0;
         const int COLUMN_STATE = 1;
@@ -56,6 +61,21 @@ namespace dp2Circulation
             this.Floating = true;   // 2023/4/6
 
             InitializeComponent();
+        }
+
+        public IEnumerable<string> Barcodes
+        {
+            get
+            {
+                return this._barcodes;
+            }
+            set
+            {
+                if (value == null)
+                    this._barcodes = new List<string>();
+                else
+                    this._barcodes = new List<string>(value);
+            }
         }
 
         public List<string> RecPaths
@@ -86,7 +106,10 @@ namespace dp2Circulation
             _stop = new DigitalPlatform.Stop();
             _stop.Register(this._stopManager, true);	// 和容器关联
             */
-            FillRecPath();
+            if (this.RecPaths.Count > 0)
+                FillRecPath();
+            else
+                FillBarcodes();
 
             EnableControls(false);
 
@@ -145,6 +168,20 @@ namespace dp2Circulation
             }
         }
 
+        // 在 listview 中填充路径列。不填充其他列
+        void FillBarcodes()
+        {
+            this.listView_items.Items.Clear();
+
+            foreach (var barcode in this.Barcodes)
+            {
+                ListViewItem item = new ListViewItem("", 0);
+                ListViewUtil.ChangeItemText(item, COLUMN_BARCODE, barcode);
+                this.listView_items.Items.Add(item);
+            }
+        }
+
+
         // 初始化数据成员
         public int Initial(
             // MainForm mainform,
@@ -156,7 +193,19 @@ namespace dp2Circulation
 
             // this.MainForm = mainform;
             this.RecPaths = paths;
+            this.textBox_message.Text = strMessage;
+            return 0;
+        }
 
+        public int InitialByBarcodes(
+    IEnumerable<string> barcodes,
+    string strMessage,
+    out string strError)
+        {
+            strError = "";
+
+            // this.MainForm = mainform;
+            this.Barcodes = barcodes;
             this.textBox_message.Text = strMessage;
             return 0;
         }
@@ -394,6 +443,18 @@ namespace dp2Circulation
                 strFormatList += ":noborrowhistory";
 
             string strRecPath = ListViewUtil.GetItemText(item, COLUMN_RECPATH);
+            string barcode = ListViewUtil.GetItemText(item, COLUMN_BARCODE);
+
+            string query_string = "";
+            if (string.IsNullOrEmpty(strRecPath) == false)
+                query_string = "@path:" + strRecPath;
+            else if (string.IsNullOrEmpty(barcode) == false)
+                query_string = barcode;
+            else
+            {
+                strError = "item 中 recpath 和 barcode 列均为空，无法装载读者信息";
+                return -1;
+            }
 
             string strPatronXml = "";
             string strPatronHtml = "";
@@ -416,16 +477,18 @@ namespace dp2Circulation
             {
                 long lRet = channel.GetReaderInfo(
                     looping.Progress,
-                    "@path:" + strRecPath,
+                    query_string,
                     strFormatList,  // "xml,html",
                     out string[] results,
+                    out string output_recpath,
+                    out _,
                     out strError);
                 if (lRet == -1)
                     goto ERROR1;  // error
 
                 if (lRet == 0)
                 {
-                    strError = "路径为 '" + strRecPath + "' 的读者记录没有找到";
+                    strError = "检索词为 '" + query_string + "' 的读者记录没有找到";
                     goto ERROR1;   // not found
                 }
 
@@ -434,6 +497,9 @@ namespace dp2Circulation
                     strError = "results error";
                     goto ERROR1;
                 }
+
+                if (string.IsNullOrEmpty(strRecPath))
+                    strRecPath = output_recpath;
 
                 strPatronXml = results[0];
                 strPatronHtml = results[1];
