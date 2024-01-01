@@ -131,7 +131,7 @@ namespace DigitalPlatform.Interfaces
     }
 
     // 2023/12/29
-    // 人脸识别命中结果。一个命中纪录
+    // 人脸识别命中结果。一个命中记录
     [Serializable()]
     public class RecognitionFaceHit
     {
@@ -157,7 +157,7 @@ namespace DigitalPlatform.Interfaces
         public int Score { get; set; }
 
         // 2023/12/29 新增
-        // 人脸识别命中结果集合。多个命中纪录
+        // 人脸识别命中结果集合。多个命中记录
         // 注: 其中第一个记录也赋值给 this.Patron 和 this.Score
         public RecognitionFaceHit[] Hits { get; set; }
 

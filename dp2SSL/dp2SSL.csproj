@@ -463,6 +463,9 @@
     <Compile Include="Controls\TouchScrolling.cs" />
     <Compile Include="Converter\BitmapConvertor.cs" />
     <Compile Include="Converter\ThicknessMaxConverter.cs" />
+    <Compile Include="Dialog\SelectPatronWindow.xaml.cs">
+      <DependentUpon>SelectPatronWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Dialog\WriteTagWindow.xaml.cs">
       <DependentUpon>WriteTagWindow.xaml</DependentUpon>
     </Compile>
@@ -658,6 +661,10 @@
     <Page Include="Dialog\InventoryWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Dialog\SelectPatronWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Dialog\SubmitWindow.xaml">
       <SubType>Designer</SubType>

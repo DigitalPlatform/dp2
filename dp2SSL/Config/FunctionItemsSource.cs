@@ -11,11 +11,11 @@ namespace dp2SSL
     {
         public ItemCollection GetValues()
         {
-            ItemCollection sizes = new ItemCollection();
-            sizes.Add("自助借还");
-            sizes.Add("智能书柜");
-            sizes.Add("盘点");
-            return sizes;
+            ItemCollection items = new ItemCollection();
+            items.Add("自助借还");
+            items.Add("智能书柜");
+            items.Add("盘点");
+            return items;
         }
     }
 
@@ -23,10 +23,10 @@ namespace dp2SSL
     {
         public ItemCollection GetValues()
         {
-            ItemCollection sizes = new ItemCollection();
-            sizes.Add("十进制");
-            sizes.Add("十六进制");
-            return sizes;
+            ItemCollection items = new ItemCollection();
+            items.Add("十进制");
+            items.Add("十六进制");
+            return items;
         }
     }
 
@@ -34,12 +34,12 @@ namespace dp2SSL
     {
         public ItemCollection GetValues()
         {
-            ItemCollection sizes = new ItemCollection();
-            sizes.Add("禁用");
-            sizes.Add("一维码+二维码");
-            sizes.Add("一维码");
-            sizes.Add("二维码");
-            return sizes;
+            ItemCollection items = new ItemCollection();
+            items.Add("禁用");
+            items.Add("一维码+二维码");
+            items.Add("一维码");
+            items.Add("二维码");
+            return items;
         }
     }
 
@@ -47,11 +47,11 @@ namespace dp2SSL
     {
         public ItemCollection GetValues()
         {
-            ItemCollection sizes = new ItemCollection();
-            sizes.Add("不打印");
-            sizes.Add("借书");
-            sizes.Add("借书+还书");
-            return sizes;
+            ItemCollection items = new ItemCollection();
+            items.Add("不打印");
+            items.Add("借书");
+            items.Add("借书+还书");
+            return items;
         }
     }
 
@@ -59,12 +59,12 @@ namespace dp2SSL
     {
         public ItemCollection GetValues()
         {
-            ItemCollection sizes = new ItemCollection();
-            sizes.Add("无");
-            sizes.Add("1min");
-            sizes.Add("5min");
-            sizes.Add("10min");
-            return sizes;
+            ItemCollection items = new ItemCollection();
+            items.Add("无");
+            items.Add("1min");
+            items.Add("5min");
+            items.Add("10min");
+            return items;
         }
     }
 
@@ -72,10 +72,10 @@ namespace dp2SSL
     {
         public ItemCollection GetValues()
         {
-            ItemCollection sizes = new ItemCollection();
-            sizes.Add("utf-8");
-            sizes.Add("gb2312");
-            return sizes;
+            ItemCollection items = new ItemCollection();
+            items.Add("utf-8");
+            items.Add("gb2312");
+            return items;
         }
     }
 
@@ -83,10 +83,22 @@ namespace dp2SSL
     {
         public ItemCollection GetValues()
         {
-            ItemCollection sizes = new ItemCollection();
-            sizes.Add("亮色");
-            sizes.Add("暗色");
-            return sizes;
+            ItemCollection items = new ItemCollection();
+            items.Add("亮色");
+            items.Add("暗色");
+            return items;
+        }
+    }
+
+    public class FaceInputMultipleItemsSource : IItemsSource
+    {
+        public ItemCollection GetValues()
+        {
+            ItemCollection items = new ItemCollection();
+            items.Add("使用第一个");
+            items.Add("明示选择");
+            items.Add("输入密码选择");
+            return items;
         }
     }
 }

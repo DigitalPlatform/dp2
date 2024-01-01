@@ -672,6 +672,21 @@ MessageBoxDefaultButton.Button2);
                     var ret = this.TryGet(() =>
                     {
                         SelectPatronDialog dlg = new SelectPatronDialog();
+                        dlg.Load += (o, e) =>
+                        {
+                            // 注: UiState 必须在窗口尺寸到位以后再设置
+                            dlg.UiState = Program.MainForm.AppInfo.GetString(
+                "ReaderInfoForm",
+                "SelectPatronDialog_uiState",
+                "");
+                        };
+                        dlg.FormClosed += (o, e) =>
+                        {
+                            Program.MainForm.AppInfo.SetString(
+            "ReaderInfoForm",
+            "SelectPatronDialog_uiState",
+            dlg.UiState);
+                        };
 
                         dlg.Overflow = StringUtil.SplitList(strOutputRecPath).Count < lRet;
                         nRet = dlg.Initial(

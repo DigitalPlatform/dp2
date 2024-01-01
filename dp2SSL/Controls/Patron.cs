@@ -444,6 +444,24 @@ namespace dp2SSL
             }
         }
 
+        bool _borrowItemsVisible = true;
+
+        public bool BorrowItemsVisible
+        {
+            get
+            {
+                return _borrowItemsVisible;
+            }
+            set
+            {
+                if (_borrowItemsVisible != value)
+                {
+                    _borrowItemsVisible = value;
+                    OnPropertyChanged("BorrowItemsVisible");
+                }
+            }
+        }
+
         string _patronName;
 
         public string PatronName

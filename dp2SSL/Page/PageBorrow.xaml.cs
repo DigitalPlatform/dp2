@@ -136,7 +136,7 @@ namespace dp2SSL
             });
             try
             {
-                result = await RecognitionFaceAsync("");
+                result = await RecognitionFaceAsync(App.FaceInputMultipleHits == "使用第一个" ? "" : "multiple_hits");
                 if (result.Value == -1)
                 {
                     if (result.ErrorCode != "cancelled")
@@ -157,6 +157,57 @@ namespace dp2SSL
                     }));
             }
 
+            {
+                List<RecognitionFaceHit> samples = new List<RecognitionFaceHit>();
+                for (int i = 0; i < 10; i++)
+                {
+                    samples.Add(new RecognitionFaceHit { Patron = "R" + (i + 1).ToString().PadLeft(7, '0') });
+                }
+
+                result.Hits = samples.ToArray();
+            }
+
+            // TODO: 从命中多个中选择。输入 PIN 码或者用鼠标选择
+            // 命中多个的选择
+            if (App.FaceInputMultipleHits != "使用第一个"
+                && result.Hits != null
+                && result.Hits.Length > 1)
+            {
+                var barcodes = result.Hits.OrderByDescending(o => o.Score).Select(o => o.Patron).ToList();
+                
+                string title = $"人脸识别命中 {barcodes.Count} 个读者，请从中选择一个，或输入密码来筛选 ...";
+                if (App.FaceInputMultipleHits == "输入密码选择")
+                    title = $"人脸识别命中 {barcodes.Count} 个读者，请通过输入密码来筛选 ...";
+                
+                var select_result = SelectOnePatron(
+                    title,
+                    barcodes);
+                if (select_result.Value != 1)
+                    result = new RecognitionFaceResult
+                    {
+                        Value = -1,
+                        ErrorInfo = select_result.ErrorInfo,
+                        ErrorCode = select_result.ErrorCode,
+                    };
+                else
+                    result = new RecognitionFaceResult
+                    {
+                        Value = 1,
+                        Score = result.Hits
+                        .Where(o => o.Patron == select_result.strBarcode)
+                        .Select(o => o.Score)
+                        .FirstOrDefault(),
+                        Patron = select_result.strBarcode
+                    };
+            }
+
+            if (result.Value == -1)
+            {
+                if (result.ErrorCode != "cancelled")
+                    SetGlobalError("face", result.ErrorInfo);
+                return;
+            }
+
             GetMessageResult message = new GetMessageResult
             {
                 Value = 1,
@@ -166,6 +217,82 @@ namespace dp2SSL
             SetQuality("");
             var fill_result = await FillPatronDetailAsync();
             Welcome(fill_result.Value == -1);
+        }
+
+        internal class SelectOnePatronResult : NormalResult
+        {
+            public string strBarcode { get; set; }
+            public string strResult { get; set; }
+        }
+
+        SelectOnePatronResult SelectOnePatron(string dialog_title,
+            IEnumerable<string> barcode_list)
+        {
+            string dialog_result = "";
+            Patron selected_patron = null;
+            App.Invoke(new Action(() =>
+            {
+                App.PauseBarcodeScan();
+                try
+                {
+                    var ask = new SelectPatronWindow();
+                    ask.Closed += (s1, e1) =>
+                    {
+                        RemoveLayer();
+                    };
+                    AddLayer(); // Closed 事件会 RemoveLayer()
+
+                    this.MemoryDialog(ask);
+
+                    PatronCollection patrons = new PatronCollection();
+                    foreach (var barcode in barcode_list)
+                    {
+                        patrons.Add(new Patron
+                        {
+                            PII = barcode,
+                            IsFingerprintSource = true,
+                            BorrowItemsVisible = false,
+                        });
+                    }
+                    ask.SetSource(patrons);
+
+                    if (App.FaceInputMultipleHits == "输入密码选择")
+                        ask.listView.Visibility = Visibility.Collapsed;
+
+                    ask.TitleText = dialog_title;
+                    //ask.MessageText = $"确实要解除读者 {patron_name} 副卡 {bind_uid} 的绑定?\r\n\r\n(解除绑定以后，读者将无法再用这一张副卡进行任何操作)";
+                    ask.Owner = Application.Current.MainWindow;
+                    ask.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                    App.SetSize(ask, "wide");
+                    //ask.OkButtonText = "是";
+                    //ask.CancelButtonVisible = true;
+                    ask.ShowDialog();
+
+                    this.ForgetDialog(ask);
+
+                    dialog_result = ask.PressedButton;
+                    selected_patron = ask.SelectedPatron;
+                }
+                finally
+                {
+                    App.ContinueBarcodeScan();
+                }
+            }));
+
+            if (dialog_result == "cancel"
+                || selected_patron == null)
+                return new SelectOnePatronResult
+                {
+                    Value = 0,
+                    ErrorInfo = "取消选择",
+                    ErrorCode = "cancelled"
+                };
+
+            return new SelectOnePatronResult
+            {
+                Value = 1,
+                strBarcode = selected_patron?.Barcode,
+            };
         }
 
         void DisplayVideo(VideoWindow window, TimeSpan timeout)
@@ -244,7 +371,7 @@ namespace dp2SSL
                             ErrorInfo = result.ErrorInfo,
                             ErrorCode = result.ErrorCode
                         };
-                    return FaceManager.RecognitionFace("");
+                    return FaceManager.RecognitionFace(style);
                 });
             }
             finally
@@ -426,7 +553,7 @@ namespace dp2SSL
             // 重置活跃时钟
             PageMenu.MenuPage.ResetActivityTimer();
 
-            await ChangeEntitiesAsync((BaseChannel<IRfid>)sender, e);
+            await ChangeEntitiesAsync(/*(BaseChannel<IRfid>)sender,*/ e);
         }
 
         public static bool isPatronChanged(TagChangedEventArgs e)
@@ -459,7 +586,7 @@ namespace dp2SSL
         }
 
         // 跟随事件动态更新列表
-        async Task ChangeEntitiesAsync(BaseChannel<IRfid> channel,
+        async Task ChangeEntitiesAsync(//BaseChannel<IRfid> channel,
             TagChangedEventArgs e)
         {
             // 读者。不再精细的进行增删改跟踪操作，而是笼统地看 TagList.Patrons 集合即可
@@ -512,7 +639,7 @@ namespace dp2SSL
 
             if (update_entities.Count > 0)
             {
-                await FillBookFieldsAsync(channel,
+                await FillBookFieldsAsync(//channel,
                     update_entities,
                     App.DisplayCoverImage ? "coverImage" : "",
                     CancelFillBooks(true));
@@ -616,10 +743,10 @@ namespace dp2SSL
                     {
                         try
                         {
-                            BaseChannel<IRfid> channel = RfidManager.GetChannel();
+                            //BaseChannel<IRfid> channel = RfidManager.GetChannel();
                             try
                             {
-                                await FillBookFieldsAsync(channel,
+                                await FillBookFieldsAsync(//channel,
                                     update_entities,
                                     App.DisplayCoverImage ? "coverImage" : "",
                                     CancelFillBooks(true));
@@ -628,7 +755,7 @@ namespace dp2SSL
                             }
                             finally
                             {
-                                RfidManager.ReturnChannel(channel);
+                                //RfidManager.ReturnChannel(channel);
                             }
                         }
                         catch (Exception ex)
@@ -1244,12 +1371,14 @@ namespace dp2SSL
             }));
         }
 
-        async Task ClearBooksAndPatronAsync(BaseChannel<IRfid> channel)
+        async Task ClearBooksAndPatronAsync(/*BaseChannel<IRfid> channel*/)
         {
             try
             {
                 ClearBookList();
-                await FillBookFieldsAsync(channel, new List<Entity>());
+                await FillBookFieldsAsync(
+                    // channel,
+                    new List<Entity>());
             }
             catch (Exception ex)
             {
@@ -1657,14 +1786,17 @@ namespace dp2SSL
                 {
                     try
                     {
-                        BaseChannel<IRfid> channel = RfidManager.GetChannel();
+                        // 注: RFID 中心没有启动的时候，这一句会抛出异常
+                        //BaseChannel<IRfid> channel = RfidManager.GetChannel();
                         try
                         {
-                            await FillBookFieldsAsync(channel, entities);
+                            await FillBookFieldsAsync(
+                                // channel, 
+                                entities);
                         }
                         finally
                         {
-                            RfidManager.ReturnChannel(channel);
+                            //RfidManager.ReturnChannel(channel);
                         }
                     }
                     catch (Exception ex)
@@ -1748,7 +1880,8 @@ namespace dp2SSL
         // 第二阶段：填充图书信息的 PII 和 Title 字段
         // parameters:
         //      style   如果包含 coverImage，会主动获得 Entity.LocalCoverImagePath
-        async Task FillBookFieldsAsync(BaseChannel<IRfid> channel,
+        async Task FillBookFieldsAsync(
+            // BaseChannel<IRfid> channel,
             List<Entity> entities,
             string style = "",
             CancellationToken token = default)
@@ -1996,7 +2129,7 @@ out string strError);
                 {
                     ClearDir(dir, time, App.CancelToken);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     WpfClientInfo.WriteErrorLog($"ClearDir({dir}) 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
@@ -2034,7 +2167,7 @@ TaskScheduler.Default);
                     {
                         Directory.Delete(childDir.FullName, true);
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         WpfClientInfo.WriteErrorLog($"ClearDir(删除子目录 '{childDir.FullName}') 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                     }

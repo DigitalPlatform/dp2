@@ -1247,32 +1247,49 @@ namespace dp2Circulation
             strError = "读者证条码号 '" + strBarcode + "' 命中 " + lRet.ToString() + " 条读者记录。这是一个严重错误，请系统管理员尽快排除。\r\n\r\n(当前窗口中显示的是其中的第一个记录)";
             goto ERROR1;
              * */
-            SelectPatronDialog dlg = new SelectPatronDialog();
+            using (SelectPatronDialog dlg = new SelectPatronDialog())
+            {
+                dlg.Load += (o, e) =>
+                {
+                    // 注: UiState 必须在窗口尺寸到位以后再设置
+                    dlg.UiState = Program.MainForm.AppInfo.GetString(
+        "QuickChargingForm",
+        "SelectPatronDialog_uiState",
+        "");
+                };
+                dlg.FormClosed += (o, e) =>
+                {
+                    Program.MainForm.AppInfo.SetString(
+    "QuickChargingForm",
+    "SelectPatronDialog_uiState",
+    dlg.UiState);
+                };
 
-            MainForm.SetControlFont(dlg, this.Font, false);
-            dlg.NoBorrowHistory = QuickChargingForm.NoBorrowHistory;
-            dlg.ColorBarVisible = false;
-            dlg.MessageVisible = false;
-            dlg.Overflow = StringUtil.SplitList(recpath_list).Count < lRet;
-            int nRet = dlg.Initial(
-                // Program.MainForm,
-                StringUtil.SplitList(recpath_list),
-                "请选择一个读者记录",
-                out strError);
-            if (nRet == -1)
-                return -1;
-            // TODO: 保存窗口内的尺寸状态
-            Program.MainForm.AppInfo.LinkFormState(dlg, "QuickChargingForm_SelectPatronDialog_state");
-            dlg.ShowDialog(this.SafeWindow);
-            Program.MainForm.AppInfo.UnlinkFormState(dlg);
+                MainForm.SetControlFont(dlg, this.Font, false);
+                dlg.NoBorrowHistory = QuickChargingForm.NoBorrowHistory;
+                dlg.ColorBarVisible = false;
+                dlg.MessageVisible = false;
+                dlg.Overflow = StringUtil.SplitList(recpath_list).Count < lRet;
+                int nRet = dlg.Initial(
+                    // Program.MainForm,
+                    StringUtil.SplitList(recpath_list),
+                    "请选择一个读者记录",
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                // TODO: 保存窗口内的尺寸状态
+                Program.MainForm.AppInfo.LinkFormState(dlg, "QuickChargingForm_SelectPatronDialog_state");
+                dlg.ShowDialog(this.SafeWindow);
+                Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
-            if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
-                return 0;
+                if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                    return 0;
 
-            strBarcode = dlg.SelectedBarcode;
-            strResult = dlg.SelectedHtml;
+                strBarcode = dlg.SelectedBarcode;
+                strResult = dlg.SelectedHtml;
 
-            return 1;
+                return 1;
+            }
         }
 
         internal class SelectOnePatronResult : NormalResult

@@ -1493,6 +1493,15 @@ namespace dp2SSL
             }
         }
 
+        // 人脸识别允许命中多个结果
+        public static string FaceInputMultipleHits
+        {
+            get
+            {
+                return WpfClientInfo.Config?.Get("global", "faceInputMultipleHits", "使用第一个") ?? "使用第一个";
+            }
+        }
+
         public static bool FullScreen
         {
             get
@@ -2614,7 +2623,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
             try
             {
-                Current.Dispatcher?.Invoke(action);
+                Current?.Dispatcher?.Invoke(action);
             }
             catch (Exception ex)
             {

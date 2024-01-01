@@ -75,6 +75,8 @@ namespace dp2SSL
             FingerprintURL = _config.Get("global", "fingerprintUrl", "");
             FaceURL = _config.Get("global", "faceUrl", "");
 
+            FaceInputMultipleHits = _config.Get("global", "faceInputMultipleHits", "使用第一个");
+
             FullScreen = _config.GetInt("global", "fullScreen", 1) == 1 ? true : false;
             AutoTrigger = _config.GetBoolean("ssl_operation", "auto_trigger", false);
             PatronInfoLasting = _config.GetBoolean("ssl_operation", "patron_info_lasting", false);
@@ -136,6 +138,7 @@ namespace dp2SSL
             _config.Set("global", "rfidUrl", RfidURL);
             _config.Set("global", "fingerprintUrl", FingerprintURL);
             _config.Set("global", "faceUrl", FaceURL);
+            _config.Set("global", "faceInputMultipleHits", FaceInputMultipleHits);
             _config.SetInt("global", "fullScreen", FullScreen == true ? 1 : 0);
             _config.SetBoolean("ssl_operation", "auto_trigger", AutoTrigger);
             _config.SetBoolean("ssl_operation", "patron_info_lasting", PatronInfoLasting);
@@ -472,6 +475,29 @@ Description = "人脸接口 URL 地址"
             }
         }
         private string _faceURL;
+
+        // 默认值 "使用第一个"
+        [Display(
+Order = 7,
+Name = "人脸识别命中多个时的处理策略",
+Description = "人脸识别命中多个时的处理策略"
+)]
+        [ItemsSource(typeof(FaceInputMultipleItemsSource))]
+        [Category("人脸接口")]
+        public string FaceInputMultipleHits
+        {
+            get => _faceInputMultipleHits;
+            set
+            {
+                if (_faceInputMultipleHits != value)
+                {
+                    _faceInputMultipleHits = value;
+                    OnPropertyChanged("FaceInputMultipleHits");
+                }
+            }
+        }
+        private string _faceInputMultipleHits = "使用第一个";
+
 
         // 默认值 true
         [Display(

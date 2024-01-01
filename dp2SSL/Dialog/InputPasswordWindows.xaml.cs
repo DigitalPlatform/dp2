@@ -26,7 +26,7 @@ namespace dp2SSL
             InitializeComponent();
 
             this.Loaded += InputPasswordWindows_Loaded;
-            this.keyborad.KeyPressed += Keyborad_KeyPressed;
+            this.keyboard.KeyPressed += Keyboard_KeyPressed;
         }
 
         private void InputPasswordWindows_Loaded(object sender, RoutedEventArgs e)
@@ -34,7 +34,7 @@ namespace dp2SSL
             this.password.Focus();
         }
 
-        private void Keyborad_KeyPressed(object sender, KeyPressedEventArgs e)
+        private void Keyboard_KeyPressed(object sender, KeyPressedEventArgs e)
         {
             if (e.Key == '\r')
             {
@@ -42,7 +42,7 @@ namespace dp2SSL
                 return;
             }
 
-            this.password.Password = this.keyborad.Text;
+            this.password.Password = this.keyboard.Text;
         }
         private void LoginButton_Click(object sender, RoutedEventArgs e)
         {

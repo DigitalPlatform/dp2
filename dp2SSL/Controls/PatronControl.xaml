@@ -24,6 +24,7 @@
             <local:BoolToVisibilityConverter
          x:Key="VisibleIfFalseConverter"
          TrueValue="Hidden" FalseValue="Visible" />
+
             <local:IntToAddConverter x:Key="IntToString" />
             <local:CountToVisibilityConverter x:Key="CountToVisible" />
             <local:ThicknessMaxConverter x:Key="ThicknessMaxConverter"/>
@@ -166,13 +167,15 @@
                         <Run Text="--- 在借册("/><Run Text="{Binding BorrowingCount}" /><Run Text=") ---"/>
                     </TextBlock>
                     <local:EntityListControl x:Name="borrowedBooks"
+                        Visibility="{Binding Path=BorrowItemsVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
                         Grid.Row="8" Grid.Column="1"
                         Grid.ColumnSpan="3"
                      />
                 </Grid>
                 <StackPanel VerticalAlignment="Center"
                         Visibility="{Binding Path=NotEmpty, Converter={StaticResource VisibleIfFalseConverter}}">
-                    <Border BorderThickness="2" Width="Auto" Margin="4">
+                <Border 
+                        BorderThickness="2" Width="Auto" Margin="4">
                         <Border.BorderBrush>
                             <VisualBrush>
                                 <VisualBrush.Visual>

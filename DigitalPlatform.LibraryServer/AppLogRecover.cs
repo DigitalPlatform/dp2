@@ -6516,7 +6516,7 @@ out strError);
                         }
                     }
 
-                    // 复制或者移动下级子纪录
+                    // 复制或者移动下级子记录
                     if (strAction == "move"
                     || strAction == "copy")
                     {

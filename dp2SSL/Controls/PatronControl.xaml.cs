@@ -59,6 +59,11 @@ namespace dp2SSL
                 this.inputFace.Visibility = Visibility.Collapsed;
         }
 
+        public void HideBorrows()
+        {
+            this.borrowedBooks.Visibility = Visibility.Hidden;
+        }
+
 #if NO
         public void HideInputFaceButton()
         {
