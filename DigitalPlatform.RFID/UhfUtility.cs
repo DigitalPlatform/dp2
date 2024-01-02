@@ -201,10 +201,13 @@ namespace DigitalPlatform.RFID
         //      uii_include_oi  是否要把 OI 装配到 UII 字符串中？
         //      style   如果包含 "afi_eas_on" 表示 AFI 用 0x07(否则用 0xc2)
         //              如果包含 "oi_in_userbank" 表示把 OI 写入 User Bank, 并且 EPC 中的 UII 里面不包含 OI 部分。否则会在 EPC 中 UII 中包含 OI 部分，而 UserBank 中不会有 OI 元素
-        public static BuildTagResult BuildTag(LogicChip chip,
+        public static BuildTagResult BuildTag(LogicChip chip_param,
             bool uii_include_oi = true,
             string style = "")
         {
+            // 2024/1/2
+            var chip = chip_param.Clone();
+
             var oiInUserBank = StringUtil.IsInList("oi_in_userbank", style);
 
             string pii = chip.FindElement(ElementOID.PII)?.Text;

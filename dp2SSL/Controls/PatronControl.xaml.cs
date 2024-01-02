@@ -218,6 +218,9 @@ namespace dp2SSL
             imageSource.CacheOption = BitmapCacheOption.OnLoad; // 2023/12/15
             imageSource.EndInit();  // 可能会抛出异常。例如 stream.Length 为 0 时
             this.photo.Source = imageSource;
+
+            // 2024/1/2
+            this.photo.Visibility = Visibility.Visible;
         }
 
         public static bool ClearPhotoCacheFile(string photo_path)

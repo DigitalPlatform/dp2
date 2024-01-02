@@ -40,16 +40,20 @@ namespace dp2SSL
 
             string content = button.Content as string;
 
+            if (content == null)
+                content = button.Name.Replace("key_", "");
+
             if (this.Text == null)
                 this.Text = "";
 
             string key = content;
-            if (key == "Delete")
+            if (key == "backspace")
             {
                 if (this.Text.Length > 0)
                     this.Text = this.Text.Substring(0, this.Text.Length - 1);   // 删除最后一位
+                key = new string('\b', 1);
             }
-            else if (key == "Enter")
+            else if (key == "return")
             {
                 key = "\r";
             }
@@ -60,6 +64,8 @@ namespace dp2SSL
                     _pageNo--;
                     RefreshKeys();
                 }
+                e.Handled = true;
+                return;
             }
             else if (key == ">")
             {
@@ -68,11 +74,15 @@ namespace dp2SSL
                     _pageNo++;
                     RefreshKeys();
                 }
+                e.Handled = true;
+                return;
             }
             else if (key.ToLower() == "caps")
             {
                 _capsLock = !_capsLock;
                 RefreshKeys();
+                e.Handled = true;
+                return;
             }
             else
                 this.Text += key;

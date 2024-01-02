@@ -12,14 +12,18 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using static dp2SSL.LibraryChannelUtil;
-
-using DigitalPlatform;
+// using System.Windows.Shapes;
+using System.Diagnostics;
 using System.Xml;
+using System.IO;
+
+// using Xceed.Wpf.Toolkit;
+using WindowsInput;
+
+using static dp2SSL.LibraryChannelUtil;
+using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
-using System.Diagnostics;
 using DigitalPlatform.WPF;
 
 namespace dp2SSL
@@ -52,7 +56,15 @@ namespace dp2SSL
                 return;
             }
 
-            this.password.Password = this.keyboard.Text;
+            // this.password.Password = this.keyboard.Text;
+
+            this.password.Focus();
+
+            InputSimulator sim = new InputSimulator();
+            if (e.Key == '\b')
+                sim.Keyboard.KeyPress(WindowsInput.Native.VirtualKeyCode.BACK);
+            else
+                sim.Keyboard.TextEntry(e.Key);
         }
 
         void OnEnter()
@@ -77,18 +89,29 @@ namespace dp2SSL
 
         private void SelectPatronWindow_Unloaded(object sender, RoutedEventArgs e)
         {
+            _cancel.Cancel();
 
+            ReleaseSource();
         }
+
+        bool _loadFinish = false;
 
         private void SelectPatronWindow_Loaded(object sender, RoutedEventArgs e)
         {
             this.password.Focus();
 
+            this.InitialVisible();
+
             _ = Task.Factory.StartNew(async () =>
             {
-                var result = await FillPatronCollectionDetailAsync(
-    _patrons);
-                // TODO: 等读者记录装载完成后，再使能密码验证
+                using (CancellationTokenSource cancel = CancellationTokenSource.CreateLinkedTokenSource(_cancel.Token, App.CancelToken))
+                {
+                    var result = await FillPatronCollectionDetailAsync(
+        _patrons,
+        cancel.Token);
+                    // 等读者记录装载完成后，再使能密码验证
+                    _loadFinish = true;
+                }
             },
 App.CancelToken,
 TaskCreationOptions.LongRunning,
@@ -99,6 +122,35 @@ TaskScheduler.Default);
         {
             _patrons = patrons;
             this.listView.ItemsSource = patrons;
+            /*
+            foreach (var patron in _patrons)
+            {
+                patron.PropertyChanged += Patron_PropertyChanged;
+            }
+            */
+        }
+
+#if REMOVED
+        private void Patron_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "PhotoPath")
+            {
+                _ = Task.Run(() =>
+                {
+                    PageBorrow.LoadPhoto(sender as PatronControl, (sender as Patron).PhotoPath);
+                });
+            }
+        }
+#endif
+
+        public void ReleaseSource()
+        {
+            /*
+            foreach (var patron in _patrons)
+            {
+                patron.PropertyChanged -= Patron_PropertyChanged;
+            }
+            */
         }
 
         private void listView_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -121,12 +173,18 @@ TaskScheduler.Default);
             }
         }
 
+
         async Task<NormalResult> FillPatronCollectionDetailAsync(
             PatronCollection patrons,
+            CancellationToken token,
             bool force = false)
         {
+            var cover_items = new List<Patron>();
             foreach (var patron in patrons)
             {
+                if (token.IsCancellationRequested)
+                    break;
+
                 patron.Waiting = true;
                 try
                 {
@@ -202,6 +260,9 @@ TaskScheduler.Default);
                             //SetGlobalError("patron", $"SetBorrowed() 出现异常: {ex.Message}");
                         }
                     }));
+
+                    if (string.IsNullOrEmpty(patron.PhotoPath) == false)
+                        cover_items.Add(patron);
                 }
                 finally
                 {
@@ -209,13 +270,82 @@ TaskScheduler.Default);
                 }
             }
 
+            // 获取封面图像
+            if (cover_items.Count > 0)
+            {
+                // string cacheDir = CoverImagesDirectory;
+
+                foreach (var patron in cover_items)
+                {
+                    if (token.IsCancellationRequested)
+                        break;
+
+                    string fileName = PatronControl.GetCachePhotoPath(patron.PhotoPath);
+                    // Path.Combine(cacheDir, PageBorrow.GetImageFilePath(patron.PhotoPath));
+
+                    if (File.Exists(fileName) == false)
+                    {
+                        var get_result = await LibraryChannelUtil.GetCoverImageAsync(patron.PhotoPath, fileName);
+                        if (get_result.Value == 1)
+                            patron.PhotoImageLocalPath = fileName;
+                        if (get_result.Value == -1 && get_result.ErrorCode == "System.IO.IOException")
+                        {
+                            // TODO: 执行缓存清理任务
+                            // BeginCleanCoverImagesDirectory(DateTime.Now);
+                        }
+                    }
+                    else
+                        patron.PhotoImageLocalPath = fileName;
+                }
+            }
+
             return new NormalResult();
         }
+
+#if REMOVED
+        public class CoverItem
+        {
+            public string ObjectPath { get; set; }
+            public Patron Patron { get; set; }
+        }
+
+
+        public static string CoverImagesDirectory
+        {
+            get
+            {
+                string cacheDir = Path.Combine(WpfClientInfo.UserDir, "coverImages");
+                PathUtil.CreateDirIfNeed(cacheDir);
+                return cacheDir;
+            }
+        }
+#endif
 
         // 根据输入的密码选择读者记录
         // 自动根据证条码号、生日、身份证号进行匹配
         NormalResult SelectPatronByPassword(string password)
         {
+            // 等待装载完成
+
+            // TODO: 显示一个半透明的文字“请等待 ...”
+            this.passwordArea.IsEnabled = false;
+            try
+            {
+                var start_time = DateTime.Now;
+                while (_loadFinish == false)
+                {
+                    _cancel.Token.ThrowIfCancellationRequested();
+                    Thread.Sleep(100);
+                    // 超过十秒还没有等到装载完成，也只好退出等待循环
+                    if (DateTime.Now - start_time > TimeSpan.FromSeconds(10))
+                        break;
+                }
+            }
+            finally
+            {
+                this.passwordArea.IsEnabled = true;
+            }
+
             try
             {
                 // this.listView.SelectedItem = null;
@@ -320,13 +450,14 @@ TaskScheduler.Default);
 
         private void password_KeyDown(object sender, KeyEventArgs e)
         {
-            /*
             if (e.Key == Key.Enter)
             {
                 OnEnter();
+                e.Handled = true;
                 return;
             }
 
+            /*
             if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
                 ToggleListViewVisiblity();
             */
@@ -334,23 +465,48 @@ TaskScheduler.Default);
 
         void ToggleListViewVisiblity()
         {
+            /*
             if (this.listView.Visibility == Visibility.Collapsed)
                 this.listView.Visibility = Visibility.Visible;
             else
                 this.listView.Visibility = Visibility.Collapsed;
+            */
+            SetLeftVisible(this.listView.Visibility == Visibility.Collapsed);
+        }
+
+        void TogglePasswordVisiblity()
+        {
+            /*
+            if (this.passwordArea.Visibility == Visibility.Collapsed)
+                this.passwordArea.Visibility = Visibility.Visible;
+            else
+                this.passwordArea.Visibility = Visibility.Collapsed;
+            */
+            SetRightVisible(this.passwordArea.Visibility == Visibility.Collapsed);
         }
 
         private void Grid_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
-                OnEnter();
+                if (this.passwordArea.Visibility == Visibility.Collapsed)
+                    selectButton_Click(this, new RoutedEventArgs());
+                else
+                    OnEnter();
                 return;
             }
 
-            if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
+            if (e.Key == Key.LeftCtrl)
             {
                 ToggleListViewVisiblity();
+                e.Handled = true;
+                return;
+            }
+
+            if (e.Key == Key.RightCtrl)
+            {
+                TogglePasswordVisiblity();
+                e.Handled = true;
                 return;
             }
 
@@ -358,14 +514,89 @@ TaskScheduler.Default);
             {
                 this.password.Focus();
 
+                /*
                 var e1 = new System.Windows.Input.KeyEventArgs(Keyboard.PrimaryDevice, Keyboard.PrimaryDevice.ActiveSource, 0, e.Key) { RoutedEvent = Keyboard.KeyDownEvent };
                 bool b = InputManager.Current.ProcessInput(e1);
+                */
+                InputSimulator sim = new InputSimulator();
+                if (e.Key == Key.Back)
+                    sim.Keyboard.KeyPress(WindowsInput.Native.VirtualKeyCode.BACK);
+                else
+                    sim.Keyboard.TextEntry((char)e.Key);
+                e.Handled = true;
             }
         }
 
         private void clearButton_Click(object sender, RoutedEventArgs e)
         {
             this.password.Clear();
+        }
+
+        public void SetLeftVisible(bool visible)
+        {
+            // 不允许两边都隐藏
+            if (this.passwordArea.Visibility == Visibility.Collapsed
+                && visible == false)
+                return;
+
+            this.listView.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
+            // (this.mainGrid.ColumnDefinitions[0] as ColumnDefinitionExtended).Visible = visible;
+
+            OnVisibleChanged();
+        }
+
+
+        public void SetRightVisible(bool visible)
+        {
+            // 不允许两边都隐藏
+            if (this.listView.Visibility == Visibility.Collapsed
+                && visible == false)
+                return;
+
+            this.passwordArea.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
+            (this.mainGrid.ColumnDefinitions[1] as ColumnDefinitionExtended).Visible = visible;
+            
+            OnVisibleChanged();
+
+            if (visible == false)
+                this.listView.Focus();
+        }
+
+        public void InitialVisible()
+        {
+            var left_visible = App.FaceInputMultipleHits.Contains("列表选择");
+            SetLeftVisible(left_visible);
+
+            var right_visible = App.FaceInputMultipleHits.Contains("密码筛选");
+            SetRightVisible(right_visible);
+
+            /*
+            if (left_visible == false && right_visible == true)
+            {
+                this.mainGrid.ColumnDefinitions[1].Width = GridLength.Auto;
+            }
+            else if (left_visible == true && right_visible == true)
+            {
+                this.mainGrid.ColumnDefinitions[1].Width = new GridLength(330);
+            }
+            */
+            OnVisibleChanged();
+        }
+
+        void OnVisibleChanged()
+        {
+            var left_visible = App.FaceInputMultipleHits.Contains("列表选择");
+
+            var right_visible = App.FaceInputMultipleHits.Contains("密码筛选");
+
+            if (left_visible == false && right_visible == true)
+            {
+                this.mainGrid.ColumnDefinitions[1].Width = GridLength.Auto;
+            }
+            else if (left_visible == true && right_visible == true)
+            {
+                this.mainGrid.ColumnDefinitions[1].Width = new GridLength(330);
+            }
         }
     }
 

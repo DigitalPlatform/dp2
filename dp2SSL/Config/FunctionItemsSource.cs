@@ -96,8 +96,9 @@ namespace dp2SSL
         {
             ItemCollection items = new ItemCollection();
             items.Add("使用第一个");
-            items.Add("明示选择");
-            items.Add("输入密码选择");
+            items.Add("列表选择+密码筛选");
+            items.Add("列表选择");
+            items.Add("密码筛选");
             return items;
         }
     }

@@ -681,6 +681,26 @@ namespace dp2SSL
             }
         }
 
+        // 
+        string _photoImageLocalPath = null;
+
+        // 封面图片本地路径
+        public string PhotoImageLocalPath
+        {
+            get
+            {
+                return _photoImageLocalPath;
+            }
+            set
+            {
+                if (_photoImageLocalPath != value)
+                {
+                    _photoImageLocalPath = value;
+                    OnPropertyChanged("PhotoImageLocalPath");
+                }
+            }
+        }
+
         string _xml = "";
         public string Xml
         {

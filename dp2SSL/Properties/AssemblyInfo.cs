@@ -51,8 +51,8 @@ using System.Windows;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.9.8")]    // 1.5.*
-[assembly: AssemblyFileVersion("1.9.8.0")]  // 1.5.0.0
+[assembly: AssemblyVersion("1.9.9")]    // 1.5.*
+[assembly: AssemblyFileVersion("1.9.9.0")]  // 1.5.0.0
 
 // 1.0 2019/2/21 第一个版本
 // 1.1 2019/2/26 可以显示版本号了
@@ -174,3 +174,4 @@ using System.Windows;
 //      1.9.5   (2023/12/22) 图书列表和读者信息 ScrollBar 样式改进为 Modern Style。这两个区域可以用触摸方式卷动。
 //                          超高频国标格式标签“不存在 PII” bug 已经修正
 //      1.9.6   (2023/12/28) 图书显示区域和读者信息显示区域支持触摸屏手指卷动内容
+//      1.9.7   (2024/1/2) 人脸识别增加命中多个记录的功能

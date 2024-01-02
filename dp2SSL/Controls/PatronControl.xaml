@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:dp2SSL"
              xmlns:fa="http://schemas.fontawesome.io/icons/"
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="400">
     <UserControl.Resources>
@@ -28,6 +29,7 @@
             <local:IntToAddConverter x:Key="IntToString" />
             <local:CountToVisibilityConverter x:Key="CountToVisible" />
             <local:ThicknessMaxConverter x:Key="ThicknessMaxConverter"/>
+            <local:StringToBitmapConverter x:Key="StringToBitmap" />
 
             <Image x:Key="MyImage" Source="/dp2SSL;component/face_recognition_219.png"/>
         </ResourceDictionary>
@@ -39,49 +41,51 @@
             Background="{StaticResource patronBackBrush}">
 
 
-            <Grid>
-                <Grid Visibility="{Binding Path=NotEmpty, Converter={StaticResource VisibleIfTrueConverter}}"
+        <Grid>
+            <Grid Visibility="{Binding Path=NotEmpty, Converter={StaticResource VisibleIfTrueConverter}}"
                   >
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="20"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="8"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="20"/>
-                    </Grid.ColumnDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="8"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="20"/>
+                </Grid.ColumnDefinitions>
 
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
 
-                    </Grid.RowDefinitions>
+                </Grid.RowDefinitions>
 
-                    <!-- 等待动画 -->
-                    <fa:ImageAwesome Grid.Row="0" Grid.Column="1" Height="30" Foreground="DarkGray"
+                <!-- 等待动画 -->
+                <fa:ImageAwesome Grid.Row="0" Grid.Column="1" Height="30" Foreground="DarkGray"
                             Icon="Spinner" Spin="true" SpinDuration="5" 
                             Visibility="{Binding Path=Waiting, Converter={StaticResource VisibleIfTrueConverter}}"
                             VerticalAlignment="Center"/>
 
-                    <!-- 证照片 -->
-                    <Image Name="photo"  Grid.Row="0" Grid.Column="3" 
+                <!-- 证照片 -->
+                <Image Name="photo"  Grid.Row="0" Grid.Column="3" 
                        MaxWidth="160" MinHeight="40"
-                          Margin="0" HorizontalAlignment="Left"/>
-
-                    <!-- UID 名称 -->
-                    <TextBlock Grid.Row="1" Grid.Column="1" 
+                          Margin="0" HorizontalAlignment="Left"
+                        Visibility="{Binding Path=PhotoImageLocalPath, Converter={StaticResource StringToVis}}"
+                        Source="{Binding Path=PhotoImageLocalPath, Converter={StaticResource StringToBitmap}}"
+                       />
+                <!-- UID 名称 -->
+                <TextBlock Grid.Row="1" Grid.Column="1" 
                            Text="UID" 
                            Foreground="{StaticResource patronNameText}" 
                                Margin="0,4,6,0" FontSize="12"  
                                TextAlignment="Right" VerticalAlignment="Center"/>
-                    <!-- UID 内容 -->
-                    <TextBox Name="uid"  Grid.Row="1" Grid.Column="3"
+                <!-- UID 内容 -->
+                <TextBox Name="uid"  Grid.Row="1" Grid.Column="3"
                          Text="{Binding UID}" 
                          IsReadOnly="True" BorderThickness="0"
                          Background="Transparent" Foreground="{StaticResource patronValueText}" 
@@ -89,97 +93,97 @@
                              Margin="0,4,6,0" FontSize="12"
                          />
 
-                    <!-- 证条码号 名称 -->
-                    <TextBlock Grid.Row="2" Grid.Column="1" 
+                <!-- 证条码号 名称 -->
+                <TextBlock Grid.Row="2" Grid.Column="1" 
                            Text="证条码号" 
                            Foreground="{StaticResource patronNameText}" 
                                Margin="0,4,6,0" FontSize="12"  TextAlignment="Right"/>
-                    <!-- 证条码号 内容 -->
-                    <TextBlock Grid.Row="2" Grid.Column="3" 
+                <!-- 证条码号 内容 -->
+                <TextBlock Grid.Row="2" Grid.Column="3" 
                                Text="{Binding BarcodeMasked}"
                        Foreground="{StaticResource patronValueText}" TextWrapping="Wrap" 
                                Margin="0,4,6,0" FontSize="12"/>
 
-                    <!-- 姓名 名称 -->
-                    <TextBlock Grid.Row="3" Grid.Column="1" 
+                <!-- 姓名 名称 -->
+                <TextBlock Grid.Row="3" Grid.Column="1" 
                            Text="姓名" 
                            Foreground="{StaticResource patronNameText}" 
                                Margin="0,4,6,0" FontSize="24"  TextAlignment="Right"/>
-                    <!-- 姓名 内容 -->
-                    <TextBlock Grid.Row="3" Grid.Column="3" Text="{Binding PatronNameMasked}"
+                <!-- 姓名 内容 -->
+                <TextBlock Grid.Row="3" Grid.Column="3" Text="{Binding PatronNameMasked}"
                        Foreground="{StaticResource patronHilightText}" TextWrapping="Wrap" 
                                Margin="0,4,6,0" FontSize="24" FontWeight="Bold"/>
 
-                    <!-- 单位 名称 -->
-                    <TextBlock Grid.Row="4" Grid.Column="1" Text="单位" 
+                <!-- 单位 名称 -->
+                <TextBlock Grid.Row="4" Grid.Column="1" Text="单位" 
                            Foreground="{StaticResource patronNameText}" 
                                Margin="0,4,6,0" FontSize="16" TextAlignment="Right"/>
-                    <!-- 单位 内容 -->
-                    <TextBlock Grid.Row="4" Grid.Column="3" Text="{Binding DepartmentMasked}"
+                <!-- 单位 内容 -->
+                <TextBlock Grid.Row="4" Grid.Column="3" Text="{Binding DepartmentMasked}"
                        Foreground="{StaticResource patronValueText}" TextWrapping="Wrap" 
                                Margin="0,4,6,0" FontSize="16"/>
 
-                    <!-- 错误信息 -->
-                    <TextBlock Grid.Row="5" Grid.Column="1"
+                <!-- 错误信息 -->
+                <TextBlock Grid.Row="5" Grid.Column="1"
                        Grid.ColumnSpan="3" Text="{Binding Error}"
                        Padding="10"
                                FontSize="20" FontWeight="Bold" Foreground="White" Background="DarkRed"
                                Visibility="{Binding Path=Error, Converter={StaticResource StringToVis}}"
                                TextWrapping="WrapWithOverflow"/>
-                    <!-- 各种状态 -->
-                    <WrapPanel Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="3">
-                        <TextBlock Foreground="White" Background="DarkRed"
-                                   Margin="4" Padding="4" 
+                <!-- 各种状态 -->
+                <WrapPanel Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="3" Margin="2">
+                    <TextBlock Foreground="White" Background="DarkRed"
+                                   Margin="0" Padding="6,2,6,2" 
                                    Visibility="{Binding State, Converter={StaticResource StringToVis}}"
                                    >
                         <Run Text="证状态 "/>
                         <Run Text="{Binding State}" />
-                        </TextBlock>
-                        <TextBlock Foreground="White" Background="DarkBlue"
-                                   Margin="4" Padding="4">
+                    </TextBlock>
+                    <TextBlock Foreground="White" Background="DarkBlue"
+                                   Margin="0" Padding="6,2,6,2">
                             <Run Text="可借总数 "/>
                             <Run Text="{Binding MaxBorrowItems}" />
-                        </TextBlock>
-                        <TextBlock Foreground="White" Background="DarkGreen"
-                                   Margin="4" Padding="4" FontWeight="Bold">
+                    </TextBlock>
+                    <TextBlock Foreground="White" Background="DarkGreen"
+                                   Margin="0" Padding="6,2,6,2" FontWeight="Bold">
                         <Run Text="当前还可借 "/>
                         <Run Text="{Binding CanBorrowItems}" />
-                        </TextBlock>
-                        <TextBlock Foreground="White" Background="DarkRed"
-                                   Margin="4" Padding="4" 
+                    </TextBlock>
+                    <TextBlock Foreground="White" Background="DarkRed"
+                                   Margin="0" Padding="6,2,6,2" 
                                    Visibility="{Binding OverdueCount, Converter={StaticResource CountToVisible}}"
                                    >
                         <Run Text="待处理违约 "/>
                         <Run Text="{Binding OverdueCount}" />
-                        </TextBlock>
-                        <TextBlock Foreground="White" Background="DarkOrange"
-                                   Margin="4" Padding="4" 
+                    </TextBlock>
+                    <TextBlock Foreground="White" Background="DarkOrange"
+                                   Margin="0" Padding="6,2,6,2" 
                                    Visibility="{Binding OverdueBorrowCount, Converter={StaticResource CountToVisible}}"
                                    >
                         <Run Text="在借超期 "/>
                         <Run Text="{Binding OverdueBorrowCount}" />
-                        </TextBlock>
-                    </WrapPanel>
-                    <TextBlock Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="3"
+                    </TextBlock>
+                </WrapPanel>
+                <TextBlock Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="3"
                                Foreground="Gray" 
                                Margin="0,4,6,0" FontSize="12" TextAlignment="Left"
                                >
                         <Run Text="--- 在借册("/><Run Text="{Binding BorrowingCount}" /><Run Text=") ---"/>
-                    </TextBlock>
-                    <local:EntityListControl x:Name="borrowedBooks"
+                </TextBlock>
+                <local:EntityListControl x:Name="borrowedBooks"
                         Visibility="{Binding Path=BorrowItemsVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
                         Grid.Row="8" Grid.Column="1"
                         Grid.ColumnSpan="3"
                      />
-                </Grid>
-                <StackPanel VerticalAlignment="Center"
+            </Grid>
+            <StackPanel VerticalAlignment="Center"
                         Visibility="{Binding Path=NotEmpty, Converter={StaticResource VisibleIfFalseConverter}}">
                 <Border 
                         BorderThickness="2" Width="Auto" Margin="4">
-                        <Border.BorderBrush>
-                            <VisualBrush>
-                                <VisualBrush.Visual>
-                                    <Rectangle StrokeDashArray="1.0 1.0"
+                    <Border.BorderBrush>
+                        <VisualBrush>
+                            <VisualBrush.Visual>
+                                <Rectangle StrokeDashArray="1.0 1.0"
                            Stroke="Gray"
                            StrokeThickness="{Binding RelativeSource={RelativeSource AncestorType={x:Type Border}},
                                                      Path=BorderThickness,
@@ -188,27 +192,37 @@
                            RadiusY="{Binding RelativeSource={RelativeSource AncestorType={x:Type Border}}, Path=CornerRadius.BottomLeft}"
                            Width="{Binding RelativeSource={RelativeSource AncestorType={x:Type Border}}, Path=ActualWidth}"
                            Height="{Binding RelativeSource={RelativeSource AncestorType={x:Type Border}}, Path=ActualHeight}"/>
-                                </VisualBrush.Visual>
-                            </VisualBrush>
-                        </Border.BorderBrush>
-                        <TextBlock Name="startMessage" Text="请放好读者卡 ..."
+                            </VisualBrush.Visual>
+                        </VisualBrush>
+                    </Border.BorderBrush>
+                    <TextBlock Name="startMessage" Text="请放好读者卡 ..."
                        Padding="10" VerticalAlignment="Center" HorizontalAlignment="Center"
                        TextAlignment="Center"
                        FontSize="30" FontWeight="Light" Foreground="Gray" Background="Transparent"
                        
                        TextWrapping="WrapWithOverflow">
 
-                        </TextBlock>
-                    </Border>
-                    <Button Name="inputFace" Visibility="Collapsed"
+                    </TextBlock>
+                </Border>
+                <!--
+                <Button Name="inputFace" Visibility="Collapsed"
                         Content="{StaticResource MyImage}"
                         Style="{StaticResource MaterialDesignFloatingActionLightButton}"
                         Margin="20,0,20,0" Padding="10,10,10,10" FontSize="20"
                         Click="InputFace_Click">
-                    </Button>
-                </StackPanel>
-            </Grid>
+                </Button>
+                -->
+                <Button Name="inputFace" Visibility="Collapsed"
+                        Style="{StaticResource MaterialDesignFloatingActionLightButton}"
+                        Margin="20,0,20,0" Padding="10,10,10,10" FontSize="20"
+                        Click="InputFace_Click">
+                    <iconPacks:PackIconForkAwesome Kind="UserOutline" 
+                                                   Width="34" Height="34" Foreground="{StaticResource buttonForeground}"/>
 
-                
+                </Button>
+            </StackPanel>
+        </Grid>
+
+
     </Border>
 </UserControl>

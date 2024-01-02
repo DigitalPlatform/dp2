@@ -1060,11 +1060,14 @@ namespace DigitalPlatform.RFID
         //      build_user_bank 是否要构造 User Bank 内容。如果不构造的话，Content Parameter 中就不会包含任何 index 信息
         //      epc_info        要创建的 EPC Bank 的一些预定义值。
         //                      如果 epc_info.ContentParameters 不为 null，则表示直接用它进入 EPC
-        public static BuildTagResult BuildTag(LogicChip chip,
+        public static BuildTagResult BuildTag(LogicChip chip_param,
             bool build_user_bank,
             bool eas = true,
             GaoxiaoEpcInfo epc_info = null)
         {
+            // 2024/1/2
+            var chip = chip_param.Clone();
+
             // 2023/11/7
             // 对于不写入 User Bank 的情况进行检查
             if (build_user_bank == false)

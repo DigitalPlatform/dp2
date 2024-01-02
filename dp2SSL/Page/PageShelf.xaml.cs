@@ -3606,6 +3606,9 @@ namespace dp2SSL
                         _patron.SetPatronXml(result.RecPath, result.ReaderXml, result.Timestamp);
 
                         this.patronControl.SetBorrowed(result.ReaderXml);
+
+                        // 2024/1/2
+                        _patron.BorrowItemsVisible = _patron.BorrowingCount > 0;
                     }
                     catch (Exception ex)
                     {

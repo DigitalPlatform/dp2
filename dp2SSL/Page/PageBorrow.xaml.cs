@@ -157,6 +157,7 @@ namespace dp2SSL
                     }));
             }
 
+            /*
             {
                 List<RecognitionFaceHit> samples = new List<RecognitionFaceHit>();
                 for (int i = 0; i < 10; i++)
@@ -166,6 +167,7 @@ namespace dp2SSL
 
                 result.Hits = samples.ToArray();
             }
+            */
 
             // TODO: 从命中多个中选择。输入 PIN 码或者用鼠标选择
             // 命中多个的选择
@@ -175,9 +177,13 @@ namespace dp2SSL
             {
                 var barcodes = result.Hits.OrderByDescending(o => o.Score).Select(o => o.Patron).ToList();
                 
-                string title = $"人脸识别命中 {barcodes.Count} 个读者，请从中选择一个，或输入密码来筛选 ...";
-                if (App.FaceInputMultipleHits == "输入密码选择")
-                    title = $"人脸识别命中 {barcodes.Count} 个读者，请通过输入密码来筛选 ...";
+                List<string> names = new List<string>();
+                if (App.FaceInputMultipleHits.Contains("列表选择"))
+                    names.Add("从列表中选择");
+                if (App.FaceInputMultipleHits.Contains("密码筛选"))
+                    names.Add("输入密码筛选");
+
+                string title = $"人脸识别命中 {barcodes.Count} 个读者，请{StringUtil.MakePathList(names, " 或 ")} ...";
                 
                 var select_result = SelectOnePatron(
                     title,
@@ -256,8 +262,27 @@ namespace dp2SSL
                     }
                     ask.SetSource(patrons);
 
-                    if (App.FaceInputMultipleHits == "输入密码选择")
+#if REMOVED
+                    if (App.FaceInputMultipleHits.Contains("列表选择") == false)
+                    {
                         ask.listView.Visibility = Visibility.Collapsed;
+
+                        if (App.FaceInputMultipleHits.Contains("+") == false)
+                        {
+                            (ask.mainGrid.ColumnDefinitions[0] as ColumnDefinitionExtended).Visible = false;
+                            ask.mainGrid.ColumnDefinitions[1].Width = GridLength.Auto;
+                        }
+                    }
+                    if (App.FaceInputMultipleHits.Contains("密码筛选") == false)
+                    {
+                        ask.passwordArea.Visibility = Visibility.Collapsed;
+
+                        if (App.FaceInputMultipleHits.Contains("+") == false)
+                        {
+                            (ask.mainGrid.ColumnDefinitions[1] as ColumnDefinitionExtended).Visible = false;
+                        }
+                    }
+#endif
 
                     ask.TitleText = dialog_title;
                     //ask.MessageText = $"确实要解除读者 {patron_name} 副卡 {bind_uid} 的绑定?\r\n\r\n(解除绑定以后，读者将无法再用这一张副卡进行任何操作)";
@@ -403,7 +428,7 @@ namespace dp2SSL
 
             // 注：将来也许可以通过(RFID 以外的)其他方式输入图书号码
             if (string.IsNullOrEmpty(RfidManager.Url))
-                this.SetGlobalError("rfid", "尚未配置 RFID 中心 URL");
+                SetGlobalError("rfid", "尚未配置 RFID 中心 URL");
 
             /*
             _layer = AdornerLayer.GetAdornerLayer(this.mainGrid);
@@ -1105,31 +1130,33 @@ namespace dp2SSL
             PatronClear();  // 2019/9/3
         }
 
-        void LoadPhoto()
+        // _patron.PhotoPath
+        public static void LoadPhoto(PatronControl patronControl,
+            string photoPath)
         {
             try
             {
                 if (App.Protocol == "dp2library")
                 {
                     // Exception: 可能会抛出异常
-                    this.patronControl.LoadPhoto(_patron.PhotoPath);
+                    patronControl.LoadPhoto(photoPath);
                 }
 
                 if (App.Protocol == "sip" && string.IsNullOrEmpty(App.FaceUrl) == false)
                 {
-                    if (string.IsNullOrEmpty(_patron.PhotoPath))
+                    if (string.IsNullOrEmpty(photoPath))
                         App.Invoke(new Action(() =>
                         {
-                            this.patronControl.SetPhoto((byte[])null);
+                            patronControl.SetPhoto((byte[])null);
                         }));
                     else
                     {
                         // 从 FaceCenter 获得头像
-                        var result = FaceManager.GetImage($"patron:{_patron.PhotoPath}");
+                        var result = FaceManager.GetImage($"patron:{photoPath}");
                         // TODO: 如何报错?
                         App.Invoke(new Action(() =>
                         {
-                            this.patronControl.SetPhoto(result.ImageData);
+                            patronControl.SetPhoto(result.ImageData);
                         }));
                     }
                 }
@@ -1152,7 +1179,7 @@ namespace dp2SSL
             {
                 _ = Task.Run(() =>
                 {
-                    LoadPhoto();
+                    LoadPhoto(this.patronControl, this._patron.PhotoPath);
                     /*
                     try
                     {
@@ -1766,6 +1793,9 @@ namespace dp2SSL
                         _patron.MaskDefinition = ShelfData.GetPatronMask();
                         _patron.SetPatronXml(result.RecPath, result.ReaderXml, result.Timestamp);
                         this.patronControl.SetBorrowed(result.ReaderXml);
+
+                        // 2024/1/2
+                        _patron.BorrowItemsVisible = _patron.BorrowingCount > 0;
                     }
                     catch (Exception ex)
                     {
@@ -2209,12 +2239,13 @@ TaskScheduler.Default);
             }
         }
 
-        static string GetImageFilePath(string text)
+        public static string GetImageFilePath(string text)
         {
             if (StringUtil.IsHttpUrl(text))
                 return StringUtil.GetMd5(text);
             return text.Replace("/", "_").Replace("\\", "_");
         }
+
         public static bool IsWhdtFormat(Entity entity)
         {
             if (entity.Protocol != InventoryInfo.ISO18000P6C)
@@ -3421,7 +3452,7 @@ TaskScheduler.Default);
         // ErrorTable _globalErrorTable = null;
 
         // 设置全局区域错误字符串
-        void SetGlobalError(string type, string error)
+        static void SetGlobalError(string type, string error)
         {
             /*
             _globalErrorTable.SetError(type, error);
@@ -3858,7 +3889,11 @@ TaskScheduler.Default);
 
                         });
 
-                        var result = await RegisterFeatureStringAsync(_patron.Barcode, "countDown,format:jpeg,action:" + action);
+                        var register_style = "countDown,format:jpeg,action:" + action;
+                        // 2024/1/2
+                        if (App.FaceInputMultipleHits == "使用第一个")
+                            register_style += ",searchDup";
+                        var result = await RegisterFeatureStringAsync(_patron.Barcode, register_style);
                         if (result.Value == -1)
                         {
                             DisplayError(ref videoRegister, result.ErrorInfo);
@@ -4317,7 +4352,7 @@ out strError);
         }
 
 #endif
-        #endregion
+#endregion
 
 #if OLDVERSION
 

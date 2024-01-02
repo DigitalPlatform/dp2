@@ -552,7 +552,7 @@ string color = "red")
         const string dp2library_base_version = "3.153"; // "3.52";
         const string fingerprintcenter_base_version = "2.3.1";
         const string rfidcenter_base_version = "1.14.17";
-        const string facecenter_base_version = "1.3";
+        const string facecenter_base_version = "1.6.1";  // "1.3";
 
         public static NormalResult CheckServerUID()
         {

@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:dp2SSL"
         xmlns:fa="http://schemas.fontawesome.io/icons/"
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         mc:Ignorable="d"
         Background="{StaticResource normalBackground}" Foreground="{StaticResource normalForeground}"
         Title="SelectPatronWindow" Height="500" Width="800"
@@ -13,15 +14,14 @@ AllowsTransparency="True"
 ResizeMode="CanResizeWithGrip" ShowInTaskbar="False"
         >
     <Border BorderThickness="1" BorderBrush="Gray">
-        <Grid Width="Auto" KeyDown="Grid_KeyDown">
+        <Grid Name="mainGrid" Width="Auto" KeyDown="Grid_KeyDown">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="330"/>
+                <local:ColumnDefinitionExtended Width="*"/>
+                <local:ColumnDefinitionExtended Width="330"/>
             </Grid.ColumnDefinitions>
 
             <Grid.RowDefinitions>
                 <RowDefinition Height="60"/>
-                <RowDefinition Height="46"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="60"/>
             </Grid.RowDefinitions>
@@ -31,7 +31,7 @@ ResizeMode="CanResizeWithGrip" ShowInTaskbar="False"
                      FontSize="18" FontWeight="Thin" HorizontalContentAlignment="Center"
                      Margin="20"/>
 
-            <local:MyScrollViewer Grid.Row="1" Grid.RowSpan="2"
+            <local:MyScrollViewer Grid.Row="1"
                   HorizontalScrollBarVisibility="Disabled"
                   VerticalScrollBarVisibility="Auto">
                 <ListView Name="listView"
@@ -56,7 +56,7 @@ ResizeMode="CanResizeWithGrip" ShowInTaskbar="False"
                     </ItemsControl.ItemTemplate>
                 </ListView>
             </local:MyScrollViewer>
-            <StackPanel Grid.Row="3" Grid.ColumnSpan="2"
+            <StackPanel Grid.Row="2" Grid.ColumnSpan="2"
                         Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button Name="selectButton" Margin="10,0,10,0"
                         IsEnabled="False"
@@ -93,21 +93,37 @@ ResizeMode="CanResizeWithGrip" ShowInTaskbar="False"
 
             </StackPanel>
 
+            <Grid Name="passwordArea" Grid.Row="1" Grid.Column="1"
+                  Width="330" HorizontalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
 
-            <PasswordBox Name="password" 
-                         Grid.Row="1" Grid.Column="1"
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="46"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <PasswordBox Name="password" 
+                         Grid.Row="0"
                          Width="320" FontSize="30" Margin="4"
                          Background="LightGray"
                          KeyDown="password_KeyDown"/>
-            <Button Name="clearButton" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right"
+                <Button Name="clearButton" Grid.Row="0" HorizontalAlignment="Right"
                 Width="30" Margin="4"  BorderThickness="0" Background="Transparent"
                     Click="clearButton_Click">
+                    <!--
                 <fa:ImageAwesome Icon="Remove" Height="20" Foreground="{StaticResource buttonForeground}"/>
-            </Button>
-            <local:NumberKeyboardControl x:Name="keyboard" 
-                                         Grid.Row="2" Grid.Column="1" VerticalAlignment="Top"
+                <iconPacks:PackIconEvaIcons Kind="CloseCircle" Width="20" Height="20" />
+                -->
+                    <iconPacks:PackIconVaadinIcons Kind="CloseCircle" Foreground="{StaticResource buttonForeground}"
+                                               Width="20" Height="20"/>
+                </Button>
+                <local:NumberKeyboardControl x:Name="keyboard" 
+                                             Grid.Row="1"
+                                         VerticalAlignment="Top"
                                                  Width="320" Height="320" Background="#FF484646"/>
-
+            </Grid>
         </Grid>
     </Border>
 </Window>

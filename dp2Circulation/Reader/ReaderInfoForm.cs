@@ -6607,6 +6607,9 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
+        const string facecenter_base_version = "1.6.1";
+
+
         // 登记人脸。用于人脸识别
         private async void toolStripSplitButton_registerFace_ButtonClick(object sender, EventArgs e)
         {
@@ -6626,9 +6629,9 @@ MessageBoxDefaultButton.Button1);
 
                 string version = version_result.ErrorCode;
                 // 要返回人脸特征
-                if (StringUtil.CompareVersion(version, "1.5.12") < 0)
+                if (StringUtil.CompareVersion(version, facecenter_base_version) < 0)
                 {
-                    strError = $"人脸登记功能必须和 facecenter 1.5.12 或以上版本配套使用(但当前 facecenter 为 {version} 版)";
+                    strError = $"人脸登记功能必须和 facecenter {facecenter_base_version} 或以上版本配套使用(但当前 facecenter 为 {version} 版)";
                     goto ERROR1;
                 }
 
@@ -6647,7 +6650,10 @@ MessageBoxDefaultButton.Button1);
                 }
 
                 var savePhoto = Program.MainForm.SavePhotoWhileRegisterFace;
-                string style = "ui,confirmPicture,searchDup";
+                string style = "ui,confirmPicture";
+                // 2024/1/2
+                if (QuickChargingForm.FaceInputMultipleHits == false)
+                    style += ",searchDup";
                 if (savePhoto)
                     style += ",returnImage";
                 REDO:
