@@ -108,11 +108,11 @@
                 <TextBlock Grid.Row="3" Grid.Column="1" 
                            Text="姓名" 
                            Foreground="{StaticResource patronNameText}" 
-                               Margin="0,4,6,0" FontSize="24"  TextAlignment="Right"/>
+                               Margin="0,4,6,0" FontSize="24" FontWeight="Thin" TextAlignment="Right"/>
                 <!-- 姓名 内容 -->
                 <TextBlock Grid.Row="3" Grid.Column="3" Text="{Binding PatronNameMasked}"
                        Foreground="{StaticResource patronHilightText}" TextWrapping="Wrap" 
-                               Margin="0,4,6,0" FontSize="24" FontWeight="Bold"/>
+                               Margin="0,4,6,0" FontSize="24" FontWeight="Thin"/>
 
                 <!-- 单位 名称 -->
                 <TextBlock Grid.Row="4" Grid.Column="1" Text="单位" 
@@ -131,7 +131,7 @@
                                Visibility="{Binding Path=Error, Converter={StaticResource StringToVis}}"
                                TextWrapping="WrapWithOverflow"/>
                 <!-- 各种状态 -->
-                <WrapPanel Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="3" Margin="2">
+                <WrapPanel Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="3" Margin="0,6,0,4">
                     <TextBlock Foreground="White" Background="DarkRed"
                                    Margin="0" Padding="6,2,6,2" 
                                    Visibility="{Binding State, Converter={StaticResource StringToVis}}"

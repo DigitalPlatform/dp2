@@ -11,12 +11,12 @@
     <SolidColorBrush x:Key="patronBorder" Color="Black"/>
 
     <!-- 名称前景色。比正文前景色轻一些 -->
-    <SolidColorBrush x:Key="patronNameText" Color="Gray"/>
+    <SolidColorBrush x:Key="patronNameText" Color="#777777"/>
 
     <!-- 正文前景色 -->
-    <SolidColorBrush x:Key="patronValueText" Color="#dddddd"/>
+    <SolidColorBrush x:Key="patronValueText" Color="#cccccc"/>
 
     <!-- 正文前景色，较明显 -->
-    <SolidColorBrush x:Key="patronHilightText" Color="#eeeeee"/>
+    <SolidColorBrush x:Key="patronHilightText" Color="#ffffff"/>
 
 </ResourceDictionary>

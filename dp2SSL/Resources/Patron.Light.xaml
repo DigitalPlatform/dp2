@@ -10,7 +10,7 @@
     <SolidColorBrush x:Key="patronBorder" Color="White"/>
 
     <!-- 名称前景色。比正文前景色轻一些 -->
-    <SolidColorBrush x:Key="patronNameText" Color="#444444"/>
+    <SolidColorBrush x:Key="patronNameText" Color="#888888"/>
 
     <!-- 正文前景色 -->
     <SolidColorBrush x:Key="patronValueText" Color="#222222"/>

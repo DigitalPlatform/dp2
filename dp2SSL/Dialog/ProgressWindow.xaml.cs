@@ -24,6 +24,10 @@ namespace dp2SSL
         public ProgressWindow()
         {
             InitializeComponent();
+
+            this.Loaded += (s, o) => {
+                this.mainGrid.Focus();
+            };
         }
 
         private void OkButton_Click(object sender, RoutedEventArgs e)
@@ -205,6 +209,22 @@ namespace dp2SSL
             PressedButton = "Cancel";
 
             this.Close();
+        }
+
+        private void Grid_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter
+                || e.Key == Key.Space)
+            {
+                OkButton_Click(this, new RoutedEventArgs());
+                return;
+            }
+
+            if (e.Key == Key.Escape)
+            {
+                cancelButton_Click(this, new RoutedEventArgs());
+                return;
+            }
         }
     }
 }

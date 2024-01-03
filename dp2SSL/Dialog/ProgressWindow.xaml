@@ -14,7 +14,9 @@
         <DropShadowEffect Color="Gray" BlurRadius="20" Direction="-45" RenderingBias="Quality" ShadowDepth="14"/>
     </Window.Effect>
     <Border BorderThickness="2" BorderBrush="Gray">
-        <Grid Background="Transparent" Margin="30">
+        <Grid Name="mainGrid"
+            Background="Transparent" Margin="30"
+              KeyDown="Grid_KeyDown" Focusable="True">
             <Grid.RowDefinitions>
                 <RowDefinition Height="60"/>
                 <RowDefinition Height="*"/>

@@ -546,7 +546,7 @@ namespace dp2SSL
                             RfidManager.ClearCache();
                             // 注：将来也许可以通过(RFID 以外的)其他方式输入图书号码
                             if (string.IsNullOrEmpty(RfidManager.Url))
-                                this.SetGlobalError("rfid", "尚未配置 RFID 中心 URL");
+                                SetGlobalError("rfid", "尚未配置 RFID 中心 URL");
 
                             await InitialShelfEntitiesAsync(App.StartNetworkMode,
                                 IsSilently() || IsFileSilently());
@@ -560,14 +560,14 @@ namespace dp2SSL
                         }
                         catch (Exception ex)
                         {
-                            this.SetGlobalError("initial", $"InitialShelfEntitiesAsync() 出现异常: {ex.Message}");
+                            SetGlobalError("initial", $"InitialShelfEntitiesAsync() 出现异常: {ex.Message}");
                             WpfClientInfo.WriteErrorLog($"InitialShelfEntitiesAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                         }
                     });
                 }
                 catch (Exception ex)
                 {
-                    this.SetGlobalError("initial", $"InitialShelfEntities() 出现异常: {ex.Message}");
+                    SetGlobalError("initial", $"InitialShelfEntities() 出现异常: {ex.Message}");
                     WpfClientInfo.WriteErrorLog($"InitialShelfEntities() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
             }
@@ -1751,7 +1751,7 @@ namespace dp2SSL
 #endif
 
         // 设置全局区域错误字符串
-        void SetGlobalError(string type, string error)
+        static void SetGlobalError(string type, string error)
         {
             /*
             if (error != null && error.StartsWith("未"))
@@ -3381,12 +3381,25 @@ namespace dp2SSL
 
         public delegate void Delegate_welcome();
 
+        async Task<NormalResult> FillPatronDetailAsync(
+            Delegate_welcome func_welcome, 
+            bool force = false)
+        {
+            return await Task.Run(async () =>
+            {
+                return await _fillPatronDetailAsync(
+                    func_welcome,
+                    force);
+            });
+        }
+
+        // TODO: 参考 PageBorrow 中 FillPatronDetailAsync() 函数，更大范围使用独立线程，以加快响应敏捷性
         // 填充读者信息的其他字段(第二阶段)
         // resut.Value
         //      -1  出错
         //      0   没有填充
         //      1   成功填充
-        async Task<NormalResult> FillPatronDetailAsync(
+        async Task<NormalResult> _fillPatronDetailAsync(
             Delegate_welcome func_welcome,
             bool force = false)
         {
@@ -4870,16 +4883,16 @@ namespace dp2SSL
             });
             try
             {
-                result = await RecognitionFaceAsync("");
+                result = await RecognitionFaceAsync(App.FaceInputMultipleHits == "使用第一个" ? "" : "multiple_hits");
                 if (result.Value == -1)
                 {
                     if (result.ErrorCode != "cancelled")
-                        SetGlobalError("face", result.ErrorInfo);
+                        SetGlobalError("faceInput", result.ErrorInfo);
                     DisplayError(ref _videoRecognition, result.ErrorInfo);
                     return;
                 }
 
-                SetGlobalError("face", null);
+                SetGlobalError("faceInput", null);
             }
             finally
             {
@@ -4888,6 +4901,77 @@ namespace dp2SSL
                     {
                         _videoRecognition.Close();
                     }));
+            }
+
+            // 命中多个的选择
+            if (App.FaceInputMultipleHits != "使用第一个"
+                && result.Hits != null
+                && result.Hits.Length > 1)
+            {
+                var barcodes = result.Hits.OrderByDescending(o => o.Score).Select(o => o.Patron).ToList();
+
+                SelectPatronWindow.CleanAttackManager();
+                if (SelectPatronWindow.HasAttacked(barcodes) == true)
+                {
+                    App.CurrentApp.Speak($"人脸信息被保护 ...");
+
+                    result = new RecognitionFaceResult
+                    {
+                        Value = -1,
+                        ErrorInfo = "为防范密码攻击，您的人脸信息处于被保护状态，请稍后再重试 ..."
+                    };
+                }
+                else
+                {
+                    App.CurrentApp.Speak($"人脸识别命中 {result.Hits.Length} 个读者，请选择 ...");
+
+                    List<string> names = new List<string>();
+                    if (App.FaceInputMultipleHits.Contains("列表选择"))
+                        names.Add("从列表中选择");
+                    if (App.FaceInputMultipleHits.Contains("密码筛选"))
+                        names.Add("输入密码筛选");
+
+                    string title = $"人脸识别命中 {barcodes.Count} 个读者，请{StringUtil.MakePathList(names, " 或 ")} ...";
+
+                    var select_result = PageBorrow.SelectOnePatron(
+                        this,
+                        title,
+                        barcodes);
+                    if (select_result.Value != 1)
+                        result = new RecognitionFaceResult
+                        {
+                            Value = -1,
+                            ErrorInfo = select_result.ErrorInfo,
+                            ErrorCode = select_result.ErrorCode,
+                        };
+                    else
+                        result = new RecognitionFaceResult
+                        {
+                            Value = 1,
+                            Score = result.Hits
+                            .Where(o => o.Patron == select_result.strBarcode)
+                            .Select(o => o.Score)
+                            .FirstOrDefault(),
+                            Patron = select_result.strBarcode
+                        };
+                }
+            }
+
+            if (result.Value == -1)
+            {
+                if (result.ErrorCode != "cancelled")
+                {
+                    // SetGlobalError("faceInput", result.ErrorInfo);
+                    _ = Task.Run(() =>
+                    {
+                        App.ErrorBox(
+    "人脸识别",
+    result.ErrorInfo,
+    "red",
+    "auto_close:10");
+                    });
+                }
+                return;
             }
 
             GetMessageResult message = new GetMessageResult
@@ -5095,7 +5179,7 @@ namespace dp2SSL
                             ErrorInfo = result.ErrorInfo,
                             ErrorCode = result.ErrorCode
                         };
-                    return FaceManager.RecognitionFace("");
+                    return FaceManager.RecognitionFace(style);
                 });
             }
             finally

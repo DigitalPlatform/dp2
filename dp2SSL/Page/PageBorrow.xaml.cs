@@ -140,12 +140,12 @@ namespace dp2SSL
                 if (result.Value == -1)
                 {
                     if (result.ErrorCode != "cancelled")
-                        SetGlobalError("face", result.ErrorInfo);
+                        SetGlobalError("faceInput", result.ErrorInfo);
                     DisplayError(ref videoRecognition, result.ErrorInfo);
                     return;
                 }
 
-                SetGlobalError("face", null);
+                SetGlobalError("faceInput", null);
             }
             finally
             {
@@ -176,41 +176,68 @@ namespace dp2SSL
                 && result.Hits.Length > 1)
             {
                 var barcodes = result.Hits.OrderByDescending(o => o.Score).Select(o => o.Patron).ToList();
-                
-                List<string> names = new List<string>();
-                if (App.FaceInputMultipleHits.Contains("列表选择"))
-                    names.Add("从列表中选择");
-                if (App.FaceInputMultipleHits.Contains("密码筛选"))
-                    names.Add("输入密码筛选");
 
-                string title = $"人脸识别命中 {barcodes.Count} 个读者，请{StringUtil.MakePathList(names, " 或 ")} ...";
-                
-                var select_result = SelectOnePatron(
-                    title,
-                    barcodes);
-                if (select_result.Value != 1)
+                SelectPatronWindow.CleanAttackManager();
+                if (SelectPatronWindow.HasAttacked(barcodes) == true)
+                {
+                    App.CurrentApp.Speak($"人脸信息被保护 ...");
+
                     result = new RecognitionFaceResult
                     {
                         Value = -1,
-                        ErrorInfo = select_result.ErrorInfo,
-                        ErrorCode = select_result.ErrorCode,
+                        ErrorInfo = "为防范密码攻击，您的人脸信息处于被保护状态，请稍后再重试 ..."
                     };
+                }
                 else
-                    result = new RecognitionFaceResult
-                    {
-                        Value = 1,
-                        Score = result.Hits
-                        .Where(o => o.Patron == select_result.strBarcode)
-                        .Select(o => o.Score)
-                        .FirstOrDefault(),
-                        Patron = select_result.strBarcode
-                    };
+                {
+                    App.CurrentApp.Speak($"人脸识别命中 {result.Hits.Length} 个读者，请选择 ...");
+
+                    List<string> names = new List<string>();
+                    if (App.FaceInputMultipleHits.Contains("列表选择"))
+                        names.Add("从列表中选择");
+                    if (App.FaceInputMultipleHits.Contains("密码筛选"))
+                        names.Add("输入密码筛选");
+
+                    string title = $"人脸识别命中 {barcodes.Count} 个读者，请{StringUtil.MakePathList(names, " 或 ")} ...";
+
+                    var select_result = SelectOnePatron(
+                        this,
+                        title,
+                        barcodes);
+                    if (select_result.Value != 1)
+                        result = new RecognitionFaceResult
+                        {
+                            Value = -1,
+                            ErrorInfo = select_result.ErrorInfo,
+                            ErrorCode = select_result.ErrorCode,
+                        };
+                    else
+                        result = new RecognitionFaceResult
+                        {
+                            Value = 1,
+                            Score = result.Hits
+                            .Where(o => o.Patron == select_result.strBarcode)
+                            .Select(o => o.Score)
+                            .FirstOrDefault(),
+                            Patron = select_result.strBarcode
+                        };
+                }
             }
 
             if (result.Value == -1)
             {
                 if (result.ErrorCode != "cancelled")
-                    SetGlobalError("face", result.ErrorInfo);
+                {
+                    // SetGlobalError("faceInput", result.ErrorInfo);
+                    _ = Task.Run(() =>
+                    {
+                        App.ErrorBox(
+    "人脸识别",
+    result.ErrorInfo,
+    "red",
+    "auto_close:10");
+                    });
+                }
                 return;
             }
 
@@ -225,13 +252,15 @@ namespace dp2SSL
             Welcome(fill_result.Value == -1);
         }
 
-        internal class SelectOnePatronResult : NormalResult
+        public class SelectOnePatronResult : NormalResult
         {
             public string strBarcode { get; set; }
             public string strResult { get; set; }
         }
 
-        SelectOnePatronResult SelectOnePatron(string dialog_title,
+        public static SelectOnePatronResult SelectOnePatron(
+            MyPage owner,
+            string dialog_title,
             IEnumerable<string> barcode_list)
         {
             string dialog_result = "";
@@ -244,11 +273,11 @@ namespace dp2SSL
                     var ask = new SelectPatronWindow();
                     ask.Closed += (s1, e1) =>
                     {
-                        RemoveLayer();
+                        owner.RemoveLayer();
                     };
-                    AddLayer(); // Closed 事件会 RemoveLayer()
+                    owner.AddLayer(); // Closed 事件会 RemoveLayer()
 
-                    this.MemoryDialog(ask);
+                    owner.MemoryDialog(ask);
 
                     PatronCollection patrons = new PatronCollection();
                     foreach (var barcode in barcode_list)
@@ -293,7 +322,7 @@ namespace dp2SSL
                     //ask.CancelButtonVisible = true;
                     ask.ShowDialog();
 
-                    this.ForgetDialog(ask);
+                    owner.ForgetDialog(ask);
 
                     dialog_result = ask.PressedButton;
                     selected_patron = ask.SelectedPatron;
@@ -1707,8 +1736,17 @@ namespace dp2SSL
             }
         }
 #endif
-        // 填充读者信息的其他字段(第二阶段)
         async Task<NormalResult> FillPatronDetailAsync(bool force = false)
+        {
+            return await Task.Run(async () =>
+            {
+                return await _fillPatronDetailAsync(force);
+            });
+        }
+
+
+        // 填充读者信息的其他字段(第二阶段)
+        async Task<NormalResult> _fillPatronDetailAsync(bool force = false)
         {
 #if NO
             if (_cancelRefresh == null
@@ -1762,6 +1800,8 @@ namespace dp2SSL
                     result = await SipChannelUtil.GetReaderInfoAsync(oi, pii);
                 }
                 else
+                {
+#if REMOVED
                     result = await
                         Task<GetReaderInfoResult>.Run(() =>
                         {
@@ -1773,6 +1813,15 @@ namespace dp2SSL
                             string oi_pii = _patron.GetOiPii(strict); // 严格模式，必须有 OI
                             return LibraryChannelUtil.GetReaderInfo(string.IsNullOrEmpty(oi_pii) ? pii : oi_pii);
                         });
+#endif
+                    // 2021/4/2 改为用 oi+pii
+                    bool strict = !_patron.IsFingerprintSource;
+                    // 2021/4/15
+                    if (ChargingData.GetBookInstitutionStrict() == false)
+                        strict = false;
+                    string oi_pii = _patron.GetOiPii(strict); // 严格模式，必须有 OI
+                    result = LibraryChannelUtil.GetReaderInfo(string.IsNullOrEmpty(oi_pii) ? pii : oi_pii);
+                }
 
                 if (result.Value != 1)
                 {
@@ -1785,33 +1834,56 @@ namespace dp2SSL
 
                 if (force)
                     _patron.PhotoPath = "";
-                // string old_photopath = _patron.PhotoPath;
-                App.Invoke(new Action(() =>
+                //App.Invoke(new Action(() =>
+                //{
+                try
                 {
-                    try
+                    _patron.MaskDefinition = ShelfData.GetPatronMask();
+                    _patron.SetPatronXml(result.RecPath, result.ReaderXml, result.Timestamp);
+
+                    App.Invoke(() =>
                     {
-                        _patron.MaskDefinition = ShelfData.GetPatronMask();
-                        _patron.SetPatronXml(result.RecPath, result.ReaderXml, result.Timestamp);
                         this.patronControl.SetBorrowed(result.ReaderXml);
+                    });
 
-                        // 2024/1/2
-                        _patron.BorrowItemsVisible = _patron.BorrowingCount > 0;
-                    }
-                    catch (Exception ex)
-                    {
-                        // 2021/8/31
-                        _patron.SetError(ex.Message);
-                        WpfClientInfo.WriteErrorLog($"SetBorrowed() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
-                        SetGlobalError("patron", $"SetBorrowed() 出现异常: {ex.Message}");
-                    }
-                }));
+                    // 2024/1/2
+                    _patron.BorrowItemsVisible = _patron.BorrowingCount > 0;
+                }
+                catch (Exception ex)
+                {
+                    // 2021/8/31
+                    _patron.SetError(ex.Message);
+                    WpfClientInfo.WriteErrorLog($"SetBorrowed() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    SetGlobalError("patron", $"SetBorrowed() 出现异常: {ex.Message}");
+                }
+                //}));
 
-                // 显示在借图书列表
+#if NO
+            // 装载图象
+            if (old_photopath != _patron.PhotoPath)
+            {
+                Task.Run(()=> {
+                    LoadPhoto(_patron.PhotoPath);
+                });
+            }
+#endif
+            }
+            finally
+            {
+                _patron.Waiting = false;
+            }
+
+            // 显示在借图书列表
+            // 此时 _patron 控件的等待动画已经结束
+            {
+                /*
                 List<Entity> entities = new List<Entity>();
                 foreach (Entity entity in this.patronControl.BorrowedEntities)
                 {
                     entities.Add(entity);
                 }
+                */
+                var entities = this.patronControl.BorrowedEntities.ToList();
                 if (entities.Count > 0)
                 {
                     try
@@ -1837,21 +1909,9 @@ namespace dp2SSL
                         return new NormalResult { Value = -1, ErrorInfo = error };
                     }
                 }
-#if NO
-            // 装载图象
-            if (old_photopath != _patron.PhotoPath)
-            {
-                Task.Run(()=> {
-                    LoadPhoto(_patron.PhotoPath);
-                });
             }
-#endif
-                return new NormalResult();
-            }
-            finally
-            {
-                _patron.Waiting = false;
-            }
+
+            return new NormalResult();
         }
 
 #if NO
@@ -4352,7 +4412,7 @@ out strError);
         }
 
 #endif
-#endregion
+        #endregion
 
 #if OLDVERSION
 

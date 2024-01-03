@@ -12,12 +12,10 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-// using System.Windows.Shapes;
 using System.Diagnostics;
 using System.Xml;
 using System.IO;
 
-// using Xceed.Wpf.Toolkit;
 using WindowsInput;
 
 using static dp2SSL.LibraryChannelUtil;
@@ -74,7 +72,13 @@ namespace dp2SSL
             string text = this.password.Password;
             if (text.Length < 4)
             {
-                MessageBox.Show(this, "输入的密码长度必须大于等于 4 字符");
+                // MessageBox.Show(this, "输入的密码长度必须大于等于 4 字符");
+                App.CurrentApp.Speak($"密码筛选失败");
+                App.ErrorBox(
+    "密码筛选",
+    "输入的密码长度必须大于等于 4 字符",
+    "red",
+    "auto_close:5");
                 return;
             }
             var result = SelectPatronByPassword(text);
@@ -83,7 +87,13 @@ namespace dp2SSL
                 selectButton_Click(this, new RoutedEventArgs());
                 return;
             }
-            MessageBox.Show(this, result.ErrorInfo);
+            // MessageBox.Show(this, result.ErrorInfo);
+            App.CurrentApp.Speak($"密码筛选失败");
+            App.ErrorBox(
+"密码筛选",
+result.ErrorInfo,
+"red",
+"auto_close:5");
             return;
         }
 
@@ -104,6 +114,9 @@ namespace dp2SSL
 
             _ = Task.Factory.StartNew(async () =>
             {
+                // 清理以前较旧的攻击条目
+                attackManager.Clean(attackManager.CleanLength);
+                
                 using (CancellationTokenSource cancel = CancellationTokenSource.CreateLinkedTokenSource(_cancel.Token, App.CancelToken))
                 {
                     var result = await FillPatronCollectionDetailAsync(
@@ -346,6 +359,12 @@ TaskScheduler.Default);
                 this.passwordArea.IsEnabled = true;
             }
 
+            if (HasAttacked() == true)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = "因失败次数太多，相关人脸信息已经进入保护状态，请稍后再重试操作 ..."
+                };
             try
             {
                 // this.listView.SelectedItem = null;
@@ -382,11 +401,14 @@ TaskScheduler.Default);
                 }
 
                 if (hits.Count == 0)
+                {
+                    MemoryAttack();
                     return new NormalResult
                     {
                         Value = 0,
                         ErrorInfo = "没有匹配的读者"
                     };
+                }
 
                 if (hits.Count == 1)
                 {
@@ -395,6 +417,7 @@ TaskScheduler.Default);
                 }
 
                 Debug.Assert(hits.Count > 1);
+                MemoryAttack();
                 return new NormalResult
                 {
                     Value = hits.Count,
@@ -597,6 +620,46 @@ TaskScheduler.Default);
             {
                 this.mainGrid.ColumnDefinitions[1].Width = new GridLength(330);
             }
+        }
+
+        static AttackManager attackManager = new AttackManager();
+
+        void MemoryAttack()
+        {
+            foreach (var patron in _patrons)
+            {
+                attackManager.Increase(patron.PII);
+            }
+        }
+
+        // 检测是否因为以前攻击而处在监控期间
+        public static bool HasAttacked(List<string> barcode_list)
+        {
+            foreach (var barcode in barcode_list)
+            {
+                var result = attackManager.Search(barcode);
+                if (result.Value == 1)
+                    return true;
+            }
+
+            return false;
+        }
+
+        bool HasAttacked()
+        {
+            List<string> barcodes = new List<string>();
+            foreach(var patron in _patrons)
+            {
+                barcodes.Add(patron.PII);
+            }
+
+            return HasAttacked(barcodes);
+        }
+
+        public static void CleanAttackManager()
+        {
+            // 清理以前较旧的攻击条目
+            attackManager.Clean(attackManager.CleanLength);
         }
     }
 

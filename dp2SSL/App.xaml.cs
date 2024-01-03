@@ -2636,8 +2636,8 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
         public static void ErrorBox(
             string title,
             string message,
-    string color = "red",
-    string style = "")
+            string color = "red",
+            string style = "")
         {
             ProgressWindow progress = null;
 
@@ -2659,9 +2659,16 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                 progress.Show();
             }));
 
+            // auto_close:xxx 其中 xxx 为延时秒数。:xxx 缺省为 3 秒
+            var delay_seconds_string = StringUtil.GetParameterByPrefix(style, "auto_close");
 
-            if (StringUtil.IsInList("auto_close", style))
+            if (/*StringUtil.IsInList("auto_close", style)*/
+                delay_seconds_string != null)
             {
+                int delay_seconds = 3;
+                if (string.IsNullOrEmpty(delay_seconds_string) == false)
+                    Int32.TryParse(delay_seconds_string, out delay_seconds);
+
                 App.Invoke(new Action(() =>
                 {
                     progress.MessageText = message;
@@ -2674,7 +2681,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                     try
                     {
                         // TODO: 显示倒计时计数？
-                        await Task.Delay(TimeSpan.FromSeconds(1));
+                        await Task.Delay(TimeSpan.FromSeconds(delay_seconds));
                         App.Invoke(new Action(() =>
                         {
                             progress.Close();

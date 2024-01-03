@@ -45,5 +45,6 @@ https://stackoverflow.com/questions/37283340/how-can-i-combine-touch-and-mouse-e
 
 https://stackoverflow.com/questions/37285335/why-my-mouse-event-handlers-are-not-working-when-i-have-touch-event-handlers
 
-
+https://www.cnblogs.com/ListenFly/p/3581735.html
+WPF之无法触发KeyDown或者KeyUp键盘事件
 

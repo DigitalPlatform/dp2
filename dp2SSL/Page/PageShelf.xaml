@@ -5,6 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:dp2SSL"
       xmlns:fa="http://schemas.fontawesome.io/icons/"
+      xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       WindowTitle="书柜" Title="书柜"
@@ -14,7 +15,7 @@
     </Page.Resources>
     <Grid Name="mainGrid" Background="Black" >
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="60" />
+            <ColumnDefinition Width="68" />
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="0" />
         </Grid.ColumnDefinitions>
@@ -32,22 +33,38 @@
         <!-- left bar -->
         <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Vertical">
             <Grid Height="20" />
-            <Button Name="goHome" Background="Transparent" BorderThickness="0"
-                    Click="GoHome_Click" ToolTip="主菜单">
+            <Button Name="goHome" ToolTip="返回主菜单"
+                    Style="{DynamicResource RoundedButtonLightStyle}"
+                    BorderThickness="0" Click="GoHome_Click">
+                <!--
                 <fa:ImageAwesome Icon="Home"
-                             Height="40" Foreground="DarkGray" Margin="4"/>
+                             Height="40" Foreground="{StaticResource buttonForeground}" Margin="6"/>
+                -->
+                <iconPacks:PackIconJamIcons Kind="Menu" 
+                                            Width="36" Height="36" Foreground="{StaticResource buttonForeground}" Margin="6"/>
             </Button>
             <Grid Height="20" />
-            <Button Name="register" Background="Transparent" BorderThickness="0"
+            <Button Name="register"  
+                    Style="{DynamicResource RoundedButtonLightStyle}"
+                    BorderThickness="0"
                     Click="register_Click" ToolTip="绑定读者证">
+                <!--
                 <fa:ImageAwesome Icon="UserPlus"
                              Height="40" Foreground="DarkGray" Margin="4"/>
+                -->
+                <iconPacks:PackIconVaadinIcons Kind="UserCard" 
+                                            Width="36" Height="36" Foreground="{StaticResource buttonForeground}" Margin="6"/>
             </Button>
             <Grid Height="20" />
-            <Button Name="goHelp" Background="Transparent" BorderThickness="0"
-                    ToolTip="帮助">
+            <Button Name="goHelp" ToolTip="帮助"
+                    Style="{DynamicResource RoundedButtonLightStyle}" 
+                    BorderThickness="0">
                 <fa:ImageAwesome Icon="LightbulbOutline"
-                             Height="40" Foreground="DarkGray" Margin="4"/>
+                             Height="40" Foreground="{StaticResource buttonForeground}" Margin="6"/>
+                <!--
+                <iconPacks:PackIconJamIcons Kind="Lightbulb" 
+                                            Width="40" Height="40" Foreground="{StaticResource buttonForeground}" Margin="6" Padding="1"/>
+                -->
             </Button>
             <Grid Height="40" />
             <TextBlock Name="Quality" ToolTip="指纹质量"
@@ -149,8 +166,12 @@
                 </Grid.RowDefinitions>
                 <TextBlock Background="Transparent" Foreground="Gray" FontSize="14" TextAlignment="Center"
                     Text="读者"/>
-                <local:PatronControl x:Name="patronControl" 
+                <local:MyScrollViewer Grid.Row="1" PanningMode="Both"
+                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                  ScrollViewer.VerticalScrollBarVisibility="Auto">
+                    <local:PatronControl x:Name="patronControl" 
                                      Grid.Row="1" />
+                </local:MyScrollViewer>
                 <Grid Grid.Row="2">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
