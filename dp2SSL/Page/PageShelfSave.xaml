@@ -109,7 +109,7 @@
                 <Button Name="openButton"
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="160" Height="60" 
-                    FontSize="30" FontWeight="ExtraBold" 
+                    FontSize="30"  
                     Foreground="White" 
                      Click="OpenButton_Click">
                     <Button.Content>

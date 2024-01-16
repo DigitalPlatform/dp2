@@ -7,97 +7,120 @@
              xmlns:fa="http://schemas.fontawesome.io/icons/"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              mc:Ignorable="d" 
-             d:DesignHeight="400" d:DesignWidth="400">
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition />
-            <ColumnDefinition />
-            <ColumnDefinition />
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition />
-            <RowDefinition />
-            <RowDefinition />
-            <RowDefinition />
-            <RowDefinition />
-        </Grid.RowDefinitions>
-        <Button Name="key_0" 
+             d:DesignHeight="400" d:DesignWidth="400"
+             Background="Transparent" Foreground="{StaticResource softForeground}">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <Style TargetType="{x:Type Button}">
+                <Setter Property="FontSize" Value="48"/>
+                <Setter Property="FontWeight" Value="Thin"/>
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Foreground" Value="{StaticResource softForeground}"/>
+
+                <Setter Property="BorderThickness" Value="0.5"/>
+                <Setter Property="BorderBrush" Value="#FF5794CA"/>
+            </Style>
+            <Style TargetType="{x:Type ToggleButton}">
+                <Setter Property="FontSize" Value="48"/>
+                <Setter Property="FontWeight" Value="Thin"/>
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Foreground" Value="#FF5794CA"/>
+
+                <Setter Property="BorderThickness" Value="0.5"/>
+                <Setter Property="BorderBrush" Value="#FF5794CA"/>
+            </Style>
+        </ResourceDictionary>
+
+    </UserControl.Resources>
+    <Border BorderThickness="0.85" BorderBrush="#FF5794CA">
+
+        <Grid Background="Transparent">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Button Name="key_0" 
                 Content="0"
                 Grid.Column="0" Grid.Row="3" 
-                FontSize="48" Background="Transparent" Foreground="LightGray"
                 Click="Key_0_Click"/>
-        <Button Name="key_1" 
+            <Button Name="key_1" 
                 Content="1"
                 Grid.Column="0" Grid.Row="2"
-                FontSize="48" Background="Transparent" Foreground="LightGray"
                 Click="Key_0_Click"/>
-        <Button Name="key_2"
+            <Button Name="key_2"
             Content="2"
                 Grid.Column="1" Grid.Row="2"
-                FontSize="48" Background="Transparent" Foreground="LightGray"
                 Click="Key_0_Click"/>
-        <Button Name="key_3"
+            <Button Name="key_3"
             Content="3"
                 Grid.Column="2" Grid.Row="2"
-                FontSize="48" Background="Transparent" Foreground="LightGray"
                 Click="Key_0_Click"/>
-        <Button Name="key_4"
+            <Button Name="key_4"
             Content="4"
                 Grid.Column="0" Grid.Row="1"
-                FontSize="48" Background="Transparent" Foreground="LightGray"
                 Click="Key_0_Click"/>
-        <Button Name="key_5"
+            <Button Name="key_5"
             Content="5"
                 Grid.Column="1" Grid.Row="1"
-                FontSize="48" Background="Transparent" Foreground="LightGray"
                 Click="Key_0_Click"/>
-        <Button Name="key_6"
+            <Button Name="key_6"
             Content="6"
                 Grid.Column="2" Grid.Row="1"
-                FontSize="48" Background="Transparent" Foreground="LightGray"
                 Click="Key_0_Click"/>
-        <Button Name="key_7"
+            <Button Name="key_7"
             Content="7"
                 Grid.Column="0" Grid.Row="0"
-                FontSize="48" Background="Transparent" Foreground="LightGray"
                 Click="Key_0_Click"/>
-        <Button Name="key_8"
+            <Button Name="key_8"
             Content="8"
                 Grid.Column="1" Grid.Row="0"
-                FontSize="48" Background="Transparent" Foreground="LightGray"
                 Click="Key_0_Click"/>
-        <Button Name="key_9"
+            <Button Name="key_9"
             Content="9"
                 Grid.Column="2" Grid.Row="0"
-                FontSize="48" Background="Transparent" Foreground="LightGray"
                 Click="Key_0_Click"/>
-        <!-- https://superuser.com/questions/1740243/unicode-backspace-key-symbol -->
-        <Button Name="key_backspace" 
+            <!-- https://superuser.com/questions/1740243/unicode-backspace-key-symbol -->
+            <Button Name="key_backspace" 
                 Grid.Column="1" Grid.Row="3" 
-                FontSize="24" Background="Transparent" Foreground="#FF5794CA"
+                Foreground="#FF5794CA"
+                FontSize="40"
                 Click="Key_0_Click">
-            <iconPacks:PackIconMaterial Kind="BackspaceOutline" Width="34" Height="34"/>
-        </Button>
-        <Button Name="key_return" 
+                <iconPacks:PackIconMaterial Kind="BackspaceOutline" Width="34" Height="34"/>
+            </Button>
+            <Button Name="key_return" 
                 Grid.Column="2" Grid.Row="3" 
-                FontSize="24" Background="Transparent" Foreground="#FF5794CA"
+                Foreground="#FF5794CA"
+                FontSize="40"
                 Click="Key_0_Click">
-            <iconPacks:PackIconMaterial Kind="KeyboardReturn" Width="34" Height="34"/>
-        </Button>
-        <Button Name="key_prev" 
+                <iconPacks:PackIconMaterial Kind="KeyboardReturn" Width="34" Height="34"/>
+            </Button>
+            <Button Name="key_prev" 
                 Content="&lt;"
                 Grid.Column="0" Grid.Row="4" 
-                FontSize="36" Background="Transparent" Foreground="#FF5794CA"
+                Foreground="#FF5794CA"
+                FontSize="40"
                 Click="Key_0_Click"/>
-        <Button Name="key_next" 
+            <Button Name="key_next" 
                 Content="&gt;"
                 Grid.Column="1" Grid.Row="4" 
-                FontSize="36" Background="Transparent" Foreground="#FF5794CA"
+                Foreground="#FF5794CA"
+                FontSize="40"
                 Click="Key_0_Click"/>
-        <ToggleButton Name="key_capslock" 
+            <ToggleButton Name="key_capslock" 
                 Content="caps"
                 Grid.Column="2" Grid.Row="4" 
-                FontSize="24" Background="Transparent" Foreground="#FF5794CA"
+                Foreground="#FF5794CA"
+                FontSize="40"
                 Click="Key_0_Click"/>
-    </Grid>
+        </Grid>
+
+    </Border>
 </UserControl>

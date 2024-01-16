@@ -215,10 +215,14 @@
                 <Button Name="inputFace" Visibility="Collapsed"
                         Style="{StaticResource MaterialDesignFloatingActionLightButton}"
                         Margin="20,0,20,0" Padding="10,10,10,10" FontSize="20"
+                        Width="110" Height="110"
                         Click="InputFace_Click">
-                    <iconPacks:PackIconForkAwesome Kind="UserOutline" 
-                                                   Width="34" Height="34" Foreground="{StaticResource buttonForeground}"/>
-
+                    <StackPanel Orientation="Vertical">
+                        <iconPacks:PackIconForkAwesome Kind="UserOutline" 
+                                                   Width="34" Height="34" HorizontalAlignment="Center"
+                                                       Foreground="{StaticResource buttonForeground}"/>
+                        <TextBlock Margin="5" Foreground="{StaticResource buttonForeground}">识别人脸</TextBlock>
+                    </StackPanel>
                 </Button>
             </StackPanel>
         </Grid>

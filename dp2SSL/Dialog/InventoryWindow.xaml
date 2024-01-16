@@ -40,25 +40,25 @@
                 <Button Name="openDoorButton" 
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="120" Height="60" 
-                    FontSize="28" FontWeight="ExtraBold" 
+                    FontSize="28" 
                     Foreground="White" 
                     Click="openDoorButton_Click">开门</Button>
                 <Button Name="retryButton" 
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="120" Height="60" 
-                    FontSize="28" FontWeight="ExtraBold" 
+                    FontSize="28" 
                     Foreground="White" 
                     Click="retryButton_Click">重试</Button>
                 <Button Name="silentlyRetryButton" 
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="160" Height="60" 
-                    FontSize="28" FontWeight="ExtraBold" 
+                    FontSize="28" 
                     Foreground="White" 
                     Click="silentlyRetryButton_Click">静默重试</Button>
                 <Button Name="cancelButton" 
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="120" Height="60" 
-                    FontSize="28" FontWeight="ExtraBold" 
+                    FontSize="28" 
                     Foreground="White" 
                     Click="cancelButton_Click">中断</Button>
             </StackPanel>

@@ -32,7 +32,7 @@
             <Button Name="okButton" Grid.Row="3"
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="120" Height="60" 
-                    FontSize="30" FontWeight="ExtraBold" 
+                    FontSize="30" 
                     Foreground="White" 
                     Click="OkButton_Click">确定</Button>
         </Grid>

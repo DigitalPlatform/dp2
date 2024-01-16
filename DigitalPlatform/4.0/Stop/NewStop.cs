@@ -427,10 +427,19 @@ namespace DigitalPlatform
         // 注：只有当所属的 group 是 active group 时，才会作用到显示
         public bool MoveToTop()
         {
-            if (this.Group == null)
-                return false;
-            return this.Group.MoveToTop(this);
-            // 注意本函数的效果是不完满的，建议用 StopManager.Activate(Stop stop) 处理
+            // 2024/1/9 增加锁定语句
+            this.m_stoplock.AcquireReaderLock(Stop.m_nLockTimeout);
+            try
+            {
+                if (this.Group == null)
+                    return false;
+                return this.Group.MoveToTop(this);
+                // 注意本函数的效果是不完满的，建议用 StopManager.Activate(Stop stop) 处理
+            }
+            finally
+            {
+                this.m_stoplock.ReleaseReaderLock();
+            }
         }
 
         public void HideProgress()

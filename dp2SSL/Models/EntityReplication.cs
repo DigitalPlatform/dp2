@@ -127,7 +127,7 @@ namespace dp2SSL.Models
                                 ErrorCode = "Canceled"
                             };
                         }
-                        // 检索全部读者库记录
+                        // 检索全部实体库记录
                         long lRet = channel.SearchItem(null,
         dbName, // "<all>",
         "",
@@ -257,6 +257,7 @@ namespace dp2SSL.Models
                                         oi = GetInstitution(location);
                                         oi_table[location] = oi;
                                     }
+
 
                                     var item = new EntityItem
                                     {
@@ -442,6 +443,14 @@ channel.ErrorCode == ErrorCode.RequestTimeOut)
         {
             try
             {
+                // 2024/1/12
+                EntityItem existing_item = await context.Entities.FindAsync(item.PII);
+                if (existing_item != null)
+                {
+                    context.Entities.Remove(existing_item);
+                    await context.SaveChangesAsync();
+                }
+
                 // 保存到本地数据库
                 context.Entities.Add(item);
                 await context.SaveChangesAsync();

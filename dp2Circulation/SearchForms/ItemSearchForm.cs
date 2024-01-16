@@ -9449,8 +9449,13 @@ TaskScheduler.Default);
         }
 
         // 从记录路径文件中导入
-        void menu_importFromRecPathFile_Click(object sender, EventArgs e)
+        async void menu_importFromRecPathFile_Click(object sender, EventArgs e)
         {
+            var result = await ImportFromRecPathFileAsync(null, "clear");
+            if (result.Value == -1)
+                ShowMessageBox(result.ErrorInfo);
+
+#if REMOVED
             _ = Task.Factory.StartNew(() =>
             {
                 string strError = "";
@@ -9467,6 +9472,7 @@ TaskScheduler.Default);
 this.CancelToken,
 TaskCreationOptions.LongRunning,
 TaskScheduler.Default);
+#endif
         }
 
         // TODO: 不具有 channel 参数的版本是否被脚本调用？可能需要改造脚本

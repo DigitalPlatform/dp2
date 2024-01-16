@@ -104,10 +104,12 @@ namespace dp2SSL
                     FaceManager.CancelRecognitionFace();
                     _stopVideo = true;
                     RemoveLayer();
+                    App.ContinueBarcodeScan();
                 };  // VideoRecognition_Closed;
                 videoRecognition.Show();
                 // 2023/12/20
                 AddLayer(); // Closed 事件会 RemoveLayer()
+                App.PauseBarcodeScan(); // 允许键盘 Escape Enter 键
             }));
             _stopVideo = false;
             var task = Task.Run(() =>
@@ -185,7 +187,7 @@ namespace dp2SSL
                     result = new RecognitionFaceResult
                     {
                         Value = -1,
-                        ErrorInfo = "为防范密码攻击，您的人脸信息处于被保护状态，请稍后再重试 ..."
+                        ErrorInfo = $"为防范密码攻击，您的人脸信息处于被保护状态，请{SelectPatronWindow.CleanLength.TotalMinutes}分钟后再重试 ..."
                     };
                 }
                 else
@@ -274,9 +276,9 @@ namespace dp2SSL
                     ask.Closed += (s1, e1) =>
                     {
                         owner.RemoveLayer();
+                        owner.ForgetDialog(ask);
                     };
                     owner.AddLayer(); // Closed 事件会 RemoveLayer()
-
                     owner.MemoryDialog(ask);
 
                     PatronCollection patrons = new PatronCollection();
@@ -322,7 +324,7 @@ namespace dp2SSL
                     //ask.CancelButtonVisible = true;
                     ask.ShowDialog();
 
-                    owner.ForgetDialog(ask);
+                    // owner.ForgetDialog(ask);
 
                     dialog_result = ask.PressedButton;
                     selected_patron = ask.SelectedPatron;
@@ -520,6 +522,18 @@ namespace dp2SSL
         private async void App_LineFeed(object sender, LineFeedEventArgs e)
 #pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
         {
+            // 扫入一个条码
+            string barcode = e.Text.ToUpper();
+
+            // 触发人脸识别
+            if (string.IsNullOrEmpty(barcode)
+                && string.IsNullOrEmpty(App.FaceUrl) == false)
+            {
+                PatronClear();
+                PatronControl_InputFace(this, new EventArgs());
+                return;
+            }
+
             // if (App.EnablePatronBarcode == false)
             if (string.IsNullOrEmpty(App.PatronBarcodeStyle) || App.PatronBarcodeStyle == "禁用")
             {
@@ -528,8 +542,6 @@ namespace dp2SSL
                 return;
             }
 
-            // 扫入一个条码
-            string barcode = e.Text.ToUpper();
             // 检查防范空字符串，和使用工作人员方式(~开头)的字符串
             if (string.IsNullOrEmpty(barcode) || barcode.StartsWith("~"))
             {
@@ -693,19 +705,21 @@ namespace dp2SSL
 
             if (update_entities.Count > 0)
             {
-                await FillBookFieldsAsync(//channel,
+                _ = FillBookFieldsAsync(//channel,
                     update_entities,
-                    App.DisplayCoverImage ? "coverImage" : "",
+                    App.DisplayCoverImage ? "coverImage,checkEAS" : "checkEAS",
                     CancelFillBooks(true));
 
                 Trigger(update_entities);
 
+#if REMOVED
                 List<Entity> temp = new List<Entity>(update_entities);
                 _ = Task.Run(() =>
                 {
                     // 自动检查 EAS 状态
                     CheckEAS(temp);
                 });
+#endif
             }
             else if (changed)
             {
@@ -800,9 +814,9 @@ namespace dp2SSL
                             //BaseChannel<IRfid> channel = RfidManager.GetChannel();
                             try
                             {
-                                await FillBookFieldsAsync(//channel,
+                                _ = FillBookFieldsAsync(//channel,
                                     update_entities,
-                                    App.DisplayCoverImage ? "coverImage" : "",
+                                    App.DisplayCoverImage ? "coverImage,checkEAS" : "checkEAS",
                                     CancelFillBooks(true));
 
                                 Trigger(update_entities);
@@ -820,12 +834,14 @@ namespace dp2SSL
                             return new NormalResult { Value = -1, ErrorInfo = error };
                         }
 
+#if REMOVED
                         // 自动检查 EAS 状态
                         List<Entity> temp = new List<Entity>(update_entities);
                         _ = Task.Run(() =>
                         {
                             CheckEAS(temp);
                         });
+#endif
                     }
                 }
                 else
@@ -1970,13 +1986,14 @@ namespace dp2SSL
         // 第二阶段：填充图书信息的 PII 和 Title 字段
         // parameters:
         //      style   如果包含 coverImage，会主动获得 Entity.LocalCoverImagePath
-        async Task FillBookFieldsAsync(
+        //              如果包含 checkEAS，会启动自动修正 EAS 线程
+        Task FillBookFieldsAsync(
             // BaseChannel<IRfid> channel,
             List<Entity> entities,
             string style = "",
             CancellationToken token = default)
         {
-            var coverImage = StringUtil.IsInList("coverImage", style);
+            // var coverImage = StringUtil.IsInList("coverImage", style);
 #if NO
             RfidChannel channel = RFID.StartRfidChannel(App.RfidUrl,
 out string strError);
@@ -1985,21 +2002,15 @@ out string strError);
 #endif
             try
             {
+                var title_entities = new List<Entity>();
                 List<CoverItem> cover_items = new List<CoverItem>();
                 foreach (Entity entity in entities)
                 {
                     if (token.IsCancellationRequested)
                         break;
-                    /*
-                    if (_cancel == null
-                        || _cancel.IsCancellationRequested)
-                        return;
-                        */
+
                     if (entity.FillFinished == true)
                         continue;
-
-                    //if (string.IsNullOrEmpty(entity.Error) == false)
-                    //    continue;
 
                     // 获得 PII
                     // 注：如果 PII 为空，文字中要填入 "(空)"
@@ -2067,11 +2078,13 @@ out string strError);
 
                     bool clearError = true;
 
-                    // 获得 Title
+                    // 获得 Title。这一部分可以考虑在单独的线程中完成
                     // 注：如果 Title 为空，文字中要填入 "(空)"
                     if (string.IsNullOrEmpty(entity.Title)
                         && string.IsNullOrEmpty(entity.PII) == false && entity.PII != "(空)")
                     {
+                        title_entities.Add(entity);
+#if REMOVED
                         bool item_completed = false;
 
                         var waiting = entity.Waiting;
@@ -2154,50 +2167,202 @@ out string strError);
                         {
                             entity.Waiting = waiting;
                         }
+#endif
                     }
 
+                    /*
                 CONTINUE:
                     if (clearError == true)
                         entity.SetError(null);
                     entity.FillFinished = true;
                     // 2020/9/10
                     entity.Waiting = false;
+                    */
                 }
 
-                booksControl.SetBorrowable();
+                var checkEAS = StringUtil.IsInList("checkEAS", style);
 
-                // 获取封面图像
-                if (cover_items.Count > 0)
-                {
-                    string cacheDir = CoverImagesDirectory;
-
-                    foreach (var item in cover_items)
-                    {
-                        if (token.IsCancellationRequested)
-                            break;
-                        string fileName = Path.Combine(cacheDir, GetImageFilePath(item.ObjectPath));
-
-                        if (File.Exists(fileName) == false)
-                        {
-                            var get_result = await LibraryChannelUtil.GetCoverImageAsync(item.ObjectPath, fileName);
-                            if (get_result.Value == 1)
-                                item.Entity.CoverImageLocalPath = fileName;
-                            if (get_result.Value == -1 && get_result.ErrorCode == "System.IO.IOException")
-                            {
-                                // 执行缓存清理任务
-                                BeginCleanCoverImagesDirectory(DateTime.Now);
-                            }
-                        }
-                        else
-                            item.Entity.CoverImageLocalPath = fileName;
-                    }
-                }
+                // 后续获取 title 和显示封面都放在另外一个单独的线程，本函数此时就可以返回了
+                return BeginGetTitleAndCoverImage(title_entities,
+        cover_items,
+        checkEAS ? entities : null,
+        style,
+        token);
             }
             catch (Exception ex)
             {
                 WpfClientInfo.WriteErrorLog($"FillBookFieldsAsync() 发生异常: {ExceptionUtil.GetExceptionText(ex)}");   // 2019/9/19
                 SetGlobalError("current", $"FillBookFieldsAsync() 发生异常(已写入错误日志): {ex.Message}"); // 2019/9/11 增加 FillBookFields() exception:
+                return Task.CompletedTask;
             }
+        }
+
+        // parameters:
+        //      eas_entities    打算进行 EAS 修正的那些 Entity
+        Task BeginGetTitleAndCoverImage(List<Entity> title_entities,
+            List<CoverItem> cover_items,
+            List<Entity> eas_entities,
+            string style = "",
+            CancellationToken token = default)
+        {
+            var coverImage = StringUtil.IsInList("coverImage", style);
+
+            return Task.Run(async () =>
+            {
+                try
+                {
+                    // 获得 title 和各种册记录字段
+                    foreach (var entity in title_entities)
+                    {
+                        if (token.IsCancellationRequested)
+                            break;
+
+                        bool clearError = true;
+
+                        // 获得 Title。这一部分可以考虑在单独的线程中完成
+                        // 注：如果 Title 为空，文字中要填入 "(空)"
+                        if (string.IsNullOrEmpty(entity.Title)
+                            && string.IsNullOrEmpty(entity.PII) == false && entity.PII != "(空)")
+                        {
+                            bool item_completed = false;
+
+                            var waiting = entity.Waiting;
+                            entity.Waiting = true;
+                            try
+                            {
+                                GetEntityDataResult result = null;
+                                if (App.Protocol == "sip")
+                                    result = await SipChannelUtil.GetEntityDataAsync(entity.PII,
+                                        entity.GetOiOrAoi(),
+                                        "network");
+                                else
+                                {
+                                    // 2021/4/15
+                                    var strict = ChargingData.GetBookInstitutionStrict();
+                                    if (strict)
+                                    {
+                                        string oi = entity.GetOiOrAoi();
+                                        if (string.IsNullOrEmpty(oi))
+                                        {
+                                            if (IsWhdtFormat(entity) == false)
+                                            {
+                                                entity.SetError("标签中没有机构代码，被拒绝使用");
+                                                clearError = false;
+                                                goto CONTINUE;
+                                            }
+                                            else
+                                                strict = false; // 改为不严格模式 2023/12/4
+                                        }
+                                    }
+                                    result = await LibraryChannelUtil.GetEntityDataAsync(entity.GetOiPii(strict),
+                                        coverImage && string.IsNullOrEmpty(entity.CoverImageLocalPath) ? "network,coverImageUrl" : "network", // 2021/4/2 改为严格模式 OI_PII
+                                        (item_result) =>
+                                        {
+                                            entity.SetData(item_result.ItemRecPath,
+        item_result.ItemXml,
+        DateTime.Now);
+                                            item_completed = true;
+                                        },
+                                        (title) =>
+                                        {
+                                            entity.Title = GetCaption(title);
+                                        });
+
+                                    if (coverImage
+                                        && string.IsNullOrEmpty(result.CoverImageUrl) == false
+                                        && string.IsNullOrEmpty(result.BiblioRecPath) == false)
+                                    {
+                                        var object_path = ScriptUtil.MakeObjectUrl(result.BiblioRecPath, result.CoverImageUrl);
+                                        cover_items.Add(new CoverItem
+                                        {
+                                            ObjectPath = object_path,
+                                            Entity = entity
+                                        });
+                                    }
+                                }
+
+                                if (result.Value == -1)
+                                {
+                                    entity.SetError(result.ErrorInfo);
+                                    clearError = false;
+                                    goto CONTINUE;
+                                }
+
+                                entity.Title = GetCaption(result.Title);
+                                if (item_completed == false)
+                                    entity.SetData(result.ItemRecPath,
+                                        result.ItemXml,
+                                        DateTime.Now);
+
+                                // 2020/7/3
+                                // 获得册记录阶段出错，但获得书目摘要成功
+                                if (string.IsNullOrEmpty(result.ErrorCode) == false)
+                                {
+                                    entity.SetError(result.ErrorInfo);
+                                    clearError = false;
+                                }
+                            }
+                            finally
+                            {
+                                entity.Waiting = waiting;
+                            }
+                        }
+
+                    CONTINUE:
+                        if (clearError == true)
+                            entity.SetError(null);
+                        entity.FillFinished = true;
+                        entity.Waiting = false;
+                    }
+
+                    App.Invoke(() =>
+                    {
+                        booksControl.SetBorrowable();
+                    });
+
+                    if (eas_entities != null
+                        && eas_entities.Count > 0)
+                    {
+                        _ = Task.Run(() =>
+                        {
+                            // 自动检查 EAS 状态
+                            CheckEAS(eas_entities);
+                        });
+                    }
+
+                    // 获取封面图像
+                    if (cover_items.Count > 0)
+                    {
+                        string cacheDir = CoverImagesDirectory;
+
+                        foreach (var item in cover_items)
+                        {
+                            if (token.IsCancellationRequested)
+                                break;
+                            string fileName = Path.Combine(cacheDir, GetImageFilePath(item.ObjectPath));
+
+                            if (File.Exists(fileName) == false)
+                            {
+                                var get_result = await LibraryChannelUtil.GetCoverImageAsync(item.ObjectPath, fileName);
+                                if (get_result.Value == 1)
+                                    item.Entity.CoverImageLocalPath = fileName;
+                                if (get_result.Value == -1 && get_result.ErrorCode == "System.IO.IOException")
+                                {
+                                    // 执行缓存清理任务
+                                    BeginCleanCoverImagesDirectory(DateTime.Now);
+                                }
+                            }
+                            else
+                                item.Entity.CoverImageLocalPath = fileName;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    WpfClientInfo.WriteErrorLog($"BeginGetTitleAndCoverImage() thread 发生异常: {ExceptionUtil.GetExceptionText(ex)}");   // 2019/9/19
+                    SetGlobalError("current", $"BeginGetTitleAndCoverImage() thread 发生异常(已写入错误日志): {ex.Message}"); // 2019/9/11 增加 FillBookFields() exception:
+                }
+            });
         }
 
         public static string CoverImagesDirectory
@@ -2925,6 +3090,13 @@ TaskScheduler.Default);
                         message += $" (另有 {skip_count} 个被忽略)";
 
                     DisplayError(ref progress, message);
+
+                    if (success_count > 0)
+                    {
+                        // 重新装载读者信息和显示
+                        var task = FillPatronDetailAsync(true);
+                    }
+
                     App.CurrentApp.Speak(message);
 
                     /*
@@ -4015,6 +4187,7 @@ TaskScheduler.Default);
             var temp_task = FillPatronDetailAsync(true);
         }
 
+#if REMOVED
         void DisplayError(ref SubmitWindow progress,
 string message,
 string color = "red")
@@ -4029,12 +4202,14 @@ string color = "red")
             }));
             progress = null;
         }
+#endif
 
         void DisplayError(ref ProgressWindow progress,
     string message,
     string color = "red",
     string set_button_text = null)
         {
+            // 记住了 progress 对话框，最后 PageBorrow 退出的时候不会忘记关闭这个对话框
             MemoryDialog(progress);
             var temp = progress;
             App.Invoke(new Action(() =>
@@ -4045,6 +4220,7 @@ string color = "red")
                 temp.BackColor = color;
                 temp = null;
             }));
+            // 这样本函数的调用者就不会关闭这个 progress 对话框了
             progress = null;
         }
 
@@ -4412,7 +4588,7 @@ out strError);
         }
 
 #endif
-        #endregion
+#endregion
 
 #if OLDVERSION
 

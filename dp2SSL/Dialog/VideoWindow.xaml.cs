@@ -22,6 +22,10 @@ namespace dp2SSL.Dialog
         public VideoWindow()
         {
             InitializeComponent();
+
+            this.Loaded += (o, e) => {
+                okButton.Focus();
+            };
         }
 
         private void OkButton_Click(object sender, RoutedEventArgs e)
@@ -171,6 +175,23 @@ namespace dp2SSL.Dialog
             imageSource.CacheOption = BitmapCacheOption.OnLoad; // 2023/12/15
             imageSource.EndInit();
             this.photo.Source = imageSource;
+        }
+
+        private void Grid_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                this.Close();
+                e.Handled = true;
+                return;
+            }
+
+            if (e.Key == Key.Escape)
+            {
+                this.Close();
+                e.Handled = true;
+                return;
+            }
         }
     }
 }

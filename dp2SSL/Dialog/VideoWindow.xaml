@@ -6,13 +6,14 @@
         xmlns:local="clr-namespace:dp2SSL.Dialog"
         mc:Ignorable="d"
         Title="VideoWindow" Height="500" Width="600"
-        Background="{StaticResource grayBackground}" Foreground="{StaticResource normalForeground}"
+        Background="{StaticResource normalDialogBackground}" Foreground="{StaticResource normalForeground}"
         WindowStyle="None"
         AllowsTransparency="True"
     ResizeMode="CanResizeWithGrip" ShowInTaskbar="False"
         >
     <Border BorderThickness="1" BorderBrush="Gray">
-        <Grid Background="Transparent" Margin="10">
+        <Grid Background="Transparent" Margin="10"
+              KeyDown="Grid_KeyDown" Focusable="True">
             <Grid.RowDefinitions>
                 <RowDefinition Height="60"/>
                 <RowDefinition Height="*"/>
@@ -36,9 +37,9 @@
             <Button Name="okButton" Grid.Row="3"
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="120" Height="60" 
-                    FontSize="30" FontWeight="ExtraBold" 
+                    FontSize="30" 
                     Foreground="White" 
-                     Click="OkButton_Click">取消</Button>
+                    Click="OkButton_Click">取消</Button>
         </Grid>
     </Border>
 

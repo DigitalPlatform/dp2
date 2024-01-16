@@ -23,6 +23,12 @@ namespace dp2SSL
         // 多长时间以上的旧条目要被清除
         public TimeSpan CleanLength = TimeSpan.FromMinutes(5);
 
+        public AttackManager(int attckCount, TimeSpan cleanLength)
+        {
+            AttackCount = attckCount;
+            CleanLength = cleanLength;
+        }
+
         // 加入一个条目，或者增量已有条目的计数
         public void Increase(string title)
         {

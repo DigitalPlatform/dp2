@@ -89,6 +89,8 @@ namespace dp2SSL.Models
                 };
             }
 
+            bool clear_before = true;
+
             writeLog?.Invoke($"开始下载全部读者记录到本地缓存");
             LibraryChannel channel = App.CurrentApp.GetChannel();
             var old_timeout = channel.Timeout;
@@ -166,13 +168,21 @@ out string strError);
     "zh");
                 try
                 {
+                    if (clear_before)
+                    {
+                        using (BiblioCacheContext context = new BiblioCacheContext())
+                        {
+                            context.Database.EnsureCreated();
+
+                            // 删除 Patrons 里面的已有记录
+                            context.Patrons.RemoveRange(context.Patrons.ToList());
+                            await context.SaveChangesAsync(token);
+                        }
+                    }
+
                     using (BiblioCacheContext context = new BiblioCacheContext())
                     {
                         context.Database.EnsureCreated();
-
-                        // 删除 Patrons 里面的已有记录
-                        context.Patrons.RemoveRange(context.Patrons.ToList());
-                        await context.SaveChangesAsync(token);
 
                         // loader.Prompt += this.Loader_Prompt;
                         if (hitcount > 0)
@@ -209,7 +219,7 @@ out string strError);
                                     continue;
                                 }
 
-                                // 
+                                // TODO: 可否不用对 PII 查重？
                                 if (pii_table.ContainsKey(result.PII))
                                 {
                                     string recpath = (string)pii_table[result.PII];
@@ -218,6 +228,17 @@ out string strError);
                                 }
 
                                 pii_table[result.PII] = item.RecPath;
+
+                                // 2024/1/12
+                                // 注: 如果一开始全部清除了表中的数据，那么每次 .Add() 的时候就可以不必 .Find() 了
+                                if (clear_before == false)
+                                {
+                                    var existing_item = await context.Patrons.FindAsync(item.RecPath);
+                                    if (existing_item != null)
+                                    {
+                                        context.Patrons.Remove(existing_item);
+                                    }
+                                }
 
                                 // TODO: PII 应该是包含 OI 的严格形态
                                 context.Patrons.Add(item);
@@ -844,6 +865,16 @@ out string strError);
                 string strOperTime = DomUtil.GetElementText(domLog.DocumentElement, "operTime");
                 DateTime operTime = DateTimeUtil.FromRfc1123DateTimeString(strOperTime).ToLocalTime();
 
+                // 2024/1/11
+                // libraryCode 可能是 '海淀分馆,西城分馆' 形态哟
+                // 注: 日志记录根元素下有 libraryCode 元素，但 record 元素中的 XML 记录很可能缺乏 libraryCode 元素
+                string libraryCode = DomUtil.GetElementText(domLog.DocumentElement, "libraryCode");
+                if (libraryCode != null && libraryCode.Contains(","))
+                {
+                    var parts = StringUtil.ParseTwoPart(libraryCode, ",");
+                    libraryCode = parts[1]; // 取目标馆代码。libraryCode 从此代表目标馆代码了
+                }
+
                 if (strAction == "new"
                     || strAction == "change"
                     || strAction == "move")
@@ -926,6 +957,32 @@ out string strError);
                         return -1;
                         */
 
+                    // 2024/1/11
+                    // 给读者 XML 记录中添加 libraryCode 元素
+                    // 如果读者记录 XML 中没有 libraryCode 元素，会造成后面产生 UII 没有 OI 部分的后果
+                    // TODO: 如果还再有 oi 元素则更好。
+                    {
+                        XmlDocument patron_dom = new XmlDocument();
+                        patron_dom.LoadXml(strRecord);
+                        DomUtil.SetElementText(patron_dom.DocumentElement,
+                            "libraryCode",
+                            libraryCode);
+                        // 2024/1/16
+                        // 删除 oi 元素
+                        DomUtil.DeleteElement(patron_dom.DocumentElement,
+                            "oi");
+                        strRecord = patron_dom.DocumentElement == null ? patron_dom.OuterXml : patron_dom.DocumentElement.OuterXml;
+                    }
+
+                    // 2024/1/11
+                    if (string.IsNullOrEmpty(strOldRecPath) == false
+                        && strOldRecPath != strNewRecPath)
+                    {
+                        var result = LibraryChannelUtil.DeleteLocalPatronRecord(strOldRecPath, strOldRecord);
+                        if (result.Value == -1)
+                            WpfClientInfo.WriteErrorLog($"TraceSetReaderInfo() 删除读者记录 '{strOldRecPath}' 出错: {result.ErrorInfo}");
+                    }
+
                     // 把读者记录保存(更新)到本地数据库
                     // parameters:
                     //          lastWriteTime   最后写入时间。采用服务器时间
@@ -968,7 +1025,7 @@ out string strError);
         out strError) == -1)
                         return -1;
                         */
-                    return LibraryChannelUtil.DeleteLocalPatronRecord(strOldRecord);
+                    return LibraryChannelUtil.DeleteLocalPatronRecord(strRecPath, strOldRecord);
                 }
                 else
                 {

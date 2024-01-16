@@ -76,14 +76,21 @@ namespace dp2SSL
             modelBuilder.Entity<EntityItem>(entity =>
             {
                 entity.HasKey(e => e.PII);
-                // entity.HasIndex(e => e.PII);
+                /*
+                // 2024/1/11 改变为:
+                entity.HasKey(e => e.RecPath);
+                entity.HasIndex(e => e.PII);
+                */
             });
 
             // ***
             modelBuilder.Entity<PatronItem>().ToTable("patron");
             modelBuilder.Entity<PatronItem>(entity =>
             {
-                entity.HasKey(e => e.PII);
+                // entity.HasKey(e => e.PII);
+                // 2024/1/11 改变为:
+                entity.HasKey(e => e.RecPath);
+                entity.HasIndex(e => e.PII);
                 // entity.HasIndex(e => e.Bindings);
             });
         }

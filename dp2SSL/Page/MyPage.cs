@@ -71,6 +71,7 @@ namespace dp2SSL
                     WpfClientInfo.WriteErrorLog($"AddLayer() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
             }
+            App.PauseBarcodeMonitor();
             _layerCount++;
         }
 
@@ -78,9 +79,12 @@ namespace dp2SSL
         {
             if (_adorner == null || _layer == null)
                 return;
+            App.ContinueBarcodeMonitor();
             _layerCount--;
             if (_layerCount == 0)
+            {
                 _layer.Remove(_adorner);
+            }
         }
     }
 }

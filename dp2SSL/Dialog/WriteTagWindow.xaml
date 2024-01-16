@@ -31,7 +31,7 @@
                 <Button Name="writeButton" Margin="10,0,10,0"
                         IsEnabled="False"
                     Width="120" Height="60" 
-                    FontSize="30" FontWeight="ExtraBold" 
+                    FontSize="30" FontWeight="Thin" 
                     Foreground="White" 
                     Click="writeButton_Click">
                     <Button.Resources>
@@ -56,7 +56,7 @@
                 <Button Name="okButton"  Margin="10,0,10,0"
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="120" Height="60" 
-                    FontSize="30" FontWeight="ExtraBold" 
+                    FontSize="30"  
                     Foreground="White" 
                     Click="OkButton_Click">关闭</Button>
 

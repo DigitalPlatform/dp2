@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+// https://www.codeproject.com/articles/14485/low-level-windows-api-hooks-from-c-to-stop-unwante
+
 namespace DigitalPlatform.IO
 {
     /// <summary>
@@ -15,6 +17,27 @@ namespace DigitalPlatform.IO
     /// </summary>
     public class BarcodeCapture
     {
+        // 禁用的键
+        List<Keys> _stopKeys = new List<Keys>();
+        public IEnumerable<Keys> StopKeys
+        {
+            get
+            {
+                return new List<Keys>(_stopKeys);
+            }
+            set
+            {
+                if (value == null)
+                    _stopKeys = new List<Keys>();
+                else
+                    _stopKeys = new List<Keys>(value);
+            }
+        }
+
+        // 是否临时暂停对扫入条码的监控。
+        // 监控状态下会触发 InputLine 和 InputChar 事件，暂停了就不会触发了
+        public bool PauseBarcodeMonitor { get; set; }
+
         public delegate void Delegate_lineFeed(StringInput input);
         public event Delegate_lineFeed InputLine;
 
@@ -115,37 +138,51 @@ namespace DigitalPlatform.IO
 
         StringInput _string = new StringInput();
 
-        static int TIME_SHTRESHOLD = 50;
+        static int TIME_SHRESHOLD = 50;
 
         private const int WM_KEYDOWN = 0x0100;
         private const int WM_KEYUP = 0x0101;
+        private const int WM_SYSKEYDOWN = 0x0104;   // https://learn.microsoft.com/en-us/windows/win32/inputdev/wm-syskeydown
+        private const int WM_SYSKEYUP = 0x0105;
 
         static bool _shift = false;
+        static bool _alt = false;
 
         private int KeyboardHookProc(int nCode, Int32 wParam, IntPtr lParam)
         {
+            bool is_stop_key = false;
+
             if (nCode == 0)
             {
                 EventMsg msg = (EventMsg)Marshal.PtrToStructure(lParam, typeof(EventMsg));
-                if (wParam == WM_KEYUP)
+                int vkCode = Marshal.ReadInt32(lParam);
+                Keys key = (Keys)vkCode;
+                if (wParam == WM_KEYUP || wParam == WM_SYSKEYUP)
                 {
-                    int vkCode = Marshal.ReadInt32(lParam);
-
-                    Keys key = (Keys)vkCode;
-
                     if (key == Keys.LShiftKey)
                     {
                         _shift = false;
                         goto END1;
                     }
+
+                    if (key == Keys.LMenu || key == Keys.RMenu)
+                    {
+                        _alt = false;
+                        Debug.WriteLine("Alt keyup");
+                        goto END1;
+                    }
+
+                    // 检查是否属于禁用的键
+                    is_stop_key = IsStopKey(key);
                 }
 
-                if (wParam == WM_KEYDOWN)//WM_KEYDOWN=0x100 
+                if (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN)//WM_KEYDOWN=0x100 
                 {
+                    /*
                     int vkCode = Marshal.ReadInt32(lParam);
 
                     Keys key = (Keys)vkCode;
-
+                    */
                     if (key == Keys.LShiftKey)
                     {
                         _shift = true;
@@ -153,8 +190,25 @@ namespace DigitalPlatform.IO
                         goto END1;
                     }
 
+                    if (key == Keys.LMenu || key == Keys.RMenu)
+                    {
+                        _alt = true;
+                        Debug.WriteLine("Alt keydown");
+                        goto END1;
+                    }
+
+                    // 检查是否属于禁用的键
+                    is_stop_key = IsStopKey(key);
+
+                    if (wParam == WM_SYSKEYDOWN)
+                        goto END1;
+
+                    // 2024/1/10
+                    if (this.PauseBarcodeMonitor)
+                        goto END1;
+
                     TimeSpan ts = DateTime.Now.Subtract(_string.Time);
-                    if (ts.TotalMilliseconds > TIME_SHTRESHOLD)
+                    if (ts.TotalMilliseconds > TIME_SHRESHOLD)
                         _barcode.Clear();
 
                     _string.Time = DateTime.Now;
@@ -195,7 +249,7 @@ namespace DigitalPlatform.IO
                         }
                     }
 
-                    if ((msg.message & 0xff) == 13 && _barcode.Length > 3)
+                    if ((msg.message & 0xff) == 13 /*&& _barcode.Length > 3*/)
                     {
                         // 回车
                         _string.Barcode = _barcode.ToString();// barCode.OriginalBarCode;
@@ -247,7 +301,8 @@ namespace DigitalPlatform.IO
                 }
             }
         END1:
-            if (Handled == true)
+            if (Handled == true
+                || is_stop_key)
             {
                 /*
                 if (wParam == WM_KEYDOWN)
@@ -256,6 +311,17 @@ namespace DigitalPlatform.IO
                 return 1;
             }
             return CallNextHookEx(hKeyboardHook, nCode, wParam, lParam);
+        }
+
+        // 检查是否属于禁用的键
+        public bool IsStopKey(Keys key)
+        {
+            Debug.WriteLine("IsStopKey() key=" + key.ToString());
+
+            if (_alt)
+                key |= Keys.Alt;
+
+            return _stopKeys.Where(o => o == key).Any();
         }
 
         /*
@@ -346,7 +412,6 @@ namespace DigitalPlatform.IO
                 if (def == null)
                     return "?";
                 return char.ToString(def[shift ? 1 : 0]);
-
             }
             else if (key == Keys.Return)
             {

@@ -8420,9 +8420,31 @@ out strError);
             }
         }
 
+        static bool IsXml(string xml)
+        {
+            if (string.IsNullOrEmpty(xml))
+                return false;
+            if (xml.StartsWith("<") == false)
+                return false;
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(xml);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         // 比较两个 XML 字符串是否等同
         static bool IsSame(string xml1, string xml2)
         {
+            // 先判断两个文件是否都是 XML 格式
+            if (IsXml(xml1) == false || IsXml(xml2) == false)
+                return string.Equals(xml1, xml2);
+
             return DomUtil.GetIndentXml(xml1) == DomUtil.GetIndentXml(xml2);
             // return XNode.DeepEquals(XElement.Parse(xml1), XElement.Parse(xml2));
         }

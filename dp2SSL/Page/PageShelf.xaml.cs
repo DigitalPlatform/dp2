@@ -644,6 +644,17 @@ namespace dp2SSL
             if (this.Visibility != Visibility.Visible)
                 return;
 
+            // 扫入一个条码
+            string barcode = e.Text;    // .ToUpper();
+
+            if (string.IsNullOrEmpty(barcode)
+                && string.IsNullOrEmpty(App.FaceUrl) == false)
+            {
+                PatronClear();
+                PatronControl_InputFace(this, new EventArgs());
+                return;
+            }
+
             if ((string.IsNullOrEmpty(App.PatronBarcodeStyle) || App.PatronBarcodeStyle == "禁用")
                 && (string.IsNullOrEmpty(App.WorkerBarcodeStyle) || App.WorkerBarcodeStyle == "禁用"))
             {
@@ -652,8 +663,6 @@ namespace dp2SSL
                 return;
             }
 
-            // 扫入一个条码
-            string barcode = e.Text;    // .ToUpper();
             // 检查防范空字符串
             if (string.IsNullOrEmpty(barcode))
             {
@@ -896,7 +905,8 @@ namespace dp2SSL
                     App.SetSize(bookInfoWindow, "wide");
                     //bookInfoWindow.Width = Math.Min(1000, this.ActualWidth);
                     //bookInfoWindow.Height = Math.Min(700, this.ActualHeight);
-                    bookInfoWindow.Closed += (s1, e1) => {
+                    bookInfoWindow.Closed += (s1, e1) =>
+                    {
                         _bookInfoWindows.Remove(sender as BookInfoWindow);
                         RemoveLayer();
                     }; // BookInfoWindow_Closed;
@@ -1095,7 +1105,7 @@ namespace dp2SSL
                             progress.Close();
                         }));
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         WpfClientInfo.WriteErrorLog($"ErrorBox() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                     }
@@ -2145,6 +2155,7 @@ namespace dp2SSL
             {
                 InputPasswordWindows dialog = null;
                 App.PauseBarcodeScan();
+                AddLayer();
                 try
                 {
                     dialog = new InputPasswordWindows();
@@ -2164,6 +2175,7 @@ namespace dp2SSL
                 }
                 finally
                 {
+                    RemoveLayer();
                     App.ContinueBarcodeScan();
                 }
 
@@ -3382,7 +3394,7 @@ namespace dp2SSL
         public delegate void Delegate_welcome();
 
         async Task<NormalResult> FillPatronDetailAsync(
-            Delegate_welcome func_welcome, 
+            Delegate_welcome func_welcome,
             bool force = false)
         {
             return await Task.Run(async () =>
@@ -4853,8 +4865,17 @@ namespace dp2SSL
                     Owner = Application.Current.MainWindow,
                     WindowStartupLocation = WindowStartupLocation.CenterOwner
                 };
-                _videoRecognition.Closed += VideoRecognition_Closed;
+                _videoRecognition.Closed += (o, e1) =>
+                {
+                    FaceManager.CancelRecognitionFace();
+                    _stopVideo = true;
+                    RemoveLayer();
+                    App.ContinueBarcodeScan();
+                    _videoRecognition = null;
+                };
                 _videoRecognition.Show();
+                AddLayer();
+                App.PauseBarcodeScan();
             }));
             _stopVideo = false;
             var task = Task.Run(() =>
@@ -4918,7 +4939,7 @@ namespace dp2SSL
                     result = new RecognitionFaceResult
                     {
                         Value = -1,
-                        ErrorInfo = "为防范密码攻击，您的人脸信息处于被保护状态，请稍后再重试 ..."
+                        ErrorInfo = $"为防范密码攻击，您的人脸信息处于被保护状态，请{SelectPatronWindow.CleanLength.TotalMinutes}分钟后再重试 ..."
                     };
                 }
                 else
@@ -5127,14 +5148,6 @@ namespace dp2SSL
                         stream.Close();
                 }
             }
-        }
-
-        private void VideoRecognition_Closed(object sender, EventArgs e)
-        {
-            FaceManager.CancelRecognitionFace();
-            _stopVideo = true;
-            RemoveLayer();
-            _videoRecognition = null;
         }
 
         bool CloseRecognitionWindow()

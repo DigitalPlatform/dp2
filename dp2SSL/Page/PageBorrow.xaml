@@ -17,7 +17,7 @@
     </Page.Resources>
     <Grid Background="{StaticResource normalBackground}" Name="mainGrid">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="68" />
+            <ColumnDefinition Width="78" />
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="0" />
         </Grid.ColumnDefinitions>
@@ -33,7 +33,8 @@
         <Button Grid.Row="0" Grid.ColumnSpan="3">Top</Button>
         -->
         <!-- left bar -->
-        <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Vertical">
+        <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Vertical"
+                    Margin="10,10,0,0">
             <Grid Height="20" />
             <Button Name="goHome" ToolTip="返回主菜单"
                     Style="{DynamicResource RoundedButtonLightStyle}"
@@ -42,8 +43,13 @@
                 <fa:ImageAwesome Icon="Home"
                              Height="40" Foreground="{StaticResource buttonForeground}" Margin="6"/>
                 -->
+                <!--
                 <iconPacks:PackIconJamIcons Kind="Menu" 
                                             Width="36" Height="36" Foreground="{StaticResource buttonForeground}" Margin="6"/>
+                -->
+                <iconPacks:PackIconBootstrapIcons Kind="House" 
+                                            Width="36" Height="36" Foreground="{StaticResource buttonForeground}" Margin="6"/>
+
             </Button>
             <Grid Height="20" />
             <Button Name="goHelp" ToolTip="帮助"
@@ -181,7 +187,7 @@
                 <Button Name="borrowButton"
                     Style="{DynamicResource RoundedButtonLightStyle}" 
                     Width="160" Height="60" 
-                    FontSize="30" FontWeight="ExtraBold" 
+                    FontSize="30" 
                     Foreground="#FF995500" 
                      Click="BorrowButton_Click">
                     <Button.Content>
@@ -192,7 +198,7 @@
                 <Button Name="returnButton"
                     Style="{DynamicResource RoundedButtonLightStyle}" 
                     Width="160" Height="60" 
-                    FontSize="30" FontWeight="ExtraBold" 
+                    FontSize="30"  
                     Foreground="Blue" 
                      Click="ReturnButton_Click">
                     <Button.Content>
@@ -204,7 +210,7 @@
                 <Button Name="renewButton"
                     Style="{DynamicResource RoundedButtonLightStyle}" 
                     Width="160" Height="60" 
-                    FontSize="30" FontWeight="ExtraBold" 
+                    FontSize="30" 
                     Foreground="Black" 
                      Click="RenewButton_Click">
                     <Button.Content>
@@ -214,8 +220,8 @@
                 </Button>
                 <Button Name="registerFace"
                     Style="{DynamicResource RoundedButtonLightStyle}" 
-                    Width="160" Height="60" 
-                    FontSize="30" FontWeight="ExtraBold" 
+                    Width="180" Height="60" 
+                    FontSize="30" 
                     Foreground="Black" 
                      Click="RegisterFace_Click">
                     <Button.Content>
@@ -224,8 +230,8 @@
                 </Button>
                 <Button Name="deleteFace"
                     Style="{DynamicResource RoundedButtonLightStyle}" 
-                    Width="160" Height="60" 
-                    FontSize="30" FontWeight="ExtraBold" 
+                    Width="180" Height="60" 
+                    FontSize="30"  
                     Foreground="Black" 
                      Click="DeleteFace_Click">
                     <Button.Content>
@@ -236,7 +242,7 @@
                 <Button Name="bindPatronCard"
                     Style="{DynamicResource RoundedButtonLightStyle}" 
                     Width="200" Height="60" 
-                    FontSize="30" FontWeight="ExtraBold" 
+                    FontSize="30"  
                     Foreground="Black" 
                      Click="bindPatronCard_Click">
                     <Button.Content>
@@ -246,7 +252,7 @@
                 <Button Name="releasPatronCard"
                     Style="{DynamicResource RoundedButtonLightStyle}" 
                     Width="200" Height="60" 
-                    FontSize="30" FontWeight="ExtraBold" 
+                    FontSize="30"  
                     Foreground="Black" 
                      Click="releasePatronCard_Click">
                     <Button.Content>

@@ -7213,6 +7213,27 @@ out string block_map);
             }
         }
 
+        // 检测和升级数据库架构
+        public static void UpgradeDatabase()
+        {
+            var version = WpfClientInfo.Config?.Get("database", "version", "0.01");
+            if (string.IsNullOrEmpty(version))
+                version = "0.01";
+            // --> 0.02
+            // patron 表从主索引 PII 变为：主索引为 RecPath，另外增加一个索引 PII
+            if (StringUtil.CompareVersion(version, "0.02") < 0)
+            {
+                using (BiblioCacheContext context = new BiblioCacheContext())
+                {
+                    context.Database.EnsureDeleted();
+                    context.Database.EnsureCreated();
+                }
+                version = "0.02";
+                WpfClientInfo.Config?.Set("database", "version", version);
+            }
+        }
+
+
         #region 本地软时钟
 
         static long _deltaTicks = 0;

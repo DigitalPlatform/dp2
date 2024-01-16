@@ -208,6 +208,8 @@ namespace dp2SSL
 
                 ReloadSkin();
 
+                ShelfData.UpgradeDatabase();
+
                 // 2021/8/21
                 // 把错误日志同时也发送给 dp2mserver
                 WpfClientInfo.WriteLogEvent += (o1, e1) =>
@@ -293,6 +295,10 @@ namespace dp2SSL
             await Task.Run(() =>
             {
                 DeleteLastTempFiles();
+
+                // 2024/1/15
+                DeleteBrokenFiles();
+
                 var free_bytes = PageBorrow.GetUserDiskFreeSpace();
                 if (free_bytes != -1 && free_bytes < 1024 * 1024 * 1024)
                     PageBorrow.BeginCleanCoverImagesDirectory(DateTime.Now);
@@ -338,7 +344,11 @@ namespace dp2SSL
                 RfidManager.StartBase2(_cancelRefresh.Token);
             }
             */
-
+            _barcodeCapture.StopKeys = new List<System.Windows.Forms.Keys> { 
+                System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.Tab,
+                System.Windows.Forms.Keys.LWin,
+                System.Windows.Forms.Keys.RWin
+            };
             _barcodeCapture.InputLine += _barcodeCapture_inputLine;
             //_barcodeCapture.InputChar += _barcodeCapture_InputChar;
             _barcodeCapture.Handled = _pauseBarcodeScan == 0;   // 是否把处理过的字符吞掉
@@ -386,7 +396,7 @@ namespace dp2SSL
                     LibraryName = result.LibraryName;
                     ServerUid = result.ServerUid;
 
-                    if (result.XmlChanged)
+                    if (result.XmlChanged && App.Function == "智能书柜")
                     {
                         WpfClientInfo.WriteInfoLog($"[1] 探测到 library.xml 中 rfid 发生变化。\r\n变化前的: {result.OldXml}\r\n变化后的: {result.Xml}");
                         // 触发重新全量下载册和读者记录
@@ -816,7 +826,7 @@ namespace dp2SSL
 
         private void _barcodeCapture_InputChar(CharInput input)
         {
-            if (_pauseBarcodeScan > 0)
+            if (_pauseBarcodeScan > 0 || _appActivated == false)
             {
                 Debug.WriteLine("pauseBarcodeScan");
                 return;
@@ -836,7 +846,7 @@ namespace dp2SSL
 
         private void _barcodeCapture_inputLine(BarcodeCapture.StringInput input)
         {
-            if (_pauseBarcodeScan > 0)
+            if (_pauseBarcodeScan > 0 || _appActivated == false)
             {
                 Debug.WriteLine("pauseBarcodeScan");
                 return;
@@ -865,6 +875,11 @@ namespace dp2SSL
 
                     _lastBarcode = new LastBarcode { Barcode = line, Time = DateTime.Now };
                     // 触发一次输入
+                    LineFeed?.Invoke(this, new LineFeedEventArgs { Text = line });
+                }
+                else
+                {
+                    // 特殊输入，空行直接回车。代表触发人脸识别
                     LineFeed?.Invoke(this, new LineFeedEventArgs { Text = line });
                 }
             }
@@ -897,6 +912,38 @@ namespace dp2SSL
             else
                 _barcodeCapture.Handled = _pauseBarcodeScan == 0;   // 若回到 0 就会吞掉击键
         }
+
+        static int _pauseMonitor = 0;
+
+        // 暂停对条码输入的监控
+        public static void PauseBarcodeMonitor()
+        {
+            _pauseMonitor++;
+            if (_pauseMonitor == 1)
+                _barcodeCapture.PauseBarcodeMonitor = true;
+        }
+
+        // 恢复对条码输入的监控
+        public static void ContinueBarcodeMonitor()
+        {
+            _pauseMonitor--;
+            if (_pauseMonitor == 0)
+                _barcodeCapture.PauseBarcodeMonitor = false;
+        }
+
+        /*
+        public static int PauseMonitor
+        {
+            get
+            {
+                return _barcodeCapture.PauseMonitor;
+            }
+            set
+            {
+                _barcodeCapture.PauseMonitor = value;
+            }
+        }
+        */
 
         StringBuilder _line = new StringBuilder();
         static BarcodeCapture _barcodeCapture = new BarcodeCapture();
@@ -2541,6 +2588,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             return false;
         }
 
+        // tall middle wide full
         public static void SetSize(Window window, string style)
         {
             var mainWindows = App.CurrentApp.MainWindow;
@@ -2633,6 +2681,9 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             }
         }
 
+        // parameters:
+        //      style   风格。
+        //              若包含(size:xxx) tall middle wide full 之一，表示窗口显示的大小
         public static void ErrorBox(
             string title,
             string message,
@@ -2641,6 +2692,10 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
         {
             ProgressWindow progress = null;
 
+            var size = StringUtil.GetParameterByPrefix(style, "size");
+            if (size == null)
+                size = "tall";
+
             App.Invoke(new Action(() =>
             {
                 progress = new ProgressWindow();
@@ -2648,7 +2703,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                 progress.MessageText = "正在处理，请稍候 ...";
                 progress.Owner = Application.Current.MainWindow;
                 progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                App.SetSize(progress, "tall");
+                App.SetSize(progress, size);    // "tall"
                 //progress.Width = Math.Min(700, this.ActualWidth);
                 //progress.Height = Math.Min(900, this.ActualHeight);
                 progress.Closed += (o, e) =>
@@ -3169,6 +3224,87 @@ AllowEdgeSwipe DWORD
 
             return true;
         }
+
+        #region 删除破损的图像文件
+
+        static object _syncRoot_brokenFile = new object();
+
+        // 记忆那些无法删除的文件的文件名。以便 dp2ssl 下次重启的时候抢先删除
+        static void MemoryBrokenFileName(string fileName)
+        {
+            lock (_syncRoot_brokenFile)
+            {
+                string memoryFileName = Path.Combine(WpfClientInfo.UserDir, "memory_deleting.txt");
+                using (StreamWriter sw = File.AppendText(memoryFileName))
+                {
+                    sw.WriteLine(fileName);
+                }
+            }
+        }
+
+        static void DeleteBrokenFiles()
+        {
+            lock (_syncRoot_brokenFile)
+            {
+                try
+                {
+                    string memoryFileName = Path.Combine(WpfClientInfo.UserDir, "memory_deleting.txt");
+                    if (File.Exists(memoryFileName) == false)
+                        return;
+                    using (var sr = new StreamReader(memoryFileName, Encoding.UTF8))
+                    {
+                        while (true)
+                        {
+                            var line = sr.ReadLine();
+                            if (line == null)
+                                break;
+                            if (string.IsNullOrEmpty(line))
+                                continue;
+                            try
+                            {
+                                File.Delete(line);
+                            }
+                            catch (Exception ex)
+                            {
+                                WpfClientInfo.WriteErrorLog($"DeleteBrokerFiles() 中删除文件 '{line}' 时出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                            }
+                        }
+                    }
+
+                    try
+                    {
+                        File.Delete(memoryFileName);
+                    }
+                    catch (Exception ex)
+                    {
+                        WpfClientInfo.WriteErrorLog($"DeleteBrokerFiles() 中删除文件名文件 '{memoryFileName}' 时出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    WpfClientInfo.WriteErrorLog($"DeleteBrokerFiles() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                }
+            }
+        }
+
+        // 删除已经损坏的图像文件(临时文件)
+        public static void TryDeleteBrokenImageFile(string fileName)
+        {
+            // TODO: 先检查，是否为临时图像文件目录中的文件。是这里的文件才删除
+
+            GC.Collect();
+            try
+            {
+                File.Delete(fileName);
+            }
+            catch
+            {
+                // 如果删除不掉，则记忆下来下次 dp2ssl.exe 启动的时候尝试删除
+                MemoryBrokenFileName(fileName);
+            }
+        }
+
+        #endregion
     }
 
     public delegate void NewTagChangedEventHandler(object sender,

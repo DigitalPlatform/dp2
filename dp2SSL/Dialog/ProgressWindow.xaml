@@ -10,12 +10,29 @@
         WindowStyle="None"
     AllowsTransparency="True"
     ResizeMode="CanResizeWithGrip" ShowInTaskbar="False">
+    <!--
+    <WindowChrome.WindowChrome>
+        <WindowChrome GlassFrameThickness="-1" />
+    </WindowChrome.WindowChrome>
+    <Window.Template>
+        <ControlTemplate TargetType="Window">
+            <Border Padding="0" Background="Transparent">
+                <Border CornerRadius="16" Background="{StaticResource normalBackground}">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="64" />
+                    </Border.Effect>
+                    <ContentPresenter ClipToBounds="True" />
+                </Border>
+            </Border>
+        </ControlTemplate>
+    </Window.Template>
+    -->
     <Window.Effect>
         <DropShadowEffect Color="Gray" BlurRadius="20" Direction="-45" RenderingBias="Quality" ShadowDepth="14"/>
     </Window.Effect>
     <Border BorderThickness="2" BorderBrush="Gray">
-        <Grid Name="mainGrid"
-            Background="Transparent" Margin="30"
+        <Grid Name="mainGrid" 
+            Background="Transparent" Margin="18"
               KeyDown="Grid_KeyDown" Focusable="True">
             <Grid.RowDefinitions>
                 <RowDefinition Height="60"/>
@@ -33,25 +50,24 @@
                                           IsSelectionEnabled="False" ScrollViewer.CanContentScroll="False"/>
                 <TextBox Name="text"  
                    VerticalAlignment="Center" HorizontalAlignment="Center"
-                   FontSize="20" TextWrapping="Wrap"
+                   FontSize="20" FontWeight="Thin" TextWrapping="Wrap"
                  Background="Transparent" Foreground="{StaticResource normalForeground}" 
                  VerticalScrollBarVisibility="Auto" BorderThickness="0">Text</TextBox>
             </Grid>
             <ProgressBar Name="progressBar" Grid.Row="2"
-                     Height="5" Background="Transparent" BorderThickness="0"/>
+                     Height="2" Background="Transparent" BorderThickness="0"/>
 
             <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center">
-
                 <Button Name="okButton" 
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="160" Height="60" 
-                    FontSize="30" FontWeight="ExtraBold" 
+                    FontSize="30" 
                     Foreground="White" 
                     Click="OkButton_Click">关闭</Button>
                 <Button Name="cancelButton" 
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="160" Height="60" 
-                    FontSize="30" FontWeight="ExtraBold" 
+                    FontSize="30" 
                     Foreground="White" 
                     Visibility="Collapsed"
                     Click="cancelButton_Click">取消</Button>

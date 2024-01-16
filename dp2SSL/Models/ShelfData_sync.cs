@@ -521,7 +521,15 @@ TaskScheduler.Default);
                     using (var connection = context.Database.GetDbConnection())
                     {
                         if (clearBefore)
+                        {
                             context.Database.EnsureDeleted();
+
+                            /*
+                            // 2024/1/11
+                            // 清除所有的 tracking 事项。避免后面 Add 事项的时候报错
+                            context.ChangeTracker.Clear();
+                            */
+                        }
 
                         context.Database.EnsureCreated();
 

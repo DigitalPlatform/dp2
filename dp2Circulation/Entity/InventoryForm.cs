@@ -4055,7 +4055,7 @@ MessageBoxDefaultButton.Button2);
             this.listView_baseList_records.SelectedIndexChanged += new System.EventHandler(this.listView_baseList_records_SelectedIndexChanged);
         }
 
-        void menu_loadSelectedBaseListItemsToItemSearchForm_Click(object sender, EventArgs e)
+        async void menu_loadSelectedBaseListItemsToItemSearchForm_Click(object sender, EventArgs e)
         {
             string strError = "";
             if (this.listView_baseList_records.SelectedItems.Count == 0)
@@ -4076,11 +4076,13 @@ MessageBoxDefaultButton.Button2);
                 }
                 ItemSearchForm form = Program.MainForm.OpenItemSearchForm("item");
                 // form.Activate();
-                int nRet = form.ImportFromRecPathFile(strTempFileName,
-                    "clear",
-                    out strError);
-                if (nRet == -1)
+                var result = await form.ImportFromRecPathFileAsync(strTempFileName,
+                    "clear");
+                if (result.Value == -1)
+                {
+                    strError = result.ErrorInfo;
                     goto ERROR1;
+                }
             }
             finally
             {
@@ -4089,7 +4091,7 @@ MessageBoxDefaultButton.Button2);
 
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            ShowMessageBox(strError);
         }
 
         void menu_refreshSelectedBaseListItems_Click(object sender, EventArgs e)

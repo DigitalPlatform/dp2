@@ -42,7 +42,7 @@
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Name="openKeyboard" 
                     Width="100" Height="30" 
-                    FontSize="14" FontWeight="ExtraBold" Margin="10"
+                    FontSize="14" FontWeight="Normal" Margin="10"
                     Foreground="White" Background="DarkGray" BorderThickness="0"
                     HorizontalAlignment="Left"
                     Click="openKeyboard_Click">打开触摸键盘</Button>
@@ -50,14 +50,14 @@
             <Button Name="okButton" 
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="200" Height="60" 
-                    FontSize="30" FontWeight="ExtraBold" 
+                    FontSize="30"  
                     Foreground="White" 
                     Click="okButton_Click">确定</Button>
 
             <Button Name="cancelButton" 
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="160" Height="60" 
-                    FontSize="30" FontWeight="ExtraBold" 
+                    FontSize="30"  
                     Foreground="White" 
                     Margin="10,0,10,0"
                     Click="cancelButton_Click">取消</Button>

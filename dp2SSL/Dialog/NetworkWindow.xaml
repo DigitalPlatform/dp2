@@ -38,19 +38,19 @@
                 <Button Name="localMode" 
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="420" Height="60" 
-                    FontSize="30" FontWeight="ExtraBold" 
+                    FontSize="30" 
                     Foreground="White" 
                     Click="localMode_Click">按断网模式继续启动</Button>
                 <Button Name="networkMode" 
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="420" Height="60" 
-                    FontSize="30" FontWeight="ExtraBold" 
+                    FontSize="30" 
                     Foreground="White" 
                     Click="networkMode_Click">按联网模式继续启动</Button>
                 <Button Name="cancelButton" 
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="320" Height="60" 
-                    FontSize="30" FontWeight="ExtraBold" 
+                    FontSize="30" 
                     Foreground="White" 
                     Click="cancelButton_Click">退出 dp2SSL</Button>
             </StackPanel>

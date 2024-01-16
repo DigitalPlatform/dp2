@@ -3,6 +3,7 @@
 
     <!-- 通用背景色 -->
     <SolidColorBrush x:Key="normalBackground" Color="White"/>
+    <SolidColorBrush x:Key="normalDialogBackground" Color="#cccccc"/>
 
     <SolidColorBrush x:Key="redBackground" Color="#ff9999"/>
     <SolidColorBrush x:Key="greenBackground" Color="LightGreen"/>
@@ -15,6 +16,7 @@
 
     <!-- 通用前景色 -->
     <SolidColorBrush x:Key="normalForeground" Color="Black"/>
+    <SolidColorBrush x:Key="softForeground" Color="#222222"/>
 
 
 </ResourceDictionary>

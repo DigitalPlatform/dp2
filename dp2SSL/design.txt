@@ -48,3 +48,142 @@ https://stackoverflow.com/questions/37285335/why-my-mouse-event-handlers-are-not
 https://www.cnblogs.com/ListenFly/p/3581735.html
 WPF之无法触发KeyDown或者KeyUp键盘事件
 
+~~~
+借书或者还书完成后，要自动刷新右侧的读者信息中的在借信息
+
+~~~
+https://superuser.com/questions/1027228/is-it-possible-to-have-num-lock-always-on-without-the-ability-of-the-num-lock-k
+
+https://www.codeproject.com/Articles/5264831/How-to-Send-Inputs-using-Csharp
+https://support.microsoft.com/en-us/topic/howto-toggle-the-num-lock-caps-lock-and-scroll-lock-keys-1718b9bd-5ebf-f3ab-c249-d5312c93d2d7
+https://www.codeproject.com/Articles/7305/Keyboard-Events-Simulation-using-keybd-event-funct
+
+https://www.codeproject.com/Articles/17123/Using-Raw-Input-from-C-to-handle-multiple-keyboard
+
+https://devblogs.microsoft.com/oldnewthing/20160627-00/?p=93755
+
+~~~
+
+        [DllImport("coredll.dll")]
+        public static extern void keybd_event(int vk, byte bScan, int dwFlags, int dwExtraInfo);
+
+
+
+            _ = Task.Run(() =>
+            {
+                Thread.Sleep(1000);
+
+                const int VK_NUMLOCK = (int)System.Windows.Forms.Keys.NumLock;
+
+                const byte KEYEVENTF_KEYUP = 0x0002;
+
+                keybd_event(VK_NUMLOCK, 1, 0, 0);
+
+                keybd_event(VK_NUMLOCK, 0, KEYEVENTF_KEYUP, 0);
+
+
+
+                /*
+                // VK_NUMLOCK  0x90
+
+                const int KEYEVENTF_KEYUP = 0x0002;
+                keybd_event(0x90, 0, 0xE0 | 0, IntPtr.Zero);
+                keybd_event(0x90, 0, 0xE0 | KEYEVENTF_KEYUP, IntPtr.Zero);
+                */
+                /*
+                {
+                    var numlock = Console.NumberLock;
+                    if (numlock == false)
+                        System.Windows.Forms.SendKeys.SendWait("{NUMLOCK}");
+                }
+                */
+            });
+
+            ~~~
+            https://stackoverflow.com/questions/42725232/rawinput-from-different-keyboard-c-sharp-net
+
+            https://csharp.hotexamples.com/examples/RawInput_dll/RawKeyboard/-/php-rawkeyboard-class-examples.html
+
+            https://www.codeproject.com/articles/716591/combining-raw-input-and-keyboard-hook-to-selective
+
+            https://devblogs.microsoft.com/oldnewthing/20041130-00/?p=37173
+
+
+            ~~~
+            /*
+            var states = Keyboard.GetKeyStates(Key.NumLock);
+            if (states == KeyStates.Toggled)
+                this.Error = "NUMLOCK off";
+            */
+
+~~~
+Listed in order from lightest weight to heaviest, the possible choices for FontWeight are:
+
+Thin
+ExtraLight
+Light
+Normal
+Medium
+DemiBold
+Bold
+ExtraBold
+Black
+ExtraBlack
+
+~~~
+https://www.c-sharpcorner.com/UploadFile/mahesh/wpf-layout-size-width-and-height/
+
+~~~
+https://social.msdn.microsoft.com/Forums/sqlserver/en-US/6a836c72-a06f-487c-8645-56090f117fea/animate-window-height-and-width-in-wpf?forum=wpf
+
+输入密码错误后，自动清除密码 text
+
+
+<iconPacks:PackIconZondicons Kind="Home" />
+
+<iconPacks:PackIconVaadinIcons Kind="Home" />
+
+<iconPacks:PackIconVaadinIcons Kind="HomeOutline" />
+
+<iconPacks:PackIconTypicons Kind="Home" />
+
+<iconPacks:PackIconTypicons Kind="HomeOutline" />
+
+<iconPacks:PackIconRemixIcon Kind="Home2Fill" />
+
+<iconPacks:PackIconRemixIcon Kind="Home2Line" />
+
+<iconPacks:PackIconRadixIcons Kind="Home" />
+
+<iconPacks:PackIconPixelartIcons Kind="Home" />
+
+<iconPacks:PackIconPicolIcons Kind="Home" />
+
+***
+<iconPacks:PackIconOcticons Kind="Home" />
+
+***
+<iconPacks:PackIconModern Kind="Home" />
+
+***
+<iconPacks:PackIconModern Kind="HomeEmpty" />
+
+<iconPacks:PackIconMaterialLight Kind="Home" />
+
+<iconPacks:PackIconMaterialDesign Kind="Home" />
+
+<iconPacks:PackIconIonicons Kind="HomeiOS" />
+
+***
+<iconPacks:PackIconForkAwesome Kind="Home" />
+
+<iconPacks:PackIconFeatherIcons Kind="Home" />
+
+<iconPacks:PackIconEvaIcons Kind="HomeOutline" />
+
+<iconPacks:PackIconCoolicons Kind="HomeOutline" />
+
+<iconPacks:PackIconCodicons Kind="Home" />
+
+***
+<iconPacks:PackIconBootstrapIcons Kind="House" />

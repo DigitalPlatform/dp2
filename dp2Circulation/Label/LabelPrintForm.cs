@@ -2616,8 +2616,12 @@ out string strError);
         }
 
         // 从记录路径文件中导入
-        void menu_importFromRecPathFile_Click(object sender, EventArgs e)
+        async void menu_importFromRecPathFile_Click(object sender, EventArgs e)
         {
+            var result = await ImportFromRecPathFileAsync(null, "clear");
+            if (result.Value == -1)
+                ShowMessageBox(result.ErrorInfo);
+#if REMOVED
             _ = Task.Factory.StartNew(() =>
             {
                 string strError = "";
@@ -2634,7 +2638,7 @@ out string strError);
 default,
 TaskCreationOptions.LongRunning,
 TaskScheduler.Default);
-
+#endif
         }
 
         // 导出选择的行中有路径的部分行 的条码栏内容 为条码号文件

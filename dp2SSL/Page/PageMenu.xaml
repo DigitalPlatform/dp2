@@ -11,7 +11,15 @@
       WindowTitle="主菜单" Title="主菜单"
       >
     <Page.Resources>
-        <local:StringToVisibilityConverter x:Key="StringToVis" />
+        <ResourceDictionary>
+            <Style TargetType="{x:Type Button}">
+                <Setter Property="FontWeight" Value="Thin"/>
+            </Style>
+            <Style TargetType="{x:Type TextBlock}">
+                <Setter Property="FontWeight" Value="Thin"/>
+            </Style>
+            <local:StringToVisibilityConverter x:Key="StringToVis" />
+        </ResourceDictionary>
     </Page.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -113,7 +121,7 @@
                    VerticalAlignment="Center" HorizontalAlignment="Center">
             <Run Text="数字平台(北京)软件有限责任公司"/>
             <LineBreak/>
-            <Run Text="http://dp2003.com"/>
+            <Run Text="https://dp2003.com"/>
         </TextBlock>
     </Grid>
 </Page>

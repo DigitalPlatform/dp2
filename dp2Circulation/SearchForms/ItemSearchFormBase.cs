@@ -18,6 +18,7 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using Microsoft.CodeAnalysis.Operations;
+using System.Threading.Tasks;
 
 
 namespace dp2Circulation
@@ -951,6 +952,32 @@ item_recpath);
             return false;
         }
 
+        // 多线程版本
+        // 从记录路径文件导入
+        // result.Value:
+        //      -1: 出错
+        //      0: 放弃处理
+        //      1:正常结束
+        public async Task<NormalResult> ImportFromRecPathFileAsync(string strFileName,
+            string strStyle)
+        {
+            return await Task.Factory.StartNew(() =>
+            {
+                var ret = _importFromRecPathFile(strFileName,
+        strStyle,
+        out string strError);
+                return new NormalResult
+                {
+                    Value = ret,
+                    ErrorInfo = strError
+                };
+            },
+this.CancelToken,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
+
+        // 界面线程版本。(即将弃用)
         /// <summary>
         /// 从记录路径文件导入
         /// </summary>
@@ -959,6 +986,15 @@ item_recpath);
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错 0: 放弃处理 1:正常结束</returns>
         public int ImportFromRecPathFile(string strFileName,
+            string strStyle,
+            out string strError)
+        {
+            return _importFromRecPathFile(strFileName,
+                strStyle,
+                out strError);
+        }
+
+        internal int _importFromRecPathFile(string strFileName,
             string strStyle,
             out string strError)
         {
@@ -1009,9 +1045,11 @@ item_recpath);
             _stop.Initial("正在导入记录路径 ...");
             _stop.BeginLoop();
             */
-            var looping = BeginLoop(this.DoStop, "正在导入记录路径 ...", "halfstop");
+            var looping = Looping(out LibraryChannel channel,
+                "正在导入记录路径 ...",
+                "timeout:0:0:40,halfstop");
 
-            LibraryChannel channel = this.GetChannel();
+            // LibraryChannel channel = this.GetChannel();
 
             this.EnableControls(false);
             try
@@ -1190,12 +1228,15 @@ item_recpath);
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
+
+                return 1;
             }
             finally
             {
                 this.EnableControls(true);
 
-                this.ReturnChannel(channel);
+                looping.Dispose();
+                // this.ReturnChannel(channel);
 
                 /*
                 _stop.EndLoop();
@@ -1204,12 +1245,11 @@ item_recpath);
                 _stop.HideProgress();
                 _stop.Style = StopStyle.None;
                 */
-                EndLoop(looping);
+                // EndLoop(looping);
 
                 if (sr != null)
                     sr.Close();
             }
-            return 1;
         ERROR1:
             return -1;
             // MessageBox.Show(this, strError);

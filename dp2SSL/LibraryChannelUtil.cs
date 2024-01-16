@@ -419,6 +419,14 @@ namespace dp2SSL
         {
             try
             {
+                // 2024/1/12
+                var existing_item = await context.BiblioSummaries.FindAsync(item.PII);
+                if (existing_item != null)
+                {
+                    context.BiblioSummaries.Remove(existing_item);
+                    await context.SaveChangesAsync();
+                }
+
                 // 保存到本地数据库
                 context.BiblioSummaries.Add(item);
                 await context.SaveChangesAsync();
@@ -558,6 +566,14 @@ namespace dp2SSL
 
             try
             {
+                // 2024/1/12
+                var existing_item = await context.Entities.FindAsync(item.PII);
+                if (existing_item != null)
+                {
+                    context.Entities.Remove(existing_item);
+                    await context.SaveChangesAsync();
+                }
+
                 // 保存到本地数据库
                 context.Entities.Add(item);
                 await context.SaveChangesAsync();
@@ -976,7 +992,9 @@ namespace dp2SSL
         }
 
         // 获得读者的 PII。注意包含了 OI 部分
-        static string GetPatronOiPii(XmlDocument dom)
+        // exception: 可能会抛出 Exception 异常
+        static string GetPatronOiPii(XmlDocument dom,
+            bool throw_exception = false)
         {
             string pii = DomUtil.GetElementText(dom.DocumentElement, "barcode");
             if (string.IsNullOrEmpty(pii))
@@ -1006,6 +1024,16 @@ namespace dp2SSL
                         oi = isil;
                     else if (string.IsNullOrEmpty(alternative) == false)
                         oi = alternative;
+                }
+                else
+                {
+                    string error = $"GetPatronOiPii() GetOwnerInstitution() 没有获得机构代码。libraryCode='{libraryCode}, 读者记录XML='{dom.OuterXml}''";
+                    WpfClientInfo.WriteErrorLog(error);
+                    if (throw_exception)
+                        throw new Exception(error);
+
+                    // 2024/1/11
+                    return pii;
                 }
             }
 
@@ -1130,6 +1158,16 @@ namespace dp2SSL
             GetReaderInfoResult get_result,
             DateTime lastWriteTime)
         {
+            // 2024/1/1
+            if (get_result.RecPath == null)
+            {
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = "UpdateLocalPatronRecord() 调用时参数不符合要求: get_result.RecPath 为空"
+                };
+            }
+
             using (BiblioCacheContext context = new BiblioCacheContext())
             {
                 if (_cacheDbCreated == false)
@@ -1152,15 +1190,18 @@ namespace dp2SSL
                         ErrorCode = "loadXmlError"
                     };
                 }
+
                 /*
-                string pii = DomUtil.GetElementText(dom.DocumentElement, "barcode");
-                if (string.IsNullOrEmpty(pii))
-                    pii = "@refID:" + DomUtil.GetElementText(dom.DocumentElement, "refID");
-                    */
                 string oi_pii = GetPatronOiPii(dom);
                 var patron = context.Patrons
     .Where(o => o.PII == oi_pii)
     .FirstOrDefault();
+                */
+                // 2024/1/11
+                // 用记录路径获得以前已经存在的记录
+                var patron = context.Patrons
+                    .Where(o => o.RecPath == get_result.RecPath)
+                    .FirstOrDefault();
                 if (patron != null)
                 {
                     // 如果已经存在的读者记录比打算写入的要新，则放弃写入
@@ -1171,10 +1212,14 @@ namespace dp2SSL
                 }
                 else
                 {
+                    /*
+                    string oi_pii = GetPatronOiPii(dom);
                     patron = new PatronItem
                     {
                         PII = oi_pii?.ToUpper(),
                     };
+                    */
+                    patron = new PatronItem();
                     Set(patron, dom);
                     context.Patrons.Add(patron);
                 }
@@ -1185,6 +1230,10 @@ namespace dp2SSL
 
             void Set(PatronItem patron, XmlDocument dom)
             {
+                // 2024/1/11 增加
+                string oi_pii = GetPatronOiPii(dom);
+                patron.PII = oi_pii?.ToUpper();
+
                 string cardNumber = DomUtil.GetElementText(dom.DocumentElement, "cardNumber");
                 cardNumber = cardNumber.ToUpper();
                 if (string.IsNullOrEmpty(cardNumber) == false)
@@ -1199,7 +1248,9 @@ namespace dp2SSL
             }
         }
 
-        public static NormalResult DeleteLocalPatronRecord(string strXml)
+        public static NormalResult DeleteLocalPatronRecord(
+            string strRecPath,
+            string strXml)
         {
             using (BiblioCacheContext context = new BiblioCacheContext())
             {
@@ -1209,6 +1260,7 @@ namespace dp2SSL
                     _cacheDbCreated = true;
                 }
 
+                /*
                 XmlDocument dom = new XmlDocument();
                 try
                 {
@@ -1223,14 +1275,24 @@ namespace dp2SSL
                         ErrorCode = "loadXmlError"
                     };
                 }
+                */
+
                 /*
-                string pii = DomUtil.GetElementText(dom.DocumentElement, "barcode");
-                if (string.IsNullOrEmpty(pii))
-                    pii = "@refID:" + DomUtil.GetElementText(dom.DocumentElement, "refID");
-                    */
                 string oi_pii = GetPatronOiPii(dom);
                 var patron = context.Patrons
     .Where(o => o.PII == oi_pii)
+    .FirstOrDefault();
+                if (patron != null)
+                {
+                    context.Patrons.Remove(patron);
+                    context.SaveChanges();
+                }
+                */
+
+                // 2024/1/11
+                // 根据记录路径进行删除
+                var patron = context.Patrons
+    .Where(o => o.RecPath == strRecPath)
     .FirstOrDefault();
                 if (patron != null)
                 {
@@ -1548,6 +1610,14 @@ AccountItem item)
         {
             try
             {
+                // 2024/1/12
+                var existing_item = context.Accounts.Find(item.UserName);
+                if (existing_item != null)
+                {
+                    context.Accounts.Remove(existing_item);
+                    context.SaveChanges();
+                }
+
                 // 保存到本地数据库
                 context.Accounts.Add(item);
                 context.SaveChanges();
@@ -2258,13 +2328,23 @@ out string strError);
                 if (object_path.StartsWith("http:")
                     || object_path.StartsWith("https:"))
                 {
-                    HttpClient client = new HttpClient();
-                    using (var stream = await client.GetStreamAsync(object_path))
-                    using (var output_stream = File.Create(output_filename))
+                    bool succeed = false;
+                    try
                     {
-                        await stream.CopyToAsync(output_stream);
+                        HttpClient client = new HttpClient();
+                        using (var stream = await client.GetStreamAsync(object_path))
+                        using (var output_stream = File.Create(output_filename))
+                        {
+                            await stream.CopyToAsync(output_stream);
+                        }
+                        succeed = true;
+                        return new NormalResult { Value = 1 };
                     }
-                    return new NormalResult { Value = 1 };
+                    finally
+                    {
+                        if (succeed == false)
+                            File.Delete(output_filename);
+                    }
                 }
 
                 using (var releaser = await _channelLimit.EnterAsync())

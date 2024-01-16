@@ -40,6 +40,7 @@
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
+                <Setter Property="FontWeight" Value="Thin"/>
             </Style>
 
             <Style x:Key="RoundedButtonLightStyle" TargetType="{x:Type Button}">
@@ -65,6 +66,7 @@
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
+                <Setter Property="FontWeight" Value="Thin"/>
             </Style>
 
         </ResourceDictionary>

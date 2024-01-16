@@ -51,7 +51,7 @@
                                 Margin="10"
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="220" Height="60"
-                    FontSize="30" FontWeight="ExtraBold" 
+                    FontSize="30"  
                     Foreground="Red" 
                     Click="TransferButton_Click">典藏移交</Button>
                     </StackPanel>
@@ -65,7 +65,7 @@
                     <Button Name="notButton" Visibility="Collapsed"
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="180" Height="60" 
-                    FontSize="30" FontWeight="ExtraBold" 
+                    FontSize="30"  
                     Foreground="White" 
                     Click="NotButton_Click">不移交</Button>
                     </StackPanel>

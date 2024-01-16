@@ -88,5 +88,14 @@ namespace dp2SSL
                 return;
             }
         }
+
+        private void Grid_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+            {
+                CancelButton_Click(this, new RoutedEventArgs());
+                return;
+            }
+        }
     }
 }

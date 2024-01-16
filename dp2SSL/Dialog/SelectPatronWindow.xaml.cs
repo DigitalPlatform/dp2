@@ -15,6 +15,8 @@ using System.Windows.Media.Imaging;
 using System.Diagnostics;
 using System.Xml;
 using System.IO;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 using WindowsInput;
 
@@ -29,7 +31,7 @@ namespace dp2SSL
     /// <summary>
     /// SelectPatronWindow.xaml 的交互逻辑
     /// </summary>
-    public partial class SelectPatronWindow : Window
+    public partial class SelectPatronWindow : Window, INotifyPropertyChanged
     {
         PatronCollection _patrons = null;
         CancellationTokenSource _cancel = new CancellationTokenSource();
@@ -40,11 +42,45 @@ namespace dp2SSL
         {
             InitializeComponent();
 
+            DataContext = this;
+
             Loaded += SelectPatronWindow_Loaded;
             Unloaded += SelectPatronWindow_Unloaded;
 
             this.keyboard.KeyPressed += Keyboard_KeyPressed;
         }
+
+        // https://www.codeproject.com/questions/1096881/how-to-bind-code-behind-variables-in-wpf
+        private string _error = null;
+        public string Error
+        {
+            get { return _error; }
+            set
+            {
+                _error = value;
+                OnPropertyChanged();
+            }
+        }
+
+        #region INotifyPropertyChanged Members
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// Raises this object's PropertyChanged event.
+        /// </summary>
+        /// <param name="propertyName">The property that has a new value.</param>
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChangedEventHandler handler = this.PropertyChanged;
+            if (handler != null)
+            {
+                var e = new PropertyChangedEventArgs(propertyName);
+                handler(this, e);
+            }
+        }
+
+        #endregion
 
         private void Keyboard_KeyPressed(object sender, KeyPressedEventArgs e)
         {
@@ -67,18 +103,25 @@ namespace dp2SSL
 
         void OnEnter()
         {
+            // 2024/1/12
+            if (password.IsFocused  == false && listView.SelectedItem != null)
+            {
+                listView_MouseDoubleClick(this, null);
+                return;
+            }
+
             // LoginButton_Click(this.loginButton, new RoutedEventArgs());
             // 验证密码，然后报错，或者关闭对话框
             string text = this.password.Password;
             if (text.Length < 4)
             {
                 // MessageBox.Show(this, "输入的密码长度必须大于等于 4 字符");
-                App.CurrentApp.Speak($"密码筛选失败");
+                App.CurrentApp.Speak($"密码长度太短");
                 App.ErrorBox(
     "密码筛选",
     "输入的密码长度必须大于等于 4 字符",
     "red",
-    "auto_close:5");
+    "auto_close:5,size:middle");
                 return;
             }
             var result = SelectPatronByPassword(text);
@@ -93,7 +136,8 @@ namespace dp2SSL
 "密码筛选",
 result.ErrorInfo,
 "red",
-"auto_close:5");
+"auto_close:5,size:middle");
+            this.password.Clear();
             return;
         }
 
@@ -116,7 +160,7 @@ result.ErrorInfo,
             {
                 // 清理以前较旧的攻击条目
                 attackManager.Clean(attackManager.CleanLength);
-                
+
                 using (CancellationTokenSource cancel = CancellationTokenSource.CreateLinkedTokenSource(_cancel.Token, App.CancelToken))
                 {
                     var result = await FillPatronCollectionDetailAsync(
@@ -363,7 +407,7 @@ TaskScheduler.Default);
                 return new NormalResult
                 {
                     Value = -1,
-                    ErrorInfo = "因失败次数太多，相关人脸信息已经进入保护状态，请稍后再重试操作 ..."
+                    ErrorInfo = $"因失败次数太多，相关人脸信息已经进入保护状态，请{CleanLength.TotalMinutes}分钟后再重试操作 ..."
                 };
             try
             {
@@ -473,6 +517,8 @@ TaskScheduler.Default);
 
         private void password_KeyDown(object sender, KeyEventArgs e)
         {
+            WarningNumPad(e.Key);
+
             if (e.Key == Key.Enter)
             {
                 OnEnter();
@@ -516,6 +562,14 @@ TaskScheduler.Default);
                     selectButton_Click(this, new RoutedEventArgs());
                 else
                     OnEnter();
+                e.Handled = true;   //
+                return;
+            }
+
+            if (e.Key == Key.Escape)
+            {
+                cancelButton_Click(this, new RoutedEventArgs());
+                e.Handled = true;
                 return;
             }
 
@@ -530,6 +584,14 @@ TaskScheduler.Default);
             {
                 TogglePasswordVisiblity();
                 e.Handled = true;
+                return;
+            }
+
+            if (e.Key == Key.NumLock/*
+                || e.Key == Key.Up || e.Key == Key.PageUp
+                || e.Key == Key.Down || e.Key == Key.PageDown*/)
+            {
+                this.password.Focus();
                 return;
             }
 
@@ -578,7 +640,7 @@ TaskScheduler.Default);
 
             this.passwordArea.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
             (this.mainGrid.ColumnDefinitions[1] as ColumnDefinitionExtended).Visible = visible;
-            
+
             OnVisibleChanged();
 
             if (visible == false)
@@ -622,7 +684,15 @@ TaskScheduler.Default);
             }
         }
 
-        static AttackManager attackManager = new AttackManager();
+        static AttackManager attackManager = new AttackManager(10, TimeSpan.FromMinutes(5));
+
+        public static TimeSpan CleanLength
+        {
+            get
+            {
+                return attackManager.CleanLength;
+            }
+        }
 
         void MemoryAttack()
         {
@@ -648,7 +718,7 @@ TaskScheduler.Default);
         bool HasAttacked()
         {
             List<string> barcodes = new List<string>();
-            foreach(var patron in _patrons)
+            foreach (var patron in _patrons)
             {
                 barcodes.Add(patron.PII);
             }
@@ -660,6 +730,47 @@ TaskScheduler.Default);
         {
             // 清理以前较旧的攻击条目
             attackManager.Clean(attackManager.CleanLength);
+        }
+
+        void WarningNumPad(Key key)
+        {
+            if (isNumlockOffState(key))
+                this.Error = $"提醒: \r\n当前键盘 NUMLOCK 状态为 OFF。\r\n想要输入数字，请先按 NUMLOCK 键，把状态切换为 ON";
+            if (isNumlockOnState(key))
+                this.Error = null;
+        }
+
+        // 判断是否为 NUMLOCK 锁定状态下的小键盘 Key
+        static bool isNumlockOnState(Key key)
+        {
+            switch (key)
+            {
+                case Key.NumPad0:
+                case Key.NumPad1:
+                case Key.NumPad2:
+                case Key.NumPad3:
+                case Key.NumPad4:
+                case Key.NumPad5:
+                case Key.NumPad6:
+                case Key.NumPad7:
+                case Key.NumPad8:
+                case Key.NumPad9:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        // 判断是否为 NUMLOCK 释放状态下的小键盘 Key
+        static bool isNumlockOffState(Key key)
+        {
+            switch (key)
+            {
+                case Key.NumLock:
+                    return true;
+                default:
+                    return false;
+            }
         }
     }
 

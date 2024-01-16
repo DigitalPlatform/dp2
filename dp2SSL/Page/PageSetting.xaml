@@ -8,13 +8,13 @@
       xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
-      Title="PageSetting" Background="Black">
+      Title="PageSetting" Background="{StaticResource normalBackground}">
     <Page.Resources>
         <local:StringToVisibilityConverter x:Key="StringToVis" />
     </Page.Resources>
     <Grid Name="mainGrid">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="68" />
+            <ColumnDefinition Width="78" />
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="0" />
         </Grid.ColumnDefinitions>
@@ -27,7 +27,8 @@
         <Button Grid.Row="0" Grid.ColumnSpan="3">Top</Button>
         -->
         <!-- left bar -->
-        <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Vertical">
+        <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Vertical"
+                    Margin="10,10,0,0">
             <Grid Height="20" />
             <Button Name="goHome" ToolTip="返回主菜单"
                     Style="{DynamicResource RoundedButtonLightStyle}"
@@ -36,7 +37,7 @@
                 <fa:ImageAwesome Icon="Home"
                              Height="40" Foreground="{StaticResource buttonForeground}" Margin="6"/>
                 -->
-                <iconPacks:PackIconJamIcons Kind="Menu" 
+                <iconPacks:PackIconBootstrapIcons Kind="House" 
                                             Width="36" Height="36" Foreground="{StaticResource buttonForeground}" Margin="6"/>
             </Button>
             <Grid Height="20" />
@@ -67,6 +68,7 @@
                     <MenuItem x:Name="backupRequests" Header="备份本地动作库" HorizontalAlignment="Left" Width="Auto" Click="backupRequests_Click"/>
                     <MenuItem x:Name="restoreRequests" Header="恢复本地动作库" HorizontalAlignment="Left" Width="Auto" Click="restoreRequests_Click"/>
                     <MenuItem x:Name="importRequests" Header="导入本地动作库" HorizontalAlignment="Left" Width="Auto" Click="importRequests_Click"/>
+                    <MenuItem x:Name="activatePatronReplication" Header="激活同步读者记录一次" HorizontalAlignment="Left" Width="Auto" Click="activatePatronReplication_Click"/>
                 </MenuItem>
                 <MenuItem Header="_小票打印">
                     <MenuItem x:Name="posPrint_clearMemory" Header="清空缓冲区" HorizontalAlignment="Left" Width="Auto" Click="posPrint_clearMemory_Click"/>
@@ -129,7 +131,7 @@
                 <Button Name="config"
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="260" Height="60" 
-                    FontSize="30" FontWeight="ExtraBold" 
+                    FontSize="30" 
                     Foreground="White" 
                     Click="Config_Click">
                     <Button.Content>
@@ -139,7 +141,7 @@
                 <Button Name="exitButton"
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="260" Height="60" 
-                    FontSize="30" FontWeight="ExtraBold" 
+                    FontSize="30"  
                     Foreground="White" 
                      Click="ExitButton_Click">
                     <Button.Content>
@@ -149,7 +151,7 @@
                 <Button Name="shutdownButton"
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="260" Height="60" 
-                    FontSize="30" FontWeight="ExtraBold" 
+                    FontSize="30" 
                     Foreground="White" 
                      Click="shutdownButton_Click">
                     <Button.Content>
@@ -159,7 +161,7 @@
                 <Button Name="openUserFolderButton"
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="260" Height="60" 
-                    FontSize="20" FontWeight="ExtraBold" 
+                    FontSize="20" 
                     Foreground="White" 
                      Click="OpenUserFolderButton_Click">
                     <Button.Content>
@@ -169,7 +171,7 @@
                 <Button Name="openProgramFolderButton"
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="260" Height="60" 
-                    FontSize="20" FontWeight="ExtraBold" 
+                    FontSize="20"  
                     Foreground="White" 
                      Click="OpenProgramFolderButton_Click">
                     <Button.Content>
@@ -179,7 +181,7 @@
                 <Button Name="openDataFolderButton"
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="260" Height="60" 
-                    FontSize="20" FontWeight="ExtraBold" 
+                    FontSize="20" 
                     Foreground="White" 
                      Click="OpenDataFolderButton_Click">
                     <Button.Content>
@@ -189,7 +191,7 @@
                 <Button Name="downloadDailyWallpaper"
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="260" Height="60" 
-                    FontSize="20" FontWeight="ExtraBold" 
+                    FontSize="20"  
                     Foreground="White" 
                      Click="DownloadDailyWallpaper_Click">
                     <Button.Content>
@@ -201,7 +203,7 @@
                 <Button Name="AddShortcut"
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="260" Height="60" 
-                    FontSize="20" FontWeight="ExtraBold" 
+                    FontSize="20" 
                     Foreground="White" 
                      Click="AddShortcut_Click">
                     <Button.Content>
@@ -211,7 +213,7 @@
                 <Button Name="RemoveShortcut"
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="260" Height="60" 
-                    FontSize="20" FontWeight="ExtraBold" 
+                    FontSize="20"  
                     Foreground="White" 
                      Click="RemoveShortcut_Click">
                     <Button.Content>
@@ -222,7 +224,7 @@
                 <Button Name="restartRfidCenter"
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="260" Height="60" 
-                    FontSize="20" FontWeight="ExtraBold" 
+                    FontSize="20" 
                     Foreground="White" 
                      Click="RestartRfidCenter_Click">
                     <Button.Content>
@@ -232,7 +234,7 @@
                 <Button Name="restartFingerprintCenter"
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="260" Height="60" 
-                    FontSize="20" FontWeight="ExtraBold" 
+                    FontSize="20"  
                     Foreground="White" 
                      Click="RestartFingerprintCenter_Click">
                     <Button.Content>
@@ -242,7 +244,7 @@
                 <Button Name="restartFaceCenter"
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="260" Height="60" 
-                    FontSize="20" FontWeight="ExtraBold" 
+                    FontSize="20" 
                     Foreground="White" 
                      Click="RestartFaceCenter_Click">
                     <Button.Content>
@@ -252,7 +254,7 @@
                 <Button Name="sterilamp"
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="260" Height="60" 
-                    FontSize="20" FontWeight="ExtraBold" 
+                    FontSize="20"  
                     Foreground="White" 
                      Click="sterilamp_Click">
                     <Button.Content>
@@ -262,7 +264,7 @@
                 <Button Name="detectNetwork"
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="260" Height="60" 
-                    FontSize="20" FontWeight="Normal" 
+                    FontSize="20" 
                     Foreground="White" 
                      Click="detectNetwork_Click">
                     <Button.Content>

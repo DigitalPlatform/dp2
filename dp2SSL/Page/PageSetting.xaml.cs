@@ -166,6 +166,7 @@ namespace dp2SSL
             {
                 InputPasswordWindows dialog = null;
                 App.PauseBarcodeScan();
+                AddLayer();
                 try
                 {
                     dialog = new InputPasswordWindows();
@@ -185,6 +186,7 @@ namespace dp2SSL
                 }
                 finally
                 {
+                    RemoveLayer();
                     App.ContinueBarcodeScan();
                 }
 
@@ -1512,6 +1514,11 @@ MessageBoxOptions.DefaultDesktopOnly);
 #endif
 
             _ = TinyServer.WriteTagAsync("write tag -loop", null);
+        }
+
+        private void activatePatronReplication_Click(object sender, RoutedEventArgs e)
+        {
+            ShelfData.ActivateReplication();
         }
     }
 }

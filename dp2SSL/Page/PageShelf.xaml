@@ -15,7 +15,7 @@
     </Page.Resources>
     <Grid Name="mainGrid" Background="Black" >
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="68" />
+            <ColumnDefinition Width="78" />
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="0" />
         </Grid.ColumnDefinitions>
@@ -31,7 +31,8 @@
         <Button Grid.Row="0" Grid.ColumnSpan="3">Top</Button>
         -->
         <!-- left bar -->
-        <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Vertical">
+        <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Vertical"
+                    Margin="10,10,0,0">
             <Grid Height="20" />
             <Button Name="goHome" ToolTip="返回主菜单"
                     Style="{DynamicResource RoundedButtonLightStyle}"
@@ -40,7 +41,7 @@
                 <fa:ImageAwesome Icon="Home"
                              Height="40" Foreground="{StaticResource buttonForeground}" Margin="6"/>
                 -->
-                <iconPacks:PackIconJamIcons Kind="Menu" 
+                <iconPacks:PackIconBootstrapIcons Kind="House" 
                                             Width="36" Height="36" Foreground="{StaticResource buttonForeground}" Margin="6"/>
             </Button>
             <Grid Height="20" />
@@ -224,7 +225,7 @@
                 <Button Name="openButton" 
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="160" Height="60" 
-                    FontSize="30" FontWeight="ExtraBold" 
+                    FontSize="30" 
                     Foreground="White" 
                      Click="OpenButton_Click">
                     <Button.Content>

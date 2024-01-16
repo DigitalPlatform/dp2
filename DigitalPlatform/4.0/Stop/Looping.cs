@@ -69,6 +69,7 @@ namespace DigitalPlatform
 
             Progress = new Stop();
             // Progress.Register(this.Host.StopManager/*_stopManager*/, activate); // 和容器关联
+            // TODO: 注意此处尚未 .Activate()
             Progress.Register(this.Host.StopManager, groupName);
 
             _handler = handler;

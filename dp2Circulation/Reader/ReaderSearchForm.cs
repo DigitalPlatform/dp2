@@ -2182,24 +2182,30 @@ MessageBoxDefaultButton.Button2);
         // 借阅历史 --> 实体查询窗
         void menu_exportChargingHistoryToItemSearchForm_Click(object sender, EventArgs e)
         {
-            string strError = "";
+            // string strError = "";
             List<string> barcodes = new List<string>();
             foreach (ListViewItem item in this.listView_records.SelectedItems)
             {
+                // 用记录路径的好处是，遇到有的读者记录缺乏证条码号，依然可以适应
+                var barcode = $"@path:{ListViewUtil.GetItemText(item, 0)}";
+                barcodes.Add(barcode);
                 // TODO: 用 style 来识别列
-                barcodes.Add(item.SubItems[1].Text);
+                // barcodes.Add(item.SubItems[1].Text);
             }
 
-            _ = Task.Factory.StartNew(() =>
+            _ = Task.Factory.StartNew(async () =>
             {
-                // return:
+                // parameters:
+                //      reader_barcodes 读者证条码号集合。除了是证条码号, 元素也可以为 "@path:xxx" 形态
+                // return.Value:
                 //      -1  出错
                 //      0   用户中断
                 //      1   成功
-                int nRet = this.ExportChargingHistoryToItemSearchForm(barcodes,
-                    out strError);
-                if (nRet != 1)
-                    this.MessageBoxShow(strError);
+                var result = await this.ExportChargingHistoryToItemSearchForm(barcodes);
+                if (result.Value == 0)
+                    return;
+                if (result.Value != 1)
+                    this.MessageBoxShow(result.ErrorInfo);
             },
 this.CancelToken,
 TaskCreationOptions.LongRunning,
@@ -7447,16 +7453,41 @@ dlg.UiState);
             return 1;
         }
 
-        // return:
+        // parameters:
+        //      reader_barcodes 读者证条码号集合。除了是证条码号, 元素也可以为 "@path:xxx" 形态
+        // return.Value:
         //      -1  出错
         //      0   用户中断
         //      1   成功
-        public int ExportChargingHistoryToItemSearchForm(List<string> reader_barcodes,
-            out string strError)
+        public async Task<NormalResult> ExportChargingHistoryToItemSearchForm(List<string> reader_barcodes)
         {
-            strError = "";
+            string strError = "";
             //int nRet = 0;
 
+            ItemSearchForm form = null;
+            if (reader_barcodes.Count > 1)
+            {
+                DialogResult result = this.TryGet(() =>
+                {
+                    return MessageBox.Show(this,
+    $"是否要针对每个读者记录打开一个单独的实体查询窗?\r\n\r\nYes 打开单独的窗口(这意味着一共会新开 {reader_barcodes.Count} 个实体查询窗);\r\nNo 全部装入一个窗口;\r\nCancel 放弃操作",
+    "ReaderSearchForm",
+    MessageBoxButtons.YesNoCancel,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+                });
+                if (result == DialogResult.Cancel)
+                    return new NormalResult();
+                if (result == DialogResult.No)
+                    this.TryInvoke(() =>
+                    {
+                        form = Program.MainForm.OpenItemSearchForm("item");
+                        if (reader_barcodes.Count > 1)
+                            form.Text = $"实体查询 读者 {reader_barcodes[0]} 等(一共{reader_barcodes.Count}个读者)的借阅历史";
+                        else
+                            form.Text = $"实体查询 读者 {reader_barcodes[0]} 的借阅历史";
+                    });
+            }
 
             var new_timeout = TimeSpan.FromSeconds(30);
 
@@ -7493,7 +7524,11 @@ dlg.UiState);
                     if (looping.Stopped)
                     {
                         strError = "用户中断";
-                        return 0;
+                        return new NormalResult
+                        {
+                            Value = 0,
+                            ErrorInfo = strError
+                        };
                     }
 
                     if (string.IsNullOrEmpty(strBarcode) == true)
@@ -7505,30 +7540,45 @@ dlg.UiState);
 
                     looping.Progress.SetMessage("正在处理读者记录 " + strBarcode + " ...");
 
-                    string[] results = null;
+                    // parameters:
+                    //      strBarcode  读者证条码号。如果前方引导以"@path:"，则表示读者记录路径。在@path引导下，路径后面还可以跟随 "$prev"或"$next"表示方向。实际上 $ 后面可以是多个 style 值，它们之间用 '|' 分隔。可用的 style 值一般有 prev next withresmetadata outputpath(多余)
                     long lRet = channel.GetReaderInfo(
                         looping.Progress,
                         strBarcode,
                         "advancexml",
-                        out results,
+                        out string[] results,
                         out strOutputRecPath,
                         out baTimestamp,
                         out strError);
                     if (lRet == -1)
-                        return -1;
-
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError
+                        };
                     if (lRet == 0)
-                        return -1;
-
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError
+                        };
                     if (lRet > 1)   // 不可能发生吧?
                     {
                         strError = "读者证条码号 " + strBarcode + " 命中记录 " + lRet.ToString() + " 条，放弃装入读者记录。\r\n\r\n注意这是一个严重错误，请系统管理员尽快排除。";
-                        return -1;
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError
+                        };
                     }
                     if (results == null || results.Length < 1)
                     {
                         strError = "返回的results不正常。";
-                        return -1;
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError
+                        };
                     }
                     string strXml = results[0];
 
@@ -7540,15 +7590,25 @@ dlg.UiState);
                     catch (Exception ex)
                     {
                         strError = "装载读者记录 XML 到 DOM 时发生错误: " + ex.Message;
-                        return -1;
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError
+                        };
                     }
 
                     try
                     {
+                        string readerBarcode = DomUtil.GetElementText(dom.DocumentElement,
+    "barcode");
+                        if (string.IsNullOrEmpty(readerBarcode))
+                            readerBarcode = "@refID:" + DomUtil.GetElementText(dom.DocumentElement,
+    "refID");
+
                         ChargingHistoryLoader history_loader = new ChargingHistoryLoader();
                         history_loader.Channel = channel;
                         history_loader.Stop = looping.Progress;
-                        history_loader.PatronBarcode = strBarcode;
+                        history_loader.PatronBarcode = readerBarcode;
                         history_loader.TimeRange = "~"; // strTimeRange;
                         history_loader.Actions = "return,lost";
                         history_loader.Order = "descending";
@@ -7560,30 +7620,39 @@ dlg.UiState);
                         if (looping.Stopped)
                         {
                             strError = "用户中断";
-                            return 0;
+                            return new NormalResult
+                            {
+                                Value = 0,
+                                ErrorInfo = strError
+                            };
                         }
 
                         // 输出借阅历史表格
-                        int nRet = OutputBorrowHistory(
+                        var result = await OutputBorrowHistoryAsync(
                             looping,
-                            // form,
+                            form,
                             dom,
-                history_loader,
-                barcode_loader,
-                out strError);
-                        if (nRet == -1)
-                            return -1;
+                            history_loader,
+                            barcode_loader);
+                        if (result.Value == -1)
+                            return result;
                     }
                     catch (Exception ex)
                     {
                         strError = "输出借阅历史时出现异常: " + ex.Message;
-                        return -1;
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError
+                        };
                     }
 
                     nReaderIndex++;
                     if (looping.Progress != null)
                         looping.Progress.SetProgressValue(nReaderIndex);
                 }
+
+                return new NormalResult { Value = 1 };
             }
             finally
             {
@@ -7606,27 +7675,29 @@ dlg.UiState);
 
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
-
             }
-            return 1;
         }
 
         // 将一个读者的操作历史输出到实体查询窗
         // parameters:
-        int OutputBorrowHistory(
+        //      form_param  如果为 null，本函数会自动创建一个新的实体查询窗；如果不为 null，本函数会直接在这个 form_param 中追加列表项
+        async Task<NormalResult> OutputBorrowHistoryAsync(
             Looping looping,
-            // ItemSearchForm form,
+            ItemSearchForm form_param,
             XmlDocument reader_dom,
             ChargingHistoryLoader history_loader,
-            ItemBarcodeLoader barcode_loader,
-            out string strError)
+            ItemBarcodeLoader barcode_loader)
         {
-            strError = "";
+            string strError = "";
 
             if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.67") < 0)
             {
                 strError = "输出操作历史到实体查询窗要求 dp2library 为 2.67 或以上版本";
-                return -1;
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError
+                };
             }
 
             string readerBarcode = DomUtil.GetElementText(reader_dom.DocumentElement,
@@ -7641,7 +7712,11 @@ dlg.UiState);
                 if (looping.Stopped)
                 {
                     strError = "用户中断";
-                    return -1;
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError
+                    };
                 }
 
                 ChargingItem item = wrapper.Item;
@@ -7674,7 +7749,7 @@ dlg.UiState);
                         string strRecPath = info.RecPath;
                         if (string.IsNullOrEmpty(strRecPath) == true)
                             continue;   // TODO: 是否要警告?
-                        sw.WriteLine(strRecPath);
+                        await sw.WriteLineAsync(strRecPath);
                         nCount++;
                     }
                 }
@@ -7682,20 +7757,47 @@ dlg.UiState);
                 if (looping.Stopped)
                 {
                     strError = "用户中断";
-                    return -1;
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError
+                    };
                 }
 
                 if (nCount > 0)
                 {
-                    ItemSearchForm form = null;
-                    this.Invoke((Action)(() =>
+                    ItemSearchForm form = form_param;
+                    if (form == null)
                     {
-                        form = Program.MainForm.OpenItemSearchForm("item");
-                    }));
+                        this.TryInvoke(() =>
+                        {
+                            form = Program.MainForm.OpenItemSearchForm("item");
+                            form.Text = $"实体查询 读者 {readerBarcode} 的借阅历史"; ;
+                        });
+                    }
                     // 临时文件划归实体查询窗管理
                     string fileName = form.MemoryTempFileName(strTempFileName);
                     strTempFileName = null;
 
+                    {
+                        form?.ShowMessage("等待装载读者借阅历史册 ...");
+                        form?.EnableControls(false);
+
+                        form?.ShowMessage("正在装载读者借阅历史册 ...");
+                        try
+                        {
+                            var result = await form.ImportFromRecPathFileAsync(fileName,
+                                "");
+                            if (result.Value == -1)
+                                form?.MessageBoxShow(result.ErrorInfo);
+                        }
+                        finally
+                        {
+                            form?.EnableControls(true);
+                            form?.ClearMessage();
+                        }
+                    }
+#if REMOVED
                     // 启动一个新的线程
                     _ = Task.Factory.StartNew(() =>
                     {
@@ -7729,8 +7831,9 @@ dlg.UiState);
                     default,
                     TaskCreationOptions.LongRunning,
                     TaskScheduler.Default);
+#endif
                 }
-                return 0;
+                return new NormalResult();
             }
             finally
             {
@@ -7811,7 +7914,7 @@ dlg.UiState);
                 int i = 0;
                 foreach (LoaderItem item in loader)
                 {
-                    Application.DoEvents();	// 出让界面控制权
+                    Application.DoEvents(); // 出让界面控制权
 
                     if (looping.Stopped)
                     {
@@ -7915,7 +8018,7 @@ dlg.UiState);
                 int nReaderIndex = 0;
                 foreach (string strBarcode in reader_barcodes)
                 {
-                    Application.DoEvents();	// 出让界面控制权
+                    Application.DoEvents(); // 出让界面控制权
 
                     if (looping.Stopped)
                     {
@@ -8106,10 +8209,10 @@ dlg.UiState);
             try
             {
                 int nRet = GetCardPhotoFile(channel,
-looping.Progress,
-strObjectPath,
-strLocalFilePath,
-out strError);
+    looping.Progress,
+    strObjectPath,
+    strLocalFilePath,
+    out strError);
                 if (nRet == -1)
                 {
                     return -1;
@@ -8155,9 +8258,9 @@ out strError);
             dlg.ShowDialog(this);
 
             Program.MainForm.AppInfo.SetString(
-"ReaderSearchForm",
-"PrintReaderSheetDialog_uiState",
-dlg.UiState);
+    "ReaderSearchForm",
+    "PrintReaderSheetDialog_uiState",
+    dlg.UiState);
 
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
             {
@@ -8406,9 +8509,9 @@ dlg.UiState);
             dlg.ShowDialog(this);
 
             Program.MainForm.AppInfo.SetString(
-"ReaderSearchForm",
-"ExportPatronExcelDialog_uiState",
-dlg.UiState);
+    "ReaderSearchForm",
+    "ExportPatronExcelDialog_uiState",
+    dlg.UiState);
 
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
             {
@@ -8461,7 +8564,7 @@ dlg.UiState);
             // TODO: 表的标题，创建时间
 
             int nRowIndex = 3;  // 空出前两行
-            //int nColIndex = 1;
+                                //int nColIndex = 1;
 
             int nReaderIndex = 0;
 
@@ -8690,14 +8793,14 @@ dlg.UiState);
         static string GetContactString(XmlDocument dom)
         {
             string strTel = DomUtil.GetElementText(dom.DocumentElement,
-"tel");
+    "tel");
             string strEmail = DomUtil.GetElementText(dom.DocumentElement,
-"email");
+    "email");
             // 2017/2/25
             strEmail = LibraryServerUtil.GetEmailAddress(strEmail);
 
             string strAddress = DomUtil.GetElementText(dom.DocumentElement,
-"address");
+    "address");
             List<string> list = new List<string>();
             if (string.IsNullOrEmpty(strTel) == false)
                 list.Add(strTel);
@@ -9148,11 +9251,11 @@ ref List<int> column_max_chars)
             int nStartRow = nRowIndex;
 
             OutputTitleLine(sheet,
-ref nRowIndex,
-"--- 借阅历史 --- " + history_loader.GetCount(),
-XLColor.DarkGreen,
-2,
-7);
+    ref nRowIndex,
+    "--- 借阅历史 --- " + history_loader.GetCount(),
+    XLColor.DarkGreen,
+    2,
+    7);
             string readerBarcode = DomUtil.GetElementText(reader_dom.DocumentElement,
                 "barcode");
 
@@ -9315,11 +9418,11 @@ XLColor.DarkGreen,
             int nStartRow = nRowIndex;
 
             OutputTitleLine(sheet,
-ref nRowIndex,
-"--- 在借 --- " + nodes.Count,
-XLColor.DarkGreen,
-2,
-7);
+    ref nRowIndex,
+    "--- 在借 --- " + nodes.Count,
+    XLColor.DarkGreen,
+    2,
+    7);
 
             List<IXLCell> cells = new List<IXLCell>();
 

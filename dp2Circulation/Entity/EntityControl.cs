@@ -147,7 +147,6 @@ namespace dp2Circulation
                     strError = "用户中断";
                     return -1;
                 }
-                EntityInfo[] entities = null;
 
                 /*
                 if (lCount > 0)
@@ -161,7 +160,7 @@ namespace dp2Circulation
                     lCount,
                     "onlygetpath",
                     "zh",
-                    out entities,
+                    out EntityInfo[] entities,
                     out strError);
                 if (lRet == -1)
                     goto ERROR1;

@@ -31,8 +31,6 @@ using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.Z3950.UI;
 using DigitalPlatform.Z3950;
 using static dp2Circulation.Order.ExportExcelFile;
-using DocumentFormat.OpenXml.EMMA;
-using DocumentFormat.OpenXml.Vml.Office;
 
 namespace dp2Circulation
 {
@@ -1578,6 +1576,7 @@ out strError);
                         //      0   没有检索目标
                         //      1   成功启动检索
                         nRet = BeginSearchShareBiblio(
+                            looping,
                             query_word, // this.textBox_queryWord.Text,
                             strFromStyle,
                             strMatchStyle,
@@ -1585,7 +1584,7 @@ out strError);
                         if (nRet == -1)
                         {
                             // 显示错误信息
-                            this.ShowMessage(strError, "red", true);
+                            this.ShowMessage("共享检索: " + strError, "red", true);
                             bDisplayClickableError = true;
                         }
                     }
@@ -1871,6 +1870,7 @@ out strError);
                                     UpdateCommandLine(item, c, r);
                                 }));
 
+                                this.ClearMessage();    // 2024/1/16
                                 Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode($"'{query_word}' 命中 {r.ResultCount} 条 (Z39.50 : {c.ServerName})") + "</div>");
                             },
                             (c, r) =>
@@ -1908,7 +1908,7 @@ out strError);
                         if (nRet == -1)
                         {
                             // 显示错误信息
-                            this.ShowMessage(strError, "red", true);
+                            this.ShowMessage("共享检索: " + strError, "red", true);
                             bDisplayClickableError = true;
                         }
                         else
@@ -2481,6 +2481,7 @@ bQuickLoad);
         //      0   没有检索目标
         //      1   成功启动检索
         int BeginSearchShareBiblio(
+            Looping looping,
             string strQueryWord,
             string strFromStyle,
             string strMatchStyle,
@@ -2496,7 +2497,8 @@ bQuickLoad);
 
             string strSearchID = Guid.NewGuid().ToString();
             _searchParam = new SearchParam();
-            _searchParam._looping = BeginLoop(this.DoStop, null);
+            // 引用外面给的 Looping 对象。不是占有
+            _searchParam._looping = looping;    // BeginLoop(this.DoStop, null);
             _searchParam._searchID = strSearchID;
             _searchParam._searchComplete = false;
             _searchParam._searchCount = 0;
@@ -2557,12 +2559,14 @@ bQuickLoad);
                 {
                     var length = timeout - (DateTime.Now - start_time);
                     this.ShowMessage($"正在共享检索...\r\n已命中:{_searchParam._searchCount}  剩余秒数:{((int)length.TotalSeconds).ToString()}");
+                    _searchParam._looping?.Progress?.SetMessage($"正在共享检索... 已命中:{_searchParam._searchCount}  剩余秒数:{((int)length.TotalSeconds).ToString()}");
 
                     // Application.DoEvents();
                     Thread.Sleep(200);
                     if (DateTime.Now - start_time > timeout)    // 超时
                         break;
-                    if (_searchParam._looping.Stopped)
+                    if (_searchParam._looping != null
+                        && _searchParam._looping.Stopped)
                     {
                         strError = "用户中断";
                         return -1;
@@ -2574,7 +2578,7 @@ bQuickLoad);
             finally
             {
                 _searchParam._searchID = "";
-                _searchParam._looping?.Dispose();
+                // _searchParam._looping?.Dispose();
             }
         }
 
@@ -5627,7 +5631,7 @@ MessageBoxDefaultButton.Button2);
                         };
                     }
                 },
-    default,
+    this.CancelToken,
     TaskCreationOptions.LongRunning,
     TaskScheduler.Default);
         }
@@ -8008,15 +8012,16 @@ out string strError)
             MessageBox.Show(this, strError);
         }
 
-        void menu_exportToItemSearchForm_Click(object sender, EventArgs e)
+        async void menu_exportToItemSearchForm_Click(object sender, EventArgs e)
         {
             string strError = "";
 
-            int nRet = ExportToItemSearchForm("item",
-                out strError);
-            if (nRet == -1)
+            var result = await ExportToItemSearchFormAsync("item");
+            if (result.Value == -1)
+            {
+                strError = result.ErrorInfo;
                 goto ERROR1;
-
+            }
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -8024,43 +8029,46 @@ out string strError)
 
 
 
-        void menu_exportToOrderSearchForm_Click(object sender, EventArgs e)
+        async void menu_exportToOrderSearchForm_Click(object sender, EventArgs e)
         {
             string strError = "";
 
-            int nRet = ExportToItemSearchForm("order",
-                out strError);
-            if (nRet == -1)
+            var result = await ExportToItemSearchFormAsync("order");
+            if (result.Value == -1)
+            {
+                strError = result.ErrorInfo;
                 goto ERROR1;
-
+            }
             return;
         ERROR1:
             MessageBox.Show(this, strError);
         }
 
-        void menu_exportToIssueSearchForm_Click(object sender, EventArgs e)
+        async void menu_exportToIssueSearchForm_Click(object sender, EventArgs e)
         {
             string strError = "";
 
-            int nRet = ExportToItemSearchForm("issue",
-                out strError);
-            if (nRet == -1)
+            var result = await ExportToItemSearchFormAsync("issue");
+            if (result.Value == -1)
+            {
+                strError = result.ErrorInfo;
                 goto ERROR1;
-
+            }
             return;
         ERROR1:
             MessageBox.Show(this, strError);
         }
 
-        void menu_exportToCommentSearchForm_Click(object sender, EventArgs e)
+        async void menu_exportToCommentSearchForm_Click(object sender, EventArgs e)
         {
             string strError = "";
 
-            int nRet = ExportToItemSearchForm("comment",
-                out strError);
-            if (nRet == -1)
+            var result = await ExportToItemSearchFormAsync("comment");
+            if (result.Value == -1)
+            {
+                strError = result.ErrorInfo;
                 goto ERROR1;
-
+            }
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -8080,78 +8088,92 @@ out string strError)
         }
 
         // 将所选择的 ? 个书目记录下属的册记录路径导出到(实体库)记录路径文件
-        void menu_saveToEntityRecordPathFile_Click(object sender, EventArgs e)
+        async void menu_saveToEntityRecordPathFile_Click(object sender, EventArgs e)
         {
             string strError = "";
 
-            int nRet = SaveToEntityRecordPathFile("item",
-                null,
-                out strError);
-            if (nRet == -1)
+            var result = await SaveToEntityRecordPathFileAsync(
+                "item",
+                null);
+            if (result.Value == -1)
+            {
+                strError = result.ErrorInfo;
                 goto ERROR1;
-
+            }
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
-        void menu_saveToOrderRecordPathFile_Click(object sender, EventArgs e)
+        async void menu_saveToOrderRecordPathFile_Click(object sender, EventArgs e)
         {
             string strError = "";
 
-            int nRet = SaveToEntityRecordPathFile("order",
-                null,
-                out strError);
-            if (nRet == -1)
+            var result = await SaveToEntityRecordPathFileAsync(
+                "order",
+                null);
+            if (result.Value == -1)
+            {
+                strError = result.ErrorInfo;
                 goto ERROR1;
+            }
 
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
-        void menu_saveToIssueRecordPathFile_Click(object sender, EventArgs e)
+        async void menu_saveToIssueRecordPathFile_Click(object sender, EventArgs e)
         {
             string strError = "";
 
-            int nRet = SaveToEntityRecordPathFile("issue",
-                null,
-                out strError);
-            if (nRet == -1)
+            var result = await SaveToEntityRecordPathFileAsync(
+                "issue",
+                null);
+            if (result.Value == -1)
+            {
+                strError = result.ErrorInfo;
                 goto ERROR1;
+            }
 
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
-        void menu_saveToCommentRecordPathFile_Click(object sender, EventArgs e)
+        async void menu_saveToCommentRecordPathFile_Click(object sender, EventArgs e)
         {
             string strError = "";
 
-            int nRet = SaveToEntityRecordPathFile("comment",
-                null,
-                out strError);
-            if (nRet == -1)
+            var result = await SaveToEntityRecordPathFileAsync(
+                "comment",
+                null);
+            if (result.Value == -1)
+            {
+                strError = result.ErrorInfo;
                 goto ERROR1;
+            }
 
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
-        int ExportToItemSearchForm(
-        string strDbType,
-        out string strError)
+        async Task<NormalResult> ExportToItemSearchFormAsync(
+        string strDbType)
         {
-            strError = "";
+            string strTempFileName = Program.MainForm.GetTempFileName("exp_search");
+            /*
             string strTempFileName = Path.Combine(Program.MainForm.UserTempDir, // Program.MainForm.DataDir, 
                 "~export_to_searchform.txt");
-            int nRet = SaveToEntityRecordPathFile(strDbType,
-                strTempFileName,
-                out strError);
-            if (nRet == -1)
-                return -1;
+            */
+            try
+            {
+                var result = await SaveToEntityRecordPathFileAsync(
+                    strDbType,
+                    strTempFileName);
+                if (result.Value == -1)
+                    return result;
 
 #if NO
             // TODO: 最好为具体类型的 SearchForm 类。否则推出时保留的遗留出鞥口类型不对
@@ -8160,14 +8182,15 @@ out string strError)
             form.MdiParent = Program.MainForm;
             form.Show();
 #endif
-            ItemSearchForm form = Program.MainForm.OpenItemSearchForm(strDbType);
+                ItemSearchForm form = Program.MainForm.OpenItemSearchForm(strDbType);
 
-            nRet = form.ImportFromRecPathFile(strTempFileName,
-                "clear",
-                out strError);
-            if (nRet == -1)
-                return -1;
-            return 0;
+                return await form.ImportFromRecPathFileAsync(strTempFileName,
+                    "clear");
+            }
+            finally
+            {
+                File.Delete(strTempFileName);
+            }
         }
 
         int ExportTo856SearchForm(out string strError)
@@ -8310,7 +8333,52 @@ out string strError)
             }
         }
 
+        // 界面线程版本。即将弃用
         int SaveToEntityRecordPathFile(
+    string strDbType,
+    string strFileName,
+    out string strError)
+        {
+            return _saveToEntityRecordPathFile(strDbType,
+                strFileName,
+                out strError);
+        }
+
+        // 多线程版本
+        public Task<NormalResult> SaveToEntityRecordPathFileAsync(
+string strDbType,
+string strFileName)
+        {
+            return Task.Factory.StartNew<NormalResult>(
+            () =>
+            {
+                try
+                {
+                    int nRet = _saveToEntityRecordPathFile(
+    strDbType,
+    strFileName,
+    out string strError);
+                    return new NormalResult
+                    {
+                        Value = nRet,
+                        ErrorInfo = strError
+                    };
+                }
+                catch (Exception ex)
+                {
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"_saveToEntityRecordPathFile() 异常: {ExceptionUtil.GetDebugText(ex)}"
+                    };
+                }
+            },
+this.CancelToken,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
+
+        int _saveToEntityRecordPathFile(
             string strDbType,
             string strFileName,
             out string strError)
@@ -8333,22 +8401,28 @@ out string strError)
 
             if (string.IsNullOrEmpty(strFileName) == true)
             {
-                // 询问文件名
-                SaveFileDialog dlg = new SaveFileDialog();
+                nRet = this.TryGet(() =>
+                {
+                    // 询问文件名
+                    SaveFileDialog dlg = new SaveFileDialog();
 
-                dlg.Title = "请指定要保存的(" + strDbTypeName + "库)记录路径文件名";
-                dlg.CreatePrompt = false;
-                dlg.OverwritePrompt = false;
-                dlg.FileName = this.ExportEntityRecPathFilename;
-                // dlg.InitialDirectory = Environment.CurrentDirectory;
-                dlg.Filter = "记录路径文件 (*.txt)|*.txt|All files (*.*)|*.*";
+                    dlg.Title = "请指定要保存的(" + strDbTypeName + "库)记录路径文件名";
+                    dlg.CreatePrompt = false;
+                    dlg.OverwritePrompt = false;
+                    dlg.FileName = this.ExportEntityRecPathFilename;
+                    // dlg.InitialDirectory = Environment.CurrentDirectory;
+                    dlg.Filter = "记录路径文件 (*.txt)|*.txt|All files (*.*)|*.*";
 
-                dlg.RestoreDirectory = true;
+                    dlg.RestoreDirectory = true;
 
-                if (dlg.ShowDialog() != DialogResult.OK)
+                    if (dlg.ShowDialog() != DialogResult.OK)
+                        return 0;
+
+                    this.ExportEntityRecPathFilename = dlg.FileName;
+                    return 1;
+                });
+                if (nRet == 0)
                     return 0;
-
-                this.ExportEntityRecPathFilename = dlg.FileName;
 
                 if (File.Exists(this.ExportEntityRecPathFilename) == true)
                 {
@@ -8382,7 +8456,7 @@ out string strError)
                 bAppend = false;
             }
 
-            LibraryChannel channel = this.GetChannel();
+            // LibraryChannel channel = this.GetChannel();
 
             /*
             _stop.Style = StopStyle.EnableHalfStop;
@@ -8390,10 +8464,18 @@ out string strError)
             _stop.Initial("正在获得记录路径 ...");
             _stop.BeginLoop();
             */
-            var looping = BeginLoop(this.DoStop, "正在获得记录路径 ...", "halfstop");
+            var looping = Looping(out LibraryChannel channel,
+                $"正在获得{strDbTypeName}记录路径 ...",
+                "timeout:0:0:30,halfstop");
 
             this.EnableControlsInSearching(false);
-            this.listView_records.Enabled = false;
+
+            /*
+            this.TryInvoke(() =>
+            {
+                this.listView_records.Enabled = false;
+            });
+            */
 
             // 创建文件
             StreamWriter sw = new StreamWriter(this.ExportEntityRecPathFilename,
@@ -8401,12 +8483,14 @@ out string strError)
                 System.Text.Encoding.UTF8);
             try
             {
-                looping.Progress.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                var items = ListViewUtil.GetSelectedItems(this.listView_records);
+                looping.Progress.SetProgressRange(0, items.Count);
 
                 int i = 0;
-                foreach (ListViewItem item in this.listView_records.SelectedItems)
+                // foreach (ListViewItem item in this.listView_records.SelectedItems)
+                foreach (var item in items)
                 {
-                    Application.DoEvents(); // 出让界面控制权
+                    // Application.DoEvents(); // 出让界面控制权
 
                     if (looping.Stopped)
                     {
@@ -8454,6 +8538,8 @@ out string strError)
                     }
                     else if (strDbType == "issue")
                     {
+                        // TODO: 针对“中文图书”库里面的记录导出下属的期记录路径，会报错。似应跳过这种报错的记录，继续处理后面的书目记录。因为书目查询窗里面可能是多个书目库的记录混合的状态，有些就是有下属期记录的
+
                         // return:
                         //      -1  出错
                         //      0   没有装载
@@ -8501,12 +8587,18 @@ out string strError)
                 _stop.HideProgress();
                 _stop.Style = StopStyle.None;
                 */
-                EndLoop(looping);
+                // EndLoop(looping);
+                looping.Dispose();
 
-                this.ReturnChannel(channel);
+                // this.ReturnChannel(channel);
 
                 this.EnableControlsInSearching(true);
-                this.listView_records.Enabled = true;
+                /*
+                this.TryInvoke(() =>
+                {
+                    this.listView_records.Enabled = true;
+                });
+                */
 
                 if (sw != null)
                     sw.Close();
@@ -8551,7 +8643,7 @@ out string strError)
             _stop.Initial("正在获得记录路径 ...");
             _stop.BeginLoop();
             */
-            var looping = BeginLoop(this.DoStop, "正在获得记录路径 ...", "halfstop");
+            var looping = BeginLoop(this.DoStop, $"正在获得{strDbTypeName}记录路径 ...", "halfstop");
 
             this.EnableControlsInSearching(false);
             this.listView_records.Enabled = false;
