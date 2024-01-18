@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.96.*")]
-[assembly: AssemblyFileVersion("3.96.0.0")]
+[assembly: AssemblyVersion("3.94.*")]
+[assembly: AssemblyFileVersion("3.94.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -232,8 +232,9 @@ using System.Runtime.InteropServices;
 //      2023/12/22  当参数为超高频高校联盟格式，不写入 UserBank 时，种册窗册登记对话框写入标签以后，对话框内再次点按钮写入，会报错说 PII 不存在，这个 bug 已经修正
 //      2023/12/26  超高频国标格式，既可以把机构代码写入 UII(EPC Bank) 中，也可以特殊指定写入 User Bank(此时 EPC Bank 中的 UII 中不再包含机构代码)。允许这种特殊写入法主要是考虑到它利于在小尺寸 EPC 标签上使用国标格式
 // 3.93 2024/1/2    快捷出纳窗的人脸识别增加允许命中多个记录的功能
-//      2024/1/4    书目查询窗导出到订购、期、实体、评注查询窗的功能重构为利用多线程。LibraryChannel 通道超时改为 40 秒
+// 3.94 2024/1/4    书目查询窗导出到订购、期、实体、评注查询窗的功能重构为利用多线程。LibraryChannel 通道超时改为 40 秒
 //                  书目查询窗导出下属的订购、期、实体、评注记录到记录路径文件，重构为利用多线程
 //                  读者查询窗导出借阅历史到实体查询窗的功能，重构为利用多线程
 //      2024/1/8    读者查询窗导出借阅历史到实体查询窗的功能，增加了一个询问对话框，询问是每个读者记录的借阅历史导出到一个单独的实体查询窗，还是所有读者记录的都导出到唯一的一个实体查询窗
 //      2024/1/16   书目查询窗共享检索时的利用 looping 方式改进。Z39.50 检索时 .ShowMessage() 后来没有清除显示的 bug 被修正
+//      2024/1/17   重构 AmerceForm 中的两个装载信息的线程为 Task，消除了 NewStop 类抛异常的 bug

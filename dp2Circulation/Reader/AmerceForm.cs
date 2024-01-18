@@ -16,8 +16,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
-using DigitalPlatform.Core;
-using Jint.Parser.Ast;
+
 
 namespace dp2Circulation
 {
@@ -34,13 +33,13 @@ namespace dp2Circulation
         internal Thread threadFillSummary = null;
          * */
 
-        volatile bool m_bStopFillAmercing = true;
-        internal Thread threadFillAmercing = null;
-        FillAmercingParam FillAmercingParam = null;
+        //volatile bool m_bStopFillAmercing = true;
+        //internal Thread threadFillAmercing = null;
+        //FillAmercingParam FillAmercingParam = null;
 
-        volatile bool m_bStopFillAmerced = true;
-        internal Thread threadFillAmerced = null;
-        FillAmercedParam FillAmercedParam = null;
+        //volatile bool m_bStopFillAmerced = true;
+        //internal Thread threadFillAmerced = null;
+        //FillAmercedParam FillAmercedParam = null;
 
         // 图标下标
         const int ITEMTYPE_AMERCED = 0;
@@ -807,35 +806,10 @@ TaskScheduler.Default);
 
                 if (String.IsNullOrEmpty(strXml) == false)
                 {
-#if NO
-                        nRet = FillAmercingList(strXml,
-                            out strError);
-                        if (nRet == -1)
-                        {
-                            // strError = "FillAmercingList()发生错误: " + strError;
-                            // goto ERROR1;
-                            SetError(this.listView_overdues, strError);
-                        }
-#endif
                     BeginFillAmercing(strXml);
                 }
 
-#if NO
-                    nRet = LoadAmercedRecords(this.textBox_readerBarcode.Text,
-                        out strError);
-                    if (nRet == -1)
-                    {
-                        //strError = "LoadAmercedRecords()发生错误: " + strError;
-                        //goto ERROR1;
-                        SetError(this.listView_amerced, strError);
-                    }
-#endif
                 BeginFillAmerced(this.ReaderBarcode, null);
-
-#if NO
-                    if (this.checkBox_fillSummary.Checked == true)
-                        this.BeginFillSummary();
-#endif
                 return 1;
             }
             finally
@@ -867,6 +841,9 @@ TaskScheduler.Default);
 
         void StopFillAmerced(bool bForce)
         {
+            _cancelFillAmerced?.Cancel();
+            _cancelFillAmerced = null;
+#if REMOVED
             // 如果以前在做，立即停止
             m_bStopFillAmerced = true;
 
@@ -880,13 +857,39 @@ TaskScheduler.Default);
                     this.threadFillAmerced = null;
                 }
             }
+#endif
         }
+
+        Task _taskFillAmerced = null;
+        CancellationTokenSource _cancelFillAmerced = new CancellationTokenSource();
+
 
         // 开始填充已交费信息
         // 如果有ids，则表示追加它们。否则为重新装载strReaderBaroode指明的读者的已交费记录
         void BeginFillAmerced(string strReaderBarcode,
             List<string> ids)
         {
+            _cancelFillAmerced?.Cancel();
+            _cancelFillAmerced = new CancellationTokenSource();
+
+            var param = new FillAmercedParam();
+            param.ReaderBarcode = strReaderBarcode;
+            param.IDs = ids;
+            param.FillSummary = this.TryGet(() =>
+            {
+                return this.checkBox_fillSummary.Checked;
+            });
+
+            _taskFillAmerced = Task.Factory.StartNew(() =>
+            {
+                ThreadFillAmercedMain(param,
+                    _cancelFillAmerced.Token);
+            },
+this.CancelToken,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+
+#if REMOVED
             // 如果以前在做，立即停止
             StopFillAmerced(true);
 
@@ -898,19 +901,15 @@ TaskScheduler.Default);
             this.threadFillAmerced =
         new Thread(new ThreadStart(this.ThreadFillAmercedMain));
             this.threadFillAmerced.Start();
+#endif
         }
 
-        void ThreadFillAmercedMain()
+        void ThreadFillAmercedMain(FillAmercedParam param,
+            CancellationToken token)
         {
             string strError = "";
-            m_bStopFillAmerced = false;
+            // m_bStopFillAmerced = false;
 
-            /*
-            LibraryChannel channel = new LibraryChannel();
-            channel.Url = Program.MainForm.LibraryServerUrl;
-            channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
-            channel.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
-            */
             var looping = Looping(out LibraryChannel channel,
                 "正在获取已交费信息 ...");
             try
@@ -930,7 +929,7 @@ TaskScheduler.Default);
                 if (lRet == -1)
                     goto ERROR1;
 
-                if (m_bStopFillAmerced == true)
+                if (token.IsCancellationRequested == true)
                     return;
 
                 // 2010/12/16 change
@@ -941,7 +940,7 @@ TaskScheduler.Default);
                     goto ERROR1;
                 }
 
-                if (string.IsNullOrEmpty(this.FillAmercedParam.ReaderBarcode) == false)
+                if (string.IsNullOrEmpty(param.ReaderBarcode) == false)
                 {
                     ClearList(this.listView_amerced);
 
@@ -950,14 +949,14 @@ TaskScheduler.Default);
 
                     // 2007/4/5 改造 加上了 GetXmlStringSimple()
                     strQueryXml = "<target list='" + strDbName + ":" + strFrom + "'><item><word>"
-        + StringUtil.GetXmlStringSimple(this.FillAmercedParam.ReaderBarcode)
+        + StringUtil.GetXmlStringSimple(param.ReaderBarcode)
         + "</word><match>" + strMatchStyle + "</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>" + strLang + "</lang></target>";
 
                     strResultSetName = "amercing";
                 } // end of strReaderBarcode != ""
                 else
                 {
-                    if (this.FillAmercedParam.IDs == null || this.FillAmercedParam.IDs.Count == 0)
+                    if (param.IDs == null || param.IDs.Count == 0)
                     {
                         strError = "IDs 参数不能为空";
                         goto ERROR1;
@@ -967,9 +966,9 @@ TaskScheduler.Default);
                     string strMatchStyle = "exact";
 
                     strQueryXml = "<target list='" + strDbName + ":" + strFrom + "'>";
-                    for (int i = 0; i < this.FillAmercedParam.IDs.Count; i++)
+                    for (int i = 0; i < param.IDs.Count; i++)
                     {
-                        string strID = this.FillAmercedParam.IDs[i];
+                        string strID = param.IDs[i];
 
                         if (i > 0)
                             strQueryXml += "<operator value='OR' />";
@@ -998,7 +997,7 @@ TaskScheduler.Default);
                 if (lRet == -1)
                     goto ERROR1;
 
-                if (m_bStopFillAmerced == true)
+                if (token.IsCancellationRequested == true)
                     return;
 
                 long lHitCount = lRet;
@@ -1014,7 +1013,7 @@ TaskScheduler.Default);
                     int i = 0;
                     foreach (Record record in loader)
                     {
-                        if (m_bStopFillAmerced == true
+                        if (token.IsCancellationRequested == true
                             || looping.Stopped)
                         {
                             strError = "中断，列表不完整...";
@@ -1025,23 +1024,6 @@ TaskScheduler.Default);
 
                         looping.Progress.SetMessage($"正在装载已交费事项 {strPath} ...");
 
-                        /*
-                        lRet = channel.GetRecord(looping.stop,
-                            strPath,
-                            out byte[] timestamp,
-                            out string strXml,
-                            out strError);
-                        if (lRet == -1)
-                        {
-                            if (channel.ErrorCode == ErrorCode.AccessDenied)
-                            {
-                                // 2018/11/6
-                                SetError(listView_amerced, "获取记录 '" + strPath + "' 时权限不够: " + strError);
-                                continue;
-                            }
-                            goto ERROR1;
-                        }
-                        */
                         if (record.RecordBody != null && record.RecordBody.Result != null
                             && record.RecordBody.Result.ErrorCode != ErrorCodeValue.NoError)
                         {
@@ -1068,86 +1050,9 @@ TaskScheduler.Default);
                         looping.Progress.SetProgressValue(i);
                     }
                 }
-#if REMOVED
-                long lStart = 0;
-                long lPerCount = Math.Min(50, lHitCount);
-                Record[] searchresults = null;
-
-                // 获得结果集，装入listview
-                for (; ; )
-                {
-                    if (m_bStopFillAmerced == true)
-                    {
-                        strError = "中断，列表不完整...";
-                        goto ERROR1;
-                    }
-                    // stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
-
-                    lRet = channel.GetSearchResult(
-                        looping.stop,
-                        strResultSetName,   // strResultSetName
-                        lStart,
-                        lPerCount,
-                        "id",   // "id,cols"
-                        strLang,
-                        out searchresults,
-                        out strError);
-                    if (lRet == -1)
-                        goto ERROR1;
-
-                    if (lRet == 0)
-                    {
-                        strError = "未命中";
-                        return;
-                    }
-
-                    // 处理浏览结果
-                    for (int i = 0; i < searchresults.Length; i++)
-                    {
-                        if (m_bStopFillAmerced == true)
-                        {
-                            strError = "中断，列表不完整...";
-                            goto ERROR1;
-                        }
-
-                        string strPath = searchresults[i].Path;
-
-                        byte[] timestamp = null;
-                        string strXml = "";
-
-                        lRet = channel.GetRecord(looping.stop,
-                            strPath,
-                            out timestamp,
-                            out strXml,
-                            out strError);
-                        if (lRet == -1)
-                        {
-                            if (channel.ErrorCode == ErrorCode.AccessDenied)
-                            {
-                                // 2018/11/6
-                                SetError(listView_amerced, "获取记录 '" + strPath + "' 时权限不够: " + strError);
-                                continue;
-                            }
-                            goto ERROR1;
-                        }
-
-                        int nRet = Safe_fillAmercedLine(
-                            looping.stop,
-                            strXml,
-                            strPath,
-                            out strError);
-                        if (nRet == -1)
-                            goto ERROR1;
-                    }
-
-                    lStart += searchresults.Length;
-                    if (lStart >= lHitCount || lPerCount <= 0)
-                        break;
-                }
-#endif
 
                 // 第二阶段，填充摘要
-                if (this.FillAmercedParam.FillSummary == true)
+                if (param.FillSummary == true)
                 {
                     looping.Progress.SetMessage("正在装载已交费事项的书目摘要 ...");
 
@@ -1162,7 +1067,7 @@ TaskScheduler.Default);
                     {
                         if (looping.Stopped)
                             return;
-                        if (this.m_bStopFillAmerced == true)
+                        if (token.IsCancellationRequested == true)
                             return;
 
                         // looping.stop.SetProgressValue(i);
@@ -1188,25 +1093,6 @@ TaskScheduler.Default);
                         path_list.Add($"@itemBarcode:{strItemBarcode}");
                         item_list.Add(item);
 
-                        /*
-                        looping.stop.SetMessage($"正在装载已交费事项 {strItemBarcode} 的书目摘要 ...");
-
-                        lRet = channel.GetBiblioSummary(
-                            looping.stop,
-                            strItemBarcode,
-                            "", // strItemRecPath,
-                            null,
-                            out string strBiblioRecPath,
-                            out strSummary,
-                            out strError);
-                        if (lRet == -1)
-                        {
-                            strSummary = strError;  // 2009/3/13 changed
-                                                    // return -1;
-                        }
-
-                        ChangeItemText(item, COLUMN_AMERCING_BIBLIOSUMMARY, strSummary);
-                        */
                     }
 
                     {
@@ -1241,41 +1127,11 @@ TaskScheduler.Default);
             finally
             {
                 looping.Dispose();
-                /*
-                channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
-                channel.AfterLogin -= new AfterLoginEventHandle(Channel_AfterLogin);
-                channel.Close();
-                */
-                m_bStopFillAmerced = true;
             }
 
         ERROR1:
             SetError(this.listView_amerced, strError);
-            // Safe_errorBox(strError);
         }
-
-#if REMOVED
-        // FillAmercedLine
-        delegate int Delegate_FillAmercedLine(Stop stop,
-            string strXml,
-            string strRecPath,
-            out string strError);
-
-
-        int Safe_fillAmercedLine(Stop stop,
-            string strXml,
-            string strRecPath,
-            out string strError)
-        {
-            //string strItemBarcodeParam = "";
-            //string strSummaryParam = "";
-            Delegate_FillAmercedLine d = new Delegate_FillAmercedLine(FillAmercedLine);
-            object[] args = new object[] { stop, strXml, strRecPath, "" };
-            int nRet = (int)this.Invoke(d, args);
-            strError = (string)args[3];
-            return nRet;
-        }
-#endif
 
         #endregion
 
@@ -1283,6 +1139,9 @@ TaskScheduler.Default);
 
         void StopFillAmercing(bool bForce)
         {
+            _cancelFillAmercing?.Cancel();
+            _cancelFillAmercing = null;
+#if REMOVED
             // 如果以前在做，立即停止
             m_bStopFillAmercing = true;
 
@@ -1295,24 +1154,46 @@ TaskScheduler.Default);
                     this.threadFillAmercing = null;
                 }
             }
+#endif
         }
+
+        Task _taskFillAmercing = null;
+        CancellationTokenSource _cancelFillAmercing = new CancellationTokenSource();
 
         void BeginFillAmercing(string strXml)
         {
+            _cancelFillAmercing?.Cancel();
+            _cancelFillAmercing = new CancellationTokenSource();
+
+            var param = new FillAmercingParam();
+            param.Xml = strXml;
+            param.FillSummary = this.TryGet(() =>
+            {
+                return this.checkBox_fillSummary.Checked;
+            });
+
+            _taskFillAmercing = Task.Factory.StartNew(() =>
+            {
+                ThreadFillAmercingMain(param,
+                    _cancelFillAmercing.Token);
+            },
+this.CancelToken,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+
+#if REMOVED
             // 如果以前在做，立即停止
             StopFillAmercing(true);
 
-            FillAmercingParam = new FillAmercingParam();
+            this.FillAmercingParam = new FillAmercingParam();
             this.FillAmercingParam.Xml = strXml;
             this.FillAmercingParam.FillSummary = this.checkBox_fillSummary.Checked;
 
             this.threadFillAmercing =
         new Thread(new ThreadStart(this.ThreadFillAmercingMain));
             this.threadFillAmercing.Start();
+#endif
         }
-
-        // ClearList
-        // delegate void Delegate_ClearList(ListView list);
 
         void ClearList(ListView list)
         {
@@ -1322,38 +1203,6 @@ TaskScheduler.Default);
             }));
         }
 
-#if NO
-        void Safe_clearList(ListView list)
-        {
-            Delegate_ClearList d = new Delegate_ClearList(ClearList);
-            this.Invoke(d, new object[] { list });
-        }
-#endif
-
-        // ErrorBox
-        // delegate void Delegate_ErrorBox(string strText);
-
-#if REMOVED
-        void ErrorBox(string strText)
-        {
-            this.Invoke((Action)(() =>
-            {
-                MessageBox.Show(this, strText);
-            }));
-        }
-#endif
-
-#if NO
-        void Safe_errorBox(string strText)
-        {
-            Delegate_ErrorBox d = new Delegate_ErrorBox(ErrorBox);
-            this.Invoke(d, new object[] { strText });
-        }
-#endif
-
-        // AddListItem
-        // delegate void Delegate_AddListItem(ListView list, ListViewItem item);
-
         void AddListItem(ListView list, ListViewItem item)
         {
             this.Invoke((Action)(() =>
@@ -1361,14 +1210,6 @@ TaskScheduler.Default);
                 list.Items.Add(item);
             }));
         }
-
-#if NO
-        void Safe_addListItem(ListView list, ListViewItem item)
-        {
-            Delegate_AddListItem d = new Delegate_AddListItem(AddListItem);
-            this.Invoke(d, new object[] { list, item });
-        }
-#endif
 
         void GetBarcodeAndSummary(ListView list,
             ListViewItem item,
@@ -1387,81 +1228,6 @@ TaskScheduler.Default);
             }
         }
 
-#if REMOVED
-        // GetBarcodeAndSummary
-        delegate void Delegate_GetBarcodeAndSummary(ListView list,
-            ListViewItem item,
-            out string strItemBarcode,
-            out string strSummary);
-
-        void Safe_getBarcodeAndSummary(ListView list,
-            ListViewItem item,
-            out string strItemBarcode,
-            out string strSummary)
-        {
-            //string strItemBarcodeParam = "";
-            //string strSummaryParam = "";
-            Delegate_GetBarcodeAndSummary d = new Delegate_GetBarcodeAndSummary(GetBarcodeAndSummary);
-            object[] args = new object[] { list, item, "", "" };
-            this.Invoke(d, args);
-            strItemBarcode = (string)args[2];
-            strSummary = (string)args[3];
-        }
-#endif
-
-        // ChangeItemText
-        // delegate void Delegate_ChangeItemText(ListViewItem item, int nCol, string strText);
-
-#if REMOVED
-        void ChangeItemText(ListViewItem item, int nCol, string strText)
-        {
-            this.Invoke((Action)(() =>
-            {
-                ListViewUtil.ChangeItemText(item, nCol, strText);
-            }));
-        }
-#endif
-
-#if NO
-        void Safe_changeItemText(ListViewItem item, int nCol, string strText)
-        {
-            Delegate_ChangeItemText d = new Delegate_ChangeItemText(ChangeItemText);
-            this.Invoke(d, new object[] { item, nCol, strText });
-        }
-#endif
-
-        // GetItemList
-        // delegate List<ListViewItem> Delegate_GetItemList(ListView list);
-
-#if REMOVED
-        List<ListViewItem> GetItemList(ListView list)
-        {
-            return (List<ListViewItem>)this.Invoke((Func<List<ListViewItem>>)(() =>
-            {
-                List<ListViewItem> results = new List<ListViewItem>();
-                foreach (ListViewItem item in list.Items)
-                {
-                    results.Add(item);
-                }
-                return results;
-            }));
-        }
-#endif
-
-#if NO
-        List<ListViewItem> Safe_getItemList(ListView list)
-        {
-            Delegate_GetItemList d = new Delegate_GetItemList(GetItemList);
-            return (List<ListViewItem>)this.Invoke(d, new object[] { list });
-        }
-#endif
-
-#if NO
-        // SetError
-        delegate void Delegate_SetError(ListView list,
-            string strError);
-#endif
-
         // 设置错误字符串显示
         static void SetError(ListView list,
             string strError)
@@ -1477,27 +1243,14 @@ TaskScheduler.Default);
             }));
         }
 
-#if NO
-        void Safe_setError(ListView list,
-            string strError)
-        {
-            Delegate_SetError d = new Delegate_SetError(SetError);
-            this.Invoke(d, new object[] { list, strError });
-        }
-#endif
-
         /*public*/
-        void ThreadFillAmercingMain()
+        void ThreadFillAmercingMain(
+            FillAmercingParam param,
+            CancellationToken token)
         {
             string strError = "";
-            m_bStopFillAmercing = false;
+            //m_bStopFillAmercing = false;
 
-            /*
-            LibraryChannel channel = new LibraryChannel();
-            channel.Url = Program.MainForm.LibraryServerUrl;
-
-            channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
-            */
             var looping = Looping(out LibraryChannel channel,
                 "正在获取待交费信息 ...");
             try
@@ -1507,7 +1260,7 @@ TaskScheduler.Default);
                 XmlDocument dom = new XmlDocument();
                 try
                 {
-                    dom.LoadXml(this.FillAmercingParam.Xml);
+                    dom.LoadXml(param.Xml);
                 }
                 catch (Exception ex)
                 {
@@ -1522,7 +1275,7 @@ TaskScheduler.Default);
 
                 for (int i = 0; i < nodes.Count; i++)
                 {
-                    if (this.m_bStopFillAmercing == true)
+                    if (token.IsCancellationRequested == true)
                     {
                         strError = "中断，列表不完整...";
                         goto ERROR1;
@@ -1618,13 +1371,13 @@ TaskScheduler.Default);
                 */
 
                 // 第二阶段，填充摘要
-                if (this.FillAmercingParam.FillSummary == true)
+                if (param.FillSummary == true)
                 {
                     List<ListViewItem> items = ListViewUtil.GetItems(listView_overdues);
 
                     for (int i = 0; i < items.Count; i++)
                     {
-                        if (this.m_bStopFillAmercing == true)
+                        if (token.IsCancellationRequested == true)
                             return;
 
                         ListViewItem item = items[i];
@@ -1657,7 +1410,6 @@ TaskScheduler.Default);
                                 strSummary = strError;  // 2009/3/13 changed
                                 // return -1;
                             }
-
                         }
                         finally
                         {
@@ -1685,16 +1437,10 @@ TaskScheduler.Default);
             finally
             {
                 looping.Dispose();
-                /*
-                channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
-                channel.Close();
-                */
-                m_bStopFillAmercing = true;
             }
         ERROR1:
             SetError(this.listView_overdues, strError);
             this.ShowMessage(strError, "red", true);    // 2019/9/19
-            // Safe_errorBox(strError);
         }
 
         #endregion
@@ -2172,7 +1918,6 @@ TaskScheduler.Default);
                             strInfo += "，并且注释要追加内容 '" + strAppendComment + "'";
                     }
                      * */
-
                 }
 
                 // 第二个条件

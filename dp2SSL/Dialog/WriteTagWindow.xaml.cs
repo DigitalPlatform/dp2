@@ -118,12 +118,12 @@ namespace dp2SSL
             App.PatronTagChanged -= App_PatronTagChanged;
             App.LineFeed -= App_LineFeed;
 
-            PageShelf.TrySetMessage(null, $"写入 RFID 标签对话框关闭");
+            ShelfData.TrySetMessage(null, $"写入 RFID 标签对话框关闭");
         }
 
         private async void WriteTagWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            PageShelf.TrySetMessage(null, $"写入 RFID 标签对话框打开");
+            ShelfData.TrySetMessage(null, $"写入 RFID 标签对话框打开");
 
             _tagChanged = false;
             App.LineFeed += App_LineFeed;
@@ -176,7 +176,7 @@ namespace dp2SSL
             // 册条码号应该都是大写的
             barcode = barcode.ToUpper();
 
-            PageShelf.TrySetMessage(null, $"扫入册条码号: {barcode}");
+            ShelfData.TrySetMessage(null, $"扫入册条码号: {barcode}");
 
             // 根据 PII 准备好 TaskInfo
             var result = await this.PrepareTaskAsync(barcode);
@@ -551,7 +551,7 @@ out string strError);
                 if (write_result.Value == -1)
                     return write_result;
 
-                PageShelf.TrySetMessage(null, $"写入 RFID 成功。\r\n{task_info.GetOiPii()}\r\n{task_info?.Title}");
+                ShelfData.TrySetMessage(null, $"写入 RFID 成功。\r\n{task_info.GetOiPii()}\r\n{task_info?.Title}");
 #if REMOVED
                 // 写入
                 var chip = BuildChip(task_info);
@@ -868,7 +868,7 @@ OI的校验，总长度不超过16位。
                 return;
             }
 
-            PageShelf.TrySetMessage(null, $"写入 RFID 成功。\r\n{TaskInfo?.GetOiPii()}\r\n{TaskInfo?.Title}");
+            ShelfData.TrySetMessage(null, $"写入 RFID 成功。\r\n{TaskInfo?.GetOiPii()}\r\n{TaskInfo?.Title}");
         }
 
         // 根据 PII 准备好 TaskInfo

@@ -647,12 +647,19 @@ namespace dp2SSL
             // 扫入一个条码
             string barcode = e.Text;    // .ToUpper();
 
-            if (string.IsNullOrEmpty(barcode)
-                && string.IsNullOrEmpty(App.FaceUrl) == false)
+            if (string.IsNullOrEmpty(barcode))
             {
-                PatronClear();
-                PatronControl_InputFace(this, new EventArgs());
-                return;
+                if (string.IsNullOrEmpty(App.FaceUrl) == false)
+                {
+                    PatronClear();
+                    PatronControl_InputFace(this, new EventArgs());
+                    return;
+                }
+                else
+                {
+                    App.CurrentApp.Speak("不允许人脸识别");
+                    return;
+                }
             }
 
             if ((string.IsNullOrEmpty(App.PatronBarcodeStyle) || App.PatronBarcodeStyle == "禁用")
@@ -746,7 +753,7 @@ namespace dp2SSL
                     text = $"门 '{e.Door.Name}' 被 {e.Door.Operator?.GetDisplayString()} 打开";
                 else
                     text = $"门 '{e.Door.Name}' 被 {e.Door.Operator?.GetDisplayString()} 关上";
-                TrySetMessage(null, text);
+                ShelfData.TrySetMessage(null, text);
             }
 
             if (e.NewState == "close")
@@ -833,36 +840,6 @@ namespace dp2SSL
 #endif
         }
 #endif
-
-        public static void TrySetMessage(string[] groups, string text)
-        {
-            // TODO: 当 groups 为 null 时，是代表当前书柜 dp2mserver 所加入的所有群名列表
-            /*
-            if (groups == null)
-            {
-                groups = TinyServer.GroupNames;
-                if (groups == null || groups.Length == 0)
-                {
-                    App.CurrentApp?.SetError("setMessage", $"发送消息出现异常: GroupName 不正确。消息内容:{StringUtil.CutString(text, 100)}");
-                    WpfClientInfo.WriteErrorLog($"发送消息出现异常: GroupName 不正确");
-                    return;
-                }
-            }
-            */
-
-            _ = Task.Run(async () =>
-            {
-                try
-                {
-                    await TinyServer.SendMessageAsync(groups, text);
-                }
-                catch (Exception ex)
-                {
-                    App.SetError("setMessage", $"发送消息出现异常: {ex.Message}。消息内容:{StringUtil.CutString(text, 100)}");
-                    WpfClientInfo.WriteErrorLog($"发送消息出现异常: {ExceptionUtil.GetDebugText(ex)}。消息内容:{text}");
-                }
-            });
-        }
 
         static string GetPartialName(string buttonName)
         {
@@ -968,7 +945,7 @@ namespace dp2SSL
             List<string> styles = new List<string>();
             styles.Add($"刷读者 RFID 卡鉴别身份");
             if (string.IsNullOrEmpty(App.FingerprintUrl) == false)
-                styles.Add("或扫入一次指纹");
+                styles.Add($"或扫入一次{PageBorrow.GetFingerprintCaption()}");
             if (string.IsNullOrEmpty(App.FaceUrl) == false)
                 styles.Add("或人脸识别");
             if (string.IsNullOrEmpty(App.PatronBarcodeStyle) == false && App.PatronBarcodeStyle != "禁用")
@@ -1597,7 +1574,7 @@ namespace dp2SSL
 
             // 提交尚未提交的取出和放入
             // PatronClear(true);
-            await BuildAllActionsAsync();
+            await ShelfData.BuildAllActionsAsync();
             await SubmitAsync(true);
 
             RfidManager.SetError -= RfidManager_SetError;
@@ -1668,7 +1645,7 @@ namespace dp2SSL
 
             if (result.Value == -1)
             {
-                SetPatronError("fingerprint", $"指纹或人脸中心出错: {result.ErrorInfo}, 错误码: {result.ErrorCode}");
+                SetPatronError("fingerprint", $"{PageBorrow.GetFingerprintCaption()}或人脸中心出错: {result.ErrorInfo}, 错误码: {result.ErrorCode}");
                 if (_patron.IsFingerprintSource)
                     PatronClear();    // 只有当面板上的读者信息来源是指纹仪时，才清除面板上的读者信息
                 return false;
@@ -2208,7 +2185,7 @@ namespace dp2SSL
                 App.CurrentApp.SetError("setMessage", null);
                 */
 
-                TrySetMessage(null, "我正在执行初始化 ...");
+                ShelfData.TrySetMessage(null, "我正在执行初始化 ...");
             }
 
             App.Invoke(new Action(() =>
@@ -2247,7 +2224,7 @@ namespace dp2SSL
                     if (passwordErrorCount > 5)
                     {
                         string error = "密码错误次数太多，开门功能被禁用";
-                        TrySetMessage(null, error);
+                        ShelfData.TrySetMessage(null, error);
                         ErrorBox("", error);
                         // 延时 10 分钟清除 passwordErrorCount
                         if (delayClear == null)
@@ -2262,12 +2239,12 @@ namespace dp2SSL
                         return;
                     }
 
-                    TrySetMessage(null, "“开门”按钮被按下(正在初始化对话框)，等待现场操作者输入管理密码");
+                    ShelfData.TrySetMessage(null, "“开门”按钮被按下(正在初始化对话框)，等待现场操作者输入管理密码");
 
                     var password = GetPassword();
                     if (password == null)
                     {
-                        TrySetMessage(null, "放弃输入密码开门");
+                        ShelfData.TrySetMessage(null, "放弃输入密码开门");
                         // ErrorBox("放弃输入密码开门");
                     }
                     else
@@ -2276,7 +2253,7 @@ namespace dp2SSL
                         if (App.MatchLockingPassword(password) == false)
                         {
                             passwordErrorCount++;
-                            TrySetMessage(null, "密码错误，无法开门");
+                            ShelfData.TrySetMessage(null, "密码错误，无法开门");
                             ErrorBox("", "密码错误，无法开门");
                         }
                         else
@@ -2284,7 +2261,7 @@ namespace dp2SSL
                             var open_result = RfidManager.OpenShelfLock(progress.Door.LockPath);
                             if (open_result.Value == -1)
                             {
-                                TrySetMessage(null, open_result.ErrorInfo);
+                                ShelfData.TrySetMessage(null, open_result.ErrorInfo);
                                 ErrorBox("", open_result.ErrorInfo);
                             }
                         }
@@ -2294,20 +2271,20 @@ namespace dp2SSL
                 {
                     silently = false;
                     eventRetry.Set();
-                    TrySetMessage(null, "“重试”按钮被按下(正在初始化对话框)");
+                    ShelfData.TrySetMessage(null, "“重试”按钮被按下(正在初始化对话框)");
                 };
                 progress.silentlyRetryButton.Click += (s, e) =>
                 {
                     silently = true;
                     eventRetry.Set();
 
-                    TrySetMessage(null, "“静默重试”按钮被按下(正在初始化对话框)");
+                    ShelfData.TrySetMessage(null, "“静默重试”按钮被按下(正在初始化对话框)");
                 };
                 progress.cancelButton.Click += (s, e) =>
                 {
                     eventCancel.Set();
                     progress.Close();
-                    TrySetMessage(null, "“中断”按钮被按下(正在初始化对话框)");
+                    ShelfData.TrySetMessage(null, "“中断”按钮被按下(正在初始化对话框)");
                 };
                 App.SetSize(progress, "tall");
                 progress.EnableRetryOpenButtons(false);
@@ -2557,7 +2534,9 @@ namespace dp2SSL
                         }));
 
                         // 构造 actions，用于同步到 dp2library 服务器
-                        var build_result = BuildInventoryActions(part,
+                        var build_result = ShelfData.BuildInventoryActions(
+                            part,
+                            "",
                             out List<ActionInfo> part_actions);
                         if (build_result.Value == -1 && silently == false)
                         {
@@ -2858,6 +2837,13 @@ namespace dp2SSL
                 // 启动门状态处理任务。此任务长期在后台运行
                 DoorStateTask.StartTask();
 
+                // 进行一次针对全部图书 UII 的查重
+                {
+                    var warning = ShelfData.CheckUiiDup(ShelfData.l_All);
+                    if (warning != null)
+                        App.ErrorBox("发现错误: 图书 UII 出现重复", warning + "\r\n\r\n请尽快将这些图书从书柜中取出进行甄别、重新加工处理");
+                }
+
                 // 2021/10/11
                 var numbers = $"{ShelfData.BookTagList.Tags.Count}:{ShelfData.PatronTagList.Tags.Count}";
                 WpfClientInfo.WriteInfoLog($"标签总数 {numbers}");
@@ -2897,7 +2883,7 @@ namespace dp2SSL
                     ShelfData.FirstInitialized = true;   // 第一次初始化已经完成
 
                     {
-                        TrySetMessage(null, "我已经成功完成初始化。读者可以开始用我借书啦");
+                        ShelfData.TrySetMessage(null, "我已经成功完成初始化。读者可以开始用我借书啦");
                     }
                 }
                 else
@@ -2912,7 +2898,7 @@ namespace dp2SSL
                         // "智能书柜初始化失败。请检查读卡器和门锁参数配置，重新进行初始化 ..."
                         );
                     {
-                        TrySetMessage(null, "*** 抱歉，我初始化失败了。请管理员帮我解决一下吧！");
+                        ShelfData.TrySetMessage(null, "*** 抱歉，我初始化失败了。请管理员帮我解决一下吧！");
                     }                    /*
                     ProgressWindow error = null;
                     Application.Current.Dispatcher.Invoke(new Action(() =>
@@ -3884,7 +3870,7 @@ namespace dp2SSL
                 || ShelfData.l_Removes.Count > 0
                 || ShelfData.l_Changes.Count > 0)
             {
-                await BuildAllActionsAsync();
+                await ShelfData.BuildAllActionsAsync();
                 await DoRequestAsync(ShelfData.PullActions(), silently ? "silence" : "");
                 // await SubmitCheckInOut("silence");
             }
@@ -4140,79 +4126,6 @@ namespace dp2SSL
         }
         */
 
-        // 获得特定门的 Operator
-        // parameters:
-        //      logNullOperator 是否在错误日志里面记载未找到门的 Operator 的情况？(读者借书时候需要 log，其他时候不需要)
-        static Operator GetOperator(Entity entity, bool logNullOperator)
-        {
-            var doors = DoorItem.FindDoors(ShelfData.Doors, entity.ReaderName, entity.Antenna);
-            if (doors.Count == 0)
-                return null;
-            if (doors.Count > 1)
-            {
-                WpfClientInfo.WriteErrorLog($"读卡器名 '{entity.ReaderName}' 天线编号 {entity.Antenna} 匹配上 {doors.Count} 个门");
-                throw new Exception($"读卡器名 '{entity.ReaderName}' 天线编号 {entity.Antenna} 匹配上 {doors.Count} 个门。请检查 shelf.xml 并修正配置此错误，确保只匹配一个门");
-            }
-
-            var person = doors[0].Operator;
-            if (person == null)
-            {
-                if (logNullOperator)
-                    WpfClientInfo.WriteErrorLog($"标签 '{entity.UID}' 经查找属于门 '{doors[0].Name}'，但此时门 '{doors[0].Name}' 并没有关联的 Operator 信息");
-                return new Operator();
-            }
-            return person;
-        }
-
-        static NormalResult BuildInventoryActions(
-            IReadOnlyCollection<Entity> entities,
-            out List<ActionInfo> actions)
-        {
-            DateTime now = ShelfData.Now;   //  DateTime.Now;
-
-            actions = new List<ActionInfo>();
-            foreach (var entity in entities)
-            {
-                actions.Add(new ActionInfo
-                {
-                    Entity = entity.Clone(),
-                    Action = "return",
-                    Operator = GetOperator(entity, false),
-                    OperTime = now,
-                });
-                actions.Add(new ActionInfo
-                {
-                    Entity = entity.Clone(),
-                    Action = "transfer",    // 这里是试探性的 transfer，如果册记录不发生变化则不写入操作日志
-                    CurrentShelfNo = ShelfData.GetShelfNo(entity),
-                    Operator = GetOperator(entity, false),
-                    OperTime = now,
-                });
-
-                // 2020/4/2
-                // 还书操作前先尝试修改 EAS
-
-                // 对于前面已经出错的标签不修改 EAS
-                if (entity.Error == null && StringUtil.IsInList("patronCard,oiError", entity.ErrorCode) == false)
-                {
-                    var eas_result = ShelfData.SetEAS(entity.UID, entity.Antenna, false);
-                    if (eas_result.Value == -1)
-                    {
-                        string text = $"修改 EAS 动作失败: {eas_result.ErrorInfo}";
-                        entity.AppendError(text, "red", "setEasError");
-
-                        return new NormalResult
-                        {
-                            Value = -1,
-                            ErrorInfo = $"修改册 '{entity.GetPiiOrUid()}' 的 EAS 失败: {eas_result.ErrorInfo}",
-                            ErrorCode = "setEasError"
-                        };
-                    }
-                }
-            }
-
-            return new NormalResult();
-        }
 
 #if REMOVED
         // 注：本函数被废止
@@ -4275,24 +4188,6 @@ namespace dp2SSL
         }
 #endif
 
-        // 将所有暂存信息构造为 Action，但并不立即提交
-        async Task BuildAllActionsAsync()
-        {
-            var result = await ShelfData.BuildActionsAsync((entity) =>
-            {
-                return GetOperator(entity, true);
-            });
-
-            if (result.Value == -1)
-            {
-                SetGlobalError("save_actions", $"SaveAllActions() 出错: {result.ErrorInfo}");
-                TrySetMessage(null, $"SaveAllActions() 出错: {result.ErrorInfo}。这是一个严重错误，请管理员及时介入处理");
-            }
-            else
-            {
-                SetGlobalError("save_actions", null);
-            }
-        }
 
         SubmitWindow _progressWindow = null;
 
@@ -4466,7 +4361,7 @@ namespace dp2SSL
                             text.AppendLine();
                             i++;
                         }
-                        TrySetMessage(null, text.ToString());
+                        ShelfData.TrySetMessage(null, text.ToString());
 #endif
                     }
 
@@ -4752,7 +4647,7 @@ namespace dp2SSL
                 text.AppendLine();
                 i++;
             }
-            TrySetMessage(null, text.ToString());
+            ShelfData.TrySetMessage(null, text.ToString());
         }
 
         static string MakeList(List<string> list)
@@ -5060,11 +4955,11 @@ namespace dp2SSL
                 else if (_patron.Protocol == "barcode")
                     style = "条码卡";
                 else if (_patron.Protocol == "fingerprint")
-                    style = "指纹";
+                    style = PageBorrow.GetFingerprintCaption();
                 else if (_patron.Protocol == "face")
                     style = "人脸";
 
-                TrySetMessage(null, $"{name} 刷{style}");
+                ShelfData.TrySetMessage(null, $"{name} 刷{style}");
             }
         }
 

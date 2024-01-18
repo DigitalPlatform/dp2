@@ -258,7 +258,7 @@ namespace dp2SSL
                     progress.Show();
                 }));
 
-                PageShelf.TrySetMessage(null, "即将开始紫外线消毒，正在倒计时 ...");
+                ShelfData.TrySetMessage(null, "即将开始紫外线消毒，正在倒计时 ...");
 
                 try
                 {
@@ -290,7 +290,7 @@ namespace dp2SSL
                         progress.MessageText = "正在进行紫外线消毒，请不要靠近书柜\r\n\r\n警告：紫外线对眼睛和皮肤有害";
                     }));
 
-                    PageShelf.TrySetMessage(null, "正在进行紫外线消毒，请不要靠近书柜");
+                    ShelfData.TrySetMessage(null, "正在进行紫外线消毒，请不要靠近书柜");
 
                     // TODO: 屏幕上可以显示剩余时间
                     // TODO: 背景色动画，闪动
@@ -322,7 +322,7 @@ namespace dp2SSL
                         progress.Close();
                     }));
 
-                    PageShelf.TrySetMessage(null, "紫外线消毒结束");
+                    ShelfData.TrySetMessage(null, "紫外线消毒结束");
 
                     _sterilampTask = null;
                 }

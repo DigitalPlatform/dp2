@@ -526,12 +526,19 @@ namespace dp2SSL
             string barcode = e.Text.ToUpper();
 
             // 触发人脸识别
-            if (string.IsNullOrEmpty(barcode)
-                && string.IsNullOrEmpty(App.FaceUrl) == false)
+            if (string.IsNullOrEmpty(barcode))
             {
-                PatronClear();
-                PatronControl_InputFace(this, new EventArgs());
-                return;
+                if (StringUtil.IsInList("face", GetPageStyleList()) == true)
+                {
+                    PatronClear();
+                    PatronControl_InputFace(this, new EventArgs());
+                    return;
+                }
+                else
+                {
+                    App.CurrentApp.Speak("不允许人脸识别");
+                    return;
+                }
             }
 
             // if (App.EnablePatronBarcode == false)
@@ -702,6 +709,13 @@ namespace dp2SSL
                         update_entities.Add(entity);
                 }
             }));
+
+            // 2024/1/19
+            // 修正: 当 ISO15693 的标签被发现实际上是读者标签时，意味着并没有发生实质性变化，changed 应该修正为 false
+            if (e.AddPatrons.Count == 1
+                && e.RemoveBooks.Count == 1
+                && e.AddPatrons[0].OneTag?.UID == e.RemoveBooks[0].OneTag?.UID)
+                changed = false;
 
             if (update_entities.Count > 0)
             {
@@ -1687,9 +1701,15 @@ namespace dp2SSL
 
             if (result.Value == -1)
             {
-                SetPatronError("fingerprint", $"指纹中心出错: {result.ErrorInfo}, 错误码: {result.ErrorCode}");
+                SetPatronError("fingerprint", $"{GetFingerprintCaption()}中心出错: {result.ErrorInfo}, 错误码: {result.ErrorCode}");
                 if (IsVerticalCard()/*_patron.IsFingerprintSource || App.PatronReaderVertical == true*/)
                     PatronClear();    // 只有当面板上的读者信息来源是指纹仪时(或者身份读卡器竖放)，才清除面板上的读者信息
+                return;
+            }
+            else if (result.Quality == -1)
+            {
+                // 掌纹(或者指纹)图像质量较差
+                // TODO: 有没有必要提示，如何提示? 比如积累到一定次数以后，提醒“请调整手掌距离”
                 return;
             }
             else
@@ -1697,6 +1717,8 @@ namespace dp2SSL
                 // 清除以前残留的报错信息
                 SetPatronError("fingerprint", "");
             }
+
+            // TODO: (掌纹识别)和上一个识别的读者证条码号一样，则语音提示，不做重新装载读者信息
 
             if (result.Message == null)
                 return;
@@ -3446,7 +3468,7 @@ TaskScheduler.Default);
                 return true;
 
             string fang = "放好";
-            if (IsVerticalCard()/*App.PatronReaderVertical*/)
+            if (IsVerticalCardDefined()/*App.PatronReaderVertical*/)
                 fang = "扫";
 
             string debug_info = $"(uid:[{_patron.UID}],barcode:[{_patron.Barcode}])";
@@ -3454,7 +3476,7 @@ TaskScheduler.Default);
             {
                 // 提示信息要考虑到应用了指纹的情况
                 if (string.IsNullOrEmpty(App.FingerprintUrl) == false)
-                    message = $"请先{fang}读者卡，或扫入一次指纹，然后再进行借书操作{(show_debug_info ? debug_info : "")}";
+                    message = $"请先{fang}读者卡，或扫入一次{GetFingerprintCaption()}，然后再进行借书操作{(show_debug_info ? debug_info : "")}";
                 else
                     message = $"请先{fang}读者卡，然后再进行借书操作{(show_debug_info ? debug_info : "")}";
             }
@@ -3467,7 +3489,7 @@ TaskScheduler.Default);
 
                 // 提示信息要考虑到应用了指纹的情况
                 if (string.IsNullOrEmpty(App.FingerprintUrl) == false)
-                    message = $"请先{fang}读者卡，或扫入一次指纹，然后再进行{action_name}操作{(show_debug_info ? debug_info : "")}";
+                    message = $"请先{fang}读者卡，或扫入一次{GetFingerprintCaption()}，然后再进行{action_name}操作{(show_debug_info ? debug_info : "")}";
                 else
                     message = $"请先{fang}读者卡，然后再进行{action_name}操作{(show_debug_info ? debug_info : "")}";
             }
@@ -3493,7 +3515,7 @@ TaskScheduler.Default);
                 List<string> styles = new List<string>();
                 styles.Add($"请{fang}可用的读者 RFID 卡鉴别身份");
                 if (string.IsNullOrEmpty(App.FingerprintUrl) == false)
-                    styles.Add("或扫入一次指纹");
+                    styles.Add($"或扫入一次{GetFingerprintCaption()}");
                 if (string.IsNullOrEmpty(App.FaceUrl) == false)
                     styles.Add("或人脸识别");
                 if (string.IsNullOrEmpty(App.PatronBarcodeStyle) == false && App.PatronBarcodeStyle != "禁用")
@@ -3507,6 +3529,14 @@ TaskScheduler.Default);
                 message = $"读卡器上的当前读者卡状态不正确。无法进行 {action} 操作{(show_debug_info ? debug_info : "")}";
             }
             return false;
+        }
+
+        public static string GetFingerprintCaption()
+        {
+            if (App.FingerprintUrl != null
+                && App.FingerprintUrl.ToLower().Contains("palm"))
+                return "掌纹";
+            return "指纹";
         }
 
 #if NO
@@ -4588,7 +4618,7 @@ out strError);
         }
 
 #endif
-#endregion
+        #endregion
 
 #if OLDVERSION
 
@@ -4793,7 +4823,7 @@ string usage)
         {
             CancelDelayClearTask();
 
-            PatronClear();
+            PatronClear(true);  // 2024/1/19 改为 true
         }
 
         #region 提醒拿走读者卡
@@ -5204,8 +5234,10 @@ string usage)
                             remove_text = $"拿走多余的读者卡(ISO14443A)，然后";  // "读卡器只应放一张副卡。请拿走多余的副卡";
 
                         string text = $"放上要{action_caption}的副卡";
+                        /*
                         if (App.PatronReaderVertical)
                             text = $"扫要{action_caption}的副卡";
+                        */
                         App.Invoke(new Action(() =>
                         {
                             progress.MessageText = "请" + remove_text + text;
@@ -5589,7 +5621,17 @@ patron_name);
         // (这种方式下需要固定读者信息一段时间)
         public bool IsVerticalCard()
         {
-            return (App.PatronReaderVertical || _patron.IsFingerprintSource);
+            if (_patron.IsFingerprintSource
+                || StringUtil.IsInList(_patron.ReaderName, App.VerticalReaderName))
+                return true;
+            return false;
+            // return (App.PatronReaderVertical || _patron.IsFingerprintSource);
+        }
+
+        // 是否已经定义了某个竖放的读写器
+        public bool IsVerticalCardDefined()
+        {
+            return string.IsNullOrEmpty(App.VerticalReaderName) == false;
         }
 
         void SetFixVisible()

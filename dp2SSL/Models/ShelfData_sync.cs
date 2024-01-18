@@ -1274,7 +1274,7 @@ TaskScheduler.Default);
             });
             if (overflow_titles.Count > 0)
             {
-                PageShelf.TrySetMessage(null, $"下列图书发生超额借阅：\r\n{StringUtil.MakePathList(overflow_titles, "\r\n")}");
+                ShelfData.TrySetMessage(null, $"下列图书发生超额借阅：\r\n{StringUtil.MakePathList(overflow_titles, "\r\n")}");
             }
         }
 

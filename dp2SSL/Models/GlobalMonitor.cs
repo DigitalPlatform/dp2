@@ -136,13 +136,13 @@ namespace dp2SSL.Models
                                 if (update_result.Value == 1)
                                 {
                                     App.TriggerUpdated("重启 dp2ssl(greensetup) 可使用新版本");
-                                    PageShelf.TrySetMessage(null, "dp2SSL 升级文件已经下载成功，下次重启 dp2ssl(greensetup) 时可自动启用新版本");
+                                    ShelfData.TrySetMessage(null, "dp2SSL 升级文件已经下载成功，下次重启 dp2ssl(greensetup) 时可自动启用新版本");
                                 }
                                 else if (update_result.Value == 2)
                                 {
                                     _needReboot = true;
                                     App.TriggerUpdated("重启计算机可使用新版本");
-                                    PageShelf.TrySetMessage(null, "dp2SSL 升级文件已经下载成功，下次重启计算机时可自动升级到新版本");
+                                    ShelfData.TrySetMessage(null, "dp2SSL 升级文件已经下载成功，下次重启计算机时可自动升级到新版本");
                                 }
                                 else
                                 {
@@ -150,7 +150,7 @@ namespace dp2SSL.Models
                                     if (ReturnUpateResult)
                                     {
                                         ReturnUpateResult = false;
-                                        PageShelf.TrySetMessage(null, "没有发现新版本");
+                                        ShelfData.TrySetMessage(null, "没有发现新版本");
                                     }
                                 }
                             }
@@ -319,11 +319,11 @@ TaskScheduler.Default);
         {
             if (_updateSucceedCount > 0)
             {
-                PageShelf.TrySetMessage(null, "稍早已经更新过了，现在重启 dp2ssl 可以使用此新版本");
+                ShelfData.TrySetMessage(null, "稍早已经更新过了，现在重启 dp2ssl 可以使用此新版本");
                 return;
             }
 
-            PageShelf.TrySetMessage(null, "开始更新");
+            ShelfData.TrySetMessage(null, "开始更新");
             _lastUpdateTime = DateTime.MinValue;
             ActivateMonitor();
         }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DigitalPlatform.RFID;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -99,6 +100,25 @@ namespace dp2SSL
             items.Add("列表选择+密码筛选");
             items.Add("列表选择");
             items.Add("密码筛选");
+            return items;
+        }
+    }
+
+    // 当前全部读写器名字列表
+    public class ReaderNameItemsSource : IItemsSource
+    {
+        public ItemCollection GetValues()
+        {
+            ItemCollection items = new ItemCollection();
+            var result = RfidManager.ListReaders();
+            if (result.Value == -1)
+                return items;
+            items.Add("");
+            foreach (var reader in result.Readers)
+            {
+                items.Add(reader);
+            }
+
             return items;
         }
     }

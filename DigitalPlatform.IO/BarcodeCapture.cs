@@ -147,6 +147,7 @@ namespace DigitalPlatform.IO
 
         static bool _shift = false;
         static bool _alt = false;
+        static bool _ctrl = false;
 
         private int KeyboardHookProc(int nCode, Int32 wParam, IntPtr lParam)
         {
@@ -172,6 +173,13 @@ namespace DigitalPlatform.IO
                         goto END1;
                     }
 
+                    if (key == Keys.LControlKey || key == Keys.RControlKey)
+                    {
+                        _ctrl = false;
+                        Debug.WriteLine("Ctrl keyup");
+                        goto END1;
+                    }
+
                     // 检查是否属于禁用的键
                     is_stop_key = IsStopKey(key);
                 }
@@ -194,6 +202,13 @@ namespace DigitalPlatform.IO
                     {
                         _alt = true;
                         Debug.WriteLine("Alt keydown");
+                        goto END1;
+                    }
+
+                    if (key == Keys.LControlKey || key == Keys.RControlKey)
+                    {
+                        _ctrl = true;
+                        Debug.WriteLine("Ctrl keydown");
                         goto END1;
                     }
 
@@ -320,7 +335,8 @@ namespace DigitalPlatform.IO
 
             if (_alt)
                 key |= Keys.Alt;
-
+            if (_ctrl)
+                key |= Keys.Control;
             return _stopKeys.Where(o => o == key).Any();
         }
 

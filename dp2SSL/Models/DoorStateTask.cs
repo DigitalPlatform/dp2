@@ -192,7 +192,7 @@ TaskScheduler.Default);
             if (result.Value == -1)
             {
                 SetGlobalError("save_actions", $"SaveDoorActions() 出错: {result.ErrorInfo}");
-                PageShelf.TrySetMessage(null, $"SaveDoorActions() 出错: {result.ErrorInfo}。这是一个严重错误，请管理员及时介入处理");
+                ShelfData.TrySetMessage(null, $"SaveDoorActions() 出错: {result.ErrorInfo}。这是一个严重错误，请管理员及时介入处理");
             }
             else
             {

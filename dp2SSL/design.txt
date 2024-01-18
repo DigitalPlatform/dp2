@@ -187,3 +187,45 @@ https://social.msdn.microsoft.com/Forums/sqlserver/en-US/6a836c72-a06f-487c-8645
 
 ***
 <iconPacks:PackIconBootstrapIcons Kind="House" />
+
+
+~~~
+给书柜设计一个功能，先将所有“智能书柜”当前位置的册，这种当前位置清空。
+然后对在书柜内的全部标签盘点一次，设置册记录的当前位置。
+不过需要注意，对在借状态的册的当前位置不要清空。
+
+~~~
+需要思考一下，Return() API 还书的时候，是否要给册记录的当前架位至少增添一个问号，表示位置不确定。
+等后面馆员进行盘点以后，这些册的当前位置才能确定下来。
+如果还书的工作人员账户另有规定，明确指定了 currentLocation，则依这个 currentLocation 修改册记录当前位置，这个效果不变。
+
+~~~
+需要给书柜做一个随时可以远程调用触发的，盘点当前所有在书柜中的册的功能
+
+~~~
+https://www.cnblogs.com/yuejin/p/3506762.html
+        #region 是否屏蔽CTRL+ALT+DEL             
+        /// <summary>
+        /// 是否屏蔽CTRL+ALT+DEL
+        /// </summary>
+        /// <param name="i">1=屏蔽 0=取消屏蔽</param>
+        public static void ShieldMissionTask(int i)
+        {
+            try
+            {
+                RegistryKey key = Registry.CurrentUser;
+                RegistryKey key1 = key.CreateSubKey(@"Software\Microsoft\Windows\CurrentVersion\Policies\System");
+                key1.SetValue("DisableTaskMgr", i, Microsoft.Win32.RegistryValueKind.DWord);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        #endregion
+
+~~~
+https://stackoverflow.com/questions/21351697/wpf-stop-ctrlaltdel-and-windows-button-using-c-sharp
+
+https://stackoverflow.com/questions/5178916/is-there-any-method-to-disable-logoff-lock-and-taskmanager-in-ctrlaltdel-in-c?rq=1
+

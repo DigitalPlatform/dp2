@@ -1801,6 +1801,44 @@ new SetErrorEventArgs
         {
             Base.ClearChannels();
         }
+
+        // 2024/1/18
+        public static ListReadersResult ListReaders()
+        {
+            try
+            {
+                BaseChannel<IRfid> channel = Base.GetChannel();
+                try
+                {
+                    var result = channel.Object.ListReaders();
+                    if (result.Value == -1)
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = result.ErrorInfo });
+                    else
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = null }); // 清除以前的报错
+
+                    return result;
+                }
+                finally
+                {
+                    Base.ReturnChannel(channel);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Base.Clear();
+                _ = Base.ClearAsync();
+
+                Base.TriggerSetError(ex,
+                    new SetErrorEventArgs
+                    {
+                        Error = $"RFID 中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
+                    });
+                return new ListReadersResult { Value = -1, ErrorInfo = ex.Message };
+            }
+        }
+
     }
 
     public delegate void ListTagsEventHandler(object sender,

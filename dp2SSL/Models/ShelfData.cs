@@ -29,6 +29,8 @@ using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.Xml;
 using static DigitalPlatform.RFID.LogicChip;
+using Microsoft.EntityFrameworkCore.Internal;
+using DocumentFormat.OpenXml.Office2013.Drawing.ChartStyle;
 
 namespace dp2SSL
 {
@@ -297,7 +299,7 @@ namespace dp2SSL
                                     text = $"门 '{result.Door.Name}' 被 {result.Door.Operator?.GetDisplayStringMasked()} 打开";
                                 else
                                     text = $"门 '{result.Door.Name}' 被 {result.Door.Operator?.GetDisplayStringMasked()} 关上";
-                                PageShelf.TrySetMessage(null, text);
+                                ShelfData.TrySetMessage(null, text);
                             }
 
                             // 2021/9/26
@@ -3867,6 +3869,13 @@ ShelfData.LibraryNetworkCondition == "OK" ? "" : "offline");
             });
             */
 
+            if (silently == false)
+            {
+                string error = CheckUiiDup(all);
+                if (error != null)
+                    warnings.Add(error);
+            }
+
             return new InitialShelfResult
             {
                 Warnings = warnings,
@@ -3883,6 +3892,54 @@ ShelfData.LibraryNetworkCondition == "OK" ? "" : "offline");
                 }
 
                 return false;
+            }
+        }
+
+        public static string CheckUiiDup(IReadOnlyCollection<Entity> all)
+        {
+            // 对 all 里面的 UII 进行查重
+            var uiis = all
+                .Select(o => new { UII = o.GetOiPii(), Entity = o })
+                .ToList();
+
+            var dups = uiis.GroupBy(o => o.UII)
+                .Select(o => new
+                {
+                    Key = o.Key,
+                    Entities = o.Select(i => i.Entity).ToList(),
+                    Count = o.Count()
+                })
+                .Where(o => o.Count > 1)
+                .ToList();
+
+            if (dups.Count > 0)
+            {
+                List<string> infos = new List<string>();
+                foreach (var dup in dups)
+                {
+                    infos.Add($"{dup.Key}:{GetDoorNames(dup.Entities)}");
+                }
+                return $"下列标签的 UII 发生了重复: {StringUtil.MakePathList(infos, "; ")}";
+            }
+
+            return null;
+
+            string GetDoorNames(IEnumerable<Entity> entities)
+            {
+                List<string> results = new List<string>();
+                foreach (var entity in entities)
+                {
+                    results.Add(GetDoorName(entity));
+                }
+                return StringUtil.MakePathList(results, ",");
+            }
+
+            string GetDoorName(Entity entity)
+            {
+                var doors = DoorItem.FindDoors(ShelfData.Doors, entity.ReaderName, entity.Antenna);
+                if (doors.Count != 1)
+                    return $"(未知门名)ReaderName={entity.ReaderName}|Antenna={entity.Antenna}";
+                return doors[0].Name;
             }
         }
 
@@ -3922,7 +3979,7 @@ ShelfData.LibraryNetworkCondition == "OK" ? "" : "offline");
                 // 注1: taginfo.EAS 在调用后可能被修改
                 // 注2: 本函数不再抛出异常。会在 ErrorInfo 中报错
                 var chip_info = RfidTagList.GetChipInfo(data.OneTag.TagInfo);
-                
+
                 if (string.IsNullOrEmpty(chip_info.ErrorInfo) == false)
                 {
                     data.Type = ""; // 表示类型不确定
@@ -4102,6 +4159,7 @@ ShelfData.LibraryNetworkCondition == "OK" ? "" : "offline");
                 Debug.Assert(string.IsNullOrEmpty(pii) == false);
                 Debug.Assert(chip != null);
 #endif
+                // 注意: 这里 pii 可能为空
                 result.PII = pii;
             }
             catch (Exception ex)
@@ -4174,6 +4232,10 @@ ShelfData.LibraryNetworkCondition == "OK" ? "" : "offline");
 
                 result.OI = oi;
                 result.AOI = aoi;
+
+                // 2024/1/18
+                if (string.IsNullOrEmpty(result.PII))
+                    result.PII = chip?.FindElement(ElementOID.PII)?.Text;
 
                 // 2020/8/27
                 // 严格要求必须有 OI(AOI) 字段
@@ -7370,6 +7432,174 @@ out string block_map);
 
             return $"馆藏地从 '{old_location}' 变为 '{new_location}' 将导致机构代码从 '{old_oi}' 变为 '{new_oi}'";
         }
+
+        // 2024/1/17
+        // 正常运行情况下，触发一次全面盘点动作
+        public static async Task<NormalResult> DoInventoryAsync()
+        {
+            List<ActionInfo> all_actions = new List<ActionInfo>();
+
+            foreach (var door in ShelfData.Doors)
+            {
+                var entities = new List<Entity>();
+                foreach (var entity in door.AllEntities)
+                {
+                    var dup = entity.Clone();
+                    dup.Container = null;
+                    entities.Add(dup);
+                }
+
+                if (entities.Count > 0)
+                {
+                    var result = BuildInventoryActions(
+        entities,
+        "dont_change_eas,dont_return",
+        out List<ActionInfo> actions);
+                    if (result.Value == -1)
+                        return result;  // TODO: 是否继续做完再报错
+                    all_actions.AddRange(actions);
+                }
+            }
+            if (all_actions.Count > 0)
+                await ShelfData.SaveActionsToDatabaseAsync(all_actions);
+            return new NormalResult { Value = all_actions.Count };
+        }
+
+        // parameters:
+        //      style   如果包含 dont_change_eas，表示不修改 EAS
+        //              如果包含 dont_return, 表示不建立 return 动作
+        public static NormalResult BuildInventoryActions(
+            IReadOnlyCollection<Entity> entities,
+            string style,    // 2024/1/17
+            out List<ActionInfo> actions)
+        {
+            var dont_change_eas = StringUtil.IsInList("dont_change_eas", style);
+            var dont_return = StringUtil.IsInList("dont_return", style);
+
+            DateTime now = ShelfData.Now;   //  DateTime.Now;
+
+            actions = new List<ActionInfo>();
+            foreach (var entity in entities)
+            {
+                if (dont_return == false)
+                {
+                    actions.Add(new ActionInfo
+                    {
+                        Entity = entity.Clone(),
+                        Action = "return",
+                        Operator = GetOperator(entity, false),
+                        OperTime = now,
+                    });
+                }
+                actions.Add(new ActionInfo
+                {
+                    Entity = entity.Clone(),
+                    Action = "transfer",    // 这里是试探性的 transfer，如果册记录不发生变化则不写入操作日志
+                    CurrentShelfNo = ShelfData.GetShelfNo(entity),
+                    Operator = GetOperator(entity, false),
+                    OperTime = now,
+                });
+
+                // 2020/4/2
+                // 还书操作前先尝试修改 EAS
+
+                // 对于前面已经出错的标签不修改 EAS
+                if (dont_change_eas == false
+                    && entity.Error == null && StringUtil.IsInList("patronCard,oiError", entity.ErrorCode) == false)
+                {
+                    var eas_result = ShelfData.SetEAS(entity.UID, entity.Antenna, false);
+                    if (eas_result.Value == -1)
+                    {
+                        string text = $"修改 EAS 动作失败: {eas_result.ErrorInfo}";
+                        entity.AppendError(text, "red", "setEasError");
+
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"修改册 '{entity.GetPiiOrUid()}' 的 EAS 失败: {eas_result.ErrorInfo}",
+                            ErrorCode = "setEasError"
+                        };
+                    }
+                }
+            }
+
+            return new NormalResult();
+        }
+
+        // 获得特定门的 Operator
+        // parameters:
+        //      logNullOperator 是否在错误日志里面记载未找到门的 Operator 的情况？(读者借书时候需要 log，其他时候不需要)
+        static Operator GetOperator(Entity entity, bool logNullOperator)
+        {
+            var doors = DoorItem.FindDoors(ShelfData.Doors, entity.ReaderName, entity.Antenna);
+            if (doors.Count == 0)
+                return null;
+            if (doors.Count > 1)
+            {
+                WpfClientInfo.WriteErrorLog($"读卡器名 '{entity.ReaderName}' 天线编号 {entity.Antenna} 匹配上 {doors.Count} 个门");
+                throw new Exception($"读卡器名 '{entity.ReaderName}' 天线编号 {entity.Antenna} 匹配上 {doors.Count} 个门。请检查 shelf.xml 并修正配置此错误，确保只匹配一个门");
+            }
+
+            var person = doors[0].Operator;
+            if (person == null)
+            {
+                if (logNullOperator)
+                    WpfClientInfo.WriteErrorLog($"标签 '{entity.UID}' 经查找属于门 '{doors[0].Name}'，但此时门 '{doors[0].Name}' 并没有关联的 Operator 信息");
+                return new Operator();
+            }
+            return person;
+        }
+
+        // 将所有暂存信息构造为 Action，但并不立即提交
+        public static async Task BuildAllActionsAsync()
+        {
+            var result = await ShelfData.BuildActionsAsync((entity) =>
+            {
+                return GetOperator(entity, true);
+            });
+
+            if (result.Value == -1)
+            {
+                App.SetError("save_actions", $"SaveAllActions() 出错: {result.ErrorInfo}");
+                TrySetMessage(null, $"SaveAllActions() 出错: {result.ErrorInfo}。这是一个严重错误，请管理员及时介入处理");
+            }
+            else
+            {
+                App.SetError("save_actions", null);
+            }
+        }
+
+
+        public static void TrySetMessage(string[] groups, string text)
+        {
+            // TODO: 当 groups 为 null 时，是代表当前书柜 dp2mserver 所加入的所有群名列表
+            /*
+            if (groups == null)
+            {
+                groups = TinyServer.GroupNames;
+                if (groups == null || groups.Length == 0)
+                {
+                    App.CurrentApp?.SetError("setMessage", $"发送消息出现异常: GroupName 不正确。消息内容:{StringUtil.CutString(text, 100)}");
+                    WpfClientInfo.WriteErrorLog($"发送消息出现异常: GroupName 不正确");
+                    return;
+                }
+            }
+            */
+
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await TinyServer.SendMessageAsync(groups, text);
+                }
+                catch (Exception ex)
+                {
+                    App.SetError("setMessage", $"发送消息出现异常: {ex.Message}。消息内容:{StringUtil.CutString(text, 100)}");
+                    WpfClientInfo.WriteErrorLog($"发送消息出现异常: {ExceptionUtil.GetDebugText(ex)}。消息内容:{text}");
+                }
+            });
+        }
+
 
         /*
         static Operator OperatorFromRequest(RequestItem request)

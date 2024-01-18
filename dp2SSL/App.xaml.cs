@@ -220,7 +220,7 @@ namespace dp2SSL
                         && e1 != null
                         && e1.Level == "error")
                         {
-                            PageShelf.TrySetMessage(null, "*** ERROR *** " + e1.Message);
+                            ShelfData.TrySetMessage(null, "*** ERROR *** " + e1.Message);
                         }
                     }
                     catch (Exception ex)
@@ -347,7 +347,8 @@ namespace dp2SSL
             _barcodeCapture.StopKeys = new List<System.Windows.Forms.Keys> { 
                 System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.Tab,
                 System.Windows.Forms.Keys.LWin,
-                System.Windows.Forms.Keys.RWin
+                System.Windows.Forms.Keys.RWin,
+                System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Delete,
             };
             _barcodeCapture.InputLine += _barcodeCapture_inputLine;
             //_barcodeCapture.InputChar += _barcodeCapture_InputChar;
@@ -380,7 +381,7 @@ namespace dp2SSL
 
                 await TinyServer.DeleteAllResultsetAsync();
                 TinyServer.StartSendTask(_cancelRefresh.Token);
-                PageShelf.TrySetMessage(null, "我这台智能书柜启动了！");
+                ShelfData.TrySetMessage(null, "我这台智能书柜启动了！");
 
                 ShelfData.StartMonitorTask();
             }
@@ -655,7 +656,7 @@ namespace dp2SSL
                 TinyServer.StartSendTask(_cancelSendingMessage.Token); // _cancelApp.Token
 
                 if (string.IsNullOrEmpty(message) == false)
-                    PageShelf.TrySetMessage(null, message);    // "我这台智能书柜启动了！"
+                    ShelfData.TrySetMessage(null, message);    // "我这台智能书柜启动了！"
             }
             else
             {
@@ -1141,7 +1142,7 @@ namespace dp2SSL
             WpfClientInfo.Finish(GrantAccess);
             WpfClientInfo.WriteDebugLog("End WpfClientInfo.Finish()");
 
-            PageShelf.TrySetMessage(null, $"我这台智能书柜停止了哟！({e.ReasonSessionEnding})");
+            ShelfData.TrySetMessage(null, $"我这台智能书柜停止了哟！({e.ReasonSessionEnding})");
 
             try
             {
@@ -1221,7 +1222,7 @@ namespace dp2SSL
             catch
             {
                 // 如果直接发送不成功，则送入 MessageQueue 中
-                PageShelf.TrySetMessage(null, $"我这台智能书柜退出了哟！");
+                ShelfData.TrySetMessage(null, $"我这台智能书柜退出了哟！");
             }
 
             try
@@ -1566,6 +1567,7 @@ namespace dp2SSL
             }
         }
 
+#if REMOVED
         // 身份读卡器是否竖向放置
         public static bool PatronReaderVertical
         {
@@ -1573,6 +1575,16 @@ namespace dp2SSL
             {
                 return (bool)WpfClientInfo.Config?.GetBoolean("ssl_operation", 
                     "patron_info_lasting", false);
+            }
+        }
+#endif
+        // 竖向放置的身份读卡器名
+        public static string VerticalReaderName
+        {
+            get
+            {
+                return WpfClientInfo.Config?.Get("ssl_operation",
+                    "vertial_reader_name", null);
             }
         }
 
@@ -2770,7 +2782,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                 else
                     text = App.FindTextChildren(window);
             }));
-            PageShelf.TrySetMessage(null, $"==== {title} 对话框显示并等待输入 ====\r\n{text}");
+            ShelfData.TrySetMessage(null, $"==== {title} 对话框显示并等待输入 ====\r\n{text}");
         }
 
         public static NormalResult PressButton(string button_name)

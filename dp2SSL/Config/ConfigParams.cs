@@ -79,7 +79,8 @@ namespace dp2SSL
 
             FullScreen = _config.GetInt("global", "fullScreen", 1) == 1 ? true : false;
             AutoTrigger = _config.GetBoolean("ssl_operation", "auto_trigger", false);
-            PatronInfoLasting = _config.GetBoolean("ssl_operation", "patron_info_lasting", false);
+            // PatronInfoLasting = _config.GetBoolean("ssl_operation", "patron_info_lasting", false);
+            VerticalReaderName = _config.Get("ssl_operation", "vertial_reader_name", null);
             AutoBackMenuPage = _config.GetBoolean("ssl_operation", "auto_back_menu_page", false);
             ProcessMonitor = _config.GetBoolean("global", "process_monitor", true);
             ReplicateEntities = _config.GetBoolean("shelf", "replicateEntities", false);
@@ -141,7 +142,8 @@ namespace dp2SSL
             _config.Set("global", "faceInputMultipleHits", FaceInputMultipleHits);
             _config.SetInt("global", "fullScreen", FullScreen == true ? 1 : 0);
             _config.SetBoolean("ssl_operation", "auto_trigger", AutoTrigger);
-            _config.SetBoolean("ssl_operation", "patron_info_lasting", PatronInfoLasting);
+            // _config.SetBoolean("ssl_operation", "patron_info_lasting", PatronInfoLasting);
+            _config.Set("ssl_operation", "vertial_reader_name", VerticalReaderName);
             _config.SetBoolean("ssl_operation", "auto_back_menu_page", AutoBackMenuPage);
             _config.SetBoolean("global", "process_monitor", ProcessMonitor);
             _config.SetBoolean("shelf", "replicateEntities", ReplicateEntities);
@@ -541,6 +543,7 @@ Description = "借书和还书操作是否自动触发操作按钮"
         }
         private bool _autoTrigger;
 
+#if REMOVED
         // 默认值 false
         [Display(
 Order = 7,
@@ -561,6 +564,28 @@ Description = "RFID读者卡读卡器是否竖向放置"
             }
         }
         private bool _patronInfoLasting;
+#endif
+        // 默认值 null
+        [Display(
+Order = 7,
+Name = "竖放的身份读写器",    // 拿走不敏感。读者信息显示持久
+Description = "竖放的RFID读者卡读写器名称"
+)]
+        [ItemsSource(typeof(ReaderNameItemsSource))]
+        [Category("自助借还操作风格")]
+        public string VerticalReaderName
+        {
+            get => _verticalReaderName;
+            set
+            {
+                if (_verticalReaderName != value)
+                {
+                    _verticalReaderName = value;
+                    OnPropertyChanged("VerticalReaderName");
+                }
+            }
+        }
+        private string _verticalReaderName;
 
         // 默认值 false
         [Display(

@@ -1520,5 +1520,43 @@ MessageBoxOptions.DefaultDesktopOnly);
         {
             ShelfData.ActivateReplication();
         }
+
+        // 2024/1/17
+        // 迫使下一次启动 dp2ssl 时进行一轮盘点。
+        // 方法是通过修改 最后一次启动阶段写入动作库的时间 为久远的时间，这样下次启动 dp2ssl 的时候程序会发现当前时间和这个时间差距超过 30 天，就会把盘点动作写入本地动作库
+        private void forceRestartInventory_Click(object sender, RoutedEventArgs e)
+        {
+            if (App.Function != "智能书柜")
+            {
+                App.ErrorBox("盘点书柜内全部图书",
+    $"当前 dp2ssl 不是智能书柜功能状态，无法执行此功能",
+    "red");
+                return;
+            }
+
+            ShelfData.SetWriteTime(DateTime.MinValue);
+        }
+
+        private async void tiggerInventory_Click(object sender, RoutedEventArgs e)
+        {
+            if (App.Function != "智能书柜")
+            {
+                App.ErrorBox("盘点书柜内全部图书",
+    $"当前 dp2ssl 不是智能书柜功能状态，无法执行此功能",
+    "red");
+                return;
+            }
+
+            var result = await ShelfData.DoInventoryAsync();
+            if (result.Value == -1)
+                App.ErrorBox("盘点书柜内全部图书",
+    $"处理出错: {result.ErrorInfo}",
+    "red");
+            else
+                App.ErrorBox("盘点书柜内全部图书",
+                    $"处理完成。创建盘点记录 {result.Value} 个",
+                    "green");
+
+        }
     }
 }

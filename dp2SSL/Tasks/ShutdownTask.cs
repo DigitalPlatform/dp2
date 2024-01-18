@@ -294,7 +294,7 @@ namespace dp2SSL
                     progress.Show();
                 }));
 
-                PageShelf.TrySetMessage(null, "即将自动关机，正在倒计时 ...");
+                ShelfData.TrySetMessage(null, "即将自动关机，正在倒计时 ...");
 
                 try
                 {
@@ -345,7 +345,7 @@ namespace dp2SSL
                                 WpfClientInfo.WriteErrorLog($"自动关机过程出现异常: {ExceptionUtil.GetDebugText(ex)}");
                             }
                         });
-                        PageShelf.TrySetMessage(null, "Windows 将在一秒后关机");
+                        ShelfData.TrySetMessage(null, "Windows 将在一秒后关机");
                     }
                 }
                 finally
@@ -356,7 +356,7 @@ namespace dp2SSL
                         progress.Close();
                     }));
 
-                    // PageShelf.TrySetMessage(null, "已经关机");
+                    // ShelfData.TrySetMessage(null, "已经关机");
 
                     _shutdownTask = null;
                 }

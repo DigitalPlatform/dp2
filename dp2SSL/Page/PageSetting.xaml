@@ -69,6 +69,8 @@
                     <MenuItem x:Name="restoreRequests" Header="恢复本地动作库" HorizontalAlignment="Left" Width="Auto" Click="restoreRequests_Click"/>
                     <MenuItem x:Name="importRequests" Header="导入本地动作库" HorizontalAlignment="Left" Width="Auto" Click="importRequests_Click"/>
                     <MenuItem x:Name="activatePatronReplication" Header="激活同步读者记录一次" HorizontalAlignment="Left" Width="Auto" Click="activatePatronReplication_Click"/>
+                    <MenuItem x:Name="forceRestartInventory" Header="迫使下次启动 dp2ssl 时进行一轮盘点" HorizontalAlignment="Left" Width="Auto" Click="forceRestartInventory_Click"/>
+                    <MenuItem x:Name="tiggerInventory" Header="立即盘点" HorizontalAlignment="Left" Width="Auto" Click="tiggerInventory_Click" />
                 </MenuItem>
                 <MenuItem Header="_小票打印">
                     <MenuItem x:Name="posPrint_clearMemory" Header="清空缓冲区" HorizontalAlignment="Left" Width="Auto" Click="posPrint_clearMemory_Click"/>

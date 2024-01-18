@@ -108,30 +108,31 @@ namespace dp2Circulation
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(2, 5);
-            this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label1.Location = new System.Drawing.Point(4, 9);
+            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(101, 12);
+            this.label1.Size = new System.Drawing.Size(180, 21);
             this.label1.TabIndex = 0;
             this.label1.Text = "读者证条码号(&R):";
             // 
             // textBox_readerBarcode
             // 
             this.textBox_readerBarcode.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.textBox_readerBarcode.Location = new System.Drawing.Point(113, 1);
-            this.textBox_readerBarcode.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox_readerBarcode.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.textBox_readerBarcode.Location = new System.Drawing.Point(207, 2);
+            this.textBox_readerBarcode.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.textBox_readerBarcode.Name = "textBox_readerBarcode";
-            this.textBox_readerBarcode.Size = new System.Drawing.Size(141, 21);
+            this.textBox_readerBarcode.Size = new System.Drawing.Size(257, 39);
             this.textBox_readerBarcode.TabIndex = 1;
             this.textBox_readerBarcode.Enter += new System.EventHandler(this.textBox_readerBarcode_Enter);
             this.textBox_readerBarcode.Leave += new System.EventHandler(this.textBox_readerBarcode_Leave);
             // 
             // splitContainer_main
             // 
-            this.splitContainer_main.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.splitContainer_main.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.splitContainer_main.Location = new System.Drawing.Point(0, 30);
+            this.splitContainer_main.Location = new System.Drawing.Point(0, 52);
             this.splitContainer_main.Margin = new System.Windows.Forms.Padding(0);
             this.splitContainer_main.Name = "splitContainer_main";
             this.splitContainer_main.Orientation = System.Windows.Forms.Orientation.Horizontal;
@@ -143,19 +144,19 @@ namespace dp2Circulation
             // splitContainer_main.Panel2
             // 
             this.splitContainer_main.Panel2.Controls.Add(this.splitContainer_lists);
-            this.splitContainer_main.Size = new System.Drawing.Size(617, 399);
-            this.splitContainer_main.SplitterDistance = 98;
-            this.splitContainer_main.SplitterWidth = 8;
+            this.splitContainer_main.Size = new System.Drawing.Size(1131, 699);
+            this.splitContainer_main.SplitterDistance = 171;
+            this.splitContainer_main.SplitterWidth = 14;
             this.splitContainer_main.TabIndex = 2;
             // 
             // webBrowser_readerInfo
             // 
             this.webBrowser_readerInfo.Dock = System.Windows.Forms.DockStyle.Fill;
             this.webBrowser_readerInfo.Location = new System.Drawing.Point(0, 0);
-            this.webBrowser_readerInfo.Margin = new System.Windows.Forms.Padding(2);
-            this.webBrowser_readerInfo.MinimumSize = new System.Drawing.Size(15, 16);
+            this.webBrowser_readerInfo.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.webBrowser_readerInfo.MinimumSize = new System.Drawing.Size(28, 28);
             this.webBrowser_readerInfo.Name = "webBrowser_readerInfo";
-            this.webBrowser_readerInfo.Size = new System.Drawing.Size(617, 98);
+            this.webBrowser_readerInfo.Size = new System.Drawing.Size(1131, 171);
             this.webBrowser_readerInfo.TabIndex = 0;
             this.webBrowser_readerInfo.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.webBrowser_readerInfo_DocumentCompleted);
             // 
@@ -163,6 +164,7 @@ namespace dp2Circulation
             // 
             this.splitContainer_lists.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer_lists.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer_lists.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.splitContainer_lists.Name = "splitContainer_lists";
             this.splitContainer_lists.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -173,9 +175,9 @@ namespace dp2Circulation
             // splitContainer_lists.Panel2
             // 
             this.splitContainer_lists.Panel2.Controls.Add(this.tableLayoutPanel_amercingOverdue);
-            this.splitContainer_lists.Size = new System.Drawing.Size(617, 293);
-            this.splitContainer_lists.SplitterDistance = 145;
-            this.splitContainer_lists.SplitterWidth = 8;
+            this.splitContainer_lists.Size = new System.Drawing.Size(1131, 514);
+            this.splitContainer_lists.SplitterDistance = 254;
+            this.splitContainer_lists.SplitterWidth = 14;
             this.splitContainer_lists.TabIndex = 1;
             // 
             // tableLayoutPanel_amerced
@@ -194,19 +196,19 @@ namespace dp2Circulation
             this.tableLayoutPanel_amerced.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_amerced.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel_amerced.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_amerced.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel_amerced.Size = new System.Drawing.Size(617, 145);
+            this.tableLayoutPanel_amerced.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 35F));
+            this.tableLayoutPanel_amerced.Size = new System.Drawing.Size(1131, 254);
             this.tableLayoutPanel_amerced.TabIndex = 0;
             // 
             // label2
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label2.Location = new System.Drawing.Point(0, 2);
-            this.label2.Margin = new System.Windows.Forms.Padding(0, 2, 2, 0);
+            this.label2.Location = new System.Drawing.Point(0, 4);
+            this.label2.Margin = new System.Windows.Forms.Padding(0, 4, 4, 0);
             this.label2.Name = "label2";
-            this.label2.Padding = new System.Windows.Forms.Padding(0, 3, 0, 2);
-            this.label2.Size = new System.Drawing.Size(64, 17);
+            this.label2.Padding = new System.Windows.Forms.Padding(0, 5, 0, 4);
+            this.label2.Size = new System.Drawing.Size(110, 30);
             this.label2.TabIndex = 0;
             this.label2.Text = "已交费用:";
             // 
@@ -236,10 +238,10 @@ namespace dp2Circulation
             this.listView_amerced.FullRowSelect = true;
             this.listView_amerced.HideSelection = false;
             this.listView_amerced.LargeImageList = this.imageList_itemType;
-            this.listView_amerced.Location = new System.Drawing.Point(0, 19);
+            this.listView_amerced.Location = new System.Drawing.Point(0, 34);
             this.listView_amerced.Margin = new System.Windows.Forms.Padding(0);
             this.listView_amerced.Name = "listView_amerced";
-            this.listView_amerced.Size = new System.Drawing.Size(617, 100);
+            this.listView_amerced.Size = new System.Drawing.Size(1131, 176);
             this.listView_amerced.SmallImageList = this.imageList_itemType;
             this.listView_amerced.TabIndex = 1;
             this.listView_amerced.UseCompatibleStateImageBehavior = false;
@@ -343,13 +345,15 @@ namespace dp2Circulation
             // 
             this.toolStrip_amerced.Dock = System.Windows.Forms.DockStyle.Fill;
             this.toolStrip_amerced.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStrip_amerced.ImageScalingSize = new System.Drawing.Size(28, 28);
             this.toolStrip_amerced.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton_amerced_selectAll,
             this.toolStripButton_undoAmerce,
             this.toolStripLabel_amercedMessage});
-            this.toolStrip_amerced.Location = new System.Drawing.Point(0, 119);
+            this.toolStrip_amerced.Location = new System.Drawing.Point(0, 210);
             this.toolStrip_amerced.Name = "toolStrip_amerced";
-            this.toolStrip_amerced.Size = new System.Drawing.Size(617, 26);
+            this.toolStrip_amerced.Padding = new System.Windows.Forms.Padding(0, 0, 4, 0);
+            this.toolStrip_amerced.Size = new System.Drawing.Size(1131, 44);
             this.toolStrip_amerced.TabIndex = 3;
             this.toolStrip_amerced.Text = "toolStrip1";
             // 
@@ -359,7 +363,7 @@ namespace dp2Circulation
             this.toolStripButton_amerced_selectAll.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_amerced_selectAll.Image")));
             this.toolStripButton_amerced_selectAll.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_amerced_selectAll.Name = "toolStripButton_amerced_selectAll";
-            this.toolStripButton_amerced_selectAll.Size = new System.Drawing.Size(36, 23);
+            this.toolStripButton_amerced_selectAll.Size = new System.Drawing.Size(58, 38);
             this.toolStripButton_amerced_selectAll.Text = "全选";
             this.toolStripButton_amerced_selectAll.Click += new System.EventHandler(this.toolStripButton_amerced_selectAll_Click);
             // 
@@ -372,7 +376,7 @@ namespace dp2Circulation
             this.toolStripButton_undoAmerce.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_undoAmerce.Image")));
             this.toolStripButton_undoAmerce.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_undoAmerce.Name = "toolStripButton_undoAmerce";
-            this.toolStripButton_undoAmerce.Size = new System.Drawing.Size(73, 23);
+            this.toolStripButton_undoAmerce.Size = new System.Drawing.Size(123, 38);
             this.toolStripButton_undoAmerce.Text = "撤回交费";
             this.toolStripButton_undoAmerce.Click += new System.EventHandler(this.toolStripButton_undoAmerce_Click);
             // 
@@ -381,7 +385,7 @@ namespace dp2Circulation
             this.toolStripLabel_amercedMessage.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.toolStripLabel_amercedMessage.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.toolStripLabel_amercedMessage.Name = "toolStripLabel_amercedMessage";
-            this.toolStripLabel_amercedMessage.Size = new System.Drawing.Size(211, 23);
+            this.toolStripLabel_amercedMessage.Size = new System.Drawing.Size(367, 38);
             this.toolStripLabel_amercedMessage.Text = "当费用事项被勾选后，按纽才可用 -->";
             // 
             // tableLayoutPanel_amercingOverdue
@@ -402,21 +406,23 @@ namespace dp2Circulation
             this.tableLayoutPanel_amercingOverdue.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel_amercingOverdue.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_amercingOverdue.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_amercingOverdue.Size = new System.Drawing.Size(617, 140);
+            this.tableLayoutPanel_amercingOverdue.Size = new System.Drawing.Size(1131, 246);
             this.tableLayoutPanel_amercingOverdue.TabIndex = 0;
             // 
             // toolStrip_amercing
             // 
             this.toolStrip_amercing.Dock = System.Windows.Forms.DockStyle.Fill;
             this.toolStrip_amercing.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStrip_amercing.ImageScalingSize = new System.Drawing.Size(28, 28);
             this.toolStrip_amercing.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton_amercing_selectAll,
             this.toolStripButton_submit,
             this.toolStripButton_modifyPriceAndComment,
             this.toolStripLabel_amercingMessage});
-            this.toolStrip_amercing.Location = new System.Drawing.Point(0, 107);
+            this.toolStrip_amercing.Location = new System.Drawing.Point(0, 192);
             this.toolStrip_amercing.Name = "toolStrip_amercing";
-            this.toolStrip_amercing.Size = new System.Drawing.Size(617, 33);
+            this.toolStrip_amercing.Padding = new System.Windows.Forms.Padding(0, 0, 4, 0);
+            this.toolStrip_amercing.Size = new System.Drawing.Size(1131, 54);
             this.toolStrip_amercing.TabIndex = 5;
             this.toolStrip_amercing.Text = "toolStrip1";
             // 
@@ -426,7 +432,7 @@ namespace dp2Circulation
             this.toolStripButton_amercing_selectAll.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_amercing_selectAll.Image")));
             this.toolStripButton_amercing_selectAll.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_amercing_selectAll.Name = "toolStripButton_amercing_selectAll";
-            this.toolStripButton_amercing_selectAll.Size = new System.Drawing.Size(36, 30);
+            this.toolStripButton_amercing_selectAll.Size = new System.Drawing.Size(58, 48);
             this.toolStripButton_amercing_selectAll.Text = "全选";
             this.toolStripButton_amercing_selectAll.Click += new System.EventHandler(this.toolStripButton_amercing_selectAll_Click);
             // 
@@ -439,7 +445,7 @@ namespace dp2Circulation
             this.toolStripButton_submit.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_submit.Image")));
             this.toolStripButton_submit.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_submit.Name = "toolStripButton_submit";
-            this.toolStripButton_submit.Size = new System.Drawing.Size(54, 30);
+            this.toolStripButton_submit.Size = new System.Drawing.Size(89, 48);
             this.toolStripButton_submit.Text = "交费";
             this.toolStripButton_submit.Click += new System.EventHandler(this.toolStripButton_submit_Click);
             // 
@@ -451,7 +457,7 @@ namespace dp2Circulation
             this.toolStripButton_modifyPriceAndComment.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_modifyPriceAndComment.Image")));
             this.toolStripButton_modifyPriceAndComment.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_modifyPriceAndComment.Name = "toolStripButton_modifyPriceAndComment";
-            this.toolStripButton_modifyPriceAndComment.Size = new System.Drawing.Size(101, 30);
+            this.toolStripButton_modifyPriceAndComment.Size = new System.Drawing.Size(172, 48);
             this.toolStripButton_modifyPriceAndComment.Text = "只修改金额/注释";
             this.toolStripButton_modifyPriceAndComment.Click += new System.EventHandler(this.toolStripButton_modifyPriceAndComment_Click);
             // 
@@ -460,7 +466,7 @@ namespace dp2Circulation
             this.toolStripLabel_amercingMessage.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.toolStripLabel_amercingMessage.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.toolStripLabel_amercingMessage.Name = "toolStripLabel_amercingMessage";
-            this.toolStripLabel_amercingMessage.Size = new System.Drawing.Size(211, 30);
+            this.toolStripLabel_amercingMessage.Size = new System.Drawing.Size(367, 48);
             this.toolStripLabel_amercingMessage.Text = "当费用事项被勾选后，按纽才可用 -->";
             // 
             // listView_overdues
@@ -483,10 +489,10 @@ namespace dp2Circulation
             this.listView_overdues.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView_overdues.FullRowSelect = true;
             this.listView_overdues.HideSelection = false;
-            this.listView_overdues.Location = new System.Drawing.Point(0, 19);
+            this.listView_overdues.Location = new System.Drawing.Point(0, 34);
             this.listView_overdues.Margin = new System.Windows.Forms.Padding(0);
             this.listView_overdues.Name = "listView_overdues";
-            this.listView_overdues.Size = new System.Drawing.Size(617, 88);
+            this.listView_overdues.Size = new System.Drawing.Size(1131, 158);
             this.listView_overdues.TabIndex = 1;
             this.listView_overdues.UseCompatibleStateImageBehavior = false;
             this.listView_overdues.View = System.Windows.Forms.View.Details;
@@ -555,11 +561,11 @@ namespace dp2Circulation
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label3.Location = new System.Drawing.Point(0, 2);
-            this.label3.Margin = new System.Windows.Forms.Padding(0, 2, 2, 0);
+            this.label3.Location = new System.Drawing.Point(0, 4);
+            this.label3.Margin = new System.Windows.Forms.Padding(0, 4, 4, 0);
             this.label3.Name = "label3";
-            this.label3.Padding = new System.Windows.Forms.Padding(0, 3, 0, 2);
-            this.label3.Size = new System.Drawing.Size(64, 17);
+            this.label3.Padding = new System.Windows.Forms.Padding(0, 5, 0, 4);
+            this.label3.Size = new System.Drawing.Size(110, 30);
             this.label3.TabIndex = 0;
             this.label3.Text = "未交费用:";
             // 
@@ -568,19 +574,19 @@ namespace dp2Circulation
             this.panel_amercing_command.AutoSize = true;
             this.panel_amercing_command.BackColor = System.Drawing.SystemColors.Control;
             this.panel_amercing_command.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel_amercing_command.Location = new System.Drawing.Point(0, 107);
+            this.panel_amercing_command.Location = new System.Drawing.Point(0, 192);
             this.panel_amercing_command.Margin = new System.Windows.Forms.Padding(0);
             this.panel_amercing_command.Name = "panel_amercing_command";
-            this.panel_amercing_command.Size = new System.Drawing.Size(617, 1);
+            this.panel_amercing_command.Size = new System.Drawing.Size(1131, 1);
             this.panel_amercing_command.TabIndex = 1;
             // 
             // button_load
             // 
             this.button_load.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button_load.Location = new System.Drawing.Point(258, 0);
-            this.button_load.Margin = new System.Windows.Forms.Padding(2);
+            this.button_load.Location = new System.Drawing.Point(473, 0);
+            this.button_load.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.button_load.Name = "button_load";
-            this.button_load.Size = new System.Drawing.Size(74, 22);
+            this.button_load.Size = new System.Drawing.Size(136, 38);
             this.button_load.TabIndex = 2;
             this.button_load.Text = "装载(&L)";
             this.button_load.UseVisualStyleBackColor = true;
@@ -595,10 +601,10 @@ namespace dp2Circulation
             // button_beginFillSummary
             // 
             this.button_beginFillSummary.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button_beginFillSummary.Location = new System.Drawing.Point(456, 0);
-            this.button_beginFillSummary.Margin = new System.Windows.Forms.Padding(2);
+            this.button_beginFillSummary.Location = new System.Drawing.Point(836, 0);
+            this.button_beginFillSummary.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.button_beginFillSummary.Name = "button_beginFillSummary";
-            this.button_beginFillSummary.Size = new System.Drawing.Size(123, 22);
+            this.button_beginFillSummary.Size = new System.Drawing.Size(226, 38);
             this.button_beginFillSummary.TabIndex = 4;
             this.button_beginFillSummary.Text = "填充书目摘要(&F)";
             this.button_beginFillSummary.UseVisualStyleBackColor = true;
@@ -608,9 +614,10 @@ namespace dp2Circulation
             // checkBox_fillSummary
             // 
             this.checkBox_fillSummary.AutoSize = true;
-            this.checkBox_fillSummary.Location = new System.Drawing.Point(337, 4);
+            this.checkBox_fillSummary.Location = new System.Drawing.Point(618, 7);
+            this.checkBox_fillSummary.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.checkBox_fillSummary.Name = "checkBox_fillSummary";
-            this.checkBox_fillSummary.Size = new System.Drawing.Size(114, 16);
+            this.checkBox_fillSummary.Size = new System.Drawing.Size(195, 25);
             this.checkBox_fillSummary.TabIndex = 3;
             this.checkBox_fillSummary.Text = "装载书目摘要(&S)";
             this.checkBox_fillSummary.UseVisualStyleBackColor = true;
@@ -623,9 +630,10 @@ namespace dp2Circulation
             this.panel_load.Controls.Add(this.label1);
             this.panel_load.Controls.Add(this.checkBox_fillSummary);
             this.panel_load.Controls.Add(this.button_load);
-            this.panel_load.Location = new System.Drawing.Point(3, 3);
+            this.panel_load.Location = new System.Drawing.Point(6, 5);
+            this.panel_load.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.panel_load.Name = "panel_load";
-            this.panel_load.Size = new System.Drawing.Size(605, 24);
+            this.panel_load.Size = new System.Drawing.Size(1109, 42);
             this.panel_load.TabIndex = 5;
             // 
             // tableLayoutPanel_main
@@ -636,21 +644,22 @@ namespace dp2Circulation
             this.tableLayoutPanel_main.Controls.Add(this.splitContainer_main, 0, 1);
             this.tableLayoutPanel_main.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel_main.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel_main.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.tableLayoutPanel_main.Name = "tableLayoutPanel_main";
             this.tableLayoutPanel_main.RowCount = 2;
             this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel_main.Size = new System.Drawing.Size(617, 429);
+            this.tableLayoutPanel_main.Size = new System.Drawing.Size(1131, 751);
             this.tableLayoutPanel_main.TabIndex = 6;
             // 
             // AmerceForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(617, 429);
+            this.ClientSize = new System.Drawing.Size(1131, 751);
             this.Controls.Add(this.tableLayoutPanel_main);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(2);
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "AmerceForm";
             this.ShowInTaskbar = false;
             this.Text = "交费";

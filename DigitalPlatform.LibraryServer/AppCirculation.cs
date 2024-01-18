@@ -16958,6 +16958,10 @@ sessioninfo.ExpandLibraryCodeList);
                         return -1;
                 }
             }
+            else
+            {
+                // 其余情况，是否要把当前位置修改为 ?xxx:xxx 形态？
+            }
 
             // 2020/3/27
             // 最近一次借还本册操作的时间。用于同步借还请求判断先后关系

@@ -47,9 +47,9 @@ namespace dp2SSL
             bool rfid = StringUtil.IsInList("rfid", style);
             bool face = StringUtil.IsInList("face", style);
             if (fingerprint && rfid)
-                this.startMessage.Text = "请放读者卡，或扫指纹 ...";
+                this.startMessage.Text = $"请放读者卡，或扫{PageBorrow.GetFingerprintCaption()} ...";
             else if (fingerprint)
-                this.startMessage.Text = "请扫指纹 ...";
+                this.startMessage.Text = $"请扫{PageBorrow.GetFingerprintCaption()} ...";
             else if (rfid)
                 this.startMessage.Text = "请放读者卡 ...";
 

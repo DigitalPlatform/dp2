@@ -198,7 +198,7 @@ namespace dp2SSL
                                 // 如果 Config 中没有记载断点位置，说明以前从来没有首次同步过。需要进行一次首次同步
                                 if (string.IsNullOrEmpty(startDate))
                                 {
-                                    // SaveStartDate("");
+                                    SaveStartDate(null);    // (2024/1/18) 当本次下载没有完整完成的情况下，下次 dp2ssl (启动后)还会继续尝试重新下载全部读者记录
 
                                     // 专用 token source
                                     using (var download_source = CancellationTokenSource.CreateLinkedTokenSource(token))
@@ -214,7 +214,7 @@ namespace dp2SSL
                                                 (text) =>
                                                 {
                                                     WpfClientInfo.WriteInfoLog(text);
-                                                    PageShelf.TrySetMessage(null, text);
+                                                    ShelfData.TrySetMessage(null, text);
                                                 },
                                                 download_source.Token);
                                             if (repl_result.Value == -1)
@@ -222,11 +222,15 @@ namespace dp2SSL
                                                 // TODO: 判断通讯出错的错误码。如果是通讯出错，则稍后需要重试下载
                                                 _replicatePatronError++;
 
+                                                WpfClientInfo.WriteErrorLog($"下载全部读者记录到本地缓存出错(注意 settings.xml 中分界日期已经清空，这样后面时机恰当时会自动重新尝试下载): {repl_result.ErrorInfo}");
+
                                                 App.CurrentApp.SpeakSequence($"下载全部读者记录到本地缓存出错: {repl_result.ErrorInfo}");
                                             }
                                             else
                                             {
                                                 SaveStartDate(repl_result.StartDate);
+
+                                                WpfClientInfo.WriteErrorLog($"下载全部读者记录到本地缓存成功。分界日期 '{repl_result.StartDate}' 已经记入 settings.xml");
 
                                                 App.CurrentApp.SpeakSequence("下载全部读者记录到本地缓存完成");
                                             }
@@ -329,7 +333,7 @@ namespace dp2SSL
                                             (text) =>
                                             {
                                                 WpfClientInfo.WriteInfoLog(text);
-                                                PageShelf.TrySetMessage(null, text);
+                                                ShelfData.TrySetMessage(null, text);
                                                 App.CurrentApp.SpeakSequence(text);
                                             },
                                             download_source.Token);

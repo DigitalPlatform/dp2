@@ -1659,6 +1659,18 @@ string strText)
         {
             if (stop == _surfaceStop)
             {
+                // 2024/1/17
+                if (stop.ProgressMin == -1
+                    || stop.ProgressMax == -1)
+                {
+                    InternalSetProgressBar(
+    stop,
+    -1,
+    -1,
+    -1);
+                    return;
+                }
+
                 if (stop.ProgressMin == -1)
                     throw new Exception("ProgressMin 尚未初始化");
                 if (stop.ProgressMax == -1)

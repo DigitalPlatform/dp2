@@ -8,6 +8,8 @@ using System.Text;
 using System.Windows.Forms;
 using System.Drawing.Drawing2D;
 using System.Diagnostics;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace DigitalPlatform.CommonControl
 {
@@ -16,7 +18,9 @@ namespace DigitalPlatform.CommonControl
     /// </summary>
     public partial class FloatingMessageForm : Form
     {
+#if REMOVED
         DateTime _clearTime = new DateTime(0);
+#endif
 
         // 是否允许感知 Click 清除文字
         public bool Closeable = false;
@@ -80,7 +84,7 @@ namespace DigitalPlatform.CommonControl
 
                 const int WS_EX_NOACTIVATE = 0x08000000;
                 // const int WS_EX_TOOLWINDOW = 0x00000080;
-                cp.ExStyle |= (int)(WS_EX_NOACTIVATE 
+                cp.ExStyle |= (int)(WS_EX_NOACTIVATE
                     // | WS_EX_TOOLWINDOW
                     );
 
@@ -120,7 +124,7 @@ namespace DigitalPlatform.CommonControl
                         windowLong |= 0x20;
                     API.SetWindowLong(this.Handle, API.GWL_EXSTYLE, windowLong);
                 }
-                catch(ObjectDisposedException)
+                catch (ObjectDisposedException)
                 {
 
                 }
@@ -512,21 +516,51 @@ Stack:
             }
         }
 
+        int _inDelay = 0;
+        CancellationTokenSource _cancelDelay = new CancellationTokenSource();
+
 
         // 设定延时 Clear 时间长度
         public void DelayClear(TimeSpan delta)
         {
+            _cancelDelay?.Cancel();
+            _cancelDelay = new CancellationTokenSource();
+            var token = _cancelDelay.Token;
+            _ = Task.Run(async () =>
+            {
+                _inDelay++;
+                try
+                {
+                    await Task.Delay(delta, token);
+                    token.ThrowIfCancellationRequested();
+                    this.TryInvoke(() =>
+                    {
+                        base.Text = "";
+                        this.Invalidate();
+                    });
+                }
+                finally
+                {
+                    _inDelay--;
+                }
+            });
+#if REMOVED
             this._clearTime = DateTime.Now + delta;
             timer1.Start();
+#endif
         }
 
         public bool InDelay()
         {
+            return _inDelay > 0;
+#if REMOVED
             if (this._clearTime == new DateTime(0))
                 return false;
             return true;
+#endif
         }
 
+#if REMOVED
         private void timer1_Tick(object sender, EventArgs e)
         {
             if (this._clearTime != new DateTime(0)
@@ -538,13 +572,17 @@ Stack:
                 StopDelayClear();
             }
         }
+#endif
 
         public void StopDelayClear()
         {
+            _cancelDelay?.Cancel();
+            _cancelDelay = null;
+#if REMOVED
             timer1.Stop();
             this._clearTime = new DateTime(0);
+#endif
         }
-
     }
 
     /// <summary>

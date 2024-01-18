@@ -987,6 +987,10 @@ readerType);
             // 2020/6/2
             this.Protocol = tag.Protocol;
 
+            // 2024/1/18
+            this.ReaderName = tag.ReaderName;
+            this.Antenna = tag.AntennaID.ToString();
+
             if (tag.TagInfo == null && tag.Protocol == InventoryInfo.ISO15693)
             {
                 // throw new Exception("Fill() taginfo == null");
@@ -1054,10 +1058,17 @@ readerType);
                 return new FillResult { Value = 1 }; // 优化
 
             string protocol_save = this.Protocol;
+            string readername_save = this.ReaderName;
+            string antenna_save = this.Antenna;
 
             this.Clear();
 
             this.Protocol = protocol_save;
+
+            // 2024/1/19
+            this.ReaderName = readername_save;
+            this.Antenna = antenna_save;
+
             this.UID = tag.UID;
             this.PII = pii;
             this.OI = oi;
@@ -1096,6 +1107,9 @@ readerType);
 
             // 2020/9/8
             this.Protocol = null;
+            // 2024/1/18
+            this.ReaderName = null;
+            this.Antenna = null;
 
             this.SetNotEmpty();
 
