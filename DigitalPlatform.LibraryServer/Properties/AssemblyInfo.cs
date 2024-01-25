@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.154.*")]
-[assembly: AssemblyFileVersion("3.154.0.0")]
+[assembly: AssemblyVersion("3.155.*")]
+[assembly: AssemblyFileVersion("3.155.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -382,3 +382,4 @@ ItemCanReturn()
 //		3.152 (2023/12/14) GetItemInfo() API 中的书目格式增加了 coverImageUrl:MediumImage 格式。用于获得书目记录的封面图像 856$u
 //		3.153 (2023/12/15) 修正 Return() API 在验证还书时的一个 bug
 //		3.154 (2024/1/16) 修正 ManageDatabase() API 中刷新书目库配置文件功能中的一个比对非 XML 字符串的 bug
+//		3.155 (2024/1/19) SetReaderInfo() API 修改读者证条码号以后，mongodb 日志动作库里面的记录也会自动修改，这点以前的版本已经做到了。最新版增加了批处理创建 mongodb 日志动作库时，跟随日志动作 setReaderInfo 也改变证条码号的功能。另外，SetReaderInfo() API 和批处理创建 mongodb 日志动作库两处功能，也都实现了跟随删除读者记录动作的效果(会自动把 mongodb 日志动作库中和被删除读者有关的所有记录都删除)

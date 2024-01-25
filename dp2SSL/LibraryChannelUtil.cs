@@ -207,6 +207,7 @@ namespace dp2SSL
                                     Xml = item_xml,
                                     RecPath = item_recpath,
                                     Timestamp = timestamp,
+                                    LastWriteTime = DateTime.Now,
                                 });
 #if NO
                                 context.Entities.Add(new EntityItem

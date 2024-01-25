@@ -29,6 +29,9 @@ namespace dp2SSL
         public string RecPath { get; set; }
         public string Xml { get; set; }
         public byte[] Timestamp { get; set; }
+
+        // 2024/1/25
+        public DateTime LastWriteTime { get; set; } // 最后更新时间
     }
 
     public class PatronItem

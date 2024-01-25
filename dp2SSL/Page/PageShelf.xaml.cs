@@ -39,6 +39,8 @@ namespace dp2SSL
     /// </summary>
     public partial class PageShelf : MyPage, INotifyPropertyChanged
     {
+        SmoothTable _smoothTable = new SmoothTable();
+
         /*
         LayoutAdorner _adorner = null;
         AdornerLayer _layer = null;
@@ -572,6 +574,15 @@ namespace dp2SSL
                 }
             }
 
+            if (string.IsNullOrEmpty(App.FingerprintUrl) == false)
+            {
+                _cancelFingerprintVideo?.Cancel();
+                _cancelFingerprintVideo = new CancellationTokenSource();
+                this.fingerprintVideo.StartDisplayFingerprint(_cancelFingerprintVideo.Token);
+            }
+            else
+                this.fingerprintVideo.Hide();
+
             // InputMethod.Current.ImeState = InputMethodState.Off;
 #if DOOR_MONITOR
 
@@ -599,6 +610,7 @@ namespace dp2SSL
 #endif
         }
 
+        CancellationTokenSource _cancelFingerprintVideo = new CancellationTokenSource();
 
         private void App_Updated(object sender, UpdatedEventArgs e)
         {
@@ -728,7 +740,8 @@ namespace dp2SSL
             // return:
             //      false   没有成功
             //      true    成功
-            SetPatronInfo(new GetMessageResult { Message = barcode }, "barcode");
+            if (SetPatronInfo(new GetMessageResult { Message = barcode }, "barcode") == false)
+                return;
 
             // resut.Value
             //      -1  出错
@@ -1570,6 +1583,9 @@ namespace dp2SSL
 
             App.Updated -= App_Updated;
 
+            _cancelFingerprintVideo?.Cancel();
+            _cancelFingerprintVideo = null;
+
             CancelDelayClearTask();
 
             // 提交尚未提交的取出和放入
@@ -1608,10 +1624,19 @@ namespace dp2SSL
         private async void FingerprintManager_Touched(object sender, TouchedEventArgs e)
 #pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
         {
+            // 2024/1/20
+            // 忽略图像消息
+            if (e.Result.Message != null
+                && e.Result.Message.StartsWith("!image"))
+                return;
+
+            SetQuality(e.Quality <= 0 ? "" : e.Quality.ToString());
+
             // return:
             //      false   没有成功
             //      true    成功
-            SetPatronInfo(e.Result, "fingerprint");
+            if (SetPatronInfo(e.Result, "fingerprint") == false)
+                return;
 
             // resut.Value
             //      -1  出错
@@ -1650,6 +1675,12 @@ namespace dp2SSL
                     PatronClear();    // 只有当面板上的读者信息来源是指纹仪时，才清除面板上的读者信息
                 return false;
             }
+            else if (result.Quality == -1)
+            {
+                // 掌纹(或者指纹)图像质量较差
+                // TODO: 有没有必要提示，如何提示? 比如积累到一定次数以后，提醒“请调整手掌距离”
+                return false;
+            }
             else
             {
                 // 清除以前残留的报错信息
@@ -1658,6 +1689,23 @@ namespace dp2SSL
 
             if (result.Message == null)
                 return false;
+
+            /*
+            // 2024/1/20
+            if (_smoothTable.Check(result?.Message) == false)
+                return false; // 平滑掉
+            */
+
+            // 2024/1/20
+            if (string.IsNullOrEmpty(App.FingerprintUrl) == false
+                && _patron.PII == result.Message
+                && DateTime.Now - _smoothTable.GetLastTime(result.Message) < TimeSpan.FromSeconds(5))
+            {
+                App.CurrentApp.SpeakSequence($"{PageBorrow.GetFingerprintCaption()}识别重复");
+                return false; // 防止短时间重复同一个条码
+            }
+
+            _smoothTable.SetLastTime(result.Message, DateTime.Now);
 
             PatronClear();
             _patron.IsFingerprintSource = true;
@@ -1675,27 +1723,15 @@ namespace dp2SSL
 
         private void FingerprintManager_SetError(object sender, SetErrorEventArgs e)
         {
+            /*
             SetGlobalError("fingerprint", e.Error);
+            */
         }
 
         private void RfidManager_SetError(object sender, SetErrorEventArgs e)
         {
-            SetGlobalError("rfid", e.Error);
             /*
-            if (e.Error == null)
-            {
-                // 恢复正常
-            }
-            else
-            {
-                // 进入错误状态
-                if (_rfidState != "error")
-                {
-                    await ClearBooksAndPatron(null);
-                }
-
-                _rfidState = "error";
-            }
+            SetGlobalError("rfid", e.Error);
             */
         }
 
@@ -2841,7 +2877,11 @@ namespace dp2SSL
                 {
                     var warning = ShelfData.CheckUiiDup(ShelfData.l_All);
                     if (warning != null)
+                    {
+                        WpfClientInfo.WriteErrorLog($"InitialShelfEntities() 总体查重 UII 遇到错误: {warning}");
+                        ShelfData.TrySetMessage(null, $"InitialShelfEntities() 总体查重 UII 遇到错误: {warning}");
                         App.ErrorBox("发现错误: 图书 UII 出现重复", warning + "\r\n\r\n请尽快将这些图书从书柜中取出进行甄别、重新加工处理");
+                    }
                 }
 
                 // 2021/10/11
@@ -4898,7 +4938,9 @@ namespace dp2SSL
             // return:
             //      false   没有成功
             //      true    成功
-            SetPatronInfo(message, "face");
+            if (SetPatronInfo(message, "face") == false)
+                return;
+
             SetQuality("");
 
             // resut.Value
@@ -4999,10 +5041,13 @@ namespace dp2SSL
 
         void SetQuality(string text)
         {
+            this.fingerprintVideo.SetQuality(text);
+#if REMOVED
             App.Invoke(new Action(() =>
             {
                 this.Quality.Text = text;
             }));
+#endif
         }
 
         void DisplayVideo(VideoWindow window, TimeSpan timeout)
@@ -5096,7 +5141,7 @@ namespace dp2SSL
             }
         }
 
-        #endregion
+#endregion
 
         private void ClearPatron_Click(object sender, RoutedEventArgs e)
         {

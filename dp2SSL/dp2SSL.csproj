@@ -36,7 +36,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>67</ApplicationRevision>
+    <ApplicationRevision>78</ApplicationRevision>
     <ApplicationVersion>1.8.63.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -563,6 +563,9 @@
     <Compile Include="Controls\AlignableWrapPanel.cs" />
     <Compile Include="Controls\ColumnDefinitionExtended.cs" />
     <Compile Include="Controls\CustomThumb.cs" />
+    <Compile Include="Controls\FingerprintVideoControl.xaml.cs">
+      <DependentUpon>FingerprintVideoControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\TouchScrolling.cs" />
     <Compile Include="Converter\BitmapConvertor.cs" />
     <Compile Include="Converter\ThicknessMaxConverter.cs" />
@@ -655,6 +658,7 @@
     <Compile Include="Models\PatronReplication.cs" />
     <Compile Include="NetworkUsage.cs" />
     <Compile Include="Resources\SkinResourceDictionary.cs" />
+    <Compile Include="SmoothTable.cs" />
     <Compile Include="Tasks\LampPerdayTask.cs" />
     <Compile Include="Models\RequestContext.cs" />
     <Compile Include="Models\DelayAction.cs" />
@@ -711,6 +715,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\DoorControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\FingerprintVideoControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

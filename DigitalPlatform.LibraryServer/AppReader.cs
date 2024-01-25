@@ -3322,6 +3322,13 @@ root, strLibraryCode);
     1);
             }
 
+            // 2024/1/19
+            // 删除出纳历史库里面的所有相关记录
+            if (string.IsNullOrEmpty(strOldBarcode) == false
+                && this.ChargingOperDatabase != null
+                && this.ChargingOperDatabase.Enabled)
+                this.ChargingOperDatabase.DeletePatronBarcode(strOldBarcode);
+
             return 1;
         ERROR1:
             kernel_errorcode = ErrorCodeValue.CommonError;

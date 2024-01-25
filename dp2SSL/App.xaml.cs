@@ -281,6 +281,8 @@ namespace dp2SSL
 #endif
             FingerprintManager.Base.Name = "指纹中心";
             FingerprintManager.Url = App.FingerprintUrl;
+            // 2024/1/22
+            FingerprintManager.Base.Name = PageBorrow.GetFingerprintCaption() + "中心";
             FingerprintManager.SetError += FingerprintManager_SetError;
             WpfClientInfo.WriteInfoLog("FingerprintManager.Start()");
             FingerprintManager.Start(_cancelApp.Token);
@@ -1706,6 +1708,7 @@ namespace dp2SSL
             }
         }
 
+        // (智能书柜)自动同步全部册记录和书目摘要到本地
         public static bool ReplicateEntities
         {
             get
@@ -2696,7 +2699,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
         // parameters:
         //      style   风格。
         //              若包含(size:xxx) tall middle wide full 之一，表示窗口显示的大小
-        public static void ErrorBox(
+        public static ProgressWindow ErrorBox(
             string title,
             string message,
             string color = "red",
@@ -2766,6 +2769,8 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                     progress.MessageText = message;
                     progress.BackColor = color;
                 }));
+
+            return progress;
         }
 
         // 显示当前对话框的内容

@@ -91,5 +91,17 @@ namespace dp2SSL
         {
             this.Close();
         }
+
+        private void urlDefault2_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = (Button)sender;
+            PropertyItem item = (PropertyItem)button.DataContext;
+            if (item.PropertyName == "FingerprintURL")
+            {
+                item.Value = "ipc://PalmChannel/PalmServer";
+            }
+            else
+                throw new Exception($"未知的属性名{item.PropertyName}");
+        }
     }
 }

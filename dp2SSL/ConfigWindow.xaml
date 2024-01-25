@@ -23,7 +23,7 @@
                2) The property named "FirstName"
                3) The property named "Spouse"
                Replacing the default editor. -->
-                <xctk:EditorTemplateDefinition TargetProperties="RfidURL,FingerprintURL,FaceURL">
+                <xctk:EditorTemplateDefinition TargetProperties="RfidURL,FaceURL">
                     <xctk:EditorTemplateDefinition.EditingTemplate>
                         <DataTemplate>
                             <DockPanel HorizontalAlignment="Stretch">
@@ -37,6 +37,24 @@
                         </DataTemplate>
                     </xctk:EditorTemplateDefinition.EditingTemplate>
                 </xctk:EditorTemplateDefinition>
+
+                <xctk:EditorTemplateDefinition TargetProperties="FingerprintURL">
+                    <xctk:EditorTemplateDefinition.EditingTemplate>
+                        <DataTemplate>
+                            <DockPanel HorizontalAlignment="Stretch">
+                                <Button Name="urlClear" Click="UrlClear_Click"
+                                        Padding="6,4,6,4" DockPanel.Dock="Right">清除</Button>
+                                <Button Name="urlDefault" Click="UrlDefault_Click" 
+                                        Padding="6,4,6,4"  DockPanel.Dock="Right">指纹</Button>
+                                <Button Name="urlDefault2" Click="urlDefault2_Click" 
+                                        Padding="6,4,6,4"  DockPanel.Dock="Right">掌纹</Button>
+                                <TextBox Text="{Binding Value}" 
+                                         Padding="6,4,6,4" HorizontalAlignment="Stretch"/>
+                            </DockPanel>
+                        </DataTemplate>
+                    </xctk:EditorTemplateDefinition.EditingTemplate>
+                </xctk:EditorTemplateDefinition>
+
             </xctk:PropertyGrid.EditorDefinitions>
         </xctk:PropertyGrid>
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">

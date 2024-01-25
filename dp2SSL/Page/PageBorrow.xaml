@@ -33,12 +33,12 @@
         <Button Grid.Row="0" Grid.ColumnSpan="3">Top</Button>
         -->
         <!-- left bar -->
-        <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Vertical"
+        <DockPanel Grid.Row="1" Grid.Column="0"
                     Margin="10,10,0,0">
-            <Grid Height="20" />
+            <Grid Height="20" DockPanel.Dock="Top"/>
             <Button Name="goHome" ToolTip="返回主菜单"
                     Style="{DynamicResource RoundedButtonLightStyle}"
-                    BorderThickness="0" Click="GoHome_Click">
+                    BorderThickness="0" Click="GoHome_Click" DockPanel.Dock="Top">
                 <!--
                 <fa:ImageAwesome Icon="Home"
                              Height="40" Foreground="{StaticResource buttonForeground}" Margin="6"/>
@@ -51,10 +51,10 @@
                                             Width="36" Height="36" Foreground="{StaticResource buttonForeground}" Margin="6"/>
 
             </Button>
-            <Grid Height="20" />
+            <Grid Height="20" DockPanel.Dock="Top"/>
             <Button Name="goHelp" ToolTip="帮助"
                     Style="{DynamicResource RoundedButtonLightStyle}" 
-                    BorderThickness="0">
+                    BorderThickness="0" DockPanel.Dock="Top">
                 <fa:ImageAwesome Icon="LightbulbOutline"
                              Height="40" Foreground="{StaticResource buttonForeground}" Margin="6"/>
                 <!--
@@ -62,10 +62,13 @@
                                             Width="40" Height="40" Foreground="{StaticResource buttonForeground}" Margin="6" Padding="1"/>
                 -->
             </Button>
-            <Grid Height="40" />
-            <TextBlock Name="Quality" ToolTip="指纹质量"
-                       Foreground="White" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"></TextBlock>
-        </StackPanel>
+            <Grid Height="40" DockPanel.Dock="Top"/>
+            <!--
+            <TextBlock Name="Quality" ToolTip="指纹质量" Background="Red"
+                       Foreground="{StaticResource normalForeground}" FontSize="16" HorizontalAlignment="Center" DockPanel.Dock="Bottom"></TextBlock>
+            -->
+            <local:FingerprintVideoControl x:Name="fingerprintVideo" DockPanel.Dock="Bottom"/>
+        </DockPanel>
         <Button Grid.Row="1" Grid.Column="2">Right</Button>
         <!--
         <Button Grid.Row="2" Grid.ColumnSpan="3">Bottom</Button>

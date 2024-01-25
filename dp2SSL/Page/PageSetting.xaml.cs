@@ -22,7 +22,7 @@ using DigitalPlatform.Face;
 using DigitalPlatform.WPF;
 using DigitalPlatform.IO;
 using DigitalPlatform.Net;
-using System.Windows.Navigation;
+using dp2SSL.Models;
 
 namespace dp2SSL
 {
@@ -408,6 +408,7 @@ string color = "red")
             //FingerprintManager.Base.State = "pause";
             var old_seconds = App.AutoBackMainMenuSeconds;
             var old_messageServerUrl = App.messageServerUrl;
+            var old_replicateEntities = App.ReplicateEntities;
 
             App.PauseBarcodeScan();
             try
@@ -547,6 +548,33 @@ string color = "red")
                         progress.Close();
                         ForgetDialog(progress);
                     }));
+                }
+            }
+
+            // 2024/1/24
+            if (App.Function == "智能书柜"
+                && App.ReplicateEntities != old_replicateEntities)
+            {
+                if (App.ReplicateEntities == true)
+                {
+                    WpfClientInfo.WriteInfoLog("因 App.ReplicateEntities 变为 true，自动触发重新全量下载册记录");
+                    App.CurrentApp.SpeakSequence("重新全量下载册记录");
+
+                    // 重新启动全量下载册记录到本地缓存
+                    ShelfData.RestartReplicateEntities();
+                    App.ErrorBox("参数修改", $"因 App.ReplicateEntities 变为 true，自动触发了重新全量下载册记录", "green");
+                }
+                else
+                {
+                    // 清除本地缓存数据库中的所有册记录和书目摘要记录
+
+                    WpfClientInfo.WriteInfoLog("因 App.ReplicateEntities 变为 false，自动触发清除本地缓存的全部册记录和书目摘要");
+                    App.CurrentApp.SpeakSequence("清除本地缓存的册记录和书目摘要");
+
+                    ShelfData.StopDownloadEntity();
+                    // 清除本地册缓存数据库
+                    _ = EntityReplication.ClearLocalEntitiesAsync(App.CancelToken);
+                    App.ErrorBox("参数修改", "因 App.ReplicateEntities 变为 false，自动触发了清除本地缓存的全部册记录和书目摘要", "green");
                 }
             }
         }
@@ -827,7 +855,7 @@ string color = "red")
             bool detect_date)
         {
             string filename = Path.Combine(WpfClientInfo.UserDir, "daily_wallpaper");
-            
+
             if (File.Exists(filename) && detect_date)
             {
                 var last_time = File.GetLastWriteTime(filename);
@@ -836,7 +864,7 @@ string color = "red")
                 if (date == DateTime.Now.ToString("yyyyMMdd"))
                     return;
             }
-            
+
             var result = await DownloadBingWallPaperAsync(
                 page,
                 _last_wallpaper_url,
@@ -1382,9 +1410,12 @@ MessageBoxOptions.DefaultDesktopOnly);
         // 重做全量同步册记录和书目摘要
         private void redoReplicateEntity_Click(object sender, RoutedEventArgs e)
         {
-            //
+            string comment = "";
+            if (App.ReplicateEntities == false)
+                comment = "\r\n(注: “同步册记录”配置参数刚被自动改为 true)";
+            // 可能改变“(智能书柜)自动同步全部册记录和书目摘要到本地”配置参数
             ShelfData.RestartReplicateEntities();
-            App.ErrorBox("全量同步册记录和书目摘要", "全量同步册记录和书目摘要的操作已安排", "green");
+            App.ErrorBox("全量同步册记录和书目摘要", $"全量同步册记录和书目摘要的操作已安排。{comment}", "green");
         }
 
         // 导入脱机册记录和书目摘要

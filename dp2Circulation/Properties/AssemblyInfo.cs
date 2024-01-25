@@ -238,3 +238,4 @@ using System.Runtime.InteropServices;
 //      2024/1/8    读者查询窗导出借阅历史到实体查询窗的功能，增加了一个询问对话框，询问是每个读者记录的借阅历史导出到一个单独的实体查询窗，还是所有读者记录的都导出到唯一的一个实体查询窗
 //      2024/1/16   书目查询窗共享检索时的利用 looping 方式改进。Z39.50 检索时 .ShowMessage() 后来没有清除显示的 bug 被修正
 //      2024/1/17   重构 AmerceForm 中的两个装载信息的线程为 Task，消除了 NewStop 类抛异常的 bug
+//      2024/1/19   把两处笔误 material_series_area 改为正确的 series_area。涉及到书目 table 格式分部定义 

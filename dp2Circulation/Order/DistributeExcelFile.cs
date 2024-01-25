@@ -1246,7 +1246,7 @@ int MAX_CHARS = 50)
             "biblio_material_specific_area -- 资料特殊细节项",
             "biblio_publication_area -- 出版发行项",
             "biblio_material_description_area -- 载体形态项",
-            "biblio_material_series_area -- 丛编项",
+            "biblio_series_area -- 丛编项",
             "biblio_notes_area -- 附注项",
             "biblio_resource_identifier_area -- 获得方式项",
             "biblio_isbn -- ISBN",

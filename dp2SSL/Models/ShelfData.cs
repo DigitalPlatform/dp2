@@ -894,16 +894,33 @@ namespace dp2SSL
 
         public static void TriggerDownloadEntitiesAndPatrons()
         {
-            WpfClientInfo.WriteInfoLog("因感知到 library.xml rfid 元素变化，触发重新全量下载册记录和读者记录");
-            App.CurrentApp.SpeakSequence("重新全量下载册记录和读者记录");
+            WpfClientInfo.WriteInfoLog("因感知到 library.xml rfid 元素变化，触发重新全量下载读者记录");
+            App.CurrentApp.SpeakSequence("重新全量下载读者记录");
 
             // 停止可能正在进行的长操作
             ShelfData.StopDownloadPatron();
-            ShelfData.StopDownloadEntity();
-
             // 重做
             ShelfData.RedoReplicatePatron();
-            ShelfData.RestartReplicateEntities();
+
+            if (App.ReplicateEntities == true)
+            {
+                WpfClientInfo.WriteInfoLog("因感知到 library.xml rfid 元素变化，触发重新全量下载册记录");
+                App.CurrentApp.SpeakSequence("重新全量下载册记录");
+
+                ShelfData.StopDownloadEntity();
+                // 可能改变“(智能书柜)自动同步全部册记录和书目摘要到本地”配置参数
+                ShelfData.RestartReplicateEntities();
+            }
+            else
+            {
+                // 2024/1/23
+                WpfClientInfo.WriteInfoLog("因感知到 library.xml rfid 元素变化，触发清除本地缓存的全部册记录和书目摘要");
+                App.CurrentApp.SpeakSequence("清除本地缓存的册记录和书目摘要");
+
+                ShelfData.StopDownloadEntity();
+                // 清除本地册缓存数据库
+                _ = EntityReplication.ClearLocalEntitiesAsync(App.CancelToken);
+            }
         }
 
         public static NormalResult GetRightsTableFromServer()
@@ -3212,9 +3229,10 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                     }
                 }
 
-                // 询问放入的图书是否需要移交到当前书柜馆藏地
+                // 询问拿出的图书是否需要修改当前架位字段
                 if (transferouts.Count > 0)
                 {
+                    int item_count = 0;
                     using (var releaser = await _askLimit.EnterAsync())
                     {
                         bAsked = true;
@@ -3235,6 +3253,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                         }
                         */
                         EntityCollection collection = BuildEntityCollection(transferouts);
+                        item_count = collection.Count;
                         string selection = "";
                         string target = "";
                         App.Invoke(new Action(() =>
@@ -3311,6 +3330,12 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                             await CheckOiChangingAsync(transferouts, "out");
                         }
                     }
+
+                    // 2024/1/24
+                    App.ErrorBox("重要提示和警告",
+                        $"请注意当前下架调出的 {item_count} 册图书，其防盗标志位(EAS)为 Off 状态，这意味着经过门禁的时候 **不会** 报警。因此 **不能直接上架** 提供开架外借，而 **必须** 经过 1)自助借还机修正 EAS 状态，或者 2)经过盘点修正 EAS 状态后，才可以上架提供开架外借",
+                        "yellow",
+                        "");
                 }
             }
 
@@ -3773,11 +3798,11 @@ ShelfData.LibraryNetworkCondition == "OK" ? "" : "offline");
                         }
                         */
 
-                        if (silently == false
-                            && string.IsNullOrEmpty(entity.Error) == false)
+                        if (string.IsNullOrEmpty(entity.Error) == false)
                         {
-                            warnings.Add($"UID 为 '{tag.OneTag?.UID}' (PII 为 '{entity.PII}') 的标签解析出错: {entity.Error}");
-                            WpfClientInfo.WriteErrorLog($"InitialShelfEntities() 遇到 tag (UID={tag.OneTag?.UID}) 解析出错: {entity.Error}\r\ntag 详情：{tag.ToString()}");
+                            if (silently == false)
+                                warnings.Add($"UID 为 '{tag.OneTag?.UID}' (PII 为 '{entity.PII}') 的标签解析出错: {entity.Error}");
+                            WpfClientInfo.WriteErrorLog($"InitialShelfEntities() 遇到 tag (UID={tag.OneTag?.UID}) 解析出错: {entity.Error}\r\ntag 详情：{tag.ToString()}\r\nsilently={silently}");
                         }
                     }
                     catch (TagDataException ex)
@@ -3869,11 +3894,14 @@ ShelfData.LibraryNetworkCondition == "OK" ? "" : "offline");
             });
             */
 
-            if (silently == false)
             {
                 string error = CheckUiiDup(all);
                 if (error != null)
-                    warnings.Add(error);
+                {
+                    if (silently == false)
+                        warnings.Add(error);
+                    WpfClientInfo.WriteErrorLog($"InitialShelfEntities() 遇到错误 '{error}'\r\nsilently={silently}");
+                }
             }
 
             return new InitialShelfResult
@@ -3919,7 +3947,7 @@ ShelfData.LibraryNetworkCondition == "OK" ? "" : "offline");
                 {
                     infos.Add($"{dup.Key}:{GetDoorNames(dup.Entities)}");
                 }
-                return $"下列标签的 UII 发生了重复: {StringUtil.MakePathList(infos, "; ")}";
+                return $"下列图书标签的 UII 发生了重复: {StringUtil.MakePathList(infos, "; ")}";
             }
 
             return null;
@@ -7248,6 +7276,7 @@ out string block_map);
                                 PII = o.UII,
                                 Xml = o.Xml,
                                 Timestamp = o.Timestamp,
+                                LastWriteTime = DateTime.Now,
                             });
 
                         // 保存书目摘要
@@ -7278,6 +7307,8 @@ out string block_map);
         // 检测和升级数据库架构
         public static void UpgradeDatabase()
         {
+            bool biblio_db_cleared = false;
+
             var version = WpfClientInfo.Config?.Get("database", "version", "0.01");
             if (string.IsNullOrEmpty(version))
                 version = "0.01";
@@ -7289,9 +7320,34 @@ out string block_map);
                 {
                     context.Database.EnsureDeleted();
                     context.Database.EnsureCreated();
+                    biblio_db_cleared = true;
                 }
                 version = "0.02";
                 WpfClientInfo.Config?.Set("database", "version", version);
+            }
+            // 2024/1/25
+            // --> 0.03
+            // entities 表增加 LastWriteTime 字段
+            if (StringUtil.CompareVersion(version, "0.03") < 0)
+            {
+                using (BiblioCacheContext context = new BiblioCacheContext())
+                {
+                    context.Database.EnsureDeleted();
+                    context.Database.EnsureCreated();
+                    biblio_db_cleared = true;
+                }
+                version = "0.03";
+                WpfClientInfo.Config?.Set("database", "version", version);
+            }
+
+            // 2024/1/25
+            if (biblio_db_cleared)
+            {
+                // 迫使全部册记录和书目摘要重新下载一次
+                if (App.ReplicateEntities == true)
+                    RestartReplicateEntities();
+
+                // 注: 读者记录的本地缓存，会自动探测 SQLite 表中有没有数据，来决定是否需要重新下载
             }
         }
 

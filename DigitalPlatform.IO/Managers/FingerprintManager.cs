@@ -228,7 +228,7 @@ new SetErrorEventArgs
             }
         }
 
-        static string Name
+        public static string Name
         {
             get
             {
@@ -420,6 +420,35 @@ new SetErrorEventArgs
                         Error = $"{Name}出现异常: {ExceptionUtil.GetAutoText(ex)}"
                     });
                 return new GetImageResult { Value = -1, ErrorInfo = ex.Message };
+            }
+        }
+
+
+        // 2024/1/22
+        // 设置参数。如果服务器不认识一个参数，则返回 false
+        public static bool SetParameter(string name, object value)
+        {
+            try
+            {
+                BaseChannel<IFingerprint> channel = Base.GetChannel();
+                try
+                {
+                    var result = channel.Object.SetParameter(name, value);
+                    return result;
+                }
+                finally
+                {
+                    Base.ReturnChannel(channel);
+                }
+            }
+            catch (Exception ex)
+            {
+                Base.TriggerSetError(ex,
+                    new SetErrorEventArgs
+                    {
+                        Error = $"{Name}出现异常: {ExceptionUtil.GetAutoText(ex)}"
+                    });
+                return false;
             }
         }
 

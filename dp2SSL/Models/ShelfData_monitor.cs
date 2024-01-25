@@ -188,13 +188,18 @@ namespace dp2SSL
                         // TODO: 断网模式下是否需要语音警告，有全量同步操作被延迟
                         if (ShelfData.LibraryNetworkCondition == "OK")
                         {
+                            bool downloaded = WpfClientInfo.Config.GetBoolean("entityReplication", "downloaded", false);
+                            // testing 
+                            // downloaded = false;
 
-                            // 下载或同步读者信息
+
                             string startDate = LoadStartDate();
                             if (/*download_complete == false || */
                             string.IsNullOrEmpty(startDate)
                             && _replicatePatronError <= 0)
                             {
+                                // *** 下载或同步读者信息
+
                                 // 如果 Config 中没有记载断点位置，说明以前从来没有首次同步过。需要进行一次首次同步
                                 if (string.IsNullOrEmpty(startDate))
                                 {
@@ -249,67 +254,13 @@ namespace dp2SSL
                                 }
                                 // download_complete = true;
                             }
-                            else
+
+                            else if (App.ReplicateEntities == true
+&& downloaded == false
+&& _replicateEntityError <= 0)
                             {
-                                // testing
-                                // 进行零星同步
-                                if (_replicateOnce
-                                    || DateTime.Now - _lastReplicateTime > _replicatePeriod)
-                                {
-#if TESTING
-                                    {
-                                        if (DateTime.Now - _lastReplicateTime > _replicatePeriod
-                                            /*&& _replicateOnce == false*/)
-                                            App.CurrentApp.SpeakSequence("轮询日志");
-                                    }
-#endif
+                                // *** 下载册记录和书目摘要到本地缓存
 
-                                    _replicateOnce = false;
-                                    // string startDate = LoadStartDate();
-
-                                    // testing
-                                    // startDate = "20200507:0-";
-
-                                    if (string.IsNullOrEmpty(startDate) == false)
-                                    {
-                                        string endDate = DateTimeUtil.DateTimeToString8(DateTime.Now);
-
-                                        // parameters:
-                                        //      strLastDate   处理中断或者结束时返回最后处理过的日期
-                                        //      last_index  处理或中断返回时最后处理过的位置。以后继续处理的时候可以从这个偏移开始
-                                        // return:
-                                        //      -1  出错
-                                        //      0   中断
-                                        //      1   完成
-                                        ReplicationResult repl_result = await PatronReplication.DoReplicationAsync(
-                                            startDate,
-                                            endDate,
-                                            LogType.OperLog,
-                                            token);
-                                        if (repl_result.Value == -1)
-                                        {
-                                            WpfClientInfo.WriteErrorLog($"同步出错: {repl_result.ErrorInfo}");
-                                        }
-                                        else if (repl_result.Value == 1)
-                                        {
-                                            string lastDate = repl_result.LastDate + ":" + repl_result.LastIndex + "-";    // 注意 - 符号不能少。少了意思就会变成每次只获取一条日志记录了
-                                            SaveStartDate(lastDate);
-                                        }
-
-                                        _lastReplicateTime = DateTime.Now;
-                                    }
-                                }
-                            }
-
-                            // 下载册记录和书目摘要到本地缓存
-                            bool downloaded = WpfClientInfo.Config.GetBoolean("entityReplication", "downloaded", false);
-                            // testing 
-                            // downloaded = false;
-
-                            if (App.ReplicateEntities == true
-                            && downloaded == false
-                            && _replicateEntityError <= 0)
-                            {
                                 List<string> unprocessed = new List<string>();
                                 // 注: 彻底重做前要清除 unprocessed
                                 string unprocessed_list = WpfClientInfo.Config.Get("entityReplication", "unprocessed", null);
@@ -361,6 +312,9 @@ namespace dp2SSL
                                             WpfClientInfo.Config.Set("entityReplication", "unprocessed", null);
 
                                             App.CurrentApp.SpeakSequence("下载全部册记录到本地缓存完成");
+
+                                            // 立刻允许接着做一次零星同步
+                                            ActivateMonitor();
                                         }
                                     }
                                     finally
@@ -372,10 +326,63 @@ namespace dp2SSL
                                     }
                                 }
                             }
+
+
+                            else
+                            {
+                                // *** 进行零星同步
+                                if (_replicateOnce
+                                    || DateTime.Now - _lastReplicateTime > _replicatePeriod)
+                                {
+#if TESTING
+                                    {
+                                        if (DateTime.Now - _lastReplicateTime > _replicatePeriod
+                                            /*&& _replicateOnce == false*/)
+                                            App.CurrentApp.SpeakSequence("轮询日志");
+                                    }
+#endif
+
+                                    _replicateOnce = false;
+                                    // string startDate = LoadStartDate();
+
+                                    // testing
+                                    // startDate = "20200507:0-";
+
+                                    if (string.IsNullOrEmpty(startDate) == false)
+                                    {
+                                        string endDate = DateTimeUtil.DateTimeToString8(DateTime.Now);
+
+                                        // parameters:
+                                        //      strLastDate   处理中断或者结束时返回最后处理过的日期
+                                        //      last_index  处理或中断返回时最后处理过的位置。以后继续处理的时候可以从这个偏移开始
+                                        // return:
+                                        //      -1  出错
+                                        //      0   中断
+                                        //      1   完成
+                                        ReplicationResult repl_result = await PatronReplication.DoReplicationAsync(
+                                            startDate,
+                                            endDate,
+                                            LogType.OperLog,
+                                            token);
+                                        if (repl_result.Value == -1)
+                                        {
+                                            WpfClientInfo.WriteErrorLog($"同步出错: {repl_result.ErrorInfo}");
+                                        }
+                                        else if (repl_result.Value == 1)
+                                        {
+                                            string lastDate = repl_result.LastDate + ":" + repl_result.LastIndex + "-";    // 注意 - 符号不能少。少了意思就会变成每次只获取一条日志记录了
+                                            SaveStartDate(lastDate);
+                                        }
+
+                                        _lastReplicateTime = DateTime.Now;
+                                    }
+                                }
+                            }
+
+
                         }
                     }
                     _monitorTask = null;
-
                 }
                 catch (OperationCanceledException)
                 {
@@ -417,12 +424,13 @@ TaskScheduler.Default).Unwrap();
             }
         }
 
+        // 可能改变“(智能书柜)自动同步全部册记录和书目摘要到本地”配置参数
         public static void RestartReplicateEntities()
         {
             _replicateEntityError = -1; // -1 效果会是后面 replication 停止后会自动清空 unprocessed 记忆 (见注:111)
             WpfClientInfo.Config.SetBoolean("entityReplication", "downloaded", false);
             WpfClientInfo.Config.Set("entityReplication", "unprocessed", null);
-            App.ReplicateEntities = true;
+            App.ReplicateEntities = true;   // 注: 这样就可能改变了“(智能书柜)自动同步全部册记录和书目摘要到本地”配置参数
         }
 
         // 初始化阶段探测本地读者缓存数据是否存在，如果不存在则设法启动首次读者同步

@@ -532,6 +532,11 @@ return { None : '' };
         {
             if (strOldBarcode == strNewBarcode)
                 return; // 没有必要修改
+            // 2024/1/19
+            if (string.IsNullOrEmpty(strOldBarcode)
+                || string.IsNullOrEmpty(strNewBarcode))
+                return; // 没有必要修改
+
             IMongoCollection<ChargingOperItem> collection = this._collection;
             if (collection == null)
                 return;
@@ -550,6 +555,19 @@ return { None : '' };
             collection.UpdateMany(
                 o => o.PatronBarcode == strOldBarcode,
                 updateDef);
+        }
+
+        // 2024/1/19
+        public void DeletePatronBarcode(string strOldBarcode)
+        {
+            if (string.IsNullOrEmpty(strOldBarcode))
+                return; // 没有必要修改
+            IMongoCollection<ChargingOperItem> collection = this._collection;
+            if (collection == null)
+                return;
+
+            collection.DeleteMany(
+                o => o.PatronBarcode == strOldBarcode);
         }
     }
 

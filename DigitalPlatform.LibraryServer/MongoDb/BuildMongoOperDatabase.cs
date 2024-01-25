@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -438,6 +439,15 @@ namespace DigitalPlatform.LibraryServer
                     out strError);
             }
 
+            // 2024/1/19
+            if (strOperation == "setReaderInfo")
+            {
+                nRet = TraceOperationSetReaderInfo(this.App,
+    domOperLog,
+    strOperation,
+    out strError);
+            }
+
             if (nRet == -1)
             {
                 string strAction = DomUtil.GetElementText(domOperLog.DocumentElement,
@@ -541,6 +551,140 @@ namespace DigitalPlatform.LibraryServer
             app.ChargingOperDatabase.Add(item);
             return 0;
         }
+
+        // 2024/1/19
+        // 将一条 setreaderinfo 操作日志信息兑现到 mongodb 日志库。
+        // 具体来说就是修改 mongodb 日志库中相关记录的证条码号
+        // mongodb 日志库的意义在于提供借阅历史检索功能
+        /*
+<root>
+	<operation>setReaderInfo</operation> 操作类型
+	<action>...</action> 具体动作。有new change delete move 4种
+	<record recPath='...'>...</record> 新记录
+    <oldRecord recPath='...'>...</oldRecord> 被覆盖或者删除的记录 动作为change和delete时具备此元素
+    <changedEntityRecord itemBarcode='...' recPath='...' oldBorrower='...' newBorrower='...' /> 若干个元素。表示连带发生修改的册记录
+	<operator>test</operator> 操作者
+	<operTime>Fri, 08 Dec 2006 09:01:38 GMT</operTime> 操作时间
+</root>
+
+注: new 的时候只有<record>元素，delete的时候只有<oldRecord>元素，change的时候两者都有
+
+         * */
+        public static int TraceOperationSetReaderInfo(
+            LibraryApplication app,
+            XmlDocument domOperLog,
+            string strOperation,
+            out string strError)
+        {
+            strError = "";
+
+            string strAction = DomUtil.GetElementText(domOperLog.DocumentElement,
+                "action");
+
+            if (strAction == "new"
+|| strAction == "change"
+|| strAction == "move")
+            {
+                string strNewRecPath = "";
+                string strRecord = DomUtil.GetElementText(domOperLog.DocumentElement,
+                    "record",
+                    out XmlNode node);
+                if (node == null)
+                {
+                    // 注: move 操作，分馆账户获得日志记录时候可能会被 dp2library 滤除 record 元素。
+                    // 此种情况可以理解为 delete 操作
+                    if (strAction != "move")
+                    {
+                        strError = $"日志记录中缺<record>元素。日志记录内容如下：{domOperLog.OuterXml}";
+                        return -1;
+                    }
+                }
+                else
+                {
+                    strNewRecPath = DomUtil.GetAttr(node, "recPath");
+                }
+
+                string strOldRecord = "";
+                string strOldRecPath = "";
+                // if (strAction == "move")
+                {
+                    strOldRecord = DomUtil.GetElementText(domOperLog.DocumentElement,
+                        "oldRecord",
+                        out node);
+                    if (node != null)
+                    {
+                        strOldRecPath = DomUtil.GetAttr(node, "recPath");
+                        if (string.IsNullOrEmpty(strOldRecPath) == true)
+                        {
+                            strError = "日志记录中<oldRecord>元素内缺recPath属性值";
+                            return -1;
+                        }
+                    }
+
+                    // 如果移动过程中没有修改，则要用旧的记录内容写入目标
+                    // 注意：如果 record 元素都不存在，则应该理解为 delete。如果 record 元素存在，即 recPath 属性存在但 InnerText 不存在，则当作移动过程记录没有变化，即采用 oldRecord 的 InnerText 作为新记录内容
+                    if (string.IsNullOrEmpty(strRecord) == true
+                        && string.IsNullOrEmpty(strNewRecPath) == false)
+                        strRecord = strOldRecord;
+                }
+
+                string old_barcode = GetPatronBarcode(strOldRecord);
+                string new_barcode = GetPatronBarcode(strRecord);
+
+                if (string.IsNullOrEmpty(old_barcode) == false
+                    && string.IsNullOrEmpty(new_barcode) == false
+                    && old_barcode != new_barcode)
+                {
+                    // 修改出纳历史库里面的全部证条码号
+                    if (app.ChargingOperDatabase != null
+                        && app.ChargingOperDatabase.Enabled)
+                        app.ChargingOperDatabase.ChangePatronBarcode(old_barcode, new_barcode);
+                }
+            }
+            else if (strAction == "delete")
+            {
+                string strOldRecord = DomUtil.GetElementText(domOperLog.DocumentElement,
+                    "oldRecord",
+                    out XmlNode node);
+                if (node == null)
+                {
+                    strError = "日志记录中缺<oldRecord>元素";
+                    return -1;
+                }
+                string strRecPath = DomUtil.GetAttr(node, "recPath");
+
+                string old_barcode = GetPatronBarcode(strOldRecord);
+
+                // 删除出纳历史库里面的全部相关记录
+                if (app.ChargingOperDatabase != null
+                    && app.ChargingOperDatabase.Enabled)
+                    app.ChargingOperDatabase.DeletePatronBarcode(old_barcode);
+            }
+            else
+            {
+                strError = "无法识别的<action>内容 '" + strAction + "'";
+                return -1;
+            }
+
+            return 0;
+        }
+
+        static string GetPatronBarcode(string xml)
+        {
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(xml);
+            }
+            catch
+            {
+                return null;
+            }
+
+            return DomUtil.GetElementText(dom.DocumentElement,
+                "barcode");
+        }
+
     }
 
 }

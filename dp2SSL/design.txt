@@ -229,3 +229,6 @@ https://stackoverflow.com/questions/21351697/wpf-stop-ctrlaltdel-and-windows-but
 
 https://stackoverflow.com/questions/5178916/is-there-any-method-to-disable-logoff-lock-and-taskmanager-in-ctrlaltdel-in-c?rq=1
 
+~~~
+PalmCenter 掌纹设备连接不成功的时候的语音报错优化。
+PalmCenter 增加一个参数，可不进行“很好”语音播报。留待 dp2ssl 来进行语音播报

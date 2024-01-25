@@ -30,6 +30,9 @@ using DigitalPlatform.Core;
 using DigitalPlatform.Face;
 using DigitalPlatform.WPF;
 using DigitalPlatform.Script;
+using DigitalPlatform.Drawing;
+using System.Windows.Media.Imaging;
+// using System.Windows.Shapes;
 
 namespace dp2SSL
 {
@@ -39,7 +42,7 @@ namespace dp2SSL
     /// </summary>
     public partial class PageBorrow : MyPage, INotifyPropertyChanged
     {
-
+        SmoothTable _smoothTable = new SmoothTable();
         // Timer _timer = null;
 
         EntityCollection _entities = new EntityCollection();
@@ -248,7 +251,8 @@ namespace dp2SSL
                 Value = 1,
                 Message = result.Patron,
             };
-            SetPatronInfo(message);
+            if (SetPatronInfo(message) == false)
+                return;
             SetQuality("");
             var fill_result = await FillPatronDetailAsync();
             Welcome(fill_result.Value == -1);
@@ -445,7 +449,7 @@ namespace dp2SSL
             SetGlobalError("current", null); // 清除以前残留的报错信息
             SetGlobalError("scan_barcode", null);
 
-            FingerprintManager.SetError += FingerprintManager_SetError;
+            //FingerprintManager.SetError += FingerprintManager_SetError;
             FingerprintManager.Touched += FingerprintManager_Touched;
 
             App.LineFeed += App_LineFeed;
@@ -516,7 +520,23 @@ namespace dp2SSL
                     WpfClientInfo.WriteErrorLog($"InitialEntitiesAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
             });
+
+            if (string.IsNullOrEmpty(App.FingerprintUrl) == false)
+            {
+                _cancelFingerprintVideo?.Cancel();
+                _cancelFingerprintVideo = new CancellationTokenSource();
+                this.fingerprintVideo.StartDisplayFingerprint(_cancelFingerprintVideo.Token);
+                /*
+                StartDisplayFingerprint(this.photo,
+                    this.lines,
+                    _cancelFingerprintVideo.Token);
+                */
+            }
+            else
+                this.fingerprintVideo.Hide();
         }
+
+        CancellationTokenSource _cancelFingerprintVideo = new CancellationTokenSource();
 
 #pragma warning disable VSTHRD100 // 避免使用 Async Void 方法
         private async void App_LineFeed(object sender, LineFeedEventArgs e)
@@ -579,7 +599,8 @@ namespace dp2SSL
 
             SetGlobalError("scan_barcode", null);
 
-            SetPatronInfo(new GetMessageResult { Message = barcode });
+            if (SetPatronInfo(new GetMessageResult { Message = barcode }) == false)
+                return;
 
             var result = await FillPatronDetailAsync();
             Welcome(result.Value == -1);
@@ -658,6 +679,52 @@ namespace dp2SSL
             return default;
         }
 
+        SemaphoreSlim _semaphoreCheckDup = new SemaphoreSlim(1, 1);
+        List<ProgressWindow> _warning_windows = new List<ProgressWindow>();
+        void CloseWarningWindows()
+        {
+            foreach (var window in _warning_windows)
+            {
+                App.Invoke(() =>
+                {
+                    window.Close();
+                });
+            }
+            _warning_windows.Clear();
+        }
+
+        void MemoryWarningWindow(ProgressWindow window)
+        {
+
+            _warning_windows.Add(window);
+        }
+
+        void BeginCheckDup()
+        {
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(TimeSpan.FromSeconds(1));
+                await _semaphoreCheckDup.WaitAsync();
+                try
+                {
+                    var warning = CheckUiiDup(_entities);
+                    if (warning != null)
+                    {
+                        WpfClientInfo.WriteErrorLog($"PageBorrow.InitialEntitiesAsync() 查重 UII 遇到错误: {warning}");
+                        ShelfData.TrySetMessage(null, $"PageBorrow.InitialEntitiesAsync() 查重 UII 遇到错误: {warning}");
+
+                        CloseWarningWindows();
+                        var window = App.ErrorBox("发现错误: 图书 UII 出现重复", warning + "\r\n\r\n请尽快将这些图书交给图书馆工作人员处理");
+                        MemoryWarningWindow(window);
+                    }
+                }
+                finally
+                {
+                    _semaphoreCheckDup.Release();
+                }
+            });
+        }
+
         // 跟随事件动态更新列表
         async Task ChangeEntitiesAsync(//BaseChannel<IRfid> channel,
             TagChangedEventArgs e)
@@ -724,6 +791,7 @@ namespace dp2SSL
                     App.DisplayCoverImage ? "coverImage,checkEAS" : "checkEAS",
                     CancelFillBooks(true));
 
+                BeginCheckDup();
                 Trigger(update_entities);
 
 #if REMOVED
@@ -786,6 +854,66 @@ namespace dp2SSL
             }
         }
 
+        static bool IsCompleted(Entity entity)
+        {
+            if (entity.Protocol == InventoryInfo.ISO15693
+                && (entity.TagInfo == null || entity.TagInfo?.Bytes == null))
+                return false;
+            if (entity.Protocol == InventoryInfo.ISO14443A)
+                return false;
+            if (entity.Protocol == InventoryInfo.ISO18000P6C
+                && entity.TagInfo == null)
+                return false;
+            return true;
+        }
+
+        public static string CheckUiiDup(IReadOnlyCollection<Entity> all)
+        {
+            // 对 all 里面的 UII 进行查重
+            var uiis = all
+                .Where(o => IsCompleted(o) == true)
+                .Select(o => new { UII = o.GetOiPii(), Entity = o })
+                .ToList();
+
+            var dups = uiis.GroupBy(o => o.UII)
+                .Select(o => new
+                {
+                    Key = o.Key,
+                    Entities = o.Select(i => i.Entity).ToList(),
+                    Count = o.Count()
+                })
+                .Where(o => o.Count > 1)
+                .ToList();
+
+            if (dups.Count > 0)
+            {
+                List<string> infos = new List<string>();
+                foreach (var dup in dups)
+                {
+                    infos.Add($"{dup.Key}:{GetLocations(dup.Entities)}");
+                }
+                return $"下列图书标签的 UII 发生了重复: {StringUtil.MakePathList(infos, "; ")}";
+            }
+
+            return null;
+
+            string GetLocations(IEnumerable<Entity> entities)
+            {
+                List<string> results = new List<string>();
+                foreach (var entity in entities)
+                {
+                    results.Add(GetLocation(entity));
+                }
+                return StringUtil.MakePathList(results, ",");
+            }
+
+            string GetLocation(Entity entity)
+            {
+                return $"UID={entity.UID},读写器={entity.ReaderName}|天线号={entity.Antenna}";
+            }
+        }
+
+
         // 是否为“图书读卡器上没有图书、读者信息区为空”
         public bool IsEmpty()
         {
@@ -833,6 +961,7 @@ namespace dp2SSL
                                     App.DisplayCoverImage ? "coverImage,checkEAS" : "checkEAS",
                                     CancelFillBooks(true));
 
+                                BeginCheckDup();
                                 Trigger(update_entities);
                             }
                             finally
@@ -906,7 +1035,7 @@ namespace dp2SSL
                 }
                 else
                 {
-                    SetQuality("");
+                    // SetQuality("");
                     // RFID 来源
                     if (patrons.Count == 1)
                     {
@@ -1012,15 +1141,20 @@ namespace dp2SSL
             if (e.Error == null)
                 SetGlobalError("fingerprint", null);
             else
-                SetGlobalError("fingerprint", $"fingerprint error: {e.Error}");  // 2019/9/11 增加 fingerprinterror:
+            {
+                SetGlobalError("fingerprint", $"{FingerprintManager.Name}: {e.Error}");  // 2019/9/11 增加 fingerprinterror:
+            }
         }
 
         void SetQuality(string text)
         {
+#if REMOVED
             App.Invoke(new Action(() =>
             {
                 this.Quality.Text = text;
             }));
+#endif
+            this.fingerprintVideo.SetQuality(text);
         }
 
         // 从指纹阅读器获取消息(第一阶段)
@@ -1032,9 +1166,16 @@ namespace dp2SSL
             if (e.Result.Value == -1)
                 return;
 
-            SetPatronInfo(e.Result);
+            // 2024/1/20
+            // 忽略图像消息
+            if (e.Result.Message != null
+                && e.Result.Message.StartsWith("!image"))
+                return;
 
-            SetQuality(e.Quality == 0 ? "" : e.Quality.ToString());
+            SetQuality(e.Quality <= 0 ? "" : e.Quality.ToString());
+
+            if (SetPatronInfo(e.Result) == false)
+                return;
 
             var fill_result = await FillPatronDetailAsync();
             Welcome(fill_result.Value == -1);
@@ -1162,6 +1303,9 @@ namespace dp2SSL
         {
             App.IsPageBorrowActive = false;
 
+            _cancelFingerprintVideo?.Cancel();
+            _cancelFingerprintVideo = null;
+
             // _cancel.Cancel();
             CancelDelayClearTask();
 
@@ -1170,7 +1314,7 @@ namespace dp2SSL
             App.TagChanged -= CurrentApp_TagChanged;
 
             FingerprintManager.Touched -= FingerprintManager_Touched;
-            FingerprintManager.SetError -= FingerprintManager_SetError;
+            //FingerprintManager.SetError -= FingerprintManager_SetError;
 
             App.LineFeed -= App_LineFeed;
 
@@ -1694,7 +1838,7 @@ namespace dp2SSL
         }
 
         // 从指纹阅读器获取消息(第一阶段)
-        void SetPatronInfo(GetMessageResult result)
+        bool SetPatronInfo(GetMessageResult result)
         {
             //Application.Current.Dispatcher.Invoke(new Action(() =>
             //{
@@ -1704,13 +1848,13 @@ namespace dp2SSL
                 SetPatronError("fingerprint", $"{GetFingerprintCaption()}中心出错: {result.ErrorInfo}, 错误码: {result.ErrorCode}");
                 if (IsVerticalCard()/*_patron.IsFingerprintSource || App.PatronReaderVertical == true*/)
                     PatronClear();    // 只有当面板上的读者信息来源是指纹仪时(或者身份读卡器竖放)，才清除面板上的读者信息
-                return;
+                return false;
             }
             else if (result.Quality == -1)
             {
                 // 掌纹(或者指纹)图像质量较差
                 // TODO: 有没有必要提示，如何提示? 比如积累到一定次数以后，提醒“请调整手掌距离”
-                return;
+                return false;
             }
             else
             {
@@ -1721,7 +1865,24 @@ namespace dp2SSL
             // TODO: (掌纹识别)和上一个识别的读者证条码号一样，则语音提示，不做重新装载读者信息
 
             if (result.Message == null)
-                return;
+                return false;
+
+            /*
+            // 2024/1/20
+            if (_smoothTable.Check(result?.Message) == false)
+                return false; // 平滑掉
+            */
+
+            // 2024/1/20
+            if (string.IsNullOrEmpty(App.FingerprintUrl) == false
+                && _patron.PII == result.Message
+                && DateTime.Now - _smoothTable.GetLastTime(result.Message) < TimeSpan.FromSeconds(5))
+            {
+                App.CurrentApp.SpeakSequence($"{GetFingerprintCaption()}识别重复");
+                return false; // 防止短时间重复同一个条码
+            }
+
+            _smoothTable.SetLastTime(result.Message, DateTime.Now);
 
             PatronClear();
             _patron.IsFingerprintSource = true;
@@ -1729,6 +1890,8 @@ namespace dp2SSL
             // TODO: 此种情况下，要禁止后续从读卡器获取，直到新一轮开始。
             // “新一轮”意思是图书全部取走以后开始的下一轮
             //}));
+
+            return true;
         }
 
 
@@ -1858,13 +2021,22 @@ namespace dp2SSL
                     if (ChargingData.GetBookInstitutionStrict() == false)
                         strict = false;
                     string oi_pii = _patron.GetOiPii(strict); // 严格模式，必须有 OI
-                    result = LibraryChannelUtil.GetReaderInfo(string.IsNullOrEmpty(oi_pii) ? pii : oi_pii);
+
+                    // 2024/1/23
+                    if (string.IsNullOrEmpty(oi_pii) == false)
+                        pii = oi_pii;
+
+                    result = LibraryChannelUtil.GetReaderInfo(pii);    // string.IsNullOrEmpty(oi_pii) ? pii : oi_pii
                 }
 
                 if (result.Value != 1)
                 {
+                    // 2024/1/23
+                    if (string.IsNullOrEmpty(_patron.Barcode))
+                        _patron.Barcode = pii;
                     string error = $"读者 '{pii}': {result.ErrorInfo}";
                     SetPatronError("getreaderinfo", error);
+                    ClearBorrowedEntities();
                     return new NormalResult { Value = -1, ErrorInfo = error };
                 }
 
@@ -4785,6 +4957,8 @@ string usage)
             // 清除 ErrorTable 中的全部出错信息，避免残余内容后面重新出现在界面上
             _patronErrorTable.SetError(null, null);
 
+            ClearBorrowedEntities();
+            /*
             if (this.patronControl.BorrowedEntities.Count > 0)
             {
                 if (!Application.Current.Dispatcher.CheckAccess())
@@ -4795,6 +4969,7 @@ string usage)
                 else
                     this.patronControl.BorrowedEntities.Clear();
             }
+            */
 
             CancelDelayClearTask();
             // TODO: 这里要测试一下 CheckAccess()
@@ -4813,6 +4988,19 @@ string usage)
             }
         }
 
+        void ClearBorrowedEntities()
+        {
+            if (this.patronControl.BorrowedEntities.Count > 0)
+            {
+                if (!Application.Current.Dispatcher.CheckAccess())
+                    App.Invoke(new Action(() =>
+                    {
+                        this.patronControl.BorrowedEntities.Clear();
+                    }));
+                else
+                    this.patronControl.BorrowedEntities.Clear();
+            }
+        }
 
         private void FixPatron_Checked(object sender, RoutedEventArgs e)
         {
@@ -5658,5 +5846,175 @@ patron_name);
         {
             _patron.FillTime = DateTime.Now;
         }
+
+#if REMOVED
+        #region 掌纹 Video
+
+        static void StartDisplayFingerprint(
+            Image image_control,
+            System.Windows.Shapes.Polyline lines_control,
+            CancellationToken token)
+        {
+            _ = Task.Factory.StartNew(async () =>
+            {
+                try
+                {
+                    while (token.IsCancellationRequested == false)
+                    {
+                        if (string.IsNullOrEmpty(FingerprintManager.Url))
+                        {
+                            DisplayError(image_control, $"尚未启用{GetFingerprintCaption()}识别功能", System.Drawing.Color.DarkGray);
+                            await Task.Delay(TimeSpan.FromSeconds(5), token);
+                            continue;
+                        }
+
+                        /*
+                        if (_disableSendkey)
+                        {
+                            // TODO: 显示为掌纹图像上面叠加文字则更好
+                            DisplayError("临时禁用发送", Color.DarkGray);
+                            await Task.Delay(TimeSpan.FromSeconds(1), token);
+                            continue;
+                        }
+
+                        if (this.Pause == true || FingerprintManager.Pause == true)
+                        {
+                            DisplayError("暂停显示", Color.DarkGray);
+                            await Task.Delay(TimeSpan.FromSeconds(1), token);
+                            continue;
+                        }
+                        */
+
+                        var result = FingerprintManager.GetImage("wait:1000,rect");
+                        if (result.Value == -1)
+                        {
+                            // 显示错误
+                            DisplayError(image_control, result.ErrorInfo, System.Drawing.Color.DarkRed);
+                            await Task.Delay(TimeSpan.FromSeconds(5), token);
+                            continue;
+                        }
+
+                        if (result.ImageData == null)
+                        {
+                            Thread.Sleep(50);
+                            continue;
+                        }
+
+                        PaintBytes(image_control,
+                            result.ImageData,
+                            out double width,
+                            out double height);
+                        if (lines_control != null
+                            /*&& string.IsNullOrEmpty(result.Text) == false*/)
+                            PaintLines(lines_control,
+                                result.Text,
+                                width,
+                                height);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // 写入错误日志
+                    WpfClientInfo.WriteErrorLog($"显示{GetFingerprintCaption()}图像出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    // 显示错误
+                    DisplayError(image_control, $"显示线程出现异常: {ex.Message}\r\n{GetFingerprintCaption()}图像显示已停止", System.Drawing.Color.DarkRed);
+                }
+            },
+token,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+
+        }
+
+        public static void PaintBytes(Image control,
+            byte[] bytes,
+            out double width,
+            out double height)
+        {
+            double w = 0;
+            double h = 0;
+            using (MemoryStream stream = new MemoryStream(bytes))
+            {
+                App.Invoke(() =>
+                {
+                    BitmapImage image = new BitmapImage();
+                    image.BeginInit();
+                    image.StreamSource = stream;
+                    image.CacheOption = BitmapCacheOption.OnLoad;   // (注意这一句必须放在 .UriSource = ... 之后) 防止 WPF 一直锁定这个文件(即便 Image 都消失了还在锁定)
+                    image.EndInit();
+
+                    control.Source = image;
+
+                    w = control.ActualWidth / image.Width;
+                    h = control.ActualHeight / image.Height;
+                });
+            }
+            width = w;
+            height = h;
+        }
+
+        static void DisplayError(
+            Image control,
+            string strError,
+            System.Drawing.Color backColor)
+        {
+            App.Invoke(() =>
+            {
+                BitmapImage image = new BitmapImage();
+
+                image.BeginInit();
+                image.StreamSource = StringToBitmapConverter.BuildTextImage(strError, backColor, (int)control.Width);
+                image.CacheOption = BitmapCacheOption.OnLoad;   // (注意这一句必须放在 .UriSource = ... 之后) 防止 WPF 一直锁定这个文件(即便 Image 都消失了还在锁定)
+                image.EndInit();
+                control.Source = image;
+            });
+        }
+
+        public static void PaintLines(System.Windows.Shapes.Polyline control,
+            string text,
+            double scale_x,
+            double scale_y,
+            float line_width = 4)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                App.Invoke(() =>
+                {
+                    if (control.Points == null
+                        || control.Points.Count != 0)
+                        control.Points = new PointCollection();
+                });
+                return;
+            }
+            string[] values = text.Split(new char[] { ',' });
+            List<int> rect = new List<int>();
+            foreach (string v in values)
+            {
+                rect.Add(Convert.ToInt32(v));
+            }
+            if (rect.Count != 8)
+                throw new ArgumentException("应该是 8 个数字");
+            Debug.Assert(rect.Count == 8);
+
+            App.Invoke(() =>
+            {
+                var transform = control.RenderTransform as ScaleTransform;
+                transform.ScaleX = scale_x;
+                transform.ScaleY = scale_y;
+
+                control.Points = new PointCollection
+                {
+                new Point(rect[0], rect[1]),
+                new Point(rect[2], rect[3]),
+                new Point(rect[4], rect[5]),
+                new Point(rect[6], rect[7]),
+                new Point(rect[0], rect[1])
+                };
+            });
+        }
+
+        #endregion
+
+#endif
     }
 }

@@ -70,7 +70,9 @@ namespace dp2SSL.Models
                 // location --> oi
                 Hashtable oi_table = new Hashtable();
 
-
+                if (first_round)
+                    await ClearLocalEntitiesAsync(token);
+#if REMOVED
                 using (BiblioCacheContext context = new BiblioCacheContext())
                 {
                     context.Database.EnsureCreated();
@@ -85,6 +87,7 @@ namespace dp2SSL.Models
                         await context.SaveChangesAsync(token);
                     }
                 }
+#endif
 
                 using (BiblioCacheContext context = new BiblioCacheContext())
                 {
@@ -265,6 +268,7 @@ namespace dp2SSL.Models
                                         Xml = item_xml,
                                         RecPath = item_recpath,
                                         Timestamp = timestamp,
+                                        LastWriteTime = DateTime.Now,
                                     };
 
                                     // 调整 PII 字段，尽量规整为 OI.PII 形态
@@ -349,6 +353,21 @@ namespace dp2SSL.Models
                 }
 
                 return -1;
+            }
+        }
+
+        public static async Task ClearLocalEntitiesAsync(CancellationToken token)
+        {
+            using (BiblioCacheContext context = new BiblioCacheContext())
+            {
+                context.Database.EnsureCreated();
+
+                // 删除 Entities 里面的已有记录
+                context.Entities.RemoveRange(context.Entities); // .ToList()
+                await context.SaveChangesAsync(token);
+                // 删除 BiblioSummaries 里面的已有记录
+                context.BiblioSummaries.RemoveRange(context.BiblioSummaries);   // .ToList()
+                await context.SaveChangesAsync(token);
             }
         }
 
@@ -704,6 +723,7 @@ strOldRecord);
                 Xml = strRecord,
                 RecPath = strRecPath,
                 Timestamp = null,
+                LastWriteTime = DateTime.Now,
             };
 
             // 调整 PII 字段，尽量规整为 OI.PII 形态
@@ -770,6 +790,7 @@ strRecPath);
                 Xml = strRecord,
                 RecPath = strRecPath,
                 Timestamp = null,
+                LastWriteTime = DateTime.Now,
             };
 
             // 调整 PII 字段，尽量规整为 OI.PII 形态

@@ -39,7 +39,7 @@ namespace dp2SSL
 
                 BitmapImage image = new BitmapImage();
                 image.BeginInit();
-                image.StreamSource = BuildTextImage(error, 400);
+                image.StreamSource = BuildTextImage(error, System.Drawing.Color.Transparent, 400);
                 image.CacheOption = BitmapCacheOption.OnLoad;   // (注意这一句必须放在 .UriSource = ... 之后) 防止 WPF 一直锁定这个文件(即便 Image 都消失了还在锁定)
                 image.EndInit();
 
@@ -73,8 +73,9 @@ namespace dp2SSL
 
 
 
-        static Stream BuildTextImage(string strText,
-    int nWidth = 400)
+        public static Stream BuildTextImage(string strText,
+            System.Drawing.Color colorBack,
+            int nWidth = 400)
         {
             // 文字图片
             return DigitalPlatform.Drawing.ArtText.BuildArtText(
