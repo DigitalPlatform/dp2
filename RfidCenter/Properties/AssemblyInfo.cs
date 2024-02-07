@@ -32,7 +32,7 @@ using System.Runtime.InteropServices;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.14.17")]   // 1.11.*
+[assembly: AssemblyVersion("1.14.18")]   // 1.11.*
 [assembly: AssemblyFileVersion("1.14.0.0")]
 
 // V1.1 2019/2/21 支持 32-bit Windows 环境
@@ -77,5 +77,6 @@ using System.Runtime.InteropServices;
 //              (2023/11/22) SetEAS() API 中增加对 UHF EPC 的 CRC-16 校验，跳过一些不必要的尝试动作
 //                          对一些地方的 PII 改为适应 UII
 //              (2023/11/24) SetEAS() 修改高校联盟的 EPC 的时候优化为仅仅改变一个 word
+//      1.14.18 (2024/2/4) 无论是利用 RfidCenter 主窗口的菜单，还是用 API 改变了模拟门锁的状态，都会进行语音播报和操作历史显示。(此前版本 API 改变时不会语音播报和操作历史显示) 改进的目的是让 dp2ssl 重新启动时候自动复位模拟门锁状态为 Off 时，会有语音提示，避免操作者误以为早先的 On 状态还在持续
 
 

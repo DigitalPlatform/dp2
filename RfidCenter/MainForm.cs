@@ -190,7 +190,7 @@ TimeSpan.FromMinutes(60),
 _cancel.Token,
 (text, level) =>
 {
-OutputHistory(text, level);
+    OutputHistory(text, level);
 });
 
             ClearHtml();
@@ -2075,9 +2075,22 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
             }
             set
             {
+                var old_value = _inSimuLock;
+
                 _inSimuLock = value;
 
                 OnSimuLockChanged();
+                if (old_value != _inSimuLock)
+                {
+                    string text = "";
+                    if (_inSimuLock == true)
+                        text = ("进入模拟门锁状态");
+                    else
+                        text = ("退出模拟门锁状态");
+
+                    OutputHistory(text);
+                    Speak(text);
+                }
             }
         }
 
@@ -2155,28 +2168,20 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
 
         private void MenuItem_simuLock_Click(object sender, EventArgs e)
         {
-            string text = "";
+            // string text = "";
             if (this.InSimuLock == false)
             {
                 this.InSimuLock = true;
-                /*
-                _inSimuLock = true;
-                MenuItem_simuLock.Checked = true;
-                */
-                text = "进入模拟门锁状态";
+                // text = "进入模拟门锁状态";
             }
             else
             {
                 this.InSimuLock = false;
-                /*
-                _inSimuLock = false;
-                MenuItem_simuLock.Checked = false;
-                */
-                text = "退出模拟门锁状态";
+                // text = "退出模拟门锁状态";
             }
 
-            OutputHistory(text);
-            Speak(text);
+            // OutputHistory(text);
+            // Speak(text);
         }
 
         void OnSimuLockChanged()

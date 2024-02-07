@@ -64,6 +64,7 @@
       <DependentUpon>SettingDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="TestCase\TestLoginApi.cs" />
+    <Compile Include="TestCase\TestReservation.cs" />
     <Compile Include="TestCase\TestSearchBiblioSafety.cs" />
     <Compile Include="TestCase\TestSearchItemSafety.cs" />
     <Compile Include="TestCase\TestSearchReaderSafety.cs" />

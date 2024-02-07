@@ -37,3 +37,48 @@ getbibliosummary,
 searchbiblio
 
 getbiblioinfo,listbibliodbfroms,getsystemparameter,
+
+~~~
+2024/1/29
+Borrow() API 中从册记录中读取信息验证当前读者证条码号(GetBorrowerBarcode())要考虑双链变化为 refID 以后的兼容性
+
+册记录中 borrower 元素的内容，改为写入 @refID:xxxx。以前的 证条码号形态 依然有效，注意使用的时候加以判断
+
+Borrow() API 返回的 BorrowInfo 结构中，strItemBarcode 字段的内容可能是册条码号，也可能是 @refID:xxx 形态
+*** 注意验证内务等前端的适应性
+
+
+读者记录中 borrows/borrow 元素中，增加了一个 refID 属性，值为册记录的参考 ID。原有的 barcode 属性依然有效，是册条码号
+
+
+Borrow() API 的操作日志记录，增加了一个 readerRefID 元素，里面是读者参考 ID。原有的 readerBarcode 元素没有变化，内容依然是读者证条码号
+... 增加了一个 itemRefID 元素，里面是册参考 ID。原有的 itemBarcode 元素不变，内容依然是册条码号(少量可能是 @refID:xxx 形态)
+
+
+~~~
+Return() API 返回的 ReturnInfo 结构中，ItemBarcode 字段的内容可能是册条码号，也可能是 @refID:xxx 形态
+... Borrower 字段的内容增加了一种可能性 @refID:xxx 形态
+*** 注意验证内务等前端的适应性
+
+Return() API 的操作日志记录，增加一个 readerRefID 元素。
+... 增加了一个 itemRefID 元素。
+
+~~~
+Reservation() API 中，预约时对册记录的 reservations/request/@reader 属性中写入的可能是证条码号或 @refID:xxx 形态
+
+预约队列记录中增加了一个 readerRefID 元素。原有 readerBarcode 元素依然有效
+
+Reservation() API 的操作日志记录中，增加了一个 itemRefIdList 元素。原有 itemBarcodeList 元素依然有效
+... 增加了一个 readerRefID 元素。原有 readerBarcode 元素依然有效
+
+~~~
+读者记录中 reservations/request 元素的 arrivedItemBarcode 属性，可能是册条码号，也可能是 @refID:xxx 形态
+
+~~~
+根据操作日志记录重建 mongodb 借阅历史库的冒烟测试
+
+~~~
+重新检查日志前滚中对借还相关的日志动作的处理，要适应新旧两种日志格式
+
+~~~
+日志记录的 version 变化

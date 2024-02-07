@@ -361,7 +361,7 @@ namespace DigitalPlatform.LibraryServer
                     lIndex,
                     lHint,
                     "", // level-0
-                    "", // strFilter
+                    "", // strFilter // TODO: 可以考虑用过滤方式加快速度
                     out lHintNext,
                     out strXml,
                     out long lAttachmentLength, // attachment,
@@ -392,7 +392,7 @@ namespace DigitalPlatform.LibraryServer
                 // 测试时候在这里安排跳过
                 if (lIndex == 1 || lIndex == 2)
                     continue;
-* */
+                * */
 
                 nRet = DoOperLogRecord(strXml,
                     // attachment,
@@ -447,6 +447,14 @@ namespace DigitalPlatform.LibraryServer
     strOperation,
     out strError);
             }
+            // 2024/2/6
+            if (strOperation == "setEntity")
+            {
+                nRet = TraceOperationSetEntity(this.App,
+    domOperLog,
+    strOperation,
+    out strError);
+            }
 
             if (nRet == -1)
             {
@@ -481,6 +489,29 @@ namespace DigitalPlatform.LibraryServer
                 "itemBarcode");
             item.PatronBarcode = DomUtil.GetElementText(domOperLog.DocumentElement,
                 "readerBarcode");
+
+            // 2024/2/6
+            string itemRefID = DomUtil.GetElementText(domOperLog.DocumentElement,
+    "itemRefID");
+            string patronRefID = DomUtil.GetElementText(domOperLog.DocumentElement,
+                "patronRefID");
+            if (string.IsNullOrEmpty(itemRefID) == false)
+                item.ItemBarcode = $"@refID:{itemRefID}";
+            else
+            {
+                var refID = GetRefID(domOperLog, "itemRecord");
+                if (string.IsNullOrEmpty(refID) == false)
+                    item.ItemBarcode = $"@refID:{refID}";
+            }
+
+            if (string.IsNullOrEmpty(patronRefID) == false)
+                item.PatronBarcode = $"@refID:{patronRefID}";
+            else
+            {
+                var refID = GetRefID(domOperLog, "readerRecord");
+                if (string.IsNullOrEmpty(refID) == false)
+                    item.PatronBarcode = $"@refID:{refID}";
+            }
 
             {
                 string strBiblioRecPath = DomUtil.GetElementText(domOperLog.DocumentElement,
@@ -550,6 +581,33 @@ namespace DigitalPlatform.LibraryServer
 
             app.ChargingOperDatabase.Add(item);
             return 0;
+        }
+
+        // 获得 readerRecord 元素或者 itemRecord 元素中的记录内容内的 refID 元素内容
+        /*
+  <readerRecord recPath='...'>...</readerRecord>	最新读者记录
+  <itemRecord recPath='...'>...</itemRecord>	最新册记录
+         * 
+         * */
+        static string GetRefID(XmlDocument domOperLog,
+            string elementName)
+        {
+            string record = DomUtil.GetElementText(domOperLog.DocumentElement,
+                elementName);
+            if (string.IsNullOrEmpty(record))
+                return null;
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(record);
+            }
+            catch
+            {
+                return null;
+            }
+
+            return DomUtil.GetElementText(dom.DocumentElement,
+                "refID");
         }
 
         // 2024/1/19
@@ -628,6 +686,7 @@ namespace DigitalPlatform.LibraryServer
                         strRecord = strOldRecord;
                 }
 
+                // *** 新旧证条码号发生变化
                 string old_barcode = GetPatronBarcode(strOldRecord);
                 string new_barcode = GetPatronBarcode(strRecord);
 
@@ -640,6 +699,32 @@ namespace DigitalPlatform.LibraryServer
                         && app.ChargingOperDatabase.Enabled)
                         app.ChargingOperDatabase.ChangePatronBarcode(old_barcode, new_barcode);
                 }
+
+                // *** 新旧参考 ID 发生变化
+                string old_refid = GetRecordRefID(strOldRecord);
+                string new_refid = GetRecordRefID(strRecord);
+
+                if (string.IsNullOrEmpty(old_refid) == false
+                    && string.IsNullOrEmpty(new_refid) == false
+                    && old_refid != new_refid)
+                {
+                    // 修改出纳历史库里面的全部册条码号
+                    if (app.ChargingOperDatabase != null
+                        && app.ChargingOperDatabase.Enabled)
+                        app.ChargingOperDatabase.ChangePatronBarcode($"@refID:{old_refid}", $"@refID:{new_refid}");
+                }
+
+                // *** 版本升级之前(mongodb中)的证条码号，替换为 @refID:xxx 形态
+                // 把出纳历史库里面可能的册条码号修改为 @refID:形态
+                if (string.IsNullOrEmpty(new_barcode) == false
+                    && string.IsNullOrEmpty(old_refid)
+                    && string.IsNullOrEmpty(new_refid) == false)
+                {
+                    if (app.ChargingOperDatabase != null
+    && app.ChargingOperDatabase.Enabled)
+                        app.ChargingOperDatabase.ChangePatronBarcode(new_barcode, $"@refID:{new_refid}");
+                }
+
             }
             else if (strAction == "delete")
             {
@@ -656,9 +741,20 @@ namespace DigitalPlatform.LibraryServer
                 string old_barcode = GetPatronBarcode(strOldRecord);
 
                 // 删除出纳历史库里面的全部相关记录
-                if (app.ChargingOperDatabase != null
-                    && app.ChargingOperDatabase.Enabled)
-                    app.ChargingOperDatabase.DeletePatronBarcode(old_barcode);
+                if (string.IsNullOrEmpty(old_barcode) == false)
+                {
+                    if (app.ChargingOperDatabase != null
+                        && app.ChargingOperDatabase.Enabled)
+                        app.ChargingOperDatabase.DeletePatronBarcode(old_barcode);
+                }
+
+                string old_refid = GetRecordRefID(strOldRecord);
+                if (string.IsNullOrEmpty(old_refid) == false)
+                {
+                    if (app.ChargingOperDatabase != null
+        && app.ChargingOperDatabase.Enabled)
+                        app.ChargingOperDatabase.DeletePatronBarcode($"@refID:{old_refid}");
+                }
             }
             else
             {
@@ -683,6 +779,185 @@ namespace DigitalPlatform.LibraryServer
 
             return DomUtil.GetElementText(dom.DocumentElement,
                 "barcode");
+        }
+
+        static string GetRecordRefID(string xml)
+        {
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(xml);
+            }
+            catch
+            {
+                return null;
+            }
+
+            return DomUtil.GetElementText(dom.DocumentElement,
+                "refID");
+        }
+
+
+        // 2024/2/6
+        // 将一条 setEntity 操作日志信息兑现到 mongodb 日志库。
+        // 具体来说就是修改 mongodb 日志库中相关记录的册条码号
+        // mongodb 日志库的意义在于提供借阅历史检索功能
+        /* 日志记录格式
+<root>
+  <operation>setEntity</operation> 操作类型
+  <action>new</action> 具体动作。有new change delete setuid transfer move。2019/7/30 增加 transfer，transfer 行为和 change 相似
+  <style>...</style> 风格。有force nocheckdup noeventlog 3种
+  <record recPath='中文图书实体/3'><root><parent>2</parent><barcode>0000003</barcode><state>状态2</state><location>阅览室</location><price></price><bookType>教学参考</bookType><registerNo></registerNo><comment>test</comment><mergeComment></mergeComment><batchNo>111</batchNo><borrower></borrower><borrowDate></borrowDate><borrowPeriod></borrowPeriod></root></record> 记录体
+  <oldRecord recPath='中文图书实体/3'>...</oldRecord> 被覆盖或者删除的记录 动作为change和delete时具备此元素
+  <operator>test</operator> 操作者
+  <operTime>Fri, 08 Dec 2006 08:41:46 GMT</operTime> 操作时间
+</root>
+
+注：1) 当<action>为delete时，没有<record>元素。为new时，没有<oldRecord>元素。
+	2) <record>中的内容, 涉及到流通的<borrower><borrowDate><borrowPeriod>等, 在日志恢复阶段, 都应当无效, 这几个内容应当从当前位置库中记录获取, 和<record>中其他内容合并后, 再写入数据库
+	3) 一次SetEntities()API调用, 可能创建多条日志记录。
+         
+         * */
+        public static int TraceOperationSetEntity(
+    LibraryApplication app,
+    XmlDocument domOperLog,
+    string strOperation,
+    out string strError)
+        {
+            strError = "";
+
+            string strAction = DomUtil.GetElementText(domOperLog.DocumentElement,
+                "action");
+
+            if (strAction == "new"
+|| strAction == "change"
+|| strAction == "move"
+|| strAction == "transfer"
+|| strAction == "setuid")
+            {
+                string strNewRecPath = "";
+                string strRecord = DomUtil.GetElementText(domOperLog.DocumentElement,
+                    "record",
+                    out XmlNode node);
+                if (node == null)
+                {
+                    // 注: move 操作，分馆账户获得日志记录时候可能会被 dp2library 滤除 record 元素。
+                    // 此种情况可以理解为 delete 操作
+                    if (strAction != "move")
+                    {
+                        strError = $"日志记录中缺<record>元素。日志记录内容如下：{domOperLog.OuterXml}";
+                        return -1;
+                    }
+                }
+                else
+                {
+                    strNewRecPath = DomUtil.GetAttr(node, "recPath");
+                }
+
+                string strOldRecord = "";
+                string strOldRecPath = "";
+                // if (strAction == "move")
+                {
+                    strOldRecord = DomUtil.GetElementText(domOperLog.DocumentElement,
+                        "oldRecord",
+                        out node);
+                    if (node != null)
+                    {
+                        strOldRecPath = DomUtil.GetAttr(node, "recPath");
+                        if (string.IsNullOrEmpty(strOldRecPath) == true)
+                        {
+                            strError = "日志记录中<oldRecord>元素内缺recPath属性值";
+                            return -1;
+                        }
+                    }
+
+                    // 如果移动过程中没有修改，则要用旧的记录内容写入目标
+                    // 注意：如果 record 元素都不存在，则应该理解为 delete。如果 record 元素存在，即 recPath 属性存在但 InnerText 不存在，则当作移动过程记录没有变化，即采用 oldRecord 的 InnerText 作为新记录内容
+                    if (string.IsNullOrEmpty(strRecord) == true
+                        && string.IsNullOrEmpty(strNewRecPath) == false)
+                        strRecord = strOldRecord;
+                }
+
+                // *** 新旧册条码号发生变化
+                string old_barcode = GetPatronBarcode(strOldRecord);
+                string new_barcode = GetPatronBarcode(strRecord);
+
+                if (string.IsNullOrEmpty(old_barcode) == false
+                    && string.IsNullOrEmpty(new_barcode) == false
+                    && old_barcode != new_barcode)
+                {
+                    // 修改出纳历史库里面的全部册条码号
+                    if (app.ChargingOperDatabase != null
+                        && app.ChargingOperDatabase.Enabled)
+                        app.ChargingOperDatabase.ChangeItemBarcode(old_barcode, new_barcode);
+                }
+
+                // *** 新旧参考 ID 发生变化
+                string old_refid = GetRecordRefID(strOldRecord);
+                string new_refid = GetRecordRefID(strRecord);
+
+                if (string.IsNullOrEmpty(old_refid) == false
+                    && string.IsNullOrEmpty(new_refid) == false
+                    && old_refid != new_refid)
+                {
+                    // 修改出纳历史库里面的全部册条码号
+                    if (app.ChargingOperDatabase != null
+                        && app.ChargingOperDatabase.Enabled)
+                        app.ChargingOperDatabase.ChangeItemBarcode($"@refID:{old_refid}", $"@refID:{new_refid}");
+                }
+
+                // *** 版本升级之前(mongodb中)的册条码号，替换为 @refID:xxx 形态
+                // 把出纳历史库里面可能的册条码号修改为 @refID:形态
+                if (string.IsNullOrEmpty(new_barcode) == false
+                    && string.IsNullOrEmpty(old_refid)
+                    && string.IsNullOrEmpty(new_refid) == false)
+                {
+                    if (app.ChargingOperDatabase != null
+    && app.ChargingOperDatabase.Enabled)
+                        app.ChargingOperDatabase.ChangeItemBarcode(new_barcode, $"@refID:{new_refid}");
+                }
+            }
+            else if (strAction == "delete")
+            {
+                string strOldRecord = DomUtil.GetElementText(domOperLog.DocumentElement,
+                    "oldRecord",
+                    out XmlNode node);
+                if (node == null)
+                {
+                    strError = "日志记录中缺<oldRecord>元素";
+                    return -1;
+                }
+                string strRecPath = DomUtil.GetAttr(node, "recPath");
+
+                /*
+                string old_barcode = GetPatronBarcode(strOldRecord);
+
+                // 删除出纳历史库里面的全部相关记录
+                if (string.IsNullOrEmpty(old_barcode) == false)
+                {
+                    if (app.ChargingOperDatabase != null
+                    && app.ChargingOperDatabase.Enabled)
+                        app.ChargingOperDatabase.DeleteItemBarcode(old_barcode);
+                }
+
+                string old_refid = GetRecordRefID(strOldRecord);
+
+                // 删除出纳历史库里面的全部相关记录
+                if (string.IsNullOrEmpty(old_refid) == false)
+                {
+                    if (app.ChargingOperDatabase != null
+                        && app.ChargingOperDatabase.Enabled)
+                        app.ChargingOperDatabase.DeleteItemBarcode($"@refID:{old_refid}");
+                }
+                */
+            }
+            else
+            {
+                strError = "无法识别的<action>内容 '" + strAction + "'";
+                return -1;
+            }
+
+            return 0;
         }
 
     }

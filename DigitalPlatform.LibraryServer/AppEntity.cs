@@ -6244,6 +6244,8 @@ out strError);
 
                         // 察看本册预约情况, 并进行初步处理
                         // TODO: 如果为注销处理，需要通知等待者，书已经注销了，不用再等待
+                        // parameters:
+                        //      strReservationReaderBarcode [out] 返回值可能是 证条码号，也可能是 @refID:xxx 形态
                         // return:
                         //      -1  error
                         //      0   没有修改

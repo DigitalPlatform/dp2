@@ -32,6 +32,8 @@ using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.Core;
 using DigitalPlatform.Marc;
+using System.Threading.Tasks;
+using Microsoft.VisualStudio.Threading;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -2212,6 +2214,24 @@ out strError);
         }
 #endif
 
+        // 修改 library.xml 中的 version 元素值
+        bool ModifyLibraryXmlVersion(string old_version,
+            string new_version)
+        {
+            // 找到<version>元素
+            XmlNode nodeVersion = this.LibraryCfgDom.DocumentElement.SelectSingleNode("version");
+            if (nodeVersion == null)
+                return false;
+
+            if (nodeVersion.InnerText.Trim() != old_version)
+                return false;
+
+            nodeVersion.InnerText = new_version;
+            this.Changed = true;
+            this.ActivateManagerThread();
+            return true;
+        }
+
         int UpgradeLibraryXml(out string strError)
         {
             strError = "";
@@ -2581,6 +2601,80 @@ out strError);
                 version = 3.01;
             }
 
+            // 2024/2/5
+            // 从 3.01 版升级
+            if (version <= 3.01)
+            {
+                // *** 升级任务是将 mongodb 日志动作库中的记录内的两类条码号变更为 @refID:xxx 形态
+                // 另外可能会对涉及到的部分读者记录和册记录添加 refID 元素
+                _ = Task.Factory.StartNew(async () =>
+                {
+                    using (var releaser = await _semaphoreUpgrade.EnterAsync(this.AppDownToken))
+                    {
+                        SessionInfo session = new SessionInfo(this);
+                        try
+                        {
+                            this.WriteErrorLog("开始升级 mongodb 出纳动作库(读者轮) ...");
+                            int nRet = UpgradePatronBarcodes(
+                                session,
+                                (text, is_error) =>
+                                {
+                                    if (is_error)
+                                        this.WriteErrorLog($"升级 mongodb 出纳动作库(读者轮) 中途出错(继续向后处理): {text}");
+                                },
+                                null,
+                                this.AppDownToken,
+                                out string error);
+                            if (nRet == -1)
+                            {
+                                this.WriteErrorLog($"升级 mongodb 出纳动作库(读者轮)出错: {error}");
+                                return;
+                            }
+                            else
+                                this.WriteErrorLog($"升级 mongodb 出纳动作库(读者轮)成功(共处理 {nRet} 条读者记录)");
+
+                            this.WriteErrorLog("开始升级 mongodb 出纳动作库(册轮) ...");
+                            nRet = UpgradeItemBarcodes(
+                                session,
+                                (text, is_error) =>
+                                {
+                                    if (is_error)
+                                        this.WriteErrorLog($"升级 mongodb 出纳动作库(册轮) 中途出错(继续向后处理): {text}");
+                                },
+                                null,
+                                this.AppDownToken,
+                                out error);
+                            if (nRet == -1)
+                            {
+                                this.WriteErrorLog($"升级 mongodb 出纳动作库(册轮)出错: {error}");
+                                return;
+                            }
+                            else
+                                this.WriteErrorLog($"升级 mongodb 出纳动作库(册轮)成功(共处理 {nRet} 条册记录)");
+
+                            ModifyLibraryXmlVersion("3.01", "3.02");
+                            this.WriteErrorLog($"自动升级 library.xml v3.01到v3.02。数据升级刚才已经完成");
+                        }
+                        finally
+                        {
+                            session.CloseSession();
+                            session = null;
+                        }
+                    }
+                },
+this.AppDownToken,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+
+                /*
+                // 升级完成后，修改版本号
+                nodeVersion.InnerText = "3.02";
+                bChanged = true;
+                WriteErrorLog($"自动升级 library.xml v{version.ToString()}到v3.02");
+                version = 3.02;
+                */
+            }
+
 
             if (bChanged == true)
             {
@@ -2590,6 +2684,9 @@ out strError);
 
             return 0;
         }
+
+        // 限制多个实例的升级按照顺序进行，避免给 CPU 太大压力
+        static AsyncSemaphore _semaphoreUpgrade = new AsyncSemaphore(1);
 
         // 根据 account/@passwordExpireLength 参数，重建或者清除 account 密码失效期
         // 如果先前有 expire，后来修改了 expire 长度，本函数不负责修改 account 中的 expire 时间。本函数只负责响应创建和清除
@@ -5139,7 +5236,7 @@ out strError);
         {
             strError = "";
             strBiblioDbName = "";
-            
+
             if (string.IsNullOrEmpty(strItemDbName))
             {
                 strError = "GetBiblioDbNameByItemDbName() 的 strItemDbName 参数不应为空";
@@ -5989,7 +6086,10 @@ out strError);
         // TODO：判断strItemBarcode是否为空
         // 获得预约到书队列记录
         // parameters:
-        //      strItemBarcodeParam  册条码号。可以使用 @itemRefID: 前缀表示册参考ID。
+        //      strItemBarcodeParam 册条码号或者其它检索字符串。
+        //                          可以使用下列形态:
+        //                          没有任何前缀，表示册条码号。
+        //                          @itemRefID: 前缀表示册参考ID。
         //                          @notifyID: 是通知记录本身的参考ID
         //                          @patronRefID: 是读者记录的参考ID
         // return:
@@ -6538,6 +6638,8 @@ out strError);
 
         // 2013/5/23
         // 包装以后的版本
+        // parameters:
+        //      strBarcode  证条码号。可以为 @refID:xxx 形态
         public int GetReaderRecXml(
             // RmsChannelCollection channels,
             RmsChannel channel,
@@ -6545,7 +6647,7 @@ out strError);
             out string strXml,
             out string strOutputPath,
             out byte[] timestamp,
-    out string strError)
+            out string strError)
         {
             strOutputPath = "";
             List<string> recpaths = null;
@@ -12927,6 +13029,7 @@ out strError);
                     nRet = FindItem(
                         channel,
                         strReaderBarcode,
+                        "", // TODO: 将来可以考虑增加参考ID参数
                         aPath,
                         true,   // 优化
                         out aFoundPath,

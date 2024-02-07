@@ -24,6 +24,7 @@ using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.rms;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.rms.Client.rmsws_localhost;
+using System.Runtime.Remoting.Activation;
 
 
 namespace dp2Library
@@ -2680,6 +2681,41 @@ namespace dp2Library
                 DateTime endTime = string.IsNullOrEmpty(strEnd) ? new DateTime(0) : DateTime.Parse(strEnd);
 
                 string strError = "";
+
+                if (patronBarcode.StartsWith("@itemBarcode:"))
+                {
+                    RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
+
+                    // 变换为 @itemRefID:xxx
+                    // 册参考 ID
+                    int nRet = app.ConvertItemBarcodeListToRefIdList(channel,
+    patronBarcode.Substring("@itemBarcode:".Length),
+    out string strItemRefIdList,
+    out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    patronBarcode = strItemRefIdList.Replace("@refID:", "@itemRefID:");
+                }
+                else if (patronBarcode.StartsWith("@") == false)
+                {
+                    RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
+
+                    // 变换为 @refID:xxx
+                    // 读者参考 ID
+                    int nRet = app.ConvertReaderBarcodeListToRefIdList(channel,
+                        patronBarcode,
+                        out string strPatronRefIdList,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    patronBarcode = strPatronRefIdList;
+                }
+
+                // parameters:
+                //      patronBarcode   读者证条码号。
+                //                      如果 以 "@itemBarcode:" 前缀引导，表示这是册条码号
+                //                      如果 以 "@itemRefID:" 前缀引导，表示这是册参考 ID
+                //                      如果 以 "@readerRefID:" 或 "@refID:" 前缀引导，表示这是读者参考 ID
                 IEnumerable<ChargingOperItem> collection = app.ChargingOperDatabase.Find(
                     patronBarcode,
                     startTime,
@@ -2733,13 +2769,11 @@ namespace dp2Library
 
                 result.Value = totalCount;
                 return result;
-#if NO
             ERROR1:
                 result.Value = -1;
                 result.ErrorInfo = strError;
                 result.ErrorCode = ErrorCode.SystemError;
                 return result;
-#endif
             }
             catch (Exception ex)
             {

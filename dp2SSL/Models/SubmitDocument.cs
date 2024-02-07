@@ -2,20 +2,27 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
-
+using System.Windows.Media.Imaging;
 using DigitalPlatform.Text;
+using DigitalPlatform.WPF;
+using Microsoft.VisualStudio.Threading;
+using static System.Resources.ResXFileRef;
 
 namespace dp2SSL
 {
     // 用于显示借书还书操作结果信息的可视化文档
     public class SubmitDocument : FlowDocument
     {
+
         public double BaseFontSize { get; set; }
         public string BuildStyle { get; set; }
         // public List<string> DoorNames { get; set; }
@@ -45,6 +52,85 @@ namespace dp2SSL
                 return existing;
             }
         }
+
+#if REMOVED
+
+        // localFilePath --> Image Control
+        static Hashtable _imageControlTable = new Hashtable();
+
+        static Image GetImageControl(string localFilePath)
+        {
+            lock (_imageControlTable.SyncRoot)
+            {
+                if (_imageControlTable.ContainsKey(localFilePath))
+                    return _imageControlTable[localFilePath] as Image;
+            }
+
+            var convertor = new StringToBitmapConverter();
+
+            var image = new Image();
+            image.Width = 120;
+            image.Margin = new Thickness(0, 4, 0, 6);
+            image.Source = convertor.Convert(localFilePath, typeof(ImageSource), null, null) as ImageSource;
+            lock (_imageControlTable.SyncRoot)
+            {
+                _imageControlTable.Add(localFilePath, image);
+            }
+            return image;
+        }
+
+#endif
+
+#if REMOVED
+        static Image GetImageControl(string localFilePath)
+        {
+            if (string.IsNullOrEmpty(localFilePath))
+                throw new ArgumentException($"{nameof(localFilePath)} 不应为空");
+
+            var convertor = new StringToBitmapConverter();
+
+            var image = new Image();
+            image.Width = 120;
+            image.Margin = new Thickness(0, 4, 0, 6);
+            image.Source = convertor.Convert(localFilePath, typeof(ImageSource), null, null) as ImageSource;
+            return image;
+        }
+#endif
+
+#if REMOVED
+        static string GetCoverImageLocalPath(Entity entity)
+        {
+            if (string.IsNullOrEmpty(entity.CoverImageLocalPath) == false)
+                return entity.CoverImageLocalPath;
+
+            var uii = entity.GetOiPii();
+
+            lock (_uiiTable.SyncRoot)
+            {
+                if (_uiiTable.ContainsKey(uii))
+                    return _uiiTable[uii] as string;
+            }
+
+            string get_style = "";
+            if (ShelfData.LibraryNetworkCondition != "OK")
+                get_style += ",localGetEntityInfo";
+            if (App.DisplayCoverImage)
+                get_style += ",coverImage";
+            EntityCollection collection = new EntityCollection { entity };
+            _ = Task.Run(async () =>
+            {
+                var result = await ShelfData.FillBookFieldsAsync(collection, default, get_style);
+                if (string.IsNullOrEmpty(entity.CoverImageLocalPath) == false)
+                {
+                    lock (_uiiTable.SyncRoot)
+                    {
+                        _uiiTable[uii] = entity.CoverImageLocalPath;
+                    }
+                }
+            });
+            return null;
+        }
+#endif
 
         // 刷新显示
         // 把 actions 中的对象的状态变化更新到当前文档中
@@ -134,11 +220,11 @@ namespace dp2SSL
             {
                 // 定位 Paragraph
                 var block = this.Blocks.Where(o =>
-                {
-                    if (!(o.Tag is ParagraphInfo info))
-                        return false;
-                    return info.Action.ID == action.ID;
-                })
+                    {
+                        if (!(o.Tag is ParagraphInfo info))
+                            return false;
+                        return info.Action.ID == action.ID;
+                    })
                     .FirstOrDefault();
                 if (block == null)
                     continue;
@@ -148,10 +234,106 @@ namespace dp2SSL
                     if (!(block.Tag is ParagraphInfo old_info))
                         continue;
 
-                    var new_block = BuildParagraph(action, old_info.Index, this.BaseFontSize, this.BuildStyle);
+                    var old_image = GetImage(block as Paragraph);
+
+                    var new_block = BuildParagraph(action,
+                        old_info.Index,
+                        this.BaseFontSize,
+                        this.BuildStyle,
+                        old_image);
                     this.Blocks.InsertBefore(block, new_block);
                     this.Blocks.Remove(block);
                 }
+            }
+        }
+
+#if REMOVED
+        static async Task _displayImagesAsync(List<ImageAndEntity> images,
+            CancellationToken token)
+        {
+            foreach (var item in images)
+            {
+                if (token.IsCancellationRequested)
+                    return;
+
+                var entity = item.Entity;
+                var image = item.Image;
+
+                string localFilePath = entity.CoverImageLocalPath;
+
+                if (string.IsNullOrEmpty(localFilePath) == false
+                    && File.Exists(localFilePath))
+                {
+                    // var convertor = new StringToBitmapConverter();
+                    image.Source = GetBitmap(localFilePath);
+                    // convertor.Convert(localFilePath, typeof(ImageSource), null, null) as ImageSource;
+                    image.Visibility = Visibility.Visible;
+                    continue;
+                }
+
+                if (token.IsCancellationRequested)
+                    return;
+
+                EntityCollection collection = new EntityCollection { entity };
+
+                string get_style = "";
+                if (ShelfData.LibraryNetworkCondition != "OK")
+                    get_style += ",localGetEntityInfo";
+                if (App.DisplayCoverImage)
+                    get_style += ",coverImage";
+
+                var result = await ShelfData.FillBookFieldsAsync(collection, token, get_style);
+
+                if (token.IsCancellationRequested)
+                    return;
+
+                if (string.IsNullOrEmpty(entity.CoverImageLocalPath) == false)
+                {
+                    if (File.Exists(entity.CoverImageLocalPath) == false)
+                        throw new Exception($"文件 '{entity.CoverImageLocalPath}' 不存在");
+
+                    App.Invoke(() =>
+                    {
+                        if (token.IsCancellationRequested)
+                            return;
+
+                        image.Source = GetBitmap(entity.CoverImageLocalPath);
+                        image.Visibility = Visibility.Visible;
+                    });
+                }
+            }
+        }
+#endif
+
+        static Image GetImage(Paragraph paragraph)
+        {
+            if (paragraph == null)
+                return null;
+
+            var container = paragraph.Inlines.Where(o => o.Name == "cover_image").FirstOrDefault() as InlineUIContainer;
+            // .ToList().Cast<InlineUIContainer>();
+            if (container == null)
+                return null;
+
+            var result = container.Child as Image;
+            container.Child = null;
+
+            return result;
+        }
+
+
+        static void MaskDeleteAllImage(Paragraph paragraph)
+        {
+            if (paragraph == null)
+                return;
+
+            var containers = paragraph.Inlines.Where(o => o is InlineUIContainer).ToList().Cast<InlineUIContainer>();
+            var images = containers.Select(o => o.Child).ToList().Cast<Image>();
+            foreach (var image in images)
+            {
+                var cancel = image.Tag as CancellationTokenSource;
+                if (cancel != null)
+                    cancel.Cancel();
             }
         }
 
@@ -444,7 +626,11 @@ namespace dp2SSL
             int index = 0;
             foreach (var action in actions)
             {
-                var p = BuildParagraph(action, index, baseFontSize, style);
+                var p = BuildParagraph(action,
+                    index,
+                    baseFontSize,
+                    style,
+                    null);
                 if (p != null)
                 {
                     doc.Blocks.Add(p);
@@ -478,8 +664,9 @@ namespace dp2SSL
         public static Paragraph BuildParagraph(
             ActionInfo action,
             int index,
-    double baseFontSize,
-    string style)
+            double baseFontSize,
+            string style,
+            Image old_image)
         {
             // 是否显示 transfer (in) 条目。注意，即便 false, 也要显示 transfer (out) 条目的
             bool display_transfer = StringUtil.IsInList("transfer", style);
@@ -602,11 +789,32 @@ namespace dp2SSL
                 });
             }
 
+#if REMOVED
+            // 获取 title 和 ImageUrl
+            if (string.IsNullOrEmpty(action.Entity.Title)
+                || (App.DisplayCoverImage && string.IsNullOrEmpty(action.Entity.CoverImageLocalPath) == true))
+            {
+                string get_style = "";
+                if (ShelfData.LibraryNetworkCondition != "OK")
+                    get_style += ",localGetEntityInfo";
+                if (App.DisplayCoverImage)
+                    get_style += ",coverImage";
+                EntityCollection collection = new EntityCollection { action.Entity };
+                var result = Task.Run(async () =>
+                {
+                    return await ShelfData.FillBookFieldsAsync(collection, default, get_style);
+                }).Result;
+            }
+#endif
+
             string title = "";
 
             if (action.Entity != null)
             {
                 title = MessageDocument.ShortTitle(action.Entity.Title);
+
+                // TODO: 这里可以尝试用 LibraryChannelUtil.GetEntityDataAsync() 获得册和书目摘要信息，顺便可以进入本地缓存
+
                 // 2020/5/6
                 // 尝试从本地缓存中获取书目摘要
                 if (string.IsNullOrEmpty(title))
@@ -638,6 +846,9 @@ namespace dp2SSL
                 p.Inlines.Add(run);
             }
 
+
+
+
             // 对于上架/下架来说，还要补充显示一些细节信息：location 去向；和 currentLocation 去向
             if (action.Action.StartsWith("transfer"))
             {
@@ -665,8 +876,218 @@ namespace dp2SSL
                 });
             }
 
+            // 2024/2/1
+            // 封面图片
+            if (App.DisplayCoverImage
+                && action.Entity != null)
+            {
+                //var path = GetCoverImageLocalPath(action.Entity);
+                //if (string.IsNullOrEmpty(path) == false)
+                {
+                    p.Inlines.Add(new Run
+                    {
+                        Text = "\r\n",
+                        Background = back,
+                        Foreground = Brushes.White
+                    });
+
+#if REMOVED
+                var convertor = new StringToBitmapConverter();
+
+                var image = new System.Windows.Controls.Image();
+                image.Width = 120;
+                image.Margin = new Thickness(0, 4, 0, 6);
+                image.Source = convertor.Convert(action.Entity.CoverImageLocalPath, typeof(ImageSource), null, null) as ImageSource;
+#endif
+                    if (old_image == null)
+                    {
+                        var image = new Image();
+                        image.Width = 120;
+                        image.Margin = new Thickness(0, 4, 0, 6);
+                        image.Visibility = Visibility.Collapsed;
+
+                        var container = new InlineUIContainer(image);
+                        container.Name = "cover_image";
+                        p.Inlines.Add(container);
+
+                        BeginImageTask(image, action.Entity);
+                    }
+                    else
+                    {
+                        var container = new InlineUIContainer(old_image);
+                        container.Name = "cover_image";
+                        p.Inlines.Add(container);
+                    }
+                }
+            }
+
             return p;
         }
+
+        #region 封面图像显示
+
+        public class ImageAndEntity
+        {
+            public Image Image { get; set; }
+            public Entity Entity { get; set; }
+        }
+
+        /*
+        // 已经处理过下载封面图片文件的的 UII 集合
+        // UII --> localFilePath
+        static Hashtable _uiiTable = new Hashtable();
+        */
+
+        // 令 BeginImageTask() 中的线程有序进行
+        static AsyncSemaphore _imageTaskLimit = new AsyncSemaphore(1);
+
+        // 启动一个获得图像并显示的任务
+        static void BeginImageTask(Image image, Entity entity_param)
+        {
+            Entity entity = entity_param.Clone();
+
+            // var uii = entity.GetOiPii();
+            string localFilePath = entity.CoverImageLocalPath;
+            /*
+            if (string.IsNullOrEmpty(localFilePath))
+            {
+                lock (_uiiTable.SyncRoot)
+                {
+                    localFilePath = _uiiTable[uii] as string;
+                }
+            }
+            */
+
+            if (string.IsNullOrEmpty(localFilePath) == false
+                && File.Exists(localFilePath))
+            {
+                App.Invoke(() =>
+                {
+                    // var convertor = new StringToBitmapConverter();
+                    image.Source = GetBitmap(localFilePath);
+                    // convertor.Convert(localFilePath, typeof(ImageSource), null, null) as ImageSource;
+                    image.Visibility = Visibility.Visible;
+                });
+                return;
+            }
+
+            CancellationTokenSource cancel = new CancellationTokenSource();
+            image.Tag = cancel;
+            string get_style = "";
+            if (ShelfData.LibraryNetworkCondition != "OK")
+                get_style += ",localGetEntityInfo";
+            if (App.DisplayCoverImage)
+                get_style += ",coverImage";
+            EntityCollection collection = new EntityCollection { entity };
+            _ = Task.Run(async () =>
+            {
+                ShelfData.FillBookFieldsResult result = null;
+                using (var releaser = await _imageTaskLimit.EnterAsync())
+                {
+                    result = await ShelfData.FillBookFieldsAsync(collection, cancel.Token, get_style);
+                }
+
+                if (string.IsNullOrEmpty(entity.CoverImageLocalPath) == false)
+                {
+                    /*
+                    lock (_uiiTable.SyncRoot)
+                    {
+                        _uiiTable[uii] = entity.CoverImageLocalPath;
+                    }
+                    */
+                    if (File.Exists(entity.CoverImageLocalPath) == false)
+                    {
+                        var error = $"BeginImageTask() 中文件 '{entity.CoverImageLocalPath}' 不存在。先前 ShelfData.FillBookFieldsAsync() 的返回值 result={result.ToString()}";
+                        WpfClientInfo.WriteErrorLog(error);
+                        return;
+                    }
+
+                    App.Invoke(() =>
+                    {
+                        if (cancel.Token.IsCancellationRequested)
+                            return;
+
+                        // var convertor = new StringToBitmapConverter();
+                        image.Source = GetBitmap(entity.CoverImageLocalPath);
+                        //convertor.Convert(entity.CoverImageLocalPath, typeof(ImageSource), null, null) as ImageSource;
+                        image.Visibility = Visibility.Visible;
+                    });
+                }
+                else
+                {
+                    // 图像文件本地路径并没有得到
+                    int i = 0;
+                    i++;
+                }
+            });
+        }
+
+        public static BitmapImage GetBitmap(string fileName,
+            bool use_memory_stream = true)
+        {
+            if (string.IsNullOrEmpty(fileName))
+                return null;
+
+            Stream s = null;
+            bool succeed = false;
+            try
+            {
+                if (use_memory_stream)
+                {
+                    byte[] bytes = null;
+                    using (var stream = File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    {
+                        int length = (int)stream.Length;
+                        if (length > 5 * 1024 * 1024)
+                            throw new Exception($"图像文件 {fileName} 尺寸大于 5M，放弃显示");
+                        bytes = new byte[length];
+                        stream.Read(bytes, 0, length);
+                    }
+                    s = new MemoryStream(bytes);
+                }
+                else
+                {
+                    s = File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+                }
+
+                var imageSource = new BitmapImage();
+                imageSource.BeginInit();
+                imageSource.StreamSource = s;
+                imageSource.CacheOption = BitmapCacheOption.OnLoad; // 2023/12/15
+                imageSource.EndInit();
+
+                succeed = true;
+                return imageSource;
+            }
+            catch (Exception ex)
+            {
+                string error = "图像错误: " + ex.Message + " " + fileName;
+                WpfClientInfo.WriteErrorLog(error);
+
+                BitmapImage image = new BitmapImage();
+                image.BeginInit();
+                image.StreamSource = StringToBitmapConverter.BuildTextImage(error, System.Drawing.Color.Transparent, 400);
+                image.CacheOption = BitmapCacheOption.OnLoad;   // (注意这一句必须放在 .UriSource = ... 之后) 防止 WPF 一直锁定这个文件(即便 Image 都消失了还在锁定)
+                image.EndInit();
+
+                /*
+                // 尝试删除这个图像文件，以便后面还有重试下载的机会
+                // 集中通知处理
+                _ = Task.Run(() =>
+                {
+                    App.TryDeleteBrokenImageFile(fileName);
+                });
+                */
+                return image;
+            }
+            finally
+            {
+                if (succeed == false && s != null)
+                    s?.Close();
+            }
+        }
+
+        #endregion
 
         // TODO: 最好把 下架 和 典藏移交(出) 区别开。典藏移交是有明确 location 目的地的操作
         // TODO: 也把上架 和典藏移交(入) 区别开。典藏移交是有明确 location 目的地的操作

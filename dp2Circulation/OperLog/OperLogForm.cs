@@ -702,7 +702,9 @@ namespace dp2Circulation
             string strOperation = DomUtil.GetElementText(dom.DocumentElement, "operation");
             string strAction = DomUtil.GetElementText(dom.DocumentElement, "action");
             string strReaderBarcode = DomUtil.GetElementText(dom.DocumentElement, "readerBarcode");
+            string strReaderRefID = DomUtil.GetElementText(dom.DocumentElement, "readerRefID"); // 2024/1/29
             string strItemBarcode = DomUtil.GetElementText(dom.DocumentElement, "itemBarcode");
+            string strItemRefID = DomUtil.GetElementText(dom.DocumentElement, "itemRefID"); // 2024/1/29
 
             string strConfirmItemRecPath = DomUtil.GetElementText(dom.DocumentElement, "confirmItemRecPath");
             string strBorrowDate = GetRfc1123DisplayString(
@@ -755,8 +757,10 @@ namespace dp2Circulation
                 BuildHtmlLine("操作类型", strOperation + " -- " + (string.IsNullOrEmpty(strNo) == true || strNo == "0" ? "借书" : "续借")) +
                 BuildHtmlLine("动作", strAction + " -- " + GetActionName(strOperation, strAction)) +
                 BuildHtmlEncodedLine("读者证条码号", BuildReaderBarcodeLink(strReaderBarcode)) +
+                BuildHtmlEncodedLine("读者参考 ID", BuildReaderBarcodeLink("@refID:" + strReaderRefID)) +
                 BuildHtmlPendingLine("(读者摘要)", BuildPendingReaderSummary(strReaderBarcode)) +
                 BuildHtmlEncodedLine("册条码号", BuildItemBarcodeLink(strItemBarcode)) +
+                BuildHtmlEncodedLine("册参考 ID", BuildItemBarcodeLink("@refID:" + strItemRefID)) +
                 BuildHtmlPendingLine("(书目摘要)", BuildPendingBiblioSummary(strItemBarcode, strConfirmItemRecPath)) +
                 BuildHtmlLine("册记录路径", strConfirmItemRecPath) +
                 BuildHtmlLine("借阅日期", strBorrowDate) +
@@ -792,7 +796,11 @@ namespace dp2Circulation
             string strOperation = DomUtil.GetElementText(dom.DocumentElement, "operation");
             string strAction = DomUtil.GetElementText(dom.DocumentElement, "action");
             string strReaderBarcode = DomUtil.GetElementText(dom.DocumentElement, "readerBarcode");
+            // 2024/1/29
+            string strReaderRefID = DomUtil.GetElementText(dom.DocumentElement, "readerRefID");
             string strItemBarcode = DomUtil.GetElementText(dom.DocumentElement, "itemBarcode");
+            // 2024/1/29
+            string strItemRefID = DomUtil.GetElementText(dom.DocumentElement, "itemRefID");
 
             string strConfirmItemRecPath = DomUtil.GetElementText(dom.DocumentElement, "confirmItemRecPath");
 
@@ -845,8 +853,10 @@ namespace dp2Circulation
                 BuildHtmlLine("操作类型", strOperation + " -- 还书") +
                 BuildHtmlLine("动作", strAction + " -- " + GetActionName(strOperation, strAction)) +
                 BuildHtmlEncodedLine("读者证条码号", BuildReaderBarcodeLink(strReaderBarcode)) +
+                BuildHtmlEncodedLine("读者参考 ID", BuildReaderBarcodeLink("@refID:" +strReaderRefID)) +
                 BuildHtmlPendingLine("(读者摘要)", BuildPendingReaderSummary(strReaderBarcode)) +
                 BuildHtmlEncodedLine("册条码号", BuildItemBarcodeLink(strItemBarcode)) +
+                BuildHtmlEncodedLine("册参考 ID", BuildItemBarcodeLink("@refID:" + strItemRefID)) +
                 BuildHtmlPendingLine("(书目摘要)", BuildPendingBiblioSummary(strItemBarcode, strConfirmItemRecPath)) +
                 BuildHtmlLine("册记录路径", strConfirmItemRecPath) +
 
@@ -2648,6 +2658,8 @@ DomUtil.GetElementInnerXml(dom.DocumentElement, "deletedCommentRecords"));
             strError = "";
 
             string strBarcode = DomUtil.GetElementInnerText(reader_dom.DocumentElement, "barcode");
+            string strRefID = DomUtil.GetElementInnerText(reader_dom.DocumentElement, "refID");
+
             string strState = DomUtil.GetElementInnerText(reader_dom.DocumentElement, "state");
             string strReaderType = DomUtil.GetElementInnerText(reader_dom.DocumentElement, "readerType");
             string strCardNumber = DomUtil.GetElementInnerText(reader_dom.DocumentElement, "cardNumber");
@@ -2723,6 +2735,8 @@ DomUtil.GetElementInnerXml(dom.DocumentElement, "deletedCommentRecords"));
                 + BuildHtmlLine("Email", strEmail)
                 + BuildHtmlLine("押金余额", strForegift)
                 + BuildHtmlLine("租金信息", strHireXml)
+
+                + BuildHtmlLine("参考ID", strRefID)
 
                 + BuildHtmlEncodedLine("借阅信息", strBorrows)
                 + BuildHtmlEncodedLine("待交费信息", strOverdues)

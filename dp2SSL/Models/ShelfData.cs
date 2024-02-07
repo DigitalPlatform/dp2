@@ -31,6 +31,8 @@ using DigitalPlatform.Xml;
 using static DigitalPlatform.RFID.LogicChip;
 using Microsoft.EntityFrameworkCore.Internal;
 using DocumentFormat.OpenXml.Office2013.Drawing.ChartStyle;
+using static dp2SSL.MyPage;
+using DigitalPlatform.Script;
 
 namespace dp2SSL
 {
@@ -5223,6 +5225,9 @@ ShelfData.LibraryNetworkCondition == "OK" ? "" : "offline");
                 try
                 {
                     string style = "";  // "refreshCount";
+                    if (App.DisplayCoverImage)
+                        style += ",coverImage";
+
                     CancellationToken token = CancelToken;
                     await FillBookFieldsAsync(l_All, token, style);
                     var result = await FillBookFieldsAsync(l_Adds, token, style);
@@ -5861,6 +5866,20 @@ ShelfData.LibraryNetworkCondition == "OK" ? "" : "offline");
         public class FillBookFieldsResult : NormalResult
         {
             public List<string> Errors { get; set; }
+
+            public override string ToString()
+            {
+                return base.ToString() + ",Errors=" + StringUtil.MakePathList(this.Errors, ";");
+            }
+        }
+
+        // 2024/2/4
+        public static void ClearLocalCoverImageFileName(IReadOnlyCollection<Entity> entities)
+        {
+            foreach(var entity in entities)
+            {
+                entity.CoverImageLocalPath = null;
+            }
         }
 
         /*
@@ -5881,6 +5900,9 @@ ShelfData.LibraryNetworkCondition == "OK" ? "" : "offline");
 
             bool localGetEntityInfo = StringUtil.IsInList("localGetEntityInfo", style);
 
+            var coverImage = StringUtil.IsInList("coverImage", style);
+            List<CoverItem> cover_items = new List<CoverItem>();
+
             // int error_count = 0;
             int request_error_count = 0;    // 请求因为通讯失败的次数
             List<string> errors = new List<string>();
@@ -5896,12 +5918,22 @@ ShelfData.LibraryNetworkCondition == "OK" ? "" : "offline");
                         ErrorInfo = "中断",
                         ErrorCode = "cancelled"
                     };
-                /*
-                if (_cancel == null
-                    || _cancel.IsCancellationRequested)
-                    return;
-                    */
-                if (entity.FillFinished == true)
+
+                // 检查需要封面图像的情形。如有必要，则不依 entity.FillFinished 的状态
+                bool needCoverImage = false;
+                if (coverImage)
+                {
+                    // 文件路径不存在
+                    if (string.IsNullOrEmpty(entity.CoverImageLocalPath))
+                        needCoverImage = true;
+                    // 文件路径存在，但文件不存在
+                    else if (string.IsNullOrEmpty(entity.CoverImageLocalPath) == false
+                        && File.Exists(entity.CoverImageLocalPath) == false)
+                        needCoverImage = true;
+                }
+
+                if (entity.FillFinished == true
+                    && needCoverImage == false)
                     continue;
 
                 //if (string.IsNullOrEmpty(entity.Error) == false)
@@ -5977,7 +6009,7 @@ ShelfData.LibraryNetworkCondition == "OK" ? "" : "offline");
 
                 // 获得 Title
                 // 注：如果 Title 为空，文字中要填入 "(空)"
-                if ((string.IsNullOrEmpty(entity.Title) || refresh_data)
+                if ((string.IsNullOrEmpty(entity.Title) || refresh_data || needCoverImage)
                     && string.IsNullOrEmpty(entity.PII) == false && entity.PII != "(空)")
                 {
                     GetEntityDataResult result = null;
@@ -5994,9 +6026,26 @@ ShelfData.LibraryNetworkCondition == "OK" ? "" : "offline");
                     }
                     else
                     {
+                        bool item_completed = false;
+
                         string uii = entity.GetOiPii(true);
+                        string get_style = ShelfData.LibraryNetworkCondition == "OK" ? "" : "offline";
+                        if (needCoverImage)
+                            get_style += ",coverImageUrl";
                         result = await GetEntityDataAsync(uii,
-                            ShelfData.LibraryNetworkCondition == "OK" ? "" : "offline");
+                            get_style,
+                            (item_result) =>
+                            {
+                                entity.SetData(item_result.ItemRecPath,
+item_result.ItemXml,
+DateTime.Now);
+                                item_completed = true;
+                            },
+                            (title) =>
+                            {
+                                entity.Title = PageBorrow.GetCaption(title);
+                            });
+
                         if (result.Value == -1 || result.Value == 0)
                         {
                             // TODO: 条码号没有找到的错误码要单独记下来
@@ -6025,49 +6074,26 @@ ShelfData.LibraryNetworkCondition == "OK" ? "" : "offline");
                             errors.Add(error);
                             continue;
                         }
+
                         entity.Title = PageBorrow.GetCaption(result.Title);
-                        entity.SetData(result.ItemRecPath,
+                        if (item_completed == false)
+                            entity.SetData(result.ItemRecPath,
                             result.ItemXml,
                             ShelfData.Now);
                     }
 
-#if NO
-                    // 验证 OI 和 AOI
-                    // return:
-                    //      true    找到。信息在 isil 和 alternative 参数里面返回
-                    //      false   没有找到
-                    var ret = ShelfData.GetOwnerInstitution(
-                        entity.Location,
-                        out string isil,
-                        out string alternative);
-                    if (ret == false)
+                    if (needCoverImage
+&& string.IsNullOrEmpty(result.CoverImageUrl) == false/*
+&& string.IsNullOrEmpty(result.BiblioRecPath) == false*/)
                     {
-                        string error = $"册 '{entity.PII}' 馆藏地 '{entity.Location}' 没有找到相关的 OI 定义";
-                        errors.Add(error);
-                        entity.AppendError(error, "red", "oiError");
-                    }
-                    else
-                    {
-                        if (string.IsNullOrEmpty(isil) == false)
+                        // var object_path = ScriptUtil.MakeObjectUrl(result.BiblioRecPath, result.CoverImageUrl);
+                        cover_items.Add(new CoverItem
                         {
-                            if (isil != entity.OI)
-                            {
-                                string error = $"册 '{entity.PII}' 的理论 OI '{isil}' 和 RFID 标签中的 OI '{entity.OI}' 不符";
-                                errors.Add(error);
-                                entity.AppendError(error, "red", "oiError");
-                            }
-                        }
-                        else if (string.IsNullOrEmpty(isil) == false)
-                        {
-                            if (alternative != entity.AOI)
-                            {
-                                string error = $"册 '{entity.PII}' 的理论 AOI '{alternative}' 和 RFID 标签中的 OI '{entity.AOI}' 不符";
-                                errors.Add(error);
-                                entity.AppendError(error, "red", "oiError");
-                            }
-                        }
+                            ObjectPath = result.CoverImageUrl,  // object_path,
+                            Entity = entity
+                        });
                     }
-#endif
+
                 }
 
                 // entity.SetError(null);
@@ -6097,18 +6123,57 @@ ShelfData.LibraryNetworkCondition == "OK" ? "" : "offline");
                     ErrorCode = "cancelled"
                 };
 
+            // 2024/1/31
+            // 获取封面图像
+            if (cover_items.Count > 0)
+            {
+                string cacheDir = CoverImagesDirectory;
+
+                foreach (var item in cover_items)
+                {
+                    if (token.IsCancellationRequested)
+                        break;
+                    string fileName = Path.Combine(cacheDir, GetImageFilePath(item.ObjectPath));
+
+                    if (File.Exists(fileName) == false)
+                    {
+                        var get_result = await LibraryChannelUtil.GetCoverImageAsync(item.ObjectPath, fileName);
+                        if (get_result.Value == 1)
+                        {
+                            item.Entity.CoverImageLocalPath = fileName;
+                            if (File.Exists(item.Entity.CoverImageLocalPath) == false)
+                                throw new Exception($"文件 '{item.Entity.CoverImageLocalPath}' 不存在");
+                        }
+                        if (get_result.Value == -1 && get_result.ErrorCode == "diskFull")
+                        {
+                            // TODO: 要进一步判定是不是因为磁盘空间不够
+                            // 执行缓存清理任务
+                            BeginCleanCoverImagesDirectory(DateTime.Now);
+                        }
+                        if (get_result.Value == -1 && get_result.ErrorCode == "offline")
+                        {
+                            // 2024/2/4 断网状态下避免显示不存在的本地文件(断网状态已无力去获取这样的文件)
+                            item.Entity.CoverImageLocalPath = null;
+                        }
+
+                        // TODO: 是否需要把错误信息变为一张图片，以便用户可以看到
+                        if (get_result.Value == -1 && get_result.ErrorCode != "offline"/*断网情况下的报错不必写入 ErrorLog*/)
+                            WpfClientInfo.WriteErrorLog($"LibraryChannelUtil.GetCoverImageAsync(item.ObjectPath='{item.ObjectPath}', fileName='{fileName}') 返回出错: {get_result.ErrorInfo}");
+                    }
+                    else
+                    {
+                        item.Entity.CoverImageLocalPath = fileName;
+                        if (File.Exists(item.Entity.CoverImageLocalPath) == false)
+                            throw new Exception($"文件 '{item.Entity.CoverImageLocalPath}' 不存在");
+                    }
+                }
+            }
+
+
             if (refreshCount)
                 ShelfData.l_RefreshCount();
 
             return new FillBookFieldsResult { Errors = errors };
-            /*
-            }
-            catch (Exception ex)
-            {
-                //LibraryChannelManager.Log?.Error($"FillBookFields() 发生异常: {ExceptionUtil.GetExceptionText(ex)}");   // 2019/9/19
-                //SetGlobalError("current", $"FillBookFields() 发生异常(已写入错误日志): {ex.Message}"); // 2019/9/11 增加 FillBookFields() exception:
-            }
-            */
         }
 
         static string GetRandomString()
@@ -7337,6 +7402,21 @@ out string block_map);
                     biblio_db_cleared = true;
                 }
                 version = "0.03";
+                WpfClientInfo.Config?.Set("database", "version", version);
+            }
+
+            // 2024/1/31
+            // --> 0.04
+            // entities 表增加 ImageUrl 字段
+            if (StringUtil.CompareVersion(version, "0.04") < 0)
+            {
+                using (BiblioCacheContext context = new BiblioCacheContext())
+                {
+                    context.Database.EnsureDeleted();
+                    context.Database.EnsureCreated();
+                    biblio_db_cleared = true;
+                }
+                version = "0.04";
                 WpfClientInfo.Config?.Set("database", "version", version);
             }
 

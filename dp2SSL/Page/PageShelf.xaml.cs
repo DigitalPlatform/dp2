@@ -31,6 +31,8 @@ using DigitalPlatform.Face;
 using DigitalPlatform.Interfaces;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.LibraryClient.localhost;
+using static dp2SSL.Patron;
+using DigitalPlatform.Script;
 
 namespace dp2SSL
 {
@@ -748,6 +750,8 @@ namespace dp2SSL
             //      0   没有填充
             //      1   成功填充
             var result = await FillPatronDetailAsync(() => Welcome());
+            if (result.Value == -1)
+                BeginDelayClearTask();
             //if (result.Value == 1)
             //    Welcome();
         }
@@ -1643,6 +1647,8 @@ namespace dp2SSL
             //      0   没有填充
             //      1   成功填充
             var result = await FillPatronDetailAsync(() => Welcome());
+            if (result.Value == -1)
+                BeginDelayClearTask();
             //if (result.Value == 1)
             //    Welcome();
 #if NO
@@ -1797,8 +1803,12 @@ namespace dp2SSL
             // 是否弹性使用 OI
             bool loose_oi = StringUtil.IsInList("loose_oi", style);
 
+            var coverImage = StringUtil.IsInList("coverImage", style);
+
             try
             {
+                List<CoverItem> cover_items = new List<CoverItem>();
+
                 foreach (Entity entity in entities)
                 {
                     if (token.IsCancellationRequested)
@@ -1830,13 +1840,43 @@ namespace dp2SSL
                         entity.AOI = chip.FindElement(ElementOID.AOI)?.Text;
                     }
 
+                    bool item_completed = false;
+
                     // 获得 Title
                     // 注：如果 Title 为空，文字中要填入 "(空)"
                     if (string.IsNullOrEmpty(entity.Title)
                         && string.IsNullOrEmpty(entity.PII) == false && entity.PII != "(空)")
                     {
+                        // 2021/8/30 如果网络条件好，就 "network" 优先从 dp2library 服务器获得册记录？或者先从 local 得到，然后马上安排一个后台任务去获得最新的册记录进入本地缓存
+                        string get_style = ShelfData.LibraryNetworkCondition == "OK" ? "" : "offline";
+                        if (coverImage && string.IsNullOrEmpty(entity.CoverImageLocalPath))
+                            get_style += ",coverImageUrl";
                         GetEntityDataResult result = await GetEntityDataAsync(entity.GetOiPii(!loose_oi),
-                            ShelfData.LibraryNetworkCondition == "OK" ? "" : "offline"); // 2021/8/30 如果网络条件好，就 "network" 优先从 dp2library 服务器获得册记录？或者先从 local 得到，然后马上安排一个后台任务去获得最新的册记录进入本地缓存
+                            get_style,
+                            (item_result) =>
+                            {
+                                entity.SetData(item_result.ItemRecPath,
+item_result.ItemXml,
+DateTime.Now);
+                                item_completed = true;
+                            },
+                            (title) =>
+                            {
+                                entity.Title = PageBorrow.GetCaption(title);
+                            });
+
+                        if (coverImage
+    && string.IsNullOrEmpty(result.CoverImageUrl) == false/*
+    && string.IsNullOrEmpty(result.BiblioRecPath) == false*/)
+                        {
+                            // var object_path = ScriptUtil.MakeObjectUrl(result.BiblioRecPath, result.CoverImageUrl);
+                            cover_items.Add(new CoverItem
+                            {
+                                ObjectPath = result.CoverImageUrl,  // object_path,
+                                Entity = entity
+                            });
+                        }
+
                         // 2021/5/17
                         if (result.Value == -1
                             && result.ErrorCode == "RequestError"
@@ -1858,7 +1898,8 @@ namespace dp2SSL
                         // 2021/8/30
                         bool old_overdue = PatronControl.IsState(entity, "overdue");
 
-                        entity.SetData(result.ItemRecPath,
+                        if (item_completed == false)
+                            entity.SetData(result.ItemRecPath,
                             result.ItemXml,
                             ShelfData.Now);
                         if (reserve_state && string.IsNullOrEmpty(old_state) == false)
@@ -1881,6 +1922,33 @@ namespace dp2SSL
                 }
 
                 // booksControl.SetBorrowable();
+
+                // 获取封面图像
+                if (cover_items.Count > 0)
+                {
+                    string cacheDir = CoverImagesDirectory;
+
+                    foreach (var item in cover_items)
+                    {
+                        if (token.IsCancellationRequested)
+                            break;
+                        string fileName = Path.Combine(cacheDir, GetImageFilePath(item.ObjectPath));
+
+                        if (File.Exists(fileName) == false)
+                        {
+                            var get_result = await LibraryChannelUtil.GetCoverImageAsync(item.ObjectPath, fileName);
+                            if (get_result.Value == 1)
+                                item.Entity.CoverImageLocalPath = fileName;
+                            if (get_result.Value == -1 && get_result.ErrorCode == "diskFull")
+                            {
+                                // 执行缓存清理任务
+                                BeginCleanCoverImagesDirectory(DateTime.Now);
+                            }
+                        }
+                        else
+                            item.Entity.CoverImageLocalPath = fileName;
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -1888,59 +1956,6 @@ namespace dp2SSL
                 SetGlobalError("current", $"FillBookFieldsAsync() exception: {ex.Message}");
             }
         }
-
-#if REMOVED
-        // 初始化时列出当前馆藏地应有的全部图书
-        // 本函数中，只给 Entity 对象里面设置好了 PII，其他成员尚未设置
-        static void FillLocationBooks(EntityCollection entities,
-            string location,
-            CancellationToken token)
-        {
-            var channel = App.CurrentApp.GetChannel();
-            TimeSpan old_timeout = channel.Timeout;
-            channel.Timeout = TimeSpan.FromSeconds(30);
-
-            try
-            {
-                long lRet = channel.SearchItem(null,
-                    "<全部>",
-                    location,
-                    5000,
-                    "馆藏地点",
-                    "exact",
-                    "zh",
-                    "shelfResultset",
-                    "",
-                    "",
-                    out string strError);
-                if (lRet == -1)
-                    throw new ChannelException(channel.ErrorCode, strError);
-
-                string strStyle = "id,cols,format:@coldef:*/barcode|*/borrower";
-
-                ResultSetLoader loader = new ResultSetLoader(channel,
-                    null,
-                    "shelfResultset",
-                    strStyle,
-                    "zh");
-                foreach (DigitalPlatform.LibraryClient.localhost.Record record in loader)
-                {
-                    token.ThrowIfCancellationRequested();
-                    string pii = record.Cols[0];
-                    App.Invoke(new Action(() =>
-                    {
-                        entities.Add(pii, "", "");
-                    }));
-                }
-            }
-            finally
-            {
-                channel.Timeout = old_timeout;
-                App.CurrentApp.ReturnChannel(channel);
-            }
-        }
-
-#endif
 
 #if OLD_TAGCHANGED
 
@@ -2521,6 +2536,8 @@ namespace dp2SSL
                             string style = "refreshCount";
                             if (networkMode == "local")
                                 style += ",localGetEntityInfo";
+                            if (App.DisplayCoverImage)
+                                style += ",coverImage";
                             var fill_result = await ShelfData.FillBookFieldsAsync(part,
                                 ShelfData.CancelToken,
                                 style);
@@ -3286,6 +3303,8 @@ namespace dp2SSL
                         //      0   没有填充
                         //      1   成功填充
                         var result = await FillPatronDetailAsync(() => Welcome());
+                        if (result.Value == -1)
+                            BeginDelayClearTask();
                         //if (result.Value == 1)
                         //    Welcome();
                     }
@@ -3617,6 +3636,15 @@ namespace dp2SSL
                                 }
                             }
 
+                            // 2024/1/30
+                            // 对读者二维码方式给出确切提示
+                            if (get_result.Value != 1
+                            && pii != null
+                            && pii.StartsWith("PQR:"))
+                            {
+                                get_result.ErrorInfo = $"断网模式下无法使用读者二维码。请改用其它身份鉴别方式。({get_result.ErrorInfo})";
+                            }
+
                             return get_result;
                         }
                     }).ConfigureAwait(false);
@@ -3724,9 +3752,12 @@ namespace dp2SSL
                             {
                                 // TODO: 由于册记录中 overflow 元素可能会发生调整，所以这里在网络条件具备的时候要优先从 dp2library 服务器获得最新的册记录
                                 // 或者，一旦发现册记录中有 overflow 元素时，补从 dp2library 服务器再获取一次册记录信息
+                                string style = "reserve_state,reserve_borrowInfo,loose_oi";
+                                //if (App.DisplayCoverImage)
+                                //    style += ",coverImage";
                                 await FillBookFieldsAsync(channel,
                                     entities,
-                                    "reserve_state,reserve_borrowInfo,loose_oi",
+                                    style,
                                     new CancellationToken());
                             }
                             finally
@@ -4948,6 +4979,9 @@ namespace dp2SSL
             //      0   没有填充
             //      1   成功填充
             var fill_result = await FillPatronDetailAsync(() => Welcome());
+            if (fill_result.Value == -1)
+                BeginDelayClearTask();
+
             //if (fill_result.Value == 1)
             //    Welcome();
         }
@@ -5141,7 +5175,7 @@ namespace dp2SSL
             }
         }
 
-#endregion
+        #endregion
 
         private void ClearPatron_Click(object sender, RoutedEventArgs e)
         {

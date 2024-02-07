@@ -287,7 +287,19 @@ TaskScheduler.Default);
                                 if (ChargingData.GetBookInstitutionStrict() == false)
                                     strict = false;
                                 string oi_pii = patron.GetOiPii(strict); // 严格模式，必须有 OI
-                                return LibraryChannelUtil.GetReaderInfo(string.IsNullOrEmpty(oi_pii) ? pii : oi_pii);
+                                if (App.Function == "智能书柜" && ShelfData.LibraryNetworkCondition != "OK")
+                                {
+                                    // return.Value:
+                                    //      -1  出错
+                                    //      0   读者记录没有找到
+                                    //      1   成功
+                                    var get_result = LibraryChannelUtil.GetReaderInfoFromLocal(string.IsNullOrEmpty(oi_pii) ? pii : oi_pii, false);
+                                    return get_result;
+                                }
+                                else
+                                {
+                                    return LibraryChannelUtil.GetReaderInfo(string.IsNullOrEmpty(oi_pii) ? pii : oi_pii);
+                                }
                             });
 
                     if (result.Value != 1)
@@ -345,7 +357,7 @@ TaskScheduler.Default);
                         var get_result = await LibraryChannelUtil.GetCoverImageAsync(patron.PhotoPath, fileName);
                         if (get_result.Value == 1)
                             patron.PhotoImageLocalPath = fileName;
-                        if (get_result.Value == -1 && get_result.ErrorCode == "System.IO.IOException")
+                        if (get_result.Value == -1 && get_result.ErrorCode == "diskFull")
                         {
                             // TODO: 执行缓存清理任务
                             // BeginCleanCoverImagesDirectory(DateTime.Now);

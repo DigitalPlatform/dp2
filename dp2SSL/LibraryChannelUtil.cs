@@ -40,7 +40,8 @@ namespace dp2SSL
             // 2021/4/1
             public byte[] ItemTimestamp { get; set; }
 
-            // 2023/12/13
+            // 2024/1/31
+            // 注意这是绝对路径，例如 中文图书/1/object/1。或者 https://dp2003.com/logo.jpg
             public string CoverImageUrl { get; set; }
 
             // 2023/12/13
@@ -122,14 +123,17 @@ namespace dp2SSL
                             // EntityItem entity_record = null;   // testing
                         }
 
-                        if (entity_record != null)
+                        if (entity_record != null
+                        && (offline == true || getCoverImageUrl == false || string.IsNullOrEmpty(entity_record.ImageUrl) == false))
                         {
+                            // 注: 如果本地缓存的记录里面 ImageUrl 字段为空，并且 offline == false，则会依然尝试从 dp2library 重新获得册信息(包括 ImageUrl)
                             result = new GetEntityDataResult
                             {
                                 Value = 1,
                                 ItemXml = entity_record.Xml,
                                 ItemRecPath = entity_record.RecPath,
                                 Title = "",
+                                CoverImageUrl = getCoverImageUrl ? entity_record.ImageUrl : null,
                             };
                             func_itemComplete?.Invoke(result);
                         }
@@ -185,6 +189,10 @@ namespace dp2SSL
                                 });
                             else
                             {
+                                string object_path = null;
+                                if (string.IsNullOrEmpty(imageUrl) == false)
+                                    object_path = DigitalPlatform.Script.ScriptUtil.MakeObjectUrl(biblio_recpath, imageUrl);
+
                                 result = new GetEntityDataResult
                                 {
                                     Value = 1,
@@ -192,7 +200,7 @@ namespace dp2SSL
                                     ItemRecPath = item_recpath,
                                     Title = "",
                                     ItemTimestamp = timestamp,
-                                    CoverImageUrl = imageUrl,
+                                    CoverImageUrl = object_path,    // imageUrl,
                                     BiblioRecPath = biblio_recpath,
                                 };
 
@@ -207,6 +215,7 @@ namespace dp2SSL
                                     Xml = item_xml,
                                     RecPath = item_recpath,
                                     Timestamp = timestamp,
+                                    ImageUrl = object_path, // imageUrl,
                                     LastWriteTime = DateTime.Now,
                                 });
 #if NO
@@ -501,6 +510,8 @@ namespace dp2SSL
                             ItemXml = entity_record.Xml,
                             ItemRecPath = entity_record.RecPath,
                             Title = "",
+                            // 2024/2/1
+                            CoverImageUrl = entity_record.ImageUrl,
                         };
 
                     // ***
@@ -2317,39 +2328,68 @@ out string strError);
             }
         }
 
+        /*
+        // 2024/2/2
+        // 为避免创建文件时发生冲突，对文件名提供加锁机制
+        static RecordLockCollection _fileNameLock = new RecordLockCollection();
+        */
+
+        static AsyncSemaphore _fileNameLimit = new AsyncSemaphore(1);
+
+        public static async Task<bool> FileExistsAsync(string fileName)
+        {
+            using (var releaser = await _fileNameLimit.EnterAsync())
+            {
+                return File.Exists(fileName);
+            }
+        }
+
+        // 根据对象路径，把对象文件下载到本地文件
+        // parameters:
+        //          overwrite_existing  是否要覆盖以前的同名文件
         // return.Value:
         //      -1  错误
         //      0   没有找到
         //      1   成功下载
         public static async Task<NormalResult> GetCoverImageAsync(string object_path,
-            string output_filename)
+            string output_filename,
+            bool overwrite_existing = false)
         {
+            string temp_filename = "";
             try
             {
-                if (object_path.StartsWith("http:")
-                    || object_path.StartsWith("https:"))
+                using (var releaser = await _fileNameLimit.EnterAsync())
                 {
-                    bool succeed = false;
-                    try
+                    if (overwrite_existing == false
+                        && File.Exists(output_filename))
+                        return new NormalResult { Value = 1 };
+
+                    string dir = Path.GetDirectoryName(output_filename);
+                    temp_filename = Path.Combine(dir, "~" + Guid.NewGuid().ToString());
+
+                    if (object_path.StartsWith("http:")
+                    || object_path.StartsWith("https:"))
                     {
                         HttpClient client = new HttpClient();
                         using (var stream = await client.GetStreamAsync(object_path))
-                        using (var output_stream = File.Create(output_filename))
+                        using (var output_stream = File.Create(temp_filename))
                         {
                             await stream.CopyToAsync(output_stream);
                         }
-                        succeed = true;
+                        File.Move(temp_filename, output_filename);
+                        temp_filename = "";
                         return new NormalResult { Value = 1 };
                     }
-                    finally
-                    {
-                        if (succeed == false)
-                            File.Delete(output_filename);
-                    }
-                }
 
-                using (var releaser = await _channelLimit.EnterAsync())
-                {
+                    if (ShelfData.LibraryNetworkCondition != "OK")
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = "当前处于断网模式",
+                            ErrorCode = "offline"
+                        };
+
+
                     LibraryChannel channel = App.CurrentApp.GetChannel();
                     TimeSpan old_timeout = channel.Timeout;
                     channel.Timeout = TimeSpan.FromSeconds(60);
@@ -2358,7 +2398,7 @@ out string strError);
                         long lRet = channel.GetRes(
     null,
     object_path,
-    output_filename,
+    temp_filename,
     "content,data,metadata,timestamp,outputpath,gzip",  // 2017/10/7 增加 gzip
     out string strMetaData,
     out byte[] baOutputTimeStamp,
@@ -2371,6 +2411,8 @@ out string strError);
                                 ErrorInfo = strError,
                                 ErrorCode = channel.ErrorCode.ToString()
                             };
+                        File.Move(temp_filename, output_filename);
+                        temp_filename = "";
                         return new NormalResult { Value = 1 };
                     }
                     finally
@@ -2384,14 +2426,32 @@ out string strError);
             {
                 WpfClientInfo.WriteErrorLog($"GetCoverImageAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
 
+                var errorCode = ex.GetType().ToString();
+                if (ex is IOException && IsDiskFull(ex))
+                    errorCode = "diskFull";
+
                 return new NormalResult
                 {
                     Value = -1,
                     ErrorInfo = $"GetCoverImageAsync() 出现异常: {ex.Message}",
-                    ErrorCode = ex.GetType().ToString()
+                    ErrorCode = errorCode
                 };
+            }
+            finally
+            {
+                if (string.IsNullOrEmpty(temp_filename) == false)
+                    File.Delete(temp_filename);
             }
         }
 
+        // https://www.codenong.com/9293227/
+        static bool IsDiskFull(Exception ex)
+        {
+            const int HR_ERROR_HANDLE_DISK_FULL = unchecked((int)0x80070027);
+            const int HR_ERROR_DISK_FULL = unchecked((int)0x80070070);
+
+            return ex.HResult == HR_ERROR_HANDLE_DISK_FULL
+                || ex.HResult == HR_ERROR_DISK_FULL;
+        }
     }
 }

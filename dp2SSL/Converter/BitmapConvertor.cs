@@ -19,9 +19,9 @@ namespace dp2SSL
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null) return null;
-
             string fileName = value as string;
+            if (string.IsNullOrEmpty(fileName)) 
+                return null;
             try
             {
                 BitmapImage image = new BitmapImage();

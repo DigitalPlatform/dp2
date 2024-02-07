@@ -666,11 +666,11 @@ string color = "red")
 
                 string fingerprint_uid = result.ErrorCode;
                 if (string.IsNullOrEmpty(fingerprint_uid))
-                    errors.Add("针对指纹中心请求 getLibraryServerUID 失败，返回的 UID 为空，无法检查核对 UID");
+                    errors.Add($"针对{FingerprintManager.Name}请求 getLibraryServerUID 失败，返回的 UID 为空，无法检查核对 UID");
                 else
                 {
                     if (fingerprint_uid != dp2library_uid)
-                        errors.Add($"dp2SSL 直连的 dp2library 服务器的 UID ('{dp2library_uid}') 和指纹中心所连接的 dp2library UID ('{fingerprint_uid}') 不同。请检查配置参数并重新配置");
+                        errors.Add($"dp2SSL 直连的 dp2library 服务器的 UID ('{dp2library_uid}') 和{FingerprintManager.Name}所连接的 dp2library UID ('{fingerprint_uid}') 不同。请检查配置参数并重新配置");
                 }
             }
 

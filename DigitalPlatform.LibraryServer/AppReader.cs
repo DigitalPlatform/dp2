@@ -2109,7 +2109,7 @@ out List<string> send_skips);
                                 if (dup == true)
                                 {
                                     result.Value = -1;
-                                    result.ErrorInfo = $"参考 ID '{refID}' 和其它读者记录发生重复了";
+                                    result.ErrorInfo = $"参考 ID '{refID}' 和其它读者记录({StringUtil.MakePathList(aPath)})发生重复了";
                                     result.ErrorCode = ErrorCode.RefIdDup;
                                     return result;
                                 }

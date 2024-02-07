@@ -1324,6 +1324,9 @@ out strError);
 
                 string strReaderBarcode = DomUtil.GetElementText(domLog.DocumentElement,
                     "readerBarcode");
+                // 2024/1/29
+                string strReaderRefID = DomUtil.GetElementText(domLog.DocumentElement,
+    "readerRefID");
 
                 // 读入册记录
                 string strConfirmItemRecPath = DomUtil.GetElementText(domLog.DocumentElement,
@@ -1424,6 +1427,7 @@ out strError);
                         nRet = FindItem(
                             channel,
                             strReaderBarcode,
+                            strReaderRefID,
                             aPath,
                             true,   // 优化
                             out List<string> aFoundPath,
@@ -1615,6 +1619,9 @@ out strError);
 
                 string strReaderBarcode = DomUtil.GetElementText(domLog.DocumentElement,
                     "readerBarcode");
+                // 2024/1/29
+                string strReaderRefID = DomUtil.GetElementText(domLog.DocumentElement,
+                    "readerRefID");
 
                 // 读入册记录
                 string strConfirmItemRecPath = DomUtil.GetElementText(domLog.DocumentElement,
@@ -1705,6 +1712,7 @@ out strError);
                         nRet = FindItem(
                             channel,
                             strReaderBarcode,
+                            strReaderRefID,
                             aPath,
                             true,   // 优化
                             out List<string> aFoundPath,
@@ -2539,7 +2547,7 @@ out strError);
         /* 日志记录格式
 <root>
   <operation>setEntity</operation> 操作类型
-  <action>new</action> 具体动作。有new change delete 3种。2019/7/30 增加 transfer，transfer 行为和 change 相似
+  <action>new</action> 具体动作。有new change delete setuid transfer move。2019/7/30 增加 transfer，transfer 行为和 change 相似
   <style>...</style> 风格。有force nocheckdup noeventlog 3种
   <record recPath='中文图书实体/3'><root><parent>2</parent><barcode>0000003</barcode><state>状态2</state><location>阅览室</location><price></price><bookType>教学参考</bookType><registerNo></registerNo><comment>test</comment><mergeComment></mergeComment><batchNo>111</batchNo><borrower></borrower><borrowDate></borrowDate><borrowPeriod></borrowPeriod></root></record> 记录体
   <oldRecord recPath='中文图书实体/3'>...</oldRecord> 被覆盖或者删除的记录 动作为change和delete时具备此元素

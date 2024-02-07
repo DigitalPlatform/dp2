@@ -606,6 +606,8 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 获得读者类型
+        // parameters:
+        //      strReaerBarcode 读者证条码号。也可以为 @refID:xxx 形态
         // return:
         //      -1  出错
         //      0   没有找到读者记录
@@ -631,17 +633,13 @@ namespace DigitalPlatform.LibraryServer
             }
 
             // 读入读者记录
-            string strReaderXml = "";
-            string strOutputReaderRecPath = "";
-            byte[] reader_timestamp = null;
-
             int nRet = this.App.GetReaderRecXml(
                 // this.RmsChannels,
                 channel,
                 strReaderBarcode,
-                out strReaderXml,
-                out strOutputReaderRecPath,
-                out reader_timestamp,
+                out string strReaderXml,
+                out string strOutputReaderRecPath,
+                out byte [] reader_timestamp,
                 out strError);
             if (nRet == 0)
             {
@@ -686,10 +684,10 @@ namespace DigitalPlatform.LibraryServer
             strError = "";
             int nRet = 0;
 
-            XmlDocument dom = new XmlDocument();
+            XmlDocument queue_dom = new XmlDocument();
             try
             {
-                dom.LoadXml(strQueueRecXml);
+                queue_dom.LoadXml(strQueueRecXml);
             }
             catch (Exception ex)
             {
@@ -697,7 +695,7 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
-            string strState = DomUtil.GetElementText(dom.DocumentElement,
+            string strState = DomUtil.GetElementText(queue_dom.DocumentElement,
                 "state");
 
             // 对通知完成后的记录, 循环中不必处理
@@ -705,21 +703,26 @@ namespace DigitalPlatform.LibraryServer
                 return 0;
 
             // TODO: 读者的馆代码
-            string strLibraryCode = DomUtil.GetElementText(dom.DocumentElement,
-    "libraryCode");
-            string strReaderBarcode = DomUtil.GetElementText(dom.DocumentElement,
-    "readerBarcode");
+            string strLibraryCode = DomUtil.GetElementText(queue_dom.DocumentElement,
+                "libraryCode");
+            string strReaderBarcode = DomUtil.GetElementText(queue_dom.DocumentElement,
+                "readerBarcode");
+            string strReaderRefID = DomUtil.GetElementText(queue_dom.DocumentElement,
+                "readerRefID");
+
+            string strReaderKey = LibraryApplication.GetUnionRefID(strReaderBarcode, strReaderRefID);
 
             // 2015/5/20
             // 通过读者证条码号获得读者类型
-            string strReaderType = "";
             // 获得读者类型
+            // parameters:
+            //      strReaerBarcode 读者证条码号。也可以为 @refID:xxx 形态
             // return:
             //      -1  出错
             //      0   没有找到读者记录
             //      1   找到
-            nRet = GetReaderType(strReaderBarcode,
-        out strReaderType,
+            nRet = GetReaderType(strReaderKey/*strReaderBarcode*/,
+        out string strReaderType,
         out strError);
             if (nRet == -1)
                 strReaderType = "";
@@ -776,7 +779,7 @@ namespace DigitalPlatform.LibraryServer
             //      1   已经超过
             nRet = CheckeOutOfReservation(
                     calendar,
-                    dom,
+                    queue_dom,
                     out strError);
             if (nRet == -1)
                 return -1;
@@ -791,17 +794,24 @@ namespace DigitalPlatform.LibraryServer
             // 超过保留期限情形的处理
             if (nRet == 1)
             {
-                string strItemBarcode = DomUtil.GetElementText(dom.DocumentElement,
+                string strItemBarcode = DomUtil.GetElementText(queue_dom.DocumentElement,
                     "itemBarcode");
+                string strItemRefID = DomUtil.GetElementText(queue_dom.DocumentElement,
+                    "itemRefID");
+
+                string strItemKey = LibraryApplication.GetUnionRefID(strItemBarcode, strItemRefID);
 
                 // 通知当前读者，他超过了取书的保留期限
-                string strNotifyDate = DomUtil.GetElementText(dom.DocumentElement,
+                string strNotifyDate = DomUtil.GetElementText(queue_dom.DocumentElement,
                     "notifyDate");
+                // parameters:
+                //      strReaderBarcode  证条码号。可以为 @refID:xxx 形态
+                //      strItemBarcode      册条码号。可以为 @refID:xxx 形态
                 nRet = AddReaderOutOfReservationInfo(
                         // this.RmsChannels,
                         channel,
-                        strReaderBarcode,
-                        strItemBarcode,
+                        strReaderKey/*strReaderBarcode*/,
+                        strItemKey/*strItemBarcode*/,
                         strNotifyDate,
                         out strError);
                 if (nRet == -1)
@@ -814,7 +824,7 @@ namespace DigitalPlatform.LibraryServer
                     null,
                     channel,
                     strQueueRecPath,
-                    dom,
+                    queue_dom,
                     baQueueRecTimeStamp,
                     out strError);
                 if (nRet == -1)
@@ -825,8 +835,12 @@ namespace DigitalPlatform.LibraryServer
                     // 需要归架
                     // 册记录中<location>需要去掉#reservation，相关<request>元素也需要删除
 
-                    nRet = RemoveEntityReservationInfo(strItemBarcode,
-                        strReaderBarcode,
+                    // parameters:
+                    //      strItemBarcode      册条码号。可以为 @refID:xxx 形态
+                    //      strReaderBarcodeParam  证条码号。可以为 @refID:xxx 形态
+                    nRet = RemoveEntityReservationInfo(
+                        strItemKey/*strItemBarcode*/,
+                        strReaderKey/*strReaderBarcode*/,
                         out strError);
                     if (nRet == -1)
                     {
@@ -840,6 +854,9 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 给读者记录里加上预约到书后超期不取的状态
+        // parameters:
+        //      strReaderBarcode    证条码号。可以为 @refID:xxx 形态
+        //      strItemBarcode      册条码号。可以为 @refID:xxx 形态
         int AddReaderOutOfReservationInfo(
             // RmsChannelCollection channels,
             RmsChannel channel,
@@ -865,16 +882,15 @@ namespace DigitalPlatform.LibraryServer
             {
 
                 // 读入读者记录
-                string strReaderXml = "";
-                string strOutputReaderRecPath = "";
-                byte[] reader_timestamp = null;
+                // parameters:
+                //      strBarcode  证条码号。可以为 @refID:xxx 形态
                 nRet = this.App.GetReaderRecXml(
                     // channels,
                     channel,
                     strReaderBarcode,
-                    out strReaderXml,
-                    out strOutputReaderRecPath,
-                    out reader_timestamp,
+                    out string strReaderXml,
+                    out string strOutputReaderRecPath,
+                    out byte [] reader_timestamp,
                     out strError);
                 if (nRet == 0)
                 {
@@ -919,23 +935,23 @@ namespace DigitalPlatform.LibraryServer
                 nCount++;
                 DomUtil.SetAttr(root, "count", nCount.ToString());
 
+                // 2024/1/30
+                // 将 strItemBarcode 内容翻译为 @refID:xxx 形态
+                nRet = this.App.ConvertItemBarcodeListToRefIdList(channel,
+    strItemBarcode,
+    out string strItemKey,
+    out strError);
+                if (nRet == -1)
+                {
+                    strError = $"在将册条码号 '{strItemBarcode}' 转换为参考 ID 形态时出错: {strError}";
+                    return -1;
+                }
+
                 // 追加<request>元素
                 XmlNode request = readerdom.CreateElement("request");
                 root.AppendChild(request);
-                DomUtil.SetAttr(request, "itemBarcode", strItemBarcode);
+                DomUtil.SetAttr(request, "itemBarcode", strItemKey/*strItemBarcode*/);
                 DomUtil.SetAttr(request, "notifyDate", strNotifyDate);
-
-                byte[] output_timestamp = null;
-                string strOutputPath = "";
-
-#if NO
-                RmsChannel channel = channels.GetChannel(this.App.WsUrl);
-                if (channel == null)
-                {
-                    strError = "get channel error";
-                    return -1;
-                }
-#endif
 
                 // 写回读者记录
                 lRet = channel.DoSaveTextRes(strOutputReaderRecPath,
@@ -943,8 +959,8 @@ namespace DigitalPlatform.LibraryServer
                     false,
                     "content",  // ,ignorechecktimestamp
                     reader_timestamp,
-                    out output_timestamp,
-                    out strOutputPath,
+                    out byte [] output_timestamp,
+                    out string strOutputPath,
                     out strError);
                 if (lRet == -1)
                 {
@@ -975,8 +991,11 @@ namespace DigitalPlatform.LibraryServer
         // 去除册记录中过时的预约信息
         // 册记录中<location>需要去掉#reservation，相关<request>元素也需要删除
         // 锁定：本函数对EntityLocks加了锁定
+        // parameters:
+        //      strItemBarcode          册条码号。可以为 @refID:xxx 形态
+        //      strReaderBarcodeParam   证条码号。可以为 @refID:xxx 形态
         int RemoveEntityReservationInfo(string strItemBarcode,
-            string strReaderBarcode,
+            string strReaderBarcodeParam,
             out string strError)
         {
             strError = "";
@@ -987,7 +1006,7 @@ namespace DigitalPlatform.LibraryServer
                 strError = "册条码号不能为空。";
                 return -1;
             }
-            if (String.IsNullOrEmpty(strReaderBarcode) == true)
+            if (String.IsNullOrEmpty(strReaderBarcodeParam) == true)
             {
                 strError = "读者证条码号不能为空。";
                 return -1;
@@ -1001,6 +1020,18 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
+            // 将证条码号列表转换为 参考 ID 列表
+            // 注: 已经为 @refID:xxx 形态的不做变化
+            nRet = this.App.ConvertReaderBarcodeListToRefIdList(channel,
+                strReaderBarcodeParam,
+                out string strReaderRefIdString,
+                out strError);
+            if (nRet == -1)
+            {
+                strError = $"将证条码号 '{strReaderBarcodeParam}' 转换为参考 ID 的过程出错: {strError}";
+                return -1;
+            }
+
             // 加册记录锁
             this.App.EntityLocks.LockForWrite(strItemBarcode);
 
@@ -1011,9 +1042,9 @@ namespace DigitalPlatform.LibraryServer
                 int nRedoCount = 0;
 
             REDO_CHANGE:
-                List<string> aPath = null;
-                string strItemXml = "";
-                byte[] item_timestamp = null;
+                //List<string> aPath = null;
+                //string strItemXml = "";
+                //byte[] item_timestamp = null;
                 string strOutputItemRecPath = "";
 
                 // 获得册记录
@@ -1026,10 +1057,10 @@ namespace DigitalPlatform.LibraryServer
                     // this.RmsChannels,
                     channel,
                     strItemBarcode,
-                    out strItemXml,
+                    out string strItemXml,
                     100,
-                    out aPath,
-                    out item_timestamp,
+                    out List<string> aPath,
+                    out byte [] item_timestamp,
                     out strError);
                 if (nRet == 0)
                 {
@@ -1079,7 +1110,23 @@ namespace DigitalPlatform.LibraryServer
                 DomUtil.SetElementText(itemdom.DocumentElement,
                     "location", strLocation);
 
-                XmlNode nodeRequest = itemdom.DocumentElement.SelectSingleNode("reservations/request[@reader='" + strReaderBarcode + "']");
+                // 先尝试用 @refID:xxx 形态定位，不行再用证条码号定位
+                XmlNode nodeRequest = itemdom.DocumentElement.SelectSingleNode("reservations/request[@reader='" + strReaderRefIdString + "']");
+                if (nodeRequest == null)
+                {
+                    // 通过参考 ID 得到读者记录的证条码号
+                    nRet = this.App.ConvertRefIdListToReaderBarcodeList(channel,
+    strReaderRefIdString,
+    out string strReaderBarcode,
+    out strError);
+                    if (nRet == -1)
+                    {
+                        strError = $"将参考 ID '{strReaderRefIdString}' 转换为证条码号的过程出错: {strError}";
+                        return -1;
+                    }
+
+                    nodeRequest = itemdom.DocumentElement.SelectSingleNode("reservations/request[@reader='" + strReaderBarcode + "']");
+                }
                 if (nodeRequest != null)
                 {
                     nodeRequest.ParentNode.RemoveChild(nodeRequest);

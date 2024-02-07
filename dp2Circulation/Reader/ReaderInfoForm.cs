@@ -26,7 +26,6 @@ using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.Drawing;
 using DigitalPlatform.Interfaces;
-using Microsoft.CodeAnalysis.Operations;
 
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Script;
@@ -35,7 +34,6 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Marc;
-// using dp2Circulation.Reader;
 
 namespace dp2Circulation
 {
@@ -2088,6 +2086,20 @@ MessageBoxDefaultButton.Button2);
                         }
                     }
 
+                    // 2024/1/29
+                    // 需要消除password/displayName元素内容
+                    if (this.m_strSetAction == "new")
+                    {
+                        // 清除一些保留字段的内容
+                        nRet = ClearReserveFields(
+                ref strNewXml,
+                out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+
+                        // bReserveFieldsCleared = true;
+                    }
+
                     // 调试
                     // MessageBoxShow("1 this.m_strSetAction='"+this.m_strSetAction+"'");
 
@@ -2592,6 +2604,9 @@ new_dom.DocumentElement,
 
             // 2019/8/1
             DomUtil.DeleteElement(dom.DocumentElement, "face");
+            // 2024/1/29
+            // 前端不提供 refID，迫使服务器填充 refID
+            DomUtil.DeleteElement(dom.DocumentElement, "refID");
 
 #if NO
             // 清除<dprms:file>元素

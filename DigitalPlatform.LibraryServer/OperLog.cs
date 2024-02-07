@@ -1137,6 +1137,18 @@ namespace DigitalPlatform.LibraryServer
             return WriteOperLog(dom, strClientAddress, new DateTime(0), out string _, out strError);
         }
 
+        // 1.01 (2014/3/8) 修改了 operation=amerce;action=expire 记录中元素名 oldReeaderRecord 为 oldReaderRecord
+        // 1.02 (2015/9/8) 日志中增加了 time 元素 linkUID 和 uid 元素
+        // 1.03 (2015/9/13) SetReaderInfo 中增加了 changedEntityRecord 元素 
+        // 1.04 (2017/1/12) Borrow() Return() 中，readerRecord 元素增加了 clipping 属性，如果值为 "true"，表示这里记载的读者记录是不完全的，不应用于快照恢复读者记录
+        // 1.05 (2017/1/16) CopyBiblioINfo() API 的操作日志增加了 overwritedRecord 元素。记载被覆盖以前的记录内容
+        // 1.06 (2017/5/16) 对 ManageDatabase() API 也写入日志了
+        // 1.07 (2018/3/7) passgate 日志记录中增加了 readerRefID 元素
+        // 1.08 (2019/4/25) changeReaderPassword 日志此前版本中少了 readerBarcode 和 newPassword 元素。现在补上
+        // 1.09 (2022/3/16) 此前版本的 setSystemParameter 类型的日志记录中 value 元素内容会把 \t 字符替换为 *，导致 XML 内容或者 C# 脚本出现错误。建议 recover 的时候忽略此前版本的 setSystemParameter 动作
+        // 1.10 (2024/2/7) 借阅信息链中两类册条码号变为参考 ID。borrow return reservation 等日志动作记录格式均有变化。见文档 https://github.com/DigitalPlatform/dp2/issues/1183
+        static string operlog_version = "1.10";
+
         // 写入一条操作日志
         // parameters:
         //      start_time  操作开始的时间。本函数会用它算出整个操作耗费的时间。如果 ticks == 0，表示不使用这个值
@@ -1164,16 +1176,9 @@ namespace DigitalPlatform.LibraryServer
 #endif
 
             WriteClientAddress(dom, strClientAddress);
-            // 1.01 (2014/3/8) 修改了 operation=amerce;action=expire 记录中元素名 oldReeaderRecord 为 oldReaderRecord
-            // 1.02 (2015/9/8) 日志中增加了 time 元素 linkUID 和 uid 元素
-            // 1.03 (2015/9/13) SetReaderInfo 中增加了 changedEntityRecord 元素 
-            // 1.04 (2017/1/12) Borrow() Return() 中，readerRecord 元素增加了 clipping 属性，如果值为 "true"，表示这里记载的读者记录是不完全的，不应用于快照恢复读者记录
-            // 1.05 (2017/1/16) CopyBiblioINfo() API 的操作日志增加了 overwritedRecord 元素。记载被覆盖以前的记录内容
-            // 1.06 (2017/5/16) 对 ManageDatabase() API 也写入日志了
-            // 1.07 (2018/3/7) passgate 日志记录中增加了 readerRefID 元素
-            // 1.08 (2019/4/25) changeReaderPassword 日志此前版本中少了 readerBarcode 和 newPassword 元素。现在补上
-            // 1.09 (2022/3/16) 此前版本的 setSystemParameter 类型的日志记录中 value 元素内容会把 \t 字符替换为 *，导致 XML 内容或者 C# 脚本出现错误。建议 recover 的时候忽略此前版本的 setSystemParameter 动作
-            DomUtil.SetElementText(dom.DocumentElement, "version", "1.09");
+            DomUtil.SetElementText(dom.DocumentElement,
+                "version",
+                operlog_version);
 
             if (start_time != new DateTime(0))
             {
@@ -1265,7 +1270,9 @@ namespace DigitalPlatform.LibraryServer
             Debug.Assert(this.m_streamSpare != null, "");
 
             WriteClientAddress(dom, strClientAddress);
-            DomUtil.SetElementText(dom.DocumentElement, "version", "1.06");
+            DomUtil.SetElementText(dom.DocumentElement,
+                "version",
+                operlog_version);   // 注: 1.9 以及以前，长期被误用为 "1.06"
 
             int nRet = WriteEnventLog(dom.OuterXml,
                 attachment,

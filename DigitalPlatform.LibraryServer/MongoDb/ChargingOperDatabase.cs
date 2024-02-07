@@ -244,7 +244,10 @@ namespace DigitalPlatform.LibraryServer
 
         // 构造 Query
         // parameters:
-        //      patronBarcode   读者证条码号。如果 以 "@itemBarcode:" 前缀引导，表示这是册条码号
+        //      patronBarcode   读者证条码号。
+        //                      如果 以 "@itemBarcode:" 前缀引导，表示这是册条码号
+        //                      如果 以 "@itemRefID:" 前缀引导，表示这是册参考 ID
+        //                      如果 以 "@readerRefID:" 或 "@refID:" 前缀引导，表示这是读者参考 ID
         public FilterDefinition<ChargingOperItem> BuildQuery(
             string patronBarcode,
             DateTime startTime,
@@ -264,6 +267,7 @@ namespace DigitalPlatform.LibraryServer
 
             string itemBarcodePrefix = "@itemBarcode:";
             string itemRefIdPrefix = "@itemRefID:";
+            string readerRefIdPrefix = "@readerRefID:";
 
             FilterDefinition<ChargingOperItem> patron_query = null;
             if (patronBarcode == "!all")    // 所有读者和图书的借阅历史
@@ -280,6 +284,9 @@ namespace DigitalPlatform.LibraryServer
             else if (patronBarcode != null
                 && patronBarcode.StartsWith(itemRefIdPrefix) == true)
                 patron_query = Builders<ChargingOperItem>.Filter.Eq("ItemBarcode", "@refID:" + patronBarcode.Substring(itemRefIdPrefix.Length));
+            else if (patronBarcode != null
+                && patronBarcode.StartsWith(readerRefIdPrefix) == true)
+                patron_query = Builders<ChargingOperItem>.Filter.Eq("PatronBarcode", "@refID:" + patronBarcode.Substring(readerRefIdPrefix.Length));
             else
                 patron_query = Builders<ChargingOperItem>.Filter.Eq("PatronBarcode", patronBarcode);
 
@@ -431,6 +438,10 @@ namespace DigitalPlatform.LibraryServer
 #endif
 
         // parameters:
+        //      patronBarcode   读者证条码号。
+        //                      如果 以 "@itemBarcode:" 前缀引导，表示这是册条码号
+        //                      如果 以 "@itemRefID:" 前缀引导，表示这是册参考 ID
+        //                      如果 以 "@readerRefID:" 或 "@refID:" 前缀引导，表示这是读者参考 ID
         //      order   排序方式。ascending/descending 之一。默认 ascending
         //      start   要跳过这么多个记录
         //      totalCount  [out] 返回命中的记录总数
@@ -569,6 +580,27 @@ return { None : '' };
             collection.DeleteMany(
                 o => o.PatronBarcode == strOldBarcode);
         }
+
+        // 2024/2/5
+        public void ChangeItemBarcode(string strOldBarcode, string strNewBarcode)
+        {
+            if (strOldBarcode == strNewBarcode)
+                return; // 没有必要修改
+            if (string.IsNullOrEmpty(strOldBarcode)
+                || string.IsNullOrEmpty(strNewBarcode))
+                return; // 没有必要修改
+
+            IMongoCollection<ChargingOperItem> collection = this._collection;
+            if (collection == null)
+                return;
+
+            var updateDef = Builders<ChargingOperItem>.Update.Set(o => o.ItemBarcode, strNewBarcode);
+
+            collection.UpdateMany(
+                o => o.ItemBarcode == strOldBarcode,
+                updateDef);
+        }
+
     }
 
     public class ChargingOperItem
@@ -581,8 +613,8 @@ return { None : '' };
         public string Operation { get; set; } // 操作名
         public string Action { get; set; }  // 动作
 
-        public string ItemBarcode { get; set; }
-        public string PatronBarcode { get; set; }
+        public string ItemBarcode { get; set; } // 2024/2/5 内容改为 @refID:xxx 形态
+        public string PatronBarcode { get; set; } // 2024/2/5 内容改为 @refID:xxx 形态
 
         public string BiblioRecPath { get; set; }
 

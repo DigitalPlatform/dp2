@@ -16,6 +16,7 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Text;
+using dp2LibraryApiTester.TestCase;
 
 namespace dp2LibraryApiTester
 {
@@ -506,6 +507,21 @@ string style = "")
                     var result = TestLoginApi.TestAll(_cancel.Token);
                     if (result.Value == -1)
                         DataModel.SetMessage(result.ErrorInfo);
+                }
+                catch (Exception ex)
+                {
+                    AppendString($"exception: {ex.Message}");
+                }
+            });
+        }
+
+        private void MenuItem_test_reservation_all_Click(object sender, EventArgs e)
+        {
+            Task.Run(() =>
+            {
+                try
+                {
+                    TestReservation.TestAll("");
                 }
                 catch (Exception ex)
                 {

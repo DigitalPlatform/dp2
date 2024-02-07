@@ -30,6 +30,9 @@ namespace dp2SSL
         public string Xml { get; set; }
         public byte[] Timestamp { get; set; }
 
+        // 2024/1/26
+        public string ImageUrl { get; set; }
+
         // 2024/1/25
         public DateTime LastWriteTime { get; set; } // 最后更新时间
     }

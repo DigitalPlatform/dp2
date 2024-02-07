@@ -1141,7 +1141,7 @@ Order = 40,
 Name = "是否显示图书封面图像",
 Description = "是否显示图书封面图像"
 )]
-        [Category("自助借还操作风格")]
+        [Category("全局")]
         public bool DisplayCoverImage
         {
             get => _displayCoverImage;

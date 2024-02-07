@@ -19,6 +19,8 @@ namespace dp2SSL
         {
             InitializeComponent();
 
+            this.books.EmptyComment = "(空)";
+
             Loaded += AskTransferInWindow_Loaded;
             Unloaded += AskTransferWindow_Unloaded;
         }
@@ -43,7 +45,9 @@ namespace dp2SSL
 
             // 后台处理刷新
             // var task = ShelfData.FillBookFieldsAsync(collection, _cancel.Token, "refreshData"/*, false*/);
-            _ = ShelfData.FillBookFieldsAsync(collection, _cancel.Token, "");
+            _ = ShelfData.FillBookFieldsAsync(collection, 
+                _cancel.Token,
+                App.DisplayCoverImage ? "coverImage" : "");
         }
 
         public string TitleText

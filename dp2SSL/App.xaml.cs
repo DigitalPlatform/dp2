@@ -965,6 +965,15 @@ namespace dp2SSL
                 {
                     while (token.IsCancellationRequested == false)
                     {
+                        // 2024/2/1
+                        // 书柜断网情况下不进行检查(因为检查会导致出现红色的“网络故障”报错，让读者困惑)
+                        // TODO: 不过断网情况下可以弱化为，只检查 fingerprintcenter/palmcenter 和 facecenter 之间的 server uid 一致性，假定这两个可以检查的话
+                        if (ShelfData.LibraryNetworkCondition != "OK")
+                        {
+                            SetError("uid", null);
+                            continue;
+                        }
+
                         var result = PageSetting.CheckServerUID();
                         if (result.Value == -1)
                             SetError("uid", result.ErrorInfo);

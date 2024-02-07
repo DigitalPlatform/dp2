@@ -38,6 +38,7 @@ namespace dp2LibraryApiTester
             this.MenuItem_test_searchBiblioSafety = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_test_searchItemSafety = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_test_setReaderInfoApi = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_test_loginApi = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_test_prepareCheckBorrow = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_test_prepareCheckBorrow_prepare = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_test_prepareCheckBorrow_prepare_condition1 = new System.Windows.Forms.ToolStripMenuItem();
@@ -49,7 +50,8 @@ namespace dp2LibraryApiTester
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
-            this.MenuItem_test_loginApi = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_test_reservation = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_test_reservation_all = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -77,7 +79,7 @@ namespace dp2LibraryApiTester
             // MenuItem_settings
             // 
             this.MenuItem_settings.Name = "MenuItem_settings";
-            this.MenuItem_settings.Size = new System.Drawing.Size(192, 40);
+            this.MenuItem_settings.Size = new System.Drawing.Size(315, 40);
             this.MenuItem_settings.Text = "设置 ...";
             this.MenuItem_settings.Click += new System.EventHandler(this.MenuItem_settings_Click);
             // 
@@ -90,7 +92,8 @@ namespace dp2LibraryApiTester
             this.MenuItem_test_searchItemSafety,
             this.MenuItem_test_setReaderInfoApi,
             this.MenuItem_test_loginApi,
-            this.MenuItem_test_prepareCheckBorrow});
+            this.MenuItem_test_prepareCheckBorrow,
+            this.MenuItem_test_reservation});
             this.MenuItem_test.Name = "MenuItem_test";
             this.MenuItem_test.Size = new System.Drawing.Size(72, 33);
             this.MenuItem_test.Text = "测试";
@@ -129,6 +132,13 @@ namespace dp2LibraryApiTester
             this.MenuItem_test_setReaderInfoApi.Size = new System.Drawing.Size(385, 40);
             this.MenuItem_test_setReaderInfoApi.Text = "测试 SerReaderInfo() API";
             this.MenuItem_test_setReaderInfoApi.Click += new System.EventHandler(this.MenuItem_test_setReaderInfoApi_Click);
+            // 
+            // MenuItem_test_loginApi
+            // 
+            this.MenuItem_test_loginApi.Name = "MenuItem_test_loginApi";
+            this.MenuItem_test_loginApi.Size = new System.Drawing.Size(385, 40);
+            this.MenuItem_test_loginApi.Text = "测试 Login() API";
+            this.MenuItem_test_loginApi.Click += new System.EventHandler(this.MenuItem_test_loginApi_Click);
             // 
             // MenuItem_test_prepareCheckBorrow
             // 
@@ -220,12 +230,20 @@ namespace dp2LibraryApiTester
             this.webBrowser1.Size = new System.Drawing.Size(800, 366);
             this.webBrowser1.TabIndex = 3;
             // 
-            // MenuItem_test_loginApi
+            // MenuItem_test_reservation
             // 
-            this.MenuItem_test_loginApi.Name = "MenuItem_test_loginApi";
-            this.MenuItem_test_loginApi.Size = new System.Drawing.Size(385, 40);
-            this.MenuItem_test_loginApi.Text = "测试 Login() API";
-            this.MenuItem_test_loginApi.Click += new System.EventHandler(this.MenuItem_test_loginApi_Click);
+            this.MenuItem_test_reservation.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MenuItem_test_reservation_all});
+            this.MenuItem_test_reservation.Name = "MenuItem_test_reservation";
+            this.MenuItem_test_reservation.Size = new System.Drawing.Size(385, 40);
+            this.MenuItem_test_reservation.Text = "测试预约相关功能";
+            // 
+            // MenuItem_test_reservation_all
+            // 
+            this.MenuItem_test_reservation_all.Name = "MenuItem_test_reservation_all";
+            this.MenuItem_test_reservation_all.Size = new System.Drawing.Size(315, 40);
+            this.MenuItem_test_reservation_all.Text = "执行全部测试";
+            this.MenuItem_test_reservation_all.Click += new System.EventHandler(this.MenuItem_test_reservation_all_Click);
             // 
             // MainForm
             // 
@@ -272,6 +290,8 @@ namespace dp2LibraryApiTester
         private System.Windows.Forms.ToolStripMenuItem MenuItem_test_prepareCheckBorrow_prepare_condition4;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_test_prepareCheckBorrow_prepare_condition5;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_test_loginApi;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_test_reservation;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_test_reservation_all;
     }
 }
 

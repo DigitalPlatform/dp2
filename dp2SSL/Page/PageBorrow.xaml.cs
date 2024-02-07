@@ -2171,11 +2171,7 @@ namespace dp2SSL
             }
         }
 #endif
-        class CoverItem
-        {
-            public string ObjectPath { get; set; }
-            public Entity Entity { get; set; }
-        }
+
 
         // 第二阶段：填充图书信息的 PII 和 Title 字段
         // parameters:
@@ -2463,13 +2459,13 @@ out string strError);
                                         });
 
                                     if (coverImage
-                                        && string.IsNullOrEmpty(result.CoverImageUrl) == false
-                                        && string.IsNullOrEmpty(result.BiblioRecPath) == false)
+                                        && string.IsNullOrEmpty(result.CoverImageUrl) == false/*
+                                        && string.IsNullOrEmpty(result.BiblioRecPath) == false*/)
                                     {
-                                        var object_path = ScriptUtil.MakeObjectUrl(result.BiblioRecPath, result.CoverImageUrl);
+                                        // var object_path = ScriptUtil.MakeObjectUrl(result.BiblioRecPath, result.CoverImageUrl);
                                         cover_items.Add(new CoverItem
                                         {
-                                            ObjectPath = object_path,
+                                            ObjectPath = result.CoverImageUrl,  // object_path,
                                             Entity = entity
                                         });
                                     }
@@ -2540,7 +2536,7 @@ out string strError);
                                 var get_result = await LibraryChannelUtil.GetCoverImageAsync(item.ObjectPath, fileName);
                                 if (get_result.Value == 1)
                                     item.Entity.CoverImageLocalPath = fileName;
-                                if (get_result.Value == -1 && get_result.ErrorCode == "System.IO.IOException")
+                                if (get_result.Value == -1 && get_result.ErrorCode == "diskFull")
                                 {
                                     // 执行缓存清理任务
                                     BeginCleanCoverImagesDirectory(DateTime.Now);
@@ -2559,111 +2555,6 @@ out string strError);
             });
         }
 
-        public static string CoverImagesDirectory
-        {
-            get
-            {
-                string cacheDir = Path.Combine(WpfClientInfo.UserDir, "coverImages");
-                PathUtil.CreateDirIfNeed(cacheDir);
-                return cacheDir;
-            }
-        }
-
-        public static void BeginCleanCoverImagesDirectory(DateTime time)
-        {
-            _ = Task.Factory.StartNew(() =>
-            {
-                var dir = CoverImagesDirectory;
-                try
-                {
-                    ClearDir(dir, time, App.CancelToken);
-                }
-                catch (Exception ex)
-                {
-                    WpfClientInfo.WriteErrorLog($"ClearDir({dir}) 出现异常: {ExceptionUtil.GetDebugText(ex)}");
-                }
-            },
-App.CancelToken,
-TaskCreationOptions.LongRunning,
-TaskScheduler.Default);
-        }
-
-        // 删除一个目录内的所有文件和目录
-        // 可能会抛出异常
-        // parameters:
-        //      time    要清除这个时间点以前创建、修改过的文件和子目录
-        static void ClearDir(string strDir,
-            DateTime time,
-            CancellationToken token)
-        {
-            DirectoryInfo di = new DirectoryInfo(strDir);
-            if (di.Exists == false)
-                return;
-
-            // 如果 strDir 是根目录，拒绝进行删除
-            if (PathUtil.IsEqual(di.Root.FullName, di.FullName))
-                return;
-
-            // 删除所有的下级目录
-            DirectoryInfo[] dirs = di.GetDirectories();
-            foreach (DirectoryInfo childDir in dirs)
-            {
-                token.ThrowIfCancellationRequested();
-
-                if (childDir.LastWriteTime < time)
-                {
-                    try
-                    {
-                        Directory.Delete(childDir.FullName, true);
-                    }
-                    catch (Exception ex)
-                    {
-                        WpfClientInfo.WriteErrorLog($"ClearDir(删除子目录 '{childDir.FullName}') 出现异常: {ExceptionUtil.GetDebugText(ex)}");
-                    }
-                }
-            }
-
-            // 删除所有文件
-            FileInfo[] fis = di.GetFiles();
-            foreach (FileInfo fi in fis)
-            {
-                token.ThrowIfCancellationRequested();
-
-                if (fi.LastWriteTime < time)
-                {
-                    try
-                    {
-                        File.Delete(fi.FullName);
-                    }
-                    catch (Exception ex)
-                    {
-                        WpfClientInfo.WriteErrorLog($"ClearDir(删除文件 '{fi.FullName}') 出现异常: {ExceptionUtil.GetDebugText(ex)}");
-                    }
-                }
-            }
-        }
-
-        // 计算磁盘剩余空间
-        public static long GetUserDiskFreeSpace()
-        {
-            try
-            {
-                var root = Path.GetPathRoot(CoverImagesDirectory);
-                DriveInfo driveInfo = new DriveInfo(root);
-                return driveInfo.AvailableFreeSpace;
-            }
-            catch (System.IO.IOException ex)
-            {
-                return -1;
-            }
-        }
-
-        public static string GetImageFilePath(string text)
-        {
-            if (StringUtil.IsHttpUrl(text))
-                return StringUtil.GetMd5(text);
-            return text.Replace("/", "_").Replace("\\", "_");
-        }
 
         public static bool IsWhdtFormat(Entity entity)
         {
@@ -4205,6 +4096,17 @@ TaskScheduler.Default);
             if (action == "deleteFace")
                 action_name = "删除人脸";
 
+            if (App.Function == "智能书柜" && ShelfData.LibraryNetworkCondition != "OK")
+            {
+                App.ErrorBox(
+$"{action_name}",
+$"当前为断网状态，无法{action_name}",
+"red",
+"auto_close:10");
+                return;
+            }
+
+
             // TODO: 用 WPF 对话框
             if (action == "deleteFace")
             {
@@ -5494,6 +5396,16 @@ string usage)
             if (action == "releasePatronCard")
                 action_name = "解绑";
 
+            if (App.Function == "智能书柜" && ShelfData.LibraryNetworkCondition != "OK")
+            {
+                App.ErrorBox(
+$"{action_name}读者卡",
+$"当前为断网状态，无法{action_name}读者卡",
+"red",
+"auto_close:10");
+                return;
+            }
+
             // 提前打开对话框
             ProgressWindow progress = null;
             CancellationTokenSource cancel = new CancellationTokenSource();
@@ -5809,6 +5721,9 @@ patron_name);
         // (这种方式下需要固定读者信息一段时间)
         public bool IsVerticalCard()
         {
+            if (App.Function == "智能书柜")
+                return true;
+
             if (_patron.IsFingerprintSource
                 || StringUtil.IsInList(_patron.ReaderName, App.VerticalReaderName))
                 return true;
@@ -5819,6 +5734,8 @@ patron_name);
         // 是否已经定义了某个竖放的读写器
         public bool IsVerticalCardDefined()
         {
+            if (App.Function == "智能书柜")
+                return true;
             return string.IsNullOrEmpty(App.VerticalReaderName) == false;
         }
 
