@@ -393,7 +393,7 @@ namespace dp2Circulation
                     };
                 }
             }
-            else if (strTaskName == "服务器同步")
+            else if (strTaskName == "服务器复制同步")
             {
                 StartServerReplicationDlg dlg = new StartServerReplicationDlg();
                 MainForm.SetControlFont(dlg, this.Font, false);

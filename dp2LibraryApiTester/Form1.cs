@@ -521,11 +521,13 @@ string style = "")
             {
                 try
                 {
-                    TestReservation.TestAll("");
+                    var result = TestReservation.TestAll("");
+                    if (result.Value == -1)
+                        AppendString(result.ErrorInfo, "error");
                 }
                 catch (Exception ex)
                 {
-                    AppendString($"exception: {ex.Message}");
+                    AppendString($"exception: {ex.Message}", "error");
                 }
             });
         }

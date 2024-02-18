@@ -1604,6 +1604,9 @@ out List<string> send_skips);
             if (nRet == -1)
                 goto ERROR1;
 
+            string strNewRefID = DomUtil.GetElementText(domNewRec.DocumentElement,
+                "refID");
+
             // 注意: oldDom 是前端提供过来的，显然前端可能会说谎，那么这个比较新旧条码号的结果就堪忧了。改进的办法可以是这里真正从读者库取出来，然后进行比较 
             bool bBarcodeChanged = false;
             if (nRet == 1)
@@ -2318,7 +2321,8 @@ strLibraryCode);    // 读者所在的馆代码
                     }
 #endif
 
-                    this.SessionTable.CloseSessionByReaderBarcode(strNewBarcode);
+                    // this.SessionTable.CloseSessionByReaderBarcode(strNewBarcode);
+                    this.SessionTable.CloseSessionByReaderRefID(strNewRefID);
                 }
                 else if (strAction == "change"
                     || strAction == "changestate"
@@ -2443,7 +2447,8 @@ strLibraryCode);    // 读者所在的馆代码
                     // 成功时 result.ErrorInfo 中也可能有内容
                     result.ErrorInfo = strError;
 
-                    this.SessionTable.CloseSessionByReaderBarcode(strNewBarcode);
+                    // this.SessionTable.CloseSessionByReaderBarcode(strNewBarcode);
+                    this.SessionTable.CloseSessionByReaderRefID(strNewRefID);
 
                     strSavedRecPath = strRecPath;   // 保存过程不会改变记录路径
                 }
@@ -2537,7 +2542,8 @@ strLibraryCode);    // 读者所在的馆代码
                         return result;
                     }
 
-                    this.SessionTable.CloseSessionByReaderBarcode(strNewBarcode);
+                    // this.SessionTable.CloseSessionByReaderBarcode(strNewBarcode);
+                    this.SessionTable.CloseSessionByReaderRefID(strNewRefID);
                 }
                 else
                 {
@@ -3553,6 +3559,9 @@ root, strLibraryCode);
             if (nRet == -1)
                 goto ERROR1;
 
+            var strNewReaderRefID = DomUtil.GetElementText(domNewRec.DocumentElement,
+                "refID");
+
             // 注意: oldDom 是前端提供过来的，显然前端可能会说谎，那么这个比较新旧条码号的结果就堪忧了。改进的办法可以是这里真正从读者库取出来，然后进行比较 
             bool bBarcodeChanged = false;
             if (nRet == 1)
@@ -3561,7 +3570,8 @@ root, strLibraryCode);
             // 对读者身份的附加判断
             if (/*strAction == "change" && */sessioninfo.UserType == "reader")
             {
-                if (sessioninfo.Account.Barcode != strNewBarcode)
+                if (// sessioninfo.Account.Barcode != strNewBarcode
+                    sessioninfo.Account.PatronRefID != strNewReaderRefID)
                 {
                     strError = "修改读者信息被拒绝。作为读者不能修改其他读者的读者记录";
                     library_errorcode = ErrorCode.AccessDenied;
@@ -4746,6 +4756,8 @@ root, strLibraryCode);
                 {
                     string strSummary = "";
                     string strBiblioRecPath = "";
+                    // parameters:
+                    //      strItemBarcodeParam         册条码号。也可以为 @refID:xxx 形态
                     LibraryServerResult result = this.GetBiblioSummary(
                         sessioninfo,
                         channel,
@@ -4883,6 +4895,8 @@ root, strLibraryCode);
                     string strConfirmItemRecPath = borrow.GetAttribute("recPath");
                     string strSummary = "";
                     string strBiblioRecPath = "";
+                    // parameters:
+                    //      strItemBarcodeParam         册条码号。也可以为 @refID:xxx 形态
                     LibraryServerResult result = this.GetBiblioSummary(
                         sessioninfo,
                         channel,
@@ -4920,6 +4934,8 @@ root, strLibraryCode);
                     {
                         string strSummary = "";
                         string strBiblioRecPath = "";
+                        // parameters:
+                        //      strItemBarcodeParam         册条码号。也可以为 @refID:xxx 形态
                         LibraryServerResult result = this.GetBiblioSummary(
                             sessioninfo,
                             channel,
@@ -5613,7 +5629,8 @@ out strError);
                         // 2013/5/20
                         // 延迟判断
                     }
-                    else if (strBarcode != sessioninfo.Account.Barcode
+                    else if (MatchReaderKey(strBarcode, sessioninfo.Account.Barcode, sessioninfo.Account.PatronRefID) == false
+                        // strBarcode != sessioninfo.Account.Barcode
                         && string.IsNullOrEmpty(strPersonalLibrary) == true)
                     {
                         // 注：具有个人书斋的，还可以继续向后执行
@@ -6172,9 +6189,9 @@ out strError);
                 if (sessioninfo.UserType == "reader"
                     && string.IsNullOrEmpty(strPersonalLibrary) == true)
                 {
-                    string strBarcode1 = DomUtil.GetElementText(readerdom.DocumentElement,
-            "barcode");
-                    if (strBarcode1 != sessioninfo.Account.Barcode)
+                    string refID = DomUtil.GetElementText(readerdom.DocumentElement,
+            "refID");
+                    if (refID != sessioninfo.Account.PatronRefID)
                     {
                         result.Value = -1;
                         result.ErrorInfo = "获得读者信息被拒绝。作为读者只能察看自己的读者记录";
@@ -7786,13 +7803,13 @@ out strError);
                 // 该函数的特殊性在于，它可以用多种检索入口，而不仅仅是条码号
                 // parameters:
                 //      strQueryWord 登录名
-                //          0) 如果以"RI:"开头，表示利用 参考ID 进行检索
                 //          1) 如果以"NB:"开头，表示利用姓名生日进行检索。姓名和生日之间间隔以'|'。姓名必须完整，生日为8字符形式
                 //          2) 如果以"EM:"开头，表示利用email地址进行检索。注意 email 本身应该是 email:xxxx 这样的形态。也就是说，整个加起来是 EM:email:xxxxx
                 //          3) 如果以"TP:"开头，表示利用电话号码进行检索
                 //          4) 如果以"ID:"开头，表示利用身份证号进行检索
                 //          5) 如果以"CN:"开头，表示利用证件号码进行检索
-                //          6) 否则用证条码号进行检索
+                //          6) 如果以"RI:"或"@refID:"开头，表示利用读者参考 ID 进行检索
+                //          7) 否则用证条码号进行检索
                 //      strPassword 密码。如果为null，表示不进行密码判断。注意，不是""
                 // return:
                 //      -2  当前没有配置任何读者库，或者可以操作的读者库
@@ -7852,8 +7869,9 @@ out strError);
                 // 对读者身份的附加判断
                 if (sessioninfo.UserType == "reader")
                 {
-                    string strBarcode = DomUtil.GetElementText(readerdom.DocumentElement, "barcode");
-                    if (sessioninfo.Account.Barcode != strBarcode)
+                    string refID = DomUtil.GetElementText(readerdom.DocumentElement,
+                        "refID");
+                    if (sessioninfo.Account.PatronRefID != refID)
                     {
                         strError = "绑定号码的操作被拒绝。作为读者不能对其他读者的记录进行操作";
                         return -2;

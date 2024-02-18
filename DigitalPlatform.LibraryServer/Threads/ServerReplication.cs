@@ -320,10 +320,10 @@ namespace DigitalPlatform.LibraryServer
             nRet = ProcessOperLogs(start,
                 param.ContinueWhenError,
                 (s)=>
-                    {
+                {
                         SaveBreakPoint(s, param);
-                    },
-                    param == null ? "" : param.Style,
+                },
+                param == null ? "" : param.Style,
                 out strError);
             if (nRet == -1 || nRet == 0)
             {

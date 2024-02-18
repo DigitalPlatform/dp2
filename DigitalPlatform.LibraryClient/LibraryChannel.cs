@@ -26,6 +26,7 @@ using System.Net.Security;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Core;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace DigitalPlatform.LibraryClient
 {
@@ -10580,6 +10581,91 @@ Stack:
             }
         }
 
+
+        #region 扩展的函数
+
+        // 2024/2/9
+        // 检索预约到书库
+        // parameters:
+        //      key 为下列形态之一：
+        //          @itemRefID:xxx
+        //          @notifyID:xxx
+        //          @patronRefID:xxx
+        public long SearchArrivedQueue(
+            Stop stop,
+            string arrived_dbname,
+            string key,
+            string state,
+            string resultSetName,
+            string strOutputStyle,
+            out string strError)
+        {
+            strError = "";
+
+            string word = key;
+            string strFrom = "册参考ID";
+            if (key.StartsWith("@itemRefID:"))
+            {
+                strFrom = "册参考ID";
+                word = key.Substring("@itemRefID:".Length).Trim();
+                if (string.IsNullOrEmpty(word) == true)
+                {
+                    strError = "参数 key 值中冒号右侧部分不应为空";
+                    return -1;
+                }
+            }
+            else if (key.StartsWith("@notifyID:"))
+            {
+                strFrom = "参考ID";
+                word = key.Substring("@notifyID:".Length);
+            }
+            else if (key.StartsWith("@patronRefID:"))
+            {
+                strFrom = "读者参考ID";
+                word = key.Substring("@patronRefID:".Length);
+            }
+
+            string query_xml1 = null;
+            if (key != null)
+                query_xml1 = "<target list='" + arrived_dbname + ":"
+    + strFrom + "'><item><word>"
++ StringUtil.GetXmlStringSimple(word)
++ "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>" + this.Lang + "</lang></target>";
+
+            string query_xml2 = null;
+            if (state != null)
+                query_xml2 = "<target list='" + arrived_dbname + ":状态'><item><word>"
++ StringUtil.GetXmlStringSimple(state)
++ "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>" + this.Lang + "</lang></target>";
+
+            string query_xml = "";
+            if (string.IsNullOrEmpty(query_xml1) == false
+                && string.IsNullOrEmpty(query_xml2) == false)
+            {
+                query_xml = query_xml1
+                    + "<operator value='AND'/>"
+                    + query_xml2;
+                query_xml = "<group>" + query_xml + "</group>";
+            }
+            else if (string.IsNullOrEmpty(query_xml1) == false)
+                query_xml = query_xml1;
+            else if (string.IsNullOrEmpty(query_xml2) == false)
+                query_xml = query_xml2;
+            else
+            {
+                strError = "key 和 state 参数不允许同时为 null";
+                return -1;
+            }
+
+            return this.Search(stop,
+                query_xml,
+                resultSetName,
+                strOutputStyle,
+                out strError);
+        }
+
+
+        #endregion
     }
 
     /// <summary>

@@ -371,6 +371,8 @@ namespace DigitalPlatform.LibraryServer
                     strError = "channel == null";
                     throw new Exception(strError);
                 }
+                // parameters:
+                //      strItemBarcodeParam         册条码号。也可以为 @refID:xxx 形态
                 LibraryServerResult result = this.App.GetBiblioSummary(
                     null,
                     channel,
@@ -489,11 +491,11 @@ namespace DigitalPlatform.LibraryServer
                 if (string.IsNullOrEmpty(strAmercedXml))
                     continue;
 
-                string strOverdueString = "";
-                string strTemp = "";
+                // parameters:
+                //      strReaderKey    [out] 返回读者证条码号或者 @refID:xxx 形态
                 int nRet = LibraryApplication.ConvertAmerceRecordToOverdueString(strAmercedXml,
-            out strTemp,
-            out strOverdueString,
+            out _,
+            out string strOverdueString,
             out strError);
                 if (nRet == -1)
                     throw new Exception(strError);
@@ -534,6 +536,8 @@ namespace DigitalPlatform.LibraryServer
                 // 加入书目摘要
                 string strSummary = "";
                 string strBiblioRecPath = "";
+                // parameters:
+                //      strItemBarcodeParam         册条码号。也可以为 @refID:xxx 形态
                 LibraryServerResult result = this.App.GetBiblioSummary(
                     null,
                     channel,

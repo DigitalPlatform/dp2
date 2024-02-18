@@ -499,6 +499,11 @@ namespace DigitalPlatform.rms.Client
             {
                 this.ErrorCode = ChannelErrorCode.NotFound;
             }
+            else if (result.ErrorCode == ErrorCodeValue.NotFoundDb)
+            {
+                // 2024/2/15
+                this.ErrorCode = ChannelErrorCode.NotFound; // TODO: 最好增加一个 NotFoundDb 的错误码
+            }
             else if (result.ErrorCode == ErrorCodeValue.PartNotFound)
             {
                 this.ErrorCode = ChannelErrorCode.PartNotFound;
@@ -515,12 +520,6 @@ namespace DigitalPlatform.rms.Client
             {
                 this.ErrorCode = ChannelErrorCode.NotLogin;
             }
-            /*
-                        else if (result.ErrorCode == ErrorCodeValue.NoHasManagement)
-                        {
-                            this.ErrorCode = ChannelErrorCode.NoHasManagement;
-                        }
-            */
             else if (result.ErrorCode == ErrorCodeValue.NotHasEnoughRights)
             {
                 this.ErrorCode = ChannelErrorCode.NotHasEnoughRights;
@@ -553,6 +552,16 @@ namespace DigitalPlatform.rms.Client
             {
                 this.ErrorCode = ChannelErrorCode.Compressed;
             }
+            /*
+            else if (result.ErrorCode == ErrorCodeValue.PathError)
+            {
+
+            }
+            else if (result.ErrorCode == ErrorCodeValue.ExistDbInfo)
+            {
+
+            }
+            */
             else
             {
                 this.ErrorCode = ChannelErrorCode.OtherError;

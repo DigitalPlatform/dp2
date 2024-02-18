@@ -214,28 +214,27 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 将参考 ID 列表转换为证条码号列表
-        //      strReaderBarcodeList    [out] 返回证条码号列表
+        //      strBarcodeList    [out] 返回证条码号列表
         public int ConvertRefIdListToReaderBarcodeList(RmsChannel channel,
-    string strReaderRefIdList,
-    out string strReaderBarcodeList,
+    string strRefIdList,
+    out string strBarcodeList,
     out string strError)
         {
             strError = "";
-            strReaderBarcodeList = strReaderRefIdList;
+            strBarcodeList = strRefIdList;
 
-            // List<string> refid_results = new List<string>();
             List<string> barcode_results = new List<string>();
 
-            // 切割出单个的证条码号
-            string[] reader_refids = strReaderRefIdList.Split(new char[] { ',' });
-            foreach (var strReaderRefIdString in reader_refids)
+            // 切割出单个的参考 ID
+            string[] refids = strRefIdList.Split(new char[] { ',' });
+            foreach (var strRefIdString in refids)
             {
-                if (string.IsNullOrEmpty(strReaderRefIdString))
+                if (string.IsNullOrEmpty(strRefIdString))
                     continue;
 
-                if (strReaderRefIdString.StartsWith("@refID:") == false)
+                if (strRefIdString.StartsWith("@refID:") == false)
                 {
-                    barcode_results.Add(strReaderRefIdString);
+                    barcode_results.Add(strRefIdString);
                     continue;
                 }
 
@@ -244,14 +243,14 @@ namespace DigitalPlatform.LibraryServer
                 //      strBarcode  证条码号。可以为 @refID:xxx 形态
                 int nRet = this.GetReaderRecXml(
     channel,
-    strReaderRefIdString,
+    strRefIdString,
     out string strItemXml,
     out string strOutputReaderRecPath,
     out byte[] item_timestamp,
     out strError);
                 if (nRet == 0)
                 {
-                    strError = "读者证条码号 '" + strReaderRefIdString + "' 不存在";
+                    strError = "读者证条码号 '" + strRefIdString + "' 不存在";
                     return -1;
                 }
                 if (nRet == -1)
@@ -273,17 +272,88 @@ namespace DigitalPlatform.LibraryServer
 
                 var barcode = DomUtil.GetElementText(readerdom.DocumentElement,
                     "barcode");
-                /*
-                if (string.IsNullOrEmpty(barcode))
-                {
-                    strError = $"读者记录 {strOutputReaderRecPath} XML 中 barcode 元素没有找到";
-                    return -1;
-                }
-                */
                 barcode_results.Add(barcode);
             }
 
-            strReaderBarcodeList = StringUtil.MakePathList(barcode_results);
+            strBarcodeList = StringUtil.MakePathList(barcode_results);
+            return 0;
+        }
+
+        // 将参考 ID 列表转换为册条码号列表
+        //      strBarcodeList    [out] 返回册条码号列表
+        public int ConvertRefIdListToItemBarcodeList(RmsChannel channel,
+    string strRefIdList,
+    out string strBarcodeList,
+    out string strError)
+        {
+            strError = "";
+            strBarcodeList = strRefIdList;
+
+            List<string> barcode_results = new List<string>();
+
+            // 切割出单个的参考 ID
+            string[] refids = strRefIdList.Split(new char[] { ',' });
+            foreach (var strRefIdString in refids)
+            {
+                if (string.IsNullOrEmpty(strRefIdString))
+                    continue;
+
+                if (strRefIdString.StartsWith("@refID:") == false)
+                {
+                    barcode_results.Add(strRefIdString);
+                    continue;
+                }
+
+                // 获得册记录
+                // return:
+                //      -1  error
+                //      0   not found
+                //      1   命中1条
+                //      >1  命中多于1条
+                int nRet = this.GetItemRecXml(
+                    channel,
+                    strRefIdString,
+                    "first",    // 在若干实体库中顺次检索，命中一个以上则返回，不再继续检索更多
+                    out string strItemXml,
+                    100,
+                    out List<string> aPath,
+                    out byte[] item_timestamp,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = $"册条码号 '{strRefIdString}' 检索册记录时出错: {strError}";
+                    return -1;
+                }
+                if (nRet == 0)
+                {
+                    strError = $"册条码号 '{strRefIdString}' 检索册记录时没有找到: {strError}";
+                    return -1;
+                }
+                if (nRet > 1)
+                {
+                    strError = $"册条码号 '{strRefIdString}' 检索册记录时命中多于一条 ({nRet})";
+                    return -1;
+                }
+
+                string strOutputReaderRecPath = aPath[0];
+
+                XmlDocument readerdom = new XmlDocument();
+                try
+                {
+                    readerdom.LoadXml(strItemXml);
+                }
+                catch (Exception ex)
+                {
+                    strError = $"读者记录 {strOutputReaderRecPath} 的 XML 装入 DOM 时出错: {ex.Message}";
+                    return -1;
+                }
+
+                var barcode = DomUtil.GetElementText(readerdom.DocumentElement,
+                    "barcode");
+                barcode_results.Add(barcode);
+            }
+
+            strBarcodeList = StringUtil.MakePathList(barcode_results);
             return 0;
         }
 
@@ -2083,7 +2153,7 @@ out strError);
         }
 
         // 探测当前的到书队列库是否具备 册参考ID 这个检索点
-        bool ArrivedDbKeysContainsRefIDKey()
+        bool ArrivedDbKeysContainsRefIdKey()
         {
             if (this.ArrivedDbFroms == null || this.ArrivedDbFroms.Length == 0)
                 return false;
@@ -2614,7 +2684,7 @@ out strError);
                 string.IsNullOrEmpty(strItemBarcode) ? $"@refID:{strItemRefID}" : strItemBarcode);
             DomUtil.SetElementText(new_queue_dom.DocumentElement, "itemRefID", strItemRefID);  // 原来元素名是 "refID"，2016/12/4 修改为 itemRefID
 
-            if (this.ArrivedDbKeysContainsRefIDKey() == false)
+            if (this.ArrivedDbKeysContainsRefIdKey() == false)
             {
                 strError = $"预约到书库的检索点定义太旧，没有包含 item_refid 检索点。请系统管理员刷新其检索点定义";
                 return -1;
@@ -2668,8 +2738,8 @@ out strError);
             DomUtil.SetElementText(new_queue_dom.DocumentElement, "libraryCode", strLibraryCode);
 
             DomUtil.SetElementText(new_queue_dom.DocumentElement, "readerBarcode", strReaderBarcode);
-            // 2024/130
-            DomUtil.SetElementText(new_queue_dom.DocumentElement, "readerRefID", strReaderRefID);
+            // 2024/2/9
+            DomUtil.SetElementText(new_queue_dom.DocumentElement, "patronRefID", strReaderRefID);   // 注意，这里用了 patron 而不是 reader
 
             DomUtil.SetElementText(new_queue_dom.DocumentElement, "notifyDate", this.Clock.GetClock());
 
@@ -3377,6 +3447,21 @@ out strError);
             return strBarcode;
         }
 
+        public static bool TryGetUnionRefID(string strBarcode,
+            string strRefID,
+            out string strKey)
+        {
+            strKey = "";
+            if (string.IsNullOrEmpty(strBarcode)
+&& string.IsNullOrEmpty(strRefID))
+                return false;
+            if (string.IsNullOrEmpty(strRefID) == false)
+                strKey = "@refID:" + strRefID;
+            else
+                strKey = strBarcode;
+            return true;
+        }
+
         /*
         // 获得册记录的馆代码。根据 location 元素内容
         public static string GetItemLibraryCode(XmlDocument itemdom)
@@ -3389,5 +3474,89 @@ out string strRoom);
             return strItemLibraryCode;
         }
         */
+
+        // TODO：判断strItemBarcode是否为空
+        // 获得预约到书队列记录
+        // parameters:
+        //      strItemBarcodeParam 册条码号或者其它检索字符串。
+        //                          可以使用下列形态:
+        //                          没有任何前缀，表示册条码号。
+        //                          @itemRefID: 前缀表示册参考ID。
+        //                          @notifyID: 是通知记录本身的参考ID
+        //                          @patronRefID: 是读者记录的参考ID
+        // return:
+        //      -1  error
+        //      0   not found
+        //      1   命中1条
+        //      >1  命中多于1条
+        public long SearchArrivedQueue(
+            RmsChannel channel,
+            string strItemBarcodeParam,
+            string resultSetName,
+            out string strError)
+        {
+            strError = "";
+
+            // 2016/12/4
+            // 兼容以前的用法。以前曾经有一段 @refID: 表示册参考ID
+            strItemBarcodeParam = strItemBarcodeParam.Replace("@refID:", "@itemRefID:");
+
+            string strFrom = "册条码";
+
+            // 注：旧的，也就是 2015/5/7 以前的 预约到书队列库里面并没有 册参考ID 检索点，所以直接用带着 @refID 前缀的字符串进行检索即可。
+            // 等队列库普遍刷新检索点以后，改为使用下面一段代码
+            if (this.ArrivedDbKeysContainsRefIdKey() == true)
+            {
+                string strHead = "@itemRefID:";
+
+                if (StringUtil.HasHead(strItemBarcodeParam, strHead, true) == true)
+                {
+                    strFrom = "册参考ID";
+                    strItemBarcodeParam = strItemBarcodeParam.Substring(strHead.Length).Trim();
+                    if (string.IsNullOrEmpty(strItemBarcodeParam) == true)
+                    {
+                        strError = "参数 strItemBarcodeParam 值中参考ID部分不应为空";
+                        return -1;
+                    }
+                }
+            }
+
+            if (strItemBarcodeParam.StartsWith("@notifyID:"))
+            {
+                strFrom = "参考ID";
+                strItemBarcodeParam = strItemBarcodeParam.Substring("@notifyID:".Length);
+            }
+            else if (strItemBarcodeParam.StartsWith("@patronRefID:"))
+            {
+                strFrom = "读者参考ID";
+                strItemBarcodeParam = strItemBarcodeParam.Substring("@patronRefID:".Length);
+            }
+
+            // 构造检索式
+            // 2007/4/5 改造 加上了 GetXmlStringSimple()
+            string strQueryXml = "<target list='"
+                + StringUtil.GetXmlStringSimple(this.ArrivedDbName + ":" + strFrom)
+                + "'><item><word>"
+                + StringUtil.GetXmlStringSimple(strItemBarcodeParam)
+                + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>1000</maxCount></item><lang>zh</lang></target>";
+
+            return channel.DoSearch(strQueryXml,
+                resultSetName,
+                "", // strOuputStyle
+                out strError);
+            /*
+            if (lRet == -1)
+                goto ERROR1;
+
+            if (lRet == 0)
+            {
+                strError = "没有找到";
+                return 0;
+            }
+
+            long lHitCount = lRet;
+            */
+        }
+
     }
 }

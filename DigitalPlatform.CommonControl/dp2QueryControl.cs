@@ -278,7 +278,7 @@ namespace DigitalPlatform.CommonControl
     + "</word><match>" + strMatchStyle + "</match><relation>" + strRelation + "</relation><dataType>" + strDataType + "</dataType><maxCount>" + nPerMax.ToString() + "</maxCount></item><lang>" + strLang + "</lang></target>";
 
                 if (string.IsNullOrEmpty(strQueryXml) == false)
-                    strQueryXml += "<operator value='" + line.LogicOperator + "'/>"; ;
+                    strQueryXml += "<operator value='" + line.LogicOperator + "'/>";
 
                 strQueryXml += strOneQueryXml;
                 nQueryCount++;

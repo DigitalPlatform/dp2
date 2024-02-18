@@ -89,6 +89,8 @@ namespace dp2Circulation
             this.checkBox_fillSummary = new System.Windows.Forms.CheckBox();
             this.panel_load = new System.Windows.Forms.Panel();
             this.tableLayoutPanel_main = new System.Windows.Forms.TableLayoutPanel();
+            this.columnHeader_amerced_itemRefID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_itemRefID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).BeginInit();
             this.splitContainer_main.Panel1.SuspendLayout();
             this.splitContainer_main.Panel2.SuspendLayout();
@@ -120,7 +122,7 @@ namespace dp2Circulation
             this.textBox_readerBarcode.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBox_readerBarcode.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.textBox_readerBarcode.Location = new System.Drawing.Point(207, 2);
-            this.textBox_readerBarcode.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBox_readerBarcode.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_readerBarcode.Name = "textBox_readerBarcode";
             this.textBox_readerBarcode.Size = new System.Drawing.Size(257, 39);
             this.textBox_readerBarcode.TabIndex = 1;
@@ -153,7 +155,7 @@ namespace dp2Circulation
             // 
             this.webBrowser_readerInfo.Dock = System.Windows.Forms.DockStyle.Fill;
             this.webBrowser_readerInfo.Location = new System.Drawing.Point(0, 0);
-            this.webBrowser_readerInfo.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.webBrowser_readerInfo.Margin = new System.Windows.Forms.Padding(4);
             this.webBrowser_readerInfo.MinimumSize = new System.Drawing.Size(28, 28);
             this.webBrowser_readerInfo.Name = "webBrowser_readerInfo";
             this.webBrowser_readerInfo.Size = new System.Drawing.Size(1131, 171);
@@ -219,6 +221,7 @@ namespace dp2Circulation
             this.listView_amerced.CheckBoxes = true;
             this.listView_amerced.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader_amerced_itemBarcode,
+            this.columnHeader_amerced_itemRefID,
             this.columnHeader_amerced_summary,
             this.columnHeader_amerced_price,
             this.columnHeader_amerced_comment,
@@ -476,6 +479,7 @@ namespace dp2Circulation
             this.listView_overdues.CheckBoxes = true;
             this.listView_overdues.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader_barcode,
+            this.columnHeader_itemRefID,
             this.columnHeader_summary,
             this.columnHeader_price,
             this.columnHeader_comment,
@@ -584,7 +588,7 @@ namespace dp2Circulation
             // 
             this.button_load.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button_load.Location = new System.Drawing.Point(473, 0);
-            this.button_load.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_load.Margin = new System.Windows.Forms.Padding(4);
             this.button_load.Name = "button_load";
             this.button_load.Size = new System.Drawing.Size(136, 38);
             this.button_load.TabIndex = 2;
@@ -602,7 +606,7 @@ namespace dp2Circulation
             // 
             this.button_beginFillSummary.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button_beginFillSummary.Location = new System.Drawing.Point(836, 0);
-            this.button_beginFillSummary.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_beginFillSummary.Margin = new System.Windows.Forms.Padding(4);
             this.button_beginFillSummary.Name = "button_beginFillSummary";
             this.button_beginFillSummary.Size = new System.Drawing.Size(226, 38);
             this.button_beginFillSummary.TabIndex = 4;
@@ -652,6 +656,16 @@ namespace dp2Circulation
             this.tableLayoutPanel_main.Size = new System.Drawing.Size(1131, 751);
             this.tableLayoutPanel_main.TabIndex = 6;
             // 
+            // columnHeader_amerced_itemRefID
+            // 
+            this.columnHeader_amerced_itemRefID.Text = "册参考ID";
+            this.columnHeader_amerced_itemRefID.Width = 150;
+            // 
+            // columnHeader_itemRefID
+            // 
+            this.columnHeader_itemRefID.Text = "册参考ID";
+            this.columnHeader_itemRefID.Width = 150;
+            // 
             // AmerceForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
@@ -659,7 +673,7 @@ namespace dp2Circulation
             this.ClientSize = new System.Drawing.Size(1131, 751);
             this.Controls.Add(this.tableLayoutPanel_main);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "AmerceForm";
             this.ShowInTaskbar = false;
             this.Text = "交费";
@@ -747,5 +761,7 @@ namespace dp2Circulation
         private System.Windows.Forms.ToolStripButton toolStripButton_modifyPriceAndComment;
         private System.Windows.Forms.ToolStripLabel toolStripLabel_amercingMessage;
         private System.Windows.Forms.Panel panel_amercing_command;
+        private System.Windows.Forms.ColumnHeader columnHeader_amerced_itemRefID;
+        private System.Windows.Forms.ColumnHeader columnHeader_itemRefID;
     }
 }

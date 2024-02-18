@@ -8,6 +8,7 @@ using System.Diagnostics;
 
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
+using DigitalPlatform.LibraryServer.Common;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -43,118 +44,6 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
-        // 解析 开始 参数
-        static int ParseLogRecoverStart(string strStart,
-            out long index,
-            out string strFileName,
-            out string strError)
-        {
-            strError = "";
-            index = 0;
-            strFileName = "";
-
-            if (String.IsNullOrEmpty(strStart) == true)
-                return 0;
-
-            int nRet = strStart.IndexOf('@');
-            if (nRet == -1)
-            {
-                try
-                {
-                    index = Convert.ToInt64(strStart);
-                }
-                catch (Exception)
-                {
-                    strError = "启动参数 '" + strStart + "' 格式错误：" + "如果没有@，则应为纯数字。";
-                    return -1;
-                }
-                return 0;
-            }
-
-            try
-            {
-                index = Convert.ToInt64(strStart.Substring(0, nRet).Trim());
-            }
-            catch (Exception)
-            {
-                strError = "启动参数 '" + strStart + "' 格式错误：'" + strStart.Substring(0, nRet).Trim() + "' 部分应当为纯数字。";
-                return -1;
-            }
-
-
-            strFileName = strStart.Substring(nRet + 1).Trim();
-
-            // 如果文件名没有扩展名，自动加上
-            if (String.IsNullOrEmpty(strFileName) == false)
-            {
-                nRet = strFileName.ToLower().LastIndexOf(".log");
-                if (nRet == -1)
-                    strFileName = strFileName + ".log";
-            }
-
-            return 0;
-        }
-
-        // 解析通用启动参数
-        // 格式
-        /*
-         * <root recoverLevel='...' clearFirst='...' continueWhenError='...'/>
-         * recoverLevel 缺省为 Snapshot
-         * clearFirst 缺省为 false
-         * continueWhenError 缺省值为 false
-         * */
-        public static int ParseLogRecoverParam(string strParam,
-            out string strRecoverLevel,
-            out bool bClearFirst,
-            out bool bContinueWhenError,
-            out string strStyle,
-            out string strError)
-        {
-            strError = "";
-            bClearFirst = false;
-            strRecoverLevel = "";
-            bContinueWhenError = false;
-            strStyle = "";
-
-            if (String.IsNullOrEmpty(strParam) == true)
-                return 0;
-
-            XmlDocument dom = new XmlDocument();
-
-            try
-            {
-                dom.LoadXml(strParam);
-            }
-            catch (Exception ex)
-            {
-                strError = "strParam参数装入XML DOM时出错: " + ex.Message;
-                return -1;
-            }
-
-            /*
-            Logic = 0,  // 逻辑操作
-            LogicAndSnapshot = 1,   // 逻辑操作，若失败则转用快照恢复
-            Snapshot = 3,   // （完全的）快照
-            Robust = 4,
-             * */
-
-            strRecoverLevel = DomUtil.GetAttr(dom.DocumentElement,
-                "recoverLevel");
-            string strClearFirst = DomUtil.GetAttr(dom.DocumentElement,
-                "clearFirst");
-            if (strClearFirst.ToLower() == "yes"
-                || strClearFirst.ToLower() == "true")
-                bClearFirst = true;
-            else
-                bClearFirst = false;
-
-            // 2016/3/8
-            bContinueWhenError = DomUtil.GetBooleanParam(dom.DocumentElement,
-                "continueWhenError",
-                false);
-            strStyle = DomUtil.GetAttr(dom.DocumentElement, "style");
-            return 0;
-        }
 
         // 一次操作循环
         public override void Worker()
@@ -169,11 +58,9 @@ namespace DigitalPlatform.LibraryServer
                 if (startinfo == null)
                     startinfo = new BatchTaskStartInfo();   // 按照缺省值来
 
-                long lStartIndex = 0;// 开始位置
-                string strStartFileName = "";// 开始文件名
-                int nRet = ParseLogRecoverStart(startinfo.Start,
-                    out lStartIndex,
-                    out strStartFileName,
+                int nRet = LogRecoverStart.ParseLogRecoverStart(startinfo.Start,
+                    out long lStartIndex,// 开始位置
+                    out string strStartFileName,// 开始文件名
                     out string strError);
                 if (nRet == -1)
                 {
@@ -182,7 +69,8 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 //
-                nRet = ParseLogRecoverParam(startinfo.Param,
+                nRet = LogRecoverParam.ParseLogRecoverParam(startinfo.Param,
+                    out string strDirectory,
                     out string strRecoverLevel,
                     out bool bClearFirst,
                     out bool bContinueWhenError,
@@ -255,8 +143,17 @@ namespace DigitalPlatform.LibraryServer
                     bStart = true;
                 }
 
+                if (string.IsNullOrEmpty(strDirectory))
+                {
+                    strDirectory = this.App.OperLog.Directory;
+                    this.AppendResultText($"日志文件目录为 dp2library 默认操作日志目录 {strDirectory}\r\n");
+                }
+                else
+                    this.AppendResultText($"日志文件目录为前端指定的目录 {strDirectory}\r\n");
+
+
                 // 列出所有日志文件
-                DirectoryInfo di = new DirectoryInfo(this.App.OperLog.Directory);
+                DirectoryInfo di = new DirectoryInfo(strDirectory);
 
                 FileInfo[] fis = di.GetFiles("*.log");
 
@@ -286,7 +183,9 @@ namespace DigitalPlatform.LibraryServer
 
                     if (bStart == true)
                     {
-                        nRet = DoOneLogFile(strFileName,
+                        nRet = DoOneLogFile(
+                            strDirectory,
+                            strFileName,
                             lStartIndex,
                             bContinueWhenError,
                             strStyle,
@@ -305,7 +204,7 @@ namespace DigitalPlatform.LibraryServer
                 // TODO: 可以考虑从 result 文本文件中搜集所有错误信息行，放入 ErrorInfo 中，不过得有个极限行数限制
                 return;
 
-                ERROR1:
+            ERROR1:
                 // 2019/4/25
                 this.AppendResultText($"{strError}\r\n");
                 this.App.WriteErrorLog($"*** 日志恢复任务出错: {strError}");
@@ -352,7 +251,9 @@ namespace DigitalPlatform.LibraryServer
         //      -1  error
         //      0   file not found
         //      1   succeed
-        int DoOneLogFile(string strFileName,
+        int DoOneLogFile(
+            string strDirectory,
+            string strFileName,
             long lStartIndex,
             bool bContinueWhenError,
             string strStyle,
@@ -399,7 +300,8 @@ namespace DigitalPlatform.LibraryServer
                         //      0   file not found
                         //      1   succeed
                         //      2   超过范围
-                        int nRet = this.App.OperLog.GetOperLog(
+                        int nRet = /*this.App.*/OperLog.GetOperLog(
+                            strDirectory,
                             "*",
                             strFileName,
                             lIndex,

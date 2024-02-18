@@ -1676,8 +1676,8 @@ dlg.UiState);
                 return 1;
             }
 
-            // 2022/1/14
-            if (StringUtil.HasHead(strBarcode, "@refID:", true) == true)
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.157") < 0
+                && StringUtil.HasHead(strBarcode, "@refID:", true) == true)
             {
                 strError = "这是册参考ID";
                 return 2;

@@ -20,6 +20,27 @@
     <caption lang="zh-CN">读者证条码</caption>
     <caption lang="en">Reader barcode</caption>
   </table>
+
+  <!-- 2024/2/11 新增 -->
+  <key>
+    <xpath>*/itemRefID</xpath>
+    <from>itemrefid</from>
+    <table ref="itemrefid" />
+  </key>
+  <table name="itemrefid" id="11"  type="item_refid">
+    <caption lang="zh-CN">册参考ID</caption>
+    <caption lang="en">Item RefID</caption>
+  </table>
+  <key>
+    <xpath>*/readerRefID</xpath>
+    <from>readerrefid</from>
+    <table ref="readerrefid" />
+  </key>
+  <table name="readerrefid" id="12"  type="patron_refid">
+    <caption lang="zh-CN">读者参考ID</caption>
+    <caption lang="en">Reader RefID</caption>
+  </table>
+
   <key>
     <xpath>*/state</xpath>
     <from>state</from>

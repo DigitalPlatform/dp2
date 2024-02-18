@@ -706,6 +706,54 @@ namespace DigitalPlatform.LibraryServer
             return nCount;
         }
 
+        // 2024/2/8
+        // 验证 @refID:xxx 形态的到底是读者参考 ID 还是册参考 ID
+        // parameters:
+        //      quickly 是否要快速判断。快速判断只检索一次
+        // return:
+        //          -1: 出错
+        //          0: 册和读者参考 ID 都没有找到
+        //          1: 合法的读者参考 ID
+        //          2: 合法的册参考 ID
+        public int VerifyRefID(
+            SessionInfo sessioninfo,
+            string text,
+            bool quickly,
+            out string barcode,
+            out string strError)
+        {
+            strError = "";
+            barcode = "";
+
+            RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+            if (channel == null)
+            {
+                strError = "channel error";
+                return -1;
+            }
+
+            int nRet = this.ConvertRefIdListToReaderBarcodeList(
+                channel,
+                text,
+                out barcode,
+                out strError);
+            if (nRet == -1)
+            {
+                if (quickly)
+                    return 2;   // 册
+                nRet = this.ConvertRefIdListToItemBarcodeList(
+                    channel,
+                    text,
+                    out barcode,
+                    out strError);
+                if (nRet == -1)
+                    return 0;   // 不是读者也不是册
+                return 2;   // 册
+            }
+
+            return 1;   // 读者
+        }
+
 
         // 执行脚本函数VerifyBarcode
         // 旧的 C# 校验脚本，和新的校验规则(XML 格式)都能兼容

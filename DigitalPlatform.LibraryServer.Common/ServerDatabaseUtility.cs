@@ -1,6 +1,7 @@
-﻿using DigitalPlatform.Xml;
-using System;
+﻿using System;
 using System.Xml;
+using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
 
 namespace DigitalPlatform.LibraryServer.Common
 {
@@ -486,6 +487,133 @@ namespace DigitalPlatform.LibraryServer.Common
                 return "";
             return attr.Value;
         }
+
+        #endregion
+
+        #region 创建数据库过程中的 XML 结构处理
+
+        // parameters:
+        //      strUsage    book/series
+        //      strRole     orderWork/orderRecommendStore/biblioSource/catalogWork/catalogTarget
+        //      strSyntax   unimarc/usmarc
+        //      strSubTypeList  要创建的下级数据库的类型列表。* 代表 entity,order,issue,comment
+        //                      注意当 strSyntax 为 "series" 时，issue 下级库是必须创建的。而当 strSyntax 为 "book" 时，虽然要求创建 issue 也会被忽略
+        public static XmlNode CreateBiblioDatabaseNode(XmlDocument dom,
+            string strDatabaseName,
+            string strUsage,
+            string strRole,
+            string strSyntax,
+            string strSubTypeList,
+            bool bInCirculation)
+        {
+            if (StringUtil.IsInList("*", strSubTypeList))
+                StringUtil.SetInList(ref strSubTypeList, "entity,order,issue,comment", true);
+
+            XmlNode nodeDatabase = dom.CreateElement("database");
+            dom.DocumentElement.AppendChild(nodeDatabase);
+
+            // type
+            DomUtil.SetAttr(nodeDatabase, "type", "biblio");
+
+            // syntax
+            DomUtil.SetAttr(nodeDatabase, "syntax", strSyntax);
+
+            // usage
+            DomUtil.SetAttr(nodeDatabase, "usage", strUsage);
+
+            // role
+            DomUtil.SetAttr(nodeDatabase, "role", strRole);
+
+            // inCirculation
+            string strInCirculation = "true";
+            if (bInCirculation == true)
+                strInCirculation = "true";
+            else
+                strInCirculation = "false";
+
+            DomUtil.SetAttr(nodeDatabase, "inCirculation", strInCirculation);
+
+            DomUtil.SetAttr(nodeDatabase, "name", strDatabaseName);
+
+            if (StringUtil.IsInList("entity", strSubTypeList))
+                DomUtil.SetAttr(nodeDatabase, "entityDbName", strDatabaseName + "实体");
+
+            if (StringUtil.IsInList("order", strSubTypeList))
+                DomUtil.SetAttr(nodeDatabase, "orderDbName", strDatabaseName + "订购");
+
+            if (strUsage == "series")
+            {
+                DomUtil.SetAttr(nodeDatabase, "issueDbName", strDatabaseName + "期");
+            }
+
+            if (StringUtil.IsInList("comment", strSubTypeList))
+                DomUtil.SetAttr(nodeDatabase, "commentDbName", strDatabaseName + "评注");
+
+            return nodeDatabase;
+        }
+
+        // 创建读者库的定义结点
+        public static XmlNode CreateReaderDatabaseNode(XmlDocument dom,
+            string strDatabaseName,
+            string strLibraryCode,
+            bool bInCirculation)
+        {
+            XmlNode nodeDatabase = dom.CreateElement("database");
+            dom.DocumentElement.AppendChild(nodeDatabase);
+
+            // type
+            DomUtil.SetAttr(nodeDatabase, "type", "reader");
+
+            // inCirculation
+            string strInCirculation = "true";
+            if (bInCirculation == true)
+                strInCirculation = "true";
+            else
+                strInCirculation = "false";
+
+            DomUtil.SetAttr(nodeDatabase, "inCirculation", strInCirculation);
+
+            DomUtil.SetAttr(nodeDatabase, "name", strDatabaseName);
+
+            DomUtil.SetAttr(nodeDatabase, "libraryCode",
+                strLibraryCode);
+
+            return nodeDatabase;
+        }
+
+        // 创建普通数据库的定义结点
+        public static XmlNode CreateSimpleDatabaseNode(XmlDocument dom,
+    string strDatabaseName,
+    string strType)
+        {
+            XmlNode nodeDatabase = dom.CreateElement("database");
+            dom.DocumentElement.AppendChild(nodeDatabase);
+
+            // type
+            DomUtil.SetAttr(nodeDatabase, "type", strType);
+
+            DomUtil.SetAttr(nodeDatabase, "name", strDatabaseName);
+
+            return nodeDatabase;
+        }
+
+        // 创建修改简单数据库的定义结点
+        public static XmlNode ChangeSimpleDatabaseNode(XmlDocument dom,
+            string strOldDatabaseName,
+            string strType,
+            string strNewDatabaseName)
+        {
+            XmlNode nodeDatabase = dom.CreateElement("database");
+            dom.DocumentElement.AppendChild(nodeDatabase);
+
+            // type
+            DomUtil.SetAttr(nodeDatabase, "type", strType);
+
+            DomUtil.SetAttr(nodeDatabase, "name", strNewDatabaseName);
+
+            return nodeDatabase;
+        }
+
 
         #endregion
     }

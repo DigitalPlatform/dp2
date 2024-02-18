@@ -76,15 +76,15 @@ namespace dp2Circulation
             "~正元一卡通读者信息同步",
             "~迪科远望一卡通读者信息同步",
             "读者信息同步",
-            "dp2Library 同步",
+            "~dp2Library 同步",
             "重建检索点",
             "创建 MongoDB 日志库",
             "大备份",
             "<日志备份>",
-            "~服务器同步",
+            "服务器复制同步",
             "报表创建"});
             this.comboBox_taskName.Location = new System.Drawing.Point(180, 18);
-            this.comboBox_taskName.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.comboBox_taskName.Margin = new System.Windows.Forms.Padding(4);
             this.comboBox_taskName.Name = "comboBox_taskName";
             this.comboBox_taskName.Size = new System.Drawing.Size(336, 29);
             this.comboBox_taskName.TabIndex = 1;
@@ -96,7 +96,7 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.webBrowser_info.Location = new System.Drawing.Point(17, 74);
-            this.webBrowser_info.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.webBrowser_info.Margin = new System.Windows.Forms.Padding(4);
             this.webBrowser_info.MinimumSize = new System.Drawing.Size(28, 28);
             this.webBrowser_info.Name = "webBrowser_info";
             this.webBrowser_info.Size = new System.Drawing.Size(832, 364);
@@ -119,7 +119,7 @@ namespace dp2Circulation
             this.button_start.Image = ((System.Drawing.Image)(resources.GetObject("button_start.Image")));
             this.button_start.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
             this.button_start.Location = new System.Drawing.Point(546, 18);
-            this.button_start.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_start.Margin = new System.Windows.Forms.Padding(4);
             this.button_start.Name = "button_start";
             this.button_start.Size = new System.Drawing.Size(147, 38);
             this.button_start.TabIndex = 4;
@@ -134,7 +134,7 @@ namespace dp2Circulation
             this.button_stop.Image = ((System.Drawing.Image)(resources.GetObject("button_stop.Image")));
             this.button_stop.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
             this.button_stop.Location = new System.Drawing.Point(700, 18);
-            this.button_stop.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_stop.Margin = new System.Windows.Forms.Padding(4);
             this.button_stop.Name = "button_stop";
             this.button_stop.Size = new System.Drawing.Size(147, 38);
             this.button_stop.TabIndex = 5;
@@ -283,7 +283,7 @@ namespace dp2Circulation
             this.Controls.Add(this.comboBox_taskName);
             this.Controls.Add(this.label1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "BatchTaskForm";
             this.ShowInTaskbar = false;
             this.Text = "批处理任务";

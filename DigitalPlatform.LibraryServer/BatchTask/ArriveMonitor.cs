@@ -708,7 +708,7 @@ namespace DigitalPlatform.LibraryServer
             string strReaderBarcode = DomUtil.GetElementText(queue_dom.DocumentElement,
                 "readerBarcode");
             string strReaderRefID = DomUtil.GetElementText(queue_dom.DocumentElement,
-                "readerRefID");
+                "patronRefID");
 
             string strReaderKey = LibraryApplication.GetUnionRefID(strReaderBarcode, strReaderRefID);
 

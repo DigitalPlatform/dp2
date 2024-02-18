@@ -1746,27 +1746,6 @@ namespace dp2Library
 
             try
             {
-                // 对读者身份的附加判断
-                if (sessioninfo.UserType == "reader")
-                {
-                    if (sessioninfo.Account != null
-                        && strReaderBarcode != sessioninfo.Account.Barcode)
-                    {
-                        result.Value = -1;
-                        if (strCommand == "getpatrontempid")
-                            result.ErrorInfo = "获得读者证号二维码被拒绝。作为读者只能获得自己的读者证号二维码";
-                        else
-                        {
-                            if (string.IsNullOrEmpty(strToken) == false)
-                                result.ErrorInfo = "验证 token 被拒绝。作为读者只能验证自己的 token";
-                            else
-                                result.ErrorInfo = "验证读者密码被拒绝。作为读者只能验证自己的密码";
-                        }
-                        result.ErrorCode = ErrorCode.AccessDenied;
-                        return result;
-                    }
-                }
-
                 RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
                 if (channel == null)
                 {
@@ -1776,9 +1755,7 @@ namespace dp2Library
                     return result;
                 }
 
-                string strXml = "";
                 string strError = "";
-                string strOutputPath = "";
 
                 // 获得读者记录
                 // return:
@@ -1789,8 +1766,8 @@ namespace dp2Library
                 int nRet = app.GetReaderRecXml(
                     channel,    // sessioninfo.Channels,
                     strReaderBarcode,
-                    out strXml,
-                    out strOutputPath,
+                    out string strXml,
+                    out string strOutputPath,
                     out strError);
                 if (nRet == 0)
                 {
@@ -1843,6 +1820,30 @@ namespace dp2Library
                     strError = "装载读者记录进入XML DOM时发生错误: " + strError;
                     goto ERROR1;
                 }
+
+                // 对读者身份的附加判断
+                if (sessioninfo.UserType == "reader")
+                {
+                    string refID = DomUtil.GetElementText(readerdom.DocumentElement,
+                        "refID");
+                    if (sessioninfo.Account != null
+                        && refID != sessioninfo.Account.PatronRefID)
+                    {
+                        result.Value = -1;
+                        if (strCommand == "getpatrontempid")
+                            result.ErrorInfo = "获得读者证号二维码被拒绝。作为读者只能获得自己的读者证号二维码";
+                        else
+                        {
+                            if (string.IsNullOrEmpty(strToken) == false)
+                                result.ErrorInfo = "验证 token 被拒绝。作为读者只能验证自己的 token";
+                            else
+                                result.ErrorInfo = "验证读者密码被拒绝。作为读者只能验证自己的密码";
+                        }
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
+                    }
+                }
+
 
                 // 2021/3/3
                 // 补充判断机构代码
@@ -2636,6 +2637,10 @@ namespace dp2Library
         }
 
         // parameters:
+        //      patronBarcode   读者证条码号。
+        //                      如果 以 "@itemBarcode:" 前缀引导，表示这是册条码号
+        //                      如果 以 "@itemRefID:" 前缀引导，表示这是册参考 ID
+        //                      如果 以 "@readerRefID:" 或 "@refID:" 前缀引导，表示这是读者参考 ID
         //      actions noResult 表示不返回 results，只返回 result.Value(totalCount)
         public LibraryServerResult SearchCharging(
             string patronBarcode,
@@ -2661,27 +2666,16 @@ namespace dp2Library
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
-                // 对读者身份的附加判断
-                if (sessioninfo.UserType == "reader")
-                {
-                    if (sessioninfo.Account != null
-                        && patronBarcode != sessioninfo.Account.Barcode)
-                    {
-                        result.Value = -1;
-                        result.ErrorInfo = "获得出纳历史信息被拒绝。作为读者只能获得自己的出纳历史信息";
-                        result.ErrorCode = ErrorCode.AccessDenied;
-                        return result;
-                    }
-                }
 
-                string strStart = "";
-                string strEnd = "";
-                StringUtil.ParseTwoPart(timeRange, "~", out strStart, out strEnd);
+                StringUtil.ParseTwoPart(timeRange, "~",
+                    out string strStart, 
+                    out string strEnd);
                 DateTime startTime = string.IsNullOrEmpty(strStart) ? new DateTime(0) : DateTime.Parse(strStart);
                 DateTime endTime = string.IsNullOrEmpty(strEnd) ? new DateTime(0) : DateTime.Parse(strEnd);
 
                 string strError = "";
 
+                // 2024/2/7
                 if (patronBarcode.StartsWith("@itemBarcode:"))
                 {
                     RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
@@ -2709,6 +2703,25 @@ namespace dp2Library
                     if (nRet == -1)
                         goto ERROR1;
                     patronBarcode = strPatronRefIdList;
+                }
+
+                // 2024/2/10 改进
+                // 对读者身份的附加判断
+                // TODO: 如果读者身份请求查看册的借阅记录，是许可查看所有册的么？
+                if (sessioninfo.UserType == "reader")
+                {
+                    string refid = patronBarcode;
+                    if (patronBarcode.StartsWith("@refID:")
+                        || patronBarcode.StartsWith("@readerRefID:"))
+                        refid = patronBarcode.Replace("@readerRefID:", "").Replace("@refID:", "");
+                    if (sessioninfo.Account != null
+                        && refid != sessioninfo.Account.PatronRefID)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = "获得出纳历史信息被拒绝。作为读者只能获得自己的出纳历史信息";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
+                    }
                 }
 
                 // parameters:
@@ -7880,6 +7893,7 @@ out timestamp);
 #endif
 
                 // parameters:
+                //      strItemBarcodeParam         册条码号。也可以为 @refID:xxx 形态
                 //      strBiblioRecPathExclude   除开列表中的这些种路径, 才返回摘要内容, 否则仅仅返回种路径即可
                 return app.GetBiblioSummary(
                         sessioninfo,
@@ -12323,6 +12337,8 @@ true);
 
         // 校验条码号
         // parameters:
+        //      strAction   verify VerifyBarcode
+        //                  transform TransformBarcode
         //      strBarcode 条码号
         // return:
         //      result.Value 0: 不是合法的条码号 1:合法的读者证条码号 2:合法的册条码号
@@ -12364,6 +12380,32 @@ true);
                 }
 #endif
                 int nRet = 0;
+
+                // 2024/2/8
+                if (strBarcode != null && 
+                    strBarcode.StartsWith("@refID:"))
+                {
+                    // 验证 @refID:xxx 形态的到底是读者参考 ID 还是册参考 ID
+                    // return:
+                    //          -1: 出错
+                    //          0: 册和读者参考 ID 都没有找到
+                    //          1: 合法的读者参考 ID
+                    //          2: 合法的册参考 ID
+                    nRet = app.VerifyRefID(
+                        sessioninfo,
+                        strBarcode,
+                        true,
+                        out strOutputBarcode,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    result.ErrorInfo = strError;
+                    result.Value = nRet;
+                    return result;
+                }
+
+
                 // TODO: 注意这里可能会面临新的 XML 校验规则判断
                 if (app.BarcodeValidation == false) // 2019/7/12
                 {

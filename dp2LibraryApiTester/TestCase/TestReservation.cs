@@ -1,8 +1,12 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
+using System.Data.SqlClient;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.UI.WebControls;
 using System.Xml;
 
 using DigitalPlatform;
@@ -32,9 +36,24 @@ namespace dp2LibraryApiTester.TestCase
             result = CreateBiblioRecords("test_normal", condition);
             if (result.Value == -1) return result;
 
+            result = TestPatronCharging("权限具备");
+            if (result.Value == -1) return result;
 
+            result = TestPatronCharging("权限不具备");
+            if (result.Value == -1) return result;
+
+            /*
+            result = TestPatronCharging("权限具备,证条码号");
+            if (result.Value == -1) return result;
+
+            result = TestPatronCharging("权限不具备,证条码号");
+            if (result.Value == -1) return result;
+            */
+
+            /*
             result = TestReservation_1("test_normal", "");
             if (result.Value == -1) return result;
+            */
 
             /*
             result = Finish();
@@ -151,7 +170,7 @@ namespace dp2LibraryApiTester.TestCase
                         new UserInfo
                         {
                             UserName = "test_normal",
-                            Rights = "setsystemparameter,getbiblioinfo,setbiblioinfo,getreaderinfo,setreaderinfo,getiteminfo,setiteminfo,borrow,return,reservation",
+                            Rights = "setsystemparameter,getbiblioinfo,setbiblioinfo,getreaderinfo,setreaderinfo,getiteminfo,setiteminfo,borrow,return,reservation,searcharrived,getarrivedinfo",
                         },
                         out strError);
                     if (lRet == -1)
@@ -182,7 +201,7 @@ namespace dp2LibraryApiTester.TestCase
             };
         }
 
-        static int _recordCount = 10;
+        static int _recordCount = 3;
 
         // "册记录缺 borrower"
         // "册记录 borrower 错位"
@@ -248,7 +267,7 @@ namespace dp2LibraryApiTester.TestCase
 
                         var entities = BuildEntityRecords(
                             "BOOK" + (i + 1).ToString().PadLeft(7, '0'),
-                            $"参考ID{(i+1)}");
+                            $"册参考ID{(i + 1)}");
                         lRet = channel.SetEntities(null,
                             output_biblio_recpath,
                             entities,
@@ -579,8 +598,10 @@ namespace dp2LibraryApiTester.TestCase
                 string xml_template = @"<root>
 <barcode>{barcode}</barcode>
 <name>{name}</name>
+<dateOfBirth>{dateOfBirth}</dateOfBirth>
 <readerType>本科生</readerType>
 <department>数学系</department>
+<rights>borrow,return</rights>
 <refID>{refID}</refID>
 </root>";
 
@@ -595,10 +616,12 @@ namespace dp2LibraryApiTester.TestCase
                     string borrow_date = DateTimeUtil.Rfc1123DateTimeStringEx(DateTime.Now);
                     string returning_date = DateTimeUtil.Rfc1123DateTimeStringEx(DateTime.Now + TimeSpan.FromDays(31));
 #endif
-                    string refID = $"读者参考ID{(i+1)}";
+                    string refID = $"读者参考ID{(i + 1)}";
+                    string dateOfBirth = DateTimeUtil.Rfc1123DateTimeStringEx(new DateTime(2000, 1, 1));
 
                     string xml = xml_template.Replace("{barcode}", barcode)
                         .Replace("{name}", name)
+                        .Replace("{dateOfBirth}", dateOfBirth)
                         .Replace("{refID}", refID);
 
 #if REMOVED
@@ -668,6 +691,7 @@ namespace dp2LibraryApiTester.TestCase
             };
         }
 
+        // 测试预约功能
         public static NormalResult TestReservation_1(
             string userName,
             string condition)
@@ -763,6 +787,15 @@ namespace dp2LibraryApiTester.TestCase
                 }
 
                 // 检查预约到书库记录，第二册到书，可以被 PATRON0000002 借阅(但其他读者去借阅会被拒绝)
+                var verify_result = VerifyQueueRecord(channel,
+                    "册参考ID2",   // 被预约的册
+                    "读者参考ID2"); // 预约者
+                if (verify_result.Value == -1)
+                {
+                    strError = verify_result.ErrorInfo;
+                    goto ERROR1;
+                }
+
                 // 检查两条册记录，预约请求都应该被消掉了
 
                 // 尝试用 PATRON0000001 或 PATRON0000003 去借阅 BOOK0000002，应该被拒绝
@@ -921,7 +954,7 @@ namespace dp2LibraryApiTester.TestCase
             }
             catch (Exception ex)
             {
-                strError = "TestCreateReaderRecord() Exception: " + ExceptionUtil.GetExceptionText(ex);
+                strError = "TestReservation_1() Exception: " + ExceptionUtil.GetExceptionText(ex);
                 goto ERROR1;
             }
             finally
@@ -931,7 +964,7 @@ namespace dp2LibraryApiTester.TestCase
             }
 
         ERROR1:
-            DataModel.SetMessage($"TestCreateReaderRecord() error: {strError}", "error");
+            DataModel.SetMessage($"TestReservation_1() error: {strError}", "error");
             return new NormalResult
             {
                 Value = -1,
@@ -939,7 +972,398 @@ namespace dp2LibraryApiTester.TestCase
             };
         }
 
+        static NormalResult VerifyQueueRecord(
+            LibraryChannel channel,
+            string itemRefID,
+            string patronRefID)
+        {
+            string resultSetName = "temp";
 
+            // *** 用册参考 ID 尝试检索
+
+            // 检索预约到书库
+            // parameters:
+            //      key 为下列形态之一：
+            //          @itemRefID:xxx
+            //          @notifyID:xxx
+            //          @patronRefID:xxx
+            var ret = channel.SearchArrivedQueue(
+                null,
+                "预约到书",
+                "@itemRefID:" + itemRefID,
+                "arrived",
+                resultSetName,
+                "",
+                out string strError);
+            if (ret == -1)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"针对预约到书库检索册参考 ID '{itemRefID}' 出错: {strError}"
+                };
+            if (ret == 0)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"针对预约到书库检索册参考 ID '{itemRefID}' 没有命中"
+                };
+            if (ret > 1)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"针对预约到书库检索册参考 ID '{itemRefID}' 命中多于一条 ({ret})"
+                };
+
+            Record record1 = null;
+            {
+                // 装载 XML 记录
+                ResultSetLoader loader = new ResultSetLoader(
+                    channel,
+                    null,
+                    resultSetName,
+                    "id,xml,timestamp");
+                foreach (Record record in loader)
+                {
+                    record1 = record;
+                }
+            }
+
+            if (record1.RecordBody.Result != null
+                && record1.RecordBody.Result.Value == -1)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"预约队列记录获取失败: {record1.RecordBody.Result.ErrorString}"
+                };
+
+            // *** 用读者参考 ID 尝试检索
+
+            // 检索预约到书库
+            // parameters:
+            //      key 为下列形态之一：
+            //          @itemRefID:xxx
+            //          @notifyID:xxx
+            //          @patronRefID:xxx
+            ret = channel.SearchArrivedQueue(
+                null,
+                "预约到书",
+                "@patronRefID:" + patronRefID,
+                "arrived",
+                resultSetName,
+                "",
+                out strError);
+            if (ret == -1)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"针对预约到书库检索读者参考 ID '{patronRefID}' 出错: {strError}"
+                };
+            if (ret == 0)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"针对预约到书库检索读者参考 ID '{patronRefID}' 没有命中"
+                };
+            if (ret > 1)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"针对预约到书库检索读者参考 ID '{patronRefID}' 命中多于一条 ({ret})"
+                };
+
+            Record record2 = null;
+            {
+                // 装载 XML 记录
+                ResultSetLoader loader = new ResultSetLoader(
+                    channel,
+                    null,
+                    resultSetName,
+                    "id,xml,timestamp");
+                foreach (Record record in loader)
+                {
+                    record2 = record;
+                }
+            }
+
+            if (record2.RecordBody.Result != null
+                && record2.RecordBody.Result.Value == -1)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"预约队列记录获取失败: {record2.RecordBody.Result.ErrorString}"
+                };
+
+
+            // *** 比较两条记录应该一致
+            if (record1.RecordBody.Xml != record2.RecordBody.Xml)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"两条预约到书记录 XML 不一致\r\nxml1={record1.RecordBody.Xml}\r\nxml2={record2.RecordBody.Xml}"
+                };
+
+            if (ByteArray.Compare(record1.RecordBody.Timestamp, record2.RecordBody.Timestamp) != 0)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"两条预约到书记录时间戳不一致\r\timestamp1={ByteArray.GetHexTimeStampString(record1.RecordBody.Timestamp)}\r\ntimestamp2={ByteArray.GetHexTimeStampString(record2.RecordBody.Timestamp)}"
+                };
+
+            // *** 检查 XML 记录内容正确性
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(record1.RecordBody.Xml);
+
+            var currentItemRefID = DomUtil.GetElementText(dom.DocumentElement,
+                "itemRefID");
+            var currentPatronRefID = DomUtil.GetElementText(dom.DocumentElement,
+    "patronRefID");
+            var state = DomUtil.GetElementText(dom.DocumentElement,
+    "state");
+
+            if (currentItemRefID != itemRefID)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"预约到书记录中的 itemRefID 元素内容和期望值 '{itemRefID}' 不一致"
+                };
+            if (currentPatronRefID != patronRefID)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"预约到书记录中的 patronRefID 元素内容和期望值 '{patronRefID}' 不一致"
+                };
+            if (state != "arrived")
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"预约到书记录中的 state 元素内容和期望值 'arrived' 不一致"
+                };
+
+            return new NormalResult();
+        }
+
+        // 测试读者身份借书还书
+        // parameter:
+        //      condition   权限具备 / 权限不具备
+        //                  证条码号 / 读者参考ID
+        public static NormalResult TestPatronCharging(
+    string condition)
+        {
+            string strError = "";
+            string patronLoginName = null;
+            
+            if (StringUtil.IsInList("证条码号", condition))
+                patronLoginName = "PATRON0000001";
+            else
+                patronLoginName = "@refID:读者参考ID1";
+
+            string password = "20000101";
+
+            // *** 修改读者记录的 rights 元素
+            var change_result = ChangePatronRights(
+                "PATRON0000001",
+                StringUtil.IsInList("权限具备", condition)  ? null : "borrow,return");
+            if (change_result.Value == -1)
+                return change_result;
+
+            // *** 创建通道然后立刻释放，目的是为了测试 dp2library 一端账户缓存残留的情况
+            LibraryChannel channel = DataModel.NewChannel(patronLoginName, password, "reader");
+
+            DataModel.ReturnChannel(channel);
+
+            // *** 再次修改读者记录的 rights 元素
+            change_result = ChangePatronRights(
+    "PATRON0000001",
+    StringUtil.IsInList("权限具备", condition) ? "borrow,return" : null);
+            if (change_result.Value == -1)
+                return change_result;
+
+            // *** 重新获取通道，看看 dp2library 一端残留的账户缓存是否会发生负面作用
+            channel = DataModel.NewChannel(patronLoginName, password, "reader");
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromMinutes(10);
+
+            try
+            {
+                DataModel.SetMessage($"P1 借书 B1 ...");
+                long lRet = 0;
+
+                {
+                    lRet = channel.Borrow(null,
+                        false,
+                        "PATRON0000001",
+                        "BOOK0000001",
+                        "",
+                        false,
+                        null,
+                        "",
+                        "xml",
+                        out string[] item_records,
+                        "xml",
+                        out string[] reader_records,
+                        "xml",
+                        out string[] biblio_records,
+                        out string[] dup_path,
+                        out string output_reader_barcode,
+                        out BorrowInfo borrow_info,
+                        out strError);
+                    if (lRet == -1)
+                    {
+                        if (StringUtil.IsInList("权限具备", condition))
+                            goto ERROR1;
+                        else
+                        {
+                            if (channel.ErrorCode != ErrorCode.AccessDenied)
+                                goto ERROR1;
+                        }
+                    }
+                    else
+                    {
+                        if (StringUtil.IsInList("权限不具备", condition))
+                        {
+                            strError = "预测 Borrow() 不应该成功";
+                            goto ERROR1;
+                        }
+                    }
+                }
+
+
+                DataModel.SetMessage($"P1 还书 B1 ...");
+
+                var channel_worker = DataModel.NewChannel("test_normal", "");
+                try
+                {
+                    lRet = channel_worker.Return(null,
+                        "return",
+                        "PATRON0000001",
+                        "BOOK0000001",
+                        "",
+                        false,
+                        "",
+                        "xml",
+                        out string[] item_records,
+                        "xml",
+                        out string[] reader_records,
+                        "xml",
+                        out string[] biblio_records,
+                        out string[] dup_path,
+                        out string output_reader_barcode,
+                        out ReturnInfo return_info,
+                        out strError);
+                    if (lRet == -1)
+                    {
+                        if (channel_worker.ErrorCode == ErrorCode.NotBorrowed
+                            && condition == "权限不具备")
+                        {
+                            // 期待失败
+                        }
+                        else
+                            goto ERROR1;
+                    }
+                }
+                finally
+                {
+                    DataModel.ReturnChannel(channel_worker);
+                }
+
+
+                /*
+                if (errors.Count > 0)
+                {
+                    Utility.DisplayErrors(errors);
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = StringUtil.MakePathList(errors, "; ")
+                    };
+                }
+                */
+                DataModel.SetMessage("读者身份借还测试完成", "green");
+                return new NormalResult();
+            }
+            catch (Exception ex)
+            {
+                strError = "TestPatronCharging() Exception: " + ExceptionUtil.GetExceptionText(ex);
+                goto ERROR1;
+            }
+            finally
+            {
+                channel.Timeout = old_timeout;
+                DataModel.DeleteChannel(channel);
+            }
+
+        ERROR1:
+            DataModel.SetMessage($"TestPatronCharging() error: {strError}", "error");
+            return new NormalResult
+            {
+                Value = -1,
+                ErrorInfo = strError
+            };
+        }
+
+        // 修改读者记录的 rights 元素
+        public static NormalResult ChangePatronRights(
+            string patronKey,
+            string rights)
+        {
+            var channel = DataModel.NewChannel("test_normal", "");
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromMinutes(10);
+            try
+            {
+                long lRet = channel.GetReaderInfo(null,
+                    patronKey,
+                    "xml",
+                    out string[] results,
+                    out string output_recpath,
+                    out byte[] output_timestamp,
+                    out string strError);
+                if (lRet != 1)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError
+                    };
+                string xml = results[0];
+
+                XmlDocument readerdom = new XmlDocument();
+                readerdom.LoadXml(xml);
+
+                if (rights == null)
+                    DomUtil.DeleteElement(readerdom.DocumentElement,
+                        "rights");
+                else
+                    DomUtil.SetElementText(readerdom.DocumentElement,
+                        "rights",
+                        rights);
+
+                lRet = channel.SetReaderInfo(null,
+    "change",
+    output_recpath,
+    readerdom.DocumentElement.OuterXml,
+    null,
+    output_timestamp,
+    out string existing_xml,
+    out string saved_xml,
+    out string saved_recpath,
+    out byte[] new_timestamp,
+    out ErrorCodeValue kernel_errorcode,
+    out strError);
+                if (lRet == -1)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError
+                    };
+
+                return new NormalResult();
+            }
+            finally
+            {
+                channel.Timeout = old_timeout;
+                DataModel.ReturnChannel(channel);
+            }
+        }
 
         public static NormalResult Finish()
         {

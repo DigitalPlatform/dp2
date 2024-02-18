@@ -684,6 +684,9 @@ namespace DigitalPlatform.LibraryServer
             }
             else if (db_type == "amerce")
             {
+                // 2024/2/12
+                if (AmerceDbKeysContainsReaderRefIdKey() == false)
+                    return $"违约金库 '{this.AmerceDbName}' 的检索点定义太旧。请先刷新其 keys 配置文件(并重建检索点)，再重试操作";
                 right = "searchamerce";
             }
             else if (db_type == "inventory")

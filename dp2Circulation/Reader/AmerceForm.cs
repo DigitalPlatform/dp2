@@ -63,50 +63,55 @@ namespace dp2Circulation
         WebExternalHost m_webExternalHost = new WebExternalHost();
 
         #region 待交费列表的列号
+
         /// <summary>
         /// 待交费列表的列号：册条码号
         /// </summary>
         public const int COLUMN_AMERCING_ITEMBARCODE = 0;
+
+        // 2024/2/12
+        public const int COLUMN_AMERCING_ITEMREFID = 1;
+
         /// <summary>
         /// 待交费列表的列号: 书目摘要
         /// </summary>
-        public const int COLUMN_AMERCING_BIBLIOSUMMARY = 1;
+        public const int COLUMN_AMERCING_BIBLIOSUMMARY = 2;
         /// <summary>
         /// 待交费列表的列号: 金额
         /// </summary>
-        public const int COLUMN_AMERCING_PRICE = 2;
+        public const int COLUMN_AMERCING_PRICE = 3;
         /// <summary>
         /// 待交费列表的列号: 注释
         /// </summary>
-        public const int COLUMN_AMERCING_COMMENT = 3;
+        public const int COLUMN_AMERCING_COMMENT = 4;
         /// <summary>
         /// 待交费列表的列号: 事由
         /// </summary>
-        public const int COLUMN_AMERCING_REASON = 4;
+        public const int COLUMN_AMERCING_REASON = 5;
         /// <summary>
         /// 待交费列表的列号: 开始时间
         /// </summary>
-        public const int COLUMN_AMERCING_BORROWDATE = 5;
+        public const int COLUMN_AMERCING_BORROWDATE = 6;
         /// <summary>
         /// 待交费列表的列号: 持续时间
         /// </summary>
-        public const int COLUMN_AMERCING_BORROWPERIOD = 6;
+        public const int COLUMN_AMERCING_BORROWPERIOD = 7;
         /// <summary>
         /// 待交费列表的列号: 开始操作者
         /// </summary>
-        public const int COLUMN_AMERCING_BORROWOPERATOR = 7;    //
+        public const int COLUMN_AMERCING_BORROWOPERATOR = 8;    //
         /// <summary>
         /// 待交费列表的列号: 结束时间
         /// </summary>
-        public const int COLUMN_AMERCING_RETURNDATE = 8;
+        public const int COLUMN_AMERCING_RETURNDATE = 9;
         /// <summary>
         /// 待交费列表的列号: 结束操作者
         /// </summary>
-        public const int COLUMN_AMERCING_RETURNOPERATOR = 9;    //
+        public const int COLUMN_AMERCING_RETURNOPERATOR = 10;    //
         /// <summary>
         /// 待交费列表的列号: 交费 ID
         /// </summary>
-        public const int COLUMN_AMERCING_ID = 10;
+        public const int COLUMN_AMERCING_ID = 11;
 
         #endregion
 
@@ -115,66 +120,70 @@ namespace dp2Circulation
         /// 已交费列表的列号: 册条码号
         /// </summary>
         public const int COLUMN_AMERCED_ITEMBARCODE = 0;
+
+        // 2024/2/12
+        public const int COLUMN_AMERCED_ITEMREFID = 1;
+
         /// <summary>
         /// 已交费列表的列号: 书目摘要
         /// </summary>
-        public const int COLUMN_AMERCED_BIBLIOSUMMARY = 1;
+        public const int COLUMN_AMERCED_BIBLIOSUMMARY = 2;
         /// <summary>
         /// 已交费列表的列号: 金额
         /// </summary>
-        public const int COLUMN_AMERCED_PRICE = 2;
+        public const int COLUMN_AMERCED_PRICE = 3;
         /// <summary>
         /// 已交费列表的列号: 注释
         /// </summary>
-        public const int COLUMN_AMERCED_COMMENT = 3;
+        public const int COLUMN_AMERCED_COMMENT = 4;
         /// <summary>
         /// 已交费列表的列号: 事由
         /// </summary>
-        public const int COLUMN_AMERCED_REASON = 4;
+        public const int COLUMN_AMERCED_REASON = 5;
         /// <summary>
         /// 已交费列表的列号: 开始时间
         /// </summary>
-        public const int COLUMN_AMERCED_BORROWDATE = 5;
+        public const int COLUMN_AMERCED_BORROWDATE = 6;
         /// <summary>
         /// 已交费列表的列号: 持续时间
         /// </summary>
-        public const int COLUMN_AMERCED_BORROWPERIOD = 6;
+        public const int COLUMN_AMERCED_BORROWPERIOD = 7;
         /// <summary>
         /// 已交费列表的列号: 结束时间
         /// </summary>
-        public const int COLUMN_AMERCED_RETURNDATE = 7;
+        public const int COLUMN_AMERCED_RETURNDATE = 8;
         /// <summary>
         /// 已交费列表的列号: 交费 ID
         /// </summary>
-        public const int COLUMN_AMERCED_ID = 8;
+        public const int COLUMN_AMERCED_ID = 9;
         /// <summary>
         /// 已交费列表的列号: 结束操作者
         /// </summary>
-        public const int COLUMN_AMERCED_RETURNOPERATOR = 9;
+        public const int COLUMN_AMERCED_RETURNOPERATOR = 10;
         /// <summary>
         /// 已交费列表的列号: 状态
         /// </summary>
-        public const int COLUMN_AMERCED_STATE = 10;
+        public const int COLUMN_AMERCED_STATE = 11;
         /// <summary>
         /// 已交费列表的列号: 交费操作者
         /// </summary>
-        public const int COLUMN_AMERCED_AMERCEOPERATOR = 11;
+        public const int COLUMN_AMERCED_AMERCEOPERATOR = 12;
         /// <summary>
         /// 已交费列表的列号: 交费时间
         /// </summary>
-        public const int COLUMN_AMERCED_AMERCETIME = 12;
+        public const int COLUMN_AMERCED_AMERCETIME = 13;
         /// <summary>
         /// 已交费列表的列号: 结算操作者
         /// </summary>
-        public const int COLUMN_AMERCED_SETTLEMENTOPERATOR = 13;
+        public const int COLUMN_AMERCED_SETTLEMENTOPERATOR = 14;
         /// <summary>
         /// 已交费列表的列号: 结算时间
         /// </summary>
-        public const int COLUMN_AMERCED_SETTLEMENTTIME = 14;
+        public const int COLUMN_AMERCED_SETTLEMENTTIME = 15;
         /// <summary>
         /// 已交费列表的列号: 交费记录路径
         /// </summary>
-        public const int COLUMN_AMERCED_RECPATH = 15;
+        public const int COLUMN_AMERCED_RECPATH = 16;
 
         #endregion
 
@@ -492,16 +501,16 @@ this.splitContainer_lists,
         }
 
 
-        // 从读者记录 XML 字符串中取出读者证条码号
+        // 从读者记录 XML 字符串中取出读者证条码号或者 @refID:xxx 形态。优先使用证条码号
         // return:
         //      -1  出错
         //      0   成功
-        static int GetReaderBarcode(string strReaderXml,
-            out string strReaderBarcode,
+        static int GetReaderKey(string strReaderXml,
+            out string strReaderKey,
             out string strError)
         {
             strError = "";
-            strReaderBarcode = "";
+            strReaderKey = "";
             if (string.IsNullOrEmpty(strReaderXml) == true)
                 return 0;
 
@@ -515,7 +524,19 @@ this.splitContainer_lists,
                 strError = "读者记录 XML 装入 DOM 时出错: " + ex.Message;
                 return -1;
             }
-            strReaderBarcode = DomUtil.GetElementText(reader_dom.DocumentElement, "barcode");
+            strReaderKey = DomUtil.GetElementText(reader_dom.DocumentElement,
+                "barcode");
+            if (string.IsNullOrEmpty(strReaderKey))
+            {
+                var strReaderRefID = DomUtil.GetElementText(reader_dom.DocumentElement,
+                    "refID");
+                if (string.IsNullOrEmpty(strReaderRefID))
+                {
+                    strError = "当前读者记录没有参考 ID 字段，这是一个严重错误，请联系系统管理员处理";
+                    return -1;
+                }
+                strReaderKey = $"@refID:{strReaderRefID}";
+            }
             return 0;
         }
 
@@ -635,21 +656,20 @@ this.splitContainer_lists,
                 goto ERROR1;
             }
 
-            string strHtml = "";
-            strHtml = results[0];
+            string strHtml = results[0];
             strXml = results[1];
 
-            // 从读者记录 XML 字符串中取出读者证条码号
+            // 从读者记录 XML 字符串中取出读者证条码号或者 @refID:xxx 形态。优先使用证条码号
             // return:
             //      -1  出错
             //      0   成功
-            nRet = GetReaderBarcode(strXml,
-                out string strOutputBarcode,
+            nRet = GetReaderKey(strXml,
+                out string strOutputReaderKey,
                 out strError);
             if (nRet == -1)
                 return -1;
 
-            strBarcode = strOutputBarcode;
+            strBarcode = strOutputReaderKey;
 
 #if NO
                 Global.SetHtmlString(this.webBrowser_readerInfo,
@@ -747,6 +767,12 @@ TaskScheduler.Default);
             bool bForceLoad)
         {
             string strError = "";
+
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.157") < 0)
+            {
+                strError = $"交费窗要求所连接的 dp2library 为 3.157 版及以上(但当前为 {Program.MainForm.ServerVersion})";
+                goto ERROR1;
+            }
 
             // this.StopFillSummary();
             StopFillAmercing(false);
@@ -944,12 +970,20 @@ TaskScheduler.Default);
                 {
                     ClearList(this.listView_amerced);
 
+                    string queryWord = param.ReaderBarcode;
+
                     string strFrom = "读者证条码";
                     string strMatchStyle = "exact";
 
+                    if (param.ReaderBarcode.StartsWith("@refID:"))
+                    {
+                        strFrom = "读者参考ID";
+                        queryWord = param.ReaderBarcode.Substring("@refID:".Length);
+                    }
+
                     // 2007/4/5 改造 加上了 GetXmlStringSimple()
                     strQueryXml = "<target list='" + strDbName + ":" + strFrom + "'><item><word>"
-        + StringUtil.GetXmlStringSimple(param.ReaderBarcode)
+        + StringUtil.GetXmlStringSimple(queryWord)
         + "</word><match>" + strMatchStyle + "</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>" + strLang + "</lang></target>";
 
                     strResultSetName = "amercing";
@@ -1074,25 +1108,29 @@ TaskScheduler.Default);
 
                         ListViewItem item = items[i];
 
-                        string strSummary = "";
-                        string strItemBarcode = "";
-
-                        GetBarcodeAndSummary(listView_amerced,
+                        // parameters:
+                        //      strItemKey  [out] 返回册记录检索键。可以为册条码号，也可以为 @refID:xxx 形态
+                        //                  注意函数返回时 strItemKey 有可能为空
+                        GetItemKeyAndSummary(listView_amerced,
         item,
-        out strItemBarcode,
-        out strSummary);
+        out string strItemKet,
+        out string strSummary);
 
                         // 已经有内容了，就不刷新了
                         if (String.IsNullOrEmpty(strSummary) == false)
                             continue;
+                        if (string.IsNullOrEmpty(strItemKet))
+                            continue;
 
-                        if (String.IsNullOrEmpty(strItemBarcode) == true
+                        if (String.IsNullOrEmpty(strItemKet) == true
                             /*&& String.IsNullOrEmpty(strItemRecPath) == true*/)
                             continue;
 
-                        path_list.Add($"@itemBarcode:{strItemBarcode}");
+                        if (strItemKet.StartsWith("@refID:"))
+                            path_list.Add(strItemKet);
+                        else
+                            path_list.Add($"@itemBarcode:{strItemKet}");
                         item_list.Add(item);
-
                     }
 
                     {
@@ -1211,20 +1249,35 @@ TaskScheduler.Default);
             }));
         }
 
-        void GetBarcodeAndSummary(ListView list,
+        // 获得册检索键和书目摘要
+        // parameters:
+        //      strItemKey  [out] 返回册记录检索键。可以为册条码号，也可以为 @refID:xxx 形态。优先返回 @refID:xxx 形态
+        //                  注意函数返回时 strItemKey 有可能为空
+        //      strSummary  [out] 界面上现有的书目摘要
+        void GetItemKeyAndSummary(ListView list,
             ListViewItem item,
-            out string strItemBarcode,
+            out string strItemKey,
             out string strSummary)
         {
             if (list == this.listView_overdues)
             {
                 strSummary = ListViewUtil.GetItemText(item, COLUMN_AMERCING_BIBLIOSUMMARY);
-                strItemBarcode = ListViewUtil.GetItemText(item, COLUMN_AMERCING_ITEMBARCODE);
+
+                // 优先用参考 ID
+                var refID = ListViewUtil.GetItemText(item, COLUMN_AMERCING_ITEMREFID);
+                if (string.IsNullOrEmpty(refID) == false)
+                    strItemKey = $"@refID:{refID}";
+                else
+                    strItemKey = ListViewUtil.GetItemText(item, COLUMN_AMERCING_ITEMBARCODE);
             }
             else
             {
                 strSummary = ListViewUtil.GetItemText(item, COLUMN_AMERCED_BIBLIOSUMMARY);
-                strItemBarcode = ListViewUtil.GetItemText(item, COLUMN_AMERCED_ITEMBARCODE);
+                var refID = ListViewUtil.GetItemText(item, COLUMN_AMERCED_ITEMREFID);
+                if (string.IsNullOrEmpty(refID) == false)
+                    strItemKey = $"@refID:{refID}";
+                else
+                    strItemKey = ListViewUtil.GetItemText(item, COLUMN_AMERCED_ITEMBARCODE);
             }
         }
 
@@ -1283,6 +1336,7 @@ TaskScheduler.Default);
 
                     XmlNode node = nodes[i];
                     string strItemBarcode = DomUtil.GetAttr(node, "barcode");
+                    string strItemRefID = DomUtil.GetAttr(node, "refID");
                     string strItemRecPath = DomUtil.GetAttr(node, "recPath");
                     string strReason = DomUtil.GetAttr(node, "reason");
                     string strBorrowDate = DomUtil.GetAttr(node, "borrowDate");
@@ -1314,6 +1368,8 @@ TaskScheduler.Default);
 
                     this.TryInvoke(() =>
                     {
+                        ListViewUtil.ChangeItemText(item, COLUMN_AMERCING_ITEMREFID, strItemRefID);
+
                         // 摘要
                         // item.SubItems.Add(strSummary);
                         ListViewUtil.ChangeItemText(item, COLUMN_AMERCING_BIBLIOSUMMARY, strSummary);
@@ -1382,16 +1438,21 @@ TaskScheduler.Default);
 
                         ListViewItem item = items[i];
 
-                        GetBarcodeAndSummary(listView_overdues,
+                        // parameters:
+                        //      strItemKey  [out] 返回册记录检索键。可以为册条码号，也可以为 @refID:xxx 形态
+                        //                  注意函数返回时 strItemKey 有可能为空
+                        GetItemKeyAndSummary(listView_overdues,
         item,
-        out string strItemBarcode,
+        out string strItemKey,
         out string strSummary);
 
                         // 已经有内容了，就不刷新了
                         if (String.IsNullOrEmpty(strSummary) == false)
                             continue;
+                        if (string.IsNullOrEmpty(strItemKey))
+                            continue;
 
-                        if (String.IsNullOrEmpty(strItemBarcode) == true
+                        if (String.IsNullOrEmpty(strItemKey) == true
                             /*&& String.IsNullOrEmpty(strItemRecPath) == true*/)
                             continue;
 
@@ -1399,7 +1460,7 @@ TaskScheduler.Default);
                         {
                             long lRet = channel.GetBiblioSummary(
                                 looping.Progress,
-                                strItemBarcode,
+                                strItemKey,
                                 "", // strItemRecPath,
                                 null,
                                 out string strBiblioRecPath,
@@ -1469,6 +1530,9 @@ TaskScheduler.Default);
             }
 
             string strItemBarcode = DomUtil.GetElementText(dom.DocumentElement, "itemBarcode");
+            // 2024/2/12
+            string strItemRefID = DomUtil.GetElementText(dom.DocumentElement, "itemRefID");
+
             string strItemRecPath = DomUtil.GetElementText(dom.DocumentElement, "itemRecPath");
             string strSummary = "";
             string strPrice = DomUtil.GetElementText(dom.DocumentElement, "price");
@@ -1522,6 +1586,9 @@ TaskScheduler.Default);
 
             this.TryInvoke(() =>
             {
+                ListViewUtil.ChangeItemText(item,
+COLUMN_AMERCED_ITEMREFID,
+strItemRefID);
                 ListViewUtil.ChangeItemText(item,
                 COLUMN_AMERCED_BIBLIOSUMMARY,
                 strSummary);
@@ -1800,6 +1867,9 @@ TaskScheduler.Default);
                 info.Price = strPrice;
                 info.ItemBarcode = ListViewUtil.GetItemText(item,
                     COLUMN_AMERCING_ITEMBARCODE);
+                // 2024/2/12
+                info.ItemRefID = ListViewUtil.GetItemText(item,
+                    COLUMN_AMERCING_ITEMREFID);
                 info.RecPath = ""; // recPath
                 info.Reason = ListViewUtil.GetItemText(item,
                     COLUMN_AMERCING_REASON);

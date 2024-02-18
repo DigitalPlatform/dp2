@@ -71,6 +71,8 @@
   <ItemGroup>
     <Compile Include="BackupTaskParam.cs" />
     <Compile Include="BarcodeValidator.cs" />
+    <Compile Include="LogRecoverParam.cs" />
+    <Compile Include="OperLogUtility.cs" />
     <Compile Include="ServerDatabaseUtility.cs" />
     <Compile Include="LibraryServerUtil.cs" />
     <Compile Include="LoanParam.cs" />

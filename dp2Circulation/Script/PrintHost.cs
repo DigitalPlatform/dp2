@@ -1146,6 +1146,9 @@ namespace dp2Circulation
         /// </summary>
         public string ItemBarcode = ""; // barcode
 
+        // 2024/2/12
+        public string ItemRefID { get; set; }
+
         /// <summary>
         /// 册记录路径
         /// </summary>

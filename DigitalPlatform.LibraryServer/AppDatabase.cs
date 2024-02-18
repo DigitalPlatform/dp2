@@ -5624,6 +5624,8 @@ out strError);
         #region CreateDatabase 下级函数
 
         // 创建书目数据库
+        // parameters:
+        //      strLibraryCodeList  操作者的馆代码列表。用于判断操作者是不是全局账户。
         // return:
         //      -1  出错
         //      0   没有找到

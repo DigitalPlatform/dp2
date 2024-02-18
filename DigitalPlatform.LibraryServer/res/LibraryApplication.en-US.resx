@@ -375,6 +375,10 @@
     <value>The Library Card Number of patron record is null, login fail</value>
     <comment>LibraryApplication.cs</comment>
   </data>
+  <data name="读者记录中参考ID内容为空，登录失败" xml:space="preserve">
+    <value>The Referrence ID of patron record is null, login fail</value>
+    <comment>LibraryApplication.cs</comment>
+  </data>
   <data name="读者证条码号s不存在" xml:space="preserve">
     <value>The barcode {0} for the patron not exist.</value>
     <comment>AppReservation.cs</comment>

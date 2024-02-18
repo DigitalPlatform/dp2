@@ -77,12 +77,13 @@ namespace dp2LibraryApiTester
             };
         }
 
+        // 模拟通道泄露
         public static NormalResult TestChannelLeakLogin(CancellationToken token)
         {
             string strError = "";
 
             try
-            { 
+            {
                 int loops = 20 * 10000;
                 string strParameters = "location=#test,type=worker,client=dp2libraryapitester|0.01";
                 for (int i = 0; i < loops; i++)
@@ -95,8 +96,9 @@ namespace dp2LibraryApiTester
                             ErrorCode = "Canceled"
                         };
                     // if ((i % 100) == 0)
-                        DataModel.SetMessage($"正在进行 Login() API 测试 ({i}/{loops})");
+                    DataModel.SetMessage($"正在进行 Login() API 测试 ({i}/{loops})");
 
+                    // 注: 这里 GetChannel() 没有配套的 ReturnChannel()，所以会发生通道泄露
                     LibraryChannel channel = DataModel.GetChannel();
 
                     var ret = channel.Login(DataModel.dp2libraryUserName,

@@ -517,9 +517,9 @@ out byte[] baOutputTimestamp)
                     if (GetRecord(out strError) == -1)
                         return -1;
 
-                    var barcode = DomUtil.GetElementText(item_dom.DocumentElement,
-                        "barcode");
-                    if (sessioninfo.Account.Barcode != barcode)
+                    var refID = DomUtil.GetElementText(item_dom.DocumentElement,
+                        "refID");
+                    if (sessioninfo.Account.PatronRefID != refID)
                     {
                         strError = $"读者身份不允许访问其他读者的读者记录";
                         return 0;
@@ -764,9 +764,9 @@ out byte[] baOutputTimestamp)
                     // 观察读者记录中的 barcode 元素，是否正好是当前账户
                     if (GetRecord(out strError) == -1)
                         return -1;
-                    var barcode = DomUtil.GetElementText(item_dom.DocumentElement,
-                        "barcode");
-                    if (sessioninfo.Account.Barcode != barcode)
+                    var refID = DomUtil.GetElementText(item_dom.DocumentElement,
+                        "refID");
+                    if (sessioninfo.Account.PatronRefID != refID)
                     {
                         strError = $"读者身份不允许修改其他读者的读者记录";
                         return 0;
@@ -920,10 +920,27 @@ out byte[] baOutputTimestamp)
 
                     var readerBarcode = DomUtil.GetElementText(item_dom.DocumentElement,
                         "readerBarcode");
-                    if (sessioninfo.Account.Barcode != readerBarcode)
+                    // 2024/2/11
+                    // 后期的预约队列记录里面还应该有读者参考 ID
+                    string strPatronRefID = DomUtil.GetElementText(item_dom.DocumentElement,
+                        "patronRefID");
+
+                    // 参考 ID 没有时才不得不用证条码号
+                    if (string.IsNullOrEmpty(strPatronRefID))
                     {
-                        strError = $"读者身份不允许修改其他读者的预约到书记录";
-                        return 0;
+                        if (sessioninfo.Account.Barcode != readerBarcode)
+                        {
+                            strError = $"读者身份不允许修改其他读者的预约到书记录";
+                            return 0;
+                        }
+                    }
+                    else
+                    {
+                        if (sessioninfo.Account.PatronRefID != strPatronRefID)
+                        {
+                            strError = $"读者身份不允许修改其他读者的预约到书记录";
+                            return 0;
+                        }
                     }
                 }
                 else
@@ -1209,16 +1226,34 @@ out error);
             if (sessioninfo.UserType == "reader")
             {
                 // 证条码号
-                string strReaderBarcode = DomUtil.GetElementText(arrived_dom.DocumentElement, "readerBarcode");
+                string strReaderBarcode = DomUtil.GetElementText(arrived_dom.DocumentElement,
+                    "readerBarcode");
+                // 2024/2/11
+                // 后期的预约队列记录里面还应该有读者参考 ID
+                string strPatronRefID = DomUtil.GetElementText(arrived_dom.DocumentElement,
+                    "patronRefID");
+
                 if (sessioninfo.Account == null)
                 {
                     strError = "sessioninfo.Account == null";
                     return -1;
                 }
-                if (sessioninfo.Account?.Barcode != strReaderBarcode)
+                // 参考 ID 没有时才不得不用证条码号
+                if (string.IsNullOrEmpty(strPatronRefID))
                 {
-                    strError = "读者身份不能查看其他人的预约到书记录";
-                    return 0;
+                    if (sessioninfo.Account?.Barcode != strReaderBarcode)
+                    {
+                        strError = "读者身份不能查看其他人的预约到书记录";
+                        return 0;
+                    }
+                }
+                else
+                {
+                    if (sessioninfo.Account.PatronRefID != strPatronRefID)
+                    {
+                        strError = "读者身份不能查看其他人的预约到书记录";
+                        return 0;
+                    }
                 }
             }
 
@@ -1286,15 +1321,32 @@ out error);
             if (sessioninfo.UserType == "reader")
             {
                 string strReaderBarcode = DomUtil.GetElementText(amerce_dom.DocumentElement, "readerBarcode");
+                // 2024/2/11
+                // 后期的违约金记录里面还应该有读者参考 ID
+                string strReaderRefID = DomUtil.GetElementText(amerce_dom.DocumentElement, "readerRefID");
+
                 if (sessioninfo.Account == null)
                 {
                     strError = "sessioninfo.Account == null";
                     return -1;
                 }
-                if (sessioninfo.Account.Barcode != strReaderBarcode)
+
+                // 参考 ID 没有时才不得不用证条码号
+                if (string.IsNullOrEmpty(strReaderRefID))
                 {
-                    strError = "读者身份不允许查看其他人的违约金记录";
-                    return 0;
+                    if (sessioninfo.Account.Barcode != strReaderBarcode)
+                    {
+                        strError = "读者身份不允许查看其他人的违约金记录";
+                        return 0;
+                    }
+                }
+                else
+                {
+                    if (sessioninfo.Account.PatronRefID != strReaderRefID)
+                    {
+                        strError = "读者身份不允许查看其他人的违约金记录";
+                        return 0;
+                    }
                 }
             }
 

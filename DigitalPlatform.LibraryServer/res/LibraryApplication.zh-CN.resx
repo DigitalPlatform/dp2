@@ -375,6 +375,10 @@
     <value>读者记录中证条码号内容为空，登录失败</value>
     <comment>LibraryApplication.cs</comment>
   </data>
+  <data name="读者记录中参考ID内容为空，登录失败" xml:space="preserve">
+    <value>读者记录中参考ID内容为空，登录失败</value>
+    <comment>LibraryApplication.cs</comment>
+  </data>
   <data name="读者证条码号s不存在" xml:space="preserve">
     <value>读者证条码号 '{0}' 不存在</value>
     <comment>AppReservation.cs</comment>

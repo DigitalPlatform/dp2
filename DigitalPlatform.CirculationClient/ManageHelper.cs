@@ -12,6 +12,7 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.IO;
 using DigitalPlatform.Core;
+using DigitalPlatform.LibraryServer.Common;
 
 namespace DigitalPlatform.CirculationClient
 {
@@ -20,127 +21,6 @@ namespace DigitalPlatform.CirculationClient
     /// </summary>
     public class ManageHelper
     {
-        // parameters:
-        //      strUsage    book/series
-        //      strRole     orderWork/orderRecommendStore/biblioSource/catalogWork/catalogTarget
-        //      strSyntax   unimarc/usmarc
-        //      strSubTypeList  要创建的下级数据库的类型列表。* 代表 entity,order,issue,comment
-        //                      注意当 strSyntax 为 "series" 时，issue 下级库是必须创建的。而当 strSyntax 为 "book" 时，虽然要求创建 issue 也会被忽略
-        static XmlNode CreateBiblioDatabaseNode(XmlDocument dom,
-            string strDatabaseName,
-            string strUsage,
-            string strRole,
-            string strSyntax,
-            string strSubTypeList,
-            bool bInCirculation)
-        {
-            if (StringUtil.IsInList("*", strSubTypeList))
-                StringUtil.SetInList(ref strSubTypeList, "entity,order,issue,comment", true);
-
-            XmlNode nodeDatabase = dom.CreateElement("database");
-            dom.DocumentElement.AppendChild(nodeDatabase);
-
-            // type
-            DomUtil.SetAttr(nodeDatabase, "type", "biblio");
-
-            // syntax
-            DomUtil.SetAttr(nodeDatabase, "syntax", strSyntax);
-
-            // usage
-            DomUtil.SetAttr(nodeDatabase, "usage", strUsage);
-
-            // role
-            DomUtil.SetAttr(nodeDatabase, "role", strRole);
-
-            // inCirculation
-            string strInCirculation = "true";
-            if (bInCirculation == true)
-                strInCirculation = "true";
-            else
-                strInCirculation = "false";
-
-            DomUtil.SetAttr(nodeDatabase, "inCirculation", strInCirculation);
-
-            DomUtil.SetAttr(nodeDatabase, "name", strDatabaseName);
-
-            if (StringUtil.IsInList("entity", strSubTypeList))
-                DomUtil.SetAttr(nodeDatabase, "entityDbName", strDatabaseName + "实体");
-
-            if (StringUtil.IsInList("order", strSubTypeList))
-                DomUtil.SetAttr(nodeDatabase, "orderDbName", strDatabaseName + "订购");
-
-            if (strUsage == "series")
-            {
-                DomUtil.SetAttr(nodeDatabase, "issueDbName", strDatabaseName + "期");
-            }
-
-            if (StringUtil.IsInList("comment", strSubTypeList))
-                DomUtil.SetAttr(nodeDatabase, "commentDbName", strDatabaseName + "评注");
-
-            return nodeDatabase;
-        }
-
-        // 创建读者库的定义结点
-        static XmlNode CreateReaderDatabaseNode(XmlDocument dom,
-            string strDatabaseName,
-            string strLibraryCode,
-            bool bInCirculation)
-        {
-            XmlNode nodeDatabase = dom.CreateElement("database");
-            dom.DocumentElement.AppendChild(nodeDatabase);
-
-            // type
-            DomUtil.SetAttr(nodeDatabase, "type", "reader");
-
-            // inCirculation
-            string strInCirculation = "true";
-            if (bInCirculation == true)
-                strInCirculation = "true";
-            else
-                strInCirculation = "false";
-
-            DomUtil.SetAttr(nodeDatabase, "inCirculation", strInCirculation);
-
-            DomUtil.SetAttr(nodeDatabase, "name", strDatabaseName);
-
-            DomUtil.SetAttr(nodeDatabase, "libraryCode",
-                strLibraryCode);
-
-            return nodeDatabase;
-        }
-
-        // 创建普通数据库的定义结点
-        static XmlNode CreateSimpleDatabaseNode(XmlDocument dom,
-    string strDatabaseName,
-    string strType)
-        {
-            XmlNode nodeDatabase = dom.CreateElement("database");
-            dom.DocumentElement.AppendChild(nodeDatabase);
-
-            // type
-            DomUtil.SetAttr(nodeDatabase, "type", strType);
-
-            DomUtil.SetAttr(nodeDatabase, "name", strDatabaseName);
-
-            return nodeDatabase;
-        }
-
-        // 创建修改简单数据库的定义结点
-        static XmlNode ChangeSimpleDatabaseNode(XmlDocument dom,
-            string strOldDatabaseName,
-            string strType,
-            string strNewDatabaseName)
-        {
-            XmlNode nodeDatabase = dom.CreateElement("database");
-            dom.DocumentElement.AppendChild(nodeDatabase);
-
-            // type
-            DomUtil.SetAttr(nodeDatabase, "type", strType);
-
-            DomUtil.SetAttr(nodeDatabase, "name", strNewDatabaseName);
-
-            return nodeDatabase;
-        }
 
         // 出现提示
         // return:
@@ -177,7 +57,7 @@ namespace DigitalPlatform.CirculationClient
                 // parameters:
                 //      strUsage    book/series
                 //      strSyntax   unimarc/usmarc
-                CreateBiblioDatabaseNode(database_dom,
+                ServerDatabaseUtility.CreateBiblioDatabaseNode(database_dom,
                     "中文图书",
                     "book",
                     "orderRecommendStore,catalogTarget",    // 2015/7/6 增加 catalogTarget
@@ -187,7 +67,7 @@ namespace DigitalPlatform.CirculationClient
                 biblio_dbnames.Add("中文图书");
                 biblio_aliases.Add("cbook");
 
-                CreateBiblioDatabaseNode(database_dom,
+                ServerDatabaseUtility.CreateBiblioDatabaseNode(database_dom,
     "中文期刊",
     "series",
     "",
@@ -197,7 +77,7 @@ namespace DigitalPlatform.CirculationClient
                 biblio_dbnames.Add("中文期刊");
                 biblio_aliases.Add("cseries");
 
-                CreateBiblioDatabaseNode(database_dom,
+                ServerDatabaseUtility.CreateBiblioDatabaseNode(database_dom,
     "西文图书",
     "book",
     "",
@@ -207,7 +87,7 @@ namespace DigitalPlatform.CirculationClient
                 biblio_dbnames.Add("西文图书");
                 biblio_aliases.Add("ebook");
 
-                CreateBiblioDatabaseNode(database_dom,
+                ServerDatabaseUtility.CreateBiblioDatabaseNode(database_dom,
     "西文期刊",
     "series",
     "",
@@ -219,28 +99,28 @@ namespace DigitalPlatform.CirculationClient
             }
 
             // 创建读者库
-            CreateReaderDatabaseNode(database_dom,
+            ServerDatabaseUtility.CreateReaderDatabaseNode(database_dom,
                 "读者",
                 "",
                 true);
 
             // 预约到书
-            CreateSimpleDatabaseNode(database_dom,
+            ServerDatabaseUtility.CreateSimpleDatabaseNode(database_dom,
     "预约到书",
     "arrived");
 
             // 违约金
-            CreateSimpleDatabaseNode(database_dom,
+            ServerDatabaseUtility.CreateSimpleDatabaseNode(database_dom,
                 "违约金",
                 "amerce");
 
             // 出版者
-            CreateSimpleDatabaseNode(database_dom,
+            ServerDatabaseUtility.CreateSimpleDatabaseNode(database_dom,
     "出版者",
     "publisher");
 
             // 消息
-            CreateSimpleDatabaseNode(database_dom,
+            ServerDatabaseUtility.CreateSimpleDatabaseNode(database_dom,
     "消息",
     "message");
 
@@ -390,7 +270,7 @@ namespace DigitalPlatform.CirculationClient
                 // parameters:
                 //      strUsage    book/series
                 //      strSyntax   unimarc/usmarc
-                CreateBiblioDatabaseNode(database_dom,
+                ServerDatabaseUtility.CreateBiblioDatabaseNode(database_dom,
                     strBiblioDbName,
                     strUsage,   // "book",
                     strRole, // "orderRecommendStore,catalogTarget",    // 2015/7/6 增加 catalogTarget
@@ -485,7 +365,7 @@ namespace DigitalPlatform.CirculationClient
 
             {
                 // 创建读者库
-                CreateReaderDatabaseNode(database_dom,
+                ServerDatabaseUtility.CreateReaderDatabaseNode(database_dom,
                     strDbName,
                     strLibraryCode,
                     bInCirculation);
@@ -556,7 +436,7 @@ namespace DigitalPlatform.CirculationClient
             database_dom.LoadXml("<root />");
 
             {
-                CreateSimpleDatabaseNode(database_dom,
+                ServerDatabaseUtility.CreateSimpleDatabaseNode(database_dom,
                     strDbName,
                     strType);
             }
@@ -850,7 +730,7 @@ namespace DigitalPlatform.CirculationClient
             database_dom.LoadXml("<root />");
 
             {
-                ChangeSimpleDatabaseNode(database_dom,
+                ServerDatabaseUtility.ChangeSimpleDatabaseNode(database_dom,
                     strDbName,
                     strType,
                     strNewDbName);

@@ -2639,6 +2639,8 @@ out strError);
         }
 
         // 检查一个读者记录是否在当前账户的控制范围内
+        // parameters:
+        //      strReaderKey    为读者证条码号或 @refID:xxx 形态
         // return:
         //      -1  出错
         //      0   不在控制下
@@ -2646,12 +2648,12 @@ out strError);
         public int IsPatronInControl(
             RmsChannel channel,
             SessionInfo sessioninfo,
-            string strReaderBarcode,
+            string strReaderKey,
             out string strError)
         {
             strError = "";
 
-            if (string.IsNullOrEmpty(strReaderBarcode))
+            if (string.IsNullOrEmpty(strReaderKey))
             {
                 strError = "IsPatronInControl() 调用参数错误，strReaderBarcode 值不应为空";
                 return -1;
@@ -2675,7 +2677,8 @@ out strError);
                 && sessioninfo.Account.IsPatron == true)
             {
                 // 如果当前用户是读者 strReaderBarcode 自己
-                if (sessioninfo.Account.Barcode == strReaderBarcode)
+                if (// sessioninfo.Account.Barcode == strReaderBarcode
+                    MatchReaderKey(strReaderKey, sessioninfo.Account.Barcode, sessioninfo.Account.PatronRefID) == true)
                     return 1;
                 // 如果当前用户是其他读者
                 return 0;
@@ -2687,7 +2690,7 @@ out strError);
             int nRet = GetReaderRecXml(
                 // sessioninfo.Channels,
                 channel,
-                strReaderBarcode,
+                strReaderKey,
                 out string strReaderXml,
                 out string strReaderRecPath,
                 out strError);

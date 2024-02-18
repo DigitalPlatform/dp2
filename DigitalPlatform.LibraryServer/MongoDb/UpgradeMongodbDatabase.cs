@@ -125,14 +125,14 @@ out strError);
                     }
                     else if (nRet == -1)
                     {
-                        AppendResultText?.Invoke($"SavePatronRecord({strOutputPath}) error : " + strError + "。", true);
+                        AppendResultText?.Invoke($"SaveRecord({strOutputPath}) error : " + strError + "。", true);
                         // 循环并不停止
                     }
                     else if (nRet == -2)
                     {
                         if (nRedoCount > 10)
                         {
-                            AppendResultText?.Invoke($"SavePatronRecord({strOutputPath}) (遇到时间戳不匹配)重试十次以后依然出错，放弃重试。error : {strError}。", true);
+                            AppendResultText?.Invoke($"SaveRecord({strOutputPath}) (遇到时间戳不匹配)重试十次以后依然出错，放弃重试。error : {strError}。", true);
                             // 循环并不停止
                         }
                         else
@@ -330,14 +330,14 @@ out strError);
                     }
                     else if (nRet == -1)
                     {
-                        AppendResultText?.Invoke($"SavePatronRecord({strOutputPath}) error : " + strError + "。", true);
+                        AppendResultText?.Invoke($"SaveRecord({strOutputPath}) error : " + strError + "。", true);
                         // 循环并不停止
                     }
                     else if (nRet == -2)
                     {
                         if (nRedoCount > 10)
                         {
-                            AppendResultText?.Invoke($"SavePatronRecord({strOutputPath}) (遇到时间戳不匹配)重试十次以后依然出错，放弃重试。error : {strError}。", true);
+                            AppendResultText?.Invoke($"SaveRecord({strOutputPath}) (遇到时间戳不匹配)重试十次以后依然出错，放弃重试。error : {strError}。", true);
                             // 循环并不停止
                         }
                         else
@@ -409,7 +409,7 @@ out strError);
                 out strError);
             if (nRet == -1)
             {
-                strError = "WriteSetReaderInfoLog() API 写入日志时发生错误: " + strError;
+                strError = "WriteSetReaderInfoLog() 写入操作日志时发生错误: " + strError;
                 return -1;
             }
 
@@ -474,7 +474,7 @@ strLibraryCode);    // 册所在的馆代码
                 out strError);
             if (nRet == -1)
             {
-                strError = "WriteSetEntityLog() API 写入日志时发生错误: " + strError;
+                strError = "WriteSetEntityLog() 写入操作日志时发生错误: " + strError;
                 return -1;
             }
 

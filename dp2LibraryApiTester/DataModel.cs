@@ -189,15 +189,22 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             }
         }
 
+        // parameters:
+        //      style   如果包含 reader，表示以读者身份登录
         public static LibraryChannel NewChannel(string userName, 
-            string password)
+            string password,
+            string style = "")
         {
             LibraryChannel channel = new LibraryChannel();
             channel.Url = DataModel.dp2libraryServerUrl;
 
+            var parameters = "client=dp2LibraryApiTester|0.01";
+            if (StringUtil.IsInList("reader", style))
+                parameters += ",type=reader";
+
             long lRet = channel.Login(userName,
                 password,
-                "client=dp2LibraryApiTester|0.01",
+                parameters,
                 out string strError);
             if (lRet != 1)
                 throw new Exception(strError);

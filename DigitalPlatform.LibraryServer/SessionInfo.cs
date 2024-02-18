@@ -63,7 +63,8 @@ namespace DigitalPlatform.LibraryServer
 
         // 刚才做过的最近一次Amerce的ID列表
         public List<string> AmerceIds = null;
-        public string AmerceReaderBarcode = ""; // 注：可能包含机构代码部分
+        // public string AmerceReaderBarcode = ""; // 注：可能包含机构代码部分
+        public string AmerceReaderRefID = ""; 
 
         // TODO: 所创建的临时文件要在规定的目录中
         // TODO: 观察它是否释放
@@ -1658,6 +1659,18 @@ SetStartEventArgs e);
                 if (info != null && info.Account != null
                     && info.Account.Barcode == strReaderBarcode
                     && info.Account.Barcode == info.Account.UserID)
+                    return true;
+                return false;
+            });
+        }
+
+        // 2024/2/11
+        public int CloseSessionByReaderRefID(string strReaderRefID)
+        {
+            return CloseSessionBy((info) =>
+            {
+                if (info != null && info.Account != null
+                    && info.Account.PatronRefID == strReaderRefID)
                     return true;
                 return false;
             });

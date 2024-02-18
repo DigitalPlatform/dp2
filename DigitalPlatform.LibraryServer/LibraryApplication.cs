@@ -412,6 +412,9 @@ namespace DigitalPlatform.LibraryServer
 
         public string InvoiceDbName = "";   // 发票库名 2012/11/6
 
+        // 违约金库的检索途径信息 2024/2/12
+        public BiblioDbFromInfo[] AmerceDbFroms = null;
+
         public string AmerceDbName = "";    // 违约金库名
 
         public string OverdueStyle = "";    // 超期罚款计算办法 <amerce overdueStyle="..." />
@@ -2612,10 +2615,13 @@ out strError);
                     using (var releaser = await _semaphoreUpgrade.EnterAsync(this.AppDownToken))
                     {
                         SessionInfo session = new SessionInfo(this);
+                        session.Account = new Account { UserID = "!upgrade"};
                         try
                         {
+                            int nRet = 0;
+                            string error = "";
                             this.WriteErrorLog("开始升级 mongodb 出纳动作库(读者轮) ...");
-                            int nRet = UpgradePatronBarcodes(
+                            nRet = UpgradePatronBarcodes(
                                 session,
                                 (text, is_error) =>
                                 {
@@ -2624,7 +2630,7 @@ out strError);
                                 },
                                 null,
                                 this.AppDownToken,
-                                out string error);
+                                out error);
                             if (nRet == -1)
                             {
                                 this.WriteErrorLog($"升级 mongodb 出纳动作库(读者轮)出错: {error}");
@@ -2651,6 +2657,26 @@ out strError);
                             }
                             else
                                 this.WriteErrorLog($"升级 mongodb 出纳动作库(册轮)成功(共处理 {nRet} 条册记录)");
+
+                            this.WriteErrorLog("开始升级违约金库 ...");
+                            nRet = UpgradeAmerceRecords(
+                                session,
+                                (text, is_error) =>
+                                {
+                                    if (is_error)
+                                        this.WriteErrorLog($"升级违约金库中途出错(继续向后处理): {text}");
+                                },
+                                null,
+                                this.AppDownToken,
+                                out error);
+                            if (nRet == -1)
+                            {
+                                this.WriteErrorLog($"升级违约金库出错: {error}");
+                                return;
+                            }
+                            else
+                                this.WriteErrorLog($"升级违约金库成功(共处理 {nRet} 条违约金记录)");
+
 
                             ModifyLibraryXmlVersion("3.01", "3.02");
                             this.WriteErrorLog($"自动升级 library.xml v3.01到v3.02。数据升级刚才已经完成");
@@ -2784,19 +2810,30 @@ TaskScheduler.Default);
 
                 this.kdbs = kdbs;
 
-                // 2015/5/7
-                BiblioDbFromInfo[] infos = null;
-                // 列出某类数据库的检索途径信息
-                // return:
-                //      -1  出错
-                //      0   没有定义
-                //      1   成功
-                nRet = this.ListDbFroms("arrived",
-                    "zh",
-                    "",
-                    out infos,
-                    out strError);
-                this.ArrivedDbFroms = infos;
+                {
+                    // 2015/5/7
+                    // 列出某类数据库的检索途径信息
+                    // return:
+                    //      -1  出错
+                    //      0   没有定义
+                    //      1   成功
+                    nRet = this.ListDbFroms("arrived",
+                        "zh",
+                        "",
+                        out BiblioDbFromInfo[] infos,
+                        out strError);
+                    this.ArrivedDbFroms = infos;
+                }
+
+                {
+                    // 2024/2/12
+                    nRet = this.ListDbFroms("amerce",
+        "zh",
+        "",
+        out BiblioDbFromInfo[] infos,
+        out strError);
+                    this.AmerceDbFroms = infos;
+                }
                 return 0;
             }
             finally
@@ -6111,6 +6148,7 @@ TaskScheduler.Default);
             strError = "";
             timestamp = null;
 
+#if REMOVED
             // 2016/12/4
             // 兼容以前的用法。以前曾经有一段 @refID: 表示册参考ID
             strItemBarcodeParam = strItemBarcodeParam.Replace("@refID:", "@itemRefID:");
@@ -6168,6 +6206,13 @@ TaskScheduler.Default);
             long lRet = channel.DoSearch(strQueryXml,
                 resultSetName,
                 "", // strOuputStyle
+                out strError);
+#endif
+            string resultSetName = "temp";
+            long lRet = this.SearchArrivedQueue(
+                channel,
+                strItemBarcodeParam,
+                resultSetName,
                 out strError);
             if (lRet == -1)
                 goto ERROR1;
@@ -9858,6 +9903,7 @@ out strError);
             prefixes.Add("ID:");    // 2009/9/22 
             prefixes.Add("CN:");    // 2012/11/7
             prefixes.Add("RI:");    // 2020/3/4
+            prefixes.Add("@REFID:");    // 2024/2/11
 
             for (int i = 0; i < prefixes.Count; i++)
             {
@@ -10097,7 +10143,8 @@ out strError);
         //          3) 如果以"TP:"开头，表示利用电话号码进行检索
         //          4) 如果以"ID:"开头，表示利用身份证号进行检索
         //          5) 如果以"CN:"开头，表示利用证件号码进行检索
-        //          6) 否则用证条码号进行检索
+        //          6) 如果以"RI:"或"@refID:"开头，表示利用读者参考 ID 进行检索
+        //          7) 否则用证条码号进行检索
         //      strPassword 密码。如果为null，表示不进行密码判断。注意，不是""
         //      strGetToken 是否要获得 token ，和有效期。 空 / day / month / year
         // return:
@@ -10192,7 +10239,7 @@ out strError);
                 strMatch = "exact";
                 strQueryWord = strName;
             }
-            else if (strPrefix == "RI:")
+            else if (strPrefix == "RI:" || strPrefix == "@refID:".ToUpper())
             {
                 // 2016/4/11
                 bBarcode = false;
@@ -11401,7 +11448,10 @@ out strError);
         //          1) 如果以"NB:"开头，表示利用姓名生日进行检索。姓名和生日之间间隔以'|'。姓名必须完整，生日为8字符形式
         //          2) 如果以"EM:"开头，表示利用email地址进行检索
         //          3) 如果以"TP:"开头，表示利用电话号码进行检索
-        //          4) 否则用证条码号进行检索
+        //          4) 如果以"ID:"开头，表示利用身份证号进行检索
+        //          5) 如果以"CN:"开头，表示利用证件号码进行检索
+        //          6) 如果以"@refID:"开头，表示利用读者参考 ID 进行检索
+        //          7) 否则用证条码号进行检索
         //      strPassword 密码。如果为null，表示不进行密码判断。注意，不是""
         //              还可以为 token: 形态
         //      strLocation 前端给出的操作者所在的当前位置(馆藏地)，会被用来修改册记录的 currentLocation 元素
@@ -11524,7 +11574,8 @@ out strError);
             //          3) 如果以"TP:"开头，表示利用电话号码进行检索
             //          4) 如果以"ID:"开头，表示利用身份证号进行检索
             //          5) 如果以"CN:"开头，表示利用证件号码进行检索
-            //          6) 否则用证条码号进行检索
+            //          6) 如果以"RI:"或"@refID:"开头，表示利用读者参考 ID 进行检索
+            //          7) 否则用证条码号进行检索
             //      strPassword 密码。如果为null，表示不进行密码判断。注意，不是""
             //      strGetToken 是否要获得 token ，和有效期。 空 / day / month / year
             // return:
@@ -11580,9 +11631,8 @@ out strError);
                 }
             }
 
-            XmlDocument readerdom = null;
             nRet = LibraryApplication.LoadToDom(strXml,
-                out readerdom,
+                out XmlDocument readerdom,
                 out strError);
             if (nRet == -1)
             {
@@ -11599,14 +11649,13 @@ out strError);
             }
 
             // 获得一个参考帐户
-            Account accountref = null;
             // 从library.xml文件定义 获得一个帐户的信息
             // return:
             //      -1  error
             //      0   not found
             //      1   found
             nRet = GetAccount("reader",
-                out accountref,
+                out Account accountref,
                 out strError);
             if (nRet == -1)
             {
@@ -11734,7 +11783,10 @@ out strError);
             account.Type = "reader";
             account.Barcode = DomUtil.GetElementText(readerdom.DocumentElement,
                 "barcode");
-            account.UserID = account.Barcode;
+            // 2024/2/10
+            account.PatronRefID = DomUtil.GetElementText(readerdom.DocumentElement,
+    "refID");
+            account.UserID = $"@refID:{account.PatronRefID}";// account.Barcode;
 
             // 2012/9/8
             // string strLibraryCode = "";
@@ -11745,6 +11797,7 @@ out strError);
                 return -1;
             account.AccountLibraryCode = strLibraryCode;
 
+#if REMOVED
             // 2009/9/26 
             if (String.IsNullOrEmpty(account.Barcode) == true)
             {
@@ -11765,6 +11818,17 @@ out strError);
                     strError);
                 return -1;
             }
+#endif
+
+            // 2024/2/11
+            if (String.IsNullOrEmpty(account.PatronRefID) == true)
+            {
+                // text-level: 用户提示
+                strError = string.Format(this.GetString("读者记录中参考ID内容为空，登录失败"),    // "读者记录中参考ID内容为空，登录失败"
+                    strError);
+                return -1;
+            }
+
 
             account.Name = DomUtil.GetElementText(readerdom.DocumentElement,
                 "name");
@@ -11828,7 +11892,8 @@ out strError);
                 && token_login == false)
             {
                 DateTimeOffset offset = DateTimeOffset.Now.AddMinutes(20);
-                this.LoginCache.Set(account.Barcode, account, offset);
+                // this.LoginCache.Set(account.Barcode, account, offset);
+                this.LoginCache.Set($"@refID:{account.PatronRefID}", account, offset);
             }
 
             return 1;
@@ -12248,12 +12313,20 @@ out strError);
 
             if (sessioninfo.Account.PatronDom == null)
             {
+                /*
                 string strBarcode = "";
 
                 strBarcode = sessioninfo.Account.Barcode;
                 if (strBarcode == "")
                 {
                     strError = "帐户信息中读者证条码号为空，无法定位读者记录。";
+                    goto ERROR1;
+                }
+                */
+                // 2024/2/10
+                if (string.IsNullOrEmpty(sessioninfo.Account.PatronRefID))
+                {
+                    strError = "帐户信息中读者参考 ID 为空，无法定位读者记录";
                     goto ERROR1;
                 }
 
@@ -12264,17 +12337,13 @@ out strError);
                     goto ERROR1;
                 }
 
-                string strXml = "";
-                string strOutputPath = "";
-                byte[] timestamp = null;
                 // 获得读者记录
                 int nRet = this.GetReaderRecXml(
-                    // sessioninfo.Channels,
                     channel,
-                    strBarcode,
-                    out strXml,
-                    out strOutputPath,
-                    out timestamp,
+                    $"@refID:{sessioninfo.Account.PatronRefID}",    // strBarcode,
+                    out string strXml,
+                    out string strOutputPath,
+                    out byte[] timestamp,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -12283,7 +12352,6 @@ out strError);
                     goto ERROR1;
 
                 readerdom = new XmlDocument();
-
                 try
                 {
                     readerdom.LoadXml(strXml);
@@ -13569,17 +13637,6 @@ out strError);
                     return result;
                 }
 
-                // 对读者身份的附加判断
-                if (sessioninfo.UserType == "reader")
-                {
-                    if (strReaderBarcode != sessioninfo.Account.Barcode)
-                    {
-                        result.Value = -1;
-                        result.ErrorInfo = "修改读者密码被拒绝。作为读者只能修改自己的密码";
-                        result.ErrorCode = ErrorCode.AccessDenied;
-                        return result;
-                    }
-                }
             }
 
             string strError = "";
@@ -13661,6 +13718,23 @@ out strError);
                 {
                     strError = "装载读者记录进入XML DOM时发生错误: " + strError;
                     goto ERROR1;
+                }
+
+                if (loggedIn)
+                {
+                    var refID = DomUtil.GetElementText(readerdom.DocumentElement,
+                        "refID");
+                    // 对读者身份的附加判断
+                    if (sessioninfo.UserType == "reader")
+                    {
+                        if (refID != sessioninfo.Account.PatronRefID)
+                        {
+                            result.Value = -1;
+                            result.ErrorInfo = "修改读者密码被拒绝。作为读者只能修改自己的密码";
+                            result.ErrorCode = ErrorCode.AccessDenied;
+                            return result;
+                        }
+                    }
                 }
 
                 // 2021/7/8
@@ -14312,6 +14386,8 @@ strLibraryCode);    // 读者所在的馆代码
                     return "get channel error";
                 }
 
+                // parameters:
+                //      strItemBarcodeParam         册条码号。也可以为 @refID:xxx 形态
                 LibraryServerResult result = this.GetBiblioSummary(sessioninfo,
                     channel,
     strBarcode,
@@ -18172,6 +18248,25 @@ out string db_type);
 
         private string barcode = ""; // 证条码号。对于读者型的帐户有意义。特殊情况下，内容可能是"@refID:xxxxx"
         public string Barcode { get => barcode; set => barcode = value; }
+
+        // 2024/2/10
+        private string patronRefID = ""; // 证参考 ID。对于读者型的帐户有意义。
+        public string PatronRefID { get => patronRefID; set => patronRefID = value; }
+
+        // 程序用读者 Key。优先使用参考 ID
+        public string GetReaderKey()
+        {
+            return LibraryApplication.BuildReaderKey(barcode, patronRefID);
+        }
+
+        // 用于显示的读者 Key。如果证条码号和参考 ID 都非空，则两者都用于构成显示内容
+        public string GetReaderDisplayKey()
+        {
+            if (string.IsNullOrEmpty(barcode) == false
+                && string.IsNullOrEmpty(patronRefID) == false)
+                return $"{barcode}(@refID:{patronRefID})";
+            return LibraryApplication.BuildReaderKey(barcode, patronRefID);
+        }
 
         private string name = "";    // 姓名。对于读者型的帐户有意义
         public string Name { get => name; set => name = value; }

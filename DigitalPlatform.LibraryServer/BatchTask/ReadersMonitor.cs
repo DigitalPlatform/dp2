@@ -2467,14 +2467,14 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
-        public class WriteMonitorLogResult : NormalResult
+        public class WriteTypeLogResult : NormalResult
         {
             public string FileName { get; set; }
             public string Time { get; set; }
         }
 
         // 写入日志信息到一个专门的 .log 文件，避免基本的 .log 文件尺寸太大
-        public WriteMonitorLogResult WriteMonitorLog(string text)
+        public WriteTypeLogResult WriteMonitorLog(string text)
         {
             /*
             DateTime now = DateTime.Now;
@@ -2490,49 +2490,49 @@ namespace DigitalPlatform.LibraryServer
             return WriteTypeLog(this.App, "readersMonitor", text);
         }
 
-        public static WriteMonitorLogResult WriteMqLogConditional(
+        public static WriteTypeLogResult WriteMqLogConditional(
             LibraryApplication app,
             string text)
         {
             return WriteTypeLogConditional(app, "mq", text);
         }
 
-        public static WriteMonitorLogResult WriteDpmailLogConditional(
+        public static WriteTypeLogResult WriteDpmailLogConditional(
             LibraryApplication app,
             string text)
         {
             return WriteTypeLogConditional(app, "dpmail", text);
         }
 
-        public static WriteMonitorLogResult WriteEmailLogConditional(
+        public static WriteTypeLogResult WriteEmailLogConditional(
             LibraryApplication app,
             string text)
         {
             return WriteTypeLogConditional(app, "email", text);
         }
 
-        public static WriteMonitorLogResult WriteSmsLogConditional(
+        public static WriteTypeLogResult WriteSmsLogConditional(
             LibraryApplication app,
             string text)
         {
             return WriteTypeLogConditional(app, "sms", text);
         }
 
-        public static WriteMonitorLogResult WriteTypeLogConditional(
+        public static WriteTypeLogResult WriteTypeLogConditional(
     LibraryApplication app,
     string type,
     string text)
         {
             if (StringUtil.IsInList(type, app.MessageLogTypes))
                 return WriteTypeLog(app, type, text);
-            return new WriteMonitorLogResult
+            return new WriteTypeLogResult
             {
                 Value = 0,
                 ErrorCode = "skip"
             };
         }
 
-        public static WriteMonitorLogResult WriteTypeLog(
+        public static WriteTypeLogResult WriteTypeLog(
             LibraryApplication app,
             string type,
             string text)
@@ -2541,7 +2541,7 @@ namespace DigitalPlatform.LibraryServer
             string path = Path.Combine(app.LogDir, $"{type}_" + DateTimeUtil.DateTimeToString8(now) + ".txt");
             string time = now.ToString("yyyy-MM-dd HH:mm:ss.ffff");
             File.AppendAllText(path, time + "  " + text + "\r\n");
-            return new WriteMonitorLogResult
+            return new WriteTypeLogResult
             {
                 FileName = path,
                 Time = time

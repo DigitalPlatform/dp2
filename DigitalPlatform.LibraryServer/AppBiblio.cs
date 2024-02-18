@@ -148,19 +148,24 @@ namespace DigitalPlatform.LibraryServer
 
                 if (strItemBarcode.StartsWith("@itemBarcode:") == true)
                     strItemBarcode = strItemBarcode.Substring("@itemBarcode:".Length);
+                else if (strItemBarcode.StartsWith("@refID:"))
+                { 
+                    // 2024/2/13
+                    // 不用变化
+                }
                 else
                     strItemBarcode = "@bibliorecpath:" + strItemBarcode;
 
-                string strOutputBiblioRecPath = "";
-                string strSummary = "";
+                // parameters:
+                //      strItemBarcodeParam         册条码号。也可以为 @refID:xxx 形态
                 LibraryServerResult result = GetBiblioSummary(
             sessioninfo,
             channel,
             strItemBarcode,
             "", // strConfirmItemRecPath,
             "", // strBiblioRecPathExclude,
-            out strOutputBiblioRecPath,
-            out strSummary);
+            out string strOutputBiblioRecPath,
+            out string strSummary);
                 if (result.Value == -1)
                 {
                     if (result.ErrorCode == ErrorCode.NotFound)
@@ -1803,6 +1808,8 @@ namespace DigitalPlatform.LibraryServer
                     return -1;
                 }
 
+                // parameters:
+                //      strItemBarcodeParam         册条码号。也可以为 @refID:xxx 形态
                 LibraryServerResult result = this.GetBiblioSummary(
                     sessioninfo,
                     channel,
@@ -1927,6 +1934,7 @@ namespace DigitalPlatform.LibraryServer
         // 从册条码号(+册记录路径)获得种记录摘要，或者从订购记录路径、期记录路径、评注记录路径获得种记录摘要
         // 权限:   需要具有getbibliosummary权限
         // parameters:
+        //      strItemBarcodeParam         册条码号。也可以为 @refID:xxx 形态
         //      strConfirmItemRecPath       册、订购、期、评注记录路径
         //                                  如果 strConfirmItemRecPath 形态为 xxx|xxx，右边部分就是书目记录路径
         //      strBiblioRecPathExclude   除开列表中的这些种路径, 才返回摘要内容, 否则仅仅返回种路径即可
