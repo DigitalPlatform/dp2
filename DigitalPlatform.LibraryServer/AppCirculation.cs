@@ -30,6 +30,9 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.Marc;
 using DigitalPlatform.rms.Client.rmsws_localhost;
+using Jint.Parser.Ast;
+using Google.Protobuf.WellKnownTypes;
+using DigitalPlatform.rms;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -251,7 +254,7 @@ namespace DigitalPlatform.LibraryServer
 
         // 根据读者证条码号找到头像资源路径
         // parameters:
-        //      strReaderBarcode    读者证条码号
+        //      strReaderKey    读者证条码号
         //      strEncryptBarcode   如果strEncryptBarcode有内容，则用它，而不用strReaderBarcode
         //      strDisplayName  供验证的显示名。可以为null，表示不验证
         // return:
@@ -627,8 +630,8 @@ namespace DigitalPlatform.LibraryServer
         // API: 借书
         // text-level: 用户提示 OPAC续借功能要调用此函数
         // parameters:
-        //      strReaderBarcode    读者证条码号。续借的时候可以为空
-        //      strItemBarcode  册条码号
+        //      strReaderKey    读者证条码号。续借的时候可以为空
+        //      strItemKey  册条码号
         //      strConfirmItemRecPath  册记录路径。在册条码号重复的情况下，才需要使用这个参数，平时为null即可
         //      saBorrowedItemBarcode   同一读者先前已经借阅成功的册条码号集合。用于在返回的读者html中显示出特定的颜色而已。
         //      strStyle    操作风格。
@@ -682,17 +685,17 @@ namespace DigitalPlatform.LibraryServer
 
             // 解析 strItemBarcodeParam 参数
             /*
-            string strItemBarcode = "";
+            string strItemKey = "";
             string strOwnerInstitution = "";
             if (strItemBarcodeParam.IndexOf(".") == -1)
             {
-                strItemBarcode = strItemBarcodeParam;
+                strItemKey = strItemBarcodeParam;
                 strOwnerInstitution = null;
             }
             else
             {
                 var parts = StringUtil.ParseTwoPart(strItemBarcodeParam, ".");
-                strItemBarcode = parts[1];
+                strItemKey = parts[1];
                 strOwnerInstitution = parts[0];
             }
             */
@@ -733,8 +736,8 @@ namespace DigitalPlatform.LibraryServer
                 // 对读者身份的附加判断
                 // 注：具有个人书斋的，还可以继续向后执行
                 if (sessioninfo.UserType == "reader"
-                    && sessioninfo.Account != null 
-                    // && strReaderBarcode != sessioninfo.Account.Barcode 
+                    && sessioninfo.Account != null
+                    // && strReaderKey != sessioninfo.Account.Barcode 
                     && MatchReaderKey(strReaderBarcode, sessioninfo.Account.Barcode, sessioninfo.Account.PatronRefID) == false
                     && string.IsNullOrEmpty(strPersonalLibrary) == true)
                 {
@@ -828,14 +831,14 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
 
-            // 因为 strReaderBarcode 可能是 PQR:xxxx 形态，需要替换为真正的证条码号以后才能参与判断，所以放到这里判断
+            // 因为 strReaderKey 可能是 PQR:xxxx 形态，需要替换为真正的证条码号以后才能参与判断，所以放到这里判断
             if (bRenew == true)
             {
                 // 对读者身份的附加判断
                 // 注：具有个人书斋的，还可以继续向后执行
                 if (sessioninfo.UserType == "reader"
-                    && sessioninfo.Account != null 
-                    // && strReaderBarcode != sessioninfo.Account.Barcode
+                    && sessioninfo.Account != null
+                    // && strReaderKey != sessioninfo.Account.Barcode
                     && MatchReaderKey(strReaderBarcode, sessioninfo.Account.Barcode, sessioninfo.Account.PatronRefID) == false
                     && string.IsNullOrEmpty(strPersonalLibrary) == true)
                 {
@@ -886,7 +889,7 @@ namespace DigitalPlatform.LibraryServer
                 if (string.IsNullOrEmpty(strReaderBarcode) == false)
                 {
                     bool bReaderDbInCirculation = true;
-                    //      strReaderBarcode    [in,out] 读者证条码号或者 @refID:xxx 形态。函数中可能会把它清空
+                    //      strReaderKey    [in,out] 读者证条码号或者 @refID:xxx 形态。函数中可能会把它清空
                     LibraryServerResult result1 = GetReaderRecord(
                 sessioninfo,
                 strActionName,
@@ -917,7 +920,7 @@ namespace DigitalPlatform.LibraryServer
                             strOutputReaderRecPath,
                             StringUtil.GetDbName(strOutputReaderRecPath));
 
-                        // "借书操作被拒绝。读者证条码号 '" + strReaderBarcode + "' 所在的读者记录 '" +strOutputReaderRecPath + "' 因其数据库 '" +strReaderDbName+ "' 属于未参与流通的读者库";
+                        // "借书操作被拒绝。读者证条码号 '" + strReaderKey + "' 所在的读者记录 '" +strOutputReaderRecPath + "' 因其数据库 '" +strReaderDbName+ "' 属于未参与流通的读者库";
                         goto ERROR1;
                     }
 
@@ -949,7 +952,7 @@ namespace DigitalPlatform.LibraryServer
                         goto ERROR1;
                     if (nRet == 1)
                     {
-                        // strError = "当前用户 '" + sessioninfo.UserID + "' 的存取权限或好友关系禁止操作读者(证条码号为 " + strReaderBarcode + ")。具体原因：" + strError;
+                        // strError = "当前用户 '" + sessioninfo.UserID + "' 的存取权限或好友关系禁止操作读者(证条码号为 " + strReaderKey + ")。具体原因：" + strError;
                         result.Value = -1;
                         result.ErrorInfo = strError;
                         result.ErrorCode = ErrorCode.AccessDenied;
@@ -1125,7 +1128,7 @@ namespace DigitalPlatform.LibraryServer
                             aPath.Count.ToString());
                         this.WriteErrorLog(result.ErrorInfo);   // 2012/12/30
 
-                        // "册条码号为 '" + strItemBarcode + "' 的册记录有 " + aPath.Count.ToString() + " 条，无法进行借阅操作。请在附加册记录路径后重新提交借阅操作。";
+                        // "册条码号为 '" + strItemKey + "' 的册记录有 " + aPath.Count.ToString() + " 条，无法进行借阅操作。请在附加册记录路径后重新提交借阅操作。";
                         result.ErrorCode = ErrorCode.ItemBarcodeDup;
 
                         aDupPath = new string[aPath.Count];
@@ -1992,7 +1995,7 @@ namespace DigitalPlatform.LibraryServer
                 finally
                 {
                     // 解册记录锁
-                    this.EntityLocks.UnlockForWrite(strItemBarcode == null ? "" : strItemBarcode);    // strItemBarcode 在整个函数中不允许被修改
+                    this.EntityLocks.UnlockForWrite(strItemBarcode == null ? "" : strItemBarcode);    // strItemKey 在整个函数中不允许被修改
                 }
 
             } // 读者记录锁定范围结束
@@ -3044,7 +3047,7 @@ start_time_1,
                                 return result;
                             }
 
-                            // strItemBarcode = "";
+                            // strItemKey = "";
                             strItemFrom = strFrom;
 
 #if NO
@@ -3064,7 +3067,7 @@ start_time_1,
                     result.ErrorInfo = string.Format(this.GetString("册条码号s不存在"),   // "册条码号 '{0}' 不存在"
                         strItemBarcode);
 
-                    // "册条码号 '" + strItemBarcode + "' 不存在";
+                    // "册条码号 '" + strItemKey + "' 不存在";
                     result.ErrorCode = ErrorCode.ItemBarcodeNotFound;
                     return result;
                 }
@@ -3736,7 +3739,7 @@ start_time_1,
 
 
         // parameters:
-        //      strReaderBarcode    [in,out] 读者证条码号或者 @refID:xxx 形态。函数中可能会把它清空
+        //      strReaderKey    [in,out] 读者证条码号或者 @refID:xxx 形态。函数中可能会把它清空
         //      strOwnerInstitution 所属机构。如果为 null 表示不使用这个参数。它可能为 RFID 的 OI 或者 AOI 字段
         //      strHitFrom      实际命中的检索途径
         LibraryServerResult GetReaderRecord(
@@ -3887,7 +3890,7 @@ out strError);
                             // sessioninfo.Channels,
                             channel,
                             null,
-                            strReaderBarcode,
+                            strReaderKey,
                             strFrom,
                             out strReaderXml,
                             out strOutputReaderRecPath,
@@ -3926,7 +3929,7 @@ out strError);
                 // text-level: 用户提示
                 result.ErrorInfo = string.Format(this.GetString("读者证条码号s不存在"),   // "读者证条码号 '{0}' 不存在"
                     strReaderBarcode);
-                // "读者证条码号 '" + strReaderBarcode + "' 不存在";
+                // "读者证条码号 '" + strReaderKey + "' 不存在";
                 result.ErrorCode = ErrorCode.ReaderBarcodeNotFound;
                 return result;
             }
@@ -4090,7 +4093,7 @@ out strError);
         //      -1  出错
         //      0   允许继续访问
         //      1   权限限制，不允许继续访问。strError 中有说明原因的文字
-        static int CheckReaderRange(
+        int CheckReaderRange(
             SessionInfo sessioninfo,
             XmlDocument reader_dom,
             string strReaderDbName,
@@ -4101,6 +4104,7 @@ out strError);
 
             string strAccessString = sessioninfo.Access;
             string strReaderBarcode = DomUtil.GetElementText(reader_dom.DocumentElement, "barcode");
+            string strReaderRefID = DomUtil.GetElementText(reader_dom.DocumentElement, "refID");
 
             if (String.IsNullOrEmpty(strAccessString) == false)
             {
@@ -4128,15 +4132,29 @@ out strError);
             if (sessioninfo.UserType == "reader")
             {
                 // 看看 借书者 是否就是操作者自己?
-                if (sessioninfo.UserID == strReaderBarcode)
+                if (sessioninfo.UserID == strReaderBarcode
+                    || sessioninfo.UserID == $"@refID:{strReaderRefID}")
                     return 0;
 
+                // TODO: 好友列表里面是列出证条码号，还是可以用 @refID:xxx 形态？
                 // 没有匹配的 reader 范畴，那么就看 reader_dom 中的 fiends 元素
                 string strFields = DomUtil.GetElementText(reader_dom.DocumentElement, "friends");
+
                 if (string.IsNullOrEmpty(strFields) == false)
                 {
+                    // 2024/2/19
+                    var channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+                    nRet = this.ConvertReaderBarcodeListToRefIdList(channel,
+    strFields,
+    out string strReaderRefIdList,
+    out strError);
+                    if (nRet == -1)
+                    {
+                        strError = $"在翻译好友列表为读者参考 ID 的过程中出错: {strError}";
+                        return -1;
+                    }
                     // 判断当前用户是否为 reader_dom 读者的 friends
-                    if (StringUtil.IsInList(sessioninfo.Account.Barcode, strFields) == true)
+                    if (StringUtil.IsInList($"@refID:{sessioninfo.Account.PatronRefID}", strReaderRefIdList) == true)
                         return 0;
                     strError = "'" + sessioninfo.Account.GetReaderDisplayKey() + "' 不在 '" + strReaderBarcode + "' 的好友列表中";
                     strError = $"借阅者 (证条码号为 '{strReaderBarcode}') 的好友关系禁止{GetCurrentUserName(sessioninfo)} 进行操作)。具体原因：" + strError;
@@ -4826,7 +4844,7 @@ out strError);
                         strItemBarcodeParam,
                         strLocation);
 
-                    // "册 " + strItemBarcode + " 的馆藏地点为 " + strLocation + "，按规定(<locationTypes>配置)此册不允许外借。";
+                    // "册 " + strItemKey + " 的馆藏地点为 " + strLocation + "，按规定(<locationTypes>配置)此册不允许外借。";
 
                     if (debugInfo != null)
                         debugInfo.Append("在列表 '" + LocationType.ToString(locations) + "' 中没有匹配上 '" + strRoom + "'\r\n");
@@ -4926,7 +4944,7 @@ out strError);
                     /*
                     strError = "不允许" 
                         + (bRenew == true ? "续借" : "外借")
-                        + "。因为册 " + strItemBarcode + " 的状态为 "+strMessageText;
+                        + "。因为册 " + strItemKey + " 的状态为 "+strMessageText;
                      * */
                     return 0;
                 }
@@ -5346,9 +5364,9 @@ out strError);
                     {
                         // text-level: 用户提示
 
-                        // string strReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement, "barcode");
+                        // string strReaderKey = DomUtil.GetElementText(readerdom.DocumentElement, "barcode");
                         strError = "借阅操作被拒绝。读者 '" + strReaderBarcode + "' 早先已经借阅了册 '" + strItemBarcodeParam + "' 。(读者记录中已存在对应的<borrow>元素)";
-                        // strError = "操作前在读者记录中发现居然已存在表明读者借阅了册'"+strItemBarcode+"'的字段信息 " + node.OuterXml;
+                        // strError = "操作前在读者记录中发现居然已存在表明读者借阅了册'"+strItemKey+"'的字段信息 " + node.OuterXml;
                         return -1;
                     }
                 }
@@ -5441,7 +5459,7 @@ out strError);
                     strOperName,
                     strItemBarcodeParam,
                     strBookState);
-                // strOperName + "操作被拒绝，原因: 册 '" + strItemBarcode + "' 的状态为 '"+ strBookState + "'。";
+                // strOperName + "操作被拒绝，原因: 册 '" + strItemKey + "' 的状态为 '"+ strBookState + "'。";
                 return 0;
             }
 
@@ -5760,8 +5778,8 @@ out _);
         // 因为没有借阅信息的读者记录，确实可能被另外的用户移动位置。
         // parameters:
         //      strReaderRecPath    读者记录路径
-        //      strReaderBarcode    读者证条码号。若需要检查记录，看看里面条码号是否已经变化了，就使用这个参数。如果不想检查，就用null
-        //      strItemBarcode  已经借的册条码号
+        //      strReaderKey    读者证条码号。若需要检查记录，看看里面条码号是否已经变化了，就使用这个参数。如果不想检查，就用null
+        //      strItemKey  已经借的册条码号
         // return:
         //      -1  error
         //      0   没有必要Undo
@@ -5862,7 +5880,7 @@ out _);
 
         // 从若干重复条码号的册记录中，选出其中符合当前读者证条码号的
         // parameters:
-        //      strReaderBarcode    读者证条码号
+        //      strReaderKey    读者证条码号
         //      strReaderRefID      读者参考 ID
         //      bOnlyGetFirstItemXml    如果为true，表明在aItemXml中只装入匹配上的第一个记录的XML。这是为了防止内存崩溃。
         //                              如果为false，表明全部匹配记录都进入aItemXml
@@ -6116,17 +6134,17 @@ out _);
 
             // 解析 strItemBarcodeParam 参数
             /*
-            string strItemBarcode = "";
+            string strItemKey = "";
             string strOwnerInstitution = "";
             if (strItemBarcodeParam.IndexOf(".") == -1)
             {
-                strItemBarcode = strItemBarcodeParam;
+                strItemKey = strItemBarcodeParam;
                 strOwnerInstitution = null;
             }
             else
             {
                 var parts = StringUtil.ParseTwoPart(strItemBarcodeParam, ".");
-                strItemBarcode = parts[1];
+                strItemKey = parts[1];
                 strOwnerInstitution = parts[0];
             }
             */
@@ -6354,7 +6372,7 @@ out _);
 
                 if (string.IsNullOrEmpty(strReaderBarcode) == false)
                 {
-                    //      strReaderBarcode    [in,out] 读者证条码号或者 @refID:xxx 形态。函数中可能会把它清空
+                    //      strReaderKey    [in,out] 读者证条码号或者 @refID:xxx 形态。函数中可能会把它清空
                     LibraryServerResult result1 = GetReaderRecord(
                 sessioninfo,
                 strActionName,
@@ -6414,7 +6432,7 @@ out _);
                         goto ERROR1;
                     if (nRet == 1)
                     {
-                        // strError = "当前用户 '" + sessioninfo.UserID + "' 的存取权限或好友关系禁止操作读者(证条码号为 " + strReaderBarcode + ")。具体原因：" + strError;
+                        // strError = "当前用户 '" + sessioninfo.UserID + "' 的存取权限或好友关系禁止操作读者(证条码号为 " + strReaderKey + ")。具体原因：" + strError;
                         result.Value = -1;
                         result.ErrorInfo = strError;
                         result.ErrorCode = ErrorCode.AccessDenied;
@@ -7143,7 +7161,7 @@ out _);
                     DateTime start_time_read_reader = DateTime.Now;
 
                     if (readerdom == null
-                        //      strReaderBarcode    [in,out] 读者证条码号或者 @refID:xxx 形态。函数中可能会把它清空
+                        //      strReaderKey    [in,out] 读者证条码号或者 @refID:xxx 形态。函数中可能会把它清空
                         && string.IsNullOrEmpty(strReaderBarcode) == false)
                     {
                         LibraryServerResult result1 = GetReaderRecord(
@@ -7190,7 +7208,7 @@ out _);
                         }
 
                         // 2024/1/29
-                        // 把 strReaderBarcode 兑现为真正的证条码号
+                        // 把 strReaderKey 兑现为真正的证条码号
                         if (strReaderBarcode != null
                             && strReaderBarcode.StartsWith("@refID:")
                             && string.IsNullOrEmpty(strOutputReaderBarcodeParam) == false)
@@ -7211,7 +7229,7 @@ out _);
                             goto ERROR1;
                         if (nRet == 1)
                         {
-                            // strError = "当前用户 '" + sessioninfo.UserID + "' 的存取权限或好友关系禁止操作读者(证条码号为 " + strReaderBarcode + ")。具体原因：" + strError;
+                            // strError = "当前用户 '" + sessioninfo.UserID + "' 的存取权限或好友关系禁止操作读者(证条码号为 " + strReaderKey + ")。具体原因：" + strError;
                             result.Value = -1;
                             result.ErrorInfo = strError;
                             result.ErrorCode = ErrorCode.AccessDenied;
@@ -7356,7 +7374,7 @@ out _);
                         strOutputReaderBarcodeParam = strReaderBarcode; // 为了返回值
 
                         {
-                            if (strOutputReaderBarcode != strPureReaderBarcode/*strReaderBarcode*/
+                            if (strOutputReaderBarcode != strPureReaderBarcode/*strReaderKey*/
                                 && strOutputReaderBarcode != $"@refID:{strReaderRefID}")
                             {
                                 strError = "册记录表明，册 " + strItemBarcode + " 实际被读者 " + strOutputReaderBarcode + " 所借阅，而不是您当前指定的读者(证条码号) " + strPureReaderBarcode + "。还书操作被放弃。";
@@ -7488,7 +7506,7 @@ out _);
                     else
                         nRet = 0;
 
-                    //string strItemBarcode = "";
+                    //string strItemKey = "";
                     if (itemdom != null)
                     {
                         // 注: strRealItemBarcode 里面为册条码号或者册的参考 ID。注意，优先为册条码号
@@ -7617,7 +7635,7 @@ out _);
                         // 探测 mongodb 库中是否已经存在这样的事项
                         IEnumerable<ChargingOperItem> collection = this.ChargingOperDatabase.Exists(
                             strReaderBarcode,
-                            "", // string.IsNullOrEmpty(strItemBarcode) == false ? strItemBarcode : strItemBarcodeParam,
+                            "", // string.IsNullOrEmpty(strItemKey) == false ? strItemKey : strItemBarcodeParam,
                             strBiblioRecPath,
                             strVolume,
                             new DateTime(0),    // DateTime.Now - new TimeSpan(0, 5, 0),
@@ -7650,8 +7668,8 @@ out _);
                         // 进行 boxing 处理，修改读者记录和册记录
                         // 按照 boxing 操作要求，对读者记录和册记录进行修改
                         // parameters:
-                        //      strReaderBarcode    读者证条码号或者 "@refID:xxxxx"
-                        //      strItemBarcode  册条码号或者 "@refID:xxxxx" 
+                        //      strReaderKey    读者证条码号或者 "@refID:xxxxx"
+                        //      strItemKey  册条码号或者 "@refID:xxxxx" 
                         nRet = DoBoxingReaderItemXml(
                             channel,
                             strReaderBarcode,
@@ -9324,8 +9342,8 @@ out string _);
         // 撤销对读者记录的借阅信息删除操作(撤销还书)
         // parameters:
         //      strReaderRecPath    读者记录路径
-        //      strReaderBarcode    读者证条码号。若需要检查记录，看看里面条码号是否已经变化了，就使用这个参数。如果不想检查，就用null
-        //      strItemBarcode  已经借的册条码号
+        //      strReaderKey    读者证条码号。若需要检查记录，看看里面条码号是否已经变化了，就使用这个参数。如果不想检查，就用null
+        //      strItemKey  已经借的册条码号
         //      strDeleteBorrowFrag 被删除掉的<borrow>元素片断
         //      strAddedOverdueFrag 已经加入的<overdue>元素片断
         // return:
@@ -12430,24 +12448,6 @@ out string _);
             return false;
         }
 
-        // 获得形态为 @refID:xxx 中的 xxx 部分
-        public static string GetRefIdValue(string text)
-        {
-            if (text.StartsWith("@refID:"))
-                return text.Substring("@refID:".Length);
-            return text;
-        }
-
-
-
-        public static string BuildReaderKey(string strReaderBarcode,
-            string strReaderRefID)
-        {
-            if (string.IsNullOrEmpty(strReaderRefID))
-                return strReaderBarcode;
-            return $"@refID:{strReaderRefID}";
-        }
-
         // return:
         //      false   没有匹配上
         //      true    匹配上了
@@ -12647,8 +12647,8 @@ out string _);
     */
         // 按照 boxing 操作要求，对读者记录和册记录进行修改，还有对预约到书记录进行修改
         // parameters:
-        //      strReaderBarcode    读者证条码号或者 "@refID:xxxxx"
-        //      strItemBarcode  册条码号或者 "@refID:xxxxx" 
+        //      strReaderKey    读者证条码号或者 "@refID:xxxxx"
+        //      strItemKey  册条码号或者 "@refID:xxxxx" 
         int DoBoxingReaderItemXml(
             RmsChannel channel,
             string strReaderBarcode,
@@ -12826,7 +12826,7 @@ out string _);
         // 加入超期检查警告
         // parameters:
         //      strItemBarcodeParam return() API 中的 strItemBarcodeParam，可能包含 @refID: 前缀部分，还可能是登录号
-        //      strItemBarcode  册记录中的 <barcode> 元素内容，或者带有前缀的 <refID>元素内容(@refID:xxxx)
+        //      strItemKey  册记录中的 <barcode> 元素内容，或者带有前缀的 <refID>元素内容(@refID:xxxx)
         //      strDeletedBorrowFrag 返回从读者记录中删除的<borrow>元素xml片断字符串(OuterXml)
         int DoReturnReaderXml(
             string strReaderLibraryCode,
@@ -13276,7 +13276,7 @@ out string _);
                 strItemBarcode = "@refID:" + strRefID;
             }
 #endif
-            // 注: strItemBarcode 里面为册条码号或者册的参考 ID。注意，优先为册条码号
+            // 注: strItemKey 里面为册条码号或者册的参考 ID。注意，优先为册条码号
             string strItemBarcode = GetItemBarcode(itemdom, out strError);
             if (strItemBarcode == null)
                 return -1;
@@ -13729,7 +13729,7 @@ out string _);
                     strOverdueString = tempdom.DocumentElement.OuterXml;
 
                     /*
-                    strOverdueString = "<overdue barcode='" + strItemBarcode
+                    strOverdueString = "<overdue barcode='" + strItemKey
                         + "' over='" + Convert.ToString(lOver) + strPeriodUnit
                         + "' borrowDate='" + strBorrowDate
                         + "' borrowPeriod='" + strPeriod 
@@ -14195,7 +14195,7 @@ out string _);
 
             // ??
 
-            // return_info.ItemBarcode = strItemBarcode;
+            // return_info.ItemBarcode = strItemKey;
             // 2024/1/29
             return_info.ItemBarcode = "@refID:" + strItemRefID;
             // 2020/8/26
@@ -14827,7 +14827,7 @@ out string _);
                 "barcode");
             string strItemRefID = DomUtil.GetElementText(itemdom.DocumentElement,
                 "refID");
-            string strItemKey = GetUnionRefID(strItemBarcode, strItemRefID);   // strItemBarcode;
+            string strItemKey = GetUnionRefID(strItemBarcode, strItemRefID);   // strItemKey;
 
             if (String.IsNullOrEmpty(strItemBarcode) == true)
             {
@@ -14846,10 +14846,11 @@ out string _);
                 // strItemKey = "@refID:" + strItemRefID;
             }
 
-            if (String.IsNullOrEmpty(strReaderBarcode) == true)
+            if (string.IsNullOrEmpty(strReaderBarcode) == true
+                && string.IsNullOrEmpty(strReaderRefID) == true)
             {
                 // text-level: 内部错误
-                strError = "读者记录中读者证条码号不能为空";
+                strError = "读者记录中读者证条码号和参考ID不允许同时为空";
                 return -1;
             }
 
@@ -14886,7 +14887,7 @@ out string _);
                         strError = string.Format(this.GetString("续借操作被拒绝。因册s当前已被s位读者预约"),    // "续借操作被拒绝。因 册 {0} 当前已被 {1} 位读者预约。为方便他人，请尽早还回此书，谢谢。"
                             strItemKey,
                             nodesReservationRequest.Count.ToString());
-                        // "续借操作被拒绝。因 册 " + strItemBarcode + " 当前已被 " + nodesReservationRequest.Count.ToString() + " 位读者预约。为方便他人，请尽早还回此书，谢谢。";
+                        // "续借操作被拒绝。因 册 " + strItemKey + " 当前已被 " + nodesReservationRequest.Count.ToString() + " 位读者预约。为方便他人，请尽早还回此书，谢谢。";
                     }
                     else
                     {
@@ -14894,7 +14895,7 @@ out string _);
                         strError = string.Format(this.GetString("续借操作被拒绝。因册s当前已被下列读者预约s"),  // "续借操作被拒绝。因 册 {0} 当前已被下列读者预约: {1}。为方便他人，请尽早还回此书，谢谢。"
                             strItemKey,
                             strList);
-                        // "续借操作被拒绝。因 册 " + strItemBarcode + " 当前已被下列读者预约: " + strList + "。为方便他人，请尽早还回此书，谢谢。";
+                        // "续借操作被拒绝。因 册 " + strItemKey + " 当前已被下列读者预约: " + strList + "。为方便他人，请尽早还回此书，谢谢。";
                     }
                     // 当前持有此书的读者无法续借，则只好在到期前归还图书馆。
                     return 2;
@@ -14923,7 +14924,7 @@ out string _);
                 nRet = DoReservationReaderXml(
                     channel,
                     "delete_for_borrow",
-                    strItemKey,    // strItemBarcode
+                    strItemKey,    // strItemKey
                     sessioninfo.Account.UserID,
                     ref readerdom,
                     out strError);
@@ -14955,7 +14956,7 @@ out string _);
             nRet = GetArrivedQueueRecXml(
                 // sessioninfo.Channels,
                 channel,
-                strItemKey.Replace("@refID:", "@itemRefID:"),    // strItemBarcode
+                strItemKey.Replace("@refID:", "@itemRefID:"),    // strItemKey
                 out strNotifyXml,
                 out timestamp,
                 out strOutputPath,
@@ -15009,8 +15010,11 @@ out string _);
                     // 删除读者记录中的reservation通知行
 
 
-                    // 在册记录中，删除相关的<reservations/request>元素 2007/1/17
-                    XmlNodeList nodes = itemdom.DocumentElement.SelectNodes("reservations/request[@reader='" + strReaderBarcode + "']");
+                    // 在册记录中，删除相关的<reservations/request>元素
+                    XmlNodeList nodes = itemdom.DocumentElement.SelectNodes($"reservations/request[@reader='@refID:{strReaderRefID}']");
+                    if (nodes.Count == 0 && string.IsNullOrEmpty(strReaderBarcode) == false)
+                        nodes = itemdom.DocumentElement.SelectNodes($"reservations/request[@reader='{strReaderBarcode}']");
+
                     for (int i = 0; i < nodes.Count; i++)
                     {
                         XmlNode node = nodes[i];
@@ -15076,7 +15080,7 @@ out string _);
                             // "借阅操作被拒绝。因为 册 {0} 为读者 {1} 所(在架)预约，已处于保留和通知取书状态。\r\n图书馆员请注意：虽然本次借阅操作被拒绝，但此册地点信息已被软件自动修改为在预约保留架(而不是在原来的普通架)，请收下此书后放入预约保留架(的特定位置，例如“曾在架”部分)。"
                             strItemKey,
                             strNotifyReaderBarcode);
-                        // "借阅操作被拒绝。因为 册 " + strItemBarcode + " 为读者 " + strNotifyReaderBarcode + " 所(在架)预约，已处于保留和通知取书状态。\r\n图书馆员请注意：虽然本次借阅操作被拒绝，但此册地点信息已被软件自动修改为在预约保留架(而不是在原来的普通架)，请收下此书后放入预约保留架(的特定位置，例如“曾在架”部分)。";
+                        // "借阅操作被拒绝。因为 册 " + strItemKey + " 为读者 " + strNotifyReaderBarcode + " 所(在架)预约，已处于保留和通知取书状态。\r\n图书馆员请注意：虽然本次借阅操作被拒绝，但此册地点信息已被软件自动修改为在预约保留架(而不是在原来的普通架)，请收下此书后放入预约保留架(的特定位置，例如“曾在架”部分)。";
                         return 3;
                     }
 
@@ -15085,7 +15089,7 @@ out string _);
                         // "借阅操作被拒绝。因为 册 {0} 为读者 {1} 所预约，已处于保留和通知取书状态。"
                         strItemKey,
                         strNotifyReaderBarcode);
-                    // "借阅操作被拒绝。因为 册 " + strItemBarcode + " 为读者 " + strNotifyReaderBarcode + " 所预约，已处于保留和通知取书状态。";
+                    // "借阅操作被拒绝。因为 册 " + strItemKey + " 为读者 " + strNotifyReaderBarcode + " 所预约，已处于保留和通知取书状态。";
                     return 1;
                 }
             }
@@ -15137,7 +15141,7 @@ out string _);
             nRet = DoReservationReaderXml(
                 channel,
                 "delete_for_borrow",
-                strItemKey,    // strItemBarcode
+                strItemKey,    // strItemKey
                 sessioninfo.Account.UserID,
                 ref readerdom,
                 out strError);
@@ -15165,11 +15169,16 @@ out string _);
             // 获得例行参数
             string strReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement,
                 "barcode");
+            string strReaderRefID = DomUtil.GetElementText(readerdom.DocumentElement,
+                "refID");
 
             string strItemBarcode = DomUtil.GetElementText(itemdom.DocumentElement,
                 "barcode");
+            string strItemRefID = DomUtil.GetElementText(itemdom.DocumentElement,
+                "refID");
 
-            if (String.IsNullOrEmpty(strItemBarcode) == true)
+            /*
+            if (String.IsNullOrEmpty(strItemKey) == true)
             {
                 // 如果册条码号为空，则记载 参考ID
                 string strRefID = DomUtil.GetElementText(itemdom.DocumentElement,
@@ -15180,19 +15189,31 @@ out string _);
                     strError = "册记录中册条码号和参考ID不应同时为空";
                     return -1;
                 }
-                strItemBarcode = "@refID:" + strRefID;
+                strItemKey = "@refID:" + strRefID;
             }
-
-            if (String.IsNullOrEmpty(strReaderBarcode) == true)
+            */
+            if (string.IsNullOrEmpty(strItemRefID) == true
+                && string.IsNullOrEmpty(strItemBarcode) == true)
             {
                 // text-level: 内部错误
-                strError = "读者记录中读者证条码号不能为空";
+                strError = "册记录中册条码号和参考ID不应同时为空";
+                return -1;
+            }
+
+            if (string.IsNullOrEmpty(strReaderBarcode) == true
+                && string.IsNullOrEmpty(strReaderRefID) == true)
+            {
+                // text-level: 内部错误
+                strError = "读者记录中读者证条码号和参考 ID 不允许同时为空";
                 return -1;
             }
 
             {
                 // 看看是否已经有先前已经借阅的册
-                XmlNode nodeBorrow = readerdom.DocumentElement.SelectSingleNode("borrows/borrow[@barcode='" + strItemBarcode + "']");
+                XmlNode nodeBorrow = readerdom.DocumentElement.SelectSingleNode("borrows/borrow[@barcode='@refID:" + strItemRefID + "']");
+                if (nodeBorrow == null && string.IsNullOrEmpty(strItemBarcode) == false)
+                    nodeBorrow = readerdom.DocumentElement.SelectSingleNode("borrows/borrow[@barcode='" + strItemBarcode + "']");
+
                 if (nodeBorrow == null)
                 {
                     return 0;
@@ -15371,14 +15392,16 @@ out string _);
             string strReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement,
                 "barcode");
             // 2024/1/29
-            // 读者 RefID
-            string patronRefID = DomUtil.GetElementText(readerdom.DocumentElement,
+            // 读者参考 ID
+            string strReaderRefID = DomUtil.GetElementText(readerdom.DocumentElement,
                 "refID");
-            if (string.IsNullOrEmpty(patronRefID))
+            if (string.IsNullOrEmpty(strReaderRefID))
             {
                 strError = $"当前读者记录的参考 ID 为空，无法完成借书操作";
                 return -1;
             }
+            // TODO: 改进为显示友好的形态
+            string strReaderKey = dp2StringUtil.BuildReaderKey(strReaderBarcode, strReaderRefID);
 
             string strLocation = DomUtil.GetElementText(itemdom.DocumentElement,
     "location");
@@ -15407,10 +15430,13 @@ out string _);
                 strItemBarcode = "@refID:" + strRefID;
             }
 #endif
-            // 注: strItemBarcode 里面为册条码号或者册的参考 ID。注意，优先为册条码号
-            string strItemBarcode = GetItemBarcode(itemdom, out strError);
-            if (strItemBarcode == null)
-                return -1;
+
+            // 册条码号
+            string strItemBarcode = DomUtil.GetElementText(itemdom.DocumentElement,
+                "barcode"); // GetItemBarcode(itemdom, out strError);// 注: strItemKey 里面为册条码号或者册的参考 ID。注意，优先为册条码号
+            //if (strItemKey == null)
+            //    return -1;
+
             // 2024/1/29
             string strItemRefID = DomUtil.GetElementText(itemdom.DocumentElement,
                 "refID");
@@ -15419,14 +15445,17 @@ out string _);
                 strError = $"当前册记录({strItemRecPath}) 的参考 ID 字段为空，无法完成借书操作";
                 return -1;
             }
+            // TODO: 改进为显示友好的形态
+            string strItemKey = dp2StringUtil.BuildReaderKey(strItemBarcode, strItemRefID);
 
             // 2020/9/8
             string strItemOI = DomUtil.GetElementText(itemdom.DocumentElement, "oi");
 
-            if (String.IsNullOrEmpty(strReaderBarcode) == true)
+            if (string.IsNullOrEmpty(strReaderBarcode) == true
+                && string.IsNullOrEmpty(strReaderRefID) == true)
             {
                 // text-level: 内部错误
-                strError = "读者记录中读者证条码号不能为空";
+                strError = "读者记录中读者证条码号和参考 ID 不允许同时为空";
                 return -1;
             }
 
@@ -15457,7 +15486,7 @@ out string _);
                     strError = string.Format(this.GetString("该读者未曾借阅过册s，因此无法续借"),
                         // "该读者未曾借阅过册 '{0}'，因此无法续借。"
                         OneOfNotEmpty(strItemBarcode, strItemRefID));
-                    // "该读者未曾借阅过册 '" + strItemBarcode + "'，因此无法续借。";
+                    // "该读者未曾借阅过册 '" + strItemKey + "'，因此无法续借。";
                     return -1;
                 }
                 else
@@ -15929,34 +15958,34 @@ out string _);
             DomUtil.SetAttr(nodeBorrow, "price", strBookPrice);   // 在读者记录<borrows/borrow>元素中写入price属性，内容为图书册价格类型，便于后续借书的时候判断已经借的和即将借的总价格是否超过读者的押金余额。这种方式可以节省时间，不必从多个册记录中去获得册价格字段
 
             // 修改册记录
-            // 注: strOldReaderBarcode 内容可能是证条码号，也可能是 @refID:xxx 形态，使用时注意判断
-            string strOldReaderBarcode = DomUtil.GetElementText(itemdom.DocumentElement,
+            // 注: strOldReaderKey 内容可能是证条码号，也可能是 @refID:xxx 形态，使用时注意判断
+            string strOldReaderKey = DomUtil.GetElementText(itemdom.DocumentElement,
                 "borrower");
 
             if (bRenew == false)
             {
                 if (bForce == false
-                    && String.IsNullOrEmpty(strOldReaderBarcode) == false)
+                    && String.IsNullOrEmpty(strOldReaderKey) == false)
                 {
                     // 2007/1/2
-                    if (strOldReaderBarcode == strReaderBarcode
-                        || GetRefID(strOldReaderBarcode) == patronRefID)
+                    if (strOldReaderKey == strReaderBarcode
+                        || GetRefID(strOldReaderKey) == strReaderRefID)
                     {
                         // text-level: 用户提示
-                        strError = "借阅操作被拒绝。因册 '" + strItemBarcode + "' 在本次操作前已经被当前读者 '" + strReaderBarcode + "' 借阅了。";
+                        strError = "借阅操作被拒绝。因册 '" + strItemKey + "' 在本次操作前已经被当前读者 '" + strReaderKey + "' 借阅了。";
                         error_code = ErrorCode.AlreadyBorrowed;    // 已经被当前读者借阅
                         return -1;
                     }
 
                     // text-level: 用户提示
-                    strError = "借阅操作被拒绝。因册 '" + strItemBarcode + "' 在本次操作前已经处于被读者 '" + strOldReaderBarcode + "' 借阅(持有)状态(尚未归还)。\r\n如果属于拿错情况，请工作人员立即扣留此书，设法交还给持有人；\r\n如果确系(经持有人同意)其他读者要转借此册，需先履行还书手续；\r\n如果持有人要续借此册，请履行续借手续。";
+                    strError = "借阅操作被拒绝。因册 '" + strItemKey + "' 在本次操作前已经处于被读者 '" + strOldReaderKey + "' 借阅(持有)状态(尚未归还)。\r\n如果属于拿错情况，请工作人员立即扣留此书，设法交还给持有人；\r\n如果确系(经持有人同意)其他读者要转借此册，需先履行还书手续；\r\n如果持有人要续借此册，请履行续借手续。";
                     error_code = ErrorCode.AlreadyBorrowedByOther;   // 已经被其他读者借阅
                     return -1;
                 }
             }
 
             DomUtil.SetElementText(itemdom.DocumentElement,
-                "borrower", "@refID:" + patronRefID /*strReaderBarcode*/);
+                "borrower", "@refID:" + strReaderRefID /*strReaderKey*/);
 
             // 2008/9/18
             DomUtil.SetElementText(itemdom.DocumentElement,
@@ -16044,7 +16073,7 @@ out string _);
                 strReaderBarcode);     // 读者证条码号
             // 2024/1/29
             DomUtil.SetElementText(domOperLog.DocumentElement, "readerRefID",
-                patronRefID);     // 读者参考ID
+                strReaderRefID);     // 读者参考ID
 
             DomUtil.SetElementText(domOperLog.DocumentElement, "itemBarcode",
                 strItemBarcode);    // 册条码号
@@ -16107,7 +16136,7 @@ out string _);
             // 2011/6/26
             borrow_info.BorrowOperator = strOperator;
 
-            // borrow_info.ItemBarcode = strItemBarcode;
+            // borrow_info.ItemBarcode = strItemKey;
             // 2024/1/29
             borrow_info.ItemBarcode = "@refID:" + strItemRefID;
             borrow_info.BorrowID = borrowID;
@@ -16342,7 +16371,7 @@ out string _);
         // 清除读者和册记录中的已到预约事项，并提取下一个预约读者证条码号
         // 本函数还负责清除册记录中以前残留的state=arrived的<request>元素
         // parameters:
-        //      strItemBarcode  册条码号。支持 "@refID:" 前缀用法
+        //      strItemKey  册条码号。支持 "@refID:" 前缀用法
         //      bMaskLocationReservation    不要给册记录<location>打上#reservation标记
         //      strReservationReaderBarcode 返回下一个预约读者的证条码号
         public int ClearArrivedInfo(
@@ -16360,7 +16389,7 @@ out string _);
             strReservationReaderBarcode = "";
 
             // 2024/1/30
-            // 将 strItemBarcode 内容翻译为 @refID:xxx 形态
+            // 将 strItemKey 内容翻译为 @refID:xxx 形态
             int nRet = ConvertItemBarcodeListToRefIdList(channel,
 strItemBarcode,
 out string strItemRefIdString,
@@ -16455,7 +16484,7 @@ out strError);
                     if (nRet == -1)
                         return -1;
 
-                    if (IsInBarcodeList(strItemRefIdString/*strItemBarcode*/,
+                    if (IsInBarcodeList(strItemRefIdString/*strItemKey*/,
                         strRefIds/*strItems*/) == true)
                     {
                         bFound = true;
@@ -17488,7 +17517,7 @@ out strError);
         //      1   检查发现有错。
         public LibraryServerResult CheckReaderBorrowInfo(
             RmsChannel channel,
-            string strReaderBarcode,
+            string strReaderKey,
             int nStart,
             int nCount,
             out int nProcessedBorrowItems,
@@ -17508,26 +17537,23 @@ out strError);
 #if DEBUG_LOCK_READER
             this.WriteErrorLog("CheckReaderBorrowInfo 开始为读者加写锁 '" + strReaderBarcode + "'");
 #endif
-            this.ReaderLocks.LockForWrite(strReaderBarcode);
+            this.ReaderLocks.LockForWrite(strReaderKey);
 
             try // 读者记录锁定范围开始
             {
                 // 读入读者记录
-                string strReaderXml = "";
-                string strOutputReaderRecPath = "";
-                byte[] reader_timestamp = null;
                 nRet = this.GetReaderRecXml(
                     // Channels,
                     channel,
-                    strReaderBarcode,
-                    out strReaderXml,
-                    out strOutputReaderRecPath,
-                    out reader_timestamp,
+                    strReaderKey,
+                    out string strReaderXml,
+                    out string strOutputReaderRecPath,
+                    out byte[] reader_timestamp,
                     out strError);
                 if (nRet == 0)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "读者证条码号 '" + PatronBarcodeLink(strReaderBarcode) + "' 不存在";
+                    result.ErrorInfo = "读者证条码号 '" + PatronBarcodeLink(strReaderKey) + "' 不存在";
                     result.ErrorCode = ErrorCode.ReaderBarcodeNotFound;
                     return result;
                 }
@@ -17536,10 +17562,15 @@ out strError);
                     strError = "读入读者记录时发生错误: " + strError;
                     goto ERROR1;
                 }
+                // 2024/2/20
+                if (nRet > 1)
+                {
+                    strError = $"读入读者记录时发生错误: 读者键 '{strReaderKey}' 检索命中多条记录({nRet})";
+                    goto ERROR1;
+                }
 
-                XmlDocument readerdom = null;
                 nRet = LibraryApplication.LoadToDom(strReaderXml,
-                    out readerdom,
+                    out XmlDocument readerdom,
                     out strError);
                 if (nRet == -1)
                 {
@@ -17574,26 +17605,26 @@ out strError);
                     if (nProcessedBorrowItems >= 10)
                         break;
 
-                    XmlNode node = nodesBorrow[i];
+                    var node = nodesBorrow[i] as XmlElement;
 
                     string strItemBarcode = DomUtil.GetAttr(node, "barcode");
+                    // 2024/2/20
+                    string strItemRefID = node.GetAttribute("refID");
+                    string strItemKey = dp2StringUtil.BuildReaderKey(strItemBarcode, strItemRefID);
 
                     nProcessedBorrowItems++;
 
-                    string strOutputReaderBarcode_0 = "";
-
-                    string[] aDupPath = null;
                     // 检查一个实体记录的借还信息是否异常。
                     LibraryServerResult result_1 = CheckItemBorrowInfo(
                         // Channels,
                         channel,
-                        strReaderBarcode,
+                        strReaderKey,
                         readerdom,
                         strOutputReaderRecPath,
-                        strItemBarcode,
+                        strItemKey, // strItemBarcode,
                         null,
-                        out strOutputReaderBarcode_0,
-                        out aDupPath);
+                        out string strOutputReaderBarcode_0,
+                        out string[] aDupPath);
                     if (result_1.Value == -1 || result_1.Value == 1)
                     {
                         if (result_1.ErrorCode == ErrorCode.ItemBarcodeDup)
@@ -17602,25 +17633,27 @@ out strError);
 
                             for (int j = 0; j < aDupPath.Length; j++)
                             {
-                                string[] aDupPathTemp = null;
-                                string strOutputReaderBarcode = "";
                                 LibraryServerResult result_2 = CheckItemBorrowInfo(
                                     // Channels,
                                     channel,
-                                    strReaderBarcode,
+                                    strReaderKey,
                                     readerdom,
                                     strOutputReaderRecPath,
-                                    strItemBarcode,
+                                    strItemKey, // strItemBarcode,
                                     aDupPath[j],
-                                    out strOutputReaderBarcode,
-                                    out aDupPathTemp);
+                                    out string strOutputReaderBarcode,
+                                    out string[] aDupPathTemp);
                                 if (result_2.Value == -1)
                                 {
                                     strError = result_2.ErrorInfo;
                                     goto ERROR1;
                                 }
 
-                                if (strOutputReaderBarcode == strReaderBarcode)
+                                // TODO: 两个 key 都不是确定的形态
+                                // if (strOutputReaderBarcode == strReaderKey)
+                                if (IsReaderKeySame(channel,
+                                    strOutputReaderBarcode,
+                                    strReaderKey))
                                 {
                                     linkedPath.Add(aDupPath[j]);
 
@@ -17649,7 +17682,7 @@ out strError);
 
                         if (result_1.ErrorCode == ErrorCode.ReaderBarcodeNotFound)
                         {
-                            strCheckError += "读者记录中借阅册条码号 " + ItemBarcodeLink(strItemBarcode) + " 关联的册记录中，其 borrower 元素关联回的读者证条码号是 '" + PatronBarcodeLink(strOutputReaderBarcode_0) + "'，而不是出发的读者证条码号 '" + PatronBarcodeLink(strReaderBarcode) + "'。并且证条码号为 '" + PatronBarcodeLink(strOutputReaderBarcode_0) + "' 的读者记录不存在。";
+                            strCheckError += "读者记录中借阅册条码号 " + ItemBarcodeLink(strItemBarcode) + " 关联的册记录中，其 borrower 元素关联回的读者证条码号是 '" + PatronBarcodeLink(strOutputReaderBarcode_0) + "'，而不是出发的读者证条码号 '" + PatronBarcodeLink(strReaderKey) + "'。并且证条码号为 '" + PatronBarcodeLink(strOutputReaderBarcode_0) + "' 的读者记录不存在。";
                             nErrorCount++;
                             continue;
                         }
@@ -17668,16 +17701,19 @@ out strError);
                     } // end of return -1
 
 
-                    if (strOutputReaderBarcode_0 != strReaderBarcode)
+                    // if (strOutputReaderBarcode_0 != strReaderKey)
+                    if (IsReaderKeySame(channel,
+                        strOutputReaderBarcode_0,
+                        strReaderKey) == false)
                     {
-                        strCheckError += "读者记录中借阅册条码号 " + ItemBarcodeLink(strItemBarcode) + " 关联的册记录中，其 borrower 元素关联回的读者证条码号是 '" + PatronBarcodeLink(strOutputReaderBarcode_0) + "'，而不是出发的读者证条码号 '" + PatronBarcodeLink(strReaderBarcode) + "'。";
+                        strCheckError += "读者记录中借阅册条码号 " + ItemBarcodeLink(strItemBarcode) + " 关联的册记录中，其 borrower 元素关联回的读者证条码号是 '" + PatronBarcodeLink(strOutputReaderBarcode_0) + "'，而不是出发的读者证条码号 '" + PatronBarcodeLink(strReaderKey) + "'。";
                         nErrorCount++;
                     }
                 }
             }
             finally
             {
-                this.ReaderLocks.UnlockForWrite(strReaderBarcode);
+                this.ReaderLocks.UnlockForWrite(strReaderKey);
 #if DEBUG_LOCK_READER
                 this.WriteErrorLog("CheckReaderBorrowInfo 结束为读者加写锁 '" + strReaderBarcode + "'");
 #endif
@@ -17697,6 +17733,31 @@ out strError);
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
             return result;
+        }
+
+        // 比较两个读者键是否指向同一条读者记录
+        bool IsReaderKeySame(RmsChannel channel,
+            string key1,
+            string key2)
+        {
+            int nRet = this.ConvertReaderBarcodeListToRefIdList(
+                channel,
+                key1,
+                out string list1,
+                out string error);
+            if (nRet == -1)
+                goto ERROR1;
+            key1 = list1;
+            nRet = this.ConvertReaderBarcodeListToRefIdList(
+    channel,
+    key2,
+    out string list2,
+    out error);
+            if (nRet == -1)
+                goto ERROR1;
+            key2 = list2;
+        ERROR1:
+            return key1 == key2;
         }
 
         public static string ItemBarcodeLink(string strItemBarcode)
@@ -17721,6 +17782,7 @@ out strError);
 
         // 检查一个实体记录的借还信息是否异常。
         // parameters:
+        //      strItemKey  册键
         //      strLockedReaderBarcode  外层已经加锁过的条码号。本函数根据这个信息，可以避免重复加锁。
         //      exist_readerdom 已经装载入DOM的读者记录。其读者证条码号是strLockedReaderBarcode。如果提供了这个值，本函数会优化性能。
         // result.Value
@@ -17732,7 +17794,7 @@ out strError);
             string strLockedReaderBarcode,
             XmlDocument exist_readerdom,
             string strExistReaderRecPath,
-            string strItemBarcode,
+            string strItemKey,
             string strConfirmItemRecPath,
             out string strOutputReaderBarcode,
             out string[] aDupPath)
@@ -17740,7 +17802,6 @@ out strError);
             string strError = "";
             aDupPath = null;
             strOutputReaderBarcode = "";
-            long lRet = 0;
             int nRet = 0;
 
             string strCheckError = "";
@@ -17770,6 +17831,46 @@ out strError);
 
             string strItemXml = "";
 
+            // return:
+            //      -1  出错
+            //      0   没有找到
+            //      其它  命中的记录条数
+            nRet = LoadItemRecord(channel,
+        strItemKey,
+        strConfirmItemRecPath,
+        null,
+        out strItemXml,
+        out item_timestamp,
+        out strOutputItemRecPath,
+        out List<string> aPath,
+        out strError);
+            if (nRet == -1)
+            {
+                strError = "读入册记录时发生错误: " + strError;
+                goto ERROR1;
+            }
+            if (nRet == 0)
+            {
+                result.Value = -1;
+                result.ErrorInfo = "册条码号 '" + ItemBarcodeLink(strItemKey) + "' 不存在";
+                result.ErrorCode = ErrorCode.ItemBarcodeNotFound;
+                return result;
+            }
+            if (nRet > 1)
+            {
+                result.Value = -1;
+                result.ErrorInfo = "册条码号为 '" + ItemBarcodeLink(strItemKey) + "' 的册记录有 " + nRet + " 条，无法进行修复操作。请在附加册记录路径后重新提交修复操作。";
+                result.ErrorCode = ErrorCode.ItemBarcodeDup;
+
+                aDupPath = aPath.ToArray();
+                return result;
+            }
+
+            // 函数返回后有用
+            aDupPath = new string[1];
+            aDupPath[0] = strOutputItemRecPath;
+
+#if REMOVED
             // 如果已经有确定的册记录路径
             if (String.IsNullOrEmpty(strConfirmItemRecPath) == false)
             {
@@ -17836,13 +17937,6 @@ out strError);
 
                 if (aPath.Count > 1)
                 {
-                    /*
-                    // 构造strDupBarcodeList
-                    string[] pathlist = new string[aPath.Count];
-                    aPath.CopyTo(pathlist);
-                    strDupBarcodeList = String.Join(",", pathlist);
-                     * */
-
                     result.Value = -1;
                     result.ErrorInfo = "册条码号为 '" + ItemBarcodeLink(strItemBarcode) + "' 的册记录有 " + aPath.Count.ToString() + " 条，无法进行修复操作。请在附加册记录路径后重新提交修复操作。";
                     result.ErrorCode = ErrorCode.ItemBarcodeDup;
@@ -17866,16 +17960,21 @@ out strError);
                 aDupPath = new string[1];
                 aDupPath[0] = strOutputItemRecPath;
             }
+#endif
 
-            XmlDocument itemdom = null;
             nRet = LibraryApplication.LoadToDom(strItemXml,
-                out itemdom,
+                out XmlDocument itemdom,
                 out strError);
             if (nRet == -1)
             {
                 strError = "装载册记录进入XML DOM时发生错误: " + strError;
                 goto ERROR1;
             }
+
+            string strItemBarcode = DomUtil.GetElementText(itemdom.DocumentElement,
+                "barcode");
+            string strItemRefID = DomUtil.GetElementText(itemdom.DocumentElement,
+                "refID");
 
             strOutputReaderBarcode = ""; // 借阅者证条码号
 
@@ -17911,7 +18010,6 @@ out strError);
                 if (exist_readerdom == null)
                 {
                     nRet = this.GetReaderRecXml(
-                        // Channels,
                         channel,
                         strOutputReaderBarcode,
                         out strReaderXml,
@@ -17946,15 +18044,19 @@ out strError);
                     strOutputReaderRecPath = strExistReaderRecPath;
                 }
 
-                XmlNodeList nodesBorrow = readerdom.DocumentElement.SelectNodes("borrows/borrow[@barcode='" + strItemBarcode + "']");
+                XmlNodeList nodesBorrow = readerdom.DocumentElement.SelectNodes("borrows/borrow[@refID='" + strItemRefID + "']");
+                if (nodesBorrow.Count == 0)
+                    nodesBorrow = readerdom.DocumentElement.SelectNodes("borrows/borrow[@barcode='" + strItemBarcode + "']");
+                if (nodesBorrow.Count == 0)
+                    nodesBorrow = readerdom.DocumentElement.SelectNodes("borrows/borrow[@barcode='@refID:" + strItemRefID + "']");
                 if (nodesBorrow.Count == 0)
                 {
-                    strCheckError += "虽然册记录 " + ItemRecPathLink(strOutputItemRecPath) + " 中表明了被读者 '" + PatronBarcodeLink(strOutputReaderBarcode) + "' 借阅，但是读者记录 " + PatronRecPathLink(strOutputReaderRecPath) + " 中并没有关于册条码号 '" + ItemBarcodeLink(strItemBarcode) + "' 的借阅记录。";
+                    strCheckError += "虽然册记录 " + ItemRecPathLink(strOutputItemRecPath) + " 中表明了被读者 '" + PatronBarcodeLink(strOutputReaderBarcode) + "' 借阅，但是读者记录 " + PatronRecPathLink(strOutputReaderRecPath) + " 中并没有关于册条码号 '" + ItemBarcodeLink(strItemKey) + "' 的借阅记录。";
                     goto END1;
                 }
                 if (nodesBorrow.Count > 1)
                 {
-                    strCheckError = "读者记录 " + PatronRecPathLink(strOutputReaderRecPath) + " 中有关于册条码号 '" + ItemBarcodeLink(strItemBarcode) + "' 的 " + nodesBorrow.Count.ToString() + " 条含糊借阅记录。";
+                    strCheckError = "读者记录 " + PatronRecPathLink(strOutputReaderRecPath) + " 中有关于册条码号 '" + ItemBarcodeLink(strItemKey) + "' 的 " + nodesBorrow.Count.ToString() + " 条含糊借阅记录。";
                     goto END1;
                 }
 
@@ -17990,10 +18092,13 @@ out strError);
         // 修复读者记录一侧的借阅信息链条错误
         // 具体来说，就是读者这边有借阅信息，但是指向的实体不存在，或者虽然存在但是
         // 其中没有指回的链。
+        // parameters:
+        //      strReaderKey    读者键
+        //      strItemKey      册键
         public LibraryServerResult RepairReaderSideError(
             SessionInfo sessioninfo,
-            string strReaderBarcode,
-            string strItemBarcode,
+            string strReaderKey,
+            string strItemKey,
             string strConfirmItemRecPath,
             out string[] aDupPath)
         {
@@ -18006,23 +18111,18 @@ out strError);
 
             int nRedoCount = 0; // 因为时间戳冲突, 重试的次数
 
-            if (String.IsNullOrEmpty(strReaderBarcode) == true)
+            if (String.IsNullOrEmpty(strReaderKey) == true)
             {
-                strError = "strReaderBarcode 参数不能为空";
+                strError = "strReaderKey 参数不能为空";
                 goto ERROR1;
             }
-            if (String.IsNullOrEmpty(strItemBarcode) == true)
+            if (String.IsNullOrEmpty(strItemKey) == true)
             {
-                strError = "strItemBarcode 参数不能为空";
+                strError = "strItemKey 参数不能为空";
                 goto ERROR1;
             }
 
         REDO_REPAIR:
-
-            /*
-                    string strOutputReaderXml = "";
-                    string strOutputItemXml = "";
-             * */
             RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
             if (channel == null)
             {
@@ -18034,29 +18134,36 @@ out strError);
 #if DEBUG_LOCK_READER
             this.WriteErrorLog("RepairReaderSideError 开始为读者加写锁 '" + strReaderBarcode + "'");
 #endif
-            this.ReaderLocks.LockForWrite(strReaderBarcode);
+            this.ReaderLocks.LockForWrite(strReaderKey);
 
             try // 读者记录锁定范围开始
             {
                 // 读入读者记录
 
-                // 注意：strReaderBarcode 内容可以使用 @refID: 前缀
+                // 注意：strReaderKey 内容可以使用 @refID: 前缀
                 nRet = this.GetReaderRecXml(
                     // sessioninfo.Channels,
                     channel,
-                    strReaderBarcode,
+                    strReaderKey,
                     out string strReaderXml,
                     out string strOutputReaderRecPath,
                     out byte[] reader_timestamp,
                     out strError);
                 if (nRet == 0)
                 {
-                    strError = "读者证条码号 '" + PatronBarcodeLink(strReaderBarcode) + "' 不存在";
+                    strError = "读者证条码号 '" + PatronBarcodeLink(strReaderKey) + "' 不存在";
                     goto ERROR1;
                 }
                 if (nRet == -1)
                 {
                     strError = "读入读者记录时发生错误: " + strError;
+                    goto ERROR1;
+                }
+
+                // 2024/2/20
+                if (nRet > 1)
+                {
+                    strError = $"读入读者记录时发生错误: 读者键 '{strReaderKey}' 检索命中多条记录({nRet})";
                     goto ERROR1;
                 }
 
@@ -18069,15 +18176,19 @@ out strError);
                     goto ERROR1;
                 }
 
-                XmlDocument readerdom = null;
                 nRet = LibraryApplication.LoadToDom(strReaderXml,
-                    out readerdom,
+                    out XmlDocument readerdom,
                     out strError);
                 if (nRet == -1)
                 {
                     strError = "装载读者记录进入XML DOM时发生错误: " + strError;
                     goto ERROR1;
                 }
+
+                string strReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement,
+                    "barcode");
+                string strReaderRefID = DomUtil.GetElementText(readerdom.DocumentElement,
+                    "refID");
 
                 // 校验读者证条码号参数是否和XML记录中完全一致
 #if NO
@@ -18094,7 +18205,7 @@ out strError);
                     //      false   不匹配
                     //      true    匹配
                     bool bRet = CheckBarcode(readerdom,
-            strReaderBarcode,
+            strReaderKey,
             "读者",
             "证条码号",
             out strError);
@@ -18105,11 +18216,14 @@ out strError);
                     }
                 }
 
-                XmlNode nodeBorrow = readerdom.DocumentElement.SelectSingleNode("borrows/borrow[@barcode='" + strItemBarcode + "']");
+                // 预先用 strItemKey 权且搜索一下 borrow 元素
+                XmlNode nodeBorrow = readerdom.DocumentElement.SelectSingleNode($"borrows/borrow[@barcode='{strItemKey}']");
                 if (nodeBorrow == null)
                 {
-                    strError = "修复操作被拒绝。读者记录 '" + PatronBarcodeLink(strReaderBarcode) + "' 中并不存在有关册 " + ItemBarcodeLink(strItemBarcode) + " 的借阅信息。";
-                    goto ERROR1;
+                    if (strItemKey.StartsWith("@refID:"))
+                        nodeBorrow = readerdom.DocumentElement.SelectSingleNode($"borrows/borrow[@refID='{dp2StringUtil.GetRefIdValue(strItemKey)}']");
+                    else
+                        nodeBorrow = readerdom.DocumentElement.SelectSingleNode($"borrows/borrow[@barcode='{strItemKey}']");
                 }
 
                 byte[] item_timestamp = null;
@@ -18126,13 +18240,50 @@ out strError);
                 }
 #endif
 
+                string strItemBarcode = "";
+                string strItemRefID = "";
+
                 // 加册记录锁
-                this.EntityLocks.LockForWrite(strItemBarcode);
+                this.EntityLocks.LockForWrite(strItemKey);
 
                 try // 册记录锁定范围开始
                 {
                     // 读入册记录
 
+                    // return:
+                    //      -1  出错
+                    //      0   没有找到
+                    //      其它  命中的记录条数
+                    nRet = LoadItemRecord(channel,
+                strItemKey,
+                strConfirmItemRecPath,
+                null,
+                out strItemXml,
+                out item_timestamp,
+                out strOutputItemRecPath,
+                out aPath,
+                out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    if (nRet == 0)
+                    {
+                        if (nodeBorrow != null)
+                            goto DELETE_CHAIN;  // 2024/2/20
+                        result.Value = -1;
+                        result.ErrorInfo = "册条码号 '" + ItemBarcodeLink(strItemKey) + "' 不存在";
+                        result.ErrorCode = ErrorCode.ItemBarcodeNotFound;
+                        return result;
+                    }
+                    if (nRet > 1)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = "册条码号为 '" + ItemBarcodeLink(strItemKey) + "' 的册记录有 " + nRet + " 条，无法进行修复操作。请在附加册记录路径后重新提交修复操作。";
+                        result.ErrorCode = ErrorCode.ItemBarcodeDup;
+
+                        aDupPath = aPath.ToArray();
+                        return result;
+                    }
+#if REMOVED
                     // 如果已经有确定的册记录路径
                     if (String.IsNullOrEmpty(strConfirmItemRecPath) == false)
                     {
@@ -18145,16 +18296,16 @@ out strError);
                         if (nRet != 1)
                             goto ERROR1;
 
-                        string strMetaData = "";
-
                         lRet = channel.GetRes(strConfirmItemRecPath,
                             out strItemXml,
-                            out strMetaData,
+                            out string strMetaData,
                             out item_timestamp,
                             out strOutputItemRecPath,
                             out strError);
                         if (lRet == -1)
                         {
+                            if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                                goto DELETE_CHAIN;  // 2024/2/20
                             strError = "根据strConfirmItemRecPath '" + ItemRecPathLink(strConfirmItemRecPath) + "' 获得册记录失败: " + strError;
                             goto ERROR1;
                         }
@@ -18172,7 +18323,7 @@ out strError);
                         nRet = this.GetItemRecXml(
                             // sessioninfo.Channels,
                             channel,
-                            strItemBarcode,
+                            strItemKey,
                             out strItemXml,
                             100,
                             out aPath,
@@ -18182,7 +18333,7 @@ out strError);
                         {
                             /*
                             result.Value = -1;
-                            result.ErrorInfo = "册条码号 '" + ItemBarcodeLink(strItemBarcode) + "' 不存在";
+                            result.ErrorInfo = "册条码号 '" + ItemBarcodeLink(strItemKey) + "' 不存在";
                             result.ErrorCode = ErrorCode.ItemBarcodeNotFound;
                             return result;
                              * */
@@ -18199,7 +18350,7 @@ out strError);
                         if (aPath.Count > 1)
                         {
                             result.Value = -1;
-                            result.ErrorInfo = "册条码号为 '" + ItemBarcodeLink(strItemBarcode) + "' 的册记录有 " + aPath.Count.ToString() + " 条，无法进行修复操作。请在附加册记录路径后重新提交修复操作。";
+                            result.ErrorInfo = "册条码号为 '" + ItemBarcodeLink(strItemKey) + "' 的册记录有 " + aPath.Count.ToString() + " 条，无法进行修复操作。请在附加册记录路径后重新提交修复操作。";
                             result.ErrorCode = ErrorCode.ItemBarcodeDup;
 
                             aDupPath = new string[aPath.Count];
@@ -18218,9 +18369,10 @@ out strError);
                         }
                     }
 
-                    XmlDocument itemdom = null;
+#endif
+
                     nRet = LibraryApplication.LoadToDom(strItemXml,
-                        out itemdom,
+                        out XmlDocument itemdom,
                         out strError);
                     if (nRet == -1)
                     {
@@ -18228,6 +18380,26 @@ out strError);
                         goto ERROR1;
                     }
 
+                    strItemBarcode = DomUtil.GetElementText(itemdom.DocumentElement,
+                        "barcode");
+                    strItemRefID = DomUtil.GetElementText(itemdom.DocumentElement,
+                        "refID");
+
+                    // 在得到册记录参考 ID 后，再次定位 borrow 元素
+                    if (nodeBorrow == null)
+                    {
+                        nodeBorrow = readerdom.DocumentElement.SelectSingleNode($"borrows/borrow[@barcode='@refID:{strItemRefID}']");
+                        if (nodeBorrow == null && string.IsNullOrEmpty(strItemBarcode) == false)
+                            nodeBorrow = readerdom.DocumentElement.SelectSingleNode($"borrows/borrow[@barcode='{strItemBarcode}']");
+                        if (nodeBorrow == null && string.IsNullOrEmpty(strItemRefID) == false)
+                            nodeBorrow = readerdom.DocumentElement.SelectSingleNode($"borrows/borrow[@refID='{strItemRefID}']");
+                    }
+
+                    if (nodeBorrow == null)
+                    {
+                        strError = "修复操作被拒绝。读者记录 '" + PatronBarcodeLink(strReaderKey) + "' 中并不存在有关册 " + ItemBarcodeLink(strItemKey) + " 的借阅信息。";
+                        goto ERROR1;
+                    }
 #if NO
                     // TODO: 要实现 strItemBarcode 为 @refID:xxxxx 的情况。因为现在允许册记录没有册条码号了
                     // 校验册条码号参数是否和XML记录中完全一致
@@ -18244,7 +18416,7 @@ out strError);
                         //      false   不匹配
                         //      true    匹配
                         bool bRet = CheckBarcode(itemdom,
-                strItemBarcode,
+                strItemKey,
                 "册",
                 "册条码号",
                 out strError);
@@ -18258,7 +18430,8 @@ out strError);
                     // 看看册记录中是否有指回读者记录的链
                     string strBorrower = DomUtil.GetElementText(itemdom.DocumentElement,
                         "borrower");
-                    if (strBorrower == strReaderBarcode)
+                    if (strBorrower == strReaderBarcode
+                        || strBorrower == $"@refID:{strReaderRefID}")
                     {
                         strError = "修复操作被拒绝。您所请求要修复的链，本是一条完整正确的链。可直接进行普通还书操作。";
                         goto CORRECT;
@@ -18269,17 +18442,14 @@ out strError);
                     // 移除读者记录侧的链
                     nodeBorrow.ParentNode.RemoveChild(nodeBorrow);
 
-                    byte[] output_timestamp = null;
-                    string strOutputPath = "";
-
                     // 写回读者记录
                     lRet = channel.DoSaveTextRes(strOutputReaderRecPath,
                         readerdom.OuterXml,
                         false,
                         "content",  // ,ignorechecktimestamp
                         reader_timestamp,
-                        out output_timestamp,
-                        out strOutputPath,
+                        out byte[] output_timestamp,
+                        out string strOutputPath,
                         out strError);
                     if (lRet == -1)
                     {
@@ -18316,15 +18486,30 @@ out strError);
                     DomUtil.SetElementText(domOperLog.DocumentElement,
     "libraryCode",
     strLibraryCode);    // 读者所在的馆代码
-                    DomUtil.SetElementText(domOperLog.DocumentElement, "operation", "repairBorrowInfo");
-                    DomUtil.SetElementText(domOperLog.DocumentElement, "action", "repairreaderside");
-                    DomUtil.SetElementText(domOperLog.DocumentElement, "readerBarcode", strReaderBarcode);
-                    DomUtil.SetElementText(domOperLog.DocumentElement, "itemBarcode", strItemBarcode);
+                    DomUtil.SetElementText(domOperLog.DocumentElement,
+                        "operation", "repairBorrowInfo");
+                    DomUtil.SetElementText(domOperLog.DocumentElement,
+                        "action", "repairreaderside");
+                    DomUtil.SetElementText(domOperLog.DocumentElement,
+                        "readerBarcode", strReaderBarcode);
+                    // 2024/2/20
+                    DomUtil.SetElementText(domOperLog.DocumentElement,
+    "readerRefID", strReaderRefID);
+
+                    DomUtil.SetElementText(domOperLog.DocumentElement,
+                        "itemBarcode", strItemBarcode);
+                    // 2024/2/20
+                    DomUtil.SetElementText(domOperLog.DocumentElement,
+    "itemRefID", strItemRefID);
+
                     if (String.IsNullOrEmpty(strConfirmItemRecPath) == false)
-                        DomUtil.SetElementText(domOperLog.DocumentElement, "confirmItemRecPath", strConfirmItemRecPath);
-                    DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
+                        DomUtil.SetElementText(domOperLog.DocumentElement,
+                            "confirmItemRecPath", strConfirmItemRecPath);
+                    DomUtil.SetElementText(domOperLog.DocumentElement,
+                        "operator",
     sessioninfo.UserID);
-                    DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
+                    DomUtil.SetElementText(domOperLog.DocumentElement,
+                        "operTime",
                         this.Clock.GetClock());
 
                     nRet = this.OperLog.WriteOperLog(domOperLog,
@@ -18348,13 +18533,12 @@ out strError);
                 finally
                 {
                     // 解册记录锁
-                    this.EntityLocks.UnlockForWrite(strItemBarcode);
+                    this.EntityLocks.UnlockForWrite(strItemKey);
                 }
-
             }
             finally
             {
-                this.ReaderLocks.UnlockForWrite(strReaderBarcode);
+                this.ReaderLocks.UnlockForWrite(strReaderKey);
 #if DEBUG_LOCK_READER
                 this.WriteErrorLog("RepairReaderSideError 结束为读者加写锁 '" + strReaderBarcode + "'");
 #endif
@@ -18372,6 +18556,114 @@ out strError);
             result.ErrorCode = ErrorCode.NoError;   // 表示链条本来就没有错误
             return result;
         }
+
+        // 根据册键和确认路径装载一条册记录
+        // parameters:
+        //      func_selectItems    命中多条时用于筛选的回调函数。
+        //                          如果为 null，表示用默认的方式以 strConfirmItemRecPath 对路径进行进一步筛选
+        // return:
+        //      -1  出错
+        //      0   没有找到
+        //      其它  命中的记录条数
+        int LoadItemRecord(RmsChannel channel,
+    string strItemKey,
+    string strConfirmItemRecPath,
+    delegate_selectItems func_selectItems,
+    out string strItemXml,
+    out byte[] item_timestamp,
+    out string strOutputItemRecPath,
+    out List<string> aPath,
+    out string strError)
+        {
+            strError = "";
+            aPath = new List<string>();
+
+            strItemXml = "";
+            strOutputItemRecPath = "";
+            item_timestamp = null;
+
+            // 获得册记录
+            // return:
+            //      -1  error
+            //      0   not found
+            //      1   命中1条
+            //      >1  命中多于1条
+            int nRet = this.GetItemRecXml(
+                channel,
+                strItemKey,
+                out strItemXml,
+                100,
+                out aPath,
+                out item_timestamp,
+                out strError);
+            if (nRet == 0)
+            {
+                return 0;
+            }
+            if (nRet == -1)
+            {
+                strError = "读入册条码号为 '" + strItemKey + "' 的册记录时发生错误: " + strError;
+                return -1;
+            }
+
+            if (aPath.Count > 0)
+                strOutputItemRecPath = aPath[0];
+
+            if (aPath.Count > 1)
+            {
+                if (func_selectItems != null)
+                {
+                    int ret = func_selectItems(aPath,
+                        ref strItemXml,
+                        ref item_timestamp,
+                        ref strOutputItemRecPath,
+                        out string error);
+                    if (ret == -1)
+                    {
+                        strError = $"命中记录多条({nRet})，在进一步选择的过程中出错: {error}";
+                        return -1;
+                    }
+                    return 1;
+                }
+                else
+                {
+                    // 缺省的筛选过程
+                    if (string.IsNullOrEmpty(strConfirmItemRecPath) == false)
+                    {
+                        foreach (var path in aPath)
+                        {
+                            if (path == strConfirmItemRecPath)
+                            {
+                                strOutputItemRecPath = path;
+                                long lRet = channel.GetRes(path,
+                                    out strItemXml,
+                                    out _,
+                                    out item_timestamp,
+                                    out _,
+                                    out strError);
+                                if (lRet == -1)
+                                    return -1;
+                                return 1;
+                            }
+                        }
+
+                        return nRet;
+                    }
+                }
+                return nRet;
+            }
+            /*
+            else
+            {
+                Debug.Assert(nRet == 1, "");
+                Debug.Assert(aPath.Count == 1, "");
+
+                strOutputItemRecPath = aPath[0];
+            }
+            */
+            return nRet;
+        }
+
 
         // 修复册记录一侧的借阅信息链条错误
         // 具体来说，就是册这边有借阅信息，但是指向的读者记录不存在，或者虽然存在但是
@@ -18472,7 +18764,7 @@ out strError);
                 if (nRet == 0)
                 {
                     /*
-                    strError = "读者证条码号 '" + strReaderBarcode + "' 不存在";
+                    strError = "读者证条码号 '" + strReaderKey + "' 不存在";
                     goto ERROR1;
                      * */
                 }

@@ -55,7 +55,39 @@ namespace DigitalPlatform.OPAC.Web
             }
         }
 
+        // 2024/2/20
+        // 作为管理员身份此时要查看的读者键。注意，不是指管理员自己的读者键
+        // 存储在Session中
+        public string ReaderKey
+        {
+            get
+            {
+                /*
+                object o = this.Page.Session[this.ID + "ReservationInfoControl_readerkey"];
+                if (o == null)
+                    return "";
+                return (string)o;
+                */
+                return TitleBarControl.GetReaderKey(this);
+            }
 
+            set
+            {
+                /*
+                // 清除 ReaderDom 缓存
+                {
+                    SessionInfo sessioninfo = (SessionInfo)this.Page.Session["sessioninfo"];
+                    if (sessioninfo != null)
+                        sessioninfo.RefreshLoginReaderDomCache(value);
+                }
+
+                this.Page.Session[this.ID + "ReservationInfoControl_readerkey"] = value;
+                */
+                TitleBarControl.SetReaderKey(this, value);
+            }
+        }
+
+#if REMOVED
         // 作为管理员身份此时要查看的读者证条码号。注意，不是指管理员自己的读者证
         // 存储在Session中
         public string ReaderBarcode
@@ -81,7 +113,7 @@ namespace DigitalPlatform.OPAC.Web
                 this.Page.Session[this.ID + "ReservationInfoControl_readerbarcode"] = value;
             }
         }
-
+#endif
 
         // 预约信息内容行数
         public int ReservationLineCount
@@ -142,7 +174,7 @@ namespace DigitalPlatform.OPAC.Web
                 + "<td class='left'></td>"
                 + "<td class='middle'>"
                 + this.GetString("预约请求")
-                + " " + HttpUtility.HtmlEncode(this.ReaderBarcode)
+                + " " + HttpUtility.HtmlEncode(this.ReaderKey)  // TODO: 需要改为更为友好的显示方式，比如优先证条码号
                 + "</td>"
                 + "<td class='right'></td>"
                 + "</tr>";
@@ -611,7 +643,7 @@ Control insertbefore)
 
             if (nRet == -2)
             {
-                if (String.IsNullOrEmpty(this.ReaderBarcode) == true)
+                if (String.IsNullOrEmpty(this.ReaderKey) == true)
                 {
                     // text-level: 内部错误
                     strError = "当前登录的用户不是reader类型，并且BorrowInfoControl.ReaderBarcode也为空";
@@ -622,13 +654,15 @@ Control insertbefore)
                 // if (sessioninfo.Account.Type != "worreader")
 
                 // 管理员获得特定证条码号的读者记录DOM
+                // parameters:
+                //      strReaderKey    读者键
                 // return:
                 //      -2  当前登录的用户不是librarian类型
                 //      -1  出错
                 //      0   尚未登录
                 //      1   成功
                 nRet = sessioninfo.GetOtherReaderDom(
-                    this.ReaderBarcode,
+                    this.ReaderKey,
                     out readerdom,
                     out strError);
                 if (nRet == -1 || nRet == -2)
@@ -669,13 +703,13 @@ Control insertbefore)
             OpacApplication app = (OpacApplication)this.Page.Application["app"];
             SessionInfo sessioninfo = (SessionInfo)this.Page.Session["sessioninfo"];
 
-            string strReaderBarcode = "";
-            if (String.IsNullOrEmpty(this.ReaderBarcode) == false)
-                strReaderBarcode = this.ReaderBarcode;
+            string strReaderKey = "";
+            if (String.IsNullOrEmpty(this.ReaderKey) == false)
+                strReaderKey = this.ReaderKey;
             else
-                strReaderBarcode = sessioninfo.ReaderInfo.Barcode;
+                strReaderKey = sessioninfo.ReaderInfo.ReaderKey;
 
-            if (String.IsNullOrEmpty(strReaderBarcode) == true)
+            if (String.IsNullOrEmpty(strReaderKey) == true)
             {
                 // text-level: 用户提示
                 this.SetDebugInfo("errorinfo", this.GetString("尚未指定读者证条码号。操作失败"));  // "尚未指定读者证条码号。操作失败。"
@@ -691,7 +725,7 @@ Control insertbefore)
                     channel.Reservation(
                     null,
                     "split",
-                    strReaderBarcode,
+                    strReaderKey,
                     strBarcodeList,
                     out strError);
                 if (lRet == -1)
@@ -726,13 +760,13 @@ Control insertbefore)
             OpacApplication app = (OpacApplication)this.Page.Application["app"];
             SessionInfo sessioninfo = (SessionInfo)this.Page.Session["sessioninfo"];
 
-            string strReaderBarcode = "";
-            if (String.IsNullOrEmpty(this.ReaderBarcode) == false)
-                strReaderBarcode = this.ReaderBarcode;
+            string strReaderKey = "";
+            if (String.IsNullOrEmpty(this.ReaderKey) == false)
+                strReaderKey = this.ReaderKey;
             else
-                strReaderBarcode = sessioninfo.ReaderInfo.Barcode;
+                strReaderKey = sessioninfo.ReaderInfo.ReaderKey;
 
-            if (String.IsNullOrEmpty(strReaderBarcode) == true)
+            if (String.IsNullOrEmpty(strReaderKey) == true)
             {
                 // text-level: 用户提示
                 this.SetDebugInfo("errorinfo", this.GetString("尚未指定读者证条码号。操作失败"));  // "尚未指定读者证条码号。操作失败。"
@@ -747,7 +781,7 @@ Control insertbefore)
                     channel.Reservation(
                     null,
                     "merge",
-                    strReaderBarcode,
+                    strReaderKey,
                     strBarcodeList,
                     out strError);
                 if (lRet == -1)
@@ -783,13 +817,13 @@ Control insertbefore)
             OpacApplication app = (OpacApplication)this.Page.Application["app"];
             SessionInfo sessioninfo = (SessionInfo)this.Page.Session["sessioninfo"];
 
-            string strReaderBarcode = "";
-            if (String.IsNullOrEmpty(this.ReaderBarcode) == false)
-                strReaderBarcode = this.ReaderBarcode;
+            string strReaderKey = "";
+            if (String.IsNullOrEmpty(this.ReaderKey) == false)
+                strReaderKey = this.ReaderKey;
             else
-                strReaderBarcode = sessioninfo.ReaderInfo.Barcode;
+                strReaderKey = sessioninfo.ReaderInfo.ReaderKey;
 
-            if (String.IsNullOrEmpty(strReaderBarcode) == true)
+            if (String.IsNullOrEmpty(strReaderKey) == true)
             {
                 // text-level: 用户提示
                 this.SetDebugInfo("errorinfo", this.GetString("尚未指定读者证条码号。操作失败"));  // "尚未指定读者证条码号。操作失败。"
@@ -799,14 +833,13 @@ Control insertbefore)
             LibraryChannel channel = sessioninfo.GetChannel(true);
             try
             {
-                string strError = "";
                 long lRet = // sessioninfo.Channel.
                     channel.Reservation(
                     null,
                     "delete",
-                    strReaderBarcode,
+                    strReaderKey,
                     strBarcodeList,
-                    out strError);
+                    out string strError);
                 if (lRet == -1)
                     this.SetDebugInfo("errorinfo", strError);
                 else

@@ -771,6 +771,7 @@ namespace DigitalPlatform.OPAC.Web
             return strTargetList;
         }
 
+        // TODO: strCreator 是否可用读者键，可能函数需要改造
         // 创建评注记录XML检索式
         // 用作者和作者显示名共同限定检索
         public static int BuildCommentQueryXml(

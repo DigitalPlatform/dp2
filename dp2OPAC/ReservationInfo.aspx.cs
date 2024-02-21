@@ -60,8 +60,8 @@ ref sessioninfo) == false)
         string strBarcode = this.Request["barcode"];
         // if (string.IsNullOrEmpty(strBarcode) == false)
         {
-            this.ReservationInfoControl1.ReaderBarcode = strBarcode;
-            this.FellBackInfoControl1.ReaderBarcode = strBarcode;
+            this.ReservationInfoControl1.ReaderKey = strBarcode;
+            this.FellBackInfoControl1.ReaderKey = strBarcode;
         }
     }
 

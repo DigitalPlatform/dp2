@@ -751,6 +751,37 @@ out string strPureName);
 
 
         #endregion
+
+        #region 和读者键、参考 ID 有关的函数
+
+        // 获得形态为 @refID:xxx 中的 xxx 部分
+        public static string GetRefIdValue(string text)
+        {
+            if (text.StartsWith("@refID:"))
+                return text.Substring("@refID:".Length);
+            return text;
+        }
+
+        // 构造读者键。优先使用参考 ID
+        public static string BuildReaderKey(string strReaderBarcode,
+            string strReaderRefID)
+        {
+            if (string.IsNullOrEmpty(strReaderRefID))
+                return strReaderBarcode;
+            return $"@refID:{strReaderRefID}";
+        }
+
+        // 构造读者键。优先使用条码号
+        public static string BuildReaderKeyLegacy(string strReaderBarcode,
+            string strReaderRefID)
+        {
+            if (string.IsNullOrEmpty(strReaderBarcode) == false)
+                return strReaderBarcode;
+            return $"@refID:{strReaderRefID}";
+        }
+
+        #endregion
+
     }
 
 

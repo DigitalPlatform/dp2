@@ -566,26 +566,26 @@ namespace DigitalPlatform.OPAC.Web
 
             Debug.Assert(String.IsNullOrEmpty(sessioninfo.UserID) == false, "");
 
-            // 获得读者证条码号
-            string strReaderBarcode = "";
+            // 获得读者键
+            string strReaderKey = "";
             if (String.IsNullOrEmpty(sessioninfo.UserID) == false
                 && sessioninfo.IsReader == true
                 && sessioninfo.ReaderInfo != null)
             {
-                // 如果为一般读者身份，帐户信息中具有证条码号
-                strReaderBarcode = sessioninfo.ReaderInfo.Barcode;
+                // 如果为一般读者身份，帐户信息中具有读者键
+                strReaderKey = sessioninfo.ReaderInfo.ReaderKey;
             }
             else
             {
-                // 否则从textbox中取得当时输入的证条码号
+                // 否则从textbox中取得当时输入的读者键
 
                 TextBox reservationreaderbarcode = (TextBox)this.FindControl("reservationreaderbarcode");
                 Debug.Assert(reservationreaderbarcode != null, "");
 
-                strReaderBarcode = reservationreaderbarcode.Text;
+                strReaderKey = reservationreaderbarcode.Text;
             }
 
-            if (strReaderBarcode == "")
+            if (string.IsNullOrEmpty(strReaderKey) == true)
             {
                 SetDebugInfo("errorinfo", this.GetString("尚未指定读者证条码号, 无法进行预约操作")); // "尚未指定读者证条码号, 无法进行预约操作。"
                 return;
@@ -594,13 +594,11 @@ namespace DigitalPlatform.OPAC.Web
             LibraryChannel channel = sessioninfo.GetChannel(true);
             try
             {
-                string strError = "";
-                long lRet = // sessioninfo.Channel.
-                    channel.Reservation(null,
+                long lRet = channel.Reservation(null,
                     "new",
-                    strReaderBarcode,
+                    strReaderKey,
                     strBarcodeList,
-                    out strError);
+                    out string strError);
                 if (lRet == -1)
                     SetDebugInfo("errorinfo", strError);
                 else
@@ -1029,15 +1027,14 @@ namespace DigitalPlatform.OPAC.Web
 
                 // 放入可能的内容 2008/9/27
                 if (sessioninfo.ReaderInfo != null
-                    // && String.IsNullOrEmpty(sessioninfo.ReaderInfo.ReaderDomBarcode) == false
-                    && String.IsNullOrEmpty(sessioninfo.ReaderInfo.Barcode) == false
+                    && String.IsNullOrEmpty(sessioninfo.ReaderInfo.ReaderKey) == false
                     )
                 {
                     TextBox reservationreaderbarcode = (TextBox)this.FindControl("reservationreaderbarcode");
                     Debug.Assert(reservationreaderbarcode != null, "");
 
                     // reservationreaderbarcode.Text = sessioninfo.ReaderInfo.ReaderDomBarcode;
-                    reservationreaderbarcode.Text = sessioninfo.ReaderInfo.Barcode;
+                    reservationreaderbarcode.Text = sessioninfo.ReaderInfo.ReaderDisplayKey;
                 }
             }
             else
@@ -1836,8 +1833,9 @@ namespace DigitalPlatform.OPAC.Web
 
                 if (loginstate == LoginState.Reader
                     /*sessioninfo.Account.Type == "reader"*/
-                    && sessioninfo.ReaderInfo.Barcode == strBorrower
-                    && String.IsNullOrEmpty(strBorrower) == false)
+                    && String.IsNullOrEmpty(strBorrower) == false
+                    && (sessioninfo.ReaderInfo.Barcode == strBorrower || $"@refID:{sessioninfo.ReaderInfo.PatronRefID}" == strBorrower)
+                    )
                 {
                     Debug.Assert(sessioninfo.ReaderInfo != null);
 
@@ -2075,8 +2073,9 @@ namespace DigitalPlatform.OPAC.Web
                     if (/*sessioninfo.Account != null
                     && sessioninfo.Account.Type == "reader"*/
                         loginstate == LoginState.Reader
-                        && sessioninfo.ReaderInfo.Barcode == strReader
-                        && String.IsNullOrEmpty(strReader) == false)
+                        && String.IsNullOrEmpty(strReader) == false
+                        && (sessioninfo.ReaderInfo.Barcode == strReader || $"@refID:{sessioninfo.ReaderInfo.PatronRefID}" == strReader)
+                        )
                     {
                         bMyselfReserver = true;
                     }

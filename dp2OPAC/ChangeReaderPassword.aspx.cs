@@ -80,7 +80,7 @@ ref sessioninfo) == false)
         out strError);
         }
         if (sessioninfo.ReaderInfo != null)
-            this.TextBox_readerBarcode.Text = sessioninfo.ReaderInfo.Barcode;
+            this.TextBox_readerBarcode.Text = sessioninfo.ReaderInfo.ReaderDisplayKey;
     }
 
     protected void Button_changePassword_Click(object sender, EventArgs e)

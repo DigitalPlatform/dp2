@@ -474,8 +474,8 @@ namespace DigitalPlatform.OPAC.Web
                 {
                     if (sessioninfo.IsReader == true
                         && sessioninfo.ReaderInfo != null
-                        && string.IsNullOrEmpty(sessioninfo.ReaderInfo.Barcode) == false)
-                        table["id"] = sessioninfo.ReaderInfo.Barcode;
+                        && string.IsNullOrEmpty(sessioninfo.ReaderInfo.ReaderKey) == false)
+                        table["id"] = sessioninfo.ReaderInfo.ReaderKey;
                     else
                         table["id"] = sessioninfo.UserID;
                 }

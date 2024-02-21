@@ -81,7 +81,7 @@ ref sessioninfo) == false)
 
             bool bHintDisplayName = false;  // []暗示为显示名
             string strDisplayName = this.Request["displayName"];
-            string strBarcode = this.Request["barcode"];
+            string strReaderKey = this.Request["barcode"];
             string strEncyptBarcode = Request.QueryString["encrypt_barcode"];
 
             string strText = "";
@@ -89,8 +89,8 @@ ref sessioninfo) == false)
             // 如果为加密的条码形态
             if (String.IsNullOrEmpty(strEncyptBarcode) == false)
             {
-                strBarcode = OpacApplication.DecryptPassword(strEncyptBarcode);
-                if (strBarcode == null)
+                strReaderKey = OpacApplication.DecryptPassword(strEncyptBarcode);
+                if (strReaderKey == null)
                 {
                     strError = "encrypt_barcode参数值格式错误";
                     goto ERROR1;
@@ -114,47 +114,42 @@ ref sessioninfo) == false)
 
                 if (String.IsNullOrEmpty(strDisplayName) == false)
                 {
-                    byte[] timestamp = null;
-
-                    string[] results = null;
                     long lRet = // temp_sessioninfo.Channel.
                         channel.GetReaderInfo(
                         null,
                         "@displayName:" + strDisplayName,
                         "xml",
-                        out results,
+                        out string[] results,
                         out strOutputReaderPath,
-                        out timestamp,
+                        out byte[] timestamp,
                         out strError);
                     if (lRet == -1)
                         goto ERROR1;
                     if (lRet == 0 && bHintDisplayName == true)
                     {
-                        strBarcode = "";
+                        strReaderKey = "";
                         goto SEARCH_COMMENT;
                     }
                     strReaderXml = results[0];
 
                 // CONTINUE1:
                     if (nRet == 0)
-                        strBarcode = strDisplayName;
+                        strReaderKey = strDisplayName;
                 }
 
             // SEARCH_BARCODE:
-                if (nRet == 0 && String.IsNullOrEmpty(strBarcode) == false)
+                if (nRet == 0 && String.IsNullOrEmpty(strReaderKey) == false)
                 {
                     strReaderXml = "";
-                    byte[] timestamp = null;
 
-                    string[] results = null;
                     long lRet = // temp_sessioninfo.Channel.
                         channel.GetReaderInfo(
                         null,
-                        strBarcode,
+                        strReaderKey,
                         "xml",
-                        out results,
+                        out string[] results,
                         out strOutputReaderPath,
-                        out timestamp,
+                        out byte[] timestamp,
                         out strError);
                     if (lRet == -1)
                         goto ERROR1;
@@ -171,8 +166,8 @@ ref sessioninfo) == false)
                     strError = "读者显示名或者证条码号 '" + strDisplayName + "' 不存在";
                     goto ERROR1;
                      * */
-                    if (String.IsNullOrEmpty(strBarcode) == true)
-                        strBarcode = strDisplayName;
+                    if (String.IsNullOrEmpty(strReaderKey) == true)
+                        strReaderKey = strDisplayName;
                     goto SEARCH_COMMENT;
                 }
 
@@ -189,13 +184,15 @@ ref sessioninfo) == false)
                 strDisplayName = DomUtil.GetElementText(readerdom.DocumentElement,
                     "displayName");
 
-                strBarcode = DomUtil.GetElementInnerXml(readerdom.DocumentElement,
+                /*
+                strReaderKey = DomUtil.GetElementInnerXml(readerdom.DocumentElement,
                     "barcode");
+                */
             }
         SEARCH_COMMENT:
             strText = strDisplayName;
             if (String.IsNullOrEmpty(strText) == true)
-                strText = strBarcode;
+                strText = strReaderKey;
 
             this.Label_name.Text = strText;
 
@@ -213,7 +210,7 @@ ref sessioninfo) == false)
             else
                 strRecipient = strBarcode;
              * */
-            strRecipient = BoxesInfo.BuildOneAddress(strDisplayName, strBarcode);
+            strRecipient = BoxesInfo.BuildOneAddress(strDisplayName, strReaderKey);
 
             string strSendMessageUrl = "./message.aspx?recipient=" + HttpUtility.UrlEncode(strRecipient);
             this.Button_sendMessage.OnClientClick = "window.open('" + strSendMessageUrl + "','_blank'); return cancelClick();";
@@ -227,7 +224,7 @@ ref sessioninfo) == false)
             if (String.IsNullOrEmpty(strEncyptBarcode) == false)
                 this.Image_photo.ImageUrl = "./getphoto.aspx?encrypt_barcode=" + HttpUtility.UrlEncode(strEncyptBarcode) + "&displayName=" + HttpUtility.UrlEncode(strDisplayName);
             else
-                this.Image_photo.ImageUrl = "./getphoto.aspx?barcode=" + HttpUtility.UrlEncode(strBarcode);
+                this.Image_photo.ImageUrl = "./getphoto.aspx?barcode=" + HttpUtility.UrlEncode(strReaderKey);
 
             this.Image_photo.Width = 128;
             this.Image_photo.Height = 128;
@@ -236,14 +233,14 @@ ref sessioninfo) == false)
             {
                 string strXml = "";
                 if (String.IsNullOrEmpty(strDisplayName) == false
-                    && String.IsNullOrEmpty(strBarcode) == false)
+                    && String.IsNullOrEmpty(strReaderKey) == false)
                 {
                     // 创建评注记录XML检索式
                     // 用作者和作者显示名共同限定检索
                     nRet = ItemSearchControl.BuildCommentQueryXml(
                         app,
                         strDisplayName,
-                        strBarcode,
+                        strReaderKey,
                         "<全部>",
                         15000,   // app.SearchMaxResultCount
                         true,
@@ -252,13 +249,13 @@ ref sessioninfo) == false)
                     if (nRet == -1)
                         goto ERROR1;
                 }
-                else if (String.IsNullOrEmpty(strBarcode) == false)
+                else if (String.IsNullOrEmpty(strReaderKey) == false)
                 {
                     // 创建XML检索式
                     nRet = ItemSearchControl.BuildQueryXml(
                         this.app,
                         "comment",
-                        strBarcode,
+                        strReaderKey,
                         "<全部>",
                         "作者",
                         "exact",

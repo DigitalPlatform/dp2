@@ -18,6 +18,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient;
+using DigitalPlatform.Text;
 //using DigitalPlatform.CirculationClient;
 
 namespace DigitalPlatform.OPAC.Web
@@ -908,6 +909,10 @@ namespace DigitalPlatform.OPAC.Web
             LiteralControl text = null;
             string strBarcode = DomUtil.GetElementText(ReaderDom.DocumentElement,
     "barcode");
+            string strRefID = DomUtil.GetElementText(ReaderDom.DocumentElement,
+    "refID");
+            // 2024/2/20
+            string strReaderKey = dp2StringUtil.BuildReaderKey(strBarcode, strRefID);
 
             // 显示名
             string strDisplayName = DomUtil.GetElementText(ReaderDom.DocumentElement,
@@ -937,7 +942,7 @@ namespace DigitalPlatform.OPAC.Web
 #endif
             text = (LiteralControl)this.FindControl("qrcode");
             if (text != null)
-                text.Text = "<img src='./getphoto.aspx?action=pqri&barcode=" + HttpUtility.UrlEncode(strBarcode) + "' alt='QRCode image'></img>";
+                text.Text = "<img src='./getphoto.aspx?action=pqri&barcode=" + HttpUtility.UrlEncode(strReaderKey) + "' alt='QRCode image'></img>";
 
             // 姓名
             string strName = DomUtil.GetElementText(ReaderDom.DocumentElement,
@@ -1083,7 +1088,7 @@ namespace DigitalPlatform.OPAC.Web
             }
 
             Image photo = (Image)this.FindControl("photo");
-            photo.ImageUrl = "./getphoto.aspx?barcode=" + strBarcode;
+            photo.ImageUrl = "./getphoto.aspx?barcode=" + strReaderKey;
 
             LoginState loginstate = GlobalUtil.GetLoginState(this.Page);
 
@@ -1092,7 +1097,8 @@ namespace DigitalPlatform.OPAC.Web
 
 
             if (loginstate == LoginState.Reader
-                && sessioninfo.ReaderInfo.Barcode == strBarcode)
+                && (sessioninfo.ReaderInfo.Barcode == strBarcode || sessioninfo.ReaderInfo.PatronRefID == strRefID)
+                )
             {
                 submit_button.Visible = true;
                 upload_photo_holder.Visible = true;

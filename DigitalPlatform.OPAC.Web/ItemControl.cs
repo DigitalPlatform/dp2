@@ -422,7 +422,8 @@ namespace DigitalPlatform.OPAC.Web
                 string strBorrowerText = "";
                 if (loginstate == LoginState.Librarian)
                     strBorrowerText = "<a href='./readerinfo.aspx?barcode=" + strBorrower + "' target='_blank'>" + strBorrower + "</a>";
-                else if (loginstate == LoginState.Reader && sessioninfo.ReaderInfo.Barcode == strBorrower)
+                else if (loginstate == LoginState.Reader
+                    && (sessioninfo.ReaderInfo.Barcode == strBorrower || $"@refID:{sessioninfo.ReaderInfo.PatronRefID}" == strBorrower))
                     strBorrowerText = strBorrower + "(" + this.GetString("我自己") + ")";
                 else
                     strBorrowerText = new string('*', strBorrower.Length);

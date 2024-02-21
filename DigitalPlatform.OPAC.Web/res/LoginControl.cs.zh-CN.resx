@@ -197,9 +197,17 @@
     <value>证号</value>
     <comment>TAB栏标题</comment>
   </data>
+	<data name="参考ID" xml:space="preserve">
+    <value>参考ID</value>
+    <comment>TAB栏标题</comment>
+  </data>
   <data name="证号不能为空" xml:space="preserve">
     <value>证号不能为空</value>
     <comment>“证号”</comment>
+  </data>
+  <data name="参考ID不能为空" xml:space="preserve">
+    <value>参考ID不能为空</value>
+    <comment>“参考ID”</comment>
   </data>
   <data name="证条码号" xml:space="preserve">
     <value>证条码号</value>

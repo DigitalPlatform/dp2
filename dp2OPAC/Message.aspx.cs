@@ -66,7 +66,7 @@ ref sessioninfo) == false)
             string strBarcode = "";
 
             strDisplayName = sessioninfo.ReaderInfo.DisplayName;
-            strBarcode = sessioninfo.ReaderInfo.Barcode;
+            strBarcode = sessioninfo.ReaderInfo.ReaderDisplayKey;
 
             strSenderName = BoxesInfo.BuildOneAddress(strDisplayName, strBarcode);
         }

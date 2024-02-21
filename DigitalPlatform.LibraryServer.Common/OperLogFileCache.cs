@@ -11,7 +11,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 
-namespace DigitalPlatform.LibraryServer.Common
+namespace DigitalPlatform.LibraryServer
 {
     // 事件日志
     public class OperLogFileCache : List<CacheFileItem>, IDisposable

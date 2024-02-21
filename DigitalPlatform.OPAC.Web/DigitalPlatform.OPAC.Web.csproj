@@ -182,7 +182,9 @@
     <EmbeddedResource Include="res\LoginControl.cs.en-US.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="res\LoginControl.cs.zh-CN.resx" />
+    <EmbeddedResource Include="res\LoginControl.cs.zh-CN.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="res\MessageControl.cs.en-US.resx" />
     <EmbeddedResource Include="res\MessageControl.cs.zh-CN.resx" />
     <EmbeddedResource Include="res\MessageListControl.cs.en-US.resx" />

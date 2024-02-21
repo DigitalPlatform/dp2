@@ -54,13 +54,13 @@ ref sessioninfo) == false)
             return;
         }
 
-        this.PersonalInfoControl1.ReaderBarcode = strReaderBarcode;
-        this.BorrowInfoControl1.ReaderBarcode = strReaderBarcode;
-        this.ReservationInfoControl1.ReaderBarcode = strReaderBarcode;
-        this.FellBackInfoControl1.ReaderBarcode = strReaderBarcode;
-        this.BorrowHistoryControl1.ReaderBarcode = strReaderBarcode;
+        this.PersonalInfoControl1.ReaderKey = strReaderBarcode;
+        this.BorrowInfoControl1.ReaderKey = strReaderBarcode;
+        this.ReservationInfoControl1.ReaderKey = strReaderBarcode;
+        this.FellBackInfoControl1.ReaderKey = strReaderBarcode;
+        this.BorrowHistoryControl1.ReaderKey = strReaderBarcode;
 
-        this.TitleBarControl1.ReaderBarcode = strReaderBarcode;
+        this.TitleBarControl1.ReaderKey = strReaderBarcode;
 
         // 防止前端浏览器缓存本页面
         this.Response.AddHeader("Cache-Control", "no-store");

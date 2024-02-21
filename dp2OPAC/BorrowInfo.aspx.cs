@@ -77,8 +77,8 @@ ref sessioninfo) == false)
         string strBarcode = this.Request["barcode"];
         // if (string.IsNullOrEmpty(strBarcode) == false)
         {
-            this.BorrowHistoryControl1.ReaderBarcode = strBarcode;
-            this.BorrowInfoControl1.ReaderBarcode = strBarcode;
+            this.BorrowHistoryControl1.ReaderKey = strBarcode;
+            this.BorrowInfoControl1.ReaderKey = strBarcode;
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using DigitalPlatform.IO;
+using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.Xml;
 using Jint.Parser.Ast;
 using System;
@@ -42,6 +43,8 @@ namespace DigitalPlatform.LibraryServer
                 return this.m_bClosed;
             }
         }
+
+#if REMOVED
 
         // 解析 开始 参数
         static int ParseLogRecoverStart(string strStart,
@@ -134,6 +137,8 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
+#endif
+
         // 一次操作循环
         public override void Worker()
         {
@@ -148,13 +153,19 @@ namespace DigitalPlatform.LibraryServer
 
             string strError = "";
 
+            if (this.App.ChargingOperDatabase.Enabled == false)
+            {
+                this.AppendResultText("启动失败: 当前尚未启用 mongodb 各项数据库\r\n");
+                return;
+            }
+
             BatchTaskStartInfo startinfo = this.StartInfo;
             if (startinfo == null)
                 startinfo = new BatchTaskStartInfo();   // 按照缺省值来
 
             long lStartIndex = 0;// 开始位置
             string strStartFileName = "";// 开始文件名
-            int nRet = ParseLogRecoverStart(startinfo.Start,
+            int nRet = LogRecoverStart.ParseLogRecoverStart(startinfo.Start,
                 out lStartIndex,
                 out strStartFileName,
                 out strError);
@@ -168,9 +179,12 @@ namespace DigitalPlatform.LibraryServer
             bool bClearFirst = false;
             bool bContinueWhenError = false;
 
-            nRet = ParseLogRecoverParam(startinfo.Param,
+            nRet = LogRecoverParam.ParseLogRecoverParam(startinfo.Param,
+                out string strDirectory,
+                out string strRecoverLevel,
                 out bClearFirst,
                 out bContinueWhenError,
+                out string style,
                 out strError);
             if (nRet == -1)
             {
@@ -213,8 +227,17 @@ namespace DigitalPlatform.LibraryServer
                 bStart = true;
             }
 
+            if (string.IsNullOrEmpty(strDirectory))
+            {
+                strDirectory = this.App.OperLog.Directory;
+                this.AppendResultText($"日志文件目录为 dp2library 默认操作日志目录 {strDirectory}\r\n");
+            }
+            else
+                this.AppendResultText($"日志文件目录为前端指定的目录 {strDirectory}\r\n");
+
+
             // 列出所有日志文件
-            DirectoryInfo di = new DirectoryInfo(this.App.OperLog.Directory);
+            DirectoryInfo di = new DirectoryInfo(strDirectory/*this.App.OperLog.Directory*/);
 
             FileInfo[] fis = di.GetFiles("????????.log");
 
@@ -250,7 +273,9 @@ namespace DigitalPlatform.LibraryServer
                     if (strEndDate + ".log" == strFileName)
                         lMax = lRecCount;
 
-                    nRet = DoOneLogFile(strFileName,
+                    nRet = DoOneLogFile(
+                        strDirectory,
+                        strFileName,
                         lStartIndex,
                         lMax,
                         bContinueWhenError,
@@ -316,7 +341,9 @@ namespace DigitalPlatform.LibraryServer
         //      -1  error
         //      0   file not found
         //      1   succeed
-        int DoOneLogFile(string strFileName,
+        int DoOneLogFile(
+            string strDirectory,
+            string strFileName,
             long lStartIndex,
             long lMax,
             bool bContinueWhenError,
@@ -326,86 +353,118 @@ namespace DigitalPlatform.LibraryServer
 
             this.AppendResultText("做文件 " + strFileName + "\r\n");
 
-            Debug.Assert(this.App != null, "");
-            long lIndex = 0;
-            long lHint = -1;
-            long lHintNext = -1;
-            for (lIndex = lStartIndex; ; lIndex++)
+            var cache = new OperLogFileCache();
+            string strTempFileName = this.App.GetTempFileName("logrecover");    // Path.GetTempFileName();
+            try
             {
-                if (this.Stopped == true)
-                    break;
-
-                if (lMax != -1 && lIndex >= lMax)
-                    break;
-
-                string strXml = "";
-
-                if (lIndex != 0)
-                    lHint = lHintNext;
-
-                SetProgressText(strFileName + " 记录" + (lIndex + 1).ToString());
-
-                // 获得一个日志记录
-                // parameters:
-                //      strFileName 纯文件名,不含路径部分
-                //      lHint   记录位置暗示性参数。这是一个只有服务器才能明白含义的值，对于前端来说是不透明的。
-                //              目前的含义是记录起始位置。
-                // return:
-                //      -1  error
-                //      0   file not found
-                //      1   succeed
-                //      2   超过范围
-                int nRet = this.App.OperLog.GetOperLog(
-                    "*",
-                    strFileName,
-                    lIndex,
-                    lHint,
-                    "", // level-0
-                    "", // strFilter // TODO: 可以考虑用过滤方式加快速度
-                    out lHintNext,
-                    out strXml,
-                    out long lAttachmentLength, // attachment,
-                    out strError);
-                if (nRet == -1)
+                Debug.Assert(this.App != null, "");
+                long lIndex = 0;
+                long lHint = -1;
+                long lHintNext = -1;
+                for (lIndex = lStartIndex; ; lIndex++)
                 {
-                    // 2017/5/9
-                    this.AppendResultText("*** 获得日志记录 " + strFileName + " " + (lIndex).ToString() + " 时发生错误：" + strError + "\r\n");
-                    if (bContinueWhenError == false)
-                        return -1;
-                } 
-                if (nRet == 0)
-                    return 0;
-                if (nRet == 2)
-                {
-                    // 最后一条补充提示一下
-                    if (((lIndex - 1) % 100) != 0)
-                        this.AppendResultText("做日志记录 " + strFileName + " " + (lIndex).ToString() + "\r\n");
-                    break;
+                    if (this.Stopped == true)
+                        break;
+
+                    if (lMax != -1 && lIndex >= lMax)
+                        break;
+
+                    string strXml = "";
+
+                    if (lIndex != 0)
+                        lHint = lHintNext;
+
+                    SetProgressText(strFileName + " 记录" + (lIndex + 1).ToString());
+
+                    using (Stream attachment = File.Create(strTempFileName))
+                    {
+                        // 获得一个日志记录
+                        // parameters:
+                        //      strFileName 纯文件名,不含路径部分
+                        //      lHint   记录位置暗示性参数。这是一个只有服务器才能明白含义的值，对于前端来说是不透明的。
+                        //              目前的含义是记录起始位置。
+                        // return:
+                        //      -1  error
+                        //      0   file not found
+                        //      1   succeed
+                        //      2   超过范围
+                        int nRet = /*this.App.*/OperLogUtility.GetOperLog(
+                            cache,
+                            strDirectory,
+                            //"*",
+                            strFileName,
+                            lIndex,
+                            lHint,
+                            "supervisor", // level-0
+                            "", // strFilter // TODO: 可以考虑用过滤方式加快速度
+                            (ref string xml, out string error) =>
+                            {
+                                error = "";
+                                // 限制记录观察范围
+                                // 虽然是全局用户，也要限制记录尺寸
+                                int ret = OperLog.ResizeXml(
+                                    "supervisor",
+                                    "",
+                                    ref xml,
+                                    out error);
+                                if (ret == -1)
+                                {
+                                    ret = 1;   // 只好返回
+                                }
+                                return ret;
+                            },
+                            out lHintNext,
+                            out strXml,
+                            attachment,
+                            // out long lAttachmentLength, // attachment,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            // 2017/5/9
+                            this.AppendResultText("*** 获得日志记录 " + strFileName + " " + (lIndex).ToString() + " 时发生错误：" + strError + "\r\n");
+                            if (bContinueWhenError == false)
+                                return -1;
+                        }
+                        if (nRet == 0)
+                            return 0;
+                        if (nRet == 2)
+                        {
+                            // 最后一条补充提示一下
+                            if (((lIndex - 1) % 100) != 0)
+                                this.AppendResultText("做日志记录 " + strFileName + " " + (lIndex).ToString() + "\r\n");
+                            break;
+                        }
+
+                        // 处理一个日志记录
+
+                        if ((lIndex % 100) == 0)
+                            this.AppendResultText("做日志记录 " + strFileName + " " + (lIndex + 1).ToString() + "\r\n");
+
+                        /*
+                        // 测试时候在这里安排跳过
+                        if (lIndex == 1 || lIndex == 2)
+                            continue;
+                        * */
+
+                        nRet = DoOperLogRecord(strXml,
+                            // attachment,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            this.AppendResultText("*** 做日志记录 " + strFileName + " " + (lIndex).ToString() + " 时发生错误：" + strError + "\r\n");
+                            if (bContinueWhenError == false)
+                                return -1;
+                        }
+                    }
                 }
 
-                // 处理一个日志记录
-
-                if ((lIndex % 100) == 0)
-                    this.AppendResultText("做日志记录 " + strFileName + " " + (lIndex + 1).ToString() + "\r\n");
-
-                /*
-                // 测试时候在这里安排跳过
-                if (lIndex == 1 || lIndex == 2)
-                    continue;
-                * */
-
-                nRet = DoOperLogRecord(strXml,
-                    // attachment,
-                    out strError);
-                if (nRet == -1)
-                {
-                    this.AppendResultText("*** 做日志记录 " + strFileName + " " + (lIndex).ToString() + " 时发生错误：" + strError + "\r\n");
-                    if (bContinueWhenError == false)
-                        return -1;
-                }
+                return 0;
             }
-
-            return 0;
+            finally
+            {
+                File.Delete(strTempFileName);
+                cache.Dispose();
+            }
         }
 
         // 执行一个日志记录的动作
@@ -469,6 +528,8 @@ namespace DigitalPlatform.LibraryServer
 
         // 将一条 borrow 或 return 操作日志信息加入 mongodb 日志库
         // mongodb 日志库的意义在于提供借阅历史检索功能
+        // 日志记录格式见:
+        // https://github.com/DigitalPlatform/dp2/issues/1184
         public static int AppendOperationBorrowReturn(
             LibraryApplication app,
             XmlDocument domOperLog,
@@ -493,8 +554,8 @@ namespace DigitalPlatform.LibraryServer
             // 2024/2/6
             string itemRefID = DomUtil.GetElementText(domOperLog.DocumentElement,
     "itemRefID");
-            string patronRefID = DomUtil.GetElementText(domOperLog.DocumentElement,
-                "patronRefID");
+            string readerRefID = DomUtil.GetElementText(domOperLog.DocumentElement,
+                "readerRefID");
             if (string.IsNullOrEmpty(itemRefID) == false)
                 item.ItemBarcode = $"@refID:{itemRefID}";
             else
@@ -504,8 +565,8 @@ namespace DigitalPlatform.LibraryServer
                     item.ItemBarcode = $"@refID:{refID}";
             }
 
-            if (string.IsNullOrEmpty(patronRefID) == false)
-                item.PatronBarcode = $"@refID:{patronRefID}";
+            if (string.IsNullOrEmpty(readerRefID) == false)
+                item.PatronBarcode = $"@refID:{readerRefID}";
             else
             {
                 var refID = GetRefID(domOperLog, "readerRecord");
@@ -573,7 +634,7 @@ namespace DigitalPlatform.LibraryServer
                     }
                     catch (Exception ex)
                     {
-                        strError = $"AppendOperationBorrowReturn() 中 borrowDate 元素内容 '{ strOperTime}' 格式错误:{ ex.Message}\r\n日志记录 XML 如下:\r\n{domOperLog.OuterXml}";
+                        strError = $"AppendOperationBorrowReturn() 中 borrowDate 元素内容 '{strOperTime}' 格式错误:{ex.Message}\r\n日志记录 XML 如下:\r\n{domOperLog.OuterXml}";
                         app.WriteErrorLog(strError);
                     }
                 }

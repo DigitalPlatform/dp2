@@ -210,6 +210,11 @@ namespace DigitalPlatform.OPAC.Web
                 TextBox tel = (TextBox)this.FindControl("cardnumber");
                 tel.Text = strName;
             }
+            else if (this.ActiveLoginColumn == LoginColumn.RefID)
+            {
+                TextBox tel = (TextBox)this.FindControl("refid");
+                tel.Text = strName;
+            }
             else if (this.ActiveLoginColumn == LoginColumn.ID)
             {
                 TextBox userid = (TextBox)this.FindControl("userid");
@@ -303,6 +308,13 @@ namespace DigitalPlatform.OPAC.Web
             this.Controls.Add(cardnumber);
 
             CreateCardNumber(cardnumber);
+
+            // 参考ID
+            PlaceHolder refid = new PlaceHolder();
+            refid.ID = "refidline";
+            this.Controls.Add(refid);
+
+            CreateRefID(refid);
 
             // 密码
             PlaceHolder password = new PlaceHolder();
@@ -481,6 +493,13 @@ namespace DigitalPlatform.OPAC.Web
                     this.GetString("身份证号"));
                 results.Add(LoginColumn.IdCardNumber);
 
+                // 2024/2/20
+                // 参考ID
+                CreateOneColumn(LoginColumn.RefID.ToString(),
+                    this.GetString("参考ID"));
+                results.Add(LoginColumn.RefID);
+
+
                 // 馆员
                 CreateOneColumn(LoginColumn.Librarian.ToString(),
                     this.GetString("馆员"),
@@ -536,7 +555,14 @@ namespace DigitalPlatform.OPAC.Web
                     CreateOneColumn(LoginColumn.CardNumber.ToString(),
                         string.IsNullOrEmpty(strCaption) == false ? strCaption : this.GetString("证号"));
                     results.Add(LoginColumn.CardNumber);
-               }
+                }
+                else if (strName == "参考ID")
+                {
+                    // 参考ID
+                    CreateOneColumn(LoginColumn.RefID.ToString(),
+                        string.IsNullOrEmpty(strCaption) == false ? strCaption : this.GetString("参考ID"));
+                    results.Add(LoginColumn.RefID);
+                }
                 else if (strName == "访客登录")
                 {
                     // 访客登录
@@ -899,6 +925,21 @@ string strWrapperClass)
             line.Controls.Add(new LiteralControl("</td></tr>"));
         }
 
+        // 2024/2/20
+        void CreateRefID(PlaceHolder line)
+        {
+            line.Controls.Add(new LiteralControl("<tr class='refid' align='left'><td class='name'>"
+                + this.GetCaption("参考ID")
+                + "</td><td class='value'>"));
+
+            TextBox textbox = new TextBox();
+            textbox.ID = "refid";
+            line.Controls.Add(textbox);
+
+            line.Controls.Add(new LiteralControl("</td></tr>"));
+        }
+
+
         // 帐户命中多条时复选
         void CreateMultipleLine(PlaceHolder line)
         {
@@ -1061,6 +1102,7 @@ string strWrapperClass)
             PlaceHolder telephoneline = (PlaceHolder)this.FindControl("telephoneline");
             PlaceHolder idcardnumberline = (PlaceHolder)this.FindControl("idcardnumberline");
             PlaceHolder cardnumberline = (PlaceHolder)this.FindControl("cardnumberline");
+            PlaceHolder refidline = (PlaceHolder)this.FindControl("refidline");
             PlaceHolder multipleline = (PlaceHolder)this.FindControl("multipleline");
 
             string strClassName = this.ActiveLoginColumn.ToString() + "_class";
@@ -1077,6 +1119,7 @@ string strWrapperClass)
                 telephoneline.Visible = false;
                 idcardnumberline.Visible = false;
                 cardnumberline.Visible = false;
+                refidline.Visible = false;
             }
             else if (this.ActiveLoginColumn == LoginColumn.Barcode)
             {
@@ -1087,6 +1130,7 @@ string strWrapperClass)
                 telephoneline.Visible = false;
                 idcardnumberline.Visible = false;
                 cardnumberline.Visible = false;
+                refidline.Visible = false;
             }
             else if (this.ActiveLoginColumn == LoginColumn.NameBirthdate)
             {
@@ -1097,6 +1141,7 @@ string strWrapperClass)
                 telephoneline.Visible = false;
                 idcardnumberline.Visible = false;
                 cardnumberline.Visible = false;
+                refidline.Visible = false;
             }
             else if (this.ActiveLoginColumn == LoginColumn.Email)
             {
@@ -1107,6 +1152,7 @@ string strWrapperClass)
                 telephoneline.Visible = false;
                 idcardnumberline.Visible = false;
                 cardnumberline.Visible = false;
+                refidline.Visible = false;
             }
             else if (this.ActiveLoginColumn == LoginColumn.Telephone)
             {
@@ -1117,6 +1163,7 @@ string strWrapperClass)
                 telephoneline.Visible = true;
                 idcardnumberline.Visible = false;
                 cardnumberline.Visible = false;
+                refidline.Visible = false;
             }
             else if (this.ActiveLoginColumn == LoginColumn.IdCardNumber)
             {
@@ -1127,6 +1174,7 @@ string strWrapperClass)
                 telephoneline.Visible = false;
                 idcardnumberline.Visible = true;
                 cardnumberline.Visible = false;
+                refidline.Visible = false;
             }
             else if (this.ActiveLoginColumn == LoginColumn.CardNumber)
             {
@@ -1137,6 +1185,18 @@ string strWrapperClass)
                 telephoneline.Visible = false;
                 idcardnumberline.Visible = false;
                 cardnumberline.Visible = true;
+                refidline.Visible = false;
+            }
+            else if (this.ActiveLoginColumn == LoginColumn.RefID)
+            {
+                useridline.Visible = false;
+                barcodeline.Visible = false;
+                namebirthdateline.Visible = false;
+                emailline.Visible = false;
+                telephoneline.Visible = false;
+                idcardnumberline.Visible = false;
+                cardnumberline.Visible = false;
+                refidline.Visible = true;
             }
             else if (this.ActiveLoginColumn == LoginColumn.Guest)
             {
@@ -1147,6 +1207,7 @@ string strWrapperClass)
                 telephoneline.Visible = false;
                 idcardnumberline.Visible = false;
                 cardnumberline.Visible = false;
+                refidline.Visible = false;
             }
             else
             {
@@ -1367,6 +1428,8 @@ string strWrapperClass)
                 return LoginColumn.IdCardNumber;
             else if (strPrefix == "CN")
                 return LoginColumn.CardNumber;
+            else if (strPrefix == "RI")
+                return LoginColumn.RefID;
             else if (strPrefix == "WK")
                 return LoginColumn.ID;
             return LoginColumn.Barcode;
@@ -1394,6 +1457,10 @@ string strWrapperClass)
             else if (column == LoginColumn.IdCardNumber)
             {
                 return "ID";
+            }
+            else if (column == LoginColumn.RefID)
+            {
+                return "RI";
             }
             else if (column == LoginColumn.CardNumber)
             {
@@ -1501,6 +1568,16 @@ string strWrapperClass)
                     goto ERROR1;
                 }
                 strUserName = "CN:" + tel.Text;
+            }
+            else if (this.ActiveLoginColumn == LoginColumn.RefID)
+            {
+                TextBox tel = (TextBox)this.FindControl("refid");
+                if (tel.Text == "")
+                {
+                    strError = this.GetString("参考ID不能为空");
+                    goto ERROR1;
+                }
+                strUserName = "RI:" + tel.Text;
             }
 
             long lRet = 0;
@@ -1681,11 +1758,12 @@ string strWrapperClass)
         Email = 3,
         Telephone = 4,
         IdCardNumber = 5,   // 2009/9/22 身份证号
-        CardNumber = 6,   // 2012/11/12 证号
+        CardNumber = 6,     // 2012/11/12 证号
+        RefID = 7,          // 2024/2/20 参考ID
 
-        Patron = 7, // 读者登录方式
-        Librarian = 8,  // 馆员登录方式
-        Guest = 9,  // 访客登录
+        Patron = 8, // 读者登录方式
+        Librarian = 9,  // 馆员登录方式
+        Guest = 10,  // 访客登录
     }
 
     public delegate void LoginEventHandler(object sender,

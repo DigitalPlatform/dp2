@@ -264,6 +264,7 @@ namespace DigitalPlatform.LibraryServer
             this.AppendResultText("做文件 " + strFileName + "\r\n");
 
             Debug.Assert(this.App != null, "");
+            var cache = new OperLogFileCache();
             string strTempFileName = this.App.GetTempFileName("logrecover");    // Path.GetTempFileName();
             try
             {
@@ -300,14 +301,31 @@ namespace DigitalPlatform.LibraryServer
                         //      0   file not found
                         //      1   succeed
                         //      2   超过范围
-                        int nRet = /*this.App.*/OperLog.GetOperLog(
+                        int nRet = /*this.App.*/OperLogUtility.GetOperLog(
+                            cache,
                             strDirectory,
-                            "*",
+                            //"*",
                             strFileName,
                             lIndex,
                             lHint,
                             "supervisor", // level-0
                             "", // strFilter
+                            (ref string xml, out string error) =>
+                            {
+                                error = "";
+                                // 限制记录观察范围
+                                // 虽然是全局用户，也要限制记录尺寸
+                                int ret = OperLog.ResizeXml(
+                                    "supervisor",
+                                    "",
+                                    ref xml,
+                                    out error);
+                                if (ret == -1)
+                                {
+                                    ret = 1;   // 只好返回
+                                }
+                                return ret;
+                            },
                             out lHintNext,
                             out strXml,
                             // ref attachment,
@@ -361,6 +379,7 @@ namespace DigitalPlatform.LibraryServer
             finally
             {
                 File.Delete(strTempFileName);
+                cache.Dispose();
             }
         }
 

@@ -66,8 +66,6 @@ namespace DigitalPlatform.OPAC.Web
             return langs[1];
         }
 
-        // public string ReaderBarcode = "";   // 作为管理员身份此时要查看的读者证条码号。注意，不是指管理员自己的读者证
-
         public static string GetLang(System.Web.UI.Page page,
             string strSelControlID)
         {
@@ -101,6 +99,60 @@ namespace DigitalPlatform.OPAC.Web
             return langs[1];
         }
 
+        // 2024/2/20
+        // 作为管理员身份此时要查看的读者键。注意，不是指管理员自己的读者键
+        // 存储在Session中
+        public string ReaderKey
+        {
+            get
+            {
+                /*
+                object o = this.Page.Session[this.ID + "TitleBarControl_readerkey"];
+                if (o == null)
+                    return "";
+                return (string)o;
+                */
+                return GetReaderKey(this);
+            }
+
+            set
+            {
+                /*
+                // 清除 ReaderDom 缓存
+                {
+                    SessionInfo sessioninfo = (SessionInfo)this.Page.Session["sessioninfo"];
+                    if (sessioninfo != null)
+                        sessioninfo.RefreshLoginReaderDomCache(value);
+                }
+                this.Page.Session[this.ID + "TitleBarControl_readerkey"] = value;
+                */
+                SetReaderKey(this, value);
+            }
+        }
+
+        public static string GetReaderKey(WebControl control)
+        {
+            var className = control.GetType().Name;
+            object o = control.Page.Session[$"{control.ID}{className}_readerkey"];
+            if (o == null)
+                return "";
+            return (string)o;
+        }
+
+        public static void SetReaderKey(WebControl control,
+            string value)
+        {
+            // 清除 ReaderDom 缓存
+            {
+                SessionInfo sessioninfo = (SessionInfo)control.Page.Session["sessioninfo"];
+                if (sessioninfo != null)
+                    sessioninfo.RefreshLoginReaderDomCache(value);
+            }
+            var className = control.GetType().Name;
+            control.Page.Session[$"{control.ID}{className}_readerkey"] = value;
+        }
+
+#if REMOVED
         // 作为管理员身份此时要查看的读者证条码号。注意，不是指管理员自己的读者证
         // 存储在Session中
         public string ReaderBarcode
@@ -125,6 +177,7 @@ namespace DigitalPlatform.OPAC.Web
                 this.Page.Session[this.ID + "TitleBarControl_readerbarcode"] = value;
             }
         }
+#endif
 
         // 当前所在的栏目
         public TitleColumn CurrentColumn = TitleColumn.None;
@@ -496,7 +549,6 @@ strLibraryStyleDir,
             {
                 EnvValue env = new EnvValue();
 
-                XmlDocument readerdom = null;
                 // 获得当前session中已经登录的读者记录DOM
                 // return:
                 //      -2  当前登录的用户不是reader类型
@@ -504,7 +556,7 @@ strLibraryStyleDir,
                 //      0   尚未登录
                 //      1   成功
                 int nRet = sessioninfo.GetLoginReaderDom(
-                    out readerdom,
+                    out XmlDocument readerdom,
                     out strError);
                 if (nRet == -1 || nRet == -2)
                     goto ERROR1;
@@ -520,7 +572,6 @@ strLibraryStyleDir,
                 XmlNode preference = readerdom.DocumentElement.SelectSingleNode("preference");
                 if (preference != null)
                 {
-
                     XmlNode webui = preference.SelectSingleNode("webui");
                     if (webui != null)
                     {
@@ -1240,7 +1291,7 @@ strLibraryStyleDir,
                 HyperLink hyperlink = null;
 
                 if (loginstate == LoginState.Librarian
-                    && this.ReaderBarcode != "")
+                    && string.IsNullOrEmpty(this.ReaderKey) == false)
                 {
 
                     // 其余栏目
@@ -1257,8 +1308,8 @@ strLibraryStyleDir,
                     hyperlink = new HyperLink();
                     hyperlink.ID = "ReaderInfo";
                     hyperlink.Text = this.GetString("读者")
-                        + " " + this.ReaderBarcode;
-                    hyperlink.NavigateUrl = "./readerinfo.aspx?barcode=" + this.ReaderBarcode;
+                        + " " + this.ReaderKey; // TODO: 可以改为更为友好的显示形态，比如优先证条码号
+                    hyperlink.NavigateUrl = "./readerinfo.aspx?barcode=" + this.ReaderKey;
                     this.Controls.Add(hyperlink);
 
                     literal = new AutoIndentLiteral();
@@ -1600,7 +1651,7 @@ strLibraryStyleDir,
                 }
 
                 if (loginstate == LoginState.Librarian
-&& String.IsNullOrEmpty(this.ReaderBarcode) == true)
+&& String.IsNullOrEmpty(this.ReaderKey) == true)
                 {
 
                     // 工作人员的管理功能
@@ -1651,7 +1702,6 @@ strLibraryStyleDir,
         {
             int nParentCount = GetParentCount();
             writer.Indent += nParentCount;
-
 
             OpacApplication app = null;
             SessionInfo sessioninfo = null;

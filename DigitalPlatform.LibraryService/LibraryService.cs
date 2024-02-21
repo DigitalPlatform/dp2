@@ -13756,7 +13756,7 @@ public int Type;	// 类型：0 库 / 1 途径 / 4 cfgs / 5 file
 
                         // 重新初始化虚拟库定义
                         app.vdbs = null;
-                        nRet = app.InitialVdbs(sessioninfo.Channels,
+                        nRet = app.InitialVdbs(app.GetRmsChannel(sessioninfo),  // sessioninfo.Channels,
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
@@ -14078,7 +14078,6 @@ strLibraryCodeList);
                 if (strAction == "upgradefromdt1000_crossref")
                 {
                     return app.CrossRefBorrowInfo(
-                        // sessioninfo.Channels,
                         channel,
                         strReaderBarcode,
                         nStart,
@@ -14095,7 +14094,6 @@ strLibraryCodeList);
                     //      0   检查无错。
                     //      1   检查发现有错。
                     return app.CheckReaderBorrowInfo(
-                        // sessioninfo.Channels,
                         channel,
                         strReaderBarcode,
                         nStart,
@@ -14117,7 +14115,6 @@ strLibraryCodeList);
                     //      0   实体记录中没有借阅信息，或者检查发现无错。
                     //      1   检查发现有错。
                     return app.CheckItemBorrowInfo(
-                        // sessioninfo.Channels,
                         channel,
                         null,   // string strLockedReaderBarcode,
                         null,   // XmlDocument exist_readerdom,

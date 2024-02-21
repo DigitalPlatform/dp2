@@ -1377,6 +1377,8 @@ namespace DigitalPlatform.OPAC.Server
             string strUserID = sessioninfo.UserID;
             if (String.IsNullOrEmpty(strUserID) == true)
                 return null;
+            // 2024/2/20
+            strUserID = PathUtil.GetValidPathString(strUserID);
             string strType = "reader";
             if (sessioninfo.IsReader == false)
                 strType = "worker";

@@ -713,7 +713,7 @@ namespace DigitalPlatform.LibraryServer
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
-                    refID = GetRefIdValue(strReaderRefIdString);
+                    refID = dp2StringUtil.GetRefIdValue(strReaderRefIdString);
 
                     if (sessioninfo.AmerceReaderRefID != refID)
                     {
@@ -1512,7 +1512,7 @@ namespace DigitalPlatform.LibraryServer
                 out string strReaderRefIdString,
                 out strError);
             if (nRet != -1)
-                strReaderRefID = GetRefIdValue(strReaderRefIdString);
+                strReaderRefID = dp2StringUtil.GetRefIdValue(strReaderRefIdString);
 
             long lRet = 0;
 
@@ -1608,7 +1608,7 @@ namespace DigitalPlatform.LibraryServer
                     strReaderBarcode,
                     strReaderRefID) == false)
                 {
-                    strError = "ID为 '" + strAmercedItemId + "' 的已付违约金记录，并不是属于所指定的读者 '" + BuildReaderKey(strReaderBarcode, strReaderRefID) + "'，而是属于另一读者 '" + strOutputReaderKey + "'";
+                    strError = "ID为 '" + strAmercedItemId + "' 的已付违约金记录，并不是属于所指定的读者 '" + dp2StringUtil.BuildReaderKey(strReaderBarcode, strReaderRefID) + "'，而是属于另一读者 '" + strOutputReaderKey + "'";
                     return -1;
                 }
                 /*
@@ -2262,7 +2262,7 @@ namespace DigitalPlatform.LibraryServer
                     out string strItemRefIdString,
                     out strError);
                 if (nRet != -1)
-                    strItemRefID = GetRefIdValue(strItemRefIdString);
+                    strItemRefID = dp2StringUtil.GetRefIdValue(strItemRefIdString);
             }
 
             string strItemRecPath = DomUtil.GetAttr(nodeOverdue, "recPath");
@@ -3606,7 +3606,7 @@ out strError);
                     }
                     else
                     {
-                        var refID = GetRefIdValue(readerRefIdString);
+                        var refID = dp2StringUtil.GetRefIdValue(readerRefIdString);
                         var element = DomUtil.SetElementText(dom.DocumentElement,
                             "readerRefID", refID);
                         element.SetAttribute("comment", $"{now.ToLongTimeString()} 自动升级");
@@ -3634,7 +3634,7 @@ out strError);
                     }
                     else
                     {
-                        var refID = GetRefIdValue(itemRefIdString);
+                        var refID = dp2StringUtil.GetRefIdValue(itemRefIdString);
                         var element = DomUtil.SetElementText(dom.DocumentElement,
                             "itemRefID", refID);
                         element.SetAttribute("comment", $"{now.ToLongTimeString()} 自动升级");

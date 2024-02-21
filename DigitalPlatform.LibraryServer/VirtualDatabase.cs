@@ -717,7 +717,8 @@ namespace DigitalPlatform.LibraryServer
         // parameters:
         //      biblio_dbs_root <itemdbgroup>元素
         public int Initial(XmlNode root,
-            RmsChannelCollection Channels,
+            RmsChannel channel,
+            // RmsChannelCollection Channels,
             string strServerUrl,
             XmlNode biblio_dbs_root,
             out string strWarning,
@@ -733,7 +734,7 @@ namespace DigitalPlatform.LibraryServer
 
         // 列出目录信息
         // 列出2级。第二级在Hashtable中
-            int nRet = GetDirInfo(Channels,
+            int nRet = GetDirInfo(channel,  // Channels,
                 strServerUrl,
                 out root_dir_results,
                 out db_dir_results,
@@ -811,7 +812,9 @@ namespace DigitalPlatform.LibraryServer
 
         // 列出目录信息
         // 列出2级。第二级在Hashtable中
-        int GetDirInfo(RmsChannelCollection Channels,
+        int GetDirInfo(
+            RmsChannel channel,
+            // RmsChannelCollection Channels,
             string strServerUrl,
             out ResInfoItem[] root_dir_results,
             out Hashtable db_dir_results,
@@ -820,7 +823,7 @@ namespace DigitalPlatform.LibraryServer
             root_dir_results = null;
             db_dir_results = null;
 
-            RmsChannel channel = Channels.GetChannel(this.ServerUrl);
+            // RmsChannel channel = Channels.GetChannel(this.ServerUrl);
 
             // 列出所有数据库
             root_dir_results = null;

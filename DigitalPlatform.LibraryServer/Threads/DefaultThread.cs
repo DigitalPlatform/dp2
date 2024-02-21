@@ -149,7 +149,7 @@ namespace DigitalPlatform.LibraryServer
             {
                 try
                 {
-                    nRet = this.App.InitialKdbs(this.RmsChannels,
+                    nRet = this.App.InitialKdbs(this.RmsChannels.GetChannel(this.App.WsUrl),
             out strError);
                     if (nRet == -1)
                     {
@@ -177,7 +177,7 @@ namespace DigitalPlatform.LibraryServer
             {
                 try
                 {
-                    nRet = this.App.InitialVdbs(this.RmsChannels,
+                    nRet = this.App.InitialVdbs(this.RmsChannels.GetChannel(this.App.WsUrl),
                         out strError);
                     if (nRet == -1)
                     {

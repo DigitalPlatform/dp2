@@ -14,13 +14,43 @@ namespace DigitalPlatform.OPAC.Web
 {
     public class ReaderInfoBase : WebControl, INamingContainer
     {
-        // public string ReaderBarcode = "";
-
         public XmlDocument ReaderDom = null;
 
         public OpacApplication app = null;
         public SessionInfo sessioninfo = null;
 
+        // 2024/2/20
+        // 作为管理员身份此时要查看的读者键。注意，不是指管理员自己的读者键
+        // 存储在Session中
+        public string ReaderKey
+        {
+            get
+            {
+                /*
+                object o = this.Page.Session[this.ID + "ReaderInfoBase_readerkey"];
+                if (o == null)
+                    return "";
+                return (string)o;
+                */
+                return TitleBarControl.GetReaderKey(this);
+            }
+
+            set
+            {
+                /*
+                // 清除 ReaderDom 缓存
+                {
+                    SessionInfo sessioninfo = (SessionInfo)this.Page.Session["sessioninfo"];
+                    if (sessioninfo != null)
+                        sessioninfo.RefreshLoginReaderDomCache(value);
+                }
+                this.Page.Session[this.ID + "ReaderInfoBase_readerkey"] = value;
+                */
+                TitleBarControl.SetReaderKey(this, value);
+            }
+        }
+
+#if REMOVED
         // 作为管理员身份此时要查看的读者证条码号。注意，不是指管理员自己的读者证
         // 存储在Session中
         public string ReaderBarcode
@@ -45,6 +75,7 @@ namespace DigitalPlatform.OPAC.Web
                 this.Page.Session[this.ID + "ReaderInfoBase_readerbarcode"] = value;
             }
         }
+#endif
 
         // 取消最外面的tag
         public override void RenderBeginTag(HtmlTextWriter writer)
@@ -100,9 +131,9 @@ namespace DigitalPlatform.OPAC.Web
 
             if (nRet == -2)
             {
-                if (String.IsNullOrEmpty(this.ReaderBarcode) == true)
+                if (String.IsNullOrEmpty(this.ReaderKey) == true)
                 {
-                    strError = "当前登录的用户不是reader类型，并且ReaderInfoBase.ReaderBarcode也为空";
+                    strError = "当前登录的用户不是 reader 类型，并且 ReaderInfoBase.ReaderKey 也为空";
                     goto ERROR1;
                 }
 
@@ -110,13 +141,15 @@ namespace DigitalPlatform.OPAC.Web
                 // if (sessioninfo.Account.Type != "worreader")
 
                 // 管理员获得特定证条码号的读者记录DOM
+                // parameters:
+                //      strReaderKey    读者键
                 // return:
                 //      -2  当前登录的用户不是librarian类型
                 //      -1  出错
                 //      0   尚未登录
                 //      1   成功
                 nRet = sessioninfo.GetOtherReaderDom(
-                    this.ReaderBarcode,
+                    this.ReaderKey,
                     out readerdom,
                     out strError);
                 if (nRet == -1 || nRet == -2)
@@ -127,7 +160,6 @@ namespace DigitalPlatform.OPAC.Web
             }
 
             this.ReaderDom = readerdom;
-
             return 0;
         ERROR1:
             return -1;

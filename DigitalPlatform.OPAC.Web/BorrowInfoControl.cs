@@ -59,6 +59,37 @@ namespace DigitalPlatform.OPAC.Web
             }
         }
 
+        // 2024/2/20 将 ReaderBarcode 改造为 ReaderRefID
+        // 作为管理员身份此时要查看的读者键。注意，不是指管理员自己的读者键
+        // 存储在Session中
+        public string ReaderKey
+        {
+            get
+            {
+                /*
+                object o = this.Page.Session[this.ID + "BorrowInfoControl_readerkey"];
+                if (o == null)
+                    return "";
+                return (string)o;
+                */
+                return TitleBarControl.GetReaderKey(this);
+            }
+            set
+            {
+                /*
+                // 清除 ReaderDom 缓存
+                {
+                    SessionInfo sessioninfo = (SessionInfo)this.Page.Session["sessioninfo"];
+                    if (sessioninfo != null)
+                        sessioninfo.RefreshLoginReaderDomCache(value);
+                }
+                this.Page.Session[this.ID + "BorrowInfoControl_readerkey"] = value;
+                */
+                TitleBarControl.SetReaderKey(this, value);
+            }
+        }
+
+#if REMOVED
         // 作为管理员身份此时要查看的读者证条码号。注意，不是指管理员自己的读者证
         // 存储在Session中
         public string ReaderBarcode
@@ -83,7 +114,7 @@ namespace DigitalPlatform.OPAC.Web
                 this.Page.Session[this.ID + "BorrowInfoControl_readerbarcode"] = value;
             }
         }
-
+#endif
 
         // 借阅信息内容行数
         public int BorrowLineCount
@@ -690,7 +721,7 @@ namespace DigitalPlatform.OPAC.Web
 
             if (nRet == -2)
             {
-                if (String.IsNullOrEmpty(this.ReaderBarcode) == true)
+                if (String.IsNullOrEmpty(this.ReaderKey) == true)
                 {
                     // text-level: 内部错误
                     strError = "当前登录的用户不是reader类型，并且BorrowInfoControl.ReaderBarcode也为空";
@@ -701,13 +732,15 @@ namespace DigitalPlatform.OPAC.Web
                 // if (sessioninfo.Account.Type != "worreader")
 
                 // 管理员获得特定证条码号的读者记录DOM
+                // parameters:
+                //      strReaderKey    读者键
                 // return:
                 //      -2  当前登录的用户不是librarian类型
                 //      -1  出错
                 //      0   尚未登录
                 //      1   成功
                 nRet = sessioninfo.GetOtherReaderDom(
-                    this.ReaderBarcode,
+                    this.ReaderKey,
                     out readerdom,
                     out strError);
                 if (nRet == -1 || nRet == -2)
@@ -778,16 +811,14 @@ namespace DigitalPlatform.OPAC.Web
                 for (int i = 0; i < barcodes.Count; i++)
                 {
                     string strItemBarcode = barcodes[i];
-                    //string strItemRecord = "";
-                    //string strReaderRecord = "";
 
-                    string strReaderBarcode = "";
-                    if (String.IsNullOrEmpty(this.ReaderBarcode) == false)
-                        strReaderBarcode = this.ReaderBarcode;
+                    string strReaderKey = "";
+                    if (String.IsNullOrEmpty(this.ReaderKey) == false)
+                        strReaderKey = this.ReaderKey;
                     else
-                        strReaderBarcode = sessioninfo.ReaderInfo.Barcode;
+                        strReaderKey = sessioninfo.ReaderInfo.ReaderKey;
 
-                    if (String.IsNullOrEmpty(strReaderBarcode) == true)
+                    if (String.IsNullOrEmpty(strReaderKey) == true)
                     {
                         // text-level: 用户提示
                         this.SetDebugInfo("errorinfo", this.GetString("尚未指定读者证条码号"));   // "尚未指定读者证条码号。操作失败。"
@@ -806,7 +837,7 @@ namespace DigitalPlatform.OPAC.Web
                         channel.Borrow(
                         null,
                         true,
-                        strReaderBarcode,
+                        strReaderKey,
                         strItemBarcode,
                         null,
                         false,

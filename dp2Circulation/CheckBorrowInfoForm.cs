@@ -226,19 +226,23 @@ namespace dp2Circulation
                         var result = DownloadAllPatronRecord(
                             (channel, record) =>
                             {
+                                string style = bAutoRepair ? "autoRepair" : "";
+
                                 count++;
                                 // parameters:
-                                //      bAutoRepair 是否同时自动修复
+                                //      style   处理风格。
+                                //              包含 autoRepair   表示需要同时自动修复
+                                //              包含 useBarcode   表示尽量用证条码号的读者键发起 RepairBorrowInfo() API 请求。缺省为参考 ID 的读者键
                                 // return:
                                 //      -1  出错
                                 //      0   没有必要处理
                                 //      1   已经处理
                                 int ret = CheckReaderRecord(
-                                    looping.Progress,
-                                    channel,
+                                        looping.Progress,
+                                        channel,
                                         record.Path,
                                         record.RecordBody.Xml,
-                                        bAutoRepair,
+                                        style,  // bAutoRepair,
                                         checkDup ? barcode_table : null,
                                         out string error);
                                 if (ret == -1)
@@ -485,7 +489,9 @@ namespace dp2Circulation
         }
 
         // parameters:
-        //      bAutoRepair 是否同时自动修复
+        //      style   处理风格。
+        //              包含 autoRepair   表示需要同时自动修复
+        //              包含 useBarcode   表示尽量用证条码号的读者键发起 RepairBorrowInfo() API 请求。缺省为参考 ID 的读者键
         // return:
         //      -1  出错
         //      0   没有必要处理
@@ -495,7 +501,7 @@ namespace dp2Circulation
             LibraryChannel channel,
             string recpath,
             string xml,
-            bool bAutoRepair,
+            string style,   // bool bAutoRepair,
             Hashtable barcode_table,
             out string strError)
         {
@@ -505,7 +511,9 @@ namespace dp2Circulation
             int nRepairedCount = 0;
             int nCount = 0;
 
-            // string[] aDupPath = null;
+            bool bAutoRepair = StringUtil.IsInList("autoRepair", style);
+            bool useBarcode = StringUtil.IsInList("useBarcode", style);
+
             try
             {
                 if (string.IsNullOrEmpty(xml))
@@ -522,14 +530,22 @@ namespace dp2Circulation
                     return -1;
                 }
 
-                string strReaderBarcode = DomUtil.GetElementText(reader_dom.DocumentElement, "barcode");
+                string strReaderBarcode = DomUtil.GetElementText(reader_dom.DocumentElement,
+                    "barcode");
+                string strReaderRefID = DomUtil.GetElementText(reader_dom.DocumentElement,
+                    "refID");
+                string strReaderKey = dp2StringUtil.BuildReaderKey(strReaderBarcode, strReaderRefID);
+                if (useBarcode)
+                    strReaderKey = dp2StringUtil.BuildReaderKeyLegacy(strReaderBarcode, strReaderRefID);
+                string strReaderDisplayKey = dp2StringUtil.BuildReaderKeyLegacy(strReaderBarcode, strReaderRefID); ;
 
-                string caption = $"{strReaderBarcode}({recpath})";
+                string caption = $"{strReaderDisplayKey}({recpath})";
 
                 // 2022/2/21
-                if (string.IsNullOrEmpty(strReaderBarcode))
+                if (string.IsNullOrEmpty(strReaderBarcode)
+                    && string.IsNullOrEmpty(strReaderRefID))
                 {
-                    DisplayError($"读者记录 {recpath} 证条码号(barcode 元素)为空，格式不合法。请尽快修正此问题");
+                    DisplayError($"读者记录 {recpath} 证条码号(barcode 元素)和参考ID(refID 元素)同时为空，格式不合法。请尽快修正此问题");
                     DisplayRecord(null, null, $"<pp>{recpath}<pp>");
                     return -1;
                     /*
@@ -563,13 +579,8 @@ namespace dp2Circulation
                 if (nodes.Count == 0)
                     return 0;   // 没有必要检查
 
-                // string strReaderBarcode = barcodes[i];
-                string strOutputReaderBarcode = "";
-
                 int nStart = 0;
                 int nPerCount = -1;
-                int nProcessedBorrowItems = 0;
-                int nTotalBorrowItems = 0;
 
                 bool bFoundError = false;
                 for (; ; )
@@ -578,14 +589,14 @@ namespace dp2Circulation
                     lRet = channel.RepairBorrowInfo(
                         stop,
                         "checkfromreader",
-                        strReaderBarcode,
+                        strReaderKey,   // strReaderKey,
                         "",
                         "",
                         nStart,   // 2008/10/27 
                         nPerCount,   // 2008/10/27 
-                        out nProcessedBorrowItems,   // 2008/10/27 
-                        out nTotalBorrowItems,   // 2008/10/27 
-                        out strOutputReaderBarcode,
+                        out int nProcessedBorrowItems,   // 2008/10/27 
+                        out int nTotalBorrowItems,   // 2008/10/27 
+                        out string strOutputReaderBarcode,
                         out string[] aDupPath,
                         out strError);
 
@@ -614,7 +625,7 @@ namespace dp2Circulation
                     if (lRet == 1)
                     {
                         DisplayCheckError($"检查读者记录 {caption} 时{strOffsComment}发现问题: ", PlainText(strError));
-                        DisplayRecord(strReaderBarcode, null, strError);
+                        DisplayRecord(strReaderKey, null, strError);
                         bFoundError = true;
                     }
 
@@ -2475,7 +2486,7 @@ false);
 
                 string strOutputReaderBarcode = "";
 
-                //stop.SetMessage("正在检查第 " + (i + 1).ToString() + " 个册记录，条码为 " + strItemBarcode);
+                //stop.SetMessage("正在检查第 " + (i + 1).ToString() + " 个册记录，条码为 " + strItemKey);
                 //stop.SetProgressValue(i);
 
                 int nProcessedBorrowItems = 0;
@@ -2629,13 +2640,13 @@ false);
                 if (lRet == -1)
                 {
                     Global.WriteHtml(this.webBrowser_resultInfo,
-                        "检查册记录 " + strItemBarcode + " 时出错: " + strError + "\r\n");
+                        "检查册记录 " + strItemKey + " 时出错: " + strError + "\r\n");
                 }
                 if (lRet == 1)
                 {
                     Debug.Assert(false, "应该走不到这里");
                     Global.WriteHtml(this.webBrowser_resultInfo,
-                        "检查册记录 " + strItemBarcode + " 时发现问题: " + strError + "\r\n");
+                        "检查册记录 " + strItemKey + " 时发现问题: " + strError + "\r\n");
                 }
                 */
 
@@ -4189,22 +4200,26 @@ out strError);
 
             this.ClearHtml();
 
-            bool bAutoRepair = Control.ModifierKeys == Keys.Control;
+            // bool bAutoRepair = Control.ModifierKeys == Keys.Control;
+            string style = Control.ModifierKeys == Keys.Control ? "autoRepair" : "";
 
-            string strReaderBarcode = this.textBox_single_readerBarcode.Text;
-            string strItemBarcode = this.textBox_single_itemBarcode.Text;
+            string strReaderKey = this.textBox_single_readerBarcode.Text;
+            string strItemKey = this.textBox_single_itemBarcode.Text;
 
-            if (string.IsNullOrEmpty(strReaderBarcode))
+            if (string.IsNullOrEmpty(strReaderKey))
             {
                 strError = "尚未指定要检查的读者证条码号";
                 goto ERROR1;
             }
 
-            if (string.IsNullOrEmpty(strItemBarcode) == false)
+            if (string.IsNullOrEmpty(strItemKey) == false)
             {
                 strError = "零星检查读者记录时，不允许输入册条码号";
                 goto ERROR1;
             }
+
+            if (strReaderKey.StartsWith("@refID:") == false)
+                style += ",useBarcode";
 
             /*
             List<string> barcodes = new List<string>();
@@ -4234,14 +4249,14 @@ out strError);
             REDO_GET:
                 // 根据证条码号获得读者记录 XML
                 long lRet = channel.GetReaderInfo(looping.Progress,
-                    strReaderBarcode,
+                    strReaderKey,
                     "xml,recpaths",
                     out string[] results,
                     out strError);
                 if (lRet == -1)
                 {
                     MessagePromptEventArgs e1 = new MessagePromptEventArgs();
-                    e1.MessageText = $"获取读者 {strReaderBarcode} 时发生错误： " + strError;
+                    e1.MessageText = $"获取读者 {strReaderKey} 时发生错误： " + strError;
                     e1.Actions = "yes,no";
                     loader_Prompt(this, e1);
                     if (e1.ResultAction == "yes")
@@ -4251,19 +4266,23 @@ out strError);
                 }
                 if (lRet == 0)
                 {
-                    strError = $"证条码号为 '{strReaderBarcode}' 的读者记录不存在";
+                    strError = $"证条码号为 '{strReaderKey}' 的读者记录不存在";
                     goto ERROR1;
                 }
 
                 string xml = results[0];
                 string recpath = results[1];
 
+                // parameters:
+                //      style   处理风格。
+                //              包含 autoRepair   表示需要同时自动修复
+                //              包含 useBarcode   表示尽量用证条码号的读者键发起 RepairBorrowInfo() API 请求。缺省为参考 ID 的读者键
                 nRet = CheckReaderRecord(
                     looping.Progress,
                     channel,
                     recpath,
                     xml,
-                    bAutoRepair,
+                    style,  // bAutoRepair,
                     null,
                     out strError);
                 if (nRet == -1)

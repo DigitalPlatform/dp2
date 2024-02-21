@@ -27,11 +27,13 @@ namespace DigitalPlatform.OPAC.Web
             if (sessioninfo.UserID == "public")
                 return LoginState.Public;
 
-            if (sessioninfo.UserID.IndexOf("@") != -1)
-                return LoginState.OtherDomain;
-
             if (sessioninfo.IsReader == true)
                 return LoginState.Reader;
+
+            // 避免这个“其它域”(xxx@xxx)和 @refID:xxx 形态混淆
+            if (sessioninfo.UserID.StartsWith("@refID:") == false
+                && sessioninfo.UserID.IndexOf("@") > 0/*!= -1*/)
+                return LoginState.OtherDomain;
 
             return LoginState.Librarian;
         }

@@ -16,7 +16,9 @@ namespace DigitalPlatform.LibraryServer
         // return:
         //      -1  出错
         //      0   成功
-        public int Initial(RmsChannelCollection Channels,
+        public int Initial(
+            RmsChannel channel,
+            //RmsChannelCollection Channels,
             string strServerUrl,
             string strLang,
             out string strError)
@@ -26,7 +28,7 @@ namespace DigitalPlatform.LibraryServer
 
             ResInfoItem[] root_dir_results = null;
 
-            RmsChannel channel = Channels.GetChannel(strServerUrl);
+            // RmsChannel channel = Channels.GetChannel(strServerUrl);
 
             // 列出所有数据库
             root_dir_results = null;

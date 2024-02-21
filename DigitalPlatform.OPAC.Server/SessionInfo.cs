@@ -638,6 +638,8 @@ namespace DigitalPlatform.OPAC.Server
         {
             readerinfo.Barcode = DomUtil.GetElementText(readerdom.DocumentElement,
 "barcode");
+            readerinfo.PatronRefID = DomUtil.GetElementText(readerdom.DocumentElement,
+"refID");
             readerinfo.Name = DomUtil.GetElementText(readerdom.DocumentElement,
 "name");
             readerinfo.DisplayName = DomUtil.GetElementText(readerdom.DocumentElement,
@@ -765,13 +767,15 @@ namespace DigitalPlatform.OPAC.Server
         }
 
         // 管理员获得特定证条码号的读者记录DOM
+        // parameters:
+        //      strReaderKey    读者键
         // return:
         //      -2  当前登录的用户不是librarian类型
         //      -1  出错
         //      0   尚未登录
         //      1   成功
         public int GetOtherReaderDom(
-            string strReaderBarcode,
+            string strReaderKey,
             out XmlDocument readerdom,
             out string strError)
         {
@@ -821,7 +825,7 @@ namespace DigitalPlatform.OPAC.Server
                 {
                     long lRet = // this.Channel.
                         channel.GetReaderInfo(null,
-                    strReaderBarcode,
+                    strReaderKey,
                     strResultTypeList,
                     out results,
                     out strOutputPath,
@@ -841,7 +845,7 @@ namespace DigitalPlatform.OPAC.Server
                     // 2011/11/22
                     if (lRet == 0)
                     {
-                        strError = "证条码号为 '" + strReaderBarcode + "' 的读者记录没有找到...";
+                        strError = "键值(证条码号或参考ID)为 '" + strReaderKey + "' 的读者记录没有找到...";
                         goto ERROR1;
                     }
                 }
@@ -912,6 +916,7 @@ namespace DigitalPlatform.OPAC.Server
                 return -2;
             }
 
+#if REMOVED
             // 2015/11/20
             if (this.UserID.IndexOf(":") != -1)
             {
@@ -920,6 +925,7 @@ namespace DigitalPlatform.OPAC.Server
             }
 
             Debug.Assert(this.UserID.IndexOf(":") == -1, "UserID中不能包含冒号");
+#endif
 
             if (this.ReaderInfo == null)
                 this.ReaderInfo = new ReaderInfo();
@@ -1033,11 +1039,21 @@ namespace DigitalPlatform.OPAC.Server
         }
 
         // 如果证条码号发生变化，则清理 ReaderDom Cache 事项
-        public void RefreshLoginReaderDomCache(string readerBarcode)
+        // parameters:
+        //      readerKey   读者证条码号，或 @refID:xxx 形态
+        public void RefreshLoginReaderDomCache(string readerKey)
         {
             if (this.ReaderInfo == null)
                 return;
-            if (this.ReaderInfo.Barcode != readerBarcode)
+
+            if (readerKey != null && readerKey.Contains("@refID:")
+                && $"@refID:{this.ReaderInfo.PatronRefID}" != readerKey)
+            {
+                ClearLoginReaderDomCache();
+                return;
+            }
+
+            if (this.ReaderInfo.Barcode != readerKey)
                 ClearLoginReaderDomCache();
         }
 
@@ -1312,7 +1328,39 @@ namespace DigitalPlatform.OPAC.Server
 
         public string Name = "";
         public string DisplayName = "";
+
         public string Barcode = "";
+        public string PatronRefID = ""; // 2024/2/20
+
+        // 2024/2/20
+        // 返回读者键
+        public string ReaderKey
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(PatronRefID)
+                    && string.IsNullOrEmpty(Barcode))
+                    return "";
+                if (string.IsNullOrEmpty(PatronRefID) == false)
+                    return $"@refID:{PatronRefID}";
+                return Barcode;
+            }
+        }
+
+        // 2024/2/20
+        // 返回显示友好的读者键。也就是说优先用证条码号
+        public string ReaderDisplayKey
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(PatronRefID)
+                    && string.IsNullOrEmpty(Barcode))
+                    return "";
+                if (string.IsNullOrEmpty(Barcode) == false)
+                    return Barcode;
+                return $"@refID:{PatronRefID}";
+            }
+        }
 
         public string Lang = "";
     }

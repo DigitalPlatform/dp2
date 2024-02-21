@@ -17,6 +17,7 @@ using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
+using DigitalPlatform.Text;
 
 namespace DigitalPlatform.OPAC.Web
 {
@@ -148,9 +149,16 @@ namespace DigitalPlatform.OPAC.Web
                     return 0;
                 if (nRet == 1)
                     return -2;
-                strReaderBarcode = DomUtil.GetElementText(ReaderDom.DocumentElement, "barcode");
+                var barcode = DomUtil.GetElementText(ReaderDom.DocumentElement, "barcode");
+                var refid = DomUtil.GetElementText(ReaderDom.DocumentElement, "refID");
+                strReaderBarcode = dp2StringUtil.BuildReaderKey(barcode, refid);
             }
-
+            /*
+            // 2024/2/20
+            strReaderBarcode = this.ReaderKey;
+            if (string.IsNullOrEmpty(strReaderBarcode))
+                return 0;
+            */
             OpacApplication app = (OpacApplication)this.Page.Application["app"];
             SessionInfo sessioninfo = (SessionInfo)this.Page.Session["sessioninfo"];
 

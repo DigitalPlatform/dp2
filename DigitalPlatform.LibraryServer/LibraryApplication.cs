@@ -1431,7 +1431,7 @@ out strError);
 #endif
 
                             // 初始化kdbs
-                            nRet = InitialKdbs(session.Channels,
+                            nRet = InitialKdbs(session.Channels.GetChannel(this.WsUrl), // session.Channels,
                                 out strError);
                             if (nRet == -1)
                             {
@@ -1462,7 +1462,7 @@ out strError);
                             // 这样，其他地方调用的InitialVdbs()就可以去除了
                             // TODO: 为了提高运行速度，可以优化为，只有当<virtualDatabases>元素下的内容有改变时，才重新进行这个初始化
                             this.vdbs = null;
-                            nRet = app.InitialVdbs(session.Channels,
+                            nRet = app.InitialVdbs(GetRmsChannel(session), // session.Channels,
                                 out strError);
                             if (nRet == -1)
                             {
@@ -2120,6 +2120,12 @@ out strError);
             return -1;
         }
 
+        // 2024/2/18
+        public RmsChannel GetRmsChannel(SessionInfo sessioninfo)
+        {
+            return sessioninfo.Channels.GetChannel(this.WsUrl);
+        }
+
         void CleanSessionDir(string strSessionDir)
         {
             try
@@ -2615,7 +2621,7 @@ out strError);
                     using (var releaser = await _semaphoreUpgrade.EnterAsync(this.AppDownToken))
                     {
                         SessionInfo session = new SessionInfo(this);
-                        session.Account = new Account { UserID = "!upgrade"};
+                        session.Account = new Account { UserID = "!upgrade" };
                         try
                         {
                             int nRet = 0;
@@ -2772,7 +2778,8 @@ TaskScheduler.Default);
         //      -1  出错
         //      0   成功
         public int InitialKdbs(
-            RmsChannelCollection Channels,
+            RmsChannel channel,
+            // RmsChannelCollection Channels,
             out string strError)
         {
             // this.m_lock.AcquireWriterLock(m_nLockTimeout);
@@ -2801,7 +2808,7 @@ TaskScheduler.Default);
                 // return:
                 //      -1  出错
                 //      0   成功
-                int nRet = kdbs.Initial(Channels,
+                int nRet = kdbs.Initial(channel,    // Channels,
                             this.WsUrl,
                             "zh",
                             out strError);
@@ -4661,12 +4668,13 @@ TaskScheduler.Default);
 
         // 兼容以前用法
         public int InitialVdbs(
-    RmsChannelCollection Channels,
-    out string strError)
+            RmsChannel channel,
+            // RmsChannelCollection Channels,
+            out string strError)
         {
             string strWarning = "";
             int nRet = InitialVdbs(
-    Channels,
+    channel,    // Channels,
     out strWarning,
     out strError);
             if (string.IsNullOrEmpty(strWarning) == false)
@@ -4680,7 +4688,8 @@ TaskScheduler.Default);
 
         // 初始化虚拟库集合定义对象
         public int InitialVdbs(
-            RmsChannelCollection Channels,
+            RmsChannel channel,
+            // RmsChannelCollection Channels,
             out string strWarning,
             out string strError)
         {
@@ -4713,7 +4722,7 @@ TaskScheduler.Default);
                  * */
                 this.vdbs = new VirtualDatabaseCollection();
                 int nRet = vdbs.Initial(root,
-                    Channels,
+                    channel,    // Channels,
                     this.WsUrl,
                     biblio_dbs_root,
                     out strWarning,
@@ -6686,7 +6695,6 @@ out strError);
         // parameters:
         //      strBarcode  证条码号。可以为 @refID:xxx 形态
         public int GetReaderRecXml(
-            // RmsChannelCollection channels,
             RmsChannel channel,
             string strBarcode,
             out string strXml,
@@ -6697,7 +6705,6 @@ out strError);
             strOutputPath = "";
             List<string> recpaths = null;
             int nRet = GetReaderRecXml(
-            // channels,
             channel,
             strBarcode,
             1,
@@ -6722,7 +6729,6 @@ out strError);
         //      1   命中1条
         //      >1  命中多于1条
         public int GetReaderRecXml(
-            // RmsChannelCollection channels,
             RmsChannel channel,
             string strBarcodeParam,
             int nMax,
@@ -11490,6 +11496,8 @@ out strError);
             alter_type_list = new List<string>();
             passwordExpired = false;
 
+            bool legacy = false; // 是否要兼容以前惯例，在 strOutputUserName 中尽量返回证条码号
+
             // 2009/9/22 
             if (String.IsNullOrEmpty(strLoginName) == true)
             {
@@ -11547,7 +11555,16 @@ out strError);
                     sessioninfo.Account = temp_account;
 
                     strRights = temp_account.RightsOrigin;
-                    strOutputUserName = temp_account.UserID;
+
+                    if (legacy)
+                    {
+                        strOutputUserName = temp_account.Barcode;
+                        if (string.IsNullOrEmpty(strOutputUserName))
+                            strOutputUserName = temp_account.UserID;
+                    }
+                    else
+                        strOutputUserName = temp_account.UserID;
+
                     strLibraryCode = temp_account.AccountLibraryCode;   // 2016/1/17
                     return 1;
                 }
@@ -11859,7 +11876,14 @@ out strError);
                 strRights += "," + StringUtil.MakePathList(adds, ",");
             */
 
-            strOutputUserName = account.UserID; // 2011/7/29 读者证条码号
+            if (legacy)
+            {
+                strOutputUserName = account.Barcode;
+                if (string.IsNullOrEmpty(strOutputUserName))
+                    strOutputUserName = account.UserID;
+            }
+            else
+                strOutputUserName = account.UserID;
 
             // 把临时密码设置为正式密码
             if (bTempPassword == true)
@@ -18234,7 +18258,7 @@ out string db_type);
         public string Access { get => access; set => access = value; }
 
         private string userID = "";
-        // 用户唯一标识。对于读者，这就是证条码号
+        // 用户唯一标识。对于读者，这就是 @refID:xxx 或证条码号
         public string UserID { get => userID; set => userID = value; }
 
         private string rmsUserName = "";
@@ -18256,7 +18280,7 @@ out string db_type);
         // 程序用读者 Key。优先使用参考 ID
         public string GetReaderKey()
         {
-            return LibraryApplication.BuildReaderKey(barcode, patronRefID);
+            return dp2StringUtil.BuildReaderKey(barcode, patronRefID);
         }
 
         // 用于显示的读者 Key。如果证条码号和参考 ID 都非空，则两者都用于构成显示内容
@@ -18265,7 +18289,7 @@ out string db_type);
             if (string.IsNullOrEmpty(barcode) == false
                 && string.IsNullOrEmpty(patronRefID) == false)
                 return $"{barcode}(@refID:{patronRefID})";
-            return LibraryApplication.BuildReaderKey(barcode, patronRefID);
+            return dp2StringUtil.BuildReaderKey(barcode, patronRefID);
         }
 
         private string name = "";    // 姓名。对于读者型的帐户有意义

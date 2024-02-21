@@ -25,6 +25,9 @@ using DigitalPlatform.Core;
 using DigitalPlatform.LibraryClient;
 using Jint.Parser.Ast;
 using System.Web.UI.WebControls;
+using System.Data.SqlClient;
+using DigitalPlatform.rms;
+using System.Security.Cryptography.X509Certificates;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -109,34 +112,74 @@ namespace DigitalPlatform.LibraryServer
                 }
                 string strItemRecPath = DomUtil.GetAttr(node, "recPath");
 
-                // 写读者记录
-                lRet = channel.DoSaveTextRes(strReaderRecPath,
-    strReaderXml,
+                {
+                    int nRedoCount = 0;
+                REDO_WRITE:
+                    // 写读者记录
+                    lRet = channel.DoSaveTextRes(strReaderRecPath,
+        strReaderXml,
+        false,
+        "content,ignorechecktimestamp",
+        null,   // timestamp,
+        out byte[] output_timestamp,
+        out string strOutputPath,
+        out strError);
+                    if (lRet == -1)
+                    {
+                        if (channel.OriginErrorCode == ErrorCodeValue.NotFoundDb)
+                        {
+                            nRet = TryCreateReaderDatabase(
+    channel,
+    strReaderRecPath,
+    ref nRedoCount,
+    out string error);
+                            if (nRet == 0)
+                                goto REDO_WRITE;
+                            else if (nRet == -1)
+                            {
+                                strError = $"根据记录路径 '{strReaderRecPath}' 临时决定创建读者库的过程出错: {error}";
+                                return -1;
+                            }
+                        }
+
+                        strError = "写入读者记录 '" + strReaderRecPath + "' 时发生错误: " + strError;
+                        return -1;
+                    }
+                }
+
+                {
+                    int nRedoCount = 0;
+                REDO_WRITE:
+                    // 写册记录
+                    lRet = channel.DoSaveTextRes(strItemRecPath,
+    strItemXml,
     false,
     "content,ignorechecktimestamp",
     null,   // timestamp,
-    out byte[] output_timestamp,
+    out _,
     out string strOutputPath,
     out strError);
-                if (lRet == -1)
-                {
-                    strError = "写入读者记录 '" + strReaderRecPath + "' 时发生错误: " + strError;
-                    return -1;
-                }
+                    if (lRet == -1)
+                    {
+                        if (channel.OriginErrorCode == ErrorCodeValue.NotFoundDb)
+                        {
+                            nRet = TryCreateBiblioDatabase(
+    channel,
+    strItemRecPath,
+    ref nRedoCount,
+    out string error);
+                            if (nRet == 0)
+                                goto REDO_WRITE;
+                            else if (nRet == -1)
+                            {
+                                strError = $"根据记录路径 '{strItemRecPath}' 临时决定创建书目库的过程出错: {error}";
+                                return -1;
+                            }
+                        }
 
-                // 写册记录
-                lRet = channel.DoSaveTextRes(strItemRecPath,
-strItemXml,
-false,
-"content,ignorechecktimestamp",
-null,   // timestamp,
-out output_timestamp,
-out strOutputPath,
-out strError);
-                if (lRet == -1)
-                {
-                    strError = "写入册记录 '" + strItemRecPath + "' 时发生错误: " + strError;
-                    return -1;
+                        strError = "写入册记录 '" + strItemRecPath + "' 时发生错误: " + strError;
+                        return -1;
+                    }
                 }
 
                 return 0;
@@ -202,8 +245,10 @@ out strError);
                 }
 
                 // 读入册记录
-                string strConfirmItemRecPath = DomUtil.GetElementText(domLog.DocumentElement,
-                    "confirmItemRecPath");
+                //string strConfirmItemRecPath = DomUtil.GetElementText(domLog.DocumentElement,
+                //    "confirmItemRecPath");
+                string strConfirmItemRecPath = GetConfirmRecPath(domLog);
+
                 string strItemBarcode = DomUtil.GetElementText(domLog.DocumentElement,
                     "itemBarcode");
                 string strItemRefID = DomUtil.GetElementText(domLog.DocumentElement,
@@ -217,6 +262,7 @@ out strError);
                     goto ERROR1;
                 }
 
+#if REMOVED
                 string strItemXml = "";
                 string strOutputItemRecPath = "";
                 byte[] item_timestamp = null;
@@ -246,6 +292,8 @@ out strError);
                 {
                     // 从册条码号获得册记录
 
+                    int nRedoCount = 0;
+                REDO_GETITEM:
                     // 获得册记录
                     // return:
                     //      -1  error
@@ -263,8 +311,25 @@ out strError);
                         out strError);
                     if (nRet == 0)
                     {
-                        strError = "册条码号 '" + strItemKey + "' 不存在";
-                        goto ERROR1;
+                        // 尝试用 itemRecord 中的 XML 内容恢复这条册记录
+                        // 根据日志记录中的特定元素，尝试恢复册记录
+                        // return:
+                        //      -2  nRedoCount 超过范围
+                        //      -1  出错
+                        //      0   日志记录中没有找到需要的元素
+                        //      1   成功。nRedoCount 自动增量 1
+                        nRet = RecoverItemRecord(
+    channel,
+    domLog,
+    "itemRecord",
+    ref nRedoCount,
+    out string error);
+                        if (nRet != 1)
+                        {
+                            strError = "册条码号 '" + strItemKey + "' 不存在";
+                            goto ERROR1;
+                        }
+                        goto REDO_GETITEM;
                     }
                     if (nRet == -1)
                     {
@@ -300,6 +365,43 @@ out strError);
                         }
                     }
                 }
+
+#endif
+                nRet = LoadItemRecord(channel,
+    strItemKey,
+    strConfirmItemRecPath,
+    domLog,
+    bForce,
+    (List<string> paths,
+    ref string item_xml,
+    ref byte[] timestamp,
+    ref string item_recpath,
+    out string error) =>
+    {
+        error = "";
+
+        if (bForce == true)
+        {
+            // 容错！
+            item_recpath = paths[0];
+
+            strRecoverComment += "册条码号 " + strItemKey + " 有 "
+                + paths.Count.ToString() + " 条重复记录，因受容错要求所迫，权且采用其中第一个记录 "
+                + item_recpath + " 来进行借阅操作。";
+        }
+        else
+        {
+            error = "册条码号为 '" + strItemKey + "' 的册记录有 " + paths.Count.ToString() + " 条，但此时confirmItemRecPath却为空";
+            return -1;
+        }
+        return 0;
+    },
+    out string strItemXml,
+    out byte[] item_timestamp,
+    out string strOutputItemRecPath,
+    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
 
                 nRet = LibraryApplication.LoadToDom(strItemXml,
                     out XmlDocument itemdom,
@@ -434,8 +536,10 @@ out strError);
                 }
 
                 // 读入册记录
-                string strConfirmItemRecPath = DomUtil.GetElementText(domLog.DocumentElement,
-                    "confirmItemRecPath");
+                //string strConfirmItemRecPath = DomUtil.GetElementText(domLog.DocumentElement,
+                //    "confirmItemRecPath");
+                string strConfirmItemRecPath = GetConfirmRecPath(domLog);
+
                 string strItemBarcode = DomUtil.GetElementText(domLog.DocumentElement,
                     "itemBarcode");
                 if (String.IsNullOrEmpty(strItemBarcode) == true)
@@ -661,6 +765,166 @@ out strError);
 
         #region RecoverBorrow()下级函数
 
+        delegate int delegate_selectItems(List<string> paths,
+            ref string item_xml,
+            ref byte[] item_timestamp,
+            ref string item_recpath,
+            out string error);
+
+        int LoadItemRecord(RmsChannel channel,
+            string strItemKey,
+            string strConfirmItemRecPath,
+            XmlDocument domLog,
+            bool bForce,
+            delegate_selectItems func_selectItems,
+            out string strItemXml,
+            out byte[] item_timestamp,
+            out string strOutputItemRecPath,
+            out string strError)
+        {
+            strError = "";
+
+            strItemXml = "";
+            strOutputItemRecPath = "";
+            item_timestamp = null;
+
+            // 如果已经有确定的册记录路径
+            if (String.IsNullOrEmpty(strConfirmItemRecPath) == false)
+            {
+                int nRedoCount = 0;
+            REDO_GETITEM:
+
+                long lRet = channel.GetRes(strConfirmItemRecPath,
+                    out strItemXml,
+                    out _,  // strMetaData,
+                    out item_timestamp,
+                    out strOutputItemRecPath,
+                    out strError);
+                if (lRet == -1)
+                {
+                    if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                    {
+                        // 根据日志记录中的特定元素，尝试恢复册记录
+                        // return:
+                        //      -2  nRedoCount 超过范围
+                        //      -1  出错
+                        //      0   日志记录中没有找到需要的元素
+                        //      1   成功。nRedoCount 自动增量 1
+                        int nRet = RecoverItemRecord(
+    channel,
+    domLog,
+    "itemRecord",
+    ref nRedoCount,
+    out string error);
+                        if (nRet != 1)
+                        {
+                            strError = $"根据strConfirmItemRecPath '{strConfirmItemRecPath}' 获得册记录失败: {strError}。并且尝试重建记录也失败: {error}";
+                            return -1;
+                        }
+                        goto REDO_GETITEM;
+                    }
+
+                    strError = "根据strConfirmItemRecPath '" + strConfirmItemRecPath + "' 获得册记录失败: " + strError;
+                    return -1;
+                }
+
+                // 需要检查记录中的<barcode>元素值是否匹配册条码号
+
+
+                // TODO: 如果记录路径所表达的记录不存在，或者其<barcode>元素值和要求的册条码号不匹配，那么都要改用逻辑方法，也就是利用册条码号来获得记录。
+                // 当然，这种情况下，非常要紧的是确保数据库的素质很好，本身没有重条码号的情况出现。
+            }
+            else
+            {
+                // 从册条码号获得册记录
+
+                int nRedoCount = 0;
+            REDO_GETITEM:
+                // 获得册记录
+                // return:
+                //      -1  error
+                //      0   not found
+                //      1   命中1条
+                //      >1  命中多于1条
+                int nRet = this.GetItemRecXml(
+                    // Channels,
+                    channel,
+                    strItemKey,
+                    out strItemXml,
+                    100,
+                    out List<string> aPath,
+                    out item_timestamp,
+                    out strError);
+                if (nRet == 0)
+                {
+                    // 尝试用 itemRecord 中的 XML 内容恢复这条册记录
+                    // 根据日志记录中的特定元素，尝试恢复册记录
+                    // return:
+                    //      -2  nRedoCount 超过范围
+                    //      -1  出错
+                    //      0   日志记录中没有找到需要的元素
+                    //      1   成功。nRedoCount 自动增量 1
+                    nRet = RecoverItemRecord(
+channel,
+domLog,
+"itemRecord",
+ref nRedoCount,
+out string error);
+                    if (nRet != 1)
+                    {
+                        strError = "册条码号 '" + strItemKey + "' 不存在";
+                        return -1;
+                    }
+                    goto REDO_GETITEM;
+                }
+                if (nRet == -1)
+                {
+                    strError = "读入册条码号为 '" + strItemKey + "' 的册记录时发生错误: " + strError;
+                    return -1;
+                }
+
+                if (aPath.Count > 1)
+                {
+#if REMOVED
+                    if (bForce == true)
+                    {
+                        // 容错！
+                        strOutputItemRecPath = aPath[0];
+
+                        strRecoverComment += "册条码号 " + strItemKey + " 有 "
+                            + aPath.Count.ToString() + " 条重复记录，因受容错要求所迫，权且采用其中第一个记录 "
+                            + strOutputItemRecPath + " 来进行借阅操作。";
+                    }
+                    else
+                    {
+                        strError = "册条码号为 '" + strItemKey + "' 的册记录有 " + aPath.Count.ToString() + " 条，但此时confirmItemRecPath却为空";
+                        return -1;
+                    }
+#endif
+                    strOutputItemRecPath = aPath[0];
+                    nRet = func_selectItems(aPath,
+                        ref strItemXml,
+                        ref item_timestamp,
+                        ref strOutputItemRecPath,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                }
+                else
+                {
+                    Debug.Assert(nRet == 1, "");
+                    Debug.Assert(aPath.Count == 1, "");
+
+                    if (nRet == 1)
+                    {
+                        strOutputItemRecPath = aPath[0];
+                    }
+                }
+            }
+
+            return 1;
+        }
+
         // 获得借阅期限
         // parameters:
         //      strLibraryCode  读者记录所从属的恶读者库的馆代码
@@ -799,7 +1063,7 @@ out strError);
                 out string strReaderRefIdString,
                 out strError);
             if (nRet != -1)
-                strReaderRefID = GetRefIdValue(strReaderRefIdString);
+                strReaderRefID = dp2StringUtil.GetRefIdValue(strReaderRefIdString);
 
             int nRedoCount = 0; // 因为时间戳冲突, 重试的次数
 
@@ -951,14 +1215,14 @@ out strError);
                 "barcode");
             string strItemRefID = DomUtil.GetElementText(itemdom.DocumentElement,
                 "refID");
-            string strItemKey = BuildReaderKey(strItemBarcode, strItemRefID);
+            string strItemKey = dp2StringUtil.BuildReaderKey(strItemBarcode, strItemRefID);
 
             // 注意，读者证条码号可能为空
             string strReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement,
                 "barcode");
             string strReaderRefID = DomUtil.GetElementText(readerdom.DocumentElement,
                 "refID");
-            string strReaderKey = BuildReaderKey(strReaderBarcode, strReaderRefID);
+            string strReaderKey = dp2StringUtil.BuildReaderKey(strReaderBarcode, strReaderRefID);
 
             XmlElement nodeBorrow = null;
 
@@ -1255,34 +1519,74 @@ out strError);
 
                 byte[] timestamp = null;
 
-                // 写读者记录
-                lRet = channel.DoSaveTextRes(strReaderRecPath,
-                    strReaderXml,
-                    false,
-                    "content,ignorechecktimestamp",
-                    timestamp,
-                    out byte[] output_timestamp,
-                    out string strOutputPath,
-                    out strError);
-                if (lRet == -1)
                 {
-                    strError = "写入读者记录 '" + strReaderRecPath + "' 时发生错误: " + strError;
-                    return -1;
+                    int nRedoCount = 0;
+                REDO_WRITE:
+                    // 写读者记录
+                    lRet = channel.DoSaveTextRes(strReaderRecPath,
+                        strReaderXml,
+                        false,
+                        "content,ignorechecktimestamp",
+                        timestamp,
+                        out byte[] output_timestamp,
+                        out string strOutputPath,
+                        out strError);
+                    if (lRet == -1)
+                    {
+                        if (channel.OriginErrorCode == ErrorCodeValue.NotFoundDb)
+                        {
+                            nRet = TryCreateReaderDatabase(
+    channel,
+    strReaderRecPath,
+    ref nRedoCount,
+    out string error);
+                            if (nRet == 0)
+                                goto REDO_WRITE;
+                            else if (nRet == -1)
+                            {
+                                strError = $"根据记录路径 '{strReaderRecPath}' 临时决定创建书目库的过程出错: {error}";
+                                return -1;
+                            }
+                        }
+
+                        strError = "写入读者记录 '" + strReaderRecPath + "' 时发生错误: " + strError;
+                        return -1;
+                    }
                 }
 
-                // 写册记录
-                lRet = channel.DoSaveTextRes(strItemRecPath,
+                {
+                    int nRedoCount = 0;
+                REDO_WRITE:
+                    // 写册记录
+                    lRet = channel.DoSaveTextRes(strItemRecPath,
                     strItemXml,
                     false,
                     "content,ignorechecktimestamp",
                     timestamp,
-                    out output_timestamp,
-                    out strOutputPath,
+                    out _, // output_timestamp,
+                    out string strOutputPath,
                     out strError);
-                if (lRet == -1)
-                {
-                    strError = "写入读者记录 '" + strReaderRecPath + "' 时发生错误: " + strError;
-                    return -1;
+                    if (lRet == -1)
+                    {
+                        if (channel.OriginErrorCode == ErrorCodeValue.NotFoundDb)
+                        {
+                            nRet = TryCreateBiblioDatabase(
+    channel,
+    strItemRecPath,
+    ref nRedoCount,
+    out string error);
+                            if (nRet == 0)
+                                goto REDO_WRITE;
+                            else if (nRet == -1)
+                            {
+                                strError = $"根据记录路径 '{strItemRecPath}' 临时决定创建书目库的过程出错: {error}";
+                                return -1;
+                            }
+                        }
+
+                        strError = "写入册记录 '" + strReaderRecPath + "' 时发生错误: " + strError;
+                        return -1;
+                    }
                 }
 
                 return 0;
@@ -1308,7 +1612,7 @@ out strError);
                 // 2024/1/29
                 string strReaderRefID = DomUtil.GetElementText(domLog.DocumentElement,
     "readerRefID");
-                var ret = TryGetUnionRefID(strReaderBarcode, 
+                var ret = TryGetUnionRefID(strReaderBarcode,
                     strReaderRefID,
                     out string strReaderKey);
                 if (ret == false)
@@ -1318,8 +1622,10 @@ out strError);
                 }
 
                 // 读入册记录
-                string strConfirmItemRecPath = DomUtil.GetElementText(domLog.DocumentElement,
-                    "confirmItemRecPath");
+                //string strConfirmItemRecPath = DomUtil.GetElementText(domLog.DocumentElement,
+                //    "confirmItemRecPath");
+                string strConfirmItemRecPath = GetConfirmRecPath(domLog);
+
                 string strItemBarcode = DomUtil.GetElementText(domLog.DocumentElement,
                     "itemBarcode");
                 string strItemRefID = DomUtil.GetElementText(domLog.DocumentElement,
@@ -1333,6 +1639,7 @@ out strError);
                     goto ERROR1;
                 }
 
+#if REMOVED
                 string strItemXml = "";
                 string strOutputItemRecPath = "";
                 byte[] item_timestamp = null;
@@ -1340,10 +1647,9 @@ out strError);
                 // 如果已经有确定的册记录路径
                 if (String.IsNullOrEmpty(strConfirmItemRecPath) == false)
                 {
-                    string strMetaData = "";
                     lRet = channel.GetRes(strConfirmItemRecPath,
                         out strItemXml,
-                        out strMetaData,
+                        out string strMetaData,
                         out item_timestamp,
                         out strOutputItemRecPath,
                         out strError);
@@ -1359,6 +1665,8 @@ out strError);
                 {
                     // 从册条码号获得册记录
 
+                    int nRedoCount = 0;
+                REDO_GETITEM:
                     // 获得册记录
                     // return:
                     //      -1  error
@@ -1376,8 +1684,25 @@ out strError);
                         out strError);
                     if (nRet == 0)
                     {
-                        strError = "册条码号 '" + strItemKey + "' 不存在";
-                        goto ERROR1;
+                        // 尝试用 itemRecord 中的 XML 内容恢复这条册记录
+                        // 根据日志记录中的特定元素，尝试恢复册记录
+                        // return:
+                        //      -2  nRedoCount 超过范围
+                        //      -1  出错
+                        //      0   日志记录中没有找到需要的元素
+                        //      1   成功。nRedoCount 自动增量 1
+                        nRet = RecoverItemRecord(
+    channel,
+    domLog,
+    "itemRecord",
+    ref nRedoCount,
+    out string error);
+                        if (nRet != 1)
+                        {
+                            strError = "册条码号 '" + strItemKey + "' 不存在";
+                            goto ERROR1;
+                        }
+                        goto REDO_GETITEM;
                     }
                     if (nRet == -1)
                     {
@@ -1488,6 +1813,96 @@ out strError);
                     }
 
                 }
+#endif
+                nRet = LoadItemRecord(channel,
+strItemKey,
+strConfirmItemRecPath,
+domLog,
+bForce,
+    (List<string> paths,
+    ref string item_xml,
+    ref byte[] timestamp,
+    ref string item_recpath,
+    out string error) =>
+    {
+        error = "";
+        if (string.IsNullOrEmpty(strReaderBarcode) == true)
+        {
+            // 发生重条码号的时候，又没有读者证条码号辅助判断
+            if (bForce == false)
+            {
+                error = "册条码号为 '" + strItemBarcode + "' 的册记录有 " + paths.Count.ToString() + " 条，但此时日志记录中没有提供读者证条码号辅助判断，无法进行还书操作。";
+                return -1;
+            }
+            // TODO: 那就至少看看这些册中，哪些表明被人借阅着？如果正巧只有一个人借过，那就...。
+            strRecoverComment += "册条码号 " + strItemBarcode + "有 " + paths.Count.ToString() + " 条重复记录，而且没有读者证条码号进行辅助选择。";
+        }
+
+        // 从若干重复条码号的册记录中，选出其中符合当前读者证条码号的
+        // return:
+        //      -1  出错
+        //      其他    选出的数量
+        nRet = FindItem(
+            channel,
+            strReaderBarcode,
+            strReaderRefID,
+            paths,
+            true,   // 优化
+            out List<string> aFoundPath,
+            out List<string> aItemXml,
+            out List<byte[]> aTimestamp,
+            out error);
+        if (nRet == -1)
+        {
+            error = "选择重复条码号的册记录时发生错误: " + error;
+            return -1;
+        }
+
+        if (nRet == 0)
+        {
+            error = "册条码号 '" + strItemBarcode + "' 检索出的 " + paths.Count + " 条记录中，没有任何一条其<borrower>元素表明了被读者 '" + strReaderBarcode + "' 借阅。";
+            return -1;
+        }
+
+        if (nRet > 1)
+        {
+            if (bForce == true)
+            {
+                // 容错情况下，选择第一个册条码号
+                item_recpath = aFoundPath[0];
+                timestamp = aTimestamp[0];
+                item_xml = aItemXml[0];
+
+                // TODO: 不过，应当在记录中记载注释，表示这是容错处理方式
+                if (string.IsNullOrEmpty(strReaderBarcode) == true)
+                {
+                    strRecoverComment += "经过筛选，仍然有 " + aFoundPath.Count.ToString() + " 条册记录含有借阅者信息(无论什么读者证条码号)，那么就只好选择其中第一个册记录 " + item_recpath + " 进行还书操作。";
+                }
+                else
+                {
+                    strRecoverComment += "经过筛选，仍然有 " + aFoundPath.Count.ToString() + " 条册记录含有借阅者 '" + strReaderBarcode + "' 信息，那么就只好选择其中第一个册记录 " + item_recpath + " 进行还书操作。";
+                }
+            }
+            else
+            {
+                error = "册条码号为 '" + strItemBarcode + "' 并且<borrower>元素表明为读者 '" + strReaderBarcode + "' 借阅的册记录有 " + aFoundPath.Count.ToString() + " 条，无法进行还书操作。";
+                return -1;
+            }
+        }
+
+        Debug.Assert(nRet == 1, "");
+
+        item_recpath = aFoundPath[0];
+        timestamp = aTimestamp[0];
+        item_xml = aItemXml[0];
+        return 0;
+    },
+out string strItemXml,
+out byte[] item_timestamp,
+out string strOutputItemRecPath,
+out strError);
+                if (nRet == -1)
+                    goto ERROR1;
 
                 nRet = LibraryApplication.LoadToDom(strItemXml,
                     out XmlDocument itemdom,
@@ -1619,8 +2034,10 @@ out strError);
                 }
 
                 // 读入册记录
-                string strConfirmItemRecPath = DomUtil.GetElementText(domLog.DocumentElement,
-                    "confirmItemRecPath");
+                //string strConfirmItemRecPath = DomUtil.GetElementText(domLog.DocumentElement,
+                //    "confirmItemRecPath");
+                string strConfirmItemRecPath = GetConfirmRecPath(domLog);
+
                 string strItemBarcode = DomUtil.GetElementText(domLog.DocumentElement,
                     "itemBarcode");
                 string strItemRefID = DomUtil.GetElementText(domLog.DocumentElement,
@@ -1943,6 +2360,83 @@ out strError);
 
         #region RecoverReturn()下级函数
 
+        static string GetConfirmRecPath(XmlDocument domOperLog)
+        {
+            string recpath = "";
+            var node = domOperLog.DocumentElement
+                .SelectSingleNode($"itemRecord/@recPath");
+            if (node != null)
+                recpath = node.Value;
+            if (string.IsNullOrEmpty(recpath))
+                recpath = DomUtil.GetElementText(domOperLog.DocumentElement,
+                    "confirmItemRecPath");
+            return recpath;
+        }
+
+        // 根据日志记录中的特定元素，尝试恢复册记录
+        // 注: 覆盖前是否需要检查原有位置已经存在一条记录，以及存在后如何处理，需要研究一下。
+        // 作追加处理不一定合适。因为不知道当前日志动作后面的其它日志动作是不是又占用了追加使用的记录位置
+        // return:
+        //      -2  nRedoCount 超过范围
+        //      -1  出错
+        //      0   日志记录中没有找到需要的元素
+        //      1   成功。nRedoCount 自动增量 1
+        int RecoverItemRecord(
+        RmsChannel channel,
+        XmlDocument domOperLog,
+        string elementName,
+        ref int nRedoCount,
+        out string strError)
+        {
+            strError = "";
+
+            if (nRedoCount >= 2)
+            {
+                strError = "nRedoCount 超过范围";
+                return -2;
+            }
+
+            var record = DomUtil.GetElementText(domOperLog.DocumentElement,
+                elementName,
+                out XmlNode node);
+            var recPath = DomUtil.GetAttr(node, "recPath");
+            if (string.IsNullOrEmpty(record)
+                || string.IsNullOrEmpty(recPath))
+            {
+                strError = $"元素 {elementName} 中没有记录内容或者没有 recPath 属性";
+                return 0;
+            }
+
+            /*
+            // 先检查这条记录是否已经存在
+            long lRet = channel.GetRes(recPath,
+                out string result,
+                out _,
+                out byte[] timestamp,
+                out string output_path,
+                out strError);
+            if (lRet == 0)
+            {
+                // 已经存在。改为追加
+                recPath = ResPath.GetDbName(recPath) + "/?";
+            }
+            */
+
+            // 写回册记录
+            long lRet = channel.DoSaveTextRes(recPath,
+                record,
+                false,
+                "content,ignorechecktimestamp",
+                null,
+                out _,
+                out string strOutputPath,
+                out strError);
+            if (lRet == -1)
+                return -1;
+
+            nRedoCount++;
+            return 1;
+        }
 
         // 根据 所借册条码号，清除若干读者记录中的借阅信息
         int ReturnAllReader(
@@ -2136,7 +2630,7 @@ out strError);
                 "barcode");
             string strItemRefID = DomUtil.GetElementText(itemdom.DocumentElement,
                 "refID");
-            string strItemKey = BuildReaderKey(strItemBarcode, strItemRefID);
+            string strItemKey = dp2StringUtil.BuildReaderKey(strItemBarcode, strItemRefID);
 
 
             // 注意，读者证条码号可能为空
@@ -2144,7 +2638,7 @@ out strError);
                 "barcode");
             string strReaderRefID = DomUtil.GetElementText(readerdom.DocumentElement,
                 "refID");
-            string strReaderKey = BuildReaderKey(strReaderBarcode, strReaderRefID);
+            string strReaderKey = dp2StringUtil.BuildReaderKey(strReaderBarcode, strReaderRefID);
 
             string strReturnOperator = DomUtil.GetElementText(domLog.DocumentElement,
     "operator");
@@ -2637,8 +3131,11 @@ out strError);
                         strOldRecPath = DomUtil.GetAttr(node, "recPath");
                     }
 
-                    // 写册记录
-                    lRet = channel.DoSaveTextRes(strNewRecPath,
+                    {
+                        int nRedoCount = 0;
+                    REDO_WRITE:
+                        // 写册记录
+                        lRet = channel.DoSaveTextRes(strNewRecPath,
                         strRecord,
                         false,
                         "content,ignorechecktimestamp",
@@ -2646,10 +3143,27 @@ out strError);
                         out output_timestamp,
                         out strOutputPath,
                         out strError);
-                    if (lRet == -1)
-                    {
-                        strError = "写入册记录 '" + strNewRecPath + "' 时发生错误: " + strError;
-                        return -1;
+                        if (lRet == -1)
+                        {
+                            if (channel.OriginErrorCode == ErrorCodeValue.NotFoundDb)
+                            {
+                                nRet = TryCreateBiblioDatabase(
+        channel,
+        strNewRecPath,
+        ref nRedoCount,
+        out string error);
+                                if (nRet == 0)
+                                    goto REDO_WRITE;
+                                else if (nRet == -1)
+                                {
+                                    strError = $"根据记录路径 '{strNewRecPath}' 临时决定创建书目库的过程出错: {error}";
+                                    return -1;
+                                }
+                            }
+
+                            strError = "写入册记录 '" + strNewRecPath + "' 时发生错误: " + strError;
+                            return -1;
+                        }
                     }
 
                     if (strAction == "move")
@@ -3604,8 +4118,11 @@ out strError);
                         strOldRecPath = DomUtil.GetAttr(node, "recPath");
                     }
 
-                    // 写订购记录
-                    lRet = channel.DoSaveTextRes(strNewRecPath,
+                    {
+                        int nRedoCount = 0;
+                    REDO_WRITE:
+                        // 写订购记录
+                        lRet = channel.DoSaveTextRes(strNewRecPath,
                         strRecord,
                         false,
                         "content,ignorechecktimestamp",
@@ -3613,10 +4130,27 @@ out strError);
                         out output_timestamp,
                         out strOutputPath,
                         out strError);
-                    if (lRet == -1)
-                    {
-                        strError = "写入订购记录 '" + strNewRecPath + "' 时发生错误: " + strError;
-                        return -1;
+                        if (lRet == -1)
+                        {
+                            if (channel.OriginErrorCode == ErrorCodeValue.NotFoundDb)
+                            {
+                                nRet = TryCreateBiblioDatabase(
+        channel,
+        strNewRecPath,
+        ref nRedoCount,
+        out string error);
+                                if (nRet == 0)
+                                    goto REDO_WRITE;
+                                else if (nRet == -1)
+                                {
+                                    strError = $"根据记录路径 '{strNewRecPath}' 临时决定创建书目库的过程出错: {error}";
+                                    return -1;
+                                }
+                            }
+
+                            strError = "写入订购记录 '" + strNewRecPath + "' 时发生错误: " + strError;
+                            return -1;
+                        }
                     }
 
                     if (strAction == "move")
@@ -3993,8 +4527,11 @@ out strError);
                         strOldRecPath = DomUtil.GetAttr(node, "recPath");
                     }
 
-                    // 写期记录
-                    lRet = channel.DoSaveTextRes(strNewRecPath,
+                    {
+                        int nRedoCount = 0;
+                    REDO_WRITE:
+                        // 写期记录
+                        lRet = channel.DoSaveTextRes(strNewRecPath,
                         strRecord,
                         false,
                         "content,ignorechecktimestamp",
@@ -4002,10 +4539,27 @@ out strError);
                         out output_timestamp,
                         out strOutputPath,
                         out strError);
-                    if (lRet == -1)
-                    {
-                        strError = "写入期记录 '" + strNewRecPath + "' 时发生错误: " + strError;
-                        return -1;
+                        if (lRet == -1)
+                        {
+                            if (channel.OriginErrorCode == ErrorCodeValue.NotFoundDb)
+                            {
+                                nRet = TryCreateBiblioDatabase(
+        channel,
+        strNewRecPath,
+        ref nRedoCount,
+        out string error);
+                                if (nRet == 0)
+                                    goto REDO_WRITE;
+                                else if (nRet == -1)
+                                {
+                                    strError = $"根据记录路径 '{strNewRecPath}' 临时决定创建书目库的过程出错: {error}";
+                                    return -1;
+                                }
+                            }
+
+                            strError = "写入期记录 '" + strNewRecPath + "' 时发生错误: " + strError;
+                            return -1;
+                        }
                     }
 
                     if (strAction == "move")
@@ -4380,8 +4934,12 @@ out strError);
                         strOldRecPath = DomUtil.GetAttr(node, "recPath");
                     }
 
-                    // 写评注记录
-                    lRet = channel.DoSaveTextRes(strNewRecPath,
+
+                    {
+                        int nRedoCount = 0;
+                    REDO_WRITE:
+                        // 写评注记录
+                        lRet = channel.DoSaveTextRes(strNewRecPath,
                         strRecord,
                         false,
                         "content,ignorechecktimestamp",
@@ -4389,10 +4947,27 @@ out strError);
                         out output_timestamp,
                         out strOutputPath,
                         out strError);
-                    if (lRet == -1)
-                    {
-                        strError = "写入评注记录 '" + strNewRecPath + "' 时发生错误: " + strError;
-                        return -1;
+                        if (lRet == -1)
+                        {
+                            if (channel.OriginErrorCode == ErrorCodeValue.NotFoundDb)
+                            {
+                                nRet = TryCreateBiblioDatabase(
+        channel,
+        strNewRecPath,
+        ref nRedoCount,
+        out string error);
+                                if (nRet == 0)
+                                    goto REDO_WRITE;
+                                else if (nRet == -1)
+                                {
+                                    strError = $"根据记录路径 '{strNewRecPath}' 临时决定创建书目库的过程出错: {error}";
+                                    return -1;
+                                }
+                            }
+
+                            strError = "写入评注记录 '" + strNewRecPath + "' 时发生错误: " + strError;
+                            return -1;
+                        }
                     }
 
                     if (strAction == "move")
@@ -4759,8 +5334,11 @@ out strError);
 
                 byte[] timestamp = null;
 
-                // 写读者记录
-                lRet = channel.DoSaveTextRes(strReaderRecPath,
+                {
+                    int nRedoCount = 0;
+                REDO_WRITE:
+                    // 写读者记录
+                    lRet = channel.DoSaveTextRes(strReaderRecPath,
     strReaderXml,
     false,
     "content,ignorechecktimestamp",
@@ -4768,10 +5346,27 @@ out strError);
     out byte[] output_timestamp,
     out string strOutputPath,
     out strError);
-                if (lRet == -1)
-                {
-                    strError = "写入读者记录 '" + strReaderRecPath + "' 时发生错误: " + strError;
-                    return -1;
+                    if (lRet == -1)
+                    {
+                        if (channel.OriginErrorCode == ErrorCodeValue.NotFoundDb)
+                        {
+                            nRet = TryCreateReaderDatabase(
+    channel,
+    strReaderRecPath,
+    ref nRedoCount,
+    out string error);
+                            if (nRet == 0)
+                                goto REDO_WRITE;
+                            else if (nRet == -1)
+                            {
+                                strError = $"根据记录路径 '{strReaderRecPath}' 临时决定创建读者库的过程出错: {error}";
+                                return -1;
+                            }
+                        }
+
+                        strError = "写入读者记录 '" + strReaderRecPath + "' 时发生错误: " + strError;
+                        return -1;
+                    }
                 }
 
                 return 0;
@@ -4929,8 +5524,11 @@ out strError);
                     }
                     string strRecPath = DomUtil.GetAttr(node, "recPath");
 
-                    // 写读者记录
-                    lRet = channel.DoSaveTextRes(strRecPath,
+                    {
+                        int nRedoCount = 0;
+                    REDO_WRITE:
+                        // 写读者记录
+                        lRet = channel.DoSaveTextRes(strRecPath,
         strRecord,
         false,
         "content,ignorechecktimestamp",
@@ -4938,10 +5536,27 @@ out strError);
         out output_timestamp,
         out strOutputPath,
         out strError);
-                    if (lRet == -1)
-                    {
-                        strError = "写入读者记录 '" + strRecPath + "' 时发生错误: " + strError;
-                        return -1;
+                        if (lRet == -1)
+                        {
+                            if (channel.OriginErrorCode == ErrorCodeValue.NotFoundDb)
+                            {
+                                nRet = TryCreateReaderDatabase(
+        channel,
+        strRecPath,
+        ref nRedoCount,
+        out string error);
+                                if (nRet == 0)
+                                    goto REDO_WRITE;
+                                else if (nRet == -1)
+                                {
+                                    strError = $"根据记录路径 '{strRecPath}' 临时决定创建读者库的过程出错: {error}";
+                                    return -1;
+                                }
+                            }
+
+                            strError = "写入读者记录 '" + strRecPath + "' 时发生错误: " + strError;
+                            return -1;
+                        }
                     }
 
                     // 2015/9/11
@@ -5497,8 +6112,11 @@ out strError);
                         out node);
                     string strReaderRecPath = DomUtil.GetAttr(node, "recPath");
 
-                    // 写读者记录
-                    lRet = channel.DoSaveTextRes(strReaderRecPath,
+                    {
+                        int nRedoCount = 0;
+                    REDO_WRITE:
+                        // 写读者记录
+                        lRet = channel.DoSaveTextRes(strReaderRecPath,
         strReaderRecord,
         false,
         "content,ignorechecktimestamp",
@@ -5506,10 +6124,27 @@ out strError);
         out output_timestamp,
         out strOutputPath,
         out strError);
-                    if (lRet == -1)
-                    {
-                        strError = "写入读者记录 '" + strReaderRecPath + "' 时发生错误: " + strError;
-                        return -1;
+                        if (lRet == -1)
+                        {
+                            if (channel.OriginErrorCode == ErrorCodeValue.NotFoundDb)
+                            {
+                                nRet = TryCreateReaderDatabase(
+        channel,
+        strReaderRecPath,
+        ref nRedoCount,
+        out string error);
+                                if (nRet == 0)
+                                    goto REDO_WRITE;
+                                else if (nRet == -1)
+                                {
+                                    strError = $"根据记录路径 '{strReaderRecPath}' 临时决定创建读者库的过程出错: {error}";
+                                    return -1;
+                                }
+                            }
+
+                            strError = "写入读者记录 '" + strReaderRecPath + "' 时发生错误: " + strError;
+                            return -1;
+                        }
                     }
                 }
 
@@ -6044,8 +6679,11 @@ out strError);
                 string strOutputPath = "";
                 byte[] output_timestamp = null;
 
-                // 写源读者记录
-                lRet = channel.DoSaveTextRes(strSourceReaderRecPath,
+                {
+                    int nRedoCount = 0;
+                REDO_WRITE:
+                    // 写源读者记录
+                    lRet = channel.DoSaveTextRes(strSourceReaderRecPath,
     strSourceReaderXml,
     false,
     "content,ignorechecktimestamp",
@@ -6053,10 +6691,27 @@ out strError);
     out output_timestamp,
     out strOutputPath,
     out strError);
-                if (lRet == -1)
-                {
-                    strError = "写入源读者记录 '" + strSourceReaderRecPath + "' 时发生错误: " + strError;
-                    return -1;
+                    if (lRet == -1)
+                    {
+                        if (channel.OriginErrorCode == ErrorCodeValue.NotFoundDb)
+                        {
+                            nRet = TryCreateReaderDatabase(
+    channel,
+    strSourceReaderRecPath,
+    ref nRedoCount,
+    out string error);
+                            if (nRet == 0)
+                                goto REDO_WRITE;
+                            else if (nRet == -1)
+                            {
+                                strError = $"根据记录路径 '{strSourceReaderRecPath}' 临时决定创建读者库的过程出错: {error}";
+                                return -1;
+                            }
+                        }
+
+                        strError = "写入源读者记录 '" + strSourceReaderRecPath + "' 时发生错误: " + strError;
+                        return -1;
+                    }
                 }
 
                 // 获目标读者记录
@@ -6072,8 +6727,11 @@ out strError);
                 }
                 string strTargetReaderRecPath = DomUtil.GetAttr(node, "recPath");
 
-                // 写目标读者记录
-                lRet = channel.DoSaveTextRes(strTargetReaderRecPath,
+                {
+                    int nRedoCount = 0;
+                REDO_WRITE:
+                    // 写目标读者记录
+                    lRet = channel.DoSaveTextRes(strTargetReaderRecPath,
                     strTargetReaderXml,
                     false,
                     "content,ignorechecktimestamp",
@@ -6081,10 +6739,27 @@ out strError);
                     out output_timestamp,
                     out strOutputPath,
                     out strError);
-                if (lRet == -1)
-                {
-                    strError = "写入目标读者记录 '" + strSourceReaderRecPath + "' 时发生错误: " + strError;
-                    return -1;
+                    if (lRet == -1)
+                    {
+                        if (channel.OriginErrorCode == ErrorCodeValue.NotFoundDb)
+                        {
+                            nRet = TryCreateReaderDatabase(
+    channel,
+    strTargetReaderRecPath,
+    ref nRedoCount,
+    out string error);
+                            if (nRet == 0)
+                                goto REDO_WRITE;
+                            else if (nRet == -1)
+                            {
+                                strError = $"根据记录路径 '{strTargetReaderRecPath}' 临时决定创建读者库的过程出错: {error}";
+                                return -1;
+                            }
+                        }
+
+                        strError = "写入目标读者记录 '" + strSourceReaderRecPath + "' 时发生错误: " + strError;
+                        return -1;
+                    }
                 }
 
                 // 循环，写入相关的若干实体记录
@@ -6420,19 +7095,21 @@ out strError);
                     }
                     string strRecPath = DomUtil.GetAttr(node, "recPath");
 
-                    int nRedoCount = 0;
-                    REDO_WRITERES:
-                    // 写书目记录
-                    lRet = channel.DoSaveTextRes(strRecPath,
-                        strRecord,
-                        false,
-                        "content,ignorechecktimestamp",
-                        timestamp,
-                        out output_timestamp,
-                        out strOutputPath,
-                        out strError);
-                    if (lRet == -1)
                     {
+                        int nRedoCount = 0;
+                    REDO_WRITERES:
+                        // 写书目记录
+                        lRet = channel.DoSaveTextRes(strRecPath,
+                            strRecord,
+                            false,
+                            "content,ignorechecktimestamp",
+                            timestamp,
+                            out output_timestamp,
+                            out strOutputPath,
+                            out strError);
+                        if (lRet == -1)
+                        {
+#if REMOVED
                         if (channel.OriginErrorCode == ErrorCodeValue.NotFoundDb
                             && nRedoCount < 2)
                         {
@@ -6442,7 +7119,7 @@ out strError);
                             if (strBiblioDbName.Contains("期刊")
                                 || strBiblioDbName.ToLower().Contains("series"))
                                 usage = "series";
-                            
+
                             // return:
                             //      -1  出错
                             //      0   没有必要创建，或者操作者放弃创建。原因在 strError 中
@@ -6465,9 +7142,27 @@ out strError);
                             nRedoCount++;
                             goto REDO_WRITERES;
                         }
+#endif
+                            if (channel.OriginErrorCode == ErrorCodeValue.NotFoundDb)
+                            {
+                                nRet = TryCreateBiblioDatabase(
+        channel,
+        strRecPath,
+        ref nRedoCount,
+        out string error);
+                                if (nRet == 0)
+                                    goto REDO_WRITERES;
+                                else if (nRet == -1)
+                                {
+                                    strError = $"根据记录路径 '{strRecPath}' 临时决定创建书目库的过程出错: {error}";
+                                    return -1;
+                                }
+                            }
 
-                        strError = "写入书目记录 '" + strRecPath + "' 时发生错误: " + strError;
-                        return -1;
+
+                            strError = "写入书目记录 '" + strRecPath + "' 时发生错误: " + strError;
+                            return -1;
+                        }
                     }
                 }
                 else if (strAction == "onlymovebiblio"
@@ -6941,6 +7636,155 @@ out strError);
             return -1;
         }
 
+        #region 尝试临时重建数据库
+
+        // 猜测一个数据库名是书目库(系列)名字还是读者库名字
+        static string GuessBiblioOrReader(string strDbName)
+        {
+            if (strDbName.Contains("读者"))
+                return "reader";
+            if (strDbName.Contains("图书")
+                || strDbName.ToLower().Contains("books")
+                || strDbName.Contains("期刊")
+                || strDbName.ToLower().Contains("series"))
+                return "biblio";
+            if (strDbName.EndsWith("实体")
+    || strDbName.EndsWith("订购")
+    || strDbName.EndsWith("期")
+    || strDbName.EndsWith("评注"))
+                return "biblio";
+            if (strDbName.Contains("书目")
+                || strDbName.Contains("源"))
+                return "biblio";
+            return "reader";
+        }
+
+        static string GuessReaderDbLibraryCode(string strOriginDbName)
+        {
+            if (strOriginDbName.EndsWith("读者"))
+                return strOriginDbName.Substring(0, strOriginDbName.Length - 2);
+            return strOriginDbName;
+        }
+
+        // return:
+        //      -2  nRedoCount 达到或者超过 2
+        //      -1  出错
+        //      0   成功。nRedoCount 被增量
+        int TryCreateReaderDatabase(
+            RmsChannel channel,
+            string strRecPath,
+            ref int nRedoCount,
+            out string strError)
+        {
+            strError = "";
+            if (nRedoCount >= 2)
+            {
+                strError = "重试次数达到或者超过 2";
+                return -1;
+            }
+
+            // 创建一个书目库。并记载下来这是新创建的
+            string strOriginDbName = ResPath.GetDbName(strRecPath);
+            string strLibraryCode = GuessReaderDbLibraryCode(strOriginDbName);
+
+            // return:
+            //      -1  出错
+            //      0   没有必要创建，或者操作者放弃创建。原因在 strError 中
+            //      1   成功创建
+            int nRet = CreateReaderDatabase(
+                channel,
+                strOriginDbName,
+                strLibraryCode,
+                true,
+                "", // strStyle,
+                out string strRequestXml,
+                out strError);
+            if (nRet != 1)
+            {
+                strError = $"临时决定创建读者库 '{strOriginDbName}' 的过程出错: {strError}";
+                return -1;
+            }
+            nRedoCount++;
+            return 0;
+        }
+
+
+
+        // 根据原始数据库名字，猜测书目库名字
+        static string GuessBiblioDbName(string strDbName)
+        {
+            if (strDbName.EndsWith("实体"))
+                return strDbName.Substring(0, strDbName.Length - 2);
+            if (strDbName.EndsWith("订购"))
+                return strDbName.Substring(0, strDbName.Length - 2);
+            if (strDbName.EndsWith("评注"))
+                return strDbName.Substring(0, strDbName.Length - 2);
+            if (strDbName.EndsWith("期"))
+                return strDbName.Substring(0, strDbName.Length - 1);
+
+            return strDbName;
+        }
+
+        // 根据书目库名字猜测 MARC 格式
+        static string GuessMarcSyntax(string strBiblioDbName)
+        {
+            if (strBiblioDbName.ToLower().Contains("english")
+                || strBiblioDbName.Contains("西文")
+                || strBiblioDbName.Contains("英文")
+                || strBiblioDbName.Contains("外文"))
+                return "usmarc";
+            return "unimarc";
+        }
+
+        // return:
+        //      -2  nRedoCount 达到或者超过 2
+        //      -1  出错
+        //      0   成功。nRedoCount 被增量
+        int TryCreateBiblioDatabase(
+            RmsChannel channel,
+            string strRecPath,
+            ref int nRedoCount,
+            out string strError)
+        {
+            strError = "";
+            if (nRedoCount >= 2)
+            {
+                strError = "重试次数达到或者超过 2";
+                return -1;
+            }
+
+            // 创建一个书目库。并记载下来这是新创建的
+            string strOriginDbName = ResPath.GetDbName(strRecPath);
+            string strBiblioDbName = GuessBiblioDbName(strOriginDbName);
+            string usage = "book";
+            if (strBiblioDbName.Contains("期刊")
+                || strBiblioDbName.ToLower().Contains("series"))
+                usage = "series";
+
+            // return:
+            //      -1  出错
+            //      0   没有必要创建，或者操作者放弃创建。原因在 strError 中
+            //      1   成功创建
+            int nRet = CreateBiblioDatabase(
+                channel,
+                strBiblioDbName,
+                usage, // strUsage,
+                "", // strRole,
+                GuessMarcSyntax(strBiblioDbName),
+                "*",    // strSubTypeList,
+                "", // strStyle,
+out string strRequestXml,
+                out strError);
+            if (nRet != 1)
+            {
+                strError = $"临时决定创建书目库 '{strBiblioDbName}' 的过程出错: {strError}";
+                return -1;
+            }
+            nRedoCount++;
+            return 0;
+        }
+
+
         // 创建一个书目库。用于日志恢复时临时决定创建一个书目库
         // parameters:
         //      strRequestXml   返回对 dp2library 发出的请求 XML
@@ -6949,7 +7793,8 @@ out strError);
         //      0   没有必要创建，或者操作者放弃创建。原因在 strError 中
         //      1   成功创建
         public int CreateBiblioDatabase(
-            RmsChannelCollection Channels,
+            RmsChannel channel,
+            // RmsChannelCollection Channels,
             string strBiblioDbName,
             string strUsage,
             string strRole,
@@ -7007,7 +7852,7 @@ out strError);
             strRequestXml = database_dom.OuterXml;
 
             return this.CreateDatabase(null,
-                Channels,
+                channel,    // Channels,
                 "", // strLibraryCodeList,
                 strRequestXml,
                 false,
@@ -7034,6 +7879,73 @@ out strError);
 #endif
         }
 
+        // 创建一个读者库
+        // parameters:
+        // return:
+        //      -1  出错
+        //      0   没有必要创建，或者操作者放弃创建。原因在 strError 中
+        //      1   成功创建
+        public int CreateReaderDatabase(
+            RmsChannel channel,
+            string strDbName,
+            string strLibraryCode,
+            bool bInCirculation,
+            string strStyle,
+            out string strRequestXml,
+            out string strError)
+        {
+            strError = "";
+            strRequestXml = "";
+
+            // 创建库的定义
+            XmlDocument database_dom = new XmlDocument();
+            database_dom.LoadXml("<root />");
+
+            {
+                // 创建读者库
+                ServerDatabaseUtility.CreateReaderDatabaseNode(database_dom,
+                    strDbName,
+                    strLibraryCode,
+                    bInCirculation);
+            }
+
+            strRequestXml = database_dom.OuterXml;
+
+            return this.CreateDatabase(null,
+                channel,    // Channels,
+                "", // strLibraryCodeList,
+                strRequestXml,
+                false,
+                "skipOperLog",
+                out string output_info,
+                out strError);
+#if REMOVED
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 10, 0);
+            try
+            {
+                strRequestXml = database_dom.OuterXml;
+                long lRet = channel.ManageDatabase(
+                    Stop,
+                    "create",
+                    "",
+                    strRequestXml,
+                    strStyle,
+                    out string strOutputInfo,
+                    out strError);
+                if (lRet == -1)
+                    return -1;
+
+                return 1;
+            }
+            finally
+            {
+                channel.Timeout = old_timeout;
+            }
+#endif
+        }
+
+        #endregion
 
         // 源记录不存在，应该忽略；目标库不存在，也应该忽略
         /*
@@ -7188,8 +8100,11 @@ API: Hire()
                 byte[] output_timestamp = null;
                 string strOutputPath = "";
 
-                // 写读者记录
-                lRet = channel.DoSaveTextRes(strReaderRecPath,
+                {
+                    int nRedoCount = 0;
+                REDO_WRITE:
+                    // 写读者记录
+                    lRet = channel.DoSaveTextRes(strReaderRecPath,
                     strReaderXml,
                     false,
                     "content,ignorechecktimestamp",
@@ -7197,10 +8112,27 @@ API: Hire()
                     out output_timestamp,
                     out strOutputPath,
                     out strError);
-                if (lRet == -1)
-                {
-                    strError = "写入读者记录 '" + strReaderRecPath + "' 时发生错误: " + strError;
-                    return -1;
+                    if (lRet == -1)
+                    {
+                        if (channel.OriginErrorCode == ErrorCodeValue.NotFoundDb)
+                        {
+                            nRet = TryCreateReaderDatabase(
+    channel,
+    strReaderRecPath,
+    ref nRedoCount,
+    out string error);
+                            if (nRet == 0)
+                                goto REDO_WRITE;
+                            else if (nRet == -1)
+                            {
+                                strError = $"根据记录路径 '{strReaderRecPath}' 临时决定创建读者库的过程出错: {error}";
+                                return -1;
+                            }
+                        }
+
+                        strError = "写入读者记录 '" + strReaderRecPath + "' 时发生错误: " + strError;
+                        return -1;
+                    }
                 }
 
                 return 0;
@@ -7400,8 +8332,11 @@ API: Foregift()
                 byte[] output_timestamp = null;
                 string strOutputPath = "";
 
-                // 写读者记录
-                lRet = channel.DoSaveTextRes(strReaderRecPath,
+                {
+                    int nRedoCount = 0;
+                REDO_WRITE:
+                    // 写读者记录
+                    lRet = channel.DoSaveTextRes(strReaderRecPath,
                     strReaderXml,
                     false,
                     "content,ignorechecktimestamp",
@@ -7409,10 +8344,27 @@ API: Foregift()
                     out output_timestamp,
                     out strOutputPath,
                     out strError);
-                if (lRet == -1)
-                {
-                    strError = "写入读者记录 '" + strReaderRecPath + "' 时发生错误: " + strError;
-                    return -1;
+                    if (lRet == -1)
+                    {
+                        if (channel.OriginErrorCode == ErrorCodeValue.NotFoundDb)
+                        {
+                            nRet = TryCreateReaderDatabase(
+    channel,
+    strReaderRecPath,
+    ref nRedoCount,
+    out string error);
+                            if (nRet == 0)
+                                goto REDO_WRITE;
+                            else if (nRet == -1)
+                            {
+                                strError = $"根据记录路径 '{strReaderRecPath}' 临时决定创建读者库的过程出错: {error}";
+                                return -1;
+                            }
+                        }
+
+                        strError = "写入读者记录 '" + strReaderRecPath + "' 时发生错误: " + strError;
+                        return -1;
+                    }
                 }
 
                 return 0;
@@ -7869,19 +8821,52 @@ API: Settlement()
                         return -1;
                     }
 
-                    string strNewRecPath = DomUtil.GetAttr(node, "recPath");
-                    lRet = channel.DoSaveTextRes(strNewRecPath,
-                        strRecord,
-                        false,
-                        "content,ignorechecktimestamp",
-                        null,
-                        out _,
-                        out _,
-                        out strError);
-                    if (lRet == -1)
                     {
-                        strError = "DoSaveTextRes() '" + strNewRecPath + "' 时发生错误: " + strError;
-                        return -1;
+                        int nRedoCount = 0;
+                    REDO_WRITE:
+                        string strNewRecPath = DomUtil.GetAttr(node, "recPath");
+                        lRet = channel.DoSaveTextRes(strNewRecPath,
+                            strRecord,
+                            false,
+                            "content,ignorechecktimestamp",
+                            null,
+                            out _,
+                            out _,
+                            out strError);
+                        if (lRet == -1)
+                        {
+                            if (channel.OriginErrorCode == ErrorCodeValue.NotFoundDb)
+                            {
+                                // TODO: 注意这里的路径还可能是读者库路径
+                                string dbName = ResPath.GetDbName(strResPath);
+                                string type = GuessBiblioOrReader(dbName);
+
+                                int nRet = 0;
+                                string error = "";
+                                if (type == "biblio")
+                                    nRet = TryCreateBiblioDatabase(
+        channel,
+        strResPath,
+        ref nRedoCount,
+        out error);
+                                else
+                                    nRet = TryCreateReaderDatabase(
+        channel,
+        strResPath,
+        ref nRedoCount,
+        out error);
+                                if (nRet == 0)
+                                    goto REDO_WRITE;
+                                else if (nRet == -1)
+                                {
+                                    strError = $"根据记录路径 '{strResPath}' 临时决定创建书目库的过程出错: {error}";
+                                    return -1;
+                                }
+                            }
+
+                            strError = "DoSaveTextRes() '" + strNewRecPath + "' 时发生错误: " + strError;
+                            return -1;
+                        }
                     }
                     return 0;
                 }
@@ -7940,34 +8925,66 @@ domLog.DocumentElement,
                 string strOutputResPath = "";
                 byte[] output_timestamp = null;
 
-                if (StringUtil.IsInList("delete", strStyle) == true)
                 {
-                    // 2015/9/3 增加
-                    lRet = channel.DoDeleteRes(strResPath,
-                        timestamp,
-                        strStyle,
-                        out output_timestamp,
-                        out strError);
-                }
-                else
-                {
-                    lRet = channel.WriteRes(strResPath,
-        strRanges,
-        lTotalLength,
-        baRecord,
-        strMetadata,
-        strStyle,
-        timestamp,
-        out strOutputResPath,
-        out output_timestamp,
-        out strError);
-                }
-                if (lRet == -1)
-                {
-                    strError = "WriteRes() '" + strResPath + "' 时发生错误: " + strError;
-                    return -1;
-                }
+                    int nRedoCount = 0;
+                REDO_WRITERES:
+                    if (StringUtil.IsInList("delete", strStyle) == true)
+                    {
+                        // 2015/9/3 增加
+                        lRet = channel.DoDeleteRes(strResPath,
+                            timestamp,
+                            strStyle,
+                            out output_timestamp,
+                            out strError);
+                    }
+                    else
+                    {
+                        lRet = channel.WriteRes(strResPath,
+            strRanges,
+            lTotalLength,
+            baRecord,
+            strMetadata,
+            strStyle,
+            timestamp,
+            out strOutputResPath,
+            out output_timestamp,
+            out strError);
+                    }
+                    if (lRet == -1)
+                    {
+                        if (channel.OriginErrorCode == ErrorCodeValue.NotFoundDb)
+                        {
+                            // TODO: 注意这里的路径还可能是读者库路径
+                            string dbName = ResPath.GetDbName(strResPath);
+                            string type = GuessBiblioOrReader(dbName);
 
+                            int nRet = 0;
+                            string error = "";
+                            if (type == "biblio")
+                                nRet = TryCreateBiblioDatabase(
+        channel,
+        strResPath,
+        ref nRedoCount,
+        out error);
+                            else
+                                nRet = TryCreateReaderDatabase(
+    channel,
+    strResPath,
+    ref nRedoCount,
+    out error);
+                            if (nRet == 0)
+                                goto REDO_WRITERES;
+                            else if (nRet == -1)
+                            {
+                                strError = $"根据记录路径 '{strResPath}' 临时决定创建书目库的过程出错: {error}";
+                                return -1;
+                            }
+                        }
+
+                        strError = "WriteRes() '" + strResPath + "' 时发生错误: " + strError;
+                        return -1;
+                    }
+                }
                 return 0;
             }
 
@@ -8101,8 +9118,10 @@ domLog.DocumentElement,
                 }
 
                 // 读入册记录
-                string strConfirmItemRecPath = DomUtil.GetElementText(domLog.DocumentElement,
-                    "confirmItemRecPath");
+                //string strConfirmItemRecPath = DomUtil.GetElementText(domLog.DocumentElement,
+                //    "confirmItemRecPath");
+                string strConfirmItemRecPath = GetConfirmRecPath(domLog);
+
                 string strItemBarcode = DomUtil.GetElementText(domLog.DocumentElement,
                     "itemBarcode");
                 if (String.IsNullOrEmpty(strItemBarcode) == true)
@@ -8118,10 +9137,9 @@ domLog.DocumentElement,
                 // 如果已经有确定的册记录路径
                 if (String.IsNullOrEmpty(strConfirmItemRecPath) == false)
                 {
-                    string strMetaData = "";
                     lRet = channel.GetRes(strConfirmItemRecPath,
                         out strItemXml,
-                        out strMetaData,
+                        out string strMetaData,
                         out item_timestamp,
                         out strOutputItemRecPath,
                         out strError);
@@ -8240,18 +9258,14 @@ domLog.DocumentElement,
                     // 移除读者记录侧的链
                     nodeBorrow.ParentNode.RemoveChild(nodeBorrow);
 
-                    byte[] output_timestamp = null;
-                    string strOutputPath = "";
-
-
                     // 写回读者记录
                     lRet = channel.DoSaveTextRes(strOutputReaderRecPath,
                         readerdom.OuterXml,
                         false,
                         "content,ignorechecktimestamp",
                         reader_timestamp,
-                        out output_timestamp,
-                        out strOutputPath,
+                        out byte[] output_timestamp,
+                        out string strOutputPath,
                         out strError);
                     if (lRet == -1)
                         goto ERROR1;
@@ -8292,17 +9306,14 @@ domLog.DocumentElement,
                     DomUtil.SetElementText(itemdom.DocumentElement,
                         "borrowPeriod", "");
 
-                    byte[] output_timestamp = null;
-                    string strOutputPath = "";
-
                     // 写回册记录
                     lRet = channel.DoSaveTextRes(strOutputItemRecPath,
                         itemdom.OuterXml,
                         false,
                         "content,ignorechecktimestamp",
                         item_timestamp,
-                        out output_timestamp,
-                        out strOutputPath,
+                        out byte[] output_timestamp,
+                        out string strOutputPath,
                         out strError);
                     if (lRet == -1)
                         goto ERROR1;
@@ -8469,13 +9480,13 @@ out string strError)
                     if (bDbNameChanged == true)
                     {
                         nRet = InitialKdbs(
-                            Channels,
+                            channel,    // Channels,
                             out strError);
                         if (nRet == -1)
                             return -1;
                         // 重新初始化虚拟库定义
                         this.vdbs = null;
-                        nRet = this.InitialVdbs(Channels,
+                        nRet = this.InitialVdbs(channel,    // Channels,
                             out strError);
                         if (nRet == -1)
                             return -1;
@@ -8582,6 +9593,41 @@ out string strError)
                     {
                         if (this.VerifyDatabaseDelete(
                             channel,
+                            strDbType,
+                            dbname,
+                            out strError) == -1)
+                            return -1;
+                    }
+                    continue;
+                }
+
+                // 2024/2/19
+                // 删除读者库
+                if (strDbType == "reader")
+                {
+                    // 删除读者库。
+                    // 也会自动修改 library.xml 的 readerdbgroup 中相关元素
+                    // parameters:
+                    //      bDbNameChanged  如果数据库发生了删除或者修改名字的情况，此参数会被设置为 true。否则其值不会发生改变
+                    // return:
+                    //      -1  出错
+                    //      0   指定的数据库不存在
+                    //      1   成功删除
+                    nRet = DeleteReaderDatabase(channel,
+                        "",
+                        dbname,
+                        null,   // strLogFileName,
+                        ref bDbNameChanged,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+
+                    if (StringUtil.IsInList("verify", strStyle))
+                    {
+                        // test
+                        // strError = "test 验证发生错误";
+                        // return -1;
+                        if (this.VerifyDatabaseDelete(channel,
                             strDbType,
                             dbname,
                             out strError) == -1)

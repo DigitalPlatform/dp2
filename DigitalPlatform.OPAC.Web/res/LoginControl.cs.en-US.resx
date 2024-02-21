@@ -197,9 +197,17 @@
     <value>Card Number</value>
     <comment>TAB栏标题</comment>
   </data>
+	<data name="参考ID" xml:space="preserve">
+    <value>Reference ID</value>
+    <comment>TAB栏标题</comment>
+  </data>
   <data name="证号不能为空" xml:space="preserve">
     <value>Card number is required</value>
     <comment>“证号”</comment>
+  </data>
+	<data name="参考ID不能为空" xml:space="preserve">
+    <value>Reference ID is required</value>
+    <comment>“参考ID”</comment>
   </data>
   <data name="证条码号" xml:space="preserve">
     <value>Library Card</value>
