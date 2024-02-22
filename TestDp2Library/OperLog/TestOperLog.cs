@@ -59,6 +59,11 @@ namespace TestDp2Library
                 Assert.AreEqual(1, nRet);
                 Assert.AreEqual(xml, output_xml);
                 Assert.AreEqual(tail, lHintNext);
+
+                var count = OperLogUtility.GetOperLogCount(
+                    strDirectory,
+                    strFileName);
+                Assert.AreEqual(1, count);
             }
             finally
             {
@@ -112,6 +117,11 @@ namespace TestDp2Library
                 Assert.AreEqual(1, nRet);
                 Assert.AreEqual(xml, output_xml);
                 Assert.AreEqual(tail, lHintNext);
+
+                var count = OperLogUtility.GetOperLogCount(
+    strDirectory,
+    strFileName);
+                Assert.AreEqual(2, count);
             }
             finally
             {
@@ -204,6 +214,12 @@ namespace TestDp2Library
                 string strFilePath = Path.Combine(strDirectory, strFileName);
                 var length = FileUtil.GetFileLength(strFilePath);
                 Assert.IsTrue(length == tail2);
+
+                var count = OperLogUtility.GetOperLogCount(
+    strDirectory,
+    strFileName);
+                Assert.AreEqual(2, count);
+
             }
             finally
             {
@@ -212,7 +228,53 @@ namespace TestDp2Library
             }
         }
 
+        // 测试在一个已有的日志文件中插入新的日志记录
+        [TestMethod]
+        public void Test_insertOperLog_01()
+        {
+            string strDirectory = Environment.CurrentDirectory;
+            string strFileName = "20000101.log";
 
+            BuildLogFile(strDirectory, strFileName, 2);
+
+            try
+            {
+                // 统计日志记录条数
+                var count1 = OperLogUtility.GetOperLogCount(
+                    strDirectory,
+                    strFileName);
+                Assert.AreEqual(2, count1);
+
+                // return:
+                //      -1  error
+                //      0   file not found
+                //      1   succeed
+                //      2   超过范围
+                int nRet = OperLogUtility.InsertOperLog(
+                    null,
+                    strDirectory,
+                    strFileName,
+                    0,  // 第一条
+                    -1,
+                    "<root111 />",
+                    null,
+                    out long tail,
+                    out string strError);
+                Assert.AreEqual(1, nRet);
+
+                // 再次统计日志记录条数
+                var count2 = OperLogUtility.GetOperLogCount(
+                    strDirectory,
+                    strFileName);
+                Assert.AreEqual(3, count2);
+            }
+            finally
+            {
+                string strFilePath = Path.Combine(strDirectory, strFileName);
+                File.Delete(strFilePath);
+            }
+
+        }
 
         // 测试从一个日志文件中删除唯一的一条日志记录
         [TestMethod]
@@ -244,6 +306,12 @@ namespace TestDp2Library
                 string strFilePath = Path.Combine(strDirectory, strFileName);
                 var length = FileUtil.GetFileLength(strFilePath);
                 Assert.AreEqual(0, length);
+
+                var count = OperLogUtility.GetOperLogCount(
+    strDirectory,
+    strFileName);
+                Assert.AreEqual(0, count);
+
             }
             finally
             {
@@ -282,6 +350,12 @@ namespace TestDp2Library
                 string strFilePath = Path.Combine(strDirectory, strFileName);
                 var length = FileUtil.GetFileLength(strFilePath);
                 Assert.IsTrue(length > 0);
+
+                var count = OperLogUtility.GetOperLogCount(
+    strDirectory,
+    strFileName);
+                Assert.AreEqual(1, count);
+
             }
             finally
             {
@@ -336,6 +410,12 @@ namespace TestDp2Library
                 string strFilePath = Path.Combine(strDirectory, strFileName);
                 var length = FileUtil.GetFileLength(strFilePath);
                 Assert.IsTrue(length == lHintNext);
+
+                var count = OperLogUtility.GetOperLogCount(
+    strDirectory,
+    strFileName);
+                Assert.AreEqual(1, count);
+
             }
             finally
             {
@@ -392,6 +472,11 @@ namespace TestDp2Library
                 Assert.AreEqual(tail, lHintNext);
                 */
             }
+
+            var ret = OperLogUtility.GetOperLogCount(
+    strDirectory,
+    strFileName);
+            Assert.AreEqual(count, ret);
         }
     }
 }

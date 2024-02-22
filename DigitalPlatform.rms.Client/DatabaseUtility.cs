@@ -30,6 +30,8 @@ namespace DigitalPlatform.rms.Client
             File.Copy(strSourcePath, strTarget);
         }
 
+        public delegate void delegate_created(string strDatabaseName);
+
         // 根据数据库定义文件，创建若干数据库
         // 注: 如果发现同名数据库已经存在，先删除再创建
         // parameters:
@@ -39,6 +41,7 @@ namespace DigitalPlatform.rms.Client
             RmsChannel channel,
             string strDbDefFileName,
             string strTempDir,
+            delegate_created func_created,
             out string strError)
         {
             strError = "";
@@ -86,7 +89,7 @@ namespace DigitalPlatform.rms.Client
                 nRet = DatabaseUtility.IsDatabaseExist(
                     channel,
                     strDatabaseName,
-        out strError);
+                    out strError);
                 if (nRet == -1)
                     return -1;
                 if (nRet == 1)
@@ -117,6 +120,7 @@ namespace DigitalPlatform.rms.Client
                 if (nRet == -1)
                     return -1;
 
+                func_created?.Invoke(strDatabaseName);
                 i++;
             }
 

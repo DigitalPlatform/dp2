@@ -1606,6 +1606,8 @@ out List<string> send_skips);
 
             string strNewRefID = DomUtil.GetElementText(domNewRec.DocumentElement,
                 "refID");
+            string strOldRefID = DomUtil.GetElementText(domOldRec.DocumentElement,
+    "refID");
 
             // 注意: oldDom 是前端提供过来的，显然前端可能会说谎，那么这个比较新旧条码号的结果就堪忧了。改进的办法可以是这里真正从读者库取出来，然后进行比较 
             bool bBarcodeChanged = false;
@@ -2543,7 +2545,7 @@ strLibraryCode);    // 读者所在的馆代码
                     }
 
                     // this.SessionTable.CloseSessionByReaderBarcode(strNewBarcode);
-                    this.SessionTable.CloseSessionByReaderRefID(strNewRefID);
+                    this.SessionTable.CloseSessionByReaderRefID(strOldRefID);
                 }
                 else
                 {

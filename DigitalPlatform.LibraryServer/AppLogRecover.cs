@@ -8,9 +8,16 @@ using System.Collections;
 using System.Reflection;
 using System.Threading;
 using System.Diagnostics;
+using System.Web.UI.WebControls;
+using System.Data.SqlClient;
+using System.Security.Cryptography.X509Certificates;
+
+using Jint.Parser.Ast;
 
 using DigitalPlatform;	// Stop类
+using DigitalPlatform.rms;
 using DigitalPlatform.rms.Client;
+using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
@@ -19,15 +26,9 @@ using DigitalPlatform.MarcDom;
 using DigitalPlatform.Marc;
 
 using DigitalPlatform.Message;
-using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.Core;
 using DigitalPlatform.LibraryClient;
-using Jint.Parser.Ast;
-using System.Web.UI.WebControls;
-using System.Data.SqlClient;
-using DigitalPlatform.rms;
-using System.Security.Cryptography.X509Certificates;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -2516,7 +2517,6 @@ out strError);
 
             return 0;
         }
-
 
         // 从若干读者记录中，清除特定的所借事项。相当于针对读者记录执行了还书操作
         // parameters:
@@ -9362,12 +9362,12 @@ domLog.DocumentElement,
         // 2017/10/15
         //      attachment  附件流对象。注意文件指针在流的尾部
         public int RecoverManageDatabase(
-RmsChannelCollection Channels,
-RecoverLevel level,
-XmlDocument domLog,
-Stream attachmentLog,
+            RmsChannelCollection Channels,
+            RecoverLevel level,
+            XmlDocument domLog,
+            Stream attachmentLog,
             string strStyle,
-out string strError)
+            out string strError)
         {
             strError = "";
             int nRet = 0;
@@ -9383,6 +9383,10 @@ out string strError)
                 strError = "get channel error";
                 return -1;
             }
+
+            // 2024/2/22
+            if (this.Changed)
+                this.Flush();
 
             bool bReuse = false;    // 是否能够不顾RecoverLevel状态而重用部分代码
 
@@ -9407,6 +9411,7 @@ out string strError)
                 string strTempDir = Path.Combine(this.TempDir, "~rcvdb");
                 PathUtil.CreateDirIfNeed(strTempDir);
 
+                this.LockForWrite();
                 try
                 {
                     bool bDbNameChanged = false;
@@ -9416,11 +9421,15 @@ out string strError)
                     if (strAction == "createDatabase")
                     {
                         nRet = DatabaseUtility.CreateDatabases(
-    null,   // stop
-    channel,
-    strTempFileName,
-    strTempDir,
-    out strError);
+                            null,   // stop
+                            channel,
+                            strTempFileName,
+                            strTempDir,
+                            (database_name) =>
+                            {
+
+                            },
+                            out strError);
                         if (nRet == -1)
                             return -1;
 
@@ -9475,7 +9484,10 @@ out string strError)
                     }
 
                     if (this.Changed == true)
-                        this.ActivateManagerThread();
+                    {
+                        this.Flush();   // 2024/2/22
+                        // this.ActivateManagerThread();
+                    }
 
                     if (bDbNameChanged == true)
                     {
@@ -9495,6 +9507,8 @@ out string strError)
                 }
                 finally
                 {
+                    this.UnlockForWrite();
+
                     if (string.IsNullOrEmpty(strTempDir) == false)
                     {
                         PathUtil.RemoveReadOnlyAttr(strTempDir);    // 避免 .zip 文件中有有只读文件妨碍删除

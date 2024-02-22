@@ -933,6 +933,7 @@ RestoreLibraryParam param
                         channel,
                         strDbDefFileName,
                         strTempDir,
+                        null,
                         out strError);
                     if (nRet == -1)
                     {

@@ -59,91 +59,99 @@ namespace DigitalPlatform.LibraryServer
                     out strError);
             }
 
-            // 创建数据库
-            if (strAction == "create")
+            this.LockForWrite();    // 2024/2/22
+            try
             {
-                return CreateDatabase(
-                    sessioninfo,
-                    channel, // Channels,
-                    strLibraryCodeList,
-                    // strDatabaseNames,
-                    strDatabaseInfo,
-                    false,
-                    strStyle,
-                    out strOutputInfo,
-                    out strError);
-            }
+                // 创建数据库
+                if (strAction == "create")
+                {
+                    return CreateDatabase(
+                        sessioninfo,
+                        channel, // Channels,
+                        strLibraryCodeList,
+                        // strDatabaseNames,
+                        strDatabaseInfo,
+                        false,
+                        strStyle,
+                        out strOutputInfo,
+                        out strError);
+                }
 
-            // 重新创建数据库
-            if (strAction == "recreate")
+                // 重新创建数据库
+                if (strAction == "recreate")
+                {
+                    return CreateDatabase(
+                        sessioninfo,
+                        channel,    // Channels,
+                        strLibraryCodeList,
+                        // strDatabaseNames,
+                        strDatabaseInfo,
+                        true,
+                        strStyle,
+                        out strOutputInfo,
+                        out strError);
+                }
+
+                // 删除数据库
+                if (strAction == "delete")
+                {
+                    return DeleteDatabase(
+                        sessioninfo,
+                        channel, // Channels,
+                        strLibraryCodeList,
+                        strDatabaseNames,
+                        strStyle,
+                        out strOutputInfo,
+                        out strError);
+                }
+
+                if (strAction == "initialize")
+                {
+                    return InitializeDatabase(
+                        sessioninfo,
+                        channel, // Channels,
+                        strLibraryCodeList,
+                        strDatabaseNames,
+                        strStyle,
+                        out strOutputInfo,
+                        out strError);
+                }
+
+                // 2008/11/16
+                if (strAction == "refresh")
+                {
+                    return RefreshDatabaseDefs(
+                        sessioninfo,
+                        channel,    // Channels,
+                        strLibraryCodeList,
+                        strDatabaseNames,
+                        strDatabaseInfo,
+                        strStyle,
+                        out strOutputInfo,
+                        out strError);
+                }
+
+                // 修改数据库
+                if (strAction == "change")
+                {
+                    return ChangeDatabase(
+                        sessioninfo,
+                        channel,    // Channels,
+                        strLibraryCodeList,
+                        strDatabaseNames,
+                        strDatabaseInfo,
+                        strStyle,
+                        out strOutputInfo,
+                        out strError);
+                }
+
+                strError = "未知的strAction值 '" + strAction + "'";
+                return -1;
+            }
+            finally
             {
-                return CreateDatabase(
-                    sessioninfo,
-                    channel,    // Channels,
-                    strLibraryCodeList,
-                    // strDatabaseNames,
-                    strDatabaseInfo,
-                    true,
-                    strStyle,
-                    out strOutputInfo,
-                    out strError);
+                this.UnlockForWrite();
             }
-
-            // 删除数据库
-            if (strAction == "delete")
-            {
-                return DeleteDatabase(
-                    sessioninfo,
-                    channel, // Channels,
-                    strLibraryCodeList,
-                    strDatabaseNames,
-                    strStyle,
-                    out strOutputInfo,
-                    out strError);
-            }
-
-            if (strAction == "initialize")
-            {
-                return InitializeDatabase(
-                    sessioninfo,
-                    channel, // Channels,
-                    strLibraryCodeList,
-                    strDatabaseNames,
-                    strStyle,
-                    out strOutputInfo,
-                    out strError);
-            }
-
-            // 2008/11/16
-            if (strAction == "refresh")
-            {
-                return RefreshDatabaseDefs(
-                    sessioninfo,
-                    channel,    // Channels,
-                    strLibraryCodeList,
-                    strDatabaseNames,
-                    strDatabaseInfo,
-                    strStyle,
-                    out strOutputInfo,
-                    out strError);
-            }
-
-            // 修改数据库
-            if (strAction == "change")
-            {
-                return ChangeDatabase(
-                    sessioninfo,
-                    channel,    // Channels,
-                    strLibraryCodeList,
-                    strDatabaseNames,
-                    strDatabaseInfo,
-                    strStyle,
-                    out strOutputInfo,
-                    out strError);
-            }
-
-            strError = "未知的strAction值 '" + strAction + "'";
-            return -1;
         }
 
         // 获得一个数据库的全部配置文件

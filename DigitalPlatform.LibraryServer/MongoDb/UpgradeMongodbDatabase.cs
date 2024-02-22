@@ -196,7 +196,6 @@ out strError);
             if (need_change_mongodb)
                 this.ChargingOperDatabase.ChangeItemBarcode(barcode, $"@refID:{refID}");
 
-
             if (changed == true)
             {
                 // 册记录发生了变化
@@ -544,7 +543,6 @@ strLibraryCode);    // 册所在的馆代码
 
             if (need_change_mongodb)
                 this.ChargingOperDatabase.ChangePatronBarcode(barcode, $"@refID:{refID}");
-
 
             if (changed == true)
             {

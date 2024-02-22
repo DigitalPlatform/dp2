@@ -1458,6 +1458,8 @@ SetStartEventArgs e);
         public delegate bool Delegate_filterSession(SessionInfo info);
 
         // 通用的选择性关闭 Session 函数
+        // return:
+        //      实际关闭的通道数量
         public int CloseSessionBy(Delegate_filterSession filter_func)
         {
             List<string> remove_keys = new List<string>();
@@ -1665,8 +1667,12 @@ SetStartEventArgs e);
         }
 
         // 2024/2/11
+        // return:
+        //      实际关闭的通道数量
         public int CloseSessionByReaderRefID(string strReaderRefID)
         {
+            if (string.IsNullOrEmpty(strReaderRefID))
+                return 0;
             return CloseSessionBy((info) =>
             {
                 if (info != null && info.Account != null

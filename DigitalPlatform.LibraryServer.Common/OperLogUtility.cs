@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -8,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using DigitalPlatform.IO;
+using DigitalPlatform.Text;
 
 namespace DigitalPlatform.LibraryServer.Common
 {
@@ -67,7 +69,7 @@ namespace DigitalPlatform.LibraryServer.Common
 
                     }
                 }
-                catch(DirectoryNotFoundException ex)
+                catch (DirectoryNotFoundException ex)
                 {
                     strError = $"目录 '{strDirectory}' 不存在，无法创建日志文件";
                     return -1;
@@ -134,7 +136,7 @@ namespace DigitalPlatform.LibraryServer.Common
                     strFileName,
                     lIndex,
                     lHint,
-                    "",
+                    "insert",
                     stream,
                     out lHintNext,
                     out strError);
@@ -233,7 +235,7 @@ namespace DigitalPlatform.LibraryServer.Common
                     strFileName,
                     lIndex,
                     lHint,
-                    "",
+                    strStyle,
                     stream,
                     out lHintNext,
                     out strError);
@@ -285,6 +287,7 @@ namespace DigitalPlatform.LibraryServer.Common
         //      lHint   暗示的偏移量。
         //              如果为 -1 表示不使用此参数
         //              当 lHint 中不为 -1 时，优先使用 lHint，忽略 lIndex 参数值
+        //      strStyle    如果包含 insert，表示希望在指定位置插入记录，而不是替换记录
         //      new_content 要替换当前记录的新内容。如果为 null 或者 .Length == 0，相当于删除了当前记录
         //              注意这个 Stream 的全部内容都会被使用。调用前不要求文件指针在文件头部
         //      lHintNext   [out] 返回当前记录被替换后，下一条记录的起始偏移量。
@@ -309,6 +312,8 @@ namespace DigitalPlatform.LibraryServer.Common
             lHintNext = -1;
 
             int nRet = 0;
+
+            var insert = StringUtil.IsInList("insert", strStyle);
 
             var current_cache = fileCache;
             if (current_cache == null)
@@ -415,17 +420,20 @@ namespace DigitalPlatform.LibraryServer.Common
 
                     start_offs = stream.Position;
 
-                    // return:
-                    //      1   出错
-                    //      0   成功
-                    //      1   文件结束，本次读入无效
-                    nRet = ReadEnventLog(
-                        stream,
-                        out _,
-                        null,   // attachment,
-                        out strError);
-                    if (nRet == -1)
-                        return -1;
+                    if (insert == false)
+                    {
+                        // return:
+                        //      1   出错
+                        //      0   成功
+                        //      1   文件结束，本次读入无效
+                        nRet = ReadEnventLog(
+                            stream,
+                            out _,
+                            null,   // attachment,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+                    }
                 }
 
                 Debug.Assert(start_offs != -1);
@@ -448,10 +456,19 @@ namespace DigitalPlatform.LibraryServer.Common
                 if (end_offs >= stream.Length)
                     stream.SetLength(new_end_offs);
                 else
+                {
+                    // 移动前，文件的总尺寸
+                    long old_length = stream.Length;
+                    // 注意，往左移动的时候，此函数不会缩小文件尺寸
                     StreamUtil.Move(stream,
                         end_offs,
-                        stream.Length - end_offs,
+                        old_length - end_offs,
                         new_end_offs);
+                    // 移动后，文件应有的总尺寸
+                    long new_length = new_end_offs + (old_length - end_offs);
+                    if (new_length < old_length)
+                        stream.SetLength(new_length);
+                }
                 if (new_content != null && new_content.Length > 0)
                 {
                     stream.Seek(start_offs, SeekOrigin.Begin);
@@ -1072,6 +1089,99 @@ namespace DigitalPlatform.LibraryServer.Common
                 if (fileCache == null)
                     current_cache.Close();
 #endif
+            }
+        }
+
+        public static long GetOperLogCount(
+            string strDirectory,
+            string strFileName)
+        {
+            // return:
+            //      -1  error
+            //      0   file not found
+            //      1   succeed
+            var ret = GetOperLogCount(null,
+                strDirectory,
+                strFileName,
+                out long count,
+                out string strError);
+            if (ret != 1)
+                return -1;
+            return count;
+        }
+
+        // 获得指定日志文件中包含的日志记录条数
+        // return:
+        //      -1  error
+        //      0   file not found
+        //      1   succeed
+        public static int GetOperLogCount(OperLogFileCache fileCache,
+            string strDirectory,
+            string strFileName,
+            out long count,
+            out string strError)
+        {
+            strError = "";
+            count = 0;
+
+            var current_cache = fileCache;
+            if (current_cache == null)
+                current_cache = new OperLogFileCache();
+
+            Stream stream = null;
+            CacheFileItem cache_item = null;
+
+            if (string.IsNullOrEmpty(strDirectory))
+            {
+                strError = "strDirectory 参数值不应为空";
+                return -1;
+            }
+
+            string strFilePath = Path.Combine(strDirectory, strFileName);
+
+            try
+            {
+
+                cache_item = current_cache.Open(strFilePath);
+                stream = cache_item.Stream;
+            }
+            catch (FileNotFoundException /*ex*/)
+            {
+                strError = "日志文件 " + strFileName + "没有找到";
+                return 0;   // file not found
+            }
+            catch (Exception ex)
+            {
+                strError = "打开日志文件 '" + strFileName + "' 发生错误: " + ex.Message;
+                return -1;
+            }
+
+            try
+            {
+                long lFileSize = stream.Length;
+                long lIndex = 0;
+                while (true)
+                {
+                    // return:
+                    //      -1  error
+                    //      0   成功
+                    //      1   到达文件末尾或者超出
+                    int nRet = LocationRecord(stream,
+                        lFileSize,
+                        lIndex++,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                    if (nRet == 1)
+                        return 1;
+                    count++;
+                }
+            }
+            finally
+            {
+                current_cache.Close(cache_item);
+                if (fileCache == null)
+                    current_cache.Close();
             }
         }
 
