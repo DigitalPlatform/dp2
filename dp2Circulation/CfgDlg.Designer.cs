@@ -86,6 +86,7 @@
             this.numericUpDown_charging_infoDlgOpacity = new System.Windows.Forms.NumericUpDown();
             this.checkBox_charging_force = new System.Windows.Forms.CheckBox();
             this.tabPage_quickCharging = new System.Windows.Forms.TabPage();
+            this.checkBox_quickCharging_faceInputMultipleHits = new System.Windows.Forms.CheckBox();
             this.numericUpDown_quickCharging_autoTriggerFaceInputDelaySeconds = new System.Windows.Forms.NumericUpDown();
             this.label43 = new System.Windows.Forms.Label();
             this.checkBox_quickCharging_allowFreeSequence = new System.Windows.Forms.CheckBox();
@@ -271,10 +272,19 @@
             this.label_message_shareBiblio_comment = new System.Windows.Forms.Label();
             this.checkBox_message_shareBiblio = new System.Windows.Forms.CheckBox();
             this.tabPage_z3950 = new System.Windows.Forms.TabPage();
+            this.groupBox7 = new System.Windows.Forms.GroupBox();
+            this.textBox_ucs_databaseName = new System.Windows.Forms.TextBox();
+            this.label47 = new System.Windows.Forms.Label();
+            this.textBox_ucs_password = new System.Windows.Forms.TextBox();
+            this.label46 = new System.Windows.Forms.Label();
+            this.textBox_ucs_userName = new System.Windows.Forms.TextBox();
+            this.label45 = new System.Windows.Forms.Label();
+            this.textBox_ucs_apiUrl = new System.Windows.Forms.TextBox();
+            this.label44 = new System.Windows.Forms.Label();
             this.button_z3950_servers = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
             this.button_Cancel = new System.Windows.Forms.Button();
-            this.checkBox_quickCharging_faceInputMultipleHits = new System.Windows.Forms.CheckBox();
+            this.button_ucs_testUpload = new System.Windows.Forms.Button();
             this.tabControl_main.SuspendLayout();
             this.tabPage_server.SuspendLayout();
             this.toolStrip_server.SuspendLayout();
@@ -328,6 +338,7 @@
             this.groupBox_dp2mserver.SuspendLayout();
             this.groupBox_message_compactShelf.SuspendLayout();
             this.tabPage_z3950.SuspendLayout();
+            this.groupBox7.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl_main
@@ -1030,6 +1041,16 @@
             this.tabPage_quickCharging.TabIndex = 17;
             this.tabPage_quickCharging.Text = "快捷出纳";
             this.tabPage_quickCharging.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_quickCharging_faceInputMultipleHits
+            // 
+            this.checkBox_quickCharging_faceInputMultipleHits.AutoSize = true;
+            this.checkBox_quickCharging_faceInputMultipleHits.Location = new System.Drawing.Point(22, 368);
+            this.checkBox_quickCharging_faceInputMultipleHits.Name = "checkBox_quickCharging_faceInputMultipleHits";
+            this.checkBox_quickCharging_faceInputMultipleHits.Size = new System.Drawing.Size(300, 25);
+            this.checkBox_quickCharging_faceInputMultipleHits.TabIndex = 16;
+            this.checkBox_quickCharging_faceInputMultipleHits.Text = "人脸识别时允许命中多个(&M)";
+            this.checkBox_quickCharging_faceInputMultipleHits.UseVisualStyleBackColor = true;
             // 
             // numericUpDown_quickCharging_autoTriggerFaceInputDelaySeconds
             // 
@@ -3225,6 +3246,7 @@
             // 
             // tabPage_z3950
             // 
+            this.tabPage_z3950.Controls.Add(this.groupBox7);
             this.tabPage_z3950.Controls.Add(this.button_z3950_servers);
             this.tabPage_z3950.Location = new System.Drawing.Point(4, 85);
             this.tabPage_z3950.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
@@ -3233,6 +3255,89 @@
             this.tabPage_z3950.TabIndex = 20;
             this.tabPage_z3950.Text = "Z39.50";
             this.tabPage_z3950.UseVisualStyleBackColor = true;
+            // 
+            // groupBox7
+            // 
+            this.groupBox7.Controls.Add(this.button_ucs_testUpload);
+            this.groupBox7.Controls.Add(this.textBox_ucs_databaseName);
+            this.groupBox7.Controls.Add(this.label47);
+            this.groupBox7.Controls.Add(this.textBox_ucs_password);
+            this.groupBox7.Controls.Add(this.label46);
+            this.groupBox7.Controls.Add(this.textBox_ucs_userName);
+            this.groupBox7.Controls.Add(this.label45);
+            this.groupBox7.Controls.Add(this.textBox_ucs_apiUrl);
+            this.groupBox7.Controls.Add(this.label44);
+            this.groupBox7.Location = new System.Drawing.Point(19, 99);
+            this.groupBox7.Name = "groupBox7";
+            this.groupBox7.Size = new System.Drawing.Size(635, 323);
+            this.groupBox7.TabIndex = 1;
+            this.groupBox7.TabStop = false;
+            this.groupBox7.Text = "UCS 上传接口";
+            // 
+            // textBox_ucs_databaseName
+            // 
+            this.textBox_ucs_databaseName.Location = new System.Drawing.Point(172, 79);
+            this.textBox_ucs_databaseName.Name = "textBox_ucs_databaseName";
+            this.textBox_ucs_databaseName.Size = new System.Drawing.Size(303, 31);
+            this.textBox_ucs_databaseName.TabIndex = 7;
+            // 
+            // label47
+            // 
+            this.label47.AutoSize = true;
+            this.label47.Location = new System.Drawing.Point(17, 82);
+            this.label47.Name = "label47";
+            this.label47.Size = new System.Drawing.Size(105, 21);
+            this.label47.TabIndex = 6;
+            this.label47.Text = "数据库名:";
+            // 
+            // textBox_ucs_password
+            // 
+            this.textBox_ucs_password.Location = new System.Drawing.Point(172, 167);
+            this.textBox_ucs_password.Name = "textBox_ucs_password";
+            this.textBox_ucs_password.PasswordChar = '*';
+            this.textBox_ucs_password.Size = new System.Drawing.Size(303, 31);
+            this.textBox_ucs_password.TabIndex = 5;
+            // 
+            // label46
+            // 
+            this.label46.AutoSize = true;
+            this.label46.Location = new System.Drawing.Point(17, 170);
+            this.label46.Name = "label46";
+            this.label46.Size = new System.Drawing.Size(63, 21);
+            this.label46.TabIndex = 4;
+            this.label46.Text = "密码:";
+            // 
+            // textBox_ucs_userName
+            // 
+            this.textBox_ucs_userName.Location = new System.Drawing.Point(172, 130);
+            this.textBox_ucs_userName.Name = "textBox_ucs_userName";
+            this.textBox_ucs_userName.Size = new System.Drawing.Size(303, 31);
+            this.textBox_ucs_userName.TabIndex = 3;
+            // 
+            // label45
+            // 
+            this.label45.AutoSize = true;
+            this.label45.Location = new System.Drawing.Point(17, 133);
+            this.label45.Name = "label45";
+            this.label45.Size = new System.Drawing.Size(84, 21);
+            this.label45.TabIndex = 2;
+            this.label45.Text = "用户名:";
+            // 
+            // textBox_ucs_apiUrl
+            // 
+            this.textBox_ucs_apiUrl.Location = new System.Drawing.Point(172, 42);
+            this.textBox_ucs_apiUrl.Name = "textBox_ucs_apiUrl";
+            this.textBox_ucs_apiUrl.Size = new System.Drawing.Size(417, 31);
+            this.textBox_ucs_apiUrl.TabIndex = 1;
+            // 
+            // label44
+            // 
+            this.label44.AutoSize = true;
+            this.label44.Location = new System.Drawing.Point(17, 45);
+            this.label44.Name = "label44";
+            this.label44.Size = new System.Drawing.Size(98, 21);
+            this.label44.TabIndex = 0;
+            this.label44.Text = "API URL:";
             // 
             // button_z3950_servers
             // 
@@ -3270,15 +3375,15 @@
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
-            // checkBox_quickCharging_faceInputMultipleHits
+            // button_ucs_testUpload
             // 
-            this.checkBox_quickCharging_faceInputMultipleHits.AutoSize = true;
-            this.checkBox_quickCharging_faceInputMultipleHits.Location = new System.Drawing.Point(22, 368);
-            this.checkBox_quickCharging_faceInputMultipleHits.Name = "checkBox_quickCharging_faceInputMultipleHits";
-            this.checkBox_quickCharging_faceInputMultipleHits.Size = new System.Drawing.Size(300, 25);
-            this.checkBox_quickCharging_faceInputMultipleHits.TabIndex = 16;
-            this.checkBox_quickCharging_faceInputMultipleHits.Text = "人脸识别时允许命中多个(&M)";
-            this.checkBox_quickCharging_faceInputMultipleHits.UseVisualStyleBackColor = true;
+            this.button_ucs_testUpload.Location = new System.Drawing.Point(172, 234);
+            this.button_ucs_testUpload.Name = "button_ucs_testUpload";
+            this.button_ucs_testUpload.Size = new System.Drawing.Size(219, 35);
+            this.button_ucs_testUpload.TabIndex = 8;
+            this.button_ucs_testUpload.Text = "测试上传记录";
+            this.button_ucs_testUpload.UseVisualStyleBackColor = true;
+            this.button_ucs_testUpload.Click += new System.EventHandler(this.button_ucs_testUpload_Click);
             // 
             // CfgDlg
             // 
@@ -3388,6 +3493,8 @@
             this.groupBox_message_compactShelf.ResumeLayout(false);
             this.groupBox_message_compactShelf.PerformLayout();
             this.tabPage_z3950.ResumeLayout(false);
+            this.groupBox7.ResumeLayout(false);
+            this.groupBox7.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -3640,5 +3747,15 @@
         private System.Windows.Forms.Label label43;
         private System.Windows.Forms.NumericUpDown numericUpDown_quickCharging_autoTriggerFaceInputDelaySeconds;
         private System.Windows.Forms.CheckBox checkBox_quickCharging_faceInputMultipleHits;
+        private System.Windows.Forms.GroupBox groupBox7;
+        private System.Windows.Forms.TextBox textBox_ucs_apiUrl;
+        private System.Windows.Forms.Label label44;
+        private System.Windows.Forms.TextBox textBox_ucs_password;
+        private System.Windows.Forms.Label label46;
+        private System.Windows.Forms.TextBox textBox_ucs_userName;
+        private System.Windows.Forms.Label label45;
+        private System.Windows.Forms.TextBox textBox_ucs_databaseName;
+        private System.Windows.Forms.Label label47;
+        private System.Windows.Forms.Button button_ucs_testUpload;
     }
 }

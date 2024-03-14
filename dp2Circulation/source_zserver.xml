@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<collection>
+	<server
+		name='红泥巴数字平台云'
+		addr='58.87.101.80'
+		port='210'
+		username='@hnb'>
+		<database name='cbook' />
+		<database name='ebook' />
+	</server>
+	<server
+		name='国图联编(UCS01U)'
+		addr='ucs.nlc.cn'
+		port='9991'
+		defaultEncoding='utf-8'
+		queryTermEncoding='utf-8'
+		_authentication='require'>
+		<database name='UCS01U' />
+	</server>
+	<server
+		name='网众'
+		addr='118.25.225.224'
+		port='2100'
+		_authentication='require'>
+		<database name='uc_bib' />
+		<database name='cipmarc' />
+		<database name='ucs09' />
+	</server>
+	<server
+		name='CALIS'
+		addr='zserver1.calis.edu.cn'
+		port='2200'
+		_authentication='require'>
+		<database name='cn_cat' />
+		<database name='we_cat' />
+		<database name='jp_cat' />
+		<database name='ru_cat' />
+	</server>
+	<server 
+		name="图畅" 
+		addr="134.175.36.209" 
+		port="2100" 
+		_authentication='require'
+		defaultEncoding="gb2312" queryTermEncoding="gb2312">
+		<database name="uc_bib" />
+		<database name="calis" />
+		<database name="cipmarc" />
+	</server>
+	<server
+		name='NBINET'
+		addr='nbinet3.ncl.edu.tw'
+		port='210'
+		defaultEncoding='utf-8'
+		queryTermEncoding='utf-8'
+		detectmarcsyntax='1'>
+		<database name='innopac' />
+	</server>
+	<server
+		name="台湾书目整合检索系统"
+		addr="metadata.ncl.edu.tw"
+		port="210"
+		homepage="https://metadata.ncl.edu.tw/blstkm/htm/z39.50.htm"
+		defaultEncoding="utf-8"
+		queryTermEncoding="utf-8">
+		<database name="bg" />
+	</server>
+	<server
+		name='Library of Congress'
+		addr='lx2.loc.gov'
+		port='210'
+		defaultEncoding='utf-8'
+		queryTermEncoding='utf-8'>
+		<database name='LCDB' />
+	</server>
+	<server
+		name="Oxford University Library"
+		addr="library.ox.ac.uk"
+		port="210"
+		defaultEncoding="utf-8"
+		queryTermEncoding="utf-8">
+		<database name="44OXF_INST" />
+	</server>
+</collection>

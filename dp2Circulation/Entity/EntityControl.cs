@@ -2316,13 +2316,13 @@ edit.UiState);
 
             /*
             // seller
-            string strSeller = DomUtil.GetElementText(dom.DocumentElement,
+            string strSeller = DomUtil.GetElementText(_dom.DocumentElement,
                 "selller");
             if (String.IsNullOrEmpty(strSeller) == false)
                 bookitem.Seller = strSeller;
 
             // source
-            string strSource = DomUtil.GetElementText(dom.DocumentElement,
+            string strSource = DomUtil.GetElementText(_dom.DocumentElement,
                 "source");
             if (String.IsNullOrEmpty(strSeller) == false)
                 bookitem.Seller = strSeller;

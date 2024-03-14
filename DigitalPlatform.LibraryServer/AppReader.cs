@@ -1565,7 +1565,10 @@ out List<string> send_skips);
             // 2021/7/21
             string important_fields = domNewRec.DocumentElement?.GetAttribute("importantFields");
             if (domNewRec.DocumentElement != null)
+            {
                 domNewRec.DocumentElement.RemoveAttribute("importantFields");
+                strSavedXml = domNewRec.OuterXml;   // 2024/2/26
+            }
 
             // 如果属性不存在，返回 null；如果属性存在，则不会返回 null，最低限度也是 ""
             string GetAttribute(XmlElement el, string attr)
@@ -1583,7 +1586,10 @@ out List<string> send_skips);
             // 2021/8/5
             string data_fields = GetAttribute(domNewRec.DocumentElement, "dataFields");
             if (domNewRec.DocumentElement != null)
+            {
                 domNewRec.DocumentElement.RemoveAttribute("dataFields");
+                strSavedXml = domNewRec.OuterXml;   // 2024/2/26
+            }
 
             // 2021/8/8
             if (strAction == "new" && data_fields != null/*string.IsNullOrEmpty(data_fields) == false*/)
@@ -2088,6 +2094,7 @@ out List<string> send_skips);
                             goto ERROR1;
 
                         domNewRec.LoadXml(xml);
+                        strSavedXml = domNewRec.OuterXml;   // 2024/2/26
 
                         if (useClientRefID)
                         {
@@ -2152,6 +2159,7 @@ out List<string> send_skips);
                     // 给 domNewRec 中添加 libraryCode 元素
                     {
                         DomUtil.SetElementText(domNewRec.DocumentElement, "libraryCode", strLibraryCode);
+                        strSavedXml = domNewRec.OuterXml;   // 2024/2/26
                     }
 
                     // 注：要在 strRecPath 决定后再进行此调用
@@ -2294,7 +2302,9 @@ strLibraryCode);    // 读者所在的馆代码
 
                         // 不创建<oldRecord>元素
 
-                        XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement, "record", strNewXml);
+                        XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
+                            "record",
+                            domNewRec.OuterXml);  // strNewXml  // 2024/2/26 改掉这个 bug
                         DomUtil.SetAttr(node, "recPath", strOutputPath);
 
                         // 新记录保存成功，需要返回信息元素。因为需要返回新的时间戳和实际保存的记录路径

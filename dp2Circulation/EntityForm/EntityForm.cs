@@ -32,6 +32,8 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Drawing;
 using DigitalPlatform.Z3950;
+// using DocumentFormat.OpenXml.Office2010.Excel;
+using UcsUpload;
 // using DocumentFormat.OpenXml.Office2021.DocumentTasks;
 
 namespace dp2Circulation
@@ -5471,18 +5473,18 @@ TaskScheduler.Default);
                 if (errorinfos[i].ErrorCode == ErrorCodeValue.NoError)
                     continue;   // 越过一般信息
 
-                XmlDocument dom = new XmlDocument();
+                XmlDocument _dom = new XmlDocument();
 
                 string strNewXml = errorinfos[i].NewRecord;
                 string strOldXml = errorinfos[i].OldRecord;
 
                 if (String.IsNullOrEmpty(strNewXml) == false)
                 {
-                    dom.LoadXml(strNewXml);
+                    _dom.LoadXml(strNewXml);
                 }
                 else if (String.IsNullOrEmpty(strOldXml) == false)
                 {
-                    dom.LoadXml(strOldXml);
+                    _dom.LoadXml(strOldXml);
                 }
                 else {
                     // 找不到条码来定位
@@ -5491,7 +5493,7 @@ TaskScheduler.Default);
                     continue;
                 }
 
-                string strBarcode = DomUtil.GetElementText(dom.DocumentElement, "barcode");
+                string strBarcode = DomUtil.GetElementText(_dom.DocumentElement, "barcode");
 
                 if (String.IsNullOrEmpty(strBarcode) == true)
                 {
@@ -11290,8 +11292,20 @@ out strError);
 
                 // 2019/5/8
                 if (this.BiblioDbName != strOldBiblioDbName)
-                    await LoadRecordOldAsync(this.BiblioRecPath, "", false);
-
+                {
+                    // await LoadRecordOldAsync(this.BiblioRecPath, "", false);
+                    // 2024/3/14
+                    var load_result = await LoadRecordAsync(
+            this.BiblioRecPath,
+            "",
+            false,
+            true,
+            false);
+                    if (string.IsNullOrEmpty(load_result.ErrorInfo) == false)
+                        this.ShowMessage($"记录保存成功，但重新装载进入种册窗时出错: {load_result.ErrorInfo}", "red", true);
+                    else
+                        this.ShowMessage("记录保存成功", "green", true);
+                }
                 return;
             }
 
@@ -15586,6 +15600,261 @@ out strError);
             */
             if (bEnable == true)
                 PlayPendingSwitchFocusCommands();
+        }
+
+        /*
+附件 C.【049 字段】
+049 字段是联合编目中心的唯一控制号字段，
+049 字段定义 说明
+049$a 来源馆代码 （必备，系统自动生成）
+049$b OLCC 唯一标识（必备，系统自动生成，格式为库代码+九位系统
+号，如 UCS01000000789）
+049$c 上传馆书目数据系统号（有则必备，一般取上传书目的 001 字段）
+049$d 上传馆书目数据库代码（有则必备，如国图 Aleph 系统库代码NLC01/NLC09)
+3. 在新建书目数据时，需要 049 字段的$c 和$d 子字段，其中$c 为必备，
+   $d 为有则必备。如果成员馆系统对书目数据使用不同库区分时，需要$d；
+4. 在更新书目数据时，049 字段$a$b$c 为必备字段
+        * */
+        // 上传到 UCS
+        private async void toolStripButton_uploadToUcs_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            var context = Program.MainForm;
+            if (string.IsNullOrEmpty(context.UcsApiUrl))
+            {
+                strError = "UCS上传接口的 API URL 尚未配置。请先到“参数配置”对话框的“Z39.50”属性页进行配置";
+                goto ERROR1;
+            }
+
+
+            // 根据记录中是否存在 049$a$b，不存在就是新增，存在就是更新
+
+            var strMARC = this.MarcEditor.Marc;
+            var record = new MarcRecord(strMARC);
+            string action = "N";
+            if (Has049(record))
+                action = "U";
+            else
+                action = "N";
+
+            var error = PrepareRecord(record,
+            action,
+            this.BiblioRecPath);
+            if (error != null)
+            {
+                strError = error;
+                goto ERROR1;
+            }
+
+            string format = GetRecordFormat(record, true);    // "BK";
+
+            var verify_result = UcsUtility.VerifyRecord(record);
+            if (verify_result.Value == -1)
+            {
+                strError = verify_result.ErrorInfo;
+                goto ERROR1;
+            }
+
+            //      style           风格。
+            //                      如果包含 writeMarcPrefix 表示要写 XML 前缀
+            //                      如果包含 writeXsi 表示要写 xsi
+            int nRet = MarcUtil.Marc2Xml(record.Text,
+    "usmarc",
+    "writeXsi",
+    out string xml,
+    out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+
+            this.toolStripButton_uploadToUcs.Enabled = false;
+            try
+            {
+                var result = await UcsUtility.Upload(
+                    context.UcsApiUrl,
+                    context.UcsDatabaseName,
+                    "chi",
+                    context.UcsUserName,
+                    context.UcsPassword,
+                    action,
+                    null,
+                    xml,
+                    "MARCXML",
+                    format);
+                if (result.Value == -1)
+                {
+                    strError = result.ErrorInfo;
+                    goto ERROR1;
+                }
+                else
+                {
+                    if (result.AreUcsSucceed)
+                    {
+                        // 上传成功
+                        // 更新当前记录的 049 字段
+                        var changed = ChangeLocalRecord(
+                            result.olcc,
+                            format);
+
+                        string message = "上传记录到 UCS 成功";
+                        if (changed)
+                            message += "。MARC 编辑器中的记录已发生改变，请注意保存";
+                        this.ShowMessage(message, "green", true);
+                    }
+                    else
+                    {
+                        strError = result.UcsErrorInfo;
+                        goto ERROR1;
+                    }
+                }
+
+
+                return;
+            }
+            finally
+            {
+                this.toolStripButton_uploadToUcs.Enabled = true;
+            }
+
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        static bool Has049(MarcRecord record)
+        {
+            return record.select("field[@name='049']").count > 0;
+        }
+
+        // 为上传做好准备
+        // return:
+        //      null    成功
+        //      其它      出错。返回的是报错信息
+        static string PrepareRecord(MarcRecord record,
+            string action,
+            string recPath)
+        {
+            if (string.IsNullOrEmpty(recPath))
+                return "recPath 不允许为空";
+
+            if (action == "N")
+            {
+                // *** 新增
+
+                // 新增的记录，上传前自动准备 049$c(记录ID)$d(数据库名)
+                string id = Global.GetRecordID(recPath);
+                if (string.IsNullOrEmpty(id))
+                    return "recPath 中的 ID 部分不允许为空";
+                if (id == "?")
+                    return "recPath 中的 ID 部分不允许为问号";
+
+                string dbName = Global.GetDbName(recPath);
+                record.setFirstSubfield("049", "c", id);
+                record.setFirstSubfield("049", "d", dbName);
+            }
+            else
+            {
+                // *** 更新
+
+                if (record.select("field[@name='049']").count == 0)
+                    return "更新时不允许缺乏 049 字段";
+
+                var a = record.select("field[@name='049']/subfield[@name='a']").FirstContent;
+                if (string.IsNullOrEmpty(a))
+                    return "更新时不允许缺乏 049$a 子字段内容";
+                var b = record.select("field[@name='049']/subfield[@name='b']").FirstContent;
+                if (string.IsNullOrEmpty(b))
+                    return "更新时不允许缺乏 049$b 子字段内容";
+                var c = record.select("field[@name='049']/subfield[@name='c']").FirstContent;
+                if (string.IsNullOrEmpty(c))
+                    return "更新时不允许缺乏 049$c 子字段内容";
+            }
+
+            // 删除 997 和 998 字段
+            record.select("field[@name='997' or @name='998']").detach();
+
+            return null;
+        }
+
+        // 更新上载前记录的 049 字段。添加 FMT 字段
+        // parameters:
+        //      olcc_string 内容举例 $$aA000001TES$$bUCS03000000007$$c004471482$$dNLC01
+        bool ChangeLocalRecord(// MarcRecord record,
+            string olcc_string,
+            string format)
+        {
+            if (format == null || format.Length < 2)
+                throw new ArgumentException($"format 值 '{format}' 不合法，应该是 2 字符或以上的字符串");
+
+            // 直接从 MARC 编辑器获得本地记录
+            var strMARC = this.MarcEditor.Marc;
+            var record = new MarcRecord(strMARC);
+
+            /*
+            var fields = record.select("field[@name='049']");
+            if (fields.count > 1)
+            {
+                // 删除多余的 049
+                for (int i = 1; i < fields.count; i++)
+                {
+                    var field = fields[i];
+                    field.detach();
+                }
+            }
+            */
+            /*
+            string old_text = "";
+            {
+                var fields = record.select("field[@name='049']");
+                if (fields.count > 0)
+                    old_text = fields[0].Text;
+            }
+            */
+            if (string.IsNullOrEmpty(olcc_string) == false)
+            {
+                record.setFirstField("049", "  ", olcc_string.Replace("$$", MarcQuery.SUBFLD));
+            }
+
+            /*
+            string new_text = "";
+            {
+                var fields = record.select("field[@name='049']");
+                if (fields.count > 0)
+                    new_text = fields[0].Text;
+            }
+            */
+
+            if (format != null)
+            {
+                // TODO: FMT 字段没有指示符，需要单元测试验证一下
+                record.setFirstField("FMT", null, format);
+                /*
+                record.setFirstField("FMT", 
+                    format.Substring(0, 2),
+                    format.Substring(2));
+                */
+            }
+
+            var changed = (strMARC != record.Text);
+
+            if (changed)
+                this.MarcEditor.Marc = record.Text;
+
+            return changed;
+        }
+
+        static string GetRecordFormat(MarcRecord record,
+            bool remove_fmt_field)
+        {
+            var fields = record.select("field[@name='FMT']");
+            if (fields.count == 0)
+                return "BK";
+            var field = fields[0];
+
+            if (remove_fmt_field)
+                fields.detach();
+
+            return field.Indicator + field.Content;
         }
 
 #if REMOVED

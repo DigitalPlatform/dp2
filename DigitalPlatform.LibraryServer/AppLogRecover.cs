@@ -29,6 +29,7 @@ using DigitalPlatform.Message;
 using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.Core;
 using DigitalPlatform.LibraryClient;
+using System.Linq;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -3373,7 +3374,7 @@ out strError);
                     // 合并新旧记录
                     string strNewXml = "";
 
-                    if (bForce == false)
+                    if (false/*bForce == false*/)   // 注: 日志记录中记载的是实际写入的记录内容，为简化处理，这里不重新进行合并了
                     {
                         // 2020/10/12
                         string[] elements = null;
@@ -4357,7 +4358,7 @@ out strError);
                     // 合并新旧记录
                     string strNewXml = "";
 
-                    if (bForce == false)
+                    if (false/*bForce == false*/)      // 注: 日志记录中记载的是实际写入的记录内容，为简化处理，这里不重新进行合并了
                     {
                         // 模拟一个 SessionInfo
                         string strLibraryCode = DomUtil.GetElementText(domLog.DocumentElement,
@@ -4369,16 +4370,23 @@ out strError);
                         temp_sessioninfo.Account.AccountLibraryCode = strLibraryCode;
                         temp_sessioninfo.Account.UserID = strOperator;
 
-                        // TODO: 按理说日志中应该是当时操作时最终写入的内容，恢复的时候就不用经过合并这一步了
-                        nRet = this.OrderItemDatabase.MergeTwoItemXml(
-                            temp_sessioninfo,
-                            strAction,
-                            domExist,
-                            domNew,
-                            out strNewXml,
-                            out strError);
-                        if (nRet == -1)
-                            goto ERROR1;
+                        try
+                        {
+                            // TODO: 按理说日志中应该是当时操作时最终写入的内容，恢复的时候就不用经过合并这一步了
+                            nRet = this.OrderItemDatabase.MergeTwoItemXml(
+                                temp_sessioninfo,
+                                strAction,
+                                domExist,
+                                domNew,
+                                out strNewXml,
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                        }
+                        finally
+                        {
+                            temp_sessioninfo.CloseSession();
+                        }
                     }
                     else
                     {
@@ -4768,7 +4776,7 @@ out strError);
                     // 合并新旧记录
                     string strNewXml = "";
 
-                    if (bForce == false)
+                    if (false/*bForce == false*/)      // 注: 日志记录中记载的是实际写入的记录内容，为简化处理，这里不重新进行合并了
                     {
                         // 模拟一个 SessionInfo
                         string strLibraryCode = DomUtil.GetElementText(domLog.DocumentElement,
@@ -4780,15 +4788,22 @@ out strError);
                         temp_sessioninfo.Account.AccountLibraryCode = strLibraryCode;
                         temp_sessioninfo.Account.UserID = strOperator;
 
-                        nRet = this.IssueItemDatabase.MergeTwoItemXml(
-                            temp_sessioninfo,
-                            strAction,
-                            domExist,
-                            domNew,
-                            out strNewXml,
-                            out strError);
-                        if (nRet == -1)
-                            goto ERROR1;
+                        try
+                        {
+                            nRet = this.IssueItemDatabase.MergeTwoItemXml(
+                                temp_sessioninfo,
+                                strAction,
+                                domExist,
+                                domNew,
+                                out strNewXml,
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                        }
+                        finally
+                        {
+                            temp_sessioninfo.CloseSession();
+                        }
                     }
                     else
                     {
@@ -5175,7 +5190,7 @@ out strError);
                     // 合并新旧记录
                     string strNewXml = "";
 
-                    if (bForce == false)
+                    if (false/*bForce == false*/)   // 注: 因为模拟读者身份 sessioninfo 和合并处理有一定麻烦，所以这里都当作 force 处理
                     {
                         // 模拟一个 SessionInfo
                         string strLibraryCode = DomUtil.GetElementText(domLog.DocumentElement,
@@ -5187,16 +5202,23 @@ out strError);
                         temp_sessioninfo.Account.AccountLibraryCode = strLibraryCode;
                         temp_sessioninfo.Account.UserID = strOperator;
 
-                        // TODO: 按理说日志中应该是当时操作时最终写入的内容，恢复的时候就不用经过合并这一步了
-                        nRet = this.CommentItemDatabase.MergeTwoItemXml(
-                            temp_sessioninfo,
-                            strAction,
-                            domExist,
-                            domNew,
-                            out strNewXml,
-                            out strError);
-                        if (nRet == -1)
-                            goto ERROR1;
+                        try
+                        {
+                            // TODO: 按理说日志中应该是当时操作时最终写入的内容，恢复的时候就不用经过合并这一步了
+                            nRet = this.CommentItemDatabase.MergeTwoItemXml(
+                                temp_sessioninfo,
+                                strAction,
+                                domExist,
+                                domNew,
+                                out strNewXml,
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                        }
+                        finally
+                        {
+                            temp_sessioninfo.CloseSession();
+                        }
                     }
                     else
                     {
@@ -5811,6 +5833,10 @@ out strError);
                         goto ERROR1;
                     }
 
+                    // 观察 domNew 中是否有 refID 元素
+                    var refID1 = DomUtil.GetElementText(domNew.DocumentElement,
+                        "refID");
+
                     // 合并新旧记录
                     // string strNewXml = "";
                     // parameters:
@@ -5836,6 +5862,19 @@ out strError);
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
+
+                    // 观察 domNew 中是否有 refID 元素
+                    var refID2 = DomUtil.GetElementText(domMerged.DocumentElement,
+                        "refID");
+                    // 2024/2/26
+                    // 如果合并后增加了随机的参考 ID，会影响到和后继日志动作的准确对应，所以这里决定删除掉参考 ID 元素
+                    // 注1: 1.10 以前的操作日志记录 setReaderInfo new 类型存在 bug，所记载的 record 中，没有记载下来实际已经创建和写入到读者记录中的参考 ID 元素
+                    // 注2: 后续如果遇到版本升级，升级过程会给读者记录统一添加参考 ID
+                    if (string.IsNullOrEmpty(refID2) == false
+                        && string.IsNullOrEmpty(refID1) == true)
+                        DomUtil.DeleteElement(domMerged.DocumentElement,
+                            "refID");
+
 
                     // 保存新记录
                     byte[] output_timestamp = null;
@@ -8810,6 +8849,7 @@ API: Settlement()
                 }
 
                 // 2024/2/12
+                // 文本类型的记录内容
                 if (domLog.DocumentElement.SelectSingleNode("record") != null)
                 {
                     string strRecord = DomUtil.GetElementText(domLog.DocumentElement,
@@ -8980,6 +9020,23 @@ domLog.DocumentElement,
                                 return -1;
                             }
                         }
+                        else if (channel.OriginErrorCode == ErrorCodeValue.NotFound)    // 注: NotFound 是指未找到路径指向的对象，而不是未找到上级元数据记录
+                        {
+                            // *** 缺乏下级记录
+                            // return:
+                            //      -1  出错
+                            //      0   发现路径 strResPath 内容不是对象路径，拒绝处理
+                            int nRet = AddSubRecord(channel,
+                                strResPath,
+                                out string error);
+                            if (nRet == 1)
+                                goto REDO_WRITERES;
+                            else
+                            {
+                                strError = $"根据对象记录路径 '{strResPath}' 临时决定为元数据记录中添加 dprms:file 元素的过程出错: {error}";
+                                return -1;
+                            }
+                        }
 
                         strError = "WriteRes() '" + strResPath + "' 时发生错误: " + strError;
                         return -1;
@@ -9006,6 +9063,86 @@ domLog.DocumentElement,
             }
             return -1;
 #endif
+        }
+
+        // return:
+        //      -1  出错
+        //      0   发现路径 strResPath 内容不是对象路径，拒绝处理
+        static int AddSubRecord(RmsChannel channel,
+            string strResPath,
+            out string strError)
+        {
+            strError = "";
+
+            string strPath = strResPath;
+            string strDbName = StringUtil.GetFirstPartPath(ref strPath);
+            bool is_object_path = IsRestObjectPath(strPath, out string strObjectID);
+            if (is_object_path == false)
+            {
+                strError = $"路径 '{strResPath}' 不是对象路径";
+                return 0;
+            }
+
+            string strID = StringUtil.GetFirstPartPath(ref strPath);
+            if (strID != null)
+                strID = strID.TrimStart('0');
+            if (IsId(strID) == false)
+            {
+                strError = $"路径 '{strResPath}' 不是对象路径: 元数据记录 ID '{strID}' 不符合格式要求";
+                return 0;
+            }
+            if (IsId(strObjectID) == false)
+            {
+                strError = $"路径 '{strResPath}' 不是对象路径: 对象记录 ID '{strObjectID}' 不符合格式要求";
+                return 0;
+            }
+
+            // 获得元数据记录
+            string strMetadataRecPath = strDbName + "/" + strID;
+            long lRet = channel.GetRes(strMetadataRecPath,
+    out string xml,
+    out _,
+    out byte[] timestamp,
+    out string output_recpath,
+    out strError);
+            if (lRet == -1)
+            {
+                strError = $"AddSubRecord() 在获取元数据记录 '{strMetadataRecPath}' 时出错: {strError}";
+                return -1;
+            }
+
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(xml);
+            }
+            catch (Exception ex)
+            {
+                strError = $"元数据记录 '{strMetadataRecPath}' 装入 XMLDOM 时出现异常: {ex.Message}";
+                return -1;
+            }
+
+            XmlElement file_node = dom.CreateElement("dprms",
+    "file",
+    DpNs.dprms);
+            dom.DocumentElement.AppendChild(file_node);
+            file_node.SetAttribute("id", strObjectID);
+
+            lRet = channel.DoSaveTextRes(output_recpath,
+    dom.OuterXml,
+    false,
+    "content,ignorechecktimestamp",
+    timestamp,
+    out byte[] output_timestamp,
+    out _,
+    out strError);
+            if (lRet == -1)
+            {
+                strError = $"AddSubRecord() 在保存回元数据记录 '{output_recpath}' 时出错: {strError}";
+                return -1;
+            }
+
+            return 1;
         }
 
         /*
@@ -9349,7 +9486,7 @@ domLog.DocumentElement,
         /*
 <root>
   <operation>manageDatabase</operation>
-  <action>createDatabase</action> createDatabase/initializeDatabase/refreshDatabase/deleteDatabase
+  <action>createDatabase</action> createDatabase/initializeDatabase/refreshDatabase/deleteDatabase/changeDatabase
   <databases>
     <database type="biblio" syntax="unimarc" usage="book" role="" inCirculation="true" name="_测试用中文图书" entityDbName="_测试用中文图书实体" orderDbName="_测试用中文图书订购" commentDbName="_测试用中文图书评注" />
   </databases>
@@ -9360,7 +9497,7 @@ domLog.DocumentElement,
 </root>
          * */
         // 2017/10/15
-        //      attachment  附件流对象。注意文件指针在流的尾部
+        //      attachment  附件流对象。注意调用本函数时其文件指针在流的尾部
         public int RecoverManageDatabase(
             RmsChannelCollection Channels,
             RecoverLevel level,
@@ -9418,69 +9555,209 @@ domLog.DocumentElement,
 
                     string strAction = DomUtil.GetElementText(domLog.DocumentElement,
                         "action");
-                    if (strAction == "createDatabase")
+                    string strLibraryCode = DomUtil.GetElementText(domLog.DocumentElement,
+                        "libraryCode");
+                    string strOperator = DomUtil.GetElementText(domLog.DocumentElement,
+                        "operator");
+                    string style = DomUtil.GetElementText(domLog.DocumentElement,
+    "style");
+                    string version = DomUtil.GetElementText(domLog.DocumentElement,
+    "version");
+
+                    SessionInfo temp_sessioninfo = new SessionInfo(this);
+                    temp_sessioninfo.Account = new Account();
+                    temp_sessioninfo.Account.AccountLibraryCode = strLibraryCode;
+                    temp_sessioninfo.Account.UserID = strOperator;
+                    try
                     {
-                        nRet = DatabaseUtility.CreateDatabases(
-                            null,   // stop
-                            channel,
-                            strTempFileName,
-                            strTempDir,
-                            (database_name) =>
-                            {
-
-                            },
-                            out strError);
-                        if (nRet == -1)
-                            return -1;
-
-                        bDbNameChanged = true;
-
-                        // 更新 library.xml 内容
-                        XmlNodeList nodes = domLog.DocumentElement.SelectNodes("databases/database");
-                        nRet = AppendDatabaseElement(this.LibraryCfgDom,
-            nodes,
-            out strError);
-                        if (nRet == -1)
-                            return -1;
-                        this.Changed = true;
-                    }
-                    else if (strAction == "changeDatabase")
-                    {
-                        // 注意处理 attach 和 detach 风格。或者明确报错不予处理
-                        // TODO: 操作日志中没有记载改名以前的数据库名
-                    }
-                    else if (strAction == "initializeDatabase")
-                    {
-
-                    }
-                    else if (strAction == "refreshDatabase")
-                    {
-
-                    }
-                    else if (strAction == "deleteDatabase")
-                    {
-                        List<string> dbnames = new List<string>();
-
-                        XmlNodeList databases = domLog.DocumentElement.SelectNodes("databases/database");
-                        foreach (XmlElement database in databases)
+                        if (strAction == "createDatabase")
                         {
-                            dbnames.Add(database.GetAttribute("name"));
-                        }
+                            List<string> skip_warnings = new List<string>();
+                            List<string> succeed_dbNames = new List<string>();
+                            // *** 创建数据库
+                            nRet = DatabaseUtility.CreateDatabases(
+                                null,   // stop
+                                channel,
+                                strTempFileName,
+                                strTempDir,
+                                "continueLoop",
+                                (database_name) =>
+                                {
+                                    succeed_dbNames.Add(database_name);
+                                    bDbNameChanged = true;
+                                },
+                                out strError);
+                            if (nRet == -1)
+                            {
+                                // 一个也没有成功
+                                if (succeed_dbNames.Count == 0)
+                                    return -1;
+                                skip_warnings.Add(strError);
+                            }
 
-                        nRet = DeleteDatabases(
-                            null,
-                            channel,
-                            dbnames,
-                            strStyle,
-                            ref bDbNameChanged,
-                            out strError);
-                        if (nRet == -1)
-                            return -1;
+                            if (succeed_dbNames.Count > 0)
+                            {
+                                // 更新 library.xml 内容
+                                var nodes = succeed_dbNames.Select(o => domLog.DocumentElement.SelectSingleNode($"databases/database[@name='{o}']")).ToList().Cast<XmlElement>().Where(o => o != null);
+                                // XmlNodeList nodes = domLog.DocumentElement.SelectNodes("databases/database");
+                                nRet = AppendDatabaseElement(this.LibraryCfgDom,
+                    nodes,
+                    out strError);
+                                if (nRet == -1)
+                                    return -1;
+                                this.Changed = true;
+                            }
+                            if (skip_warnings.Count > 0)
+                            {
+                                this.Flush();
+                                strError = StringUtil.MakePathList(skip_warnings, "; ");
+                                return -1;
+                            }
+                        }
+                        else if (strAction == "changeDatabase")
+                        {
+                            // *** 修改数据库
+                            /*
+    - <root>
+      <operation>manageDatabase</operation> 
+      <action>changeDatabase</action> 
+    - <databases>
+        <database type="biblio" syntax="unimarc" usage="book" name="中文图书改名" oldName="中文图书" /> 
+      </databases>
+      <operator>supervisor</operator> 
+      <operTime>Fri, 23 Feb 2024 18:44:24 +0800</operTime> 
+      <clientAddress via="net.pipe://localhost/dp2library/xe">localhost</clientAddress> 
+      <version>1.10</version> 
+      </root>
+                            注：1.10 之前版本的 changeDatabase action 的日志记录缺乏信息。
+                            databases/database 元素中缺乏 oldName 属性，因此看不出改名以前的旧名字是什么，前滚日志动作没法进行。
+                            1.10 (以及)更高版本的日志记录才改正了这个 bug
+                            * 
+                             * */
+                            if (StringUtil.CompareVersion(version, "1.10") < 0)
+                            {
+                                strError = $"action 为 changeDatabase 的日志动作因为版本低于 1.10(为 {version})，缺乏 databases/database/@oldName 属性，无法执行日志前滚，特此警告";
+                                return -1;
+                            }
+                            // 注意处理 attach 和 detach 风格。或者明确报错不予处理
+                            // TODO: 操作日志中没有记载改名以前的数据库名
+
+                            XmlNodeList oldNames = domLog.DocumentElement.SelectNodes("databases/database/@oldName");
+                            string strDatabaseNames = StringUtil.MakePathList(oldNames.Cast<XmlNode>().Select(o => o.Value).ToList(), ",");
+                            string strDatabaseInfo = domLog.DocumentElement.SelectSingleNode("databases")?.OuterXml;
+
+                            // return:
+                            //      -1  出错
+                            //      0   没有找到
+                            //      1   成功
+                            nRet = this.ChangeDatabase(
+                                temp_sessioninfo,
+                                channel,
+                                strLibraryCode,
+                                strDatabaseNames,
+                                strDatabaseInfo,
+                                MergeStyle(strStyle, style, "skipOperLog,continueLoop"),
+                                out string strOutputInfo,
+                                out strError);
+                            if (nRet == -1)
+                                return -1;
+                            // 注: ChangeDatabase() 中已经使 this.Changed = true 了
+
+                        }
+                        else if (strAction == "initializeDatabase")
+                        {
+                            // *** 初始化数据库
+
+                            XmlNodeList names = domLog.DocumentElement.SelectNodes("databases/database/@name");
+                            string strDatabaseNames = StringUtil.MakePathList(names.Cast<XmlNode>().Select(o => o.Value).ToList(), ",");
+
+                            // 初始化数据库
+                            // return:
+                            //      -1  出错
+                            //      0   没有找到
+                            //      1   成功
+                            nRet = this.InitializeDatabase(
+                                temp_sessioninfo,
+                                channel,
+                                strLibraryCode,
+                                strDatabaseNames,
+                                MergeStyle(strStyle, style, "skipOperLog"),
+                                out string strOutputInfo,
+                                out strError);
+                            if (nRet == -1)
+                                return -1;
+                            // 注: InitializeDatabase() 中似乎不会改变 this.Changed
+                        }
+                        else if (strAction == "refreshDatabase")
+                        {
+                            // *** 刷新数据库定义
+                            // 指从 templates 目录中用最新的配置文件刷新数据库原有的配置文件
+
+                            XmlNodeList names = domLog.DocumentElement.SelectNodes("databases/database/@name");
+                            string strDatabaseNames = StringUtil.MakePathList(names.Cast<XmlNode>().Select(o => o.Value).ToList(), ",");
+
+                            {
+                                // 日志前滚的时候，要压制 autoRebuildKeys 和 recoverModeKeys 这两个属性
+                                var refreshStyle_element = domLog.DocumentElement.SelectSingleNode("refreshStyle") as XmlElement;
+                                if (refreshStyle_element != null)
+                                {
+                                    var auto_rebuild_keys = refreshStyle_element.GetAttribute("autoRebuildKeys");
+                                    // TODO: 可以把 auto_rebuild_keys 所针对的数据库名字记载积累下来，在日志恢复任务结束时，再安排一次重建检索点后台任务
+
+                                    refreshStyle_element.SetAttribute("autoRebuildKeys", "false");
+                                    refreshStyle_element.SetAttribute("recoverModeKeys", "false");
+                                }
+                            }
+
+                            string strDatabaseInfo = domLog.DocumentElement.SelectSingleNode("refreshStyle")?.OuterXml;
+
+                            // return:
+                            //      -1  出错
+                            //      0   没有找到
+                            //      1   成功
+                            nRet = this.RefreshDatabaseDefs(
+                                temp_sessioninfo,
+                                channel,
+                                strLibraryCode,
+                                strDatabaseNames,
+                                strDatabaseInfo,
+                                MergeStyle(strStyle, style, "skipOperLog,continueLoop"),
+                                out string strOutputInfo,
+                                out strError);
+                            if (nRet == -1)
+                                return -1;
+                            // 注: RefreshDatabaseDefs() 中似乎不会改变 this.Changed
+                        }
+                        else if (strAction == "deleteDatabase")
+                        {
+                            // *** 删除数据库
+                            List<string> dbnames = new List<string>();
+
+                            XmlNodeList databases = domLog.DocumentElement.SelectNodes("databases/database");
+                            foreach (XmlElement database in databases)
+                            {
+                                dbnames.Add(database.GetAttribute("name"));
+                            }
+
+                            nRet = DeleteDatabases(
+                                null,
+                                channel,
+                                dbnames,
+                                MergeStyle(strStyle, style, "skipOperLog,continueLoop"),
+                                ref bDbNameChanged,
+                                out strError);
+                            if (nRet == -1)
+                                return -1;
+                        }
+                        else
+                        {
+                            strError = "不可识别的strAction值 '" + strAction + "'";
+                            goto ERROR1;
+                        }
                     }
-                    else
+                    finally
                     {
-                        strError = "不可识别的strAction值 '" + strAction + "'";
-                        goto ERROR1;
+                        temp_sessioninfo.CloseSession();
                     }
 
                     if (this.Changed == true)
@@ -9538,6 +9815,24 @@ domLog.DocumentElement,
             return -1;
         }
 
+        // 合并 style
+        static string MergeStyle(params string[] styles)
+        {
+            if (styles == null)
+                return "";
+            List<string> results = new List<string>();
+            foreach (var style in styles)
+            {
+                var list = StringUtil.SplitList(style, ",");
+                if (list.Count > 0)
+                    results.AddRange(list);
+            }
+
+            return StringUtil.MakePathList(results, ",");
+        }
+
+        // parameters:
+        //      strStyle    如果包含 continueLoop，表示中途遇到出错后尽量继续循环处理后续任务
         int DeleteDatabases(
             Stop stop,
             RmsChannel channel,
@@ -9549,6 +9844,10 @@ domLog.DocumentElement,
             strError = "";
             int nRet = 0;
 
+            // 遇到报错是否尽量维持循环，以继续完成后面的处理
+            var continueLoop = StringUtil.IsInList("continueLoop", strStyle);
+            List<string> skip_warnings = new List<string>();
+
             foreach (string dbname in dbnames)
             {
                 string strDbType = GetDbTypeByDbName(dbname);
@@ -9557,6 +9856,7 @@ domLog.DocumentElement,
                     // TODO: 遇到此种情况，写入错误日志
                     strError = "数据库 '" + dbname + "' 没有找到类型";
                     // return -1;
+                    skip_warnings.Add(strError);
                     continue;
                 }
 
@@ -9576,7 +9876,14 @@ domLog.DocumentElement,
                         ref bDbNameChanged,
                         out strError);
                     if (nRet == -1)
+                    {
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         return -1;
+                    }
                     if (StringUtil.IsInList("verify", strStyle))
                     {
                         if (this.VerifyDatabaseDelete(
@@ -9602,7 +9909,14 @@ domLog.DocumentElement,
     ref bDbNameChanged,
     out strError);
                     if (nRet == -1)
+                    {
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         return -1;
+                    }
                     if (StringUtil.IsInList("verify", strStyle))
                     {
                         if (this.VerifyDatabaseDelete(
@@ -9634,8 +9948,14 @@ domLog.DocumentElement,
                         ref bDbNameChanged,
                         out strError);
                     if (nRet == -1)
+                    {
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         return -1;
-
+                    }
                     if (StringUtil.IsInList("verify", strStyle))
                     {
                         // test
@@ -9675,7 +9995,14 @@ domLog.DocumentElement,
                         ref bDbNameChanged,
                         out strError);
                     if (nRet == -1)
+                    {
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         return -1;
+                    }
                     if (StringUtil.IsInList("verify", strStyle))
                     {
                         // test
@@ -9708,7 +10035,14 @@ domLog.DocumentElement,
                         ref bDbNameChanged,
                         out strError);
                     if (nRet == -1)
+                    {
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         return -1;
+                    }
                     if (StringUtil.IsInList("verify", strStyle))
                     {
                         Debug.Assert(string.IsNullOrEmpty(strDbType) == false, "");
@@ -9722,11 +10056,260 @@ domLog.DocumentElement,
                 }
 
                 strError = "DeleteDatabases() 遭遇无法识别的数据库名 '" + dbname + "' (数据库类型 '" + strDbType + "')";
+                if (continueLoop)
+                {
+                    skip_warnings.Add(strError);
+                    continue;
+                }
                 return -1;
             }
 
+            if (skip_warnings.Count > 0)
+            {
+                strError = StringUtil.MakePathList(skip_warnings, "; ");
+                return -1;
+            }
             return 0;
         }
+
+        // 2024/2/22
+        /*
+  <root>
+  <operation>setSystemParameter</operation> 
+  <category>...</category> 
+  <name>...</name> 
+  <value>...</value> 
+  <libraryCodeList>...</libraryCodeList>
+  <operator>...</operator> 
+  <operTime>Thu, 22 Feb 2024 15:38:40 +0800</operTime> 
+  <clientAddress via="...">...</clientAddress> 
+  <version>1.10</version> 
+  </root>
+        * */
+        public int RecoverSetSystemParameter(
+        RmsChannelCollection Channels,
+        RecoverLevel level,
+        XmlDocument domLog,
+        Stream attachmentLog,
+        string strStyle,
+        out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+            // long lRet = 0;
+
+            // 暂时把Robust当作Logic处理
+            if (level == RecoverLevel.Robust)
+                level = RecoverLevel.Logic;
+
+            RmsChannel channel = Channels.GetChannel(this.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
+            // 2024/2/22
+            if (this.Changed)
+                this.Flush();
+
+            bool bReuse = false;    // 是否能够不顾RecoverLevel状态而重用部分代码
+
+        DO_SNAPSHOT:
+
+            // 快照恢复
+            if (level == RecoverLevel.Snapshot
+                || bReuse == true)
+            {
+                string category = DomUtil.GetElementText(domLog.DocumentElement,
+                    "category");
+                string name = DomUtil.GetElementText(domLog.DocumentElement,
+                    "name");
+                string value = DomUtil.GetElementText(domLog.DocumentElement,
+                    "value");
+                string libraryCodeList = DomUtil.GetElementText(domLog.DocumentElement,
+                    "libraryCodeList");
+                string strOperator = DomUtil.GetElementText(domLog.DocumentElement,
+"operator");
+                SessionInfo temp_sessioninfo = new SessionInfo(this);
+                temp_sessioninfo.Account = new Account();
+                temp_sessioninfo.Account.AccountLibraryCode = libraryCodeList;
+                temp_sessioninfo.Account.UserID = strOperator;
+
+                try
+                {
+                    nRet = this.SetSystemParameter(
+        temp_sessioninfo,
+        category,
+        name,
+        value,
+        out bool succeed,
+        out strError);
+                    if (nRet == -1)
+                        return -1;
+                    if (succeed && this.Changed)
+                        this.Flush();
+                    return 0;
+                }
+                finally
+                {
+                    temp_sessioninfo.CloseSession();
+                }
+            }
+
+            // 逻辑恢复或者混合恢复
+            if (level == RecoverLevel.Logic
+                || level == RecoverLevel.LogicAndSnapshot)
+            {
+                // 和SnapShot方式相同
+                bReuse = true;
+                goto DO_SNAPSHOT;
+            }
+            return 0;
+        ERROR1:
+            if (level == RecoverLevel.LogicAndSnapshot)
+            {
+                WriteErrorLog($"RecoverSetSystemParameter() 用 LogicAndSnapShot 方式恢复遇到报错 {strError}，后面自动改用 SnapShot 方式尝试 ...");
+                level = RecoverLevel.Snapshot;
+                goto DO_SNAPSHOT;
+            }
+            return -1;
+        }
+
+        /* version 1.10 才增加的日志操作类型
+<root>
+    <operation>setCalendar</operation> 
+    <action>...</action> change new delete overwirte
+    <oldCalendar>...</oldCalendar> 
+    <calendar>...</calendar> 
+    <operator>...</operator> 
+    <operTime>Thu, 22 Feb 2024 15:38:40 +0800</operTime> 
+    <clientAddress via="...">...</clientAddress> 
+    <version>1.10</version> 
+</root>
+* */
+        public int RecoverSetCalendar(
+RmsChannelCollection Channels,
+RecoverLevel level,
+XmlDocument domLog,
+Stream attachmentLog,
+string strStyle,
+out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+            // long lRet = 0;
+
+            // 暂时把Robust当作Logic处理
+            if (level == RecoverLevel.Robust)
+                level = RecoverLevel.Logic;
+
+            RmsChannel channel = Channels.GetChannel(this.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
+            // 2024/2/22
+            if (this.Changed)
+                this.Flush();
+
+            bool bReuse = false;    // 是否能够不顾RecoverLevel状态而重用部分代码
+
+        DO_SNAPSHOT:
+
+            // 快照恢复
+            if (level == RecoverLevel.Snapshot
+                || bReuse == true)
+            {
+                string action = DomUtil.GetElementText(domLog.DocumentElement,
+                    "action");
+                XmlElement calendar_element = null;
+                if (action == "delete")
+                {
+                    calendar_element = domLog.DocumentElement.SelectSingleNode("oldCalendar") as XmlElement;
+                    if (calendar_element == null)
+                    {
+                        strError = "日志记录中缺乏 oldCalendar 元素";
+                        return -1;
+                    }
+                }
+                else
+                {
+                    calendar_element = domLog.DocumentElement.SelectSingleNode("calendar") as XmlElement;
+                    if (calendar_element == null)
+                    {
+                        strError = "日志记录中缺乏 calendar 元素";
+                        return -1;
+                    }
+                }
+                
+                
+                var info = GetElementValues(calendar_element);
+                /*
+                var info = new CalenderInfo();
+                {
+                    info.Name = DomUtil.GetElementText(domLog.DocumentElement,
+                        "calendarName");
+                    info.Range = DomUtil.GetElementText(domLog.DocumentElement,
+                        "calendarRange");
+                    info.Content = DomUtil.GetElementText(domLog.DocumentElement,
+        "calendarContent");
+                    info.Comment = DomUtil.GetElementText(domLog.DocumentElement,
+        "calendarComment");
+                }
+                */
+                string strOperator = DomUtil.GetElementText(domLog.DocumentElement,
+"operator");
+
+                SessionInfo temp_sessioninfo = new SessionInfo(this);
+                temp_sessioninfo.Account = new Account();
+                temp_sessioninfo.Account.AccountLibraryCode = "";
+                temp_sessioninfo.Account.UserID = "~recover";
+
+                try
+                {
+                    nRet = this.SetCalendar(
+        temp_sessioninfo,
+        action,
+        info,
+        "skipOperLog,recover",
+        out ErrorCode error_code,
+        out strError);
+                    if (nRet == -1)
+                        return -1;
+                    if (this.Changed)
+                        this.Flush();
+                    return 0;
+                }
+                finally
+                {
+                    temp_sessioninfo.CloseSession();
+                }
+            }
+
+            // 逻辑恢复或者混合恢复
+            if (level == RecoverLevel.Logic
+                || level == RecoverLevel.LogicAndSnapshot)
+            {
+                // 和SnapShot方式相同
+                bReuse = true;
+                goto DO_SNAPSHOT;
+            }
+            return 0;
+            /*
+        ERROR1:
+            if (level == RecoverLevel.LogicAndSnapshot)
+            {
+                WriteErrorLog($"RecoverSetCalendar() 用 LogicAndSnapShot 方式恢复遇到报错 {strError}，后面自动改用 SnapShot 方式尝试 ...");
+                level = RecoverLevel.Snapshot;
+                goto DO_SNAPSHOT;
+            }
+            return -1;
+            */
+        }
+
     }
 
     public enum RecoverLevel

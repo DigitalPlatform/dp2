@@ -14,7 +14,6 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.rms.Client.rmsws_localhost;
-using System.Xml.Linq;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -398,14 +397,17 @@ namespace DigitalPlatform.LibraryServer
 
         // 修改数据库
         // parameters:
-        //      strStyle    changeOut/changeIn  改出/改入数据库名字
-        //                  改出的意思是，请求 dp2kernel 修改内核数据库名字，然后从 library.xml 清除这个数据库的痕迹。请求前，dp2kernel 中要检查源数据库名已经存在(并且 library.xml 中也有相应的配置元素内容)，若目标数据库名已经存在，要先删除这个数据库
-        //                  改入，则是请求 dp2kernel 修改内核数据库名字，然后在 library.xml 相关位置设置好这个新名字。请求前，dp2kernel 中的源数据库名应该存在；若目标数据库名已经存在，则要先删除这个数据库，确保改名可以成功
+        //      strStyle    detach/attach  摘除/挂接数据库名字
+        //                  摘除的意思是，请求 dp2kernel 修改内核数据库名字，然后从 library.xml 清除这个数据库的痕迹。请求前，dp2kernel 中要检查源数据库名已经存在(并且 library.xml 中也有相应的配置元素内容)，若目标数据库名已经存在，要先删除这个数据库
+        //                  挂接，则是请求 dp2kernel 修改内核数据库名字，然后在 library.xml 相关位置设置好这个新名字。请求前，dp2kernel 中的源数据库名应该存在；若目标数据库名已经存在，则要先删除这个数据库，确保改名可以成功
+        //      strStyle    attach/detach/空。
+        //                  attach 表示将 dp2kernel 中数据库附加上来。
+        //                  detach 表示将 dp2library 用到的某个数据库从 library.xml 中摘除(但数据库已经在 dp2kernel 中存在)
         // return:
         //      -1  出错
         //      0   没有找到
         //      1   成功
-        int ChangeDatabase(
+        public int ChangeDatabase(
             SessionInfo sessioninfo,
             RmsChannel channel,
             // RmsChannelCollection Channels,
@@ -420,7 +422,10 @@ namespace DigitalPlatform.LibraryServer
             strError = "";
 
             int nRet = 0;
-            // long lRet = 0;
+
+            // 遇到报错是否尽量维持循环，以继续完成后面的处理
+            var continueLoop = StringUtil.IsInList("continueLoop", strStyle);
+            List<string> skip_warnings = new List<string>();    // 跳过处理的警告
 
             bool bDbNameChanged = false;
 
@@ -469,6 +474,11 @@ namespace DigitalPlatform.LibraryServer
                     if (nodeDatabase == null)
                     {
                         strError = "配置DOM中名字为 '" + strName + "' 的书目库(biblioDbName属性)相关<database>元素没有找到";
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         return 0;
                     }
 
@@ -517,7 +527,14 @@ namespace DigitalPlatform.LibraryServer
                                 },
                                 out strError);
                             if (nRet == -1)
+                            {
+                                if (continueLoop)
+                                {
+                                    skip_warnings.Add(strError);
+                                    continue;
+                                }
                                 goto ERROR1;
+                            }
 #if NO
                             bDbNameChanged = true;
                             DomUtil.SetAttr(nodeDatabase, "biblioDbName", strNewBiblioDbName);
@@ -557,8 +574,14 @@ namespace DigitalPlatform.LibraryServer
                                 },
                                 out strError);
                             if (nRet == -1)
+                            {
+                                if (continueLoop)
+                                {
+                                    skip_warnings.Add(strError);
+                                    continue;
+                                }
                                 goto ERROR1;
-
+                            }
 #if NO
                             bDbNameChanged = true;
 
@@ -599,8 +622,14 @@ namespace DigitalPlatform.LibraryServer
                                 },
                                 out strError);
                             if (nRet == -1)
+                            {
+                                if (continueLoop)
+                                {
+                                    skip_warnings.Add(strError);
+                                    continue;
+                                }
                                 goto ERROR1;
-
+                            }
 #if NO
                             bDbNameChanged = true;
 
@@ -640,8 +669,14 @@ namespace DigitalPlatform.LibraryServer
                                 },
                                 out strError);
                             if (nRet == -1)
+                            {
+                                if (continueLoop)
+                                {
+                                    skip_warnings.Add(strError);
+                                    continue;
+                                }
                                 goto ERROR1;
-
+                            }
 #if NO
                             bDbNameChanged = true;
 
@@ -682,8 +717,14 @@ namespace DigitalPlatform.LibraryServer
                                 },
                                 out strError);
                             if (nRet == -1)
+                            {
+                                if (continueLoop)
+                                {
+                                    skip_warnings.Add(strError);
+                                    continue;
+                                }
                                 goto ERROR1;
-
+                            }
 #if NO
                             bDbNameChanged = true;
 
@@ -777,7 +818,8 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     this.Changed = true;
-                    // request_node.SetAttribute("oldName", strName);
+
+                    request_node.SetAttribute("oldName", strName);
                     database_nodes.Add(request_node);
                     goto CONTINUE;
                 } // end of if 书目库名
@@ -807,7 +849,14 @@ namespace DigitalPlatform.LibraryServer
                         ref bDbNameChanged,
                         out strError);
                     if (nRet == -1)
+                    {
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         goto ERROR1;
+                    }
                     if (nRet == 0)
                         return 0;
 #if NO
@@ -896,6 +945,7 @@ namespace DigitalPlatform.LibraryServer
 
                     this.Changed = true;
 #endif
+                    request_node.SetAttribute("oldName", strName);
                     database_nodes.Add(request_node);
                     goto CONTINUE;
                 }
@@ -1196,8 +1246,14 @@ namespace DigitalPlatform.LibraryServer
                                 },
                             out strError);
                         if (nRet == -1)
+                        {
+                            if (continueLoop)
+                            {
+                                skip_warnings.Add(strError);
+                                continue;
+                            }
                             goto ERROR1;
-
+                        }
 #if NO
                         bDbNameChanged = true;
 
@@ -1281,6 +1337,8 @@ namespace DigitalPlatform.LibraryServer
                     this.LoadReaderDbGroupParam(this.LibraryCfgDom);
 
                     this.Changed = true;
+
+                    request_node.SetAttribute("oldName", strName);
                     database_nodes.Add(request_node);
                     goto CONTINUE;
                 }
@@ -1340,10 +1398,18 @@ namespace DigitalPlatform.LibraryServer
                                 },
                             out strError);
                         if (nRet == -1)
+                        {
+                            if (continueLoop)
+                            {
+                                skip_warnings.Add(strError);
+                                continue;
+                            }
                             goto ERROR1;
+                        }
                     }
 
                     this.Changed = true;
+
                     request_node.SetAttribute("oldName", strOldReaderDbName);
                     database_nodes.Add(request_node);
                     goto CONTINUE;
@@ -1365,7 +1431,12 @@ namespace DigitalPlatform.LibraryServer
                 {
                     if (string.IsNullOrEmpty(strType))
                     {
-                        strError = "数据库名 '" + strType + "' 在 library.xml 中没有找到对应的类型信息";
+                        strError = $"数据库名 '{strName}' 在 library.xml 中没有找到对应的类型信息";
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         return -1;
                     }
                 }
@@ -1396,10 +1467,16 @@ namespace DigitalPlatform.LibraryServer
                         strStyle,
                         ref bDbNameChanged,
                         out strError);
-                    if (nRet == -1)
-                        return -1;
-                    if (nRet == 0)
-                        return 0;
+                    if (nRet == -1 || nRet == 0)
+                    {
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
+                        return nRet;
+                    }
+
 #if NO
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
@@ -1443,6 +1520,7 @@ namespace DigitalPlatform.LibraryServer
                             goto ERROR1;
                     }
 #endif
+                    request_node.SetAttribute("oldName", strName);
                     database_nodes.Add(request_node);
                     goto CONTINUE;
                 }
@@ -1713,10 +1791,16 @@ namespace DigitalPlatform.LibraryServer
                         strStyle,
                         ref bDbNameChanged,
                         out strError);
-                    if (nRet == -1)
-                        return -1;
-                    if (nRet == 0)
-                        return 0;
+                    if (nRet == -1 || nRet == 0)
+                    {
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
+                        return nRet;
+                    }
+
 #if NO
                     XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("utilDb/database[@name='" + strName + "']");
                     if (nodeDatabase == null)
@@ -1783,6 +1867,7 @@ namespace DigitalPlatform.LibraryServer
                     }
 #endif
 
+                    request_node.SetAttribute("oldName", strName);
                     database_nodes.Add(request_node);
                     goto CONTINUE;
                 }
@@ -1798,6 +1883,9 @@ namespace DigitalPlatform.LibraryServer
                 // TODO: 验证数据库名的修改在 LibraryCfgDom 中兑现了
             }
 
+            if (this.Changed == true)
+                this.Flush();
+
             // 写入操作日志
             if (StringUtil.IsInList("skipOperLog", strStyle) == false)
             {
@@ -1810,6 +1898,10 @@ namespace DigitalPlatform.LibraryServer
                 DomUtil.SetElementText(domOperLog.DocumentElement,
     "action",
     "changeDatabase");
+
+                // 2024/2/23 verion 1.10 开始才有的这个元素
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+                    "libraryCode", strLibraryCodeList);
 
                 XmlNode new_node = DomUtil.SetElementText(domOperLog.DocumentElement, "databases",
 "");
@@ -1842,8 +1934,11 @@ out strError);
                 }
             }
 
+            // 2024/2/23 注释掉
+            /*
             if (this.Changed == true)
                 this.ActivateManagerThread();
+            */
 
             if (bDbNameChanged == true)
             {
@@ -1860,30 +1955,37 @@ out strError);
                     return -1;
             }
 
+            // 2024/2/24
+            if (skip_warnings.Count > 0)
+            {
+                strError = StringUtil.MakePathList(skip_warnings, "; ");
+                return -1;
+            }
             return 1;
         ERROR1:
+            // 2024/2/23 注释掉
+            /*
             // 2015/1/29
             if (this.Changed == true)
                 this.ActivateManagerThread();
+            */
 
             // 2015/1/29
             if (bDbNameChanged == true)
             {
                 {
-                    string strError1 = "";
                     nRet = InitialKdbs(
                         channel,    // Channels,
-                        out strError1);
+                        out string strError1);
                     if (nRet == -1)
                         strError += "; 在收尾的时候进行 InitialKdbs() 调用又出错：" + strError1;
                 }
 
                 {
-                    string strError1 = "";
                     // 重新初始化虚拟库定义
                     this.vdbs = null;
                     nRet = this.InitialVdbs(channel,    // Channels,
-                        out strError1);
+                        out string strError1);
                     if (nRet == -1)
                         strError += "; 在收尾的时候进行 InitialVdbs() 调用又出错：" + strError1;
                 }
@@ -3381,6 +3483,10 @@ out strError);
     "action",
     "deleteDatabase");
 
+                // 2024/2/23 verion 1.10 开始才有的这个元素
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+                    "libraryCode", strLibraryCodeList);
+
                 XmlNode new_node = DomUtil.SetElementText(domOperLog.DocumentElement, "databases",
 "");
                 foreach (string name in names)
@@ -3426,9 +3532,12 @@ out strError);
                 }
             }
 
+            // 2024/2/23 注释掉
+            /*
             // 2017/6/7
             if (this.Changed == true)
                 this.ActivateManagerThread();
+            */
 
             if (bDbNameChanged == true)
             {
@@ -3506,7 +3615,14 @@ out strError);
             int nRet = 0;
             // long lRet = 0;
 
-            string strLogFileName = this.GetTempFileName("zip");
+            // 遇到报错是否尽量维持循环，以继续完成后面的处理
+            var continueLoop = StringUtil.IsInList("continueLoop", strStyle);
+            List<string> skip_warnings = new List<string>();    // 跳过处理的警告
+
+            string strLogFileName = "";
+
+            if (StringUtil.IsInList("skipOperLog", strStyle) == false)
+                strLogFileName = this.GetTempFileName("zip");
 
             string strInclude = "";
             string strExclude = "";
@@ -3514,6 +3630,7 @@ out strError);
             bool bAutoRebuildKeys = false;  // 2014/11/26
             bool bRecoverModeKeys = false;  // 2015/9/28
 
+            string strRefreshStyleOuterXml = "";
             if (String.IsNullOrEmpty(strDatabaseInfo) == false)
             {
                 XmlDocument style_dom = new XmlDocument();
@@ -3534,6 +3651,7 @@ out strError);
                     bAutoRebuildKeys = DomUtil.GetBooleanParam(style_node, "autoRebuildKeys", false);
                     bRecoverModeKeys = DomUtil.GetBooleanParam(style_node, "recoverModeKeys", false);
                 }
+                strRefreshStyleOuterXml = style_node.OuterXml;
             }
 
             if (String.IsNullOrEmpty(strInclude) == true)
@@ -3602,6 +3720,11 @@ out strError);
                     if (nRet == -1)
                     {
                         strError = "刷新小书目库 '" + strName + "' 定义时发生错误: " + strError;
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         goto ERROR1;
                     }
                     if (nRet == 1)
@@ -3620,12 +3743,17 @@ out strError);
                             info.EntityDbName,
                             strInclude,
                             strExclude,
-                        bRecoverModeKeys,
-                        strLogFileName,
+                            bRecoverModeKeys,
+                            strLogFileName,
                             out strError);
                         if (nRet == -1)
                         {
                             strError = "刷新书目库 '" + strName + "' 所从属的实体库 '" + info.EntityDbName + "' 定义时发生错误: " + strError;
+                            if (continueLoop)
+                            {
+                                skip_warnings.Add(strError);
+                                continue;
+                            }
                             goto ERROR1;
                         }
                         if (nRet == 1)
@@ -3644,12 +3772,17 @@ out strError);
                             info.OrderDbName,
                             strInclude,
                             strExclude,
-                        bRecoverModeKeys,
-                        strLogFileName,
+                            bRecoverModeKeys,
+                            strLogFileName,
                             out strError);
                         if (nRet == -1)
                         {
                             strError = "刷新书目库 '" + strName + "' 所从属的订购库 '" + info.OrderDbName + "' 定义时发生错误: " + strError;
+                            if (continueLoop)
+                            {
+                                skip_warnings.Add(strError);
+                                continue;
+                            }
                             goto ERROR1;
                         }
                         if (nRet == 1)
@@ -3667,12 +3800,17 @@ out strError);
                             info.IssueDbName,
                             strInclude,
                             strExclude,
-                        bRecoverModeKeys,
-                        strLogFileName,
+                            bRecoverModeKeys,
+                            strLogFileName,
                             out strError);
                         if (nRet == -1)
                         {
                             strError = "刷新书目库 '" + strName + "' 所从属的期库 '" + info.IssueDbName + "' 定义时发生错误: " + strError;
+                            if (continueLoop)
+                            {
+                                skip_warnings.Add(strError);
+                                continue;
+                            }
                             goto ERROR1;
                         }
                         if (nRet == 1)
@@ -3691,12 +3829,17 @@ out strError);
                             info.CommentDbName,
                             strInclude,
                             strExclude,
-                        bRecoverModeKeys,
-                        strLogFileName,
+                            bRecoverModeKeys,
+                            strLogFileName,
                             out strError);
                         if (nRet == -1)
                         {
                             strError = "刷新书目库 '" + strName + "' 所从属的评注库 '" + info.CommentDbName + "' 定义时发生错误: " + strError;
+                            if (continueLoop)
+                            {
+                                skip_warnings.Add(strError);
+                                continue;
+                            }
                             goto ERROR1;
                         }
                         if (nRet == 1)
@@ -3738,6 +3881,11 @@ out strError);
                     if (nRet == -1)
                     {
                         strError = "刷新实体库 '" + strName + "' 定义时发生错误: " + strError;
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         goto ERROR1;
                     }
                     if (nRet == 1)
@@ -3777,6 +3925,11 @@ out strError);
                     if (nRet == -1)
                     {
                         strError = "刷新订购库 '" + strName + "' 定义时发生错误: " + strError;
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         goto ERROR1;
                     }
                     if (nRet == 1)
@@ -3817,6 +3970,11 @@ out strError);
                     if (nRet == -1)
                     {
                         strError = "刷新期库 '" + strName + "' 定义时发生错误: " + strError;
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         goto ERROR1;
                     }
                     if (nRet == 1)
@@ -3857,6 +4015,11 @@ out strError);
                     if (nRet == -1)
                     {
                         strError = "刷新评注库 '" + strName + "' 定义时发生错误: " + strError;
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         goto ERROR1;
                     }
                     if (nRet == 1)
@@ -3905,6 +4068,11 @@ out strError);
                     if (nRet == -1)
                     {
                         strError = "刷新读者库 '" + strName + "' 定义时发生错误: " + strError;
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         goto ERROR1;
                     }
                     if (nRet == 1)
@@ -3948,6 +4116,11 @@ out strError);
                     if (nRet == -1)
                     {
                         strError = "刷新规范库 '" + strName + "' 定义时发生错误: " + strError;
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         goto ERROR1;
                     }
                     if (nRet == 1)
@@ -3979,6 +4152,11 @@ out strError);
                     if (nRet == -1)
                     {
                         strError = "刷新预约到书库 '" + strName + "' 定义时发生错误: " + strError;
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         goto ERROR1;
                     }
                     if (nRet == 1)
@@ -4009,6 +4187,11 @@ out strError);
                     if (nRet == -1)
                     {
                         strError = "刷新违约金库 '" + strName + "' 定义时发生错误: " + strError;
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         goto ERROR1;
                     }
                     if (nRet == 1)
@@ -4040,6 +4223,11 @@ out strError);
                     if (nRet == -1)
                     {
                         strError = "刷新发票库 '" + strName + "' 定义时发生错误: " + strError;
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         goto ERROR1;
                     }
                     if (nRet == 1)
@@ -4071,6 +4259,11 @@ out strError);
                     if (nRet == -1)
                     {
                         strError = "刷新消息库 '" + strName + "' 定义时发生错误: " + strError;
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         goto ERROR1;
                     }
                     if (nRet == 1)
@@ -4122,6 +4315,11 @@ out strError);
                     if (nRet == -1)
                     {
                         strError = "刷新" + strTypeCaption + "库 '" + strName + "' 定义时发生错误: " + strError;
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         goto ERROR1;
                     }
                     if (nRet == 1)
@@ -4162,6 +4360,11 @@ out strError);
                     if (nRet == -1)
                     {
                         strError = "刷新实用库 '" + strName + "' 定义时发生错误: " + strError;
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         goto ERROR1;
                     }
                     if (nRet == 1)
@@ -4181,8 +4384,11 @@ out strError);
 
                     if (string.IsNullOrEmpty(this.MongoDbConnStr) == true)
                     {
-                        strError = "当前尚未启用 MongoDB 功能";
-                        return -1;
+                        strError = $"当前尚未启用 MongoDB 功能，无法刷新 访问日志库 '{strName}'";
+                        if (continueLoop == false)
+                            return -1;
+                        skip_warnings.Add(strError);
+                        continue;
                     }
 
                     this.AccessLogDatabase.CreateIndex();
@@ -4202,8 +4408,11 @@ out strError);
 
                     if (string.IsNullOrEmpty(this.MongoDbConnStr) == true)
                     {
-                        strError = "当前尚未启用 MongoDB 功能";
-                        return -1;
+                        strError = $"当前尚未启用 MongoDB 功能，无法刷新 访问统计库 '{strName}'";
+                        if (continueLoop == false)
+                            return -1;
+                        skip_warnings.Add(strError);
+                        continue;
                     }
 
                     this.HitCountDatabase.CreateIndex();
@@ -4223,8 +4432,11 @@ out strError);
 
                     if (string.IsNullOrEmpty(this.MongoDbConnStr) == true)
                     {
-                        strError = "当前尚未启用 MongoDB 功能";
-                        return -1;
+                        strError = $"当前尚未启用 MongoDB 功能，无法刷新 出纳历史库 '{strName}'";
+                        if (continueLoop == false)
+                            return -1;
+                        skip_warnings.Add(strError);
+                        continue;
                     }
 
                     this.ChargingOperDatabase.CreateIndex();
@@ -4244,8 +4456,11 @@ out strError);
 
                     if (string.IsNullOrEmpty(this.MongoDbConnStr) == true)
                     {
-                        strError = "当前尚未启用 MongoDB 功能";
-                        return -1;
+                        strError = $"当前尚未启用 MongoDB 功能，无法刷新 书目摘要库 '{strName}'";
+                        if (continueLoop == false)
+                            return -1;
+                        skip_warnings.Add(strError);
+                        continue;
                     }
 
                     this.CreateBiblioSummaryIndex();
@@ -4255,7 +4470,10 @@ out strError);
                 }
 
                 strError = "数据库名 '" + strName + "' 不属于 dp2library 目前管辖的范围...";
-                return 0;
+                if (continueLoop == false)
+                    return 0;
+                else
+                    skip_warnings.Add(strError);
             }
 
             // 写入操作日志
@@ -4270,6 +4488,10 @@ out strError);
                 DomUtil.SetElementText(domOperLog.DocumentElement,
     "action",
     "refreshDatabase");
+
+                // 2024/2/23 verion 1.10 开始才有的这个元素
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+                    "libraryCode", strLibraryCodeList);
 
                 XmlNode new_node = DomUtil.SetElementText(domOperLog.DocumentElement, "databases",
 "");
@@ -4290,6 +4512,14 @@ out strError);
                         database.SetAttribute("type", type);
                         i++;
                     }
+                }
+
+                // 2024/2/24 version 1.10 才具有这个元素。更早的日志记录缺乏这个元素
+                if (string.IsNullOrEmpty(strRefreshStyleOuterXml) == false)
+                {
+                    var refreshStyleElement = DomUtil.SetElementText(domOperLog.DocumentElement,
+                        "refreshStyle", "");
+                    DomUtil.SetElementOuterXml(refreshStyleElement, strRefreshStyleOuterXml);
                 }
 
                 DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
@@ -4365,6 +4595,12 @@ out strError);
                 strOutputInfo = dom.OuterXml;
             }
 
+            // 2024/2/24
+            if (skip_warnings.Count > 0)
+            {
+                strError = StringUtil.MakePathList(skip_warnings, "; ");
+                return -1;
+            }
             return 1;
         ERROR1:
             if (keyschanged_dbnames.Count > 0)
@@ -4432,6 +4668,10 @@ out strError);
             int nRet = 0;
             long lRet = 0;
 
+            // 遇到报错是否尽量维持循环，以继续完成后面的处理
+            var continueLoop = StringUtil.IsInList("continueLoop", strStyle);
+            List<string> skip_warnings = new List<string>();    // 跳过处理的警告
+
             string strLogFileName = this.GetTempFileName("zip");
             List<string> dbnames = new List<string>();  // 已经完成的数据库名集合
             List<string> other_dbnames = new List<string>();    // 其他类型的数据库名集合
@@ -4474,11 +4714,16 @@ out strError);
                     if (lRet == -1 && channel.IsNotFound() == false)
                     {
                         strError = "初始化小书目库 '" + strName + "' 时发生错误: " + strError;
-                        return -1;
+                        if (continueLoop)
+                            skip_warnings.Add(strError);
+                        else
+                            return -1;
                     }
-
-                    dbnames.Add(strName);
-                    bDbNameChanged = true;
+                    if (lRet != -1)
+                    {
+                        dbnames.Add(strName);
+                        bDbNameChanged = true;
+                    }
 
                     // 初始化实体库
                     string strEntityDbName = DomUtil.GetAttr(nodeDatabase, "name");
@@ -4491,9 +4736,13 @@ out strError);
                         if (lRet == -1 && channel.IsNotFound() == false)
                         {
                             strError = "初始化书目库 '" + strName + "' 所从属的实体库 '" + strEntityDbName + "' 时发生错误: " + strError;
-                            return -1;
+                            if (continueLoop)
+                                skip_warnings.Add(strError);
+                            else
+                                return -1;
                         }
-                        dbnames.Add(strEntityDbName);
+                        if (lRet != -1)
+                            dbnames.Add(strEntityDbName);
                     }
 
                     // 初始化订购库
@@ -4506,10 +4755,14 @@ out strError);
                             out strError);
                         if (lRet == -1 && channel.IsNotFound() == false)
                         {
-                            strError = "初始化书目库 '" + strName + "' 所从属的订购库 '" + strOrderDbName + "' 时发生错误: " + strError;
-                            return -1;
+                            strError = "初始化订购库 '" + strName + "' 所从属的订购库 '" + strOrderDbName + "' 时发生错误: " + strError;
+                            if (continueLoop)
+                                skip_warnings.Add(strError);
+                            else
+                                return -1;
                         }
-                        dbnames.Add(strOrderDbName);
+                        if (lRet != -1)
+                            dbnames.Add(strOrderDbName);
                     }
 
                     // 初始化期库
@@ -4522,10 +4775,14 @@ out strError);
                             out strError);
                         if (lRet == -1 && channel.IsNotFound() == false)
                         {
-                            strError = "初始化书目库 '" + strName + "' 所从属的期库 '" + strIssueDbName + "' 时发生错误: " + strError;
-                            return -1;
+                            strError = "初始化期库 '" + strName + "' 所从属的期库 '" + strIssueDbName + "' 时发生错误: " + strError;
+                            if (continueLoop)
+                                skip_warnings.Add(strError);
+                            else
+                                return -1;
                         }
-                        dbnames.Add(strIssueDbName);
+                        if (lRet != -1)
+                            dbnames.Add(strIssueDbName);
                     }
 
                     // 初始化评注库
@@ -4539,9 +4796,13 @@ out strError);
                         if (lRet == -1 && channel.IsNotFound() == false)
                         {
                             strError = "初始化书目库 '" + strName + "' 所从属的评注库 '" + strCommentDbName + "' 时发生错误: " + strError;
-                            return -1;
+                            if (continueLoop)
+                                skip_warnings.Add(strError);
+                            else
+                                return -1;
                         }
-                        dbnames.Add(strCommentDbName);
+                        if (lRet != -1)
+                            dbnames.Add(strCommentDbName);
                     }
 
                     continue;
@@ -4572,11 +4833,19 @@ out strError);
                     if (lRet == -1 && channel.IsNotFound() == false)
                     {
                         strError = "初始化实体库 '" + strName + "' 时发生错误: " + strError;
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         return -1;
                     }
 
-                    dbnames.Add(strName);
-                    bDbNameChanged = true;
+                    if (lRet != -1)
+                    {
+                        dbnames.Add(strName);
+                        bDbNameChanged = true;
+                    }
                     continue;
                 }
 
@@ -4605,11 +4874,19 @@ out strError);
                     if (lRet == -1 && channel.IsNotFound() == false)
                     {
                         strError = "初始化订购库 '" + strName + "' 时发生错误: " + strError;
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         return -1;
                     }
 
-                    dbnames.Add(strName);
-                    bDbNameChanged = true;
+                    if (lRet != -1)
+                    {
+                        dbnames.Add(strName);
+                        bDbNameChanged = true;
+                    }
                     continue;
                 }
 
@@ -4638,11 +4915,19 @@ out strError);
                     if (lRet == -1 && channel.IsNotFound() == false)
                     {
                         strError = "初始化期库 '" + strName + "' 时发生错误: " + strError;
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         return -1;
                     }
 
-                    dbnames.Add(strName);
-                    bDbNameChanged = true;
+                    if (lRet != -1)
+                    {
+                        dbnames.Add(strName);
+                        bDbNameChanged = true;
+                    }
                     continue;
                 }
 
@@ -4671,11 +4956,19 @@ out strError);
                     if (lRet == -1 && channel.IsNotFound() == false)
                     {
                         strError = "初始化评注库 '" + strName + "' 时发生错误: " + strError;
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         return -1;
                     }
 
-                    dbnames.Add(strName);
-                    bDbNameChanged = true;
+                    if (lRet != -1)
+                    {
+                        dbnames.Add(strName);
+                        bDbNameChanged = true;
+                    }
                     continue;
                 }
 
@@ -4712,11 +5005,19 @@ out strError);
                     if (lRet == -1 && channel.IsNotFound() == false)
                     {
                         strError = "初始化读者库 '" + strName + "' 时发生错误: " + strError;
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         return -1;
                     }
 
-                    dbnames.Add(strName);
-                    bDbNameChanged = true;
+                    if (lRet != -1)
+                    {
+                        dbnames.Add(strName);
+                        bDbNameChanged = true;
+                    }
                     continue;
                 }
 
@@ -4746,11 +5047,19 @@ out strError);
                     if (lRet == -1 && channel.IsNotFound() == false)
                     {
                         strError = "初始化规范库 '" + strName + "' 时发生错误: " + strError;
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         return -1;
                     }
 
-                    dbnames.Add(strName);
-                    bDbNameChanged = true;
+                    if (lRet != -1)
+                    {
+                        dbnames.Add(strName);
+                        bDbNameChanged = true;
+                    }
                     continue;
                 }
 
@@ -4771,9 +5080,15 @@ out strError);
                     if (lRet == -1 && channel.IsNotFound() == false)
                     {
                         strError = "初始化预约到书库 '" + strName + "' 时发生错误: " + strError;
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         return -1;
                     }
-                    dbnames.Add(strName);
+                    if (lRet != -1)
+                        dbnames.Add(strName);
                     continue;
                 }
 
@@ -4794,10 +5109,16 @@ out strError);
                     if (lRet == -1 && channel.IsNotFound() == false)
                     {
                         strError = "初始化违约金库 '" + strName + "' 时发生错误: " + strError;
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         return -1;
                     }
 
-                    dbnames.Add(strName);
+                    if (lRet != -1)
+                        dbnames.Add(strName);
                     continue;
                 }
 
@@ -4818,10 +5139,16 @@ out strError);
                     if (lRet == -1 && channel.IsNotFound() == false)
                     {
                         strError = "初始化发票库 '" + strName + "' 时发生错误: " + strError;
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         return -1;
                     }
 
-                    dbnames.Add(strName);
+                    if (lRet != -1)
+                        dbnames.Add(strName);
                     continue;
                 }
 
@@ -4842,10 +5169,16 @@ out strError);
                     if (lRet == -1 && channel.IsNotFound() == false)
                     {
                         strError = "初始化消息库 '" + strName + "' 时发生错误: " + strError;
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         return -1;
                     }
 
-                    dbnames.Add(strName);
+                    if (lRet != -1)
+                        dbnames.Add(strName);
                     continue;
                 }
 
@@ -4866,10 +5199,16 @@ out strError);
                     if (lRet == -1 && channel.IsNotFound() == false)
                     {
                         strError = "初始化拼音库 '" + strName + "' 时发生错误: " + strError;
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         return -1;
                     }
 
-                    dbnames.Add(strName);
+                    if (lRet != -1)
+                        dbnames.Add(strName);
                     continue;
                 }
 
@@ -4890,9 +5229,16 @@ out strError);
                     if (lRet == -1 && channel.IsNotFound() == false)
                     {
                         strError = "初始化著者号码库 '" + strName + "' 时发生错误: " + strError;
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         return -1;
                     }
-                    dbnames.Add(strName);
+
+                    if (lRet != -1)
+                        dbnames.Add(strName);
                     continue;
                 }
 
@@ -4920,9 +5266,16 @@ out strError);
                     if (lRet == -1 && channel.IsNotFound() == false)
                     {
                         strError = "初始化实用库 '" + strName + "' 时发生错误: " + strError;
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         return -1;
                     }
-                    dbnames.Add(strName);
+
+                    if (lRet != -1)
+                        dbnames.Add(strName);
                     continue;
                 }
 
@@ -4938,6 +5291,11 @@ out strError);
                     if (string.IsNullOrEmpty(this.MongoDbConnStr) == true)
                     {
                         strError = "当前尚未启用 MongoDB 功能";
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         return -1;
                     }
 
@@ -4946,6 +5304,11 @@ out strError);
                     if (nRet == -1)
                     {
                         strError = "初始化" + AccessLogDbName + "库 '" + strName + "' 时发生错误: " + strError;
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         return -1;
                     }
                     other_dbnames.Add(strName);
@@ -4965,6 +5328,11 @@ out strError);
                     if (string.IsNullOrEmpty(this.MongoDbConnStr) == true)
                     {
                         strError = "当前尚未启用 MongoDB 功能";
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         return -1;
                     }
 
@@ -4973,6 +5341,11 @@ out strError);
                     if (nRet == -1)
                     {
                         strError = "初始化" + HitCountDbName + "库 '" + strName + "' 时发生错误: " + strError;
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         return -1;
                     }
                     other_dbnames.Add(strName);
@@ -4992,6 +5365,11 @@ out strError);
                     if (string.IsNullOrEmpty(this.MongoDbConnStr) == true)
                     {
                         strError = "当前尚未启用 MongoDB 功能";
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         return -1;
                     }
 
@@ -5000,6 +5378,11 @@ out strError);
                     if (nRet == -1)
                     {
                         strError = "初始化" + ChargingHistoryDbName + "库 '" + strName + "' 时发生错误: " + strError;
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         return -1;
                     }
                     other_dbnames.Add(strName);
@@ -5019,6 +5402,11 @@ out strError);
                     if (string.IsNullOrEmpty(this.MongoDbConnStr) == true)
                     {
                         strError = "当前尚未启用 MongoDB 功能";
+                        if (continueLoop)
+                        {
+                            skip_warnings.Add(strError);
+                            continue;
+                        }
                         return -1;
                     }
 
@@ -5046,6 +5434,10 @@ out strError);
                 DomUtil.SetElementText(domOperLog.DocumentElement,
     "action",
     "initializeDatabase");
+
+                // 2024/2/23 verion 1.10 开始才有的这个元素
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+                    "libraryCode", strLibraryCodeList);
 
                 XmlNode new_node = DomUtil.SetElementText(domOperLog.DocumentElement, "databases",
 "");
@@ -5097,7 +5489,6 @@ out strError);
                     strError = "ManageDatabase() API refreshDatabase 写入日志时发生错误: " + strError;
                     return -1;
                 }
-
             }
 
 
@@ -5118,6 +5509,12 @@ out strError);
                  * */
             }
 
+            // 2024/2/24
+            if (skip_warnings.Count > 0)
+            {
+                strError = StringUtil.MakePathList(skip_warnings, "; ");
+                return -1;
+            }
             return 1;
         }
 
@@ -7612,6 +8009,10 @@ out strError);
     "action",
     "createDatabase");
 
+                // 2024/2/23 verion 1.10 开始才有的这个元素
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+                    "libraryCode", strLibraryCodeList);
+
                 XmlNode new_node = DomUtil.SetElementText(domOperLog.DocumentElement, "databases", "");
                 StringBuilder text = new StringBuilder();
                 foreach (XmlElement node in database_nodes)
@@ -7654,8 +8055,11 @@ out strError);
 
             Debug.Assert(created_dbnames.Count == 0, "");
 
+            // 2024/2/23 注释掉
+            /*
             if (this.Changed == true)
                 this.ActivateManagerThread();
+            */
 
             if (bDbChanged == true)
             {
@@ -7781,7 +8185,7 @@ out strError);
         //      0   没有发生修改
         //      1   发生了修改
         public int AppendDatabaseElement(XmlDocument cfg_dom,
-            XmlNodeList elements,
+            IEnumerable<XmlElement> elements,
             out string strError)
         {
             strError = "";
@@ -8401,7 +8805,9 @@ out strError);
                     }
                 }
 
-                if (nCfgFileCount > 0)
+                if (nCfgFileCount > 0
+                    && string.IsNullOrEmpty(strLogFileName) == false
+                    && string.IsNullOrEmpty(strTempDir) == false)
                 {
                     nRet = CompressDirectory(
         strTempDir,

@@ -205,10 +205,10 @@ namespace dp2Circulation
 
             Debug.Assert(item.Tag == null, "");
 
-            XmlDocument dom = new XmlDocument();
+            XmlDocument _dom = new XmlDocument();
             try
             {
-                dom.LoadXml(strItemXml);
+                _dom.LoadXml(strItemXml);
             }
             catch (Exception ex)
             {
@@ -216,29 +216,29 @@ namespace dp2Circulation
                 return -1;
             }
 
-            string strBarcode = DomUtil.GetElementText(dom.DocumentElement,
+            string strBarcode = DomUtil.GetElementText(_dom.DocumentElement,
                 "barcode");
-            string strState = DomUtil.GetElementText(dom.DocumentElement,
+            string strState = DomUtil.GetElementText(_dom.DocumentElement,
                 "state");
-            string strLocation = DomUtil.GetElementText(dom.DocumentElement,
+            string strLocation = DomUtil.GetElementText(_dom.DocumentElement,
                 "location");
-            string strPrice = DomUtil.GetElementText(dom.DocumentElement,
+            string strPrice = DomUtil.GetElementText(_dom.DocumentElement,
                 "price");
-            string strBookType = DomUtil.GetElementText(dom.DocumentElement,
+            string strBookType = DomUtil.GetElementText(_dom.DocumentElement,
                 "bookType");
-            string strRegisterNo = DomUtil.GetElementText(dom.DocumentElement,
+            string strRegisterNo = DomUtil.GetElementText(_dom.DocumentElement,
                 "registerNo");
-            string strComment = DomUtil.GetElementText(dom.DocumentElement,
+            string strComment = DomUtil.GetElementText(_dom.DocumentElement,
                 "comment");
-            string strMergeComment = DomUtil.GetElementText(dom.DocumentElement,
+            string strMergeComment = DomUtil.GetElementText(_dom.DocumentElement,
                 "mergeComment");
-            string strBatchNo = DomUtil.GetElementText(dom.DocumentElement,
+            string strBatchNo = DomUtil.GetElementText(_dom.DocumentElement,
                 "batchNo");
-            string strBorrower = DomUtil.GetElementText(dom.DocumentElement,
+            string strBorrower = DomUtil.GetElementText(_dom.DocumentElement,
                 "borrower");
-            string strBorrowDate = DomUtil.GetElementText(dom.DocumentElement,
+            string strBorrowDate = DomUtil.GetElementText(_dom.DocumentElement,
                 "borrowDate");
-            string strBorrowPeriod = DomUtil.GetElementText(dom.DocumentElement,
+            string strBorrowPeriod = DomUtil.GetElementText(_dom.DocumentElement,
                 "borrowPeriod");
 
             ListViewUtil.ChangeItemText(item, 1, strBarcode);

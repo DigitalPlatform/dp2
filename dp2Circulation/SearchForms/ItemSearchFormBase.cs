@@ -1896,7 +1896,7 @@ biblio.Content, biblio.RecPath);
                 }
 
                 /*
-                XmlElement line = dom.DocumentElement.SelectSingleNode($"line[@type='{type}']") as XmlElement;
+                XmlElement line = _dom.DocumentElement.SelectSingleNode($"line[@type='{type}']") as XmlElement;
                 if (line == null)
                 {
                     results.Add("");

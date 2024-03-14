@@ -147,7 +147,8 @@ namespace DigitalPlatform.Marc
             // dprms名字空间 2010/11/15
             _writer.WriteAttributeString("xmlns", "dprms", null, DpNs.dprms);
 
-            if (WriteXsi == true)
+            if (WriteXsi == true
+                && namespace_type == "usmarc")
             {
                 /* 2010/10/28
                 writer.WriteAttributeString("xmlns:xsi",
@@ -161,6 +162,7 @@ namespace DigitalPlatform.Marc
                 _writer.WriteAttributeString("xsi", "schemaLocation", null,
                     "http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd");
             }
+
             return 0;
         }
 
@@ -243,6 +245,32 @@ namespace DigitalPlatform.Marc
                 // dprms名字空间 2010/11/15
                 _writer.WriteAttributeString("xmlns", "dprms", null, DpNs.dprms);
             }
+
+            // 2024/3/8
+            if (WriteXsi == true
+                && MarcNameSpaceUri == Ns.usmarcxml
+                && String.IsNullOrEmpty(_writer.LookupPrefix("http://www.w3.org/2001/XMLSchema-instance")) == true)
+            {
+                /* 2010/10/28
+                writer.WriteAttributeString("xmlns:xsi",
+					"http://www.w3.org/2001/XMLSchema-instance");
+                 * 上面用法有问题。会造成大量重复的nsuri存在。应该采用下面的用法：
+                    writer.WriteAttributeString("xmlns", "dc", null,
+    "http://purl.org/dc/elements/1.1/");
+                 * */
+                _writer.WriteAttributeString("xmlns", "xsi", null,
+                    "http://www.w3.org/2001/XMLSchema-instance");
+                _writer.WriteAttributeString("xsi", "schemaLocation", null,
+                    "http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd");
+            }
+
+
+            if (String.IsNullOrEmpty(_writer.LookupPrefix(MarcNameSpaceUri)) == true)
+            {
+                // marc 名字空间 2024/3/6
+                _writer.WriteAttributeString("xmlns", null, null, MarcNameSpaceUri);
+            }
+
 
             if (string.IsNullOrEmpty(path) == false)
             {

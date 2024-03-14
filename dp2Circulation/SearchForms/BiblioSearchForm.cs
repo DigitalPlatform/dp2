@@ -5146,7 +5146,7 @@ MessageBoxDefaultButton.Button2);
 
                         /*
                         OutputBiblioInfoNew(sheet,
-                            dom,
+                            _dom,
                             strRecPath,
                             nBiblioIndex++,
                             "",
@@ -13391,6 +13391,7 @@ message,
             {
                 MainForm.SetControlFont(dlg, this.Font, false);
                 dlg.XmlFileName = Path.Combine(Program.MainForm.UserDir, "zserver.xml");
+                dlg.SourceServerFileName = Path.Combine(Program.MainForm.DataDir, "source_zserver.xml");
                 dlg.StartPosition = FormStartPosition.CenterParent;
                 dlg.ShowDialog(this);
             }

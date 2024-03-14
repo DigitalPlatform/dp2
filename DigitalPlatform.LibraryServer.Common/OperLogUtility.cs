@@ -1219,6 +1219,13 @@ namespace DigitalPlatform.LibraryServer.Common
 
                 Int64 lLength = BitConverter.ToInt64(length, 0);
 
+                // 2024/2/23
+                // 注: 原来没有添加这个判断前，格式错误的文件会被当作“到达文件末尾”返回 1。添加了这个 if 以后，格式错误就被暴露出来了
+                if (stream.Position + lLength > stream.Length)
+                {
+                    strError = $"起始位置不正确(当前 stream.Position({stream.Position}) + lLength({lLength}) > stream.Length({stream.Length}))";
+                    return -1;
+                }
                 stream.Seek(lLength, SeekOrigin.Current);
             }
 

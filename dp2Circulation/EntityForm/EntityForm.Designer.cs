@@ -135,6 +135,7 @@
             this.toolStripMenuItem_itemArea_ensureDisplay = new System.Windows.Forms.ToolStripMenuItem();
             this.imageList_itemType = new System.Windows.Forms.ImageList(this.components);
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.toolStripButton_uploadToUcs = new System.Windows.Forms.ToolStripButton();
             this.contextMenuStrip_selectRegisterType.SuspendLayout();
             this.contextMenuStrip_option.SuspendLayout();
             this.tableLayoutPanel_main.SuspendLayout();
@@ -447,10 +448,10 @@
             this.panel_biblioInfo.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.panel_biblioInfo.Controls.Add(this.tabControl_biblioInfo);
             this.panel_biblioInfo.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel_biblioInfo.Location = new System.Drawing.Point(5, 43);
+            this.panel_biblioInfo.Location = new System.Drawing.Point(5, 49);
             this.panel_biblioInfo.Margin = new System.Windows.Forms.Padding(5);
             this.panel_biblioInfo.Name = "panel_biblioInfo";
-            this.panel_biblioInfo.Size = new System.Drawing.Size(1332, 201);
+            this.panel_biblioInfo.Size = new System.Drawing.Size(1332, 195);
             this.panel_biblioInfo.TabIndex = 12;
             // 
             // tabControl_biblioInfo
@@ -466,7 +467,7 @@
             this.tabControl_biblioInfo.Name = "tabControl_biblioInfo";
             this.tabControl_biblioInfo.Padding = new System.Drawing.Point(0, 0);
             this.tabControl_biblioInfo.SelectedIndex = 0;
-            this.tabControl_biblioInfo.Size = new System.Drawing.Size(1332, 201);
+            this.tabControl_biblioInfo.Size = new System.Drawing.Size(1332, 195);
             this.tabControl_biblioInfo.TabIndex = 3;
             this.tabControl_biblioInfo.SelectedIndexChanged += new System.EventHandler(this.tabControl_biblioInfo_SelectedIndexChanged);
             // 
@@ -476,7 +477,7 @@
             this.tabPage_html.Location = new System.Drawing.Point(60, 4);
             this.tabPage_html.Margin = new System.Windows.Forms.Padding(0);
             this.tabPage_html.Name = "tabPage_html";
-            this.tabPage_html.Size = new System.Drawing.Size(1268, 193);
+            this.tabPage_html.Size = new System.Drawing.Size(1268, 187);
             this.tabPage_html.TabIndex = 0;
             this.tabPage_html.Text = "OPAC";
             this.tabPage_html.UseVisualStyleBackColor = true;
@@ -487,7 +488,7 @@
             this.webBrowser_biblioRecord.Location = new System.Drawing.Point(0, 0);
             this.webBrowser_biblioRecord.Margin = new System.Windows.Forms.Padding(0);
             this.webBrowser_biblioRecord.Name = "webBrowser_biblioRecord";
-            this.webBrowser_biblioRecord.Size = new System.Drawing.Size(1268, 193);
+            this.webBrowser_biblioRecord.Size = new System.Drawing.Size(1268, 187);
             this.webBrowser_biblioRecord.TabIndex = 2;
             // 
             // tabPage_marc
@@ -596,6 +597,7 @@
             this.toolStripButton_marcEditor_moveTo,
             this.toolStripSplitButton_searchDup,
             this.toolStripButton_verifyData,
+            this.toolStripButton_uploadToUcs,
             this.toolStripSeparator3,
             this.toolStripButton_next,
             this.toolStripButton_prev,
@@ -604,14 +606,14 @@
             this.toolStripSplitButton_insertCoverImage});
             this.toolStrip_marcEditor.Location = new System.Drawing.Point(0, 0);
             this.toolStrip_marcEditor.Name = "toolStrip_marcEditor";
-            this.toolStrip_marcEditor.Size = new System.Drawing.Size(1342, 38);
+            this.toolStrip_marcEditor.Size = new System.Drawing.Size(1342, 44);
             this.toolStrip_marcEditor.TabIndex = 5;
             this.toolStrip_marcEditor.Text = "toolStrip1";
             // 
             // toolStripLabel1
             // 
             this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(59, 32);
+            this.toolStripLabel1.Size = new System.Drawing.Size(59, 38);
             this.toolStripLabel1.Text = "书目:";
             // 
             // textBox_biblioRecPath
@@ -619,13 +621,13 @@
             this.textBox_biblioRecPath.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
             this.textBox_biblioRecPath.Name = "textBox_biblioRecPath";
             this.textBox_biblioRecPath.ReadOnly = true;
-            this.textBox_biblioRecPath.Size = new System.Drawing.Size(273, 38);
+            this.textBox_biblioRecPath.Size = new System.Drawing.Size(273, 44);
             this.textBox_biblioRecPath.ToolTipText = "种(书目)记录路径";
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 38);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 44);
             // 
             // toolStripButton_saveAll
             // 
@@ -634,7 +636,7 @@
             this.toolStripButton_saveAll.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.toolStripButton_saveAll.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
             this.toolStripButton_saveAll.Name = "toolStripButton_saveAll";
-            this.toolStripButton_saveAll.Size = new System.Drawing.Size(40, 32);
+            this.toolStripButton_saveAll.Size = new System.Drawing.Size(40, 38);
             this.toolStripButton_saveAll.Text = "全部保存";
             this.toolStripButton_saveAll.ToolTipText = "全部保存 F2";
             this.toolStripButton_saveAll.Click += new System.EventHandler(this.toolStripButton_saveAll_Click);
@@ -646,7 +648,7 @@
             this.toolStripButton_marcEditor_save.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.toolStripButton_marcEditor_save.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
             this.toolStripButton_marcEditor_save.Name = "toolStripButton_marcEditor_save";
-            this.toolStripButton_marcEditor_save.Size = new System.Drawing.Size(40, 32);
+            this.toolStripButton_marcEditor_save.Size = new System.Drawing.Size(40, 38);
             this.toolStripButton_marcEditor_save.Text = "保存书目记录(不保存册信息)";
             this.toolStripButton_marcEditor_save.ToolTipText = "保存书目记录(不保存册信息) Ctrl+S";
             this.toolStripButton_marcEditor_save.Click += new System.EventHandler(this.toolStripButton_marcEditor_save_Click);
@@ -658,7 +660,7 @@
             this.toolStripButton_marcEditor_loadTemplate.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.toolStripButton_marcEditor_loadTemplate.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
             this.toolStripButton_marcEditor_loadTemplate.Name = "toolStripButton_marcEditor_loadTemplate";
-            this.toolStripButton_marcEditor_loadTemplate.Size = new System.Drawing.Size(40, 32);
+            this.toolStripButton_marcEditor_loadTemplate.Size = new System.Drawing.Size(40, 38);
             this.toolStripButton_marcEditor_loadTemplate.Text = "装载书目模板";
             this.toolStripButton_marcEditor_loadTemplate.ToolTipText = "装载书目模板(Ctrl+T)";
             this.toolStripButton_marcEditor_loadTemplate.Click += new System.EventHandler(this.toolStripButton_marcEditor_loadTemplate_Click);
@@ -666,7 +668,7 @@
             // toolStripSeparator9
             // 
             this.toolStripSeparator9.Name = "toolStripSeparator9";
-            this.toolStripSeparator9.Size = new System.Drawing.Size(6, 38);
+            this.toolStripSeparator9.Size = new System.Drawing.Size(6, 44);
             // 
             // toolStripButton_marcEditor_delete
             // 
@@ -675,7 +677,7 @@
             this.toolStripButton_marcEditor_delete.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.toolStripButton_marcEditor_delete.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
             this.toolStripButton_marcEditor_delete.Name = "toolStripButton_marcEditor_delete";
-            this.toolStripButton_marcEditor_delete.Size = new System.Drawing.Size(40, 32);
+            this.toolStripButton_marcEditor_delete.Size = new System.Drawing.Size(40, 38);
             this.toolStripButton_marcEditor_delete.Text = "删除书目记录及下属的册记录";
             this.toolStripButton_marcEditor_delete.ToolTipText = "删除书目记录及下属的册、期、订购记录";
             this.toolStripButton_marcEditor_delete.Click += new System.EventHandler(this.toolStripButton_marcEditor_delete_Click);
@@ -687,7 +689,7 @@
             this.toolStripButton_clear.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.toolStripButton_clear.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
             this.toolStripButton_clear.Name = "toolStripButton_clear";
-            this.toolStripButton_clear.Size = new System.Drawing.Size(40, 32);
+            this.toolStripButton_clear.Size = new System.Drawing.Size(40, 38);
             this.toolStripButton_clear.Text = "清除";
             this.toolStripButton_clear.Click += new System.EventHandler(this.toolStripButton_clear_Click);
             // 
@@ -716,7 +718,7 @@
             this.toolStripDropDownButton_marcEditor_someFunc.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton_marcEditor_someFunc.Image")));
             this.toolStripDropDownButton_marcEditor_someFunc.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDropDownButton_marcEditor_someFunc.Name = "toolStripDropDownButton_marcEditor_someFunc";
-            this.toolStripDropDownButton_marcEditor_someFunc.Size = new System.Drawing.Size(48, 32);
+            this.toolStripDropDownButton_marcEditor_someFunc.Size = new System.Drawing.Size(48, 38);
             this.toolStripDropDownButton_marcEditor_someFunc.Text = "...";
             this.toolStripDropDownButton_marcEditor_someFunc.ToolTipText = "更多命令...";
             this.toolStripDropDownButton_marcEditor_someFunc.DropDownOpening += new System.EventHandler(this.toolStripDropDownButton_marcEditor_someFunc_DropDownOpening);
@@ -844,7 +846,7 @@
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 38);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 44);
             // 
             // toolStripButton_marcEditor_saveTo
             // 
@@ -853,7 +855,7 @@
             this.toolStripButton_marcEditor_saveTo.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.toolStripButton_marcEditor_saveTo.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
             this.toolStripButton_marcEditor_saveTo.Name = "toolStripButton_marcEditor_saveTo";
-            this.toolStripButton_marcEditor_saveTo.Size = new System.Drawing.Size(40, 32);
+            this.toolStripButton_marcEditor_saveTo.Size = new System.Drawing.Size(40, 38);
             this.toolStripButton_marcEditor_saveTo.Text = "复制书目记录(包括册、期、订购、实体信息)到其他库 F3";
             this.toolStripButton_marcEditor_saveTo.ToolTipText = "复制书目记录(包括册、期、订购、实体信息)到其他库 F3";
             this.toolStripButton_marcEditor_saveTo.Click += new System.EventHandler(this.toolStripButton1_marcEditor_saveTo_Click);
@@ -865,7 +867,7 @@
             this.toolStripButton_setTargetRecord.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.toolStripButton_setTargetRecord.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
             this.toolStripButton_setTargetRecord.Name = "toolStripButton_setTargetRecord";
-            this.toolStripButton_setTargetRecord.Size = new System.Drawing.Size(40, 32);
+            this.toolStripButton_setTargetRecord.Size = new System.Drawing.Size(40, 38);
             this.toolStripButton_setTargetRecord.Text = "设置目标记录";
             this.toolStripButton_setTargetRecord.Click += new System.EventHandler(this.toolStripButton_setTargetRecord_Click);
             // 
@@ -876,7 +878,7 @@
             this.toolStripButton_marcEditor_moveTo.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.toolStripButton_marcEditor_moveTo.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
             this.toolStripButton_marcEditor_moveTo.Name = "toolStripButton_marcEditor_moveTo";
-            this.toolStripButton_marcEditor_moveTo.Size = new System.Drawing.Size(40, 32);
+            this.toolStripButton_marcEditor_moveTo.Size = new System.Drawing.Size(40, 38);
             this.toolStripButton_marcEditor_moveTo.Text = "移动书目记录";
             this.toolStripButton_marcEditor_moveTo.ToolTipText = "移动书目记录 Alt+M";
             this.toolStripButton_marcEditor_moveTo.Click += new System.EventHandler(this.toolStripButton_marcEditor_moveTo_Click);
@@ -893,7 +895,7 @@
             this.toolStripSplitButton_searchDup.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.toolStripSplitButton_searchDup.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
             this.toolStripSplitButton_searchDup.Name = "toolStripSplitButton_searchDup";
-            this.toolStripSplitButton_searchDup.Size = new System.Drawing.Size(46, 32);
+            this.toolStripSplitButton_searchDup.Size = new System.Drawing.Size(46, 38);
             this.toolStripSplitButton_searchDup.Text = "查重 (Ctrl+D)";
             this.toolStripSplitButton_searchDup.ButtonClick += new System.EventHandler(this.toolStripSplitButton_searchDup_ButtonClick);
             // 
@@ -932,14 +934,14 @@
             this.toolStripButton_verifyData.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.toolStripButton_verifyData.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
             this.toolStripButton_verifyData.Name = "toolStripButton_verifyData";
-            this.toolStripButton_verifyData.Size = new System.Drawing.Size(40, 32);
+            this.toolStripButton_verifyData.Size = new System.Drawing.Size(40, 38);
             this.toolStripButton_verifyData.Text = "校验数据 (Ctrl+Y)";
             this.toolStripButton_verifyData.Click += new System.EventHandler(this.toolStripButton_verifyData_Click);
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 38);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 44);
             // 
             // toolStripButton_next
             // 
@@ -948,7 +950,7 @@
             this.toolStripButton_next.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_next.Image")));
             this.toolStripButton_next.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
             this.toolStripButton_next.Name = "toolStripButton_next";
-            this.toolStripButton_next.Size = new System.Drawing.Size(40, 32);
+            this.toolStripButton_next.Size = new System.Drawing.Size(40, 38);
             this.toolStripButton_next.Text = "下一记录";
             this.toolStripButton_next.Click += new System.EventHandler(this.toolStripButton_next_Click);
             // 
@@ -959,7 +961,7 @@
             this.toolStripButton_prev.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_prev.Image")));
             this.toolStripButton_prev.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
             this.toolStripButton_prev.Name = "toolStripButton_prev";
-            this.toolStripButton_prev.Size = new System.Drawing.Size(40, 32);
+            this.toolStripButton_prev.Size = new System.Drawing.Size(40, 38);
             this.toolStripButton_prev.Text = "上一记录";
             this.toolStripButton_prev.Click += new System.EventHandler(this.toolStripButton_prev_Click);
             // 
@@ -969,14 +971,14 @@
             this.toolStripButton_option.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_option.Image")));
             this.toolStripButton_option.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_option.Name = "toolStripButton_option";
-            this.toolStripButton_option.Size = new System.Drawing.Size(40, 32);
+            this.toolStripButton_option.Size = new System.Drawing.Size(40, 38);
             this.toolStripButton_option.Text = "选项";
             this.toolStripButton_option.Click += new System.EventHandler(this.toolStripButton_option_Click);
             // 
             // toolStripSeparator8
             // 
             this.toolStripSeparator8.Name = "toolStripSeparator8";
-            this.toolStripSeparator8.Size = new System.Drawing.Size(6, 38);
+            this.toolStripSeparator8.Size = new System.Drawing.Size(6, 44);
             // 
             // toolStripSplitButton_insertCoverImage
             // 
@@ -988,7 +990,7 @@
             this.toolStripSplitButton_insertCoverImage.Image = ((System.Drawing.Image)(resources.GetObject("toolStripSplitButton_insertCoverImage.Image")));
             this.toolStripSplitButton_insertCoverImage.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripSplitButton_insertCoverImage.Name = "toolStripSplitButton_insertCoverImage";
-            this.toolStripSplitButton_insertCoverImage.Size = new System.Drawing.Size(48, 32);
+            this.toolStripSplitButton_insertCoverImage.Size = new System.Drawing.Size(48, 38);
             this.toolStripSplitButton_insertCoverImage.Text = "插入封面图像";
             this.toolStripSplitButton_insertCoverImage.ButtonClick += new System.EventHandler(this.toolStripSplitButton_insertCoverImage_ButtonClick);
             // 
@@ -1272,6 +1274,17 @@
             // 
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
+            // toolStripButton_uploadToUcs
+            // 
+            this.toolStripButton_uploadToUcs.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_uploadToUcs.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_uploadToUcs.Image")));
+            this.toolStripButton_uploadToUcs.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_uploadToUcs.Name = "toolStripButton_uploadToUcs";
+            this.toolStripButton_uploadToUcs.Size = new System.Drawing.Size(40, 38);
+            this.toolStripButton_uploadToUcs.Text = "上";
+            this.toolStripButton_uploadToUcs.ToolTipText = "上传到 UCS";
+            this.toolStripButton_uploadToUcs.Click += new System.EventHandler(this.toolStripButton_uploadToUcs_Click);
+            // 
             // EntityForm
             // 
             this.AllowDrop = true;
@@ -1433,5 +1446,6 @@
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip_itemArea;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_itemArea_ensureDisplay;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_searchDupBySelected;
+        private System.Windows.Forms.ToolStripButton toolStripButton_uploadToUcs;
     }
 }

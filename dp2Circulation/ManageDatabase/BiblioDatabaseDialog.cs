@@ -27,7 +27,7 @@ namespace dp2Circulation
         public bool CreateMode = false; // 是否为创建模式？==true为创建模式；==false为修改模式
         public bool Recreate = false;   // 是否为重新创建模式？当CreateMode == true 时起作用
 
-        XmlDocument dom = null;
+        XmlDocument _dom = null;
 
         string _dbType = "biblio";  // biblio/authority
         public string DbType
@@ -73,10 +73,10 @@ namespace dp2Circulation
         {
             strError = "";
 
-            this.dom = new XmlDocument();
+            this._dom = new XmlDocument();
             try
             {
-                this.dom.LoadXml(strXml);
+                this._dom.LoadXml(strXml);
             }
             catch (Exception ex)
             {
@@ -84,7 +84,7 @@ namespace dp2Circulation
                 return -1;
             }
 
-            string strType = DomUtil.GetAttr(dom.DocumentElement,
+            string strType = DomUtil.GetAttr(_dom.DocumentElement,
                 "type");
             if (this.DbType == "biblio")
             {
@@ -107,36 +107,36 @@ namespace dp2Circulation
 
             try
             {
-                this.textBox_biblioDbName.Text = DomUtil.GetAttr(dom.DocumentElement,
+                this.textBox_biblioDbName.Text = DomUtil.GetAttr(_dom.DocumentElement,
                     "name");
-                this.comboBox_syntax.Text = DomUtil.GetAttr(dom.DocumentElement,
+                this.comboBox_syntax.Text = DomUtil.GetAttr(_dom.DocumentElement,
                     "syntax");
 
                 if (this.DbType == "biblio")
                 {
                     // 2009/10/23 
-                    this.checkedComboBox_role.Text = DomUtil.GetAttr(dom.DocumentElement,
+                    this.checkedComboBox_role.Text = DomUtil.GetAttr(_dom.DocumentElement,
                         "role");
 
-                    SetReplicationParam(DomUtil.GetAttr(dom.DocumentElement, "replication"));
+                    SetReplicationParam(DomUtil.GetAttr(_dom.DocumentElement, "replication"));
 
-                    this.textBox_entityDbName.Text = DomUtil.GetAttr(dom.DocumentElement,
+                    this.textBox_entityDbName.Text = DomUtil.GetAttr(_dom.DocumentElement,
                         "entityDbName");
-                    this.textBox_issueDbName.Text = DomUtil.GetAttr(dom.DocumentElement,
+                    this.textBox_issueDbName.Text = DomUtil.GetAttr(_dom.DocumentElement,
                         "issueDbName");
-                    this.textBox_orderDbName.Text = DomUtil.GetAttr(dom.DocumentElement,
+                    this.textBox_orderDbName.Text = DomUtil.GetAttr(_dom.DocumentElement,
                         "orderDbName");
-                    this.textBox_commentDbName.Text = DomUtil.GetAttr(dom.DocumentElement,
+                    this.textBox_commentDbName.Text = DomUtil.GetAttr(_dom.DocumentElement,
                         "commentDbName");
 
-                    string strInCirculation = DomUtil.GetAttr(dom.DocumentElement,
+                    string strInCirculation = DomUtil.GetAttr(_dom.DocumentElement,
                         "inCirculation");
                     if (String.IsNullOrEmpty(strInCirculation) == true)
                         strInCirculation = "true";
                     this.checkBox_inCirculation.Checked = DomUtil.IsBooleanTrue(strInCirculation);
 
                     // usage属性一般在从服务器传来的XML片段中是没有的。仅仅在创建的时候，client发给server的xml片段中才有
-                    string strUsage = DomUtil.GetAttr(dom.DocumentElement,
+                    string strUsage = DomUtil.GetAttr(_dom.DocumentElement,
                         "usage");
                     if (String.IsNullOrEmpty(strUsage) == true)
                     {
@@ -157,7 +157,7 @@ namespace dp2Circulation
                 if (this.DbType == "authority")
                 {
                     // usage属性一般在从服务器传来的XML片段中是没有的。仅仅在创建的时候，client发给server的xml片段中才有
-                    string strUsage = DomUtil.GetAttr(dom.DocumentElement,
+                    string strUsage = DomUtil.GetAttr(_dom.DocumentElement,
                         "usage");
                     if (String.IsNullOrEmpty(strUsage) == true)
                     {
@@ -181,6 +181,11 @@ namespace dp2Circulation
             {
                 this.comboBox_syntax.Enabled = false;
                 this.comboBox_documentType.Enabled = false;
+                this.checkBox_lockDbNames.Checked = true;   // 默认是锁定文件名关系
+            }
+            else
+            {
+                this.checkBox_lockDbNames.Visible = false;
             }
 
             if (this._dbType == "authority")
@@ -263,6 +268,78 @@ namespace dp2Circulation
                     }
                 }
             }
+            else
+            {
+                var locked = this.checkBox_lockDbNames.Checked;
+                if (locked)
+                    AutoChangeDbNames(this.textBox_biblioDbName.Text);
+            }
+        }
+
+        void AutoChangeDbNames(string biblioDbName)
+        {
+            if (string.IsNullOrEmpty(_dom.DocumentElement.GetAttribute("entityDbName"))
+                || string.IsNullOrEmpty(biblioDbName))
+                this.textBox_entityDbName.Text = "";
+            else
+                this.textBox_entityDbName.Text = biblioDbName + "实体";
+
+            if (string.IsNullOrEmpty(_dom.DocumentElement.GetAttribute("orderDbName"))
+                || string.IsNullOrEmpty(biblioDbName))
+                this.textBox_orderDbName.Text = "";
+            else
+                this.textBox_orderDbName.Text = biblioDbName + "订购";
+
+            if (string.IsNullOrEmpty(_dom.DocumentElement.GetAttribute("issueDbName"))
+                || string.IsNullOrEmpty(biblioDbName))
+                this.textBox_issueDbName.Text = "";
+            else
+                this.textBox_issueDbName.Text = biblioDbName + "期";
+
+            if (string.IsNullOrEmpty(_dom.DocumentElement.GetAttribute("commentDbName"))
+                || string.IsNullOrEmpty(biblioDbName))
+                this.textBox_commentDbName.Text = "";
+            else
+                this.textBox_commentDbName.Text = biblioDbName + "评注";
+        }
+
+        string CheckDbNamesRelationship()
+        {
+            string biblioDbName = this.textBox_biblioDbName.Text;
+
+            List<string> errors = new List<string>();
+
+            {
+                string entityDbName = this.textBox_entityDbName.Text;
+                if (string.IsNullOrEmpty(entityDbName) == false
+                    && entityDbName != biblioDbName + "实体")
+                    errors.Add($"实体库名 '{entityDbName}' 和书目库名 '{biblioDbName}' 不对应");
+            }
+
+            {
+                string orderDbName = this.textBox_orderDbName.Text;
+                if (string.IsNullOrEmpty(orderDbName) == false
+                    && orderDbName != biblioDbName + "订购")
+                    errors.Add($"订购库名 '{orderDbName}' 和书目库名 '{biblioDbName}' 不对应");
+            }
+
+            {
+                string issueDbName = this.textBox_issueDbName.Text;
+                if (string.IsNullOrEmpty(issueDbName) == false
+                    && issueDbName != biblioDbName + "期")
+                    errors.Add($"期库名 '{issueDbName}' 和书目库名 '{biblioDbName}' 不对应");
+            }
+
+            {
+                string commentDbName = this.textBox_commentDbName.Text;
+                if (string.IsNullOrEmpty(commentDbName) == false
+                    && commentDbName != biblioDbName + "评注")
+                    errors.Add($"评注库名 '{commentDbName}' 和书目库名 '{biblioDbName}' 不对应");
+            }
+
+            if (errors.Count > 0)
+                return StringUtil.MakePathList(errors, "\r\n");
+            return null;
         }
 
         static string GetPureValue(string strText)
@@ -309,6 +386,20 @@ namespace dp2Circulation
 
         private void button_OK_Click(object sender, EventArgs e)
         {
+            // TODO: 检查数据库名之间的锁定关系
+            var error = CheckDbNamesRelationship();
+            if (error != null)
+            {
+                DialogResult result = MessageBox.Show(this,
+    $"{error}\r\n\r\n数据库名如果没有严格按照对应关系来命名，可能会对以后的维护工作带来麻烦。\r\n\r\n确实要按照目前的名字继续操作?",
+    "BiblioDatabaseDialog",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+                if (result == DialogResult.No)
+                    return;
+            }
+
             if (this._dbType == "biblio")
                 CreateBiblioDatabase();
             else if (this._dbType == "authority")
@@ -359,7 +450,7 @@ namespace dp2Circulation
             string strReplication = GetReplicationParam();
 
             {
-                REDO:
+            REDO:
                 if (strUsage == "book")
                 {
                     if (String.IsNullOrEmpty(this.textBox_issueDbName.Text) == false)
@@ -725,7 +816,7 @@ namespace dp2Circulation
                     }
 
                     // 书目库名
-                    string strOldBiblioDbName = DomUtil.GetAttr(this.dom.DocumentElement,
+                    string strOldBiblioDbName = DomUtil.GetAttr(this._dom.DocumentElement,
                         "name");
 
                     if (String.IsNullOrEmpty(strOldBiblioDbName) == false
@@ -752,7 +843,7 @@ namespace dp2Circulation
                     bool bInCirculationChanged = false;
 
                     // 是否参与流通
-                    string strOldInCirculation = DomUtil.GetAttr(this.dom.DocumentElement,
+                    string strOldInCirculation = DomUtil.GetAttr(this._dom.DocumentElement,
                         "inCirculation");
                     if (String.IsNullOrEmpty(strOldInCirculation) == true)
                         strOldInCirculation = "true";
@@ -771,7 +862,7 @@ namespace dp2Circulation
                     bool bRoleChanged = false;
 
                     // 角色
-                    string strOldRole = DomUtil.GetAttr(this.dom.DocumentElement,
+                    string strOldRole = DomUtil.GetAttr(this._dom.DocumentElement,
                         "role");
                     if (strOldRole != strRole)
                     {
@@ -786,7 +877,7 @@ namespace dp2Circulation
                     bool bReplicationChanged = false;
 
                     // 角色
-                    string strOldReplication = DomUtil.GetAttr(this.dom.DocumentElement,
+                    string strOldReplication = DomUtil.GetAttr(this._dom.DocumentElement,
                         "replication");
                     if (strOldReplication != strReplication)
                     {
@@ -799,7 +890,7 @@ namespace dp2Circulation
                     }
 
                     // 实体库名
-                    string strOldEntityDbName = DomUtil.GetAttr(this.dom.DocumentElement,
+                    string strOldEntityDbName = DomUtil.GetAttr(this._dom.DocumentElement,
                         "entityDbName");
                     if (this.textBox_entityDbName.Text == "")
                     {
@@ -843,7 +934,7 @@ namespace dp2Circulation
                     }
 
                     // 订购库名
-                    string strOldOrderDbName = DomUtil.GetAttr(this.dom.DocumentElement,
+                    string strOldOrderDbName = DomUtil.GetAttr(this._dom.DocumentElement,
                         "orderDbName");
                     if (this.textBox_orderDbName.Text == "")
                     {
@@ -886,7 +977,7 @@ namespace dp2Circulation
                     }
 
                     // 期库名
-                    string strOldIssueDbName = DomUtil.GetAttr(this.dom.DocumentElement,
+                    string strOldIssueDbName = DomUtil.GetAttr(this._dom.DocumentElement,
                         "issueDbName");
                     if (this.textBox_issueDbName.Text == "")
                     {
@@ -930,7 +1021,7 @@ namespace dp2Circulation
 
 
                     // 评注库名
-                    string strOldCommentDbName = DomUtil.GetAttr(this.dom.DocumentElement,
+                    string strOldCommentDbName = DomUtil.GetAttr(this._dom.DocumentElement,
                         "commentDbName");
                     if (this.textBox_commentDbName.Text == "")
                     {
@@ -1130,11 +1221,11 @@ namespace dp2Circulation
 
             }
 
-            END1:
+        END1:
             this.DialogResult = DialogResult.OK;
             this.Close();
             return;
-            ERROR1:
+        ERROR1:
             // MessageBox.Show(this, strError);
             MessageDlg.Show(this, strError, "BiblioDatabaseDialog");
         }
@@ -1282,7 +1373,7 @@ namespace dp2Circulation
                     DomUtil.SetAttr(nodeChangeDatabase, "usage", strUsage);
 
                     // 规范库名
-                    string strOldBiblioDbName = DomUtil.GetAttr(this.dom.DocumentElement,
+                    string strOldBiblioDbName = DomUtil.GetAttr(this._dom.DocumentElement,
                         "name");
 
                     if (String.IsNullOrEmpty(strOldBiblioDbName) == false
@@ -1442,11 +1533,11 @@ namespace dp2Circulation
                 }
             }
 
-            END1:
+        END1:
             this.DialogResult = DialogResult.OK;
             this.Close();
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1575,9 +1666,21 @@ namespace dp2Circulation
                 m_nInDropDown--;
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
+        private void checkBox_lockDbNames_CheckedChanged(object sender, EventArgs e)
+        {
+            if (this.CreateMode)
+                return;
+
+            var locked = this.checkBox_lockDbNames.Checked;
+
+            this.textBox_entityDbName.ReadOnly = locked;
+            this.textBox_orderDbName.ReadOnly = locked;
+            this.textBox_issueDbName.ReadOnly = locked;
+            this.textBox_commentDbName.ReadOnly = locked;
+        }
     }
 }

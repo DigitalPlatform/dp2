@@ -516,6 +516,8 @@ namespace dp2Circulation
                 nRet = GetConfigChangedString(dom, out strHtml, out strError);
             else if (strOperation == "adjustOverflow")
                 nRet = GetAdjustOverflowString(dom, out strHtml, out strError);
+            else if (strOperation == "setCalendar")
+                nRet = GetSetCalendarString(dom, out strHtml, out strError);
             else
             {
                 strError = "未知的操作类型 '" + strOperation + "'";
@@ -853,7 +855,7 @@ namespace dp2Circulation
                 BuildHtmlLine("操作类型", strOperation + " -- 还书") +
                 BuildHtmlLine("动作", strAction + " -- " + GetActionName(strOperation, strAction)) +
                 BuildHtmlEncodedLine("读者证条码号", BuildReaderBarcodeLink(strReaderBarcode)) +
-                BuildHtmlEncodedLine("读者参考 ID", BuildReaderBarcodeLink("@refID:" +strReaderRefID)) +
+                BuildHtmlEncodedLine("读者参考 ID", BuildReaderBarcodeLink("@refID:" + strReaderRefID)) +
                 BuildHtmlPendingLine("(读者摘要)", BuildPendingReaderSummary(strReaderBarcode)) +
                 BuildHtmlEncodedLine("册条码号", BuildItemBarcodeLink(strItemBarcode)) +
                 BuildHtmlEncodedLine("册参考 ID", BuildItemBarcodeLink("@refID:" + strItemRefID)) +
@@ -1274,7 +1276,7 @@ namespace dp2Circulation
             int nRet = 0;
 
             /*
-            string strLibraryCode = DomUtil.GetElementText(dom.DocumentElement, "libraryCode", out node);
+            string strLibraryCode = DomUtil.GetElementText(_dom.DocumentElement, "libraryCode", out node);
             if (node != null && string.IsNullOrEmpty(strLibraryCode) == true)
                 strLibraryCode = "<空>";
              * */
@@ -1315,7 +1317,7 @@ namespace dp2Circulation
             int nRet = 0;
 
             /*
-            string strLibraryCode = DomUtil.GetElementText(dom.DocumentElement, "libraryCode", out node);
+            string strLibraryCode = DomUtil.GetElementText(_dom.DocumentElement, "libraryCode", out node);
             if (node != null && string.IsNullOrEmpty(strLibraryCode) == true)
                 strLibraryCode = "<空>";
              * */
@@ -2179,7 +2181,7 @@ DomUtil.GetElementInnerXml(dom.DocumentElement, "deletedCommentRecords"));
             if (string.IsNullOrEmpty(strValue) == false)
                 strValue = DomUtil.GetIndentXml(strValue);
 
-            // string strLibraryCodeList = DomUtil.GetElementText(dom.DocumentElement, "libraryCodeList");
+            // string strLibraryCodeList = DomUtil.GetElementText(_dom.DocumentElement, "libraryCodeList");
 
             strHtml =
                 "<table class='operlog'>" +
@@ -2209,7 +2211,7 @@ DomUtil.GetElementInnerXml(dom.DocumentElement, "deletedCommentRecords"));
             int nRet = 0;
 
             /*
-            string strLibraryCode = DomUtil.GetElementText(dom.DocumentElement, "libraryCode", out node);
+            string strLibraryCode = DomUtil.GetElementText(_dom.DocumentElement, "libraryCode", out node);
             if (node != null && string.IsNullOrEmpty(strLibraryCode) == true)
                 strLibraryCode = "<空>";
              * */
@@ -2308,6 +2310,72 @@ DomUtil.GetElementInnerXml(dom.DocumentElement, "deletedCommentRecords"));
                 "</table>";
 
             return 0;
+        }
+
+        // 2024/3/4
+        int GetSetCalendarString(XmlDocument dom,
+out string strHtml,
+out string strError)
+        {
+            strHtml = "";
+            strError = "";
+
+            string strOperation = DomUtil.GetElementText(dom.DocumentElement, "operation");
+            string strAction = DomUtil.GetElementText(dom.DocumentElement, "action");
+
+            string strOperator = DomUtil.GetElementText(dom.DocumentElement, "operator");
+            string strOperTime = GetRfc1123DisplayString(
+                DomUtil.GetElementText(dom.DocumentElement, "operTime"));
+
+            var oldCalendarElement = dom.DocumentElement
+                .SelectSingleNode("oldCalendar") as XmlElement;
+
+            var calendarElement = dom.DocumentElement
+                .SelectSingleNode("calendar") as XmlElement;
+
+            CalenderInfo oldInfo = null;
+            if (oldCalendarElement != null)
+                oldInfo = GetElementValues(oldCalendarElement);
+
+            CalenderInfo info = null;
+            if (calendarElement != null)
+                info = GetElementValues(calendarElement);
+
+            strHtml =
+                "<table class='operlog'>" +
+                BuildHtmlLine("操作类型", strOperation + " -- 设置系统参数") +
+                BuildHtmlLine("动作", strAction) +
+                (oldInfo == null ? "" :
+                (
+                BuildHtmlLine("旧日历名字", oldInfo.Name) +
+                BuildHtmlLine("旧日历时间范围", oldInfo.Range) +
+                BuildHtmlLine("旧日历内容", oldInfo.Content) +
+                BuildHtmlLine("旧日历注释", oldInfo.Comment)
+                )) +
+                (info == null ? "" :
+                (
+                BuildHtmlLine("新日历名字", info.Name) +
+                BuildHtmlLine("新日历时间范围", info.Range) +
+                BuildHtmlLine("新日历内容", info.Content) +
+                BuildHtmlLine("新日历注释", info.Comment)
+                )) +
+                BuildHtmlLine("操作者", strOperator) +
+                BuildHtmlLine("操作时间", strOperTime) +
+                BuildClientAddressLine(dom) +
+                "</table>";
+
+            return 0;
+        }
+
+        static CalenderInfo GetElementValues(XmlElement c)
+        {
+            return new CalenderInfo
+            {
+                Name = c.GetAttribute("name"),
+                Range = c.GetAttribute("range"),
+                Content = c.InnerText,
+                Comment = c.GetAttribute("comment"),
+            };
         }
 
         static string GetActionName(string strOperation,
@@ -6266,8 +6334,8 @@ MessageBoxDefaultButton.Button1);
                     if (dom.DocumentElement != null)
                     {
                         // 给根元素设置几个参数
-                        //DomUtil.SetAttr(dom.DocumentElement, "date", date);
-                        //DomUtil.SetAttr(dom.DocumentElement, "index", index.ToString());
+                        //DomUtil.SetAttr(_dom.DocumentElement, "date", date);
+                        //DomUtil.SetAttr(_dom.DocumentElement, "index", index.ToString());
 
                         dom.DocumentElement.SetAttribute("path", item.Path);
                         dom.DocumentElement.SetAttribute("_operlogPosition", $"{item.Date}:{item.Index}:oldRecord");
@@ -7190,12 +7258,12 @@ MessageBoxDefaultButton.Button1);
                     string strOperation = ListViewUtil.GetItemText(item, COLUMN_OPERATION);
 
                     /*
-                    var ret = Eval.Execute<bool>(dlg.Script, new { dom = dom, col_operation = strOperation });
+                    var ret = Eval.Execute<bool>(dlg.Script, new { _dom = _dom, col_operation = strOperation });
                     */
                     /*
                     // https://github.com/dynamicexpresso/DynamicExpresso
                     var target = new Interpreter();
-                    target.SetVariable<XmlDocument>("dom", dom);
+                    target.SetVariable<XmlDocument>("_dom", _dom);
                     target.SetVariable<string>("col_operation", strOperation);
                     var ret = target.Eval<bool>(dlg.Script);
                     */
@@ -8064,7 +8132,7 @@ MessageBoxDefaultButton.Button1);
 
             string strCurrentLibraryCode = dom.DocumentElement.GetAttribute("libraryCodeList");
             string strCurrentServerUrl = dom.DocumentElement.GetAttribute("libraryServerUrl");
-            //string strCurrentFilter = dom.DocumentElement.GetAttribute("filter");
+            //string strCurrentFilter = _dom.DocumentElement.GetAttribute("filter");
 
             if (strLibraryCodeList != strCurrentLibraryCode
                 || strCurrentServerUrl != strDp2LibraryServerUrl
@@ -8096,7 +8164,7 @@ MessageBoxDefaultButton.Button1);
                 dom.LoadXml("<root />");
                 dom.DocumentElement.SetAttribute("libraryCodeList", strLibraryCodeList);
                 dom.DocumentElement.SetAttribute("libraryServerUrl", strDp2LibraryServerUrl);
-                // dom.DocumentElement.SetAttribute("filter", strFilter);
+                // _dom.DocumentElement.SetAttribute("filter", strFilter);
                 dom.Save(strVersionFilePath);
             }
             catch (Exception ex)
@@ -10261,7 +10329,7 @@ MessageBoxDefaultButton.Button1);
 "readerBarcode");
             string strItemBarcode = DomUtil.GetElementText(dom.DocumentElement,
 "itemBarcode");
-            // string strLibraryCode = DomUtil.GetElementText(dom.DocumentElement,
+            // string strLibraryCode = DomUtil.GetElementText(_dom.DocumentElement,
             // "libraryCode");
 
             List<RecoverBiblioItem> records = new List<RecoverBiblioItem>();

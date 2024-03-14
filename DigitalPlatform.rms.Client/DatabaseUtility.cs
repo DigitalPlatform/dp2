@@ -9,6 +9,7 @@ using Ionic.Zip;
 using DigitalPlatform.IO;
 using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.Core;
+using DigitalPlatform.Text;
 
 namespace DigitalPlatform.rms.Client
 {
@@ -36,16 +37,21 @@ namespace DigitalPlatform.rms.Client
         // 注: 如果发现同名数据库已经存在，先删除再创建
         // parameters:
         //      strTempDir  临时目录路径。调用前要创建好这个临时目录。调用后需要删除这个临时目录
+        //      style       如果包含 continueLoop，在出错的时候会尽量继续循环向后处理
         public static int CreateDatabases(
             Stop stop,
             RmsChannel channel,
             string strDbDefFileName,
             string strTempDir,
+            string style,
             delegate_created func_created,
             out string strError)
         {
             strError = "";
             int nRet = 0;
+
+            var continueLoop = StringUtil.IsInList("continueLoop", style);
+            List<string> skip_warnings = new List<string>();
 
             // 展开压缩文件
             if (stop != null)
@@ -118,10 +124,24 @@ namespace DigitalPlatform.rms.Client
             null,
             out strError);
                 if (nRet == -1)
+                {
+                    if (continueLoop)
+                    {
+                        skip_warnings.Add(strError);
+                        continue;
+                    }
                     return -1;
+                }
 
                 func_created?.Invoke(strDatabaseName);
                 i++;
+            }
+
+            // 2024/2/24
+            if (skip_warnings.Count > 0)
+            {
+                strError = StringUtil.MakePathList(skip_warnings, "; ");
+                return -1;
             }
 
             return 0;

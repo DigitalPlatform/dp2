@@ -5366,7 +5366,7 @@ out strError);
 
                         // string strReaderKey = DomUtil.GetElementText(readerdom.DocumentElement, "barcode");
                         strError = "借阅操作被拒绝。读者 '" + strReaderBarcode + "' 早先已经借阅了册 '" + strItemBarcodeParam + "' 。(读者记录中已存在对应的<borrow>元素)";
-                        // strError = "操作前在读者记录中发现居然已存在表明读者借阅了册'"+strItemKey+"'的字段信息 " + node.OuterXml;
+                        // strError = "操作前在读者记录中发现居然已存在表明读者借阅了册'"+strItemKey+"'的字段信息 " + calendar_node.OuterXml;
                         return -1;
                     }
                 }
@@ -9714,15 +9714,23 @@ out string _);
         // 分馆用户只能修改自己管辖的分馆的日历
         // parameters:
         //      strAction   change new delete overwirte(2008/8/23)
-        public int SetCalendar(string strAction,
-            string strLibraryCodeList,
+        //      style       skipOperLog 跳过写入操作日志
+        //                  recover 表示以恢复方式执行
+        public int SetCalendar(
+            SessionInfo sessioninfo,
+            string strAction,
+            // string strLibraryCodeList,
             CalenderInfo info,
+            string style,
             out ErrorCode error_code,
             out string strError)
         {
             strError = "";
             error_code = ErrorCode.NoError;
 
+            var recover = StringUtil.IsInList("recover", style);
+
+            string strLibraryCodeList = sessioninfo.LibraryCodeList;
             {
                 // 解析日历名
                 ParseCalendarName(info.Name,
@@ -9757,9 +9765,13 @@ out string _);
 
             XmlNodeList nodes = this.LibraryCfgDom.DocumentElement.SelectNodes(strXPath);
 
-            XmlNode node = null;
+            // 在 library.xml 中新创建的 calendar 元素
+            XmlElement calendar_node = null;
+            // 保存修改前的 CalenderInfo
+            CalenderInfo old_info = null;
 
             // 2008/8/23
+            // overwrite 和 change 的区别是，overwrite 允许操作前(name 指定的)元素不存在，change 要求操作前(name 指定的)元素必须存在
             if (strAction == "overwrite")
             {
                 if (String.IsNullOrEmpty(info.Name) == true)
@@ -9770,15 +9782,18 @@ out string _);
 
                 if (nodes.Count == 0)
                 {
+                    /*
                     XmlNode root = this.LibraryCfgDom.DocumentElement.SelectSingleNode("calendars");
                     if (root == null)
                     {
                         root = this.LibraryCfgDom.CreateElement("calendars");
                         this.LibraryCfgDom.DocumentElement.AppendChild(root);
                     }
+                    */
+                    var root = EnsureRoot();
 
-                    node = this.LibraryCfgDom.CreateElement("calendar");
-                    root.AppendChild(node);
+                    calendar_node = this.LibraryCfgDom.CreateElement("calendar");
+                    root.AppendChild(calendar_node);
                 }
                 else if (nodes.Count > 1)
                 {
@@ -9787,44 +9802,69 @@ out string _);
                     {
                         nodes[i].ParentNode.RemoveChild(nodes[i]);
                     }
-                    node = nodes[0];
+                    calendar_node = nodes[0] as XmlElement;
+                    old_info = GetElementValues(calendar_node);
                 }
                 else
                 {
                     Debug.Assert(nodes.Count == 1, "");
-                    node = nodes[0];
+                    calendar_node = nodes[0] as XmlElement;
+                    old_info = GetElementValues(calendar_node);
                 }
 
-                DomUtil.SetAttr(node, "name", info.Name);   // 2008/10/8 增加。原来缺少本行，为一个bug
-                DomUtil.SetAttr(node, "range", info.Range);
-                DomUtil.SetAttr(node, "comment", info.Comment);
-                node.InnerText = info.Content;
+                /*
+                DomUtil.SetAttr(calendar_node, "name", info.Name);   // 2008/10/8 增加。原来缺少本行，为一个bug
+                DomUtil.SetAttr(calendar_node, "range", info.Range);
+                DomUtil.SetAttr(calendar_node, "comment", info.Comment);
+                calendar_node.InnerText = info.Content;
+                */
+                SetElementValues(info, calendar_node);
                 this.Changed = true;
-                return 0;
             }
 
-            if (strAction == "change")
+            else if (strAction == "change")
             {
-                if (nodes.Count == 0)
+                if (recover == false)
                 {
-                    error_code = ErrorCode.NotFound;
-                    strError = "日历名 '" + info.Name + "' 不存在";
-                    return -1;
+                    if (nodes.Count == 0)
+                    {
+                        error_code = ErrorCode.NotFound;
+                        strError = "日历名 '" + info.Name + "' 不存在";
+                        return -1;
+                    }
+                    if (nodes.Count > 1)
+                    {
+                        strError = "日历名 '" + info.Name + "' 存在  " + nodes.Count.ToString() + " 个。修改操作被拒绝。";
+                        return -1;
+                    }
+
+                    calendar_node = nodes[0] as XmlElement;
                 }
-                if (nodes.Count > 1)
+                else
                 {
-                    strError = "日历名 '" + info.Name + "' 存在  " + nodes.Count.ToString() + " 个。修改操作被拒绝。";
-                    return -1;
+                    // 恢复时，如果 calendar 元素不存在，则需要新创建
+                    if (nodes.Count == 0)
+                    {
+                        var root = EnsureRoot();
+
+                        calendar_node = this.LibraryCfgDom.CreateElement("calendar");
+                        root.AppendChild(calendar_node);
+                        calendar_node.SetAttribute("name", info.Name);
+                    }
                 }
-                node = nodes[0];
-                DomUtil.SetAttr(node, "range", info.Range);
-                DomUtil.SetAttr(node, "comment", info.Comment);
-                node.InnerText = info.Content;
+
+                old_info = GetElementValues(calendar_node);
+
+                /*
+                DomUtil.SetAttr(calendar_node, "range", info.Range);
+                DomUtil.SetAttr(calendar_node, "comment", info.Comment);
+                calendar_node.InnerText = info.Content;
+                */
+                SetElementValues(info, calendar_node);
                 this.Changed = true;
-                return 0;
             }
 
-            if (strAction == "new")
+            else if (strAction == "new")
             {
                 if (String.IsNullOrEmpty(info.Name) == true)
                 {
@@ -9832,51 +9872,165 @@ out string _);
                     return -1;
                 }
 
-                if (nodes.Count > 0)
+                if (recover == false)
                 {
-                    error_code = ErrorCode.AlreadyExist;
-                    strError = "日历名 '" + info.Name + "' 已经存在";
-                    return -1;
+                    if (nodes.Count > 0)
+                    {
+                        error_code = ErrorCode.AlreadyExist;
+                        strError = "日历名 '" + info.Name + "' 已经存在";
+                        return -1;
+                    }
+                }
+                else
+                {
+                    if (nodes.Count > 0)
+                    {
+                        foreach (XmlElement current in nodes)
+                        {
+                            current.ParentNode.RemoveChild(current);
+                        }
+                    }
                 }
 
+                /*
                 XmlNode root = this.LibraryCfgDom.DocumentElement.SelectSingleNode("calendars");
                 if (root == null)
                 {
                     root = this.LibraryCfgDom.CreateElement("calendars");
                     this.LibraryCfgDom.DocumentElement.AppendChild(root);
                 }
+                */
+                var root = EnsureRoot();
 
-                node = this.LibraryCfgDom.CreateElement("calendar");
-                root.AppendChild(node);
+                calendar_node = this.LibraryCfgDom.CreateElement("calendar");
+                root.AppendChild(calendar_node);
 
-                DomUtil.SetAttr(node, "name", info.Name);
-                DomUtil.SetAttr(node, "range", info.Range);
-                DomUtil.SetAttr(node, "comment", info.Comment);
-                node.InnerText = info.Content;
+                /*
+                DomUtil.SetAttr(calendar_node, "name", info.Name);
+                DomUtil.SetAttr(calendar_node, "range", info.Range);
+                DomUtil.SetAttr(calendar_node, "comment", info.Comment);
+                calendar_node.InnerText = info.Content;
+                */
+                SetElementValues(info, calendar_node);
                 this.Changed = true;
-                return 0;
             }
 
-            if (strAction == "delete")
+            else if (strAction == "delete")
             {
                 if (nodes.Count == 0)
                 {
-                    error_code = ErrorCode.NotFound;
-                    strError = "日历名 '" + info.Name + "' 不存在";
-                    return -1;
+                    if (recover == false)
+                    {
+                        error_code = ErrorCode.NotFound;
+                        strError = "日历名 '" + info.Name + "' 不存在";
+                        return -1;
+                    }
+                    else
+                        return 0;
                 }
+
+                calendar_node = nodes[0] as XmlElement;
+                old_info = GetElementValues(calendar_node);
 
                 for (int i = 0; i < nodes.Count; i++)
                 {
-                    node = nodes[i];
-                    node.ParentNode.RemoveChild(node);
+                    calendar_node = nodes[i] as XmlElement;
+                    calendar_node.ParentNode.RemoveChild(calendar_node);
+                    this.Changed = true;
                 }
-                this.Changed = true;
-                return 0;
+            }
+            else
+            {
+                strError = "无法识别的strAction参数值 '" + strAction + "' ";
+                return -1;
             }
 
-            strError = "无法识别的strAction参数值 '" + strAction + "' ";
-            return -1;
+            if (StringUtil.IsInList("skipOperLog", style) == false)
+            {
+                XmlDocument domOperLog = new XmlDocument();
+                domOperLog.LoadXml("<root />");
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+                    "operation",
+                    "setCalendar");
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+                    "action",
+                    strAction);
+
+                /*
+                // 日历名。可以是全局的，例如“基本日历”，也可以是两段式“海淀分馆/基本日历”。分馆用户只能修改属于自己分馆的日历，但可以看到全部日历
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+    "calendarName",
+    info.Name);
+                */
+
+                if (old_info != null)
+                {
+                    var element = DomUtil.SetElementText(domOperLog.DocumentElement,
+    "oldCalendar",
+    "");
+                    SetElementValues(old_info, element);
+                }
+
+                if (info != null
+                    && strAction != "delete")
+                {
+                    var element = DomUtil.SetElementText(domOperLog.DocumentElement,
+    "calendar",
+    "");
+                    SetElementValues(info, element);
+                }
+
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+            "operator",
+        sessioninfo.UserID);
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+                    "operTime",
+                    this.Clock.GetClock());
+
+                int nRet = this.OperLog.WriteOperLog(domOperLog,
+                    sessioninfo.ClientAddress,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "SetCalendar() API 写入日志时发生错误: " + strError;
+                    return -1;
+                }
+            }
+
+            return 0;
+
+            XmlElement EnsureRoot()
+            {
+                var root = this.LibraryCfgDom.DocumentElement.SelectSingleNode("calendars") as XmlElement;
+                if (root == null)
+                {
+                    root = this.LibraryCfgDom.CreateElement("calendars");
+                    this.LibraryCfgDom.DocumentElement.AppendChild(root);
+                }
+
+                return root;
+            }
+        }
+
+        static void SetElementValues(CalenderInfo i, XmlElement c)
+        {
+            DomUtil.SetAttr(c, "name", i.Name);
+            DomUtil.SetAttr(c, "range", i.Range);
+            DomUtil.SetAttr(c, "comment", i.Comment);
+            c.InnerText = i.Content;
+        }
+
+        public static CalenderInfo GetElementValues(XmlElement c)
+        {
+            if (c == null)
+               throw new ArgumentException("参数 c 不允许为空");
+            
+            return new CalenderInfo {
+                Name = c.GetAttribute("name"),
+                Range = c.GetAttribute("range"),
+                Content = c.InnerText,
+                Comment = c.GetAttribute("comment"),
+            };
         }
 
 #if DEBUG_LOAN_PARAM
@@ -9958,9 +10112,9 @@ out string _);
 
             for (int i = 0; i < nodes.Count; i++)
             {
-                XmlNode node = nodes[i];
+                XmlNode calendar_node = nodes[i];
 
-                result.Add(node.InnerText);
+                result.Add(calendar_node.InnerText);
             }
 
             return result;
@@ -9973,9 +10127,9 @@ out string _);
 
             for (int i = 0; i < nodes.Count; i++)
             {
-                XmlNode node = nodes[i];
+                XmlNode calendar_node = nodes[i];
 
-                result.Add(node.InnerText);
+                result.Add(calendar_node.InnerText);
             }
 
             return result;
@@ -10288,7 +10442,7 @@ out string _);
                 /*
                 if (string.IsNullOrEmpty(strName) == true)
                 {
-                    strError = "馆藏地点名不能为空。'" + node.OuterXml + "'";
+                    strError = "馆藏地点名不能为空。'" + calendar_node.OuterXml + "'";
                     return -1;
                 }
                  * */
@@ -10306,7 +10460,7 @@ out string _);
                 /*
                 if (string.IsNullOrEmpty(strName) == true)
                 {
-                    strError = "馆藏地点名不能为空。'" + node.OuterXml + "'";
+                    strError = "馆藏地点名不能为空。'" + calendar_node.OuterXml + "'";
                     return -1;
                 }
                  * */
@@ -10605,7 +10759,7 @@ out string _);
             // 另外如果要修改<group>元素本身的除了name以外的任何一个属性，都要求下属的<location>全部在当前用户的管辖范围内才行
             foreach (XmlNode group_node in remain_group_nodes)
             {
-                // 注意 node 来自 old_nodes 集合
+                // 注意 calendar_node 来自 old_nodes 集合
                 string strGroupName = DomUtil.GetAttr(group_node, "name");
 
                 XmlNode new_group = source_root.SelectSingleNode("group[@name='" + strGroupName + "']");
@@ -14525,7 +14679,7 @@ out string _);
 
             /*
             // 删除<request>元素
-            node.ParentNode.RemoveChild(node);
+            calendar_node.ParentNode.RemoveChild(calendar_node);
              * */
             // 将<request>元素的state属性值修改为arrived
             DomUtil.SetAttr(found_node, "state", "arrived");

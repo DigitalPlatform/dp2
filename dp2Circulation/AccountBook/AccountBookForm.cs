@@ -1867,13 +1867,13 @@ namespace dp2Circulation
             string strRefID = DomUtil.GetElementText(dom.DocumentElement,
                 "refID");
             /*
-            string strBorrower = DomUtil.GetElementText(dom.DocumentElement,
+            string strBorrower = DomUtil.GetElementText(_dom.DocumentElement,
                 "borrower");
-            string strBorrowDate = DomUtil.GetElementText(dom.DocumentElement,
+            string strBorrowDate = DomUtil.GetElementText(_dom.DocumentElement,
                 "borrowDate");
             // 2007/6/20 
             strBorrowDate = DateTimeUtil.LocalTime(strBorrowDate, "u");
-            string strBorrowPeriod = DomUtil.GetElementText(dom.DocumentElement,
+            string strBorrowPeriod = DomUtil.GetElementText(_dom.DocumentElement,
                 "borrowPeriod");
              * */
             // 2011/6/13

@@ -633,6 +633,8 @@ namespace DigitalPlatform.LibraryServer
 
                     sessioninfo.Account = account;
 
+                    // TODO: 要释放 sessioninfo
+
                     // 找到根
                     while (true)
                     {

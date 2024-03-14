@@ -3933,7 +3933,7 @@ namespace DigitalPlatform.rms
                             out baOutputTimestamp,
                             out strError);
 
-                        strOutputResPath = strDbName + "/" + strRecordID + "/object/" + strObjectID;
+                        strOutputResPath = strDbName + "/" + GetCompactID(strRecordID) + "/object/" + strObjectID;
                     }
                     else  // 记录体
                     {
@@ -3965,9 +3965,9 @@ namespace DigitalPlatform.rms
                         strRecordID = strOutputID;
 
                         if (strXPath == "")
-                            strOutputResPath = strDbName + "/" + strRecordID;
+                            strOutputResPath = strDbName + "/" + GetCompactID(strRecordID);
                         else
-                            strOutputResPath = strDbName + "/" + strRecordID + "/xpath/" + strXPath;
+                            strOutputResPath = strDbName + "/" + GetCompactID(strRecordID) + "/xpath/" + strXPath;
 
                     }
                 }
@@ -3989,6 +3989,15 @@ namespace DigitalPlatform.rms
             }
 
             return nRet;
+        }
+
+        // 2024/2/27
+        // 获得紧缩的记录 ID。比如 "00000000001" --> "1"
+        static string GetCompactID(string strRecordID)
+        {
+            if (strRecordID == null)
+                return "";
+            return strRecordID.TrimStart('0');
         }
 
         // 写目录配置事项

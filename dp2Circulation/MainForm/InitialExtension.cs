@@ -5887,10 +5887,61 @@ out strError);
                 */
             }
         }
+
+        #region UCS 上载接口的几个配置参数
+
+        public string UcsApiUrl
+        {
+            get
+            {
+                return AppInfo.GetString(
+    "ucsUpload",
+    "apiURL",
+    "http://202.96.31.28/X");
+            }
+        }
+
+
+        public string UcsDatabaseName
+        {
+            get
+            {
+                return AppInfo.GetString(
+    "ucsUpload",
+    "databaseName",
+    "UCS01");
+            }
+        }
+
+        public string UcsUserName
+        {
+            get
+            {
+                return AppInfo.GetString(
+    "ucsUpload",
+    "userName",
+    "");
+            }
+        }
+
+
+        public string UcsPassword
+        {
+            get
+            {
+                string password =AppInfo.GetString(
+"ucsUpload",
+"password",
+""); 
+                return Program.MainForm.DecryptPasssword(password);
+            }
+        }
+
+        #endregion
     }
 
     public delegate void TagChangedEventHandler(object sender,
-TagChangedEventArgs e);
+    TagChangedEventArgs e);
 
     /// <summary>
     /// 设置标签变化事件的参数

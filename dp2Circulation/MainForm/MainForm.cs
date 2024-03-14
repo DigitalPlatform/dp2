@@ -9345,7 +9345,7 @@ Keys keyData)
                 // TODO: 询问账户名和密码(账户名第一字符为 ~ 表示这是一个读者账户)。并验证。可以放弃加入此服务器节点
                 string strWangzhongUrl = "";
                 {
-                    XmlElement server = dom.DocumentElement.SelectSingleNode("server[@name='网众']") as XmlElement;
+                    XmlElement server = _dom.DocumentElement.SelectSingleNode("server[@name='网众']") as XmlElement;
                     if (server != null)
                         strWangzhongUrl = server.GetAttribute("url");
 

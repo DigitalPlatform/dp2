@@ -2964,7 +2964,7 @@ line.ReturningTime);
     "borrowDate"));
             line.BorrowPeriod = DomUtil.GetElementText(dom.DocumentElement,
 "borrowPeriod");
-            // line.ReturningTime = GetLocalTime(DomUtil.GetElementText(dom.DocumentElement, "returningDate"));
+            // line.ReturningTime = GetLocalTime(DomUtil.GetElementText(_dom.DocumentElement, "returningDate"));
 
             if (string.IsNullOrEmpty(line.BorrowTime) == false)
             {

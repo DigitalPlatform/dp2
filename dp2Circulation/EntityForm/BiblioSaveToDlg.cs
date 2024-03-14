@@ -295,6 +295,10 @@ namespace dp2Circulation
                 return true;
             if (StringUtil.IsPureNumber(strRight) == false)
                 return false;
+
+            if (Program.MainForm.IsBiblioDbName(strLeft) == false)
+                return false;
+
             return true;
         }
     }

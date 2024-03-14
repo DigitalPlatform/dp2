@@ -347,7 +347,7 @@ namespace dp2Circulation
             }
 
             /*
-            string strEncoding = DomUtil.GetDomEncodingString(dom);
+            string strEncoding = DomUtil.GetDomEncodingString(_dom);
             Encoding encoding = Encoding.UTF8;
             if (string.IsNullOrEmpty(strEncoding) == false)
             {

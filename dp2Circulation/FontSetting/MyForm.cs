@@ -4350,10 +4350,10 @@ MessageBoxDefaultButton.Button2);
                                 content = content.Replace("{items}", items_line);
                                 writer.Write(content);
                                 // 给根元素设置几个参数
-                                //DomUtil.SetAttr(dom.DocumentElement, "path", DpNs.dprms, Program.MainForm.LibraryServerUrl + "?" + item.BiblioInfo.RecPath);  // strRecPath
-                                //DomUtil.SetAttr(dom.DocumentElement, "timestamp", DpNs.dprms, ByteArray.GetHexTimeStampString(item.BiblioInfo.Timestamp));   // baTimestamp
+                                //DomUtil.SetAttr(_dom.DocumentElement, "path", DpNs.dprms, Program.MainForm.LibraryServerUrl + "?" + item.BiblioInfo.RecPath);  // strRecPath
+                                //DomUtil.SetAttr(_dom.DocumentElement, "timestamp", DpNs.dprms, ByteArray.GetHexTimeStampString(item.BiblioInfo.Timestamp));   // baTimestamp
 
-                                // dom.DocumentElement.WriteTo(writer);
+                                // _dom.DocumentElement.WriteTo(writer);
                             }
                         }
 

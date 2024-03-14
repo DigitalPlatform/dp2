@@ -35,11 +35,6 @@
             this.columnHeader_enabled = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripSplitButton_new1 = new System.Windows.Forms.ToolStripSplitButton();
-            this.ToolStripMenuItem_new_hongniba = new System.Windows.Forms.ToolStripMenuItem();
-            this.ToolStripMenuItem_new_nlc = new System.Windows.Forms.ToolStripMenuItem();
-            this.ToolStripMenuItem_wangzhong = new System.Windows.Forms.ToolStripMenuItem();
-            this.ToolStripMenuItem_new_calis = new System.Windows.Forms.ToolStripMenuItem();
-            this.ToolStripMenuItem_new_nbinet = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripButton_modify = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_delete = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
@@ -52,7 +47,6 @@
             this.toolStripButton_import = new System.Windows.Forms.ToolStripButton();
             this.button_Cancel = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
-            this.ToolStripMenuItem_new_lc = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -117,56 +111,14 @@
             // toolStripSplitButton_new1
             // 
             this.toolStripSplitButton_new1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripSplitButton_new1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.ToolStripMenuItem_new_hongniba,
-            this.ToolStripMenuItem_new_nlc,
-            this.ToolStripMenuItem_wangzhong,
-            this.ToolStripMenuItem_new_calis,
-            this.ToolStripMenuItem_new_nbinet,
-            this.ToolStripMenuItem_new_lc});
+
             this.toolStripSplitButton_new1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripSplitButton_new1.Image")));
             this.toolStripSplitButton_new1.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripSplitButton_new1.Name = "toolStripSplitButton_new1";
             this.toolStripSplitButton_new1.Size = new System.Drawing.Size(78, 32);
             this.toolStripSplitButton_new1.Text = "新增";
             this.toolStripSplitButton_new1.ButtonClick += new System.EventHandler(this.toolStripSplitButton_new1_ButtonClick);
-            // 
-            // ToolStripMenuItem_new_hongniba
-            // 
-            this.ToolStripMenuItem_new_hongniba.Name = "ToolStripMenuItem_new_hongniba";
-            this.ToolStripMenuItem_new_hongniba.Size = new System.Drawing.Size(360, 40);
-            this.ToolStripMenuItem_new_hongniba.Text = "红泥巴数字平台云";
-            this.ToolStripMenuItem_new_hongniba.ToolTipText = "新增一个 红泥巴数字平台云 服务器节点";
-            this.ToolStripMenuItem_new_hongniba.Click += new System.EventHandler(this.ToolStripMenuItem_new_hongniba_Click);
-            // 
-            // ToolStripMenuItem_new_nlc
-            // 
-            this.ToolStripMenuItem_new_nlc.Name = "ToolStripMenuItem_new_nlc";
-            this.ToolStripMenuItem_new_nlc.Size = new System.Drawing.Size(360, 40);
-            this.ToolStripMenuItem_new_nlc.Text = "国家图书馆联合编目中心";
-            this.ToolStripMenuItem_new_nlc.ToolTipText = "新增一个 国家图书馆联合编目中心 服务器节点";
-            this.ToolStripMenuItem_new_nlc.Click += new System.EventHandler(this.ToolStripMenuItem_new_nlc_Click);
-            // 
-            // ToolStripMenuItem_wangzhong
-            // 
-            this.ToolStripMenuItem_wangzhong.Name = "ToolStripMenuItem_wangzhong";
-            this.ToolStripMenuItem_wangzhong.Size = new System.Drawing.Size(360, 40);
-            this.ToolStripMenuItem_wangzhong.Text = "网众";
-            this.ToolStripMenuItem_wangzhong.Click += new System.EventHandler(this.ToolStripMenuItem_wangzhong_Click);
-            // 
-            // ToolStripMenuItem_new_calis
-            // 
-            this.ToolStripMenuItem_new_calis.Name = "ToolStripMenuItem_new_calis";
-            this.ToolStripMenuItem_new_calis.Size = new System.Drawing.Size(360, 40);
-            this.ToolStripMenuItem_new_calis.Text = "CALIS";
-            this.ToolStripMenuItem_new_calis.Click += new System.EventHandler(this.ToolStripMenuItem_new_calis_Click);
-            // 
-            // ToolStripMenuItem_new_nbinet
-            // 
-            this.ToolStripMenuItem_new_nbinet.Name = "ToolStripMenuItem_new_nbinet";
-            this.ToolStripMenuItem_new_nbinet.Size = new System.Drawing.Size(360, 40);
-            this.ToolStripMenuItem_new_nbinet.Text = "NBINET";
-            this.ToolStripMenuItem_new_nbinet.Click += new System.EventHandler(this.ToolStripMenuItem_new_nbinet_Click);
+            this.toolStripSplitButton_new1.DropDownOpening += new System.EventHandler(this.toolStripSplitButton_new1_DropDownOpening);
             // 
             // toolStripButton_modify
             // 
@@ -285,13 +237,6 @@
             this.button_OK.UseVisualStyleBackColor = true;
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
-            // ToolStripMenuItem_new_lc
-            // 
-            this.ToolStripMenuItem_new_lc.Name = "ToolStripMenuItem_new_lc";
-            this.ToolStripMenuItem_new_lc.Size = new System.Drawing.Size(360, 40);
-            this.ToolStripMenuItem_new_lc.Text = "Library of Congress";
-            this.ToolStripMenuItem_new_lc.Click += new System.EventHandler(this.ToolStripMenuItem_new_lc_Click);
-            // 
             // ZServerListDialog
             // 
             this.AcceptButton = this.button_OK;
@@ -337,11 +282,6 @@
         private System.Windows.Forms.ToolStripButton toolStripButton_export;
         private System.Windows.Forms.ToolStripButton toolStripButton_import;
         private System.Windows.Forms.ToolStripSplitButton toolStripSplitButton_new1;
-        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_new_hongniba;
-        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_new_nlc;
-        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_wangzhong;
-        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_new_calis;
-        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_new_nbinet;
-        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_new_lc;
+
     }
 }

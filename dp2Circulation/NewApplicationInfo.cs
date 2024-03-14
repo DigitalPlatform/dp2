@@ -20,7 +20,7 @@ namespace dp2Circulation
     /// </summary>
     public class NewApplicationInfo : IApplicationInfo
     {
-        // public XmlDocument dom = new XmlDocument();
+        // public XmlDocument _dom = new XmlDocument();
 
         ConfigSetting _config = null;   // 引用
 
@@ -281,7 +281,7 @@ Convert.ToString(nValue));
 
             try
             {
-                node = dom.SelectSingleNode(strPath);
+                node = _dom.SelectSingleNode(strPath);
             }
             catch (Exception ex)
             {
@@ -323,7 +323,7 @@ Convert.ToString(nValue));
             string strPath = GetSectionPath(strPathParam);
 
             string[] aPath = strPath.Split(new char[] { '/' });
-            XmlNode node = DomUtil.CreateNode(dom, aPath);
+            XmlNode node = DomUtil.CreateNode(_dom, aPath);
 
             if (node == null)
             {

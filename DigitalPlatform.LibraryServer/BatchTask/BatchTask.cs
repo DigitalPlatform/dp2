@@ -1095,7 +1095,13 @@ namespace DigitalPlatform.LibraryServer
             }
             else if (strOperation == "setSystemParameter")
             {
-                // 只读 2020/8/28
+                // 2024/2/22
+                nRet = this.App.RecoverSetSystemParameter(this.RmsChannels,
+    level,
+    dom,
+    attachment,
+    strStyle,
+    out strError);
             }
             else if (strOperation == "adjustOverflow")
             {
@@ -1115,6 +1121,16 @@ namespace DigitalPlatform.LibraryServer
                     attachment,
                     strStyle,
                     out strError);
+            }
+            else if (strOperation == "setCalendar")
+            {
+                // 2024/3/1
+                nRet = this.App.RecoverSetCalendar(this.RmsChannels,
+    level,
+    dom,
+    attachment,
+    strStyle,
+    out strError);
             }
             else
             {

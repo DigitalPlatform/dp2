@@ -66,7 +66,7 @@ MessageBoxDefaultButton.Button2);
             this.DialogResult = DialogResult.OK;
             this.Close();
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, result.ErrorInfo);
         }
 
@@ -157,7 +157,7 @@ MessageBoxDefaultButton.Button2);
                 this.Changed = true;
                 return;
             }
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -191,7 +191,7 @@ MessageBoxDefaultButton.Button2);
                 this.Changed = true;
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -426,7 +426,7 @@ MessageBoxDefaultButton.Button2);
                 strError = "导入过程出现异常: " + ex.Message;
                 goto ERROR1;
             }
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -477,7 +477,7 @@ MessageBoxDefaultButton.Button2);
             {
                 item.BackColor = System.Drawing.Color.DarkGreen;
                 item.ForeColor = System.Drawing.Color.White;
-            }    
+            }
             else
             {
                 item.BackColor = SystemColors.Window;
@@ -574,22 +574,15 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
-        private void ToolStripMenuItem_new_hongniba_Click(object sender, EventArgs e)
-        {
-            string server_xml = @"<server 
-name='红泥巴数字平台云' 
-addr='58.87.101.80' 
-port='210'
-username='@hnb'>
-    <database name='cbook' />
-    <database name='ebook' />
-</server>";
-
-            CreateServer(server_xml);
-        }
 
         void CreateServer(string server_xml)
         {
+            if (string.IsNullOrEmpty(server_xml))
+                throw new ArgumentException($"server_xml 参数值不应为空");
+
+            if (_dom == null)
+                throw new ArgumentException("_dom 不应为 null");
+
             XmlElement server = _dom.CreateElement("server");
             _dom.DocumentElement.AppendChild(server);
             server = DomUtil.SetElementOuterXml(server, server_xml);
@@ -609,10 +602,32 @@ username='@hnb'>
                     SetItemColor(item);
 
                     this.listView1.Items.Add(item);
+
+                    item.EnsureVisible();
+                    ListViewUtil.SelectLine(item, true);
                 }
 
                 this.Changed = true;
             }
+
+            // 2024/2/26
+            if (server.GetAttribute("_authentication") == "require")
+                MessageBox.Show(this, "该服务器需要用户名和密码才能访问，请您稍后用“修改”按钮设置");
+        }
+
+#if REMOVED
+        private void ToolStripMenuItem_new_hongniba_Click(object sender, EventArgs e)
+        {
+            string server_xml = @"<server 
+name='红泥巴数字平台云' 
+addr='58.87.101.80' 
+port='210'
+username='@hnb'>
+    <database name='cbook' />
+    <database name='ebook' />
+</server>";
+
+            CreateServer(server_xml);
         }
 
         private void ToolStripMenuItem_new_nlc_Click(object sender, EventArgs e)
@@ -648,7 +663,7 @@ port='2100'>
 
             MessageBox.Show(this, "该服务器需要用户名和密码才能访问，请您稍后用“修改”按钮设置");
         }
-  
+
         private void ToolStripMenuItem_new_calis_Click(object sender, EventArgs e)
         {
             string server_xml = @"
@@ -688,6 +703,94 @@ detectmarcsyntax='1'
   </server>";
 
             CreateServer(server_xml);
+        }
+#endif
+
+        private void toolStripSplitButton_new1_DropDownOpening(object sender, EventArgs e)
+        {
+            var menu = sender as ToolStripSplitButton;
+            if (menu.DropDownItems.Count > 0)
+                return;
+
+            var properties = GetZ3950ServerProperties();
+            foreach (var property in properties)
+            {
+                var name = property.Name;
+                if (property.NeedAuthentication)
+                    name += " *";
+                var submenu = new ToolStripMenuItem(name);
+                submenu.Tag = property.Name;
+                submenu.Click += (s1, e1) =>
+                {
+                    new_server(s1, e1);
+                };
+                menu.DropDownItems.Add(submenu);
+            }
+
+            {
+                var submenu = new ToolStripLabel("注: 带 * 的表示需要权限验证");
+                submenu.Enabled = false;
+                menu.DropDownItems.Add(submenu);
+            }
+        }
+
+        void new_server(object sender, EventArgs e)
+        {
+            var menu = sender as ToolStripMenuItem;
+            var name = menu.Tag as string;
+            var server_xml = GetZ3950Xml(name);
+
+            CreateServer(server_xml);
+        }
+
+        public string SourceServerFileName { get; set; }
+
+        string GetZ3950Xml(string name)
+        {
+            if (string.IsNullOrEmpty(SourceServerFileName))
+                return null;
+
+            if (File.Exists(SourceServerFileName) == false)
+                return null;
+
+            XmlDocument dom = new XmlDocument();
+            dom.Load(SourceServerFileName);
+
+            var server_node = dom.DocumentElement.SelectSingleNode($"server[@name='{name}']") as XmlElement;
+            if (server_node == null)
+                return null;
+            return
+                server_node.OuterXml;
+        }
+
+        class ServerProperty
+        {
+            // 服务器名字。来源是 server 元素 name 属性值
+            public string Name { get; set; }
+
+            // 服务器是否需要权限验证。来源是 server 元素的 _authentication 属性值
+            public bool NeedAuthentication { get; set; }
+        }
+
+        List<ServerProperty> GetZ3950ServerProperties()
+        {
+            if (string.IsNullOrEmpty(SourceServerFileName))
+                return new List<ServerProperty>();
+
+            if (File.Exists(SourceServerFileName) == false)
+                return new List<ServerProperty>();
+
+            XmlDocument dom = new XmlDocument();
+            dom.Load(SourceServerFileName);
+
+            var server_nodes = dom.DocumentElement.SelectNodes("server");
+            return server_nodes
+                .Cast<XmlElement>()
+                .Select(o => new ServerProperty
+                {
+                    Name = o.GetAttribute("name"),
+                    NeedAuthentication = o.GetAttribute("_authentication") == "require"
+                }).ToList();
         }
     }
 }

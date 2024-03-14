@@ -661,7 +661,7 @@ out string timestamp);
 
             /*
             // 父记录id
-            DomUtil.SetElementText(dom.DocumentElement, "parent", strParentID);
+            DomUtil.SetElementText(_dom.DocumentElement, "parent", strParentID);
             */
 
             // 册条码
@@ -1011,7 +1011,7 @@ out strNextSubfieldName);
                 /*
                 if (String.IsNullOrEmpty(strBindOperator) == false)
                 {
-                    DomUtil.SetElementText(dom.DocumentElement, "bindOperator", strBindOperator);
+                    DomUtil.SetElementText(_dom.DocumentElement, "bindOperator", strBindOperator);
                 }
                  * */
 
@@ -2106,7 +2106,7 @@ CALIS中，许可重复010$d来表达价格实录和获赠或其它币种价格�
             dom.LoadXml("<root />");
 
             // 父记录id
-            // DomUtil.SetElementText(dom.DocumentElement, "parent", strParentID);
+            // DomUtil.SetElementText(_dom.DocumentElement, "parent", strParentID);
 
             // 编号
             DomUtil.SetElementText(dom.DocumentElement, "index", (nOrderIndex + 1).ToString());
@@ -2411,7 +2411,7 @@ CALIS中，许可重复010$d来表达价格实录和获赠或其它币种价格�
 
 
             // 状态
-            // DomUtil.SetElementText(dom.DocumentElement, "state", strState);
+            // DomUtil.SetElementText(_dom.DocumentElement, "state", strState);
 
 
             // 附注 $z
@@ -2519,7 +2519,7 @@ CALIS中，许可重复010$d来表达价格实录和获赠或其它币种价格�
                 if (address_dom.DocumentElement.ChildNodes.Count > 0)
                 {
                     /*
-                    XmlNode node = DomUtil.SetElementText(dom.DocumentElement, "sellerAddress", "");
+                    XmlNode node = DomUtil.SetElementText(_dom.DocumentElement, "sellerAddress", "");
                     node.OuterXml = address_dom.DocumentElement.OuterXml;
                      * */
                     DomUtil.SetElementInnerXml(dom.DocumentElement,
@@ -2669,7 +2669,7 @@ CALIS中，许可重复010$d来表达价格实录和获赠或其它币种价格�
             dom.LoadXml("<root />");
 
             // 父记录id
-            // DomUtil.SetElementText(dom.DocumentElement, "parent", strParentID);
+            // DomUtil.SetElementText(_dom.DocumentElement, "parent", strParentID);
 
             // 编号
             DomUtil.SetElementText(dom.DocumentElement, "index", (nGroupIndex + 1).ToString());

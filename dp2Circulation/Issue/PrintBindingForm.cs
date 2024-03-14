@@ -1810,7 +1810,7 @@ string strBiblioRecPath)
             string strRefID = DomUtil.GetElementText(dom.DocumentElement,
                 "refID");
             /*
-            string strBinding = DomUtil.GetElementInnerXml(dom.DocumentElement,
+            string strBinding = DomUtil.GetElementInnerXml(_dom.DocumentElement,
                 "binding");
              * */
 
@@ -1821,16 +1821,16 @@ string strBiblioRecPath)
             string strSource = DomUtil.GetElementText(dom.DocumentElement,
                 "source");
             /*
-            string strBorrower = DomUtil.GetElementText(dom.DocumentElement,
+            string strBorrower = DomUtil.GetElementText(_dom.DocumentElement,
                 "borrower");
-            string strBorrowDate = DomUtil.GetElementText(dom.DocumentElement,
+            string strBorrowDate = DomUtil.GetElementText(_dom.DocumentElement,
                 "borrowDate");
             // 2007/6/20
             strBorrowDate = DateTimeUtil.LocalTime(strBorrowDate, "u");
-            string strBorrowPeriod = DomUtil.GetElementText(dom.DocumentElement,
+            string strBorrowPeriod = DomUtil.GetElementText(_dom.DocumentElement,
                 "borrowPeriod");
             strBorrowDate = DateTimeUtil.LocalTime(strBorrowDate, "u");
-            string strBorrowPeriod = DomUtil.GetElementText(dom.DocumentElement,
+            string strBorrowPeriod = DomUtil.GetElementText(_dom.DocumentElement,
                 "borrowPeriod");
              * */
 

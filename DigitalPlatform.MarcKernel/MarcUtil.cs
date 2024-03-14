@@ -1594,12 +1594,28 @@ out strError);
             return 1;
         }
 
+        public static int Marc2Xml(string strMARC,
+    string strMarcSyntax,
+    out string strXml,
+    out string strError)
+        {
+            return Marc2Xml(strMARC,
+            strMarcSyntax,
+            "writeMarcPrefix",
+            out strXml,
+            out strError);
+        }
+
         // 将MARC记录转换为xml格式
         // 2015/5/10 改进了函数性能，采用 StringWriter 获取字符串结果
         // parameters:
         //      strMarcSyntax   MARC格式．为 unimarc/usmarc之一，缺省为unimarc
+        //      style           风格。
+        //                      如果包含 writeMarcPrefix 表示要写 XML 前缀
+        //                      如果包含 writeXsi 表示要写 xsi
         public static int Marc2Xml(string strMARC,
             string strMarcSyntax,
+            string style,
             out string strXml,
             out string strError)
         {
@@ -1610,6 +1626,9 @@ out strError);
             using (StringWriter s = new StringWriter())
             using (MarcXmlWriter writer = new MarcXmlWriter(s))
             {
+                // 2024/3/6
+                writer.WriteMarcPrefix = StringUtil.IsInList("writeMarcPrefix", style);
+                writer.WriteXsi = StringUtil.IsInList("writeXsi", style);
                 /*
                 if (strMarcSyntax == "unimarc")
                 {
@@ -2505,6 +2524,9 @@ out strError);
             if (strFieldName[0] == '0' && strFieldName[1] == '0')
                 return true;
             if (strFieldName == "hdr" || strFieldName == "###" || strFieldName == "-01")
+                return true;
+            // 2024/3/6
+            if (strFieldName == "FMT")
                 return true;
             return false;
         }

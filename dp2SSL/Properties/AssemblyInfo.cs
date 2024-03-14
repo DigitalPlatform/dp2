@@ -51,8 +51,8 @@ using System.Windows;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.9.12")]    // 1.5.*
-[assembly: AssemblyFileVersion("1.9.12.0")]  // 1.5.0.0
+[assembly: AssemblyVersion("1.9.13")]    // 1.5.*
+[assembly: AssemblyFileVersion("1.9.13.0")]  // 1.5.0.0
 
 // 1.0 2019/2/21 第一个版本
 // 1.1 2019/2/26 可以显示版本号了
@@ -209,3 +209,4 @@ using System.Windows;
 //                          ShelfData.FillBookFieldsAsync() 函数做了增强，当 entity.LocalCoverImagePath 有值，但所指的图像文件实际上不存在的时候，会重新下载图像文件
 //                          根据对象路径下载到本地文件的过程中使用了临时文件，最后再 Move() 到目标文件，这样可以避免偶尔出现的“图像文件被另一进程占用”的报错
 //                          读者信息区的在借册从显示 PII 改为显示 UII
+//      1.9.13  (2024/3/14) 自助借书画面，修正多轮刷新图书信息小卡片时候偶尔出现中间没有刷新的 bug。

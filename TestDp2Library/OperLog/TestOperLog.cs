@@ -476,7 +476,69 @@ namespace TestDp2Library
             var ret = OperLogUtility.GetOperLogCount(
     strDirectory,
     strFileName);
+            Assert.IsTrue(count >= 0);
             Assert.AreEqual(count, ret);
         }
+
+
+        #region 特殊测试
+
+        [TestMethod]
+        public void Test_appendToExistingFile()
+        {
+            string strDirectory = Environment.CurrentDirectory;
+            string strFileName = "20240222.log";
+
+            string strSourceFileName = "c:\\temp\\20240222.log";
+            string strTargetFileName = Path.Combine(strDirectory, strFileName);
+            File.Copy(strSourceFileName, strTargetFileName, true);
+
+            long length1 = FileUtil.GetFileLength(strTargetFileName);
+
+            string xml = "<root />";
+
+            var count1 = OperLogUtility.GetOperLogCount(
+    strDirectory,
+    strFileName);
+            Assert.IsTrue(count1 >= 0);
+
+            // return:
+            //      -1  error
+            //      0   file not found
+            //      1   succeed
+            //      2   超过范围
+            int nRet = OperLogUtility.AppendOperLog(
+                null,
+                strDirectory,
+                strFileName,
+                xml,
+                null,
+                out long tail,
+                out string strError);
+            Assert.AreEqual(1, nRet);
+
+            long length2 = FileUtil.GetFileLength(strTargetFileName);
+            Assert.IsTrue(length2 > length1);
+
+            // 然后尝试读出刚写入的日志记录内容，并加以比对验证
+            nRet = OperLogUtility.GetOperLog(
+                null,
+                strDirectory,
+                strFileName,
+                count1,
+                -1,
+                "",
+                "",
+                null,
+                out long lHintNext,
+                out string output_xml,
+                null,
+                out strError);
+            Assert.AreEqual(1, nRet);
+            Assert.AreEqual(xml, output_xml);
+            Assert.AreEqual(tail, lHintNext);
+        }
+
+        #endregion
     }
 }

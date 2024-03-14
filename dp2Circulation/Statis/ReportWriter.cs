@@ -352,7 +352,7 @@ namespace dp2Circulation
                     writer.WriteEndElement();
                 }
 
-                // XmlNode node = dom.DocumentElement.SelectSingleNode("columns");
+                // XmlNode node = _dom.DocumentElement.SelectSingleNode("columns");
                 if (columns_dom != null && columns_dom.DocumentElement != null)
                     columns_dom.DocumentElement.WriteTo(writer);
 

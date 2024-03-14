@@ -53,7 +53,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>527</ApplicationRevision>
+    <ApplicationRevision>535</ApplicationRevision>
     <ApplicationVersion>3.78.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -2737,7 +2737,7 @@
     <EmbeddedResource Include="SearchForms\VerifyEntityDialog.resx">
       <DependentUpon>VerifyEntityDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="SettlementForm.resx">
+    <EmbeddedResource Include="Amerce\SettlementForm.resx">
       <SubType>Designer</SubType>
       <DependentUpon>SettlementForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -2797,6 +2797,9 @@
     <EmbeddedResource Include="Charging\UrgentChargingForm.resx">
       <SubType>Designer</SubType>
       <DependentUpon>UrgentChargingForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Testing\UcsUploadDialog.resx">
+      <DependentUpon>UcsUploadDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UserForm.resx">
       <SubType>Designer</SubType>
@@ -2987,10 +2990,10 @@
       <DependentUpon>VerifyEntityDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="SearchForms\Z3950Searcher.cs" />
-    <Compile Include="SettlementForm.cs">
+    <Compile Include="Amerce\SettlementForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SettlementForm.Designer.cs">
+    <Compile Include="Amerce\SettlementForm.Designer.cs">
       <DependentUpon>SettlementForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Monitor\StartArriveMonitorDlg.cs">
@@ -3099,6 +3102,12 @@
     <Compile Include="Charging\UrgentChargingForm.Designer.cs">
       <DependentUpon>UrgentChargingForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Testing\UcsUploadDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Testing\UcsUploadDialog.Designer.cs">
+      <DependentUpon>UcsUploadDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Thread\ThreadBase.cs" />
     <Content Include="PatronSheetLayout\card_photo_2X5.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -3154,6 +3163,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="select2\select2.min.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="source_zserver.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="subrecords.css">
@@ -3570,6 +3582,10 @@
     <ProjectReference Include="..\PieChart\PieChart.csproj">
       <Project>{696E929A-6A4A-4C6D-A8B2-C4F25F781940}</Project>
       <Name>PieChart</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UcsUpload\UcsUpload.csproj">
+      <Project>{08259FA8-ED39-482D-870C-FEAAB1F5A5E3}</Project>
+      <Name>UcsUpload</Name>
     </ProjectReference>
     <ProjectReference Include="..\UpgradeUtil\UpgradeUtil.csproj">
       <Project>{F4035EC4-076B-47CB-B8F2-D8EEC7AFE56A}</Project>
@@ -4434,6 +4450,16 @@
       <FileType>File</FileType>
     </PublishFile>
     <PublishFile Include="settlement.css">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="source_zserver.xml">
       <Visible>False</Visible>
       <Group>
       </Group>

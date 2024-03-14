@@ -348,19 +348,28 @@ namespace dp2Circulation
 
             Debug.Assert(strDbName != "", "");
 
+            /*
+        strQueryXml = "<target list='" + strDbName + ":" + strFrom + "'>"
+
+        // start
+        + "<item><word>"
+        + StringUtil.GetXmlStringSimple(strStartTime)
+        + "</word><match>left</match><relation>" + StringUtil.GetXmlStringSimple(">=") + "</relation><dataType>number</dataType><maxCount>-1</maxCount></item>"
+
+        + "<operator value='AND' />"
+        // end
+        + "<item><word>"
+        + StringUtil.GetXmlStringSimple(strEndTime)
+        + "</word><match>left</match><relation>" + StringUtil.GetXmlStringSimple("<=") + "</relation><dataType>number</dataType><maxCount>-1</maxCount></item>"
+        + "<lang>" + this.Lang + "</lang></target>";
+            */
+
             strQueryXml = "<target list='" + strDbName + ":" + strFrom + "'>"
-
-            // start
-            + "<item><word>"
-            + StringUtil.GetXmlStringSimple(strStartTime)
-            + "</word><match>left</match><relation>" + StringUtil.GetXmlStringSimple(">=") + "</relation><dataType>number</dataType><maxCount>-1</maxCount></item>"
-
-            + "<operator value='AND' />"
-            // end
-            + "<item><word>"
-            + StringUtil.GetXmlStringSimple(strEndTime)
-            + "</word><match>left</match><relation>" + StringUtil.GetXmlStringSimple("<=") + "</relation><dataType>number</dataType><maxCount>-1</maxCount></item>"
-            + "<lang>" + this.Lang + "</lang></target>";
++ "<item><word>"
++ StringUtil.GetXmlStringSimple(strStartTime)
++ "~" + StringUtil.GetXmlStringSimple(strEndTime)
++ "</word><match>left</match><relation>range</relation><dataType>number</dataType><maxCount>-1</maxCount></item>"
++ "</target>";
 
 
             if (String.IsNullOrEmpty(strState) == false
@@ -381,7 +390,6 @@ namespace dp2Circulation
 
                 strQueryXml = "<group>" + strQueryXml + "<operator value='AND'/>" + strStateXml + "</group>";
             }
-
 
             return 1;
         ERROR1:
@@ -512,7 +520,7 @@ namespace dp2Circulation
             */
             var looping = Looping(out LibraryChannel channel,
                 "正在检索违约金记录 ...",
-                "disableControl");
+                "disableControl,timeout:0:20:0");
 
             this.m_nInSearching++;
             try

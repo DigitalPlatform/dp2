@@ -784,10 +784,11 @@ idElementName="barcode"
             return 1;
         }
 
+        // 注意用完了要释放 SessionInfo
         SessionInfo GetTempSessionInfo()
         {
-            if (this.m_tempSessionInfo != null)
-                return this.m_tempSessionInfo;
+            //if (this.m_tempSessionInfo != null)
+            //    return this.m_tempSessionInfo;
 
             // 临时的SessionInfo对象
             SessionInfo sessioninfo = new SessionInfo(this.App);
@@ -808,12 +809,12 @@ idElementName="barcode"
 
             sessioninfo.Account = account;
 
-            this.m_tempSessionInfo = sessioninfo;
+            //this.m_tempSessionInfo = sessioninfo;
 
             return sessioninfo;
         }
 
-        SessionInfo m_tempSessionInfo = null;
+        // SessionInfo m_tempSessionInfo = null;
         string PatronDbName = "";   // 同步的读者库名
         string From = "";           // id字段检索途径名
         string IdElementName = "";  // id字段元素名，缺省为 "barcode"
@@ -850,59 +851,61 @@ idElementName="barcode"
 
             SessionInfo sessioninfo = GetTempSessionInfo();
 
-            if (string.IsNullOrEmpty(strLastNumber) == true)
-                strLastNumber = "-1";
-
-            Int64 nStart = 0;
-
-            if (Int64.TryParse(strLastNumber, out nStart) == false)
-            {
-                strError = "参数strLastNumber值 '" + strLastNumber + "' 错误，应当为纯数字";
-                return -1;
-            }
-
-            RmsChannel channel = this.RmsChannels.GetChannel(this.App.WsUrl);
-            if (channel == null)
-            {
-                strError = "get channel error";
-                return -1;
-            }
-
-            Stream file = null;
-
             try
             {
-                file = File.Open(strInputFileName,
-                    FileMode.Open,
-                    FileAccess.Read);
-            }
-            catch (Exception ex)
-            {
-                strError = "打开文件 " + strInputFileName + " 失败: " + ex.Message;
-                return -1;
-            }
+                if (string.IsNullOrEmpty(strLastNumber) == true)
+                    strLastNumber = "-1";
 
-            XmlTextReader reader = new XmlTextReader(file);
+                Int64 nStart = 0;
 
-            try
-            {
-                bool bRet = false;
-
-                while (true)
+                if (Int64.TryParse(strLastNumber, out nStart) == false)
                 {
-                    bRet = reader.Read();
-                    if (bRet == false)
-                    {
-                        strError = "没有根元素";
-                        return -1;
-                    }
-                    if (reader.NodeType == XmlNodeType.Element)
-                        break;
+                    strError = "参数strLastNumber值 '" + strLastNumber + "' 错误，应当为纯数字";
+                    return -1;
                 }
 
-                for (int i = 0; ; i++)
+                RmsChannel channel = this.RmsChannels.GetChannel(this.App.WsUrl);
+                if (channel == null)
                 {
-                    Thread.Sleep(1);    // 避免处理太繁忙
+                    strError = "get channel error";
+                    return -1;
+                }
+
+                Stream file = null;
+
+                try
+                {
+                    file = File.Open(strInputFileName,
+                        FileMode.Open,
+                        FileAccess.Read);
+                }
+                catch (Exception ex)
+                {
+                    strError = "打开文件 " + strInputFileName + " 失败: " + ex.Message;
+                    return -1;
+                }
+
+                XmlTextReader reader = new XmlTextReader(file);
+
+                try
+                {
+                    bool bRet = false;
+
+                    while (true)
+                    {
+                        bRet = reader.Read();
+                        if (bRet == false)
+                        {
+                            strError = "没有根元素";
+                            return -1;
+                        }
+                        if (reader.NodeType == XmlNodeType.Element)
+                            break;
+                    }
+
+                    for (int i = 0; ; i++)
+                    {
+                        Thread.Sleep(1);    // 避免处理太繁忙
 
 #if NO
                     // 2012/2/4
@@ -913,174 +916,112 @@ idElementName="barcode"
                         return -1;
                     }
 #endif
-                    if (this.Stopped == true)
-                    {
-                        strError = "中断处理";
-                        return -1;
-                    }
+                        if (this.Stopped == true)
+                        {
+                            strError = "中断处理";
+                            return -1;
+                        }
 
-                    if (this.Stopped == true)
-                    {
-                        return 1;
-                    }
+                        if (this.Stopped == true)
+                        {
+                            return 1;
+                        }
 
-                    while (true)
-                    {
-                        bRet = reader.Read();
+                        while (true)
+                        {
+                            bRet = reader.Read();
+                            if (bRet == false)
+                                return 0;
+                            if (reader.NodeType == XmlNodeType.Element)
+                                break;
+                        }
+
                         if (bRet == false)
-                            return 0;
-                        if (reader.NodeType == XmlNodeType.Element)
-                            break;
-                    }
+                            return 0;   // 结束
 
-                    if (bRet == false)
-                        return 0;	// 结束
+                        string strSourceXml = reader.ReadOuterXml();
 
-                    string strSourceXml = reader.ReadOuterXml();
-
-                    XmlDocument source_dom = new XmlDocument();
-                    try
-                    {
-                        source_dom.LoadXml(strSourceXml);
-                    }
-                    catch (Exception ex)
-                    {
-                        strError = "strSourceXml字符串装入XMLDOM时出错: " + ex.Message;
-                        return -1;
-                    }
-
-                    string strID = DomUtil.GetElementText(source_dom.DocumentElement,
-                        this.IdElementName);
-                    if (string.IsNullOrEmpty(strID) == true)
-                    {
-                        strError = "来自卡中心的XML记录 '" + strSourceXml + "' 中没有名为 " + this.IdElementName + " 的元素，或其值为空";
-                        return -1;
-                    }
-
-                    ids.Add(strID);
-
-                    // 进入范围才处理
-                    if (i <= nStart)
-                    {
-                        continue;
-                    }
-
-                    int nRedoCount = 0;
-                REDO:
-                    string strExistingXml = "";
-                    // 检索所有读者库，看这条记录是否已经存在
-                    // 通过特定检索途径获得读者记录
-                    // return:
-                    //      -1  error
-                    //      0   not found
-                    //      1   命中1条
-                    //      >1  命中多于1条
-                    nRet = this.App.GetReaderRecXmlByFrom(
-                        // this.RmsChannels,
-                        channel,
-                        null,   // this.PatronDbName,
-                        strID,
-                        this.From,
-                        out strExistingXml,
-                        out string strOutputPath,
-                        out byte[] baTimestamp,
-                        out strError);
-                    if (nRet == -1)
-                    {
-                        strError = "获取读者记录 '" + strID + "' (检索途径 '" + this.From + "') 时发生错误: " + strError;
-                        return -1;
-                    }
-
-                    if (nRet > 1)
-                    {
-                        // 警告，检索命中不唯一
-                        string strErrorText = "获取读者记录 '" + strID + "' (检索途径 '" + this.From + "') 时发现命中多条(" + nRet.ToString() + ")记录，这是一个严重错误，请系统管理员尽快检查修复";
-                        this.AppendResultText(strErrorText + "\r\n");
-                        this.App.WriteErrorLog(strErrorText);
-                        continue;
-                    }
-
-                    if (nRet == 0)
-                    {
-                        // 没有命中。需要创建新的读者记录
-                        nRet = BuildNewPatronXml(
-        source_dom,
-        out string strNewXml,
-        out strError);
-                        if (nRet == -1)
-                            return -1;
-
-                        DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue kernel_errorcode = DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue.NoError;
-
-                        LibraryServerResult result = this.App.SetReaderInfo(
-sessioninfo,
-"new",
-this.PatronDbName + "/?",
-strNewXml,
-null,
-null,
-out strExistingXml,
-out string strSavedXml,
-out string strSavedRecPath,
-out byte[] baNewTimestamp,
-out kernel_errorcode);
-                        if (result.Value == -1)
-                        {
-                            strError = "在数据库 " + this.PatronDbName + " 中创建读者记录时出错: " + result.ErrorInfo;
-                            return -1;
-                        }
-
-                        // this.AppendResultText("创建读者记录 " + strSavedRecPath + "\r\n");
-                        this.SetProgressText("创建读者记录 " + strSavedRecPath);
-                        nCreateCount++;
-                    }
-                    else
-                    {
-                        // 观察是否在同步的读者库中
-                        string strDbName = ResPath.GetDbName(strOutputPath);
-                        if (strDbName != this.PatronDbName
-                            && this.ModifyOtherDbRecords == false)
-                        {
-                            nNotChangedCount++;
-                            continue;
-                        }
-
-                        // 命中，需要检查和修改读者记录
-                        XmlDocument exist_dom = new XmlDocument();
+                        XmlDocument source_dom = new XmlDocument();
                         try
                         {
-                            exist_dom.LoadXml(strExistingXml);
+                            source_dom.LoadXml(strSourceXml);
                         }
                         catch (Exception ex)
                         {
-                            strError = "strExistingXml字符串装入XMLDOM时出错: " + ex.Message;
+                            strError = "strSourceXml字符串装入XMLDOM时出错: " + ex.Message;
                             return -1;
                         }
 
-                        // 检查记录有无修改
+                        string strID = DomUtil.GetElementText(source_dom.DocumentElement,
+                            this.IdElementName);
+                        if (string.IsNullOrEmpty(strID) == true)
+                        {
+                            strError = "来自卡中心的XML记录 '" + strSourceXml + "' 中没有名为 " + this.IdElementName + " 的元素，或其值为空";
+                            return -1;
+                        }
+
+                        ids.Add(strID);
+
+                        // 进入范围才处理
+                        if (i <= nStart)
+                        {
+                            continue;
+                        }
+
+                        int nRedoCount = 0;
+                    REDO:
+                        string strExistingXml = "";
+                        // 检索所有读者库，看这条记录是否已经存在
+                        // 通过特定检索途径获得读者记录
                         // return:
-                        //      -1  出错
-                        //      0   没有修改
-                        //      1   有修改
-                        nRet = MergePatronXml(
-                            exist_dom,
-                            source_dom,
-                            out string strMergedXml,
+                        //      -1  error
+                        //      0   not found
+                        //      1   命中1条
+                        //      >1  命中多于1条
+                        nRet = this.App.GetReaderRecXmlByFrom(
+                            // this.RmsChannels,
+                            channel,
+                            null,   // this.PatronDbName,
+                            strID,
+                            this.From,
+                            out strExistingXml,
+                            out string strOutputPath,
+                            out byte[] baTimestamp,
                             out strError);
                         if (nRet == -1)
-                            return -1;
-
-                        if (nRet == 1)
                         {
+                            strError = "获取读者记录 '" + strID + "' (检索途径 '" + this.From + "') 时发生错误: " + strError;
+                            return -1;
+                        }
+
+                        if (nRet > 1)
+                        {
+                            // 警告，检索命中不唯一
+                            string strErrorText = "获取读者记录 '" + strID + "' (检索途径 '" + this.From + "') 时发现命中多条(" + nRet.ToString() + ")记录，这是一个严重错误，请系统管理员尽快检查修复";
+                            this.AppendResultText(strErrorText + "\r\n");
+                            this.App.WriteErrorLog(strErrorText);
+                            continue;
+                        }
+
+                        if (nRet == 0)
+                        {
+                            // 没有命中。需要创建新的读者记录
+                            nRet = BuildNewPatronXml(
+            source_dom,
+            out string strNewXml,
+            out strError);
+                            if (nRet == -1)
+                                return -1;
+
                             DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue kernel_errorcode = DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue.NoError;
 
                             LibraryServerResult result = this.App.SetReaderInfo(
     sessioninfo,
-    "change",
-    strOutputPath,
-    strMergedXml,
-    strExistingXml,
-    baTimestamp,
+    "new",
+    this.PatronDbName + "/?",
+    strNewXml,
+    null,
+    null,
     out strExistingXml,
     out string strSavedXml,
     out string strSavedRecPath,
@@ -1088,47 +1029,114 @@ out kernel_errorcode);
     out kernel_errorcode);
                             if (result.Value == -1)
                             {
-                                // 时间戳不匹配，重试
-                                if (nRedoCount < 10
-                                    && kernel_errorcode == rms.Client.rmsws_localhost.ErrorCodeValue.TimestampMismatch)
-                                {
-                                    nRedoCount++;
-                                    goto REDO;
-                                }
-
-                                strError = "WriteToReaderDb() 修改保存读者记录 '" + strOutputPath + "' 时出错: " + result.ErrorInfo;
-                                // return -1;
-                                // 2017/6/7
-                                this.App.WriteErrorLog(strError);
-                                this.AppendResultText(strError + "\r\n");
-                                continue;
+                                strError = "在数据库 " + this.PatronDbName + " 中创建读者记录时出错: " + result.ErrorInfo;
+                                return -1;
                             }
-                            // this.AppendResultText("更新读者记录 " + strSavedRecPath + "\r\n");
-                            this.SetProgressText("更新读者记录 " + strSavedRecPath);
-                            nChangedCount++;
+
+                            // this.AppendResultText("创建读者记录 " + strSavedRecPath + "\r\n");
+                            this.SetProgressText("创建读者记录 " + strSavedRecPath);
+                            nCreateCount++;
                         }
                         else
                         {
-                            nNotChangedCount++;
+                            // 观察是否在同步的读者库中
+                            string strDbName = ResPath.GetDbName(strOutputPath);
+                            if (strDbName != this.PatronDbName
+                                && this.ModifyOtherDbRecords == false)
+                            {
+                                nNotChangedCount++;
+                                continue;
+                            }
+
+                            // 命中，需要检查和修改读者记录
+                            XmlDocument exist_dom = new XmlDocument();
+                            try
+                            {
+                                exist_dom.LoadXml(strExistingXml);
+                            }
+                            catch (Exception ex)
+                            {
+                                strError = "strExistingXml字符串装入XMLDOM时出错: " + ex.Message;
+                                return -1;
+                            }
+
+                            // 检查记录有无修改
+                            // return:
+                            //      -1  出错
+                            //      0   没有修改
+                            //      1   有修改
+                            nRet = MergePatronXml(
+                                exist_dom,
+                                source_dom,
+                                out string strMergedXml,
+                                out strError);
+                            if (nRet == -1)
+                                return -1;
+
+                            if (nRet == 1)
+                            {
+                                DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue kernel_errorcode = DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue.NoError;
+
+                                LibraryServerResult result = this.App.SetReaderInfo(
+        sessioninfo,
+        "change",
+        strOutputPath,
+        strMergedXml,
+        strExistingXml,
+        baTimestamp,
+        out strExistingXml,
+        out string strSavedXml,
+        out string strSavedRecPath,
+        out byte[] baNewTimestamp,
+        out kernel_errorcode);
+                                if (result.Value == -1)
+                                {
+                                    // 时间戳不匹配，重试
+                                    if (nRedoCount < 10
+                                        && kernel_errorcode == rms.Client.rmsws_localhost.ErrorCodeValue.TimestampMismatch)
+                                    {
+                                        nRedoCount++;
+                                        goto REDO;
+                                    }
+
+                                    strError = "WriteToReaderDb() 修改保存读者记录 '" + strOutputPath + "' 时出错: " + result.ErrorInfo;
+                                    // return -1;
+                                    // 2017/6/7
+                                    this.App.WriteErrorLog(strError);
+                                    this.AppendResultText(strError + "\r\n");
+                                    continue;
+                                }
+                                // this.AppendResultText("更新读者记录 " + strSavedRecPath + "\r\n");
+                                this.SetProgressText("更新读者记录 " + strSavedRecPath);
+                                nChangedCount++;
+                            }
+                            else
+                            {
+                                nNotChangedCount++;
+                            }
+
                         }
 
+                        strMaxNumber = i.ToString();
                     }
-
-                    strMaxNumber = i.ToString();
                 }
+                finally
+                {
+                    if (reader != null)
+                        reader.Close();
+                    if (file != null)
+                        file.Close();
+
+                    this.SetProgressText("");
+                    this.AppendResultText("创建记录数 " + nCreateCount.ToString() + "; 修改记录数 " + nChangedCount.ToString() + "; 没有发生变化的记录数 " + nNotChangedCount.ToString() + "\r\n");
+                }
+
+                return 0;
             }
             finally
             {
-                if (reader != null)
-                    reader.Close();
-                if (file != null)
-                    file.Close();
-
-                this.SetProgressText("");
-                this.AppendResultText("创建记录数 " + nCreateCount.ToString() + "; 修改记录数 " + nChangedCount.ToString() + "; 没有发生变化的记录数 " + nNotChangedCount.ToString() + "\r\n");
+                sessioninfo.CloseSession(); // 2024/2/22
             }
-
-            return 0;
         }
 
         // 根据两个集合的差异部分,标记删除卡中心全部记录中为包含的当前读者记录
@@ -1148,16 +1156,18 @@ out kernel_errorcode);
 
             SessionInfo sessioninfo = GetTempSessionInfo();
 
-            RmsChannel channel = this.RmsChannels.GetChannel(this.App.WsUrl);
-            if (channel == null)
+            try
             {
-                strError = "get channel error";
-                return -1;
-            }
+                RmsChannel channel = this.RmsChannels.GetChannel(this.App.WsUrl);
+                if (channel == null)
+                {
+                    strError = "get channel error";
+                    return -1;
+                }
 
-            for (int i = 0; i < ids.Count; i++)
-            {
-                Thread.Sleep(1);    // 避免处理太繁忙
+                for (int i = 0; i < ids.Count; i++)
+                {
+                    Thread.Sleep(1);    // 避免处理太繁忙
 
 #if NO
                 // 2012/2/4
@@ -1168,143 +1178,148 @@ out kernel_errorcode);
                     return -1;
                 }
 #endif
-                if (this.Stopped == true)
-                {
-                    strError = "中断处理";
-                    return -1;
-                }
-
-                if (this.Stopped == true)
-                {
-                    return 1;
-                }
-
-                string strID = ids[i].Trim();
-                if (string.IsNullOrEmpty(strID) == true)
-                {
-                    Debug.Assert(false, "");
-                    continue;
-                }
-
-                int nRedoCount = 0;
-            REDO:
-                string strExistingXml = "";
-                string strOutputPath = "";
-                byte[] baTimestamp = null;
-                // 检索读者库，看这条记录是否已经存在
-                // 通过特定检索途径获得读者记录
-                // return:
-                //      -1  error
-                //      0   not found
-                //      1   命中1条
-                //      >1  命中多于1条
-                nRet = this.App.GetReaderRecXmlByFrom(
-                    // this.RmsChannels,
-                    channel,
-                    this.PatronDbName,
-                    strID,
-                    this.From,
-                    out strExistingXml,
-                    out strOutputPath,
-                    out baTimestamp,
-                    out strError);
-                if (nRet == -1)
-                {
-                    strError = "获取读者记录 '" + strID + "' (检索途径 '" + this.From + "') 时发生错误: " + strError;
-                    return -1;
-                }
-                if (nRet == 0)
-                {
-                    // 等到处理记录的时候，发现记录已经不存在
-                    this.App.WriteErrorLog("PatronReplication: 在删除阶段发现ID为 '" + strID + "' 的读者记录已经不存在");
-                    continue;
-                }
-
-                if (nRet > 1)
-                {
-                    // TODO: 警告，检索命中不唯一
-                }
-
-                {
-                    // 命中，需要检查和修改读者记录
-                    XmlDocument exist_dom = new XmlDocument();
-                    try
+                    if (this.Stopped == true)
                     {
-                        exist_dom.LoadXml(strExistingXml);
-                    }
-                    catch (Exception ex)
-                    {
-                        strError = "strExistingXml字符串装入XMLDOM时出错: " + ex.Message;
+                        strError = "中断处理";
                         return -1;
                     }
 
-                    string strOutputXml = "";
+                    if (this.Stopped == true)
+                    {
+                        return 1;
+                    }
 
-                    // 准备要标记删除写回的XML记录
+                    string strID = ids[i].Trim();
+                    if (string.IsNullOrEmpty(strID) == true)
+                    {
+                        Debug.Assert(false, "");
+                        continue;
+                    }
+
+                    int nRedoCount = 0;
+                REDO:
+                    string strExistingXml = "";
+                    string strOutputPath = "";
+                    byte[] baTimestamp = null;
+                    // 检索读者库，看这条记录是否已经存在
+                    // 通过特定检索途径获得读者记录
                     // return:
-                    //      -1  出错
-                    //      0   没有修改(本来就是标记删除状态)
-                    //      1   有修改
-                    nRet = BuildMaskDeleteXml(
-                        exist_dom,
-                        out strOutputXml,
+                    //      -1  error
+                    //      0   not found
+                    //      1   命中1条
+                    //      >1  命中多于1条
+                    nRet = this.App.GetReaderRecXmlByFrom(
+                        // this.RmsChannels,
+                        channel,
+                        this.PatronDbName,
+                        strID,
+                        this.From,
+                        out strExistingXml,
+                        out strOutputPath,
+                        out baTimestamp,
                         out strError);
                     if (nRet == -1)
-                        return -1;
-
-                    if (nRet == 1)
                     {
-                        string strSavedXml = "";
-                        string strSavedRecPath = "";
-                        byte[] baNewTimestamp = null;
-                        DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue kernel_errorcode = DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue.NoError;
+                        strError = "获取读者记录 '" + strID + "' (检索途径 '" + this.From + "') 时发生错误: " + strError;
+                        return -1;
+                    }
+                    if (nRet == 0)
+                    {
+                        // 等到处理记录的时候，发现记录已经不存在
+                        this.App.WriteErrorLog("PatronReplication: 在删除阶段发现ID为 '" + strID + "' 的读者记录已经不存在");
+                        continue;
+                    }
 
-                        LibraryServerResult result = this.App.SetReaderInfo(
-sessioninfo,
-"change",
-strOutputPath,
-strOutputXml,
-strExistingXml,
-baTimestamp,
-out strExistingXml,
-out strSavedXml,
-out strSavedRecPath,
-out baNewTimestamp,
-out kernel_errorcode);
-                        if (result.Value == -1)
+                    if (nRet > 1)
+                    {
+                        // TODO: 警告，检索命中不唯一
+                    }
+
+                    {
+                        // 命中，需要检查和修改读者记录
+                        XmlDocument exist_dom = new XmlDocument();
+                        try
                         {
-                            // 时间戳不匹配，重试
-                            if (nRedoCount < 10
-                                && kernel_errorcode == rms.Client.rmsws_localhost.ErrorCodeValue.TimestampMismatch)
-                            {
-                                nRedoCount++;
-                                goto REDO;
-                            }
-
-                            strError = "MaskDeleteRecords() 修改保存读者记录 '" + strOutputPath + "' 时出错: " + result.ErrorInfo;
-                            // return -1;
-                            // 2017/6/7
-                            this.App.WriteErrorLog(strError);
-                            this.AppendResultText(strError + "\r\n");
-                            continue;
+                            exist_dom.LoadXml(strExistingXml);
+                        }
+                        catch (Exception ex)
+                        {
+                            strError = "strExistingXml字符串装入XMLDOM时出错: " + ex.Message;
+                            return -1;
                         }
 
-                        // this.AppendResultText("标记删除读者记录 '" + strOutputPath + "'\r\n");
-                        this.SetProgressText("标记删除读者记录 " + strOutputPath);
-                        nDeleteCount++;
-                    }
-                    else
-                    {
-                        this.SetProgressText("发现已经标记删除读者记录 '" + strOutputPath);
-                        nNotChangedCount++;
+                        string strOutputXml = "";
+
+                        // 准备要标记删除写回的XML记录
+                        // return:
+                        //      -1  出错
+                        //      0   没有修改(本来就是标记删除状态)
+                        //      1   有修改
+                        nRet = BuildMaskDeleteXml(
+                            exist_dom,
+                            out strOutputXml,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+
+                        if (nRet == 1)
+                        {
+                            string strSavedXml = "";
+                            string strSavedRecPath = "";
+                            byte[] baNewTimestamp = null;
+                            DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue kernel_errorcode = DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue.NoError;
+
+                            LibraryServerResult result = this.App.SetReaderInfo(
+    sessioninfo,
+    "change",
+    strOutputPath,
+    strOutputXml,
+    strExistingXml,
+    baTimestamp,
+    out strExistingXml,
+    out strSavedXml,
+    out strSavedRecPath,
+    out baNewTimestamp,
+    out kernel_errorcode);
+                            if (result.Value == -1)
+                            {
+                                // 时间戳不匹配，重试
+                                if (nRedoCount < 10
+                                    && kernel_errorcode == rms.Client.rmsws_localhost.ErrorCodeValue.TimestampMismatch)
+                                {
+                                    nRedoCount++;
+                                    goto REDO;
+                                }
+
+                                strError = "MaskDeleteRecords() 修改保存读者记录 '" + strOutputPath + "' 时出错: " + result.ErrorInfo;
+                                // return -1;
+                                // 2017/6/7
+                                this.App.WriteErrorLog(strError);
+                                this.AppendResultText(strError + "\r\n");
+                                continue;
+                            }
+
+                            // this.AppendResultText("标记删除读者记录 '" + strOutputPath + "'\r\n");
+                            this.SetProgressText("标记删除读者记录 " + strOutputPath);
+                            nDeleteCount++;
+                        }
+                        else
+                        {
+                            this.SetProgressText("发现已经标记删除读者记录 '" + strOutputPath);
+                            nNotChangedCount++;
+                        }
                     }
                 }
+
+                this.SetProgressText("");
+                this.AppendResultText("本次标记删除记录数 " + nDeleteCount.ToString() + "; 原先已经标记删除的记录数 " + nNotChangedCount.ToString() + "\r\n");
+
+                return 0;
             }
-
-            this.SetProgressText("");
-            this.AppendResultText("本次标记删除记录数 " + nDeleteCount.ToString() + "; 原先已经标记删除的记录数 " + nNotChangedCount.ToString() + "\r\n");
-
-            return 0;
+            finally
+            {
+                sessioninfo.CloseSession(); // 2024/2/22
+            }
         }
 
         // 读者记录中 需要从卡中心同步的 元素名列表

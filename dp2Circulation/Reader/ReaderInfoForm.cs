@@ -2599,7 +2599,7 @@ new_dom.DocumentElement,
             DomUtil.DeleteElement(dom.DocumentElement, "fingerprint");
             DomUtil.DeleteElement(dom.DocumentElement, "hire");
             DomUtil.DeleteElement(dom.DocumentElement, "foregift");
-            // DomUtil.DeleteElement(dom.DocumentElement, "personalLibrary");
+            // DomUtil.DeleteElement(_dom.DocumentElement, "personalLibrary");
             DomUtil.DeleteElement(dom.DocumentElement, "friends");
 
             // 2019/8/1
@@ -7494,7 +7494,7 @@ MessageBoxDefaultButton.Button1);
 
             /*
             // 发证日期
-            DomUtil.SetElementText(dom.DocumentElement, "createDate", strCreateDate);
+            DomUtil.SetElementText(_dom.DocumentElement, "createDate", strCreateDate);
              * */
 
             // 失效期
@@ -7612,7 +7612,7 @@ MessageBoxDefaultButton.Button1);
                 "200",
                 "c");
 
-            DomUtil.SetElementText(dom.DocumentElement, "birthday", strBirthday);
+            DomUtil.SetElementText(_dom.DocumentElement, "birthday", strBirthday);
              * */
 
             // 身份证号

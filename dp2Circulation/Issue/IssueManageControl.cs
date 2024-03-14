@@ -157,10 +157,10 @@ namespace dp2Circulation
 
             /*
             item.Xml = strXml;
-            item.dom = new XmlDocument();
+            item._dom = new XmlDocument();
             try
             {
-                item.dom.LoadXml(strXml);
+                item._dom.LoadXml(strXml);
             }
             catch (Exception ex)
             {
@@ -681,14 +681,14 @@ namespace dp2Circulation
                 dom.LoadXml(strXml);
 
                 /*
-                DomUtil.SetElementText(dom.DocumentElement,
+                DomUtil.SetElementText(_dom.DocumentElement,
                     "parent", Global.GetID(this.BiblioRecPath));
                  * */
 
                 /*
                 if (design_item.NewlyAcceptedCount > 0)
                 {
-                    DomUtil.SetElementText(dom.DocumentElement,
+                    DomUtil.SetElementText(_dom.DocumentElement,
                         "state", "已验收");
                 }*/
 

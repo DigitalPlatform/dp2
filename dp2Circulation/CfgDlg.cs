@@ -13,6 +13,7 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.Z3950.UI;
+using dp2Circulation.Testing;
 
 namespace dp2Circulation
 {
@@ -878,6 +879,34 @@ namespace dp2Circulation
     "message",
     "shelfAccount",
     "");
+                // *** Z3950
+
+                this.textBox_ucs_apiUrl.Text =
+                    ap.GetString(
+    "ucsUpload",
+    "apiURL",
+    "http://202.96.31.28/X");
+
+                this.textBox_ucs_databaseName.Text =
+                    ap.GetString(
+    "ucsUpload",
+    "databaseName",
+    "UCS01");
+
+                this.textBox_ucs_userName.Text =
+                    ap.GetString(
+    "ucsUpload",
+    "userName",
+    "");
+
+                {
+                    string password =
+        ap.GetString(
+    "ucsUpload",
+    "password",
+    "");
+                    this.textBox_ucs_password.Text = Program.MainForm.DecryptPasssword(password);
+                }
 
                 checkBox_charging_isbnBorrow_CheckedChanged(this, null);
                 checkBox_quickCharging_isbnBorrow_CheckedChanged(this, null);
@@ -1635,6 +1664,32 @@ this.checkBox_patron_disableBioKeyboardSimulation.Checked);
 "shelfAccount",
 this.textBox_message_shelfAccount.Text);
 
+                // *** Z3950
+
+                ap.SetString(
+    "ucsUpload",
+    "apiURL",
+    this.textBox_ucs_apiUrl.Text);
+
+                ap.SetString(
+"ucsUpload",
+"databaseName",
+this.textBox_ucs_databaseName.Text);
+
+                ap.SetString(
+"ucsUpload",
+"userName",
+this.textBox_ucs_userName.Text);
+
+                {
+                    string password = Program.MainForm.EncryptPassword(this.textBox_ucs_password.Text);
+
+                    ap.SetString(
+                        "ucsUpload",
+                        "password",
+                        password);
+                }
+
                 if (m_bServerCfgChanged == true
                     && Program.MainForm != null)
                 {
@@ -2108,6 +2163,7 @@ MessageBoxDefaultButton.Button2);
             {
                 MainForm.SetControlFont(dlg, this.Font, false);
                 dlg.XmlFileName = Path.Combine(Program.MainForm.UserDir, "zserver.xml");
+                dlg.SourceServerFileName = Path.Combine(Program.MainForm.DataDir, "source_zserver.xml");
                 dlg.StartPosition = FormStartPosition.CenterParent;
                 dlg.ShowDialog(this);
             }
@@ -2237,6 +2293,22 @@ MessageBoxDefaultButton.Button2);
                 && comboBox_uhf_dataFormat.Text == "国标格式")
             {
                 MessageBox.Show(this, "警告: 对于超高频标签的国标格式，您选择了将“机构代码”写入 User Bank，这是一种不常见的做法，可能会导致兼容性问题，请仔细斟酌选择。\r\n\r\n一般的做法是将“机构代码”写入到 EPC Bank 中即可，这是默认行为，不需要特意指定");
+            }
+        }
+
+        private void button_ucs_testUpload_Click(object sender, EventArgs e)
+        {
+            this.button_ucs_testUpload.Enabled = false;
+            try
+            {
+                using (UcsUploadDialog dlg = new UcsUploadDialog())
+                {
+                    dlg.ShowDialog(this);
+                }
+            }
+            finally
+            {
+                this.button_ucs_testUpload.Enabled = true;
             }
         }
     }

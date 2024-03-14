@@ -183,7 +183,7 @@ namespace dp2Circulation
                 string strDatabaseName = database_names[i];
 
                 string strDefaultProject = "";
-                // XmlNode nodeDefault = dom.DocumentElement.SelectSingleNode("//defaultProject/sourceDatabase[@name='" + strDatabaseName + "']");
+                // XmlNode nodeDefault = _dom.DocumentElement.SelectSingleNode("//defaultProject/sourceDatabase[@name='" + strDatabaseName + "']");
                 XmlNode nodeDefault = dom.DocumentElement.SelectSingleNode("//default[@origin='" + strDatabaseName + "']");
                 if (nodeDefault != null)
                     strDefaultProject = DomUtil.GetAttr(nodeDefault, "project");
@@ -203,7 +203,7 @@ namespace dp2Circulation
                 string strDatabaseName = startpaths[i];
 
                 string strDefaultProject = "";
-                // XmlNode nodeDefault = dom.DocumentElement.SelectSingleNode("//defaultProject/sourceDatabase[@name='" + strDatabaseName + "']");
+                // XmlNode nodeDefault = _dom.DocumentElement.SelectSingleNode("//defaultProject/sourceDatabase[@name='" + strDatabaseName + "']");
                 XmlNode nodeDefault = dom.DocumentElement.SelectSingleNode("//default[@origin='" + strDatabaseName + "']");
                 if (nodeDefault != null)
                     strDefaultProject = DomUtil.GetAttr(nodeDefault, "project");

@@ -1546,7 +1546,9 @@ out strError);
                     if (string.IsNullOrEmpty(id))
                         throw new Exception($"下级记录在 bdf 文件中记载的原始路径为 '{strPath}'，无法获得 ID 部分");
 
-                    string current_dbName = Program.MainForm.GetItemDbName(Global.GetDbName(info.BiblioRecPath));
+                    string current_dbName = Program.MainForm.GetItemDbName(
+                        Global.GetDbName(info.BiblioRecPath), 
+                        strRootElementName);    // 2024/3/7
                     if (dbName != current_dbName)
                     {
                         throw new Exception($"下级记录在 bdf 文件中记载的原始路径为 '{strPath}'，其中的库名部分 '{dbName}' 和即将导入的库名 '{current_dbName}' 不吻合，因此无法实现覆盖回原始 ID 的效果 ");

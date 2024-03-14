@@ -2024,7 +2024,7 @@ namespace dp2Circulation
                     /*
                     XmlNodeList nodes = null;
 
-                    nodes = this.dom.DocumentElement.SelectNodes("orderInfo/*");
+                    nodes = this._dom.DocumentElement.SelectNodes("orderInfo/*");
                      * */
                 }
                 this.OrderInfoLoaded = true;
@@ -2270,7 +2270,7 @@ namespace dp2Circulation
             /*
             // 根据Xml中<orderInfo>元素内容，计算出还没有到达的预测册，追加在右边
             // TODO: 将来是否从一个恒定的位置开始追加? 
-            XmlNodeList nodes = this.dom.DocumentElement.SelectNodes("orderInfo/*");
+            XmlNodeList nodes = this._dom.DocumentElement.SelectNodes("orderInfo/*");
 
             if (nodes.Count == 0
                 && this.OrderInfoLoaded == false)
@@ -2294,11 +2294,11 @@ namespace dp2Circulation
                 }
                 else
                 {
-                    XmlNode root = this.dom.DocumentElement.SelectSingleNode("orderInfo");
+                    XmlNode root = this._dom.DocumentElement.SelectSingleNode("orderInfo");
                     if (root == null)
                     {
-                        root = this.dom.CreateElement("orderInfo");
-                        this.dom.DocumentElement.AppendChild(root);
+                        root = this._dom.CreateElement("orderInfo");
+                        this._dom.DocumentElement.AppendChild(root);
                     }
                     for (int i = 0; i < e1.OrderXmls.Count; i++)
                     {
@@ -2312,11 +2312,11 @@ namespace dp2Circulation
                             strError = "订购记录第 " + i.ToString() + " 个XML装入DOM时出错: " + ex.Message;
                             return -1;
                         }
-                        XmlNode node = this.dom.CreateElement("root");
+                        XmlNode node = this._dom.CreateElement("root");
                         root.AppendChild(node);
                         node.InnerXml = whole_dom.DocumentElement.InnerXml;
                     }
-                    nodes = this.dom.DocumentElement.SelectNodes("orderInfo/*");
+                    nodes = this._dom.DocumentElement.SelectNodes("orderInfo/*");
                 }
             }
 
@@ -2417,7 +2417,7 @@ namespace dp2Circulation
 
             /*
             // 根据Xml中<orderInfo>元素内容，初始化出全部应有的位置
-            XmlNodeList nodes = this.dom.DocumentElement.SelectNodes("orderInfo/*");
+            XmlNodeList nodes = this._dom.DocumentElement.SelectNodes("orderInfo/*");
 
             if (nodes.Count == 0
                 && this.OrderInfoLoaded == false)
@@ -2441,11 +2441,11 @@ namespace dp2Circulation
                 }
                 else
                 {
-                    XmlNode root = this.dom.DocumentElement.SelectSingleNode("orderInfo");
+                    XmlNode root = this._dom.DocumentElement.SelectSingleNode("orderInfo");
                     if (root == null)
                     {
-                        root = this.dom.CreateElement("orderInfo");
-                        this.dom.DocumentElement.AppendChild(root);
+                        root = this._dom.CreateElement("orderInfo");
+                        this._dom.DocumentElement.AppendChild(root);
                     }
                     for (int i = 0; i < e1.OrderXmls.Count; i++)
                     {
@@ -2459,11 +2459,11 @@ namespace dp2Circulation
                             strError = "订购记录第 " + i.ToString() + " 个XML装入DOM时出错: " + ex.Message;
                             return -1;
                         }
-                        XmlNode node = this.dom.CreateElement("root");
+                        XmlNode node = this._dom.CreateElement("root");
                         root.AppendChild(node);
                         node.InnerXml = whole_dom.DocumentElement.InnerXml;
                     }
-                    nodes = this.dom.DocumentElement.SelectNodes("orderInfo/*");
+                    nodes = this._dom.DocumentElement.SelectNodes("orderInfo/*");
                 }
             }
 
@@ -6570,8 +6570,8 @@ rectFrame);
             string strBatchNo = this.Container.Container.GetAcceptingBatchNo();
 
             /*
-            XmlNode order_node = order_item.dom.DocumentElement;
-            Debug.Assert(order_item.dom != null, "");
+            XmlNode order_node = order_item._dom.DocumentElement;
+            Debug.Assert(order_item._dom != null, "");
             Debug.Assert(order_node != null, "");
              * */
 
@@ -7052,22 +7052,22 @@ rectFrame);
             strInnerXml = "";
             strError = "";
 
-            XmlDocument dom = new XmlDocument();
-            dom.LoadXml("<binding />");
+            XmlDocument _dom = new XmlDocument();
+            _dom.LoadXml("<binding />");
 
             for (int i = 0; i < items.Count; i++)
             {
                 ItemBindingItem item = items[i];
 
-                XmlNode node = dom.CreateElement("item");
-                dom.DocumentElement.AppendChild(node);
+                XmlNode node = _dom.CreateElement("item");
+                _dom.DocumentElement.AppendChild(node);
 
                 DomUtil.SetAttr(node, "publishTime", item.PublishTime);
                 DomUtil.SetAttr(node, "volume", item.Volume);
                 DomUtil.SetAttr(node, "refID", item.RefID);
             }
 
-            strInnerXml = dom.DocumentElement.InnerXml;
+            strInnerXml = _dom.DocumentElement.InnerXml;
 
             return 0;
         }

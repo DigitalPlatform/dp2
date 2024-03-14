@@ -1308,7 +1308,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                 // 顺次根据 记录路径 -- 条码 -- 登录号 来定位
                 nRet = LocateBookItem(
                     errorinfos[i].OldRecPath,   // 原来是NewRecPath
-                    dom,
+                    _dom,
                     out bookitem,
                     out strBarcode,
                     out strRegisterNo,

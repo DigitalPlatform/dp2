@@ -686,6 +686,8 @@ out strError);
                     deleted_fields.Add(target_field);
             }
 
+            // FmtMarcNodeComparer comparer = new FmtMarcNodeComparer();
+
             int nCount = 0;
             foreach (MarcField source_field in source_record.Fields)
             {
@@ -700,7 +702,8 @@ out strError);
                     }
                     else
                         target_record.ChildNodes.insertSequence(new MarcField(source_field.Text),
-    InsertSequenceStyle.PreferTail);
+    InsertSequenceStyle.PreferTail/*,
+    comparer*/);
                     nCount++;
                 }
                 else
@@ -734,6 +737,37 @@ out strError);
                 strTargetMarc = target_record.Text;
             return nCount;
         }
+
+        // 2024/3/6
+        // 带有 FMT 靠前排序能力的新排序类
+
+        class FmtMarcNodeComparer : IComparer<MarcNode>
+        {
+            int IComparer<MarcNode>.Compare(MarcNode x, MarcNode y)
+            {
+                // 如果名字字符串中出现了字符 '-'，需要特殊的比较方式
+                if (x.Name.IndexOf("-") != -1 
+                    || y.Name.IndexOf("-") != -1
+                    || x.Name == "FMT"
+                    || y.Name == "FMT")
+                    return CompareFieldName(x.Name, y.Name);
+                return string.Compare(x.Name, y.Name);
+            }
+
+            // 字段名字符串比较大小
+            // "-01"理解为比"001"更小
+            public static int CompareFieldName(string s1, string s2)
+            {
+                if (s1 == "FMT")
+                    s1 = "///";
+                if (s2 == "FMT")
+                    s2 = "///";
+                s1 = s1.Replace("-", "/");
+                s2 = s2.Replace("-", "/");
+                return string.CompareOrdinal(s1, s2);
+            }
+        }
+
 
         static MarcField FindField(List<MarcField> fields, string name)
         {

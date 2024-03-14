@@ -32,6 +32,8 @@ using DigitalPlatform.dp2.Statis;
 using System.Threading.Tasks;
 using Jint.Parser.Ast;
 using System.Data.Sql;
+using DocumentFormat.OpenXml.Wordprocessing;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
 
 // 2017/4/9 从 this.Channel 用法改造为 ChannelPool 用法
 
@@ -256,55 +258,57 @@ namespace dp2Circulation
         /// <summary>
         /// 合并后数据的列号: 已到的套数
         /// </summary>
-        public static int MERGED_COLUMN_ACCEPTCOPY = 17;       // 已到的套数
+        public static int MERGED_COLUMN_ACCEPTCOPY = 17;       // 已到的套数 根据馆藏分配得到
+
+        public static int MERGED_COLUMN_ACCEPTCOPY_2 = 18;       // 已到的套数 根据复本数右侧得到
 
         /// <summary>
         /// 合并后数据的列号: 已到的每套册数
         /// </summary>
-        public static int MERGED_COLUMN_ACCEPTSUBCOPY = 18;       // 已到的每套册数
+        public static int MERGED_COLUMN_ACCEPTSUBCOPY = 19;       // 已到的每套册数
 
 
         /// <summary>
         /// 合并后数据的列号: 到书码洋
         /// </summary>
-        public static int MERGED_COLUMN_ACCEPTFIXEDPRICE = 19;       // 到书码洋
+        public static int MERGED_COLUMN_ACCEPTFIXEDPRICE = 20;       // 到书码洋
 
         /// <summary>
         /// 合并后数据的列号: 到书折扣
         /// </summary>
-        public static int MERGED_COLUMN_ACCEPTDISCOUNT = 20;       // 到书折扣
+        public static int MERGED_COLUMN_ACCEPTDISCOUNT = 21;       // 到书折扣
 
         /// <summary>
         /// 合并后数据的列号: 到书单价
         /// </summary>
-        public static int MERGED_COLUMN_ACCEPTPRICE = 21;       // 到书单价
+        public static int MERGED_COLUMN_ACCEPTPRICE = 22;       // 到书单价
 
         /// <summary>
         /// 合并后数据的列号: 到书总价格
         /// </summary>
-        public static int MERGED_COLUMN_ACCEPTTOTALPRICE = 22;        // 到书总价格
+        public static int MERGED_COLUMN_ACCEPTTOTALPRICE = 23;        // 到书总价格
 
         /// <summary>
         /// 合并后数据的列号: 到书总码洋价格
         /// </summary>
-        public static int MERGED_COLUMN_ACCEPTTOTALFIXEDPRICE = 23;        // 到书总码洋价格
+        public static int MERGED_COLUMN_ACCEPTTOTALFIXEDPRICE = 24;        // 到书总码洋价格
 
         /// <summary>
         /// 合并后数据的列号: 类别
         /// </summary>
-        public static int MERGED_COLUMN_CLASS = 24;             // 类别
+        public static int MERGED_COLUMN_CLASS = 25;             // 类别
         /// <summary>
         /// 合并后数据的列号: 附注
         /// </summary>
-        public static int MERGED_COLUMN_COMMENT = 25;          // 附注
+        public static int MERGED_COLUMN_COMMENT = 26;          // 附注
         /// <summary>
         /// 合并后数据的列号: 渠道地址
         /// </summary>
-        public static int MERGED_COLUMN_SELLERADDRESS = 26;    // 渠道地址
+        public static int MERGED_COLUMN_SELLERADDRESS = 27;    // 渠道地址
         /// <summary>
         /// 合并后数据的列号: 种记录路径
         /// </summary>
-        public static int MERGED_COLUMN_BIBLIORECPATH = 27;    // 种记录路径
+        public static int MERGED_COLUMN_BIBLIORECPATH = 28;    // 种记录路径
 
         #endregion
 
@@ -2122,6 +2126,7 @@ out strError);
             ColumnHeader columnHeader_orderID = new ColumnHeader();
             ColumnHeader columnHeader_distribute = new ColumnHeader();
             ColumnHeader columnHeader_acceptcopy = new ColumnHeader();
+            ColumnHeader columnHeader_acceptcopy_2 = new ColumnHeader();
             ColumnHeader columnHeader_acceptsubcopy = new ColumnHeader();
             ColumnHeader columnHeader_acceptprice = new ColumnHeader();
             ColumnHeader columnHeader_acceptfixedprice = new ColumnHeader();
@@ -2155,6 +2160,7 @@ out strError);
             columnHeader_orderID,
             columnHeader_distribute,
             columnHeader_acceptcopy,
+            columnHeader_acceptcopy_2,
             columnHeader_acceptsubcopy,
             columnHeader_acceptfixedprice,
             columnHeader_acceptdiscount,
@@ -2264,6 +2270,11 @@ out strError);
             // 
             columnHeader_acceptcopy.Text = "已到套数";
             columnHeader_acceptcopy.Width = 100;
+            // 
+            // columnHeader_acceptcopy_2
+            // 
+            columnHeader_acceptcopy_2.Text = "已到套数(参考)";
+            columnHeader_acceptcopy_2.Width = 100;
             // 
             // columnHeader_acceptsubcopy
             // 
@@ -9060,10 +9071,16 @@ ORIGIN_COLUMN_COPY);
                             strAcceptSeries = locations.GetArrivedCopy().ToString();
                         }
 
-                        // acceptcopy
+                        // acceptcopy -- 根据馆藏分配字段得到
                         ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ACCEPTCOPY,
                             strAcceptSeries);
                     }
+
+                    // 2024/3/8
+                    // acceptcopy -- 根据副本数字段得到
+                    ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ACCEPTCOPY_2,
+                        source_line.Copy.NewCopy.Copy.ToString());
+
 
                     // acceptsubcopy
                     ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ACCEPTSUBCOPY,
@@ -11816,30 +11833,49 @@ TaskScheduler.Default);
 
             foreach (ListViewItem item in items)
             {
-                string strDistributes = item.SubItems[MERGED_COLUMN_DISTRIBUTE].Text;
-                if (string.IsNullOrEmpty(strDistributes) == true)
-                    continue;
+                string strAcceptCopy2 = ListViewUtil.GetItemText(item, MERGED_COLUMN_ACCEPTCOPY_2);
 
-                LocationCollection locations = new LocationCollection();
-                nRet = locations.Build(strDistributes,
-                    out strError);
-                if (nRet == -1)
+                string strDistributes = item.SubItems[MERGED_COLUMN_DISTRIBUTE].Text;
+
+                List<string> refids = new List<string>();
+
+                if (string.IsNullOrEmpty(strDistributes) == false)
                 {
-                    strError = "馆藏分配字符串 '" + strDistributes + "' 格式错误: " + strError;
-                    return -1;
+                    LocationCollection locations = new LocationCollection();
+                    nRet = locations.Build(strDistributes,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "馆藏分配字符串 '" + strDistributes + "' 格式错误: " + strError;
+                        return -1;
+                    }
+
+                    refids = locations.GetRefIDs();
                 }
 
-                OneLine info = new OneLine();
-                info.Item = item;
-                info.Books = new List<OneBook>();
+                if (Int32.TryParse(strAcceptCopy2, out int accept_copy) == false)
+                    accept_copy = 0;    // TODO: 报错或者警告
 
-                infos.Add(info);
-                List<string> refids = locations.GetRefIDs();
-                foreach (string s in refids)
+                // 2024/3/8
+                // 增强健壮性。用验收册数，来补齐 refids
+                while (refids.Count < accept_copy)
                 {
-                    OneBook book = new OneBook();
-                    book.RefID = s;
-                    info.Books.Add(book);
+                    refids.Add("(null)");
+                }
+
+                if (refids.Count > 0)
+                {
+                    OneLine info = new OneLine();
+                    info.Item = item;
+                    info.Books = new List<OneBook>();
+
+                    infos.Add(info);
+                    foreach (string s in refids)
+                    {
+                        OneBook book = new OneBook();
+                        book.RefID = s;
+                        info.Books.Add(book);
+                    }
                 }
             }
 
@@ -11858,6 +11894,8 @@ TaskScheduler.Default);
 
                 if (temp_refids.Count >= 100)
                 {
+                    // parameters:
+                    //      result_table    [in,out] 返回册记录参考 ID 和创建时间的对照关系。key 为册记录参考 ID
                     nRet = GetRecordTimes(
                         stop,
                         channel,
@@ -11873,6 +11911,8 @@ TaskScheduler.Default);
             // 最后一批
             if (temp_refids.Count > 0)
             {
+                // parameters:
+                //      result_table    [in,out] 返回册记录参考 ID 和创建时间的对照关系。key 为册记录参考 ID
                 nRet = GetRecordTimes(
                     stop,
                     channel,
@@ -11906,6 +11946,8 @@ TaskScheduler.Default);
         }
 
         // 根据 refid 获得一批记录的创建时间，追加到 Hashtable 中
+        // parameters:
+        //      result_table    [in,out] 返回册记录参考 ID 和创建时间的对照关系。key 为册记录参考 ID
         int GetRecordTimes(
             Stop stop,
             LibraryChannel channel,
@@ -11921,6 +11963,10 @@ TaskScheduler.Default);
 
             Hashtable table = null;
             // 获得册记录信息
+            // TODO 1: (2024/3/7) 对于没有找到的册记录，可否考虑合理推断一下它们的创建时间。比如从订购记录中找到验收时间推断
+            // DOTO 2: (2024/3/7) 订购和验收控件上，可否用特殊颜色显示这些没有对应册记录的参考 ID 事项，并提供一种功能，可以批处理清除这些参考 ID 对应的 checkbox on 状态
+            // parameters:
+            //      table   [in,out] 返回册记录的参考 ID 和 XML 对照关系。key 是册记录参考 ID
             nRet = LoadItemRecord(
                 stop,
                 channel,
@@ -11978,7 +12024,59 @@ TaskScheduler.Default);
         }
 
         // 根据册记录refid，转换为册记录的recpath，然后获得册记录XML
+        // parameters:
+        //      table   [in,out] 返回册记录的参考 ID 和 XML 对照关系。key 是册记录参考 ID
         int LoadItemRecord(
+            Stop stop,
+            LibraryChannel channel,
+            List<string> refids_param,
+            ref Hashtable table,
+            out string strError)
+        {
+            strError = "";
+            if (table == null)
+                table = new Hashtable();
+
+            int null_count = 0;
+            List<string> refids = new List<string>();
+            foreach (var refid in refids_param)
+            {
+                if (refid != "(null)")
+                    refids.Add(refid);
+                else
+                    null_count++;
+            }
+
+            if (refids.Count > 0)
+            {
+                int nRet = _loadItemRecord(
+            stop,
+            channel,
+            refids,
+            ref table,
+            out strError);
+                if (nRet == -1)
+                    return -1;
+            }
+
+            if (null_count > 0)
+            {
+                // 模拟出一个 hashtable entry
+                table["(null)"] = SimulateXml();
+            }
+            return 0;
+        }
+
+        static string SimulateXml()
+        {
+            var time = DateTimeUtil.Rfc1123DateTimeString(DateTime.Now);
+            return $"<root><operations><operation name='create' time='{time}'/></operations></root>";
+        }
+
+        // 根据册记录refid，转换为册记录的recpath，然后获得册记录XML
+        // parameters:
+        //      table   [in,out] 返回册记录的参考 ID 和 XML 对照关系。key 是册记录参考 ID
+        int _loadItemRecord(
             Stop stop,
             LibraryChannel channel,
             List<string> refids,
@@ -11990,14 +12088,12 @@ TaskScheduler.Default);
                 table = new Hashtable();
 
             REDO_GETITEMINFO:
-            string strBiblio = "";
-            string strResult = "";
             long lRet = channel.GetItemInfo(stop,
                 "@refid-list:" + StringUtil.MakePathList(refids),
                 "get-path-list",
-                out strResult,
+                out string strResult,
                 "", // strBiblioType,
-                out strBiblio,
+                out string strBiblio,
                 out strError);
             if (lRet == -1)
                 return -1;
@@ -12127,6 +12223,17 @@ MessageBoxDefaultButton.Button1);
 
                     string strXml = (string)result_table[record.RecPath];
                     record.Xml = strXml;
+                }
+
+                // 2024/3/8
+                // 增强健壮性。为没有找到的 refid 模拟 XML 记录
+                foreach (var refid in notfound_refids)
+                {
+                    OneItemRecord record = new OneItemRecord();
+                    record.RefID = refid;
+                    record.RecPath = "(notfound)";
+                    record.Xml = SimulateXml();
+                    records.Add(record);
                 }
 
                 // 最后放入table中

@@ -20,6 +20,7 @@ using DigitalPlatform.Marc;
 
 using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
+using System.Numerics;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -1468,16 +1469,26 @@ out strError);
                 return -1;
             }
 
-            // 2010/4/8
-            // 
-            nRet = this.App.SetOperation(
+
+            bool bNoOperations = false; // 是否为不要覆盖<operations>内容
+            if (StringUtil.IsInList("nooperations", info.Style) == true)
+            {
+                bNoOperations = true;
+            }
+
+            if (bNoOperations == false)
+            {
+                // 2010/4/8
+                // 
+                nRet = this.App.SetOperation(
                 ref domNew,
                 "moved",
                 sessioninfo.UserID, // strUserID,
                 "",
                 out strError);
-            if (nRet == -1)
-                goto ERROR1;
+                if (nRet == -1)
+                    goto ERROR1;
+            }
 
             string part_type = "";
             string strWarning = "";
@@ -1818,15 +1829,24 @@ out strError);
                     domNew.LoadXml(strNewXml);
                 }
 
-                // 2010/4/8
-                nRet = this.App.SetOperation(
+                bool bNoOperations = false; // 是否为不要覆盖<operations>内容
+                if (StringUtil.IsInList("nooperations", info.Style) == true)
+                {
+                    bNoOperations = true;
+                }
+
+                if (bNoOperations == false)
+                {
+                    // 2010/4/8
+                    nRet = this.App.SetOperation(
                     ref domNew,
                     "lastModified",
                     sessioninfo.UserID,
                     "",
                     out strError);
-                if (nRet == -1)
-                    goto ERROR1;
+                    if (nRet == -1)
+                        goto ERROR1;
+                }
             }
             else
             {
@@ -2218,6 +2238,12 @@ out strError);
                         ErrorInfos.Add(error);
                         continue;
                     }
+                }
+
+                bool bNoOperations = false; // 是否为不要覆盖<operations>内容
+                if (StringUtil.IsInList("nooperations", strStyle) == true)
+                {
+                    bNoOperations = true;
                 }
 
                 // 把(前端发过来的)旧记录装载到DOM
@@ -2641,20 +2667,24 @@ out strError);
                             goto ERROR1;
                         }
 
-                        nRet = this.App.SetOperation(
+                        if (bForce == false && bNoOperations == false)
+                        {
+                            nRet = this.App.SetOperation(
                             ref temp,
                             "create",
                             sessioninfo.UserID,
                             "",
                             out strError);
-                        if (nRet == -1)
-                        {
-                            EntityInfo error = new EntityInfo(info);
-                            error.ErrorInfo = strError;
-                            error.ErrorCode = ErrorCodeValue.CommonError;
-                            ErrorInfos.Add(error);
-                            continue;
+                            if (nRet == -1)
+                            {
+                                EntityInfo error = new EntityInfo(info);
+                                error.ErrorInfo = strError;
+                                error.ErrorCode = ErrorCodeValue.CommonError;
+                                ErrorInfos.Add(error);
+                                continue;
+                            }
                         }
+
                         strNewXml = temp.DocumentElement.OuterXml;
 
                         lRet = channel.DoSaveTextRes(info.NewRecPath,

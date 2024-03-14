@@ -3316,7 +3316,6 @@ out strError);
                     Debug.Assert(string.IsNullOrEmpty(strDetachOldDbName) == false, "");
 
                     DisplayTitle(stop, "(测试结束。还原最初保存的数据库 '" + strDetachOldDbName + "' --> '" + strOldDbName + "')");
-                    string strError1 = "";
                     // 修改一个简单库
                     // parameters:
                     // return:
@@ -3330,7 +3329,7 @@ out strError);
                 strType,
                 strOldDbName,
                 "attach",
-                out strError1);
+                out string strError1);
                     if (nRet == -1)
                     {
                         string strText = "还原时出错: " + strError1;

@@ -212,7 +212,7 @@ namespace dp2Circulation
             nsmgr.AddNamespace("unimarc", DpNs.unimarcxml);
             nsmgr.AddNamespace("usmarc", Ns.usmarcxml);
 
-            // XmlNodeList nodes = dom.DocumentElement.SelectNodes("//unimarc:leader | //unimarc:controlfield | //unimarc:datafield | //usmarc:leader | //usmarc:controlfield | //usmarc:datafield | //dprms:file", nsmgr);
+            // XmlNodeList nodes = _dom.DocumentElement.SelectNodes("//unimarc:leader | //unimarc:controlfield | //unimarc:datafield | //usmarc:leader | //usmarc:controlfield | //usmarc:datafield | //dprms:file", nsmgr);
             // 留下 dprms:file
             XmlNodeList nodes = dom.DocumentElement.SelectNodes("//unimarc:leader | //unimarc:controlfield | //unimarc:datafield | //usmarc:leader | //usmarc:controlfield | //usmarc:datafield", nsmgr);
             foreach (XmlNode node in nodes)

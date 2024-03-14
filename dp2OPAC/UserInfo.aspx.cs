@@ -13,7 +13,6 @@ using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.OPAC.Web;
-// using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 
 public partial class UserInfo : MyWebPage
@@ -289,7 +288,10 @@ ref sessioninfo) == false)
                     goto ERROR1;
                 }
 
-                string strResultSetName = "opac_userinfo";
+                // string strResultSetName = "opac_userinfo";
+
+                // 注: 每次都产生随机的全局结果集名字，如何防止结果集数量太多?
+                string strResultSetName = $"#opac_userinfo_{Guid.NewGuid().ToString()}";    // 2024/2/26
 
                 // sessioninfo.Channel.
                 channel.Idle += new IdleEventHandler(channel_Idle);

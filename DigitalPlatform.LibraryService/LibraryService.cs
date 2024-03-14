@@ -2668,7 +2668,7 @@ namespace dp2Library
                 }
 
                 StringUtil.ParseTwoPart(timeRange, "~",
-                    out string strStart, 
+                    out string strStart,
                     out string strEnd);
                 DateTime startTime = string.IsNullOrEmpty(strStart) ? new DateTime(0) : DateTime.Parse(strStart);
                 DateTime endTime = string.IsNullOrEmpty(strEnd) ? new DateTime(0) : DateTime.Parse(strEnd);
@@ -11496,9 +11496,12 @@ PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin)
                     }
                 }
 
-                int nRet = app.SetCalendar(strAction,
-                    sessioninfo.LibraryCodeList,
+                int nRet = app.SetCalendar(
+                    sessioninfo,
+                    strAction,
+                    // sessioninfo.LibraryCodeList,
                     info,
+                    "",
                     out ErrorCode error_code,
                     out strError);
                 if (nRet == -1)
@@ -11790,6 +11793,11 @@ Stack:
                     strStyle,
                     out strOutputInfo,
                     out strError);
+
+                // 2024/2/23
+                if (app.Changed == true)
+                    app.ActivateManagerThread();
+
                 if (nRet == -1)
                 {
                     result.ErrorCode = ErrorCode.SystemError;
@@ -12382,7 +12390,7 @@ true);
                 int nRet = 0;
 
                 // 2024/2/8
-                if (strBarcode != null && 
+                if (strBarcode != null &&
                     strBarcode.StartsWith("@refID:"))
                 {
                     // 验证 @refID:xxx 形态的到底是读者参考 ID 还是册参考 ID
@@ -13159,6 +13167,7 @@ public int Type;	// 类型：0 库 / 1 途径 / 4 cfgs / 5 file
             return this.app.EnsureKdbs(bThrowException);
         }
 
+#if REMOVED
         // 设置系统参数
         // parameters:
         //      strCategory 参数所在目录
@@ -13846,6 +13855,95 @@ public int Type;	// 类型：0 库 / 1 途径 / 4 cfgs / 5 file
                 app.UnlockForWrite();
             }
         }
+#endif
+        // 设置系统参数
+        // parameters:
+        //      strCategory 参数所在目录
+        //      strName 参数名
+        //      strValue    参数值
+        // rights:
+        //      需要 setsystemparameter 权限
+        // return:
+        //      result.Value    -1 错误；0 成功
+        public LibraryServerResult SetSystemParameter(
+            string strCategory,
+            string strName,
+            string strValue)
+        {
+            string strError = "";
+
+            LibraryServerResult result = this.PrepareEnvironment("SetSystemParameter", true, true, true);
+            if (result.Value == -1)
+                return result;
+
+            app.LockForWrite();
+            try
+            {
+                // 对读者身份的判断
+                if (sessioninfo.UserType == "reader")
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "设置系统参数的操作被拒绝。作为读者不能设置任何系统参数";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+
+                // 权限判断
+                if (StringUtil.IsInList("setsystemparameter", sessioninfo.RightsOrigin) == false)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = $"设置系统参数的操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备setsystemparameter权限。";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+
+                int nRet = 0;
+
+                nRet = app.SetSystemParameter(
+                    sessioninfo,
+                    strCategory,
+                    strName,
+                    strValue,
+                    out bool succeed,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                if (succeed)
+                {
+                    if (app.Changed)
+                        app.ActivateManagerThread();
+
+                    result.Value = nRet;
+                    if (WriteSetSystemParameterOperLog(strCategory,
+                        strName,
+                        strValue,
+                        sessioninfo.LibraryCodeList,
+                        out strError) == -1)
+                        goto ERROR1;
+                    return result;
+                }
+            ERROR1:
+                result.Value = -1;
+                result.ErrorCode = ErrorCode.SystemError;
+                result.ErrorInfo = strError;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                string strErrorText = "dp2Library SetSystemParameter() API出现异常: " + ExceptionUtil.GetDebugText(ex);
+                app.WriteErrorLog(strErrorText);
+
+                result.Value = -1;
+                result.ErrorCode = ErrorCode.SystemError;
+                result.ErrorInfo = strErrorText;
+                return result;
+            }
+            finally
+            {
+                app.UnlockForWrite();
+            }
+        }
+
 
         // 2020/8/28
         int WriteSetSystemParameterOperLog(string strCategory,

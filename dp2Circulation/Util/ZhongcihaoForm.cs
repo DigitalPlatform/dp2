@@ -375,7 +375,7 @@ namespace dp2Circulation
             this.MaxNumber = "";
 
             /*
-            if (dom == null)
+            if (_dom == null)
             {
                 strError = "请先调用GetGlobalCfgFile()函数";
                 return -1;

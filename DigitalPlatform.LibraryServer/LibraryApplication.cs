@@ -3474,6 +3474,14 @@ TaskScheduler.Default);
     // string strLibraryCodeList,
     out string strError)
         {
+            // 2024/3/3
+            // 日志恢复期间，不会再写入任何日志
+            if (this.ContainsHangup("LogRecover") == true)
+            {
+                strError = "当前系统正处在LogRecover挂起状态，无法写入任何操作日志";
+                return 0;
+            }
+
             try
             {
                 XmlDocument domOperLog = new XmlDocument();
@@ -16800,11 +16808,18 @@ out string db_type);
             return false;
         }
 
+        static bool IsRestObjectPath(string strPath)
+        {
+            return IsRestObjectPath(strPath, out _);
+        }
+
         // 检查数据库名以右的部分字符串是否为对象路径形态
         // parameters:
         //      strPath 数据库名以右的部分。例如 "1/object/0"
-        static bool IsRestObjectPath(string strPath)
+        static bool IsRestObjectPath(string strPath,
+            out string strObjectID)
         {
+            strObjectID = "";
             string strRecordID = StringUtil.GetFirstPartPath(ref strPath);
             if (strRecordID == "cfgs")
                 return false;   // 配置文件目录
@@ -16816,7 +16831,7 @@ out string db_type);
                 string strObject = StringUtil.GetFirstPartPath(ref strPath);
                 if (strObject != "object")
                     return false;
-                string strObjectID = StringUtil.GetFirstPartPath(ref strPath);
+                strObjectID = StringUtil.GetFirstPartPath(ref strPath);
                 if (string.IsNullOrEmpty(strObjectID) == false)
                     return true;
             }

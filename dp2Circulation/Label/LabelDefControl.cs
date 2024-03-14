@@ -1012,7 +1012,7 @@ namespace dp2Circulation
                 if (nRet == -1)
                     goto ERROR1;
 
-                this.textBox_xml.Text = DomUtil.GetIndentXml(dom);  // dom.OuterXml;
+                this.textBox_xml.Text = DomUtil.GetIndentXml(dom);  // _dom.OuterXml;
 
                 _xmlVersion = 0;
                 _panelVersion = 0;

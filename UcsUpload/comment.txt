@@ -1,0 +1,4 @@
+﻿
+.csproj 文件中
+  <PropertyGroup> 下删掉了
+    <Nullable>enable</Nullable>

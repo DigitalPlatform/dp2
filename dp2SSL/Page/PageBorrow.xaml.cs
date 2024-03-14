@@ -29,10 +29,6 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Core;
 using DigitalPlatform.Face;
 using DigitalPlatform.WPF;
-using DigitalPlatform.Script;
-using DigitalPlatform.Drawing;
-using System.Windows.Media.Imaging;
-// using System.Windows.Shapes;
 
 namespace dp2SSL
 {
@@ -679,6 +675,15 @@ namespace dp2SSL
             return default;
         }
 
+        // 2024/3/13
+        // 获得一个 Cancel Token。如果以前用过，直接返回以前的
+        CancellationToken GetCancelFillBooks()
+        {
+            if (_cancelFillBooks == null)
+                _cancelFillBooks = new CancellationTokenSource();
+            return _cancelFillBooks.Token;
+        }
+
         SemaphoreSlim _semaphoreCheckDup = new SemaphoreSlim(1, 1);
         List<ProgressWindow> _warning_windows = new List<ProgressWindow>();
         void CloseWarningWindows()
@@ -789,7 +794,7 @@ namespace dp2SSL
                 _ = FillBookFieldsAsync(//channel,
                     update_entities,
                     App.DisplayCoverImage ? "coverImage,checkEAS" : "checkEAS",
-                    CancelFillBooks(true));
+                    GetCancelFillBooks());
 
                 BeginCheckDup();
                 Trigger(update_entities);
@@ -959,7 +964,7 @@ namespace dp2SSL
                                 _ = FillBookFieldsAsync(//channel,
                                     update_entities,
                                     App.DisplayCoverImage ? "coverImage,checkEAS" : "checkEAS",
-                                    CancelFillBooks(true));
+                                    GetCancelFillBooks());
 
                                 BeginCheckDup();
                                 Trigger(update_entities);
@@ -1302,6 +1307,8 @@ namespace dp2SSL
         private void PageBorrow_Unloaded(object sender, RoutedEventArgs e)
         {
             App.IsPageBorrowActive = false;
+
+            CancelFillBooks(false);
 
             _cancelFingerprintVideo?.Cancel();
             _cancelFingerprintVideo = null;

@@ -842,6 +842,8 @@ namespace DigitalPlatform.LibraryServer
 
                 sessioninfo.Account = account;
 
+                // TODO: 要释放 sessioninfo
+
                 int nRecordCount = 0;
                 for (int i = 0; ; i++)
                 {
@@ -1746,6 +1748,8 @@ namespace DigitalPlatform.LibraryServer
 
             sessioninfo.Account = account;
 
+            // TODO: 要释放 sessioninfo
+            
             /*
              * 检索出全部挂失状态的读者记录
              * */

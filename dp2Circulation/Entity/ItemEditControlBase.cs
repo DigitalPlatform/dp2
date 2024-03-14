@@ -368,7 +368,7 @@ namespace dp2Circulation
         }
 
         int _inRefreshDom = 0;
-        // member --> dom
+        // member --> _dom
         internal virtual void RefreshDom()
         {
             // throw new Exception("尚未实现 RefreshDom()");

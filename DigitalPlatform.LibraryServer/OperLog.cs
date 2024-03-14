@@ -845,6 +845,15 @@ namespace DigitalPlatform.LibraryServer
         {
             strRefID = "";
 
+            // 2024/3/3
+            // 日志恢复期间，不会再写入任何日志
+            if (this.App != null
+                && this.App.ContainsHangup("LogRecover") == true)
+            {
+                strError = "当前系统正处在LogRecover挂起状态，无法写入任何操作日志";
+                return 0;
+            }
+
             // 2013/11/20
             if (this._bSmallFileMode == false
                 && this.m_streamSpare == null)

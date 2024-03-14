@@ -19,11 +19,15 @@ namespace dp2SSL
 {
     public class MyPage : Page
     {
+        object _dialogs_syncRoot = new object();    // 2024/3/13
         List<Window> _dialogs = new List<Window>();
 
         public int GetDialogCount()
         {
-            return _dialogs.Count;
+            lock (_dialogs_syncRoot)
+            {
+                return _dialogs.Count;
+            }
         }
 
         internal void CloseDialogs()
@@ -31,22 +35,35 @@ namespace dp2SSL
             // 确保 page 关闭时对话框能自动关闭
             App.Invoke(new Action(() =>
             {
-                foreach (var window in _dialogs)
+                // 避免直接操作 _dialogs 锁定时间太长
+                var dialogs = new List<Window>();
+                lock (_dialogs_syncRoot)
+                {
+                    dialogs.AddRange(_dialogs);
+                    _dialogs.Clear();
+                }
+
+                foreach (var window in dialogs)
                 {
                     window.Close();
                 }
-                _dialogs.Clear();
             }));
         }
 
         internal void MemoryDialog(Window dialog)
         {
-            _dialogs.Add(dialog);
+            lock (_dialogs_syncRoot)
+            {
+                _dialogs.Add(dialog);
+            }
         }
 
         internal void ForgetDialog(Window dialog)
         {
-            _dialogs.Remove(dialog);
+            lock (_dialogs_syncRoot)
+            {
+                _dialogs.Remove(dialog);
+            }
         }
 
         LayoutAdorner _adorner = null;

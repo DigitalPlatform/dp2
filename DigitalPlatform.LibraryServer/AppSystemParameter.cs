@@ -1,13 +1,14 @@
-﻿using DigitalPlatform.IO;
-using DigitalPlatform.rms.Client;
-using DigitalPlatform.Text;
-using DigitalPlatform.Xml;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
+
+using DigitalPlatform.IO;
+using DigitalPlatform.rms.Client;
+using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -1375,5 +1376,661 @@ namespace DigitalPlatform.LibraryServer
                 this.UnlockForRead();
             }
         }
+
+        // 异常:
+        //      可能会抛出异常
+        public int SetSystemParameter(
+            SessionInfo sessioninfo,
+    string strCategory,
+    string strName,
+    string strValue,
+    out bool succeed,
+    out string strError)
+        {
+            strError = "";
+            succeed = false;
+
+            var app = this;
+
+            app.LockForWrite();
+            try
+            {
+                int nRet = 0;
+
+                if (strCategory == "center")
+                {
+                    // 分馆用户不能修改定义
+                    if (sessioninfo.GlobalUser == false)
+                    {
+                        strError = "分馆用户不允许修改<center>元素定义";
+                        goto ERROR1;
+                    }
+
+                    // 修改 <center> 内的定义
+                    // return:
+                    //      -1  error
+                    //      0   not change
+                    //      1   changed
+                    nRet = app.SetCenterDef(strName,
+                        strValue,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    if (nRet == 1)
+                    {
+                        app.Changed = true;
+                        // app.ActivateManagerThread();
+                    }
+                    goto END1;
+                }
+
+                // 值列表
+                // 2008/8/21 
+                if (strCategory == "valueTable")
+                {
+                    // TODO: 需要进行针对分馆用户的改造
+                    // 分馆用户不能修改定义
+                    if (sessioninfo.GlobalUser == false)
+                    {
+                        strError = "分馆用户不允许修改<valueTables>元素定义";
+                        goto ERROR1;
+                    }
+
+                    XmlDocument dom = new XmlDocument();
+                    try
+                    {
+                        dom.LoadXml(strValue);
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "strValue装入XMLDOM时发生错误: " + ex.Message;
+                        goto ERROR1;
+                    }
+
+                    string strNameParam = DomUtil.GetAttr(dom.DocumentElement, "name");
+                    string strDbNameParam = DomUtil.GetAttr(dom.DocumentElement, "dbname");
+                    string strValueParam = dom.DocumentElement.InnerText;
+
+                    // 修改值列表
+                    // 2008/8/21 
+                    // parameters:
+                    //      strAction   "new" "change" "overwirte" "delete"
+                    // return:
+                    //      -1  error
+                    //      0   not change
+                    //      1   changed
+                    nRet = app.SetValueTable(strName,
+                        strNameParam,
+                        strDbNameParam,
+                        strValueParam,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    if (nRet == 1)
+                    {
+                        app.Changed = true;
+                        // app.ActivateManagerThread();
+                    }
+                    goto END1;
+                }
+
+                // 读者权限
+                if (strCategory == "circulation")
+                {
+                    // 2021/8/6
+                    // 临时修改内存中的 app.AcceptBlankReaderBarcode 值
+                    if (strName == "?AcceptBlankReaderBarcode")
+                    {
+                        app.AcceptBlankReaderBarcode = DomUtil.IsBooleanTrue(strValue);
+                        goto END1;
+                    }
+
+                    // 临时修改内存中的 app.AcceptBlankItemBarcode 值
+                    if (strName == "?AcceptBlankItemBarcode")
+                    {
+                        app.AcceptBlankItemBarcode = DomUtil.IsBooleanTrue(strValue);
+                        goto END1;
+                    }
+
+                    // 临时修改内存中的 app.VerifyBarcode 值
+                    if (strName == "?VerifyBarcode")
+                    {
+                        app.VerifyBarcode = DomUtil.IsBooleanTrue(strValue);
+                        goto END1;
+                    }
+
+                    // 临时修改内存中的 app.UpperCaseItemBarcode 值
+                    if (strName == "?UpperCaseItemBarcode")
+                    {
+                        app.UpperCaseItemBarcode = DomUtil.IsBooleanTrue(strValue);
+                        goto END1;
+                    }
+
+                    // 临时修改内存中的 app.UpperCaseReaderBarcode 值
+                    if (strName == "?UpperCaseReaderBarcode")
+                    {
+                        app.UpperCaseReaderBarcode = DomUtil.IsBooleanTrue(strValue);
+                        goto END1;
+                    }
+
+                    // 临时修改内存中的 app.VerifyBookType 值
+                    if (strName == "?VerifyBookType")
+                    {
+                        app.VerifyBookType = DomUtil.IsBooleanTrue(strValue);
+                        goto END1;
+                    }
+
+                    // 临时修改内存中的 app.VerifyReaderType 值
+                    if (strName == "?VerifyReaderType")
+                    {
+                        app.VerifyReaderType = DomUtil.IsBooleanTrue(strValue);
+                        goto END1;
+                    }
+
+                    // 临时修改内存中的 app.BorrowCheckOverdue 值
+                    if (strName == "?BorrowCheckOverdue")
+                    {
+                        app.BorrowCheckOverdue = DomUtil.IsBooleanTrue(strValue);
+                        goto END1;
+                    }
+
+                    // 临时修改内存中的 app.CirculationNotifyTypes 值
+                    if (strName == "?CirculationNotifyTypes")
+                    {
+                        app.CirculationNotifyTypes = strValue;
+                        goto END1;
+                    }
+
+                    // 临时修改内存中的 app.AcceptBlankRoomName 值
+                    if (strName == "?AcceptBlankRoomName")
+                    {
+                        app.AcceptBlankRoomName = DomUtil.IsBooleanTrue(strValue);
+                        goto END1;
+                    }
+
+                    // 临时修改内存中的 app.VerifyRegisterNoDup 值
+                    if (strName == "?VerifyRegisterNoDup")
+                    {
+                        app.AcceptBlankRoomName = DomUtil.IsBooleanTrue(strValue);
+                        goto END1;
+                    }
+
+                    // 临时修改内存中的 app.PatronAdditionalFroms 值
+                    if (strName == "?PatronAdditionalFroms")
+                    {
+                        app.PatronAdditionalFroms = StringUtil.SplitList(strValue);
+                        goto END1;
+                    }
+
+                    // 临时修改内存中的 app.PatronAdditionalFields 值
+                    if (strName == "?PatronAdditionalFields")
+                    {
+                        app.PatronAdditionalFields = StringUtil.SplitList(strValue);
+                        goto END1;
+                    }
+
+                    // 设置<valueTables>元素
+                    // strValue中是下级片断定义，没有<valueTables>元素作为根。
+                    if (strName == "valueTables")
+                    {
+                        nRet = app.SetValueTablesXml(
+                            sessioninfo.LibraryCodeList,
+                            strValue,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+
+                        app.Changed = true;
+                        // app.ActivateManagerThread();
+                        goto END1;
+                    }
+
+                    // 设置<rightsTable>元素
+                    // strValue中是下级片断定义，没有<rightsTable>元素作为根。
+                    if (strName == "rightsTable")
+                    {
+                        nRet = app.SetRightsTableXml(
+    sessioninfo.LibraryCodeList,
+    strValue,
+    out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+
+                        // 2022/3/8
+                        app.SessionTable.RefreshExpandLibraryCodeList();
+
+                        app.Changed = true;
+                        // app.ActivateManagerThread();
+
+                        goto END1;
+                    }
+
+                    // 2008/10/10 
+                    // 设置<locationtypes>元素
+                    // strValue中是下级片断定义，没有<locationTypes>元素作为根。
+                    /*
+                     *  <locationTypes>
+                            <item canborrow="yes">流通库</item>
+                            <item>阅览室</item>
+                        </locationTypes>
+                     * */
+                    if (strName == "locationTypes")
+                    {
+#if NO
+                        XmlNode root = app.LibraryCfgDom.DocumentElement.SelectSingleNode("locationTypes"); // 0.02前为locationtypes
+                        if (root == null)
+                        {
+                            root = app.LibraryCfgDom.CreateElement("locationTypes");
+                            app.LibraryCfgDom.DocumentElement.AppendChild(root);
+                        }
+
+                        try
+                        {
+                            root.InnerXml = strValue;
+                        }
+                        catch (Exception ex)
+                        {
+                            strError = "设置<locationTypes>元素的InnerXml时发生错误: " + ex.Message;
+                            goto ERROR1;
+                        }
+#endif
+                        nRet = app.SetLocationTypesXml(
+                            sessioninfo.LibraryCodeList,
+                            strValue,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+
+                        app.Changed = true;
+                        // app.ActivateManagerThread();
+                        goto END1;
+                    }
+
+                    // 2008/10/12 
+                    // 设置<zhongcihao>元素
+                    // strValue中是下级片断定义，没有<zhongcihao>元素作为根。
+                    /*
+                        <zhongcihao>
+                            <nstable name="nstable">
+                                <item prefix="marc" uri="http://dp2003.com/UNIMARC" />
+                            </nstable>
+                            <group name="中文书目" zhongcihaodb="种次号">
+                                <database name="中文图书" leftfrom="索取类号" rightxpath="//marc:record/marc:datafield[@tag='905']/marc:subfield[@code='e']/text()" titlexpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='a']/text()" authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or @code='g']/text()" />
+                            </group>
+                        </zhongcihao>
+                     * */
+                    if (strName == "zhongcihao")
+                    {
+                        // 分馆用户不能修改定义
+                        if (sessioninfo.GlobalUser == false)
+                        {
+                            strError = "分馆用户不允许修改<zhongcihao>元素定义";
+                            goto ERROR1;
+                        }
+
+                        XmlNode root = app.LibraryCfgDom.DocumentElement.SelectSingleNode("zhongcihao");
+                        if (root == null)
+                        {
+                            root = app.LibraryCfgDom.CreateElement("zhongcihao");
+                            app.LibraryCfgDom.DocumentElement.AppendChild(root);
+                        }
+
+                        try
+                        {
+                            root.InnerXml = strValue;
+                        }
+                        catch (Exception ex)
+                        {
+                            strError = "设置<zhongcihao>元素的InnerXml时发生错误: " + ex.Message;
+                            goto ERROR1;
+                        }
+
+                        app.Changed = true;
+                        // app.ActivateManagerThread();
+                        goto END1;
+                    }
+
+                    // 2009/2/18 
+                    // 设置<callNumber>元素
+                    // strValue中是下级片断定义，没有<callNumber>元素作为根。
+                    /*
+            <callNumber>
+                <group name="中文" zhongcihaodb="种次号">
+                    <location name="基藏库" />
+                    <location name="流通库" />
+                </group>
+                <group name="英文" zhongcihaodb="新种次号库">
+                    <location name="英文基藏库" />
+                    <location name="英文流通库" />
+                </group>
+            </callNumber>             * */
+                    if (strName == "callNumber")
+                    {
+                        // 分馆用户可以修改定义
+                        if (sessioninfo.GlobalUser == false)
+                        {
+                            // 修改 <callNumber> 元素定义。本函数专用于分馆用户。全局用户可以直接修改这个元素的 InnerXml 即可
+                            nRet = app.SetCallNumberXml(
+                                sessioninfo.LibraryCodeList,
+                                strValue,
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                            // app.ActivateManagerThread();
+                            goto END1;
+                        }
+
+                        XmlNode root = app.LibraryCfgDom.DocumentElement.SelectSingleNode("callNumber");
+                        if (root == null)
+                        {
+                            root = app.LibraryCfgDom.CreateElement("callNumber");
+                            app.LibraryCfgDom.DocumentElement.AppendChild(root);
+                        }
+
+                        try
+                        {
+                            root.InnerXml = strValue;
+                        }
+                        catch (Exception ex)
+                        {
+                            strError = "设置<callNumber>元素的InnerXml时发生错误: " + ex.Message;
+                            goto ERROR1;
+                        }
+
+                        app.Changed = true;
+                        // app.ActivateManagerThread();
+                        goto END1;
+                    }
+
+                    // 2009/3/9 
+                    // 设置<dup>元素
+                    // strValue中是下级片断定义，没有<dup>元素作为根。
+                    /*
+         <dup>
+                <project name="采购查重" comment="示例方案">
+                    <database name="测试书目库" threshold="60">
+                        <accessPoint name="著者" weight="50" searchStyle="" />
+                        <accessPoint name="题名" weight="70" searchStyle="" />
+                        <accessPoint name="索书类号" weight="10" searchStyle="" />
+                    </database>
+                    <database name="编目库" threshold="60">
+                        <accessPoint name="著者" weight="50" searchStyle="" />
+                        <accessPoint name="题名" weight="70" searchStyle="" />
+                        <accessPoint name="索书类号" weight="10" searchStyle="" />
+                    </database>
+                </project>
+                <project name="编目查重" comment="这是编目查重示例方案">
+                    <database name="中文图书" threshold="100">
+                        <accessPoint name="责任者" weight="50" searchStyle="" />
+                        <accessPoint name="ISBN" weight="80" searchStyle="" />
+                        <accessPoint name="题名" weight="20" searchStyle="" />
+                    </database>
+                    <database name="图书测试" threshold="100">
+                        <accessPoint name="责任者" weight="50" searchStyle="" />
+                        <accessPoint name="ISBN" weight="80" searchStyle="" />
+                        <accessPoint name="题名" weight="20" searchStyle="" />
+                    </database>
+                </project>
+                <default origin="中文图书" project="编目查重" />
+                <default origin="图书测试" project="编目查重" />
+            </dup>             * */
+                    if (strName == "dup")
+                    {
+                        // 分馆用户不能修改定义
+                        if (sessioninfo.GlobalUser == false)
+                        {
+                            strError = "分馆用户不允许修改<dup>元素定义";
+                            goto ERROR1;
+                        }
+
+                        XmlNode root = app.LibraryCfgDom.DocumentElement.SelectSingleNode("dup");
+                        if (root == null)
+                        {
+                            root = app.LibraryCfgDom.CreateElement("dup");
+                            app.LibraryCfgDom.DocumentElement.AppendChild(root);
+                        }
+
+                        try
+                        {
+                            root.InnerXml = strValue;
+                        }
+                        catch (Exception ex)
+                        {
+                            strError = "设置<dup>元素的InnerXml时发生错误: " + ex.Message;
+                            goto ERROR1;
+                        }
+
+                        app.Changed = true;
+                        // app.ActivateManagerThread();
+                        goto END1;
+                    }
+
+                    // 2008/10/13 2019/5/31
+                    // 设置 <script> 或 <barcodeValidation> 元素
+                    // strValue中是下级片断定义，没有<script>元素作为根。
+                    if (strName == "script" || strName == "barcodeValidation")
+                    {
+                        // 分馆用户不能修改定义
+                        if (sessioninfo.GlobalUser == false)
+                        {
+                            strError = $"分馆用户不允许修改<{strName}>元素定义";
+                            goto ERROR1;
+                        }
+
+                        // 2021/10/9
+                        // 先编译一次，如果报错则不兑现到 LibraryDom
+                        if (strName == "script")
+                        {
+                            XmlDocument dom = new XmlDocument();
+                            try
+                            {
+                                dom.LoadXml("<script>" + strValue + "</script>");
+                            }
+                            catch (Exception ex)
+                            {
+                                strError = "脚本代码 XML 结构错误。保存失败";
+                                goto ERROR1;
+                            }
+
+                            // 注意检测编译错误
+                            // 初始化LibraryHostAssembly对象
+                            // 必须在ReadersMonitor以前启动。否则其中用到脚本代码时会出错。2007/10/10 changed
+                            // return:
+                            //		-1	出错
+                            //		0	脚本代码没有找到
+                            //      1   成功
+                            nRet = app.InitialLibraryHostAssembly(
+                                new List<XmlElement> { dom.DocumentElement },
+                                out strError);
+                            if (nRet == -1)
+                            {
+                                /*
+                                app.ActivateManagerThread(); // 促使尽快保存
+                                app.WriteErrorLog(strError);
+                                */
+                                goto ERROR1;
+                            }
+                        }
+
+                        bool changed = false;
+                        XmlNode root = app.LibraryCfgDom.DocumentElement.SelectSingleNode(strName);
+                        if (string.IsNullOrEmpty(strValue) == false)
+                        {
+                            if (root == null)
+                            {
+                                root = app.LibraryCfgDom.CreateElement(strName);
+                                app.LibraryCfgDom.DocumentElement.AppendChild(root);
+                                changed = true;
+                            }
+                        }
+                        else
+                        {
+                            if (root != null)
+                            {
+                                root.ParentNode.RemoveChild(root);
+                                changed = true;
+                            }
+                        }
+
+                        try
+                        {
+                            root.InnerXml = ConvertCrLf(strValue);
+                            changed = true;
+                        }
+                        catch (Exception ex)
+                        {
+                            strError = $"设置 <{strName}> 元素的 InnerXml 时发生错误: " + ex.Message;
+                            goto ERROR1;
+                        }
+
+                        app.Changed = changed;
+
+#if REMOVED
+                        if (strName == "script" && changed)
+                        {
+                            // 注意检测编译错误
+                            // 初始化LibraryHostAssembly对象
+                            // 必须在ReadersMonitor以前启动。否则其中用到脚本代码时会出错。2007/10/10 changed
+                            // return:
+                            //		-1	出错
+                            //		0	脚本代码没有找到
+                            //      1   成功
+                            nRet = app.InitialLibraryHostAssembly(out strError);
+                            if (nRet == -1)
+                            {
+                                app.ActivateManagerThread(); // 促使尽快保存
+                                app.WriteErrorLog(strError);
+                                goto ERROR1;
+                            }
+
+                        }
+#endif
+
+                        //if (changed)
+                        //    app.ActivateManagerThread();
+                        goto END1;
+                    }
+
+                    strError = "(strCategory为 '" + strCategory + "' 时)未知的strName值 '" + strName + "' ";
+                    goto ERROR1;
+                }
+
+                // OPAC检索
+                if (strCategory == "opac")
+                {
+                    // 分馆用户不能修改定义
+                    if (sessioninfo.GlobalUser == false)
+                    {
+                        strError = "分馆用户不允许修改OPAC查询参数定义";
+                        goto ERROR1;
+                    }
+
+                    // 设置<virtualDatabases>元素
+                    // strValue中是下级片断定义，没有<virtualDatabases>元素作为根。
+                    if (strName == "databases")
+                    {
+                        XmlNode root = app.LibraryCfgDom.DocumentElement.SelectSingleNode("virtualDatabases");
+                        if (root == null)
+                        {
+                            root = app.LibraryCfgDom.CreateElement("virtualDatabases");
+                            app.LibraryCfgDom.DocumentElement.AppendChild(root);
+                        }
+
+                        try
+                        {
+                            root.InnerXml = strValue;
+                        }
+                        catch (Exception ex)
+                        {
+                            strError = "设置<virtualDatabases>元素的InnerXml时发生错误: " + ex.Message;
+                            goto ERROR1;
+                        }
+
+                        app.Changed = true;
+                        //app.ActivateManagerThread();
+
+                        // 重新初始化虚拟库定义
+                        app.vdbs = null;
+                        nRet = app.InitialVdbs(app.GetRmsChannel(sessioninfo),  // sessioninfo.Channels,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+
+                        goto END1;
+                    }
+
+                    // 设置<browseformats>元素
+                    // strValue中是下级片断定义，没有<browseformats>元素作为根。
+                    if (strName == "browseformats")
+                    {
+                        XmlNode root = app.LibraryCfgDom.DocumentElement.SelectSingleNode("browseformats");
+                        if (root == null)
+                        {
+                            root = app.LibraryCfgDom.CreateElement("browseformats");
+                            app.LibraryCfgDom.DocumentElement.AppendChild(root);
+                        }
+
+                        try
+                        {
+                            root.InnerXml = strValue;
+                        }
+                        catch (Exception ex)
+                        {
+                            strError = "设置<browseformats>元素的InnerXml时发生错误: " + ex.Message;
+                            goto ERROR1;
+                        }
+
+                        app.Changed = true;
+                        //app.ActivateManagerThread();
+
+                        // TODO: 刷新OPAC界面中的浏览格式列表？
+
+                        goto END1;
+                    }
+
+                    // 2011/2/15
+                    if (strName == "serverDirectory")
+                    {
+                        /*
+                        XmlNode node = app.LibraryCfgDom.SelectSingleNode("//opacServer");
+                        if (node == null)
+                        {
+                            node = app.LibraryCfgDom.CreateElement("opacServer");
+                            app.LibraryCfgDom.DocumentElement.AppendChild(node);
+                        }
+
+                        DomUtil.SetAttr(node, "url", strValue);
+                         * */
+                        app.OpacServerUrl = strValue;
+                        app.Changed = true;
+                        //app.ActivateManagerThread();
+                        goto END1;
+                    }
+
+                    strError = "(strCategory为 '" + strCategory + "' 时)未知的strName值 '" + strName + "' ";
+                    goto ERROR1;
+                }
+
+            END1:
+                succeed = true; 
+                return nRet;
+            ERROR1:
+                return -1;
+            }
+            /*
+            catch (Exception ex)
+            {
+                string strErrorText = "dp2Library SetSystemParameter() API出现异常: " + ExceptionUtil.GetDebugText(ex);
+                app.WriteErrorLog(strErrorText);
+                return -1;
+            }
+            */
+            finally
+            {
+                app.UnlockForWrite();
+            }
+        }
+
+
     }
 }
