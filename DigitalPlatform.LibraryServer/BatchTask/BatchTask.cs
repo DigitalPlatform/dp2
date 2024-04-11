@@ -915,6 +915,8 @@ namespace DigitalPlatform.LibraryServer
             return Task.CompletedTask;
         }
 
+        public delegate void Delegate_warning(string text);
+
         // 执行一个日志记录的恢复动作
         // parameters:
         //      attachment  附件流对象。注意文件指针在流的尾部
@@ -923,6 +925,7 @@ namespace DigitalPlatform.LibraryServer
             string strXml,
             Stream attachment,
             string strStyle,
+            Delegate_warning func_warning,
             out string strError)
         {
             strError = "";
@@ -947,6 +950,7 @@ namespace DigitalPlatform.LibraryServer
                     level,
                     dom,
                     false,
+                    func_warning,
                     out strError);
             }
             else if (strOperation == "return")
@@ -955,6 +959,7 @@ namespace DigitalPlatform.LibraryServer
                     level,
                     dom,
                     false,
+                    func_warning,
                     out strError);
             }
             else if (strOperation == "setEntity")
@@ -962,27 +967,31 @@ namespace DigitalPlatform.LibraryServer
                 nRet = this.App.RecoverSetEntity(this.RmsChannels,
                     level,
                     dom,
+                    "entity",
                     out strError);
             }
             else if (strOperation == "setOrder")
             {
-                nRet = this.App.RecoverSetOrder(this.RmsChannels,
+                nRet = this.App.RecoverSetEntity(this.RmsChannels,
                     level,
                     dom,
+                    "order",
                     out strError);
             }
             else if (strOperation == "setIssue")
             {
-                nRet = this.App.RecoverSetIssue(this.RmsChannels,
+                nRet = this.App.RecoverSetEntity(this.RmsChannels,
                     level,
                     dom,
+                    "issue",
                     out strError);
             }
             else if (strOperation == "setComment")
             {
-                nRet = this.App.RecoverSetComment(this.RmsChannels,
+                nRet = this.App.RecoverSetEntity(this.RmsChannels,
                     level,
                     dom,
+                    "comment",
                     out strError);
             }
             else if (strOperation == "changeReaderPassword")
@@ -990,6 +999,7 @@ namespace DigitalPlatform.LibraryServer
                 nRet = this.App.RecoverChangeReaderPassword(this.RmsChannels,
                     level,
                     dom,
+                    func_warning,
                     out strError);
             }
             else if (strOperation == "changeReaderTempPassword")
@@ -1001,6 +1011,7 @@ namespace DigitalPlatform.LibraryServer
                 nRet = this.App.RecoverSetReaderInfo(this.RmsChannels,
                     level,
                     dom,
+                    func_warning,
                     out strError);
             }
             else if (strOperation == "devolveReaderInfo")
@@ -1009,6 +1020,7 @@ namespace DigitalPlatform.LibraryServer
                     level,
                     dom,
                     attachment,
+                    func_warning,
                     out strError);
             }
             else if (strOperation == "amerce")
@@ -1016,6 +1028,7 @@ namespace DigitalPlatform.LibraryServer
                 nRet = this.App.RecoverAmerce(this.RmsChannels,
                     level,
                     dom,
+                    func_warning,
                     out strError);
             }
             else if (strOperation == "setBiblioInfo")
@@ -1030,6 +1043,7 @@ namespace DigitalPlatform.LibraryServer
                 nRet = this.App.RecoverHire(this.RmsChannels,
                     level,
                     dom,
+                    func_warning,
                     out strError);
             }
             else if (strOperation == "foregift")
@@ -1038,6 +1052,7 @@ namespace DigitalPlatform.LibraryServer
                 nRet = this.App.RecoverForegift(this.RmsChannels,
                     level,
                     dom,
+                    func_warning,
                     out strError);
             }
             else if (strOperation == "settlement")
@@ -1054,6 +1069,7 @@ namespace DigitalPlatform.LibraryServer
                     level,
                     dom,
                     attachment,
+                    func_warning,
                     out strError);
             }
             else if (strOperation == "repairBorrowInfo")

@@ -3006,6 +3006,11 @@ AppInfo.GetString("config",
                                 this.MessageBoxShow(strError);
                         }
 
+                        // 获得图书馆一般信息
+                        nRet = GetLibraryInfo(false);
+                        if (nRet == -1)
+                            goto END1;
+
                         // 获得各种类型的数据库的检索途径
                         nRet = GetDbFromInfos(false);
                         if (nRet == -1)
@@ -3046,10 +3051,7 @@ AppInfo.GetString("config",
                         if (nRet == -1)
                             goto END1;
 
-                        // 获得图书馆一般信息
-                        nRet = GetLibraryInfo(false);
-                        if (nRet == -1)
-                            goto END1;
+                        //
 
                         // 获得索取号配置信息
                         // 2009/2/24 

@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Xml.Linq;
 using System.Text;
 using System.IO;
+using System.Net.Http;
 
 using A = DocumentFormat.OpenXml.Drawing;
 using DW = DocumentFormat.OpenXml.Drawing.Wordprocessing;
@@ -20,7 +21,6 @@ using DocumentFormat.OpenXml.Wordprocessing;
 
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
-using System.Net.Http;
 // using SixLabors.ImageSharp;
 
 namespace DigitalPlatform.Typography
@@ -1216,6 +1216,7 @@ out string error);
                     string src = e.GetAttribute("src");
 
                     HttpClient client = new HttpClient();
+                    // TODO: 捕获这里的异常，然后创建一幅含有报错文字的图片并显示出来
                     var response = client.GetAsync(src).Result;
 
                     var contentType = response.Content.Headers.ContentType?.MediaType;

@@ -161,6 +161,9 @@ namespace DigitalPlatform.rms.Client.rmsws_localhost {
         Compressed = 25,
         
         [System.Runtime.Serialization.EnumMemberAttribute()]
+        NotFoundTargetDb = 26,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
         RequestError = 100,
         
         [System.Runtime.Serialization.EnumMemberAttribute()]

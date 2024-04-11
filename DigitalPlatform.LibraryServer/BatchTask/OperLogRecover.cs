@@ -99,8 +99,9 @@ namespace DigitalPlatform.LibraryServer
 
                 this.AppendResultText($"日志恢复级别为: {this.RecoverLevel}\r\n");
 
+#if REMOVED
                 // 当为容错恢复级别时，检查当前全部读者库的检索点是否符合要求
-                if (this.RecoverLevel == LibraryServer.RecoverLevel.Robust)
+                if ((this.RecoverLevel & RecoverLevel.RobustMask) == RecoverLevel.RobustMask)
                 {
                     // 检查全部读者库的检索途径，看是否满足都有“所借册条码号”这个检索途径的这个条件
                     // return:
@@ -119,6 +120,7 @@ namespace DigitalPlatform.LibraryServer
                         return;
                     }
                 }
+#endif
 
                 // TODO: 检查当前是否有 重建检索点 的后台任务正在运行，或者还有没有运行完的部分。
                 // 要求重建检索点的任务运行完以后才能执行日志恢复任务
@@ -155,6 +157,7 @@ namespace DigitalPlatform.LibraryServer
                 // 列出所有日志文件
                 DirectoryInfo di = new DirectoryInfo(strDirectory);
 
+                // 注: GetFiles() 由于此方法检查具有 8.3 文件名格式和长文件名格式的文件名，因此类似于"*1.txt"的搜索模式可能会返回意外的 * 文件名。 例如，使用"1.txt"的搜索模式将返回 * * "longfilename.txt"，因为等效的 8.3 文件名格式将为"longf~1.txt"。
                 FileInfo[] fis = di.GetFiles("*.log");
 
                 // BUG!!! 以前缺乏排序。2008/2/1
@@ -359,6 +362,10 @@ namespace DigitalPlatform.LibraryServer
                             strXml,
                             attachment,
                             strStyle,
+                            (warning) =>
+                            {
+                                this.AppendResultText($"*** 警告: {warning}\r\n");
+                            },
                             out strError);
                         if (nRet == -1)
                         {

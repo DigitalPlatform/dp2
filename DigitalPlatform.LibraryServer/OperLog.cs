@@ -1871,7 +1871,7 @@ out strTargetLibraryCode);
             if (StringUtil.IsInList("getfilenames", strStyle) == true)
             {
                 DirectoryInfo di = new DirectoryInfo(this.m_strDirectory);
-                FileInfo[] fis = di.GetFiles("????????.log");
+                FileInfo[] fis = di.GetFiles("*.log");
 
                 if (fis.Length == 0)
                 {
@@ -2515,7 +2515,7 @@ out strTargetLibraryCode);
             // 列出所有日志文件
             DirectoryInfo di = new DirectoryInfo(this.m_strDirectory);
 
-            FileInfo[] fis = di.GetFiles("????????.log");
+            FileInfo[] fis = di.GetFiles("*.log");
             if (fis.Length == 0)
                 return 0;
 

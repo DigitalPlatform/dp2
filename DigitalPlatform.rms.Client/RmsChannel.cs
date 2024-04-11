@@ -25,7 +25,6 @@ using DigitalPlatform.Xml;
 
 using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.Core;
-using System.Data.SqlClient;
 
 namespace DigitalPlatform.rms.Client
 {

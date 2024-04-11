@@ -614,6 +614,25 @@ namespace DigitalPlatform.LibraryServer.Common
             return nodeDatabase;
         }
 
+        // 创建(目库的)下级库的定义节点
+        public static XmlNode CreateBiblioChildDatabaseNode(XmlDocument dom,
+    string strDatabaseName,
+    string strBiblioDbName,
+    string strSubType)
+        {
+            var nodeDatabase = dom.CreateElement("database");
+            dom.DocumentElement.AppendChild(nodeDatabase);
+
+            // type
+            DomUtil.SetAttr(nodeDatabase, "type", strSubType);
+
+            DomUtil.SetAttr(nodeDatabase, "name", strDatabaseName);
+
+            nodeDatabase.SetAttribute("biblioDbName", strBiblioDbName);
+
+            return nodeDatabase;
+        }
+
 
         #endregion
     }

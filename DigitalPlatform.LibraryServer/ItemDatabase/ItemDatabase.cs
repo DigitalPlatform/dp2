@@ -1570,11 +1570,14 @@ out strError);
             {
                 info.NewRecPath = strOutputPath;    // 兑现保存的位置，因为可能有追加形式的路径
 
-                DomUtil.SetElementText(domOperLog.DocumentElement, "action", "move");
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+                    "action", 
+                    "move");
 
                 // 新记录
                 XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
-                    "record", strNewXml);
+                    "record", 
+                    strNewXml);
                 DomUtil.SetAttr(node, "recPath", info.NewRecPath);
 
                 // 旧记录
@@ -1893,7 +1896,9 @@ out strError);
             }
             else // 成功
             {
-                DomUtil.SetElementText(domOperLog.DocumentElement, "action", "change");
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+                    "action", 
+                    "change");
 
                 // 新记录
                 XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
@@ -2816,6 +2821,16 @@ out strError);
                         && bNoEventLog == false    // 2008/10/19
                         && bSimulate == false)
                     {
+                        // 2024/3/20
+                        // 检查 domOperLog 中是否准备好了 action 元素
+                        var action = DomUtil.GetElementText(domOperLog.DocumentElement,
+                            "action");
+                        if (string.IsNullOrEmpty(action))
+                        {
+                            strError = "内部错误: domOperLog 中没有准备好 action 元素";
+                            goto ERROR1;
+                        }
+
                         string strOperTime = this.App.Clock.GetClock();
                         DomUtil.SetElementText(domOperLog.DocumentElement,
                             "operator",

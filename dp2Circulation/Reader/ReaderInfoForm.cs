@@ -58,6 +58,7 @@ namespace dp2Circulation
         const int WM_SAVETO = API.WM_USER + 206;
         const int WM_SAVE_RECORD = API.WM_USER + 207;
         const int WM_SAVE_RECORD_BARCODE = API.WM_USER + 208;
+        const int WM_SAVE_RECORD_REFID = API.WM_USER + 209;
 
         // 2020/5/26
         const int WM_SAVE_RECORD_STATE = API.WM_USER + 210;
@@ -1910,11 +1911,19 @@ strXml);
 
                 // 是否强制修改册条码号
                 bool bChangeReaderBarcode = StringUtil.IsInList("changereaderbarcode", strStyle);
+                // 是否强制修改参考 ID
+                bool bChangeReaderRefID = StringUtil.IsInList("changereaderrefid", strStyle);
+
                 bool bChangeState = StringUtil.IsInList("changestate", strStyle);
                 bool bChangeReaderForce = StringUtil.IsInList("changereaderforce", strStyle);
                 if (bChangeReaderBarcode && bChangeReaderForce)
                 {
                     strError = "style 不应同时包含 changereaderbarcode 和 changerecordforce";
+                    goto ERROR1;
+                }
+                if (bChangeReaderRefID && bChangeReaderForce)
+                {
+                    strError = "style 不应同时包含 changereaderrefid 和 changerecordforce";
                     goto ERROR1;
                 }
 
@@ -2055,6 +2064,21 @@ strXml);
                             goto ERROR1;
                         }
                         strAction = "changereaderbarcode";
+                    }
+                    else if (strAction == "change" && bChangeReaderRefID)
+                    {
+                        if (bChangeState)
+                        {
+                            strError = "changestate 和 changereaderrefid 不应同时具备";
+                            goto ERROR1;
+                        }
+                        // 2024/4/9
+                        if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.158") < 0)
+                        {
+                            strError = "需要 dp2library 版本在 3.158 以上才能实现强制修改参考 ID 的功能。当前 dp2library 版本为 " + Program.MainForm.ServerVersion;
+                            goto ERROR1;
+                        }
+                        strAction = "changereaderrefid";
                     }
                     else if (strAction == "change" && bChangeState) // 2020/5/28
                     {
@@ -2835,7 +2859,8 @@ TaskScheduler.Default);
                     if (channel.ErrorCode == ErrorCode.PartialDenied)
                     {
                         // 提醒重新装载?
-                        this.MessageBoxShow("请重新装载记录, 检查哪些字段内容修改被拒绝。");
+                        // 2024/4/9 注: 有些字段内容在编辑器里面改变了，但实际上和刚才成功保存到服务器的记录内容中的相应字段内容不一致。这一点特别容易造成迷惑
+                        this.MessageBoxShow("注意当前窗口中的内容并未全部被 dp2library 服务器接受。建议重新装载记录内容到本窗口, 并检查哪些字段内容修改被拒绝了。");
                     }
                 }
                 else
@@ -3515,6 +3540,25 @@ TaskScheduler.Default);
                                 msg) == true)
                             {
                                 await this.SaveRecordAsync("displaysuccess,changereaderbarcode");  // verifybarcode,
+                            }
+                        }
+                        finally
+                        {
+                            EnableToolStrip(true);
+                        }
+                    });
+                    return;
+                case WM_SAVE_RECORD_REFID:
+                    _ = Task.Run(async () =>
+                    {
+                        EnableToolStrip(false);
+                        try
+                        {
+                            if (this.m_webExternalHost.CanCallNew(
+                                this.commander,
+                                msg) == true)
+                            {
+                                await this.SaveRecordAsync("displaysuccess,changereaderrefid");
                             }
                         }
                         finally
@@ -9177,6 +9221,16 @@ MessageBoxDefaultButton.Button2);
         ERROR1:
             MessageBox.Show(this, strError);
             return;
+        }
+
+        private void ToolStripMenuItem_saveChangeRefID_Click(object sender, EventArgs e)
+        {
+            EnableToolStrip(false);
+
+            this.m_webExternalHost.StopPrevious();
+            this.webBrowser_readerInfo.Stop();
+
+            this.commander.AddMessage(WM_SAVE_RECORD_REFID);  // 能在读者尚有外借信息的情况下强行修改参考 ID
         }
     }
 }

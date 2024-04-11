@@ -90,6 +90,7 @@
             this.toolStripMenuItem_loadBlankRecord = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_notifyRecall = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_notifyOverdue = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem_cancelReservation = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripMenuItem_createRfidCard = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_bindCardNumber = new System.Windows.Forms.ToolStripMenuItem();
@@ -113,7 +114,7 @@
             this.toolStripTextBox_barcode = new System.Windows.Forms.ToolStripTextBox();
             this.toolStripButton_load = new System.Windows.Forms.ToolStripButton();
             this.tableLayoutPanel_main = new System.Windows.Forms.TableLayoutPanel();
-            this.toolStripMenuItem_cancelReservation = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_saveChangeRefID = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_normal)).BeginInit();
             this.splitContainer_normal.Panel1.SuspendLayout();
             this.splitContainer_normal.Panel2.SuspendLayout();
@@ -246,7 +247,7 @@
             this.tabPage_borrowHistory.Location = new System.Drawing.Point(4, 31);
             this.tabPage_borrowHistory.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_borrowHistory.Name = "tabPage_borrowHistory";
-            this.tabPage_borrowHistory.Size = new System.Drawing.Size(1102, 383);
+            this.tabPage_borrowHistory.Size = new System.Drawing.Size(1063, 507);
             this.tabPage_borrowHistory.TabIndex = 3;
             this.tabPage_borrowHistory.Text = "借阅历史";
             this.tabPage_borrowHistory.UseVisualStyleBackColor = true;
@@ -258,7 +259,7 @@
             this.webBrowser_borrowHistory.Margin = new System.Windows.Forms.Padding(5);
             this.webBrowser_borrowHistory.MinimumSize = new System.Drawing.Size(37, 35);
             this.webBrowser_borrowHistory.Name = "webBrowser_borrowHistory";
-            this.webBrowser_borrowHistory.Size = new System.Drawing.Size(1102, 383);
+            this.webBrowser_borrowHistory.Size = new System.Drawing.Size(1063, 507);
             this.webBrowser_borrowHistory.TabIndex = 0;
             // 
             // tabPage_xml
@@ -268,7 +269,7 @@
             this.tabPage_xml.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabPage_xml.Name = "tabPage_xml";
             this.tabPage_xml.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.tabPage_xml.Size = new System.Drawing.Size(1102, 383);
+            this.tabPage_xml.Size = new System.Drawing.Size(1063, 507);
             this.tabPage_xml.TabIndex = 1;
             this.tabPage_xml.Text = "XML";
             this.tabPage_xml.UseVisualStyleBackColor = true;
@@ -280,7 +281,7 @@
             this.webBrowser_xml.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.webBrowser_xml.MinimumSize = new System.Drawing.Size(27, 28);
             this.webBrowser_xml.Name = "webBrowser_xml";
-            this.webBrowser_xml.Size = new System.Drawing.Size(1094, 377);
+            this.webBrowser_xml.Size = new System.Drawing.Size(1055, 501);
             this.webBrowser_xml.TabIndex = 0;
             // 
             // tabPage_objects
@@ -289,7 +290,7 @@
             this.tabPage_objects.Location = new System.Drawing.Point(4, 31);
             this.tabPage_objects.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_objects.Name = "tabPage_objects";
-            this.tabPage_objects.Size = new System.Drawing.Size(1102, 383);
+            this.tabPage_objects.Size = new System.Drawing.Size(1063, 507);
             this.tabPage_objects.TabIndex = 2;
             this.tabPage_objects.Text = "对象";
             this.tabPage_objects.UseVisualStyleBackColor = true;
@@ -305,7 +306,7 @@
             this.binaryResControl1.Margin = new System.Windows.Forms.Padding(5);
             this.binaryResControl1.Name = "binaryResControl1";
             this.binaryResControl1.RightsCfgFileName = null;
-            this.binaryResControl1.Size = new System.Drawing.Size(1102, 383);
+            this.binaryResControl1.Size = new System.Drawing.Size(1063, 507);
             this.binaryResControl1.TabIndex = 1;
             this.binaryResControl1.TempDir = null;
             // 
@@ -316,7 +317,7 @@
             this.tabPage_qrCode.Location = new System.Drawing.Point(4, 31);
             this.tabPage_qrCode.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_qrCode.Name = "tabPage_qrCode";
-            this.tabPage_qrCode.Size = new System.Drawing.Size(1102, 383);
+            this.tabPage_qrCode.Size = new System.Drawing.Size(1063, 507);
             this.tabPage_qrCode.TabIndex = 4;
             this.tabPage_qrCode.Text = "二维码";
             this.tabPage_qrCode.UseVisualStyleBackColor = true;
@@ -328,7 +329,7 @@
             this.textBox_pqr.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_pqr.Name = "textBox_pqr";
             this.textBox_pqr.ReadOnly = true;
-            this.textBox_pqr.Size = new System.Drawing.Size(1102, 31);
+            this.textBox_pqr.Size = new System.Drawing.Size(1063, 31);
             this.textBox_pqr.TabIndex = 0;
             // 
             // pictureBox_qrCode
@@ -338,7 +339,7 @@
             this.pictureBox_qrCode.Margin = new System.Windows.Forms.Padding(5);
             this.pictureBox_qrCode.Name = "pictureBox_qrCode";
             this.pictureBox_qrCode.Padding = new System.Windows.Forms.Padding(37, 35, 37, 35);
-            this.pictureBox_qrCode.Size = new System.Drawing.Size(1102, 383);
+            this.pictureBox_qrCode.Size = new System.Drawing.Size(1063, 507);
             this.pictureBox_qrCode.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox_qrCode.TabIndex = 0;
             this.pictureBox_qrCode.TabStop = false;
@@ -603,6 +604,7 @@
             // 
             this.toolStripSplitButton_save.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ToolStripMenuItem_saveChangeBarcode,
+            this.ToolStripMenuItem_saveChangeRefID,
             this.ToolStripMenuItem_saveChangeState,
             this.ToolStripMenuItem_saveForce});
             this.toolStripSplitButton_save.Image = ((System.Drawing.Image)(resources.GetObject("toolStripSplitButton_save.Image")));
@@ -760,6 +762,13 @@
             this.toolStripMenuItem_notifyOverdue.Size = new System.Drawing.Size(608, 40);
             this.toolStripMenuItem_notifyOverdue.Text = "立即发出超期通知";
             this.toolStripMenuItem_notifyOverdue.Click += new System.EventHandler(this.toolStripMenuItem_notifyOverdue_Click);
+            // 
+            // toolStripMenuItem_cancelReservation
+            // 
+            this.toolStripMenuItem_cancelReservation.Name = "toolStripMenuItem_cancelReservation";
+            this.toolStripMenuItem_cancelReservation.Size = new System.Drawing.Size(608, 40);
+            this.toolStripMenuItem_cancelReservation.Text = "取消预约 ...";
+            this.toolStripMenuItem_cancelReservation.Click += new System.EventHandler(this.toolStripMenuItem_cancelReservation_Click);
             // 
             // toolStripSeparator8
             // 
@@ -938,12 +947,12 @@
             this.tableLayoutPanel_main.Size = new System.Drawing.Size(1079, 624);
             this.tableLayoutPanel_main.TabIndex = 6;
             // 
-            // toolStripMenuItem_cancelReservation
+            // ToolStripMenuItem_saveChangeRefID
             // 
-            this.toolStripMenuItem_cancelReservation.Name = "toolStripMenuItem_cancelReservation";
-            this.toolStripMenuItem_cancelReservation.Size = new System.Drawing.Size(608, 40);
-            this.toolStripMenuItem_cancelReservation.Text = "取消预约 ...";
-            this.toolStripMenuItem_cancelReservation.Click += new System.EventHandler(this.toolStripMenuItem_cancelReservation_Click);
+            this.ToolStripMenuItem_saveChangeRefID.Name = "ToolStripMenuItem_saveChangeRefID";
+            this.ToolStripMenuItem_saveChangeRefID.Size = new System.Drawing.Size(353, 40);
+            this.ToolStripMenuItem_saveChangeRefID.Text = "保存(强制修改参考 ID)";
+            this.ToolStripMenuItem_saveChangeRefID.Click += new System.EventHandler(this.ToolStripMenuItem_saveChangeRefID_Click);
             // 
             // ReaderInfoForm
             // 
@@ -1069,5 +1078,6 @@
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_clearPhoto;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator9;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_cancelReservation;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_saveChangeRefID;
     }
 }

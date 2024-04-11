@@ -13,7 +13,6 @@ using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
-using DigitalPlatform.Core;
 
 namespace dp2Circulation
 {
@@ -568,14 +567,14 @@ namespace dp2Circulation
             {
                 //return this.TryGet(() =>
                 //{
-                    return this.textBox_department.Text;
+                return this.textBox_department.Text;
                 //});
             }
             set
             {
                 //this.TryInvoke(() =>
                 //{
-                    this.textBox_department.Text = value;
+                this.textBox_department.Text = value;
                 //});
             }
         }
@@ -1102,6 +1101,13 @@ namespace dp2Circulation
                 DomUtil.SetAttr(nodeHire, "expireDate", this.HireExpireDate);
                 DomUtil.SetAttr(nodeHire, "period", this.HirePeriod);
 
+                // 2024/4/10
+                // 如果是 <hire period="" expireDate=""/>，删除整个元素
+                if (string.IsNullOrEmpty(this.HireExpireDate)
+                && string.IsNullOrEmpty(this.HirePeriod)
+                && string.IsNullOrEmpty(nodeHire.InnerXml))
+                    nodeHire.ParentNode.RemoveChild(nodeHire);
+
                 DomUtil.SetElementText(this._dataDom.DocumentElement,
                     "foregift", this.Foregift);
 
@@ -1205,6 +1211,26 @@ namespace dp2Circulation
                 if (string.IsNullOrEmpty(strInnerXml) == true
                     && element.Attributes.Count == 0)
                     element.ParentNode.RemoveChild(element);
+
+                /*
+                // 2024/4/10
+                if (element.Name == "hire"
+                    && string.IsNullOrEmpty(strInnerXml) == true)
+                {
+                    // 探测是否所有属性值都是空
+                    bool all_empty = true;
+                    foreach (XmlAttribute attr in element.Attributes)
+                    {
+                        if (string.IsNullOrEmpty(attr.Value) == false)
+                        {
+                            all_empty = false;
+                            break;
+                        }
+                    }
+                    if (all_empty)
+                        element.ParentNode.RemoveChild(element);
+                }
+                */
             }
 
             return 0;
@@ -1429,6 +1455,12 @@ namespace dp2Circulation
                     return null;
                 return this.tableLayoutPanel_main.GetControlFromPosition(0, row) as Label;
             }
+        }
+
+        void SetRefIdReadOnly(bool value)
+        {
+            this.textBox_refID.ReadOnly = value;
+            // this.checkBox_refID_allowChange.Checked = !value;
         }
 
         // 为每个编辑域设置 Tag
@@ -2079,6 +2111,18 @@ namespace dp2Circulation
         private void button_editCardNumber_Click(object sender, EventArgs e)
         {
             this.EditCardNumber?.Invoke(this, new EventArgs());
+        }
+
+        private void checkBox_refID_allowChange_CheckedChanged(object sender, EventArgs e)
+        {
+            if (this.textBox_refID.ReadOnly != !this.checkBox_refID_allowChange.Checked)
+                this.textBox_refID.ReadOnly = !this.checkBox_refID_allowChange.Checked;
+        }
+
+        private void textBox_refID_ReadOnlyChanged(object sender, EventArgs e)
+        {
+            if (this.checkBox_refID_allowChange.Checked != !this.textBox_refID.ReadOnly)
+                this.checkBox_refID_allowChange.Checked = !this.textBox_refID.ReadOnly;
         }
     }
     // 

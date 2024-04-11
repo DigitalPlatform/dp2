@@ -10023,9 +10023,10 @@ out string _);
         public static CalenderInfo GetElementValues(XmlElement c)
         {
             if (c == null)
-               throw new ArgumentException("参数 c 不允许为空");
-            
-            return new CalenderInfo {
+                throw new ArgumentException("参数 c 不允许为空");
+
+            return new CalenderInfo
+            {
                 Name = c.GetAttribute("name"),
                 Range = c.GetAttribute("range"),
                 Content = c.InnerText,
@@ -16789,8 +16790,8 @@ out strError);
         //      1   已经成功转移
         public LibraryServerResult DevolveReaderInfo(
             SessionInfo sessioninfo,
-            string strSourceReaderBarcode,
-            string strTargetReaderBarcode)
+            string strSourceReaderKey,
+            string strTargetReaderKey)
         {
             string strError = "";
             int nRet = 0;
@@ -16809,21 +16810,21 @@ out strError);
             }
 
             // 检查源和目标条码号不能相同
-            if (strSourceReaderBarcode == strTargetReaderBarcode)
+            if (strSourceReaderKey == strTargetReaderKey)
             {
-                strError = "源和目标读者记录证条码号不能相同";
+                strError = "源和目标读者记录键不能相同";
                 goto ERROR1;
             }
 
-            if (String.IsNullOrEmpty(strSourceReaderBarcode) == true)
+            if (String.IsNullOrEmpty(strSourceReaderKey) == true)
             {
-                strError = "源读者记录证条码号不能为空";
+                strError = "源读者记录键不能为空";
                 goto ERROR1;
             }
 
-            if (String.IsNullOrEmpty(strTargetReaderBarcode) == true)
+            if (String.IsNullOrEmpty(strTargetReaderKey) == true)
             {
-                strError = "目标读者记录证条码号不能为空";
+                strError = "目标读者记录键不能为空";
                 goto ERROR1;
             }
 
@@ -16838,15 +16839,15 @@ out strError);
             // 加锁有先后有技巧：先加条码号较小的锁定。否则容易造成死锁
             string strBarcode1 = "";
             string strBarcode2 = "";
-            if (String.Compare(strSourceReaderBarcode, strTargetReaderBarcode) < 0)
+            if (String.Compare(strSourceReaderKey, strTargetReaderKey) < 0)
             {
-                strBarcode1 = strSourceReaderBarcode;
-                strBarcode2 = strTargetReaderBarcode;
+                strBarcode1 = strSourceReaderKey;
+                strBarcode2 = strTargetReaderKey;
             }
             else
             {
-                strBarcode1 = strTargetReaderBarcode;
-                strBarcode2 = strSourceReaderBarcode;
+                strBarcode1 = strTargetReaderKey;
+                strBarcode2 = strSourceReaderKey;
             }
 
             try
@@ -16873,7 +16874,7 @@ out strError);
                         nRet = this.GetReaderRecXml(
                             // sessioninfo.Channels,
                             channel,
-                            strSourceReaderBarcode,
+                            strSourceReaderKey,
                             out strSourceReaderXml,
                             out strSourceOutputReaderRecPath,
                             out source_reader_timestamp,
@@ -16881,7 +16882,7 @@ out strError);
                         if (nRet == 0)
                         {
                             result.Value = -1;
-                            result.ErrorInfo = "源读者证条码号 '" + strSourceReaderBarcode + "' 不存在";
+                            result.ErrorInfo = "源读者证条码号 '" + strSourceReaderKey + "' 不存在";
                             result.ErrorCode = ErrorCode.SourceReaderBarcodeNotFound;
                             return result;
                         }
@@ -16894,7 +16895,7 @@ out strError);
                         // 2008/6/17
                         if (nRet > 1)
                         {
-                            strError = "读入源读者记录时，发现读者证条码号 " + strSourceReaderBarcode + " 命中 " + nRet.ToString() + " 条，这是一个严重错误，请系统管理员尽快处理。";
+                            strError = "读入源读者记录时，发现读者证条码号 " + strSourceReaderKey + " 命中 " + nRet.ToString() + " 条，这是一个严重错误，请系统管理员尽快处理。";
                             goto ERROR1;
                         }
 
@@ -16924,6 +16925,13 @@ out strError);
                             goto ERROR1;
                         }
 
+                        string source_reader_refid = DomUtil.GetElementText(source_readerdom.DocumentElement,
+                            "refID");
+                        string source_reader_barcode = DomUtil.GetElementText(source_readerdom.DocumentElement,
+                            "barcode");
+                        string source_reader_key = dp2StringUtil.BuildReaderKey(source_reader_barcode, source_reader_refid);
+
+
                         // 读入目标读者记录
                         string strTargetReaderXml = "";
                         string strTargetOutputReaderRecPath = "";
@@ -16931,7 +16939,7 @@ out strError);
                         nRet = this.GetReaderRecXml(
                             // sessioninfo.Channels,
                             channel,
-                            strTargetReaderBarcode,
+                            strTargetReaderKey,
                             out strTargetReaderXml,
                             out strTargetOutputReaderRecPath,
                             out target_reader_timestamp,
@@ -16939,7 +16947,7 @@ out strError);
                         if (nRet == 0)
                         {
                             result.Value = -1;
-                            result.ErrorInfo = "目标读者证条码号 '" + strTargetReaderBarcode + "' 不存在";
+                            result.ErrorInfo = "目标读者证条码号 '" + strTargetReaderKey + "' 不存在";
                             result.ErrorCode = ErrorCode.TargetReaderBarcodeNotFound;
                             return result;
                         }
@@ -16952,7 +16960,7 @@ out strError);
                         // 2008/6/17
                         if (nRet > 1)
                         {
-                            strError = "读入目标读者记录时，发现读者证条码号 " + strTargetReaderBarcode + " 命中 " + nRet.ToString() + " 条，这是一个严重错误，请系统管理员尽快处理。";
+                            strError = "读入目标读者记录时，发现读者证条码号 " + strTargetReaderKey + " 命中 " + nRet.ToString() + " 条，这是一个严重错误，请系统管理员尽快处理。";
                             goto ERROR1;
                         }
 
@@ -16982,6 +16990,20 @@ out strError);
                             goto ERROR1;
                         }
 
+                        string target_reader_refid = DomUtil.GetElementText(target_readerdom.DocumentElement,
+    "refID");
+                        string target_reader_barcode = DomUtil.GetElementText(target_readerdom.DocumentElement,
+    "barcode");
+                        string target_reader_key = dp2StringUtil.BuildReaderKey(target_reader_barcode, target_reader_refid);
+
+                        if (string.IsNullOrEmpty(source_reader_refid) == false
+                            && string.IsNullOrEmpty(target_reader_refid) == false
+                            && source_reader_refid == target_reader_refid)
+                        {
+                            strError = $"源读者记录和目标读者记录的参考 ID 不允许相同";
+                            goto ERROR1;
+                        }
+
                         XmlDocument domOperLog = new XmlDocument();
                         domOperLog.LoadXml("<root />");
                         DomUtil.SetElementText(domOperLog.DocumentElement,
@@ -16992,12 +17014,24 @@ out strError);
 
                         // 从逻辑日志的角度，应当说，只要有源读者证条码号和
                         // 目标读者证条码号，就足以复原
-                        DomUtil.SetElementText(domOperLog.DocumentElement,
-                            "sourceReaderBarcode",
-                            strSourceReaderBarcode);
-                        DomUtil.SetElementText(domOperLog.DocumentElement,
+                        if (string.IsNullOrEmpty(source_reader_barcode) == false)
+                            DomUtil.SetElementText(domOperLog.DocumentElement,
+                                "sourceReaderBarcode",
+                                source_reader_barcode);
+                        if (string.IsNullOrEmpty(target_reader_barcode) == false)
+                            DomUtil.SetElementText(domOperLog.DocumentElement,
                             "targetReaderBarcode",
-                            strTargetReaderBarcode);
+                            target_reader_barcode);
+
+                        // 2024/3/27
+                        if (string.IsNullOrEmpty(source_reader_refid) == false)
+                            DomUtil.SetElementText(domOperLog.DocumentElement,
+        "sourceReaderRefID",
+        source_reader_refid);
+                        if (string.IsNullOrEmpty(target_reader_refid) == false)
+                            DomUtil.SetElementText(domOperLog.DocumentElement,
+                            "targetReaderRefID",
+                            target_reader_refid);
 
                         string strOperTimeString = this.Clock.GetClock();   // RFC1123格式
 
@@ -17018,10 +17052,9 @@ out strError);
                             //      0   not found brrowinfo
                             //      1   found and moved
                             nRet = DevolveBorrowInfo(
-                                // sessioninfo.Channels,
                                 channel,
-                                strSourceReaderBarcode,
-                                strTargetReaderBarcode,
+                                source_reader_key,  // strSourceReaderKey,
+                                target_reader_key,  // strTargetReaderKey,
                                 strOperTimeString,
                                 ref source_readerdom,
                                 ref target_readerdom,
@@ -17040,8 +17073,8 @@ out strError);
                             //      0   not found overdueinfo
                             //      1   found and moved
                             nRet = DevolveOverdueInfo(
-                                strSourceReaderBarcode,
-                                strTargetReaderBarcode,
+                                source_reader_key,  // strSourceReaderKey,
+                                target_reader_key,  // strTargetReaderKey,
                                 strOperTimeString,
                                 ref source_readerdom,
                                 ref target_readerdom,
@@ -17205,6 +17238,7 @@ out strError);
 
         // 移动借阅信息 -- <borrows>元素内容
         // 此函数也被日志恢复模块所使用，只是恢复时domOperLog为null
+        // 注: 本函数根据移动的 borrow 元素多寡，决定是否使用 attachment
         // parameters:
         //      domOperLog      操作日志DOM对象。如果调用时为null，表示根本不创建日志（包括日志附件）
         //      strAttachmentFileName   日志附件文件名。如果有必要创建日志附件，则创建出的文件用这个名字。
@@ -17214,10 +17248,9 @@ out strError);
         //      0   not found brrowinfo
         //      1   found and moved
         int DevolveBorrowInfo(
-            // RmsChannelCollection Channels,
             RmsChannel channel,
-            string strSourceReaderBarcode,
-            string strTargetReaderBarcode,
+            string strSourceReaderKey,
+            string strTargetReaderKey,
             string strOperTimeString,
             ref XmlDocument source_dom,
             ref XmlDocument target_dom,
@@ -17261,9 +17294,10 @@ out strError);
                 }
             }
 
-            for (int i = 0; i < nodesSourceBorrow.Count; i++)
+            // for (int i = 0; i < nodesSourceBorrow.Count; i++)
+            foreach (XmlElement source in nodesSourceBorrow)
             {
-                XmlNode source = nodesSourceBorrow[i];
+                // XmlNode source = nodesSourceBorrow[i];
 
                 // 加<borrow>元素
                 XmlDocumentFragment fragment = target_dom.CreateDocumentFragment();
@@ -17271,12 +17305,15 @@ out strError);
 
                 XmlNode target = nodeTargetBorrows.AppendChild(fragment);
                 // 增加一个注释元素
-                DomUtil.SetAttr(target, "devolveComment", "从读者 " + strSourceReaderBarcode + " 转移而来，操作时间 " + strOperTimeString);
+                DomUtil.SetAttr(target, "devolveComment", "从读者 " + strSourceReaderKey + " 转移而来，操作时间 " + strOperTimeString);
 
                 string strEntityBarcode = DomUtil.GetAttr(source, "barcode");
-
-                if (String.IsNullOrEmpty(strEntityBarcode) == true)
+                string strEntityRefID = source.GetAttribute("refID");
+                if (String.IsNullOrEmpty(strEntityBarcode) == true
+                    && string.IsNullOrEmpty(strEntityRefID) == true)
                     continue;
+
+                string strEntityKey = dp2StringUtil.BuildReaderKey(strEntityBarcode, strEntityRefID);
 
                 // 同步修改册记录中的借者证条码号
                 // return:
@@ -17284,11 +17321,10 @@ out strError);
                 //      0   entitybarcode not found
                 //      1   found and changed
                 nRet = ChangeEntityBorrower(
-                    // Channels,
                     channel,
-                    strEntityBarcode,
-                    strSourceReaderBarcode,
-                    strTargetReaderBarcode,
+                    strEntityKey,   // strEntityKey,
+                    strSourceReaderKey, // strSourceReaderKey,
+                    strTargetReaderKey, // strTargetReaderKey,
                     strOperTimeString,
                     ref domOperLog,
                     attachment,
@@ -17304,11 +17340,11 @@ out strError);
 
             // 源记录中根下创建一个注释元素
             // 并将原<borrows>元素中的内容移入，用于日后备查
-            XmlNode nodeComment = source_dom.CreateElement("devolvedBorrows");
+            var nodeComment = source_dom.CreateElement("devolvedBorrows");
             source_dom.DocumentElement.AppendChild(nodeComment);
             nodeComment.InnerXml = nodeSourceBorrows.InnerXml;
 
-            DomUtil.SetAttr(nodeComment, "comment", "已于 " + strOperTimeString + " 将下列借阅信息转移到读者 " + strTargetReaderBarcode + " 名下");
+            DomUtil.SetAttr(nodeComment, "comment", "已于 " + strOperTimeString + " 将下列借阅信息转移到读者 " + strTargetReaderKey + " 名下");
 
             // 创建日志记录信息要素
             if (domOperLog != null)
@@ -17331,8 +17367,8 @@ out strError);
         //      0   not found overdueinfo
         //      1   found and moved
         int DevolveOverdueInfo(
-            string strSourceReaderBarcode,
-            string strTargetReaderBarcode,
+            string strSourceReaderKey,
+            string strTargetReaderKey,
             string strOperTimeString,
             ref XmlDocument source_dom,
             ref XmlDocument target_dom,
@@ -17369,7 +17405,7 @@ out strError);
                 XmlNode target = nodeTargetOverdues.AppendChild(fragment);
 
                 // 增加一个注释元素
-                DomUtil.SetAttr(target, "devolveComment", "从读者 " + strSourceReaderBarcode + " 转移而来，操作时间 " + strOperTimeString);
+                DomUtil.SetAttr(target, "devolveComment", "从读者 " + strSourceReaderKey + " 转移而来，操作时间 " + strOperTimeString);
             }
 
             // 源记录中根下创建一个注释元素
@@ -17380,7 +17416,7 @@ out strError);
 
             DomUtil.SetAttr(nodeComment, "comment", "已于 "
                 + strOperTimeString
-                + " 将下列超期信息转移到读者 " + strTargetReaderBarcode + " 名下");
+                + " 将下列超期信息转移到读者 " + strTargetReaderKey + " 名下");
 
             // 创建日志记录信息要素
             if (domOperLog != null)
@@ -17399,6 +17435,9 @@ out strError);
 
         // 修改册记录中的借者证条码号
         // parameters:
+        //      strEntityKey    册记录检索键。内容为册条码号，或者 "@refID:xxx" 形态
+        //      strOldReaderKey 旧的读者键。内容为证条码号，或者 "@refID:xxx" 形态
+        //      strNewReaderKey 新的读者键。注意，(虽然也可以使用两种形态，但)倾向于尽量使用 "@refID:xxx" 形态
         //      domOperLog  日志记录DOM对象。如果==null，表示根本不创建日志（包括日志DOM）
         //      attachment    如果!=null表示要把实体记录保存到日志的attachment中。如果==null，表示直接把实体记录保存到日志记录(DOM)中
         //      nAttachmentIndex    日志附件记录index。第一次调用的时候，此值应为0，然后如果本函数增添了日志附件记录，会自动增量这个值
@@ -17407,11 +17446,10 @@ out strError);
         //      0   entitybarcode not found
         //      1   found and changed
         int ChangeEntityBorrower(
-            // RmsChannelCollection Channels,
             RmsChannel channel,
-            string strEntityBarcode,
-            string strOldReaderBarcode,
-            string strNewReaderBarcode,
+            string strEntityKey,
+            string strOldReaderKey,
+            string strNewReaderKey,
             string strOperTimeString,
             ref XmlDocument domOperLog,
             Stream attachment,
@@ -17422,8 +17460,30 @@ out strError);
             int nRet = 0;
             long lRet = 0;
 
+            if (String.IsNullOrEmpty(strOldReaderKey) == true)
+            {
+                strError = "strOldReaderKey 参数值不能为空";
+                goto ERROR1;
+            }
+
+            nRet = this.ConvertReaderBarcodeListToRefIdList(channel,
+strOldReaderKey,
+out string strOldReaderRefID,
+out strError);
+            if (nRet == -1)
+                strOldReaderRefID = "";
+            else
+                strOldReaderRefID = GetRefID(strOldReaderRefID);
+
+            nRet = this.ConvertRefIdListToReaderBarcodeList(channel,
+strOldReaderKey,
+out string strOldReaderBarcode,
+out strError);
+            if (nRet == -1)
+                strOldReaderBarcode = "";
+
             // 加册记录锁
-            this.EntityLocks.LockForWrite(strEntityBarcode);
+            this.EntityLocks.LockForWrite(strEntityKey);
 
             try // 册记录锁定范围开始
             {
@@ -17443,9 +17503,8 @@ out strError);
                 //      1   命中1条
                 //      >1  命中多于1条
                 nRet = this.GetItemRecXml(
-                    // Channels,
                     channel,
-                    strEntityBarcode,
+                    strEntityKey,
                     out strItemXml,
                     100,
                     out aPath,
@@ -17453,12 +17512,12 @@ out strError);
                     out strError);
                 if (nRet == 0)
                 {
-                    strError = "册条码号 '" + strEntityBarcode + "' 不存在";
+                    strError = "册条码号 '" + strEntityKey + "' 不存在";
                     return 0;
                 }
                 if (nRet == -1)
                 {
-                    strError = "读入册记录 '" + strEntityBarcode + "' 时发生错误: " + strError;
+                    strError = "读入册记录 '" + strEntityKey + "' 时发生错误: " + strError;
                     goto ERROR1;
                 }
 
@@ -17467,7 +17526,7 @@ out strError);
                 if (aPath.Count > 1)
                 {
                     /*
-                    strError = "册条码号为 '" + strEntityBarcode + "' 的册记录有 " + aPath.Count.ToString() + " 条，无法进行修改";
+                    strError = "册条码号为 '" + strEntityKey + "' 的册记录有 " + aPath.Count.ToString() + " 条，无法进行修改";
                     return -1;
                      * */
 
@@ -17485,12 +17544,6 @@ out strError);
                     List<byte[]> aTimestamp = null;
                     List<string> aItemXml = null;
 
-                    if (String.IsNullOrEmpty(strOldReaderBarcode) == true)
-                    {
-                        strError = "strOldReaderBarcode参数值不能为空";
-                        goto ERROR1;
-                    }
-
 #if NO
                     channel = Channels.GetChannel(this.WsUrl);
                     if (channel == null)
@@ -17507,7 +17560,7 @@ out strError);
                     nRet = FindItem(
                         channel,
                         strOldReaderBarcode,
-                        "", // TODO: 将来考虑增加参考 ID 参数
+                        strOldReaderRefID, // TODO: 将来考虑增加参考 ID 参数
                         aPath,
                         true,   // 优化
                         out aFoundPath,
@@ -17522,13 +17575,13 @@ out strError);
 
                     if (nRet == 0)
                     {
-                        strError = "册条码号 '" + strEntityBarcode + "' 检索出的 " + aPath.Count + " 条记录中，没有任何一条其<borrower>元素表明了被读者 '" + strOldReaderBarcode + "' 借阅。";
+                        strError = "册条码号 '" + strEntityKey + "' 检索出的 " + aPath.Count + " 条记录中，没有任何一条其<borrower>元素表明了被读者 '" + strOldReaderKey + "' 借阅。";
                         goto ERROR1;
                     }
 
                     if (nRet > 1)
                     {
-                        strError = "册条码号为 '" + strEntityBarcode + "' 并且<borrower>元素表明为读者 '" + strOldReaderBarcode + "' 借阅的册记录有 " + aFoundPath.Count.ToString() + " 条，无法进行移动操作。";
+                        strError = "册条码号为 '" + strEntityKey + "' 并且<borrower>元素表明为读者 '" + strOldReaderKey + "' 借阅的册记录有 " + aFoundPath.Count.ToString() + " 条，无法进行移动操作。";
                         goto ERROR1;
                     }
 
@@ -17549,9 +17602,8 @@ out strError);
                     }
                 }
 
-                XmlDocument itemdom = null;
                 nRet = LibraryApplication.LoadToDom(strItemXml,
-                    out itemdom,
+                    out XmlDocument itemdom,
                     out strError);
                 if (nRet == -1)
                 {
@@ -17569,7 +17621,8 @@ out strError);
                 }
 
                 // 核对旧读者证条码号
-                if (strBorrower != strOldReaderBarcode)
+                if (strBorrower != strOldReaderBarcode
+                    && strBorrower != $"@refID:{strOldReaderRefID}")
                 {
                     strError = "实体记录中，已有借者证条码号 '" + strBorrower + "' 和期望的改前证条码号 '" + strOldReaderBarcode + "' 不一致...";
                     goto ERROR1;
@@ -17578,13 +17631,13 @@ out strError);
                 // 修改为新读者证条码号
                 DomUtil.SetElementText(itemdom.DocumentElement,
                     "borrower",
-                    strNewReaderBarcode);
+                    strNewReaderKey);
 
                 // 加上一个注释
                 DomUtil.SetElementText(itemdom.DocumentElement,
                     "devolveComment",
                     "本册原为读者 " + strOldReaderBarcode + " 所借阅，后于 "
-                    + strOperTimeString + " 被转移到读者 " + strNewReaderBarcode + " 名下");
+                    + strOperTimeString + " 被转移到读者 " + strNewReaderKey + " 名下");
 
 #if NO
                 if (channel == null)
@@ -17599,16 +17652,13 @@ out strError);
 #endif
 
                 // 保存实体记录
-                byte[] output_timestamp = null;
-                string strOutputPath = "";
-
                 lRet = channel.DoSaveTextRes(strOutputItemRecPath,
                     itemdom.OuterXml,
                     false,
                     "content",  // ,ignorechecktimestamp
                     item_timestamp,
-                    out output_timestamp,
-                    out strOutputPath,
+                    out byte[] output_timestamp,
+                    out string strOutputPath,
                     out strError);
                 if (lRet == -1)
                 {
@@ -17625,9 +17675,21 @@ out strError);
                 // 将保存了的记录写入日志
                 if (domOperLog != null)
                 {
-                    XmlNode nodeLogRecord = domOperLog.CreateElement("changedEntityRecord");
+                    var nodeLogRecord = domOperLog.CreateElement("changedEntityRecord");
                     domOperLog.DocumentElement.AppendChild(nodeLogRecord);
-                    DomUtil.SetAttr(nodeLogRecord, "recPath", strOutputPath);
+                    nodeLogRecord.SetAttribute("recPath", strOutputPath);
+
+                    // 2024/3/27 新增
+                    var itemBarcode = DomUtil.GetElementText(itemdom.DocumentElement,
+                        "barcode");
+                    if (string.IsNullOrEmpty(itemBarcode) == false)
+                        nodeLogRecord.SetAttribute("itemBarcode", itemBarcode);
+
+                    // 2024/3/27 新增
+                    var itemRefID = DomUtil.GetElementText(itemdom.DocumentElement,
+                        "refID");
+                    if (string.IsNullOrEmpty(itemRefID) == false)
+                        nodeLogRecord.SetAttribute("itemRefID", itemBarcode);
 
                     if (attachment == null)
                     {
@@ -17652,7 +17714,7 @@ out strError);
             }
             finally
             {
-                this.EntityLocks.UnlockForWrite(strEntityBarcode);
+                this.EntityLocks.UnlockForWrite(strEntityKey);
             }
             return 1;
         ERROR1:
@@ -19847,13 +19909,14 @@ out strError);
 
         // 创建押金交费请求
         // parameters:
-        //      strOutputReaderXml 返回修改后的读者记录
-        //      strOutputID 返回本次创建的交费请求的 ID
+        //      strReaderKey        读者证条码号，或者 "@refID:xxx" 形态
+        //      strOutputReaderXml  返回修改后的读者记录
+        //      strOutputID         返回本次创建的交费请求的 ID
         // result.Value -1 出错 其他 本次创建的交费请求条数
         public LibraryServerResult Foregift(
             SessionInfo sessioninfo,
             string strAction,
-            string strReaderBarcode,
+            string strReaderKey,
             out string strOutputReaderXml,
             out string strOutputID)
         {
@@ -19913,26 +19976,23 @@ out strError);
 #if DEBUG_LOCK_READER
             this.WriteErrorLog("Foregift 开始为读者加读锁 '" + strReaderBarcode + "'");
 #endif
-            this.ReaderLocks.LockForRead(strReaderBarcode);
+            this.ReaderLocks.LockForRead(strReaderKey);
 
             try // 读者记录锁定范围开始
             {
-
                 // 读入读者记录
-                string strOutputReaderRecPath = "";
-                byte[] reader_timestamp = null;
                 nRet = this.GetReaderRecXml(
                     // sessioninfo.Channels,
                     channel,
-                    strReaderBarcode,
+                    strReaderKey,
                     out strReaderXml,
-                    out strOutputReaderRecPath,
-                    out reader_timestamp,
+                    out string strOutputReaderRecPath,
+                    out byte[] reader_timestamp,
                     out strError);
                 if (nRet == 0)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "读者证条码号 '" + strReaderBarcode + "' 不存在";
+                    result.ErrorInfo = "读者证条码号 '" + strReaderKey + "' 不存在";
                     result.ErrorCode = ErrorCode.ReaderBarcodeNotFound;
                     return result;
                 }
@@ -19967,6 +20027,11 @@ out strError);
                     goto ERROR1;
                 }
 
+                string strReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement,
+                    "barcode");
+                string strReaderRefID = DomUtil.GetElementText(readerdom.DocumentElement,
+                    "refID");
+
                 // 检查当前是不是已经有了押金交费请求
                 XmlNodeList nodeOverdues = readerdom.DocumentElement.SelectNodes("overdues/overdue");
                 for (int i = 0; i < nodeOverdues.Count; i++)
@@ -19981,7 +20046,7 @@ out strError);
                     string strPart = strReason.Substring(0, strWord.Length);
                     if (strPart == strWord)
                     {
-                        strError = "读者 '" + strReaderBarcode + "' 已经存在押金交费请求。需要先将此押金请求交费完成后，才能创建新的押金交费请求。";
+                        strError = "读者 '" + strReaderKey + "' 已经存在押金交费请求。需要先将此押金请求交费完成后，才能创建新的押金交费请求。";
                         goto ERROR1;
                     }
                 }
@@ -20059,9 +20124,15 @@ out strError);
                 DomUtil.SetElementText(domOperLog.DocumentElement,
                     "action",
                     strAction);
-                DomUtil.SetElementText(domOperLog.DocumentElement,
-                    "readerBarcode",
-                    strReaderBarcode);
+                if (string.IsNullOrEmpty(strReaderBarcode) == false)
+                    DomUtil.SetElementText(domOperLog.DocumentElement,
+                        "readerBarcode",
+                        strReaderBarcode);
+                // 2024/4/8
+                if (string.IsNullOrEmpty(strReaderRefID) == false)
+                    DomUtil.SetElementText(domOperLog.DocumentElement,
+        "readerRefID",
+        strReaderRefID);
 
                 // 新增的细节字符串 一个或者多个<overdue> OuterXml内容
                 DomUtil.SetElementText(domOperLog.DocumentElement,
@@ -20093,7 +20164,7 @@ out strError);
             } // 读者记录锁定范围结束
             finally
             {
-                this.ReaderLocks.UnlockForRead(strReaderBarcode);
+                this.ReaderLocks.UnlockForRead(strReaderKey);
 #if DEBUG_LOCK_READER
                 this.WriteErrorLog("Foregift 结束为读者加读锁 '" + strReaderBarcode + "'");
 #endif
@@ -20130,14 +20201,17 @@ out strError);
                 strID = GetOverdueID();
 
             // 获得相关参数
-            XmlNode nodeForegift = readerdom.DocumentElement.SelectSingleNode("foregift");
+            var nodeForegift = readerdom.DocumentElement.SelectSingleNode("foregift") as XmlElement;
+            /*
             if (nodeForegift == null)
             {
                 nodeForegift = readerdom.CreateElement("foregift");
                 readerdom.DocumentElement.AppendChild(nodeForegift);
             }
+            */
+            // 2024/4/11 注: 这里不急于添加一个空内容的 foregift 元素。等后面读者交费了以后，交费功能自然是会自动添加 foregift 元素
 
-            string strExistPrice = nodeForegift.InnerText;
+            string strExistPrice = nodeForegift?.InnerText;
 
             string strCurrentDate = strOperTime;
             DateTime current_date = DateTimeUtil.FromRfc1123DateTimeString(strCurrentDate);
@@ -20178,8 +20252,6 @@ out strError);
                 goto ERROR1;
             }
 
-            int nResultValue = 0;
-            string strForegiftPrice = "";
             // 执行脚本函数GetForegift
             // 根据已有价格，计算出需要新交的价格
             // parameters:
@@ -20191,8 +20263,8 @@ out strError);
                 strAction,
                 readerdom,
                 strExistPrice,
-                out nResultValue,
-                out strForegiftPrice,
+                out int nResultValue,
+                out string strForegiftPrice,
                 out strError);
             if (nRet == -1 || nRet == -2)
                 goto ERROR1;
@@ -20232,7 +20304,6 @@ out strError);
             if (strAction == "return")
                 DomUtil.SetAttr(nodeOverdue, "comment", "退还押金");
 
-
             strOverdueString = nodeOverdue.OuterXml;
             return 0;
         ERROR1:
@@ -20241,13 +20312,14 @@ out strError);
 
         // 创建租金交费请求
         // parameters:
-        //      strOutputReaderXml 返回修改后的读者记录
-        //      strOutputID 返回本次创建的交费请求的 ID
+        //      strReaderKey        读者证条码号，或者 "@refID:xxx" 形态
+        //      strOutputReaderXml  返回修改后的读者记录
+        //      strOutputID         返回本次创建的交费请求的 ID
         // result.Value -1 出错 其他 本次创建的交费请求条数
         public LibraryServerResult Hire(
             SessionInfo sessioninfo,
             string strAction,
-            string strReaderBarcode,
+            string strReaderKey,
             out string strOutputReaderXml,
             out string strOutputID)
         {
@@ -20301,7 +20373,7 @@ out strError);
 #if DEBUG_LOCK_READER
             this.WriteErrorLog("Hire 开始为读者加读锁 '" + strReaderBarcode + "'");
 #endif
-            this.ReaderLocks.LockForRead(strReaderBarcode);
+            this.ReaderLocks.LockForRead(strReaderKey);
 
             try // 读者记录锁定范围开始
             {
@@ -20312,7 +20384,7 @@ out strError);
                 nRet = this.GetReaderRecXml(
                     // sessioninfo.Channels,
                     channel,
-                    strReaderBarcode,
+                    strReaderKey,
                     out strReaderXml,
                     out strOutputReaderRecPath,
                     out reader_timestamp,
@@ -20320,7 +20392,7 @@ out strError);
                 if (nRet == 0)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "读者证条码号 '" + strReaderBarcode + "' 不存在";
+                    result.ErrorInfo = "读者证条码号 '" + strReaderKey + "' 不存在";
                     result.ErrorCode = ErrorCode.ReaderBarcodeNotFound;
                     return result;
                 }
@@ -20355,6 +20427,11 @@ out strError);
                     goto ERROR1;
                 }
 
+                string strReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement,
+                    "barcode");
+                string strReaderRefID = DomUtil.GetElementText(readerdom.DocumentElement,
+                    "refID");
+
                 // 检查当前是不是已经有了租金交费请求
                 XmlNodeList nodeOverdues = readerdom.DocumentElement.SelectNodes("overdues/overdue");
                 for (int i = 0; i < nodeOverdues.Count; i++)
@@ -20369,7 +20446,7 @@ out strError);
                     string strPart = strReason.Substring(0, strWord.Length);
                     if (strPart == strWord)
                     {
-                        strError = "读者 '" + strReaderBarcode + "' 已经存在租金交费请求。需要先将此租金请求交费完成后，才能创建新的租金交费请求。";
+                        strError = "读者 '" + strReaderKey + "' 已经存在租金交费请求。需要先将此租金请求交费完成后，才能创建新的租金交费请求。";
                         goto ERROR1;
                     }
                 }
@@ -20447,9 +20524,16 @@ out strError);
                 DomUtil.SetElementText(domOperLog.DocumentElement,
                     "action",
                     strAction);
+                if (string.IsNullOrEmpty(strReaderBarcode) == false)
                 DomUtil.SetElementText(domOperLog.DocumentElement,
                     "readerBarcode",
                     strReaderBarcode);
+
+                // 2024/4/8
+                if (string.IsNullOrEmpty(strReaderRefID) == false)
+                    DomUtil.SetElementText(domOperLog.DocumentElement,
+    "readerRefID",
+    strReaderRefID);
 
                 // 新增的细节字符串 一个或者多个<overdue> OuterXml内容
                 DomUtil.SetElementText(domOperLog.DocumentElement,
@@ -20481,7 +20565,7 @@ out strError);
             } // 读者记录锁定范围结束
             finally
             {
-                this.ReaderLocks.UnlockForRead(strReaderBarcode);
+                this.ReaderLocks.UnlockForRead(strReaderKey);
 #if DEBUG_LOCK_READER
                 this.WriteErrorLog("Hire 结束为读者加读锁 '" + strReaderBarcode + "'");
 #endif

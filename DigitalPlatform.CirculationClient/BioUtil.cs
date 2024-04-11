@@ -106,6 +106,7 @@ namespace DigitalPlatform.CirculationClient
             }
         }
 
+        // 为缓存添加若干事项
         public virtual int AddItems(
             List<FingerprintItem> items,
             ProcessInfo info,
@@ -115,6 +116,7 @@ namespace DigitalPlatform.CirculationClient
             return -1;
         }
 
+        // 获得缓存事项的数量
         public virtual int ItemCount
         {
             get
@@ -123,6 +125,7 @@ namespace DigitalPlatform.CirculationClient
             }
         }
 
+        // 初始化
         public virtual NormalResult Init(int dev_index)
         {
             return new NormalResult { Value = -1,
@@ -131,6 +134,7 @@ namespace DigitalPlatform.CirculationClient
             };
         }
 
+        // 释放
         public virtual NormalResult Free()
         {
             return new NormalResult { Value = -1, 
@@ -142,6 +146,7 @@ namespace DigitalPlatform.CirculationClient
         // GetRegisterString() 过程中所使用的 CancellationTokenSource 对象
         public CancellationTokenSource _cancelOfRegister = new CancellationTokenSource();
 
+        // 取消 RegisterString() 过程
         public virtual void CancelRegisterString()
         {
             _cancelOfRegister?.Cancel();
@@ -181,6 +186,7 @@ namespace DigitalPlatform.CirculationClient
             return e.Image;
         }
 
+        // 获得指定图象的特征字符串
         public virtual TextResult GetRegisterString(Image image,
             string strExcludeBarcodes)
         {
@@ -194,6 +200,7 @@ namespace DigitalPlatform.CirculationClient
 
         // 2021/5/17
         // 新版本，支持双目图像
+        // 获得指定图象的特征字符串
         public virtual TextResult GetRegisterString(Image image,
             Image irImage,
             string strExcludeBarcodes)
@@ -211,6 +218,7 @@ namespace DigitalPlatform.CirculationClient
 
         }
 
+        // 识别人脸图象
         // parameters:
         //      style   处理风格。(2023/12/29 新增的此参数)
         public virtual RecognitionFaceResult RecongnitionFace(Image image,

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ReferenceGroup xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" ID="6220cbc6-a9db-45b0-8153-fe3122d076ac" xmlns="urn:schemas-microsoft-com:xml-wcfservicemap">
+<ReferenceGroup xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ID="6220cbc6-a9db-45b0-8153-fe3122d076ac" xmlns="urn:schemas-microsoft-com:xml-wcfservicemap">
   <ClientOptions>
     <GenerateAsynchronousMethods>true</GenerateAsynchronousMethods>
     <EnableDataBinding>true</EnableDataBinding>
@@ -18,14 +18,14 @@
     <ServiceContractMappings />
   </ClientOptions>
   <MetadataSources>
-    <MetadataSource Address="http://localhost:8001/dp2kernel/metadata" Protocol="http" SourceId="1" />
+    <MetadataSource Address="http://localhost:8005/dp2kernel/metadata" Protocol="http" SourceId="1" />
   </MetadataSources>
   <Metadata>
-    <MetadataFile FileName="metadata.xsd" MetadataType="Schema" ID="6c035d45-7634-4fda-ba23-900ae4ab05a3" SourceId="1" SourceUrl="http://localhost:8001/dp2kernel/metadata?xsd=xsd0" />
-    <MetadataFile FileName="metadata1.xsd" MetadataType="Schema" ID="fdb00943-8995-49b1-9e79-8da3b5bd0f4f" SourceId="1" SourceUrl="http://localhost:8001/dp2kernel/metadata?xsd=xsd1" />
-    <MetadataFile FileName="KernelService.wsdl" MetadataType="Wsdl" ID="53651efd-ba84-4198-a929-a31dfdf1ce11" SourceId="1" SourceUrl="http://localhost:8001/dp2kernel/metadata" />
-    <MetadataFile FileName="metadata2.xsd" MetadataType="Schema" ID="5734dfc9-b01c-46bd-ad52-6f9512e51545" SourceId="1" SourceUrl="http://localhost:8001/dp2kernel/metadata?xsd=xsd2" />
-    <MetadataFile FileName="metadata3.xsd" MetadataType="Schema" ID="fa5c04f8-0cb5-4dcc-9870-46fc82f157ef" SourceId="1" SourceUrl="http://localhost:8001/dp2kernel/metadata?xsd=xsd3" />
+    <MetadataFile FileName="metadata4.xsd" MetadataType="Schema" ID="3993cd54-32e6-4473-bada-fa587ebed996" SourceId="1" SourceUrl="http://localhost:8005/dp2kernel/metadata?xsd=xsd0" />
+    <MetadataFile FileName="KernelService1.wsdl" MetadataType="Wsdl" ID="9bb7692d-fafb-4fde-920b-ff6da4503029" SourceId="1" SourceUrl="http://localhost:8005/dp2kernel/metadata" />
+    <MetadataFile FileName="metadata41.xsd" MetadataType="Schema" ID="cf10ba47-9f2a-4dd8-8467-93de2e42a69f" SourceId="1" SourceUrl="http://localhost:8005/dp2kernel/metadata?xsd=xsd3" />
+    <MetadataFile FileName="metadata42.xsd" MetadataType="Schema" ID="62bc7aec-657f-4cf9-9f40-e175ca719306" SourceId="1" SourceUrl="http://localhost:8005/dp2kernel/metadata?xsd=xsd2" />
+    <MetadataFile FileName="metadata43.xsd" MetadataType="Schema" ID="038ba7b0-a78c-4796-a1e9-f3eecede460b" SourceId="1" SourceUrl="http://localhost:8005/dp2kernel/metadata?xsd=xsd1" />
   </Metadata>
   <Extensions>
     <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />

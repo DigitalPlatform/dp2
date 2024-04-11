@@ -1785,7 +1785,7 @@ namespace DigitalPlatform.rms
 
                 if (db.FastAppendTaskCount == 0)
                 {
-                    strError = $"对数据库 '{ db.GetCaption("zh-CN") }' {strAction} 动作的次数多于 beginfastappend 的次数，本次 {strAction} 操作被拒绝";
+                    strError = $"对数据库 '{db.GetCaption("zh-CN")}' {strAction} 动作的次数多于 beginfastappend 的次数，本次 {strAction} 操作被拒绝";
                     return -1;
                 }
                 db.FastAppendTaskCount--;
@@ -2603,9 +2603,10 @@ namespace DigitalPlatform.rms
         // return:
         //		-1	一般性错误
         //      -4  未找到记录
-        //      -5  未找到数据库
+        //      -5  未找到源数据库
         //      -6  没有足够的权限
         //      -7  路径不合法
+        //      -12 未找到目标数据库
         //		0	成功
         public int API_CopyRecord(User user,
             string strOriginRecordPath,
@@ -2714,6 +2715,8 @@ namespace DigitalPlatform.rms
                 {
                     // 目标记录不存在
                 }
+                else if (nRet == -5)
+                    return -12; // 2024/3/29
                 else if (nRet <= -1)
                     return (int)nRet;
                 else
@@ -3798,6 +3801,7 @@ namespace DigitalPlatform.rms
                         //      -1  一般性错误
                         //      -2  时间戳不匹配
                         //      -4  自动创建目录时，未找到上级
+                        //		-5	未找到数据库(2024/3/20 增加)
                         //		-6	权限不够
                         //		-9	存在其它类型的事项
                         //		0	成功
@@ -4122,6 +4126,7 @@ namespace DigitalPlatform.rms
         //      -1  一般性错误
         //      -2  时间戳不匹配
         //      -4  自动创建目录时，未找到上级
+        //		-5	未找到数据库(2024/3/20 增加)
         //		-6	权限不够
         //		-9	存在其它类型的事项
         //		0	成功
@@ -4276,11 +4281,12 @@ namespace DigitalPlatform.rms
             if (strParentCfgItemPath != "")
             {
                 List<XmlNode> parentNodes = DatabaseUtil.GetNodes(this.NodeDbs,
-                    strParentCfgItemPath);
+                    strParentCfgItemPath,
+                    out int max_hit_level);
                 if (parentNodes.Count > 1)
                 {
                     nIndex = strCfgItemPath.LastIndexOf("/");
-                    string strTempParentPath = strCfgItemPath.Substring(0, nIndex);
+                    string strTempParentPath = strCfgItemPath.Substring(0, nIndex); // TODO: 可直接用 strParentCfgItemPath
                     strError = "服务器端路径为 '" + strTempParentPath + "' 的配置事项有'" + Convert.ToString(parentNodes.Count) + "'个，配置文件不合法。";
                     return -1;
                 }
@@ -4295,9 +4301,19 @@ namespace DigitalPlatform.rms
                     if (StringUtil.IsInList("autocreatedir", strStyle, true) == false)
                     {
                         nIndex = strCfgItemPath.LastIndexOf("/");
-                        string strTempParentPath = strCfgItemPath.Substring(0, nIndex);
-                        strError = "未找到路径为 '" + strTempParentPath + "' 的配置事项，无法创建下级文件。";
-                        return -4;
+                        string strTempParentPath = strCfgItemPath.Substring(0, nIndex); // TODO: 可直接用 strParentCfgItemPath
+
+                        // 2024/3/19
+                        if (max_hit_level == -1)
+                        {
+                            strError = "未找到路径 '" + strTempParentPath + "' 中的数据库部分，无法创建下级文件";
+                            return -5;  // 错误码 未找到数据库
+                        }
+                        else
+                        {
+                            strError = "未找到路径为 '" + strTempParentPath + "' 的配置事项，无法创建下级文件。";
+                            return -4;
+                        }
                     }
 
                     // return:
@@ -4385,15 +4401,15 @@ namespace DigitalPlatform.rms
                     bNeedLock,
                     strCfgItemPath,
                     strFilePath,
-                     strRanges,
-                     lTotalLength,
-                     baSource,
-                     // streamSource,
-                     strMetadata,
-                     strStyle,
-                     baInputTimestamp,
-                     out baOutputTimestamp,
-                     out strError);
+                    strRanges,
+                    lTotalLength,
+                    baSource,
+                    // streamSource,
+                    strMetadata,
+                    strStyle,
+                    baInputTimestamp,
+                    out baOutputTimestamp,
+                    out strError);
             }
             else
             {

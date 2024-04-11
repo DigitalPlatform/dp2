@@ -7196,7 +7196,7 @@ out strError);
         //      strBiblio   源书目记录。目前需要用null调用
         //      baTimestamp 源记录的时间戳
         //      strNewBiblioRecPath 目标书目记录路径。可能为追加形态
-        //      strNewBiblio    需要在目标记录中更新的内容。如果 == null，表示不特意更新
+        //      strNewBiblioParam   需要在目标记录中更新的内容。如果 == null，表示不特意更新
         //      strMergeStyle   如何合并两条书目记录的元数据部分? reserve_source / reserve_target / missing_source_subrecord / overwrite_target_subrecord。 空表示 reserve_source + combine_subrecord
         //                      reserve_source 表示采用源书目记录; reserve_target 表示采用目标书目记录
         //                      missing_source_subrecord 表示丢失来自源的下级记录(保留目标原本的下级记录); overwrite_target_subrecord 表示采纳来自源的下级记录，删除目标记录原本的下级记录(注：此功能暂时没有实现); combine_subrecord 表示组合来源和目标的下级记录
@@ -7214,7 +7214,7 @@ out strError);
             string strBiblio,
             byte[] baTimestamp,
             string strNewBiblioRecPath,
-            string strNewBiblio,
+            string strNewBiblioParam,
             string strMergeStyle,
             out string strOutputBiblio,
             out string strOutputBiblioRecPath,
@@ -7228,6 +7228,8 @@ out strError);
             baOutputTimestamp = null;
 
             strOutputBiblio = "";
+
+            string strNewBiblio = strNewBiblioParam;
 
             LibraryServerResult result = new LibraryServerResult();
 
@@ -7819,8 +7821,8 @@ out strError);
                             //      1   strBiblioXml 发生了修改
                             nRet = CreateUniformKey(
                                 false,
-        ref strExistingSourceXml,
-        out strError);
+                                ref strExistingSourceXml,
+                                out strError);
                             if (nRet == -1)
                                 goto ERROR1;
 
@@ -7987,9 +7989,20 @@ out strError);
                     // 注：如果strNewBiblio为空，则表明仅仅进行了复制，并没有在目标记录写什么新内容
                     // 如果在日志记录中要查到到底复制了什么内容，可以看<oldRecord>元素的文本内容
                     // 注: 如果 strMergeStyle 为 reserve_target， 需要记载一下这个位置已经存在的记录
-                    XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
-                            "record", string.IsNullOrEmpty(strOutputBiblio) == false ? strOutputBiblio : strNewBiblio);
-                    DomUtil.SetAttr(node, "recPath", strOutputBiblioRecPath);
+                    
+                    // 2024/3/29
+                    var xml = "";
+                    if (string.IsNullOrEmpty(strOutputBiblio) == false)
+                        xml = strOutputBiblio;
+                    else if (string.IsNullOrEmpty(strNewBiblioParam) == false)
+                        xml = strNewBiblio;
+                    var node = DomUtil.SetElementText(domOperLog.DocumentElement,
+                            "record", 
+                            xml);   // string.IsNullOrEmpty(strOutputBiblio) == false ? strOutputBiblio : strNewBiblio
+                    node.SetAttribute("recPath", strOutputBiblioRecPath);
+                    // 2024/3/29
+                    if (string.IsNullOrEmpty(strNewBiblioParam))
+                        node.SetAttribute("newBiblioParam", "(null)");    // 表示 strNewBiblioParam 参数其实为空
                 }
 
                 // 2017/1/16

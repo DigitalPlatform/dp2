@@ -13081,6 +13081,10 @@ public int Type;	// 类型：0 库 / 1 途径 / 4 cfgs / 5 file
             bool isPublic = false;  // 是否不需要登录
             if (strCategory == "library" && strName == "name")
                 isPublic = true;
+            // 2024/3/15
+            bool checkHangup = true;    // 是否需要检查挂起
+            if (strCategory == "system" && strName == "expire")
+                checkHangup = false;
 
             LibraryServerResult result = null;
             if (isPublic)
@@ -13089,7 +13093,7 @@ public int Type;	// 类型：0 库 / 1 途径 / 4 cfgs / 5 file
                 // sessioninfo = null;
             }
             else
-                result = this.PrepareEnvironment("GetSystemParameter", true, true, true);
+                result = this.PrepareEnvironment("GetSystemParameter", true, true, checkHangup);
 
             if (result.Value == -1)
                 return result;
@@ -14066,6 +14070,7 @@ strLibraryCodeList);
                         RecoverLevel.Logic,
                         dom,
                         true,
+                        (DigitalPlatform.LibraryServer.BatchTask.Delegate_warning)null,
                         out strError);
                 }
                 else if (strOperation == "return")
@@ -14075,6 +14080,7 @@ strLibraryCodeList);
                         RecoverLevel.Logic,
                         dom,
                         true,
+                        (DigitalPlatform.LibraryServer.BatchTask.Delegate_warning)null,
                         out strError);
                 }
                 else
@@ -14318,7 +14324,7 @@ strLibraryCodeList);
         // 创建押金交费请求
         // parameters:
         //      strAction   值为foregift return之一
-        //      strReaderBarcode    读者证条码号
+        //      strReaderBarcode    读者证条码号，或者 "@refID:xxx" 形态
         //      strOutputReaderXml 返回修改后的读者记录
         //      strOutputID 返回本次创建的交费请求的 ID
         // return:
@@ -14375,7 +14381,7 @@ strLibraryCodeList);
 
         // 创建租金交费请求
         // parameters:
-        //      strReaderBarcode    读者证条码号
+        //      strReaderBarcode    读者证条码号，或者 "@refID:xxx" 形态
         //      strOutputReaderXml 返回修改后的读者记录
         //      strOutputID 返回本次创建的交费请求的 ID
         // return:

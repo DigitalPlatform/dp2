@@ -67,9 +67,9 @@ namespace dp2Circulation
             this.groupBox1.Controls.Add(this.textBox_startFileName);
             this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Location = new System.Drawing.Point(16, 114);
-            this.groupBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(4);
             this.groupBox1.Size = new System.Drawing.Size(583, 180);
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
@@ -90,7 +90,7 @@ namespace dp2Circulation
             this.textBox_startIndex.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_startIndex.Location = new System.Drawing.Point(187, 116);
-            this.textBox_startIndex.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBox_startIndex.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_startIndex.Name = "textBox_startIndex";
             this.textBox_startIndex.Size = new System.Drawing.Size(224, 31);
             this.textBox_startIndex.TabIndex = 4;
@@ -110,7 +110,7 @@ namespace dp2Circulation
             this.textBox_startFileName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_startFileName.Location = new System.Drawing.Point(187, 38);
-            this.textBox_startFileName.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBox_startFileName.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_startFileName.Name = "textBox_startFileName";
             this.textBox_startFileName.Size = new System.Drawing.Size(282, 31);
             this.textBox_startFileName.TabIndex = 1;
@@ -131,12 +131,12 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Right)));
             this.comboBox_recoverLevel.FormattingEnabled = true;
             this.comboBox_recoverLevel.Items.AddRange(new object[] {
-            "Logic(Âß¼­)",
-            "LogicAndSnapshot(Âß¼­+¿ìÕÕ)",
             "Snapshot(¿ìÕÕ)",
-            "Robust(ÈÝ´í)"});
+            "SnapshotRobust(¿ìÕÕÈÝ´í)",
+            "Logic(Âß¼­)",
+            "LogicRobust(Âß¼­ÈÝ´í)"});
             this.comboBox_recoverLevel.Location = new System.Drawing.Point(204, 348);
-            this.comboBox_recoverLevel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.comboBox_recoverLevel.Margin = new System.Windows.Forms.Padding(4);
             this.comboBox_recoverLevel.Name = "comboBox_recoverLevel";
             this.comboBox_recoverLevel.Size = new System.Drawing.Size(394, 29);
             this.comboBox_recoverLevel.TabIndex = 2;
@@ -146,7 +146,7 @@ namespace dp2Circulation
             // 
             this.checkBox_clearBefore.AutoSize = true;
             this.checkBox_clearBefore.Location = new System.Drawing.Point(16, 408);
-            this.checkBox_clearBefore.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.checkBox_clearBefore.Margin = new System.Windows.Forms.Padding(4);
             this.checkBox_clearBefore.Name = "checkBox_clearBefore";
             this.checkBox_clearBefore.Size = new System.Drawing.Size(332, 25);
             this.checkBox_clearBefore.TabIndex = 3;
@@ -157,7 +157,7 @@ namespace dp2Circulation
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_OK.Location = new System.Drawing.Point(385, 512);
-            this.button_OK.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_OK.Margin = new System.Windows.Forms.Padding(4);
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(103, 38);
             this.button_OK.TabIndex = 5;
@@ -170,7 +170,7 @@ namespace dp2Circulation
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.button_Cancel.Location = new System.Drawing.Point(496, 512);
-            this.button_Cancel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_Cancel.Margin = new System.Windows.Forms.Padding(4);
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(103, 38);
             this.button_Cancel.TabIndex = 6;
@@ -182,7 +182,7 @@ namespace dp2Circulation
             // 
             this.checkBox_continueWhenError.AutoSize = true;
             this.checkBox_continueWhenError.Location = new System.Drawing.Point(16, 442);
-            this.checkBox_continueWhenError.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.checkBox_continueWhenError.Margin = new System.Windows.Forms.Padding(4);
             this.checkBox_continueWhenError.Name = "checkBox_continueWhenError";
             this.checkBox_continueWhenError.Size = new System.Drawing.Size(237, 25);
             this.checkBox_continueWhenError.TabIndex = 4;
@@ -236,7 +236,7 @@ namespace dp2Circulation
             this.Controls.Add(this.label_recoverLevel);
             this.Controls.Add(this.groupBox1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "StartLogRecoverDlg";
             this.ShowInTaskbar = false;
             this.Text = "Æô¶¯ ÈÕÖ¾»Ö¸´ ÈÎÎñ";

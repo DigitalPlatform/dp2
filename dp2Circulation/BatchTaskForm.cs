@@ -179,7 +179,7 @@ namespace dp2Circulation
         private async void button_start_Click(object sender, EventArgs e)
         {
             // string strError = "";
-            var result = await StartBatchTask(this.comboBox_taskName.Text);
+            var result = await StartBatchTaskAsync(this.comboBox_taskName.Text);
             if (result.Value == -1)
             {
                 this.ShowMessage(result.ErrorInfo, "red", true);
@@ -245,7 +245,7 @@ namespace dp2Circulation
         // return:
         //      -1  出错
         //      1   成功。strError 里面有提示成功的内容
-        async Task<NormalResult> StartBatchTask(string strTaskName)
+        async Task<NormalResult> StartBatchTaskAsync(string strTaskName)
         {
             string strError = "";
 
@@ -254,8 +254,16 @@ namespace dp2Circulation
             {
                 StartLogRecoverDlg dlg = new StartLogRecoverDlg();
                 MainForm.SetControlFont(dlg, this.Font, false);
-                dlg.StartInfo = startinfo;
+                dlg.StartInfo = null;   // startinfo;
+                dlg.UiState = Program.MainForm.AppInfo.GetString(
+                            "StartBatchTask",
+                            "StartLogRecoverDlg_uiState",
+                            "");
                 dlg.ShowDialog(this);
+                Program.MainForm.AppInfo.SetString(
+                            "StartBatchTask",
+                            "StartLogRecoverDlg_uiState",
+                            dlg.UiState);
                 if (dlg.DialogResult != DialogResult.OK)
                 {
                     strError = "用户放弃启动";
@@ -265,6 +273,8 @@ namespace dp2Circulation
                         ErrorInfo = strError
                     };
                 }
+                // 2024/3/21
+                startinfo = dlg.StartInfo;
             }
             else if (strTaskName == "dp2Library 同步")
             {

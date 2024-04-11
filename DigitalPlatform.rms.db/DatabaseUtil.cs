@@ -7,6 +7,7 @@ using System.Diagnostics;
 
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
+using System.Linq;
 
 namespace DigitalPlatform.rms
 {
@@ -721,14 +722,34 @@ namespace DigitalPlatform.rms
             return strAllCaption;
         }
 
-
+        // 2024/3/19
+        // 计算路径的级数
+        static int CountLevel(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+                return 0;
+            string[] paths = path.Split(new char[] { '/' });
+            return paths.Count();
+        }
 
         public static List<XmlNode> GetNodes(XmlNode root,
-            string strCfgItemPath)
+    string strCfgItemPath)
+        {
+            return GetNodes(root,
+            strCfgItemPath,
+            out _);
+        }
+
+        // parameters:
+        //      max_hit_level   [out] 返回最多匹配的级数。-1 表示一级也没有匹配，0 表示匹配了第一级，以此类推
+        public static List<XmlNode> GetNodes(XmlNode root,
+            string strCfgItemPath,
+            out int max_hit_level)
         {
             Debug.Assert(root != null, "GetNodes()调用错误，root参数值不能为null。");
             Debug.Assert(strCfgItemPath != null && strCfgItemPath != "", "GetNodes()调用错误，strCfgItemPath不能为null。");
 
+            max_hit_level = -1;
 
             List<XmlNode> nodes = new List<XmlNode>();
 
@@ -797,6 +818,7 @@ namespace DigitalPlatform.rms
                 // 本级未找到，跳出循环
                 if (bFound == false)
                     break;
+                max_hit_level = i;
             }
 
             return nodes;

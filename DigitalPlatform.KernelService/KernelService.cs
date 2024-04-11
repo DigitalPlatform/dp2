@@ -2904,9 +2904,10 @@ namespace dp2Kernel
                 // return:
                 //		-1	一般性错误
                 //      -4  未找到记录
-                //      -5  未找到数据库
+                //      -5  未找到源数据库
                 //      -6  没有足够的权限
                 //      -7  路径不合法
+                //      -12 未找到目标数据库
                 //		0	成功
                 int nRet = app.Dbs.API_CopyRecord(user,
                     strOriginRecordPath,

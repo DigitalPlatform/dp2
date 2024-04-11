@@ -244,6 +244,8 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 如果数据库不存在会当作出错-1来报错
+        // parameters:
+        //      strLogFileName  要(追加)记载到的附件文件名。如果为空，表示不记载
         int InitializeDatabase(RmsChannel channel,
             string strDbName,
             string strLogFileName,
@@ -1431,7 +1433,8 @@ namespace DigitalPlatform.LibraryServer
                 {
                     if (string.IsNullOrEmpty(strType))
                     {
-                        strError = $"数据库名 '{strName}' 在 library.xml 中没有找到对应的类型信息";
+                        // 注: 各种类型找遍了都没有找到定义
+                        strError = $"数据库名 '{strName}' 在 library.xml 中没有定义";  // $"数据库名 '{strName}' 在 library.xml 中没有找到对应的类型信息";
                         if (continueLoop)
                         {
                             skip_warnings.Add(strError);
@@ -1873,7 +1876,7 @@ namespace DigitalPlatform.LibraryServer
                 }
                 #endregion
 
-                strError = "数据库名 '" + strName + "' 不属于 dp2library (library.xml)目前管辖的范围...";
+                strError = "数据库名 '" + strName + "' 在 dp2library (library.xml)中未定义...";
                 return 0;
 
             CONTINUE:
@@ -1903,14 +1906,24 @@ namespace DigitalPlatform.LibraryServer
                 DomUtil.SetElementText(domOperLog.DocumentElement,
                     "libraryCode", strLibraryCodeList);
 
-                XmlNode new_node = DomUtil.SetElementText(domOperLog.DocumentElement, "databases",
+                // 2024/3/15
+                // 记载请求 API 时的 strDatabaseNames 参数值
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+                    "databaseNames",
+                    strDatabaseNames);
+
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+"databaseInfo",
+strDatabaseInfo);
+
+                XmlNode databases_node = DomUtil.SetElementText(domOperLog.DocumentElement, "databases",
 "");
                 StringBuilder text = new StringBuilder();
                 foreach (XmlElement node in database_nodes)
                 {
                     text.Append(node.OuterXml);
                 }
-                new_node.InnerXml = text.ToString();
+                databases_node.InnerXml = text.ToString();
 
                 // 记载 attach detach 风格
                 if (string.IsNullOrEmpty(strStyle) == false)
@@ -3072,6 +3085,9 @@ out strError);
             return 1;
         }
 
+        // 处理数据库完成后触发
+        delegate void Delegate_processedDatabase(string dbname, string type);
+
         // 删除一个书目库，包括下属的数据库。
         // 根据书目库的库名，在 library.xml 的 itemdbgroup 中找出所有下属库的库名，然后删除它们
         // return:
@@ -3083,6 +3099,7 @@ out strError);
             string strLibraryCodeList,
             string strName,
             string strLogFileName,
+            Delegate_processedDatabase func_procesedDatabase,
             ref bool bDbNameChanged,
             out string strError)
         {
@@ -3108,13 +3125,18 @@ out strError);
             }
 
             // 删除书目库
-            int nRet = DeleteDatabase(channel, strName, strLogFileName,
-out strError);
+            int nRet = DeleteDatabase(channel,
+                strName,
+                strLogFileName,
+                out strError);
             if (nRet == -1)
             {
                 strError = "删除书目库 '" + strName + "' 时发生错误: " + strError;
                 return -1;
             }
+            func_procesedDatabase?.Invoke(
+    strName,
+    "biblio");
 
             bDbNameChanged = true;
 
@@ -3131,6 +3153,9 @@ out strError);
                     strError = "删除书目库 '" + strName + "' 所从属的实体库 '" + strEntityDbName + "' 时发生错误: " + strError;
                     return -1;
                 }
+                func_procesedDatabase?.Invoke(
+    strEntityDbName,
+    "entity");
             }
 
             // 删除订购库
@@ -3140,12 +3165,15 @@ out strError);
                 nRet = DeleteDatabase(channel,
                     strOrderDbName,
                     strLogFileName,
-out strError);
+                    out strError);
                 if (nRet == -1)
                 {
                     strError = "删除书目库 '" + strName + "' 所从属的订购库 '" + strOrderDbName + "' 时发生错误: " + strError;
                     return -1;
                 }
+                func_procesedDatabase?.Invoke(
+    strOrderDbName,
+    "order");
             }
 
             // 删除期库
@@ -3155,12 +3183,15 @@ out strError);
                 nRet = DeleteDatabase(channel,
                     strIssueDbName,
                     strLogFileName,
-out strError);
+                    out strError);
                 if (nRet == -1)
                 {
                     strError = "删除书目库 '" + strName + "' 所从属的期库 '" + strIssueDbName + "' 时发生错误: " + strError;
                     return -1;
                 }
+                func_procesedDatabase?.Invoke(
+strIssueDbName,
+"issue");
             }
 
             // 删除评注库
@@ -3170,12 +3201,15 @@ out strError);
                 nRet = DeleteDatabase(channel,
                     strCommentDbName,
                     strLogFileName,
-out strError);
+                    out strError);
                 if (nRet == -1)
                 {
                     strError = "删除书目库 '" + strName + "' 所从属的评注库 '" + strCommentDbName + "' 时发生错误: " + strError;
                     return -1;
                 }
+                func_procesedDatabase?.Invoke(
+strCommentDbName,
+"comment");
             }
 
             nodeDatabase.ParentNode.RemoveChild(nodeDatabase);
@@ -3192,6 +3226,13 @@ out strError);
             this.Changed = true;
             // this.ActivateManagerThread();
             return 1;
+        }
+
+        class DatabaseProperty
+        {
+            public string DbName { get; set; }
+            public string Type { get; set; }
+            public string BiblioDbName { get; set; }
         }
 
         // 删除数据库
@@ -3214,10 +3255,14 @@ out strError);
 
             int nRet = 0;
 
-            string strLogFileName = this.GetTempFileName("zip");
+            var skipOperLog = StringUtil.IsInList("skipOperLog", strStyle);
+
+            string strLogFileName = (skipOperLog == true ?
+                null : this.GetTempFileName("zip"));
 
             bool bDbNameChanged = false;
 
+            List<DatabaseProperty> physics_db_props = new List<DatabaseProperty>();
             // RmsChannel channel = Channels.GetChannel(this.WsUrl);
 
             string[] names = strDatabaseNames.Split(new char[] { ',' });
@@ -3259,6 +3304,15 @@ out strError);
                         strLibraryCodeList,
                         strName,
                         strLogFileName,
+                        (current_dbname, current_dbtype) =>
+                        {
+                            physics_db_props.Add(new DatabaseProperty
+                            {
+                                DbName = current_dbname,
+                                Type = current_dbtype,
+                                BiblioDbName = current_dbtype == "biblio" ? null : strName,
+                            });
+                        },
                         ref bDbNameChanged,
                         out strError);
                     if (nRet == -1)
@@ -3270,6 +3324,13 @@ out strError);
                         // return 0;
                     }
 
+                    /*
+                    physics_db_props.Add(new DatabaseProperty
+                    {
+                        DbName = strName,
+                        Type = "biblio",
+                    });
+                    */
                     goto CONTINUE;
                 }
 
@@ -3303,6 +3364,11 @@ out strError);
                         // return 0;
                     }
 
+                    physics_db_props.Add(new DatabaseProperty
+                    {
+                        DbName = strName,
+                        Type = strDbType,
+                    });
                     goto CONTINUE;
                 }
                 #endregion
@@ -3334,7 +3400,11 @@ out strError);
                         continue;
                         // return 0;
                     }
-
+                    physics_db_props.Add(new DatabaseProperty
+                    {
+                        DbName = strName,
+                        Type = "reader",
+                    });
                     goto CONTINUE;
                 }
                 #endregion
@@ -3366,6 +3436,11 @@ out strError);
                         continue;
                         // return 0;
                     }
+                    physics_db_props.Add(new DatabaseProperty
+                    {
+                        DbName = strName,
+                        Type = "authority"
+                    });
                     goto CONTINUE;
                 }
                 #endregion
@@ -3407,6 +3482,11 @@ out strError);
                         // return 0;
                     }
                     // TODO: 要把 this.ArrivedDbName 的值兑现到 LibraryCfgDom，便于 Verify 模块正常运作
+                    physics_db_props.Add(new DatabaseProperty
+                    {
+                        DbName = strName,
+                        Type = strDbType,
+                    });
                     goto CONTINUE;
                 }
                 #endregion
@@ -3414,7 +3494,10 @@ out strError);
                 #region 实用库
 
                 // 单独删除实用库
-                if (ServerDatabaseUtility.IsUtilDbName(this.LibraryCfgDom, strName, out _) == true)
+                if (ServerDatabaseUtility.IsUtilDbName(
+                    this.LibraryCfgDom,
+                    strName,
+                    out string util_db_type) == true)
                 {
                     // 删除一个实用库。
                     // 也会自动修改 library.xml 的相关元素
@@ -3439,11 +3522,16 @@ out strError);
                         continue;
                         // return 0;
                     }
+                    physics_db_props.Add(new DatabaseProperty
+                    {
+                        DbName = strName,
+                        Type = util_db_type,
+                    });
                     goto CONTINUE;
                 }
                 #endregion
 
-                strError = "数据库名 '" + strName + "' 不属于 dp2library 目前管辖的范围...";
+                strError = "数据库名 '" + strName + "' 在 dp2library 中未定义...";
                 return 0;
 
             CONTINUE:
@@ -3471,7 +3559,7 @@ out strError);
             }
 
             // 写入操作日志
-            if (StringUtil.IsInList("skipOperLog", strStyle) == false)
+            if (skipOperLog == false)
             {
                 XmlDocument domOperLog = new XmlDocument();
                 domOperLog.LoadXml("<root />");
@@ -3487,14 +3575,36 @@ out strError);
                 DomUtil.SetElementText(domOperLog.DocumentElement,
                     "libraryCode", strLibraryCodeList);
 
-                XmlNode new_node = DomUtil.SetElementText(domOperLog.DocumentElement, "databases",
-"");
+                // 2024/3/15
+                // 记载请求 API 时的 strDatabaseNames 参数值
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+                    "databaseNames",
+                    strDatabaseNames);
+
+                XmlNode databases_node = DomUtil.SetElementText(
+                    domOperLog.DocumentElement,
+                    "databases",
+                    "");
+                // 注: 所记载的 type='biblio' 的书目库语义实际上是逻辑库，代表一套数据库。
+                //      其余的 type='entity' type='order' ... 的数据库是物理库，是冗余的信息，一般日志恢复时可以忽略这几个数据库名的删除动作
+                foreach (var prop in physics_db_props)
+                {
+                    XmlElement database = domOperLog.CreateElement("database");
+                    databases_node.AppendChild(database);
+                    database.SetAttribute("name", prop.DbName);
+                    if (string.IsNullOrEmpty(prop.Type) == false)
+                        database.SetAttribute("type", prop.Type);
+                    if (string.IsNullOrEmpty(prop.BiblioDbName) == false)
+                        database.SetAttribute("biblioDbName", prop.BiblioDbName);
+                }
+                /*
                 foreach (string name in names)
                 {
                     XmlElement database = domOperLog.CreateElement("database");
-                    new_node.AppendChild(database);
+                    databases_node.AppendChild(database);
                     database.SetAttribute("name", name);
                 }
+                */
 
                 DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
                     sessioninfo.UserID);
@@ -3504,7 +3614,8 @@ out strError);
                 DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
                     strOperTime);
 
-                if (File.Exists(strLogFileName))
+                if (string.IsNullOrEmpty(strLogFileName) == false
+                    && File.Exists(strLogFileName))
                 {
                     using (Stream stream = File.OpenRead(strLogFileName))
                     {
@@ -4469,7 +4580,7 @@ out strError);
                     continue;
                 }
 
-                strError = "数据库名 '" + strName + "' 不属于 dp2library 目前管辖的范围...";
+                strError = "数据库名 '" + strName + "' 在 dp2library 中未定义 ...";
                 if (continueLoop == false)
                     return 0;
                 else
@@ -4493,13 +4604,39 @@ out strError);
                 DomUtil.SetElementText(domOperLog.DocumentElement,
                     "libraryCode", strLibraryCodeList);
 
-                XmlNode new_node = DomUtil.SetElementText(domOperLog.DocumentElement, "databases",
+                // 2024/3/15
+                // 记载请求 API 时的 strDatabaseNames 参数值
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+                    "databaseNames",
+                    strDatabaseNames);
+
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+    "databaseInfo",
+    strDatabaseInfo);
+
+                XmlNode databases_node = DomUtil.SetElementText(domOperLog.DocumentElement, "databases",
 "");
                 foreach (string name in dbnames)
                 {
                     XmlElement database = domOperLog.CreateElement("database");
-                    new_node.AppendChild(database);
+                    databases_node.AppendChild(database);
                     database.SetAttribute("name", name);
+
+                    // type
+                    var type = GetDbTypeByDbName(name);
+                    if (string.IsNullOrEmpty(type) == false)
+                        database.SetAttribute("type", type);
+                    // biblioDbName
+                    // 根据书目下属库名, 找到对应的书目库名
+                    // return:
+                    //      -1  出错
+                    //      0   没有找到
+                    //      1   找到
+                    nRet = this.GetBiblioDbNameByChildDbName(name,
+                        out string biblioDbName,
+                        out _);
+                    if (string.IsNullOrEmpty(biblioDbName) == false)
+                        database.SetAttribute("biblioDbName", biblioDbName);
                 }
                 {
                     int i = 0;
@@ -4507,7 +4644,7 @@ out strError);
                     {
                         string type = other_types[i];
                         XmlElement database = domOperLog.CreateElement("database");
-                        new_node.AppendChild(database);
+                        databases_node.AppendChild(database);
                         database.SetAttribute("name", name);
                         database.SetAttribute("type", type);
                         i++;
@@ -4647,6 +4784,8 @@ out strError);
             return 0;
         }
 
+
+
         // 初始化数据库
         // return:
         //      -1  出错
@@ -4672,10 +4811,13 @@ out strError);
             var continueLoop = StringUtil.IsInList("continueLoop", strStyle);
             List<string> skip_warnings = new List<string>();    // 跳过处理的警告
 
+            var skipOperLog = StringUtil.IsInList("skipOperLog", strStyle);
+
             string strLogFileName = this.GetTempFileName("zip");
-            List<string> dbnames = new List<string>();  // 已经完成的数据库名集合
+            List<string> physics_dbnames = new List<string>();  // 已经完成的物理库名称集合。注意书目库由好几个物理库构成，这里会记载物理库的名字
             List<string> other_dbnames = new List<string>();    // 其他类型的数据库名集合
             List<string> other_types = new List<string>();  // 和 other_dbnames 锁定对应的数据库类型集合
+
 
             bool bDbNameChanged = false;    // 初始化后，检索途径名等都可能被改变
 
@@ -4686,6 +4828,11 @@ out strError);
             {
                 string strName = names[i].Trim();
                 if (String.IsNullOrEmpty(strName) == true)
+                    continue;
+
+                // 2024/3/15
+                // 重复记载的物理库名字，先前已经处理过了，这里跳过
+                if (Processed(strName))
                     continue;
 
                 // 书目库整体初始化，也是可以的
@@ -4709,7 +4856,7 @@ out strError);
                     // 初始化书目库
                     lRet = InitializeDatabase(channel,
                         strName,
-                        strLogFileName,
+                        ProcessedOrSkip(strName) ? null : strLogFileName,
                         out strError);
                     if (lRet == -1 && channel.IsNotFound() == false)
                     {
@@ -4721,7 +4868,7 @@ out strError);
                     }
                     if (lRet != -1)
                     {
-                        dbnames.Add(strName);
+                        physics_dbnames.Add(strName);
                         bDbNameChanged = true;
                     }
 
@@ -4731,7 +4878,7 @@ out strError);
                     {
                         lRet = InitializeDatabase(channel,
                             strEntityDbName,
-                            strLogFileName,
+                            ProcessedOrSkip(strEntityDbName) ? null : strLogFileName,
                             out strError);
                         if (lRet == -1 && channel.IsNotFound() == false)
                         {
@@ -4742,7 +4889,10 @@ out strError);
                                 return -1;
                         }
                         if (lRet != -1)
-                            dbnames.Add(strEntityDbName);
+                        {
+                            physics_dbnames.Add(strEntityDbName);
+                            //physics_db_props.Add(strEntityDbName);
+                        }
                     }
 
                     // 初始化订购库
@@ -4751,7 +4901,7 @@ out strError);
                     {
                         lRet = InitializeDatabase(channel,
                             strOrderDbName,
-                            strLogFileName,
+                            ProcessedOrSkip(strOrderDbName) ? null : strLogFileName,
                             out strError);
                         if (lRet == -1 && channel.IsNotFound() == false)
                         {
@@ -4762,7 +4912,10 @@ out strError);
                                 return -1;
                         }
                         if (lRet != -1)
-                            dbnames.Add(strOrderDbName);
+                        {
+                            physics_dbnames.Add(strOrderDbName);
+                            //physics_db_props.Add(strOrderDbName);
+                        }
                     }
 
                     // 初始化期库
@@ -4771,7 +4924,7 @@ out strError);
                     {
                         lRet = InitializeDatabase(channel,
                             strIssueDbName,
-                            strLogFileName,
+                            ProcessedOrSkip(strIssueDbName) ? null : strLogFileName,
                             out strError);
                         if (lRet == -1 && channel.IsNotFound() == false)
                         {
@@ -4782,7 +4935,10 @@ out strError);
                                 return -1;
                         }
                         if (lRet != -1)
-                            dbnames.Add(strIssueDbName);
+                        {
+                            physics_dbnames.Add(strIssueDbName);
+                            //physics_db_props.Add(strIssueDbName);
+                        }
                     }
 
                     // 初始化评注库
@@ -4791,7 +4947,7 @@ out strError);
                     {
                         lRet = InitializeDatabase(channel,
                             strCommentDbName,
-                            strLogFileName,
+                            ProcessedOrSkip(strCommentDbName) ? null : strLogFileName,
                             out strError);
                         if (lRet == -1 && channel.IsNotFound() == false)
                         {
@@ -4802,7 +4958,10 @@ out strError);
                                 return -1;
                         }
                         if (lRet != -1)
-                            dbnames.Add(strCommentDbName);
+                        {
+                            physics_dbnames.Add(strCommentDbName);
+                            //physics_db_props.Add(strCommentDbName);
+                        }
                     }
 
                     continue;
@@ -4828,7 +4987,7 @@ out strError);
                     // 初始化实体库
                     lRet = InitializeDatabase(channel,
                         strName,
-                        strLogFileName,
+                        ProcessedOrSkip(strName) ? null : strLogFileName,
                         out strError);
                     if (lRet == -1 && channel.IsNotFound() == false)
                     {
@@ -4843,7 +5002,7 @@ out strError);
 
                     if (lRet != -1)
                     {
-                        dbnames.Add(strName);
+                        physics_dbnames.Add(strName);
                         bDbNameChanged = true;
                     }
                     continue;
@@ -4869,7 +5028,7 @@ out strError);
                     // 初始化订购库
                     lRet = InitializeDatabase(channel,
                         strName,
-                        strLogFileName,
+                        ProcessedOrSkip(strName) ? null : strLogFileName,
                         out strError);
                     if (lRet == -1 && channel.IsNotFound() == false)
                     {
@@ -4884,7 +5043,7 @@ out strError);
 
                     if (lRet != -1)
                     {
-                        dbnames.Add(strName);
+                        physics_dbnames.Add(strName);
                         bDbNameChanged = true;
                     }
                     continue;
@@ -4910,7 +5069,7 @@ out strError);
                     // 初始化期库
                     lRet = InitializeDatabase(channel,
                         strName,
-                        strLogFileName,
+                        ProcessedOrSkip(strName) ? null : strLogFileName,
                         out strError);
                     if (lRet == -1 && channel.IsNotFound() == false)
                     {
@@ -4925,7 +5084,7 @@ out strError);
 
                     if (lRet != -1)
                     {
-                        dbnames.Add(strName);
+                        physics_dbnames.Add(strName);
                         bDbNameChanged = true;
                     }
                     continue;
@@ -4951,7 +5110,7 @@ out strError);
                     // 初始化评注库
                     lRet = InitializeDatabase(channel,
                         strName,
-                        strLogFileName,
+                        ProcessedOrSkip(strName) ? null : strLogFileName,
                         out strError);
                     if (lRet == -1 && channel.IsNotFound() == false)
                     {
@@ -4966,7 +5125,7 @@ out strError);
 
                     if (lRet != -1)
                     {
-                        dbnames.Add(strName);
+                        physics_dbnames.Add(strName);
                         bDbNameChanged = true;
                     }
                     continue;
@@ -5000,7 +5159,7 @@ out strError);
                     // 初始化读者库
                     lRet = InitializeDatabase(channel,
                         strName,
-                        strLogFileName,
+                        ProcessedOrSkip(strName) ? null : strLogFileName,
                         out strError);
                     if (lRet == -1 && channel.IsNotFound() == false)
                     {
@@ -5015,7 +5174,7 @@ out strError);
 
                     if (lRet != -1)
                     {
-                        dbnames.Add(strName);
+                        physics_dbnames.Add(strName);
                         bDbNameChanged = true;
                     }
                     continue;
@@ -5042,7 +5201,7 @@ out strError);
                     // 初始化规范库
                     lRet = InitializeDatabase(channel,
                         strName,
-                        strLogFileName,
+                        ProcessedOrSkip(strName) ? null : strLogFileName,
                         out strError);
                     if (lRet == -1 && channel.IsNotFound() == false)
                     {
@@ -5057,7 +5216,7 @@ out strError);
 
                     if (lRet != -1)
                     {
-                        dbnames.Add(strName);
+                        physics_dbnames.Add(strName);
                         bDbNameChanged = true;
                     }
                     continue;
@@ -5075,7 +5234,7 @@ out strError);
                     // 初始化预约到书库
                     lRet = InitializeDatabase(channel,
                         strName,
-                        strLogFileName,
+                        ProcessedOrSkip(strName) ? null : strLogFileName,
                         out strError);
                     if (lRet == -1 && channel.IsNotFound() == false)
                     {
@@ -5088,7 +5247,7 @@ out strError);
                         return -1;
                     }
                     if (lRet != -1)
-                        dbnames.Add(strName);
+                        physics_dbnames.Add(strName);
                     continue;
                 }
 
@@ -5104,7 +5263,7 @@ out strError);
                     // 初始化违约金库
                     lRet = InitializeDatabase(channel,
                         strName,
-                        strLogFileName,
+                        ProcessedOrSkip(strName) ? null : strLogFileName,
                         out strError);
                     if (lRet == -1 && channel.IsNotFound() == false)
                     {
@@ -5118,7 +5277,7 @@ out strError);
                     }
 
                     if (lRet != -1)
-                        dbnames.Add(strName);
+                        physics_dbnames.Add(strName);
                     continue;
                 }
 
@@ -5134,7 +5293,7 @@ out strError);
                     // 初始化发票库
                     lRet = InitializeDatabase(channel,
                         strName,
-                        strLogFileName,
+                        ProcessedOrSkip(strName) ? null : strLogFileName,
                         out strError);
                     if (lRet == -1 && channel.IsNotFound() == false)
                     {
@@ -5148,7 +5307,7 @@ out strError);
                     }
 
                     if (lRet != -1)
-                        dbnames.Add(strName);
+                        physics_dbnames.Add(strName);
                     continue;
                 }
 
@@ -5164,7 +5323,7 @@ out strError);
                     // 初始化消息库
                     lRet = InitializeDatabase(channel,
                         strName,
-                        strLogFileName,
+                        ProcessedOrSkip(strName) ? null : strLogFileName,
                         out strError);
                     if (lRet == -1 && channel.IsNotFound() == false)
                     {
@@ -5178,7 +5337,7 @@ out strError);
                     }
 
                     if (lRet != -1)
-                        dbnames.Add(strName);
+                        physics_dbnames.Add(strName);
                     continue;
                 }
 
@@ -5194,7 +5353,7 @@ out strError);
                     // 初始化拼音库
                     lRet = InitializeDatabase(channel,
                         strName,
-                        strLogFileName,
+                        ProcessedOrSkip(strName) ? null : strLogFileName,
                         out strError);
                     if (lRet == -1 && channel.IsNotFound() == false)
                     {
@@ -5208,7 +5367,7 @@ out strError);
                     }
 
                     if (lRet != -1)
-                        dbnames.Add(strName);
+                        physics_dbnames.Add(strName);
                     continue;
                 }
 
@@ -5224,7 +5383,7 @@ out strError);
                     // 初始化著者号码库
                     lRet = InitializeDatabase(channel,
                         strName,
-                        strLogFileName,
+                        ProcessedOrSkip(strName) ? null : strLogFileName,
                         out strError);
                     if (lRet == -1 && channel.IsNotFound() == false)
                     {
@@ -5238,7 +5397,7 @@ out strError);
                     }
 
                     if (lRet != -1)
-                        dbnames.Add(strName);
+                        physics_dbnames.Add(strName);
                     continue;
                 }
 
@@ -5261,7 +5420,7 @@ out strError);
                     // 初始化实用库
                     lRet = InitializeDatabase(channel,
                         strName,
-                        strLogFileName,
+                        ProcessedOrSkip(strName) ? null : strLogFileName,
                         out strError);
                     if (lRet == -1 && channel.IsNotFound() == false)
                     {
@@ -5275,7 +5434,7 @@ out strError);
                     }
 
                     if (lRet != -1)
-                        dbnames.Add(strName);
+                        physics_dbnames.Add(strName);
                     continue;
                 }
 
@@ -5417,13 +5576,13 @@ out strError);
                     continue;
                 }
 
-                strError = "数据库名 '" + strName + "' 不属于 dp2library 目前管辖的范围...";
+                strError = "数据库名 '" + strName + "' 在 dp2library 中未定义...";
                 return 0;
             }
 
 
             // 写入操作日志
-            if (StringUtil.IsInList("skipOperLog", strStyle) == false)
+            if (skipOperLog == false)
             {
                 XmlDocument domOperLog = new XmlDocument();
                 domOperLog.LoadXml("<root />");
@@ -5439,13 +5598,34 @@ out strError);
                 DomUtil.SetElementText(domOperLog.DocumentElement,
                     "libraryCode", strLibraryCodeList);
 
-                XmlNode new_node = DomUtil.SetElementText(domOperLog.DocumentElement, "databases",
+                // 2024/3/15
+                // 记载请求 API 时的 strDatabaseNames 参数值
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+                    "databaseNames",
+                    strDatabaseNames);
+
+                XmlNode databases_node = DomUtil.SetElementText(domOperLog.DocumentElement, "databases",
 "");
-                foreach (string name in dbnames)
+                foreach (string name in physics_dbnames)
                 {
                     XmlElement database = domOperLog.CreateElement("database");
-                    new_node.AppendChild(database);
+                    databases_node.AppendChild(database);
                     database.SetAttribute("name", name);
+                    // type
+                    var type = GetDbTypeByDbName(name);
+                    if (string.IsNullOrEmpty(type) == false)
+                        database.SetAttribute("type", type);
+                    // biblioDbName
+                    // 根据书目下属库名, 找到对应的书目库名
+                    // return:
+                    //      -1  出错
+                    //      0   没有找到
+                    //      1   找到
+                    nRet = this.GetBiblioDbNameByChildDbName(name,
+                        out string biblioDbName,
+                        out _);
+                    if (string.IsNullOrEmpty(biblioDbName) == false)
+                        database.SetAttribute("biblioDbName", biblioDbName);
                 }
                 {
                     int i = 0;
@@ -5453,7 +5633,7 @@ out strError);
                     {
                         string type = other_types[i];
                         XmlElement database = domOperLog.CreateElement("database");
-                        new_node.AppendChild(database);
+                        databases_node.AppendChild(database);
                         database.SetAttribute("name", name);
                         database.SetAttribute("type", type);
                         i++;
@@ -5516,6 +5696,24 @@ out strError);
                 return -1;
             }
             return 1;
+
+            bool ProcessedOrSkip(string dbname)
+            {
+                if (skipOperLog)
+                    return true;
+                return Processed(dbname);
+            }
+
+            // 是否已经包含在处理过的逻辑或者物理库名字列表中?
+            bool Processed(string dbname)
+            {
+
+                if (physics_dbnames.Contains(dbname))
+                    return true;
+                //if (physics_db_props.Contains(dbname))
+                //    return true;
+                return false;
+            }
         }
 
         const string AccessLogDbName = "访问日志";
@@ -6039,6 +6237,7 @@ out strError);
         // 创建书目数据库
         // parameters:
         //      strLibraryCodeList  操作者的馆代码列表。用于判断操作者是不是全局账户。
+        //      strStyle            (2024/3/25 注: 此功能尚未完全实现)如果包含 suppressBiblioExistingError，表示对已经存在小书目库并不报错
         // return:
         //      -1  出错
         //      0   没有找到
@@ -6086,13 +6285,18 @@ out strError);
                 return 0;
             }
 
+            bool biblio_existed = false;
             if (bRecreate == false)
             {
                 // 检查 cfgdom 中是否已经存在同名的书目库
                 if (this.IsBiblioDbName(strName) == true)
                 {
-                    strError = "书目库 '" + strName + "' 的定义已经存在，不能重复创建";
-                    return -1;
+                    // 2024/3/22
+                    if (StringUtil.IsInList("suppressBiblioExistingError", strStyle) == false)
+                    {
+                        strError = "书目库 '" + strName + "' 的定义已经存在，不能重复创建";
+                        return -1;
+                    }
                 }
             }
 
@@ -6110,7 +6314,14 @@ out strError);
                     out strError);
                 if (nRet == -1)
                     return -1;
-                if (nRet >= 1)
+                if (nRet == 1)
+                {
+                    // 2024/3/22
+                    if (StringUtil.IsInList("suppressBiblioExistingError", strStyle) == false)
+                        return -1;
+                    biblio_existed = true;
+                }
+                if (nRet > 1)
                     return -1;
             }
 
@@ -6241,18 +6452,21 @@ out strError);
 
             // this.DataDir + "\\templates\\" + "biblio_" + info.Syntax + "_" + info.Usage;
 
-            // 根据预先的定义，创建一个数据库
-            nRet = CreateDatabase(channel,
-                strTemplateDir,
-                strName,
-                strLogFileName,
-                out strError);
-            if (nRet == -1)
-                return -1;
+            if (biblio_existed == false)
+            {
+                // 根据预先的定义，创建一个数据库
+                nRet = CreateDatabase(channel,
+                    strTemplateDir,
+                    strName,
+                    strLogFileName,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
 
-            created_dbnames.Add(strName);
+                created_dbnames.Add(strName);
 
-            bDbChanged = true;
+                bDbChanged = true;
+            }
 
             // 创建实体库
             if (String.IsNullOrEmpty(info.EntityDbName) == false)
@@ -6345,6 +6559,12 @@ out strError);
             else
             {
                 nodeNewDatabase = exist_database_node;
+            }
+
+            // TODO: (2024/3/25) 当 strStyle 中包含 suppressBiblioExistingError 时，要把 nodeNewDatabase 和 library.xml 中已有的书目库 XML 片段合并，而不是新增
+            if (StringUtil.IsInList("suppressBiblioExistingError", strStyle) == true)
+            {
+                throw new NotImplementedException();
             }
 
             info.WriteBiblioCfgNode(nodeNewDatabase);
@@ -7988,9 +8208,9 @@ out strError);
                     //      1   验证发现正确
                     nRet = VerifyDatabaseCreate(//this.LibraryCfgDom,
                         channel,
-                strDbType,
-                strName,
-                out strError);
+                        strDbType,
+                        strName,
+                        out strError);
                     if (nRet != 1)
                         return -1;
                 }
@@ -8013,13 +8233,20 @@ out strError);
                 DomUtil.SetElementText(domOperLog.DocumentElement,
                     "libraryCode", strLibraryCodeList);
 
-                XmlNode new_node = DomUtil.SetElementText(domOperLog.DocumentElement, "databases", "");
+                // 2024/3/15
+                // 注: strDatabaseNames 参数值为空
+                // 记载请求 API 时的 strDatabaseInfo 参数值
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+    "databaseInfo",
+    strDatabaseInfo);
+
+                XmlNode databases_node = DomUtil.SetElementText(domOperLog.DocumentElement, "databases", "");
                 StringBuilder text = new StringBuilder();
                 foreach (XmlElement node in database_nodes)
                 {
                     text.Append(node.OuterXml);
                 }
-                new_node.InnerXml = text.ToString();
+                databases_node.InnerXml = text.ToString();
 
                 DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
                     sessioninfo.UserID);
@@ -9028,7 +9255,15 @@ out strError);
                     // string strShortFileName = filename.Substring(strHead.Length + 1);
                     string strShortFileName = filename.Substring(strBase.Length + 1);
                     string directoryPathInArchive = Path.GetDirectoryName(strShortFileName);
-                    zip.AddFile(filename, directoryPathInArchive);
+                    try
+                    {
+                        zip.AddFile(filename, directoryPathInArchive);
+                    }
+                    catch (Exception ex)
+                    {
+                        string error = $"为 .zip 文件添加 '{filename}' '{directoryPathInArchive}' 时出现异常: {ex.Message}";
+                        throw new Exception(error, ex);
+                    }
                 }
 
                 zip.UseZip64WhenSaving = Zip64Option.AsNecessary;

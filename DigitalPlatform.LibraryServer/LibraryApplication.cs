@@ -76,8 +76,8 @@ namespace DigitalPlatform.LibraryServer
 
         public DailyItemCountTable DailyItemCountTable = new DailyItemCountTable();
 
-        internal static DateTime _expire = new DateTime(2024, 3, 15);
-        // 上一个版本是 2023/12/15 2023/9/15 2023/6/15 2023/3/15 2022/11/15 2022/9/15 2022/7/15 2022/5/15 2022/3/15 2021/12/15 2021/9/15 2021/7/15 2021/3/15 2020/11/15 2020/7/15 2019/2/15 2019/10/15 2019/7/15 2019/5/15 2019/2/15 2018/11/15 2018/9/15 2018/7/15 2018/5/15 2018/3/15 2017/1/15 2017/12/1 2017/9/1 2017/6/1 2017/3/1 2016/11/1
+        internal static DateTime _expire = new DateTime(2024, 9, 15);
+        // 上一个版本是 2024/3/15 2023/12/15 2023/9/15 2023/6/15 2023/3/15 2022/11/15 2022/9/15 2022/7/15 2022/5/15 2022/3/15 2021/12/15 2021/9/15 2021/7/15 2021/3/15 2020/11/15 2020/7/15 2019/2/15 2019/10/15 2019/7/15 2019/5/15 2019/2/15 2018/11/15 2018/9/15 2018/7/15 2018/5/15 2018/3/15 2017/1/15 2017/12/1 2017/9/1 2017/6/1 2017/3/1 2016/11/1
 
 #if NO
         int m_nRefCount = 0;
@@ -6752,10 +6752,31 @@ out strError);
             strXml = "";
             strError = "";
             int nRet = 0;
+            long lRet = 0;
 
             recpaths = new List<string>();
 
             LibraryApplication app = this;
+
+            // 2024/3/21
+            if (strBarcodeParam.StartsWith("@path:"))
+            {
+                var path = strBarcodeParam.Substring("@path:".Length);
+                lRet = channel.GetRes(path,
+                    out strXml,
+                    out _,
+                    out timestamp,
+                    out string output_path,
+                    out strError);
+                if (lRet == -1)
+                {
+                    if (channel.IsNotFound())
+                        return 0;
+                    return -1;
+                }
+                recpaths.Add(output_path);
+                return 1;
+            }
 
             string strBarcode = strBarcodeParam;
             string strHead = "@refID:";
@@ -6843,7 +6864,7 @@ out strError);
             // TODO: 这里最好使用一个随机的结果集名字，使用完以后主动删除这个结果集
             // 通用的临时检索记录的时候，都有类似问题，即，可能会摧毁调主正在使用的 default 名字的结果集
             string resultSetName = "temp";
-            long lRet = channel.DoSearchEx(strQueryXml,
+            lRet = channel.DoSearchEx(strQueryXml,
                 resultSetName,
                 "", // strOuputStyle
                 1,

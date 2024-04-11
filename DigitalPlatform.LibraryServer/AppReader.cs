@@ -20,13 +20,9 @@ using DigitalPlatform.rms.Client;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
-using DigitalPlatform.Script;
-using DigitalPlatform.MarcDom;
-using DigitalPlatform.Marc;
 
-using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
-using DigitalPlatform.Core;
+using System.Web.UI.HtmlControls;
 
 
 namespace DigitalPlatform.LibraryServer
@@ -326,6 +322,27 @@ namespace DigitalPlatform.LibraryServer
                     "comment",
                     };
             }
+            else if (strAction == "changereaderbarcode")
+            {
+                // 2024/4/9 
+                element_names = new string[] {
+                    "barcode",
+                    "comment",
+                    };
+            }
+            else if (strAction == "changereaderrefid")
+            {
+                // 2024/4/9 
+                element_names = new string[] {
+                    "refID",
+                    "comment",
+                    };
+            }
+            else if (strAction == "change")
+            {
+                // 排除掉 foregift 元素
+                element_names = element_names.ToList().Except(new string[] { "foregift" }).ToArray();
+            }
 
             // 2021/7/21
             // 超出 element_names 的部分元素名
@@ -419,8 +436,11 @@ namespace DigitalPlatform.LibraryServer
                 element_names = temp.ToArray();
             }
 
+            List<string> skipped_element_names = new List<string>();
+
             if (strAction == "change"
-                || strAction == "changereaderbarcode")
+                || strAction == "changereaderbarcode"
+                || strAction == "changereaderrefid")
             {
                 /*
                 // 要害元素名列表
@@ -459,13 +479,18 @@ namespace DigitalPlatform.LibraryServer
                         continue;
 
                     // 2021/8/9
-                    // 如果现有记录中 refID 为非空，则不允许修改它 
+                    // 如果现有记录中 refID 为非空，则(change 和 changereaderbarcode 动作)不允许修改它 
                     string old_refID = "";
                     if (strElementName == "refID")
                     {
                         old_refID = DomUtil.GetElementText(domExist.DocumentElement, "refID");
-                        if (string.IsNullOrEmpty(old_refID) == false)
+
+                        if (strAction != "changereaderrefid"
+                            && string.IsNullOrEmpty(old_refID) == false)
+                        {
+                            skipped_element_names.Add(strElementName);
                             continue;
+                        }
                     }
 
                     // 2021/7/23
@@ -634,7 +659,7 @@ namespace DigitalPlatform.LibraryServer
             }
             else
             {
-                strError = "strAction 值必须为 change、changestate、changeforegift 和 changereaderbarcode 之一。";
+                strError = "strAction 值必须为 change、changestate、changeforegift、changereaderbarcode 和 changereaderrefid 之一。";
                 return -1;
             }
 
@@ -651,6 +676,12 @@ namespace DigitalPlatform.LibraryServer
             // 2023/2/9
             // 观察被阻止修改修改的元素
             {
+                // 2024/4/9
+                if (skipped_element_names.Count > 0)
+                {
+                    element_names = element_names.ToList().Except(skipped_element_names).ToArray();
+                }
+
                 List<string> unprocessed_element_names = new List<string>();
                 unprocessed_element_names.AddRange(GetUnprocessedElementNames(
                     domNew,
@@ -703,10 +734,12 @@ unprocessed_element_names.Except(_auto_maintain_element_names)));
 
         // 根据给定的元素名集合，检查记录中这些元素是否即将发生修改
         public static List<string> DetectElementChanging(
-            XmlDocument domExistParam,
-            XmlDocument domNew,
+            XmlDocument domExist0,
+            XmlDocument domNew0,
             IEnumerable<string> element_names)
         {
+            var domExistParam = domExist0;
+            var domNew = domNew0;
             // 检查元素的内容是否即将发生变化
             List<string> changing_names = new List<string>();
             foreach (var strElementName in element_names)
@@ -714,7 +747,8 @@ unprocessed_element_names.Except(_auto_maintain_element_names)));
                 // 如果是 fingerprint face palmprint 元素，则只比较 InnerText
                 if (strElementName == "fingerprint"
                     || strElementName == "face"
-                    || strElementName == "palmprint")
+                    || strElementName == "palmprint"
+                    || strElementName == "refID")
                 {
                     string old_innerText = DomUtil.GetElementText(domExistParam.DocumentElement, strElementName);
                     string new_innerText = DomUtil.GetElementText(domNew.DocumentElement, strElementName);
@@ -722,22 +756,27 @@ unprocessed_element_names.Except(_auto_maintain_element_names)));
                     if (old_innerText != new_innerText)
                         changing_names.Add(strElementName);
                 }
+#if REMOVED
                 else if (strElementName == "refID")
                 {
                     // 2021/8/9
                     string old_innerText = DomUtil.GetElementText(domExistParam.DocumentElement, strElementName);
                     string new_innerText = DomUtil.GetElementText(domNew.DocumentElement, strElementName);
+
+                    /*
                     // 如果现有记录中 refID 为非空，则不允许修改它
                     if (string.IsNullOrEmpty(old_innerText) == false)
                         new_innerText = old_innerText;
+                    */
 
                     if (old_innerText != new_innerText)
                         changing_names.Add(strElementName);
                 }
+#endif
                 else
                 {
-                    string old_outerXml = GetOuterXml(domExistParam, strElementName);
-                    string new_outerXml = GetOuterXml(domNew, strElementName);
+                    string old_outerXml = GetOuterXml(domExistParam, strElementName, true);
+                    string new_outerXml = GetOuterXml(domNew, strElementName, true);
 
                     if (old_outerXml != new_outerXml)
                         changing_names.Add(strElementName);
@@ -750,7 +789,8 @@ unprocessed_element_names.Except(_auto_maintain_element_names)));
         }
 
         static string GetOuterXml(XmlDocument domTarget,
-            string element_name)
+            string element_name,
+            bool remove_empty_element = false)
         {
             XmlNodeList nodes = null;
             if (element_name.Contains(":"))
@@ -769,7 +809,14 @@ unprocessed_element_names.Except(_auto_maintain_element_names)));
             List<string> oldOuterXmls = new List<string>();
             foreach (XmlElement element in nodes)
             {
-                oldOuterXmls.Add(element.OuterXml);
+                string outer_xml = null;
+                if (remove_empty_element)
+                    outer_xml = GetOuterXml(element);
+                else
+                    outer_xml = element.OuterXml;
+                if (string.IsNullOrEmpty(outer_xml))
+                    continue;
+                oldOuterXmls.Add(outer_xml);
             }
 
             /*
@@ -777,8 +824,19 @@ unprocessed_element_names.Except(_auto_maintain_element_names)));
             if (oldOuterXmls.Count > 0)
                 oldOuterXmls.Sort();
             */
-
+            // 2024/4/11
+            if (oldOuterXmls.Count == 0)
+                return null;
             return StringUtil.MakePathList(oldOuterXmls, "\r\n");
+        }
+
+        // 获得一个元素的 OuterXml。注意，对空元素做了特殊处理，返回 null
+        static string GetOuterXml(XmlElement element)
+        {
+            if (string.IsNullOrEmpty(element.InnerXml)
+                && element.Attributes.Count == 0)
+                return null;
+            return element.OuterXml;
         }
 
         static void Append(StringBuilder s, string prefix, string[] a, string postfix)
@@ -983,8 +1041,8 @@ unprocessed_element_names.Except(_auto_maintain_element_names)));
                     }
                     else
                     {
-                        string old_outerXml = GetOuterXml(domNewRec, strElementName);
-                        string new_outerXml = GetOuterXml(dom, strElementName);
+                        string old_outerXml = GetOuterXml(domNewRec, strElementName, true);
+                        string new_outerXml = GetOuterXml(dom, strElementName, true);
 
                         if (old_outerXml != new_outerXml)
                             error_names.Add(strElementName);
@@ -1116,7 +1174,7 @@ unprocessed_element_names.Except(_auto_maintain_element_names)));
         // 了API的可用性。如果实际运用中不允许发回旧记录，可发来空字符串，就会牺牲上述
         // 可用性，变成，不论数据库中当前记录的改变具体在那些字段范围，都只能报错返回了。
         // paramters:
-        //      strAction    操作。new change delete changestate changeforegift forcenew forcechange forcedelete changereaderbarcode
+        //      strAction    操作。new change delete changestate changeforegift forcenew forcechange forcedelete changereaderbarcode changereaderrefid
         //      strRecPath  希望保存到的记录路径。可以为空。
         //      strNewXml   希望保存的记录体
         //      strOldXml   原先获得的旧记录体。可以为空。
@@ -1130,7 +1188,7 @@ unprocessed_element_names.Except(_auto_maintain_element_names)));
         // 权限：
         //      读者不能修改任何人的读者记录，包括他自己的。
         //      工作人员则要看 setreaderinfo权限是否具备
-        //      特殊操作可能还需要 changereaderstate 和 changereaderforegift changereaderbarcode 权限
+        //      特殊操作可能还需要 changereaderstate 和 changereaderforegift changereaderbarcode changereaderrefid 权限
         // 日志:
         //      要产生操作日志
         public LibraryServerResult SetReaderInfo(
@@ -1212,6 +1270,7 @@ unprocessed_element_names.Except(_auto_maintain_element_names)));
                 }
                 else if (strAction == "changereaderbarcode")
                 {
+#if REMOVED
                     // TODO: 对于 setreaderinfo:n 权限，要检查是否包含 barcode 元素
 
                     if (StringUtil.IsInList("changereaderbarcode", sessioninfo.RightsOrigin) == false)
@@ -1221,9 +1280,62 @@ unprocessed_element_names.Except(_auto_maintain_element_names)));
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
+#endif
+                    // 2024/4/9
+                    string write_level = GetReaderInfoLevel("setreaderinfo", sessioninfo.RightsOrigin);
+                    if (write_level == null)
+                    {
+                        if (StringUtil.IsInList("changereaderbarcode", sessioninfo.RightsOrigin) == false)
+                        {
+                            result.Value = -1;
+                            result.ErrorInfo = $"修改读者信息(证条码号字段)被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 changereaderbarcode 权限。";
+                            result.ErrorCode = ErrorCode.AccessDenied;
+                            return result;
+                        }
+                    }
+                    else if (string.IsNullOrEmpty(write_level) == false)
+                    {
+                        // 对于 setreaderinfo:n 权限，要检查是否包含 barcode 元素
+                        var names = GetElementNames(write_level, element_names);
+                        if (names.Contains("barcode") == false)
+                        {
+                            result.Value = -1;
+                            result.ErrorInfo = $"修改读者信息(证条码号字段)被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}针对读者记录的可修改字段中未包含 证条码号 字段。";
+                            result.ErrorCode = ErrorCode.AccessDenied;
+                            return result;
+                        }
+                    }
+                }
+                else if (strAction == "changereaderrefid")
+                {
+                    // 2024/4/9
+                    string write_level = GetReaderInfoLevel("setreaderinfo", sessioninfo.RightsOrigin);
+                    if (write_level == null)
+                    {
+                        if (StringUtil.IsInList("changereaderrefid", sessioninfo.RightsOrigin) == false)
+                        {
+                            result.Value = -1;
+                            result.ErrorInfo = $"修改读者信息(参考 ID 字段)被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 changereaderrefid 权限。";
+                            result.ErrorCode = ErrorCode.AccessDenied;
+                            return result;
+                        }
+                    }
+                    else if (string.IsNullOrEmpty(write_level) == false)
+                    {
+                        // 对于 setreaderinfo:n 权限，要检查是否包含 refID 元素
+                        var names = GetElementNames(write_level, element_names);
+                        if (names.Contains("refID") == false)
+                        {
+                            result.Value = -1;
+                            result.ErrorInfo = $"修改读者信息(参考 ID 字段)被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}针对读者记录的可修改字段中未包含 参考 ID 字段。";
+                            result.ErrorCode = ErrorCode.AccessDenied;
+                            return result;
+                        }
+                    }
                 }
                 else if (strAction == "changeforegift")
                 {
+#if REMOVED
                     // TODO: 对于 setreaderinfo:n 权限，要检查是否包含 foregift 元素
 
                     // changereaderforegift
@@ -1233,6 +1345,31 @@ unprocessed_element_names.Except(_auto_maintain_element_names)));
                         result.ErrorInfo = $"changeforegift方式修改读者信息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 changereaderforegift 权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
+                    }
+#endif
+                    // 2024/4/9
+                    string write_level = GetReaderInfoLevel("setreaderinfo", sessioninfo.RightsOrigin);
+                    if (write_level == null)
+                    {
+                        if (StringUtil.IsInList("changereaderforegift", sessioninfo.RightsOrigin) == false)
+                        {
+                            result.Value = -1;
+                            result.ErrorInfo = $"修改读者信息(押金字段)被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 changereaderforegift 权限。";
+                            result.ErrorCode = ErrorCode.AccessDenied;
+                            return result;
+                        }
+                    }
+                    else if (string.IsNullOrEmpty(write_level) == false)
+                    {
+                        // 对于 setreaderinfo:n 权限，要检查是否包含 foregift 元素
+                        var names = GetElementNames(write_level, element_names);
+                        if (names.Contains("foregift") == false)
+                        {
+                            result.Value = -1;
+                            result.ErrorInfo = $"修改读者信息(押金字段)被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}针对读者记录的可修改字段中未包含 押金 字段。";
+                            result.ErrorCode = ErrorCode.AccessDenied;
+                            return result;
+                        }
                     }
                 }
                 else if (strAction == "delete")
@@ -1499,7 +1636,8 @@ out List<string> send_skips);
             if (strAction == "change"
                     || strAction == "changestate"
                     || strAction == "changeforegift"
-                    || strAction == "changereaderbarcode")
+                    || strAction == "changereaderbarcode"
+                    || strAction == "changereaderrefid")
             {
                 if (string.IsNullOrEmpty(strRecPath))
                 {
@@ -1523,6 +1661,7 @@ out List<string> send_skips);
                 || strAction == "changestate"
                 || strAction == "changeforegift"
                 || strAction == "changereaderbarcode"
+                || strAction == "changereaderrefid"
                 || strAction == "delete")
             {
                 nRet = VerifyReadWriteSet(sessioninfo,
@@ -1664,7 +1803,8 @@ out List<string> send_skips);
             if (strAction == "new"
                 || strAction == "change"
                 || strAction == "changestate"
-                || strAction == "changereaderbarcode")
+                || strAction == "changereaderbarcode"
+                || strAction == "changereaderrefid")
                 strLockBarcode = strNewBarcode;
             else if (strAction == "delete")
             {
@@ -1802,6 +1942,7 @@ out List<string> send_skips);
                 if (strAction == "new"
 || strAction == "change"
 || strAction == "changereaderbarcode"
+|| strAction == "changereaderrefid"
 || strAction == "move")
                 {
                     // 2021/4/17
@@ -2339,7 +2480,8 @@ strLibraryCode);    // 读者所在的馆代码
                 else if (strAction == "change"
                     || strAction == "changestate"
                     || strAction == "changeforegift"
-                    || strAction == "changereaderbarcode")
+                    || strAction == "changereaderbarcode"
+                    || strAction == "changereaderrefid")
                 {
                     StringBuilder comment = new StringBuilder();
                     int count = 0;
@@ -2453,7 +2595,11 @@ strLibraryCode);    // 读者所在的馆代码
 
                     // 2023/2/9
                     if (library_errorcode != ErrorCode.NoError)
+                    {
                         result.ErrorCode = library_errorcode;
+                        // 2024/4/9
+                        result.Value = 1;   // 表示部分字段被拒绝
+                    }
 
                     // 2023/2/9
                     // 成功时 result.ErrorInfo 中也可能有内容
@@ -3552,11 +3698,8 @@ root, strLibraryCode);
                 domNewRec = domMerged;
             }
 
-
-            bool bChangeReaderBarcode = false;
-
-            string strOldBarcode = "";
-            string strNewBarcode = "";
+            // 是否需要连带修改相关的册记录中的 borrower 元素
+            bool bNeedChangeItemBorrower = false;
 
             // 比较新旧记录的条码号是否有改变
             // return:
@@ -3565,19 +3708,39 @@ root, strLibraryCode);
             //      1   不相等
             nRet = CompareTwoBarcode(domExist,
                 domNewRec,
-                out strOldBarcode,
-                out strNewBarcode,
+                out string strOldBarcode,
+                out string strNewBarcode,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
-
-            var strNewReaderRefID = DomUtil.GetElementText(domNewRec.DocumentElement,
-                "refID");
 
             // 注意: oldDom 是前端提供过来的，显然前端可能会说谎，那么这个比较新旧条码号的结果就堪忧了。改进的办法可以是这里真正从读者库取出来，然后进行比较 
             bool bBarcodeChanged = false;
             if (nRet == 1)
                 bBarcodeChanged = true;
+
+            // 比较新旧记录的参考 ID 是否有改变
+            // return:
+            //      -1  出错
+            //      0   相等
+            //      1   不相等
+            nRet = CompareTwoField(
+                "refID",
+                domExist,
+                domNewRec,
+                out string strOldReaderRefID,
+                out string strNewReaderRefID,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            bool bRefIDChanged = false;
+            if (nRet == 1)
+                bRefIDChanged = true;
+
+            //var strNewReaderRefID = DomUtil.GetElementText(domNewRec.DocumentElement,
+            //    "refID");
+
 
             // 对读者身份的附加判断
             if (/*strAction == "change" && */sessioninfo.UserType == "reader")
@@ -3599,7 +3762,7 @@ root, strLibraryCode);
                 bool bHasCirculationInfo = false;   // 读者记录里面是否有流通信息
                 bool bDetectCiculationInfo = false; // 是否已经探测过读者记录中的流通信息
 
-                if (bBarcodeChanged)  // 读者证条码号有改变
+                if (bBarcodeChanged || bRefIDChanged)  // 读者证条码号有改变
                 {
                     // 观察已经存在的记录是否有流通信息
                     bHasCirculationInfo = IsReaderHasCirculationInfo(domExist,
@@ -3608,17 +3771,28 @@ root, strLibraryCode);
 
                     if (bHasCirculationInfo == true)
                     {
+#if REMOVED
                         if (strAction != "changereaderbarcode"
+                            && strAction != "changereaderrefid"
                             && bForce == false)
                         {
-                            strError = "(在读者记录中尚有借还信息时)修改读者证条码号的操作被拒绝。建议用 changereaderbarcode 动作进行此项操作；或者用 forcechange 动作。"
-    + "因读者记录 '" + strRecPath + "' 中包含有 " + strDetailInfo + "，所以修改它时证条码号字段内容不能改变。(当前证条码号 '" + strOldBarcode + "'，试图修改为条码号 '" + strNewBarcode + "')";
+                            if (bBarcodeChanged)
+                            {
+                                strError = "(在读者记录中尚有借还信息时)修改读者证条码号的操作被拒绝。建议用 changereaderbarcode 动作进行此项操作；或者用 forcechange 动作。"
+        + "因读者记录 '" + strRecPath + "' 中包含有 " + strDetailInfo + "，所以修改它时证条码号字段内容不能改变。(当前证条码号 '" + strOldBarcode + "'，试图修改为条码号 '" + strNewBarcode + "')";
+                            }
+                            if (bRefIDChanged)
+                            {
+                                strError = "(在读者记录中尚有借还信息时)修改读者参考 ID 的操作被拒绝。建议用 changereaderrefid 动作进行此项操作；或者用 forcechange 动作。"
+        + "因读者记录 '" + strRecPath + "' 中包含有 " + strDetailInfo + "，所以修改它时参考 ID 字段内容不能改变。(当前参考 ID '" + strOldReaderRefID + "'，试图修改为 '" + strNewReaderRefID + "')";
+                            }
                             goto ERROR1;
                         }
+#endif
 
                         // TODO: 可否增加允许同时修改所关联的已借阅册记录修改能力?
                         // 值得注意的是如何记录进操作日志，将来如何进行recover的问题
-                        bChangeReaderBarcode = true;
+                        bNeedChangeItemBorrower = true;
                     }
                 }
 
@@ -3802,7 +3976,8 @@ root, strLibraryCode);
                 && (strAction == "change"
                     || strAction == "changestate"
                     || strAction == "changeforegift"
-                    || strAction == "changereaderbarcode")
+                    || strAction == "changereaderbarcode"
+                    || strAction == "changereaderrefid")
                 && String.IsNullOrEmpty(strNewDisplayName) == false
                 )
             {
@@ -4033,7 +4208,7 @@ root, strLibraryCode);
 
             // 2014/7/4
             if (this.VerifyReaderType == true
-                && strAction == "change"   // 2020/5/28 除了 change 以外的 changestate changeforegift changereaderbarcode 都不需要检查 readerType 元素
+                && strAction == "change"   // 2020/5/28 除了 change 以外的 changestate changeforegift changereaderbarcode changereaderrefid 都不需要检查 readerType 元素
                 && bForce == false) // 2020/5/28
             {
                 string strReaderDbName = "";
@@ -4069,16 +4244,27 @@ root, strLibraryCode);
             }
 
             // 注：bForce 为 true 时，效果是允许直接修改读者记录而并不修改相关册记录里的回链证条码号。这是为备份恢复而准备的功能。在备份恢复操作中，后面自然有人去操心恢复册记录，不必劳烦这里去操心联动修改了
-            if (bChangeReaderBarcode && bForce == false)
+            if (bNeedChangeItemBorrower && bForce == false)
             {
-                // 要修改读者记录的附注字段
-                string strExistComment = DomUtil.GetElementText(domNewRec.DocumentElement, "comment");
-                if (string.IsNullOrEmpty(strExistComment) == true)
-                    strExistComment = "";
-                else
-                    strExistComment += "; ";
-                strExistComment += DateTime.Now.ToString() + " 证条码号从 '" + strOldBarcode + "' 修改为 '" + strNewBarcode + "'";
-                DomUtil.SetElementText(domNewRec.DocumentElement, "comment", strExistComment);
+                List<string> comments = new List<string>();
+                if (strOldBarcode != strNewBarcode)
+                    comments.Add($"{DateTime.Now.ToString()} 证条码号从 '{strOldBarcode}' 修改为 '{strNewBarcode}'");
+                if (strOldReaderRefID != strNewReaderRefID)
+                    comments.Add($"{DateTime.Now.ToString()} 参考 ID 从 '{strOldReaderRefID}' 修改为 '{strNewReaderRefID}'");
+
+                if (comments.Count > 0)
+                {
+                    // 要修改读者记录的附注字段
+                    string strExistComment = DomUtil.GetElementText(domNewRec.DocumentElement, "comment");
+                    if (string.IsNullOrEmpty(strExistComment) == true)
+                        strExistComment = "";
+                    else
+                        strExistComment += "; ";
+
+                    strExistComment += StringUtil.MakePathList(comments, "; ");
+
+                    DomUtil.SetElementText(domNewRec.DocumentElement, "comment", strExistComment);
+                }
             }
 
             // 检查 password/@expire 属性
@@ -4257,8 +4443,9 @@ root, strLibraryCode);
                 && this.ChargingOperDatabase.Enabled)
                 this.ChargingOperDatabase.ChangePatronBarcode(strOldBarcode, strNewBarcode);
 
-            // 注：bForce 为 true 时，效果是允许直接修改读者记录而并不修改相关册记录里的回链证条码号。这是为备份恢复而准备的功能。在备份恢复操作中，后面自然有人去操心恢复册记录，不必劳烦这里去操心联动修改了
-            if (bChangeReaderBarcode && bForce == false)
+            // 注：bForce 为 true 时，效果是允许直接修改读者记录而并不修改相关册记录里的回链证条码号。这是为备份恢复而准备的功能。
+            // 在备份恢复操作中，后面自然有人去操心恢复册记录，不必劳烦这里去操心联动修改了
+            if (bNeedChangeItemBorrower && bForce == false)
             {
                 // parameters:
                 //      domNewRec   拟保存的新读者记录
@@ -4270,10 +4457,19 @@ root, strLibraryCode);
                     channel,
                     domNewRec,
                     strOldBarcode,
+                    strOldReaderRefID,
                     domOperLog,
-                    out strError);
+                    out string strWarning);
                 if (nRet == -1)
-                    return -1;
+                {
+                    if (library_errorcode == ErrorCode.NoError)
+                        library_errorcode = ErrorCode.PartialDenied;
+                    if (string.IsNullOrEmpty(strError) == false)
+                        strError += "; ";
+                    strError += $"读者记录保存成功，但自动修改相关册记录时出现错误: {strWarning}。请系统管理员注意检查和修复借阅信息链";
+                    this.WriteErrorLog($"$读者记录 '{strOutputPath}' 保存成功，但自动修改相关册记录时出现错误: {strWarning}。请系统管理员注意检查和修复借阅信息链");
+                    return 1;   // 表示部分成功。注意不是返回出错(-1)
+                }
             }
 
             return 0;
@@ -4284,20 +4480,28 @@ root, strLibraryCode);
 
         // parameters:
         //      domNewRec   拟保存的新读者记录
-        //      strOldReaderBarcode 旧的证条码号
+        //      strOldReaderBarcode 旧的证条码号。注意这是证条码号，不能用 "@refID:xxx" 形态
+        //      strOldReaderRefID   旧的参考 ID。注意这是参考 ID 内容，不含前缀部分
         // return:
         //      -1  出错。错误信息已写入系统错误日志
         //      0   成功
         int ChangeRelativeItemRecords(
-            // SessionInfo sessioninfo,
             RmsChannel channel,
             XmlDocument domNewRec,
             string strOldReaderBarcode,
+            string strOldReaderRefID,
             XmlDocument domOperLog,
             out string strError)
         {
             strError = "";
             int nRet = 0;
+
+            // 2024/3/29
+            if (strOldReaderBarcode.Contains(":"))
+            {
+                strError = $"strOldReaderBarcode 参数值 '{strOldReaderBarcode}' 不合法。只允许用证条码号";
+                return -1;
+            }
 
 #if NO
             XmlDocument domNewRec = new XmlDocument();
@@ -4312,7 +4516,11 @@ root, strLibraryCode);
             }
 #endif
 
-            string strNewReaderBarcode = DomUtil.GetElementText(domNewRec.DocumentElement, "barcode");
+            string strNewReaderBarcode = DomUtil.GetElementText(domNewRec.DocumentElement,
+                "barcode");
+            string strNewReaderRefID = DomUtil.GetElementText(domNewRec.DocumentElement,
+                "refID");
+            string strNewReaderKey = dp2StringUtil.BuildReaderKey(strNewReaderBarcode, strNewReaderRefID);
 
             XmlNodeList nodes = domNewRec.DocumentElement.SelectNodes("borrows/borrow");
 
@@ -4326,27 +4534,37 @@ root, strLibraryCode);
             foreach (XmlElement borrow in nodes)
             {
                 string strItemBarcode = borrow.GetAttribute("barcode");
+                string strItemRefID = borrow.GetAttribute("refID");
+                string strItemKey = dp2StringUtil.BuildReaderKey(strItemBarcode, strItemRefID);
+
                 string strItemRecPath = borrow.GetAttribute("recPath");
 
+                List<string> oldBorrowers = new List<string>();
+                if (string.IsNullOrEmpty(strOldReaderBarcode) == false)
+                    oldBorrowers.Add(strOldReaderBarcode);
+                if (string.IsNullOrEmpty(strOldReaderRefID) == false)
+                    oldBorrowers.Add($"@refID:{strOldReaderRefID}");
+
                 // 修改一条册记录，的 borrower 元素内容
-                // parameters:
+                // return:
                 //      -2  保存记录时出错
                 //      -1  一般性错误
-                //      0   成功
+                //      0   没有必要修改
+                //      1   成功
                 nRet = ChangeBorrower(
-                    // sessioninfo,
                     channel,
-                    strItemBarcode,
+                    strItemKey,
                     strItemRecPath,
-                    strOldReaderBarcode,
-                    strNewReaderBarcode,
+                    oldBorrowers,   // strOldReaderBarcode,
+                    strNewReaderKey,    // strNewReaderBarcode,
                     false,
+                    out bool notfound,
                     out strError);
                 if (nRet == -1 || nRet == -2)
                 {
                     strError = "修改读者记录所关联的在借册记录时出错：" + strError
                         + "。下列册条码号的册记录尚未执行修改: " + StringUtil.MakePathList(item_barcodes)
-                        + "。为消除数据不一致，请系统管理员手工将这些册记录里的 borrower 元素文本值修改为 " + strNewReaderBarcode;
+                        + "。为消除数据不一致，请系统管理员手工将这些册记录里的 borrower 元素文本值修改为 " + strNewReaderKey;
                     this.WriteErrorLog(strError);
                     return -1;
                 }
@@ -4354,14 +4572,18 @@ root, strLibraryCode);
                 // 处理成功的，就从列表中排除
                 item_barcodes.Remove(strItemBarcode);
 
+                // 注: 无论是否真正发生修改，都记入 changeEntityRecord 元素
                 if (domOperLog != null)
                 {
-                    XmlNode nodeLogRecord = domOperLog.CreateElement("changedEntityRecord");
+                    var nodeLogRecord = domOperLog.CreateElement("changedEntityRecord");
                     domOperLog.DocumentElement.AppendChild(nodeLogRecord);
                     DomUtil.SetAttr(nodeLogRecord, "itemBarcode", strItemBarcode);
+                    // 2024/3/29 新增
+                    if (string.IsNullOrEmpty(strItemRefID) == false)
+                        nodeLogRecord.SetAttribute("itemRefID", strItemRefID);
                     DomUtil.SetAttr(nodeLogRecord, "recPath", strItemRecPath);
                     DomUtil.SetAttr(nodeLogRecord, "oldBorrower", strOldReaderBarcode);
-                    DomUtil.SetAttr(nodeLogRecord, "newBorrower", strNewReaderBarcode);
+                    DomUtil.SetAttr(nodeLogRecord, "newBorrower", strNewReaderKey);
                 }
             }
 
@@ -4370,24 +4592,29 @@ root, strLibraryCode);
 
         // 修改一条册记录，的 borrower 元素内容
         // parameters:
-        //      bLogRecover    是否为日志恢复时被调用？日志恢复时本函数检查不会那么严格
+        //      strItemKey      用于检索册记录的键值。为册条码号或者 "@refID:xxx" 形态
+        //      strConfirmItemRecPath   册记录路径。可能为空，如果为空则靠 strItemKey 来寻找记录
+        //      bLogRecover     是否为日志恢复时被调用？日志恢复时本函数检查不会那么严格
         // return:
         //      -2  保存记录时出错
         //      -1  一般性错误
-        //      0   成功
+        //      0   没有必要修改
+        //      1   成功
         int ChangeBorrower(
-            // SessionInfo sessioninfo,
             RmsChannel channel,
-            string strItemBarcode,
+            string strItemKey,
             string strConfirmItemRecPath,
-            string strOldBorrower,
+            // string strOldBorrower,
+            List<string> oldBorrowers,
             string strNewBorrower,
             bool bLogRecover,
+            out bool notfound,
             out string strError)
         {
             strError = "";
             int nRet = 0;
             long lRet = 0;
+            notfound = false;
 
 #if NO
             RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
@@ -4399,7 +4626,7 @@ root, strLibraryCode);
 #endif
 
             // 加册记录锁
-            this.EntityLocks.LockForWrite(strItemBarcode);
+            this.EntityLocks.LockForWrite(strItemKey);
 
             try // 册记录锁定范围开始
             {
@@ -4428,11 +4655,9 @@ root, strLibraryCode);
                         }
                     }
 
-                    string strMetaData = "";
-
                     lRet = channel.GetRes(strConfirmItemRecPath,
                         out strItemXml,
-                        out strMetaData,
+                        out string strMetaData,
                         out item_timestamp,
                         out strOutputItemRecPath,
                         out strError);
@@ -4449,7 +4674,7 @@ root, strLibraryCode);
                 }
 
                 if (string.IsNullOrEmpty(strItemXml) == true
-                    && string.IsNullOrEmpty(strItemBarcode) == false)
+                    && string.IsNullOrEmpty(strItemKey) == false)
                 {
                     // 从册条码号获得册记录
 
@@ -4461,7 +4686,7 @@ root, strLibraryCode);
                     //      >1  命中多于1条
                     nRet = this.GetItemRecXml(
                         channel,
-                        strItemBarcode,
+                        strItemKey,
                         out strItemXml,
                         100,
                         out List<string> aPath,
@@ -4471,8 +4696,8 @@ root, strLibraryCode);
                     {
                         // text-level: 用户提示
                         strError = string.Format(this.GetString("册条码号s不存在"),   // "册条码号 '{0}' 不存在"
-                            strItemBarcode);
-
+                            strItemKey);
+                        notfound = true;
                         return -1;
                     }
                     if (nRet == -1)
@@ -4485,7 +4710,7 @@ root, strLibraryCode);
                     if (aPath.Count > 1)
                     {
                         // this.WriteErrorLog(result.ErrorInfo);   
-                        strError = "册条码号 '" + strItemBarcode + "' 命中多于一条";
+                        strError = "册条码号 '" + strItemKey + "' 命中多于一条";
                         return -1;
                     }
                     else
@@ -4500,9 +4725,8 @@ root, strLibraryCode);
                     }
                 }
 
-                XmlDocument itemdom = null;
                 nRet = LibraryApplication.LoadToDom(strItemXml,
-                    out itemdom,
+                    out XmlDocument itemdom,
                     out strError);
                 if (nRet == -1)
                 {
@@ -4514,17 +4738,25 @@ root, strLibraryCode);
                 if (bLogRecover == false)
                 {
                     string strExistingBorrower = DomUtil.GetElementText(itemdom.DocumentElement, "borrower");
-                    if (strExistingBorrower != strOldBorrower)
+                    // if (strExistingBorrower != strOldBorrower)
+                    if (oldBorrowers.IndexOf(strExistingBorrower) == -1)
                     {
-                        strError = "册记录 '" + strOutputItemRecPath + "' 中原有的 borrower 元素内容为 '" + strExistingBorrower + "'，和期待的 '" + strOldBorrower + "' 不同。对册记录的修改被放弃";
+                        strError = "册记录 '" + strOutputItemRecPath + "' 中原有的 borrower 元素内容为 '" + strExistingBorrower + "'，和期待的 '" + StringUtil.MakePathList(oldBorrowers) + "' (都)不同。对册记录的修改被放弃";
                         return -1;
                     }
                 }
 
-                DomUtil.SetElementText(itemdom.DocumentElement, "borrower", strNewBorrower);
+                // 2024/3/29
+                {
+                    string oldBorrower = DomUtil.GetElementText(itemdom.DocumentElement,
+                        "borrower");
+                    if (oldBorrower == strNewBorrower)
+                        return 0;
+                }
 
-                byte[] output_timestamp = null;
-                string strOutputPath = "";
+                DomUtil.SetElementText(itemdom.DocumentElement,
+                    "borrower",
+                    strNewBorrower);
 
                 // 写回册记录
                 lRet = channel.DoSaveTextRes(strOutputItemRecPath,
@@ -4532,8 +4764,8 @@ root, strLibraryCode);
                     false,
                     "content",  // ,ignorechecktimestamp
                     item_timestamp,
-                    out output_timestamp,
-                    out strOutputPath,
+                    out byte[] output_timestamp,
+                    out string strOutputPath,
                     out strError);
                 if (lRet == -1)
                 {
@@ -4543,12 +4775,12 @@ root, strLibraryCode);
                     return -2;
                 }
 
-                return 0;
+                return 1;
             } // 册记录锁定范围结束
             finally
             {
                 // 解册记录锁
-                this.EntityLocks.UnlockForWrite(strItemBarcode);    // strItemBarcode 在整个函数中不允许被修改
+                this.EntityLocks.UnlockForWrite(strItemKey);    // strItemKey 在整个函数中不允许被修改
             }
         }
 
@@ -4631,7 +4863,7 @@ root, strLibraryCode);
         }
 
 
-        #endregion
+#endregion
 
 
         // 为读者XML添加附加信息

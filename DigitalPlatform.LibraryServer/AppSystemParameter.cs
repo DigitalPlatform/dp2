@@ -1936,6 +1936,7 @@ namespace DigitalPlatform.LibraryServer
                             app.LibraryCfgDom.DocumentElement.AppendChild(root);
                         }
 
+                        string strOldInnerXml = root.InnerXml;
                         try
                         {
                             root.InnerXml = strValue;
@@ -1946,16 +1947,21 @@ namespace DigitalPlatform.LibraryServer
                             goto ERROR1;
                         }
 
-                        app.Changed = true;
-                        //app.ActivateManagerThread();
-
                         // 重新初始化虚拟库定义
                         app.vdbs = null;
                         nRet = app.InitialVdbs(app.GetRmsChannel(sessioninfo),  // sessioninfo.Channels,
                             out strError);
                         if (nRet == -1)
+                        {
+                            // 2024/4/3
+                            // Undo 刚才对 library.xml 的修改
+                            root.InnerXml = strOldInnerXml;
+                            strError = $"library.xml 中 virtualDatabases 元素内容被修改后，重新初始化 vdbs 时出错: {strError}。刚才对 virtualDatabases 元素内容的修改已被取消(注: 若要查看引发错误的内容，您不应该在 library.xml 中查看 virtualDatabase 元素内容，而要去查看 SetSystemParameter() API 的 strValue 参数值)";
                             goto ERROR1;
+                        }
 
+                        app.Changed = true;
+                        //app.ActivateManagerThread();
                         goto END1;
                     }
 

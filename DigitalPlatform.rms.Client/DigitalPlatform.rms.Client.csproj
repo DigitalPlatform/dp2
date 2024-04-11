@@ -434,17 +434,17 @@
     <None Include="Service References\rmsws_localhost\DigitalPlatform.rms.Client.rmsws_localhost.TaskInfo.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
     </None>
-    <None Include="Service References\rmsws_localhost\KernelService.wsdl" />
-    <None Include="Service References\rmsws_localhost\metadata.xsd">
+    <None Include="Service References\rmsws_localhost\KernelService1.wsdl" />
+    <None Include="Service References\rmsws_localhost\metadata4.xsd">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Service References\rmsws_localhost\metadata1.xsd">
+    <None Include="Service References\rmsws_localhost\metadata41.xsd">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Service References\rmsws_localhost\metadata2.xsd">
+    <None Include="Service References\rmsws_localhost\metadata42.xsd">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Service References\rmsws_localhost\metadata3.xsd">
+    <None Include="Service References\rmsws_localhost\metadata43.xsd">
       <SubType>Designer</SubType>
     </None>
     <None Include="Service References\rmsws_localhost\Reference.svcmap">

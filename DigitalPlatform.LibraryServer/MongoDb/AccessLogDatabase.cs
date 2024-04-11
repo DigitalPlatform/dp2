@@ -661,7 +661,7 @@ g => new { Id = g.Key, Count = g.Count() })
                 return (int)lIndex + hit_count;
 #if NO
                 DirectoryInfo di = new DirectoryInfo(this.m_strDirectory);
-                FileInfo[] fis = di.GetFiles("????????.log");
+                FileInfo[] fis = di.GetFiles("*.log");
 
                 if (fis.Length == 0)
                     return 0;   // 一个文件也没有

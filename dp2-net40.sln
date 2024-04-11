@@ -331,7 +331,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CompactShelfDriver.First", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestWpfSkin", "TestWpfSkin\TestWpfSkin.csproj", "{4E36E849-D79C-4BF1-9F54-CED9C9A9024C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UcsUpload", "UcsUpload\UcsUpload.csproj", "{08259FA8-ED39-482D-870C-FEAAB1F5A5E3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UcsUpload", "UcsUpload\UcsUpload.csproj", "{08259FA8-ED39-482D-870C-FEAAB1F5A5E3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FaceDrivers.Baidu", "FaceDrivers.Baidu\FaceDrivers.Baidu.csproj", "{4AA30953-6DCB-44AE-B268-696C2AFB33B8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -2866,6 +2868,24 @@ Global
 		{08259FA8-ED39-482D-870C-FEAAB1F5A5E3}.Test|Mixed Platforms.Build.0 = Debug|Any CPU
 		{08259FA8-ED39-482D-870C-FEAAB1F5A5E3}.Test|x86.ActiveCfg = Debug|Any CPU
 		{08259FA8-ED39-482D-870C-FEAAB1F5A5E3}.Test|x86.Build.0 = Debug|Any CPU
+		{4AA30953-6DCB-44AE-B268-696C2AFB33B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4AA30953-6DCB-44AE-B268-696C2AFB33B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4AA30953-6DCB-44AE-B268-696C2AFB33B8}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{4AA30953-6DCB-44AE-B268-696C2AFB33B8}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{4AA30953-6DCB-44AE-B268-696C2AFB33B8}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4AA30953-6DCB-44AE-B268-696C2AFB33B8}.Debug|x86.Build.0 = Debug|Any CPU
+		{4AA30953-6DCB-44AE-B268-696C2AFB33B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4AA30953-6DCB-44AE-B268-696C2AFB33B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4AA30953-6DCB-44AE-B268-696C2AFB33B8}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{4AA30953-6DCB-44AE-B268-696C2AFB33B8}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{4AA30953-6DCB-44AE-B268-696C2AFB33B8}.Release|x86.ActiveCfg = Release|Any CPU
+		{4AA30953-6DCB-44AE-B268-696C2AFB33B8}.Release|x86.Build.0 = Release|Any CPU
+		{4AA30953-6DCB-44AE-B268-696C2AFB33B8}.Test|Any CPU.ActiveCfg = Debug|Any CPU
+		{4AA30953-6DCB-44AE-B268-696C2AFB33B8}.Test|Any CPU.Build.0 = Debug|Any CPU
+		{4AA30953-6DCB-44AE-B268-696C2AFB33B8}.Test|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{4AA30953-6DCB-44AE-B268-696C2AFB33B8}.Test|Mixed Platforms.Build.0 = Debug|Any CPU
+		{4AA30953-6DCB-44AE-B268-696C2AFB33B8}.Test|x86.ActiveCfg = Debug|Any CPU
+		{4AA30953-6DCB-44AE-B268-696C2AFB33B8}.Test|x86.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

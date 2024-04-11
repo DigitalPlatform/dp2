@@ -21,7 +21,7 @@ namespace DigitalPlatform.LibraryServer
     public class ServerReplication : BatchTask
     {
         // 日志恢复级别
-        public RecoverLevel RecoverLevel = RecoverLevel.LogicAndSnapshot;
+        public RecoverLevel RecoverLevel = RecoverLevel.Snapshot;   // RecoverLevel.LogicAndSnapshot;
 
         string m_strUrl = "";
         string m_strUserName = "";
@@ -319,9 +319,9 @@ namespace DigitalPlatform.LibraryServer
             //      1   完成
             nRet = ProcessOperLogs(start,
                 param.ContinueWhenError,
-                (s)=>
+                (s) =>
                 {
-                        SaveBreakPoint(s, param);
+                    SaveBreakPoint(s, param);
                 },
                 param == null ? "" : param.Style,
                 out strError);
@@ -636,6 +636,10 @@ namespace DigitalPlatform.LibraryServer
                             item.Xml,
                             attachment,
                             strStyle,
+                            (warning) =>
+                            {
+                                this.AppendResultText($"*** 警告: {warning}\r\n");
+                            },
                             out strError);
                         if (nRet == -1)
                         {

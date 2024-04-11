@@ -551,6 +551,8 @@ namespace DigitalPlatform.rms
                 return ErrorCodeValue.PartNotFound;
             else if (nRet == -11)
                 return ErrorCodeValue.ExistDbInfo;
+            else if (nRet == -12)   // 2024/3/29
+                return ErrorCodeValue.NotFoundTargetDb;
             else if (nRet == -100)
                 return ErrorCodeValue.NotFoundObjectFile; // 对象文件不存在
             else
@@ -895,6 +897,9 @@ namespace DigitalPlatform.rms
         [EnumMember]
         Compressed = 25,  // 返回的内容是压缩过的
 
+        // 2024/3/29
+        [EnumMember]
+        NotFoundTargetDb = 26,  // 没找到数据库 -12
 
         //
 

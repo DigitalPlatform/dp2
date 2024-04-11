@@ -10,6 +10,7 @@ using System.Xml;
 using DigitalPlatform.Xml;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryServer.Common;
+using DigitalPlatform.CommonControl;
 
 // 2013/3/16 添加 XML 注释
 
@@ -60,15 +61,14 @@ namespace dp2Circulation
 
         private void StartLogRecoverDlg_Load(object sender, EventArgs e)
         {
-            // 起始位置参数
-            long index = 0;
-            string strFileName = "";
-            string strError = "";
+            if (this.StartInfo == null)
+                return;
 
+            // 起始位置参数
             int nRet = LogRecoverStart.ParseLogRecoverStart(this.StartInfo.Start,
-                out index,
-                out strFileName,
-                out strError);
+                out long index,
+                out string strFileName,
+                out string strError);
             if (nRet == -1)
                 goto ERROR1;
 
@@ -76,15 +76,11 @@ namespace dp2Circulation
             this.textBox_startIndex.Text = index.ToString();
 
             // 通用启动参数
-            string strRecoverLevel = "";
-            bool bClearFirst = false;
-            bool bContinueWhenError = false;
-
             nRet = LogRecoverParam.ParseLogRecoverParam(this.StartInfo.Param,
                 out string strDirectory,
-                out strRecoverLevel,
-                out bClearFirst,
-                out bContinueWhenError,
+                out string strRecoverLevel,
+                out bool bClearFirst,
+                out bool bContinueWhenError,
                 out string strStyle,
                 out strError);
             if (nRet == -1)
@@ -112,6 +108,10 @@ namespace dp2Circulation
                 MessageBox.Show(this, "尚未指定 恢复级别");
                 return;
             }
+
+            // 2024/3/21
+            if (this.StartInfo == null)
+                this.StartInfo = new BatchTaskStartInfo();
 
             try
             {
@@ -155,9 +155,7 @@ namespace dp2Circulation
                 if (nRet != -1)
                     strRecoverLevel = strRecoverLevel.Substring(0, nRet).Trim();
             }
-                string strDirectory = this.textBox_logDirectory.Text;
-
-
+            string strDirectory = this.textBox_logDirectory.Text;
 
             this.StartInfo.Param = LogRecoverParam.Build(
 strDirectory,
@@ -205,5 +203,32 @@ this.checkBox_continueWhenError.Checked,
             this.DialogResult = DialogResult.Cancel;
             this.Close();
         }
+
+        public string UiState
+        {
+            get
+            {
+                List<object> controls = new List<object>();
+                controls.Add(this.textBox_logDirectory);
+                controls.Add(this.textBox_startFileName);
+                controls.Add(this.textBox_startIndex);
+                controls.Add(this.comboBox_recoverLevel);
+                controls.Add(this.checkBox_clearBefore);
+                controls.Add(this.checkBox_continueWhenError);
+                return GuiState.GetUiState(controls);
+            }
+            set
+            {
+                List<object> controls = new List<object>();
+                controls.Add(this.textBox_logDirectory);
+                controls.Add(this.textBox_startFileName);
+                controls.Add(this.textBox_startIndex);
+                controls.Add(this.comboBox_recoverLevel);
+                controls.Add(this.checkBox_clearBefore);
+                controls.Add(this.checkBox_continueWhenError);
+                GuiState.SetUiState(controls, value);
+            }
+        }
+
     }
 }
