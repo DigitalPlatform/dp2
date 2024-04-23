@@ -747,6 +747,11 @@ namespace dp2Circulation
 
             InitializeComponent();
 
+            this.dateControl_dateOfBirth.OutputDelta = true;
+            this.dateControl_createDate.OutputDelta = true;
+            this.dateControl_expireDate.OutputDelta = true;
+            this.dateControl_hireExpireDate.OutputDelta = true; // 要保持时分秒部分
+
             base._tableLayoutPanel_main = this.tableLayoutPanel_main;
 
             AddEvents(true);

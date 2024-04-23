@@ -20,8 +20,8 @@ using DigitalPlatform.Text;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
-using DigitalPlatform.Core;
 using DigitalPlatform.CommonControl;
+using DigitalPlatform.rms.Client;
 
 namespace dp2Circulation
 {
@@ -192,8 +192,11 @@ namespace dp2Circulation
 
             // barcode --> 重复次数
             Hashtable barcode_table = new Hashtable();
+            // refID --> 重复次数
+            Hashtable refid_table = new Hashtable();
 
-            bool checkDup = this.checkBox_checkReaderBarcodeDup.Checked;
+            bool checkBarcodeDup = this.checkBox_checkReaderBarcodeDup.Checked;
+            bool checkRefIdDup = true;
 
             CancellationToken token = new CancellationToken();
             _ = Task.Factory.StartNew(
@@ -226,13 +229,15 @@ namespace dp2Circulation
                         var result = DownloadAllPatronRecord(
                             (channel, record) =>
                             {
-                                string style = bAutoRepair ? "autoRepair" : "";
+                                string style = "autoRetry";
+                                style += (bAutoRepair ? ",autoRepair" : "");
 
                                 count++;
                                 // parameters:
                                 //      style   处理风格。
                                 //              包含 autoRepair   表示需要同时自动修复
                                 //              包含 useBarcode   表示尽量用证条码号的读者键发起 RepairBorrowInfo() API 请求。缺省为参考 ID 的读者键
+                                //      strFilterItemKey  要限定检查的册记录的 key。如果为空，表示检查读者记录中所有 borrow 元素关联的册
                                 // return:
                                 //      -1  出错
                                 //      0   没有必要处理
@@ -243,7 +248,9 @@ namespace dp2Circulation
                                         record.Path,
                                         record.RecordBody.Xml,
                                         style,  // bAutoRepair,
-                                        checkDup ? barcode_table : null,
+                                        null,
+                                        checkBarcodeDup ? barcode_table : null,
+                                        checkRefIdDup ? refid_table : null,
                                         out string error);
                                 if (ret == -1)
                                 {
@@ -373,6 +380,7 @@ namespace dp2Circulation
                     MessagePromptEventArgs e = new MessagePromptEventArgs();
                     e.MessageText = $"检索全部读者记录时发生错误： " + strError;
                     e.Actions = "yes,no";
+                    e.AutoRetryTimeout = 20 * 1000; // 20 秒
                     loader_Prompt(this, e);
                     if (e.ResultAction == "yes")
                         goto REDO;
@@ -492,6 +500,8 @@ namespace dp2Circulation
         //      style   处理风格。
         //              包含 autoRepair   表示需要同时自动修复
         //              包含 useBarcode   表示尽量用证条码号的读者键发起 RepairBorrowInfo() API 请求。缺省为参考 ID 的读者键
+        //              包含 autoRetry    表示遇到出错时会自动延时重试操作
+        //      strFilterItemKey  要限定检查的册记录的 key。如果为空，表示检查读者记录中所有 borrow 元素关联的册
         // return:
         //      -1  出错
         //      0   没有必要处理
@@ -502,7 +512,9 @@ namespace dp2Circulation
             string recpath,
             string xml,
             string style,   // bool bAutoRepair,
+            string strFilterItemKey,
             Hashtable barcode_table,
+            Hashtable refid_table,
             out string strError)
         {
             strError = "";
@@ -513,6 +525,7 @@ namespace dp2Circulation
 
             bool bAutoRepair = StringUtil.IsInList("autoRepair", style);
             bool useBarcode = StringUtil.IsInList("useBarcode", style);
+            bool bAutoRetry = StringUtil.IsInList("autoRetry", style);
 
             try
             {
@@ -554,6 +567,15 @@ namespace dp2Circulation
                     */
                 }
 
+                CheckDup("证条码号",
+                    barcode_table,
+                    strReaderBarcode,
+                    recpath);
+                CheckDup("读者参考ID",
+                    refid_table,
+                    strReaderRefID,
+                    recpath);
+#if REMOVED
                 // 条码号查重
                 if (barcode_table != null && string.IsNullOrEmpty(strReaderBarcode) == false)
                 {
@@ -574,6 +596,7 @@ namespace dp2Circulation
                         DisplayCheckError($"读者证条码号 {strReaderBarcode} 有重复记录 {dup_count}条。({recpath})");
                     }
                 }
+#endif
 
                 var nodes = reader_dom.DocumentElement.SelectNodes("borrows/borrow");
                 if (nodes.Count == 0)
@@ -590,7 +613,7 @@ namespace dp2Circulation
                         stop,
                         "checkfromreader",
                         strReaderKey,   // strReaderKey,
-                        "",
+                        strFilterItemKey, // "",
                         "",
                         nStart,   // 2008/10/27 
                         nPerCount,   // 2008/10/27 
@@ -614,6 +637,8 @@ namespace dp2Circulation
                         MessagePromptEventArgs e = new MessagePromptEventArgs();
                         e.MessageText = strError;
                         e.Actions = "yes,no";
+                        if (bAutoRetry)
+                            e.AutoRetryTimeout = 20 * 1000; // 20 秒
                         loader_Prompt(this, e);
                         if (e.ResultAction == "yes")
                             goto REDO_REPAIR;
@@ -645,33 +670,70 @@ namespace dp2Circulation
                     && bAutoRepair
                     && string.IsNullOrEmpty(xml) == false)
                 {
+                    // return:
+                    //      -1  错误。可能有部分册已经修复成功
+                    //      其他  共修复多少个册事项
                     int nRet = RepairAllErrorFromReaderSide(
                         stop,
                         channel,
                         recpath,
                         xml,
                         useBarcode ? "useBarcode" : "",
+                        strFilterItemKey,
                         out strError);
                     if (nRet == -1)
                     {
                         DisplayRepairError("*** 修复读者记录 " + caption + " 内链条问题时出错: " + strError);
                     }
+                    else if (nRet == 0)
+                    {
+                        // TODO: 没有必要修复，是否需要提示
+                        DisplayRepairError("*** 修复读者记录 " + caption + " 内链条问题时: " + strError);
+                    }
                     else
                     {
                         DisplaySucceed("- 成功修复读者记录 " + caption + " 内链条问题");
-                        nRepairedCount++;
+                        nRepairedCount += nRet;
                     }
                 }
 
                 nCount++;
+                if (bAutoRepair)
+                    return nRepairedCount;
+                return nCount;
             }
             finally
             {
             }
 
-            if (bAutoRepair)
-                return nRepairedCount;
-            return nCount;
+        }
+
+        void CheckDup(
+            string caption,
+            Hashtable barcode_table,
+            string strReaderBarcode,
+            string recpath)
+        {
+            // 条码号查重
+            if (barcode_table != null && string.IsNullOrEmpty(strReaderBarcode) == false)
+            {
+                int dup_count = 1;
+                if (barcode_table.ContainsKey(strReaderBarcode) == false)
+                {
+                    barcode_table[strReaderBarcode] = dup_count;
+                }
+                else
+                {
+                    dup_count = (int)barcode_table[strReaderBarcode];
+                    dup_count++;
+                    barcode_table[strReaderBarcode] = dup_count;
+                }
+
+                if (dup_count > 1)
+                {
+                    DisplayCheckError($"{caption} {strReaderBarcode} 有重复记录 {dup_count}条。({recpath})");  // 读者证条码号
+                }
+            }
         }
 
         public void ClearHtml()
@@ -1028,6 +1090,7 @@ out strError);
                     MessagePromptEventArgs e = new MessagePromptEventArgs();
                     e.MessageText = $"获取记录 {this.Value} 时发生错误： " + strError;
                     e.Actions = "yes,no";
+                    e.AutoRetryTimeout = 20 * 1000; // 20 秒
                     form.loader_Prompt(this, e);
                     if (e.ResultAction == "yes")
                         goto REDO_GETDATA;
@@ -1619,10 +1682,17 @@ false);
         {
             string strError = "";
 
+            string style = "autoRetry";
+            if (bAutoRepair)
+                style += ",autoRepair";
+
             // barcode --> 重复次数
             Hashtable barcode_table = new Hashtable();
+            // refID --> 重复次数
+            Hashtable refid_table = new Hashtable();
 
-            bool checkDup = this.checkBox_checkItemBarcodeDup.Checked;
+            bool checkBarcodeDup = this.checkBox_checkItemBarcodeDup.Checked;
+            bool checkRefIdDup = true;
 
             CancellationToken token = new CancellationToken();
             _ = Task.Factory.StartNew(
@@ -1672,6 +1742,18 @@ false);
                                 string barcode = record.Cols[0];
                                 string borrower = record.Cols[1];
                                 string refID = record.Cols[2];  // 2024/2/21
+
+                                if (checkBarcodeDup)
+                                    CheckDup("册条码号",
+        barcode_table,
+        barcode,
+        record.Path);
+                                if (checkRefIdDup)
+                                    CheckDup("册参考ID",
+                        refid_table,
+                        refID,
+                        record.Path);
+
                                 if (string.IsNullOrEmpty(borrower)
                                     && (string.IsNullOrEmpty(barcode) == false || string.IsNullOrEmpty(refID) == false))
                                     return; // 跳过不是在借状态的册。但如果册条码号为空则不跳过，还要在后面继续处理
@@ -1713,12 +1795,14 @@ false);
                                 int ret = CheckItemRecord(
                                     looping.Progress,
                                     channel,
-                                        record.Path,
-                                        xml,  // record.RecordBody.Xml,
-                                        bAutoRepair,
-                                        checkDup ? barcode_table : null,
-                                        "",
-                                        out string error);
+                                    record.Path,
+                                    xml,  // record.RecordBody.Xml,
+                                          // bAutoRepair,
+                                    null,   // checkBarcodeDup ? barcode_table : null,
+                                    null,   // checkRefIdDup ? refid_table : null,
+                                    style,
+                                    null,
+                                    out string error);
                                 if (ret == -1)
                                 {
                                     if (channel.ErrorCode == ErrorCode.RequestCanceled)
@@ -1937,6 +2021,7 @@ false);
                         MessagePromptEventArgs e = new MessagePromptEventArgs();
                         e.MessageText = strError;
                         e.Actions = "yes,no,cancel";
+                        e.AutoRetryTimeout = 20 * 1000; // 20 秒
                         loader_Prompt(this, e);
                         if (e.ResultAction == "no")
                             continue;
@@ -2254,7 +2339,7 @@ false);
                     //      DialogResult.Ignore 表示点了 跳过 按钮
                     DialogResult result = AutoCloseMessageBox.ShowIgnore(this,
         e.MessageText + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
-        20 * 1000,
+        e.AutoRetryTimeout, // 20 * 1000,
         "CheckBorrowInfoForm");
                     if (result == DialogResult.Cancel)
                         e.ResultAction = "cancel";
@@ -2270,7 +2355,7 @@ false);
                     //      DialogResult.Cancel 表示点了右上角的 Close 按钮
                     DialogResult result = AutoCloseMessageBox.Show(this,
         e.MessageText + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
-        20 * 1000,
+        e.AutoRetryTimeout, // 20 * 1000,
         "CheckBorrowInfoForm");
                     if (result == DialogResult.Cancel)
                         e.ResultAction = "no";
@@ -2412,7 +2497,10 @@ false);
         }
 #endif
         // parameters:
-        //      bAutoRepair 是否同时自动修复
+        //      style   处理风格。
+        //              包含 autoRepair   表示需要同时自动修复
+        //              包含 autoRetry    表示遇到出错时会自动延时重试操作
+        //      strReaderKeyParam  用于 API 调用的读者 key，会直接作为参数发送给 dp2library。如果为空，程序会自动从册记录中获取 borrower 元素内容，并进行相应的 API 调用
         // return:
         //      -1  出错
         //      0   没有必要处理
@@ -2422,12 +2510,16 @@ false);
             LibraryChannel channel,
             string recpath,
             string xml,
-            bool bAutoRepair,
             Hashtable barcode_table,
+            Hashtable refid_table,
             string style,
+            string strReaderKeyParam,
             out string strError)
         {
             strError = "";
+
+            bool bAutoRepair = StringUtil.IsInList("autoRepair", style);
+            bool bAutoRetry = StringUtil.IsInList("autoRetry", style);
 
             var useBarcode = StringUtil.IsInList("useBarcode", style);
 
@@ -2469,6 +2561,15 @@ false);
 
                 string caption = $"{strItemKey}({recpath})";
 
+                CheckDup("册条码号",
+                    barcode_table,
+                    strItemBarcode,
+                    recpath);
+                CheckDup("册参考ID",
+    refid_table,
+    strItemRefID,
+    recpath);
+#if REMOVED
                 // 条码号查重
                 if (barcode_table != null && string.IsNullOrEmpty(strItemBarcode) == false)
                 {
@@ -2489,6 +2590,7 @@ false);
                         DisplayCheckError($"册条码号 {strItemBarcode} 有重复记录 {dup_count}条。({recpath})");
                     }
                 }
+#endif
 
                 string strReaderKey = DomUtil.GetElementText(item_dom.DocumentElement, "borrower");
                 if (string.IsNullOrEmpty(strReaderKey))
@@ -2496,7 +2598,7 @@ false);
 
                 string strOutputReaderBarcode = "";
 
-                //stop.SetMessage("正在检查第 " + (i + 1).ToString() + " 个册记录，条码为 " + strItemKey);
+                //stop.SetMessage("正在检查第 " + (i + 1).ToString() + " 个册记录，条码为 " + strCurrentItemKey);
                 //stop.SetProgressValue(i);
 
                 int nProcessedBorrowItems = 0;
@@ -2506,8 +2608,8 @@ false);
                 long lRet = channel.RepairBorrowInfo(
                     stop,
                     "checkfromitem",
-                    "",
-                    strItemKey, // strItemKey,
+                    strReaderKeyParam,
+                    strItemKey, // strCurrentItemKey,
                     "",
                     0,
                     -1,
@@ -2540,6 +2642,8 @@ false);
                         MessagePromptEventArgs e = new MessagePromptEventArgs();
                         e.MessageText = $"检查册记录 {caption} 时发生错误： " + strError;
                         e.Actions = "yes,no";
+                        if (bAutoRetry)
+                            e.AutoRetryTimeout = 20 * 1000; // 20 秒
                         loader_Prompt(this, e);
                         if (e.ResultAction == "yes")
                             goto REDO_REPAIR;
@@ -2566,7 +2670,7 @@ false);
                                 stop,
                                 "checkfromitem",
                                 "",
-                                strItemKey, // strItemKey,
+                                strItemKey, // strCurrentItemKey,
                                 aDupPath[j],
                     0,
                     -1,
@@ -2580,6 +2684,8 @@ false);
                                 MessagePromptEventArgs e = new MessagePromptEventArgs();
                                 e.MessageText = $"检查册记录 {caption} 时发生错误： " + strError;
                                 e.Actions = "yes,no,cancel";
+                                if (bAutoRetry)
+                                    e.AutoRetryTimeout = 20 * 1000; // 20 秒
                                 loader_Prompt(this, e);
                                 if (e.ResultAction == "no")
                                     continue;
@@ -2596,20 +2702,29 @@ false);
 
                                 if (bAutoRepair)
                                 {
+                                    // return:
+                                    //      -1  错误。
+                                    //      0   没有必要修复
+                                    //      1   已经修复
                                     int nRet = RepairErrorFromItemSide(
                                         stop,
                                         channel,
-                                        strItemKey, // strItemKey,
+                                        strItemKey, // strCurrentItemKey,
                                         aDupPath[j],
                                         out strError);
                                     if (nRet == -1)
                                     {
                                         DisplayRepairError("*** 修复册记录 " + caption + " 内链条问题时出错: " + strError);
                                     }
+                                    else if (nRet == 0)
+                                    {
+                                        // TODO: 没有必要修复，是否需要提示
+                                        DisplayRepairError("*** 修复册记录 " + caption + " 内链条问题时: " + strError);
+                                    }
                                     else
                                     {
                                         DisplaySucceed("- 成功修复册记录 " + caption + " 内链条问题");
-                                        nRepairedCount++;
+                                        nRepairedCount += nRet;
                                     }
                                 }
                             }
@@ -2626,20 +2741,29 @@ false);
 
                         if (bAutoRepair)
                         {
+                            // return:
+                            //      -1  错误。
+                            //      0   没有必要修复
+                            //      1   已经修复
                             int nRet = RepairErrorFromItemSide(
                                 stop,
                                 channel,
-                                strItemKey, // strItemKey,
+                                strItemKey, // strCurrentItemKey,
                                 "",
                                 out strError);
                             if (nRet == -1)
                             {
                                 DisplayRepairError("*** 修复册记录 " + caption + " 内链条问题时出错: " + strError);
                             }
+                            else if (nRet == 0)
+                            {
+                                // TODO: 没有必要修复，是否需要提示
+                                DisplayRepairError("*** 修复册记录 " + caption + " 内链条问题时: " + strError);
+                            }
                             else
                             {
                                 DisplaySucceed("- 成功修复册记录 " + caption + " 内链条问题");
-                                nRepairedCount++;
+                                nRepairedCount += nRet;
                             }
                         }
                     }
@@ -2650,13 +2774,13 @@ false);
                 if (lRet == -1)
                 {
                     Global.WriteHtml(this.webBrowser_resultInfo,
-                        "检查册记录 " + strItemKey + " 时出错: " + strError + "\r\n");
+                        "检查册记录 " + strCurrentItemKey + " 时出错: " + strError + "\r\n");
                 }
                 if (lRet == 1)
                 {
                     Debug.Assert(false, "应该走不到这里");
                     Global.WriteHtml(this.webBrowser_resultInfo,
-                        "检查册记录 " + strItemKey + " 时发现问题: " + strError + "\r\n");
+                        "检查册记录 " + strCurrentItemKey + " 时发现问题: " + strError + "\r\n");
                 }
                 */
 
@@ -2966,6 +3090,7 @@ false);
                 MessagePromptEventArgs e = new MessagePromptEventArgs();
                 e.MessageText = $"获取册 {strItemKey} 时发生错误： " + strError;
                 e.Actions = "yes,no";
+                e.AutoRetryTimeout = 20 * 1000; // 20 秒
                 loader_Prompt(this, e);
                 if (e.ResultAction == "yes")
                     goto REDO_GETITEM;
@@ -2991,6 +3116,7 @@ out strError);
                         MessagePromptEventArgs e1 = new MessagePromptEventArgs();
                         e1.MessageText = $"获取册 {"@path:" + strConfirmItemRecPath} 时发生错误： " + strError;
                         e1.Actions = "yes,no";
+                        e1.AutoRetryTimeout = 20 * 1000; // 20 秒
                         loader_Prompt(this, e1);
                         if (e1.ResultAction == "yes")
                             goto REDO_GETITEM2;
@@ -3053,7 +3179,7 @@ out strError);
                 out strOutputReaderBarcode,
                 out aDupPath,
                 out strError);
-            if (lRet == -1)
+            if (lRet == -1 || lRet == 0)
             {
                 if (channel.ErrorCode == ErrorCode.NoError)
                     return 0;
@@ -3062,6 +3188,7 @@ out strError);
                 MessagePromptEventArgs e = new MessagePromptEventArgs();
                 e.MessageText = $"修复册记录 {strItemKey} 时发生错误： " + strError;
                 e.Actions = "yes,no";
+                e.AutoRetryTimeout = 20 * 1000; // 20 秒
                 loader_Prompt(this, e);
                 if (e.ResultAction == "yes")
                     goto REDO_REPAIR;
@@ -3103,6 +3230,7 @@ out strError);
                     MessagePromptEventArgs e = new MessagePromptEventArgs();
                     e.MessageText = $"获取读者记录 {strReaderKey} 时发生错误： " + strError;
                     e.Actions = "yes,no";
+                    e.AutoRetryTimeout = 20 * 1000; // 20 秒
                     loader_Prompt(this, e);
                     if (e.ResultAction == "yes")
                         goto REDO_GET;
@@ -3131,6 +3259,7 @@ out strError);
                     strReaderRecPath,
                     strReaderXml,
                     style,
+                    null,
                     out strError);
             }
             finally
@@ -3143,6 +3272,7 @@ out strError);
         // parameters:
         //      strReaderXml    读者记录 XML。从中可以获知有哪些册条码号(相关的链)需要尝试进行修复
         //      style           处理风格。如果包含 useBarcode，表示读者键尽量使用证条码号
+        //      strFilterItemKey      要限定修复的册的 Key。如果为空，表示自动修复该读者记录中所有 borrow 元素对应的链
         // return:
         //      -1  错误。可能有部分册已经修复成功
         //      其他  共修复多少个册事项
@@ -3152,6 +3282,7 @@ out strError);
             string strReaderRecPath,
             string strReaderXml,
             string style,
+            string strFilterItemKey,
             out string strError)
         {
             strError = "";
@@ -3198,7 +3329,16 @@ out strError);
             {
                 string strItemBarcode = borrow.GetAttribute("barcode");
                 string strItemRefID = borrow.GetAttribute("refID");
-                string strItemKey = dp2StringUtil.BuildReaderKey(strItemBarcode, strItemRefID);
+
+                // 2024/4/15
+                // 如果限定了单个册记录
+                if (string.IsNullOrEmpty(strFilterItemKey) == false)
+                {
+                    if (dp2StringUtil.MatchReaderKey(strFilterItemKey, strItemBarcode, strItemRefID) == false)
+                        continue;
+                }
+
+                string strCurrentItemKey = dp2StringUtil.BuildReaderKey(strItemBarcode, strItemRefID);
 
                 string strConfirmItemRecPath = borrow.GetAttribute("recPath");
 
@@ -3207,7 +3347,7 @@ out strError);
                     stop,
                     "repairreaderside",
                     strReaderKey,   // strReaderKey,
-                    strItemKey, // strItemKey,
+                    strCurrentItemKey, // strCurrentItemKey,
                     "", // 2022/1/10 // strConfirmItemRecPath,
                     0,
                     -1,
@@ -3216,7 +3356,7 @@ out strError);
                     out string strOutputReaderBarcode,
                     out string[] aDupPath,
                     out strError);
-                if (lRet == -1)
+                if (lRet == -1 || lRet == 0)
                 {
                     if (channel.ErrorCode != ErrorCode.NoError)
                     {
@@ -3224,6 +3364,7 @@ out strError);
                         MessagePromptEventArgs e = new MessagePromptEventArgs();
                         e.MessageText = $"修复读者记录 {dp2StringUtil.BuildReaderKeyLegacy(strReaderBarcode, strReaderRefID)} 时发生错误： " + strError;
                         e.Actions = "yes,no,cancel";
+                        e.AutoRetryTimeout = 20 * 1000; // 20 秒
                         loader_Prompt(this, e);
                         if (e.ResultAction == "no")
                             continue;
@@ -3287,11 +3428,12 @@ out strError);
                     out strOutputReaderBarcode,
                     out aDupPath,
                     out strError);
-                if (lRet == -1)
+                if (lRet == -1 || lRet == 0)
                 {
                     MessagePromptEventArgs e = new MessagePromptEventArgs();
                     e.MessageText = $"修复记录 {strReaderKey} {strItemKey} 时发生错误： " + strError;
                     e.Actions = "yes,no";
+                    // e.AutoRetryTimeout = 20 * 1000; // 20 秒
                     loader_Prompt(this, e);
                     if (e.ResultAction == "yes")
                         goto REDO;
@@ -3390,6 +3532,7 @@ out strError);
                         MessagePromptEventArgs e1 = new MessagePromptEventArgs();
                         e1.MessageText = $"获取册 {strItemKey} 时发生错误： " + strError;
                         e1.Actions = "yes,no";
+                        // e1.AutoRetryTimeout = 20 * 1000; // 20 秒
                         loader_Prompt(this, e1);
                         if (e1.ResultAction == "yes")
                             goto REDO_GET;
@@ -4025,13 +4168,20 @@ out strError);
 
             if (string.IsNullOrEmpty(strReaderKey) == false)
             {
+                MessageBox.Show(this,
+"零星检查册记录时，可以不输入读者证条码号(或读者参考ID)。如果不输入，程序会自动从册记录中发现相关的读者，进行检查");
+
+                /*
                 strError = "零星检查册记录时，不允许输入证条码号";
                 goto ERROR1;
+                */
             }
 
             string style = "";
             if (strItemKey.StartsWith("@refID:") == false)
                 style = "useBarcode";
+            if (bAutoRepair)
+                style += ",autoRepair";
 
             var looping = Looping(out LibraryChannel channel,
                 "正在进行检查 ...",
@@ -4056,6 +4206,7 @@ out strError);
                     MessagePromptEventArgs e1 = new MessagePromptEventArgs();
                     e1.MessageText = $"获取册 {strItemKey} 时发生错误： " + strError;
                     e1.Actions = "yes,no";
+                    e1.AutoRetryTimeout = 20 * 1000; // 20 秒
                     loader_Prompt(this, e1);
                     if (e1.ResultAction == "yes")
                         goto REDO_GET;
@@ -4074,9 +4225,11 @@ out strError);
                     channel,
                     recpath,
                     xml,
-                    bAutoRepair,
+                    // bAutoRepair,
+                    null,
                     null,
                     style,
+                    strReaderKey,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -4180,8 +4333,13 @@ out strError);
 
             if (string.IsNullOrEmpty(strItemKey) == false)
             {
+                MessageBox.Show(this,
+"零星检查读者记录时，可以不输入册条码号(或册参考ID)。如果不输入，程序会自动从读者记录中发现相关的册，进行检查");
+
+                /*
                 strError = "零星检查读者记录时，不允许输入册条码号";
                 goto ERROR1;
+                */
             }
 
             if (strReaderKey.StartsWith("@refID:") == false)
@@ -4214,7 +4372,8 @@ out strError);
             {
             REDO_GET:
                 // 根据证条码号获得读者记录 XML
-                long lRet = channel.GetReaderInfo(looping.Progress,
+                long lRet = channel.GetReaderInfo(
+                    looping.Progress,
                     strReaderKey,
                     "xml,recpaths",
                     out string[] results,
@@ -4224,6 +4383,7 @@ out strError);
                     MessagePromptEventArgs e1 = new MessagePromptEventArgs();
                     e1.MessageText = $"获取读者 {strReaderKey} 时发生错误： " + strError;
                     e1.Actions = "yes,no";
+                    e1.AutoRetryTimeout = 20 * 1000; // 20 秒
                     loader_Prompt(this, e1);
                     if (e1.ResultAction == "yes")
                         goto REDO_GET;
@@ -4243,12 +4403,15 @@ out strError);
                 //      style   处理风格。
                 //              包含 autoRepair   表示需要同时自动修复
                 //              包含 useBarcode   表示尽量用证条码号的读者键发起 RepairBorrowInfo() API 请求。缺省为参考 ID 的读者键
+                //      strFilterItemKey  要限定检查的册记录的 key。如果为空，表示检查读者记录中所有 borrow 元素关联的册
                 nRet = CheckReaderRecord(
                     looping.Progress,
                     channel,
                     recpath,
                     xml,
                     style,  // bAutoRepair,
+                    strItemKey,
+                    null,
                     null,
                     out strError);
                 if (nRet == -1)
@@ -4310,6 +4473,7 @@ out strError);
                 MessagePromptEventArgs e1 = new MessagePromptEventArgs();
                 e1.MessageText = $"获取册 {strItemBarcode} 时发生错误： " + strError;
                 e1.Actions = "yes,no";
+                e1.AutoRetryTimeout = 20 * 1000; // 20 秒
                 loader_Prompt(this, e1);
                 if (e1.ResultAction == "yes")
                     goto REDO_GET;

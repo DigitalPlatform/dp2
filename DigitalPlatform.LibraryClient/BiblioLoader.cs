@@ -391,5 +391,8 @@ namespace DigitalPlatform.LibraryClient
 
         public string Actions = ""; // [in] 可选的动作。例如 "yes,no,cancel"
         public string ResultAction = "";  // [out] 返回希望采取的动作
+
+        // 2024/4/15
+        public int AutoRetryTimeout = -1;   // [in] 自动重试的超时毫秒数。-1 表示无限长，也就是相当永不超时的意思
     }
 }

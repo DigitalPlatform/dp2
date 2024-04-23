@@ -2678,7 +2678,7 @@ out strError);
             {
                 // 如果当前用户是读者 strReaderBarcode 自己
                 if (// sessioninfo.Account.Barcode == strReaderBarcode
-                    MatchReaderKey(strReaderKey, sessioninfo.Account.Barcode, sessioninfo.Account.PatronRefID) == true)
+                    dp2StringUtil.MatchReaderKey(strReaderKey, sessioninfo.Account.Barcode, sessioninfo.Account.PatronRefID) == true)
                     return 1;
                 // 如果当前用户是其他读者
                 return 0;
@@ -3535,7 +3535,7 @@ out strError);
             if (string.IsNullOrEmpty(strBiblioDbName) == false
                 && string.IsNullOrEmpty(strItemDbName) == true)
             {
-                strError = $"书目库 '{ strBiblioDbName }' 不具备下属的实体库，设置实体记录的操作失败";
+                strError = $"书目库 '{strBiblioDbName}' 不具备下属的实体库，设置实体记录的操作失败";
                 goto ERROR1;
             }
 
@@ -3689,7 +3689,7 @@ out strError);
                     if (StringUtil.IsInList("restore", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = $"修改册信息的{ strAction}操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 restore 权限。";
+                        result.ErrorInfo = $"修改册信息的{strAction}操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 restore 权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -3716,7 +3716,7 @@ out strError);
                     if (StringUtil.IsInList("restore", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = $"带有风格 'force' 的修改册信息的{ strAction}操作被拒绝。不具备 restore 权限。";
+                        result.ErrorInfo = $"带有风格 'force' 的修改册信息的{strAction}操作被拒绝。不具备 restore 权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -3758,7 +3758,7 @@ out strError);
                     if (StringUtil.IsInList("restore", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = $"带有风格 'nocheckdup' 的修改册信息的{ strAction}操作被拒绝。不具备 restore 权限。";
+                        result.ErrorInfo = $"带有风格 'nocheckdup' 的修改册信息的{strAction}操作被拒绝。不具备 restore 权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -3778,7 +3778,7 @@ out strError);
                     if (StringUtil.IsInList("restore", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = $"带有风格 'noeventlog' 的修改册信息的{ strAction}操作被拒绝。不具备 restore 权限。";
+                        result.ErrorInfo = $"带有风格 'noeventlog' 的修改册信息的{strAction}操作被拒绝。不具备 restore 权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -5936,9 +5936,14 @@ out strError);
             if (info.OldRecPath != info.NewRecPath
                 && string.IsNullOrEmpty(info.OldRecPath) == false)
             {
-                strError = "当action为\"change\"时，info.NewRecordPath路径 '" + info.NewRecPath + "' 和info.OldRecPath '" + info.OldRecPath + "' 必须相同";
+                strError = $"当action为\"change\"时，若 info.OldRecPath 值为非空，则 info.NewRecPath 值 '{info.NewRecPath}' 和 info.OldRecPath 值 '{info.OldRecPath}' 必须相同";
                 goto ERROR1;
             }
+
+            // 2024/4/17
+            // 整理一下参数，便于后面使用 info.OldRecPath
+            if (string.IsNullOrEmpty(info.OldRecPath))
+                info.OldRecPath = info.NewRecPath;
 
             bool bNoOperations = false; // 是否为不要覆盖<operations>内容
             if (StringUtil.IsInList("nooperations", strStyle) == true)

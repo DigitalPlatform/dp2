@@ -1079,6 +1079,7 @@ namespace DigitalPlatform.LibraryServer
                     level,
                     dom,
                     attachment,
+                    func_warning,
                     out strError);
             }
             else if (strOperation == "reservation")

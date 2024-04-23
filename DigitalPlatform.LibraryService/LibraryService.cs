@@ -14112,7 +14112,10 @@ strLibraryCodeList);
 
         // 修复读者或者册记录
         // return:
-        //      result.Value    -1 错误 0 not found 1 found
+        // result.Value
+        //      -1 错误
+        //      0 没有找到/没有必要修复
+        //      1 找到/成功修复
         public LibraryServerResult RepairBorrowInfo(
             string strAction,
             string strReaderBarcode,
@@ -14202,6 +14205,7 @@ strLibraryCodeList);
                         strReaderBarcode,
                         nStart,
                         nCount,
+                        strItemBarcode,
                         out nProcessedBorrowItems,
                         out nTotalBorrowItems);
                 }
@@ -14220,7 +14224,7 @@ strLibraryCodeList);
                     //      1   检查发现有错。
                     return app.CheckItemBorrowInfo(
                         channel,
-                        null,   // string strLockedReaderBarcode,
+                        strReaderBarcode,   // string strLockedReaderBarcode,
                         null,   // XmlDocument exist_readerdom,
                         null,   // string strExistReaderRecPath,
                         strItemBarcode,
@@ -14231,20 +14235,30 @@ strLibraryCodeList);
 
                 if (strAction == "repairreaderside")
                 {
+                    // result.Value
+                    //      -1  出错
+                    //      0   没有必要修复
+                    //      1   成功修复
                     return app.RepairReaderSideError(
                         sessioninfo,
                         strReaderBarcode,
                         strItemBarcode,
                         strConfirmItemRecPath,
+                        "",
                         out aDupPath);
                 }
                 if (strAction == "repairitemside")
                 {
+                    // result.Value
+                    //      -1  出错
+                    //      0   没有必要修复
+                    //      1   成功修复
                     return app.RepairItemSideError(
                         sessioninfo,
                         strReaderBarcode,
                         strItemBarcode,
                         strConfirmItemRecPath,
+                        "",
                         out aDupPath);
                 }
 

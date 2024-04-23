@@ -1604,7 +1604,7 @@ namespace DigitalPlatform.LibraryServer
             // 如果 strOutputReaderKey 值非空，则要检查一下检索出来的已付违约金记录是否真的属于这个读者
             if (string.IsNullOrEmpty(strOutputReaderKey) == false)
             {
-                if (MatchReaderKey(strOutputReaderKey,
+                if (dp2StringUtil.MatchReaderKey(strOutputReaderKey,
                     strReaderBarcode,
                     strReaderRefID) == false)
                 {

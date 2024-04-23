@@ -780,6 +780,25 @@ out string strPureName);
             return $"@refID:{strReaderRefID}";
         }
 
+        // return:
+        //      false   没有匹配上
+        //      true    匹配上了
+        public static bool MatchReaderKey(string strReaderKey,
+            string strReaderBarcode,
+            string strReaderRefID)
+        {
+            if (string.IsNullOrEmpty(strReaderBarcode) == false
+    && strReaderKey.StartsWith("@") == false
+    && strReaderBarcode == strReaderKey)
+                return true;
+            else if (string.IsNullOrEmpty(strReaderRefID) == false
+&& strReaderKey.StartsWith("@refID:") == true
+&& $"@refID:{strReaderRefID}" == strReaderKey)
+                return true;
+            return false;
+        }
+
+
         #endregion
 
     }

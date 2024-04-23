@@ -276,7 +276,7 @@ namespace DigitalPlatform
             if (font != null)
                 dlg.Font = font;
 
-            if (nTimeout != -1)
+            //if (nTimeout != -1)
                 dlg.m_nTimeOut = nTimeout;
 
             if (strTitle != null)
@@ -320,7 +320,7 @@ namespace DigitalPlatform
             if (font != null)
                 dlg.Font = font;
 
-            if (nTimeout != -1)
+            //if (nTimeout != -1)
                 dlg.m_nTimeOut = nTimeout;
 
             if (strTitle != null)

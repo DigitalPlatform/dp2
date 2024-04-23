@@ -2449,6 +2449,7 @@ out strError);
 
         private async void toolStripButton_save_Click(object sender, EventArgs e)
         {
+            // TODO: 界面改成明显的两种不同按钮
             await SaveRecordAsync(Control.ModifierKeys == Keys.Control ? "force" : "");
         }
 

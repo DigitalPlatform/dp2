@@ -534,8 +534,7 @@ namespace DigitalPlatform.LibraryServer
                     // 保护 expireDate 属性不被修改
                     else if (strElementName == "hire")
                     {
-                        XmlNode nodeExist = domExist.DocumentElement.SelectSingleNode("hire");
-                        // XmlNode nodeNew = domNew.DocumentElement.SelectSingleNode("hire");
+                        var nodeExist = domExist.DocumentElement.SelectSingleNode("hire") as XmlElement;
 
                         string strExistExpireDate = "";
                         if (nodeExist != null)
@@ -546,16 +545,21 @@ namespace DigitalPlatform.LibraryServer
                             strTextNew);
 
                         // 将 expireDate 覆盖回去
-                        nodeExist = domExist.DocumentElement.SelectSingleNode("hire");
+                        nodeExist = domExist.DocumentElement.SelectSingleNode("hire") as XmlElement;
                         if (nodeExist != null)
                         {
                             // DomUtil.SetAttr(domExist.DocumentElement, "expireDate", strExistExpireDate); // bug!!! 2020/5/19
-
-                            DomUtil.SetAttr(nodeExist, "expireDate", strExistExpireDate);   // 2020/5/19 改掉 bug
+                            var oldExpireDate = nodeExist.GetAttribute("expireDate");
+                            if (oldExpireDate != strExistExpireDate)
+                            {
+                                nodeExist.SetAttribute("expireDate", strExistExpireDate);   // 2020/5/19 改掉 bug
+                                // 2024/4/12
+                                skipped_element_names.Add(strElementName);  //  + "/@expireDate"
+                            }
                         }
                         else if (string.IsNullOrEmpty(strExistExpireDate) == false)
                         {
-                            XmlNode node = DomUtil.SetElementText(domExist.DocumentElement,
+                            var node = DomUtil.SetElementText(domExist.DocumentElement,
                                 strElementName,
                                 "");
                             DomUtil.SetAttr(node, "expireDate", strExistExpireDate);
@@ -4863,7 +4867,7 @@ root, strLibraryCode);
         }
 
 
-#endregion
+        #endregion
 
 
         // 为读者XML添加附加信息
@@ -5873,7 +5877,7 @@ out strError);
                         // 2013/5/20
                         // 延迟判断
                     }
-                    else if (MatchReaderKey(strBarcode, sessioninfo.Account.Barcode, sessioninfo.Account.PatronRefID) == false
+                    else if (dp2StringUtil.MatchReaderKey(strBarcode, sessioninfo.Account.Barcode, sessioninfo.Account.PatronRefID) == false
                         // strBarcode != sessioninfo.Account.Barcode
                         && string.IsNullOrEmpty(strPersonalLibrary) == true)
                     {

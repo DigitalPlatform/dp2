@@ -12,6 +12,9 @@ using DigitalPlatform.GUI;
 
 namespace DigitalPlatform.CommonControl
 {
+    /// <summary>
+    /// 日期控件
+    /// </summary>
     public partial class DateControl : UserControl
     {
         string m_strCaption = "";
@@ -122,6 +125,12 @@ namespace DigitalPlatform.CommonControl
             return false;
         }
 
+        // “年月日”以外的“时分秒”等部分偏移量
+        TimeSpan _delta = new TimeSpan(0);
+
+        // 是否要令 .Value 中输出包含偏移量?
+        public bool OutputDelta = false;
+
 
         public DateTime Value
         {
@@ -131,14 +140,14 @@ namespace DigitalPlatform.CommonControl
                 string strPureText = GetPureDateText();
 
                 if (strPureText.Trim() == "")
-                    return new DateTime((long)0);
+                    return new DateTime((long)0) + (OutputDelta ? _delta : new TimeSpan(0));
 
                 try
                 {
                     DateTime date = DateTime.Parse(this.maskedTextBox_date.Text,
                         this.maskedTextBox_date.Culture,
                         DateTimeStyles.NoCurrentDateDefault);
-                    return date;
+                    return date + (OutputDelta ? _delta : new TimeSpan(0));
                 }
                 catch
                 {
@@ -148,18 +157,24 @@ namespace DigitalPlatform.CommonControl
             }
             set
             {
+                _delta = new TimeSpan(0);
+
                 if (value == new DateTime((long)0))
                 {
                     this.maskedTextBox_date.Text = "";
                     return;
                 }
 
-                this.maskedTextBox_date.Text = GetDateString(value);
+                this.maskedTextBox_date.Text = GetDateString(value, out _delta);
             }
         }
 
-        static string GetDateString(DateTime date)
+        // 构造年月日字符串
+        static string GetDateString(DateTime date,
+            out TimeSpan delta)
         {
+            delta = date - new DateTime(date.Year, date.Month, date.Day);
+
             return date.Year.ToString().PadLeft(4, '0') + "年"
                 + date.Month.ToString().PadLeft(2, '0') + "月"
                 + date.Day.ToString().PadLeft(2, '0') + "日";
