@@ -8675,8 +8675,18 @@ issue.Volume);
                 nCount = 2;
             }
 
+            // 2024/4/24
+            // 一年26期(双周刊)
+            // TODO: 弹出对话框询问是 14 天中的那一天(比如第一周的周一、周二 ...)
+            else if (nIssueCount > 24 && nIssueCount <= 26)
+            {
+                // 14天以后
+                start += new TimeSpan(14, 0, 0, 0);
+                return DateTimeUtil.DateTimeToString8(start);
+            }
+
             // 一年36期
-            else if (nIssueCount > 24 && nIssueCount <= 36)
+            else if (nIssueCount > 26 && nIssueCount <= 36)
             {
                 // TODO: 如果是 36 期，则尽量分布在每月以内 3 期
                 // 把一个月粗略划分为 30/3，根据落入的部分来测算下一个的时间

@@ -551,7 +551,7 @@ TaskScheduler.Default);
                                     protocol += ":国标";
                                 else if (uhfProtocol == "gxlm")
                                 {
-                                    if (IsWhdt(ByteArray.GetTimeStampByteArray(tag.UID)))
+                                    if (GaoxiaoUtility.IsWhdt(ByteArray.GetTimeStampByteArray(tag.UID)))
                                         protocol += ":望湖洞庭";
                                     else
                                         protocol += ":高校联盟";
@@ -2538,8 +2538,8 @@ TaskScheduler.Default);
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("复制解释信息到剪贴板 [" + this.listView_tags.SelectedItems.Count.ToString() + "] (&D)");
-            menuItem.Click += new System.EventHandler(this.menu_copyDescriptionToClipbard_Click);
+            menuItem = new MenuItem("解释标签内容 [" + this.listView_tags.SelectedItems.Count.ToString() + "] (&D)");
+            menuItem.Click += new System.EventHandler(this.menu_describe_Click);
             if (this.listView_tags.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
@@ -2580,6 +2580,16 @@ TaskScheduler.Default);
                 contextMenu.MenuItems.Add(menuItem);
             }
 
+            /*
+            {
+                menuItem = new MenuItem("解释“高校联盟”标签 ...");
+                menuItem.Click += new System.EventHandler(this.menu_describeGaoxiaoTag_Click);
+                if (this.listView_tags.SelectedItems.Count == 0)
+                    menuItem.Enabled = false;
+                contextMenu.MenuItems.Add(menuItem);
+            }
+            */
+
             menuItem = new MenuItem("测试创建错误的标签内容 [" + this.listView_tags.SelectedItems.Count.ToString() + "] (&S)");
             menuItem.Click += new System.EventHandler(this.menu_saveSelectedErrorTagContent_Click);
             if (this.listView_tags.SelectedItems.Count == 0)
@@ -2606,6 +2616,47 @@ TaskScheduler.Default);
         void menu_clearTagsCache_Click(object sender, EventArgs e)
         {
             RfidTagList.ClearTagTable(null);
+        }
+
+        // 解释高校联盟标签
+        void menu_describeGaoxiaoTag_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            if (this.listView_tags.SelectedItems.Count == 0)
+            {
+                strError = "请选择要解释的标签";
+                goto ERROR1;
+            }
+
+            StringBuilder text = new StringBuilder();
+            int i = 0;
+            foreach (ListViewItem item in this.listView_tags.SelectedItems)
+            {
+                strError = GetUhfTagRowInfo(this.listView_tags.SelectedItems[0],
+        out byte[] user_bank,
+        out string epc_bank_hex);
+                if (strError != null)
+                    goto ERROR1;
+
+                text.AppendLine($"{(i+1)})");
+
+                var epc_bank = ByteArray.GetTimeStampByteArray(epc_bank_hex);
+
+                var parse_result = GaoxiaoUtility.ParseTag(epc_bank,
+                    user_bank,
+                    "");
+                if (parse_result.Value == -1)
+                    text.AppendLine($"解析过程出错: {parse_result.ErrorInfo}");
+                else
+                    text.AppendLine(parse_result.GetDescription(epc_bank,user_bank));
+
+                i++;
+            }
+            MessageDlg.Show(this, text.ToString(), "解释文字");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
 
         void menu_test_Click(object sender, EventArgs e)
@@ -2636,14 +2687,19 @@ TaskScheduler.Default);
             chip.SetElement(ElementOID.AIBI, "1234567890");
         }
 
-        // 针对选定的标签，创建描述文字并复制到 Windows 剪贴板
-        void menu_copyDescriptionToClipbard_Click(object sender, EventArgs e)
+        // 针对选定的标签，创建描述文字
+        void menu_describe_Click(object sender, EventArgs e)
         {
             StringBuilder text = new StringBuilder();
+            int i = 0;
             foreach (ListViewItem item in this.listView_tags.SelectedItems)
             {
+                /*
                 if (text.Length > 0)
                     text.Append("\r\n***\r\n");
+                */
+                text.AppendLine($"{(i + 1)})");
+
                 ItemInfo item_info = (ItemInfo)item.Tag;
 
                 // 超高频
@@ -2651,18 +2707,68 @@ TaskScheduler.Default);
                 {
                     text.Append(GetUhfTagDescription(item_info.OneTag));    // ???
                 }
-
-                if (item_info.LogicChipItem == null)
-                {
-                    text.Append("\r\n[LogicChipItem 为空]\r\n");
-                    text.Append(item_info.OneTag.CloneOneTag().GetDescription());   // ???
-                }
                 else
-                    text.Append(item_info.LogicChipItem.GetDescription());
+                {
+                    if (item_info.LogicChipItem == null)
+                    {
+                        text.Append("\r\n[LogicChipItem 为空]\r\n");
+                        text.Append(item_info.OneTag.CloneOneTag().GetDescription());   // ???
+                    }
+                    else
+                        text.Append(item_info.LogicChipItem.GetDescription());
+                }
+
+                i++;
             }
-            Clipboard.SetDataObject(text.ToString(), true);
+
+            MessageDlg.Show(this, text.ToString(), "解释文字");
+            // Clipboard.SetDataObject(text.ToString(), true);
         }
 
+        static string GetUhfTagDescription(ReadonlyOneTag tag)
+        {
+            StringBuilder text = new StringBuilder();
+
+            var taginfo = tag.TagInfo;
+            var user_bank = taginfo.Bytes;
+            var epc_bank = ByteArray.GetTimeStampByteArray(tag.UID);
+
+            var parse_result = GaoxiaoUtility.ParseTag(epc_bank,
+    user_bank,
+    "");
+            if (parse_result.Value == -1)
+                text.AppendLine($"解析过程出错: {parse_result.ErrorInfo}");
+            else
+                text.Append(parse_result.GetDescription(epc_bank, user_bank));
+
+            // 尝试获得 TID Bank
+            {
+                text.AppendLine("=== TID Bank ===");
+                GetTagInfoResult result = RfidManager.GetTagInfo("*",
+    tag.UID,
+    tag.AntennaID,
+    null,
+    "tid");
+                if (result.Value == -1)
+                    text.AppendLine($"error: {result.ErrorInfo}");
+                else
+                {
+                    // TODO: 核对两个 bytes 是否完全一致，不一致则报错
+                    // tag.TagInfo = result.TagInfo;   // 使用重新获得的数据
+                }
+
+                if (result.TagInfo.Tag != null)
+                {
+                    var bytes = result.TagInfo.Tag as byte[];
+                    text.AppendLine($"Hex(十六进制内容):\t{ByteArray.GetHexTimeStampString(bytes).ToUpper()} ({bytes?.Length}bytes)");
+                }
+            }
+
+            return text.ToString();
+        }
+
+
+#if REMOVED
         static string GetUhfTagDescription(ReadonlyOneTag tag)
         {
             StringBuilder text = new StringBuilder();
@@ -2731,6 +2837,7 @@ TaskScheduler.Default);
 
             return text.ToString();
         }
+#endif
 
         void menu_selectAll_Click(object sender, EventArgs e)
         {
@@ -4223,7 +4330,7 @@ LogicChipItem chip)
                         existingUhfProtocol = "gb";
                     else
                     {
-                        if (IsWhdt(epc_bank))
+                        if (GaoxiaoUtility.IsWhdt(epc_bank))
                             existingUhfProtocol = "gxlm(whdt)";
                         else
                             existingUhfProtocol = "gxlm";
@@ -4268,7 +4375,7 @@ LogicChipItem chip)
                             uhfProtocol = "gb";
                         else
                         {
-                            if (IsWhdt(epc_bank))
+                            if (GaoxiaoUtility.IsWhdt(epc_bank))
                                 uhfProtocol = "gxlm(whdt)";
                             else
                                 uhfProtocol = "gxlm";
@@ -4500,6 +4607,7 @@ LogicChipItem chip)
             throw new ArgumentException($"目前暂不支持 {existing.Protocol} 协议标签的写入操作");
         }
 
+#if REMOVED
         // 根据 EPC Bank 判断是不是“望湖洞庭”格式
         public static bool IsWhdt(byte[] epc_bank)
         {
@@ -4536,6 +4644,7 @@ LogicChipItem chip)
                 return false;
             return true;
         }
+#endif
 
         // 过滤掉 User Bank 中的不需要的元素。
         // Program.MainForm.UhfUserBankElements 中定义了不该被过滤的元素名列表。其余的元素名就应该被过滤掉

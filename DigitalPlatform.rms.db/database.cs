@@ -174,6 +174,7 @@ namespace DigitalPlatform.rms
             //		-5	存在多个节点
             //		0	成功
             nRet = this.container.GetFileCfgItemLocalPath(strDbName + "/cfgs/keys",
+                out _,
                 out strKeysFileName,
                 out strError);
 
@@ -372,6 +373,7 @@ namespace DigitalPlatform.rms
             //		-5	存在多个节点
             //		0	成功
             int nRet = this.container.GetFileCfgItemLocalPath(strBrowsePath,
+                out _,
                 out strBrowseFileName,
                 out strError);
             if (nRet == -2 || nRet == -4)
@@ -2608,6 +2610,7 @@ namespace DigitalPlatform.rms
                     //		-5	存在多个节点
                     //		0	成功
                     nRet = this.container.GetFileCfgItemLocalPath(strDbName + "/cfgs/keys",
+                        out _,
                         out strKeysFileName,
                         out strError);
                     if (nRet != 0)
@@ -2659,6 +2662,7 @@ namespace DigitalPlatform.rms
                     //		-5	存在多个节点
                     //		0	成功
                     nRet = this.container.GetFileCfgItemLocalPath(strDbName + "/cfgs/browse",
+                        out _,
                         out strBrowseFileName,
                         out strError);
                     if (nRet != 0)
@@ -2860,6 +2864,7 @@ namespace DigitalPlatform.rms
                     //		-5	存在多个节点
                     //		0	成功
                     nRet = this.container.GetFileCfgItemLocalPath(strDbName + "/cfgs/keys",
+                        out _,
                         out strKeysFileName,
                         out strError);
                     if (nRet != 0)
@@ -2888,6 +2893,7 @@ namespace DigitalPlatform.rms
                             //		-5	存在多个节点
                             //		0	成功
                             nRet = this.container.GetFileCfgItemLocalPath(this.GetCaption("zh") + "/cfgs/keys",
+                                out _,
                                 out strKeysFileName,
                                 out strError);
                             if (nRet != 0)
@@ -2930,6 +2936,7 @@ namespace DigitalPlatform.rms
                     //		-5	存在多个节点
                     //		0	成功
                     nRet = this.container.GetFileCfgItemLocalPath(strDbName + "/cfgs/browse",
+                        out _,
                         out strBrowseFileName,
                         out strError);
                     if (nRet != 0)
@@ -2958,6 +2965,7 @@ namespace DigitalPlatform.rms
                             //		-5	存在多个节点
                             //		0	成功
                             nRet = this.container.GetFileCfgItemLocalPath(this.GetCaption("zh") + "/cfgs/browse",
+                                out _,
                                 out strBrowseFileName,
                                 out strError);
                             if (nRet != 0)

@@ -1338,6 +1338,8 @@ namespace DigitalPlatform.LibraryServer
                         lRet = channel.DoCopyRecord(strOldRecPath,
                             strTargetRecPath,
                             strAction == "onlymovebiblio" ? true : false,   // bDeleteSourceRecord
+                            "file_reserve_source",  // 2024/4/28
+                            out _,
                             out output_timestamp,
                             out strOutputPath,
                             out strError);

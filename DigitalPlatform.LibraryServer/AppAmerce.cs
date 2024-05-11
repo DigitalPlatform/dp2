@@ -382,7 +382,6 @@ namespace DigitalPlatform.LibraryServer
                 DomUtil.SetElementText(amerced_dom.DocumentElement,
                     "state", "settlemented");
 
-
                 // 清除两个信息
                 DomUtil.DeleteElement(amerced_dom.DocumentElement,
                     "undoSettlementOperTime");
@@ -402,27 +401,17 @@ namespace DigitalPlatform.LibraryServer
                 DomUtil.SetElementText(amerced_dom.DocumentElement,
                     "state", "amerced");
 
-
                 // 清除两个信息
                 DomUtil.SetElementText(amerced_dom.DocumentElement,
                     "settlementOperTime", "");
                 DomUtil.SetElementText(amerced_dom.DocumentElement,
                     "settlementOperator", "");
 
-
                 DomUtil.SetElementText(amerced_dom.DocumentElement,
                     "undoSettlementOperTime", strOperTime);
                 DomUtil.SetElementText(amerced_dom.DocumentElement,
                     "undoSettlementOperator", strOperator);
 
-            }
-
-            if (bCreateOperLog == true)
-            {
-                DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
-                    strOperator);   // 操作者
-                DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
-                    strOperTime);   // 操作时间
             }
 
 
@@ -467,6 +456,14 @@ namespace DigitalPlatform.LibraryServer
                         this.Statis.IncreaseEntryValue(
                             strLibraryCode,
                             "费用结算", "删除结算记录数", 1);
+                }
+
+                if (bCreateOperLog == true)
+                {
+                    DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
+                        strOperator);   // 操作者
+                    DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
+                        strOperTime);   // 操作时间
                 }
 
 
@@ -1822,10 +1819,10 @@ namespace DigitalPlatform.LibraryServer
                 {
                     byte[] output_timestamp = null;
 
-                    strReaderXml = readerdom.OuterXml;
+                    string changed_reader_xml = readerdom.OuterXml;
                     // 野蛮写入
                     lRet = channel.DoSaveTextRes(strOutputReaderRecPath,
-                        strReaderXml,
+                        changed_reader_xml,
                         false,
                         "content,ignorechecktimestamp", // ?????
                         reader_timestamp,
@@ -1879,6 +1876,14 @@ namespace DigitalPlatform.LibraryServer
                         DomUtil.SetElementText(domOperLog.DocumentElement,
         "readerRefID", strReaderRefID);
 
+                    {
+                        // 2024/5/6
+                        // 在日志中保留旧的读者记录
+                        var element = DomUtil.SetElementText(domOperLog.DocumentElement,
+            "oldReaderRecord", strReaderXml);
+                        element.SetAttribute("recPath", strOutputReaderRecPath);
+                    }
+
                     /*
                     DomUtil.SetElementText(domOperLog.DocumentElement,
                         "amerceItemID", strAmercedItemId);
@@ -1891,7 +1896,7 @@ namespace DigitalPlatform.LibraryServer
 
                     // 最新的读者记录
                     node = DomUtil.SetElementText(domOperLog.DocumentElement,
-                        "readerRecord", strReaderXml);
+                        "readerRecord", changed_reader_xml);
                     DomUtil.SetAttr(node, "recPath", strOutputReaderRecPath);
 
 

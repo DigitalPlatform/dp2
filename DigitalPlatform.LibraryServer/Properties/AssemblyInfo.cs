@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Data.SqlClient;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -31,8 +32,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.158.*")]
-[assembly: AssemblyFileVersion("3.158.0.0")]
+[assembly: AssemblyVersion("3.159.*")]
+[assembly: AssemblyFileVersion("3.159.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -386,3 +387,5 @@ ItemCanReturn()
 //		3.156 (2024/2/4) 借阅双链代码重构
 //		3.157 (2024/2/8) VerifyBarcode() API 中增加判断 @refID:xxx 形态的参考 ID 到底是读者类型还是册类型的功能
 //		3.158 (2024/4/9) SetReaderInfo() API 中 strAction 增加 "changereaderrefid" 这一种动作
+//		3.159 (2024/4/28) "strMergeStyle 中不允许包含 file_reserve_source 或 file_reserve_target。这两个值已经废止"
+

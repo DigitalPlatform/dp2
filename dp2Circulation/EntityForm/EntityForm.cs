@@ -10302,6 +10302,534 @@ out strError);
         }
 #endif
 
+        // parameters:
+        //      type    类型。为 verify 和 convert 之一
+        //      ext     [out] .cs 代码文件类型。为 cs 和 fltx 之一
+        int GetAssembly(
+            string type,
+            out string ext,
+            out Assembly assembly,
+            out string strError)
+        {
+            strError = "";
+            assembly = null;
+            ext = "";
+
+            // 库名部分路径
+            string strBiblioDbName = Global.GetDbName(this.BiblioRecPath);
+            string key = "";
+
+            if (type == "verify")
+            {
+                string strCfgFileName = "dp2circulation_marc_verify.fltx";
+
+                {
+                    key = strBiblioDbName + "/cfgs/" + strCfgFileName;
+                    assembly = this.MainForm.AssemblyCache.FindObject(key);
+                    if (assembly != null)
+                    {
+                        ext = "fltx";
+                        return 1;
+                    }
+                }
+
+                // return:
+                //      -1  error
+                //      0   not found
+                //      1   found
+                int nRet = this.GetCfgFile(strBiblioDbName,
+                    strCfgFileName,
+                    out string strOutputFilename,
+                    out byte[] baCfgOutputTimestamp,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                if (nRet == 0)
+                {
+                    // .cs 和 .cs.ref
+                    strCfgFileName = "dp2circulation_marc_verify.cs";
+
+                    {
+                        key = strBiblioDbName + "/cfgs/" + strCfgFileName;
+                        assembly = this.MainForm.AssemblyCache.FindObject(key);
+                        if (assembly != null)
+                        {
+                            ext = "cs";
+                            return 1;
+                        }
+                    }
+
+                    nRet = this.GetCfgFileContent(strBiblioDbName,
+        strCfgFileName,
+        out string strCode,
+        out baCfgOutputTimestamp,
+        out strError);
+                    if (nRet == 0)
+                    {
+                        strError = "服务器上没有定义路径为 '" + strBiblioDbName + "/" + strCfgFileName + "' 的配置文件(或.fltx配置文件)，数据校验无法进行";
+                        return -1;
+                    }
+                    if (nRet == -1 || nRet == 0)
+                        return -1;
+                    strCfgFileName = "dp2circulation_marc_verify.cs.ref";
+                    nRet = this.GetCfgFileContent(strBiblioDbName,
+                        strCfgFileName,
+                        out string strRef,
+                        out baCfgOutputTimestamp,
+                        out strError);
+                    if (nRet == 0)
+                    {
+                        strError = "服务器上没有定义路径为 '" + strBiblioDbName + "/" + strCfgFileName + "' 的配置文件，虽然定义了 .cs 配置文件。数据校验无法进行";
+                        return -1;
+                    }
+                    if (nRet == -1 || nRet == 0)
+                        return -1;
+
+                    nRet = CompileVerifyCs(
+strCode,
+strRef,
+out assembly,
+out strError);
+                    if (nRet == -1)
+                        return -1;
+
+                    ext = "cs";
+                }
+                else
+                {
+                    nRet = CompileVerifyFltx(
+strOutputFilename,
+out assembly,
+out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "编译文件 '" + strCfgFileName + "' 的过程中出错:\r\n" + strError;
+                        return -1;
+                    }
+
+                    ext = "fltx";
+                }
+
+                this.MainForm.AssemblyCache.SetObject(key, assembly);
+                return 1;
+            }
+
+            return 0;
+        }
+
+        int CompileVerifyFltx(
+    string strFilterFileName,
+    out Assembly assembly,
+    out string strError)
+        {
+            strError = "";
+            assembly = null;
+
+            // 新创建
+            // string strFilterFileContent = "";
+
+            var filter = new VerifyFilterDocument();
+
+            filter.FilterHost = new VerifyHost();
+            filter.strOtherDef = "VerifyHost Host = null;";
+
+            filter.strPreInitial = " VerifyFilterDocument doc = (VerifyFilterDocument)this.Document;\r\n";
+            filter.strPreInitial += " Host = ("
+                + "VerifyHost" + ")doc.FilterHost;\r\n";
+
+            try
+            {
+                filter.Load(strFilterFileName);
+            }
+            catch (Exception ex)
+            {
+                strError = "EntityForm filter.Load() exception: " + ExceptionUtil.GetAutoText(ex);
+                return -1;
+            }
+
+            string strCode = "";    // c#代码
+
+            int nRet = filter.BuildScriptFile(out strCode,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            string[] saAddRef1 = {
+                                    "system.dll",
+                                    "system.xml.dll",
+                                    "system.windows.forms.dll",
+                                    "system.drawing.dll",
+                                    "System.Runtime.Serialization.dll",
+
+                                    Environment.CurrentDirectory + "\\digitalplatform.core.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marceditor.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marcfixedfieldcontrol.dll",
+                                    //Environment.CurrentDirectory + "\\digitalplatform.gcatclient.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.script.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.commoncontrol.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
+
+                                    Environment.CurrentDirectory + "\\dp2circulation.exe"
+                                };
+
+            string[] saRef2 = filter.GetRefs();
+
+            string[] saRef = new string[saRef2.Length + saAddRef1.Length];
+            Array.Copy(saRef2, saRef, saRef2.Length);
+            Array.Copy(saAddRef1, 0, saRef, saRef2.Length, saAddRef1.Length);
+
+            // 创建Script的Assembly
+            // 本函数内对saRef不再进行宏替换
+            nRet = ScriptManager.CreateAssembly_1(strCode,
+                saRef,
+                "", // strLibPaths,
+                out assembly,
+                out strError,
+                out string strWarning);
+            if (nRet == -2)
+                return -1;
+            if (nRet == -1)
+            {
+                if (strWarning == "")
+                    return -1;
+            }
+
+            return 0;
+        }
+
+
+        int CompileVerifyCs(
+    string strCode,
+    string strRef,
+    out Assembly assembly,
+    out string strError)
+        {
+            strError = "";
+            assembly = null;
+            string[] saRef = null;
+            int nRet;
+
+            nRet = ScriptManager.GetRefsFromXml(strRef,
+                out saRef,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            // 2007/12/4 
+            ScriptManager.RemoveRefsBinDirMacro(ref saRef);
+
+            string[] saAddRef = {
+                                    "system.dll",
+                                    "system.xml.dll",
+                                    "system.windows.forms.dll",
+                                    "system.drawing.dll",
+                                    "System.Runtime.Serialization.dll",
+
+                                    Environment.CurrentDirectory + "\\digitalplatform.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.core.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marceditor.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marcfixedfieldcontrol.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
+                                    //Environment.CurrentDirectory + "\\digitalplatform.gcatclient.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.script.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.commoncontrol.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
+
+                                    Environment.CurrentDirectory + "\\dp2circulation.exe"
+                                };
+
+            if (saAddRef != null)
+            {
+                string[] saTemp = new string[saRef.Length + saAddRef.Length];
+                Array.Copy(saRef, 0, saTemp, 0, saRef.Length);
+                Array.Copy(saAddRef, 0, saTemp, saRef.Length, saAddRef.Length);
+                saRef = saTemp;
+            }
+
+            nRet = ScriptManager.CreateAssembly_1(strCode,
+                saRef,
+                null,   // strLibPaths,
+                out assembly,
+                out string strErrorInfo,
+                out string strWarningInfo);
+            if (nRet == -1)
+            {
+                strError = "脚本编译发现错误或警告:\r\n" + strErrorInfo;
+                return -1;
+            }
+
+            return 0;
+        }
+
+        // MARC格式校验
+        // parameters:
+        //      sender    从何处启动? MarcEditor EntityEditForm BindingForm
+        /// <summary>
+        /// MARC格式校验
+        /// </summary>
+        /// <param name="sender">从何处启动?</param>
+        /// <param name="e">GenerateDataEventArgs对象，表示动作参数</param>
+        /// <param name="bAutoVerify">是否自动校验。自动校验的时候，如果没有发现错误，则不出现最后的对话框</param>
+        /// <returns>0: 没有发现校验错误; 1: 发现校验警告; 2: 发现校验错误</returns>
+        public int VerifyData(object sender,
+            GenerateDataEventArgs e,
+            bool bAutoVerify)
+        {
+            string strError = "";
+            this._processing++;
+            try
+            {
+                if (this.IsDisposed == true)
+                {
+                    strError = "VerifyData() 失败。因 EntityForm 窗口已经释放";
+                    goto ERROR1;
+                }
+
+                // test
+                //Thread.Sleep(10 * 1000);
+
+                // 库名部分路径
+                // string strBiblioDbName = Global.GetDbName(this.BiblioRecPath);
+
+                //string strCode = "";
+                //string strRef = "";
+                //string strOutputFilename = "";
+
+                // Debug.Assert(false, "");
+                this.m_strVerifyResult = "正在校验...";
+                // 自动校验的时候，如果没有发现错误，则不出现最后的对话框
+                if (bAutoVerify == false)
+                {
+                    // 如果固定面板隐藏，就打开窗口
+                    DoViewVerifyResult(Program.MainForm.PanelFixedVisible == false ? true : false);
+
+                    // 2011/8/17
+                    if (Program.MainForm.PanelFixedVisible == true)
+                        MainForm.ActivateVerifyResultPage();
+                }
+
+                VerifyHost host = new VerifyHost();
+                host.DetailForm = this;
+
+                int nRet = GetAssembly("verify",
+                    out string ext,
+                    out Assembly assembly,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                if (ext == "cs")
+                {
+                    // 得到Assembly中VerifyHost派生类Type
+                    Type entryClassType = ScriptManager.GetDerivedClassType(
+                        assembly,
+                        "dp2Circulation.VerifyHost");
+                    if (entryClassType == null)
+                    {
+                        strError = "dp2Circulation.VerifyHost派生类没有找到";
+                        goto ERROR1;
+                    }
+
+                    {
+                        // new一个VerifyHost派生对象
+                        VerifyHost hostObj = (VerifyHost)entryClassType.InvokeMember(null,
+                            BindingFlags.DeclaredOnly |
+                            BindingFlags.Public | BindingFlags.NonPublic |
+                            BindingFlags.Instance | BindingFlags.CreateInstance, null, null,
+                            null);
+
+                        if (hostObj == null)
+                        {
+                            strError = "new VerifyHost派生类对象失败";
+                            goto ERROR1;
+                        }
+
+                        // 为Host派生类设置参数
+                        hostObj.DetailForm = this;
+                        hostObj.Assembly = assembly;
+
+                        HostEventArgs e1 = new HostEventArgs();
+                        e1.e = e;   // 2009/2/24 
+
+                        hostObj.Main(sender, e1);
+                    }
+                }
+                else if (ext == "fltx")
+                {
+                    var filter = new VerifyFilterDocument();
+                    filter.FilterHost = new VerifyHost { DetailForm = this };
+                    filter.Assembly = assembly;
+
+                    try
+                    {
+                        nRet = filter.DoRecord(null,
+                            this.GetMarc(),    //  this.m_marcEditor.Marc,
+                            0,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "filter.DoRecord error: " + ExceptionUtil.GetDebugText(ex);
+                        goto ERROR1;
+                    }
+                }
+                else
+                {
+                    strError = $"无法识别的 ext '{ext}'";
+                    goto ERROR1;
+                }
+
+#if REMOVED
+                string strCfgFileName = "dp2circulation_marc_verify.fltx";
+
+                // return:
+                //      -1  error
+                //      0   not found
+                //      1   found
+                int nRet = this.GetCfgFile(strBiblioDbName,
+                    strCfgFileName,
+                    out strOutputFilename,
+                    out byte[] baCfgOutputTimestamp,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                // test
+                //Thread.Sleep(10 * 1000);
+
+                if (nRet == 0)
+                {
+                    // .cs 和 .cs.ref
+                    strCfgFileName = "dp2circulation_marc_verify.cs";
+                    nRet = this.GetCfgFileContent(strBiblioDbName,
+        strCfgFileName,
+        out strCode,
+        out baCfgOutputTimestamp,
+        out strError);
+                    if (nRet == 0)
+                    {
+                        strError = "服务器上没有定义路径为 '" + strBiblioDbName + "/" + strCfgFileName + "' 的配置文件(或.fltx配置文件)，数据校验无法进行";
+                        goto ERROR1;
+                    }
+                    if (nRet == -1 || nRet == 0)
+                        goto ERROR1;
+                    strCfgFileName = "dp2circulation_marc_verify.cs.ref";
+                    nRet = this.GetCfgFileContent(strBiblioDbName,
+                        strCfgFileName,
+                        out strRef,
+                        out baCfgOutputTimestamp,
+                        out strError);
+                    if (nRet == 0)
+                    {
+                        strError = "服务器上没有定义路径为 '" + strBiblioDbName + "/" + strCfgFileName + "' 的配置文件，虽然定义了 .cs 配置文件。数据校验无法进行";
+                        goto ERROR1;
+                    }
+                    if (nRet == -1 || nRet == 0)
+                        goto ERROR1;
+
+                    try
+                    {
+                        // 执行代码
+                        nRet = RunVerifyCsScript(
+                            sender,
+                            e,
+                            strCode,
+                            strRef,
+                            out host,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "执行脚本代码过程中发生异常: \r\n" + ExceptionUtil.GetDebugText(ex);
+                        goto ERROR1;
+                    }
+                }
+                else
+                {
+                    VerifyFilterDocument filter = null;
+
+                    nRet = this.PrepareMarcFilter(
+                        host,
+                        strOutputFilename,
+                        out filter,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "编译文件 '" + strCfgFileName + "' 的过程中出错:\r\n" + strError;
+                        goto ERROR1;
+                    }
+
+                    try
+                    {
+                        nRet = filter.DoRecord(null,
+                            this.GetMarc(),    //  this.m_marcEditor.Marc,
+                            0,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "filter.DoRecord error: " + ExceptionUtil.GetDebugText(ex);
+                        goto ERROR1;
+                    }
+                }
+#endif
+
+                bool bVerifyFail = false;
+                if (string.IsNullOrEmpty(host.ResultString) == true)
+                {
+                    if (this.m_verifyViewer != null)
+                    {
+                        this.m_verifyViewer.ResultString = "经过校验没有发现任何错误。";
+                    }
+                }
+                else
+                {
+                    if (bAutoVerify == true)
+                    {
+                        // 延迟打开窗口
+                        DoViewVerifyResult(Program.MainForm.PanelFixedVisible == false ? true : false);
+                    }
+                    this.m_verifyViewer.ResultString = host.ResultString;
+                    Program.MainForm.ActivateVerifyResultPage();   // 2014/7/3
+                    bVerifyFail = true;
+                }
+
+                this.SetSaveAllButtonState(!InDisabledState);   // 2009/3/29 
+                return bVerifyFail == true ? 2 : 0;
+            }
+            finally
+            {
+                this._processing--;
+            }
+        ERROR1:
+            this.MessageBoxShow(strError);
+            if (this.m_verifyViewer != null)
+                this.m_verifyViewer.ResultString = strError;
+            return 0;
+        }
+
+
+#if REMOVED
         // MARC格式校验
         // parameters:
         //      sender    从何处启动? MarcEditor EntityEditForm BindingForm
@@ -10483,6 +11011,9 @@ out strError);
             return 0;
         }
 
+#endif
+
+        // TODO: 考虑把 Assembly 加入缓存，避免每次都重新编译
         int RunVerifyCsScript(
             object sender,
             GenerateDataEventArgs e,
@@ -14002,10 +14533,20 @@ out strError);
                 }
 
                 string strMergeStyle = "";
-                if ((merge_style & MergeStyle.ReserveSourceBiblio) != 0)
-                    strMergeStyle = "reserve_source,file_reserve_source";
+                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.159") < 0)
+                {
+                    if ((merge_style & MergeStyle.ReserveSourceBiblio) != 0)
+                        strMergeStyle = "reserve_source,file_reserve_source";
+                    else
+                        strMergeStyle = "reserve_target,file_reserve_target";
+                }
                 else
-                    strMergeStyle = "reserve_target,file_reserve_target";
+                {
+                    if ((merge_style & MergeStyle.ReserveSourceBiblio) != 0)
+                        strMergeStyle = "reserve_source";   // 2024/4/28 注: CopyBiblioInfo() API 的 strMergeStyle 参数改了，默认不用 file_reserve_source 值，只要具备 reserve_source 就是保留源中对象的效果。这是为了方便前端使用 API 做的改动。将来如果需要控制书目记录的对象在复制中的效果，可考虑另行增加新的子参数值
+                    else
+                        strMergeStyle = "reserve_target";   // 2024/4/28 注: CopyBiblioInfo() API 的 strMergeStyle 参数改了，默认不用 file_reserve_target 值，只要具备 reserve_target 就是保留源中对象的效果。这是为了方便前端使用 API 做的改动。将来如果需要控制书目记录的对象在复制中的效果，可考虑另行增加新的子参数值
+                }
 
                 if ((merge_style & MergeStyle.MissingSourceSubrecord) != 0)
                     strMergeStyle += ",missing_source_subrecord";
@@ -16020,8 +16561,47 @@ out strError);
         /// <param name="e">事件参数</param>
         public virtual void Main(object sender, HostEventArgs e)
         {
+            // 要触发转换 MARC 功能，需要在 e.e.ScriptEntry 中放入 "#convertMarc"，
+            // 并在 e.e.Parameter 中放入动作名称
+            if (e.e.ScriptEntry == "#convertMarc")
+            {
+                var marc = this.DetailForm.GetMarc();
+                var action = e.e.Parameter as string;
+                var result = this.ConvertMarc(marc, action);
+                if (result.Value == -1)
+                {
+                    this.ResultString = result.ErrorInfo;
+                    return;
+                }
 
+                this.DetailForm.SetMarc(result.ResultMarc);
+            }
         }
+
+        // 2024/5/9
+        // 进行转换
+        public virtual ConvertMarcResult ConvertMarc(string marc, string action)
+        {
+            return new ConvertMarcResult
+            {
+                Value = -1,
+                ErrorInfo = "尚未实现"
+            };
+        }
+
+        // 2024/5/9
+        // 获得转换动作列表
+        public virtual List<string> GetConvertActions()
+        {
+            return new List<string>();
+        }
+    }
+
+    // 2024/5/9
+    public class ConvertMarcResult : NormalResult
+    {
+        // [out] 返回转换后的结果 MARC
+        public string ResultMarc { get; set; }
     }
 
     /// <summary>

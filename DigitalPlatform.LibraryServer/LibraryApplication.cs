@@ -4846,8 +4846,14 @@ TaskScheduler.Default);
         // 检测一个数据库的类型
         // TODO: 需要逐渐增加支持的数据库类型，直到支持全部
         // 2023/2/3
-        public string GetAllDbType(string strDbName)
+        public string GetAllDbType(string strDbName,
+            bool detect_kernel_database = false)
         {
+            // 2024/5/10
+            if (detect_kernel_database
+                && strDbName.StartsWith("<kernel>"))
+                return "kernel";
+
             var type = GetDbType(strDbName,
     out _);
             if (type != null)
@@ -12084,6 +12090,7 @@ out strError);
                 readerdom.OuterXml,
                 "", // sessioninfo.Account.ReaderDomOldXml,    // strOldXml
                 sessioninfo.Account.ReaderDomTimestamp,
+                "",
                 out strExistingXml,
                 out strOutputXml,
                 out strOutputPath,
@@ -12240,6 +12247,7 @@ out strError);
                 readerdom.OuterXml,
                 "", // sessioninfo.Account.ReaderDomOldXml,    // strOldXml
                 sessioninfo.Account.ReaderDomTimestamp,
+                "",
                 out strExistingXml,
                 out strOutputXml,
                 out strOutputPath,
@@ -16018,9 +16026,12 @@ strLibraryCode);    // 读者所在的馆代码
             if (strDbName == "cfgs" || strFirstPart == "cfgs")
             {
                 string strLocalPath = this.CfgsMap.Clear(strResPath);
-                this.Filters.ClearFilter(strLocalPath);
-                this.AssemblyCache.Clear(strLocalPath);
-                return true;
+                if (string.IsNullOrEmpty(strLocalPath) == false)
+                {
+                    this.Filters.ClearFilter(strLocalPath);
+                    this.AssemblyCache.Clear(strLocalPath);
+                    return true;
+                }
             }
 
             return false;
@@ -16125,7 +16136,7 @@ strLibraryCode);    // 读者所在的馆代码
                         return 0;
                     }
                 }
-                else if (string.Compare(strFirstLevel, "library.xml", true) == 0
+                else if ((string.Compare(strFirstLevel, "library.xml", true) == 0 || string.Compare(strFirstLevel, "library.xml.bak", true) == 0)
     && string.IsNullOrEmpty(strPath))
                 {
                     if (strAction == "delete")
@@ -16244,6 +16255,8 @@ out string db_type);
                         strError = $"写入配置文件 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 writecfgfile 权限";
                         return 0;
                     }
+
+                    return 1;   // 2024/5/10 添加
                 }
 
                 // 记录ID
@@ -16306,7 +16319,7 @@ out string db_type);
                     return 0;
                 }
                 */
-                strError = "写入资源 " + strResPath + " 被拒绝";
+                strError = "写入资源 " + strResPath + " 被拒绝(资源不属于数据库 cfgs 目录，也不是数据库元数据记录或其下级)";
                 return 0;
             }
 
@@ -16344,6 +16357,8 @@ out string db_type);
                         strError = $"写入配置文件 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 writecfgfile 权限";
                         return 0;
                     }
+
+                    return 1;   // 2024/5/10 添加
                 }
 
                 // 记录ID
@@ -16405,7 +16420,7 @@ out string db_type);
                     return 0;
                 }
                 */
-                strError = "写入资源 " + strResPath + " 被拒绝";
+                strError = "写入资源 " + strResPath + " 被拒绝(资源不属于数据库 cfgs 目录，也不是数据库元数据记录或其下级)";
                 return 0;
             }
 
@@ -16446,6 +16461,8 @@ out string db_type);
                         strError = $"写入配置文件 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 writecfgfile 权限";
                         return 0;
                     }
+
+                    return 1;   // 2024/5/10 添加
                 }
 
                 // check set db
@@ -16491,7 +16508,7 @@ out string db_type);
                     return 0;
                 }
                 */
-                strError = "写入资源 " + strResPath + " 被拒绝";
+                strError = "写入资源 " + strResPath + " 被拒绝(资源不属于数据库 cfgs 目录，也不是数据库元数据记录或其下级)";
                 return 0;
             }
 
@@ -16521,6 +16538,8 @@ out string db_type);
                         strError = $"写入配置文件 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 writecfgfile 权限";
                         return 0;
                     }
+
+                    return 1;   // 2024/5/10 添加
                 }
 
                 // 记录ID
@@ -16559,7 +16578,7 @@ out string db_type);
                     return 0;
                 }
                 */
-                strError = "写入资源 " + strResPath + " 被拒绝";
+                strError = "写入资源 " + strResPath + " 被拒绝(资源不属于数据库 cfgs 目录，也不是数据库元数据记录或其下级)";
                 return 0;
             }
 
@@ -17299,7 +17318,15 @@ out string db_type);
             }
             //else
             //    right = "getres";
-            else
+            else if (strDbName.StartsWith("<kernel>"))
+            {
+                // 2024/5/10
+                right = "managedatabase,backup";
+                if (StringUtil.IsInList(right, sessioninfo.RightsOrigin) == false)
+                    return $"{SessionInfo.GetCurrentUserName(sessioninfo)} 获取数据库 {strDbName} 内资源被拒绝。不具备 {right} 权限。";
+                return null;
+            }
+            else 
                 return $"数据库 {strDbName} 内资源不允许访问";
 
             // 书目库(规范库)，先判断存取定义
@@ -17577,9 +17604,9 @@ out string db_type);
         string CheckDbSetRights(
             SessionInfo sessioninfo,
             string rights,
-    string strDbName,
-    string strAction,
-    out string db_type)
+            string strDbName,
+            string strAction,
+            out string db_type)
         {
             db_type = "";
             string right = "";

@@ -736,10 +736,12 @@ namespace dp2Circulation
         // 刷新指定id的事项行
         // parameters:
         //      bPrepareStop    是否准备stop循环状态？如果外部调用前已经准备好了，就需要用false调用
+        //      strAction       如果为 "delete"，表示刚才删除了这些事项
         int RefreshAmercedRecords(
             Stop stop,
             LibraryChannel channel,
             // bool bPrepareStop,
+            string strAction,
             string[] ids,
             out string strError)
         {
@@ -778,6 +780,12 @@ namespace dp2Circulation
                         goto ERROR1;
                     }
 
+                    if (strAction == "delete")
+                    {
+                        item.ListView.Items.Remove(item);
+                        continue;
+                    }
+
                     string strPath = item.SubItems[COLUMN_RECPATH].Text;
 
                     stop?.SetMessage("正在装入记录信息 " + strPath);
@@ -801,7 +809,6 @@ namespace dp2Circulation
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
-
                 }
             }
             finally
@@ -1578,12 +1585,12 @@ namespace dp2Circulation
                     if (lRet == -1)
                         goto ERROR1;
 
-
                     // 刷新
                     int nRet = RefreshAmercedRecords(
                         looping.Progress,
                         channel,
                         // false,
+                        strAction,
                         ids,
                         out strError);
                     if (nRet == -1)

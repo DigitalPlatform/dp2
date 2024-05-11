@@ -3974,9 +3974,15 @@ out strError);
                     REDO_COPY:
                         // 复制源记录到目标位置，然后自动删除源记录
                         // 但是尚未在目标位置写入最新内容
+                        // parameters:
+                        //      strMergeStyle           如何合并两条记录的 XML 部分和下属对象?
+                        //                              关于 XML 部分: reserve_source / reserve_target 之一。 缺省两者，则表示 reserve_source
+                        //                              关于下属对象部分：file_reserve_source 和 file_reserve_target 组合使用。如果两者都没有出现，表示最后的目标记录中会被去掉所有 file 元素。这是 2017/4/19 新增的参数值。以前版本都是自动合并源和目标的全部 files 元素
                         lRet = channel.DoCopyRecord(strOldRecPath,
                             strNewRecPath,
                             true,   // bDeleteSourceRecord
+                            "file_reserve_source",
+                            out _,
                             out _,
                             out _,
                             out strError);
@@ -4378,6 +4384,8 @@ out strError);
                         lRet = channel.DoCopyRecord(strOldRecPath,
                             strNewRecPath,
                             true,   // bDeleteSourceRecord
+                            "file_reserve_source",  // 2024/4/28
+                            out _,
                             out output_timestamp,
                             out strOutputPath,
                             out strError);
@@ -6927,6 +6935,8 @@ out strError);
                         strOldRecPath,
                         strRecPath,
                         true,
+                        "file_reserve_source",  // 2024/4/28
+                        out _,
                         out output_timestamp,
                         out strOutputPath,
                         out strError);
@@ -7412,6 +7422,8 @@ out XmlNode record_node);
                         strOldRecPath,
                         strRecPath,
                         true,
+                        "file_reserve_source",  // 2024/4/28
+                        out _,
                         out byte[] output_timestamp,
                         out string strOutputPath,
                         out strError);
@@ -8913,11 +8925,11 @@ out string strReaderKey);
 	  ...
   </deletedEntityRecords>
   <copyEntityRecords> 被复制的实体记录(容器)。只有当<action>为*copy*时才有这个元素。
-	  <record recPath='中文图书实体/100' targetRecPath='中文图书实体/110'>...</record> 这个元素可以重复。注意元素内文本内容目前为空。recPath属性为源记录路径，targetRecPath为目标记录路径
+	  <record recPath='中文图书实体/100' targetRecPath='中文图书实体/110' newBarcode='...'>...</record> 这个元素可以重复。注意元素内文本内容目前为空。recPath属性为源记录路径，targetRecPath为目标记录路径。特殊地，如果 targetRecPath 属性值为空，表示删除了 recPath 属性值这条记录。newBarcode 属性为复制到目标后应该把其 barcode 元素修改成的值。
 	  ...
   </copyEntityRecords>
   <moveEntityRecords> 被移动的实体记录(容器)。只有当<action>为*move*时才有这个元素。
-	  <record recPath='中文图书实体/100' targetRecPath='中文图书实体/110'>...</record> 这个元素可以重复。注意元素内文本内容目前为空。recPath属性为源记录路径，targetRecPath为目标记录路径
+	  <record recPath='中文图书实体/100' targetRecPath='中文图书实体/110'>...</record> 这个元素可以重复。注意元素内文本内容目前为空。recPath属性为源记录路径，targetRecPath为目标记录路径。特殊地，如果 targetRecPath 属性值为空，表示删除了 recPath 属性值这条记录。
 	  ...
   </moveEntityRecords>
   <copyOrderRecords /> <moveOrderRecords />
@@ -9058,7 +9070,7 @@ out string strReaderKey);
                     || strAction == "move"
                     || strAction == "copy")
                 {
-                    // 2024/3/29 注: 日志记录 1.10 版本以后，record 元素多了一个 newBiblioParam 属性，如果其值为 "(null)"，表示当初 API 请求的时候手机上 strNewBiblioParam 实际上为空
+                    // 2024/3/29 注: 日志记录 1.10 版本以后，record 元素多了一个 newBiblioParam 属性，如果其值为 "(null)"，表示当初 API 请求的时候 strNewBiblioParam 实际上为空
                     // 所以 record 元素中记载的 XML 记录，实际上可能是 API 并没有请求最后覆盖目标位置，但操作日志主动记载下来的实际写入目标位置的记录 XML 内容
                     string strTargetRecord = DomUtil.GetElementText(domLog.DocumentElement,
                         "record",
@@ -9073,7 +9085,7 @@ out string strReaderKey);
                     /*
                     // 2024/3/29
                     // 逻辑恢复时，要使用 API 提交时候的 strTargetRecord
-                    if (IsLogic(origin_level) && DomUtil.GetAttr(node, "newBiblioParam") == "(null)")
+                    if (IsLogic(origin_level) && DomUtil.GetAttr(container_node, "newBiblioParam") == "(null)")
                         strTargetRecord = "";
                     */
 
@@ -9113,15 +9125,22 @@ out string strReaderKey);
                         }
                     }
 
+                    // 源记录是否要被(CopyRecord())删除掉
+                    bool delete_source_record = false;
+
                     if (bSourceExist == true)
                     {
+                        delete_source_record = (strAction == "onlymovebiblio" || strAction == "move" ? true : false);
+                        // 2024/4/28
+                        string copy_style = GetCopyRecordMergeStyle(strMergeStyle);
+
                         int nRedoCount = 0;
                     REDO_COPY:
                         // 复制书目记录
                         lRet = channel.DoCopyRecord(strOldRecPath,
                             strTargetRecPath,
-                            strAction == "onlymovebiblio" ? true : false,   // bDeleteSourceRecord
-                            strMergeStyle,
+                            delete_source_record,   // bDeleteSourceRecord
+                            copy_style,
                             out string strIdChangeList,
                             out output_timestamp,
                             out strOutputPath,
@@ -9232,8 +9251,8 @@ out string strReaderKey);
 
                         for (int i = 0; i < element_names.Length; i++)
                         {
-                            XmlNode node_subrecords = domLog.DocumentElement.SelectSingleNode(
-                                element_names[i]);
+                            var node_subrecords = domLog.DocumentElement.SelectSingleNode(
+                                element_names[i]) as XmlElement;
                             if (node_subrecords != null)
                             {
                                 nRet = CopySubRecords(
@@ -9249,6 +9268,7 @@ out string strReaderKey);
 
                     // 2011/12/12
                     if (bSourceExist == true
+                        && delete_source_record == false
                         && (strAction == "move" || strAction == "onlymovebiblio")
                         )
                     {
@@ -9700,8 +9720,14 @@ out strError);
         #region 尝试临时重建数据库
 
         // 猜测一个数据库名是书目库(系列)名字还是读者库名字
-        static string GuessBiblioOrReader(string strDbName)
+        // return:
+        //      "biblio"
+        //      "reader"
+        //      "amerce"
+        static string GuessBiblioOrReaderOrAmerce(string strDbName)
         {
+            if (strDbName == "违约金")
+                return "amerce";
             if (strDbName.Contains("读者"))
                 return "reader";
             if (strDbName.Contains("图书")
@@ -10203,40 +10229,42 @@ out strError);
         // 源记录不存在，应该忽略；目标库不存在，也应该忽略
         /*
     <copyEntityRecords> 被复制的实体记录(容器)。只有当<action>为*copy*时才有这个元素。
-      <record recPath='中文图书实体/100' targetRecPath='中文图书实体/110'>...</record> 这个元素可以重复。注意元素内文本内容目前为空。recPath属性为源记录路径，targetRecPath为目标记录路径
+      <record recPath='中文图书实体/100' targetRecPath='中文图书实体/110' newBarcode='...'>...</record> 这个元素可以重复。注意元素内文本内容目前为空。recPath属性为源记录路径，targetRecPath为目标记录路径
       ...
     </copyEntityRecords>
     <moveEntityRecords> 被移动的实体记录(容器)。只有当<action>为*move*时才有这个元素。
       <record recPath='中文图书实体/100' targetRecPath='中文图书实体/110'>...</record> 这个元素可以重复。注意元素内文本内容目前为空。recPath属性为源记录路径，targetRecPath为目标记录路径
       ...
     </moveEntityRecords>
+        注意 targetRecPath 属性值可能为空，这时候表明删除 recPath 属性值指向的记录
          * */
         public int CopySubRecords(
             RmsChannel channel,
-            XmlNode node,
+            XmlElement container_node,
             string strTargetBiblioRecPath,
             out string strError)
         {
             strError = "";
 
             string strAction = "";
-            if (StringUtil.HasHead(node.Name, "copy") == true)
+            if (StringUtil.HasHead(container_node.Name, "copy") == true)
                 strAction = "copy";
-            else if (StringUtil.HasHead(node.Name, "move") == true) // 2011/12/5 原先有BUG "copy"
+            else if (StringUtil.HasHead(container_node.Name, "move") == true) // 2011/12/5 原先有BUG "copy"
                 strAction = "move";
             else
             {
-                strError = "不能识别的元素名 '" + node.Name + "'";
+                strError = "不能识别的元素名 '" + container_node.Name + "'";
                 return -1;
             }
 
-            XmlNodeList nodes = node.SelectNodes("record");
-            foreach (XmlNode record_node in nodes)
+            XmlNodeList nodes = container_node.SelectNodes("record");
+            foreach (XmlElement record_node in nodes)
             {
                 string strSourceRecPath = DomUtil.GetAttr(record_node, "recPath");
                 string strTargetRecPath = DomUtil.GetAttr(record_node, "targetRecPath");
 
                 string strNewBarcode = DomUtil.GetAttr(record_node, "newBarcode");
+                string strNewRefID = DomUtil.GetAttr(record_node, "newRefID");
 
                 string strMetaData = "";
                 string strXml = "";
@@ -10271,9 +10299,12 @@ out strError);
                 // TODO: 如果目标数据库已经不存在，要跳过
 
                 List<string> target_recpaths = new List<string>();
-                target_recpaths.Add(strTargetRecPath);
+                target_recpaths.Add(strTargetRecPath);  // 注意 strTargetRecPath 可能为空
                 List<string> newbarcodes = new List<string>();
                 newbarcodes.Add(strNewBarcode);
+                List<string> newrefids = new List<string>();
+                newrefids.Add(strNewRefID);
+
 
                 // 复制属于同一书目记录的全部实体记录
                 // parameters:
@@ -10287,6 +10318,7 @@ out strError);
                     target_recpaths,
                     strTargetBiblioRecPath,
                     newbarcodes,
+                    newrefids,
                     out strError);
                 if (nRet == -1)
                     return -1;
@@ -11154,18 +11186,38 @@ out strError);
             if (IsSnapshot(level, out bool robust)
                 || bReuse == true)
             {
+                string strStyle = DomUtil.GetElementText(
+domLog.DocumentElement,
+"style");
+
                 string strResPath = DomUtil.GetElementText(
                     domLog.DocumentElement,
                     "resPath");
                 if (string.IsNullOrEmpty(strResPath) == true)
                 {
-                    strError = "日志记录中缺<resPath>元素";
-                    return -1;
+                    // 注: delete 情况下不会有 resPath 元素
+                    if (StringUtil.IsInList("delete", strStyle) == true)
+                    {
+                        strResPath = DomUtil.GetElementText(
+                            domLog.DocumentElement,
+                            "requestResPath");
+                        if (string.IsNullOrEmpty(strResPath) == true)
+                        {
+                            strError = "日志记录中缺 requestResPath 元素";
+                            return -1;
+                        }
+                    }
+                    else
+                    {
+                        strError = "日志记录中缺 resPath 元素";
+                        return -1;
+                    }
                 }
 
                 // 2024/2/12
                 // 文本类型的记录内容
-                if (domLog.DocumentElement.SelectSingleNode("record") != null)
+                if (domLog.DocumentElement.SelectSingleNode("record") != null
+                    && StringUtil.IsInList("delete", strStyle) == false)
                 {
                     string strRecord = DomUtil.GetElementText(domLog.DocumentElement,
                         "record",
@@ -11175,6 +11227,13 @@ out strError);
                         strError = "日志记录中缺 record 元素";
                         return -1;
                     }
+
+                    if (StringUtil.IsInList("autocreatedir", strStyle))
+                    {
+                        strError = "当日志记录中存在 record 元素时(表明记录中是文本内容)，style 元素中就不应该具有 autocreatedir 子参数。日志恢复时会自动忽略此 autocreatedir 子参数";
+                        func_warning?.Invoke(strError);
+                    }
+
 
                     {
                         int nRedoCount = 0;
@@ -11193,9 +11252,9 @@ out strError);
                             if (channel.OriginErrorCode == ErrorCodeValue.NotFoundDb
                             && robust == true)
                             {
-                                // 注意这里的路径还可能是读者库路径
+                                // 注意这里的路径还可能是读者库或违约金库路径
                                 string dbName = ResPath.GetDbName(strResPath);
-                                string type = GuessBiblioOrReader(dbName);
+                                string type = GuessBiblioOrReaderOrAmerce(dbName);
 
                                 int nRet = 0;
                                 string error = "";
@@ -11205,13 +11264,19 @@ out strError);
         strResPath,
         ref nRedoCount,
         out error);
+                                else if (type == "amerce")
+                                    nRet = TryCreateAmerceDatabase(
+channel,
+strResPath,
+ref nRedoCount,
+out error);
                                 else
                                     nRet = TryCreateReaderDatabase(
-        channel,
-        strResPath,
-        func_warning,
-        ref nRedoCount,
-        out error);
+            channel,
+            strResPath,
+            func_warning,
+            ref nRedoCount,
+            out error);
                                 if (nRet == 0)
                                     goto REDO_WRITE;
                                 else if (nRet == -1)
@@ -11228,20 +11293,7 @@ out strError);
                     return 0;
                 }
 
-                string strTotalLength = DomUtil.GetElementText(
-    domLog.DocumentElement,
-    "totalLength");
-                if (string.IsNullOrEmpty(strTotalLength) == true)
-                {
-                    strError = "日志记录中缺 totalLength 元素";
-                    return -1;
-                }
 
-                if (long.TryParse(strTotalLength, out long lTotalLength) == false)
-                {
-                    strError = $"totalLength 元素值 '{strTotalLength}' 格式不正确";
-                    return -1;
-                }
 #if REMOVED
                 long lTotalLength = 0;
                 try
@@ -11255,23 +11307,11 @@ out strError);
                 }
 #endif
 
-                string strRanges = DomUtil.GetElementText(
-    domLog.DocumentElement,
-    "ranges");
-                if (lTotalLength != -1 && string.IsNullOrEmpty(strRanges) == true)
-                {
-                    // 2017/10/26 注: 当 totalLength 为 -1 时，表示仅修改 metadata。此时 ranges 为空
-                    // 而当 totalLength 为非 -1 值时，ranges 就不允许为空
-                    strError = "日志记录中缺 ranges 元素(当 totalLength 元素内容为非 -1 时)";
-                    return -1;
-                }
 
                 string strMetadata = DomUtil.GetElementText(
     domLog.DocumentElement,
     "metadata");
-                string strStyle = DomUtil.GetElementText(
-    domLog.DocumentElement,
-    "style");
+
 
                 // 读入记录内容
                 byte[] baRecord = null;
@@ -11294,34 +11334,100 @@ out strError);
                 REDO_WRITERES:
                     if (StringUtil.IsInList("delete", strStyle) == true)
                     {
+                        /*
                         // 2015/9/3 增加
                         lRet = channel.DoDeleteRes(strResPath,
                             timestamp,
                             strStyle,
                             out output_timestamp,
                             out strError);
+                        */
+                        // 2024/5/8
+                        lRet = TryDeleteRes(
+    channel,
+    strResPath,
+    timestamp,
+    robust ? "" : "notExistingAsError",
+    out strError);
                     }
                     else
                     {
-                        lRet = channel.WriteRes(strResPath,
-            strRanges,
-            lTotalLength,
-            baRecord,
-            strMetadata,
-            strStyle,
-            timestamp,
-            out strOutputResPath,
-            out output_timestamp,
-            out strError);
+                        string strTotalLength = DomUtil.GetElementText(
+            domLog.DocumentElement,
+            "totalLength");
+                        if (string.IsNullOrEmpty(strTotalLength) == true)
+                        {
+                            strError = "日志记录中缺 totalLength 元素";
+                            return -1;
+                        }
+
+                        if (long.TryParse(strTotalLength, out long lTotalLength) == false)
+                        {
+                            strError = $"totalLength 元素值 '{strTotalLength}' 格式不正确";
+                            return -1;
+                        }
+
+                        string strRanges = DomUtil.GetElementText(
+        domLog.DocumentElement,
+        "ranges");
+                        if (lTotalLength != -1 && string.IsNullOrEmpty(strRanges) == true)
+                        {
+                            // 2017/10/26 注: 当 totalLength 为 -1 时，表示仅修改 metadata。此时 ranges 为空
+                            // 而当 totalLength 为非 -1 值时，ranges 就不允许为空
+                            strError = "日志记录中缺 ranges 元素(当 totalLength 元素内容为非 -1 时)";
+                            return -1;
+                        }
+
+                        lRet = 0;
+                        // 如果 strStyle 中包含 autocreatedir，要先在这里检测路径第一级的数据库名是否存在对应的 dp2kernel 数据库
+                        // 如果不存在，则要先自动创建好这个数据库再往后执行
+                        if (StringUtil.IsInList("autocreatedir", strStyle))
+                        {
+                            var dbname = ResPath.GetDbName(strResPath);
+                            // return:
+                            //      -1  error
+                            //      0   not exist
+                            //      1   exist
+                            //      2   其他类型的同名对象已经存在
+                            var ret = DatabaseUtility.IsDatabaseExist(
+                                channel,
+                                dbname,
+                                out _);
+                            if (ret == 0)
+                            {
+                                lRet = -1;
+                                channel.OriginErrorCode = ErrorCodeValue.NotFoundDb;
+                                // 注: 后面就会跳过 .WriteRes()
+                            }
+                            else if (ret == -1 || ret == 2)
+                            {
+                                strError = $"在探测 dp2kernel 数据库 '' 是否存在的过程中遇到错误: {strError}";
+                                return -1;
+                            }
+                        }
+
+                        if (lRet != -1)
+                        {
+                            lRet = channel.WriteRes(strResPath,
+                strRanges,
+                lTotalLength,
+                baRecord,
+                strMetadata,
+                strStyle,
+                timestamp,
+                out strOutputResPath,
+                out output_timestamp,
+                out strError);
+                        }
                     }
                     if (lRet == -1)
                     {
                         if (channel.OriginErrorCode == ErrorCodeValue.NotFoundDb
                             && robust == true)
                         {
-                            // 注意这里的路径还可能是读者库路径
+                            // 注意这里的路径还可能是读者库或违约金库路径
                             string dbName = ResPath.GetDbName(strResPath);
-                            string type = GuessBiblioOrReader(dbName);
+                            string type = GuessBiblioOrReaderOrAmerce(dbName);
 
                             int nRet = 0;
                             string error = "";
@@ -11331,6 +11437,12 @@ out strError);
         strResPath,
         ref nRedoCount,
         out error);
+                            else if (type == "amerce")
+                                nRet = TryCreateAmerceDatabase(
+channel,
+strResPath,
+ref nRedoCount,
+out error);
                             else
                                 nRet = TryCreateReaderDatabase(
     channel,
@@ -11913,7 +12025,7 @@ out strError);
                         out XmlNode node);
                     string strReaderRecPath = DomUtil.GetAttr(node, "recPath");
                     var existing = DomUtil.GetBooleanParam(node, "existing", true);
-                    // var changed = DomUtil.GetBooleanParam(node, "changed", true);
+                    // var changed = DomUtil.GetBooleanParam(container_node, "changed", true);
                     // 注: 不管当初执行 API 时读者记录有没有修改，现在恢复的时候都覆盖保存一下读者记录
                     if (string.IsNullOrEmpty(strReaderRecPath) == false
                         && existing == true
@@ -11940,7 +12052,7 @@ out strError);
                         out XmlNode node);
                     string strItemRecPath = DomUtil.GetAttr(node, "recPath");
                     var existing = DomUtil.GetBooleanParam(node, "existing", true);
-                    // var changed = DomUtil.GetBooleanParam(node, "changed", true);
+                    // var changed = DomUtil.GetBooleanParam(container_node, "changed", true);
                     // 注: 不管当初执行 API 时册记录有没有修改，现在恢复的时候都覆盖保存一下册记录
                     if (string.IsNullOrEmpty(strItemRecPath) == false
                         && existing == true

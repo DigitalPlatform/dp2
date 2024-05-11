@@ -866,6 +866,7 @@ namespace DigitalPlatform.LibraryServer
                     strNewXml,
                     strReaderXml,
                     baTimestamp,
+                    "",
                     out strExistingXml,
                     out strSavedXml,
                     out strSavedRecPath,

@@ -403,7 +403,7 @@ namespace DigitalPlatform.RFID
                         element.CompactMethod,  // CompactionScheme.Null,
                         false);
                     //if (start != element.StartOffs)
-                    //    throw new Exception($"element {element.ToString()} 的 StartOffs {element.StartOffs} 不符合预期值 {start}");
+                    //    throw new Exception($"element {element.OidToString()} 的 StartOffs {element.StartOffs} 不符合预期值 {start}");
 
 
                     start += element.OriginData.Length;

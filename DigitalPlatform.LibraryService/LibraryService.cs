@@ -2095,6 +2095,7 @@ namespace dp2Library
                     strNewXml,
                     strOldXml,
                     baOldTimestamp,
+                    "",
                     out strExistingXml,
                     out strSavedXml,
                     out strSavedRecPath,
@@ -2152,6 +2153,7 @@ namespace dp2Library
                 return app.MoveReaderInfo(
                         sessioninfo,
                         strSourceRecPath,
+                        "",
                         ref strTargetRecPath,
                         out target_timestamp);
             }
@@ -12584,6 +12586,10 @@ true);
                 //      strPath [in]逻辑路径
                 //              [out]吃掉第一部分后余下的逻辑路径
                 //      strStartDir 起点物理路径。也就是被吃掉的第一部分对应的物理路径
+                // return:
+                //      -1  出错
+                //      0   没有找到
+                //      1   找到
                 nRet = app.GetStartDir(ref temp,
                     sessioninfo,
                     strAction,
@@ -12591,6 +12597,11 @@ true);
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
+                if (nRet == 0)
+                {
+                    strError = $"路径 '{strCategory}' 部分没有找到对应的物理文件";
+                    goto ERROR1;
+                }
 
                 //if (string.IsNullOrEmpty(strCategory) == false
                 //    && strCategory[0] == '!')
@@ -14447,7 +14458,7 @@ strLibraryCodeList);
         // parameters:
         //      ids    ID的集合
         // return:
-        //      result.Value    -1 错误 其他 本次的累计量
+        //      result.Value    -1 错误; 1 成功
         public LibraryServerResult Settlement(
             string strAction,
             string[] ids)
@@ -15437,7 +15448,7 @@ Stack:
                 // TODO: 读者身份是否还需要作更细致的限定?
                 {
                     string strDbName = ResPath.GetDbName(strResPath);
-                    string db_type = app.GetAllDbType(strDbName);
+                    string db_type = app.GetAllDbType(strDbName, true);
                     if (string.IsNullOrEmpty(db_type))
                     {
                         strError = $"无法探知数据库 '{strDbName}' 的类型";
@@ -16232,13 +16243,23 @@ out strError);
                     // TODO: 检查权限。如果权限足够，也可以访问某些 数据目录下的二级目录
                     string strTargetDir = app.DataDir;
                     string strFilePath = Path.Combine(strTargetDir, strResPath.Substring(1));
+
+                    /*
+                    // 安全性检查：不允许文件和目录越出指定的根目录
+                    if (PathUtil.IsChildOrEqual(strFilePath, app.DataDir) == false)
+                    {
+                        strError = "xxx";
+                        goto ERROR1;
+                    }
+                    */
+
                     // return:
                     //      -2  时间戳不匹配
                     //      -1  一般性错误
                     //      0   成功
                     //      其他  成功删除的文件和目录个数
                     int nRet = app.WriteFile(
-                        Path.Combine(app.DataDir, "upload"),    // TODO: ?? 这里要测试一下，可能请求意图写入 backup 子目录呢
+                        app.DataDir,    // Path.Combine(app.DataDir, "upload"),    // TODO: ?? 这里要测试一下，可能请求意图写入 backup 子目录呢
                         strFilePath,
                         strRanges,
                         lTotalLength,
@@ -16277,7 +16298,7 @@ out strError);
                         return result;
                     }
 
-                    var db_type = app.GetAllDbType(strDbName);
+                    var db_type = app.GetAllDbType(strDbName, true);
                     if (string.IsNullOrEmpty(db_type))
                     {
                         result.Value = -1;
@@ -16292,109 +16313,130 @@ out strError);
                     {
                         if (app.IsDatabaseMetadataPath(sessioninfo, strResPath) == false)
                         {
+                            /*
                             result.Value = -1;
                             result.ErrorInfo = $"不允许使用 WriteRes() 删除元数据记录以外的其它类型资源 {strResPath}";
                             result.ErrorCode = ErrorCode.AccessDenied;
                             return result;
-                        }
-
-                        // if (ServerDatabaseUtility.IsUtilDbName(app.LibraryCfgDom, strDbName, "inventory") == true)
-                        if (StringUtil.IsInList(db_type,
-                        "amerce,arrived,publisher,zhongcihao,dictionary,inventory"))
-                        {
-                            /*
-                            // 盘点库记录
-                            if (StringUtil.IsInList("setinventoryinfo,inventorydelete", sessioninfo.RightsOrigin) == false)
-                            {
-                                result.Value = -1;
-                                result.ErrorInfo = "当前用户缺乏删除盘点库记录 '" + strResPath + "' 所需要的 setinventoryinfo 或 inventorydelete 权限";
-                                result.ErrorCode = ErrorCode.AccessDenied;
-                                return result;
-                            }
-                            lRet = channel.DoDeleteRes(strResPath,
-                                baInputTimestamp,
-                                strStyle,   // 2017/9/16 增加
-                                out baOutputTimestamp,
-                                out strError);
                             */
+                            lRet = channel.DoDeleteRes(strResPath,
+    baInputTimestamp,
+    strStyle,
+    out baOutputTimestamp,
+    out strError);
+                            if (lRet == -1)
+                                return new LibraryServerResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = strError,
+                                    ErrorCode = ErrorCode.SystemError,
+                                };
+                            lRet = 0;
+                        }
+                        else
+                        {
 
-                            // 不能简单删除。要判断是否具备 writexxxobject 权限，
-                            // 并且 XML 记录中是否具有 dprms:file 元素。只有当条件具备才允许删除
-                            var ret = app.SetRecordInfo(
-sessioninfo,
-strResPath,
-"",
-"",
-strStyle,
-baInputTimestamp,
-out strOutputResPath,
-out baOutputTimestamp);
-                            if (ret.Value == -1)
-                                return ret;
-                            lRet = 0;
-                            strError = ret.ErrorInfo;
-                            result.ErrorCode = ret.ErrorCode;
-                        }
-                        else if (db_type == "biblio")
-                        {
-                            var ret = app.SetBiblioInfo(sessioninfo,
-                                "delete",
-                                strResPath,
-                                "",
-                                "",
-                                baInputTimestamp,
-                                "",
-                                "",
-                                out strOutputResPath,
-                                out baOutputTimestamp);
-                            if (ret.Value == -1)
-                                return ret;
-                            lRet = 0;
-                            strError = ret.ErrorInfo;
-                            result.ErrorCode = ret.ErrorCode;
-                        }
-                        else if (db_type == "reader")
-                        {
-                            var ret = app.SetReaderInfo(sessioninfo,
-                                "delete",
-                                strResPath,
-                                "",
-                                "",
-                                baInputTimestamp,
-                                out _,
-                                out _,
-                                out strOutputResPath,
-                                out baOutputTimestamp,
-                                out _);
-                            if (ret.Value == -1)
-                                return ret;
-                            lRet = 0;
-                            strError = ret.ErrorInfo;
-                            result.ErrorCode = ret.ErrorCode;
-                        }
-                        else if (app.IsItemDbName(strDbName)
-                        || app.IsOrderDbName(strDbName)
-                        || app.IsIssueDbName(strDbName)
-                        || app.IsCommentDbName(strDbName))
-                        {
-                            // string db_type = app.GetDbType(strDbName, out _);
+                            // if (ServerDatabaseUtility.IsUtilDbName(app.LibraryCfgDom, strDbName, "inventory") == true)
+                            if (StringUtil.IsInList(db_type,
+                            "amerce,arrived,publisher,zhongcihao,dictionary,inventory"))
+                            {
+                                /*
+                                // 盘点库记录
+                                if (StringUtil.IsInList("setinventoryinfo,inventorydelete", sessioninfo.RightsOrigin) == false)
+                                {
+                                    result.Value = -1;
+                                    result.ErrorInfo = "当前用户缺乏删除盘点库记录 '" + strResPath + "' 所需要的 setinventoryinfo 或 inventorydelete 权限";
+                                    result.ErrorCode = ErrorCode.AccessDenied;
+                                    return result;
+                                }
+                                lRet = channel.DoDeleteRes(strResPath,
+                                    baInputTimestamp,
+                                    strStyle,   // 2017/9/16 增加
+                                    out baOutputTimestamp,
+                                    out strError);
+                                */
 
-                            var ret = app.SetItemInfo(
-                                sessioninfo,
-                                // db_type,
-                                "delete",
-                                strResPath,
-                                "",
-                                baInputTimestamp,
-                                "",
-                                out strOutputResPath,
-                                out baOutputTimestamp);
-                            if (ret.Value == -1)
-                                return ret;
-                            lRet = 0;
-                            strError = ret.ErrorInfo;
-                            result.ErrorCode = ret.ErrorCode;
-                        }
+                                // 不能简单删除。要判断是否具备 writexxxobject 权限，
+                                // 并且 XML 记录中是否具有 dprms:file 元素。只有当条件具备才允许删除
+                                var ret = app.SetRecordInfo(
+    sessioninfo,
+    strResPath,
+    "",
+    "",
+    strStyle,
+    baInputTimestamp,
+    out strOutputResPath,
+    out baOutputTimestamp);
+                                if (ret.Value == -1)
+                                    return ret;
+                                lRet = 0;
+                                strError = ret.ErrorInfo;
+                                result.ErrorCode = ret.ErrorCode;
+                            }
+                            else if (db_type == "biblio")
+                            {
+                                var ret = app.SetBiblioInfo(sessioninfo,
+                                    "delete",
+                                    strResPath,
+                                    "",
+                                    "",
+                                    baInputTimestamp,
+                                    "",
+                                    strStyle,
+                                    out strOutputResPath,
+                                    out baOutputTimestamp);
+                                if (ret.Value == -1)
+                                    return ret;
+                                lRet = 0;
+                                strError = ret.ErrorInfo;
+                                result.ErrorCode = ret.ErrorCode;
+                                bWriteOperLog = false;  // SetBiblioInfo() 已经写入了日志，WriteRes() API 就不要再写入日志
+                            }
+                            else if (db_type == "reader")
+                            {
+                                var ret = app.SetReaderInfo(sessioninfo,
+                                    "delete",
+                                    strResPath,
+                                    "",
+                                    "",
+                                    baInputTimestamp,
+                                    strStyle,
+                                    out _,
+                                    out _,
+                                    out strOutputResPath,
+                                    out baOutputTimestamp,
+                                    out _);
+                                if (ret.Value == -1)
+                                    return ret;
+                                lRet = 0;
+                                strError = ret.ErrorInfo;
+                                result.ErrorCode = ret.ErrorCode;
+                                bWriteOperLog = false;  // SetReaderInfo() 已经写入了日志，WriteRes() API 就不要再写入日志
+                            }
+                            else if (app.IsItemDbName(strDbName)
+                            || app.IsOrderDbName(strDbName)
+                            || app.IsIssueDbName(strDbName)
+                            || app.IsCommentDbName(strDbName))
+                            {
+                                // string db_type = app.GetDbType(strDbName, out _);
+
+                                var ret = app.SetItemInfo(
+                                    sessioninfo,
+                                    // db_type,
+                                    "delete",
+                                    strResPath,
+                                    "",
+                                    baInputTimestamp,
+                                    strStyle,
+                                    out strOutputResPath,
+                                    out baOutputTimestamp);
+                                if (ret.Value == -1)
+                                    return ret;
+                                lRet = 0;
+                                strError = ret.ErrorInfo;
+                                result.ErrorCode = ret.ErrorCode;
+                                bWriteOperLog = false;  // SetXXXInfo() 已经写入了日志，WriteRes() API 就不要再写入日志
+                            }
 #if REMOVED
                         else if (strDbName == app.AmerceDbName)
                         {
@@ -16412,12 +16454,13 @@ out baOutputTimestamp);
                                 out strError);
                         }
 #endif
-                        else
-                        {
-                            result.Value = -1;
-                            result.ErrorInfo = "删除资源 '" + strResPath + "' 的权限不够";
-                            result.ErrorCode = ErrorCode.AccessDenied;
-                            return result;
+                            else
+                            {
+                                result.Value = -1;
+                                result.ErrorInfo = "删除资源 '" + strResPath + "' 的权限不够";
+                                result.ErrorCode = ErrorCode.AccessDenied;
+                                return result;
+                            }
                         }
                     }
                     else if (
@@ -16531,6 +16574,9 @@ out strError);
 
                             if (app.IsBiblioDbName(strDbName))
                             {
+                                string style = strStyle;
+                                if (StringUtil.IsInList("new", output_style))
+                                    StringUtil.SetInList(ref style, "new", true);
                                 var ret = app.SetBiblioInfo(sessioninfo,
                                     set_action,
                                     strResPath,
@@ -16538,7 +16584,7 @@ out strError);
                                     strBiblio,
                                     new_timestamp,
                                     null,
-                                    StringUtil.IsInList("new", output_style) ? "new" : "", // strStyle,
+                                    style,
                                     out strOutputResPath,
                                     out baOutputTimestamp);
                                 if (ret.Value == -1)
@@ -16552,6 +16598,7 @@ out strError);
                                 lRet = 0;
                                 strError = ret.ErrorInfo;
                                 result.ErrorCode = ret.ErrorCode;
+                                bWriteOperLog = false;  // SetBiblioInfo() 已经写入了操作日志，此处不再写入操作日志
                             }
                             if (app.IsReaderDbName(strDbName))
                             {
@@ -16561,6 +16608,7 @@ out strError);
                                     strBiblio,
                                     null, // strOldXml
                                     baInputTimestamp,
+                                    strStyle,
                                     out _,
                                     out _,
                                     out strOutputResPath,
@@ -16577,6 +16625,7 @@ out strError);
                                 lRet = 0;
                                 strError = ret.ErrorInfo;
                                 result.ErrorCode = ret.ErrorCode;
+                                bWriteOperLog = false;  // SetReaderInfo() 已经写入了操作日志，此处不再写入操作日志
                             }
                             if (app.IsItemDbName(strDbName)
                         || app.IsOrderDbName(strDbName)
@@ -16591,7 +16640,7 @@ out strError);
                                     strResPath,
                                     strBiblio,
                                     baInputTimestamp,
-                                    null,
+                                    strStyle,
                                     out strOutputResPath,
                                     out baOutputTimestamp);
                                 if (ret.Value == -1)
@@ -16599,6 +16648,7 @@ out strError);
                                 lRet = 0;
                                 strError = ret.ErrorInfo;
                                 result.ErrorCode = ret.ErrorCode;
+                                bWriteOperLog = false;  // SetItemInfo() 已经写入了操作日志，此处不再写入操作日志
                             }
                             if (StringUtil.IsInList(db_type,
                         "amerce,arrived,publisher,zhongcihao,dictionary,inventory"))
@@ -16617,6 +16667,7 @@ out baOutputTimestamp);
                                 // baContent = ??
                                 result = ret;
                                 strError = ret.ErrorInfo;
+                                // 注: SetRecordInfo() 不会写入操作日志
                             }
 
                         }
@@ -16628,7 +16679,8 @@ out baOutputTimestamp);
                             lRet = 0;
                             baContent = null;   // 避免后续处理 baContent
                         }
-                        bWriteOperLog = false;  // SetBiblioInfo() 或者 SetReaderInfo() 已经写入了操作日志，此处不再写入操作日志
+
+                        // ??
                     }
                     else
                     {
@@ -16727,6 +16779,7 @@ out baOutputTimestamp);
                     if (StringUtil.IsInList("delete", strStyle) == false)
                     {
                         Debug.Assert(string.IsNullOrEmpty(strOutputResPath) == false, "");
+                        // 注: delete 情况下不会有 resPath 元素
                         DomUtil.SetElementText(domOperLog.DocumentElement, "resPath",
                             strOutputResPath);
 

@@ -460,6 +460,7 @@ string color = "red")
 
                     // 迫使 URL 生效
                     RfidManager.Url = App.RfidUrl;
+                    RfidTagList.OnlyReadEPC = App.OnlyReadEPC;
                     RfidManager.Clear();
                     FingerprintManager.Url = App.FingerprintUrl;
                     FingerprintManager.Clear();

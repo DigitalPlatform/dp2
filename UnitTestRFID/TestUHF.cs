@@ -349,6 +349,44 @@ EB00"
                 chip.FindElement(ElementOID.OwnerInstitution)?.Text);
         }
 
+#if REMOVED
+        [TestMethod]
+        public void Test_decode_userbank_2()
+        {
+            byte[] userbank = Element.FromHexString(
+@"0c02d9941404000100012c0038000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000");
+            /*
+            // 解码 User Bank，和解码高频标签的 Bytes 一样
+            List<byte> temp = new List<byte>(userbank);
+            temp.RemoveAt(0);
+
+            var chip = LogicChip.From(temp.ToArray(),
+                4);
+            */
+            var result = UhfUtility.ParseUserBank(userbank, 4);
+
+            Assert.AreEqual(0, result.Value);
+
+            /*
+            var chip = result.LogicChip;
+
+            Assert.AreEqual(4, chip.Elements.Count);    // 3 + 还有一个 Content Parameter 元素
+
+            // 验证 Content Parameter
+            var contentParameter = chip.FindElement(ElementOID.ContentParameter)?.Content;
+            string description = Element.GetContentParameterDesription(contentParameter);
+            Assert.AreEqual("OwnerInstitution,SetInformation,ShelfLocation", description);
+
+            Assert.AreEqual("1203",
+                chip.FindElement(ElementOID.SetInformation)?.Text);
+            Assert.AreEqual("QA268.L55",
+                chip.FindElement(ElementOID.ShelfLocation)?.Text);
+            Assert.AreEqual("US-InU-Mu",
+                chip.FindElement(ElementOID.OwnerInstitution)?.Text);
+            */
+        }
+#endif
+
         // 编码 EPC bank
         [TestMethod]
         public void Test_encode_epcbank_1()

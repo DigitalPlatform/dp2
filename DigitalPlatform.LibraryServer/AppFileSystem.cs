@@ -77,6 +77,7 @@ namespace DigitalPlatform.LibraryServer
         // 上传本地文件，或者删除服务器端文件
         // parameters:
         //      strStyle    当包含 delete 的时候，表示要删除 strFilePath 所指的文件
+        //                  当包含 createdir 的时候，表示要创建的是目录(而不是文件)
         // return:
         //      -2  时间戳不匹配
         //      -1  一般性错误
@@ -121,6 +122,7 @@ namespace DigitalPlatform.LibraryServer
 
             if (bDelete == true)
             {
+                int nOutControlCount = 0;
                 int nDeleteCount = 0;
                 string strDirectory = Path.GetDirectoryName(strFilePath);
                 string strPattern = Path.GetFileName(strFilePath);
@@ -131,7 +133,10 @@ namespace DigitalPlatform.LibraryServer
                 {
                     // 安全性检查：不允许文件和目录越出指定的根目录
                     if (PathUtil.IsChildOrEqual(si.FullName, strRootPath) == false)
+                    {
+                        nOutControlCount++;
                         continue;
+                    }
 
                     if (si is DirectoryInfo)
                     {
@@ -163,6 +168,14 @@ namespace DigitalPlatform.LibraryServer
 
                         nDeleteCount++;
                     }
+                }
+
+                // 2024/5/8
+                // 如果所有拟删除的文件都越过了根目录，则报错
+                if (nDeleteCount == 0 && nOutControlCount > 0)
+                {
+                    strError = $"路径 '{strFilePath}' 不合法(会导致越过容器路径)";
+                    return -1;
                 }
 
                 return nDeleteCount;
@@ -201,10 +214,35 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
+            // 2024/5/8
+            // 安全性检查：不允许文件和目录越出指定的根目录
+            if (PathUtil.IsChildOrEqual(strFilePath, strRootPath) == false)
+            {
+                strError = $"路径 '{strFilePath}' 不合法(会导致越过容器路径)";
+                return -1;
+            }
+
             string strNewFilePath = GetNewFileName(strFilePath);
 
             // 确保文件的路径所经过的所有子目录已经创建
             PathUtil.TryCreateDir(Path.GetDirectoryName(strFilePath));
+
+            // 2024/5/10
+            if (StringUtil.IsInList("createdir", strStyle))
+            {
+                if (File.Exists(strFilePath))
+                {
+                    strError = $"已经存在同名文件，无法创建子目录";
+                    return -1;
+                }
+                if (Directory.Exists(strFilePath))
+                {
+                    strError = $"已经存在同名子目录，无法重复创建";
+                    return -1;
+                }
+                Directory.CreateDirectory(strFilePath);
+                return 0;
+            }
 
             //*************************************************
             // 检查时间戳,当目标文件存在时
@@ -1051,6 +1089,8 @@ namespace DigitalPlatform.LibraryServer
         // parameters:
         //      root_paths  可用的根目录列表。只要在其中之一以下，就允许删除。否则不允许删除
         //      strCurrentDirectory 当前路径，注意这是物理路径
+        //                  注: 要删除 a/b/c，可以令 strCurrentDirectory 为 "a/b/c"，strPattern 为 ""；也可以令 strCurrentDirectory 为 "a/b"，strPattern 为 "c"。
+        //      strPattern  匹配模式。例如 test.txt，或者 test*.txt 等
         // return:
         //      -1  出错
         //      其他  实际删除的文件和目录个数。若 strError 中返回了值，也表示出错

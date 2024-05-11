@@ -1511,6 +1511,16 @@ namespace dp2rms
                         MessageBox.Show(this, "目前暂不支持跨服务器情况下的资源复制。本记录中原有的已上载资源，在另存到目标库的时丢失（为空），请注意保存完后手动上载。");
                         goto SKIPCOPYRECORD;
                     }
+
+                    /*
+                    // 2024/4/28
+                    string strMergeStyle = "";
+                    if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.159") < 0)
+                        strMergeStyle = "file_reserve_source";
+                    else
+                        strMergeStyle = "";
+                    */
+
                     // 复制记录
                     // return:
                     //		-1	出错。错误信息在strError中
@@ -1518,6 +1528,8 @@ namespace dp2rms
                     nRet = channel.DoCopyRecord(respath_old.Path,
                         respath.Path,
                         false,  // bool bDeleteOriginRecord,
+                        "",/* 3.159 以后用法 */ // "file_reserve_source",  // 2024/4/28
+                        out _,
                         out baOutputTimeStamp,
                         out strOutputPath,
                         out strError);

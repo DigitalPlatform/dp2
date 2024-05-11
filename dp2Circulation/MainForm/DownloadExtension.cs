@@ -483,7 +483,8 @@ namespace dp2Circulation
             foreach (DownloadFileInfo info in fileinfos)
             {
                 string filename = info.ServerPath;
-                string strTargetPath = Path.Combine(strOutputFolder, Path.GetFileName(filename));
+
+                string strTargetPath = PathCombine(strOutputFolder, PathGetFileName(filename));
                 info.LocalPath = strTargetPath;
 
                 // all_target_filenames.Add(strTargetPath);
@@ -911,7 +912,7 @@ namespace dp2Circulation
         {
             string strError = "";
 
-            string strExt = Path.GetExtension(strPath);
+            string strExt = Path.GetExtension(strPath?.Replace("<kernel>", ""));
             if (strExt == ".~state")
             {
                 strError = "状态文件是一种临时文件，不支持直接下载";
@@ -1206,14 +1207,14 @@ namespace dp2Circulation
                 {
                     string strPath = info.ServerPath;
 
-                    string strExt = Path.GetExtension(strPath);
+                    string strExt = Path.GetExtension(strPath?.Replace("<kernel>", ""));
                     if (strExt == ".~state")
                     {
                         strError = "状态文件是一种临时文件，不支持直接下载";
                         return -1;
                     }
 
-                    string strTargetPath = Path.Combine(strOutputFolder, Path.GetFileName(strPath));
+                    string strTargetPath = PathCombine(strOutputFolder, PathGetFileName(strPath));
 
                     string strTargetTempPath = DynamicDownloader.GetTempFileName(strTargetPath);
 
@@ -1864,98 +1865,106 @@ namespace dp2Circulation
             _ = Task.Factory.StartNew(() =>
             {
                 string strError = "";
-                foreach (string localfilename in e.SourceFileNames)
+                try
                 {
-                    if (stop.IsStopped)
+                    foreach (string localfilename in e.SourceFileNames)
                     {
-                        strError = "用户中断";
-                        dlg.SetText(strError);
-                        goto ERROR1;
-                    }
+                        if (stop.IsStopped)
+                        {
+                            strError = "用户中断";
+                            dlg.SetText(strError);
+                            goto ERROR1;
+                        }
 
-                    string strTargetPath = "";
-                    // 2022/6/6
-                    // 感叹号要特殊处理
-                    if (e.TargetFolder == "!")
-                        strTargetPath = "!" + Path.GetFileName(localfilename).Replace("\\", "/");
-                    else
-                        strTargetPath = Path.Combine(e.TargetFolder, Path.GetFileName(localfilename)).Replace("\\", "/");
-                    // channel.UploadResChunkSize = nChunkSize;
+                        string strTargetPath = "";
+                        // 2022/6/6
+                        // 感叹号要特殊处理
+                        if (e.TargetFolder == "!")
+                            strTargetPath = "!" + Path.GetFileName(localfilename).Replace("\\", "/");
+                        else
+                            strTargetPath = PathCombine(e.TargetFolder, Path.GetFileName(localfilename)).Replace("\\", "/");
+                        // channel.UploadResChunkSize = nChunkSize;
+
+                        this.Invoke((Action)(() =>
+                        {
+                            dlg.Text = "正在上传 " + strTargetPath;
+                            dlg.SourceFilePath = localfilename;
+                            dlg.TargetFilePath = strTargetPath;
+                        }));
+
+                        bool _hide_dialog = false;
+                        int _hide_dialog_count = 0;
+
+                        int nRet = channel.UploadObject(
+                    stop,
+                    localfilename,
+                    strTargetPath,
+                    "_checkMD5," + ((StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.120") >= 0) ? "gzip" : ""),
+                    null,   // timestamp,
+                    true,
+                    true,
+                    (c, m, buttons, sec) =>
+                    {
+                        DialogResult result = DialogResult.Yes;
+                        if (_hide_dialog == false)
+                        {
+                            MessageBoxButtons v = MessageBoxButtons.YesNoCancel;
+                            if (buttons.Length == 2)
+                                v = MessageBoxButtons.YesNo;
+                            result = MessageDialog.Show(this,
+                        m,
+                        v,
+                        MessageBoxDefaultButton.Button1,
+                        "此后不再出现本对话框",
+                        ref _hide_dialog,
+                        buttons,    // new string[] { "重试", "中断" },
+                        sec);
+                            _hide_dialog_count = 0;
+                        }
+                        else
+                        {
+                            _hide_dialog_count++;
+                            if (_hide_dialog_count > 10)
+                                _hide_dialog = false;
+                        }
+
+                        if (result == DialogResult.Yes)
+                            return buttons[0];
+                        else if (result == DialogResult.No)
+                            return buttons[1];
+                        return buttons[2];
+                    },
+                    out byte[] temp_timestamp,
+                    out strError);
+                        if (nRet == -1)
+                        {
+                            strError = $"上传 '{localfilename}' --> '{strTargetPath}' 时出错: {strError}";
+                            dlg.SetText(strError);
+                            goto ERROR1;
+                        }
+                    }
 
                     this.Invoke((Action)(() =>
                     {
-                        dlg.Text = "正在上传 " + strTargetPath;
-                        dlg.SourceFilePath = localfilename;
-                        dlg.TargetFilePath = strTargetPath;
+                        e.FuncEnd?.Invoke(false);
                     }));
-
-                    bool _hide_dialog = false;
-                    int _hide_dialog_count = 0;
-
-                    int nRet = channel.UploadObject(
-                stop,
-                localfilename,
-                strTargetPath,
-                "_checkMD5," + ((StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.120") >= 0) ? "gzip" : ""),
-                null,   // timestamp,
-                true,
-                true,
-                (c, m, buttons, sec) =>
-                {
-                    DialogResult result = DialogResult.Yes;
-                    if (_hide_dialog == false)
+                    if (channel != null)
                     {
-                        MessageBoxButtons v = MessageBoxButtons.YesNoCancel;
-                        if (buttons.Length == 2)
-                            v = MessageBoxButtons.YesNo;
-                        result = MessageDialog.Show(this,
-                    m,
-                    v,
-                    MessageBoxDefaultButton.Button1,
-                    "此后不再出现本对话框",
-                    ref _hide_dialog,
-                    buttons,    // new string[] { "重试", "中断" },
-                    sec);
-                        _hide_dialog_count = 0;
+                        channel.Timeout = old_timeout;
+                        this.ReturnChannel(channel);
+                        channel = null;
                     }
-                    else
+                    this.Invoke((Action)(() =>
                     {
-                        _hide_dialog_count++;
-                        if (_hide_dialog_count > 10)
-                            _hide_dialog = false;
-                    }
-
-                    if (result == DialogResult.Yes)
-                        return buttons[0];
-                    else if (result == DialogResult.No)
-                        return buttons[1];
-                    return buttons[2];
-                },
-                out byte[] temp_timestamp,
-                out strError);
-                    if (nRet == -1)
-                    {
-                        strError = $"上传 '{localfilename}' --> '{strTargetPath}' 时出错: {strError}";
-                        dlg.SetText(strError);
-                        goto ERROR1;
-                    }
+                        dlg.Close();
+                    }));
+                    return;
                 }
-
-                this.Invoke((Action)(() =>
+                catch (Exception ex)
                 {
-                    e.FuncEnd?.Invoke(false);
-                }));
-                if (channel != null)
-                {
-                    channel.Timeout = old_timeout;
-                    this.ReturnChannel(channel);
-                    channel = null;
+                    strError = $"上传过程出现异常: {ex.Message}";
+                    goto ERROR1;
                 }
-                this.Invoke((Action)(() =>
-                {
-                    dlg.Close();
-                }));
-                return;
             ERROR1:
                 this.Invoke((Action)(() =>
                 {
@@ -1977,6 +1986,30 @@ CancellationToken.None,
 TaskCreationOptions.LongRunning,
 TaskScheduler.Default);
 
+        }
+
+        // 2024/5/11
+        // 能处理 <kernel> 的 Path.Combine
+        string PathCombine(string path, string name)
+        {
+            if (path.StartsWith("<kernel>"))
+            {
+                path = path.Replace("<kernel>", "(folder)");
+                return Path.Combine(path, name).Replace("(folder)", "<kernel>");
+            }
+            return Path.Combine(path, name);
+        }
+
+        // 2024/5/11
+        // 能处理 <kernel> 的 Path.GetFileName()
+        string PathGetFileName(string path)
+        {
+            if (path.StartsWith("<kernel>"))
+            {
+                path = path.Replace("<kernel>", "(folder)");
+                return Path.GetFileName(path).Replace("(folder)", "<kernel>");
+            }
+            return Path.GetFileName(path);
         }
 
         #endregion

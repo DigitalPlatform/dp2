@@ -7719,6 +7719,13 @@ out string strError)
                     }
                     else
                     {
+                        // 2024/4/28
+                        string strMergeStyle = "";
+                        if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.159") < 0)
+                            strMergeStyle = "file_reserve_source";
+                        else
+                            strMergeStyle = "";
+
                         // result.Value:
                         //      -1  出错
                         //      0   成功，没有警告信息。
@@ -7732,7 +7739,7 @@ out string strError)
                             null,    // this.BiblioTimestamp,
                             dlg.RecPath,
                             null,   // strXml,
-                            "file_reserve_source",  // 2017/4/19
+                            strMergeStyle,  // "file_reserve_source",  // 2017/4/19
                             out strOutputBiblio,
                             out strOutputBiblioRecPath,
                             out baOutputTimestamp,

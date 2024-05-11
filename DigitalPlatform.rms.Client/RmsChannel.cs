@@ -1845,6 +1845,7 @@ namespace DigitalPlatform.rms.Client
         }
 
         // 包装后的版本
+        // 注意这个版本 strMergeStyle 为隐含值，容易导致误用
         public int DoCopyRecord(string strOriginRecordPath,
     string strTargetRecordPath,
     bool bDeleteOriginRecord,
@@ -1856,7 +1857,7 @@ namespace DigitalPlatform.rms.Client
             return DoCopyRecord(strOriginRecordPath,
                 strTargetRecordPath,
                 bDeleteOriginRecord,
-                "",
+                "file_reserve_source",  // 2024/4/28 增加 file_reserve_source。此前的版本这里为 ""，会导致复制到目标记录丢失了源记录中的对象 file 元素
                 out strIdChangeList,
                 out baOutputTimeStamp,
                 out strOutputPath,

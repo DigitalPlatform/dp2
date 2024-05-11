@@ -923,6 +923,7 @@ namespace DigitalPlatform.LibraryServer
             string strOldPublishTime,
              * */
             XmlDocument domOldRec,
+            string strStyle,    // 2024/5/10 增加
             bool bForce,
             bool bSimulate,
             ref XmlDocument domOperLog,
@@ -1161,47 +1162,51 @@ namespace DigitalPlatform.LibraryServer
 
             // 比较时间戳
             // 观察时间戳是否发生变化
-            nRet = ByteArray.Compare(info.OldTimestamp, exist_timestamp);
-            if (nRet != 0)
+            // 2024/5/10 增加 ignorechecktimestamp 判断
+            if (StringUtil.IsInList("ignorechecktimestamp", strStyle) == false)
             {
-                // 2008/10/19
-                if (bForce == true)
-                {
-                    error = new EntityInfo(info);
-                    // error.NewTimestamp = exist_timestamp;   // 让前端知道库中记录实际上发生过变化
-                    error.OldTimestamp = exist_timestamp;   // 2023/2/24 让前端知道库中记录实际上发生过变化
-                    error.ErrorInfo = "数据库中即将删除的册记录已经发生了变化，请重新装载、仔细核对后再行删除。";
-                    error.ErrorCode = ErrorCodeValue.TimestampMismatch;
-                    ErrorInfos.Add(error);
-                    return -1;
-                }
-
-                // 如果前端给出了旧记录，就有和库中记录进行比较的基础
-                if (String.IsNullOrEmpty(info.OldRecord) == false)
-                {
-                    // 比较两个记录, 看看和事项要害信息有关的字段是否发生了变化
-                    // return:
-                    //      0   没有变化
-                    //      1   有变化
-                    nRet = IsItemInfoChanged(domExist,
-                        domOldRec);
-                }
-                else
-                    nRet = 1;   // 2023/3/23
-
+                nRet = ByteArray.Compare(info.OldTimestamp, exist_timestamp);
                 if (nRet != 0)
                 {
-                    error = new EntityInfo(info);
-                    // error.NewTimestamp = exist_timestamp;   // 让前端知道库中记录实际上发生过变化
-                    error.OldTimestamp = exist_timestamp;   // 2023/2/24 让前端知道库中记录实际上发生过变化
-                    error.ErrorInfo = "数据库中即将删除的" + this.ItemName + "记录已经发生了变化，请重新装载、仔细核对后再行删除。";
-                    error.ErrorCode = ErrorCodeValue.TimestampMismatch;
-                    ErrorInfos.Add(error);
-                    return -1;
-                }
+                    // 2008/10/19
+                    if (bForce == true)
+                    {
+                        error = new EntityInfo(info);
+                        // error.NewTimestamp = exist_timestamp;   // 让前端知道库中记录实际上发生过变化
+                        error.OldTimestamp = exist_timestamp;   // 2023/2/24 让前端知道库中记录实际上发生过变化
+                        error.ErrorInfo = "数据库中即将删除的册记录已经发生了变化，请重新装载、仔细核对后再行删除。";
+                        error.ErrorCode = ErrorCodeValue.TimestampMismatch;
+                        ErrorInfos.Add(error);
+                        return -1;
+                    }
 
-                info.OldTimestamp = exist_timestamp;
-                info.NewTimestamp = exist_timestamp;
+                    // 如果前端给出了旧记录，就有和库中记录进行比较的基础
+                    if (String.IsNullOrEmpty(info.OldRecord) == false)
+                    {
+                        // 比较两个记录, 看看和事项要害信息有关的字段是否发生了变化
+                        // return:
+                        //      0   没有变化
+                        //      1   有变化
+                        nRet = IsItemInfoChanged(domExist,
+                            domOldRec);
+                    }
+                    else
+                        nRet = 1;   // 2023/3/23
+
+                    if (nRet != 0)
+                    {
+                        error = new EntityInfo(info);
+                        // error.NewTimestamp = exist_timestamp;   // 让前端知道库中记录实际上发生过变化
+                        error.OldTimestamp = exist_timestamp;   // 2023/2/24 让前端知道库中记录实际上发生过变化
+                        error.ErrorInfo = "数据库中即将删除的" + this.ItemName + "记录已经发生了变化，请重新装载、仔细核对后再行删除。";
+                        error.ErrorCode = ErrorCodeValue.TimestampMismatch;
+                        ErrorInfos.Add(error);
+                        return -1;
+                    }
+
+                    info.OldTimestamp = exist_timestamp;
+                    info.NewTimestamp = exist_timestamp;
+                }
             }
 
             byte[] output_timestamp = null;
@@ -1407,48 +1412,52 @@ namespace DigitalPlatform.LibraryServer
             }
 
             // 观察时间戳是否发生变化
-            nRet = ByteArray.Compare(info.OldTimestamp, exist_source_timestamp);
-            if (nRet != 0)
+            // 2024/5/10 增加 ignorechecktimestamp 判断
+            if (StringUtil.IsInList("ignorechecktimestamp", info.Style) == false)
             {
-                // 时间戳不相等了
-                // 需要把info.OldRecord和strExistXml进行比较，看看和事项有关的元素（要害元素）值是否发生了变化。
-                // 如果这些要害元素并未发生变化，就继续进行合并、覆盖保存操作
-
-                XmlDocument domOld = new XmlDocument();
-
-                try
+                nRet = ByteArray.Compare(info.OldTimestamp, exist_source_timestamp);
+                if (nRet != 0)
                 {
-                    domOld.LoadXml(info.OldRecord);
-                }
-                catch (Exception ex)
-                {
-                    strError = "info.OldRecord装载进入DOM时发生错误: " + ex.Message;
-                    goto ERROR1;
-                }
+                    // 时间戳不相等了
+                    // 需要把info.OldRecord和strExistXml进行比较，看看和事项有关的元素（要害元素）值是否发生了变化。
+                    // 如果这些要害元素并未发生变化，就继续进行合并、覆盖保存操作
 
-                // 比较两个记录, 看看和事项有关的要害字段是否发生了变化
-                // return:
-                //      0   没有变化
-                //      1   有变化
-                nRet = IsItemInfoChanged(domOld,
-                    domSourceExist);
-                if (nRet == 1)
-                {
-                    error = new EntityInfo(info);
-                    // 错误信息中, 返回了修改过的原记录和新时间戳
-                    error.OldRecord = strExistSourceXml;
-                    error.OldTimestamp = exist_source_timestamp;
+                    XmlDocument domOld = new XmlDocument();
 
-                    if (bExist == false)
-                        error.ErrorInfo = "移动操作发生错误: 数据库中的原记录 (路径为'" + info.OldRecPath + "') 已被删除。";
-                    else
-                        error.ErrorInfo = "移动操作发生错误: 数据库中的原记录 (路径为'" + info.OldRecPath + "') 已发生过修改";
-                    error.ErrorCode = ErrorCodeValue.TimestampMismatch;
-                    ErrorInfos.Add(error);
-                    return -1;
+                    try
+                    {
+                        domOld.LoadXml(info.OldRecord);
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "info.OldRecord装载进入DOM时发生错误: " + ex.Message;
+                        goto ERROR1;
+                    }
+
+                    // 比较两个记录, 看看和事项有关的要害字段是否发生了变化
+                    // return:
+                    //      0   没有变化
+                    //      1   有变化
+                    nRet = IsItemInfoChanged(domOld,
+                        domSourceExist);
+                    if (nRet == 1)
+                    {
+                        error = new EntityInfo(info);
+                        // 错误信息中, 返回了修改过的原记录和新时间戳
+                        error.OldRecord = strExistSourceXml;
+                        error.OldTimestamp = exist_source_timestamp;
+
+                        if (bExist == false)
+                            error.ErrorInfo = "移动操作发生错误: 数据库中的原记录 (路径为'" + info.OldRecPath + "') 已被删除。";
+                        else
+                            error.ErrorInfo = "移动操作发生错误: 数据库中的原记录 (路径为'" + info.OldRecPath + "') 已发生过修改";
+                        error.ErrorCode = ErrorCodeValue.TimestampMismatch;
+                        ErrorInfos.Add(error);
+                        return -1;
+                    }
+
+                    // exist_source_timestamp此时已经反映了库中被修改后的记录的时间戳
                 }
-
-                // exist_source_timestamp此时已经反映了库中被修改后的记录的时间戳
             }
 
             // 2011/2/11
@@ -1522,7 +1531,7 @@ out strError);
             lRet = channel.DoCopyRecord(info.OldRecPath,
                 info.NewRecPath,
                 true,   // bDeleteSourceRecord
-                bSimulate ? "simulate" : "",
+                (bSimulate ? "simulate" : "") + ",file_reserve_source",
                 out string strIdChangeList,
                 out byte[] output_timestamp,
                 out strOutputPath,
@@ -1571,12 +1580,12 @@ out strError);
                 info.NewRecPath = strOutputPath;    // 兑现保存的位置，因为可能有追加形式的路径
 
                 DomUtil.SetElementText(domOperLog.DocumentElement,
-                    "action", 
+                    "action",
                     "move");
 
                 // 新记录
                 XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
-                    "record", 
+                    "record",
                     strNewXml);
                 DomUtil.SetAttr(node, "recPath", info.NewRecPath);
 
@@ -1719,57 +1728,61 @@ out strError);
             }
 
             // 观察时间戳是否发生变化
-            nRet = ByteArray.Compare(info.OldTimestamp, exist_timestamp);
-            if (nRet != 0)
+            // 2024/5/10 增加 ignorechecktimestamp 判断
+            if (StringUtil.IsInList("ignorechecktimestamp", info.Style) == false)
             {
-                // 时间戳不相等了
-                // 需要把info.OldRecord和strExistXml进行比较，看看和业务有关的元素（要害元素）值是否发生了变化。
-                // 如果这些要害元素并未发生变化，就继续进行合并、覆盖保存操作
-
-                if (string.IsNullOrEmpty(info.OldRecord) == false)
+                nRet = ByteArray.Compare(info.OldTimestamp, exist_timestamp);
+                if (nRet != 0)
                 {
-                    XmlDocument domOld = new XmlDocument();
+                    // 时间戳不相等了
+                    // 需要把info.OldRecord和strExistXml进行比较，看看和业务有关的元素（要害元素）值是否发生了变化。
+                    // 如果这些要害元素并未发生变化，就继续进行合并、覆盖保存操作
 
-                    try
+                    if (string.IsNullOrEmpty(info.OldRecord) == false)
                     {
-                        domOld.LoadXml(info.OldRecord);
-                    }
-                    catch (Exception ex)
-                    {
-                        strError = "(时间戳不匹配时)info.OldRecord装载进入DOM时发生错误: " + ex.Message;
-                        goto ERROR1;
-                    }
+                        XmlDocument domOld = new XmlDocument();
 
-                    if (bForce == false)
-                    {
-                        // 比较两个记录, 看看和事项有关的字段是否发生了变化
-                        // return:
-                        //      0   没有变化
-                        //      1   有变化
-                        nRet = IsItemInfoChanged(domOld,
-                            domExist);
+                        try
+                        {
+                            domOld.LoadXml(info.OldRecord);
+                        }
+                        catch (Exception ex)
+                        {
+                            strError = "(时间戳不匹配时)info.OldRecord装载进入DOM时发生错误: " + ex.Message;
+                            goto ERROR1;
+                        }
+
+                        if (bForce == false)
+                        {
+                            // 比较两个记录, 看看和事项有关的字段是否发生了变化
+                            // return:
+                            //      0   没有变化
+                            //      1   有变化
+                            nRet = IsItemInfoChanged(domOld,
+                                domExist);
+                        }
                     }
-                }
-                else
-                    nRet = 1;   // 2023/3/23
-
-                if (nRet != 0 || bForce == true)    // 2008/10/19
-                {
-                    error = new EntityInfo(info);
-                    // 错误信息中, 返回了修改过的原记录和新时间戳
-                    error.OldRecord = strExistXml;
-                    error.OldTimestamp = exist_timestamp;
-
-                    if (bExist == false)
-                        error.ErrorInfo = "保存操作发生错误: 数据库中的原记录 (路径为'" + LibraryApplication.GetOldRecPath(info) + "') 已被删除。";
                     else
-                        error.ErrorInfo = "保存操作发生错误: 数据库中的原记录 (路径为'" + LibraryApplication.GetOldRecPath(info) + "') 已发生过修改";
-                    error.ErrorCode = ErrorCodeValue.TimestampMismatch;
-                    ErrorInfos.Add(error);
-                    return -1;
-                }
+                        nRet = 1;   // 2023/3/23
 
-                // exist_timestamp此时已经反映了库中被修改后的记录的时间戳
+                    if (nRet != 0 || bForce == true)    // 2008/10/19
+                    {
+                        error = new EntityInfo(info);
+                        // 错误信息中, 返回了修改过的原记录和新时间戳
+                        error.OldRecord = strExistXml;
+                        error.OldTimestamp = exist_timestamp;
+
+                        if (bExist == false)
+                            error.ErrorInfo = "保存操作发生错误: 数据库中的原记录 (路径为'" + LibraryApplication.GetOldRecPath(info) + "') 已被删除。";
+                        else
+                            error.ErrorInfo = "保存操作发生错误: 数据库中的原记录 (路径为'" + LibraryApplication.GetOldRecPath(info) + "') 已发生过修改";
+                        error.ErrorCode = ErrorCodeValue.TimestampMismatch;
+                        ErrorInfos.Add(error);
+                        return -1;
+                    }
+
+                    // exist_timestamp此时已经反映了库中被修改后的记录的时间戳
+                }
             }
 
             string part_type = "";
@@ -1897,7 +1910,7 @@ out strError);
             else // 成功
             {
                 DomUtil.SetElementText(domOperLog.DocumentElement,
-                    "action", 
+                    "action",
                     "change");
 
                 // 新记录
@@ -1910,7 +1923,7 @@ out strError);
                 // 旧记录
                 node = DomUtil.SetElementText(domOperLog.DocumentElement,
                     "oldRecord", strExistXml);
-                DomUtil.SetAttr(node, "recPath", info.OldRecPath);
+                DomUtil.SetAttr(node, "recPath", info.NewRecPath/*info.OldRecPath*/);
 
                 // 保存成功，需要返回信息元素。因为需要返回新的时间戳
                 error = new EntityInfo(info);
@@ -2797,6 +2810,7 @@ out strError);
                             info,
                             oldLocateParam,
                             domOldRec,
+                            strStyle,
                             bForce,
                             bSimulate,
                             ref domOperLog,
@@ -3629,6 +3643,7 @@ strError);
         // 复制属于同一书目记录的全部实体记录
         // parameters:
         //      strAction   copy / move
+        //      strTargetBiblioRecPath  目标书目记录的路径。如果为空，表示不进行拷贝，但注意此种情况叠加 strAction 为 "move" 时依然要删除源下级记录
         // return:
         //      -2  目标实体库不存在，无法进行复制或者删除
         //      -1  error
@@ -3657,92 +3672,162 @@ strError);
 
             // 获得目标书目库下属的实体库名
             string strTargetItemDbName = "";
-            string strTargetBiblioDbName = ResPath.GetDbName(strTargetBiblioRecPath);
-            // return:
-            //      -1  出错
-            //      0   没有找到
-            //      1   找到
-            int nRet = this.GetItemDbName(strTargetBiblioDbName,
-                out strTargetItemDbName,
-                out strError);
-            if (nRet == 0 || string.IsNullOrEmpty(strTargetItemDbName) == true)
+            string strParentID = "";
+            if (string.IsNullOrEmpty(strTargetBiblioRecPath) == false)
             {
-                return -2;   // 目标实体库不存在
-            }
+                string strTargetBiblioDbName = ResPath.GetDbName(strTargetBiblioRecPath);
+                // return:
+                //      -1  出错
+                //      0   没有找到
+                //      1   找到
+                int nRet = this.GetItemDbName(strTargetBiblioDbName,
+                    out strTargetItemDbName,
+                    out strError);
+                if (nRet == 0 || string.IsNullOrEmpty(strTargetItemDbName) == true)
+                {
+                    return -2;   // 目标实体库不存在
+                }
 
-            string strParentID = ResPath.GetRecordId(strTargetBiblioRecPath);
-            if (string.IsNullOrEmpty(strParentID) == true)
-            {
-                strError = "目标书目记录路径 '" + strTargetBiblioRecPath + "' 不正确，无法获得记录号";
-                return -1;
+                strParentID = ResPath.GetRecordId(strTargetBiblioRecPath);
+                if (string.IsNullOrEmpty(strParentID) == true)
+                {
+                    strError = "目标书目记录路径 '" + strTargetBiblioRecPath + "' 不正确，无法获得记录号";
+                    return -1;
+                }
             }
 
             List<string> newrecordpaths = new List<string>();
             List<string> oldrecordpaths = new List<string>();
-            for (int i = 0; i < entityinfos.Count; i++)
+            List<string> parentids = new List<string>();
+            List<string> oldrecords = new List<string>();
+
+            // for (int i = 0; i < entityinfos.Count; i++)
+            foreach (DeleteEntityInfo info in entityinfos)
             {
-                DeleteEntityInfo info = entityinfos[i];
+                // DeleteEntityInfo info = entityinfos[i];
 
                 byte[] output_timestamp = null;
                 string strOutputRecPath = "";
 
+                // string strNewBarcode = "";  // 复制中修改后的册条码号
+                string strNewRefID = "";    // 复制中修改后的参考 ID(2024/4/30)
+
                 // this.EntityLocks.LockForWrite(info.ItemBarcode);
                 try
                 {
-                    XmlDocument dom = new XmlDocument();
-                    try
+                    // 2024/4/20
+                    // 不复制
+                    if (string.IsNullOrEmpty(strTargetBiblioRecPath))
                     {
-                        dom.LoadXml(info.OldRecord);
-                    }
-                    catch (Exception ex)
-                    {
-                        strError = "记录 '" + info.RecPath + "' 装入XMLDOM发生错误: " + ex.Message;
-                        goto ERROR1;
-                    }
-                    DomUtil.SetElementText(dom.DocumentElement,
-                        "parent",
-                        strParentID);
+                        // 要删除源记录
+                        if (strAction == "move")
+                        {
+                            long ret = channel.DoDeleteRes(info.RecPath,
+                                null,
+                                "ignorechecktimestamp",
+                                out _,
+                                out strError);
+                            if (ret == -1)
+                            {
+                                if (channel.IsNotFound())
+                                    continue;
+                                strError = "删除实体记录 '" + info.RecPath + "' 时发生错误: " + strError;
+                                goto ERROR1;
+                            }
 
-                    // 复制的情况
-                    if (strAction == "copy")
+                            oldrecordpaths.Add(info.RecPath);
+                            newrecordpaths.Add("");
+                            oldrecords.Add(info.OldRecord);
+                        }
+                    }
+                    else
                     {
-                        // 避免refID重复
+                        // 2024/4/29
+                        if (string.IsNullOrEmpty(strParentID))
+                            throw new Exception("此处 strParentID 不应为空");
+                        if (string.IsNullOrEmpty(strTargetItemDbName))
+                            throw new Exception("此处 strTargetItemDbName 不应为空");
+
+                        XmlDocument dom = new XmlDocument();
+                        try
+                        {
+                            dom.LoadXml(info.OldRecord);
+                        }
+                        catch (Exception ex)
+                        {
+                            strError = "记录 '" + info.RecPath + "' 装入XMLDOM发生错误: " + ex.Message;
+                            goto ERROR1;
+                        }
                         DomUtil.SetElementText(dom.DocumentElement,
-                            "refID",
-                            null);
+                            "parent",
+                            strParentID);
+
+                        // 复制的情况
+                        if (strAction == "copy")
+                        {
+                            // 2024/5/1
+                            string strOldRefID = DomUtil.GetElementText(dom.DocumentElement,
+                                "refID");
+                            // 把原有的参考 ID 保留在下级记录的 oldRefID 元素文本中
+                            DomUtil.SetElementText(dom.DocumentElement,
+                                "oldRefID",
+                                strOldRefID);
+
+                            // 2024/5/1
+                            // 修改参考 ID，避免其在复制后发生重复
+                            // 注: 无论旧记录内容中有没有 refID 元素，都要覆盖(新增)一个 refID 元素内容
+                            {
+                                strNewRefID = ShortGuid.NewGuid().ToString().ToUpper();
+                                DomUtil.SetElementText(dom.DocumentElement,
+                                    "refID",
+                                    strNewRefID);
+                            }
+
+                            /*
+                            // 避免refID重复
+                            DomUtil.SetElementText(dom.DocumentElement,
+                                "refID",
+                                null);
+                            */
+                        }
+
+                        long lRet = channel.DoCopyRecord(info.RecPath,
+                             strTargetItemDbName + "/?",
+                             strAction == "move" ? true : false,   // bDeleteSourceRecord
+                                "file_reserve_source",  // 2024/4/28
+                                out _,
+                             out output_timestamp,
+                             out strOutputRecPath,
+                             out strError);
+                        if (lRet == -1)
+                        {
+                            if (channel.IsNotFound())
+                                continue;
+                            strError = "复制" + this.ItemName + "记录 '" + info.RecPath + "' 时发生错误: " + strError;
+                            goto ERROR1;
+                        }
+
+                        // 2011/5/24
+                        // 修改xml记录。<parent>元素发生了变化
+                        byte[] baOutputTimestamp = null;
+                        string strOutputRecPath1 = "";
+                        lRet = channel.DoSaveTextRes(strOutputRecPath,
+                            dom.OuterXml,
+                            false,
+                            "content", // ,ignorechecktimestamp
+                            output_timestamp,
+                            out baOutputTimestamp,
+                            out strOutputRecPath1,
+                            out strError);
+                        if (lRet == -1)
+                            goto ERROR1;
+
+                        oldrecordpaths.Add(info.RecPath);
+                        newrecordpaths.Add(strOutputRecPath);
+                        parentids.Add(strParentID);
+                        if (strAction == "move")
+                            oldrecords.Add(info.OldRecord);
                     }
-
-                    long lRet = channel.DoCopyRecord(info.RecPath,
-                         strTargetItemDbName + "/?",
-                         strAction == "move" ? true : false,   // bDeleteSourceRecord
-                         out output_timestamp,
-                         out strOutputRecPath,
-                         out strError);
-                    if (lRet == -1)
-                    {
-                        if (channel.IsNotFound())
-                            continue;
-                        strError = "复制" + this.ItemName + "记录 '" + info.RecPath + "' 时发生错误: " + strError;
-                        goto ERROR1;
-                    }
-
-                    // 2011/5/24
-                    // 修改xml记录。<parent>元素发生了变化
-                    byte[] baOutputTimestamp = null;
-                    string strOutputRecPath1 = "";
-                    lRet = channel.DoSaveTextRes(strOutputRecPath,
-                        dom.OuterXml,
-                        false,
-                        "content", // ,ignorechecktimestamp
-                        output_timestamp,
-                        out baOutputTimestamp,
-                        out strOutputRecPath1,
-                        out strError);
-                    if (lRet == -1)
-                        goto ERROR1;
-
-                    oldrecordpaths.Add(info.RecPath);
-                    newrecordpaths.Add(strOutputRecPath);
                 }
                 finally
                 {
@@ -3758,7 +3843,14 @@ strError);
                     root.AppendChild(node);
 
                     DomUtil.SetAttr(node, "recPath", info.RecPath);
-                    DomUtil.SetAttr(node, "targetRecPath", strOutputRecPath);
+                    // 注: 如果是 move，并且 strTargetBiblioRecPath 为空，则日志记录中 record 元素没有 targetRecPath 属性
+                    //      此种情况表明是删除了源记录
+                    if (string.IsNullOrEmpty(strOutputRecPath) == false)
+                        DomUtil.SetAttr(node, "targetRecPath", strOutputRecPath);
+
+                    // 2024/4/30
+                    if (string.IsNullOrEmpty(strNewRefID) == false)
+                        DomUtil.SetAttr(node, "newRefID", strNewRefID);
                 }
 
                 nOperCount++;
@@ -3807,19 +3899,50 @@ strError);
                 string strWarning = "";
                 for (int i = 0; i < newrecordpaths.Count; i++)
                 {
+                    var oldrecordpath = oldrecordpaths[i];
+                    var newrecordpath = newrecordpaths[i];
+
                     byte[] output_timestamp = null;
-                    string strOutputRecPath = "";
-                    string strTempError = "";
-                    long lRet = channel.DoCopyRecord(newrecordpaths[i],
-         oldrecordpaths[i],
-         true,   // bDeleteSourceRecord
-         out output_timestamp,
-         out strOutputRecPath,
-         out strTempError);
-                    if (lRet == -1)
+
+                    if (string.IsNullOrEmpty(newrecordpath) == false
+    && string.IsNullOrEmpty(oldrecordpath) == false)
                     {
-                        strWarning += strTempError + ";";
+                        string strOutputRecPath = "";
+                        string strTempError = "";
+                        long lRet = channel.DoCopyRecord(newrecordpaths[i],
+                            oldrecordpaths[i],
+                            true,   // bDeleteSourceRecord
+                                "file_reserve_source",  // 2024/4/28
+                                out _,
+                            out output_timestamp,
+                            out strOutputRecPath,
+                            out strTempError);
+                        if (lRet == -1)
+                        {
+                            strWarning += strTempError + ";";
+                        }
                     }
+
+                    if (string.IsNullOrEmpty(oldrecords[i]) == false)
+                    {
+                        string style = "content";
+                        if (output_timestamp == null)
+                            style += ",ignorechecktimestamp";
+                        // 修改xml记录。<parent>元素发生了变化
+                        long lRet = channel.DoSaveTextRes(oldrecordpath,
+                            oldrecords[i],
+                            false,
+                            style,  // "content", // ,ignorechecktimestamp
+                            output_timestamp,
+                            out _,
+                            out _,
+                            out string strTempError);
+                        if (lRet == -1)
+                        {
+                            strWarning += strTempError + ";";
+                        }
+                    }
+
                 }
                 if (string.IsNullOrEmpty(strWarning) == false)
                     strError = strError + "。在Undo过程中，又遇到出错: " + strWarning;
@@ -3834,7 +3957,6 @@ strError);
         //      0   没有找到属于书目记录的任何实体记录，因此也就无从删除
         //      >0  实际删除的实体记录数
         public int DeleteBiblioChildItems(
-            // RmsChannelCollection Channels,
             RmsChannel channel,
             List<DeleteEntityInfo> entityinfos,
             XmlDocument domOperLog,

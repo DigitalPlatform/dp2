@@ -776,6 +776,44 @@ namespace DigitalPlatform.RFID
             return results;
         }
 
+        public static string GetUserElementName(int oid)
+        {
+            switch(oid)
+            {
+                case 3:
+                    return "所属馆标识 OwnerLibrary";
+                case 4:
+                    return "卷册信息 SetInformation";
+                    case 5:
+                    return "馆藏类别与状态 TypeOfUsage";
+                case 6:
+                    return "馆藏位置 ItemLocation";
+                case 11:
+                    return "馆际互借借入馆标识 ILL-BorrowingLibrary";
+                case 12:
+                    return "馆际互借事务号 ILL-BorrowingTransactionNumber";
+                case 14:
+                    return "备选的馆藏标识符(条码号) AlternativeItemIdentifier";
+                case 15: 
+                    return "临时馆藏位置 TemporaryItemLocation";
+                case 16: 
+                    return "主题 Subject";
+                case 24: 
+                    return "分馆标识 SubsidiaryOfAnOwnerLibrary";
+                case 26: 
+                    return "ISBN/ISSN";
+                case 27:
+                    return "备选项(数字平台计划用作 AOI)";
+                case 28:
+                case 29:
+                case 30:
+                case 31:
+                    return "备选项";
+            }
+
+            return $"暂未命名";
+        }
+
         public static byte[] EncodeUserElementContent(int oid, string content)
         {
             if (oid == 3)
@@ -1310,6 +1348,26 @@ namespace DigitalPlatform.RFID
                     return true;
                 return false;
             }
+
+            // 获得解释文字
+            public string GetDescription(byte[] epc_bank, byte[] user_bank)
+            {
+                StringBuilder text = new StringBuilder();
+                text.AppendLine("=== EPC Bank ===");
+                text.AppendLine($"Hex(十六进制内容):\t{ByteArray.GetHexTimeStampString(epc_bank)?.ToUpper()}");
+                text.AppendLine($"PC(协议控制字):\t{this.PC.ToString()}");
+                text.AppendLine($"高校联盟字段:\t{this.EpcInfo.ToString()}");
+                text.AppendLine("=== User Bank ===");
+                text.AppendLine($"Hex(十六进制内容):\t{ByteArray.GetHexTimeStampString(user_bank)?.ToUpper()}");
+                if (this.UserElements != null)
+                {
+                    foreach (var element in this.UserElements)
+                    {
+                        text.AppendLine($"{element.OID} {GaoxiaoUtility.GetUserElementName(element.OID)}:\t'{element.Content}'");
+                    }
+                }
+                return text.ToString();
+            }
         }
 
         // 解析标签信息。
@@ -1798,6 +1856,47 @@ A~F 未来使用
             return StringUtil.Unquote(nuetral, "{}");
         }
 
+        // 根据 EPC Bank 判断是不是“望湖洞庭”格式
+        public static bool IsWhdt(byte[] epc_bank)
+        {
+            var parse_result = GaoxiaoUtility.ParseTag(epc_bank, null, ""); // 注意，没有包含 checkUMI 表示不要检查 UMI 和 ContentParameters 是否具备之间的关系
+            if (parse_result.PC == null
+                || parse_result.EpcInfo == null)
+                return false;
+            var pc = parse_result.PC;
+            // 注: 望湖洞庭有一批标签没有 User Bank 内容，但 EPC 内容和先前的无异
+            if (/*pc.UMI == true
+                && */(pc.AFI == 0 || pc.AFI == 4)
+                && pc.XPC == false
+                && pc.ISO == false)
+            {
+
+            }
+            else
+                return false;
+
+            var epc_info = parse_result.EpcInfo;
+
+            // content parameter 16 24 28 30
+            var cp = new int[] { 16, 24, 28, 30 };
+            if (cp.SequenceEqual(epc_info.ContentParameters) == false)
+                return false;
+
+            if (epc_info.Reserve != 0)
+                return false;
+            /*
+            if (epc_info.Picking != 1 && epc_info.Picking != 0)
+                return false;
+            if (epc_info.Version != 5 && epc_info.Version != 1)
+                return false;
+            */
+            if (epc_info.EncodingType != 0)
+                return false;
+            return true;
+        }
+
+
+
 #if DEVELOPING
         // 将元素值从国标形态转换为高校标准
         public static ConvertResult ToGaoxiao(List<GaoxiaoUserElement> elements)
@@ -2026,10 +2125,10 @@ A~F 未来使用
 
         public override string ToString()
         {
-            return $"PII={PII},EncodingType={EncodingType},Version={Version},ContentParameters={ToString(ContentParameters)},Lending={Lending},Reserve={Reserve},Picking={Picking}";
+            return $"PII={PII},EncodingType={EncodingType},Version={Version},ContentParameters='{OidToString(ContentParameters)}',Lending={Lending},Reserve={Reserve},Picking={Picking}";
         }
 
-        static string ToString(int[] list)
+        static string OidToString(int[] list)
         {
             StringBuilder text = new StringBuilder();
             int i = 0;
@@ -2037,7 +2136,8 @@ A~F 未来使用
             {
                 if (i > 0)
                     text.Append(",");
-                text.Append(v);
+                text.Append($"{v}({GaoxiaoUtility.GetUserElementName(v)})");
+                // text.Append(v);
                 i++;
             }
 

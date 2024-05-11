@@ -524,6 +524,7 @@ namespace dp2SSL
             RfidManager.Base.Name = "RFID 中心";
             RfidManager.EnableBase2();
             RfidManager.Url = App.RfidUrl;
+            RfidTagList.OnlyReadEPC = App.OnlyReadEPC;
             // RfidManager.AntennaList = "1|2|3|4";    // TODO: 从 shelf.xml 中归纳出天线号范围
 
             RfidManager.SetError += RfidManager_SetError;
@@ -1533,6 +1534,17 @@ namespace dp2SSL
             get
             {
                 return WpfClientInfo.Config?.Get("global", "rfidUrl", "");
+            }
+        }
+
+        // 仅读取 EPC，加速超高频标签的读取
+        public static bool OnlyReadEPC
+        {
+            get
+            {
+                if (WpfClientInfo.Config == null)
+                    return false;
+                return WpfClientInfo.Config.GetBoolean("uhf", "onlyReadEPC", false);
             }
         }
 

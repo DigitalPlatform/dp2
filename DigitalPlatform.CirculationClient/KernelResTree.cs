@@ -15,6 +15,8 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Core;
 using System.Diagnostics;
+using DigitalPlatform.LibraryServer;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 namespace DigitalPlatform.CirculationClient
 {
@@ -579,9 +581,19 @@ namespace DigitalPlatform.CirculationClient
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("删除文件 [" + selected_file_nodes.Count + "] (&D)");
-            menuItem.Click += new System.EventHandler(this.menu_deleteFile);
-            if (selected_file_nodes.Count == 0)
+            List<TreeNode> selected_folder_or_file_nodes = GetCheckedNodes(null,
+    (node) =>
+    {
+        if (node.ImageIndex == RESTYPE_FILE
+            || node.ImageIndex == RESTYPE_FOLDER)
+            return true;
+        return false;
+    }
+);
+
+            menuItem = new MenuItem("删除目录或文件 [" + selected_folder_or_file_nodes.Count + "] (&D)");
+            menuItem.Click += new System.EventHandler(this.menu_deleteFolderOrFile);
+            if (selected_folder_or_file_nodes.Count == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
@@ -1018,7 +1030,7 @@ out string _);
             {
                 string strPath = GetNodePath(node);
 
-                string strExt = Path.GetExtension(strPath);
+                string strExt = Path.GetExtension(strPath?.Replace("<kernel>", ""));
                 if (strExt == ".~state")
                 {
                     strError = "不允许下载扩展名为 .~state 的状态文件 (" + strPath + ")";
@@ -1090,7 +1102,7 @@ out string _);
             {
                 string strPath = GetNodePath(node);
 
-                string strExt = Path.GetExtension(strPath);
+                string strExt = Path.GetExtension(strPath?.Replace("<kernel>", ""));
                 if (strExt == ".~state")
                 {
                     strError = "不允许查看扩展名为 .~state 的状态文件 (" + strPath + ")";
@@ -1158,16 +1170,25 @@ out string _);
         }
 
         // TODO: 如何限定 dp2library 2.115 以上才能使用此功能?
-        // 删除文件
-        void menu_deleteFile(object sender, System.EventArgs e)
+        // 删除选定的目录或文件
+        void menu_deleteFolderOrFile(object sender, System.EventArgs e)
         {
             string strError = "";
 
-            List<TreeNode> selected_file_nodes = GetCheckedFileNodes();
+            List<TreeNode> selected_nodes = GetCheckedNodes(null,
+                (node) =>
+                {
+                    if (node.ImageIndex == RESTYPE_FILE
+                        || node.ImageIndex == RESTYPE_FOLDER)
+                        return true;
+                    return false;
+                }
+            );
+            // GetCheckedFileNodes();
 
-            if (selected_file_nodes.Count == 0)
+            if (selected_nodes.Count == 0)
             {
-                strError = "尚未选择要删除的文件节点";
+                strError = "尚未选择要删除的目录或文件节点";
                 goto ERROR1;
             }
 
@@ -1180,11 +1201,12 @@ out string _);
 #endif
             List<int> path_types = new List<int>(); // 节点类型
             List<string> paths = new List<string>();
-            foreach (TreeNode node in selected_file_nodes)
+            foreach (TreeNode node in selected_nodes)
             {
                 string strPath = GetNodePath(node);
 
-                string strExt = Path.GetExtension(strPath);
+                // 注意 Path.GetExtension() 在遇到 "<kernel>" 时会抛出异常
+                string strExt = Path.GetExtension(strPath.Replace("<kernel>", ""));
                 if (strExt == ".~state")
                 {
                     strError = "不允许删除扩展名为 .~state 的状态文件";
@@ -1197,10 +1219,10 @@ out string _);
 
             string strNameList = StringUtil.MakePathList(paths);
             if (strNameList.Length > 1000)
-                strNameList = strNameList.Substring(0, 1000) + " ... 等 " + selected_file_nodes.Count + " 个文件";
+                strNameList = strNameList.Substring(0, 1000) + " ... 等 " + selected_nodes.Count + " 个文件";
 
             DialogResult result = MessageBox.Show(this,
-"确实要删除文件 " + strNameList + " ?",
+"确实要删除目录或文件 " + strNameList + " ?",
 "KernelResTree",
 MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,
@@ -1257,16 +1279,37 @@ MessageBoxDefaultButton.Button2);
                     string strCurrentDirectory = Path.GetDirectoryName(strPath);
                     string strFileName = Path.GetFileName(strPath);
                     */
+                    long nRet = 0;
+                    if (strCurrentDirectory.StartsWith(LibraryServerUtil.LOCAL_PREFIX))
+                    {
+                        nRet = channel.ListFile(
+    null,
+    "delete",
+    strCurrentDirectory,
+    strFileName,
+    0,
+    -1,
+    out infos,
+    out strError);
+                    }
+                    else
+                    {
+                        // 2024/5/8
+                        nRet = channel.WriteRes(
+                            null,
+                            strPath,
+                            null,
+                            0,
+                            null,
+                            null,
+                            "delete,ignorechecktimestamp",
+                            null,
+                            out _,
+                            out _,
+                            out strError);
+                    }
 
-                    long nRet = channel.ListFile(
-                        null,
-                        "delete",
-                        strCurrentDirectory,
-                        strFileName,
-                        0,
-                        -1,
-                        out infos,
-                        out strError);
+
                     if (nRet == -1)
                         goto ERROR1;
 
@@ -1291,7 +1334,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             // 刷新显示
-            List<TreeNode> parents = FindParentNodes(selected_file_nodes);
+            List<TreeNode> parents = FindParentNodes(selected_nodes);
             foreach (TreeNode node in parents)
             {
                 this.Fill(node);
@@ -1313,12 +1356,40 @@ MessageBoxDefaultButton.Button2);
                 strCurrentDirectory = Path.GetDirectoryName(path).Replace("(folder)", "!").Replace("\\", "/");
                 strFileName = Path.GetFileName(path);
             }
+            else if (strPath.StartsWith("<kernel>"))
+            {
+                string path = strPath.Replace("<kernel>", "(folder)/");
+                strCurrentDirectory = Path.GetDirectoryName(path).Replace("(folder)", "<kernel>").Replace("\\", "/");
+                strFileName = Path.GetFileName(path);
+            }
             else
             {
                 strCurrentDirectory = Path.GetDirectoryName(strPath).Replace("\\", "/");
                 strFileName = Path.GetFileName(strPath);
             }
         }
+
+#if REMOVED
+        // 可以避免抛出异常的 Path.GetDirectoryName() 替代版本
+        static string GetDirectoryName(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return text;
+            var replaced = text.Replace("<", "_").Replace(">", "_");
+            var result = Path.GetDirectoryName(replaced);
+            return text.Substring(0, result.Length);
+        }
+
+        // 可以避免抛出异常的 Path.GetDirectoryName() 替代版本
+        static string GetFileName(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return text;
+            var replaced = text.Replace("<", "_").Replace(">", "_");
+            var result = Path.GetFileName(replaced);
+            return text.Substring(text.Length - result.Length, result.Length);
+        }
+#endif
 
         // 获得共同的 parent fold nodes
         List<TreeNode> FindParentNodes(List<TreeNode> nodes)

@@ -719,10 +719,12 @@ unprocessed_element_names.Except(_auto_maintain_element_names)));
             bool remove_dup = true)
         {
             List<string> results = new List<string>();
-            foreach (XmlElement element in dom.DocumentElement.ChildNodes)
+            foreach (XmlNode node in dom.DocumentElement.ChildNodes)
             {
-                if (element == null || element.NodeType != XmlNodeType.Element)
+                if (node == null || node.NodeType != XmlNodeType.Element)
                     continue;
+
+                var element = node as XmlElement;
 
                 string name = GetMyName(element);
 
@@ -1202,6 +1204,7 @@ unprocessed_element_names.Except(_auto_maintain_element_names)));
             string strNewXml,
             string strOldXml,
             byte[] baOldTimestamp,
+            string strStyle,    // 2024/5/10 增加
             out string strExistingXml,
             out string strSavedXml,
             out string strSavedRecPath,
@@ -1503,6 +1506,16 @@ unprocessed_element_names.Except(_auto_maintain_element_names)));
                         goto ERROR1;
                     }
                 }
+            }
+
+            // 2024/5/10
+            // 检查路径是否严格符合元数据记录的形态
+            if (this.IsDatabaseMetadataPath(sessioninfo, strRecPath) == false)
+            {
+                result.Value = -1;
+                result.ErrorInfo = $"SetReaderInfo() 不允许操作元数据记录以外的其它类型资源 {strRecPath}";
+                result.ErrorCode = ErrorCode.AccessDenied;
+                return result;
             }
 
             if (strAction == "notifyOverdue"
@@ -2568,6 +2581,7 @@ strLibraryCode);    // 读者所在的馆代码
                         comment.ToString(),
                         important_fields,
                         strAction,
+                        strStyle,
                         bForce,
                         channel,
                         sessioninfo.RightsOrigin,
@@ -2669,6 +2683,7 @@ strLibraryCode);    // 读者所在的馆代码
                         strOldBarcode,
                         // strNewBarcode,
                         domOldRec,
+                        strStyle,
                         out strExistingXml,
                         ref baNewTimestamp,
                         ref domOperLog,
@@ -3113,6 +3128,7 @@ root, strLibraryCode);
             string strOldBarcode,
             // string strNewBarcode,
             XmlDocument domOldRec,
+            string strStyle,    // 2024/5/10
             out string strExistingRecord,
             ref byte[] baNewTimestamp,
             ref XmlDocument domOperLog,
@@ -3339,50 +3355,54 @@ root, strLibraryCode);
 
             // 比较时间戳
             // 观察时间戳是否发生变化
-            nRet = ByteArray.Compare(baOldTimestamp, exist_timestamp);
-            if (nRet != 0)
+            // 2024/5/10 增加 ignorechecktimestamp 判断
+            if (StringUtil.IsInList("ignorechecktimestamp", strStyle) == false)
             {
-                // 2008/5/29 
-                if (bForce == true)
-                {
-                    strError = "数据库中即将删除的读者记录已经发生了变化，请重新装载、仔细核对后再行删除。";
-                    kernel_errorcode = ErrorCodeValue.TimestampMismatch;
-                    library_errorcode = ErrorCode.TimestampMismatch;
-                    baNewTimestamp = exist_timestamp;   // 让前端知道库中记录实际上发生过变化
-                    goto ERROR1;
-                }
-
-                // 是否报错?
-                // 功能做的精细一点，需要比较strOldXml和strExistingXml中要害字段是否被改变了，如果没有改变，是不必报错的
-
-                // 如果前端给出了旧记录，就有和库中记录进行比较的基础
-                // if (String.IsNullOrEmpty(strOldXml) == false)
-                if (domOldRec != null && domOldRec.DocumentElement != null
-                    && domOldRec.DocumentElement.HasChildNodes)
-                {
-                    // 比较两个记录, 看看和读者静态信息有关的字段是否发生了变化
-                    // return:
-                    //      0   没有变化
-                    //      1   有变化
-                    nRet = IsReaderInfoChanged(
-                        element_names,
-                        domExist,
-                        domOldRec);
-                }
-                else
-                    nRet = 1;   // 2023/3/23
-
+                nRet = ByteArray.Compare(baOldTimestamp, exist_timestamp);
                 if (nRet != 0)
                 {
-                    strError = "数据库中即将删除的读者记录已经发生了变化，请重新装载、仔细核对后再行删除。";
-                    kernel_errorcode = ErrorCodeValue.TimestampMismatch;
-                    library_errorcode = ErrorCode.TimestampMismatch;    // TODO: 建议给一个专门的错误码表示“期间原记录已经被修改”
-                    baNewTimestamp = exist_timestamp;   // 让前端知道库中记录实际上发生过变化
-                    goto ERROR1;
-                }
+                    // 2008/5/29 
+                    if (bForce == true)
+                    {
+                        strError = "数据库中即将删除的读者记录已经发生了变化，请重新装载、仔细核对后再行删除。";
+                        kernel_errorcode = ErrorCodeValue.TimestampMismatch;
+                        library_errorcode = ErrorCode.TimestampMismatch;
+                        baNewTimestamp = exist_timestamp;   // 让前端知道库中记录实际上发生过变化
+                        goto ERROR1;
+                    }
 
-                baOldTimestamp = exist_timestamp;
-                baNewTimestamp = exist_timestamp;   // 让前端知道库中记录实际上发生过变化
+                    // 是否报错?
+                    // 功能做的精细一点，需要比较strOldXml和strExistingXml中要害字段是否被改变了，如果没有改变，是不必报错的
+
+                    // 如果前端给出了旧记录，就有和库中记录进行比较的基础
+                    // if (String.IsNullOrEmpty(strOldXml) == false)
+                    if (domOldRec != null && domOldRec.DocumentElement != null
+                        && domOldRec.DocumentElement.HasChildNodes)
+                    {
+                        // 比较两个记录, 看看和读者静态信息有关的字段是否发生了变化
+                        // return:
+                        //      0   没有变化
+                        //      1   有变化
+                        nRet = IsReaderInfoChanged(
+                            element_names,
+                            domExist,
+                            domOldRec);
+                    }
+                    else
+                        nRet = 1;   // 2023/3/23
+
+                    if (nRet != 0)
+                    {
+                        strError = "数据库中即将删除的读者记录已经发生了变化，请重新装载、仔细核对后再行删除。";
+                        kernel_errorcode = ErrorCodeValue.TimestampMismatch;
+                        library_errorcode = ErrorCode.TimestampMismatch;    // TODO: 建议给一个专门的错误码表示“期间原记录已经被修改”
+                        baNewTimestamp = exist_timestamp;   // 让前端知道库中记录实际上发生过变化
+                        goto ERROR1;
+                    }
+
+                    baOldTimestamp = exist_timestamp;
+                    baNewTimestamp = exist_timestamp;   // 让前端知道库中记录实际上发生过变化
+                }
             }
 
             // 2021/8/3
@@ -3515,6 +3535,7 @@ root, strLibraryCode);
         // parameters:
         //      element_names   元素名集合。包含允许修改的元素名。注意元素名要求是内部正规形态，不允许使用别名(例如 dprms.file 和 dprms:file 就是别名)
         //      importantFields 要重点关注是否兑现了修改的元素名列表。如果列表中的元素没有兑现修改，则 API 应该报错
+        //      strStyle        如果包含 ignorechecktimestamp，表示不检查时间戳
         //      library_errorcode   [out] 返回 dp2library 型错误码。注意，即便本函数没有返回 -1，library_errorcode 中也有可能返回有意义的错误码。
         //                      如果没有错误, library_errorcode 返回 ErrorCode.NoError
         // return:
@@ -3527,6 +3548,7 @@ root, strLibraryCode);
             string elementset_comment,
             string importantFields,
             string strAction,
+            string strStyle,    // 2024/5/10 增加
             bool bForce,
             RmsChannel channel,
             string rights,
@@ -4132,72 +4154,77 @@ root, strLibraryCode);
             }
 
             // 观察时间戳是否发生变化
-            nRet = ByteArray.Compare(baOldTimestamp, exist_timestamp);
-            if (exist_timestamp != null && nRet != 0)
+            // 2024/5/10 增加 ignorechecktimestamp 判断
+            if (StringUtil.IsInList("ignorechecktimestamp", strStyle) == false)
             {
-                if (bForce == true)
+                nRet = ByteArray.Compare(baOldTimestamp, exist_timestamp);
+                if (exist_timestamp != null && nRet != 0)
                 {
-                    // 2021/8/27
-                    // 虽然本次会报错，但返回新的时间戳给前端，便于前端重试请求成功
-                    baNewTimestamp = exist_timestamp;
-
-                    // 2008/5/29 
-                    // 在强制修改模式下，时间戳不一致意义重大，直接返回出错，而不进行要害字段的比对判断
-                    strError = "保存操作发生错误: 数据库中的原记录 (路径为'" + strRecPath + "') 在编辑期间原记录已发生过修改(保存时发现提交的时间戳和原记录不匹配)";
-                    kernel_errorcode = DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue.TimestampMismatch;
-                    library_errorcode = ErrorCode.TimestampMismatch;    // 2021/9/2
-                    return -1;  // timestamp mismatch
-                }
-
-                // 时间戳不相等了
-                // 需要把domOldRec和strExistXml进行比较，看看和读者信息有关的元素（要害元素）值是否发生了变化。
-                // 如果这些要害元素并未发生变化，就继续进行合并、覆盖保存操作
-
-                // 比较两个记录, 看看和册登录有关的字段是否发生了变化
-                // return:
-                //      0   没有变化
-                //      1   有变化
-                nRet = IsReaderInfoChanged(
-                    element_names,
-                    domOldRec,
-                    domExist);
-                if (nRet == 1)
-                {
-                    // 错误信息中, 返回了修改过的原记录和新时间戳
-                    // strExistingRecord = strExistXml;
-
-                    // 2021/8/10
-                    // 从 strExistingRecord 中去除 password 元素，和当前用户不具备读权限的元素
+                    if (bForce == true)
                     {
-                        AddPatronOI(domExist, strLibraryCode);
+                        // 2021/8/27
+                        // 虽然本次会报错，但返回新的时间戳给前端，便于前端重试请求成功
+                        baNewTimestamp = exist_timestamp;
 
-                        // return:
-                        //      null    没有找到 getreaderinfo 前缀
-                        //      ""      找到了前缀，并且 level 部分为空
-                        //      其他     返回 level 部分
-                        string read_level = GetReaderInfoLevel("getreaderinfo", rights);
-                        FilterByLevel(domExist,
-                            read_level,
-                            "read",
-                            this.PatronMaskDefinition,
-                            out _);
-
-                        strExistingRecord = domExist.OuterXml;
+                        // 2008/5/29 
+                        // 在强制修改模式下，时间戳不一致意义重大，直接返回出错，而不进行要害字段的比对判断
+                        strError = "保存操作发生错误: 数据库中的原记录 (路径为'" + strRecPath + "') 在编辑期间原记录已发生过修改(保存时发现提交的时间戳和原记录不匹配)";
+                        kernel_errorcode = DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue.TimestampMismatch;
+                        library_errorcode = ErrorCode.TimestampMismatch;    // 2021/9/2
+                        return -1;  // timestamp mismatch
                     }
 
-                    baNewTimestamp = exist_timestamp;
+                    // 时间戳不相等了
+                    // 需要把domOldRec和strExistXml进行比较，看看和读者信息有关的元素（要害元素）值是否发生了变化。
+                    // 如果这些要害元素并未发生变化，就继续进行合并、覆盖保存操作
 
-                    if (bExist == false)
-                        strError = "保存操作发生错误: 数据库中的原记录 (路径为'" + strRecPath + "') 已被删除。";
-                    else
-                        strError = "保存操作发生错误: 数据库中的原记录 (路径为'" + strRecPath + "') 在编辑期间原记录已发生过修改(保存时发现提交的时间戳和原记录不匹配)";
+                    // 比较两个记录, 看看和册登录有关的字段是否发生了变化
+                    // return:
+                    //      0   没有变化
+                    //      1   有变化
+                    nRet = IsReaderInfoChanged(
+                        element_names,
+                        domOldRec,
+                        domExist);
+                    if (nRet == 1)
+                    {
+                        // 错误信息中, 返回了修改过的原记录和新时间戳
+                        // strExistingRecord = strExistXml;
 
-                    kernel_errorcode = DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue.TimestampMismatch;
-                    library_errorcode = ErrorCode.TimestampMismatch;    // 2021/9/2
-                    return -1;  // timestamp mismatch
+                        // 2021/8/10
+                        // 从 strExistingRecord 中去除 password 元素，和当前用户不具备读权限的元素
+                        {
+                            AddPatronOI(domExist, strLibraryCode);
+
+                            // return:
+                            //      null    没有找到 getreaderinfo 前缀
+                            //      ""      找到了前缀，并且 level 部分为空
+                            //      其他     返回 level 部分
+                            string read_level = GetReaderInfoLevel("getreaderinfo", rights);
+                            FilterByLevel(domExist,
+                                read_level,
+                                "read",
+                                this.PatronMaskDefinition,
+                                out _);
+
+                            strExistingRecord = domExist.OuterXml;
+                        }
+
+                        baNewTimestamp = exist_timestamp;
+
+                        if (bExist == false)
+                            strError = "保存操作发生错误: 数据库中的原记录 (路径为'" + strRecPath + "') 已被删除。";
+                        else
+                            strError = "保存操作发生错误: 数据库中的原记录 (路径为'" + strRecPath + "') 在编辑期间原记录已发生过修改(保存时发现提交的时间戳和原记录不匹配)";
+
+                        kernel_errorcode = DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue.TimestampMismatch;
+                        library_errorcode = ErrorCode.TimestampMismatch;    // 2021/9/2
+                        return -1;  // timestamp mismatch
+                    }
+
+                    // exist_timestamp此时已经反映了库中被修改后的记录的时间戳
                 }
 
-                // exist_timestamp此时已经反映了库中被修改后的记录的时间戳
             }
 
             // TODO: 当strAction==changestate时，只允许<state>和<comment>两个元素内容发生变化
@@ -7230,6 +7257,7 @@ out strError);
 
         // 移动读者记录
         // parameters:
+        //      strStyle    如果包含 ignorechecktimestamp 表示不检查时间戳
         //      strTargetRecPath    [in][out]目标记录路径
         // return:
         // result.Value:
@@ -7242,6 +7270,7 @@ out strError);
         public LibraryServerResult MoveReaderInfo(
             SessionInfo sessioninfo,
             string strSourceRecPath,
+            string strStyle,    // 2024/5/10 增加
             ref string strTargetRecPath,
             out byte[] target_timestamp)
         {
@@ -7317,7 +7346,7 @@ out strError);
 
             // 读出源记录
             string strExistingSourceXml = "";
-            byte[] exist_soutce_timestamp = null;
+            byte[] exist_source_timestamp = null;
             string strTempOutputPath = "";
             string strMetaData = "";
             int nRedoCount = 0;
@@ -7328,7 +7357,7 @@ out strError);
             lRet = channel.GetRes(strSourceRecPath,
                 out strExistingSourceXml,
                 out strMetaData,
-                out exist_soutce_timestamp,
+                out exist_source_timestamp,
                 out strTempOutputPath,
                 out strError);
             if (lRet == -1)
@@ -7402,37 +7431,40 @@ out strError);
                     goto ERROR1;
                 }
 
-                nRet = ByteArray.Compare(exist_soutce_timestamp, temp_timestamp);
-                if (nRet != 0)
+                // 2024/5/10 增加 ignorechecktimestamp 判断
+                if (StringUtil.IsInList("ignorechecktimestamp", strStyle) == false)
                 {
-                    // 重新把记录装入DOM
-                    domExist = new XmlDocument();
-                    try
+                    nRet = ByteArray.Compare(exist_source_timestamp, temp_timestamp);
+                    if (nRet != 0)
                     {
-                        domExist.LoadXml(strExistingSourceXml);
-                    }
-                    catch (Exception ex)
-                    {
-                        strError = "strExistingSourceXml装载进入DOM时发生错误(2): " + ex.Message;
-                        goto ERROR1;
-                    }
-
-                    // 重新核对条码号
-                    if (strLockBarcode != DomUtil.GetElementText(domExist.DocumentElement,
-                "barcode"))
-                    {
-                        if (nRedoCount < 10)
+                        // 重新把记录装入DOM
+                        domExist = new XmlDocument();
+                        try
                         {
-                            nRedoCount++;
-                            goto REDOLOAD;
+                            domExist.LoadXml(strExistingSourceXml);
                         }
-                        strError = "争夺锁定过程中发生太多次的错误。请稍后重试移动操作";
-                        goto ERROR1;
+                        catch (Exception ex)
+                        {
+                            strError = "strExistingSourceXml装载进入DOM时发生错误(2): " + ex.Message;
+                            goto ERROR1;
+                        }
+
+                        // 重新核对条码号
+                        if (strLockBarcode != DomUtil.GetElementText(domExist.DocumentElement,
+                    "barcode"))
+                        {
+                            if (nRedoCount < 10)
+                            {
+                                nRedoCount++;
+                                goto REDOLOAD;
+                            }
+                            strError = "争夺锁定过程中发生太多次的错误。请稍后重试移动操作";
+                            goto ERROR1;
+                        }
+
+                        exist_source_timestamp = temp_timestamp;
                     }
-
-                    exist_soutce_timestamp = temp_timestamp;
                 }
-
 
                 // 检查即将覆盖的目标位置是不是有记录，如果有，则不允许进行move操作。
                 bool bAppendStyle = false;  // 目标路径是否为追加形态？
@@ -7504,6 +7536,8 @@ out strError);
                 lRet = channel.DoCopyRecord(strSourceRecPath,
                      strTargetRecPath,
                      true,   // bDeleteSourceRecord
+                            "file_reserve_source",  // 2024/4/28
+                            out _,
                      out target_timestamp,
                      out strOutputRecPath,
                      out strError);

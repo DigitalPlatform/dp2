@@ -29,6 +29,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Core;
+using System.Security.Cryptography;
 
 namespace DigitalPlatform.rms
 {
@@ -4246,6 +4247,7 @@ namespace DigitalPlatform.rms
                 //		-5	存在多个节点
                 //		0	成功
                 nRet = this.GetFileCfgItemLocalPath(strCfgItemPath,
+                    out _,
                     out strLocalPath,
                     out strError);
                 if (nRet != 0)
@@ -4379,6 +4381,7 @@ namespace DigitalPlatform.rms
             //		-5	存在多个节点
             //		0	成功
             nRet = this.GetFileCfgItemLocalPath(strCfgItemPath,
+                out _,
                 out strFilePath,
                 out strError);
             if (nRet != 0)
@@ -5408,7 +5411,7 @@ namespace DigitalPlatform.rms
                     "read",
                     out strExistRights);
 
-                string strFilePath = "";//this.GetCfgItemLacalPath(strCfgItemPath);
+                // string strFilePath = "";//this.GetCfgItemLacalPath(strCfgItemPath);
                 // return:
                 //		-1	一般性错误，比如调用错误，参数不合法等
                 //		-2	没找到节点
@@ -5417,7 +5420,8 @@ namespace DigitalPlatform.rms
                 //		-5	存在多个节点
                 //		0	成功
                 int nRet = this.GetFileCfgItemLocalPath(strCfgItemPath,
-                    out strFilePath,
+                    out XmlElement element,
+                    out string strFilePath,
                     out strError);
                 if (nRet != 0)
                 {
@@ -5433,18 +5437,31 @@ namespace DigitalPlatform.rms
                     return -6;
                 }
 
-                // return:
-                //		-1      出错
-                //		>= 0	成功，返回最大长度
-                return DatabaseCollection.GetFileForCfgItem(strFilePath,
-                    lStart,
-                    nLength,
-                    nMaxLength,
-                    strStyle,
-                    out destBuffer,
-                    out strMetadata,
-                    out outputTimestamp,
-                    out strError);
+                if (element != null && element.Name == "file")
+                {
+                    // 文件情形
+                    // return:
+                    //		-1      出错
+                    //		>= 0	成功，返回最大长度
+                    return DatabaseCollection.GetFileForCfgItem(strFilePath,
+                        lStart,
+                        nLength,
+                        nMaxLength,
+                        strStyle,
+                        out destBuffer,
+                        out strMetadata,
+                        out outputTimestamp,
+                        out strError);
+                }
+                else
+                {
+                    // 2024/5/10
+                    // dir 元素
+                    destBuffer = new byte[0];
+                    strMetadata = "";
+                    outputTimestamp = null;
+                    return 0;
+                }
             }
             catch (PathErrorException ex)
             {
@@ -5465,6 +5482,8 @@ namespace DigitalPlatform.rms
         }
 
         // 为GetCfgItem服务器的内部函数
+        // parameters:
+        //      strStyle    如果包含 md5，表示要在 outputTimestamp 中返回文件的 MD5 校验码
         // return:
         //		-1      出错
         //		>= 0	成功，返回最大长度
@@ -5562,12 +5581,33 @@ namespace DigitalPlatform.rms
                         (int)lOutputLength);
                 }
             }
+
+            // 2024/5/9
+            // 获得 MD5 校验码
+            if (StringUtil.IsInList("md5", strStyle) == true)
+            {
+                using (FileStream s = new FileStream(strFilePath,
+    FileMode.Open))
+                {
+                    outputTimestamp = GetFileMd5(s);
+                }
+            }
+
             return lTotalLength;
+        }
+
+        public static byte[] GetFileMd5(Stream stream)
+        {
+            using (var md5 = MD5.Create())
+            {
+                return md5.ComputeHash(stream);
+            }
         }
 
         // 得到一个文件配置事项的本地文件绝对路径
         // parameters:
         //		strFileCfgItemPath	文件配置事项的路径，格式为'dir1/dir2/file'
+        //      element     [out] 返回负责定义该节点的 XML 元素。可能为 file 或 dir
         //		strLocalPath	out参数，返回对应的本地文件绝对路径	
         //		strError	out参数，返回出错信息
         // return:
@@ -5579,11 +5619,13 @@ namespace DigitalPlatform.rms
         //		0	成功
         // 线：不安全
         public int GetFileCfgItemLocalPath(string strFileCfgItemPath,
+            out XmlElement element,
             out string strLocalPath,
             out string strError)
         {
             strLocalPath = "";
             strError = "";
+            element = null;
 
             if (strFileCfgItemPath == ""
                 || strFileCfgItemPath == null)
@@ -5605,29 +5647,67 @@ namespace DigitalPlatform.rms
             }
 
             XmlNode nodeFile = nodes[0];
+            element = nodeFile as XmlElement; // 2024/5/10
 
-            string strPureFileName = DomUtil.GetAttr(nodeFile, "localname");
-            if (strPureFileName == "")
+            if (nodeFile.Name == "file")
             {
-                strError = "dp2Kernel 服务器上路径为 '" + strFileCfgItemPath + "' 的文件配置事项未定义对应的物理文件";
-                return -3;
+                string strPureFileName = DomUtil.GetAttr(nodeFile, "localname");
+                if (strPureFileName == "")
+                {
+                    strError = "dp2Kernel 服务器上路径为 '" + strFileCfgItemPath + "' 的文件配置事项未定义对应的物理文件";
+                    return -3;
+                }
+
+                string strLocalDir = DatabaseUtil.GetLocalDir(this.NodeDbs,
+                    nodeFile.ParentNode);
+
+                string strRealPath = "";
+                if (strLocalDir == "")
+                    strRealPath = this.DataDir + "\\" + strPureFileName;
+                else
+                    strRealPath = this.DataDir + "\\" + strLocalDir + "\\" + strPureFileName;
+
+                strLocalPath = strRealPath;
+                if (File.Exists(strRealPath) == false)
+                {
+                    strError = "dp2Kernel 服务器上路径为 '" + strFileCfgItemPath + "' 的文件配置事项对应的物理文件在本地不存在";
+                    return -4;
+                }
             }
+            else if (nodeFile.Name == "dir")
+            {
+                // 2024/5/10
+                string strPureFileName = DomUtil.GetAttr(nodeFile, "localdir");
+                if (strPureFileName == "")
+                {
+                    strError = "dp2Kernel 服务器上路径为 '" + strFileCfgItemPath + "' 的目录配置事项未定义对应的物理目录";
+                    return -3;
+                }
 
-            string strLocalDir = DatabaseUtil.GetLocalDir(this.NodeDbs,
-                nodeFile.ParentNode);
+                string strLocalDir = DatabaseUtil.GetLocalDir(this.NodeDbs,
+                    nodeFile.ParentNode);
 
-            string strRealPath = "";
-            if (strLocalDir == "")
-                strRealPath = this.DataDir + "\\" + strPureFileName;
+                string strRealPath = "";
+                if (strLocalDir == "")
+                    strRealPath = this.DataDir + "\\" + strPureFileName;
+                else
+                    strRealPath = this.DataDir + "\\" + strLocalDir + "\\" + strPureFileName;
+
+                strLocalPath = strRealPath;
+                if (Directory.Exists(strRealPath) == false)
+                {
+                    strError = "dp2Kernel 服务器上路径为 '" + strFileCfgItemPath + "' 的目录配置事项对应的物理目录在本地不存在";
+                    return -4;
+                }
+            }
             else
-                strRealPath = this.DataDir + "\\" + strLocalDir + "\\" + strPureFileName;
-
-            strLocalPath = strRealPath;
-            if (File.Exists(strRealPath) == false)
             {
-                strError = "dp2Kernel 服务器上路径为 '" + strFileCfgItemPath + "' 的文件配置事项对应的物理文件在本地不存在";
-                return -4;
+                // 2024/5/10
+                strLocalPath = "";
+                strError = $"无法获取 {nodeFile.Name} 元素的本地路径({nodeFile.OuterXml})";
+                return -1;
             }
+
             return 0;
         }
 
@@ -5724,6 +5804,7 @@ namespace DigitalPlatform.rms
                         //      0   成功
                         nRet = this.DeleteCfgItem(user,
                             strResPath,
+                            strStyle,
                             baInputTimestamp,
                             out baOutputTimestamp,
                             out strError);
@@ -5732,6 +5813,11 @@ namespace DigitalPlatform.rms
                     }
 
                     goto CHECK_CHANGED;
+                }
+                else if (info.IsLocalPath)
+                {
+                    strError = "dp2Kernel 暂不支持删除本地文件";
+                    return -1;
                 }
                 else
                 {
@@ -5961,6 +6047,7 @@ namespace DigitalPlatform.rms
         //      0   成功
         public int DeleteCfgItem(User user,
             string strCfgItemPath,
+            string strStyle,    // 2024/5/8 增加
             byte[] intputTimestamp,
             out byte[] outputTimestamp,
             out string strError)
@@ -6037,6 +6124,7 @@ namespace DigitalPlatform.rms
             //		-5	存在多个节点
             //		0	成功
             int nRet = this.GetFileCfgItemLocalPath(strCfgItemPath,
+                out _,
                 out strFilePath,
                 out strError);
             if (nRet != 0)
@@ -6051,18 +6139,21 @@ namespace DigitalPlatform.rms
 
                 if (File.Exists(strFilePath) == true)
                 {
-
-                    byte[] oldTimestamp = null;
-                    if (File.Exists(strNewFileName) == true)
-                        oldTimestamp = DatabaseUtil.CreateTimestampForCfg(strNewFileName);
-                    else
-                        oldTimestamp = DatabaseUtil.CreateTimestampForCfg(strFilePath);
-
-                    outputTimestamp = oldTimestamp;
-                    if (ByteArray.Compare(oldTimestamp, intputTimestamp) != 0)
+                    // 2024/5/8 增加 ignorechecktimestamp 判断
+                    if (StringUtil.IsInList("ignorechecktimestamp", strStyle) == false)
                     {
-                        strError = "时间戳不匹配";
-                        return -2;
+                        byte[] oldTimestamp = null;
+                        if (File.Exists(strNewFileName) == true)
+                            oldTimestamp = DatabaseUtil.CreateTimestampForCfg(strNewFileName);
+                        else
+                            oldTimestamp = DatabaseUtil.CreateTimestampForCfg(strFilePath);
+
+                        outputTimestamp = oldTimestamp;
+                        if (ByteArray.Compare(oldTimestamp, intputTimestamp) != 0)
+                        {
+                            strError = "时间戳不匹配";
+                            return -2;
+                        }
                     }
                 }
 
@@ -6252,23 +6343,31 @@ namespace DigitalPlatform.rms
         END1:
             // 列出实际需要的项
             nTotalLength = aItem.Count;
-            long lOutputLength;
-            // return:
-            //		-1  出错
-            //		0   成功
-            nRet = ConvertUtil.GetRealLength((int)lStart,
-                (int)lLength,
-                nTotalLength,
-                (int)lMaxLength,
-                out lOutputLength,
-                out strError);
-            if (nRet == -1)
-                return -1;
-
-            items = new ResInfoItem[(int)lOutputLength];
-            for (int i = 0; i < items.Length; i++)
+            if (nTotalLength == 0)
             {
-                items[i] = aItem[i + (int)lStart];
+                // 2024/5/10
+                items = new ResInfoItem[0];
+            }
+            else
+            {
+                long lOutputLength;
+                // return:
+                //		-1  出错
+                //		0   成功
+                nRet = ConvertUtil.GetRealLength((int)lStart,
+                    (int)lLength,
+                    nTotalLength,
+                    (int)lMaxLength,
+                    out lOutputLength,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                items = new ResInfoItem[(int)lOutputLength];
+                for (int i = 0; i < items.Length; i++)
+                {
+                    items[i] = aItem[i + (int)lStart];
+                }
             }
 
             return 0;

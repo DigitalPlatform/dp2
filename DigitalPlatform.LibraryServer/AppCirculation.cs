@@ -30,6 +30,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.Marc;
 using DigitalPlatform.rms.Client.rmsws_localhost;
+using DigitalPlatform.rms;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -17838,16 +17839,84 @@ out strError);
                         );
                 else
                 {
-                    // 2024/4/23
-                    var nodeBorrow = LookupBorrowElement(readerdom,
+                    // 读入册记录
+
+                    // return:
+                    //      -1  出错
+                    //      0   没有找到
+                    //      其它  命中的记录条数
+                    nRet = GetItemRecXml(channel,
                         strFilterItemKey,
-                        out _);
-                    if (nodeBorrow == null)
+                        out string strItemXml,
+                        out string strOutputItemRecPath,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        goto ERROR1;
+                    }
+                    if (nRet == 0)
+                    {
+                        // 用 strItemKey 权且搜索一下 borrow 元素
+                        // 注意，如果 册 Key 是册条码号，可能会匹配到较为陈旧的 borrow/@barcode 内容(exactly == false 情形)
+                        var nodeBorrow = LookupBorrowElement(readerdom,
+    strFilterItemKey,
+    out bool exactly);
+                        if (nodeBorrow != null)
+                        {
+                            strCheckError = "读者记录 " + PatronRecPathLink(strOutputReaderRecPath) + " 中有关于册条码号 '" + ItemBarcodeLink(strFilterItemKey) + "' 的借阅信息，但对应的册记录却不存在";
+                            result.Value = 1;
+                            result.ErrorInfo = strCheckError;
+                            return result;
+                        }
+
+                        result.Value = -1;
+                        result.ErrorInfo = "册条码号 '" + ItemBarcodeLink(strFilterItemKey) + "' 对应的册记录不存在";
+                        if (strFilterItemKey.StartsWith("@refID:") == false)
+                            result.ErrorInfo += "。注意册条码号属于易变的内容，如果条件允许，可以尝试改用参考 ID 形态的“册 Key”参数重新请求本功能";
+                        result.ErrorCode = ErrorCode.ItemBarcodeNotFound;
+                        return result;
+                    }
+                    if (nRet > 1)
+                    {
+                        strCheckError = $"册键 '{ItemBarcodeLink(strFilterItemKey)}' 命中多条册记录。({nodesBorrow.Count.ToString()}";
+                        if (GetKeyType(strFilterItemKey) == "barcode")
+                            strCheckError += "。可以尝试用册参考 ID 来重新请求";
+                        else
+                            strCheckError += "。这是一个严重问题，需要系统管理员手动处理";
+                        result.Value = 1;
+                        result.ErrorInfo = strCheckError;
+                        return result;
+                    }
+
+                    nRet = LibraryApplication.LoadToDom(strItemXml,
+    out XmlDocument itemdom,
+    out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "装载册记录进入XML DOM时发生错误: " + strError;
+                        goto ERROR1;
+                    }
+
+                    string strItemBarcode = DomUtil.GetElementText(itemdom.DocumentElement,
+                        "barcode");
+                    string strItemRefID = DomUtil.GetElementText(itemdom.DocumentElement,
+                        "refID");
+
+                    nodesBorrow = LookupBorrowElements(readerdom,
+                        strItemRefID,
+                        strItemBarcode);
+                    if (nodesBorrow.Count == 0)
                     {
                         strError = $"读者记录中没有找到匹配 '{strFilterItemKey}' 的借阅信息";
                         goto ERROR1;
                     }
-                    nodesBorrow = new List<XmlElement> { nodeBorrow };
+                    if (nodesBorrow.Count > 1)
+                    {
+                        strCheckError = "读者记录 " + PatronRecPathLink(strOutputReaderRecPath) + " 中有关于册条码号 '" + ItemBarcodeLink(strFilterItemKey) + "' 的 " + nodesBorrow.Count.ToString() + " 条含糊借阅记录(建议从读者一侧加以修复)。";
+                        result.Value = 1;
+                        result.ErrorInfo = strCheckError;
+                        return result;
+                    }
                 }
 
                 nTotalBorrowItems = nodesBorrow.Count;
@@ -17978,7 +18047,7 @@ out strError);
                         strOutputReaderBarcode_0,
                         strReaderKey) == false)
                     {
-                        strCheckError += "读者记录中借阅册条码号 " + ItemBarcodeLink(strItemBarcode) + " 关联的册记录中，其 borrower 元素关联回的读者证条码号是 '" + PatronBarcodeLink(strOutputReaderBarcode_0) + "'，而不是出发的读者证条码号 '" + PatronBarcodeLink(strReaderKey) + "'。";
+                        strCheckError += "读者记录中借阅册条码号 " + ItemBarcodeLink(strItemKey) + " 关联的册记录中，其 borrower 元素关联回的读者证条码号是 '" + PatronBarcodeLink(strOutputReaderBarcode_0) + "'，而不是出发的读者证条码号 '" + PatronBarcodeLink(strReaderKey) + "'。";
                         nErrorCount++;
                     }
                 }

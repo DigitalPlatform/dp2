@@ -228,7 +228,7 @@ uint new_password);
                 int i = 0;
                 foreach (Element element in chip.Elements)
                 {
-                    text.Append($"{++i}) {element.ToString()}\r\n");
+                    text.Append($"{++i}) {element.OidToString()}\r\n");
                 }
             }
 
@@ -252,7 +252,7 @@ uint new_password);
                 int i = 0;
                 foreach (Element element in this.Elements)
                 {
-                    text.Append($"{++i}) {element.ToString()}\r\n");
+                    text.Append($"{++i}) {element.OidToString()}\r\n");
                 }
             }
             */

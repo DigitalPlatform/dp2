@@ -4454,6 +4454,14 @@ MessageBoxDefaultButton.Button2);
             // 直接将没有998$t的MARC记录用于创建
             // TODO: 为了保险，是否特意删除一下998$t?
             strTargetBiblioRecPath = strTargetBiblioDbName + "/?";
+
+            // 2024/4/28
+            string strMergeStyle = "";
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.159") < 0)
+                strMergeStyle = "file_reserve_source";
+            else
+                strMergeStyle = "";
+
             string strOutputPath = "";
             byte[] baNewTimestamp = null;
             string strOutputBiblio = "";
@@ -4466,7 +4474,7 @@ MessageBoxDefaultButton.Button2);
                 timestamp,
                 strTargetBiblioRecPath,
                 null,   // strSourceXml,
-                "file_reserve_source",  // 2017/4/19
+                strMergeStyle,  // "file_reserve_source",  // 2017/4/19
                 out strOutputBiblio,
                 out strOutputPath,
                 out baNewTimestamp,

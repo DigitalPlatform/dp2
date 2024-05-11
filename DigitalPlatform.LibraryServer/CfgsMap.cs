@@ -45,7 +45,7 @@ namespace DigitalPlatform.LibraryServer
             {
                 PathUtil.TryCreateDir(this.RootDir);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 // 2020/4/24
                 throw new Exception($"重新创建目录 '{this.RootDir}' 时出现异常：{ex.Message}", ex);
@@ -73,18 +73,22 @@ namespace DigitalPlatform.LibraryServer
                         // TODO: 注意安全性风险，要限制在 this.RootDir 以下的位置
                         File.Delete(strLocalPath);
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         string strText = ex.Message;
                     }
                 }
+                return strLocalPath;
+            }
+            catch (ArgumentException ex)
+            {
+                // 一般是由于 strLocalPath 中有问号等非法字符引起的
+                return null;
             }
             finally
             {
                 this.locks.UnlockForRead(strLocalPath);
             }
-
-            return strLocalPath;
         }
 
         // 将内核网络配置文件映射到本地
@@ -107,10 +111,12 @@ namespace DigitalPlatform.LibraryServer
             PathUtil.TryCreateDir(Path.GetDirectoryName(strLocalPath));
 
             this.locks.LockForRead(strLocalPath);
-            try {
+            try
+            {
                 // 看看物理文件是否存在
                 FileInfo fi = new FileInfo(strLocalPath);
-                if (fi.Exists == true) {
+                if (fi.Exists == true)
+                {
                     if (fi.Length == 0)
                         return 0;   // not exist
                     return 1;
@@ -152,7 +158,7 @@ namespace DigitalPlatform.LibraryServer
                     if (channel.IsNotFound())
                     {
                         // 为了避免以后再次从网络获取耗费时间, 需要在本地写一个0字节的文件
-                        using(FileStream fs = File.Create(strLocalPath))
+                        using (FileStream fs = File.Create(strLocalPath))
                         {
 
                         }

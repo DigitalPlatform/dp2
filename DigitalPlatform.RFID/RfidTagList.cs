@@ -499,6 +499,13 @@ namespace DigitalPlatform.RFID
                                     try
                                     {
                                         var chip_info = GetUhfChipInfo(info);
+                                        // 2024/4/25
+                                        // chip_info.ErrorInfo 中可能有报错信息
+                                        if (string.IsNullOrEmpty(chip_info.ErrorInfo) == false)
+                                        {
+                                            setError?.Invoke("rfid", chip_info.ErrorInfo);
+                                            data.Error = chip_info.ErrorInfo;
+                                        }
                                         typeOfUsage = chip_info.Chip?.FindElement(ElementOID.TypeOfUsage)?.Text;
                                     }
                                     catch

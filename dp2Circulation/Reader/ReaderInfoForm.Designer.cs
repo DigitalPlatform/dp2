@@ -76,6 +76,7 @@
             this.toolStripButton_saveTo = new System.Windows.Forms.ToolStripButton();
             this.toolStripSplitButton_save = new System.Windows.Forms.ToolStripSplitButton();
             this.ToolStripMenuItem_saveChangeBarcode = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_saveChangeRefID = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_saveChangeState = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_saveForce = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripButton_next = new System.Windows.Forms.ToolStripButton();
@@ -114,7 +115,6 @@
             this.toolStripTextBox_barcode = new System.Windows.Forms.ToolStripTextBox();
             this.toolStripButton_load = new System.Windows.Forms.ToolStripButton();
             this.tableLayoutPanel_main = new System.Windows.Forms.TableLayoutPanel();
-            this.ToolStripMenuItem_saveChangeRefID = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_normal)).BeginInit();
             this.splitContainer_normal.Panel1.SuspendLayout();
             this.splitContainer_normal.Panel2.SuspendLayout();
@@ -145,7 +145,7 @@
             // splitContainer_normal.Panel2
             // 
             this.splitContainer_normal.Panel2.Controls.Add(this.webBrowser_readerInfo);
-            this.splitContainer_normal.Size = new System.Drawing.Size(1055, 501);
+            this.splitContainer_normal.Size = new System.Drawing.Size(1055, 489);
             this.splitContainer_normal.SplitterDistance = 564;
             this.splitContainer_normal.SplitterWidth = 5;
             this.splitContainer_normal.TabIndex = 5;
@@ -190,7 +190,7 @@
             this.readerEditControl1.RecPath = "";
             this.readerEditControl1.RefID = "";
             this.readerEditControl1.Rights = "";
-            this.readerEditControl1.Size = new System.Drawing.Size(564, 501);
+            this.readerEditControl1.Size = new System.Drawing.Size(564, 489);
             this.readerEditControl1.State = "";
             this.readerEditControl1.TabIndex = 0;
             this.readerEditControl1.Tel = "";
@@ -207,7 +207,7 @@
             this.webBrowser_readerInfo.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.webBrowser_readerInfo.MinimumSize = new System.Drawing.Size(27, 28);
             this.webBrowser_readerInfo.Name = "webBrowser_readerInfo";
-            this.webBrowser_readerInfo.Size = new System.Drawing.Size(486, 501);
+            this.webBrowser_readerInfo.Size = new System.Drawing.Size(486, 489);
             this.webBrowser_readerInfo.TabIndex = 0;
             this.webBrowser_readerInfo.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.webBrowser_readerInfo_DocumentCompleted);
             // 
@@ -221,11 +221,11 @@
             this.tabControl_readerInfo.Controls.Add(this.tabPage_xml);
             this.tabControl_readerInfo.Controls.Add(this.tabPage_objects);
             this.tabControl_readerInfo.Controls.Add(this.tabPage_qrCode);
-            this.tabControl_readerInfo.Location = new System.Drawing.Point(4, 41);
+            this.tabControl_readerInfo.Location = new System.Drawing.Point(4, 47);
             this.tabControl_readerInfo.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabControl_readerInfo.Name = "tabControl_readerInfo";
             this.tabControl_readerInfo.SelectedIndex = 0;
-            this.tabControl_readerInfo.Size = new System.Drawing.Size(1071, 542);
+            this.tabControl_readerInfo.Size = new System.Drawing.Size(1071, 530);
             this.tabControl_readerInfo.TabIndex = 0;
             this.tabControl_readerInfo.SelectedIndexChanged += new System.EventHandler(this.tabControl_readerInfo_SelectedIndexChanged);
             // 
@@ -236,7 +236,7 @@
             this.tabPage_normal.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabPage_normal.Name = "tabPage_normal";
             this.tabPage_normal.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.tabPage_normal.Size = new System.Drawing.Size(1063, 507);
+            this.tabPage_normal.Size = new System.Drawing.Size(1063, 495);
             this.tabPage_normal.TabIndex = 0;
             this.tabPage_normal.Text = "常规";
             this.tabPage_normal.UseVisualStyleBackColor = true;
@@ -375,9 +375,9 @@
             this.toolStripDropDownButton_otherFunc,
             this.toolStripSeparator2});
             this.toolStrip1.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.HorizontalStackWithOverflow;
-            this.toolStrip1.Location = new System.Drawing.Point(0, 586);
+            this.toolStrip1.Location = new System.Drawing.Point(0, 580);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1079, 38);
+            this.toolStrip1.Size = new System.Drawing.Size(1079, 44);
             this.toolStrip1.TabIndex = 4;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -388,7 +388,7 @@
             this.toolStripSplitButton_delete.Image = ((System.Drawing.Image)(resources.GetObject("toolStripSplitButton_delete.Image")));
             this.toolStripSplitButton_delete.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripSplitButton_delete.Name = "toolStripSplitButton_delete";
-            this.toolStripSplitButton_delete.Size = new System.Drawing.Size(102, 32);
+            this.toolStripSplitButton_delete.Size = new System.Drawing.Size(102, 38);
             this.toolStripSplitButton_delete.Text = "删除";
             this.toolStripSplitButton_delete.ButtonClick += new System.EventHandler(this.toolStripSplitButton_delete_ButtonClick);
             // 
@@ -405,7 +405,7 @@
             this.toolStripButton_loadFromIdcard.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_loadFromIdcard.Image")));
             this.toolStripButton_loadFromIdcard.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_loadFromIdcard.Name = "toolStripButton_loadFromIdcard";
-            this.toolStripButton_loadFromIdcard.Size = new System.Drawing.Size(40, 32);
+            this.toolStripButton_loadFromIdcard.Size = new System.Drawing.Size(40, 38);
             this.toolStripButton_loadFromIdcard.Text = "从身份证导入信息";
             this.toolStripButton_loadFromIdcard.ToolTipText = "从身份证导入信息 (按住 Ctrl 键不清空原有内容)";
             this.toolStripButton_loadFromIdcard.Click += new System.EventHandler(this.toolStripButton_loadFromIdcard_Click);
@@ -416,7 +416,7 @@
             this.toolStripButton_loadBlank.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_loadBlank.Image")));
             this.toolStripButton_loadBlank.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_loadBlank.Name = "toolStripButton_loadBlank";
-            this.toolStripButton_loadBlank.Size = new System.Drawing.Size(40, 32);
+            this.toolStripButton_loadBlank.Size = new System.Drawing.Size(40, 38);
             this.toolStripButton_loadBlank.Text = "从本地装入空白记录";
             this.toolStripButton_loadBlank.Click += new System.EventHandler(this.toolStripButton_loadBlank_Click);
             // 
@@ -429,7 +429,7 @@
             this.toolStripDropDownButton_loadBlank.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton_loadBlank.Image")));
             this.toolStripDropDownButton_loadBlank.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDropDownButton_loadBlank.Name = "toolStripDropDownButton_loadBlank";
-            this.toolStripDropDownButton_loadBlank.Size = new System.Drawing.Size(21, 32);
+            this.toolStripDropDownButton_loadBlank.Size = new System.Drawing.Size(21, 38);
             this.toolStripDropDownButton_loadBlank.Text = "装入空白记录";
             // 
             // toolStripMenuItem_loadBlankFromLocal
@@ -456,7 +456,7 @@
             this.toolStripButton_webCamera.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_webCamera.Image")));
             this.toolStripButton_webCamera.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_webCamera.Name = "toolStripButton_webCamera";
-            this.toolStripButton_webCamera.Size = new System.Drawing.Size(40, 32);
+            this.toolStripButton_webCamera.Size = new System.Drawing.Size(40, 38);
             this.toolStripButton_webCamera.Text = "从摄像头获取图像";
             this.toolStripButton_webCamera.Click += new System.EventHandler(this.toolStripButton_webCamera_Click);
             // 
@@ -469,7 +469,7 @@
             this.toolStripSplitButton_registerFace.Image = ((System.Drawing.Image)(resources.GetObject("toolStripSplitButton_registerFace.Image")));
             this.toolStripSplitButton_registerFace.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripSplitButton_registerFace.Name = "toolStripSplitButton_registerFace";
-            this.toolStripSplitButton_registerFace.Size = new System.Drawing.Size(48, 32);
+            this.toolStripSplitButton_registerFace.Size = new System.Drawing.Size(48, 38);
             this.toolStripSplitButton_registerFace.Text = "登记人脸(用于人脸识别)";
             this.toolStripSplitButton_registerFace.ButtonClick += new System.EventHandler(this.toolStripSplitButton_registerFace_ButtonClick);
             // 
@@ -506,7 +506,7 @@
             this.toolStripSplitButton_registerFingerprint.Image = ((System.Drawing.Image)(resources.GetObject("toolStripSplitButton_registerFingerprint.Image")));
             this.toolStripSplitButton_registerFingerprint.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripSplitButton_registerFingerprint.Name = "toolStripSplitButton_registerFingerprint";
-            this.toolStripSplitButton_registerFingerprint.Size = new System.Drawing.Size(48, 32);
+            this.toolStripSplitButton_registerFingerprint.Size = new System.Drawing.Size(48, 38);
             this.toolStripSplitButton_registerFingerprint.Text = "登记指纹";
             this.toolStripSplitButton_registerFingerprint.ButtonClick += new System.EventHandler(this.toolStripSplitButton_registerFingerprint_ButtonClick);
             // 
@@ -525,7 +525,7 @@
             this.toolStripSplitButton_registerPalmprint.Image = ((System.Drawing.Image)(resources.GetObject("toolStripSplitButton_registerPalmprint.Image")));
             this.toolStripSplitButton_registerPalmprint.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripSplitButton_registerPalmprint.Name = "toolStripSplitButton_registerPalmprint";
-            this.toolStripSplitButton_registerPalmprint.Size = new System.Drawing.Size(48, 32);
+            this.toolStripSplitButton_registerPalmprint.Size = new System.Drawing.Size(48, 38);
             this.toolStripSplitButton_registerPalmprint.Text = "登记掌纹";
             this.toolStripSplitButton_registerPalmprint.ButtonClick += new System.EventHandler(this.toolStripSplitButton_registerPalmprint_ButtonClick);
             // 
@@ -550,7 +550,7 @@
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 38);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 44);
             // 
             // toolStripButton_createMoneyRecord
             // 
@@ -561,7 +561,7 @@
             this.toolStripButton_createMoneyRecord.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_createMoneyRecord.Image")));
             this.toolStripButton_createMoneyRecord.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
             this.toolStripButton_createMoneyRecord.Name = "toolStripButton_createMoneyRecord";
-            this.toolStripButton_createMoneyRecord.Size = new System.Drawing.Size(183, 32);
+            this.toolStripButton_createMoneyRecord.Size = new System.Drawing.Size(183, 38);
             this.toolStripButton_createMoneyRecord.Text = "创建交费请求";
             // 
             // ToolStripMenuItem_hire
@@ -588,14 +588,14 @@
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 38);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 44);
             // 
             // toolStripButton_saveTo
             // 
             this.toolStripButton_saveTo.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_saveTo.Image")));
             this.toolStripButton_saveTo.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_saveTo.Name = "toolStripButton_saveTo";
-            this.toolStripButton_saveTo.Size = new System.Drawing.Size(82, 32);
+            this.toolStripButton_saveTo.Size = new System.Drawing.Size(82, 38);
             this.toolStripButton_saveTo.Text = "新增";
             this.toolStripButton_saveTo.ToolTipText = "将记录保存为一条新的记录";
             this.toolStripButton_saveTo.Click += new System.EventHandler(this.toolStripButton_saveTo_Click);
@@ -610,7 +610,7 @@
             this.toolStripSplitButton_save.Image = ((System.Drawing.Image)(resources.GetObject("toolStripSplitButton_save.Image")));
             this.toolStripSplitButton_save.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripSplitButton_save.Name = "toolStripSplitButton_save";
-            this.toolStripSplitButton_save.Size = new System.Drawing.Size(102, 32);
+            this.toolStripSplitButton_save.Size = new System.Drawing.Size(102, 38);
             this.toolStripSplitButton_save.Text = "保存";
             this.toolStripSplitButton_save.ButtonClick += new System.EventHandler(this.toolStripSplitButton_save_ButtonClick);
             // 
@@ -620,6 +620,13 @@
             this.ToolStripMenuItem_saveChangeBarcode.Size = new System.Drawing.Size(353, 40);
             this.ToolStripMenuItem_saveChangeBarcode.Text = "保存(强制修改证条码号)";
             this.ToolStripMenuItem_saveChangeBarcode.Click += new System.EventHandler(this.ToolStripMenuItem_saveChangeBarcode_Click);
+            // 
+            // ToolStripMenuItem_saveChangeRefID
+            // 
+            this.ToolStripMenuItem_saveChangeRefID.Name = "ToolStripMenuItem_saveChangeRefID";
+            this.ToolStripMenuItem_saveChangeRefID.Size = new System.Drawing.Size(353, 40);
+            this.ToolStripMenuItem_saveChangeRefID.Text = "保存(强制修改参考 ID)";
+            this.ToolStripMenuItem_saveChangeRefID.Click += new System.EventHandler(this.ToolStripMenuItem_saveChangeRefID_Click);
             // 
             // ToolStripMenuItem_saveChangeState
             // 
@@ -642,7 +649,7 @@
             this.toolStripButton_next.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_next.Image")));
             this.toolStripButton_next.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
             this.toolStripButton_next.Name = "toolStripButton_next";
-            this.toolStripButton_next.Size = new System.Drawing.Size(40, 32);
+            this.toolStripButton_next.Size = new System.Drawing.Size(40, 38);
             this.toolStripButton_next.Text = "后一记录";
             this.toolStripButton_next.Click += new System.EventHandler(this.toolStripButton_next_Click);
             // 
@@ -653,7 +660,7 @@
             this.toolStripButton_prev.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_prev.Image")));
             this.toolStripButton_prev.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
             this.toolStripButton_prev.Name = "toolStripButton_prev";
-            this.toolStripButton_prev.Size = new System.Drawing.Size(40, 32);
+            this.toolStripButton_prev.Size = new System.Drawing.Size(40, 38);
             this.toolStripButton_prev.Text = "前一记录";
             this.toolStripButton_prev.Click += new System.EventHandler(this.toolStripButton_prev_Click);
             // 
@@ -661,7 +668,7 @@
             // 
             this.toolStripSeparator4.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(6, 38);
+            this.toolStripSeparator4.Size = new System.Drawing.Size(6, 44);
             // 
             // toolStripButton_stopSummaryLoop
             // 
@@ -670,14 +677,14 @@
             this.toolStripButton_stopSummaryLoop.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_stopSummaryLoop.Image")));
             this.toolStripButton_stopSummaryLoop.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_stopSummaryLoop.Name = "toolStripButton_stopSummaryLoop";
-            this.toolStripButton_stopSummaryLoop.Size = new System.Drawing.Size(40, 32);
+            this.toolStripButton_stopSummaryLoop.Size = new System.Drawing.Size(40, 38);
             this.toolStripButton_stopSummaryLoop.Text = "停止装载书目摘要";
             this.toolStripButton_stopSummaryLoop.Click += new System.EventHandler(this.toolStripButton_stopSummaryLoop_Click);
             // 
             // toolStripSeparator5
             // 
             this.toolStripSeparator5.Name = "toolStripSeparator5";
-            this.toolStripSeparator5.Size = new System.Drawing.Size(6, 38);
+            this.toolStripSeparator5.Size = new System.Drawing.Size(6, 44);
             // 
             // toolStripButton_addFriends
             // 
@@ -685,7 +692,7 @@
             this.toolStripButton_addFriends.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_addFriends.Image")));
             this.toolStripButton_addFriends.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_addFriends.Name = "toolStripButton_addFriends";
-            this.toolStripButton_addFriends.Size = new System.Drawing.Size(40, 32);
+            this.toolStripButton_addFriends.Size = new System.Drawing.Size(40, 38);
             this.toolStripButton_addFriends.Text = "加好友";
             this.toolStripButton_addFriends.Click += new System.EventHandler(this.toolStripButton_addFriends_Click);
             // 
@@ -695,7 +702,7 @@
             this.toolStripButton_clearOutofReservationCount.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_clearOutofReservationCount.Image")));
             this.toolStripButton_clearOutofReservationCount.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_clearOutofReservationCount.Name = "toolStripButton_clearOutofReservationCount";
-            this.toolStripButton_clearOutofReservationCount.Size = new System.Drawing.Size(40, 28);
+            this.toolStripButton_clearOutofReservationCount.Size = new System.Drawing.Size(40, 38);
             this.toolStripButton_clearOutofReservationCount.Text = "清除预约到书后未取次数";
             this.toolStripButton_clearOutofReservationCount.Click += new System.EventHandler(this.toolStripButton_clearOutofReservationCount_Click);
             // 
@@ -728,7 +735,7 @@
             this.toolStripDropDownButton_otherFunc.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton_otherFunc.Image")));
             this.toolStripDropDownButton_otherFunc.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDropDownButton_otherFunc.Name = "toolStripDropDownButton_otherFunc";
-            this.toolStripDropDownButton_otherFunc.Size = new System.Drawing.Size(48, 32);
+            this.toolStripDropDownButton_otherFunc.Size = new System.Drawing.Size(48, 38);
             this.toolStripDropDownButton_otherFunc.Text = "...";
             this.toolStripDropDownButton_otherFunc.ToolTipText = "更多命令...";
             // 
@@ -886,7 +893,7 @@
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 38);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 44);
             // 
             // toolStrip_load
             // 
@@ -899,21 +906,21 @@
             this.toolStripButton_load});
             this.toolStrip_load.Location = new System.Drawing.Point(0, 0);
             this.toolStrip_load.Name = "toolStrip_load";
-            this.toolStrip_load.Size = new System.Drawing.Size(439, 38);
+            this.toolStrip_load.Size = new System.Drawing.Size(439, 44);
             this.toolStrip_load.TabIndex = 5;
             this.toolStrip_load.Text = "toolStrip2";
             // 
             // toolStripLabel1
             // 
             this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(101, 32);
+            this.toolStripLabel1.Size = new System.Drawing.Size(101, 38);
             this.toolStripLabel1.Text = "证条码号:";
             // 
             // toolStripTextBox_barcode
             // 
             this.toolStripTextBox_barcode.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
             this.toolStripTextBox_barcode.Name = "toolStripTextBox_barcode";
-            this.toolStripTextBox_barcode.Size = new System.Drawing.Size(272, 38);
+            this.toolStripTextBox_barcode.Size = new System.Drawing.Size(272, 44);
             this.toolStripTextBox_barcode.Enter += new System.EventHandler(this.toolStripTextBox_barcode_Enter);
             this.toolStripTextBox_barcode.Leave += new System.EventHandler(this.toolStripTextBox_barcode_Leave);
             this.toolStripTextBox_barcode.KeyDown += new System.Windows.Forms.KeyEventHandler(this.toolStripTextBox_barcode_KeyDown);
@@ -925,7 +932,7 @@
             this.toolStripButton_load.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_load.Image")));
             this.toolStripButton_load.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_load.Name = "toolStripButton_load";
-            this.toolStripButton_load.Size = new System.Drawing.Size(58, 32);
+            this.toolStripButton_load.Size = new System.Drawing.Size(58, 38);
             this.toolStripButton_load.Text = "装载";
             this.toolStripButton_load.Click += new System.EventHandler(this.toolStripButton_load_Click);
             // 
@@ -946,13 +953,6 @@
             this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_main.Size = new System.Drawing.Size(1079, 624);
             this.tableLayoutPanel_main.TabIndex = 6;
-            // 
-            // ToolStripMenuItem_saveChangeRefID
-            // 
-            this.ToolStripMenuItem_saveChangeRefID.Name = "ToolStripMenuItem_saveChangeRefID";
-            this.ToolStripMenuItem_saveChangeRefID.Size = new System.Drawing.Size(353, 40);
-            this.ToolStripMenuItem_saveChangeRefID.Text = "保存(强制修改参考 ID)";
-            this.ToolStripMenuItem_saveChangeRefID.Click += new System.EventHandler(this.ToolStripMenuItem_saveChangeRefID_Click);
             // 
             // ReaderInfoForm
             // 

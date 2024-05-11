@@ -693,7 +693,8 @@ namespace dp2Circulation
                     else
                     {
                         DisplaySucceed("- 成功修复读者记录 " + caption + " 内链条问题");
-                        nRepairedCount += nRet;
+                        if (nRet >= 1)
+                            nRepairedCount += 1;    // 注: nRepairedCount 是已修复的读者记录数
                     }
                 }
 
@@ -2338,7 +2339,7 @@ false);
                     //      DialogResult.Cancel 表示点了右上角的 Close 按钮
                     //      DialogResult.Ignore 表示点了 跳过 按钮
                     DialogResult result = AutoCloseMessageBox.ShowIgnore(this,
-        e.MessageText + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
+        BuildText(e.MessageText, e.AutoRetryTimeout),
         e.AutoRetryTimeout, // 20 * 1000,
         "CheckBorrowInfoForm");
                     if (result == DialogResult.Cancel)
@@ -2354,7 +2355,7 @@ false);
                     //      DialogResult.OK 表示点了 OK 按钮
                     //      DialogResult.Cancel 表示点了右上角的 Close 按钮
                     DialogResult result = AutoCloseMessageBox.Show(this,
-        e.MessageText + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
+        BuildText(e.MessageText, e.AutoRetryTimeout),
         e.AutoRetryTimeout, // 20 * 1000,
         "CheckBorrowInfoForm");
                     if (result == DialogResult.Cancel)
@@ -2365,6 +2366,13 @@ false);
                 else
                     throw new Exception($"不支持的 actions '{e.Actions}'");
             }));
+        }
+
+        static string BuildText(string text, int retry_timeout)
+        {
+            if (retry_timeout != -1)
+                text += "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)";
+            return text;
         }
 
 #if OLD

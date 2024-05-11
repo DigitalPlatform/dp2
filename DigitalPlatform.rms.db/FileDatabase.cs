@@ -2067,11 +2067,15 @@ namespace DigitalPlatform.rms
                         strError = "不可能没有时间戳文件";
                         return -1;
                     }
-                    if (ByteArray.Compare(inputTimestamp,
-                        outputTimestamp) != 0)
+                    // 2024/5/8 增加 ignorechecktimestamp 判断
+                    if (StringUtil.IsInList("ignorechecktimestamp", strStyle) == false)
                     {
-                        strError = "时间戳不匹配";
-                        return -2;
+                        if (ByteArray.Compare(inputTimestamp,
+                        outputTimestamp) != 0)
+                        {
+                            strError = "时间戳不匹配";
+                            return -2;
+                        }
                     }
                     bool bLoadXmlSuccessed = true;
                     XmlDocument oldDataDom = new XmlDocument();

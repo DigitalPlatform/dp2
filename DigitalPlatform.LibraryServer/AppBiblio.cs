@@ -25,6 +25,7 @@ using DigitalPlatform.Core;
 using System.Data.SqlClient;
 using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolTip;
+using MongoDB.Driver.Core.Clusters.ServerSelectors;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -149,7 +150,7 @@ namespace DigitalPlatform.LibraryServer
                 if (strItemBarcode.StartsWith("@itemBarcode:") == true)
                     strItemBarcode = strItemBarcode.Substring("@itemBarcode:".Length);
                 else if (strItemBarcode.StartsWith("@refID:"))
-                { 
+                {
                     // 2024/2/13
                     // 不用变化
                 }
@@ -4924,6 +4925,8 @@ ref string strMARC)
         //      strBiblioRecPath    书目(规范)记录路径。TODO: 这个参数的值是否允许为空？如果不允许，要在函数中检查和尽早报错
         //      strBiblioType   xml 或 iso2709。iso2709 格式可以包含编码方式，例如 iso2709:utf-8
         //      baTimestamp 时间戳。如果为新创建记录，可以为null 
+        //      strStyle    如果包含 new，则对 strAction 为 "new" 的处理中途不会被转变为 "change" 动作(这可能涉及到操作日志内写入何种动作，这一点待确定)
+        //                  如果包含 ignorechecktimestamp，表示不检查时间戳
         //      strOutputBiblioRecPath 输出的书目记录路径。当strBiblioRecPath中末级为问号，表示追加保存书目记录的时候，本参数返回实际保存的书目记录路径
         //      baOutputTimestamp   操作完成后，新的时间戳
         // 日志:
@@ -5165,6 +5168,16 @@ ref string strMARC)
                 {
                     strError = "书目记录路径 '" + strBiblioRecPath + "' 中包含的数据库名 '" + strBiblioDbName + "' 不是合法的书目库名或规范库名";
                     goto ERROR1;
+                }
+
+                // 2024/5/8
+                // 检查路径是否严格符合元数据记录的形态
+                if (this.IsDatabaseMetadataPath(sessioninfo, strBiblioRecPath) == false)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = $"SetBiblioInfo() 不允许操作元数据记录以外的其它类型资源 {strBiblioRecPath}";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
                 }
 
 #if NO
@@ -6000,10 +6013,14 @@ out strError);
 
                     try
                     {
+                        string style = "content" + (bSimulate ? ",simulate" : "");
+                        // 2024/5/10
+                        InheritTimestampStyle(ref style, strStyle);
+
                         lRet = channel.DoSaveTextRes(strBiblioRecPath,
                             strBiblio,
                             false,
-                            "content" + (bSimulate ? ",simulate" : ""),
+                            style,
                             baTimestamp,
                             out baOutputTimestamp,
                             out strOutputBiblioRecPath,
@@ -6511,6 +6528,11 @@ out strError);
         }
 
         // 删除书目记录的下级记录
+        // parameters:
+        //      strAction   为 "delete" 或 "onlydeletesubrecord" 之一。
+        //                  delete 表示要删除书目记录和全部下级记录
+        //                  onlydeletesubrecord 表示不删除书目记录，只删除下级记录
+        //      strStyleParam   如果包含 whenChildEmpty，表示 仅当没有子记录时才删除书目记录
         // return:
         //      -1  失败
         //      0   成功
@@ -7199,7 +7221,9 @@ out strError);
         //      strNewBiblioParam   需要在目标记录中更新的内容。如果 == null，表示不特意更新
         //      strMergeStyle   如何合并两条书目记录的元数据部分? reserve_source / reserve_target / missing_source_subrecord / overwrite_target_subrecord。 空表示 reserve_source + combine_subrecord
         //                      reserve_source 表示采用源书目记录; reserve_target 表示采用目标书目记录
+        //                      注: 如果 reserve_source 和 reserve_target 都没有，则默认 reserve_source
         //                      missing_source_subrecord 表示丢失来自源的下级记录(保留目标原本的下级记录); overwrite_target_subrecord 表示采纳来自源的下级记录，删除目标记录原本的下级记录(注：此功能暂时没有实现); combine_subrecord 表示组合来源和目标的下级记录
+        //                      如果 strMergeStyle 中包含 ignorechecktimestamp，表示不检查时间戳(2024/5/10 增加)
         //      strOutputBiblioRecPath 输出的书目记录路径。当 strNewBiblioRecPath 中末级为问号，表示追加保存书目记录的时候，本参数返回实际保存的书目记录路径
         //      baOutputTimestamp   操作完成后，新的时间戳
         // result.Value:
@@ -7253,6 +7277,15 @@ out strError);
                 strError = "strMergeStyle 中包含 reserve_target 时，strNewBiblio 参数必须为空";
                 goto ERROR1;
             }
+
+            /*
+            // 2024/4/28
+            if (StringUtil.IsInList("file_reserve_target,file_reserve_source", strMergeStyle) == true)
+            {
+                strError = "strMergeStyle 中不允许包含 file_reserve_source 或 file_reserve_target。这两个值已经废止";
+                goto ERROR1;
+            }
+            */
 
             bool bChangePartDenied = false; // 修改操作部分被拒绝
             string strDeniedComment = "";   // 关于部分字段被拒绝的注释
@@ -7662,6 +7695,13 @@ out strError);
                     {
                         if (channel.IsNotFoundOrDamaged())
                         {
+                            // 2024/4/29
+                            if (StringUtil.IsInList("reserve_target", strMergeStyle))
+                            {
+                                strError = $"当需要保留目标记录 XML 内容时(strMergeStyle 为 '{strMergeStyle}')，目标位置记录 '{strNewBiblioRecPath}' 不存在。{strAction}操作被拒绝";
+                                goto ERROR1;
+                            }
+
                             // 如果记录不存在, 说明不会造成覆盖态势
                         }
                         else
@@ -7669,6 +7709,15 @@ out strError);
                             strError = "移动操作发生错误, 在读入即将覆盖的目标位置 '" + strNewBiblioRecPath + "' 原有记录阶段:" + strError;
                             goto ERROR1;
                         }
+                    }
+                }
+                else
+                {
+                    // 2024/4/29
+                    if (StringUtil.IsInList("reserve_target", strMergeStyle))
+                    {
+                        strError = $"当需要保留目标记录 XML 内容时(strMergeStyle 为 '{strMergeStyle}')，目标位置记录 '{strNewBiblioRecPath}' 不存在(路径为追加形态)。{strAction}操作被拒绝";
+                        goto ERROR1;
                     }
                 }
             }
@@ -7688,7 +7737,8 @@ out strError);
                 || strAction == "move")
             {
                 // if (string.IsNullOrEmpty(strNewBiblio) == false)
-                if (baTimestamp != null)
+                // 2024/5/10 增加 ignorechecktimestamp 判断
+                if (baTimestamp != null && StringUtil.IsInList("ignorechecktimestamp", strMergeStyle) == false)
                 {
                     // 观察时间戳是否发生变化
                     nRet = ByteArray.Compare(baTimestamp, exist_source_timestamp);
@@ -7712,7 +7762,12 @@ out strError);
                     // 2023/3/17
                     // 如果参数 strNewBiblio 中没有提供记录内容，则直接使用源位置的已经存在的记录内容。这样，复制以后总是要再覆盖写入一步
                     if (string.IsNullOrEmpty(strNewBiblio))
-                        strNewBiblio = strExistingSourceXml;
+                    {
+                        if (StringUtil.IsInList("reserve_target", strMergeStyle))
+                            strNewBiblio = strExistingTargetXml;    // 2024/4/29
+                        else
+                            strNewBiblio = strExistingSourceXml;
+                    }
 
                     if (String.IsNullOrEmpty(strNewBiblio) == false)
                     {
@@ -7888,9 +7943,8 @@ out strError);
                     }
 
                     if ((strAction == "copy" || strAction == "move")
-                        && StringUtil.IsInList("missing_source_subrecord", strMergeStyle) == false)
+                        /*&& StringUtil.IsInList("missing_source_subrecord", strMergeStyle) == false*/)
                     {
-                        string strWarning = "";
                         // 
                         // 调用前，假定书目记录已经被锁定
                         // parameters:
@@ -7906,7 +7960,7 @@ out strError);
                             strOutputBiblioRecPath,
                             strMergeStyle,
                             domOperLog,
-                            out strWarning,
+                            out string strWarning,
                             out strError);
                         if (nRet == -1 || nRet == -2)   // 2017/5/28 增加 nRet == -2
                         {
@@ -7932,6 +7986,8 @@ out strError);
                                     lRet = channel.DoCopyRecord(strOutputBiblioRecPath,
                                          strBiblioRecPath,
                                          true,   // bDeleteSourceRecord
+                                        "file_reserve_source",  // 2024/4/28
+                                         out _,
                                          out output_timestamp,
                                          out strTempOutputRecPath,
                                          out strError_1);
@@ -7970,7 +8026,6 @@ out strError);
                         if (nRet == 0 && bBiblioMoved == false)
                             domOperLog = null;  // 没有必要写入操作日志记录
                     }
-
                 }
                 finally
                 {
@@ -7989,7 +8044,7 @@ out strError);
                     // 注：如果strNewBiblio为空，则表明仅仅进行了复制，并没有在目标记录写什么新内容
                     // 如果在日志记录中要查到到底复制了什么内容，可以看<oldRecord>元素的文本内容
                     // 注: 如果 strMergeStyle 为 reserve_target， 需要记载一下这个位置已经存在的记录
-                    
+
                     // 2024/3/29
                     var xml = "";
                     if (string.IsNullOrEmpty(strOutputBiblio) == false)
@@ -7997,7 +8052,7 @@ out strError);
                     else if (string.IsNullOrEmpty(strNewBiblioParam) == false)
                         xml = strNewBiblio;
                     var node = DomUtil.SetElementText(domOperLog.DocumentElement,
-                            "record", 
+                            "record",
                             xml);   // string.IsNullOrEmpty(strOutputBiblio) == false ? strOutputBiblio : strNewBiblio
                     node.SetAttribute("recPath", strOutputBiblioRecPath);
                     // 2024/3/29
@@ -8016,9 +8071,9 @@ out strError);
                 }
 
                 // 2015/1/21
-                // 注；如果 reserve_source 和 reserve_target 都没有，则默认 reserve_source
+                // 注: 如果 reserve_source 和 reserve_target 都没有，则默认 reserve_source
                 DomUtil.SetElementText(domOperLog.DocumentElement, "mergeStyle",
-        strMergeStyle);
+                    strMergeStyle);
 
                 DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
                     sessioninfo.UserID);
@@ -8104,6 +8159,10 @@ out strError);
             bool bStrict = true;    // 是否严格检查复制时丢失下级记录情况
             if (StringUtil.IsInList("loose", strStyle) == true)
                 bStrict = false;
+
+            // 2024/4/29
+            // 是否需要在移动的过程中主动丢弃来自源书目记录下级的记录。也就是说是否“不拷贝这些下级记录”
+            var missing_source_subrecord = StringUtil.IsInList("missing_source_subrecord", strStyle);
 
             // 1)
             // 探测书目记录有没有下属的实体记录(也顺便看看实体记录里面是否有流通信息)?
@@ -8338,11 +8397,12 @@ out strError);
             // 真正进行移动或者复制
             if (entityinfos != null && entityinfos.Count > 0)
             {
-                // TODO: 如果是复制, 则要为目标实体记录的测条码号增加一个前缀。或者受到strStyle控制，能决定在source或者target中加入前缀
+                // TODO: 如果是复制, 则要为目标实体记录的册条码号增加一个前缀。或者受到strStyle控制，能决定在source或者target中加入前缀
 
                 // 复制属于同一书目记录的全部实体记录
                 // parameters:
                 //      strAction   copy / move
+                //      strTargetBiblioRecPath  目标书目记录的路径。如果为空，表示不进行拷贝，但注意此种情况叠加 strAction 为 "move" 时依然要删除源下级记录
                 // return:
                 //      -2  目标实体库不存在，无法进行复制或者删除
                 //      -1  error
@@ -8350,7 +8410,7 @@ out strError);
                 nRet = CopyBiblioChildEntities(channel,
                     strAction,
                     entityinfos,
-                    strNewBiblioRecPath,
+                    missing_source_subrecord ? "" : strNewBiblioRecPath,
                     domOperLog,
                     out strError);
                 if (nRet == -1)
@@ -8399,11 +8459,11 @@ out strError);
                 //      -1  error
                 //      >=0  实际复制或者移动的实体记录数
                 nRet = this.OrderItemDatabase.CopyBiblioChildItems(channel,
-                strAction,
-                orderinfos,
-                strNewBiblioRecPath,
-                domOperLog,
-                out strError);
+            strAction,
+            orderinfos,
+                    missing_source_subrecord ? "" : strNewBiblioRecPath,
+            domOperLog,
+            out strError);
                 if (nRet == -1)
                 {
                     if (entityinfos.Count > 0)
@@ -8429,6 +8489,7 @@ out strError);
 
                     strWarning += "目标书目库 '" + strTargetBiblioDbName + "' 没有下属的订购库，已丢失来自源书目库下属的 " + orderinfos.Count + " 条订购记录; ";
                 }
+
                 if (nRet > 0)
                     nCopyCount += nRet;
             }
@@ -8441,11 +8502,11 @@ out strError);
                 //      -1  error
                 //      >=0  实际复制或者移动的实体记录数
                 nRet = this.IssueItemDatabase.CopyBiblioChildItems(channel,
-            strAction,
-            issueinfos,
-            strNewBiblioRecPath,
-            domOperLog,
-            out strError);
+        strAction,
+        issueinfos,
+                missing_source_subrecord ? "" : strNewBiblioRecPath,
+        domOperLog,
+        out strError);
                 if (nRet == -1)
                 {
                     if (entityinfos.Count > 0)
@@ -8473,6 +8534,7 @@ out strError);
 
                     strWarning += "目标书目库 '" + strTargetBiblioDbName + "' 没有下属的期库，已丢失来自源书目库下属的 " + issueinfos.Count + " 条期记录; ";
                 }
+
                 if (nRet > 0)
                     nCopyCount += nRet;
             }
@@ -8485,11 +8547,11 @@ out strError);
                 //      -1  error
                 //      >=0  实际复制或者移动的实体记录数
                 nRet = this.CommentItemDatabase.CopyBiblioChildItems(channel,
-            strAction,
-            commentinfos,
-            strNewBiblioRecPath,
-            domOperLog,
-            out strError);
+        strAction,
+        commentinfos,
+                missing_source_subrecord ? "" : strNewBiblioRecPath,
+        domOperLog,
+        out strError);
                 if (nRet == -1)
                 {
                     if (entityinfos.Count > 0)
@@ -8519,6 +8581,7 @@ out strError);
 
                     strWarning += "目标书目库 '" + strTargetBiblioDbName + "' 没有下属的评注库，已丢失来自源书目库下属的 " + commentinfos.Count + " 条评注记录; ";
                 }
+
                 if (nRet > 0)
                     nCopyCount += nRet;
             }
@@ -8732,12 +8795,15 @@ out strError);
             {
                 string strIdChangeList = "";
 
+                // 2024/4/28
+                string copy_style = GetCopyRecordMergeStyle(strMergeStyle);
+
                 // TODO: Copy后还要写一次？因为Copy并不写入新记录。
                 // 其实Copy的意义在于带走资源。否则还不如用Save+Delete
                 lRet = channel.DoCopyRecord(strOldRecPath,
                      strNewRecPath,
                      strAction == "onlymovebiblio" || strAction == "move" ? true : false,   // bDeleteSourceRecord
-                     strMergeStyle,
+                     copy_style,
                      out strIdChangeList,
                      out byte[] output_timestamp,
                      out strOutputRecPath,
@@ -8799,6 +8865,22 @@ out strError);
             return 0;
         ERROR1:
             return -1;
+        }
+
+        // 根据 CopyBiblioInfo() API 的 strMergeStyle 参数获得 dp2kernel 的 DoCopyRecord() API 的 merge_style 参数
+        public static string GetCopyRecordMergeStyle(string strMergeStyle)
+        {
+            // 2024/4/28
+            string copy_style = strMergeStyle;
+
+            // 注意：如果 reserve_source 和 reserve_target 都缺乏，则等同于 reserve_source
+            //  如果 reserve_source 和 reserve_target 同时具备，应该认为是一种错误情况，这里随机处理为当作 reserve_target
+            if (StringUtil.IsInList("reserve_target", strMergeStyle))
+                StringUtil.SetInList(ref copy_style, "file_reserve_target", true);
+            else
+                StringUtil.SetInList(ref copy_style, "file_reserve_source", true);
+
+            return copy_style;
         }
 
         bool UniqueSpaceDefined()

@@ -22,7 +22,7 @@ namespace DigitalPlatform.LibraryServer
         // 修改和删除违约金库、盘点库等杂项数据库记录
         // 注: 本函数不判断账户权限
         // parameters:
-        //      strStyle    如果包含 delete，表示要删除这条记录
+        //      strRefStyle    如果包含 delete，表示要删除这条记录
         public LibraryServerResult SetRecordInfo(
 SessionInfo sessioninfo,
 string strRecPath,
@@ -139,7 +139,8 @@ out byte[] baOutputTimestamp)
                 goto ERROR1;
             }
 
-            if (bExist)
+            // 2024/5/10 增加 ignorechecktimestamp 判断
+            if (bExist && StringUtil.IsInList("ignorechecktimestamp", strStyle) == false)
             {
                 // 观察时间戳是否发生变化
                 nRet = ByteArray.Compare(baTimestamp, exist_timestamp);
@@ -148,6 +149,7 @@ out byte[] baOutputTimestamp)
                     // 时间戳不相等了
                     baOutputTimestamp = exist_timestamp;
 
+                    result.Value = -1;  // 2024/5/6
                     if (bExist == false)
                         result.ErrorInfo = "保存操作发生错误: 数据库中的原记录 (路径为'" + strRecPath + "') 已被删除。";
                     else
@@ -309,12 +311,21 @@ out byte[] baOutputTimestamp)
             else
                 strNewXml = domNew.OuterXml;
 
+            // 2024/5/8
+            string style = "content";
+            /*
+            if (StringUtil.IsInList("ignorechecktimestamp", strStyle))
+                StringUtil.SetInList(ref style, "ignorechecktimestamp", true);
+            if (StringUtil.IsInList("checkcreatingtimestamp", strStyle))
+                StringUtil.SetInList(ref style, "checkcreatingtimestamp", true);
+            */
+            InheritTimestampStyle(ref style, strStyle);
             // 保存新记录
             lRet = channel.DoSaveTextRes(strRecPath,
                 strNewXml,
                 false,   // include preamble?
                 strMetadata,
-                "content",
+                style,  // "content",
                 exist_timestamp,
                 out baOutputTimestamp,
                 out strOutputRecPath,
@@ -386,6 +397,15 @@ out byte[] baOutputTimestamp)
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
             return result;
+        }
+
+        // 从 strRefStyle 继承两个和 timestamp 有关的子参数
+        public static void InheritTimestampStyle(ref string style, string strRefStyle)
+        {
+            if (StringUtil.IsInList("ignorechecktimestamp", strRefStyle))
+                StringUtil.SetInList(ref style, "ignorechecktimestamp", true);
+            if (StringUtil.IsInList("checkcreatingtimestamp", strRefStyle))
+                StringUtil.SetInList(ref style, "checkcreatingtimestamp", true);
         }
 
         // 权限判断
@@ -1552,7 +1572,7 @@ out error);
 
             // 2023/3/14
             // 检查 strDbName 里面的数据库名是否合法
-            if (ServerDatabaseUtility.IsUtilDbName(this.LibraryCfgDom, 
+            if (ServerDatabaseUtility.IsUtilDbName(this.LibraryCfgDom,
                 strDbName,
                 out string db_type) == false
                 || db_type != "publisher")

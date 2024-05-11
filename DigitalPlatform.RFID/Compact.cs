@@ -120,7 +120,7 @@ namespace DigitalPlatform.RFID
             }
 
             return v.ToString();
-            // return TrimLeft(BitConverter.ToUInt64(data, 0)).ToString();
+            // return TrimLeft(BitConverter.ToUInt64(data, 0)).OidToString();
         }
 
         // 检查字符串是否符合整型压缩的要求

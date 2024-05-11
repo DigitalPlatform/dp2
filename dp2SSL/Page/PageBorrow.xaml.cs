@@ -2235,6 +2235,7 @@ out string strError);
                         Debug.Assert(entity.TagInfo != null);
 
                         LogicChip chip = null;
+                        string error = null;
 
                         if (entity.TagInfo.Protocol == InventoryInfo.ISO15693)
                         {
@@ -2251,6 +2252,7 @@ out string strError);
                             // 注1: taginfo.EAS 在调用后可能被修改
                             // 注2: 本函数不再抛出异常。会在 ErrorInfo 中报错
                             var chip_info = RfidTagList.GetUhfChipInfo(entity.TagInfo);
+                            error = chip_info.ErrorInfo;
                             chip = chip_info.Chip;
                             /*
                             if (chip == null)
@@ -2271,6 +2273,10 @@ out string strError);
                             entity.OI = chip?.FindElement(ElementOID.OI)?.Text;
                             entity.AOI = chip?.FindElement(ElementOID.AOI)?.Text;
                         }
+
+                        // 2024/4/23
+                        if (string.IsNullOrEmpty(error) == false)
+                            entity.AppendError(error);
                     }
 
                     bool clearError = true;
@@ -2568,46 +2574,8 @@ out string strError);
             if (entity.Protocol != InventoryInfo.ISO18000P6C)
                 return false;
             var epc_bank = ByteArray.GetTimeStampByteArray(entity.UID);
-            return IsWhdt(epc_bank);
+            return GaoxiaoUtility.IsWhdt(epc_bank);
         }
-
-        // 根据 EPC Bank 判断是不是“望湖洞庭”格式
-        public static bool IsWhdt(byte[] epc_bank)
-        {
-            var parse_result = GaoxiaoUtility.ParseTag(epc_bank, null, ""); // 注意，没有包含 checkUMI 表示不要检查 UMI 和 ContentParameters 是否具备之间的关系
-            if (parse_result.PC == null
-                || parse_result.EpcInfo == null)
-                return false;
-            var pc = parse_result.PC;
-            // 注: 望湖洞庭有一批标签没有 User Bank 内容，但 EPC 内容和先前的无异
-            if (/*pc.UMI == true
-                && */pc.AFI == 0
-                && pc.XPC == false
-                && pc.ISO == false)
-            {
-
-            }
-            else
-                return false;
-
-            var epc_info = parse_result.EpcInfo;
-
-            // content parameter 16 24 28 30
-            var cp = new int[] { 16, 24, 28, 30 };
-            if (cp.SequenceEqual(epc_info.ContentParameters) == false)
-                return false;
-
-            if (epc_info.Reserve != 0)
-                return false;
-            if (epc_info.Picking != 1)
-                return false;
-            if (epc_info.Version != 5)
-                return false;
-            if (epc_info.EncodingType != 0)
-                return false;
-            return true;
-        }
-
 
         public static string GetCaption(string text)
         {

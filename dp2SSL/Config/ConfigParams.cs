@@ -72,6 +72,7 @@ namespace dp2SSL
             Dp2Password = App.DecryptPasssword(_config.Get("global", "dp2Password", ""));
 
             RfidURL = _config.Get("global", "rfidUrl", "");
+            OnlyReadEPC = _config.GetBoolean("uhf", "onlyReadEPC", false);
             FingerprintURL = _config.Get("global", "fingerprintUrl", "");
             FaceURL = _config.Get("global", "faceUrl", "");
 
@@ -137,6 +138,7 @@ namespace dp2SSL
             }
 
             _config.Set("global", "rfidUrl", RfidURL);
+            _config.SetBoolean("uhf", "onlyReadEPC", OnlyReadEPC);
             _config.Set("global", "fingerprintUrl", FingerprintURL);
             _config.Set("global", "faceUrl", FaceURL);
             _config.Set("global", "faceInputMultipleHits", FaceInputMultipleHits);
@@ -435,6 +437,28 @@ Description = "RFID 接口 URL 地址"
             }
         }
         private string _rfidURL;
+
+        // 默认值 false
+        [Display(
+Order = 1,
+Name = "只读取 EPC",
+Description = "只读取超高频标签的 EPC，以加速读取"
+)]
+        [Category("RFID UHF")]
+        public bool OnlyReadEPC
+        {
+            get => _onlyReadEPC;
+            set
+            {
+                if (_onlyReadEPC != value)
+                {
+                    _onlyReadEPC = value;
+                    OnPropertyChanged("OnlyReadEPC");
+                }
+            }
+        }
+        private bool _onlyReadEPC;
+
 
         // 默认值 ipc://FingerprintChannel/FingerprintServer
         [Display(
