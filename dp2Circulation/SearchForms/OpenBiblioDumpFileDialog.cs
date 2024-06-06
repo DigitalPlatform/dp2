@@ -75,7 +75,7 @@ namespace dp2Circulation
             this.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.Close();
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -296,6 +296,26 @@ namespace dp2Circulation
                 this.TryInvoke(() =>
                 {
                     this.checkBox_includeObjectFile.Checked = value;
+                });
+            }
+        }
+
+        // 2024/5/28
+        // 备份模式。意思是“是否要从服务器获得没有被过滤的原始记录 XML”
+        public bool BackupMode
+        {
+            get
+            {
+                return this.TryGet(() =>
+                {
+                    return this.checkBox_backup.Checked;
+                });
+            }
+            set
+            {
+                this.TryInvoke(() =>
+                {
+                    this.checkBox_backup.Checked = value;
                 });
             }
         }

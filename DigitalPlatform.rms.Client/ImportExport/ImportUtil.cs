@@ -16,6 +16,8 @@ using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.Core;
+using DigitalPlatform.LibraryServer;
+using System.Data.SqlTypes;
 
 namespace DigitalPlatform.rms.Client
 {
@@ -35,6 +37,19 @@ namespace DigitalPlatform.rms.Client
 
         public int Index = 0;
 
+        // 2024/6/4
+        // 导入时是否自动为 MARC 数据添加 997 字段
+        public bool AddUniformKey { get; set; }
+
+        public class AskMarcFileInfoResult : NormalResult
+        {
+            public string Syntax { get; set; }
+            public Encoding Encoding { get; set; } = Encoding.UTF8;
+        
+        }
+
+        public delegate AskMarcFileInfoResult delegate_ask(string fileName);
+
         // 准备输入
         // return:
         //      -1  出错
@@ -44,6 +59,7 @@ namespace DigitalPlatform.rms.Client
             IWin32Window owner,
             ApplicationInfo appInfo,
             string strInputFileName,
+            delegate_ask func_ask,
             out string strError)
         {
             strError = "";
@@ -129,47 +145,68 @@ namespace DigitalPlatform.rms.Client
             // ISO2709文件需要预先准备条件
             else if (this.FileType == ExportFileType.ISO2709File)
             {
-                string temp = "";
-                int nRet = (int)Application.OpenForms[0].Invoke(new Func<int>(() =>
+                // 2024/6/4
+                if (func_ask != null)
                 {
-                    // 询问encoding和marcsyntax
-                    using (OpenMarcFileDlg dlg = new OpenMarcFileDlg())
+                    var ask_result = func_ask.Invoke(strInputFileName);
+                    if (ask_result.Value != 0)
                     {
-                        Font font = GuiUtil.GetDefaultFont();
-                        if (font != null)
-                            dlg.Font = font;
-
-                        dlg.Text = "请指定要导入的 ISO2709 文件属性";
-                        dlg.FileName = strInputFileName;
-
-                        if (this.AppInfo != null)
-                            this.AppInfo.LinkFormState(dlg, "restree_OpenMarcFileDlg_input_state");
-                        dlg.ShowDialog(this.m_owner);
-                        if (this.AppInfo != null)
-                            this.AppInfo.UnlinkFormState(dlg);
-
-                        if (dlg.DialogResult != DialogResult.OK)
-                        {
-                            temp = "用户取消";
-                            return 1;
-                        }
-
-                        this.FileName = dlg.FileName;
-
-                        this.Stream = File.Open(this.FileName,
-            FileMode.Open,
-            FileAccess.Read);
-
-                        this.MarcSyntax = dlg.MarcSyntax;
-                        this.Encoding = dlg.Encoding;
-                        return 0;
+                        strError = ask_result.ErrorInfo;
+                        return ask_result.Value;
                     }
-                }));
-                if (nRet != 0)
-                {
-                    strError = temp;
-                    return nRet;
+                    this.FileName = strInputFileName;
+                    this.MarcSyntax = ask_result.Syntax;
+                    this.Encoding = ask_result.Encoding;
                 }
+                else
+                {
+                    string temp = "";
+                    // return:
+                    //      -1  出错
+                    //      0   正常
+                    //      1   用户放弃
+                    int nRet = (int)Application.OpenForms[0].Invoke(new Func<int>(() =>
+                    {
+                        // 询问encoding和marcsyntax
+                        using (OpenMarcFileDlg dlg = new OpenMarcFileDlg())
+                        {
+                            Font font = GuiUtil.GetDefaultFont();
+                            if (font != null)
+                                dlg.Font = font;
+
+                            dlg.Text = "请指定要导入的 ISO2709 文件属性";
+                            dlg.FileName = strInputFileName;
+                            dlg.IsOutput = false;   // 2024/6/4
+
+                            if (this.AppInfo != null)
+                                this.AppInfo.LinkFormState(dlg, "restree_OpenMarcFileDlg_input_state");
+                            dlg.ShowDialog(this.m_owner);
+                            if (this.AppInfo != null)
+                                this.AppInfo.UnlinkFormState(dlg);
+
+                            if (dlg.DialogResult != DialogResult.OK)
+                            {
+                                temp = "用户取消";
+                                return 1;
+                            }
+
+                            this.FileName = dlg.FileName;
+
+                            this.MarcSyntax = dlg.MarcSyntax;
+                            this.Encoding = dlg.Encoding;
+                            return 0;
+                        }
+                    }));
+                    if (nRet != 0)
+                    {
+                        strError = temp;
+                        return nRet;
+                    }
+                }
+
+                this.Stream = File.Open(this.FileName,
+FileMode.Open,
+FileAccess.Read);
             }
 
             return 0;
@@ -197,7 +234,7 @@ namespace DigitalPlatform.rms.Client
         // return:
         //		-1	出错
         //		0	正常
-        //		1	结束。此次API不返回有效的记录
+        //		1	结束。此次调用不返回有效的记录
         public int ReadOneRecord(out UploadRecord record,
             out string strError)
         {
@@ -209,18 +246,14 @@ namespace DigitalPlatform.rms.Client
 
             if (this.FileType == ExportFileType.XmlFile)
             {
-                string strXml = "";
-                string strPath = "";
-                string strTimestamp = "";
-
                 // 读入一条XML记录
                 // return:
                 //		-1	出错
                 //		0	正常
                 //		1	结束。此次API不返回有效的XML记录
-                nRet = ReadOneXmlRecord(out strXml,
-                    out strPath,
-                    out strTimestamp);
+                nRet = ReadOneXmlRecord(out string strXml,
+                    out string strPath,
+                    out string strTimestamp);
                 if (nRet == -1)
                 {
                     strError = "ReadOneXmlRecord() 出错";
@@ -240,7 +273,6 @@ namespace DigitalPlatform.rms.Client
                 record.RecordBody.Xml = strXml;
                 record.RecordBody.Path = respath.Path;  // 数据库名/ID
                 record.RecordBody.Timestamp = ByteArray.GetTimeStampByteArray(strTimestamp);
-                return 0;
             }
             else if (this.FileType == ExportFileType.BackupFile)
             {
@@ -302,13 +334,9 @@ namespace DigitalPlatform.rms.Client
                         this.Stream.Seek(lSave, SeekOrigin.Begin);
                     }
                 }
-
-                return 0;
             }
             else if (this.FileType == ExportFileType.ISO2709File)
             {
-                string strMARC = "";
-
                 // 从ISO2709文件中读入一条MARC记录
                 // return:
                 //	-2	MARC格式错
@@ -320,7 +348,7 @@ namespace DigitalPlatform.rms.Client
                     this.Encoding,
                     true,	// bRemoveEndCrLf,
                     true,	// bForce,
-                    out strMARC,
+                    out string strMARC,
                     out strError);
                 if (nRet == -2 || nRet == -1)
                 {
@@ -338,13 +366,10 @@ namespace DigitalPlatform.rms.Client
 
                 Debug.Assert(nRet == 0 || nRet == 1, "");
 
-
-                string strXml = "";
-
                 // 将MARC记录转换为xml格式
                 nRet = MarcUtil.Marc2Xml(strMARC,
                     this.MarcSyntax,
-                    out strXml,
+                    out string strXml,
                     out strError);
                 if (nRet == -1)
                     return -1;
@@ -354,10 +379,24 @@ namespace DigitalPlatform.rms.Client
                 record.RecordBody.Xml = strXml;
                 record.RecordBody.Path = "";
                 record.RecordBody.Timestamp = null;
-
-                return 0;
+            }
+            else
+            {
+                strError = $"无法识别的文件类型 '{this.FileType}'";
+                return -1;
             }
 
+            if (AddUniformKey 
+                && record != null 
+                && record.RecordBody != null
+                && string.IsNullOrEmpty(record.RecordBody.Xml) == false)
+            {
+                string xml = record.RecordBody.Xml;
+                LibraryServerUtil.CreateUniformKey(false,
+    ref xml,
+    out strError);
+                record.RecordBody.Xml = xml;
+            }
             return 0;
         }
 

@@ -1839,7 +1839,9 @@ namespace dp2Circulation
             old_timeout = channel.Timeout;
             channel.Timeout = new TimeSpan(0, 5, 0);
 
-            Stop stop = new Stop();
+            Stop stop = new Stop(); // TODO: _manager
+            // 2024/5/15
+            // stop.Register(Program.MainForm.stopManager, "");	// 和容器关联
 
             FileDownloadDialog dlg = new FileDownloadDialog();
             dlg.FormClosed += new FormClosedEventHandler(delegate (object o1, FormClosedEventArgs e1)
@@ -1849,6 +1851,8 @@ namespace dp2Circulation
                 {
                     channel.TryAbortIt();
                 }
+                // 2024/5/15
+                // stop.Unregister();
             });
             dlg.Font = this.Font;
             dlg.Show(this);

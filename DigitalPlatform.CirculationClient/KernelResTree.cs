@@ -16,7 +16,6 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.Core;
 using System.Diagnostics;
 using DigitalPlatform.LibraryServer;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 namespace DigitalPlatform.CirculationClient
 {
@@ -38,6 +37,9 @@ namespace DigitalPlatform.CirculationClient
         public event GetChannelEventHandler GetChannel = null;
 
         public event ReturnChannelEventHandler ReturnChannel = null;
+
+        // 配置文件发生变化
+        public event ConfigFileChangedEventHandle ConfigFileChanged = null;
 
         public string Lang { get; set; }
 
@@ -522,6 +524,14 @@ namespace DigitalPlatform.CirculationClient
             //    menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
+            menuItem = new MenuItem("全部刷新(&A)");
+            menuItem.Click += new System.EventHandler(this.menu_refreshAll);
+            contextMenu.MenuItems.Add(menuItem);
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
             // 
             menuItem = new MenuItem("允许复选(&M)");
             menuItem.Click += new System.EventHandler(this.menu_toggleCheckBoxes);
@@ -542,6 +552,21 @@ namespace DigitalPlatform.CirculationClient
             menuItem = new MenuItem("全选下级节点(&A)");
             menuItem.Click += new System.EventHandler(this.menu_checkAllSubNodes);
             // menuItem.Enabled = this.CheckBoxes;
+            contextMenu.MenuItems.Add(menuItem);
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem($"在 {GetNodePath(this.SelectedNode)} 下级创建新目录(&N)");
+            menuItem.Click += new System.EventHandler(this.menu_newDirectory);
+            if (this.SelectedNode != null
+                && (this.SelectedNode.ImageIndex == RESTYPE_SERVER
+                || this.SelectedNode.ImageIndex == RESTYPE_DB
+                || this.SelectedNode.ImageIndex == RESTYPE_FOLDER))
+                menuItem.Enabled = true;
+            else
+                menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
             // ---
@@ -718,6 +743,90 @@ namespace DigitalPlatform.CirculationClient
                 contextMenu.Show(this, new Point(e.X, e.Y));
         }
 
+        void menu_newDirectory(object sender, EventArgs e)
+        {
+            string strError = "";
+            if (this.SelectedNode == null)
+            {
+                strError = "尚未选择要在其下级创建新目录的节点";
+                goto ERROR1;
+            }
+
+            var dir_name = InputDlg.GetInput(this,
+                "在下级创建目录",
+                "目录名",
+                "",
+                this.Font);
+            if (dir_name == null)
+                return;
+
+            if (dir_name.StartsWith("/") || dir_name.StartsWith("\\"))
+            {
+                strError = $"目录名 '{dir_name}' 不合法。第一个字符不允许为斜杠";
+                goto ERROR1;
+            }
+
+            LibraryChannel channel = null;
+            TimeSpan old_timeout = new TimeSpan(0);
+
+            channel = this.CallGetChannel(out Looping looping);
+
+            old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 5, 0);
+            try
+            {
+                string strPath = GetNodePath(this.SelectedNode) + "/" + dir_name;
+
+                /*
+                // 节点类型
+                int type = this.SelectedNode.ImageIndex;
+
+                string strCurrentDirectory = "";
+                string strFileName = "";
+
+                if (type == RESTYPE_FILE)
+                {
+                    ParseFolderAndFileName(strPath,
+out strCurrentDirectory,
+out strFileName);
+                }
+                else
+                {
+                    strCurrentDirectory = strPath;
+                    strFileName = "";
+                }
+                */
+
+                // 2024/5/13
+                long nRet = channel.WriteRes(
+                    null,
+                    strPath,
+                    null,
+                    0,
+                    null,
+                    null,
+                    "createdir,autocreatedir",
+                    null,
+                    out _,
+                    out _,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+            }
+            finally
+            {
+                channel.Timeout = old_timeout;
+
+                this.CallReturnChannel(channel, looping);
+            }
+
+            // 刷新显示
+            this.Fill(this.SelectedNode);
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
         bool _hideConfirmMessageBox = false;
 
         private void menu_uploadFile(object sender, EventArgs e)
@@ -816,6 +925,14 @@ out string _);
             if (string.IsNullOrEmpty(e1.ErrorInfo) == false)
                 goto ERROR1;
 
+            // TODO: 获得上传成功的服务器一端的若干文件路径，然后触发 this.ConfigFileChanged 事件
+            /*
+            this.ConfigFileChanged?.Invoke(this, new ConfigFileChangedEventArgs
+            {
+                Path = strPath,
+                Condition = "created"
+            });
+            */
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -1125,6 +1242,17 @@ out string _);
             MessageBox.Show(this, strError);
         }
 
+        void menu_refreshAll(object sender, System.EventArgs e)
+        {
+            string strError = "";
+
+            Refresh(null);
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+
         void menu_refresh(object sender, System.EventArgs e)
         {
             string strError = "";
@@ -1230,6 +1358,7 @@ MessageBoxDefaultButton.Button2);
             if (result != DialogResult.Yes)
                 return;
 
+
             LibraryChannel channel = null;
             TimeSpan old_timeout = new TimeSpan(0);
 
@@ -1313,6 +1442,12 @@ MessageBoxDefaultButton.Button2);
                     if (nRet == -1)
                         goto ERROR1;
 
+                    this.ConfigFileChanged?.Invoke(this, new ConfigFileChangedEventArgs
+                    {
+                        Path = strPath,
+                        Condition = "deleted"
+                    });
+
 #if NO
                     if (nRet == 1)
                         this.SelectedNode.Remove(); // TODO: 删除任何文件后都要注意刷新去除相伴的 .~state 文件
@@ -1348,7 +1483,7 @@ MessageBoxDefaultButton.Button2);
             out string strCurrentDirectory,
             out string strFileName)
         {
-            if (strPath.StartsWith("!") 
+            if (strPath.StartsWith("!")
                 && strPath.StartsWith("!/") == false
                 && strPath.StartsWith("!\\") == false)
             {
@@ -1479,6 +1614,11 @@ MessageBoxDefaultButton.Button2);
                 if (nRet == -1)
                     goto ERROR1;
 
+                this.ConfigFileChanged?.Invoke(this, new ConfigFileChangedEventArgs
+                {
+                    Path = strPath,
+                    Condition = "changed"
+                });
             }
             finally
             {
@@ -1836,4 +1976,17 @@ out strError);
 
     public delegate void Delegate_end(bool bError);
 
+    // 2024/5/24
+    // 配置文件发生变化事件
+    public delegate void ConfigFileChangedEventHandle(object sender,
+ConfigFileChangedEventArgs e);
+
+    public class ConfigFileChangedEventArgs : EventArgs
+    {
+        // 配置文件路径。例如 “中文图书/cfgs/dp2circulation_marc_verify.cs”
+        public string Path { get; set; }
+
+        // 发生了什么改变。例如 changed/deleted/created
+        public string Condition { get; set; }
+    }
 }

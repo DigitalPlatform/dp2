@@ -39,6 +39,7 @@
             this.button_OK = new System.Windows.Forms.Button();
             this.checkBox_mimeFileExtension = new System.Windows.Forms.CheckBox();
             this.checkBox_usageFileExtension = new System.Windows.Forms.CheckBox();
+            this.checkBox_backup = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // label1
@@ -168,6 +169,16 @@
             this.checkBox_usageFileExtension.Text = "采用 usage 扩展名(&U)";
             this.checkBox_usageFileExtension.UseVisualStyleBackColor = true;
             // 
+            // checkBox_backup
+            // 
+            this.checkBox_backup.AutoSize = true;
+            this.checkBox_backup.Location = new System.Drawing.Point(22, 115);
+            this.checkBox_backup.Name = "checkBox_backup";
+            this.checkBox_backup.Size = new System.Drawing.Size(153, 25);
+            this.checkBox_backup.TabIndex = 11;
+            this.checkBox_backup.Text = "备份数据(&B)";
+            this.checkBox_backup.UseVisualStyleBackColor = true;
+            // 
             // OpenPatronXmlFileDialog
             // 
             this.AcceptButton = this.button_OK;
@@ -175,6 +186,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
             this.ClientSize = new System.Drawing.Size(840, 494);
+            this.Controls.Add(this.checkBox_backup);
             this.Controls.Add(this.checkBox_usageFileExtension);
             this.Controls.Add(this.checkBox_mimeFileExtension);
             this.Controls.Add(this.button_OK);
@@ -210,5 +222,6 @@
         private System.Windows.Forms.Button button_OK;
         private System.Windows.Forms.CheckBox checkBox_mimeFileExtension;
         private System.Windows.Forms.CheckBox checkBox_usageFileExtension;
+        private System.Windows.Forms.CheckBox checkBox_backup;
     }
 }

@@ -2287,6 +2287,37 @@ out strError);
             }
         }
 
+        // 和以前版本兼容
+        public long SetReaderInfo(
+    DigitalPlatform.Stop stop,
+    string strAction,
+    string strRecPath,
+    string strNewXml,
+    string strOldXml,
+    byte[] baOldTimestamp,
+    out string strExistingXml,
+    out string strSavedXml,
+    out string strSavedRecPath,
+    out byte[] baNewTimestamp,
+    out ErrorCodeValue kernel_errorcode,
+    out string strError)
+        {
+            return SetReaderInfo(
+    stop,
+    strAction,
+    strRecPath,
+    strNewXml,
+    strOldXml,
+    baOldTimestamp,
+    "",
+    out strExistingXml,
+    out strSavedXml,
+    out strSavedRecPath,
+    out baNewTimestamp,
+    out kernel_errorcode,
+    out strError);
+        }
+
         // 保存读者记录
         /// <summary>
         /// 写入读者记录。
@@ -2298,6 +2329,7 @@ out strError);
         /// <param name="strNewXml">新记录 XML</param>
         /// <param name="strOldXml">旧记录 XML</param>
         /// <param name="baOldTimestamp">时间戳</param>
+        /// <param name="strStyle">风格</param>
         /// <param name="strExistingXml">返回数据库中已经存在的记录的 XML</param>
         /// <param name="strSavedXml">返回实际保存的记录 XML</param>
         /// <param name="strSavedRecPath">返回实际保存记录的路径</param>
@@ -2316,6 +2348,7 @@ out strError);
             string strNewXml,
             string strOldXml,
             byte[] baOldTimestamp,
+            string strStyle,
             out string strExistingXml,
             out string strSavedXml,
             out string strSavedRecPath,
@@ -2340,6 +2373,7 @@ out strError);
                     strNewXml,
                     strOldXml,
                     baOldTimestamp,
+                    strStyle,
                     null,
                     null);
 
@@ -5076,6 +5110,8 @@ out strError);
         /// <param name="stop"></param>
         /// <param name="strSourceRecPath">源记录路径</param>
         /// <param name="strTargetRecPath">调用前设置目标记录路径；调用后返回实际移动到的目标记录路径</param>
+        /// <param name="strNewReader">要覆盖到目标位置的记录 XML 内容</param>
+        /// <param name="strStyle">处理风格</param>
         /// <param name="target_timestamp">返回目标记录的新时间戳</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>
@@ -5086,6 +5122,8 @@ out strError);
             DigitalPlatform.Stop stop,
             string strSourceRecPath,
             ref string strTargetRecPath,
+            string strNewReader,
+            string strStyle,
             out byte[] target_timestamp,
             out string strError)
         {
@@ -5098,6 +5136,8 @@ out strError);
                 IAsyncResult soapresult = this.ws.BeginMoveReaderInfo(
                     strSourceRecPath,
                     ref strTargetRecPath,
+                    strNewReader,
+                    strStyle,
                     null,
                     null);
 

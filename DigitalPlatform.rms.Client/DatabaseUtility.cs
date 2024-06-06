@@ -10,6 +10,8 @@ using DigitalPlatform.IO;
 using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.Core;
 using DigitalPlatform.Text;
+using System.Data.SqlClient;
+using System.Runtime.CompilerServices;
 
 namespace DigitalPlatform.rms.Client
 {
@@ -31,19 +33,29 @@ namespace DigitalPlatform.rms.Client
             File.Copy(strSourcePath, strTarget);
         }
 
+        static void CopyTempFile(string strSourcePath,
+string strTargetPath)
+        {
+            PathUtil.TryCreateDir(Path.GetDirectoryName(strTargetPath));
+            File.Copy(strSourcePath, strTargetPath);
+        }
+
         public delegate void delegate_created(string strDatabaseName);
 
         // 根据数据库定义文件，创建若干数据库
         // 注: 如果发现同名数据库已经存在，先删除再创建
         // parameters:
-        //      strTempDir  临时目录路径。调用前要创建好这个临时目录。调用后需要删除这个临时目录
+        //      strTempDir  临时目录路径(注意，不是安装包的模板目录)。调用前要创建好这个临时目录。调用后需要删除这个临时目录
         //      style       如果包含 continueLoop，在出错的时候会尽量继续循环向后处理
+        //      filter_dbnames  数据库名列表，在此列表中的数据库才会被创建。也就是说 .zip 文件中的一些不在列表中的数据库会被忽略创建
+        //                      如果为 null，表示 .zip 文件中的所有数据库都会被创建
         public static int CreateDatabases(
             Stop stop,
             RmsChannel channel,
             string strDbDefFileName,
             string strTempDir,
             string style,
+            List<string> filter_dbnames,
             delegate_created func_created,
             out string strError)
         {
@@ -84,8 +96,15 @@ namespace DigitalPlatform.rms.Client
                 if (info.Name == "_datadir")
                     continue;
 
+                // 从 .zip 文件中展开的目录中，位于数据库名的子目录下的 cfgs 子目录
                 string strTemplateDir = Path.Combine(info.FullName, "cfgs");
+
                 string strDatabaseName = info.Name;
+
+                if (filter_dbnames != null
+                    && filter_dbnames.IndexOf(strDatabaseName) == -1)
+                    continue;
+
                 // 数据库是否已经存在？
                 // return:
                 //      -1  error
@@ -225,71 +244,86 @@ namespace DigitalPlatform.rms.Client
                 return -1;
             }
 
-            lRet = channel.DoInitialDB(strDatabaseName,
-                out strError);
-            if (lRet == -1)
+            bool succeed = false;   // 后续操作是否完全成功
+            try
             {
-                strError = "初始化数据库 " + strDatabaseName + " 时发生错误: " + strError;
-                // TODO: 初始化数据库失败，但数据库创建是成功的。需要在退出前尝试删除这个数据库
-                {
-                    // 如果发现同名数据库已经存在，先删除
-                    lRet = channel.DoDeleteDB(strDatabaseName, out string strError1);
-                    if (lRet == -1)
-                    {
-                        if (channel.IsNotFound() == false)
-                        {
-                            strError += "\r\n尝试删除刚创建的此数据库时又遇到出错: " + strError1;
-                            return -1;
-                        }
-                    }
-                    else
-                        strError += "\r\n已经删除此数据库";
-                }
-                return -1;
-            }
-
-            // 增补其他数据从属对象
-
-            /*
-            List<string> subdirs = new List<string>();
-            // 创建所有目录对象
-            GetSubdirs(strTemplateDir, ref subdirs);
-            for (int i = 0; i < subdirs.Count; i++)
-            {
-                string strDiskPath = subdirs[i];
-
-                // 反过来推算为逻辑路径
-                // 或者预先在获得的数组中就存放为部分(逻辑)路径？
-                string strPath = "";
-
-                // 在服务器端创建对象
-                // parameters:
-                //      strStyle    风格。当创建目录的时候，为"createdir"，否则为空
-                // return:
-                //		-1	错误
-                //		1	以及存在同名对象
-                //		0	正常返回
-                nRet = NewServerSideObject(
-                    channel,
-                    strPath,
-                    "createdir",
-                    null,
-                    null,
+                lRet = channel.DoInitialDB(strDatabaseName,
                     out strError);
+                if (lRet == -1)
+                {
+                    strError = "初始化数据库 " + strDatabaseName + " 时发生错误: " + strError;
+                    // TODO: 初始化数据库失败，但数据库创建是成功的。需要在退出前尝试删除这个数据库
+                    {
+                        // 如果发现同名数据库已经存在，先删除
+                        lRet = channel.DoDeleteDB(strDatabaseName,
+                            out string strError1);
+                        if (lRet == -1)
+                        {
+                            if (channel.IsNotFound() == false)
+                            {
+                                strError += "\r\n尝试删除刚创建的此数据库时又遇到出错: " + strError1;
+                                return -1;
+                            }
+                        }
+                        else
+                            strError += "\r\n已经删除此数据库";
+                    }
+                    return -1;
+                }
+
+                // 增补其他数据从属对象
+
+                /*
+                List<string> subdirs = new List<string>();
+                // 创建所有目录对象
+                GetSubdirs(strTemplateDir, ref subdirs);
+                for (int i = 0; i < subdirs.Count; i++)
+                {
+                    string strDiskPath = subdirs[i];
+
+                    // 反过来推算为逻辑路径
+                    // 或者预先在获得的数组中就存放为部分(逻辑)路径？
+                    string strPath = "";
+
+                    // 在服务器端创建对象
+                    // parameters:
+                    //      strStyle    风格。当创建目录的时候，为"createdir"，否则为空
+                    // return:
+                    //		-1	错误
+                    //		1	以及存在同名对象
+                    //		0	正常返回
+                    nRet = NewServerSideObject(
+                        channel,
+                        strPath,
+                        "createdir",
+                        null,
+                        null,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                }
+                    // 列出每个目录中的文件，并在服务器端创建之
+                    // 注意模板目录下的文件，被当作cfgs中的文件来创建
+                 * */
+
+                // 2024/5/16
+                nRet = NewServerSideDirectory(
+        channel,
+        strDatabaseName + "/cfgs",
+        strTemplateDir,
+        string.IsNullOrEmpty(strTempDir) ? null : Path.Combine(strTempDir, strDatabaseName + "/cfgs"),
+        out strError);
                 if (nRet == -1)
                     return -1;
-            }
-                // 列出每个目录中的文件，并在服务器端创建之
-                // 注意模板目录下的文件，被当作cfgs中的文件来创建
-             * */
-
+#if REMOVED
             DirectoryInfo di = new DirectoryInfo(strTemplateDir);
-            FileInfo[] fis = di.GetFiles();
+            var fis = di.GetFileSystemInfos();
 
             // 创建所有文件对象
-            for (int i = 0; i < fis.Length; i++)
+            // for (int i = 0; i < fis.Length; i++)
+            foreach (var fi in fis)
             {
-                string strName = fis[i].Name;
+                string strName = fi.Name;
                 if (strName == "." || strName == "..")
                     continue;
 
@@ -297,16 +331,11 @@ namespace DigitalPlatform.rms.Client
                     || strName.ToLower() == "browse")
                     continue;
 
-                string strFullPath = fis[i].FullName;
+                string strFullPath = fi.FullName;
 
-                nRet = FileUtil.ConvertGb2312TextfileToUtf8(strFullPath,
-                    out strError);
-                if (nRet == -1)
-                    return -1;
-
-                CopyTempFile(strFullPath, strTempDir, strDatabaseName);
-
-                using (Stream s = new FileStream(strFullPath, FileMode.Open))
+                // 2024/5/16
+                // 创建子目录
+                if (fi is DirectoryInfo)
                 {
                     string strPath = strDatabaseName + "/cfgs/" + strName;
                     // 在服务器端创建对象
@@ -319,12 +348,157 @@ namespace DigitalPlatform.rms.Client
                     nRet = NewServerSideObject(
                         channel,
                         strPath,
-                        "",
-                        s,
+                        "createdir",
+                        null,
                         null,
                         out strError);
                     if (nRet == -1)
                         return -1;
+
+                    continue;
+                }
+
+                if (fi is FileInfo)
+                {
+                    nRet = FileUtil.ConvertGb2312TextfileToUtf8(strFullPath,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+
+                    CopyTempFile(strFullPath, strTempDir, strDatabaseName);
+
+                    using (Stream s = new FileStream(strFullPath, FileMode.Open))
+                    {
+                        string strPath = strDatabaseName + "/cfgs/" + strName;
+                        // 在服务器端创建对象
+                        // parameters:
+                        //      strStyle    风格。当创建目录的时候，为"createdir"，否则为空
+                        // return:
+                        //		-1	错误
+                        //		1	以及存在同名对象
+                        //		0	正常返回
+                        nRet = NewServerSideObject(
+                            channel,
+                            strPath,
+                            "",
+                            s,
+                            null,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+                    }
+                }
+            }
+#endif
+                succeed = true;
+                return 0;
+            }
+            finally
+            {
+                // 2024/5/16
+                // 如果中途失败，要把创建到一半的数据库删除掉
+                if (succeed == false)
+                {
+                    lRet = channel.DoDeleteDB(strDatabaseName,
+        out string strError1);
+                    // TODO: 如果删除失败，要写入错误日志文件
+                }
+
+            }
+        }
+
+        // parameters:
+        //      strServerPath   例如 "中文图书/cfgs"
+        //      strOutputDir  将创建数据库过程中，用到的配置文件会自动汇集拷贝到此目录。如果 == null，则不拷贝
+        static int NewServerSideDirectory(
+            RmsChannel channel,
+            string strServerPath,
+            string strTemplateDir,
+            string strOutputDir,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            DirectoryInfo di = new DirectoryInfo(strTemplateDir);
+            var fis = di.GetFileSystemInfos();
+
+            // 创建所有文件和子目录对象
+            foreach (var fi in fis)
+            {
+                string strName = fi.Name;
+                if (strName == "." || strName == "..")
+                    continue;
+
+                if (strName.ToLower() == "keys"
+                    || strName.ToLower() == "browse")
+                    continue;
+
+                string strFullPath = fi.FullName;
+                string strPath = strServerPath + "/" + strName;
+
+                // 2024/5/16
+                // 创建子目录
+                if (fi is DirectoryInfo)
+                {
+                    // 在服务器端创建对象
+                    // parameters:
+                    //      strStyle    风格。当创建目录的时候，为"createdir"，否则为空
+                    // return:
+                    //		-1	错误
+                    //		1	以及存在同名对象
+                    //		0	正常返回
+                    nRet = NewServerSideObject(
+                        channel,
+                        strPath,
+                        "createdir",
+                        null,
+                        null,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+
+                    nRet = NewServerSideDirectory(
+    channel,
+    strPath,
+    Path.Combine(strTemplateDir, strName),
+    string.IsNullOrEmpty(strOutputDir) ? null : Path.Combine(strOutputDir, strName),
+    out strError);
+                    if (nRet == -1)
+                        return -1;
+                    continue;
+                }
+
+                if (fi is FileInfo)
+                {
+                    nRet = FileUtil.ConvertGb2312TextfileToUtf8(strFullPath,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+
+                    // CopyTempFile(strFullPath, strTempDir, strDatabaseName);
+                    if (string.IsNullOrEmpty(strOutputDir) == false)
+                        CopyTempFile(strFullPath, Path.Combine(strOutputDir, strName));
+
+                    using (Stream s = new FileStream(strFullPath, FileMode.Open))
+                    {
+                        // 在服务器端创建对象
+                        // parameters:
+                        //      strStyle    风格。当创建目录的时候，为"createdir"，否则为空
+                        // return:
+                        //		-1	错误
+                        //		1	以及存在同名对象
+                        //		0	正常返回
+                        nRet = NewServerSideObject(
+                            channel,
+                            strPath,
+                            "",
+                            s,
+                            null,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+                    }
                 }
             }
 

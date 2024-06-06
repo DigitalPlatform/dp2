@@ -11,6 +11,7 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.dp2.Statis;
+using System.Runtime.CompilerServices;
 
 namespace dp2Catalog
 {
@@ -437,11 +438,16 @@ namespace dp2Catalog
 
             if (bCut == true)
             {
+                list.BeginUpdate();
+                ListViewUtil.ClearSelection(list);
+                /*
                 for (int i = indices.Count - 1; i >= 0; i--)
                 {
                     int index = indices[i];
                     list.Items.RemoveAt(index);
                 }
+                */
+                list.EndUpdate();
             }
 
             form.Cursor = oldCursor;

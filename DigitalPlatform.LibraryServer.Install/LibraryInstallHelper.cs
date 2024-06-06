@@ -935,6 +935,7 @@ RestoreLibraryParam param
                         strTempDir,
                         "",
                         null,
+                        null,
                         out strError);
                     if (nRet == -1)
                     {
@@ -1364,6 +1365,7 @@ RestoreLibraryParam param
             int nRet = import_util.Begin(null,
                 null,   // this.AppInfo,
                 strBackupFileName,
+                null,
                 out strError);
             if (nRet == -1 || nRet == 1)
                 return -1;
@@ -1733,7 +1735,7 @@ RestoreLibraryParam param
                         target_dburls = temp;
                     }
                     */
-                    EndFastAppend(stop,
+                    EndFastAppend(null, // stop,
     channel,
     target_dburls);
                 }
@@ -1748,7 +1750,8 @@ RestoreLibraryParam param
             int nRet = 0;
             foreach (string url in target_dburls)
             {
-                if (stop?.State != 0)
+                if (stop != null
+                    && stop?.State != 0)
                     throw new Exception("快速导入收尾阶段被强行中断，恢复没有完成");
 
                 if (stop != null)
@@ -1760,19 +1763,22 @@ RestoreLibraryParam param
                     // TODO: 在错误日志中记载开始和结束时间
                     // 如果捕获到异常，还要记载一下尚未来得及处理的 url
                     //                  start_endfastappend 启动“结束快速追加”任务。返回 0 表示任务启动并已经完成；返回 1 表示任务启动成功，但还需要后面用探寻功能来观察它是否结束
+                    // return:
+                    //      2   本次已经减少计数 1，但依然不够，还剩下一定的计数当重新请求直到计数为零才会自动启动“收尾快速导入”任务
                     nRet = ManageKeysIndex(
                         channel,
                         url,
                         "start_endfastappend",
                         "正在对数据库 " + url + " 启动快速导入模式的收尾工作，请耐心等待 ...",
                         out string strQuickModeError);
-                    if (nRet == -1)
+                    if (nRet == -1 || nRet == 2)
                         throw new Exception(strQuickModeError);
                     if (nRet == 1)
                     {
                         while (true)
                         {
-                            if (stop?.State != 0)
+                            if (stop != null
+                                && stop?.State != 0)
                                 throw new Exception("快速导入收尾阶段被强行中断，恢复没有完成");
 
                             //                  detect_endfastappend 探寻任务的状态。返回 0 表示任务尚未结束; 1 表示任务已经结束
@@ -1821,10 +1827,10 @@ RestoreLibraryParam param
 
         static int ManageKeysIndex(
             RmsChannel channel,
-    string strDbUrl,
-    string strAction,
-    string strMessage,
-    out string strError)
+            string strDbUrl,
+            string strAction,
+            string strMessage,
+            out string strError)
         {
             strError = "";
 

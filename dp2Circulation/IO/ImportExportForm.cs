@@ -812,6 +812,13 @@ Program.MainForm.ActivateFixPage("history")
                     styles.Add("force");
                 */
             }
+
+            // 2024/5/23
+            if (strAction == "new" && Global.IsAppendRecPath(strPath) == false)
+                styles.Add("ifExist:continue");
+            if (strAction == "change" && Global.IsAppendRecPath(strPath) == false)
+                styles.Add("ifNotExist:continue");
+
             string strStyle = StringUtil.MakePathList(styles);
 
             // 2021/8/27
@@ -1547,7 +1554,7 @@ out strError);
                         throw new Exception($"下级记录在 bdf 文件中记载的原始路径为 '{strPath}'，无法获得 ID 部分");
 
                     string current_dbName = Program.MainForm.GetItemDbName(
-                        Global.GetDbName(info.BiblioRecPath), 
+                        Global.GetDbName(info.BiblioRecPath),
                         strRootElementName);    // 2024/3/7
                     if (dbName != current_dbName)
                     {
@@ -1727,12 +1734,18 @@ out strError);
 
                 item.NewRecPath = strNewPath;
                 item.NewRecord = strXml;
-                item.NewTimestamp = ByteArray.GetTimeStampByteArray(strTimestamp);
+                item.NewTimestamp = null;
 
                 item.OldRecord = "";
-                item.OldTimestamp = null;
+                // 注: action 为 new 时，用 .OldTimestamp 运载时间戳
+                item.OldTimestamp = ByteArray.GetTimeStampByteArray(strTimestamp);
 
                 item.Style = strStyle;
+
+                // 2024/5/23
+                // 如果路径位置存在原记录，要继续
+                if (Global.IsAppendRecPath(item.NewRecPath) == false)
+                    item.Style += ",ifExist:continue";
 
                 entityArray.Add(item);
             }

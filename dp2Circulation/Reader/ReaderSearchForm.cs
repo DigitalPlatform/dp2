@@ -13,10 +13,12 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Runtime.CompilerServices;
 using System.Linq;
+using System.Globalization;
 
 using ClosedXML.Excel;
 
 using static dp2Circulation.ReaderInfoForm;
+using dp2Circulation.Reader;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
@@ -33,8 +35,6 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.LibraryServer;
-using dp2Circulation.Reader;
-using System.Globalization;
 
 namespace dp2Circulation
 {
@@ -1972,6 +1972,7 @@ MessageBoxDefaultButton.Button2);
                 //      -1  出错。包括用户中断的情况
                 //      >=0 实际处理的读者记录数
                 int nRet = this.ProcessSelectedPatrons(
+                    "id,xml,timestamp",
                     (channel, strRecPath, dom, timestamp) =>
                     {
                         this.ShowMessage("正在处理读者记录 " + strRecPath);
@@ -4855,6 +4856,8 @@ MessageBoxDefaultButton.Button1);
         looping.Progress,
         strCurrentRecPath,
         ref strTargetRecPath,
+        "",
+        "",
         out target_timestamp,
         out strError);
                     if (lRet == -1)
@@ -4989,6 +4992,14 @@ MessageBoxDefaultButton.Button2);
                 }
             }
 
+            if (dlg.BackupMode)
+                MessageBox.Show(this, "警告: 以备份方式导出的读者 XML 文件会含有(Hash 以后的)密码等敏感信息，请注意妥善保管");
+
+            var backup_mode = dlg.BackupMode;
+            var format = "id,xml,timestamp";
+            if (backup_mode)
+                format = "id,xml:backup,timestamp";
+
             var looping = BeginLoop(this.DoStop, "正在导出读者记录到 XML 文件 ...");
 
             string strOutputFileName = dlg.FileName;
@@ -5010,64 +5021,65 @@ MessageBoxDefaultButton.Button2);
                     //      -1  出错。包括用户中断的情况
                     //      >=0 实际处理的读者记录数
                     nRet = this.ProcessSelectedPatrons(
-                    (channel, strRecPath, dom, timestamp) =>
-                    {
-                        this.ShowMessage("正在处理读者记录 " + strRecPath);
-
-                        DomUtil.RemoveEmptyElements(dom.DocumentElement);
-
-                        // TODO: 要检查一下代码，看看到底是什么地方为读者记录的根元素添加了一个值为空的 expireDate 属性
-                        dom.DocumentElement.RemoveAttribute("expireDate");
-
-                        ResPath respathtemp = new ResPath();
-                        respathtemp.Url = channel.Url;
-                        respathtemp.Path = strRecPath;
-
-                        // 给根元素设置几个参数
-                        DomUtil.SetAttr(dom.DocumentElement, "path", DpNs.dprms, respathtemp.FullPath);
-                        DomUtil.SetAttr(dom.DocumentElement, "timestamp", DpNs.dprms, ByteArray.GetHexTimeStampString(timestamp));
-
-                        // 导出对象文件
-                        if (dlg.IncludeObjectFile)
+                        format,
+                        (channel, strRecPath, dom, timestamp) =>
                         {
-                            List<string> extensionStyles = new List<string>(); ;
-                            if (dlg.MimeFileExtension)
-                                extensionStyles.Add("mimeFileExtension");
-                            if (dlg.UsageFileExtension)
-                                extensionStyles.Add("usageFileExtension");
+                            this.ShowMessage("正在处理读者记录 " + strRecPath);
 
-                            REDO_WRITEOBJECTS:
-                            // 将记录中的对象资源写入外部文件
-                            nRet = BiblioSearchForm.WriteObjectFiles(looping.Progress,
-                    channel,
-                    strRecPath,
-                    ref dom,
-                    dlg.ObjectDirectoryName,
-                    StringUtil.MakePathList(extensionStyles),
-                    out strError);
-                            if (nRet == -1)
+                            DomUtil.RemoveEmptyElements(dom.DocumentElement);
+
+                            // TODO: 要检查一下代码，看看到底是什么地方为读者记录的根元素添加了一个值为空的 expireDate 属性
+                            dom.DocumentElement.RemoveAttribute("expireDate");
+
+                            ResPath respathtemp = new ResPath();
+                            respathtemp.Url = channel.Url;
+                            respathtemp.Path = strRecPath;
+
+                            // 给根元素设置几个参数
+                            DomUtil.SetAttr(dom.DocumentElement, "path", DpNs.dprms, respathtemp.FullPath);
+                            DomUtil.SetAttr(dom.DocumentElement, "timestamp", DpNs.dprms, ByteArray.GetHexTimeStampString(timestamp));
+
+                            // 导出对象文件
+                            if (dlg.IncludeObjectFile)
                             {
-                                if (looping.Stopped)
-                                    return false;
+                                List<string> extensionStyles = new List<string>(); ;
+                                if (dlg.MimeFileExtension)
+                                    extensionStyles.Add("mimeFileExtension");
+                                if (dlg.UsageFileExtension)
+                                    extensionStyles.Add("usageFileExtension");
 
-                                DialogResult temp_result = MessageBox.Show(this,
-                strError + "\r\n\r\n是否重试?\r\n\r\n(Yes: 重试; No: 放弃导出本记录的对象，但继续后面的处理; Cancel: 放弃全部处理)",
-                "BiblioSearchForm",
-                MessageBoxButtons.YesNoCancel,
-                MessageBoxIcon.Question,
-                MessageBoxDefaultButton.Button1);
-                                if (temp_result == System.Windows.Forms.DialogResult.Yes)
-                                    goto REDO_WRITEOBJECTS;
-                                if (temp_result == DialogResult.Cancel)
-                                    return false;
+                                REDO_WRITEOBJECTS:
+                                // 将记录中的对象资源写入外部文件
+                                nRet = BiblioSearchForm.WriteObjectFiles(looping.Progress,
+                        channel,
+                        strRecPath,
+                        ref dom,
+                        dlg.ObjectDirectoryName,
+                        StringUtil.MakePathList(extensionStyles),
+                        out strError);
+                                if (nRet == -1)
+                                {
+                                    if (looping.Stopped)
+                                        return false;
+
+                                    DialogResult temp_result = MessageBox.Show(this,
+                    strError + "\r\n\r\n是否重试?\r\n\r\n(Yes: 重试; No: 放弃导出本记录的对象，但继续后面的处理; Cancel: 放弃全部处理)",
+                    "BiblioSearchForm",
+                    MessageBoxButtons.YesNoCancel,
+                    MessageBoxIcon.Question,
+                    MessageBoxDefaultButton.Button1);
+                                    if (temp_result == System.Windows.Forms.DialogResult.Yes)
+                                        goto REDO_WRITEOBJECTS;
+                                    if (temp_result == DialogResult.Cancel)
+                                        return false;
+                                }
                             }
-                        }
 
-                        dom.DocumentElement.WriteTo(writer);
+                            dom.DocumentElement.WriteTo(writer);
 
-                        count++;
-                        return true;
-                    },
+                            count++;
+                            return true;
+                        },
                     out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -7851,10 +7863,13 @@ dlg.UiState);
         // 通用的，遍历和处理读者记录的函数
         // 该函数的弱点是不能按照特殊风格来获取读者记录，而 ProcessPatrons() 能做到
         // 优点是速度特别快
+        // parameters:
+        //      format  记录格式。一般为 "id,xml,timestamp"
         // return:
         //      -1  出错。包括用户中断的情况
         //      >=0 实际处理的读者记录数
         public int ProcessSelectedPatrons(
+            string format,
             Delegate_processPatron func,
             out string strError)
         {
@@ -7866,6 +7881,8 @@ dlg.UiState);
                 return -1;
             }
 
+            var xml_sub_params = StringUtil.GetParameterByPrefix(format, "xml");
+            var backup_mode = (xml_sub_params == "backup");
             /*
             // 读者信息缓存
             // 如果已经初始化，则保持
@@ -7905,7 +7922,8 @@ dlg.UiState);
                 ListViewPatronLoader loader = new ListViewPatronLoader(channel,
                     looping.Progress,
                     items,
-                    this.BiblioTable);
+                    backup_mode ? new Hashtable() : this.BiblioTable,   // 备份模式下，不能用当前 ReaderSearchForm 的 CacheTable，因为这里面都是非备份模式下获得的读者 XML 记录，没有 password 元素。另外，备份模式获得的敏感读者 XML 也不允许进入 this.CacheTable 被后面的一般功能用到
+                    format);
                 loader.DbTypeCaption = this.DbTypeCaption;
 
                 loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
@@ -9860,15 +9878,17 @@ out strError);
         /// <param name="stop">停止对象</param>
         /// <param name="items">ListViewItem 数组</param>
         /// <param name="cacheTable">用于缓存的 Hashtable</param>
+        /// <param name="format">记录格式</param>
         public ListViewPatronLoader(LibraryChannel channel,
             Stop stop,
             List<ListViewItem> items,
-            Hashtable cacheTable)
+            Hashtable cacheTable,
+            string format = "id,xml,timestamp")
         {
             m_loader = new BrowseLoader();
             m_loader.Channel = channel;
             m_loader.Stop = stop;
-            m_loader.Format = "id,xml,timestamp";
+            m_loader.Format = format;   // 2024/5/26
 #if NO
             if (this.Prompt != null)
                 m_loader.Prompt += m_loader_Prompt;

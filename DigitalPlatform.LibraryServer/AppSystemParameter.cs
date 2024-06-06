@@ -618,7 +618,7 @@ namespace DigitalPlatform.LibraryServer
                             // TODO: 将来library.xml格式修改后，这部分可以免去了
                             XmlNodeList nodes = dom.DocumentElement.SelectNodes("database");
                             // for (int i = 0; i < nodes.Count; i++)
-                            foreach(XmlElement nodeDatabase in nodes)
+                            foreach (XmlElement nodeDatabase in nodes)
                             {
                                 // XmlNode nodeDatabase = nodes[i];
 
@@ -1016,6 +1016,9 @@ namespace DigitalPlatform.LibraryServer
                 // 获得内核数据库原始定义
                 if (strCategory == "database_def")
                 {
+                    // 2024/5/10
+                    this.CheckVdbsThrow();
+
                     // strName参数不能为空。本功能只能得到一个数据库的定义，如果要得到全部数据库的定义，请使用ManageDatabase API的getinfo子功能
                     nRet = this.vdbs.GetDatabaseDef(
                         strName,
@@ -1381,11 +1384,11 @@ namespace DigitalPlatform.LibraryServer
         //      可能会抛出异常
         public int SetSystemParameter(
             SessionInfo sessioninfo,
-    string strCategory,
-    string strName,
-    string strValue,
-    out bool succeed,
-    out string strError)
+            string strCategory,
+            string strName,
+            string strValue,
+            out bool succeed,
+            out string strError)
         {
             strError = "";
             succeed = false;
@@ -1956,7 +1959,18 @@ namespace DigitalPlatform.LibraryServer
                             // 2024/4/3
                             // Undo 刚才对 library.xml 的修改
                             root.InnerXml = strOldInnerXml;
+                            // 2024/5/13
+                            {
+                                nRet = app.InitialVdbs(app.GetRmsChannel(sessioninfo),  // sessioninfo.Channels,
+    out strError);
+                                if (nRet != -1 && app.vdbs != null)
+                                {
+                                    // Undo 以后 vdbs 重新初始化成功，系统处于正常状态
+                                }
+                            }
                             strError = $"library.xml 中 virtualDatabases 元素内容被修改后，重新初始化 vdbs 时出错: {strError}。刚才对 virtualDatabases 元素内容的修改已被取消(注: 若要查看引发错误的内容，您不应该在 library.xml 中查看 virtualDatabase 元素内容，而要去查看 SetSystemParameter() API 的 strValue 参数值)";
+                            if (app.vdbs == null)
+                                this.WriteErrorLog($"*** SetSystemParameter() 过程中出现致命错误，app.vdbs 为 null 已处于不正常状态。请在日志恢复完成后，手动修正故障: {strError}");
                             goto ERROR1;
                         }
 
@@ -2018,7 +2032,7 @@ namespace DigitalPlatform.LibraryServer
                 }
 
             END1:
-                succeed = true; 
+                succeed = true;
                 return nRet;
             ERROR1:
                 return -1;

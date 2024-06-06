@@ -2103,5 +2103,43 @@ MessageBoxDefaultButton.Button2);
 
             MessageBox.Show(this, "OK");
         }
+
+        private void button_addCrLf_countRecords_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            this.button_addCrLf_countRecords.Enabled = false;
+            try
+            {
+                var source_filename = this.textBox_addCrLf_sourceFilename.Text;
+
+                long count = 0;
+                using (var stream_in = File.OpenRead(source_filename))
+                {
+                    while (true)
+                    {
+                        int nRet = stream_in.ReadByte();
+                        if (nRet == -1)
+                            break;
+                        if ((char)nRet == 29)
+                            count++;
+                    }
+                }
+
+                MessageBox.Show(this, $"文件 {source_filename} 中包含 {count} 个 MARC 记录");
+                return;
+            }
+            catch (Exception ex)
+            {
+                strError = $"统计出现异常: {ex.Message}";
+                goto ERROR1;
+            }
+            finally
+            {
+                this.button_addCrLf_countRecords.Enabled = true;
+            }
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
     }
 }

@@ -5581,7 +5581,6 @@ namespace dp2Catalog
                     out strError);
                 if (nRet == -1 || nRet == 0)
                     goto ERROR1;
-
             }
 
             OpenMarcFileDlg dlg = new OpenMarcFileDlg();
@@ -6925,7 +6924,7 @@ Program.MainForm,
                             {
                                 DialogResult result = MessageBox.Show(this,
         "保存书目记录 " + strRecPath + " 时遭遇时间戳不匹配: " + strError + "。\r\n\r\n此记录已无法被保存。\r\n\r\n请问现在是否要顺便重新装载此记录? \r\n\r\n(Yes 重新装载；\r\nNo 不重新装载、但继续处理后面的记录保存; \r\nCancel 中断整批保存操作)",
-        "BiblioSearchForm",
+        "dp2SearchForm",
         MessageBoxButtons.YesNoCancel,
         MessageBoxIcon.Question,
         MessageBoxDefaultButton.Button1);
@@ -6971,7 +6970,7 @@ Program.MainForm,
                         {
                             DialogResult result = MessageBox.Show(this,
     "保存书目记录 " + strRecPath + " 时部分字段被拒绝。\r\n\r\n此记录已部分保存成功。\r\n\r\n请问现在是否要顺便重新装载此记录以便观察? \r\n\r\n(Yes 重新装载(到旧记录部分)；\r\nNo 不重新装载、但继续处理后面的记录保存; \r\nCancel 中断整批保存操作)",
-    "BiblioSearchForm",
+    "dpSearchForm",
     MessageBoxButtons.YesNoCancel,
     MessageBoxIcon.Question,
     MessageBoxDefaultButton.Button1);

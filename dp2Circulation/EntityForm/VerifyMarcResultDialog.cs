@@ -1,61 +1,55 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
-using System.Diagnostics;
 
-using DigitalPlatform.Marc;
 using DigitalPlatform.IO;
+using DigitalPlatform.Marc;
+using DigitalPlatform.Text;
+using static DigitalPlatform.Marc.MarcEditor;
+
 
 namespace dp2Circulation
 {
-    /// <summary>
-    /// 书目记录保存时候如果部分字段被拒绝，显示实际保存和拟保存记录差异的对话框
-    /// </summary>
-    public partial class PartialDeniedDialog : Form
+    public partial class VerifyMarcResultDialog : Form
     {
         /// <summary>
-        /// 拟保存的记录 XML
+        /// 原始记录。显示在左侧
         /// </summary>
-        public string SavingXml = "";
+        public string OriginMarc = "";
 
         /// <summary>
-        /// 实际保存的记录 XML
+        /// 修改后的记录。显示在右侧
         /// </summary>
-        public string SavedXml = "";
+        public string ChangedMarc = "";
 
-        /// <summary>
-        /// 框架窗口
-        /// </summary>
-        // public MainForm MainForm = null;
 
-        // string _style = "";
-
-        public PartialDeniedDialog()
+        public VerifyMarcResultDialog()
         {
             InitializeComponent();
         }
 
-        private void PartialDeniedDialog_Load(object sender, EventArgs e)
+        private void VerifyMarcResultDialog_Load(object sender, EventArgs e)
         {
             if (this.DesignMode)
                 return;
             this.Display();
         }
 
-        private void button_loadSaved_Click(object sender, EventArgs e)
+        private void VerifyMarcResultDialog_FormClosed(object sender, FormClosedEventArgs e)
         {
-            this.DialogResult = System.Windows.Forms.DialogResult.OK;
+
+        }
+
+        // 接受修改后的记录
+        private void button_acceptChangedMarc_Click(object sender, EventArgs e)
+        {
+            this.DialogResult = DialogResult.OK;
             this.Close();
         }
 
+        // 取消(也就是说不接受修改后的记录)
         private void button_Cancel_Click(object sender, EventArgs e)
         {
-            this.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.DialogResult = DialogResult.Cancel;
             this.Close();
         }
 
@@ -64,9 +58,9 @@ namespace dp2Circulation
             string strError = "";
             string strHtml2 = "";
 
-            int nRet = GetXmlHtml(
-    this.SavingXml,
-    this.SavedXml,
+            int nRet = GetHtml(
+    this.OriginMarc,
+    this.ChangedMarc,
     out strHtml2,
     out strError);
             if (nRet == -1)
@@ -117,6 +111,7 @@ strHtml2 +
     "</head>";
         }
 
+#if REMOVED
         int GetXmlHtml(
     string strXml1,
     string strXml2,
@@ -210,15 +205,101 @@ strHtml2 +
 
             return 0;
         }
-
-        internal string _leftTitle = "拟保存的记录";
-        internal string _rightTitle = "实际保存后的记录";
-
-        public string Action { get; set; }
-
-        private void button_compareEdit_Click(object sender, EventArgs e)
+#endif
+        int GetHtml(
+string strOldMARC,
+string strNewMARC,
+out string strHtml2,
+out string strError)
         {
+            strError = "";
+            strHtml2 = "";
+            int nRet = 0;
 
+            string strOldFragmentXml = "";
+            string strNewFragmentXml = "";
+
+            if (string.IsNullOrEmpty(strOldMARC) == false
+                && string.IsNullOrEmpty(strNewMARC) == false)
+            {
+                // 创建展示两个 MARC 记录差异的 HTML 字符串
+                // return:
+                //      -1  出错
+                //      0   成功
+                nRet = MarcDiff.DiffHtml(
+                    _leftTitle,
+                    strOldMARC,
+                    strOldFragmentXml,
+                    "",
+                    _rightTitle,
+                    strNewMARC,
+                    strNewFragmentXml,
+                    "",
+                    out strHtml2,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+            }
+            else if (string.IsNullOrEmpty(strOldMARC) == false
+    && string.IsNullOrEmpty(strNewMARC) == true)
+            {
+                strHtml2 = MarcUtil.GetHtmlOfMarc(strOldMARC,
+                    strOldFragmentXml,
+                    "",
+                    false);
+            }
+            else if (string.IsNullOrEmpty(strOldMARC) == true
+                && string.IsNullOrEmpty(strNewMARC) == false)
+            {
+                strHtml2 = MarcUtil.GetHtmlOfMarc(strNewMARC,
+                    strNewFragmentXml,
+                    "",
+                    false);
+            }
+
+            return 0;
         }
+
+
+        internal string _leftTitle = "原始记录";
+        internal string _rightTitle = "修改后的记录";
+
+        private void toolStripButton_copyLeftToClipboard_Click(object sender, EventArgs e)
+        {
+            TextToClipboardFormat(this.OriginMarc);
+        }
+
+        private void toolStripButton_copyRightToClipboard_Click(object sender, EventArgs e)
+        {
+            TextToClipboardFormat(this.ChangedMarc);
+        }
+
+        public static void TextToClipboardFormat(string strText)
+        {
+            /*
+#if BIDI_SUPPORT
+            strText = RemoveBidi(strText);
+#endif
+            */
+
+            // Make a DataObject.
+            DataObject data_object = new DataObject();
+
+            // Add the data in various formats.
+            // 普通格式
+            data_object.SetData(DataFormats.UnicodeText, strText
+                .Replace((char)Record.SUBFLD, '$')
+                .Replace((char)Record.FLDEND, '#')
+                .Replace((char)Record.RECEND, '*'));
+            // 专用格式
+            data_object.SetData(new MarcEditorData(strText));
+
+            // Place the data in the Clipboard.
+            StringUtil.RunClipboard(() =>
+            {
+                Clipboard.SetDataObject(data_object);
+            });
+        }
+
     }
 }

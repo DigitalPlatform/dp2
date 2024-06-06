@@ -210,8 +210,11 @@ namespace DigitalPlatform.LibraryServer
 
             if (bDelete == false && baSource == null)
             {
-                strError = "baSource 参数值不能为 null";
-                return -1;
+                if (StringUtil.IsInList("createdir", strStyle) == false)
+                {
+                    strError = "baSource 参数值不能为 null";
+                    return -1;
+                }
             }
 
             // 2024/5/8

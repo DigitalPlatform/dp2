@@ -38,6 +38,8 @@ namespace DigitalPlatform.Marc
 
                 this.TryInvoke(() =>
                 {
+                    this.checkBox_unimarc_modify_100.Visible = value;
+
                     if (value == true)
                     {
                         // 改为用EnableMarcSyntax成员控制
@@ -134,10 +136,10 @@ namespace DigitalPlatform.Marc
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(-3, 0);
-            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label1.Location = new System.Drawing.Point(-4, 0);
+            this.label1.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(269, 18);
+            this.label1.Size = new System.Drawing.Size(324, 21);
             this.label1.TabIndex = 0;
             this.label1.Text = "MARC (ISO2709格式) 文件名(&F):";
             // 
@@ -145,20 +147,20 @@ namespace DigitalPlatform.Marc
             // 
             this.textBox_filename.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_filename.Location = new System.Drawing.Point(0, 22);
-            this.textBox_filename.Margin = new System.Windows.Forms.Padding(4);
+            this.textBox_filename.Location = new System.Drawing.Point(0, 26);
+            this.textBox_filename.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.textBox_filename.Name = "textBox_filename";
-            this.textBox_filename.Size = new System.Drawing.Size(691, 28);
+            this.textBox_filename.Size = new System.Drawing.Size(844, 31);
             this.textBox_filename.TabIndex = 1;
             this.textBox_filename.TextChanged += new System.EventHandler(this.textBox_filename_TextChanged);
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(0, 112);
-            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label2.Location = new System.Drawing.Point(0, 131);
+            this.label2.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(116, 18);
+            this.label2.Size = new System.Drawing.Size(138, 21);
             this.label2.TabIndex = 5;
             this.label2.Text = "编码方式(&E):";
             // 
@@ -168,10 +170,10 @@ namespace DigitalPlatform.Marc
             "GB2312",
             "UTF-8",
             "UTF-16"});
-            this.comboBox_encoding.Location = new System.Drawing.Point(141, 108);
-            this.comboBox_encoding.Margin = new System.Windows.Forms.Padding(4);
+            this.comboBox_encoding.Location = new System.Drawing.Point(172, 126);
+            this.comboBox_encoding.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.comboBox_encoding.Name = "comboBox_encoding";
-            this.comboBox_encoding.Size = new System.Drawing.Size(250, 26);
+            this.comboBox_encoding.Size = new System.Drawing.Size(305, 29);
             this.comboBox_encoding.TabIndex = 6;
             this.comboBox_encoding.Text = "GB2312";
             this.comboBox_encoding.TextChanged += new System.EventHandler(this.comboBox_encoding_TextChanged);
@@ -179,10 +181,10 @@ namespace DigitalPlatform.Marc
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(0, 78);
-            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label3.Location = new System.Drawing.Point(0, 91);
+            this.label3.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(116, 18);
+            this.label3.Size = new System.Drawing.Size(140, 21);
             this.label3.TabIndex = 3;
             this.label3.Text = "MARC格式(&S):";
             // 
@@ -192,10 +194,10 @@ namespace DigitalPlatform.Marc
             "UNIMARC",
             "USMARC",
             "<自动>"});
-            this.comboBox_marcSyntax.Location = new System.Drawing.Point(141, 74);
-            this.comboBox_marcSyntax.Margin = new System.Windows.Forms.Padding(4);
+            this.comboBox_marcSyntax.Location = new System.Drawing.Point(172, 86);
+            this.comboBox_marcSyntax.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.comboBox_marcSyntax.Name = "comboBox_marcSyntax";
-            this.comboBox_marcSyntax.Size = new System.Drawing.Size(250, 26);
+            this.comboBox_marcSyntax.Size = new System.Drawing.Size(305, 29);
             this.comboBox_marcSyntax.TabIndex = 4;
             this.comboBox_marcSyntax.Text = "UNIMARC";
             this.comboBox_marcSyntax.TextChanged += new System.EventHandler(this.comboBox_marcSyntax_TextChanged);
@@ -203,10 +205,10 @@ namespace DigitalPlatform.Marc
             // button_OK
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_OK.Location = new System.Drawing.Point(524, 459);
-            this.button_OK.Margin = new System.Windows.Forms.Padding(4);
+            this.button_OK.Location = new System.Drawing.Point(640, 536);
+            this.button_OK.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.button_OK.Name = "button_OK";
-            this.button_OK.Size = new System.Drawing.Size(112, 34);
+            this.button_OK.Size = new System.Drawing.Size(137, 40);
             this.button_OK.TabIndex = 14;
             this.button_OK.Text = "确定";
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
@@ -214,10 +216,10 @@ namespace DigitalPlatform.Marc
             // button_Cancel
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_Cancel.Location = new System.Drawing.Point(645, 459);
-            this.button_Cancel.Margin = new System.Windows.Forms.Padding(4);
+            this.button_Cancel.Location = new System.Drawing.Point(788, 536);
+            this.button_Cancel.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.button_Cancel.Name = "button_Cancel";
-            this.button_Cancel.Size = new System.Drawing.Size(112, 34);
+            this.button_Cancel.Size = new System.Drawing.Size(137, 40);
             this.button_Cancel.TabIndex = 15;
             this.button_Cancel.Text = "取消";
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
@@ -225,10 +227,10 @@ namespace DigitalPlatform.Marc
             // button_findFileName
             // 
             this.button_findFileName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_findFileName.Location = new System.Drawing.Point(692, 20);
-            this.button_findFileName.Margin = new System.Windows.Forms.Padding(4);
+            this.button_findFileName.Location = new System.Drawing.Point(846, 23);
+            this.button_findFileName.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.button_findFileName.Name = "button_findFileName";
-            this.button_findFileName.Size = new System.Drawing.Size(50, 33);
+            this.button_findFileName.Size = new System.Drawing.Size(61, 38);
             this.button_findFileName.TabIndex = 2;
             this.button_findFileName.Text = "...";
             this.button_findFileName.Click += new System.EventHandler(this.button_findFileName_Click);
@@ -236,28 +238,28 @@ namespace DigitalPlatform.Marc
             // checkBox_crLf
             // 
             this.checkBox_crLf.AutoSize = true;
-            this.checkBox_crLf.Location = new System.Drawing.Point(0, 335);
-            this.checkBox_crLf.Margin = new System.Windows.Forms.Padding(4);
+            this.checkBox_crLf.Location = new System.Drawing.Point(0, 391);
+            this.checkBox_crLf.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.checkBox_crLf.Name = "checkBox_crLf";
-            this.checkBox_crLf.Size = new System.Drawing.Size(313, 22);
+            this.checkBox_crLf.Size = new System.Drawing.Size(363, 25);
             this.checkBox_crLf.TabIndex = 13;
             this.checkBox_crLf.Text = "在每条记录后添加回车换行符号(&C)";
             // 
             // label_encodingComment
             // 
-            this.label_encodingComment.Location = new System.Drawing.Point(138, 138);
-            this.label_encodingComment.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label_encodingComment.Location = new System.Drawing.Point(169, 161);
+            this.label_encodingComment.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label_encodingComment.Name = "label_encodingComment";
-            this.label_encodingComment.Size = new System.Drawing.Size(255, 33);
+            this.label_encodingComment.Size = new System.Drawing.Size(312, 38);
             this.label_encodingComment.TabIndex = 7;
             // 
             // checkBox_addG01Field
             // 
             this.checkBox_addG01Field.AutoSize = true;
-            this.checkBox_addG01Field.Location = new System.Drawing.Point(0, 368);
-            this.checkBox_addG01Field.Margin = new System.Windows.Forms.Padding(4);
+            this.checkBox_addG01Field.Location = new System.Drawing.Point(0, 429);
+            this.checkBox_addG01Field.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.checkBox_addG01Field.Name = "checkBox_addG01Field";
-            this.checkBox_addG01Field.Size = new System.Drawing.Size(160, 22);
+            this.checkBox_addG01Field.Size = new System.Drawing.Size(186, 25);
             this.checkBox_addG01Field.TabIndex = 14;
             this.checkBox_addG01Field.Text = "加入-01字段(&G)";
             this.checkBox_addG01Field.UseVisualStyleBackColor = true;
@@ -268,10 +270,10 @@ namespace DigitalPlatform.Marc
             "<无限制>",
             "NLC",
             "CALIS"});
-            this.comboBox_catalogingRule.Location = new System.Drawing.Point(141, 176);
-            this.comboBox_catalogingRule.Margin = new System.Windows.Forms.Padding(4);
+            this.comboBox_catalogingRule.Location = new System.Drawing.Point(172, 205);
+            this.comboBox_catalogingRule.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.comboBox_catalogingRule.Name = "comboBox_catalogingRule";
-            this.comboBox_catalogingRule.Size = new System.Drawing.Size(250, 26);
+            this.comboBox_catalogingRule.Size = new System.Drawing.Size(305, 29);
             this.comboBox_catalogingRule.TabIndex = 9;
             this.comboBox_catalogingRule.Text = "<无限制>";
             this.comboBox_catalogingRule.Visible = false;
@@ -279,10 +281,10 @@ namespace DigitalPlatform.Marc
             // label_catalogingRule
             // 
             this.label_catalogingRule.AutoSize = true;
-            this.label_catalogingRule.Location = new System.Drawing.Point(0, 180);
-            this.label_catalogingRule.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label_catalogingRule.Location = new System.Drawing.Point(0, 210);
+            this.label_catalogingRule.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label_catalogingRule.Name = "label_catalogingRule";
-            this.label_catalogingRule.Size = new System.Drawing.Size(116, 18);
+            this.label_catalogingRule.Size = new System.Drawing.Size(138, 21);
             this.label_catalogingRule.TabIndex = 8;
             this.label_catalogingRule.Text = "编目规则(&R):";
             this.label_catalogingRule.Visible = false;
@@ -292,20 +294,20 @@ namespace DigitalPlatform.Marc
             this.webBrowser1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
             | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.webBrowser1.Location = new System.Drawing.Point(423, 74);
-            this.webBrowser1.Margin = new System.Windows.Forms.Padding(4);
-            this.webBrowser1.MinimumSize = new System.Drawing.Size(30, 30);
+            this.webBrowser1.Location = new System.Drawing.Point(517, 86);
+            this.webBrowser1.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.webBrowser1.MinimumSize = new System.Drawing.Size(37, 35);
             this.webBrowser1.Name = "webBrowser1";
-            this.webBrowser1.Size = new System.Drawing.Size(318, 354);
+            this.webBrowser1.Size = new System.Drawing.Size(389, 413);
             this.webBrowser1.TabIndex = 15;
             // 
             // checkBox_removeField998
             // 
             this.checkBox_removeField998.AutoSize = true;
-            this.checkBox_removeField998.Location = new System.Drawing.Point(0, 269);
-            this.checkBox_removeField998.Margin = new System.Windows.Forms.Padding(4);
+            this.checkBox_removeField998.Location = new System.Drawing.Point(0, 314);
+            this.checkBox_removeField998.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.checkBox_removeField998.Name = "checkBox_removeField998";
-            this.checkBox_removeField998.Size = new System.Drawing.Size(214, 22);
+            this.checkBox_removeField998.Size = new System.Drawing.Size(252, 25);
             this.checkBox_removeField998.TabIndex = 11;
             this.checkBox_removeField998.Text = "删除 997/998 字段(&R)";
             this.checkBox_removeField998.UseVisualStyleBackColor = true;
@@ -313,10 +315,10 @@ namespace DigitalPlatform.Marc
             // checkBox_880
             // 
             this.checkBox_880.AutoSize = true;
-            this.checkBox_880.Location = new System.Drawing.Point(0, 302);
-            this.checkBox_880.Margin = new System.Windows.Forms.Padding(4);
+            this.checkBox_880.Location = new System.Drawing.Point(0, 352);
+            this.checkBox_880.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.checkBox_880.Name = "checkBox_880";
-            this.checkBox_880.Size = new System.Drawing.Size(196, 22);
+            this.checkBox_880.Size = new System.Drawing.Size(229, 25);
             this.checkBox_880.TabIndex = 12;
             this.checkBox_880.Text = "转换为 998 模式(&C)";
             this.checkBox_880.UseVisualStyleBackColor = true;
@@ -343,21 +345,22 @@ namespace DigitalPlatform.Marc
             this.panel_main.Controls.Add(this.label3);
             this.panel_main.Controls.Add(this.label_encodingComment);
             this.panel_main.Controls.Add(this.comboBox_marcSyntax);
-            this.panel_main.Location = new System.Drawing.Point(18, 18);
-            this.panel_main.Margin = new System.Windows.Forms.Padding(4);
+            this.panel_main.Location = new System.Drawing.Point(22, 21);
+            this.panel_main.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.panel_main.Name = "panel_main";
-            this.panel_main.Size = new System.Drawing.Size(741, 432);
+            this.panel_main.Size = new System.Drawing.Size(906, 504);
             this.panel_main.TabIndex = 16;
+            this.panel_main.VisibleChanged += new System.EventHandler(this.panel_main_VisibleChanged);
             // 
             // checkBox_unimarc_modify_100
             // 
             this.checkBox_unimarc_modify_100.AutoSize = true;
             this.checkBox_unimarc_modify_100.Checked = true;
             this.checkBox_unimarc_modify_100.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox_unimarc_modify_100.Location = new System.Drawing.Point(0, 239);
-            this.checkBox_unimarc_modify_100.Margin = new System.Windows.Forms.Padding(4);
+            this.checkBox_unimarc_modify_100.Location = new System.Drawing.Point(0, 279);
+            this.checkBox_unimarc_modify_100.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.checkBox_unimarc_modify_100.Name = "checkBox_unimarc_modify_100";
-            this.checkBox_unimarc_modify_100.Size = new System.Drawing.Size(286, 22);
+            this.checkBox_unimarc_modify_100.Size = new System.Drawing.Size(338, 25);
             this.checkBox_unimarc_modify_100.TabIndex = 10;
             this.checkBox_unimarc_modify_100.Text = "自动规整 UNIMARC 100 字段(&M)";
             this.checkBox_unimarc_modify_100.UseVisualStyleBackColor = true;
@@ -365,14 +368,14 @@ namespace DigitalPlatform.Marc
             // OpenMarcFileDlg
             // 
             this.AcceptButton = this.button_OK;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(777, 512);
+            this.ClientSize = new System.Drawing.Size(950, 597);
             this.Controls.Add(this.panel_main);
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(4);
+            this.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.Name = "OpenMarcFileDlg";
             this.ShowInTaskbar = false;
             this.Text = "请指定MARC文件名";
@@ -443,8 +446,6 @@ namespace DigitalPlatform.Marc
 #endif
 
             this.BeginInvoke(new Delegate_Initial(_initial));
-
-            comboBox_marcSyntax_TextChanged(this, null);
         }
 
         private void OpenMarcFileDlg_FormClosed(object sender, FormClosedEventArgs e)
@@ -465,6 +466,8 @@ namespace DigitalPlatform.Marc
             }
 
             this.checkBox_unimarc_modify_100.Visible = this.IsOutput;
+
+            comboBox_marcSyntax_TextChanged(this, null);
         }
 
         private void button_findFileName_Click(object sender, System.EventArgs e)
@@ -1137,8 +1140,9 @@ TABLE.marc SPAN.fieldend
             else
                 this.checkBox_880.Visible = false;
 
-            if (this.comboBox_marcSyntax.Text == "UNIMARC"
+            if ((this.comboBox_marcSyntax.Text == "UNIMARC"
     || this.comboBox_marcSyntax.Text == "<自动>")
+                && this.IsOutput == true)
                 this.checkBox_unimarc_modify_100.Visible = true;
             else
                 this.checkBox_unimarc_modify_100.Visible = false;
@@ -1212,6 +1216,20 @@ TABLE.marc SPAN.fieldend
             get
             {
                 return this.panel_main;
+            }
+        }
+
+        int _visible_change_count = 0;
+
+        private void panel_main_VisibleChanged(object sender, EventArgs e)
+        {
+            if (this.panel_main.Visible
+                && _visible_change_count == 0)
+            {
+                this.checkBox_unimarc_modify_100.Visible = this.IsOutput;
+                comboBox_marcSyntax_TextChanged(this, null);
+
+                _visible_change_count++;
             }
         }
     }

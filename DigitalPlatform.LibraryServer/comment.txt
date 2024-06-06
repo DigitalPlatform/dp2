@@ -188,3 +188,67 @@ publishTime 字段改为记录期记录的参考 ID。这样建立链接关系�
 
 另外一种策略是，实现期记录和册记录修改纳入同一个事务的能力。这样一旦期记录
 没有保存成功，确保册记录也不会保存或者保存了会回滚。
+
+~~~
+日志恢复任务开始的时候，检查一下 app.vdbs 是否为 null，如果为 null 则报错拒绝进行日志恢复。
+
+~~~
+SetBiblioInfo() API 的 change 动作，遇到确定的路径，原记录不存在的情况，
+是否应该直接报错。如果改变代码可能会引起前端兼容性问题，如何检查前端和回归测试？
+比如故意背后删除一条书目记录，然后让内务种册窗用修改方式保存回去，观察
+内务的报错，看看是否要改进内务。
+另外，评估一下对于导入覆盖到书目库的功能模块是否会产生兼容性影响。
+
+读者记录不允许这样做的原因是，如果允许了，可能会造成读者记录密码莫名其妙丢失
+的安全性问题。看看书目记录是否也有类似问题。
+
+~~~
+MoveReaderInfo() API 目前的处理方法没有考虑当前账户对读者记录中的
+字段修改权限。应改进为新旧记录(按照权限规则)合并后再写入。
+
+~~~
+小结：
+SetBiblioInfo() change 动作，在遇到原记录不存在的时候，改变了语义，
+现在是缺省报错返回(并返回错误码 NotFound)，需要检查前端兼容性
+
+SetEntities() change 动作，在遇到原记录不存在的时候，改变了语义，
+现在是缺省报错返回(并返回错误码 NotFound)，需要检查前端兼容性
+
+SetOrders() 等 change 动作，在遇到原记录不存在的时候，改变了语义，
+现在是缺省报错返回(并返回错误码 NotFound)，需要检查前端兼容性
+
+这三类 API 的前端兼容性问题可以通过在 style 中增加 ifNotExist:continue 来解决。
+但注意，原记录不存在，等于 operation 元素(create动作)就没有了，要考虑补齐
+(用当天日期添加一个 create 动作的 operation 元素)。其它元素缺乏后的
+副作用待评估
+
+SetBiblioInfo() new 动作，在遇到原记录存在的时候，改变了语义，
+现在是缺省报错返回(并返回错误码 AlreadyExist)，需要检查前端兼容性。
+前端的兼容性问题可以通过在 style 中增加 ifExist:continue 来解决。
+
+~~~
+http://zing.z3950.org/srw/bath/2.0/
+The Bath Profile for SRW, version 2.0
+
+https://www.ukoln.ac.uk/interop-focus/activities/z3950/int_profile/bath/draft/stable1.html
+The Bath Profile:
+An International Z39.50 Specification
+for Library Applications and Resource Discovery
+
+~~~
+GetReaderInfo() 也要有一种 force style，可以下载备份包括 password 元素的数据；
+然后 SetReaderInfo() 的 force style 正好可以恢复这些数据，包括恢复 password 元素。
+要求无论是 new 还是 change 动作都能恢复(指 force style)
+
+~~~
+无论 action 是 new 还是 change，只要原记录不存在，写入 operation 元素就
+按照写入 create 动作来处理；只要原记录存在，就按照写入 change(modified) 动作处理。
+这是说非 force 的情况。
+
+~~~
+CopyBiblioInfo() API 中对 997 查重的代码要审查一下。
+
+~~~
+GetBiblioInfo() API 和 SetBiblioInfo() API 联合使用的时候，如果一个账户
+定义的 MARC 字段权限，是写范围大于读范围，就会造成一些字段在往返(读出/保存)
+以后丢失。应该能识别这种情况，并在写入的时候报错说权限定义不合适。

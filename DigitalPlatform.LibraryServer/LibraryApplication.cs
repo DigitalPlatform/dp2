@@ -1468,6 +1468,12 @@ out strError);
                             {
                                 app.WriteErrorLog("ERR002 首次初始化vdbs失败: " + strError);
                             }
+                            else
+                            {
+                                // 2024/5/13
+                                if (this.vdbs == null)
+                                    app.WriteErrorLog("ERR010 初始化 vdbs 异常");
+                            }
 
                         }
                         finally
@@ -4675,6 +4681,9 @@ TaskScheduler.Default);
         }
 
         // 兼容以前用法
+        // return:
+        //      -1  出错
+        //      0   成功
         public int InitialVdbs(
             RmsChannel channel,
             // RmsChannelCollection Channels,
@@ -4695,6 +4704,9 @@ TaskScheduler.Default);
         }
 
         // 初始化虚拟库集合定义对象
+        // return:
+        //      -1  出错
+        //      0   成功
         public int InitialVdbs(
             RmsChannel channel,
             // RmsChannelCollection Channels,
@@ -4864,6 +4876,9 @@ TaskScheduler.Default);
                 return "amerce";
             if (strDbName == this.ArrivedDbName)
                 return "arrived";
+            // 2024/5/21
+            if (strDbName == this.MessageDbName)
+                return "message";
             // 实用库包括 publisher / zhongcihao / dictionary / inventory 类型
             if (ServerDatabaseUtility.IsUtilDbName(this.LibraryCfgDom,
     strDbName,
@@ -5503,24 +5518,50 @@ TaskScheduler.Default);
             return results;
         }
 
-        // 根据书目库名, 找到对应的实体库名
+        // 2024/5/13
+        // 根据书目库名, 找到对应的下级库名
         // 注：返回1的时候strItemDbName依然可能为空。1只是表示找到了书目库定义，但是不确保有实体库定义
         // return:
         //      -1  出错
         //      0   没有找到
         //      1   找到(书目库定义，但是不确保实体库存在)
-        public int GetItemDbName(string strBiblioDbName,
+        public int GetSubDbName(string strBiblioDbName,
+            string dbType,
             out string strItemDbName,
             out string strError)
         {
             strError = "";
             strItemDbName = "";
 
+            // 2024/5/13
+            if (this.LibraryCfgDom == null)
+            {
+                strError = "this.LibraryCfgDom 为 null";
+                return -1;
+            }
+
+            // 2024/5/13
+            if (this.LibraryCfgDom.DocumentElement == null)
+            {
+                strError = "this.LibraryCfgDom.DocumentElement 为 null";
+                return -1;
+            }
+
             // 2007/5/25 new changed
             XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//itemdbgroup/database[@biblioDbName='" + strBiblioDbName + "']");
-
             if (node == null)
             {
+                // 2024/5/13
+                if (this.vdbs == null)
+                {
+                    this.ActivateManagerThreadForLoad();
+                    strError = "app.vdbs == null。故障原因请检查dp2Library日志";
+                    return -1;
+                }
+
+                // 2024/5/10
+                this.CheckVdbsThrow();
+
                 // 如果没有找到，则找<caption>
                 VirtualDatabase vdb = this.vdbs[strBiblioDbName];
                 if (vdb == null)
@@ -5535,7 +5576,83 @@ TaskScheduler.Default);
 
                 // 再次获得
                 node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//itemdbgroup/database[@biblioDbName='" + strBiblioDbName + "']");
+                if (node == null)
+                    return 0;
+            }
+            if (dbType == "entity" || dbType == "item")
+                strItemDbName = DomUtil.GetAttr(node, "name");
+            else if (dbType == "comment")
+                strItemDbName = DomUtil.GetAttr(node, "commentDbName");
+            else if (dbType == "order")
+                strItemDbName = DomUtil.GetAttr(node, "orderDbName");
+            else if (dbType == "issue")
+                strItemDbName = DomUtil.GetAttr(node, "issueDbName");
+            else
+            {
+                strError = $"GetSubDbName() 遇到无法识别的下级库类型 '{dbType}'";
+                return -1;
+            }
+            return 1;
+        }
 
+        // 根据书目库名, 找到对应的实体库名
+        // 注：返回1的时候strItemDbName依然可能为空。1只是表示找到了书目库定义，但是不确保有实体库定义
+        // return:
+        //      -1  出错
+        //      0   没有找到
+        //      1   找到(书目库定义，但是不确保实体库存在)
+        public int GetItemDbName(string strBiblioDbName,
+            out string strItemDbName,
+            out string strError)
+        {
+            return GetSubDbName(strBiblioDbName,
+                "entity",
+                out strItemDbName,
+                out strError);
+#if REMOVED
+            strError = "";
+            strItemDbName = "";
+
+            // 2024/5/13
+            if (this.LibraryCfgDom == null)
+            {
+                strError = "this.LibraryCfgDom 为 null";
+                return -1;
+            }
+
+            // 2024/5/13
+            if (this.LibraryCfgDom.DocumentElement == null)
+            {
+                strError = "this.LibraryCfgDom.DocumentElement 为 null";
+                return -1;
+            }
+
+            // 2007/5/25 new changed
+            XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//itemdbgroup/database[@biblioDbName='" + strBiblioDbName + "']");
+
+            if (node == null)
+            {
+                // 2024/5/13
+                if (this.vdbs == null)
+                {
+                    strError = "this.vdbs 为 null";
+                    return -1;
+                }
+
+                // 如果没有找到，则找<caption>
+                VirtualDatabase vdb = this.vdbs[strBiblioDbName];
+                if (vdb == null)
+                    return 0;
+
+                strBiblioDbName = vdb.GetName("zh");
+                if (String.IsNullOrEmpty(strBiblioDbName) == true)
+                {
+                    strError = "数据库 " + vdb.GetName(null) + " 居然没有 zh 语言的名字";
+                    return -1;
+                }
+
+                // 再次获得
+                node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//itemdbgroup/database[@biblioDbName='" + strBiblioDbName + "']");
                 if (node == null)
                     return 0;
             }
@@ -5567,7 +5684,7 @@ TaskScheduler.Default);
             }
             return 0;
              * */
-
+#endif
         }
 
         // 根据书目库名, 找到对应的期库名
@@ -5579,6 +5696,11 @@ TaskScheduler.Default);
             out string strIssueDbName,
             out string strError)
         {
+            return GetSubDbName(strBiblioDbName,
+                "issue",
+                out strIssueDbName,
+                out strError);
+#if REMOVED
             strError = "";
             strIssueDbName = "";
 
@@ -5608,6 +5730,7 @@ TaskScheduler.Default);
 
             strIssueDbName = DomUtil.GetAttr(node, "issueDbName");
             return 1;   // 注意有时虽然找到了书目库，但是issueDbName属性缺省或者为空
+#endif
         }
 
         // 根据书目库名, 找到对应的订购库名
@@ -5619,6 +5742,11 @@ TaskScheduler.Default);
             out string strOrderDbName,
             out string strError)
         {
+            return GetSubDbName(strBiblioDbName,
+                "order",
+                out strOrderDbName,
+                out strError);
+#if REMOVED
             strError = "";
             strOrderDbName = "";
 
@@ -5647,6 +5775,7 @@ TaskScheduler.Default);
 
             strOrderDbName = DomUtil.GetAttr(node, "orderDbName");
             return 1;   // 注意有时虽然找到了书目库，但是orderDbName属性缺省或者为空
+#endif
         }
 
         // 根据书目库名, 找到对应的评注库名
@@ -5659,13 +5788,39 @@ TaskScheduler.Default);
             out string strCommentDbName,
             out string strError)
         {
+            return GetSubDbName(strBiblioDbName,
+                "comment",
+                out strCommentDbName,
+                out strError);
+#if REMOVED
             strError = "";
             strCommentDbName = "";
+
+            // 2024/5/13
+            if (this.LibraryCfgDom == null)
+            {
+                strError = "this.LibraryCfgDom 为 null";
+                return -1;
+            }
+
+            // 2024/5/13
+            if (this.LibraryCfgDom.DocumentElement == null)
+            {
+                strError = "this.LibraryCfgDom.DocumentElement 为 null";
+                return -1;
+            }
 
             XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//itemdbgroup/database[@biblioDbName='" + strBiblioDbName + "']");
 
             if (node == null)
             {
+                // 2024/5/13
+                if (this.vdbs == null)
+                {
+                    strError = "this.vdbs 为 null";
+                    return -1;
+                }
+
                 // 如果没有找到，则找<caption>
                 VirtualDatabase vdb = this.vdbs[strBiblioDbName];
                 if (vdb == null)
@@ -5680,12 +5835,12 @@ TaskScheduler.Default);
 
                 // 再次获得
                 node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//itemdbgroup/database[@biblioDbName='" + strBiblioDbName + "']");
-
                 if (node == null)
                     return 0;
             }
             strCommentDbName = DomUtil.GetAttr(node, "commentDbName");
             return 1;   // 注意有时虽然找到了书目库，但是commentDbName属性缺省或者为空
+#endif
         }
 
         // 在未指定语言的情况下获得全部<caption>名
@@ -12810,6 +12965,9 @@ out strError);
         }
 
         // 修改读者密码
+        // parameters:
+        //      domOperLog  日志记录 XmlDocument。本函数会在里面写入一个 newPassword 和 type 和 expire 元素。type 和 expireDate 元素可能会缺省。
+        //                  如果为 null，表示不写入记录。
         // return:
         //      -1  error
         //      0   成功
@@ -12817,7 +12975,7 @@ out strError);
             XmlDocument readerdom,
             string strNewPassword,
             TimeSpan expireLength,
-            ref XmlDocument domOperLog,
+            XmlDocument domOperLog,
             out string strError)
         {
             strError = "";
@@ -12881,6 +13039,13 @@ out strError);
                 // 在日志恢复阶段, 把这个密码直接写入读者记录即可, 不需要再加工
                 DomUtil.SetElementText(domOperLog.DocumentElement,
                     "newPassword", strNewPassword);
+
+                if (string.IsNullOrEmpty(new_type) == false)
+                {
+                    // 2024/5/20
+                    DomUtil.SetElementText(domOperLog.DocumentElement,
+                        "type", new_type);
+                }
 
                 if (string.IsNullOrEmpty(strExpireTime) == false)
                 {
@@ -13673,7 +13838,7 @@ out strError);
         //		如果为读者, 附加限制还只能修改属于自己的密码
         public LibraryServerResult ChangeReaderPassword(
             SessionInfo sessioninfo,
-            string strReaderBarcode,
+            string strReaderKey,
             string strReaderOldPassword,
             string strReaderNewPassword)
         {
@@ -13706,7 +13871,7 @@ out strError);
 #if DEBUG_LOCK_READER
             this.WriteErrorLog("ChangeReaderPassword 开始为读者加写锁 '" + strReaderBarcode + "'");
 #endif
-            this.ReaderLocks.LockForWrite(strReaderBarcode);
+            this.ReaderLocks.LockForWrite(strReaderKey);
 
             try
             {
@@ -13730,25 +13895,25 @@ out strError);
                 int nRet = this.GetReaderRecXml(
                     // sessioninfo.Channels,
                     channel,
-                    strReaderBarcode,
+                    strReaderKey,
                     out strXml,
                     out strOutputPath,
                     out timestamp,
                     out strError);
                 if (nRet == 0)
                 {
-                    strError = "证条码号为 '" + strReaderBarcode + "' 的读者不存在";
+                    strError = "证条码号为 '" + strReaderKey + "' 的读者不存在";
                     goto ERROR1;
                 }
                 if (nRet == -1)
                 {
-                    strError = "获得证条码号为 '" + strReaderBarcode + "' 的读者记录时出错: " + strError;
+                    strError = "获得证条码号为 '" + strReaderKey + "' 的读者记录时出错: " + strError;
                     goto ERROR1;
                 }
 
                 if (nRet > 1)
                 {
-                    strError = "系统错误: 证条码号为 '" + strReaderBarcode + "' 的读者记录多于一个";
+                    strError = "系统错误: 证条码号为 '" + strReaderKey + "' 的读者记录多于一个";
                     goto ERROR1;
                 }
 
@@ -13876,7 +14041,7 @@ out strError);
                     if (StringUtil.IsInList("denychangemypassword", rights))
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "读者 " + strReaderBarcode + " 因被设定了 denychangemypassword 权限，不能修改自己的密码";
+                        result.ErrorInfo = "读者 " + strReaderKey + " 因被设定了 denychangemypassword 权限，不能修改自己的密码";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -13911,7 +14076,7 @@ out strError);
             }
             finally
             {
-                this.ReaderLocks.UnlockForWrite(strReaderBarcode);
+                this.ReaderLocks.UnlockForWrite(strReaderKey);
 #if DEBUG_LOCK_READER
                 this.WriteErrorLog("ChangeReaderPassword 结束为读者加写锁 '" + strReaderBarcode + "'");
 #endif
@@ -14003,6 +14168,9 @@ strLibraryCode);    // 读者所在的馆代码
         REDO:
 
             // 修改读者密码
+            // parameters:
+            //      domOperLog  日志记录 XmlDocument。本函数会在里面写入一个 newPassword 和 type 和 expire 元素。type 和 expireDate 元素可能会缺省。
+            //                  如果为 null，表示不写入记录。
             // return:
             //      -1  error
             //      0   成功
@@ -14010,7 +14178,7 @@ strLibraryCode);    // 读者所在的馆代码
                 readerdom,
                 strReaderNewPassword,
                 expireLength,
-                ref domOperLog,
+                domOperLog,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -14075,16 +14243,28 @@ strLibraryCode);    // 读者所在的馆代码
              * */
 
             // 写入日志
-            string strReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement, "barcode"); // 2019/4/25 修改 bug。原来为 domOperLog.Document
+            string strReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement,
+                "barcode"); // 2019/4/25 修改 bug。原来为 domOperLog.Document
+            string strReaderRefID = DomUtil.GetElementInnerText(readerdom.DocumentElement,
+                "refID");
             string strNewPassword = DomUtil.GetElementText(readerdom.DocumentElement, "password"); // 2019/4/25 增加
 
             // 读者证条码号
             DomUtil.SetElementText(domOperLog.DocumentElement,
-                "readerBarcode", strReaderBarcode);
+                "readerBarcode",
+                strReaderBarcode);
+            // 2024/5/21
+            if (string.IsNullOrEmpty(strReaderRefID) == false)
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+                    "readerRefID",
+                    strReaderRefID);
 
+            // 前面已经把 newPassword 元素写入 domOperLog 了
+            /*
             // 新密码(hash 形态)
             DomUtil.SetElementText(domOperLog.DocumentElement,
                 "newPassword", strNewPassword);
+            */
 
             // 读者记录
             XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
@@ -14376,7 +14556,7 @@ strLibraryCode);    // 读者所在的馆代码
                 goto ERROR1;
             }
 
-            // this.LoginCache.Remove(strReaderBarcode);   // 及时失效登录缓存
+            // this.LoginCache.Remove(strReaderKey);   // 及时失效登录缓存
             this.ClearLoginCache(strReaderBarcode);   // 及时失效登录缓存
             return 0;
         ERROR1:
@@ -15675,6 +15855,8 @@ strLibraryCode);    // 读者所在的馆代码
             if (String.IsNullOrEmpty(strDataType) == true)
                 strDataType = "string";
 
+            // 2024/5/10
+            app.CheckVdbsThrow();
             //
             // 数据库是不是虚拟库?
             VirtualDatabase vdb = app.vdbs[strDbName];  // 需要增加一个索引器
@@ -15684,6 +15866,9 @@ strLibraryCode);    // 读者所在的馆代码
             // 如果是虚拟库
             if (vdb != null && vdb.IsVirtual == true)
             {
+                // 2024/5/10
+                app.CheckVdbsThrow();
+
                 int nRet = BuildVirtualQuery(
                     app.vdbs.db_dir_results,
                     vdb,
@@ -15714,12 +15899,17 @@ strLibraryCode);    // 读者所在的馆代码
                 {
                     List<string> found_dup = new List<string>();    // 用于去重
 
+                    // 2024/5/10
+                    app.CheckVdbsThrow();
+
                     if (app.vdbs.Count == 0)
                     {
                         strError = "目前library.xml中<virtualDatabases>内尚未配置检索目标";
                         return 0;
                     }
 
+                    // 2024/5/10
+                    app.CheckVdbsThrow();
 
                     // 所有虚拟库包含的去重后的物理库名 和全部物理名 (整体去重一次)
                     // 要注意检查特定的from名在物理库中是否存在，如果不存在则排除该库名
@@ -15822,6 +16012,16 @@ strLibraryCode);    // 读者所在的馆代码
             strXml = strOneDbQuery;
 
             return 1;
+        }
+
+        public void CheckVdbsThrow()
+        {
+            if (this.vdbs == null)
+            {
+                this.ActivateManagerThreadForLoad();
+                string strError = "app.vdbs == null。故障原因请检查dp2Library日志";
+                throw new Exception(strError);
+            }
         }
 
 #if NOOOOOOOOOOOOOOOOOOOOO
@@ -17308,6 +17508,12 @@ out string db_type);
                 db_type = "arrived";
                 right = "getarrivedinfo";
             }
+            else if (this.MessageDbName == strDbName)
+            {
+                // 2024/5/21
+                db_type = "message";
+                right = "getmessageinfo";
+            }
             else if (ServerDatabaseUtility.IsUtilDbName(this.LibraryCfgDom,
     strDbName,
     out string util_db_type) == true)
@@ -17326,7 +17532,7 @@ out string db_type);
                     return $"{SessionInfo.GetCurrentUserName(sessioninfo)} 获取数据库 {strDbName} 内资源被拒绝。不具备 {right} 权限。";
                 return null;
             }
-            else 
+            else
                 return $"数据库 {strDbName} 内资源不允许访问";
 
             // 书目库(规范库)，先判断存取定义

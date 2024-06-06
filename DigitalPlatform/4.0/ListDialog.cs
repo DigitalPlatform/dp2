@@ -20,7 +20,11 @@ namespace DigitalPlatform
 
         private void ListDialog_Load(object sender, EventArgs e)
         {
-
+            Task.Factory.StartNew(() => {
+                this.TryInvoke(() => {
+                    this.listBox1.Focus();
+                });
+            });
         }
 
         private void ListDialog_FormClosing(object sender, FormClosingEventArgs e)
@@ -35,6 +39,13 @@ namespace DigitalPlatform
 
         private void button_OK_Click(object sender, EventArgs e)
         {
+            if (this.listBox1.Items.Count > 0
+                && this.listBox1.SelectedItems.Count == 0)
+            {
+                MessageBox.Show(this, "请选择一个事项");
+                return;
+            }
+
             this.DialogResult = DialogResult.OK;
             this.Close();
         }

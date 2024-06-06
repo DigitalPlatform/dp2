@@ -42,6 +42,7 @@ namespace dp2Circulation
                 MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 
+            this._openMarcFileDialog.IsOutput = false;  // 2024/6/4
             // 输入的ISO2709文件名
             this._openMarcFileDialog.FileName = Program.MainForm.AppInfo.GetString(
                 "ImportMarcForm",

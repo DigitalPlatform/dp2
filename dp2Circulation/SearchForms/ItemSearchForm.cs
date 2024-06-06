@@ -7359,6 +7359,25 @@ out strError);
                                         return ProcessParts.Basic;
                                     }
 
+                                    // 2024/5/17
+                                    if (c.Type == "biblio_itemPrice")
+                                    {
+                                        // return:
+                                        //      -1  出错
+                                        //      0   没有找到
+                                        //      1   成功
+                                        var ret = Utility.GetTotalPrice(
+                                            channel,
+                                            stop,
+                                            strBiblioRecPath,
+                                            out string strResult,
+                                            out string error);
+                                        v = strResult;
+                                        if (ret == -1)
+                                            v = "error:" + error;
+                                        return ProcessParts.Basic;
+                                    }
+
                                     // 2023/11/9
                                     if (c.Type == "biblio_itemCount")
                                     {

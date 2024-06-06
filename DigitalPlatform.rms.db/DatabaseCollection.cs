@@ -1659,6 +1659,8 @@ namespace DigitalPlatform.rms
         //      -5  数据库不存在
         //      -6  权限不够
         //      0   成功
+        //      1   后台任务启动了，但还没有结束
+        //      2   本次已经减少计数 1，但依然不够，还剩下一定的计数当重新请求直到计数为零才会自动启动“收尾快速导入”任务
         // 线：安全 代码没跟上？？？
         public int API_RefreshPhysicalDatabase(
             // SessionInfo sessioninfo,
@@ -1791,7 +1793,12 @@ namespace DigitalPlatform.rms
                 }
                 db.FastAppendTaskCount--;
                 if (db.FastAppendTaskCount > 0)
-                    return 0;
+                {
+                    strError = $"还剩余 {db.FastAppendTaskCount} 次 {strAction} 请求，才会启动快速导入的收尾任务";
+                    // 这种情况应该给一个独特的返回值
+                    return 2;  // 2024/6/4
+                    // return 0;
+                }
 
                 Debug.Assert(db.FastAppendTaskCount == 0, "");
 
@@ -1871,9 +1878,12 @@ namespace DigitalPlatform.rms
                 if (strAction == "start_endfastappend")
                 {
                     // 2021/12/30
-                    if (db._tasks.Count > 0)
+                    // 2024/6/4
+                    // TODO: 应该在快速导入一开始就检测这个数字。避免最后阶段才报错
+                    var running_count = GetRunningCount(db._tasks);
+                    if (running_count > 0)
                     {
-                        strError = $"错误: 数据库 '{strDbName}' 中已经有 {db._tasks.Count} 个 end task，无法再启动 task";
+                        strError = $"错误: 数据库 '{strDbName}' 中已经有 {running_count} 个 end task，无法再启动 task";
                         return -1;
                     }
 
@@ -1936,6 +1946,21 @@ namespace DigitalPlatform.rms
 
             strError = "API_RefreshPhysicalDatabase() 未知的 strAction 参数值 '" + strAction + "'";
             return -1;
+        }
+
+        // 获得正在运行中(尚未结束)的 task 数量
+        static int GetRunningCount(List<Task<NormalResult>> tasks)
+        {
+            if (Task.WaitAll(tasks.ToArray(), TimeSpan.FromSeconds(1)) == true)
+                return 0;
+            int count = 0;
+            foreach (var task in tasks)
+            {
+                if (Task.WaitAll(new Task[] { task }, TimeSpan.FromMilliseconds(1)) == false)
+                    count++;
+            }
+
+            return count;
         }
 
         static NormalResult BuildResult(List<Task<NormalResult>> tasks)
@@ -3184,7 +3209,8 @@ namespace DigitalPlatform.rms
             DirectoryInfo[] dirs = di.GetDirectories();
             foreach (DirectoryInfo childDir in dirs)
             {
-                Directory.Delete(childDir.FullName, true);
+                // Directory.Delete(childDir.FullName, true);
+                PathUtil.DeleteDirectory(childDir.FullName);
             }
 
             // 删除所有的下级文件
@@ -4532,6 +4558,9 @@ namespace DigitalPlatform.rms
             }
             else
             {
+                // 2024/5/12
+                PathUtil.TryCreateDir(Path.GetDirectoryName(strFilePath));
+
                 using (FileStream s = File.Create(strFilePath))
                 {
 
@@ -5559,10 +5588,11 @@ namespace DigitalPlatform.rms
                 }
                 // 检查范围是否合法
                 long lOutputLength;
+                // 2024/5/15 从 GetRealLength() 改为 GetRealLengthNew()，以避免 totalLength 在 0 时报错
                 // return:
                 //		-1  出错
                 //		0   成功
-                int nRet = ConvertUtil.GetRealLength(lStart,
+                int nRet = ConvertUtil.GetRealLengthNew(lStart,
                     nLength,
                     lTotalLength,
                     nMaxLength,
@@ -6094,8 +6124,13 @@ namespace DigitalPlatform.rms
                     return -6;
                 }
                 string strDir = DatabaseUtil.GetLocalDir(this.NodeDbs, node).Trim();
-                Directory.Delete(this.DataDir + "\\" + strDir, true);
+                // Directory.Delete(this.DataDir + "\\" + strDir, true);
+                PathUtil.DeleteDirectory(Path.Combine(this.DataDir, strDir));
                 node.ParentNode.RemoveChild(node);
+
+                // 2024/5/13
+                this.Changed = true;
+                this.SaveXml();
                 return 0;
             }
             else if (String.Compare(node.Name, "database", true) == 0)
@@ -6157,26 +6192,40 @@ namespace DigitalPlatform.rms
                     }
                 }
 
-                File.Delete(strNewFileName);
-                File.Delete(strFilePath);
+                TryDeleteFile(strNewFileName);
+                TryDeleteFile(strFilePath);
 
                 string strRangeFileName = DatabaseUtil.GetRangeFileName(strFilePath);
                 if (File.Exists(strRangeFileName) == false)
-                    File.Delete(strRangeFileName);
+                    TryDeleteFile(strRangeFileName);
 
                 string strMetadataFileName = DatabaseUtil.GetMetadataFileName(strFilePath);
                 if (File.Exists(strMetadataFileName) == false)
-                    File.Delete(strMetadataFileName);
+                    TryDeleteFile(strMetadataFileName);
             }
             node.ParentNode.RemoveChild(node);
 
             this.Changed = true;
             this.SaveXml();
-
             return 0;
         }
 
-
+        static bool TryDeleteFile(string filename)
+        {
+            if (File.Exists(filename))
+            {
+                try
+                {
+                    File.Delete(filename);
+                    return true;
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+            return false;
+        }
 
         // 根据服务器上的指定路径列出其下级的事项
         // parameters:

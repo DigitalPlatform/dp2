@@ -2130,6 +2130,7 @@ namespace dp2Circulation
                 this.checkBox_refID_allowChange.Checked = !this.textBox_refID.ReadOnly;
         }
     }
+
     // 
     /// <summary>
     /// 获得图书馆代码事件

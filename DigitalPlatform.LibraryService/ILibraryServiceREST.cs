@@ -84,6 +84,7 @@ SessionMode = SessionMode.NotAllowed)]
             string strNewXml,
             string strOldXml,
             byte[] baOldTimestamp,
+            string strStyle,    // 2024/5/23
             out string strExistingXml,
             out string strSavedXml,
             out string strSavedRecPath,
@@ -94,6 +95,8 @@ SessionMode = SessionMode.NotAllowed)]
         LibraryServerResult MoveReaderInfo(
             string strSourceRecPath,
             ref string strTargetRecPath,
+            string strNewReader,
+            string strStyle,
             out byte[] target_timestamp);
 
         [OperationContract]

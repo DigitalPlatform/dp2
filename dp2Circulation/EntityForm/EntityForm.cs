@@ -34,6 +34,9 @@ using DigitalPlatform.Drawing;
 using DigitalPlatform.Z3950;
 // using DocumentFormat.OpenXml.Office2010.Excel;
 using UcsUpload;
+using Jint.Parser.Ast;
+using System.Linq;
+using System.Data.SqlTypes;
 // using DocumentFormat.OpenXml.Office2021.DocumentTasks;
 
 namespace dp2Circulation
@@ -1075,6 +1078,37 @@ true);
             this.Channel.AfterLogin -= new AfterLoginEventHandle(__Channel_AfterLogin);
             this.Channel.AfterLogin += new AfterLoginEventHandle(__Channel_AfterLogin);
 #endif
+        }
+
+        static string[] _verify_filenames = new string[] {
+            "dp2circulation_marc_verify.cs",
+            "dp2circulation_marc_verify.cs.ref",
+            "dp2circulation_marc_verify.fltx",
+            "dp2circulation_marc_convert.cs",
+            "dp2circulation_marc_convert.cs.ref",
+            "dp2circulation_marc_convert.fltx",
+        };
+
+        public override void OnNotify(ParamChangedEventArgs e)
+        {
+            if (e.Section == "serverConfigFileChanged")
+            {
+                string path = e.Value as string;
+                if (path != null)
+                {
+                    path = path.ToLower().Replace("\\", "/");
+                    Program.MainForm.AssemblyCache.Clear(path);
+                    if (EndsWith(path, _verify_filenames))
+                    {
+                        ClearVerifyDropDownMenus();
+                    }
+                }
+            }
+        }
+
+        static bool EndsWith(string path, string[] parts)
+        {
+            return parts.Where(s => path.EndsWith("/" + s)).Any();
         }
 
         // 添加自由词，前半部分工作
@@ -8697,7 +8731,6 @@ out strError);
                     out strError);
                 if (nRet == -1)
                     return -1;
-
             }
             finally
             {
@@ -10079,6 +10112,10 @@ out strError);
             // ****
             this.toolStripButton_marcEditor_save.Enabled = true;
 
+            // 2024/5/20
+            // 清除校验按钮下方的 DropDown 菜单项，迫使以后重新产生
+            ClearVerifyDropDownMenus();
+
             this.SetSaveAllButtonState(!InDisabledState);
 
             this._marcEditorVersion++;
@@ -10260,6 +10297,7 @@ out strError);
                 GetBiblioRecPathOrSyntax());
         }
 
+        // MARC 编辑器 Ctrl+Y 触发校验 MARC
         private void MarcEditor_VerifyData(object sender, GenerateDataEventArgs e)
         {
             // this.VerifyData(sender, e);
@@ -10305,7 +10343,12 @@ out strError);
         // parameters:
         //      type    类型。为 verify 和 convert 之一
         //      ext     [out] .cs 代码文件类型。为 cs 和 fltx 之一
-        int GetAssembly(
+        // return:
+        //      -1  出错
+        //      0   没有找到配置文件
+        //      1   成功获得 Assembly
+        static int GetAssembly(
+            string strBiblioRecPath,
             string type,
             out string ext,
             out Assembly assembly,
@@ -10316,19 +10359,46 @@ out strError);
             ext = "";
 
             // 库名部分路径
-            string strBiblioDbName = Global.GetDbName(this.BiblioRecPath);
+            string strBiblioDbName = Global.GetDbName(strBiblioRecPath);
             string key = "";
 
-            if (type == "verify")
+            string strCfgFileName = $"dp2circulation_marc_{type}.fltx";
+
             {
-                string strCfgFileName = "dp2circulation_marc_verify.fltx";
+                key = strBiblioDbName + "/cfgs/" + strCfgFileName;
+                assembly = Program.MainForm.AssemblyCache.FindObject(key);
+                if (assembly != null)
+                {
+                    ext = "fltx";
+                    return 1;
+                }
+            }
+
+            // return:
+            //      -1  error
+            //      0   not found
+            //      1   found
+            int nRet = Program.MainForm.GetCfgFile(strBiblioDbName,
+                strCfgFileName,
+                out string strOutputFilename,
+                out byte[] baCfgOutputTimestamp,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            if (nRet == 0)
+            {
+                // Program.MainForm.AssemblyCache.SetObject(key, null);
+
+                // .cs 和 .cs.ref
+                strCfgFileName = $"dp2circulation_marc_{type}.cs";
 
                 {
                     key = strBiblioDbName + "/cfgs/" + strCfgFileName;
-                    assembly = this.MainForm.AssemblyCache.FindObject(key);
+                    assembly = Program.MainForm.AssemblyCache.FindObject(key);
                     if (assembly != null)
                     {
-                        ext = "fltx";
+                        ext = "cs";
                         return 1;
                     }
                 }
@@ -10337,88 +10407,67 @@ out strError);
                 //      -1  error
                 //      0   not found
                 //      1   found
-                int nRet = this.GetCfgFile(strBiblioDbName,
-                    strCfgFileName,
-                    out string strOutputFilename,
-                    out byte[] baCfgOutputTimestamp,
-                    out strError);
+                nRet = Program.MainForm.GetCfgFileContent(strBiblioDbName,
+    strCfgFileName,
+    out string strCode,
+    out baCfgOutputTimestamp,
+    out strError);
                 if (nRet == -1)
                     return -1;
-
                 if (nRet == 0)
                 {
-                    // .cs 和 .cs.ref
-                    strCfgFileName = "dp2circulation_marc_verify.cs";
+                    strError = "服务器上没有定义路径为 '" + strBiblioDbName + "/" + strCfgFileName + "' 的配置文件(或.fltx配置文件)";
+                    // Program.MainForm.AssemblyCache.SetObject(key, null);
+                    return 0;
+                }
 
-                    {
-                        key = strBiblioDbName + "/cfgs/" + strCfgFileName;
-                        assembly = this.MainForm.AssemblyCache.FindObject(key);
-                        if (assembly != null)
-                        {
-                            ext = "cs";
-                            return 1;
-                        }
-                    }
+                strCfgFileName = $"dp2circulation_marc_{type}.cs.ref";
+                nRet = Program.MainForm.GetCfgFileContent(strBiblioDbName,
+                    strCfgFileName,
+                    out string strRef,
+                    out baCfgOutputTimestamp,
+                    out strError);
+                if (nRet == 0)
+                {
+                    strError = "服务器上没有定义路径为 '" + strBiblioDbName + "/" + strCfgFileName + "' 的配置文件，虽然定义了 .cs 配置文件。数据校验无法进行";
+                    return -1;
+                }
+                if (nRet == -1 || nRet == 0)
+                    return -1;
 
-                    nRet = this.GetCfgFileContent(strBiblioDbName,
-        strCfgFileName,
-        out string strCode,
-        out baCfgOutputTimestamp,
-        out strError);
-                    if (nRet == 0)
-                    {
-                        strError = "服务器上没有定义路径为 '" + strBiblioDbName + "/" + strCfgFileName + "' 的配置文件(或.fltx配置文件)，数据校验无法进行";
-                        return -1;
-                    }
-                    if (nRet == -1 || nRet == 0)
-                        return -1;
-                    strCfgFileName = "dp2circulation_marc_verify.cs.ref";
-                    nRet = this.GetCfgFileContent(strBiblioDbName,
-                        strCfgFileName,
-                        out string strRef,
-                        out baCfgOutputTimestamp,
-                        out strError);
-                    if (nRet == 0)
-                    {
-                        strError = "服务器上没有定义路径为 '" + strBiblioDbName + "/" + strCfgFileName + "' 的配置文件，虽然定义了 .cs 配置文件。数据校验无法进行";
-                        return -1;
-                    }
-                    if (nRet == -1 || nRet == 0)
-                        return -1;
-
-                    nRet = CompileVerifyCs(
+                nRet = CompileVerifyCs(
 strCode,
 strRef,
 out assembly,
 out strError);
-                    if (nRet == -1)
-                        return -1;
-
-                    ext = "cs";
-                }
-                else
+                if (nRet == -1)
                 {
-                    nRet = CompileVerifyFltx(
+                    strError = $"脚本文件 {key} 编译时出错: \r\n{strError}";
+                    return -1;
+                }
+
+                ext = "cs";
+            }
+            else
+            {
+                nRet = CompileVerifyFltx(
 strOutputFilename,
 out assembly,
 out strError);
-                    if (nRet == -1)
-                    {
-                        strError = "编译文件 '" + strCfgFileName + "' 的过程中出错:\r\n" + strError;
-                        return -1;
-                    }
-
-                    ext = "fltx";
+                if (nRet == -1)
+                {
+                    strError = "编译文件 '" + strCfgFileName + "' 的过程中出错:\r\n" + strError;
+                    return -1;
                 }
 
-                this.MainForm.AssemblyCache.SetObject(key, assembly);
-                return 1;
+                ext = "fltx";
             }
 
-            return 0;
+            Program.MainForm.AssemblyCache.SetObject(key, assembly);
+            return 1;
         }
 
-        int CompileVerifyFltx(
+        static int CompileVerifyFltx(
     string strFilterFileName,
     out Assembly assembly,
     out string strError)
@@ -10507,7 +10556,7 @@ out strError);
         }
 
 
-        int CompileVerifyCs(
+        static int CompileVerifyCs(
     string strCode,
     string strRef,
     out Assembly assembly,
@@ -10575,6 +10624,20 @@ out strError);
             return 0;
         }
 
+        // parameters:
+        //      operation   功能。例如 verifyMarc 或者 convertMarc
+        //      action      动作。这是从脚本中获得的动作列表中，其中之一值
+        public int VerifyData(object sender,
+    string operation,
+    string action,
+    bool bAutoVerify)
+        {
+            GenerateDataEventArgs e = new GenerateDataEventArgs();
+            e.ScriptEntry = $"#{operation}";
+            e.Parameter = action;
+            return VerifyData(sender, e, bAutoVerify);
+        }
+
         // MARC格式校验
         // parameters:
         //      sender    从何处启动? MarcEditor EntityEditForm BindingForm
@@ -10590,7 +10653,8 @@ out strError);
             bool bAutoVerify)
         {
             string strError = "";
-            this._processing++;
+            if (this != null)
+                this._processing++;
             try
             {
                 if (this.IsDisposed == true)
@@ -10598,6 +10662,306 @@ out strError);
                     strError = "VerifyData() 失败。因 EntityForm 窗口已经释放";
                     goto ERROR1;
                 }
+
+                {
+                    this.m_strVerifyResult = "正在校验...";
+                    // 自动校验的时候，如果没有发现错误，则不出现最后的对话框
+                    if (bAutoVerify == false)
+                    {
+                        // 如果固定面板隐藏，就打开窗口
+                        this.DoViewVerifyResult(Program.MainForm.PanelFixedVisible == false ? true : false);
+
+                        // 2011/8/17
+                        if (Program.MainForm.PanelFixedVisible == true)
+                            Program.MainForm.ActivateVerifyResultPage();
+                    }
+                }
+                var marc = this.GetMarc();
+                var operation = e.ScriptEntry;
+                var action = e.Parameter as string;
+                var source_syntax = this.GetCurrentMarcSyntax();
+
+                if (string.IsNullOrEmpty(action))
+                {
+                    // TODO: 要设法加快找不到配置文件时候的速度。
+                    // 可以考虑在 AssemblyCache 中放一个 key<-->const assembly 事项，表示配置文件不存在
+                    // 也可以增加一个 Hashtable，存储已经发现不存在的 key
+
+                    // return:
+                    //      -1  出错
+                    //      0   没有找到配置文件
+                    //      1   成功获得 actions
+                    int nRet = GetVerifyActions(
+                        this.BiblioRecPath,
+                        operation,  // TODO: 去掉 #
+                        marc,
+                        null,
+                        out List<string> actions,
+                        out string error);
+                    if (nRet == -1)
+                    {
+                        strError = ($"获得 MARC {operation}脚本的 actions 时出错: {error}");
+                        goto ERROR1;
+                    }
+                    // 没有定义配置文件，无法校验
+                    if (nRet == 0)
+                    {
+                        strError = error;
+                        goto ERROR1;
+                    }
+
+                    string catalogingRule = "";
+                    if (actions.Count > 0)
+                    {
+                        // 探测一条 MARC 记录的编目规则
+                        // return:
+                        //      -1  出错
+                        //      0   没有找到
+                        //      1   找到
+                        nRet = BiblioSearchForm.DetectCatalogingRule(
+                            this.BiblioRecPath,
+                            new MarcRecord(marc),
+                            out catalogingRule,
+                            out error);
+                        if (nRet == -1)
+                        {
+                            strError = ($"获得书目记录的编目规则时出错: {error}");
+                            goto ERROR1;
+                        }
+                        if (nRet == 0)
+                        {
+                            if (actions.Count == 1)
+                                catalogingRule = actions[0];
+                            else if (actions.Count == 0)
+                            {
+                                // TODO: 要测试验证一下，其实 "" 触发转换并成功也是可能的？
+                                strError = $"书目库 '{Global.GetDbName(this.BiblioRecPath)}' 没有可用的编目规则，无法执行校验";
+                                goto ERROR1;
+                            }
+                            else
+                            {
+                                // actions.Count > 1
+                                // return:
+                                //      -1  出错
+                                //      0   放弃选择
+                                //      1   已经选择
+                                nRet = BiblioSearchForm.SelectCatalogingRule(
+                                    $"(针对 '{Global.GetDbName(this.BiblioRecPath)}') 选择一种编目规则进行校验",
+                                    "编目规则:",
+                                    actions,
+                                    false,
+                                    out catalogingRule,
+                                    out strError);
+                                if (nRet == -1 || nRet == 0)
+                                    goto ERROR1;
+                            }
+                        }
+                    }
+
+                    action = catalogingRule;
+                }
+
+                string link_id = "";
+                // 确保当前种册窗内 MARC 编辑器内记录创建过 998$l
+                if (action == "#convert")
+                {
+                    MarcRecord record = new MarcRecord(marc);
+                    link_id = BiblioSearchForm.EnsureCatalogingRuleLinkID(
+                        record,
+                        null,
+                        out bool changed);
+                    if (changed)
+                    {
+                        marc = record.Text;
+                        this.MarcEditor.Marc = marc;
+                    }
+                }
+
+                var ret = _verifyData(
+                this.BiblioRecPath,
+                marc,
+                operation,
+                action,
+                this,
+                out VerifyHost hostObj,
+                out strError);
+                if (ret == -1)
+                    goto ERROR1;
+
+                // convert 功能如果没有返回 ChangedMarc，则直接用 marc 代替，一定要弹出对话框
+                if (operation == "#convert"
+                    && hostObj.VerifyResult.Value != -1
+                    && string.IsNullOrEmpty(hostObj.VerifyResult.ChangedMarc) == true)
+                {
+                    MarcRecord record = new MarcRecord(marc);
+                    BiblioSearchForm.SetCatalogingRule(record, action);
+                    hostObj.VerifyResult.ChangedMarc = record.Text;
+
+                    hostObj.VerifyResult.Result += "\r\n(MARC 记录内容转换后没有发生实质性变化)";   // 注: 998$c 有可能变化
+                }
+
+                // 弹出一个无模式对话框显示新旧 MARC 内容对照
+                if (hostObj.VerifyResult.Value != -1
+                    && string.IsNullOrEmpty(hostObj.VerifyResult.ChangedMarc) == false)
+                {
+                    // TODO: 可以用一个成员保存，在 EntityForm 被关闭时关闭它
+                    var dlg = new VerifyMarcResultDialog();
+                    dlg.Text = "MARC 格式转换";
+                    dlg.OriginMarc = marc;
+                    dlg.ChangedMarc = hostObj.VerifyResult.ChangedMarc;
+                    Program.MainForm.AppInfo.LinkFormState(dlg, "VerifyMarcResultDialog_state");
+                    dlg.Show(this);
+                    dlg.Closed += (s1, e1) =>
+                    {
+                        if (dlg.DialogResult == DialogResult.OK)
+                        {
+                            if (operation == "#verify")
+                            {
+                                if (this.IsHandleCreated/* 避免 EntityForm 释放后再访问*/)
+                                    this.SetMarc(hostObj.VerifyResult.ChangedMarc);
+                            }
+                            else
+                            {
+                                // TODO: 确保当前种册窗内 MARC 编辑器内记录创建过 998$l
+
+                                // 打开一个新的种册窗，然后填充 MARC 内容
+                                // (注: 这里始终没有对 this 形成依赖)
+                                var new_entity_form = Program.MainForm.OpenWindow<EntityForm>("new");
+                                new_entity_form.MarcSyntax = source_syntax;
+                                new_entity_form.SetMarc(hostObj.VerifyResult.ChangedMarc);
+                            }
+                        }
+                    };
+                }
+
+                if (operation == "#verify")
+                {
+                    //bool bVerifyFail = false;
+                    if (hostObj.VerifyResult.Value != -1)
+                    {
+                        if (this.m_verifyViewer != null)
+                        {
+                            if (string.IsNullOrEmpty(hostObj.VerifyResult.Result) == false)
+                                this.m_verifyViewer.ResultString = hostObj.VerifyResult.Result;  // 经过校验发现问题
+                            else
+                                this.m_verifyViewer.ResultString = "经过校验没有发现任何错误。";
+                        }
+                    }
+                    else
+                    {
+                        if (bAutoVerify == true)
+                        {
+                            // 延迟打开窗口
+                            DoViewVerifyResult(Program.MainForm.PanelFixedVisible == false ? true : false);
+                        }
+                        this.m_verifyViewer.ResultString = hostObj.VerifyResult.ErrorInfo;
+                        Program.MainForm.ActivateVerifyResultPage();   // 2014/7/3
+                        //bVerifyFail = true;
+                    }
+
+                    this.SetSaveAllButtonState(!InDisabledState);   // 2009/3/29 
+                    return hostObj.VerifyResult.Value;
+                }
+                else if (operation == "#convert")
+                {
+                    // 成功
+                    if (hostObj.VerifyResult.Value != -1)
+                    {
+                        string succeed_info = "";
+                        if (string.IsNullOrEmpty(hostObj.VerifyResult.Result) == false)
+                            succeed_info = hostObj.VerifyResult.Result;  // 过程信息
+                        else
+                            succeed_info = "转换成功";
+
+                        if (this.m_verifyViewer != null)
+                        {
+                            this.m_verifyViewer.ResultString = succeed_info;
+                        }
+
+                        string title = $"向 {action} 转换成功";
+                        if (string.IsNullOrEmpty(action))
+                            title = "转换成功";
+                        MessageDlg.Show(this,
+                            succeed_info,
+                            title);
+                    }
+                    else
+                    {
+                        // 失败
+                        if (bAutoVerify == true)
+                        {
+                            // 延迟打开窗口
+                            DoViewVerifyResult(Program.MainForm.PanelFixedVisible == false ? true : false);
+                        }
+                        if (this.m_verifyViewer != null)
+                            this.m_verifyViewer.ResultString = hostObj.VerifyResult.ErrorInfo;
+
+                        string title = $"向 {action} 转换失败";
+                        if (string.IsNullOrEmpty(action))
+                            title = "转换失败";
+                        MessageDlg.Show(this,
+    hostObj.VerifyResult.ErrorInfo,
+    title);
+                        Program.MainForm.ActivateVerifyResultPage();   // 2014/7/3
+                    }
+
+                    this.SetSaveAllButtonState(!InDisabledState);   // 2009/3/29 
+                    return hostObj.VerifyResult.Value;
+                }
+                else
+                {
+                    // TODO: 如何显示转换结果?
+                    this.SetSaveAllButtonState(!this.InDisabledState);
+                    return 0;
+                }
+            }
+            finally
+            {
+                this._processing--;
+            }
+        ERROR1:
+            this.MessageBoxShow(strError);
+            if (this.m_verifyViewer != null)
+                this.m_verifyViewer.ResultString = strError;
+            return 0;
+        }
+
+        public static int _verifyData(
+            //object sender,
+            //GenerateDataEventArgs e,
+            string strBiblioRecPath,
+            string strMARC,
+            string operation,
+            string action,
+            EntityForm entity_form,
+            out VerifyHost hostObj,
+            out string strError)
+        {
+            strError = "";
+            hostObj = null;
+            /*
+            if (entity_form != null)
+                entity_form._processing++;
+            */
+            try
+            {
+                /*
+                if (entity_form != null && entity_form.IsDisposed == true)
+                {
+                    strError = "VerifyData() 失败。因 EntityForm 窗口已经释放";
+                    goto ERROR1;
+                }
+                */
+
+                //string operation = e.ScriptEntry;
+                if (string.IsNullOrEmpty(operation))
+                    operation = "#verify";
+                if (operation.StartsWith("#"))
+                    operation = operation.Substring(1);
+
+                //var action = e.Parameter as string;
+
+                var marc = strMARC;
 
                 // test
                 //Thread.Sleep(10 * 1000);
@@ -10609,31 +10973,52 @@ out strError);
                 //string strRef = "";
                 //string strOutputFilename = "";
 
-                // Debug.Assert(false, "");
-                this.m_strVerifyResult = "正在校验...";
-                // 自动校验的时候，如果没有发现错误，则不出现最后的对话框
-                if (bAutoVerify == false)
+#if REMOVED
+                if (entity_form != null)
                 {
-                    // 如果固定面板隐藏，就打开窗口
-                    DoViewVerifyResult(Program.MainForm.PanelFixedVisible == false ? true : false);
+                    // Debug.Assert(false, "");
+                    entity_form.m_strVerifyResult = "正在校验...";
+                    // 自动校验的时候，如果没有发现错误，则不出现最后的对话框
+                    if (bAutoVerify == false)
+                    {
+                        // 如果固定面板隐藏，就打开窗口
+                        entity_form.DoViewVerifyResult(Program.MainForm.PanelFixedVisible == false ? true : false);
 
-                    // 2011/8/17
-                    if (Program.MainForm.PanelFixedVisible == true)
-                        MainForm.ActivateVerifyResultPage();
+                        // 2011/8/17
+                        if (Program.MainForm.PanelFixedVisible == true)
+                            Program.MainForm.ActivateVerifyResultPage();
+                    }
                 }
+#endif
 
+                /*
                 VerifyHost host = new VerifyHost();
                 host.DetailForm = this;
+                */
+                // VerifyHost hostObj = null;
 
-                int nRet = GetAssembly("verify",
+                // return:
+                //      -1  出错
+                //      0   没有找到配置文件
+                //      1   成功获得 Assembly
+                int nRet = GetAssembly(
+                    strBiblioRecPath,
+                    operation,   // "verify",
                     out string ext,
                     out Assembly assembly,
                     out strError);
+                if (nRet == -1 || nRet == 0)
+                    return -1;
+
+                nRet = NewVerifyHostObject(assembly,
+            out hostObj,
+            out strError);
                 if (nRet == -1)
-                    goto ERROR1;
+                    return -1;
 
                 if (ext == "cs")
                 {
+#if REMOVED
                     // 得到Assembly中VerifyHost派生类Type
                     Type entryClassType = ScriptManager.GetDerivedClassType(
                         assembly,
@@ -10646,7 +11031,7 @@ out strError);
 
                     {
                         // new一个VerifyHost派生对象
-                        VerifyHost hostObj = (VerifyHost)entryClassType.InvokeMember(null,
+                        hostObj = (VerifyHost)entryClassType.InvokeMember(null,
                             BindingFlags.DeclaredOnly |
                             BindingFlags.Public | BindingFlags.NonPublic |
                             BindingFlags.Instance | BindingFlags.CreateInstance, null, null,
@@ -10657,42 +11042,47 @@ out strError);
                             strError = "new VerifyHost派生类对象失败";
                             goto ERROR1;
                         }
+#endif
 
-                        // 为Host派生类设置参数
-                        hostObj.DetailForm = this;
-                        hostObj.Assembly = assembly;
+                    // 为Host派生类设置参数
+                    hostObj.DetailForm = entity_form;
+                    hostObj.Assembly = assembly;
 
-                        HostEventArgs e1 = new HostEventArgs();
-                        e1.e = e;   // 2009/2/24 
-
-                        hostObj.Main(sender, e1);
-                    }
+                    // HostEventArgs e1 = new HostEventArgs();
+                    // e1.e = e;   // 2009/2/24 
+                    hostObj.VerifyResult = hostObj.Verify(action, marc);
+#if REMOVED
+                }
+#endif
                 }
                 else if (ext == "fltx")
                 {
+                    if (hostObj == null)
+                        hostObj = new VerifyHost { DetailForm = entity_form };
                     var filter = new VerifyFilterDocument();
-                    filter.FilterHost = new VerifyHost { DetailForm = this };
+                    filter.FilterHost = hostObj;
                     filter.Assembly = assembly;
+                    filter.Action = action;
 
                     try
                     {
                         nRet = filter.DoRecord(null,
-                            this.GetMarc(),    //  this.m_marcEditor.Marc,
+                            marc,    //  this.m_marcEditor.Marc,
                             0,
                             out strError);
                         if (nRet == -1)
-                            goto ERROR1;
+                            return -1;
                     }
                     catch (Exception ex)
                     {
                         strError = "filter.DoRecord error: " + ExceptionUtil.GetDebugText(ex);
-                        goto ERROR1;
+                        return -1;
                     }
                 }
                 else
                 {
                     strError = $"无法识别的 ext '{ext}'";
-                    goto ERROR1;
+                    return -1;
                 }
 
 #if REMOVED
@@ -10794,40 +11184,160 @@ out strError);
                 }
 #endif
 
-                bool bVerifyFail = false;
-                if (string.IsNullOrEmpty(host.ResultString) == true)
+
+#if REMOVED
+                // 弹出一个无模式对话框显示新旧 MARC 内容对照
+                if (hostObj.VerifyResult.Value != -1
+                    && string.IsNullOrEmpty(hostObj.VerifyResult.ChangedMarc) == false)
                 {
-                    if (this.m_verifyViewer != null)
+                    // TODO: 可以用一个成员保存，在 EntityForm 被关闭时关闭它
+                    var dlg = new VerifyMarcResultDialog();
+                    dlg.OriginMarc = marc;
+                    dlg.ChangedMarc = hostObj.VerifyResult.ChangedMarc;
+                    Program.MainForm.AppInfo.LinkFormState(dlg, "VerifyMarcResultDialog_state");
+                    dlg.Show(this);
+                    dlg.Closed += (s1, e1) =>
                     {
-                        this.m_verifyViewer.ResultString = "经过校验没有发现任何错误。";
+                        if (dlg.DialogResult == DialogResult.OK
+                            && this.IsHandleCreated/* 避免 EntityForm 释放后再访问*/)
+                            this.SetMarc(hostObj.VerifyResult.ChangedMarc);
+                    };
+                }
+
+                if (operation == "verify")
+                {
+                    //bool bVerifyFail = false;
+                    if (hostObj.VerifyResult.Value != -1)
+                    {
+                        if (this.m_verifyViewer != null)
+                        {
+                            if (string.IsNullOrEmpty(hostObj.VerifyResult.Result) == false)
+                                this.m_verifyViewer.ResultString = hostObj.VerifyResult.Result;  // 经过校验发现问题
+                            else
+                                this.m_verifyViewer.ResultString = "经过校验没有发现任何错误。";
+                        }
                     }
+                    else
+                    {
+                        if (bAutoVerify == true)
+                        {
+                            // 延迟打开窗口
+                            DoViewVerifyResult(Program.MainForm.PanelFixedVisible == false ? true : false);
+                        }
+                        this.m_verifyViewer.ResultString = hostObj.VerifyResult.ErrorInfo;
+                        Program.MainForm.ActivateVerifyResultPage();   // 2014/7/3
+                        //bVerifyFail = true;
+                    }
+
+                    this.SetSaveAllButtonState(!InDisabledState);   // 2009/3/29 
+                    return hostObj.VerifyResult.Value;
+                }
+                else if (operation == "convert")
+                {
+                    // 成功
+                    if (hostObj.VerifyResult.Value != -1)
+                    {
+                        string succeed_info = "";
+                        if (string.IsNullOrEmpty(hostObj.VerifyResult.Result) == false)
+                            succeed_info = hostObj.VerifyResult.Result;  // 过程信息
+                        else
+                            succeed_info = "转换成功";
+
+                        if (this.m_verifyViewer != null)
+                        {
+                            this.m_verifyViewer.ResultString = succeed_info;
+                        }
+
+                        string title = $"向 {action} 转换成功";
+                        if (string.IsNullOrEmpty(action))
+                            title = "转换成功";
+                        MessageDlg.Show(this,
+                            succeed_info,
+                            title);
+                    }
+                    else
+                    {
+                        // 失败
+                        if (bAutoVerify == true)
+                        {
+                            // 延迟打开窗口
+                            DoViewVerifyResult(Program.MainForm.PanelFixedVisible == false ? true : false);
+                        }
+                        if (this.m_verifyViewer != null)
+                            this.m_verifyViewer.ResultString = hostObj.VerifyResult.ErrorInfo;
+
+                        string title = $"向 {action} 转换失败";
+                        if (string.IsNullOrEmpty(action))
+                            title = "转换失败";
+                        MessageDlg.Show(this,
+    hostObj.VerifyResult.ErrorInfo,
+    title);
+                        Program.MainForm.ActivateVerifyResultPage();   // 2014/7/3
+                    }
+
+                    this.SetSaveAllButtonState(!InDisabledState);   // 2009/3/29 
+                    return hostObj.VerifyResult.Value;
                 }
                 else
                 {
-                    if (bAutoVerify == true)
-                    {
-                        // 延迟打开窗口
-                        DoViewVerifyResult(Program.MainForm.PanelFixedVisible == false ? true : false);
-                    }
-                    this.m_verifyViewer.ResultString = host.ResultString;
-                    Program.MainForm.ActivateVerifyResultPage();   // 2014/7/3
-                    bVerifyFail = true;
+                    // TODO: 如何显示转换结果?
+                    entity_form.SetSaveAllButtonState(!entity_form.InDisabledState);
+                    return 0;
                 }
-
-                this.SetSaveAllButtonState(!InDisabledState);   // 2009/3/29 
-                return bVerifyFail == true ? 2 : 0;
+#endif
+                strError = hostObj.VerifyResult.ErrorInfo;
+                return hostObj.VerifyResult.Value;
             }
-            finally
+            catch (Exception ex)
             {
-                this._processing--;
+                strError = $"_verifyData() 出现异常: {ExceptionUtil.GetDebugText(ex)}";
+                return -1;
             }
-        ERROR1:
-            this.MessageBoxShow(strError);
-            if (this.m_verifyViewer != null)
-                this.m_verifyViewer.ResultString = strError;
-            return 0;
+
+            /*
+            ERROR1:
+                if (entity_form != null)
+                {
+                    entity_form.MessageBoxShow(strError);
+                    if (entity_form.m_verifyViewer != null)
+                        entity_form.m_verifyViewer.ResultString = strError;
+                }
+                return 0;
+            */
         }
 
+        static int NewVerifyHostObject(Assembly assembly,
+            out VerifyHost hostObj,
+            out string strError)
+        {
+            strError = "";
+            hostObj = null;
+
+            // 得到Assembly中VerifyHost派生类Type
+            Type entryClassType = ScriptManager.GetDerivedClassType(
+                assembly,
+                "dp2Circulation.VerifyHost");
+            if (entryClassType == null)
+            {
+                strError = "dp2Circulation.VerifyHost派生类没有找到";
+                return -1;
+            }
+
+            // new一个VerifyHost派生对象
+            hostObj = (VerifyHost)entryClassType.InvokeMember(null,
+                BindingFlags.DeclaredOnly |
+                BindingFlags.Public | BindingFlags.NonPublic |
+                BindingFlags.Instance | BindingFlags.CreateInstance, null, null,
+                null);
+
+            if (hostObj == null)
+            {
+                strError = "new VerifyHost派生类对象失败";
+                return -1;
+            }
+
+            return 0;
+        }
 
 #if REMOVED
         // MARC格式校验
@@ -11013,14 +11523,15 @@ out strError);
 
 #endif
 
+#if REMOVED
         // TODO: 考虑把 Assembly 加入缓存，避免每次都重新编译
         int RunVerifyCsScript(
-            object sender,
-            GenerateDataEventArgs e,
-            string strCode,
-            string strRef,
-            out VerifyHost hostObj,
-            out string strError)
+        object sender,
+        GenerateDataEventArgs e,
+        string strCode,
+        string strRef,
+        out VerifyHost hostObj,
+        out string strError)
         {
             strError = "";
             string[] saRef = null;
@@ -11121,6 +11632,7 @@ out strError);
 
             return 0;
         }
+#endif
 
         /*public*/
         int PrepareMarcFilter(
@@ -11666,7 +12178,16 @@ out strError);
         }
 
 #endif
-
+        /* 998 字段各个子字段定义
+         * (参考 DetailHost::BeforeSaveRecord() 函数里面的默认行为)
+         * $a编目批次号。此子字段不可重复。
+         * $c编目规则。例如 "NLC" 或 "CALIS"。此子字段不可重复。
+         * $k查重键中的附加信息。此子字段可以重复。用于区分实际上不同的两种书目记录，避免查重键完全一样
+         * $l相同书目记录之间的关联 ID。此子字段不可重复。两种书目记录之间若 $l 中的关联 ID 相同，但 $c 中的编目规则不同，表明虽然编目规则不同，但描述的图书是同一种图书。
+         * $t目标记录路径。表示当前记录(一般是多库流程中的订购或临时编目书目记录)最终进入中央库的时候，要合并保存到 $t 指向的路径
+         * $u记录创建时间。u 格式时间字符串。
+         * $z记录创建者。账户名。
+         * */
 
         // (复制)另存书目记录为。注：包括下属的册、订购、期、评注记录和对象资源
         private async void toolStripButton1_marcEditor_saveTo_Click(object sender, EventArgs e)
@@ -16398,6 +16919,321 @@ out strError);
             return field.Indicator + field.Content;
         }
 
+        // TODO: 列出所有可用的子菜单，但对其中等于当前编目规则名字的，加粗显示
+        // 自动跟踪 MARC 编辑器中对 998 字段的编辑修改，当发现编目规则子字段发生修改时，要触发清除 
+        // this.toolStripSplitButton_verify.DropDownItems 集合，迫使这些子菜单在下次 Opening 时重新产生
+        private void toolStripSplitButton_verify_DropDownOpening(object sender, EventArgs e)
+        {
+            if (this.toolStripSplitButton_verify.DropDownItems.Count > 0)
+                return;
+            if (string.IsNullOrEmpty(this.BiblioRecPath))
+            {
+                this.toolStripSplitButton_verify.DropDownItems
+.Add(new ToolStripMenuItem
+{
+    Text = "(书目记录路径为空)",
+    ToolTipText = "因书目记录路径为空，暂时无法展开下级菜单",
+    Enabled = false
+});
+                return;
+            }
+
+            string strError = "";
+
+            string catalogingRule = "";
+            {
+                // 探测一条 MARC 记录的编目规则
+                // return:
+                //      -1  出错
+                //      0   没有找到
+                //      1   找到
+                int nRet = BiblioSearchForm.DetectCatalogingRule(
+                    this.BiblioRecPath,
+                    new MarcRecord(this.GetMarc()),
+                    out catalogingRule,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = $"获得当前书目记录的编目规则时出错: {strError}";
+                    goto ERROR1;
+                }
+            }
+
+            {
+                // return:
+                //      -1  出错
+                //      0   没有找到配置文件
+                //      1   成功获得 actions
+                int nRet = GetVerifyActions(
+                    this.BiblioRecPath,
+                    "verify",
+                    this.GetMarc(),
+                    this,
+                    out List<string> actions,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                if (nRet == 0)
+                    this.toolStripSplitButton_verify.DropDownItems
+.Add(new ToolStripMenuItem
+{
+    Text = "(尚未配置格式校验脚本)",
+    Enabled = false
+});
+
+                if (actions.Count == 0)
+                {
+                    actions.Add("");
+                }
+
+                {
+                    foreach (string action in actions)
+                    {
+                        var menu = new ToolStripMenuItem();
+                        if (string.IsNullOrEmpty(action))
+                            menu.Text = "校验 (默认)";
+                        else
+                            menu.Text = $"校验 {action}";
+                        if (action == catalogingRule)
+                            menu.Font = new Font(this.Font, FontStyle.Bold);
+                        menu.Tag = action;
+                        menu.Click += (s1, e1) =>
+                        {
+                            ToolStripMenuItem m = s1 as ToolStripMenuItem;
+                            VerifyData(this, "verify", m.Tag as string, false);
+                        };
+                        this.toolStripSplitButton_verify.DropDownItems.Add(menu);
+                    }
+                }
+            }
+
+            {
+                // return:
+                //      -1  出错
+                //      0   没有找到配置文件
+                //      1   成功获得 actions
+                int nRet = GetVerifyActions(
+                    this.BiblioRecPath,
+                    "convert",
+                    this.GetMarc(),
+                    this,
+                    out List<string> actions,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                this.toolStripSplitButton_verify.DropDownItems
+                    .Add(new ToolStripSeparator());
+
+                if (nRet == 0)
+                    this.toolStripSplitButton_verify.DropDownItems
+    .Add(new ToolStripMenuItem
+    {
+        Text = "(尚未配置格式转换脚本)",
+        Enabled = false
+    });
+
+                if (actions.Count == 0)
+                {
+                    actions.Add("");
+                }
+
+                {
+                    foreach (string action in actions)
+                    {
+                        var menu = new ToolStripMenuItem();
+                        if (string.IsNullOrEmpty(action))
+                            menu.Text = "转换到 (默认)";
+                        else
+                            menu.Text = $"转换到 {action}";
+                        if (action != catalogingRule)
+                            menu.Font = new Font(this.Font, FontStyle.Bold);
+                        menu.Tag = action;
+                        menu.Click += (s1, e1) =>
+                        {
+                            ToolStripMenuItem m = s1 as ToolStripMenuItem;
+                            VerifyData(this, "convert", m.Tag as string, false);
+                        };
+                        this.toolStripSplitButton_verify.DropDownItems.Add(menu);
+                    }
+                }
+            }
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        // return:
+        //      -1  出错
+        //      0   没有找到配置文件
+        //      1   成功获得 actions
+        public static int GetVerifyActions(
+            string strBiblioRecPath,
+            string operation,
+            string strMARC,
+            EntityForm entity_form,
+            out List<string> actions,
+            out string strError)
+        {
+            strError = "";
+            actions = new List<string>();
+
+            //this._processing++;
+            try
+            {
+                /*
+                if (this.IsDisposed == true)
+                {
+                    strError = "GetVerifyActions() 失败。因 EntityForm 窗口已经释放";
+                    return -1;
+                }
+                */
+                // 2024/5/30
+                if (string.IsNullOrEmpty(operation))
+                    operation = "verify";
+
+                // return:
+                //      -1  出错
+                //      0   没有找到配置文件
+                //      1   成功获得 Assembly
+                int nRet = GetAssembly(
+                    strBiblioRecPath,
+                    operation,   // "verify",
+                    out string ext,
+                    out Assembly assembly,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 0)
+                    return 0;
+                VerifyHost hostObj = null;
+                nRet = NewVerifyHostObject(assembly,
+out hostObj,
+out strError);
+                if (nRet == -1)
+                    return -1;
+
+                hostObj.Assembly = assembly;
+                hostObj.DetailForm = entity_form;   //  this;
+
+                if (ext == "cs")
+                {
+                    actions = hostObj.GetActions(strMARC);
+                }
+                else if (ext == "fltx")
+                {
+                    if (hostObj == null)
+                        hostObj = new VerifyHost { DetailForm = entity_form };
+
+                    actions = hostObj.GetActions(strMARC);
+                }
+                else
+                {
+                    strError = $"无法识别的 ext '{ext}'";
+                    return -1;
+                }
+
+                return 1;
+            }
+            finally
+            {
+                // this._processing--;
+            }
+        }
+
+        // 触发“校验”按钮。
+        // 如果 actions.Count == 0，则以 "" 作为 action 参数运行；
+        // 如果 actions.Count == 1，则以该 action 运行；
+        // 如果 actions.Count > 1，则弹出对话框提供选择，然后运行
+        private void toolStripSplitButton_verify_ButtonClick(object sender, EventArgs e)
+        {
+            // ToolStripMenuItem m = sender as ToolStripMenuItem;
+
+            string strError = "";
+
+            // return:
+            //      -1  出错
+            //      0   没有找到配置文件
+            //      1   成功获得 actions
+            int nRet = GetVerifyActions(
+                this.BiblioRecPath,
+                "verify",
+                this.GetMarc(),
+                this,
+                out List<string> actions,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            if (nRet == 0)
+            {
+                // 没有定义配置文件
+                goto ERROR1;
+            }
+
+            if (actions.Count == 0)
+            {
+                actions.Add("");
+            }
+
+            string action = null;
+            if (actions.Count > 1)
+            {
+                // 探测一条 MARC 记录的编目规则
+                // return:
+                //      -1  出错
+                //      0   没有找到
+                //      1   找到
+                nRet = BiblioSearchForm.DetectCatalogingRule(
+                    this.BiblioRecPath,
+                    new MarcRecord(this.GetMarc()),
+                    out action,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = $"获得当前书目记录的编目规则时出错: {strError}";
+                    goto ERROR1;
+                }
+                if (nRet == 0)
+                {
+                    //strError = $"无法获得书目记录的编目规则，因而无法进行 MARC 格式校验";
+                    //goto ERROR1;
+
+                    // 只好人工选择编目规则
+                    action = ListDialog.GetInput(this,
+                        "按何种编目规则进行校验?",
+                        "编目规则:",
+                        actions,
+                        -1,
+                        this.Font);
+                    if (action == null)
+                        return;
+                }
+            }
+            else
+                action = actions[0];
+
+            VerifyData(this, "verify", action, false);
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        private void textBox_biblioRecPath_TextChanged(object sender, EventArgs e)
+        {
+            // 2024/5/20
+            ClearVerifyDropDownMenus();
+        }
+
+        // 清除校验按钮下方的 DropDown 菜单项，迫使以后重新产生
+        public void ClearVerifyDropDownMenus()
+        {
+            this.TryInvoke(() =>
+            {
+                this.toolStripSplitButton_verify.DropDownItems.Clear();
+            });
+        }
+
+
 #if REMOVED
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
@@ -16521,7 +17357,9 @@ out strError);
         /// <summary>
         /// 结果字符串
         /// </summary>
-        public string ResultString = "";
+        // public string ResultString = "";
+
+        public VerifyResult VerifyResult { get; set; }
 
         /// <summary>
         /// 脚本编译后的 Assembly
@@ -16554,6 +17392,7 @@ out strError);
                 null);
         }
 
+#if REMOVED
         /// <summary>
         /// 入口函数
         /// </summary>
@@ -16563,45 +17402,74 @@ out strError);
         {
             // 要触发转换 MARC 功能，需要在 e.e.ScriptEntry 中放入 "#convertMarc"，
             // 并在 e.e.Parameter 中放入动作名称
-            if (e.e.ScriptEntry == "#convertMarc")
+
             {
                 var marc = this.DetailForm.GetMarc();
                 var action = e.e.Parameter as string;
-                var result = this.ConvertMarc(marc, action);
+                var result = this.Verify(action, marc);
                 if (result.Value == -1)
                 {
                     this.ResultString = result.ErrorInfo;
                     return;
                 }
 
-                this.DetailForm.SetMarc(result.ResultMarc);
+                this.ResultString = result.Result;
+                // this.DetailForm.SetMarc(result.Result);
             }
         }
+#endif
 
         // 2024/5/9
-        // 进行转换
-        public virtual ConvertMarcResult ConvertMarc(string marc, string action)
+        // 获得动作列表
+        // parameters:
+        //      operation   目前为 "verify" 或 "convert"
+        public virtual List<string> GetActions(string marc)
         {
-            return new ConvertMarcResult
+            return new List<string>();
+        }
+
+        // 2024/5/14
+        // 进行校验
+        public virtual VerifyResult Verify(string action, string marc)
+        {
+            return new VerifyResult
             {
                 Value = -1,
                 ErrorInfo = "尚未实现"
             };
         }
 
-        // 2024/5/9
-        // 获得转换动作列表
-        public virtual List<string> GetConvertActions()
+        public static string ChangeString(string text,
+            int start,
+            string new_value)
         {
-            return new List<string>();
+            if (text.Length < start)
+                return text + (new string(' ', start - text.Length)) + new_value;
+            var left = text.Substring(0, start);
+            if (text.Length < start + new_value.Length)
+                return left + new_value;
+            var right = text.Substring(start + new_value.Length);
+            return left + new_value + right;
         }
     }
 
-    // 2024/5/9
-    public class ConvertMarcResult : NormalResult
+    // .Value:
+    //      -1  执行过程出错(也就是说校验没有完成)
+    //      0   校验正确
+    //      1   校验产生警告
+    //      2   校验产生错误(也可能同时包含警告)
+    // 注: 如果执行出错，.Value 为 -1。此时出错信息放到 .ErrorInfo 中。执行成功时，.Value 为非 -1 的值，此时 .ErrorInfo 中也可以有内容，表示过程信息
+    // 如果执行成功，产生的结果内容放到 .Result 中。.Result 的数据格式放到 .Format 中
+    //  .ChangedMarc 在 .Value 返回 -1 的时候没有值。其它情况都可能有值
+    public class VerifyResult : NormalResult
     {
-        // [out] 返回转换后的结果 MARC
-        public string ResultMarc { get; set; }
+        // [out] 被改变后的 MARC 机内格式记录
+        public string ChangedMarc { get; set; }
+
+        // [out] Result 的格式
+        public string Format { get; set; }
+        // [out] 返回校验结果文字。内容中包含 \r\n
+        public string Result { get; set; }
     }
 
     /// <summary>
@@ -16613,5 +17481,8 @@ out strError);
         /// 宿主对象
         /// </summary>
         public VerifyHost FilterHost = null;
+
+        // 2024/5/14
+        public string Action { get; set; }
     }
 }

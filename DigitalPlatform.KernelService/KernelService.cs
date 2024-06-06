@@ -1223,6 +1223,8 @@ namespace dp2Kernel
                 //      -5  数据库不存在
                 //      -6  权限不够
                 //      0   成功
+                //      1   后台任务启动了，但还没有结束
+                //      2   本次已经减少计数 1，但依然不够，还剩下一定的计数当重新请求直到计数为零才会自动启动“收尾快速导入”任务
                 int nRet = app.Dbs.API_RefreshPhysicalDatabase(
                     // sessioninfo,
                     user,

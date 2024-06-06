@@ -41,6 +41,7 @@
             this.checkBox_includeComments = new System.Windows.Forms.CheckBox();
             this.button_Cancel = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
+            this.checkBox_backup = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // label1
@@ -200,6 +201,16 @@
             this.button_OK.UseVisualStyleBackColor = true;
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
+            // checkBox_backup
+            // 
+            this.checkBox_backup.AutoSize = true;
+            this.checkBox_backup.Location = new System.Drawing.Point(346, 114);
+            this.checkBox_backup.Name = "checkBox_backup";
+            this.checkBox_backup.Size = new System.Drawing.Size(153, 25);
+            this.checkBox_backup.TabIndex = 13;
+            this.checkBox_backup.Text = "备份数据(&B)";
+            this.checkBox_backup.UseVisualStyleBackColor = true;
+            // 
             // OpenBiblioDumpFileDialog
             // 
             this.AcceptButton = this.button_OK;
@@ -207,6 +218,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
             this.ClientSize = new System.Drawing.Size(840, 494);
+            this.Controls.Add(this.checkBox_backup);
             this.Controls.Add(this.button_OK);
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.checkBox_includeComments);
@@ -246,5 +258,6 @@
         private System.Windows.Forms.CheckBox checkBox_includeComments;
         private System.Windows.Forms.Button button_Cancel;
         private System.Windows.Forms.Button button_OK;
+        private System.Windows.Forms.CheckBox checkBox_backup;
     }
 }

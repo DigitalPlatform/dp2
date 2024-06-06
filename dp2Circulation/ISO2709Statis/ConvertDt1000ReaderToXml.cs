@@ -111,6 +111,7 @@ out string timestamp);
             if (ReaderInfoForm.GetDt1000G01Path(
                 record,
                 _source,
+                "dp2",
                 out string path,
                 out string timestamp) != 1)
             {

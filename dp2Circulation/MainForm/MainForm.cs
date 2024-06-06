@@ -4268,7 +4268,7 @@ string style = null)
             NotifyAllMdiChildren(e);
         }
 
-        void NotifyAllMdiChildren(ParamChangedEventArgs e)
+        public void NotifyAllMdiChildren(ParamChangedEventArgs e)
         {
             foreach (Form form in this.MdiChildren)
             {

@@ -378,6 +378,7 @@ FormWindowState.Normal);
                 result = await dp2Kernel_start(true);
                 if (result.Value == -1)
                 {
+                    strError = result.ErrorInfo;    // 2024/5/17
                     WriteKernelEventLog("dp2Library XE 启动 dp2Kernel 时出错: " + strError, EventLogEntryType.Error);
                     MessageBox.Show(this, strError);
                 }
@@ -387,6 +388,7 @@ FormWindowState.Normal);
                 result = await dp2Library_start(true);
                 if (result.Value == -1)
                 {
+                    strError = result.ErrorInfo;    // 2024/5/17
                     WriteLibraryEventLog("dp2Library XE 启动 dp2Library 时出错: " + strError, EventLogEntryType.Error);
                     MessageBox.Show(this, strError);
                 }

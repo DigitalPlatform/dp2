@@ -2071,6 +2071,7 @@ namespace dp2Library
             string strNewXml,
             string strOldXml,
             byte[] baOldTimestamp,
+            string strStyle,    // 2024/5/23
             out string strExistingXml,
             out string strSavedXml,
             out string strSavedRecPath,
@@ -2095,7 +2096,7 @@ namespace dp2Library
                     strNewXml,
                     strOldXml,
                     baOldTimestamp,
-                    "",
+                    strStyle,
                     out strExistingXml,
                     out strSavedXml,
                     out strSavedRecPath,
@@ -2127,6 +2128,8 @@ namespace dp2Library
         public LibraryServerResult MoveReaderInfo(
             string strSourceRecPath,
             ref string strTargetRecPath,
+            string strNewReader,    // 2024/5/21
+            string strStyle,    // 2024/5/21
             out byte[] target_timestamp)
         {
             target_timestamp = null;
@@ -2153,8 +2156,9 @@ namespace dp2Library
                 return app.MoveReaderInfo(
                         sessioninfo,
                         strSourceRecPath,
-                        "",
                         ref strTargetRecPath,
+                        strNewReader,
+                        strStyle,
                         out target_timestamp);
             }
             catch (Exception ex)
@@ -4168,7 +4172,9 @@ strDbName);
         {
             bool bHasCols = StringUtil.IsInList("cols", strBrowseInfoStyle)
                 || (StringUtil.GetParameterByPrefix(strBrowseInfoStyle, "format", ":") != null);
-            bool bHasXml = StringUtil.IsInList("xml", strBrowseInfoStyle);
+            // bool bHasXml = StringUtil.IsInList("xml", strBrowseInfoStyle);
+            var xml_sub_parameters = StringUtil.GetParameterByPrefix(strBrowseInfoStyle, "xml");
+            bool bHasXml = (xml_sub_parameters != null);
 
             // 如果 record 中没有包含 cols 或者 xml，那么就没有必要进行权限过滤
             if (bHasCols == false && bHasXml == false)
@@ -4181,12 +4187,20 @@ strDbName);
                 return; // 保持 XML 和 Cols 不变
             */
 
-            if (record.RecordBody == null
+            // 2024/5/26
+            if (bHasXml && string.IsNullOrEmpty(origin_xml))
+            {
+                // 现在需要 XML，但 record 中没有给出 XML，那么就要继续向后获取 XML
+            }
+            else
+            {
+                if (record.RecordBody == null
 || string.IsNullOrEmpty(record.RecordBody.Xml))
-                return;
+                    return;
 
-            if (string.IsNullOrEmpty(origin_xml))
-                return;
+                if (string.IsNullOrEmpty(origin_xml))
+                    return;
+            }
 
             bool bXmlChanged = false;
 
@@ -4199,12 +4213,16 @@ strDbName);
             }
             else
             {
+                var temp_format = "xml";
+                if (string.IsNullOrEmpty(xml_sub_parameters) == false)
+                    temp_format += ":" + xml_sub_parameters;
+
                 // Result.Value -1出错 0没有找到 1找到
                 var ret = app.GetBiblioInfos(
     sessioninfo,
     record.Path,
     origin_xml,
-    new string[] { "xml" },
+    new string[] { temp_format },
     out string[] results,
     out byte[] _);
                 if (ret.Value == -1 || ret.Value > 1)
@@ -4231,7 +4249,8 @@ strDbName);
                     {
                         xml = results[0];
 
-                        record.RecordBody.Xml = xml;
+                        SetXml(record, xml);
+                        // record.RecordBody.Xml = xml;
 
                         bXmlChanged = true;
                     }
@@ -4445,7 +4464,9 @@ strDbName);
         {
             bool bHasCols = StringUtil.IsInList("cols", strBrowseInfoStyle)
                 || (StringUtil.GetParameterByPrefix(strBrowseInfoStyle, "format", ":") != null);
-            bool bHasXml = StringUtil.IsInList("xml", strBrowseInfoStyle);
+            // bool bHasXml = StringUtil.IsInList("xml", strBrowseInfoStyle);
+            var xml_sub_parameters = StringUtil.GetParameterByPrefix(strBrowseInfoStyle, "xml");
+            bool bHasXml = (xml_sub_parameters != null);
 
             // 如果 record 中没有包含 cols 或者 xml，那么就没有必要进行权限过滤
             if (bHasCols == false
@@ -4463,12 +4484,20 @@ strDbName);
 
             string origin_xml = record.RecordBody?.Xml;
 
-            if (record.RecordBody == null
-|| string.IsNullOrEmpty(record.RecordBody.Xml))
-                return;
+            // 2024/5/26
+            if (bHasXml && string.IsNullOrEmpty(origin_xml))
+            {
+                // 现在需要 XML，但 record 中没有给出 XML，那么就要继续向后获取 XML
+            }
+            else
+            {
+                if (record.RecordBody == null
+    || string.IsNullOrEmpty(record.RecordBody.Xml))
+                    return;
 
-            if (string.IsNullOrEmpty(origin_xml))
-                return;
+                if (string.IsNullOrEmpty(origin_xml))
+                    return;
+            }
 
             bool bXmlChanged = false;
 
@@ -4481,12 +4510,15 @@ strDbName);
             }
             else
             {
+                var temp_format = "xml";
+                if (string.IsNullOrEmpty(xml_sub_parameters) == false)
+                    temp_format += ":" + xml_sub_parameters;
                 // Result.Value -1出错 0没有找到 1找到 >1命中多于1条
                 var ret = app.GetReaderInfo(
     sessioninfo,
     "@path:" + record.Path,
     origin_xml,
-    "xml",
+    temp_format,    // 2024/5/26
     out string[] results,
     out string _,
     out byte[] _);
@@ -4514,7 +4546,8 @@ strDbName);
                     {
                         xml = results[0];
 
-                        record.RecordBody.Xml = xml;
+                        SetXml(record, xml);
+                        // record.RecordBody.Xml = xml;
 
                         bXmlChanged = true;
                     }
@@ -4559,13 +4592,16 @@ strDbName);
         {
             bool bHasCols = StringUtil.IsInList("cols", strBrowseInfoStyle)
                 || (StringUtil.GetParameterByPrefix(strBrowseInfoStyle, "format", ":") != null);
-            bool bHasXml = StringUtil.IsInList("xml", strBrowseInfoStyle);
+            // bool bHasXml = StringUtil.IsInList("xml", strBrowseInfoStyle);
+            var xml_sub_parameters = StringUtil.GetParameterByPrefix(strBrowseInfoStyle, "xml");
+            bool bHasXml = (xml_sub_parameters != null);
 
             // 如果 record 中没有包含 cols 或者 xml，那么就没有必要进行权限过滤
             if (bHasCols == false && bHasXml == false)
                 return;
 
             var origin_xml = record.RecordBody?.Xml;
+
             if (string.IsNullOrEmpty(origin_xml))
                 return;
 
@@ -4616,7 +4652,8 @@ strDbName);
                 if (nRet == 1)
                 {
                     xml = item_dom.DocumentElement.OuterXml;
-                    record.RecordBody.Xml = xml;
+                    SetXml(record, xml);
+                    // record.RecordBody.Xml = xml;
                 }
             }
 
@@ -5544,6 +5581,16 @@ out timestamp);
             record.RecordBody.Xml = null;
         }
 
+        // 2024/5/29
+        static void SetXml(Record record, string xml)
+        {
+            if (string.IsNullOrEmpty(xml) && record.RecordBody == null)
+                return;
+            if (record.RecordBody == null)
+                record.RecordBody = new RecordBody();
+            record.RecordBody.Xml = xml;
+        }
+
         // 2021/7/15
         // 清除全部 Cols 列内容
         static void ClearCols(Record record, string mask_string = "")
@@ -5563,7 +5610,8 @@ out timestamp);
         static void ClearWorkingFields(Record record,
             string strBrowseInfoStyle)
         {
-            if (StringUtil.IsInList("xml", strBrowseInfoStyle) == false
+            if (// StringUtil.IsInList("xml", strBrowseInfoStyle) == false
+                StringUtil.GetParameterByPrefix(strBrowseInfoStyle, "xml") == null
                 && record.RecordBody != null)
                 record.RecordBody.Xml = null;
             // 2023/1/31
@@ -16475,6 +16523,8 @@ out strError);
                         )
                         && app.IsDatabaseMetadataPath(sessioninfo, strResPath) == true)
                     {
+                        var origin_input_timestamp = baInputTimestamp;
+
                         // 书目库、元数据记录
                         // 转为调用 SetBiblioInfo()
                         // 读者库、元数据记录
@@ -16570,6 +16620,7 @@ out strError);
                             {
                                 // 最后一次改为用追加方式的路径兑现保存
                                 strResPath = ResPath.GetDbName(strResPath) + "/?";
+                                baInputTimestamp = origin_input_timestamp;    // 2024/5/12
                             }
 
                             if (app.IsBiblioDbName(strDbName))
@@ -16582,7 +16633,7 @@ out strError);
                                     strResPath,
                                     "xml",
                                     strBiblio,
-                                    new_timestamp,
+                                    baInputTimestamp,   // new_timestamp,
                                     null,
                                     style,
                                     out strOutputResPath,

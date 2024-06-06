@@ -6,7 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-
+using DigitalPlatform;
 using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation
@@ -244,6 +244,25 @@ namespace dp2Circulation
             }
         }
 
+        // 是否为备份模式
+        public bool BackupMode
+        {
+            get
+            {
+                return this.TryGet(() =>
+                {
+                    return this.checkBox_backup.Checked;
+                });
+            }
+            set
+            {
+                this.TryInvoke(() =>
+                {
+                    this.checkBox_backup.Checked = value;
+                });
+            }
+        }
+
         public string UiState
         {
             get
@@ -254,6 +273,7 @@ namespace dp2Circulation
                 controls.Add(this.textBox_objectDirectoryName);
                 controls.Add(this.checkBox_mimeFileExtension);
                 controls.Add(this.checkBox_usageFileExtension);
+                controls.Add(this.checkBox_backup);
                 return GuiState.GetUiState(controls);
             }
             set
@@ -264,6 +284,7 @@ namespace dp2Circulation
                 controls.Add(this.textBox_objectDirectoryName);
                 controls.Add(this.checkBox_mimeFileExtension);
                 controls.Add(this.checkBox_usageFileExtension);
+                controls.Add(this.checkBox_backup);
                 GuiState.SetUiState(controls, value);
             }
         }

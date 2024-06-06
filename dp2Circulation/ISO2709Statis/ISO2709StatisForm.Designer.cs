@@ -120,7 +120,8 @@
             this.comboBox_projectName.FormattingEnabled = true;
             this.comboBox_projectName.Items.AddRange(new object[] {
             "#将dt1000书目MARC转换为dp2的bdf格式",
-            "#将dt1000读者MARC转换为dp2的XML格式"});
+            "#将dt1000读者MARC转换为dp2的XML格式",
+            "#对dt1000导出的ISO2909文件整理-01字段"});
             this.comboBox_projectName.Location = new System.Drawing.Point(149, 16);
             this.comboBox_projectName.Name = "comboBox_projectName";
             this.comboBox_projectName.Size = new System.Drawing.Size(433, 29);

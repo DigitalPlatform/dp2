@@ -1326,6 +1326,7 @@ int MAX_CHARS = 50)
                 string[] lines = new string[] {
             "biblio_accessNo -- 索取号",   // 2023/11/9
             "biblio_itemCount -- 册数",   // 2023/11/9
+            "biblio_itemPrice -- 册价格总和",   // 2024/5/17
                 };
 
                 foreach (string line in lines)

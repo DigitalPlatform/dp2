@@ -28,6 +28,7 @@ using DigitalPlatform.Script;
 using DigitalPlatform.MarcDom;
 using DigitalPlatform.Text;
 using DigitalPlatform.Core;
+using DigitalPlatform.LibraryServer;
 
 namespace dp2Batch
 {
@@ -449,7 +450,7 @@ namespace dp2Batch
             // 
             // textBox_dbPath
             // 
-            this.textBox_dbPath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_dbPath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_dbPath.Location = new System.Drawing.Point(75, 6);
             this.textBox_dbPath.Name = "textBox_dbPath";
@@ -468,7 +469,7 @@ namespace dp2Batch
             // 
             // groupBox1
             // 
-            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox1.Controls.Add(this.textBox_endNo);
             this.groupBox1.Controls.Add(this.label3);
@@ -485,7 +486,7 @@ namespace dp2Batch
             // 
             // textBox_endNo
             // 
-            this.textBox_endNo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_endNo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_endNo.Location = new System.Drawing.Point(165, 95);
             this.textBox_endNo.Name = "textBox_endNo";
@@ -503,7 +504,7 @@ namespace dp2Batch
             // 
             // textBox_startNo
             // 
-            this.textBox_startNo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_startNo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_startNo.Location = new System.Drawing.Point(165, 63);
             this.textBox_startNo.Name = "textBox_startNo";
@@ -521,7 +522,7 @@ namespace dp2Batch
             // 
             // radioButton_startEnd
             // 
-            this.radioButton_startEnd.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.radioButton_startEnd.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.radioButton_startEnd.Checked = true;
             this.radioButton_startEnd.Location = new System.Drawing.Point(21, 38);
@@ -533,7 +534,7 @@ namespace dp2Batch
             // 
             // radioButton_all
             // 
-            this.radioButton_all.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.radioButton_all.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.radioButton_all.Location = new System.Drawing.Point(21, 19);
             this.radioButton_all.Name = "radioButton_all";
@@ -593,7 +594,7 @@ namespace dp2Batch
             // 
             // textBox_import_range
             // 
-            this.textBox_import_range.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_import_range.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_import_range.Location = new System.Drawing.Point(119, 33);
             this.textBox_import_range.Name = "textBox_import_range";
@@ -621,7 +622,7 @@ namespace dp2Batch
             // 
             // textBox_import_fileName
             // 
-            this.textBox_import_fileName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_import_fileName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_import_fileName.Location = new System.Drawing.Point(119, 8);
             this.textBox_import_fileName.Name = "textBox_import_fileName";
@@ -649,8 +650,8 @@ namespace dp2Batch
             // 
             // textBox_import_dbMap
             // 
-            this.textBox_import_dbMap.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_import_dbMap.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_import_dbMap.Location = new System.Drawing.Point(12, 104);
             this.textBox_import_dbMap.Multiline = true;
@@ -1238,7 +1239,7 @@ this.checkBox_import_fastMode.Checked);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBoxShow(strError);
         }
 
@@ -1482,6 +1483,7 @@ this.checkBox_import_fastMode.Checked);
 
                         dlg.Text = "请指定要导入的 ISO2709 文件属性";
                         dlg.FileName = importFileName;
+                        dlg.IsOutput = false;   // 2024/6/4
 
                         this.AppInfo.LinkFormState(dlg, "OpenMarcFileDlg_input_state");
                         dlg.ShowDialog(this);
@@ -1540,7 +1542,7 @@ this.checkBox_import_fastMode.Checked);
                 strError = "未知的文件类型...";
                 goto ERROR1;
             }
-            END1:
+        END1:
             // 触发Script的OnEnd()代码
             if (batchObj != null)
             {
@@ -1561,7 +1563,7 @@ this.checkBox_import_fastMode.Checked);
             this.MarcFilter = null;
             return;
 
-            ERROR1:
+        ERROR1:
             this.AssemblyMain = null;
             this.AssemblyFilter = null;
             if (filter != null)
@@ -1599,7 +1601,8 @@ this.checkBox_import_fastMode.Checked);
             int nRet;
             strError = "";
 
-            bool bFastMode = this.checkBox_import_fastMode.Checked;
+            // bool bFastMode = this.checkBox_import_fastMode.Checked;
+            bool bFastMode = this.ImportFastMode;
 
             this.bNotAskTimestampMismatchWhenOverwrite = false;	// 要询问
 
@@ -1760,7 +1763,7 @@ this.checkBox_import_fastMode.Checked);
             }
 
             WriteLog("结束导入XML数据");  // TODO: 是否要放入 finally 中
-            END1:
+        END1:
 
             stop.EndLoop();
             stop.OnStop -= new StopEventHandler(this.DoStop);
@@ -1770,7 +1773,7 @@ this.checkBox_import_fastMode.Checked);
 
             strError = "恢复数据文件 '" + strFileName + "' 完成。";
             return 0;
-            ERROR1:
+        ERROR1:
             stop.EndLoop();
             stop.OnStop -= new StopEventHandler(this.DoStop);
             stop.Initial("");
@@ -2000,7 +2003,7 @@ this.checkBox_import_fastMode.Checked);
 
             strError = "恢复数据文件 '" + strFileName + "' 完成。";
             return 0;
-            ERROR1:
+        ERROR1:
             stop.EndLoop();
             stop.OnStop -= new StopEventHandler(this.DoStop);
             stop.Initial("");
@@ -2132,7 +2135,7 @@ this.checkBox_import_fastMode.Checked);
                 byte[] output_timestamp = null;
                 string strOutputPath = "";
 
-                REDOSAVE:
+            REDOSAVE:
 
                 // 保存Xml记录
                 long lRet = channel.DoSaveTextRes(respath.Path,
@@ -2217,7 +2220,7 @@ this.checkBox_import_fastMode.Checked);
                 }
 
                 return 0;
-                ERROR1:
+            ERROR1:
                 return -1;
             }
             finally
@@ -2251,6 +2254,22 @@ this.checkBox_import_fastMode.Checked);
             if (bSkip == true)
                 return 0;
 
+            // 2024/6/4
+            // 为书目记录添加 997 字段
+            // parameters:
+            //      strAction   如果为 true，表示要删除 MARC 记录中的 997 字段
+            //                  如果为 false，表示正常创建 997 字段
+            // return:
+            //      -1  出错
+            //      0   strBiblioXml 没有发生修改
+            //      1   strBiblioXml 发生了修改
+            nRet = LibraryServerUtil.CreateUniformKey(
+                false,
+                ref strXml,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
             XmlDocument dataDom = new XmlDocument();
             try
             {
@@ -2278,7 +2297,7 @@ this.checkBox_import_fastMode.Checked);
                 strSourceDbPath = respath0.FullPath;
             }
 
-            REDO:
+        REDO:
 
             DbNameMapItem mapItem = null;
 
@@ -2337,7 +2356,7 @@ this.checkBox_import_fastMode.Checked);
                 }
             }
 
-            MAPITEMOK:
+        MAPITEMOK:
 
             if (mapItem.Style == "skip")
                 return 0;
@@ -2474,7 +2493,7 @@ this.checkBox_import_fastMode.Checked);
 
             string strWarning = "";
 
-            REDOSAVE:
+        REDOSAVE:
             if (stop != null)
             {
                 if (strTargetPath.IndexOf("?") == -1)
@@ -2599,10 +2618,10 @@ this.checkBox_import_fastMode.Checked);
             }
             // strRecordPath = strOutputPath;
             return 0;
-            END1:
-            END2:
+        END1:
+        END2:
 
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -2762,7 +2781,7 @@ this.checkBox_import_fastMode.Checked);
 
             strError = "恢复数据文件 '" + strFileName + "' 完成。";
             return 0;
-            ERROR1:
+        ERROR1:
             stop.EndLoop();
             stop.OnStop -= new StopEventHandler(this.DoStop);
             stop.Initial("");
@@ -2927,7 +2946,7 @@ this.checkBox_import_fastMode.Checked);
                 ResPath respath = new ResPath(strResPath);
                 respath.MakeDbName();
 
-                REDO:
+            REDO:
                 DbNameMapItem mapItem = (DbNameMapItem)map["*"];
                 if (mapItem != null)
                 {
@@ -3053,13 +3072,13 @@ this.checkBox_import_fastMode.Checked);
             byte[] timestamp = ByteArray.GetTimeStampByteArray(strTimeStamp);
             byte[] output_timestamp = null;
 
-            REDOWHOLESAVE:
+        REDOWHOLESAVE:
             string strOutputPath = "";
             string strWarning = "";
 
             for (int j = 0; j < ranges.Length; j++)
             {
-                REDOSINGLESAVE:
+            REDOSINGLESAVE:
 
                 // Application.DoEvents();	// 出让界面控制权
 
@@ -3192,7 +3211,7 @@ this.checkBox_import_fastMode.Checked);
                 strRecordPath = strOutputPath;
 
             return 0;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -3498,7 +3517,7 @@ this.checkBox_import_fastMode.Checked);
 
             return 0;
 
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -3859,7 +3878,7 @@ this.checkBox_import_fastMode.Checked);
                 MessageBoxShow(strError);
             return;
 
-            ERROR1:
+        ERROR1:
             this.AssemblyMain = null;
             this.AssemblyFilter = null;
             if (filter != null)
@@ -4544,7 +4563,7 @@ this.checkBox_import_fastMode.Checked);
 
                         bool bNeedRetry = true;
 
-                        REDO_GETRES:
+                    REDO_GETRES:
                         // 获得资源
                         // return:
                         //		-1	出错。具体出错原因在this.ErrorCode中。this.ErrorInfo中有出错信息。
@@ -4679,7 +4698,7 @@ this.checkBox_import_fastMode.Checked);
 
                         strRealEndNo = strID;
 
-                        CONTINUE:
+                    CONTINUE:
 
                         // 是否超过循环范围
                         try
@@ -4906,7 +4925,7 @@ this.checkBox_import_fastMode.Checked);
 
                     EnableControls(true);
 
-                    CONTINUEDBS:
+                CONTINUEDBS:
                     strInfo += " : " + m_nRecordCount.ToString() + "条 (ID " + strRealStartNo + "-" + strRealEndNo + ")";
                 }   // end of dbpaths loop
 
@@ -4939,7 +4958,7 @@ this.checkBox_import_fastMode.Checked);
             WriteLog("结束输出");
 
             return 0;
-            ERROR1:
+        ERROR1:
             stop.EndLoop();
             stop.OnStop -= new StopEventHandler(this.DoStop);
             stop.Initial("");
@@ -5251,7 +5270,7 @@ this.checkBox_import_fastMode.Checked);
             outputfile.Seek(lTotalLength, SeekOrigin.Current);
 
             return 1;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -5319,7 +5338,7 @@ this.checkBox_import_fastMode.Checked);
                 byte[] baOutputTimeStamp = null;
                 string strOutputPath;
 
-                REDO_GETRES:
+            REDO_GETRES:
                 lRet = channel.GetRes(strResPath,
                     (Stream)null,	// 故意不获取资源体
                     stop,
@@ -6550,7 +6569,7 @@ this.checkBox_import_fastMode.Checked);
 
                         bool bNeedRetry = true;
 
-                        REDO_REBUILD:
+                    REDO_REBUILD:
                         // 获得资源
                         // return:
                         //		-1	出错。具体出错原因在this.ErrorCode中。this.ErrorInfo中有出错信息。
@@ -6662,7 +6681,7 @@ this.checkBox_import_fastMode.Checked);
 
                         strRealEndNo = strID;
 
-                        CONTINUE:
+                    CONTINUE:
                         // 是否超过循环范围
                         try
                         {
@@ -6735,7 +6754,7 @@ this.checkBox_import_fastMode.Checked);
             MessageBoxShow(strError);
             return;
 
-            ERROR1:
+        ERROR1:
             MessageBoxShow(strError);
         }
 
@@ -6814,7 +6833,7 @@ this.checkBox_import_fastMode.Checked);
 
             DoRebuildKeys();
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 

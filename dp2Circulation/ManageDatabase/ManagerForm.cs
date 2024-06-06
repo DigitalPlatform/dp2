@@ -135,6 +135,17 @@ namespace dp2Circulation
             this.kernelResTree1.HideIndices = new int[] { KernelResTree.RESTYPE_FROM };
             this.kernelResTree1.DownloadFilesAsync += kernelResTree1_DownloadFilesAsync;
             this.kernelResTree1.UploadFiles += KernelResTree1_UploadFiles;
+            this.kernelResTree1.ConfigFileChanged += KernelResTree1_ConfigFileChanged;
+        }
+
+        private void KernelResTree1_ConfigFileChanged(object sender, ConfigFileChangedEventArgs e)
+        {
+            // 通知所有 MDI 子窗口
+            ParamChangedEventArgs e1 = new ParamChangedEventArgs();
+            e1.Section = "serverConfigFileChanged";
+            e1.Entry = e.Condition;
+            e1.Value = e.Path;
+            Program.MainForm.NotifyAllMdiChildren(e1);
         }
 
         private void KernelResTree1_UploadFiles(object sender, UploadFilesEventArgs e)
@@ -191,7 +202,11 @@ namespace dp2Circulation
                         goto ERROR1;
                     }
 
-                    lines.Add($"文件 {filepath} 的 MD5 为 {Convert.ToBase64String(server_md5)}");
+                    // 2024/5/11
+                    if (server_md5 == null)
+                        lines.Add($"文件 {filepath} 的 MD5 为空");
+                    else
+                        lines.Add($"文件 {filepath} 的 MD5 为 {Convert.ToBase64String(server_md5)}");
                 }
             }
             finally
@@ -225,46 +240,56 @@ namespace dp2Circulation
             {
                 _ = Task.Factory.StartNew(() =>
                 {
-                    GetMd5(e,
-                        (o1, e1) =>
-                        {
-                            // 遇到出错要可以 UI 交互重试
-
-                            if (this.IsDisposed == true)
+                    try
+                    {
+                        GetMd5(e,
+                            (o1, e1) =>
                             {
-                                e1.ResultAction = "cancel";
-                                return;
-                            }
+                                // 遇到出错要可以 UI 交互重试
 
-                            this.Invoke((Action)(() =>
-                            {
-                                if (e1.Actions == "yes,no,cancel")
+                                if (this.IsDisposed == true)
                                 {
-                                    bool bHideMessageBox = true;
+                                    e1.ResultAction = "cancel";
+                                    return;
+                                }
 
-                                    DialogResult result = MessageDialog.Show(this,
-                                            $"{e1.MessageText}\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断处理)",
-                            MessageBoxButtons.YesNoCancel,
-                            MessageBoxDefaultButton.Button1,
-                            null,
-                            ref bHideMessageBox,
-                            new string[] { "重试", "跳过", "放弃" },
-                            20);
-                                    if (result == DialogResult.Cancel)
-                                        e1.ResultAction = "cancel";
-                                    else if (result == System.Windows.Forms.DialogResult.No)
-                                        e1.ResultAction = "no";
+                                this.Invoke((Action)(() =>
+                                {
+                                    if (e1.Actions == "yes,no,cancel")
+                                    {
+                                        bool bHideMessageBox = true;
+
+                                        DialogResult result = MessageDialog.Show(this,
+                                                $"{e1.MessageText}\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断处理)",
+                                MessageBoxButtons.YesNoCancel,
+                                MessageBoxDefaultButton.Button1,
+                                null,
+                                ref bHideMessageBox,
+                                new string[] { "重试", "跳过", "放弃" },
+                                20);
+                                        if (result == DialogResult.Cancel)
+                                            e1.ResultAction = "cancel";
+                                        else if (result == System.Windows.Forms.DialogResult.No)
+                                            e1.ResultAction = "no";
+                                        else
+                                            e1.ResultAction = "yes";
+                                    }
                                     else
+                                    {
                                         e1.ResultAction = "yes";
-                                }
-                                else
-                                {
-                                    e1.ResultAction = "yes";
-                                    // TODO: 是否延时一段？
-                                }
+                                        // TODO: 是否延时一段？
+                                    }
 
-                            }));
+                                }));
+                            });
+                    }
+                    catch (Exception ex)
+                    {
+                        this.TryInvoke(() =>
+                        {
+                            MessageBox.Show(this, $"获得 MD5 时出现异常: {ex.Message}");
                         });
+                    }
                 },
     CancellationToken.None,
     TaskCreationOptions.LongRunning,

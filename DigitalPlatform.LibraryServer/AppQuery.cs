@@ -190,6 +190,9 @@ namespace DigitalPlatform.LibraryServer
             strError = "";
             int nRet = 0;
 
+            // 2024/5/10
+            this.CheckVdbsThrow();
+
             Debug.Assert(this.vdbs != null, "");
 
             XmlDocument dom = new XmlDocument();
@@ -509,6 +512,9 @@ namespace DigitalPlatform.LibraryServer
             {
                 Db db = dbs[i];
 
+                // 2024/5/10
+                this.CheckVdbsThrow();
+
                 Debug.Assert(this.vdbs != null, "");
 
                 VirtualDatabase vdb = this.vdbs[db.DbName];
@@ -542,6 +548,9 @@ namespace DigitalPlatform.LibraryServer
                     {
                         // 虚拟的路径名
                         string strVirtualFromName = db.Froms[k];
+                        
+                        // 2024/5/10
+                        this.CheckVdbsThrow();
 
                         // 实在的路径名
                         string strRealFroms = vdb.GetRealFromName(

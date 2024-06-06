@@ -326,15 +326,16 @@ out byte[] baOutputTimestamp)
                 false,   // include preamble?
                 strMetadata,
                 style,  // "content",
-                exist_timestamp,
+                baTimestamp,   // exist_timestamp,
                 out baOutputTimestamp,
                 out strOutputRecPath,
                 out strError);
             if (lRet == -1)
             {
-                if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
+                if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch
+                    && bExist == true)
                 {
-                    if (nRedoCount > 10)
+                    if (nRedoCount > 5)
                     {
                         /*
                         strError = "反复保存均遇到时间戳冲突, 超过10次重试仍然失败";

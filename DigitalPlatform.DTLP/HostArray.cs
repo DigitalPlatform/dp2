@@ -8,351 +8,357 @@ using DigitalPlatform.Xml;
 
 namespace DigitalPlatform.DTLP
 {
-	public class HostArray : ArrayList
-	{
-		ApplicationInfo appinfo = null;
+    public class HostArray : ArrayList
+    {
+        ApplicationInfo appinfo = null;
 
-		public DtlpChannel Container = null;
+        public DtlpChannel Container = null;
 
-		// 从ini文件或者registry装载已经配置的所有主机事项
-		public int InitialHostArray(ApplicationInfo appInfoParam)
-		{
-			int i, nMax;
-			HostEntry entry = null;
+        // 从ini文件或者registry装载已经配置的所有主机事项
+        public int InitialHostArray(ApplicationInfo appInfoParam)
+        {
+            int i, nMax;
+            HostEntry entry = null;
 
-			this.Clear();
+            this.Clear();
 
-			appinfo = appInfoParam;	// 保存下来备用
+            appinfo = appInfoParam;	// 保存下来备用
 
             if (appInfoParam == null)   // 2006/11/21
                 return 0;
 
-			ArrayList saHost = LoadHosts(appInfoParam);
-			nMax = saHost.Count;
-			for(i=0; i<nMax; i++) 
-			{
-				entry = new HostEntry();
-				entry.m_strHostName = (string)saHost[i];
-				this.Add(entry);
-				entry.Container = this;
-			}
+            ArrayList saHost = LoadHosts(appInfoParam);
+            nMax = saHost.Count;
+            for (i = 0; i < nMax; i++)
+            {
+                entry = new HostEntry();
+                entry.m_strHostName = (string)saHost[i];
+                this.Add(entry);
+                entry.Container = this;
+            }
 
-			return 0;
-		}
+            return 0;
+        }
 
-		// 从ini文件或者registry装载已经配置的所有主机事项
-		public static ArrayList LoadHosts(ApplicationInfo appInfo)
-		{
-			ArrayList saResult = new ArrayList();
+        // 从ini文件或者registry装载已经配置的所有主机事项
+        public static ArrayList LoadHosts(ApplicationInfo appInfo)
+        {
+            ArrayList saResult = new ArrayList();
 
-			for(int i=0; ;i++) 
-			{
-				string strEntry = "entry" + Convert.ToString(i+1);
-					
-				string strValue = appInfo.GetString("ServerAddress",
-					strEntry,
-					"");
-				if (strValue == "")
-					break;
-				saResult.Add(strValue);
-			}
+            for (int i = 0; ; i++)
+            {
+                string strEntry = "entry" + Convert.ToString(i + 1);
 
-			return saResult;
-		}
+                string strValue = appInfo.GetString("ServerAddress",
+                    strEntry,
+                    "");
+                if (strValue == "")
+                    break;
+                saResult.Add(strValue);
+            }
 
-		// 将CStringArray中的主机事项写入ini文件或者registry
-		public static void SaveHosts(ApplicationInfo appInfo,
-			ArrayList saHost)
-		{
-			string strEntry = null;
-			int i = 0;
+            return saResult;
+        }
 
-			for(i=0; i<saHost.Count; i++) 
-			{
+        // 将CStringArray中的主机事项写入ini文件或者registry
+        public static void SaveHosts(ApplicationInfo appInfo,
+            ArrayList saHost)
+        {
+            string strEntry = null;
+            int i = 0;
 
-				strEntry = "entry" + Convert.ToString(i+1);
-			
-				string strValue = (string)saHost[i];
-			
-				appInfo.SetString("ServerAddress",
-					strEntry,
-					strValue);
-			}
+            for (i = 0; i < saHost.Count; i++)
+            {
 
-			// 最后一次，截断
-			strEntry = "entry" + Convert.ToString(i+1);
-			appInfo.SetString("ServerAddress",
-				strEntry,
-				"");
-	
-		}
+                strEntry = "entry" + Convert.ToString(i + 1);
 
-		// 摧毁一个Host事项
-		public int DestroyHostEntry(HostEntry entry)
-		{
-			this.Remove(entry);
-			return 0; // not found
-		}
+                string strValue = (string)saHost[i];
 
-		// 以主机名字或者别名寻找主机事项
-		public HostEntry MatchHostEntry(string strHostName)
-		{
+                appInfo.SetString("ServerAddress",
+                    strEntry,
+                    strValue);
+            }
 
-			for(int i=0;i<this.Count;i++) 
-			{
-				HostEntry entry = (HostEntry)this[i];
-				Debug.Assert(entry != null, "HostEntry中出现空元素");
+            // 最后一次，截断
+            strEntry = "entry" + Convert.ToString(i + 1);
+            appInfo.SetString("ServerAddress",
+                strEntry,
+                "");
 
-				if ( (String.Compare(strHostName,entry.m_strHostName, true)==0)
-					|| (String.Compare(strHostName,entry.m_strAlias, true)==0) )
-					return entry;
-			}
-			return null;
-		}
+        }
 
-		public void CloseAllSockets()
-		{
+        // 摧毁一个Host事项
+        public int DestroyHostEntry(HostEntry entry)
+        {
+            this.Remove(entry);
+            return 0; // not found
+        }
 
-			for(int i=0;i<this.Count;i++) 
-			{
-				HostEntry entry = (HostEntry)this[i];
-				Debug.Assert(entry != null, "HostEntry中出现空元素");
+        // 以主机名字或者别名寻找主机事项
+        public HostEntry MatchHostEntry(string strHostName)
+        {
 
-				if (entry.client != null) 
-				{
-					entry.client.Close();
-					entry.client = null;
-				}
-			}
-		}
+            for (int i = 0; i < this.Count; i++)
+            {
+                HostEntry entry = (HostEntry)this[i];
+                Debug.Assert(entry != null, "HostEntry中出现空元素");
 
+                if ((String.Compare(strHostName, entry.m_strHostName, true) == 0)
+                    || (String.Compare(strHostName, entry.m_strAlias, true) == 0))
+                    return entry;
+            }
+            return null;
+        }
 
-	}
+        public void CloseAllSockets()
+        {
+
+            for (int i = 0; i < this.Count; i++)
+            {
+                HostEntry entry = (HostEntry)this[i];
+                Debug.Assert(entry != null, "HostEntry中出现空元素");
+
+                if (entry.client != null)
+                {
+                    entry.client.Close();
+                    entry.client = null;
+                }
+            }
+        }
 
 
-	/// <summary>
-	/// Summary description for HostArray.
-	/// </summary>
-	public class HostEntry
-	{
-
-		// SOCKET		m_hSocket;
-
-		public TcpClient client = null;
-
-		public string		m_strHostName = "";	// IP地址或者域名
-		public string		m_strAlias = "";		// 别名
-
-		public int			m_nDTLPCharset = DtlpChannel.CHARSET_DBCS;
-
-		// int			m_nLock = 0;
-
-//		bool		m_bWantDel = false;
-		public int			m_lUsrID = 0;
-		public int			m_lChannel = -1;
-	
-//		int			m_nStatus = 0;	// 0:空闲 1:发送 2:接收
+    }
 
 
-		public HostArray	Container = null;
+    /// <summary>
+    /// Summary description for HostArray.
+    /// </summary>
+    public class HostEntry
+    {
+        // 2024/6/6
+        public TimeSpan _sendTimeout = TimeSpan.FromSeconds(10);
+        public TimeSpan _recvTimeout = TimeSpan.FromSeconds(10);
 
 
-		public HostEntry()
-		{
-			//m_hSocket = INVALID_SOCKET;
-			// m_nDTLPCharset = CHARSET_DBCS;
-		}
+        // SOCKET		m_hSocket;
+
+        public TcpClient client = null;
+
+        public string m_strHostName = "";   // IP地址或者域名
+        public string m_strAlias = "";      // 别名
+
+        public int m_nDTLPCharset = DtlpChannel.CHARSET_DBCS;
+
+        // int			m_nLock = 0;
+
+        //		bool		m_bWantDel = false;
+        public int m_lUsrID = 0;
+        public int m_lChannel = -1;
+
+        //		int			m_nStatus = 0;	// 0:空闲 1:发送 2:接收
+
+
+        public HostArray Container = null;
+
+
+        public HostEntry()
+        {
+            //m_hSocket = INVALID_SOCKET;
+            // m_nDTLPCharset = CHARSET_DBCS;
+        }
 
         // TODO: 容易造成 mem leak。建议用 Dispose() 改写
-		~HostEntry()
-		{
-			if (m_lChannel != -1 && client != null) 
-			{
-				// RmtDestroyChannel();
-			}
-			if (client != null) 
-			{
-				client.Close();
-				client = null;
-			}
-		}
+        ~HostEntry()
+        {
+            if (m_lChannel != -1 && client != null)
+            {
+                // RmtDestroyChannel();
+            }
+            if (client != null)
+            {
+                client.Close();
+                client = null;
+            }
+        }
 
-		// 远程建立通道
-		// 返回 -1 表示失败
-		public int RmtCreateChannel(int usrid)
-		{
+        // 远程建立通道
+        // 返回 -1 表示失败
+        public int RmtCreateChannel(int usrid)
+        {
 
-			// send:long usrid
-			// recv:
-			// return long
-	
-			DTLPParam	param = new DTLPParam();
-			int		lRet;
-			int			nRet;
-			int			nLen;
-			byte []	baSendBuffer = null;
-			byte []	baRecvBuffer = null;
-			int			nErrorNo = 0;
+            // send:long usrid
+            // recv:
+            // return long
 
-			Debug.Assert(client != null,
-				"client为空");
-	
-			param.Clear();
-			param.ParaLong(usrid);
-			lRet = param.ParaToPackage(DtlpChannel.FUNC_CREATECHANNEL,
-				nErrorNo,
-				out baSendBuffer );
+            DTLPParam param = new DTLPParam();
+            int lRet;
+            int nRet;
+            int nLen;
+            byte[] baSendBuffer = null;
+            byte[] baRecvBuffer = null;
+            int nErrorNo = 0;
 
-			if (lRet == -1) 
-			{
-				return -1; // error
-			}
+            Debug.Assert(client != null,
+                "client为空");
 
-			nRet = SendTcpPackage(baSendBuffer,
+            param.Clear();
+            param.ParaLong(usrid);
+            lRet = param.ParaToPackage(DtlpChannel.FUNC_CREATECHANNEL,
+                nErrorNo,
+                out baSendBuffer);
+
+            if (lRet == -1)
+            {
+                return -1; // error
+            }
+
+            nRet = SendTcpPackage(baSendBuffer,
                 baSendBuffer.Length,
-				out nErrorNo);
-	
-			if (nRet < 0) 
-			{
-				return -1;
-			}
+                out nErrorNo);
 
-			nRet = RecvTcpPackage(out baRecvBuffer, 
-				out nLen,
-				out nErrorNo);
-			if (nRet<0) 
-			{
-				return -1;
-			}
-	
-			param.Clear();
-			param.DefPara(Param.STYLE_LONG);
+            if (nRet < 0)
+            {
+                return -1;
+            }
+
+            nRet = RecvTcpPackage(out baRecvBuffer,
+                out nLen,
+                out nErrorNo);
+            if (nRet < 0)
+            {
+                return -1;
+            }
+
+            param.Clear();
+            param.DefPara(Param.STYLE_LONG);
 
 
-			int nTempFuncNum = 0;
-			param.PackageToPara(baRecvBuffer,
+            int nTempFuncNum = 0;
+            param.PackageToPara(baRecvBuffer,
                 ref nErrorNo,
-				out nTempFuncNum);
+                out nTempFuncNum);
 
-			lRet = param.lValue(0);
+            lRet = param.lValue(0);
 
-			m_lChannel = lRet;
-			m_lUsrID = usrid;
+            m_lChannel = lRet;
+            m_lUsrID = usrid;
 
-			return lRet;
-		}
+            return lRet;
+        }
 
 
-		// 注销远程通道
-		public int RmtDestroyChannel()
+        // 注销远程通道
+        public int RmtDestroyChannel()
 
-		{
-			// send:long usrid
-			//      long Channel
-			// recv:
-			// return long
-	
-			DTLPParam	param = new DTLPParam();
-			int		lRet;
-			int			nRet;
-			int			nLen;
-			byte [] baSendBuffer = null;
-			byte []	baRecvBuffer = null;
-			int			nErrorNo = 0;
-	
-			Debug.Assert(client != null,
-				"client为空");
-	
-			param.Clear();
-			param.ParaLong(m_lUsrID);
-			param.ParaLong(m_lChannel);
+        {
+            // send:long usrid
+            //      long Channel
+            // recv:
+            // return long
 
-			lRet = param.ParaToPackage(DtlpChannel.FUNC_DESTROYCHANNEL,
-				nErrorNo,
-				out baSendBuffer );
+            DTLPParam param = new DTLPParam();
+            int lRet;
+            int nRet;
+            int nLen;
+            byte[] baSendBuffer = null;
+            byte[] baRecvBuffer = null;
+            int nErrorNo = 0;
 
-			if (lRet == -1) 
-			{
-				return -1; // error
-			}
-	
-			nRet = SendTcpPackage(baSendBuffer,
+            Debug.Assert(client != null,
+                "client为空");
+
+            param.Clear();
+            param.ParaLong(m_lUsrID);
+            param.ParaLong(m_lChannel);
+
+            lRet = param.ParaToPackage(DtlpChannel.FUNC_DESTROYCHANNEL,
+                nErrorNo,
+                out baSendBuffer);
+
+            if (lRet == -1)
+            {
+                return -1; // error
+            }
+
+            nRet = SendTcpPackage(baSendBuffer,
                 baSendBuffer.Length,
-				out nErrorNo);
-			if (nRet < 0) 
-			{
-				return -1;
-			}
+                out nErrorNo);
+            if (nRet < 0)
+            {
+                return -1;
+            }
 
-			nRet = RecvTcpPackage(out baRecvBuffer,
-				out nLen,
-				out nErrorNo);
+            nRet = RecvTcpPackage(out baRecvBuffer,
+                out nLen,
+                out nErrorNo);
 
-			if (nRet<0) 
-			{
-				return -1;
-			}
-	
-			param.Clear();
-			param.DefPara(Param.STYLE_LONG);
+            if (nRet < 0)
+            {
+                return -1;
+            }
 
-
-			int nTempFuncNum = 0;
-			param.PackageToPara(baRecvBuffer,
-				ref nErrorNo,
-				out nTempFuncNum);
-
-			lRet = param.lValue(0);
-	
-			m_lChannel = -1;
-
-			return lRet;
-		}
+            param.Clear();
+            param.DefPara(Param.STYLE_LONG);
 
 
+            int nTempFuncNum = 0;
+            param.PackageToPara(baRecvBuffer,
+                ref nErrorNo,
+                out nTempFuncNum);
 
-		// connect()到主机
-		// 原来的模块，是先检查空格，如果有，去掉空格右边。
-		// 然后，看是否有"()"，如果有，去掉中间的内容(包括括号)。"()"可以多次出现
-		public int ConnectSocket(string strHostName,
-			out int nErrorNo)
-		{
-			string strPort = "";
-			nErrorNo = 0;
+            lRet = param.lValue(0);
 
-			m_strHostName = strHostName;	// 加工前的字符串
+            m_lChannel = -1;
 
-			int nRet = strHostName.IndexOf(":", 0);
-			if (nRet != -1) 
-			{
-				strPort = strHostName.Substring(nRet+1);
-				strPort.Trim();
-				strHostName = strHostName.Substring(0, nRet);
-				strHostName.Trim();
-			}
+            return lRet;
+        }
 
-			int nPort = 3001;
-		
-			if (strPort != "")
-				nPort = Convert.ToInt32(strPort);
 
-			try 
-			{
 
-				client = new TcpClient(strHostName, nPort);
-			}
+        // connect()到主机
+        // 原来的模块，是先检查空格，如果有，去掉空格右边。
+        // 然后，看是否有"()"，如果有，去掉中间的内容(包括括号)。"()"可以多次出现
+        public int ConnectSocket(string strHostName,
+            out int nErrorNo)
+        {
+            string strPort = "";
+            nErrorNo = 0;
 
-			catch (SocketException) 
-			{
-				nErrorNo = DtlpChannel.GL_CONNECT;
-				// 是否返回错误字符串? 精确区分错误类型
-				return -1;
-			}
+            m_strHostName = strHostName;    // 加工前的字符串
 
-	
-	
-			return 0;
-			/*
+            int nRet = strHostName.IndexOf(":", 0);
+            if (nRet != -1)
+            {
+                strPort = strHostName.Substring(nRet + 1);
+                strPort.Trim();
+                strHostName = strHostName.Substring(0, nRet);
+                strHostName.Trim();
+            }
+
+            int nPort = 3001;
+
+            if (strPort != "")
+                nPort = Convert.ToInt32(strPort);
+
+            try
+            {
+
+                client = new TcpClient(strHostName, nPort);
+                //client.ReceiveTimeout;
+                //client.SendTimeout;
+            }
+
+            catch (SocketException)
+            {
+                nErrorNo = DtlpChannel.GL_CONNECT;
+                // 是否返回错误字符串? 精确区分错误类型
+                return -1;
+            }
+
+
+
+            return 0;
+            /*
 	
 			ERROR1:
 				if (client != null)
@@ -361,19 +367,19 @@ namespace DigitalPlatform.DTLP
 			client = null;
 			return -1;
 			*/
-		}
+        }
 
 
-		public int CloseSocket()
-		{
-			if (client != null) 
-			{
-				client.Close();
-				client = null;
-			}
+        public int CloseSocket()
+        {
+            if (client != null)
+            {
+                client.Close();
+                client = null;
+            }
 
-			return 0;
-		}
+            return 0;
+        }
 
 
 #if OLD
@@ -460,7 +466,7 @@ namespace DigitalPlatform.DTLP
 
                 // TODO: 是否要关闭 NetworkStream !!!
                 NetworkStream stream = client.GetStream();
-
+                var start_time = DateTime.Now;
                 IAsyncResult result = stream.BeginWrite(baPackage, 0, nLen,
                     null, null);
                 for (; ; )
@@ -471,16 +477,27 @@ namespace DigitalPlatform.DTLP
                         return -1;
                     System.Threading.Thread.Sleep(100);
                      * */
-                    if ( Container.Container.Container.DoIdle(this) == true)
+                    if (Container.Container.Container.DoIdle(this) == true)
                         return -1;
 
                     if (result.IsCompleted)
                         break;
+
+                    if (DateTime.Now - start_time > _sendTimeout)
+                    {
+                        nErrorNo = DtlpChannel.GL_SEND;
+                        if (client != null)
+                        {
+                            client.Close();
+                            client = null;
+                        }
+                        return -1;
+                    }
                 }
 
                 stream.EndWrite(result);
             }
-            catch (Exception /*ex*/) 
+            catch (Exception /*ex*/)
             {
                 nErrorNo = DtlpChannel.GL_SEND;
 
@@ -612,7 +629,6 @@ namespace DigitalPlatform.DTLP
             out int nLen,
             out int nErrorNo)
         {
-            // nErrorNo = 0;
             nErrorNo = DtlpChannel.GL_INTR;
 
             int nInLen;
@@ -636,18 +652,18 @@ namespace DigitalPlatform.DTLP
                 if (Container.Container.Container.procIdle != null)
                 {
                  * */
-                    if (client != null && stream.DataAvailable == false)
-                    {
-                        /*
-                        int nRet = Container.Container.Container.procIdle(this);
-                        if (nRet == 1)
-                            goto ERROR1;
-                        System.Threading.Thread.Sleep(100);
-                         * */
-                        if (Container.Container.Container.DoIdle(this) == true)
-                            goto ERROR1;
-                        continue;
-                    }
+                if (client != null && stream.DataAvailable == false)
+                {
+                    /*
+                    int nRet = Container.Container.Container.procIdle(this);
+                    if (nRet == 1)
+                        goto ERROR1;
+                    System.Threading.Thread.Sleep(100);
+                     * */
+                    if (Container.Container.Container.DoIdle(this) == true)
+                        goto ERROR1;
+                    continue;
+                }
                 /*
                 }
                  * */
@@ -658,6 +674,7 @@ namespace DigitalPlatform.DTLP
                     goto ERROR1;
                 }
 
+                var start_time = DateTime.Now;
                 IAsyncResult result = stream.BeginRead(baPackage, nInLen, baPackage.Length - nInLen,
                     null, null);
                 for (; ; )
@@ -673,11 +690,30 @@ namespace DigitalPlatform.DTLP
 
                     if (result.IsCompleted)
                         break;
+
+                    if (DateTime.Now - start_time > _recvTimeout)
+                    {
+                        nErrorNo = DtlpChannel.GL_RECV;
+                        if (client != null)
+                        {
+                            client.Close();
+                            client = null;
+                        }
+                        return -1;
+                    }
                 }
 
-                wRet = stream.EndRead(result);
-
-                if (wRet == 0)
+                // 2024/6/5
+                // 捕获异常
+                try
+                {
+                    wRet = stream.EndRead(result);
+                    if (wRet == 0)
+                    {
+                        goto ERROR1;
+                    }
+                }
+                catch (ObjectDisposedException ex)
                 {
                     goto ERROR1;
                 }
@@ -687,7 +723,6 @@ namespace DigitalPlatform.DTLP
                 if ((wRet >= 4 || nInLen >= 4)
                     && bInitialLen == false)
                 {
-
                     l = BitConverter.ToInt32(baPackage, 0);
                     l = IPAddress.NetworkToHostOrder((Int32)l);
                     nLen = (int)l;
@@ -732,12 +767,11 @@ namespace DigitalPlatform.DTLP
                 client.Close();
                 client = null;
             }
-
             return -1;
         }
 
 #endif
 
 
-	}
+    }
 }

@@ -2188,6 +2188,50 @@ namespace DigitalPlatform.LibraryServer
             {
                 DateTime start_time_1 = DateTime.Now;
 
+                XmlDocument item_dom = new XmlDocument();
+                item_dom.LoadXml(strOutputItemXml);
+
+                // 按照当前账户的权限，来过滤掉原始册记录中的一些敏感字段
+                // return:
+                //      -2  权限不具备。也可以理解为全部字段都应被过滤掉
+                //      -1  出错
+                //      0   过滤后记录没有改变
+                //      1   过滤后记录发生了改变
+                nRet = this.FilterItemRecord(
+            sessioninfo,
+            "item",
+            item_dom,
+            out strError);
+                if (nRet == -1 || nRet == -2)
+                {
+                    string[] item_formats = strItemFormatList.Split(new char[] { ',' });
+                    List<string> results = new List<string>();
+                    for (int i = 0; i < item_formats.Length; i++)
+                    {
+                        results.Add($"!error:{strError}");
+                    }
+                    item_records = results.ToArray();
+                }
+                else
+                {
+                    nRet = this._buildItemFormats(sessioninfo,
+        strItemFormatList,
+        strOutputItemRecPath,
+        "item",
+        item_dom,
+        out List<FormatItem> items,
+        out strError);
+                    if (nRet == -1)
+                    {
+                        if (result.ErrorCode == ErrorCode.NoError)
+                            strError = "虽然出现了下列错误，但是借书操作已经成功: " + strError;
+                        goto ERROR1;
+                    }
+
+                    item_records = FormatItem.BuildStringList(items).ToArray();
+                }
+
+#if REMOVED
                 string[] item_formats = strItemFormatList.Split(new char[] { ',' });
                 item_records = new string[item_formats.Length];
 
@@ -2273,6 +2317,7 @@ namespace DigitalPlatform.LibraryServer
                         goto ERROR1;
                     }
                 } // end of for
+#endif
 
                 WriteTimeUsed(
     time_lines,
@@ -2527,13 +2572,9 @@ start_time_1,
                 nRet = BuildBiblio(
     sessioninfo,
     strBiblioRecPath,
-    /*
-    strBiblioRecID,
-    strOutputItemRecPath,
-    */
-    strStyle,
+    //strStyle,
     strBiblioFormatList,
-    result,
+    //result,
     out biblio_records,
     out strError);
                 if (nRet == -1)
@@ -2606,6 +2647,105 @@ start_time_1,
             return strError;
         }
 
+        // parameters:
+        //      strStyle    其中要包括 biblio，才会返回书目相关信息
+        int BuildBiblio(
+            SessionInfo sessioninfo,
+            string strBiblioRecPath,
+            //string strStyle,
+            string strBiblioFormatList,
+            //LibraryServerResult result,
+            out string[] biblio_records,
+            out string strError)
+        {
+            biblio_records = null;
+            strError = "";
+            int nRet = 0;
+
+            // string strBiblioDbName = StringUtil.GetDbName(strBiblioRecPath);
+
+            string[] biblio_formats = strBiblioFormatList.Split(new char[] { ',' });
+            // biblio_records = new string[biblio_formats.Length];
+
+            string strBiblioXml = "";
+            string strOutputPath = strBiblioRecPath;
+            string strMetaData = "";
+            byte[] timestamp = null;
+
+
+            string style = "";
+            // 至少有 html xml text summary 之一，才获取 strBiblioXml
+            if (StringUtil.GetParameterByPrefix(strBiblioFormatList, "html") != null
+                || StringUtil.GetParameterByPrefix(strBiblioFormatList, "xml") != null
+                || StringUtil.GetParameterByPrefix(strBiblioFormatList, "text") != null
+                || StringUtil.GetParameterByPrefix(strBiblioFormatList, "summary") != null
+                || StringUtil.GetParameterByPrefix(strBiblioFormatList, "iso2709") != null
+                || StringUtil.GetParameterByPrefix(strBiblioFormatList, "marc") != null)
+                StringUtil.SetInList(ref style, "content,data", true);
+
+            // 根据 formats 中包含 recpath metadata 和 timestamp，灵活决定 .GetRes() 要获取到的信息
+            if (StringUtil.IsInList("recpath,outputpath", strBiblioFormatList))
+                StringUtil.SetInList(ref style, "outputpath", true);
+
+            if (StringUtil.IsInList("metadata", strBiblioFormatList))
+                StringUtil.SetInList(ref style, "metadata", true);
+
+            if (StringUtil.IsInList("timestamp", strBiblioFormatList))
+                StringUtil.SetInList(ref style, "timestamp", true);
+
+
+            if (string.IsNullOrEmpty(style) == false)
+            {
+                RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+                if (channel == null)
+                {
+                    strError = "get channel error";
+                    // goto ERROR1;
+                    return -1;
+                }
+
+                long lRet = channel.GetRes(strBiblioRecPath,
+                    style,  // "content,data,metadata,timestamp,outputpath",
+                    out strBiblioXml,
+                    out strMetaData,
+                    out timestamp,
+                    out strOutputPath,
+                    out strError);
+                if (lRet == -1)
+                {
+                    strError = "获得种记录 '" + strBiblioRecPath + "' 时出错: " + strError;
+                    // goto ERROR1;
+                    return -1;
+                }
+            }
+
+            // TODO: 测试格式 html summary text xml
+
+            // return:
+            //      -2  权限不足(建议调用者以 AccessDenied 错误码返回 LibraryServerResult)
+            //      -1  出错
+            //      0   成功
+            //      1   有警告信息返回在 strError 中
+            nRet = BuildFormats(
+sessioninfo,
+strBiblioRecPath,
+strBiblioXml,
+strOutputPath,   // 记录的路径
+strMetaData,     // 记录的metadata
+timestamp,
+biblio_formats,
+out List<String> result_strings,
+out strError);
+            if (nRet == -1 || nRet == -2)
+                return -1;
+
+            if (result_strings != null)
+                biblio_records = result_strings.ToArray();
+
+            return 0;
+        }
+
+#if REMOVED
         // parameters:
         //      strStyle    其中要包括 biblio，才会返回书目相关信息
         int BuildBiblio(
@@ -2767,6 +2907,7 @@ start_time_1,
                 else if (String.Compare(strBiblioFormat, "summary", true) == 0)
                 {
                     // return:
+                    //      -2  权限不足(建议调用者以 AccessDenied 错误码返回 LibraryServerResult)
                     //      -1  出错
                     //      0   成功
                     //      1   有警告信息返回在 strError 中
@@ -2780,7 +2921,7 @@ start_time_1,
     new string[] { "summary" },
     out List<String> result_strings,
     out strError);
-                    if (nRet == -1)
+                    if (nRet == -1 || nRet == -2)
                         return -1;
                     biblio_records[i] = result_strings[0];
                 }
@@ -2844,6 +2985,7 @@ start_time_1,
 
             return 0;
         }
+#endif
 
         // 2017/1/12
         // 裁剪读者记录中的 borrow 元素
@@ -8377,12 +8519,61 @@ out _);
             } // end if
 #endif
 
+            /*
+            // testing
+            strStyle += ",item";
+            strItemFormatList = "xml,html";
+            */
+
             // 2008/5/9
             if (String.IsNullOrEmpty(strOutputItemXml) == false
                 && StringUtil.IsInList("item", strStyle) == true)
             {
                 DateTime start_time_1 = DateTime.Now;
 
+                XmlDocument item_dom = new XmlDocument();
+                item_dom.LoadXml(strOutputItemXml);
+
+                // 按照当前账户的权限，来过滤掉原始册记录中的一些敏感字段
+                // return:
+                //      -2  权限不具备。也可以理解为全部字段都应被过滤掉
+                //      -1  出错
+                //      0   过滤后记录没有改变
+                //      1   过滤后记录发生了改变
+                nRet = this.FilterItemRecord(
+            sessioninfo,
+            "item",
+            item_dom,
+            out strError);
+                if (nRet == -1 || nRet == -2)
+                {
+                    string[] item_formats = strItemFormatList.Split(new char[] { ',' });
+                    List<string> results = new List<string>();
+                    for (int i = 0; i < item_formats.Length; i++)
+                    {
+                        results.Add($"!error:{strError}");
+                    }
+                    item_records = results.ToArray();
+                }
+                else
+                {
+                    nRet = this._buildItemFormats(sessioninfo,
+        strItemFormatList,
+        strOutputItemRecPath,
+        "item",
+        item_dom,
+        out List<FormatItem> items,
+        out strError);
+                    if (nRet == -1)
+                    {
+                        if (result.ErrorCode == ErrorCode.NoError)
+                            strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
+                        goto ERROR1;
+                    }
+
+                    item_records = FormatItem.BuildStringList(items).ToArray();
+                }
+#if REMOVED
                 string[] item_formats = strItemFormatList.Split(new char[] { ',' });
                 item_records = new string[item_formats.Length];
 
@@ -8460,12 +8651,20 @@ out _);
                     }
                 } // end of for
 
+#endif
+
                 WriteTimeUsed(
     time_lines,
     start_time_1,
     "Return() 中返回册记录(" + strItemFormatList + ") 耗时 ");
 
             }
+
+            /*
+            // testing
+            strStyle += ",biblio";
+            strBiblioFormatList += ",xml";
+            */
 
             // 2008/5/9
             if (StringUtil.IsInList("biblio", strStyle) == true)
@@ -8518,13 +8717,9 @@ out _);
                 nRet = BuildBiblio(
 sessioninfo,
 strBiblioRecPath,
-/*
-strBiblioRecID,
-strOutputItemRecPath,
-*/
-strStyle,
+//strStyle,
 strBiblioFormatList,
-result,
+//result,
 out biblio_records,
 out strError);
                 if (nRet == -1)
@@ -15278,6 +15473,7 @@ out string _);
             REDO_DELETE:
                 lRet = channel.DoDeleteRes(strOutputPath,
                     timestamp,
+                    "ignorechecktimestamp", //2024/5/16
                     out output_timestamp,
                     out strError);
                 if (lRet == -1)

@@ -112,6 +112,7 @@ namespace DigitalPlatform.LibraryServer
                         strLibraryCodeList,
                         strDatabaseNames,
                         strStyle,
+                        null,
                         out strOutputInfo,
                         out strError);
                 }
@@ -176,38 +177,58 @@ namespace DigitalPlatform.LibraryServer
 
             try
             {
+                // 2025/5/12
+                // 可以递归地下载 dp2kernel 文件和目录
+                // parameters:
+                //      strStartPath    dp2kernel 目录路径，起始路径。例如 "中文图书/cfgs"
+                int nRet = DownloadConfigFiles(channel,
+            strDbName + "/cfgs",
+            strTempDir + "/" + strDbName + "/cfgs",
+            out strError);
+                if (nRet == -1)
+                    return -1;
+#if REMOVED
                 DirLoader loader = new DirLoader(channel,
                     null,
                     strDbName + "/cfgs");
                 foreach (ResInfoItem item in loader)
                 {
                     string strTargetFilePath = Path.Combine(strTempDir, strDbName, "cfgs\\" + item.Name);
-                    PathUtil.TryCreateDir(Path.GetDirectoryName(strTargetFilePath));
 
-                    using (Stream exist_stream = File.Create(strTargetFilePath))
+                    if (item.Type == ResTree.RESTYPE_FOLDER)
                     {
-                        string strPath = strDbName + "/cfgs/" + item.Name;
-                        string strStyle = "content,data,metadata,timestamp,outputpath";
-                        byte[] timestamp = null;
-                        string strOutputPath = "";
-                        string strMetaData = "";
-                        long lRet = channel.GetRes(
-                            strPath,    // item.Name,
-                            exist_stream,
-                            null,	// stop,
-                            strStyle,
-                            null,	// byte [] input_timestamp,
-                            out strMetaData,
-                            out timestamp,
-                            out strOutputPath,
-                            out strError);
-                        if (lRet == -1)
+                        PathUtil.TryCreateDir(strTargetFilePath);
+
+
+                    }
+                    else if (item.Type == ResTree.RESTYPE_FILE)
+                    {
+                        PathUtil.TryCreateDir(Path.GetDirectoryName(strTargetFilePath));
+
+                        using (Stream exist_stream = File.Create(strTargetFilePath))
                         {
-                            // 配置文件不存在，怎么返回错误码的?
-                            if (channel.IsNotFound())
-                                continue;
-                            return -1;
-                        }
+                            string strPath = strDbName + "/cfgs/" + item.Name;
+                            string strStyle = "content,data,metadata,timestamp,outputpath";
+                            byte[] timestamp = null;
+                            string strOutputPath = "";
+                            string strMetaData = "";
+                            long lRet = channel.GetRes(
+                                strPath,    // item.Name,
+                                exist_stream,
+                                null,   // stop,
+                                strStyle,
+                                null,   // byte [] input_timestamp,
+                                out strMetaData,
+                                out timestamp,
+                                out strOutputPath,
+                                out strError);
+                            if (lRet == -1)
+                            {
+                                // 配置文件不存在，怎么返回错误码的?
+                                if (channel.IsNotFound())
+                                    continue;
+                                return -1;
+                            }
 
 #if NO
                     exist_stream.Seek(0, SeekOrigin.Begin);
@@ -217,13 +238,15 @@ namespace DigitalPlatform.LibraryServer
                     }
 #endif
 
-                    }
+                        }
 
+                    }
                 }
+#endif
 
                 if (string.IsNullOrEmpty(strTempDir) == false)
                 {
-                    int nRet = CompressDirectory(
+                    nRet = CompressDirectory(
                         strTempDir,
                         strTempDir,
                         strLogFileName,
@@ -242,6 +265,75 @@ namespace DigitalPlatform.LibraryServer
                     PathUtil.DeleteDirectory(strTempDir);
             }
         }
+
+        // parameters:
+        //      strStartPath    dp2kernel 目录路径，起始路径。例如 "中文图书/cfgs"
+        int DownloadConfigFiles(RmsChannel channel,
+    string strStartPath,
+    string strOutputDirectory,
+    out string strError)
+        {
+            strError = "";
+
+            // return:
+            //      false   已经存在
+            //      true    刚刚新创建
+            // exception:
+            //      可能会抛出异常 System.IO.DirectoryNotFoundException (未能找到路径“...”的一部分)
+            PathUtil.TryCreateDir(strOutputDirectory);
+
+            DirLoader loader = new DirLoader(channel,
+                null,
+                strStartPath);
+            foreach (ResInfoItem item in loader)
+            {
+                string strTargetFilePath = Path.Combine(strOutputDirectory, item.Name);
+
+                if (item.Type == ResTree.RESTYPE_FOLDER)
+                {
+                    PathUtil.TryCreateDir(strTargetFilePath);
+                    int nRet = DownloadConfigFiles(channel,
+strStartPath + "/" + item.Name,
+strTargetFilePath,
+out strError);
+                    if (nRet == -1)
+                        return -1;
+                }
+                else if (item.Type == ResTree.RESTYPE_FILE)
+                {
+                    PathUtil.TryCreateDir(Path.GetDirectoryName(strTargetFilePath));
+
+                    using (Stream exist_stream = File.Create(strTargetFilePath))
+                    {
+                        string strPath = strStartPath + "/" + item.Name;
+                        string strStyle = "content,data,metadata,timestamp,outputpath";
+                        // byte[] timestamp = null;
+                        // string strOutputPath = "";
+                        // string strMetaData = "";
+                        long lRet = channel.GetRes(
+                            strPath,    // item.Name,
+                            exist_stream,
+                            null,   // stop,
+                            strStyle,
+                            null,   // byte [] input_timestamp,
+                            out _,
+                            out byte [] timestamp,
+                            out string strOutputPath,
+                            out strError);
+                        if (lRet == -1)
+                        {
+                            // 配置文件不存在，怎么返回错误码的?
+                            if (channel.IsNotFound())
+                                continue;
+                            return -1;
+                        }
+                    }
+                }
+            }
+
+            return 0;
+        }
+
 
         // 如果数据库不存在会当作出错-1来报错
         // parameters:
@@ -1965,7 +2057,10 @@ out strError);
                 nRet = this.InitialVdbs(channel,    // Channels,
                     out strError);
                 if (nRet == -1)
+                {
+                    this.WriteErrorLog($"*** ChangeDatabase() (2) 过程中出现致命错误，请在日志恢复完成后，手动修正故障: {strError}");
                     return -1;
+                }
             }
 
             // 2024/2/24
@@ -2000,7 +2095,10 @@ out strError);
                     nRet = this.InitialVdbs(channel,    // Channels,
                         out string strError1);
                     if (nRet == -1)
+                    {
                         strError += "; 在收尾的时候进行 InitialVdbs() 调用又出错：" + strError1;
+                        this.WriteErrorLog($"*** ChangeDatabase() 过程中出现致命错误，请在日志恢复完成后，手动修正故障: {strError}");
+                    }
                 }
             }
             return -1;
@@ -2724,8 +2822,10 @@ out strError);
                 int nRet = this.InitialVdbs(channel,    // Channels,
                     out strError);
                 if (nRet == -1)
+                {
+                    this.WriteErrorLog($"*** RenameOpacDatabaseDef() 过程中出现致命错误，请在日志恢复完成后，手动修正故障: {strError}");
                     return -1;
-
+                }
             }
 
             root = this.LibraryCfgDom.DocumentElement.SelectSingleNode("browseformats");
@@ -3662,7 +3762,10 @@ strCommentDbName,
                 nRet = this.InitialVdbs(channel,    // Channels,
                     out strError);
                 if (nRet == -1)
+                {
+                    this.WriteErrorLog($"*** DeleteDatabase() 过程中出现致命错误，请在日志恢复完成后，手动修正故障: {strError}");
                     return -1;
+                }
             }
 
             return 1;
@@ -4707,7 +4810,10 @@ strCommentDbName,
                 nRet = this.InitialVdbs(channel,    // Channels,
                     out strError);
                 if (nRet == -1)
+                {
+                    this.WriteErrorLog($"*** RefreshDatabaseDefs() 过程中出现致命错误，请在日志恢复完成后，手动修正故障: {strError}");
                     return -1;
+                }
             }
 
             if (bAutoRebuildKeys == true
@@ -4784,7 +4890,7 @@ strCommentDbName,
             return 0;
         }
 
-
+        public delegate bool delegate_databaseNotFound(string databaseName);
 
         // 初始化数据库
         // return:
@@ -4798,6 +4904,7 @@ strCommentDbName,
             string strLibraryCodeList,
             string strDatabaseNames,
             string strStyle,
+            delegate_databaseNotFound func_notFound,
             out string strOutputInfo,
             out string strError)
         {
@@ -4844,6 +4951,11 @@ strCommentDbName,
                     if (nodeDatabase == null)
                     {
                         strError = "配置DOM中名字为 '" + strName + "' 的书目库(biblioDbName属性)相关<database>元素没有找到";
+                        if (func_notFound != null)
+                        {
+                            if (func_notFound(strName) == true)
+                                continue;
+                        }
                         return 0;
                     }
 
@@ -4975,6 +5087,11 @@ strCommentDbName,
                     if (nodeDatabase == null)
                     {
                         strError = "配置DOM中名字为 '" + strName + "' 的实体库(name属性)相关<database>元素没有找到";
+                        if (func_notFound != null)
+                        {
+                            if (func_notFound(strName) == true)
+                                continue;
+                        }
                         return 0;
                     }
 
@@ -5016,6 +5133,11 @@ strCommentDbName,
                     if (nodeDatabase == null)
                     {
                         strError = "配置DOM中名字为 '" + strName + "' 的订购库(orderDbName属性)相关<database>元素没有找到";
+                        if (func_notFound != null)
+                        {
+                            if (func_notFound(strName) == true)
+                                continue;
+                        }
                         return 0;
                     }
 
@@ -5057,6 +5179,11 @@ strCommentDbName,
                     if (nodeDatabase == null)
                     {
                         strError = "配置DOM中名字为 '" + strName + "' 的期库(issueDbName属性)相关<database>元素没有找到";
+                        if (func_notFound != null)
+                        {
+                            if (func_notFound(strName) == true)
+                                continue;
+                        }
                         return 0;
                     }
 
@@ -5098,6 +5225,11 @@ strCommentDbName,
                     if (nodeDatabase == null)
                     {
                         strError = "配置DOM中名字为 '" + strName + "' 的评注库(commentDbName属性)相关<database>元素没有找到";
+                        if (func_notFound != null)
+                        {
+                            if (func_notFound(strName) == true)
+                                continue;
+                        }
                         return 0;
                     }
 
@@ -5139,6 +5271,11 @@ strCommentDbName,
                     if (nodeDatabase == null)
                     {
                         strError = "配置DOM中名字为 '" + strName + "' 的读者库(name属性)相关<database>元素没有找到";
+                        if (func_notFound != null)
+                        {
+                            if (func_notFound(strName) == true)
+                                continue;
+                        }
                         return 0;
                     }
 
@@ -5188,6 +5325,11 @@ strCommentDbName,
                     if (nodeDatabase == null)
                     {
                         strError = "library.xml 中名字为 '" + strName + "' 的读者库(name属性)相关 authdbgroup/database 元素没有找到";
+                        if (func_notFound != null)
+                        {
+                            if (func_notFound(strName) == true)
+                                continue;
+                        }
                         return 0;
                     }
 
@@ -5408,6 +5550,11 @@ strCommentDbName,
                     if (nodeDatabase == null)
                     {
                         strError = "不存在name属性值为 '" + strName + "' 的<utilDb/database>的元素";
+                        if (func_notFound != null)
+                        {
+                            if (func_notFound(strName) == true)
+                                continue;
+                        }
                         return 0;
                     }
 
@@ -5577,9 +5724,13 @@ strCommentDbName,
                 }
 
                 strError = "数据库名 '" + strName + "' 在 dp2library 中未定义...";
+                if (func_notFound != null)
+                {
+                    if (func_notFound(strName) == true)
+                        continue;
+                }
                 return 0;
             }
-
 
             // 写入操作日志
             if (skipOperLog == false)
@@ -7515,7 +7666,7 @@ out strError);
                 }
                 #endregion
 #endif
-                #region reader
+#region reader
                 else if (strDbType == "reader")
                 {
                     // 创建读者库
@@ -8300,7 +8451,10 @@ out strError);
                 nRet = this.InitialVdbs(channel,    // Channels,
                     out strError);
                 if (nRet == -1)
+                {
+                    this.WriteErrorLog($"*** CreateDatabase() 过程中出现致命错误，请在日志恢复完成后，手动修正故障: {strError}");
                     return -1;
+                }
             }
 
             return 1;

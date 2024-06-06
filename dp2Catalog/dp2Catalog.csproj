@@ -11,8 +11,8 @@
     <RootNamespace>dp2Catalog</RootNamespace>
     <AssemblyName>dp2Catalog</AssemblyName>
     <IsWebBootstrapper>true</IsWebBootstrapper>
-    <ManifestCertificateThumbprint>8A609FAD04B89DDF14832D49A2DD957EC2628C66</ManifestCertificateThumbprint>
-    <ManifestKeyFile>数字平台（北京）软件有限责任公司苏州分公司.pfx</ManifestKeyFile>
+    <ManifestCertificateThumbprint>24DDBB615697CE0F3C03216184C9DC9604C7FFFA</ManifestCertificateThumbprint>
+    <ManifestKeyFile>dp2Catalog_TemporaryKey.pfx</ManifestKeyFile>
     <GenerateManifests>false</GenerateManifests>
     <SignManifests>true</SignManifests>
     <SccProjectName>
@@ -45,14 +45,13 @@
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
     <InstallUrl>http://dp2003.com/dp2Catalog/V3/</InstallUrl>
-    <UpdateUrl>http://dp2003.com/dp2Catalog/V3/</UpdateUrl>
     <TargetCulture>zh-CN</TargetCulture>
     <ProductName>dp2编目 V3</ProductName>
     <PublisherName>DigitalPlatform</PublisherName>
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>43</ApplicationRevision>
+    <ApplicationRevision>57</ApplicationRevision>
     <ApplicationVersion>3.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -370,6 +369,12 @@
     <Compile Include="DTLP\DtlpSearchForm.Designer.cs">
       <DependentUpon>DtlpSearchForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="DTLP\GenerateBatchFileDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DTLP\GenerateBatchFileDialog.Designer.cs">
+      <DependentUpon>GenerateBatchFileDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Global.cs" />
     <Compile Include="IZSearchForm.cs" />
     <Compile Include="MainForm\FirstRunDialog.cs">
@@ -505,6 +510,9 @@
     <EmbeddedResource Include="DTLP\DtlpSearchForm.resx">
       <SubType>Designer</SubType>
       <DependentUpon>DtlpSearchForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DTLP\GenerateBatchFileDialog.resx">
+      <DependentUpon>GenerateBatchFileDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="EaccForm.resx">
       <SubType>Designer</SubType>
@@ -671,6 +679,7 @@
     <Content Include="eacc_charsettable.index">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="dp2Catalog_TemporaryKey.pfx" />
     <None Include="packages.config" />
     <None Include="Properties\app.manifest" />
     <None Include="Properties\Settings.settings">

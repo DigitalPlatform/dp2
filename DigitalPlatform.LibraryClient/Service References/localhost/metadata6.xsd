@@ -1054,6 +1054,7 @@
         <xs:element minOccurs="0" name="strNewXml" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="strOldXml" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="baOldTimestamp" nillable="true" type="xs:base64Binary" />
+        <xs:element minOccurs="0" name="strStyle" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -1074,6 +1075,8 @@
       <xs:sequence>
         <xs:element minOccurs="0" name="strSourceRecPath" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="strTargetRecPath" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strNewReader" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strStyle" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>

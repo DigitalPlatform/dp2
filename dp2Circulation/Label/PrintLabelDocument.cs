@@ -2155,7 +2155,28 @@ format);
         }
 
         // parameters:
-        //      strType 39 / 空 / 
+        //      strType 条码类型。为 39 / 空 / 等等。详细如下列表
+        //              39 或 code_39: BarcodeFormat.CODE_39
+        //              ean_13: BarcodeFormat.EAN_13
+        //              codabar: BarcodeFormat.CODABAR
+        //              另外还有 enum BarcodeFormat 中的所有可用值
+        //              AZTEC: Aztec 2D barcode format
+        //              CODABAR: CODABAR 1D format
+        //              CODE_39: Code 39 1D format
+        //              CODE_93: Code 93 1D format
+        //              CODE_128: Code 128 1D format
+        //              DATA_MATRIX: Data Matrix 2D barcode format
+        //              EAN_8: EAN-8 1D format
+        //              EAN_13: EAN-13 1D format.</summary>
+        //              ITF: ITF (Interleaved Two of Five) 1D format
+        //              MAXICODE: MaxiCode 2D barcode format
+        //              PDF_417: PDF417 format
+        //              QR_CODE: QR Code 2D barcode format
+        //              RSS_14: RSS 14</summary>
+        //              RSS_EXPANDED: RSS EXPANDED
+        //              UPC_A: UPC-A 1D format
+        //              UPC_E: UPC-E 1D format
+        //              UPC_EAN_EXTENSION: UPC/EAN extension format. Not a stand-alone format
         // return:
         //      null    
         //      其他
@@ -2201,6 +2222,15 @@ format);
             else if (strType == "qr" || strType == "qrcode")
             {
 
+            }
+            else
+            {
+                // 2025/5/18
+                // 支持 BarcodeFormat 中所有的枚举值
+                var ret = TryParseBarcodeFormat(strType, out format);
+                if (ret == false)
+                    throw new Exception($"BuildQrCodeImage() 遇到无法识别的条码类型 '{strType}'");
+                strCode = strCode.ToUpper();
             }
 
             EncodingOptions options = new QrCodeEncodingOptions
@@ -2264,6 +2294,16 @@ int nWidth = 400)
                 nWidth);
         }
 #endif
+        static bool TryParseBarcodeFormat(string text, out BarcodeFormat format)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                format = BarcodeFormat.CODE_39;
+                return false;
+            }
+            return Enum.TryParse<BarcodeFormat>(text.ToUpper(), out format);
+        }
+
 
         public static Color GetColor(string strColorString)
         {

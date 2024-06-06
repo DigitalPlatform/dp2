@@ -53,7 +53,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>551</ApplicationRevision>
+    <ApplicationRevision>563</ApplicationRevision>
     <ApplicationVersion>3.78.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -510,6 +510,12 @@
     <Compile Include="EntityForm\TimestampMismatchDialog.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="EntityForm\VerifyMarcResultDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EntityForm\VerifyMarcResultDialog.Designer.cs">
+      <DependentUpon>VerifyMarcResultDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="EntityRegister\AmazonSearch.cs" />
     <Compile Include="EntityRegister\BiblioAndEntities.cs" />
     <Compile Include="EntityRegister\EntityRegisterBase.cs" />
@@ -665,6 +671,7 @@
     <Compile Include="ISO2709Statis\OverwriteBiblioDialog.Designer.cs">
       <DependentUpon>OverwriteBiblioDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="ISO2709Statis\ProcessDt1000G01.cs" />
     <Compile Include="ItemHandOver\ScanBarcodeForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -1991,6 +1998,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="EntityForm\PartialDeniedDialog.resx">
       <DependentUpon>PartialDeniedDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EntityForm\VerifyMarcResultDialog.resx">
+      <DependentUpon>VerifyMarcResultDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="EntityRegister\Save\EntityRegisterControl.resx">
       <DependentUpon>EntityRegisterControl.cs</DependentUpon>

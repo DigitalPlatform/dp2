@@ -1837,6 +1837,7 @@ namespace DigitalPlatform.LibraryServer
                     // 删除已付违约金记录
                     lRet = channel.DoDeleteRes(strAmercedRecPath,
                         amerced_timestamp,
+                        "ignorechecktimestamp", //2024/5/16
                         out output_timestamp,
                         out strError);
                     if (lRet == -1)
@@ -1989,9 +1990,9 @@ namespace DigitalPlatform.LibraryServer
                 byte[] output_timestamp = null;
                 int nRedoCount = 0;
             REDO:
-
                 long lRet = channel.DoDeleteRes(strPath,
                     timestamp,
+                    "ignorechecktimestamp", //2024/5/16
                     out output_timestamp,
                     out strError);
                 if (lRet == -1)

@@ -278,7 +278,7 @@ namespace dp2Circulation
         /// <param name="timestamp">时间戳</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错; 0: 成功</returns>
-        public int SetData(string strXml,
+        public virtual int SetData(string strXml,
             string strRecPath,
             byte[] timestamp,
             out string strError)

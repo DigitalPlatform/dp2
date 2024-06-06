@@ -2342,6 +2342,17 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                     subMenuItem.Enabled = true;
                 else
                     subMenuItem.Enabled = false;
+
+                // 2024/5/20
+                // 从 机内格式 粘贴整个记录
+                subMenuItem = new MenuItem("从 机内格式 粘贴整个记录");
+                subMenuItem.Click += new System.EventHandler(this.menuItem_PasteFromJinei);
+                menuItem.MenuItems.Add(subMenuItem);
+                if (ido.GetDataPresent(DataFormats.Text)
+                    && this.ReadOnly == false)
+                    subMenuItem.Enabled = true;
+                else
+                    subMenuItem.Enabled = false;
             }
 
             //粘贴覆盖
@@ -2497,11 +2508,41 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
-            // 复制工作单到剪贴板
-            menuItem = new MenuItem("复制工作单到剪贴板");
-            menuItem.Click += new System.EventHandler(this.CopyWorksheetToClpboard);
+            // 复制机内格式到剪贴板
+            menuItem = new MenuItem("复制整个记录(机内格式)");
+            menuItem.Click += new System.EventHandler(this.CopyJineiToClipboard);
             contextMenu.MenuItems.Add(menuItem);
             if (this.record.Fields.Count > 0)
+                menuItem.Enabled = true;
+            else
+                menuItem.Enabled = false;
+
+            // 复制工作单到剪贴板
+            menuItem = new MenuItem("复制整个记录(工作单格式)");
+            menuItem.Click += new System.EventHandler(this.CopyWorksheetToClipboard);
+            contextMenu.MenuItems.Add(menuItem);
+            if (this.record.Fields.Count > 0)
+                menuItem.Enabled = true;
+            else
+                menuItem.Enabled = false;
+
+            // 2024/5/20
+            // 从 机内格式 粘贴整个记录
+            menuItem = new MenuItem("粘贴整个记录(机内格式)");
+            menuItem.Click += new System.EventHandler(this.menuItem_PasteFromJinei);
+            contextMenu.MenuItems.Add(menuItem);
+            if (ido.GetDataPresent(DataFormats.Text)
+                && this.ReadOnly == false)
+                menuItem.Enabled = true;
+            else
+                menuItem.Enabled = false;
+
+            // 从 工作单 粘贴整个记录
+            menuItem = new MenuItem("粘贴整个记录(工作单格式)");
+            menuItem.Click += new System.EventHandler(this.menuItem_PasteFromWorksheet);
+            contextMenu.MenuItems.Add(menuItem);
+            if (ido.GetDataPresent(DataFormats.Text)
+                && this.ReadOnly == false)    // 原来是==1
                 menuItem.Enabled = true;
             else
                 menuItem.Enabled = false;
@@ -2646,7 +2687,21 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             MessageBox.Show(this, strError);
         }
 
-        void CopyWorksheetToClpboard(object sender, EventArgs e)
+        // 2024/5/20
+        // 复制机内格式的完整记录到剪贴板
+        void CopyJineiToClipboard(object sender, EventArgs e)
+        {
+            string strText = "";
+            for (int i = 0; i < this.record.Fields.Count; i++)
+            {
+                Field field = this.record.Fields[i];
+                strText += field.GetFieldMarc(true);
+            }
+            MarcEditor.TextToClipboardFormat(strText);
+        }
+
+        // 复制工作单格式的完整记录到剪贴板
+        void CopyWorksheetToClipboard(object sender, EventArgs e)
         {
             bool bControl = Control.ModifierKeys == Keys.Control;
             string strError = "";
@@ -4500,6 +4555,9 @@ SYS	011528318
             return strResult;
         }
 
+        // 将工作单格式的字符串转换为机内格式的字符串
+        // parameters:
+        //      get_first_record    是否只取第一个记录。也就是说遇到 *** 行的时候终止处理
         /*
 01310nam0 2200157   45__
 -01/132.147.160.100/读者库/ctlno/0002118|7badce52100000002b
@@ -4516,7 +4574,8 @@ SYS	011528318
 997  ǂa|吴梅菊||,|ǂh1b0463476e6d0a593b1c1b79abf082a2ǂv0.04
 ***
 ** */
-        static string ConvertWorksheetMarcString(string strMARC)
+        static string ConvertWorksheetMarcString(string strMARC,
+            bool get_first_record = true)
         {
             string strResult = strMARC.Replace("\r\n", "\r");
             string[] lines = strResult.Split(new char[] { '\r' });
@@ -4526,6 +4585,9 @@ SYS	011528318
             {
                 if (string.IsNullOrEmpty(s) == true)
                     continue;
+
+                if (get_first_record && s == "***")
+                    break;
 
                 if (i == 0)
                 {
@@ -4590,6 +4652,35 @@ SYS	011528318
             {
                 MessageBox.Show(this, $"异常: {ex.Message}");
             }
+        }
+
+        // 2024/5/20
+        // 从 机内格式 粘贴整个记录
+        void menuItem_PasteFromJinei(object sender, EventArgs e)
+        {
+            /*
+            bool bHasFocus = this.Focused;
+
+            // 先删除所有字段
+            this.record.Fields.Clear();
+            this.SelectedFieldIndices.Clear();
+
+            string strFieldsMarc = MarcEditor.ClipboardToTextFormat();
+            this.record.Fields.InsertInternal(0,
+                strFieldsMarc,
+                out int nNewFieldsCount);
+            this.SetScrollBars(ScrollBarMember.Both);
+            this.Invalidate();
+
+            // 设第一个节点为当前活动焦点
+            if (bHasFocus == true)
+            {
+                if (this.record.Fields.Count > 0)
+                    this.SetActiveField(0, 3, true);
+            }
+            */
+            string strFieldsMarc = MarcEditor.ClipboardToTextFormat();
+            this.Marc = strFieldsMarc;
         }
 
         // 从 工作单 粘贴整个记录

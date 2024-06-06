@@ -19,14 +19,8 @@ using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
-using DigitalPlatform.Script;
-using DigitalPlatform.MarcDom;
-using DigitalPlatform.Marc;
 
-using DigitalPlatform.Message;
 using DigitalPlatform.LibraryServer.Common;
-using DigitalPlatform.Core;
-using DigitalPlatform.LibraryClient;
 using static DigitalPlatform.LibraryServer.BatchTask;
 
 
@@ -301,7 +295,7 @@ namespace DigitalPlatform.LibraryServer
                         out string strReaderKey);
                     if (ret == false)
                     {
-                        strError = "readerBarcode 元素值为空，并且 readerRefID 元素值也为空";
+                        strError = "日志记录中 readerBarcode 元素值为空，并且 readerRefID 元素值也为空";
                         goto ERROR1;
                     }
 
@@ -1200,6 +1194,7 @@ out string error);
         REDO_DELETE:
             long lRet = channel.DoDeleteRes(recpath,
                 timestamp,
+                "ignorechecktimestamp", //2024/5/16
                 out output_timestamp,
                 out strError);
             if (lRet == -1)
@@ -6497,6 +6492,8 @@ out strError);
   <operation>changeReaderPassword</operation> 
   <readerBarcode>...</readerBarcode>	读者证条码号
   <newPassword>5npAUJ67/y3aOvdC0r+Dj7SeXGE=</newPassword> 
+  <type>...</type>  密码 Hash 算法类型。2024/5/21 增加。此前的日志记录中没有这个元素，恢复的时候 password 元素缺 type 属性，可能会出现故障
+  <expire>...</expire>  失效时间
   <operator>test</operator> 
   <operTime>Fri, 08 Dec 2006 09:01:38 GMT</operTime> 
   <readerRecord recPath='...'>...</readerRecord>	最新读者记录
@@ -6604,11 +6601,24 @@ out strError);
                 // 读出原有读者记录，修改密码后存回
                 string strReaderBarcode = DomUtil.GetElementText(domLog.DocumentElement,
                     "readerBarcode");
-                if (String.IsNullOrEmpty(strReaderBarcode) == true)
+                string strReaderRefID = DomUtil.GetElementText(domLog.DocumentElement,
+    "readerRefID");
+                var ret = TryGetUnionRefID(strReaderBarcode,
+    strReaderRefID,
+    out string strReaderKey);
+                if (ret == false)
                 {
-                    strError = "日志记录中缺乏 <readerBarcode> 元素";
+                    strError = "日志记录中 readerBarcode 元素值为空，并且 readerRefID 元素值也为空";
                     goto ERROR1;
                 }
+                /*
+                if (String.IsNullOrEmpty(strReaderBarcode) == true
+                    && string.IsNullOrEmpty(strReaderRefID) == true)
+                {
+                    strError = "日志记录中同时缺乏 readerBarcode 和 readerRefID 元素";
+                    goto ERROR1;
+                }
+                */
 
                 string strNewPassword = DomUtil.GetElementText(domLog.DocumentElement,
                     "newPassword");
@@ -6618,23 +6628,27 @@ out strError);
                     goto ERROR1;
                 }
 
+                string type = DomUtil.GetElementText(domLog.DocumentElement,
+                    "type");
+                string expire = DomUtil.GetElementText(domLog.DocumentElement,
+                    "expire");
+
                 // 读入读者记录
                 nRet = this.GetReaderRecXml(
-                    // Channels,
                     channel,
-                    strReaderBarcode,
+                    strReaderKey,   // strReaderBarcode,
                     out string strReaderXml,
                     out string strOutputReaderRecPath,
                     out byte[] reader_timestamp,
                     out strError);
                 if (nRet == 0)
                 {
-                    strError = "读者证条码号 '" + strReaderBarcode + "' 不存在";
+                    strError = "读者证条码号 '" + strReaderKey + "' 不存在";
                     goto ERROR1;
                 }
                 if (nRet == -1)
                 {
-                    strError = "读入证条码号为 '" + strReaderBarcode + "' 的读者记录时发生错误: " + strError;
+                    strError = "读入证条码号为 '" + strReaderKey + "' 的读者记录时发生错误: " + strError;
                     goto ERROR1;
                 }
 
@@ -6647,10 +6661,17 @@ out strError);
                     goto ERROR1;
                 }
 
-                // strNewPassword中本来就是SHA1形态
-                DomUtil.SetElementText(readerdom.DocumentElement,
-                    "password", strNewPassword);
+                // strNewPassword中本来就是 Hash 形态
+                var element = DomUtil.SetElementText(
+                    readerdom.DocumentElement,
+                    "password",
+                    strNewPassword);
 
+                // 2024/5/21
+                if (string.IsNullOrEmpty(type) == false)
+                    element.SetAttribute("type", type);
+                if (string.IsNullOrEmpty(expire) == false)
+                    element.SetAttribute("expire", type);
 
                 // 写回读者记录
                 lRet = channel.DoSaveTextRes(strOutputReaderRecPath,
@@ -6685,7 +6706,7 @@ out strError);
 	<operation>setReaderInfo</operation> 操作类型
 	<action>...</action> 具体动作。有new change delete move 4种
 	<record recPath='...'>...</record> 新记录
-    <oldRecord recPath='...'>...</oldRecord> 被覆盖或者删除的记录 动作为 change 和 delete 时具备此元素
+    <oldRecord recPath='...'>...</oldRecord> 被覆盖或者删除的记录 动作为 change 和 delete 时具备此元素(2024/5/25 动作为 new 时也可能会具备此元素)
     <changedEntityRecord itemBarcode='...' recPath='...' oldBorrower='...' newBorrower='...' /> 若干个元素。表示连带发生修改的册记录
 	<operator>test</operator> 操作者
 	<operTime>Fri, 08 Dec 2006 09:01:38 GMT</operTime> 操作时间
@@ -11397,6 +11418,7 @@ out error);
                             {
                                 lRet = -1;
                                 channel.OriginErrorCode = ErrorCodeValue.NotFoundDb;
+                                strError = $"记录路径 '{strResPath}' 中的数据库 '{dbname}' 不存在，无法完成写入记录";
                                 // 注: 后面就会跳过 .WriteRes()
                             }
                             else if (ret == -1 || ret == 2)
@@ -12106,6 +12128,7 @@ out error);
             XmlDocument domLog,
             Stream attachmentLog,
             string strStyle,
+            Delegate_warning func_warning,
             out string strError)
         {
             strError = "";
@@ -12185,6 +12208,7 @@ out error);
                                 strTempFileName,
                                 strTempDir,
                                 "continueLoop",
+                                null,
                                 (database_name) =>
                                 {
                                     succeed_dbNames.Add(database_name);
@@ -12275,6 +12299,7 @@ out error);
                             XmlNodeList names = domLog.DocumentElement.SelectNodes("databases/database/@name");
                             string strDatabaseNames = StringUtil.MakePathList(names.Cast<XmlNode>().Select(o => o.Value).ToList(), ",");
 
+                            List<string> notexist_dbnames = new List<string>();
                             // 初始化数据库
                             // return:
                             //      -1  出错
@@ -12286,11 +12311,77 @@ out error);
                                 strLibraryCode,
                                 strDatabaseNames,
                                 MergeStyle(strStyle, style, "skipOperLog"),
+                                (name) => {
+                                    notexist_dbnames.Add(name);
+                                    return true;
+                                },
                                 out string strOutputInfo,
                                 out strError);
                             if (nRet == -1)
                                 return -1;
                             // 注: InitializeDatabase() 中似乎不会改变 this.Changed
+
+                            // 2024/5/12
+                            // 对于当前不存在的数据库，执行重新创建
+                            if (notexist_dbnames.Count > 0)
+                            {
+                                if (robust == false)
+                                {
+                                    strError = $"初始化数据库时发现下列数据库的定义不存在({StringUtil.MakePathList(notexist_dbnames, ",")})，无法完成初始化";
+                                    return -1;
+                                }
+
+                                func_warning?.Invoke($"初始化数据库时发现下列数据库的定义不存在({StringUtil.MakePathList(notexist_dbnames, ",")})，正在尝试重新创建这些数据库");
+
+                                List<string> skip_warnings = new List<string>();
+                                List<string> succeed_dbNames = new List<string>();
+                                // *** 创建数据库
+                                nRet = DatabaseUtility.CreateDatabases(
+                                    null,   // stop
+                                    channel,
+                                    strTempFileName,
+                                    strTempDir,
+                                    "continueLoop",
+                                    notexist_dbnames,
+                                    (database_name) =>
+                                    {
+                                        succeed_dbNames.Add(database_name);
+                                        bDbNameChanged = true;
+                                    },
+                                    out strError);
+                                if (nRet == -1)
+                                {
+                                    // 一个也没有成功
+                                    if (succeed_dbNames.Count == 0)
+                                    {
+                                        strError = $"初始化数据库时发现下列数据库的定义不存在({StringUtil.MakePathList(notexist_dbnames, ",")})，然后尝试重新创建这些数据库时，一个也没有创建成功";
+                                        return -1;
+                                    }
+                                    skip_warnings.Add(strError);
+                                }
+
+                                if (succeed_dbNames.Count > 0)
+                                {
+                                    // 更新 library.xml 内容
+                                    var nodes = succeed_dbNames.Select(o => domLog.DocumentElement.SelectSingleNode($"databases/database[@name='{o}']")).ToList().Cast<XmlElement>().Where(o => o != null);
+                                    // XmlNodeList nodes = domLog.DocumentElement.SelectNodes("databases/database");
+                                    nRet = AppendDatabaseElement(this.LibraryCfgDom,
+                        nodes,
+                        out strError);
+                                    if (nRet == -1)
+                                    {
+                                        strError = $"初始化数据库时发现下列数据库的定义不存在({StringUtil.MakePathList(notexist_dbnames, ",")})，然后尝试重新创建这些数据库时遇到报错: {strError}";
+                                        return -1;
+                                    }
+                                    this.Changed = true;
+                                }
+                                if (skip_warnings.Count > 0)
+                                {
+                                    this.Flush();
+                                    strError = $"初始化数据库时发现下列数据库的定义不存在({StringUtil.MakePathList(notexist_dbnames, ",")})，然后尝试重新创建这些数据库时遇到报错: " + StringUtil.MakePathList(skip_warnings, "; ");
+                                    return -1;
+                                }
+                            }
                         }
                         else if (strAction == "refreshDatabase")
                         {
@@ -12390,7 +12481,10 @@ out error);
                         nRet = this.InitialVdbs(channel,    // Channels,
                             out strError);
                         if (nRet == -1)
+                        {
+                            this.WriteErrorLog($"*** LogRecover 过程中出现致命错误，请在日志恢复完成后，手动修正故障: {strError}");
                             return -1;
+                        }
                     }
                     return 0;
                 }

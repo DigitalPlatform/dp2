@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.9.*")]
-[assembly: AssemblyFileVersion("3.9.0.0")]
+[assembly: AssemblyVersion("3.10.*")]
+[assembly: AssemblyFileVersion("3.10.0.0")]
 
 // 2.5 (2015/12/11) 调用 dp2library Login() API 的时候发送了 client 参数
 // 3.0 (2018/6/23) 改用 .NET Framework 4.6.1 编译
@@ -47,3 +47,4 @@ using System.Runtime.InteropServices;
 // 3.9 (2023/8/10) dp2 检索窗的单行属性页的一个 textbox 和 combobox 控件在 Windows 7 下尺寸不正确；多行属性页的一个 combobox 也有这个问题。这两个问题已经修正
 //                  记录窗的一个 textbox 的尺寸在 Windows 7 下，反复修改记录窗尺寸的时候会导致 textbox 宽度只能收缩不能重新扩大。此问题已经修正
 //                  MarcQueryHost 类增加几个从 MarcQuery 类复制过来的 static 定义
+// 3.10 (2024/5/30) 为 DTLP 检索窗的浏览列表上下文菜单增加几个命令。主要是导出批控文件命令，和发生批控文件命令。

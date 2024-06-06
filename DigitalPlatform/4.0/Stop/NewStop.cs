@@ -403,7 +403,7 @@ namespace DigitalPlatform
             if (lValue > this.ProgressMax)
             {
                 this.ProgressMax = lValue;
-                _manager.UpdateProgressRange(this);
+                _manager?.UpdateProgressRange(this);
 
                 /*
                 _manager.ChangeState(this,

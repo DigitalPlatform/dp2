@@ -11,17 +11,14 @@ using System.Diagnostics;
 using System.IO;
 using System.Collections;
 
-// using System.Reflection;
-//using DigitalPlatform.Script;
-
 using DigitalPlatform;
 using DigitalPlatform.DTLP;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Marc;
-using DigitalPlatform.MarcDom;
-//using DigitalPlatform.IO;
 using DigitalPlatform.GUI;
+using dp2Catalog.DTLP;
+using DigitalPlatform.CommonControl;
 
 namespace dp2Catalog
 {
@@ -185,6 +182,7 @@ namespace dp2Catalog
                     out baTimestamp,
                     out record,
                     out currrentEncoding,
+                    out _,
                     out strError);
                 if (string.IsNullOrEmpty(strOutputPath) == false)
                     strSavePath = this.CurrentProtocol + ":" + strOutputPath;
@@ -331,6 +329,7 @@ namespace dp2Catalog
                     out baTimestamp,
                     out record,
                     out currrentEncoding,
+                    out _,
                     out strError);
                 if (string.IsNullOrEmpty(strOutputPath) == false)
                     strSavePath = this.CurrentProtocol + ":" + strOutputPath;
@@ -375,6 +374,7 @@ namespace dp2Catalog
             out byte[] baTimestamp,
             out DigitalPlatform.OldZ3950.Record record,
             out Encoding currrentEncoding,
+            out int errorcode,
             out string strError)
         {
             strMARC = "";
@@ -384,6 +384,7 @@ namespace dp2Catalog
             baTimestamp = null;
             strOutStyle = "marc";
             strOutputPath = ""; // TODO: 需要参考dp1batch看获得outputpath的方法
+            errorcode = 0;
 
             if (strStyle != "marc")
             {
@@ -435,13 +436,12 @@ namespace dp2Catalog
             Encoding encoding = null;
             try
             {
-
                 nRet = channel.Search(strPath,
                     nStyle,
                     out baPackage);
                 if (nRet == -1)
                 {
-                    int errorcode = channel.GetLastErrno();
+                    errorcode = channel.GetLastErrno();
 
                     if (errorcode == DtlpChannel.GL_NOTEXIST
                         && (strDirection == "prev" || strDirection == "next"))
@@ -492,8 +492,7 @@ namespace dp2Catalog
 
             strOutputPath = package.GetFirstPath();
 
-            byte[] content = null;
-            nRet = package.GetFirstBin(out content);
+            nRet = package.GetFirstBin(out byte[] content);
             if (nRet == -1)
             {
                 strError = "Package::GetFirstBin() error";
@@ -914,6 +913,22 @@ namespace dp2Catalog
             return -1;
         }
 
+        // 继续检索的路径
+        string _queryPath = null;
+        // 继续检索的附加部分
+        byte[] _queryNext = null;
+
+        void ClearContinueSearchParam()
+        {
+            _queryPath = null;
+            _queryNext = null;
+        }
+
+        bool IsContinueSearchParamNull()
+        {
+            return _queryPath == null;
+        }
+
         int m_nInSearching = 0; // 表示this.DtlpChannel是否被占用
 
         /*
@@ -940,7 +955,9 @@ Stack:
 
          * */
         // 检索
-        public int DoSearch()
+        // parameters:
+        //      continueSearch  本次是否为继续检索
+        public int DoSearch(bool continueSearch = false)
         {
             string strError = "";
             int nRet = 0;
@@ -948,26 +965,49 @@ Stack:
             this._processing++;
             try
             {
+                if (continueSearch == false)
+                    ClearContinueSearchParam();
+                else
+                {
+                    if (IsContinueSearchParamNull())
+                    {
+                        strError = "当前“继续检索”参数为空，无法以继续检索方式进行检索";
+                        goto ERROR1;
+                    }
+                }
+
                 byte[] baNext = null;
                 int nStyle = DtlpChannel.CTRLNO_STYLE;
 
                 // nStyle |=  Channel.JH_STYLE;    // 获得简化记录
 
-                string strPath = "";
-
-                if ((this.dtlpResDirControl1.SelectedMask & DtlpChannel.TypeStdbase) != 0)
                 {
-                    this.strCurrentTargetPath = this.textBox_resPath.Text + "//";
+                    if ((this.dtlpResDirControl1.SelectedMask & DtlpChannel.TypeStdbase) != 0)
+                    {
+                        this.strCurrentTargetPath = this.textBox_resPath.Text + "//";
+                    }
+                    else
+                    {
+                        this.strCurrentTargetPath = this.textBox_resPath.Text + "/";
+                    }
+                    this.strCurrentQueryWord = this.textBox_queryWord.Text;
+                }
+
+                string strPath = "";
+                if (continueSearch)
+                {
+                    strPath = _queryPath;
+                    baNext = _queryNext;
+                    nStyle |= DtlpChannel.CONT_RECORD;
                 }
                 else
                 {
-                    this.strCurrentTargetPath = this.textBox_resPath.Text + "/";
+                    strPath = this.strCurrentTargetPath + this.strCurrentQueryWord;
+                    baNext = null;
+
+                    this.listView_browse.Items.Clear();
                 }
-                this.strCurrentQueryWord = this.textBox_queryWord.Text;
 
-                strPath = this.strCurrentTargetPath + this.strCurrentQueryWord;
-
-                this.listView_browse.Items.Clear();
                 EnableControls(false);
 
                 /*
@@ -1006,7 +1046,7 @@ Stack:
                         this.CurrentEncoding = encoding;    // 记忆下来
 
                         byte[] baPackage;
-                        if (bFirst == true)
+                        if (bFirst == true && continueSearch == false)
                         {
                             looping.Progress.SetMessage(listView_browse.Items.Count.ToString() + " 去重:" + nDupCount.ToString() + " " + "正在检索 " + strPath);
                             nRet = this.DtlpChannel.Search(strPath,
@@ -1039,6 +1079,8 @@ Stack:
                             goto ERROR1;
                         }
 
+                        ClearContinueSearchParam();
+
                         bFirst = false;
 
                         Package package = new Package();
@@ -1067,17 +1109,22 @@ Stack:
                         {
                             nStyle |= DtlpChannel.CONT_RECORD;
                             baNext = package.ContinueBytes;
+
+                            // 记忆为了中断后继续检索用
+                            {
+                                _queryPath = strPath;
+                                _queryNext = baNext;
+                            }
                         }
                         else
                         {
+                            ClearContinueSearchParam();
                             break;
                         }
-
                     }
 
                     this.textBox_resultInfo.Text = "命中记录 " + this.listView_browse.Items.Count.ToString() + " 条";
                 }
-
                 finally
                 {
                     this.m_nInSearching--;
@@ -1174,11 +1221,9 @@ Stack:
                 ListViewItem item = new ListViewItem();
                 item.Text = strPath;
 
-
-                string[] cols = null;
                 int nRet = GetOneBrowseRecord(
                     cell.Path,
-                    out cols,
+                    out string[] cols,
                     out strError);
                 if (nRet == -1)
                 {
@@ -1468,6 +1513,923 @@ Stack:
                 e.Result = 1;
             }
         }
+
+        private void listView_browse_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Right)
+                return;
+
+            ContextMenuStrip contextMenu = new ContextMenuStrip();
+
+            ToolStripMenuItem menuItem = null;
+
+            int nSelectedCount = 0;
+            nSelectedCount = this.listView_browse.SelectedItems.Count;
+
+            /*
+            // ---
+            var sep = new ToolStripSeparator();
+            contextMenu.Items.Add(sep);
+            */
+
+            menuItem = new ToolStripMenuItem("剪切(&T)");
+            menuItem.Click += new System.EventHandler(this.menu_cutToClipboard_Click);
+            if (nSelectedCount == 0)
+                menuItem.Enabled = false;
+            contextMenu.Items.Add(menuItem);
+
+
+            menuItem = new ToolStripMenuItem("复制(&C)");
+            menuItem.Click += new System.EventHandler(this.menu_copyToClipboard_Click);
+            if (nSelectedCount == 0)
+                menuItem.Enabled = false;
+            contextMenu.Items.Add(menuItem);
+
+            menuItem = new ToolStripMenuItem("复制单列(&S)");
+            if (this.listView_browse.SelectedIndices.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.Items.Add(menuItem);
+
+            for (int i = 0; i < this.listView_browse.Columns.Count; i++)
+            {
+                ToolStripMenuItem subMenuItem = new ToolStripMenuItem("复制列 '" + this.listView_browse.Columns[i].Text + "'");
+                subMenuItem.Tag = i;
+                subMenuItem.Click += new System.EventHandler(this.menu_copySingleColumnToClipboard_Click);
+                menuItem.DropDownItems.Add(subMenuItem);
+            }
+
+            bool bHasClipboardObject = false;
+            IDataObject iData = Clipboard.GetDataObject();
+            if (iData == null
+                || iData.GetDataPresent(typeof(string)) == false)
+                bHasClipboardObject = false;
+            else
+                bHasClipboardObject = true;
+
+#if REMOVED
+            menuItem = new ToolStripMenuItem("粘贴[前插](&P)");
+            menuItem.Click += new System.EventHandler(this.menu_pasteFromClipboard_insertBefore_Click);
+            if (bHasClipboardObject == false)
+                menuItem.Enabled = false;
+            contextMenu.Items.Add(menuItem);
+
+            menuItem = new ToolStripMenuItem("粘贴[后插](&V)");
+            menuItem.Click += new System.EventHandler(this.menu_pasteFromClipboard_insertAfter_Click);
+            if (bHasClipboardObject == false)
+                menuItem.Enabled = false;
+            contextMenu.Items.Add(menuItem);
+#endif
+
+            // ---
+            var sep = new ToolStripSeparator();
+            contextMenu.Items.Add(sep);
+
+            // 全选
+            menuItem = new ToolStripMenuItem("全选(&A)");
+            menuItem.Click += new EventHandler(menuItem_selectAll_Click);
+            contextMenu.Items.Add(menuItem);
+
+            // ---
+            sep = new ToolStripSeparator();
+            contextMenu.Items.Add(sep);
+
+            menuItem = new ToolStripMenuItem("移除所选择的 " + nSelectedCount.ToString() + " 个事项(&R)");
+            menuItem.Click += new System.EventHandler(this.menu_removeSelectedItems_Click);
+            if (nSelectedCount == 0)
+                menuItem.Enabled = false;
+            contextMenu.Items.Add(menuItem);
+
+            // ---
+            sep = new ToolStripSeparator();
+            contextMenu.Items.Add(sep);
+
+            menuItem = new ToolStripMenuItem("导出所选择的 " + nSelectedCount.ToString() + " 个事项到批控文件(&L) ...");
+            menuItem.Click += new System.EventHandler(this.menu_exportSelectedItemsToBatchFile_Click);
+            if (nSelectedCount == 0)
+                menuItem.Enabled = false;
+            contextMenu.Items.Add(menuItem);
+
+            // 保存原始记录到ISO2709文件
+            menuItem = new ToolStripMenuItem($"保存到 MARC 文件 [{nSelectedCount}] (&S)");
+            if (nSelectedCount > 0 /*&& this.m_bInSearching == false*/)
+                menuItem.Enabled = true;
+            else
+                menuItem.Enabled = false;
+            menuItem.Click += new EventHandler(menuItem_saveOriginRecordToIso2709_Click);
+            contextMenu.Items.Add(menuItem);
+
+            // ---
+            sep = new ToolStripSeparator();
+            contextMenu.Items.Add(sep);
+
+            menuItem = new ToolStripMenuItem("发生批控文件(&G) ...");
+            menuItem.Click += new System.EventHandler(this.menu_generateToBatchFile_Click);
+            contextMenu.Items.Add(menuItem);
+
+            menuItem = new ToolStripMenuItem("按照索引号段装载(&L) ...");
+            menuItem.Click += new System.EventHandler(this.menu_generateFill_Click);
+            contextMenu.Items.Add(menuItem);
+
+            contextMenu.Show(this.listView_browse, e.Location);
+        }
+
+        void menu_generateFill_Click(object sender, EventArgs e)
+        {
+            var shift = (Control.ModifierKeys == Keys.Shift);
+
+            var batch_dlg = new GenerateBatchFileDialog();
+            batch_dlg.Text = "按照索引号段装载";
+            batch_dlg.StartPathLabel = "开始号码(7位数字)";
+            batch_dlg.EndPathLabel = "结束号码(7位数字)";
+            batch_dlg.ShowDialog();
+            if (batch_dlg.DialogResult == DialogResult.Cancel)
+                return;
+
+            string strError = "";
+
+            // 提取出两个号码
+            int start_value = 0;
+            int end_value = 0;
+            {
+                string start_number = batch_dlg.StartPath;
+                if (start_number.Length != 7)
+                {
+                    strError = $"起始路径 '{start_number.Length}' 字符数应当为 7";
+                    goto ERROR1;
+                }
+                if (StringUtil.IsNumber(start_number) == false)
+                {
+                    strError = $"起始 ID 号码 '{start_number}' 格式不合法：应当为纯数字";
+                    goto ERROR1;
+                }
+                if (Int32.TryParse(start_number, out start_value) == false)
+                {
+                    strError = $"起始 ID 号码 '{start_number}' 解析出错";
+                    goto ERROR1;
+                }
+
+                string end_number = batch_dlg.EndPath;
+                if (end_number.Length != 7)
+                {
+                    strError = $"结束路径 '{end_number.Length}' 字符数应当为 7";
+                    goto ERROR1;
+                }
+                if (StringUtil.IsNumber(end_number) == false)
+                {
+                    strError = $"结束 ID 号码 '{end_number}' 格式不合法：应当为纯数字";
+                    goto ERROR1;
+                }
+                if (Int32.TryParse(end_number, out end_value) == false)
+                {
+                    strError = $"结束 ID 号码 '{end_number}' 解析出错";
+                    goto ERROR1;
+                }
+            }
+
+            // 获得树状目录上当前选择节点的路径
+            string prefix = "";
+            {
+                if ((this.dtlpResDirControl1.SelectedMask & DtlpChannel.TypeStdbase) != 0)
+                {
+                    prefix = this.textBox_resPath.Text + "/ctlno/";
+                }
+                else
+                {
+                    strError = "请先选择一个数据库节点";
+                    goto ERROR1;
+                }
+            }
+
+            var looping = BeginLoop(this.DoStop, "正在根据号码范围装载记录 ...");
+
+            EnableControls(false);
+            this.listView_browse.BeginUpdate();
+            try
+            {
+                this.listView_browse.Items.Clear();
+
+                int count = 0;
+                int succeed_count = 0;
+                bool current_shift = false;
+
+                looping.Progress.SetProgressRange(0, end_value - start_value + 1);
+
+                for (int value = start_value; value <= end_value; value++)
+                {
+                    Application.DoEvents();
+
+                    if (looping.Stopped)
+                    {
+                        strError = "用户中断";
+                        goto ERROR1;
+                    }
+
+                    if ((count % 1000) == 0)
+                    {
+                        current_shift = (Control.ModifierKeys == Keys.Shift);
+                        if (shift == true || current_shift == true)
+                        { 
+                            // shift 按下的情况下，中途始终不刷新显示
+                        }
+                        else
+                        {
+                            // 每隔 1000 行刷新一次显示
+                            this.listView_browse.EndUpdate();
+                            Application.DoEvents();
+                            this.listView_browse.BeginUpdate();
+                        }
+                    }
+
+                    var number = value.ToString().PadLeft(7, '0');
+                    string strPath = prefix + number;
+                    ListViewItem item = new ListViewItem();
+                    item.Text = strPath;
+
+                    if (shift == false && current_shift == false)
+                    {
+                        int nRet = GetOneBrowseRecord(
+                            strPath,    // cell.Path,
+                            out string[] cols,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            item.SubItems.Add(strError);
+                            goto CONTINUE;
+                        }
+                        succeed_count++;
+
+                        if (cols != null)
+                        {
+                            // 确保列标题数量足够
+                            ListViewUtil.EnsureColumns(this.listView_browse,
+                                cols.Length,
+                                200);
+                            for (int j = 0; j < cols.Length; j++)
+                            {
+                                item.SubItems.Add(cols[j]);
+                            }
+                        }
+                    }
+
+                CONTINUE:
+                    this.listView_browse.Items.Add(item);
+
+                    count++;
+                    looping.Progress.SetProgressValue(count);
+                }
+
+                MessageBox.Show(this, $"按照指定号码范围装载完成，共创建 {count} 个记录路径，装载成功 {succeed_count} 个");
+                return;
+            }
+            finally
+            {
+                this.listView_browse.EndUpdate();
+                EnableControls(true);
+                EndLoop(looping);
+            }
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+
+        // 发生批控文件。
+        // 根据输入的起止记录路径，创建一个全新的批控文件
+        void menu_generateToBatchFile_Click(object sender, EventArgs e)
+        {
+            var batch_dlg = new GenerateBatchFileDialog();
+            batch_dlg.ShowDialog();
+            if (batch_dlg.DialogResult == DialogResult.Cancel)
+                return;
+
+            SaveFileDialog dlg = new SaveFileDialog();
+
+            dlg.Title = "请指定要保存的批控文件名";
+            dlg.OverwritePrompt = true;
+            // dlg.FileName = strLocalPath == "" ? strID + ".res" : strLocalPath;
+            dlg.InitialDirectory = Environment.CurrentDirectory;
+            dlg.Filter = "批控文件 (*.ctl)|*.ctl|All files (*.*)|*.*";
+
+            dlg.RestoreDirectory = true;
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            string strError = "";
+
+            // 提取出前缀，和两个号码
+            string prefix = "";
+            int start_value = 0;
+            int end_value = 0;
+            {
+                string startPath = batch_dlg.StartPath;
+                int index = startPath.LastIndexOf("/");
+                if (index == -1)
+                {
+                    strError = $"起始路径 '{startPath}' 中没有找到字符 '/'，解析失败";
+                    goto ERROR1;
+                }
+
+                prefix = startPath.Substring(0, index + 1);
+                string start_number = startPath.Substring(index + 1);
+                if (start_number.Length != 7)
+                {
+                    strError = $"起始路径 '{startPath.Length}' 中的 ID '{start_number}' 其字符数应当为 7";
+                    goto ERROR1;
+                }
+                if (StringUtil.IsNumber(start_number) == false)
+                {
+                    strError = $"起始 ID 号码 '{start_number}' 格式不合法：应当为纯数字";
+                    goto ERROR1;
+                }
+                if (Int32.TryParse(start_number, out start_value) == false)
+                {
+                    strError = $"起始 ID 号码 '{start_number}' 解析出错";
+                    goto ERROR1;
+                }
+
+                string endPath = batch_dlg.EndPath;
+                if (endPath.Length != startPath.Length)
+                {
+                    strError = $"起始路径 '{startPath.Length}' 和结束路径 '{endPath}' 的字符数应当相等";
+                    goto ERROR1;
+                }
+
+                if (endPath.StartsWith(prefix) == false)
+                {
+                    strError = $"起始路径 '{startPath}' 和结束路径 '{endPath}' 的前缀部分(最后一个斜杠字符以左的部分)应当完全一致";
+                    goto ERROR1;
+                }
+
+                string end_number = endPath.Substring(index + 1);
+                if (StringUtil.IsNumber(end_number) == false)
+                {
+                    strError = $"结束 ID 号码 '{end_number}' 格式不合法：应当为纯数字";
+                    goto ERROR1;
+                }
+                if (Int32.TryParse(end_number, out end_value) == false)
+                {
+                    strError = $"结束 ID 号码 '{end_number}' 解析出错";
+                    goto ERROR1;
+                }
+            }
+
+            var looping = BeginLoop(this.DoStop, "正在发生号码内容 ...");
+
+            this.listView_browse.Enabled = false;
+            try
+            {
+                int count = 0;
+                using (var stream = File.Create(dlg.FileName))
+                {
+                    looping.Progress.SetProgressRange(0, end_value - start_value + 1);
+
+                    for (int value = start_value; value <= end_value; value++)
+                    {
+                        Application.DoEvents();
+
+                        if (looping.Stopped)
+                        {
+                            strError = "用户中断";
+                            goto ERROR1;
+                        }
+
+                        var text = prefix + value.ToString().PadLeft(7, '0');
+                        var buffer = Encoding.GetEncoding("gb2312").GetBytes(text);
+                        stream.Write(buffer, 0, buffer.Length);
+                        var tail = new byte[1];
+                        tail[0] = 0;
+                        stream.Write(tail, 0, tail.Length);
+
+                        count++;
+                        looping.Progress.SetProgressValue(count);
+                    }
+                }
+
+                MessageBox.Show(this, $"发生路径到批控文件 {dlg.FileName} 完成，共创建 {count} 个记录路径");
+                return;
+            }
+            finally
+            {
+                this.listView_browse.Enabled = true;
+                EndLoop(looping);
+            }
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        void menu_exportSelectedItemsToBatchFile_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            SaveFileDialog dlg = new SaveFileDialog();
+
+            dlg.Title = "请指定要保存的批控文件名";
+            dlg.OverwritePrompt = true;
+            // dlg.FileName = strLocalPath == "" ? strID + ".res" : strLocalPath;
+            dlg.InitialDirectory = Environment.CurrentDirectory;
+            dlg.Filter = "批控文件 (*.ctl)|*.ctl|All files (*.*)|*.*";
+
+            dlg.RestoreDirectory = true;
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            var prefix = InputDlg.GetInput(this,
+                "请指定每个路径需要添加的前缀",
+                "路径前缀:",
+                "/TCPIP网络/x.x.x.x",
+                this.Font);
+            if (prefix == null)
+                return;
+
+            var looping = BeginLoop(this.DoStop, "开始导出批控文件 ...");
+
+            this.listView_browse.Enabled = false;
+            try
+            {
+                int count = 0;
+                using (var stream = File.Create(dlg.FileName))
+                {
+                    looping.Progress.SetProgressRange(0, this.listView_browse.SelectedItems.Count);
+
+                    foreach (ListViewItem item in this.listView_browse.SelectedItems)
+                    {
+                        Application.DoEvents();
+
+                        if (looping.Stopped)
+                        {
+                            strError = "用户中断";
+                            goto ERROR1;
+                        }
+
+                        string path = ListViewUtil.GetItemText(item, 0);
+                        // 变成外部可以理解的状态
+                        path = DigitalPlatform.DTLP.Global.ModifyDtlpRecPath(path, "ctlno");
+
+                        var text = prefix + RemoveFirstLevel(path); // .Replace("//", "/ctlno/")
+                        // string strCompletePath = ;
+                        var buffer = Encoding.GetEncoding("gb2312").GetBytes(text);
+                        stream.Write(buffer, 0, buffer.Length);
+                        var tail = new byte[1];
+                        tail[0] = 0;
+                        stream.Write(tail, 0, tail.Length);
+
+                        count++;
+                        looping.Progress.SetProgressValue(count);
+                    }
+                }
+
+                MessageBox.Show(this, $"导出到文件 {dlg.FileName} 完成，共导出 {count} 个记录路径");
+                return;
+            }
+            finally
+            {
+                this.listView_browse.Enabled = true;
+                EndLoop(looping);
+            }
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        static string RemoveFirstLevel(string text)
+        {
+            int index = text.IndexOf("/");
+            if (index == -1)
+                return text;
+            return text.Substring(index);
+        }
+
+        void menu_cutToClipboard_Click(object sender, EventArgs e)
+        {
+            Global.CopyLinesToClipboard(this,
+                "dp2SearchForm",
+                this.listView_browse,
+                true);
+        }
+
+        void menu_copyToClipboard_Click(object sender, EventArgs e)
+        {
+            Global.CopyLinesToClipboard(this,
+                "dp2SearchForm",
+                this.listView_browse,
+                false);
+        }
+
+        void menu_copySingleColumnToClipboard_Click(object sender, EventArgs e)
+        {
+            int nColumn = (int)((ToolStripMenuItem)sender).Tag;
+
+            Global.CopyLinesToClipboard(this, nColumn, this.listView_browse, false);
+        }
+
+#if REMOVED
+        void menu_pasteFromClipboard_insertBefore_Click(object sender, EventArgs e)
+        {
+            Global.PasteLinesFromClipboard(this,
+                "dp2SearchForm,AmazonSearchForm",
+                this.listView_browse,
+                true);
+
+            ConvertPastedLines();
+        }
+
+        void menu_pasteFromClipboard_insertAfter_Click(object sender, EventArgs e)
+        {
+            Global.PasteLinesFromClipboard(this,
+                "dp2SearchForm,AmazonSearchForm",
+                this.listView_browse,
+                false);
+
+            ConvertPastedLines();
+        }
+#endif
+
+        void menuItem_selectAll_Click(object sender,
+    EventArgs e)
+        {
+            this.listView_browse.BeginUpdate();
+            ListViewUtil.SelectAllItems(this.listView_browse);
+            /*
+            for (int i = 0; i < this.listView_browse.Items.Count; i++)
+            {
+                this.listView_browse.Items[i].Selected = true;
+            }
+            */
+            this.listView_browse.EndUpdate();
+        }
+
+        // 从窗口中移走所选择的事项
+        void menu_removeSelectedItems_Click(object sender, EventArgs e)
+        {
+
+            Cursor oldCursor = this.Cursor;
+            this.Cursor = Cursors.WaitCursor;
+
+            this.listView_browse.BeginUpdate();
+            ListViewUtil.ClearSelection(this.listView_browse);
+            /*
+            for (int i = this.listView_browse.SelectedIndices.Count - 1; i >= 0; i--)
+            {
+                this.listView_browse.Items.RemoveAt(this.listView_browse.SelectedIndices[i]);
+            }
+            */
+            this.listView_browse.EndUpdate();
+            this.Cursor = oldCursor;
+        }
+
+        void menuItem_saveOriginRecordToIso2709_Click(object sender, EventArgs e)
+        {
+            this.SaveOriginRecordToIso2709();
+        }
+
+        public void SaveOriginRecordToIso2709()
+        {
+            string strError = "";
+            int nRet = 0;
+
+            bool bControl = Control.ModifierKeys == Keys.Control;
+
+            if (this.listView_browse.SelectedItems.Count == 0)
+            {
+                strError = "尚未选定要保存的记录";
+                goto ERROR1;
+            }
+
+            Encoding preferredEncoding = this.CurrentEncoding;
+
+            string strPreferedMarcSyntax = "unimarc";
+
+            OpenMarcFileDlg dlg = new OpenMarcFileDlg();
+            GuiUtil.SetControlFont(dlg, this.Font);
+            dlg.IsOutput = true;
+            dlg.FileName = MainForm.LastIso2709FileName;
+            // dlg.CrLf = MainForm.LastCrLfIso2709;
+            dlg.CrLfVisible = false;   // 2020/3/9
+            dlg.RemoveField998 = MainForm.LastRemoveField998;
+            dlg.EncodingListItems = Global.GetEncodingList(true);
+            dlg.EncodingName =
+                (String.IsNullOrEmpty(MainForm.LastEncodingName) == true ? GetEncodingForm.GetEncodingName(preferredEncoding) : MainForm.LastEncodingName);
+            dlg.EncodingComment = "注: 原始编码方式为 " + GetEncodingForm.GetEncodingName(preferredEncoding);
+
+            if (string.IsNullOrEmpty(strPreferedMarcSyntax) == false)
+                dlg.MarcSyntax = strPreferedMarcSyntax;
+            else
+                dlg.MarcSyntax = "<自动>";    // strPreferedMarcSyntax;
+
+            if (bControl == false)
+                dlg.EnableMarcSyntax = false;
+            dlg.ShowDialog(this);
+            if (dlg.DialogResult != DialogResult.OK)
+                return;
+
+            bool unimarc_modify_100 = dlg.UnimarcModify100;
+
+            Encoding targetEncoding = null;
+
+            if (dlg.EncodingName == "MARC-8"
+                && preferredEncoding.Equals(this.MainForm.Marc8Encoding) == false)
+            {
+                strError = "保存操作无法进行。只有在记录的原始编码方式为 MARC-8 时，才能使用这个编码方式保存记录。";
+                goto ERROR1;
+            }
+
+            nRet = this.MainForm.GetEncoding(dlg.EncodingName,
+                out targetEncoding,
+                out strError);
+            if (nRet == -1)
+            {
+                goto ERROR1;
+            }
+
+            string strLastFileName = MainForm.LastIso2709FileName;
+            string strLastEncodingName = MainForm.LastEncodingName;
+
+            bool bExist = File.Exists(dlg.FileName);
+            bool bAppend = false;
+
+            if (bExist == true)
+            {
+                DialogResult result = MessageBox.Show(this,
+        "文件 '" + dlg.FileName + "' 已存在，是否以追加方式写入记录?\r\n\r\n--------------------\r\n注：(是)追加  (否)覆盖  (取消)放弃",
+        "DtlpSearchForm",
+        MessageBoxButtons.YesNoCancel,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button1);
+                if (result == DialogResult.Yes)
+                    bAppend = true;
+
+                if (result == DialogResult.No)
+                    bAppend = false;
+
+                if (result == DialogResult.Cancel)
+                {
+                    strError = "放弃处理...";
+                    goto ERROR1;
+                }
+            }
+
+            // 检查同一个文件连续存时候的编码方式一致性
+            if (strLastFileName == dlg.FileName
+                && bAppend == true)
+            {
+                if (strLastEncodingName != ""
+                    && strLastEncodingName != dlg.EncodingName)
+                {
+                    DialogResult result = MessageBox.Show(this,
+                        "文件 '" + dlg.FileName + "' 已在先前已经用 " + strLastEncodingName + " 编码方式存储了记录，现在又以不同的编码方式 " + dlg.EncodingName + " 追加记录，这样会造成同一文件中存在不同编码方式的记录，可能会令它无法被正确读取。\r\n\r\n是否继续? (是)追加  (否)放弃操作",
+                        "DtlpSearchForm",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Question,
+                        MessageBoxDefaultButton.Button2);
+                    if (result == DialogResult.No)
+                    {
+                        strError = "放弃处理...";
+                        goto ERROR1;
+                    }
+                }
+            }
+
+            MainForm.LastIso2709FileName = dlg.FileName;
+            MainForm.LastCrLfIso2709 = dlg.CrLf;
+            MainForm.LastEncodingName = dlg.EncodingName;
+            MainForm.LastRemoveField998 = dlg.RemoveField998;
+
+            this.EnableControls(false);
+
+            var looping = BeginLoop(this.DoStop, "正在保存到 MARC 文件 ...");
+
+            Stream s = null;
+            try
+            {
+                s = File.Open(MainForm.LastIso2709FileName,
+                     FileMode.OpenOrCreate);
+                if (bAppend == false)
+                    s.SetLength(0);
+                else
+                    s.Seek(0, SeekOrigin.End);
+            }
+            catch (Exception ex)
+            {
+                strError = "打开或创建文件 " + MainForm.LastIso2709FileName + " 失败，原因: " + ex.Message;
+                goto ERROR1;
+            }
+
+            bool bHideMessageBox = false;
+            DialogResult error_result = DialogResult.No;
+
+            int nCount = 0;
+
+            try
+            {
+                looping.Progress.SetProgressRange(0, this.listView_browse.SelectedItems.Count);
+                bool bAsked = false;
+
+                int i = 0;
+                int count = this.listView_browse.SelectedItems.Count;
+
+                foreach (ListViewItem item in this.listView_browse.SelectedItems)
+                {
+                    Application.DoEvents(); // 出让界面控制权
+
+                    if (looping.Stopped)
+                    {
+                        strError = "用户中断";
+                        goto ERROR1;
+                    }
+
+                    string strPath = item.Text;
+                    // 2024/6/6
+                    // 变成外部可以理解的状态
+                    strPath = DigitalPlatform.DTLP.Global.ModifyDtlpRecPath(strPath, "ctlno");
+
+                    byte[] baTarget = null;
+
+                    string strRecord = "";
+                    string strOutputPath = "";
+                    string strOutStyle = "";
+                    byte[] baTimestamp = null;
+                    DigitalPlatform.OldZ3950.Record record = null;
+                    Encoding currrentEncoding;
+                // string strXmlFragment = "";
+
+                REDO_GET:
+                    // 获得一条MARC/XML记录
+                    // parameters:
+                    //      strPath 记录路径。格式为"中文图书/1 @服务器名"
+                    //      strDirection    方向。为 prev/next/current之一。current可以缺省。
+                    //      strOutputPath   [out]返回的实际路径。格式和strPath相同。
+                    // return:
+                    //      -1  error 包括not found
+                    //      0   found
+                    //      1   为诊断记录
+                    nRet = InternalGetOneRecord(
+                        "marc",
+                        strPath,
+                        "current",
+                        out strRecord,
+                        out strOutputPath,
+                        out strOutStyle,
+                        out baTimestamp,
+                        out record,
+                        out currrentEncoding,
+                        out int errorcode,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        if (bHideMessageBox == false
+                            || errorcode != DtlpChannel.GL_NOTEXIST)
+                        {
+                            Application.DoEvents();
+
+                            error_result = MessageDialog.Show(this,
+    $"获得书目记录 {strPath} 时发生错误: {strError}。\r\n\r\n请问是否重试获得记录?\r\n[Y]重试 [N]跳过本条继续后面的处理 [C]中断处理",
+    MessageBoxButtons.YesNoCancel,
+    MessageBoxDefaultButton.Button1,
+    "以后不再提示，按本次的选择处理",
+    ref bHideMessageBox,
+    new string[] { "重试", "跳过", "中断" });
+                        }
+
+                        if (error_result == DialogResult.Yes)
+                        {
+                            // TODO: 出错信息进入操作历史面板
+                            goto REDO_GET;
+                        }
+                        if (error_result == DialogResult.No)
+                            goto CONTINUE;
+
+                        goto ERROR1;
+                    }
+
+                    string strMarcSyntax = "";
+
+                    if (dlg.MarcSyntax == "<自动>")
+                    {
+                        if (record.m_strSyntaxOID == "1.2.840.10003.5.1")
+                            strMarcSyntax = "unimarc";
+                        else if (record.m_strSyntaxOID == "1.2.840.10003.5.10")
+                            strMarcSyntax = "usmarc";
+                        else
+                            strMarcSyntax = "unimarc";
+
+                        if (strMarcSyntax == "unimarc"
+                            && dlg.Mode880 == true
+                            && bAsked == false)
+                        {
+                            DialogResult result = MessageBox.Show(this,
+"书目记录 " + strPath + " 的 MARC 格式为 UNIMARC，在保存对话框选择“<自动>”的情况下，在保存前将不会被处理为 880 模式。如果确需在保存前处理为 880 模式，请终止当前操作，重新进行一次保存，注意在保存对话框中明确选择 “USMARC” 格式。\r\n\r\n请问是否继续处理? \r\n\r\n(Yes 继续处理，UNIMARC 格式记录不会处理为 880 模式；\r\nNo 中断整批保存操作)",
+"DtlpSearchForm",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+                            if (result == System.Windows.Forms.DialogResult.No)
+                                goto END1;
+                            bAsked = true;
+                        }
+                    }
+                    else
+                    {
+                        strMarcSyntax = dlg.MarcSyntax;
+                        // TODO: 检查常用字段名和所选定的 MARC 格式是否矛盾。如果矛盾给出警告
+                    }
+
+                    Debug.Assert(strMarcSyntax != "", "");
+
+                    if (dlg.RemoveField998 == true)
+                    {
+                        MarcRecord temp = new MarcRecord(strRecord);
+                        temp.select("field[@name='998']").detach();
+                        temp.select("field[@name='997']").detach();
+                        strRecord = temp.Text;
+                    }
+
+                    if (dlg.Mode880 == true && strMarcSyntax == "usmarc")
+                    {
+                        MarcRecord temp = new MarcRecord(strRecord);
+                        MarcQuery.To880(temp);
+                        strRecord = temp.Text;
+                    }
+
+                    // 添加 -01 字段
+                    {
+                        MarcRecord temp = new MarcRecord(strRecord);
+                        temp.select("field[@name='-01']").detach();
+                        temp.setFirstField("-01", "", $"{strOutputPath}|{ByteArray.GetHexTimeStampString(baTimestamp)}");
+                        strRecord = temp.Text;
+
+                    }
+
+                    // 将MARC机内格式转换为ISO2709格式
+                    // parameters:
+                    //      strSourceMARC   [in]机内格式MARC记录。
+                    //      strMarcSyntax   [in]为"unimarc"或"usmarc"
+                    //      targetEncoding  [in]输出ISO2709的编码方式。为UTF8、codepage-936等等
+                    //      baResult    [out]输出的ISO2709记录。编码方式受targetEncoding参数控制。注意，缓冲区末尾不包含0字符。
+                    // return:
+                    //      -1  出错
+                    //      0   成功
+                    nRet = MarcUtil.CvtJineiToISO2709(
+                        strRecord,
+                        strMarcSyntax,
+                        targetEncoding,
+                        unimarc_modify_100 ? "unimarc_100" : "",
+                        out baTarget,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    s.Write(baTarget, 0,
+                        baTarget.Length);
+
+                    if (dlg.CrLf == true)
+                    {
+                        byte[] baCrLf = targetEncoding.GetBytes("\r\n");
+                        s.Write(baCrLf, 0,
+                            baCrLf.Length);
+                    }
+
+                CONTINUE:
+                    nCount++;
+
+                    looping.Progress.SetProgressValue(i + 1);
+                    looping.Progress.SetMessage($"正在导出 {strPath}  {i + 1}/{count} ...");
+                    i++;
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = "写入文件 " + MainForm.LastIso2709FileName + " 失败，原因: " + ex.Message;
+                goto ERROR1;
+            }
+            finally
+            {
+                s.Close();
+
+                /*
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                stop.HideProgress();
+                */
+                EndLoop(looping);
+
+                this.EnableControls(true);
+            }
+
+        END1:
+            // 
+            if (bAppend == true)
+                MainForm.MessageText = nCount.ToString()
+                    + "条记录成功追加到文件 " + MainForm.LastIso2709FileName + " 尾部";
+            else
+                MainForm.MessageText = nCount.ToString()
+                    + "条记录成功保存到新文件 " + MainForm.LastIso2709FileName + " 尾部";
+
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
 
         /*
         protected override bool ProcessDialogChar(

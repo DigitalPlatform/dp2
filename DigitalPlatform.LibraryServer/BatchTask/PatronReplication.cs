@@ -1429,8 +1429,12 @@ idElementName="barcode"
 
             // 2017/2/21
             // 添加 password 元素
-            XmlDocument domOperLog = null;
+            // XmlDocument domOperLog = null;
+
             // 修改读者密码
+            // parameters:
+            //      domOperLog  日志记录 XmlDocument。本函数会在里面写入一个 newPassword 和 type 和 expire 元素。type 和 expireDate 元素可能会缺省。
+            //                  如果为 null，表示不写入记录。
             // return:
             //      -1  error
             //      0   成功
@@ -1438,7 +1442,7 @@ idElementName="barcode"
                 domNew,
                 Guid.NewGuid().ToString(),
                 expireLength,   // this.App._patronPasswordExpirePeriod,
-                ref domOperLog,
+                null,   // domOperLog,
                 out strError);
             if (nRet == -1)
             {

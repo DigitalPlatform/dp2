@@ -18,8 +18,6 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.LibraryClient;
-using DocumentFormat.OpenXml.EMMA;
-using DocumentFormat.OpenXml.Drawing.Charts;
 
 namespace dp2Circulation
 {

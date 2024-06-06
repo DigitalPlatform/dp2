@@ -338,8 +338,18 @@ out strError);
                         RangeList rl = new RangeList(range);
                         if (rl.Count != 1)
                         {
-                            strError = $"{range} 中只应包含一个连续范围";
-                            return -1;
+                            // 2024/5/15
+                            // 如果遇到唯一的一个空范围
+                            if (string.IsNullOrEmpty(range))
+                            {
+                                rl = new RangeList();
+                                rl.Add(new RangeItem { lStart = 0, lLength = 0 });
+                            }
+                            else
+                            {
+                                strError = $"{range} 中只应包含一个连续范围";
+                                return -1;
+                            }
                         }
 
                         {

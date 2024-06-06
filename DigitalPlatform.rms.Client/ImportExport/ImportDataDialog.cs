@@ -8,6 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 
 using DigitalPlatform.CommonControl;
+using DigitalPlatform.Text;
 
 namespace DigitalPlatform.rms.Client
 {
@@ -29,17 +30,25 @@ namespace DigitalPlatform.rms.Client
             dlg.FileName = this.textBox_fileName.Text;
             dlg.Filter = "备份文件 (*.dp2bak)|*.dp2bak|XML文件 (*.xml)|*.xml|ISO2709文件 (*.iso;*.mrc)|*.iso;*.mrc|All files (*.*)|*.*";
             dlg.RestoreDirectory = true;
+            dlg.Multiselect = true; // 2024/6/4 允许多选
 
             if (dlg.ShowDialog() != DialogResult.OK)
                 return;
 
-            this.textBox_fileName.Text = dlg.FileName;
+            // this.textBox_fileName.Text = dlg.FileName;
+            this.textBox_fileName.Text = string.Join("\r\n", dlg.FileNames);
         }
 
         private void button_OK_Click(object sender, EventArgs e)
         {
             string strError = "";
             if (string.IsNullOrEmpty(this.textBox_fileName.Text) == true)
+            {
+                strError = "尚未指定要导入的文件名";
+                goto ERROR1;
+            }
+
+            if (this.FileNames.Length == 0)
             {
                 strError = "尚未指定要导入的文件名";
                 goto ERROR1;
@@ -85,6 +94,7 @@ MessageBoxDefaultButton.Button2);
             this.Close();
         }
 
+        /*
         public string FileName
         {
             get
@@ -94,6 +104,26 @@ MessageBoxDefaultButton.Button2);
             set
             {
                 this.textBox_fileName.Text = value;
+            }
+        }
+        */
+
+        // 文件名集合
+        public string[] FileNames
+        {
+            get
+            {
+                var values = StringUtil.SplitList(this.textBox_fileName.Text.Replace("\r\n", "\n"), '\n');
+                StringUtil.RemoveDupNoSort(ref values);
+                StringUtil.RemoveBlank(ref values);
+                return values.ToArray();
+            }
+            set
+            {
+                if (value == null)
+                    this.textBox_fileName.Text = "";
+                else
+                    this.textBox_fileName.Text = StringUtil.MakePathList(value.ToList(), "\r\n");
             }
         }
 

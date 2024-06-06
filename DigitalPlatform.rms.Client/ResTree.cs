@@ -18,6 +18,9 @@ using DigitalPlatform.IO;
 
 using DigitalPlatform.rms.Client.rmsws_localhost;
 using System.Threading.Tasks;
+using System.Linq;
+using System.Data.SqlClient;
+using System.Security.Policy;
 
 namespace DigitalPlatform.rms.Client
 {
@@ -541,6 +544,12 @@ namespace DigitalPlatform.rms.Client
                 subMenuItem.Enabled = false;
             menuItem.MenuItems.Add(subMenuItem);
 
+            subMenuItem = new MenuItem("endfastappend");
+            subMenuItem.Click += new System.EventHandler(this.menu_endFastAppend);
+            if (this.SelectedNode == null)
+                subMenuItem.Enabled = false;
+            menuItem.MenuItems.Add(subMenuItem);
+
             // ---
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
@@ -667,7 +676,7 @@ namespace DigitalPlatform.rms.Client
             if (this.SelectedNode != null)
                 this.SelectedNode.Expand();
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return;
         }
@@ -715,7 +724,7 @@ namespace DigitalPlatform.rms.Client
                 out strError);
 
             return nRet;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -737,7 +746,7 @@ namespace DigitalPlatform.rms.Client
             this.channel = Channels.GetChannel(strServerUrl);
             Debug.Assert(channel != null, "Channels.GetChannel() 异常");
 
-            REDO:
+        REDO:
 
 #if NO
             DigitalPlatform.Stop stop = null;
@@ -1049,6 +1058,35 @@ namespace DigitalPlatform.rms.Client
             ManageKeysIndex("flushpendingkeys");
         }
 
+        // 2024/6/4
+        void menu_endFastAppend(object sender, EventArgs e)
+        {
+            string strError = "";
+            TreeNode selectedNode = (TreeNode)this.Invoke(new Func<TreeNode>(() =>
+            {
+                return this.SelectedNode;
+            }));
+
+            if (selectedNode == null)
+            {
+                strError = "尚未选择要要导入数据的数据库节点";
+                goto ERROR1;
+            }
+
+            if (selectedNode.ImageIndex != RESTYPE_DB)
+            {
+                strError = "所选择的节点不是数据库类型。请选择要导入数据的数据库节点。";
+                goto ERROR1;
+            }
+
+            ResPath default_target_respath = new ResPath(selectedNode);
+            var url = GetDbUrl(default_target_respath.FullPath);
+            EndFastAppend(null, new List<string> { url });
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
         void ManageKeysIndex(string strAction)
         {
             string strError = "";
@@ -1057,7 +1095,7 @@ namespace DigitalPlatform.rms.Client
                 goto ERROR1;
             MessageBox.Show(this, "操作成功");
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1154,7 +1192,7 @@ namespace DigitalPlatform.rms.Client
 
                 this.channel = null;
             }
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -1181,7 +1219,6 @@ namespace DigitalPlatform.rms.Client
         int ImportData(bool bFastMode = false)
         {
             string strError = "";
-            string strTimeMessage = "";
             int CHUNK_SIZE = 150 * 1024;    // 70
 
             TreeNode selectedNode = (TreeNode)this.Invoke(new Func<TreeNode>(() =>
@@ -1229,17 +1266,19 @@ namespace DigitalPlatform.rms.Client
                 return 0;
             }
 #endif
-            string fileName = "";
+            // string fileName = "";
             bool importDataRecord = false;
             bool insertMissing = false;
             bool importObject = false;
+            List<string> filenames = new List<string>();
 
             int nRet = (int)this.Invoke(new Func<int>(() =>
             {
                 using (ImportDataDialog dlg = new ImportDataDialog())
                 {
                     dlg.Font = GuiUtil.GetDefaultFont();
-                    dlg.FileName = "";
+                    // dlg.FileName = "";
+                    dlg.FileNames = null;
 
                     if (this.AppInfo != null)
                     {
@@ -1264,41 +1303,32 @@ namespace DigitalPlatform.rms.Client
                     if (dlg.DialogResult != DialogResult.OK)
                         return 0;
 
-                    fileName = dlg.FileName;
+                    // fileName = dlg.FileName;
+                    filenames = dlg.FileNames.ToList();
                     importDataRecord = dlg.ImportDataRecord;
                     insertMissing = dlg.InsertMissing;
                     importObject = dlg.ImportObject;
-
                     return 1;
                 }
             }));
             if (nRet == 0)
                 return 0;
 
+            List<string> target_dburls = new List<string>();
+            List<string> times = new List<string>();    // 记载每个文件导入耗费的时间
             long lTotalCount = 0;
 
-            ImportUtil import_util = new ImportUtil();
-            nRet = import_util.Begin(this,
-                this.AppInfo,
-                fileName,   // dlg.FileName,
-                out strError);
-            if (nRet == -1 || nRet == 1)
-                goto ERROR0;
+            string syntax = "";
+            Encoding encoding = Encoding.UTF8;
 
-#if NO
-            ResPath respath = new ResPath(this.SelectedNode);
-            this.channel = Channels.GetChannel(respath.Url);
-            Debug.Assert(channel != null, "Channels.GetChannel() 异常");
-#endif
-            // 缺省的目标数据库路径
+            bool bDontPromptTimestampMismatchWhenOverwrite = false;
+            DbNameMap map = new DbNameMap();
 
             ResPath default_target_respath = new ResPath(selectedNode);
             RmsChannel cur_channel = Channels.CreateTempChannel(default_target_respath.Url);
             Debug.Assert(cur_channel != null, "Channels.GetChannel() 异常");
 
-            List<string> target_dburls = new List<string>();
-
-            DigitalPlatform.Stop stop = PrepareStop("正在导入数据 ...");  // + default_target_respath.FullPath);
+            var stop = PrepareStop($"正在导入数据 ...");  // + default_target_respath.FullPath);
             stop.OnStop -= new StopEventHandler(this.DoStop);   // 去掉缺省的回调函数
             stop.OnStop += (sender1, e1) =>
             {
@@ -1306,353 +1336,432 @@ namespace DigitalPlatform.rms.Client
                     cur_channel.Abort();
             };
             stop.Style = StopStyle.EnableHalfStop;  // API的间隙才让中断。避免获取结果集的中途，因为中断而导致 Session 失效，结果集丢失，进而无法 Retry 获取
+
+            var total_length = GetTotalLength(filenames);
             ProgressEstimate estimate = new ProgressEstimate();
-            try // open import util
+            estimate.SetRange(0, total_length);
+            estimate.StartEstimate();
+
+            stop.SetProgressRange(0, total_length);
+
+            // 前面文件已经处理过的 bytes 数
+            long processed_length = 0;
+            try
             {
-                bool bDontPromptTimestampMismatchWhenOverwrite = false;
-                DbNameMap map = new DbNameMap();
-                long lSaveOffs = -1;
-
-                estimate.SetRange(0, import_util.Stream.Length);
-                estimate.StartEstimate();
-
-                stop.SetProgressRange(0, import_util.Stream.Length);
-
-                List<UploadRecord> records = new List<UploadRecord>();
-                int nBatchSize = 0;
-                for (int index = 0; ; index++)
+                for (int i = 0; i < filenames.Count; i++)
                 {
-                    // Application.DoEvents();	// 出让界面控制权
+                    string fileName = filenames[i];
 
-                    if (stop.State != 0)
-                    {
-                        DialogResult result = (DialogResult)this.Invoke(new Func<DialogResult>(() =>
-                        {
-                            return MessageBox.Show(this,
-                            "确实要中断当前批处理操作?",
-                            "导入数据",
-                            MessageBoxButtons.YesNo,
-                            MessageBoxIcon.Question,
-                            MessageBoxDefaultButton.Button2);
-                        }));
-                        if (result == DialogResult.Yes)
-                        {
-                            strError = "用户中断";
-                            goto ERROR1;
-                        }
-                        else
-                        {
-                            stop.Continue();
-                        }
-                    }
 
-                    if (import_util.FileType == ExportFileType.BackupFile)
-                    {
-                        if (lSaveOffs != -1 && import_util.Stream.Position != lSaveOffs)
-                        {
-                            // import_util.Stream.Seek(lSaveOffs, SeekOrigin.Begin);
-                            StreamUtil.FastSeek(import_util.Stream, lSaveOffs);
-                        }
-                    }
+                    ImportUtil import_util = new ImportUtil();
 
-                    nRet = import_util.ReadOneRecord(out UploadRecord record,
+                    ImportUtil.delegate_ask func = null;
+                    if (i > 0)
+                        func = (filename) =>
+                        {
+                            return new ImportUtil.AskMarcFileInfoResult
+                            {
+                                Value = 0,
+                                Syntax = syntax,
+                                Encoding = encoding,
+                            };
+                        };
+
+                    // 2024/6/4
+                    // 导入时自动添加 997 字段
+                    import_util.AddUniformKey = true;
+                    nRet = import_util.Begin(this,
+                        this.AppInfo,
+                        fileName,   // dlg.FileName,
+                        func,
                         out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
-                    if (nRet == 1)
-                        break;
+                    if (nRet == -1 || nRet == 1)
+                        goto ERROR0;
 
-                    if (import_util.FileType == ExportFileType.BackupFile)
+                    // 记忆下来
+                    syntax = import_util.MarcSyntax;
+                    encoding = import_util.Encoding;
+
+#if NO
+            ResPath respath = new ResPath(this.SelectedNode);
+            this.channel = Channels.GetChannel(respath.Url);
+            Debug.Assert(channel != null, "Channels.GetChannel() 异常");
+#endif
+                    // 缺省的目标数据库路径
+
+                    // 本文件总共处理记录数
+                    long current_count = 0;
+
+                    try // open import util
                     {
-                        // 保存每次读取后的文件指针位置
-                        lSaveOffs = import_util.Stream.Position;
-                    }
 
-                    Debug.Assert(record != null, "");
+                        long lSaveOffs = -1;
 
-                    // 准备目标路径
-                    {
-                        string strLongPath = record.Url + "?" + record.RecordBody.Path;
 
-                        // 根据原始路径准备即将写入的路径
-                        // return:
-                        //      -1  出错
-                        //      0   用户放弃
-                        //      1   成功
-                        //      2   要跳过本条
-                        nRet = ImportUtil.PrepareOverwritePath(
-                            this,
-                            this.Servers,
-                            this.Channels,
-                            this.AppInfo,
-                            index,
-                            default_target_respath.FullPath,
-                            ref map,
-                            ref strLongPath,
-                            out strError);
-                        if (nRet == 0 || nRet == -1)
-                            goto ERROR1;
-                        if (nRet == 2)
-                            continue;
+                        stop.SetMessage($"正在导入文件 {fileName} ({i + 1}/{filenames.Count}) 中的数据 ...");
 
-                        ResPath respath = new ResPath(strLongPath);
-                        record.Url = respath.Url;
-                        record.RecordBody.Path = respath.Path;
-
-                        // 记载每个数据库的 URL
-                        string strDbUrl = GetDbUrl(strLongPath);
-                        if (target_dburls.IndexOf(strDbUrl) == -1)
+                        List<UploadRecord> records = new List<UploadRecord>();
+                        int nBatchSize = 0;
+                        for (int index = 0; ; index++)
                         {
-                            // 每个数据库要进行一次快速模式的准备操作
-                            if (bFastMode == true)
+                            // Application.DoEvents();	// 出让界面控制权
+
+                            if (stop.State != 0)
                             {
-                                nRet = ManageKeysIndex(strDbUrl,
-                                    "beginfastappend",
-                                    "正在对数据库 " + strDbUrl + " 进行快速导入模式的准备工作 ...",
-                                    out strError);
-                                if (nRet == -1)
+                                DialogResult result = (DialogResult)this.Invoke(new Func<DialogResult>(() =>
+                                {
+                                    return MessageBox.Show(this,
+                                    "确实要中断当前批处理操作?",
+                                    "导入数据",
+                                    MessageBoxButtons.YesNo,
+                                    MessageBoxIcon.Question,
+                                    MessageBoxDefaultButton.Button2);
+                                }));
+                                if (result == DialogResult.Yes)
+                                {
+                                    strError = "用户中断";
                                     goto ERROR1;
+                                }
+                                else
+                                {
+                                    stop.Continue();
+                                }
                             }
-                            target_dburls.Add(strDbUrl);
-                        }
-                    }
 
-                    bool bNeedPush = false;
-                    // 是否要把积累的记录推送出去进行写入?
-                    // 要进行以下检查：
-                    // 1) 当前记录和前一条记录之间，更换了服务器
-                    // 2) 累积的记录尺寸超过要求
-                    // 3) 当前记录是一条超大的记录 (这是因为要保持从文件中读出的顺序来写入(例如追加时候的号码增量顺序)，就必须在单条写入本条前，先写入积累的那些记录)
-                    if (records.Count > 0)
-                    {
-                        if (record.TooLarge() == true)
-                            bNeedPush = true;
-                        else if (nBatchSize + record.RecordBody.Xml.Length > CHUNK_SIZE)
-                            bNeedPush = true;
-                        else
-                        {
-                            if (LastUrl(records) != record.Url)
-                                bNeedPush = true;
-                        }
-                    }
-
-                    if (bNeedPush == true)
-                    {
-                        // 准备 Channel
-                        Debug.Assert(records.Count > 0, "");
-                        cur_channel = ImportUtil.GetChannel(this.Channels,
-                            stop,
-                            LastUrl(records),
-                            cur_channel);
-
-                        List<UploadRecord> save_records = new List<UploadRecord>();
-                        save_records.AddRange(records);
-
-                        if (importDataRecord)
-                        {
-                            while (records.Count > 0)
+                            if (import_util.FileType == ExportFileType.BackupFile)
                             {
-                                // 将 XML 记录成批写入数据库
+                                if (lSaveOffs != -1 && import_util.Stream.Position != lSaveOffs)
+                                {
+                                    // import_util.Stream.Seek(lSaveOffs, SeekOrigin.Begin);
+                                    StreamUtil.FastSeek(import_util.Stream, lSaveOffs);
+                                }
+                            }
+
+                            nRet = import_util.ReadOneRecord(out UploadRecord record,
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                            if (nRet == 1)
+                                break;
+
+                            current_count++;
+
+                            if (import_util.FileType == ExportFileType.BackupFile)
+                            {
+                                // 保存每次读取后的文件指针位置
+                                lSaveOffs = import_util.Stream.Position;
+                            }
+
+                            Debug.Assert(record != null, "");
+
+                            // 准备目标路径
+                            {
+                                string strLongPath = record.Url + "?" + record.RecordBody.Path;
+
+                                // 根据原始路径准备即将写入的路径
                                 // return:
                                 //      -1  出错
-                                //      >=0 本次已经写入的记录个数。本函数返回时 records 集合的元素数没有变化(但元素的Path和Timestamp会有变化)，如果必要调主可截取records集合中后面未处理的部分再次调用本函数
-                                nRet = ImportUtil.WriteRecords(
+                                //      0   用户放弃
+                                //      1   成功
+                                //      2   要跳过本条
+                                nRet = ImportUtil.PrepareOverwritePath(
                                     this,
+                                    this.Servers,
+                                    this.Channels,
+                                    this.AppInfo,
+                                    index,
+                                    default_target_respath.FullPath,
+                                    ref map,
+                                    ref strLongPath,
+                                    out strError);
+                                if (nRet == 0 || nRet == -1)
+                                    goto ERROR1;
+                                if (nRet == 2)
+                                    continue;
+
+                                ResPath respath = new ResPath(strLongPath);
+                                record.Url = respath.Url;
+                                record.RecordBody.Path = respath.Path;
+
+                                // 记载每个数据库的 URL
+                                string strDbUrl = GetDbUrl(strLongPath);
+                                if (target_dburls.IndexOf(strDbUrl) == -1)
+                                {
+                                    // 每个数据库要进行一次快速模式的准备操作
+                                    if (bFastMode == true)
+                                    {
+                                        nRet = ManageKeysIndex(strDbUrl,
+                                            "beginfastappend",
+                                            "正在对数据库 " + strDbUrl + " 进行快速导入模式的准备工作 ...",
+                                            out strError);
+                                        if (nRet == -1)
+                                            goto ERROR1;
+                                    }
+                                    target_dburls.Add(strDbUrl);
+                                }
+                            }
+
+                            bool bNeedPush = false;
+                            // 是否要把积累的记录推送出去进行写入?
+                            // 要进行以下检查：
+                            // 1) 当前记录和前一条记录之间，更换了服务器
+                            // 2) 累积的记录尺寸超过要求
+                            // 3) 当前记录是一条超大的记录 (这是因为要保持从文件中读出的顺序来写入(例如追加时候的号码增量顺序)，就必须在单条写入本条前，先写入积累的那些记录)
+                            if (records.Count > 0)
+                            {
+                                if (record.TooLarge() == true)
+                                    bNeedPush = true;
+                                else if (nBatchSize + record.RecordBody.Xml.Length > CHUNK_SIZE)
+                                    bNeedPush = true;
+                                else
+                                {
+                                    if (LastUrl(records) != record.Url)
+                                        bNeedPush = true;
+                                }
+                            }
+
+                            if (bNeedPush == true)
+                            {
+                                // 准备 Channel
+                                Debug.Assert(records.Count > 0, "");
+                                cur_channel = ImportUtil.GetChannel(this.Channels,
+                                    stop,
+                                    LastUrl(records),
+                                    cur_channel);
+
+                                List<UploadRecord> save_records = new List<UploadRecord>();
+                                save_records.AddRange(records);
+
+                                if (importDataRecord)
+                                {
+                                    while (records.Count > 0)
+                                    {
+                                        // 将 XML 记录成批写入数据库
+                                        // return:
+                                        //      -1  出错
+                                        //      >=0 本次已经写入的记录个数。本函数返回时 records 集合的元素数没有变化(但元素的Path和Timestamp会有变化)，如果必要调主可截取records集合中后面未处理的部分再次调用本函数
+                                        nRet = ImportUtil.WriteRecords(
+                                            this,
+                                            stop,
+                                            cur_channel,
+                                            bFastMode,
+                                            insertMissing,
+                                            records,
+                                            ref bDontPromptTimestampMismatchWhenOverwrite,
+                                            out strError);
+                                        if (nRet == -1)
+                                            goto ERROR1;
+                                        if (nRet == 0)
+                                        {
+                                            // TODO: 或可以改为单条写入
+                                            strError = "WriteRecords() error :" + strError;
+                                            goto ERROR1;
+                                        }
+                                        Debug.Assert(nRet <= records.Count, "");
+                                        records.RemoveRange(0, nRet);
+                                        lTotalCount += nRet;
+                                    }
+                                }
+                                else
+                                {
+                                    lTotalCount += records.Count;
+                                    records.Clear();
+                                }
+
+                                if (importObject)
+                                {
+                                    // 上载对象
+                                    // return:
+                                    //      -1  出错
+                                    //      0   成功
+                                    nRet = import_util.UploadObjects(
+                                        stop,
+                                        cur_channel,
+                                        save_records,
+                                        true,
+                                        ref bDontPromptTimestampMismatchWhenOverwrite,
+                                        out strError);
+                                    if (nRet == -1)
+                                        goto ERROR1;
+                                }
+
+                                nBatchSize = 0;
+                                stop.SetProgressValue(import_util.Stream.Position + processed_length);
+
+                                stop.SetMessage($"{fileName} ({i + 1}/{filenames.Count}) 已经写入记录 "
+                                    + lTotalCount.ToString() + " 条。"
+                                    + "剩余时间 " + ProgressEstimate.Format(estimate.Estimate(import_util.Stream.Position + processed_length)) + " 已经过时间 " + ProgressEstimate.Format(estimate.delta_passed));
+                            }
+
+                            // 如果 记录的 XML 尺寸太大不便于成批上载，需要在单独直接上载
+                            if (record.TooLarge() == true)
+                            {
+                                // 准备 Channel
+                                // ResPath respath = new ResPath(record.RecordBody.Path);
+                                cur_channel = ImportUtil.GetChannel(this.Channels,
+                                    stop,
+                                    record.Url,
+                                    cur_channel);
+
+                                if (importDataRecord)
+                                {
+                                    // 写入一条 XML 记录
+                                    // return:
+                                    //      -1  出错
+                                    //      0   邀请中断整个处理
+                                    //      1   成功
+                                    //      2   跳过本条，继续处理后面的
+                                    nRet = ImportUtil.WriteOneXmlRecord(
+                                        this,
+                                        stop,
+                                        cur_channel,
+                                        record,
+                                        ref bDontPromptTimestampMismatchWhenOverwrite,
+                                        out strError);
+                                    if (nRet == -1)
+                                        goto ERROR1;
+                                    if (nRet == 0)
+                                        goto ERROR1;
+                                }
+
+                                if (importObject)
+                                {
+                                    List<UploadRecord> temp = new List<UploadRecord>();
+                                    temp.Add(record);
+                                    // 上载对象
+                                    // return:
+                                    //      -1  出错
+                                    //      0   成功
+                                    nRet = import_util.UploadObjects(
+                                        stop,
+                                        cur_channel,
+                                        temp,
+                                        true,
+                                        ref bDontPromptTimestampMismatchWhenOverwrite,
+                                        out strError);
+                                    if (nRet == -1)
+                                        goto ERROR1;
+                                }
+
+                                lTotalCount += 1;
+                                continue;
+                            }
+
+                            records.Add(record);
+                            if (record.RecordBody != null && record.RecordBody.Xml != null)
+                                nBatchSize += record.RecordBody.Xml.Length;
+                        }
+
+                        // 最后提交一次
+                        if (records.Count > 0)
+                        {
+                            // 准备 Channel
+                            Debug.Assert(records.Count > 0, "");
+                            cur_channel = ImportUtil.GetChannel(this.Channels,
+                                stop,
+                                LastUrl(records),
+                                cur_channel);
+
+                            List<UploadRecord> save_records = new List<UploadRecord>();
+                            save_records.AddRange(records);
+
+                            if (importDataRecord)
+                            {
+                                while (records.Count > 0)
+                                {
+                                    // 将 XML 记录成批写入数据库
+                                    // return:
+                                    //      -1  出错
+                                    //      >=0 本次已经写入的记录个数。本函数返回时 records 集合的元素数没有变化(但元素的Path和Timestamp会有变化)，如果必要调主可截取records集合中后面未处理的部分再次调用本函数
+                                    nRet = ImportUtil.WriteRecords(
+                                        this,
+                                        stop,
+                                        cur_channel,
+                                        bFastMode,
+                                        insertMissing,
+                                        records,
+                                        ref bDontPromptTimestampMismatchWhenOverwrite,
+                                        out strError);
+                                    if (nRet == -1)
+                                        goto ERROR1;
+                                    if (nRet == 0)
+                                    {
+                                        strError = "WriteRecords() error :" + strError;
+                                        goto ERROR1;
+                                    }
+                                    Debug.Assert(nRet <= records.Count, "");
+                                    records.RemoveRange(0, nRet);
+                                    lTotalCount += nRet;
+                                }
+                            }
+                            else
+                            {
+                                lTotalCount += records.Count;
+                                records.Clear();
+                            }
+
+                            if (importObject)
+                            {
+                                // 上载对象
+                                // return:
+                                //      -1  出错
+                                //      0   成功
+                                nRet = import_util.UploadObjects(
                                     stop,
                                     cur_channel,
-                                    bFastMode,
-                                    insertMissing,
-                                    records,
+                                    save_records,
+                                    true,
                                     ref bDontPromptTimestampMismatchWhenOverwrite,
                                     out strError);
                                 if (nRet == -1)
                                     goto ERROR1;
-                                if (nRet == 0)
-                                {
-                                    // TODO: 或可以改为单条写入
-                                    strError = "WriteRecords() error :" + strError;
-                                    goto ERROR1;
-                                }
-                                Debug.Assert(nRet <= records.Count, "");
-                                records.RemoveRange(0, nRet);
-                                lTotalCount += nRet;
                             }
-                        }
-                        else
-                        {
-                            lTotalCount += records.Count;
+
+                            nBatchSize = 0;
+                            stop.SetProgressValue(import_util.Stream.Position + processed_length);
+
+                            stop.SetMessage($"{fileName} ({i + 1}/{filenames.Count}) 已经写入记录 "
+                                + lTotalCount.ToString() + " 条。"
+                                + "剩余时间 " + ProgressEstimate.Format(estimate.Estimate(import_util.Stream.Position + processed_length)) + " 已经过时间 " + ProgressEstimate.Format(estimate.delta_passed));
+
                             records.Clear();
+                            nBatchSize = 0;
                         }
 
-                        if (importObject)
-                        {
-                            // 上载对象
-                            // return:
-                            //      -1  出错
-                            //      0   成功
-                            nRet = import_util.UploadObjects(
-                                stop,
-                                cur_channel,
-                                save_records,
-                                true,
-                                ref bDontPromptTimestampMismatchWhenOverwrite,
-                                out strError);
-                            if (nRet == -1)
-                                goto ERROR1;
-                        }
+                        processed_length += import_util.Stream.Length;
+                        times.Add($"{fileName}: 记录数 {current_count}");
 
-                        nBatchSize = 0;
-                        stop.SetProgressValue(import_util.Stream.Position);
-
-                        stop.SetMessage("已经写入记录 " + lTotalCount.ToString() + " 条。"
-+ "剩余时间 " + ProgressEstimate.Format(estimate.Estimate(import_util.Stream.Position)) + " 已经过时间 " + ProgressEstimate.Format(estimate.delta_passed));
-
-                    }
-
-                    // 如果 记录的 XML 尺寸太大不便于成批上载，需要在单独直接上载
-                    if (record.TooLarge() == true)
+                    }// close import util
+                    catch (Exception ex)
                     {
-                        // 准备 Channel
-                        // ResPath respath = new ResPath(record.RecordBody.Path);
-                        cur_channel = ImportUtil.GetChannel(this.Channels,
-                            stop,
-                            record.Url,
-                            cur_channel);
-
-                        if (importDataRecord)
-                        {
-                            // 写入一条 XML 记录
-                            // return:
-                            //      -1  出错
-                            //      0   邀请中断整个处理
-                            //      1   成功
-                            //      2   跳过本条，继续处理后面的
-                            nRet = ImportUtil.WriteOneXmlRecord(
-                                this,
-                                stop,
-                                cur_channel,
-                                record,
-                                ref bDontPromptTimestampMismatchWhenOverwrite,
-                                out strError);
-                            if (nRet == -1)
-                                goto ERROR1;
-                            if (nRet == 0)
-                                goto ERROR1;
-                        }
-
-                        if (importObject)
-                        {
-                            List<UploadRecord> temp = new List<UploadRecord>();
-                            temp.Add(record);
-                            // 上载对象
-                            // return:
-                            //      -1  出错
-                            //      0   成功
-                            nRet = import_util.UploadObjects(
-                                stop,
-                                cur_channel,
-                                temp,
-                                true,
-                                ref bDontPromptTimestampMismatchWhenOverwrite,
-                                out strError);
-                            if (nRet == -1)
-                                goto ERROR1;
-                        }
-
-                        lTotalCount += 1;
-                        continue;
+                        strError = $"导入数据过程出现异常: {ExceptionUtil.GetExceptionText(ex)}";
+                        goto ERROR1;
                     }
+                    finally
+                    {
 
-                    records.Add(record);
-                    if (record.RecordBody != null && record.RecordBody.Xml != null)
-                        nBatchSize += record.RecordBody.Xml.Length;
-                }
 
-                // 最后提交一次
-                if (records.Count > 0)
+#if NO
+                if (stopManager != null)
                 {
-                    // 准备 Channel
-                    Debug.Assert(records.Count > 0, "");
-                    cur_channel = ImportUtil.GetChannel(this.Channels,
-                        stop,
-                        LastUrl(records),
-                        cur_channel);
+                    stop.EndLoop();
+                    stop.OnStop -= new StopEventHandler(this.DoStop);
+                    stop.Initial("");
 
-                    List<UploadRecord> save_records = new List<UploadRecord>();
-                    save_records.AddRange(records);
-
-                    if (importDataRecord)
-                    {
-                        while (records.Count > 0)
-                        {
-                            // 将 XML 记录成批写入数据库
-                            // return:
-                            //      -1  出错
-                            //      >=0 本次已经写入的记录个数。本函数返回时 records 集合的元素数没有变化(但元素的Path和Timestamp会有变化)，如果必要调主可截取records集合中后面未处理的部分再次调用本函数
-                            nRet = ImportUtil.WriteRecords(
-                                this,
-                                stop,
-                                cur_channel,
-                                bFastMode,
-                                insertMissing,
-                                records,
-                                ref bDontPromptTimestampMismatchWhenOverwrite,
-                                out strError);
-                            if (nRet == -1)
-                                goto ERROR1;
-                            if (nRet == 0)
-                            {
-                                strError = "WriteRecords() error :" + strError;
-                                goto ERROR1;
-                            }
-                            Debug.Assert(nRet <= records.Count, "");
-                            records.RemoveRange(0, nRet);
-                            lTotalCount += nRet;
-                        }
-                    }
-                    else
-                    {
-                        lTotalCount += records.Count;
-                        records.Clear();
-                    }
-
-                    if (importObject)
-                    {
-                        // 上载对象
-                        // return:
-                        //      -1  出错
-                        //      0   成功
-                        nRet = import_util.UploadObjects(
-                            stop,
-                            cur_channel,
-                            save_records,
-                            true,
-                            ref bDontPromptTimestampMismatchWhenOverwrite,
-                            out strError);
-                        if (nRet == -1)
-                            goto ERROR1;
-                    }
-
-                    nBatchSize = 0;
-                    stop.SetProgressValue(import_util.Stream.Position);
-
-                    stop.SetMessage("已经写入记录 " + lTotalCount.ToString() + " 条。"
-+ "剩余时间 " + ProgressEstimate.Format(estimate.Estimate(import_util.Stream.Position)) + " 已经过时间 " + ProgressEstimate.Format(estimate.delta_passed));
-
-                    records.Clear();
-                    nBatchSize = 0;
+                    stop.Unregister();	// 和容器脱离关联
                 }
-            }// close import util
-            catch(Exception ex)
-            {
-                strError = $"导入数据过程出现异常: {ExceptionUtil.GetExceptionText(ex)}";
-                goto ERROR1;
+#endif
+
+                        import_util.End();
+                    }
+
+                }
             }
             finally
             {
                 if (bFastMode == true)
                 {
-                    EndFastAppend(stop, target_dburls);
+                    EndFastAppend(null, target_dburls);
 #if NO
                     foreach (string url in target_dburls)
                     {
@@ -1667,38 +1776,40 @@ namespace DigitalPlatform.rms.Client
                 }
 
                 EndStop(stop);
-#if NO
-                if (stopManager != null)
-                {
-                    stop.EndLoop();
-                    stop.OnStop -= new StopEventHandler(this.DoStop);
-                    stop.Initial("");
-
-                    stop.Unregister();	// 和容器脱离关联
-                }
-#endif
                 cur_channel.Close();
                 cur_channel = null;
-
-                import_util.End();
             }
 
-            strTimeMessage = "总共耗费时间: " + estimate.GetTotalTime().ToString();
             // TODO: 对话框可能超高
-            MessageBoxShow("文件 " + fileName + " 内的数据已经成功导入下列数据库:\r\n\r\n" + StringUtil.MakePathList(target_dburls, "\r\n") + "\r\n\r\n共导入记录 " + lTotalCount.ToString() + " 条。\r\n\r\n" + strTimeMessage);
-            return 0;
-            ERROR0:
-            // TODO: 内容太高时候要改进对话框显示方式
-            MessageBoxShow(strError);
-            return -1;
-            ERROR1:
-            MessageBoxShow(strError);
-            // 使用了 lTotalCount 和 estimate 以后的报错
-            if (lTotalCount > 0)
+            this.TryInvoke(() =>
             {
-                strTimeMessage = "总共耗费时间: " + estimate.GetTotalTime().ToString();
-                MessageBoxShow("文件 " + fileName + " 内的部分数据已经成功导入下列数据库:\r\n\r\n" + StringUtil.MakePathList(target_dburls, "\r\n") + "\r\n\r\n共导入记录 " + lTotalCount.ToString() + " 条。\r\n\r\n" + strTimeMessage);
-            }
+                string strTimeMessage = "总共耗费时间: " + estimate.GetTotalTime().ToString();
+                MessageDlg.Show(this,
+                    "文件 " + StringUtil.MakePathList(filenames) + " 内的数据已经成功导入下列数据库:\r\n\r\n" + StringUtil.MakePathList(target_dburls, "\r\n") + "\r\n\r\n共导入记录 " + lTotalCount.ToString() + " 条。\r\n\r\n" + strTimeMessage,
+                    "导入成功");
+            });
+            return 0;
+        ERROR0:
+            this.TryInvoke(() =>
+            {
+                // TODO: 内容太高时候要改进对话框显示方式
+                MessageDlg.Show(this, strError, "错误");
+            });
+            return -1;
+        ERROR1:
+            this.TryInvoke(() =>
+            {
+                MessageDlg.Show(this, strError, "错误");
+                // 使用了 lTotalCount 和 estimate 以后的报错
+                if (lTotalCount > 0)
+                {
+                    string strTimeMessage = "耗费时间: " + estimate.GetTotalTime().ToString();
+                    MessageDlg.Show(this,
+                        "文件 " + StringUtil.MakePathList(filenames) + " 内的部分数据已经成功导入下列数据库:\r\n\r\n" + StringUtil.MakePathList(target_dburls, "\r\n") + "\r\n\r\n共导入记录 " + lTotalCount.ToString() + " 条。\r\n\r\n" + strTimeMessage,
+                        "信息");
+                }
+            });
+
             return -1;
         }
 
@@ -1706,60 +1817,102 @@ namespace DigitalPlatform.rms.Client
         void EndFastAppend(Stop stop,
     List<string> target_dburls)
         {
-            int nRet = 0;
-            foreach (string url in target_dburls)
+            var bar = this.TryGet(() => {
+                var result = MessageBar.Create(this, "快速导入收尾");
+                result.Font = this.Font;
+                return result;
+            });
+            try
             {
-                if (stop?.State != 0)
-                    throw new Exception("快速导入收尾阶段被强行中断，恢复没有完成");
-
-                if (stop != null)
-                    stop.SetMessage("正在对数据库 " + url + " 进行快速导入模式的最后收尾工作，请耐心等待 ...");
-
-                //LibraryChannelManager.Log?.Debug($"开始对数据库{url}进行快速导入模式的最后收尾工作");
-                try
+                int nRet = 0;
+                foreach (string url in target_dburls)
                 {
-                    nRet = ManageKeysIndex(url,
-                        "start_endfastappend",
-                        "正在对数据库 " + url + " 启动快速导入模式的收尾工作，请耐心等待 ...",
-    out string strQuickModeError);
-                    //if (nRet == -1)
-                    //    MessageBoxShow(strQuickModeError);
-                    if (nRet == -1)
-                        throw new Exception(strQuickModeError);
-                    if (nRet == 1)
-                    {
-                        while (true)
-                        {
-                            if (stop?.State != 0)
-                                throw new Exception("快速导入收尾阶段被强行中断，恢复没有完成");
+                    if (stop != null
+                        && stop.State != 0)
+                        throw new Exception("快速导入收尾阶段被强行中断，恢复没有完成");
 
-                            //                  detect_endfastappend 探寻任务的状态。返回 0 表示任务尚未结束; 1 表示任务已经结束
-                            nRet = ManageKeysIndex(
-        url,
-        "detect_endfastappend",
-        "正在对数据库 " + url + " 进行快速导入模式的收尾工作，请耐心等待 ...",
-        out strQuickModeError);
-                            if (nRet == -1)
-                                throw new Exception(strQuickModeError);
-                            if (nRet == 1)
-                                break;
+                    if (stop != null)
+                        stop.SetMessage("正在对数据库 " + url + " 进行快速导入模式的最后收尾工作，请耐心等待 ...");
+
+                    this.TryInvoke(() =>
+                    {
+                        bar.SetMessageText($"正在对数据库 {url} 进行收尾工作，请耐心等待 ...");
+                    });
+
+                    //LibraryChannelManager.Log?.Debug($"开始对数据库{url}进行快速导入模式的最后收尾工作");
+                    try
+                    {
+                        nRet = ManageKeysIndex(url,
+                            "start_endfastappend",
+                            "正在对数据库 " + url + " 启动快速导入模式的收尾工作，请耐心等待 ...",
+        out string strQuickModeError);
+                        //if (nRet == -1)
+                        //    MessageBoxShow(strQuickModeError);
+                        if (nRet == -1)
+                            throw new Exception(strQuickModeError);
+                        else if (nRet == 1)
+                        {
+                            while (true)
+                            {
+                                if (stop != null
+                                    && stop.State != 0)
+                                    throw new Exception("快速导入收尾阶段被强行中断，恢复没有完成");
+
+                                //                  detect_endfastappend 探寻任务的状态。返回 0 表示任务尚未结束; 1 表示任务已经结束
+                                nRet = ManageKeysIndex(
+            url,
+            "detect_endfastappend",
+            "正在对数据库 " + url + " 进行快速导入模式的收尾工作，请耐心等待 ...",
+            out strQuickModeError);
+                                if (nRet == -1)
+                                    throw new Exception(strQuickModeError);
+                                if (nRet == 1)
+                                    break;
+                            }
+                        }
+                        else if (nRet == 2)
+                        {
+                            //      2   本次已经减少计数 1，但依然不够，还剩下一定的计数当重新请求直到计数为零才会自动启动“收尾快速导入”任务
+                            throw new Exception(strQuickModeError);
+                            // TODO: 也可以尝试再次调用 ManageKeysIndex(url, "start_endfastappend",
                         }
                     }
+                    catch (Exception ex)
+                    {
+                        //LibraryChannelManager.Log?.Debug($"对数据库{url}进行快速导入模式的最后收尾工作阶段出现异常: {ExceptionUtil.GetExceptionText(ex)}\r\n(其后的 URL 没有被收尾)全部数据库 URL:{StringUtil.MakePathList(target_dburls, "; ")}");
+                        // throw new Exception($"对数据库 {url} 进行收尾时候出现异常。\r\n(其后的 URL 没有被收尾)全部数据库 URL:{StringUtil.MakePathList(target_dburls, "; ")}", ex);
+                        MessageBoxShow($"对数据库 {url} 进行收尾时候出现异常。\r\n(其后的 URL 没有被收尾)全部数据库 URL:{StringUtil.MakePathList(target_dburls, "; ")}。\r\n异常信息{ExceptionUtil.GetExceptionText(ex)}");
+                    }
+                    finally
+                    {
+                        //LibraryChannelManager.Log?.Debug($"结束对数据库{url}进行快速导入模式的最后收尾工作");
+                    }
                 }
-                catch (Exception ex)
-                {
-                    //LibraryChannelManager.Log?.Debug($"对数据库{url}进行快速导入模式的最后收尾工作阶段出现异常: {ExceptionUtil.GetExceptionText(ex)}\r\n(其后的 URL 没有被收尾)全部数据库 URL:{StringUtil.MakePathList(target_dburls, "; ")}");
-                    // throw new Exception($"对数据库 {url} 进行收尾时候出现异常。\r\n(其后的 URL 没有被收尾)全部数据库 URL:{StringUtil.MakePathList(target_dburls, "; ")}", ex);
-                    MessageBoxShow($"对数据库 {url} 进行收尾时候出现异常。\r\n(其后的 URL 没有被收尾)全部数据库 URL:{StringUtil.MakePathList(target_dburls, "; ")}。\r\n异常信息{ExceptionUtil.GetExceptionText(ex)}");
-                }
-                finally
-                {
-                    //LibraryChannelManager.Log?.Debug($"结束对数据库{url}进行快速导入模式的最后收尾工作");
-                }
+                if (stop != null)
+                    stop.SetMessage("");
             }
-            if (stop != null)
-                stop.SetMessage("");
+            finally
+            {
+                this.TryInvoke(() => {
+                    bar.Close();
+                });
+            }
         }
+
+        static long GetTotalLength(List<string> filenames)
+        {
+            long length = 0;
+            foreach (var filename in filenames)
+            {
+                if (File.Exists(filename) == false)
+                    continue;
+                FileInfo fi = new FileInfo(filename);
+                length += fi.Length;
+            }
+
+            return length;
+        }
+
 
         public void MessageBoxShow(string strText)
         {
@@ -1851,7 +2004,7 @@ namespace DigitalPlatform.rms.Client
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2025,7 +2178,7 @@ out strError);
                                 strStyle = "id,xml,timestamp,metadata";
 
                             nRedoGetCount = 0;
-                            REDO_GET:
+                        REDO_GET:
                             Record[] searchresults = null;
                             lRet = cur_channel.DoGetSearchResult(
                                 "default",
@@ -2175,7 +2328,7 @@ out strError);
             }
             MessageBox.Show(this, "数据库 '" + StringUtil.MakePathList(paths) + "' 内共有记录 " + lTotalCount.ToString() + " 条，本次导出 " + lExportCount.ToString() + " 条。" + strTimeMessage);
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             if (lExportCount > 0)
                 MessageBox.Show(this, "数据库内共有记录 " + lTotalCount.ToString() + " 条，本次导出 " + lExportCount.ToString() + " 条");
@@ -2790,7 +2943,7 @@ out strError);
 
                 item.Target += ":" + ((TreeNode)aNode[2]).Text;
 
-                END1:
+            END1:
                 return aText;
             }
 
@@ -3350,7 +3503,7 @@ out strError);
 
 
 
-                CONTINUE:
+            CONTINUE:
 
                 // 2007/4/5 改造 加上了 GetXmlStringSimple()
                 strXml += "<word>"

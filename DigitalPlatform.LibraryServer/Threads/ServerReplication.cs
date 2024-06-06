@@ -386,6 +386,8 @@ namespace DigitalPlatform.LibraryServer
             this.AppendResultText("循环结束\r\n");
 
             this.App.WriteErrorLog("日志恢复 任务结束。");
+            if (this.App.vdbs == null)
+                this.App.WriteErrorLog("*** 注意 app.vdbs 为 null，系统部分功能处于瘫痪状态，请及时解决此问题");
 
             // 保存断点文件
             SaveBreakPoint(start, param);
@@ -393,12 +395,16 @@ namespace DigitalPlatform.LibraryServer
             return;
         ERROR1:
             this.AppendResultText(strError + "\r\n任务因出错而中断。\r\n");
+            if (this.App.vdbs == null)
+                this.App.WriteErrorLog("*** 注意 app.vdbs 为 null，系统部分功能处于瘫痪状态，请及时解决此问题");
             return;
         ERROR2:
             // 保存断点文件
             SaveBreakPoint(start, param);
             this.StartInfo = BuildStartInfo(null, param);  // 迫使后面循环处理的时候，从断点位置继续
             this.AppendResultText(strError + "\r\n任务因出错而中断。\r\n");
+            if (this.App.vdbs == null)
+                this.App.WriteErrorLog("*** 注意 app.vdbs 为 null，系统部分功能处于瘫痪状态，请及时解决此问题");
             return;
         }
 

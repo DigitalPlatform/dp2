@@ -48,6 +48,12 @@ namespace DigitalPlatform.LibraryServer
         // 一次操作循环
         public override void Worker()
         {
+            // 2024/5/13
+            if (this.App.vdbs == null)
+            {
+                this.AppendErrorText("启动失败: 当前系统 app.vdbs 为 null，请先解决此问题，再重新启动日志恢复任务\r\n");
+            }
+
             // 把系统挂起
             // this.App.HangupReason = HangupReason.LogRecover;
             this.App.AddHangup("LogRecover");
@@ -202,7 +208,8 @@ namespace DigitalPlatform.LibraryServer
                 this.AppendResultText("循环结束\r\n");
 
                 this.App.WriteErrorLog("日志恢复 任务结束。");
-
+                if (this.App.vdbs == null)
+                    this.App.WriteErrorLog("*** 注意 app.vdbs 为 null，系统部分功能处于瘫痪状态，请及时解决此问题");
                 // this.ErrorInfo = StringUtil.MakePathList(_errors, "\r\n");
                 // TODO: 可以考虑从 result 文本文件中搜集所有错误信息行，放入 ErrorInfo 中，不过得有个极限行数限制
                 return;
@@ -211,6 +218,8 @@ namespace DigitalPlatform.LibraryServer
                 // 2019/4/25
                 this.AppendResultText($"{strError}\r\n");
                 this.App.WriteErrorLog($"*** 日志恢复任务出错: {strError}");
+                if (this.App.vdbs == null)
+                    this.App.WriteErrorLog("*** 注意 app.vdbs 为 null，系统部分功能处于瘫痪状态，请及时解决此问题");
 
                 this.ErrorInfo = strError;
                 return;

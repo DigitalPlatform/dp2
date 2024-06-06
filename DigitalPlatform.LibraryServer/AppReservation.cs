@@ -2619,6 +2619,7 @@ out strError);
             REDO_DELETE:
                 lRet = channel.DoDeleteRes(strOutputPath,
                     timestamp,
+                    "ignorechecktimestamp", //2024/5/16
                     out output_timestamp,
                     out strError);
                 if (lRet == -1)

@@ -2124,9 +2124,23 @@ MessageBoxDefaultButton.Button2);
                         // bReserveFieldsCleared = true;
                     }
 
-                    // 调试
-                    // MessageBoxShow("1 this.m_strSetAction='"+this.m_strSetAction+"'");
-
+                    long lRet = SetReaderInfo(channel,
+    looping.Progress,
+    strAction,
+    strTargetRecPath,
+    strNewXml,
+    out string strExistingXml,
+    out string strSavedXml,
+    out string strSavedPath,
+    out byte[] baNewTimestamp,
+    out ErrorCodeValue kernel_errorcode,
+    out strError);
+                    if (lRet == -1)
+                        goto ERROR1;
+#if REMOVED
+                // 调试
+                // MessageBoxShow("1 this.m_strSetAction='"+this.m_strSetAction+"'");
+                REDO_SAVE:
                     long lRet = channel.SetReaderInfo(
                         looping.Progress,
                         strAction,  // this.m_strSetAction,
@@ -2144,6 +2158,26 @@ MessageBoxDefaultButton.Button2);
                     if (lRet == -1)
                     {
                         // Debug.Assert(false, "");
+                        if (channel.ErrorCode == ErrorCode.NotFound
+    && strAction == "change")
+                        {
+                            // 在这里 MessageBox 询问是否改为新增读者记录。
+                            DialogResult result = this.TryGet(() =>
+                            {
+                                return MessageBox.Show(this,
+                strError + "\r\n\r\n是否改为使用新增方式保存当前记录? ",
+                "ReaderInfoForm",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button2);
+                            });
+                            if (result == DialogResult.Yes)
+                            {
+                                strAction = "new";
+                                goto REDO_SAVE;
+                            }
+                        }
+
 
                         if (kernel_errorcode == ErrorCodeValue.TimestampMismatch)
                         {
@@ -2182,7 +2216,7 @@ MessageBoxDefaultButton.Button2);
 
                         goto ERROR1;
                     }
-
+#endif
                     /*
                     this.Timestamp = baNewTimestamp;
                     this.OldRecord = strSavedXml;
@@ -2741,7 +2775,8 @@ TaskScheduler.Default);
 
             bool bIdChanged = false;    // 目标路径是否发生了变化
 
-            if (saveto_dlg.RecID == "?")
+            if (saveto_dlg.RecID == "?"
+                || string.IsNullOrEmpty(this.readerEditControl1.RecPath))
                 this.m_strSetAction = "new";
             else
             {
@@ -2787,12 +2822,22 @@ TaskScheduler.Default);
                     bReserveFieldsCleared = true;
                 }
 
+                long lRet = SetReaderInfo(channel,
+looping.Progress,
+this.m_strSetAction,
+saveto_dlg.RecPath,
+strNewXml,
+out string strExistingXml,
+out string strSavedXml,
+out string strSavedPath,
+out byte[] baNewTimestamp,
+out ErrorCodeValue kernel_errorcode,
+out strError);
+                if (lRet == -1)
+                    goto ERROR1;
+#if REMOVED
+            REDO_SAVE:
                 ErrorCodeValue kernel_errorcode;
-
-                byte[] baNewTimestamp = null;
-                string strExistingXml = "";
-                string strSavedXml = "";
-                string strSavedPath = "";
 
                 // 调试
                 // MessageBox.Show(this, "2 this.m_strSetAction='" + this.m_strSetAction + "'");
@@ -2804,15 +2849,34 @@ TaskScheduler.Default);
                     strNewXml,
                     this.m_strSetAction != "new" && bIdChanged == false ? this.readerEditControl1.OldRecord : null,
                     this.m_strSetAction != "new" && bIdChanged == false ? this.readerEditControl1.Timestamp : null,
-                    out strExistingXml,
-                    out strSavedXml,
-                    out strSavedPath,
-                    out baNewTimestamp,
+                    out string strExistingXml,
+                    out string strSavedXml,
+                    out string strSavedPath,
+                    out byte[] baNewTimestamp,
                     out kernel_errorcode,
                     out strError);
                 if (lRet == -1)
                 {
                     // Debug.Assert(false, "");
+                    if (channel.ErrorCode == ErrorCode.NotFound
+                        && this.m_strSetAction == "change")
+                    {
+                        // 在这里 MessageBox 询问是否改为新增读者记录。
+                        DialogResult result = this.TryGet(() =>
+                        {
+                            return MessageBox.Show(this,
+            strError + "\r\n\r\n是否改为使用新增方式保存当前记录? ",
+            "ReaderInfoForm",
+            MessageBoxButtons.YesNo,
+            MessageBoxIcon.Question,
+            MessageBoxDefaultButton.Button2);
+                        });
+                        if (result == DialogResult.Yes)
+                        {
+                            this.m_strSetAction = "new";
+                            goto REDO_SAVE;
+                        }
+                    }
 
                     if (kernel_errorcode == ErrorCodeValue.TimestampMismatch)
                     {
@@ -2850,6 +2914,8 @@ TaskScheduler.Default);
 
                     goto ERROR1;
                 }
+#endif
+
 
                 if (lRet == 1)
                 {
@@ -2993,6 +3059,114 @@ TaskScheduler.Default);
             this.MessageBoxShow(strError);
         }
 
+        // return:
+        //      -1  出错
+        //      0   成功
+        long SetReaderInfo(LibraryChannel channel,
+            Stop stop,
+            string strAction,
+            string strTargetRecPath,
+            string strNewXml,
+            out string strExistingXml,
+            out string strSavedXml,
+            out string strSavedPath,
+            out byte[] baNewTimestamp,
+            out ErrorCodeValue kernel_errorcode,
+            out string strError)
+        {
+        REDO_SAVE:
+            long lRet = channel.SetReaderInfo(
+                stop,
+                strAction,  // this.m_strSetAction,
+                strTargetRecPath,
+                strNewXml,
+                // 2007/11/5 changed
+                strAction != "new" ? this.readerEditControl1.OldRecord : null,
+                strAction != "new" ? this.readerEditControl1.Timestamp : null,
+                out strExistingXml,
+                out strSavedXml,
+                out strSavedPath,
+                out baNewTimestamp,
+                out kernel_errorcode,
+                out strError);
+            if (lRet == -1)
+            {
+                // Debug.Assert(false, "");
+                if (channel.ErrorCode == ErrorCode.NotFound
+&& strAction == "change")
+                {
+                    string error = strError;
+                    // 在这里 MessageBox 询问是否改为新增读者记录。
+                    DialogResult result = this.TryGet(() =>
+                    {
+                        return MessageBox.Show(this,
+        error + "\r\n\r\n是否改为使用新增方式保存当前记录? ",
+        "ReaderInfoForm",
+        MessageBoxButtons.YesNo,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button2);
+                    });
+                    if (result == DialogResult.Yes)
+                    {
+                        strAction = "new";
+                        goto REDO_SAVE;
+                    }
+                }
+
+                if (kernel_errorcode == ErrorCodeValue.TimestampMismatch)
+                {
+                    string additional_error = "";
+                    var xml = strExistingXml;
+                    var timestamp = baNewTimestamp;
+                    // ret:
+                    //      -1  出错(当前函数以 -1 返回)
+                    //      0   (点了取消按钮)当前函数以 lRet 返回
+                    //      1   (点了确定按钮)自动重试保存记录
+                    var ret = this.TryGet(() =>
+                    {
+                        CompareReaderForm dlg = new CompareReaderForm();
+                        dlg.Initial(
+                            this.readerEditControl1.RecPath,
+                            xml,
+                            timestamp,
+                            strNewXml,
+                            this.readerEditControl1.Timestamp,
+                            "数据库中的记录在编辑期间发生了改变。请仔细核对，并重新修改窗口中的未保存记录，按确定按钮后可重试保存。");
+
+                        dlg.StartPosition = FormStartPosition.CenterScreen;
+                        dlg.ShowDialog(this);
+                        if (dlg.DialogResult == DialogResult.OK)
+                        {
+                            int nRet = this.readerEditControl1.SetData(dlg.UnsavedXml,
+                            dlg.RecPath,
+                            dlg.UnsavedTimestamp,
+                            out string error);
+                            if (nRet == -1)
+                            {
+                                this.MessageBoxShow(error);
+                                additional_error = error;
+                                return -1;  // 实际上这里是 SetData() 出错了
+                            }
+                            // this.MessageBoxShow("请注意重新保存记录");
+                            return 1;
+                        }
+                        return 0;
+                    });
+                    if (ret == -1)
+                    {
+                        if (string.IsNullOrEmpty(additional_error) == false)
+                            strError += "\r\n" + additional_error;
+                        return -1;
+                    }
+                    if (ret == 1)
+                        goto REDO_SAVE;
+                }
+
+                return lRet;
+            }
+            return lRet;
+        }
+
 #if REMOVED
         // 删除记录
         private void toolStripButton_delete_Click(object sender, EventArgs e)
@@ -3034,6 +3208,7 @@ TaskScheduler.Default);
                 strActionName = "强制删除";
             }
 
+            /*
             string strRecPath = null;
             string strText = $"确实要{strActionName}证条码号为 '" + this.readerEditControl1.Barcode + "' 的读者记录 ? ";
 
@@ -3044,6 +3219,11 @@ TaskScheduler.Default);
                 strRecPath = this.readerEditControl1.RecPath;
                 strText = $"确实要{strActionName}证条码号为 '" + this.readerEditControl1.Barcode + "' 并且记录路径为 '" + strRecPath + "' 的读者记录 ? ";
             }
+            */
+
+            // 2024/5/17
+            string strRecPath = this.readerEditControl1.RecPath;
+            string strText = $"确实要{strActionName}记录路径为 '" + strRecPath + "' 的读者记录 ? ";
 
             if (bForceDelete)
                 strText += "\r\n\r\n警告：当读者有在借信息的情况下，强制删除功能在删除读者记录时 *** 不会修改 *** 相关在借册记录，会造成借阅信息关联错误。正常情况下应该先将该读者的在借册全部执行还书，然后再删除读者记录。请慎重操作";
@@ -4952,6 +5132,8 @@ TaskScheduler.Default);
     looping.Progress,
     this.readerEditControl1.RecPath,
     ref strTargetRecPath,
+    "",
+    "",
     out target_timestamp,
     out strError);
                 if (lRet == -1)
@@ -7926,14 +8108,19 @@ MessageBoxDefaultButton.Button1);
         }
 
         // 根据 source 定位并获得 -01 字段中的记录路径
+        // parameters:
+        //      style   如果包含 dp2，表示希望把 path 中的路径变换为 dp2 的形态返回。如果不包含，则不做变换
         public static int GetDt1000G01Path(
     MarcRecord record,
     string source,
+    string style,
     out string path,
     out string timestamp)
         {
             path = "";
             timestamp = "";
+
+            var dp2 = StringUtil.IsInList("dp2", style);
 
             var fields = record.select("field[@name='-01']");
             foreach (MarcField field in fields)
@@ -7945,7 +8132,8 @@ MessageBoxDefaultButton.Button1);
 
                 if (path.StartsWith(source + "/"))
                 {
-                    path = ToDp2Path(path);
+                    if (dp2)
+                        path = ToDp2Path(path);
                     return 1;
                 }
             }

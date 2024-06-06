@@ -837,10 +837,10 @@ out strError);
                 m_nRecordCount++;
 
             // 重建查重键
-            int nRet = LibraryApplication.CreateUniformKey(
+            int nRet = LibraryServerUtil.CreateUniformKey(
                 false,
-ref strResult,
-out strError);
+                ref strResult,
+                out strError);
             if (nRet == -1)
             {
                 strError = "为记录 '" + strNextRecPath + "' 创建查重键时出错: " + strError;

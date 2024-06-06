@@ -31,6 +31,7 @@ using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.Z3950.UI;
 using DigitalPlatform.Z3950;
 using static dp2Circulation.Order.ExportExcelFile;
+using static DigitalPlatform.Marc.MarcUtil;
 
 namespace dp2Circulation
 {
@@ -1076,7 +1077,7 @@ out strError);
                     if (this.m_nChangedCount > 0)
                     {
                         DialogResult result = MessageBox.Show(this,
-                            "当前命中记录列表中有 " + this.listView_records.Items.Count.ToString() + " 项修改尚未保存。\r\n\r\n是否继续操作?\r\n\r\n(Yes 清除，然后继续操作；No 放弃操作)",
+                            "当前命中记录列表中有 " + this.m_nChangedCount + " 项修改尚未保存。\r\n\r\n是否继续操作?\r\n\r\n(Yes 清除，然后继续操作；No 放弃操作)",
                             "BiblioSearchForm",
                             MessageBoxButtons.YesNo,
                             MessageBoxIcon.Question,
@@ -1384,7 +1385,7 @@ out strError);
                     DialogResult result = this.TryGet(() =>
                     {
                         return MessageBox.Show(this,
-                        "当前命中记录列表中有 " + this.listView_records.Items.Count.ToString() + " 项修改尚未保存。\r\n\r\n是否继续操作?\r\n\r\n(Yes 清除，然后继续操作；No 放弃操作)",
+                        "当前命中记录列表中有 " + this.m_nChangedCount + " 项修改尚未保存。\r\n\r\n是否继续操作?\r\n\r\n(Yes 清除，然后继续操作；No 放弃操作)",
                         "BiblioSearchForm",
                         MessageBoxButtons.YesNo,
                         MessageBoxIcon.Question,
@@ -3685,6 +3686,13 @@ bQuickLoad);
                     )
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
+
+                subMenuItem = new MenuItem("格式转换书目记录 [" + this.listView_records.SelectedItems.Count.ToString() + "] (&C)");
+                subMenuItem.Click += new System.EventHandler(this.menu_convertBiblioRecord_Click);
+                if (this.listView_records.SelectedItems.Count == 0 || this.InSearching == true
+                    )
+                    subMenuItem.Enabled = false;
+                menuItem.MenuItems.Add(subMenuItem);
             }
 
 
@@ -3997,7 +4005,20 @@ bQuickLoad);
 
         void menu_verifyBiblioRecord_Click(object sender, EventArgs e)
         {
-            int nRet = VerifyBiblioRecord(out string strError);
+            int nRet = VerifyBiblioRecord("verify",
+                out string strError);
+            if (nRet == -1)
+                goto ERROR1;
+            MessageBox.Show(this, "共处理 " + nRet.ToString() + " 个书目记录");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        void menu_convertBiblioRecord_Click(object sender, EventArgs e)
+        {
+            int nRet = VerifyBiblioRecord("convert",
+                out string strError);
             if (nRet == -1)
                 goto ERROR1;
             MessageBox.Show(this, "共处理 " + nRet.ToString() + " 个书目记录");
@@ -4154,7 +4175,13 @@ bQuickLoad);
         }
 
         // 2020/7/27
-        // 校验一条书目记录
+        // 校验一条书目记录，或者对书目记录进行格式转换
+        // parameters:
+        //      strBiblioRecPath    书目记录路径。校验时，为正在校验的书目记录的路径；格式转换时，为格式转换后拟保存去的书目库的一个追加形态的路径
+        //      operation       动作。为 verify 和 convert 之一。
+        //      strChangedXml   动作为 verify 或者 convert 时可能发生对现有记录的修改，这是修改后的内容
+        //      strNewXml       动作为 convert 时创建的新记录内容
+        //      strError        [out] 返回出错信息。字符串里面可能会包含 \r\n，表示多行报错信息
         // return:
         //      -1  校验过程出错
         //      0   校验成功
@@ -4163,17 +4190,23 @@ bQuickLoad);
             LibraryChannel channel,
             string strBiblioRecPath,
             string strXml,
+            string operation,
+            out string strChangedXml,   // verify 或 convert 对现有记录修改后的内容
+            out string strNewXml,   // convert 创建的新记录内容
             out string strError)
         {
             strError = "";
+            strChangedXml = "";
+            strNewXml = "";
 
             // 将XML格式转换为MARC格式
             // 自动从数据记录中获得MARC语法
             int nRet = MarcUtil.Xml2Marc(strXml,    // info.OldXml,
-                true,
+                Xml2MarcStyle.Warning,
                 null,
                 out string strMarcSyntax,
                 out string strMARC,
+                out string strFragmentXml,
                 out strError);
             if (nRet == -1)
             {
@@ -4218,11 +4251,517 @@ bQuickLoad);
                 }
             }
 
+            // MARC 格式校验
+            {
+                // TODO: 要设法加快找不到配置文件时候的速度。
+                // 可以考虑在 AssemblyCache 中放一个 key<-->const assembly 事项，表示配置文件不存在
+                // 也可以增加一个 Hashtable，存储已经发现不存在的 key
+
+                // return:
+                //      -1  出错
+                //      0   没有找到配置文件
+                //      1   成功获得 actions
+                nRet = EntityForm.GetVerifyActions(
+                    strBiblioRecPath,
+                    operation, // "verify",
+                    strMARC,
+                    null,
+                    out List<string> actions,
+                    out string error);
+                if (nRet == -1)
+                {
+                    errors.Add($"获得 MARC {operation}脚本的 actions 时出错: {error}");
+                    goto END1;
+                }
+                // 没有定义配置文件，无法校验
+                if (nRet == 0)
+                {
+                    errors.Add(error);
+                    goto END1;
+                }
+
+                string catalogingRule = "";
+                if (actions.Count > 0)
+                {
+                    // 探测一条 MARC 记录的编目规则
+                    // return:
+                    //      -1  出错
+                    //      0   没有找到
+                    //      1   找到
+                    nRet = DetectCatalogingRule(
+                        strBiblioRecPath,
+                        record,
+                        out catalogingRule,
+                        out error);
+                    if (nRet == -1)
+                    {
+                        errors.Add($"获得书目记录的编目规则时出错: {error}");
+                        goto END1;
+                    }
+                    if (nRet == 0)
+                    {
+                        // TODO1: 校验的时候，如果当前 MARC 记录没有明确的编目规则，
+                        // 但 actions 中有若干可选的编目规则，这里需要弹出一个列表对话框提供选择。
+                        // 注意校验完成后，自动在 MARC 记录中添加 998$c，这样避免以后再次进行校验的时候再次遇到选择
+
+
+
+                        // errors.Add($"无法获得书目记录的编目规则，因而无法进行 MARC 格式{operation}");
+                        // goto END1;
+                    }
+                }
+
+                // 找到当前编目规则以外的其它规则，这些规则正是可选的转换目标规则
+                if (operation == "convert")
+                {
+                    actions.Remove(catalogingRule);
+                    if (actions.Count == 1)
+                        catalogingRule = actions[0];
+                    else if (actions.Count == 0)
+                    {
+                        // TODO: 要测试验证一下，其实 "" 触发转换并成功也是可能的？
+                        strError = $"书目库 '{Global.GetDbName(strBiblioRecPath)}' 没有可用的编目规则，无法执行格式转换";
+                        return -1;
+                    }
+                    else
+                    {
+                        // TODO2: 因为这里是批处理，如果每条记录都让选择一次，就比较痛苦了，
+                        // 那么建议针对同样的情况，缓存一种先前选择过的编目规则，可以提供静默自动选择。
+                        // 注意缓存的 key 可以是 actions 变换为一个逗号间隔的字符串，value 是曾经选择好的一个编目规则名称
+
+                        // actions.Count > 1
+                        // return:
+                        //      -1  出错
+                        //      0   放弃选择
+                        //      1   已经选择
+                        nRet = SelectCatalogingRule(
+                            $"(针对 '{Global.GetDbName(strBiblioRecPath)}')转换为何种编目规则?",
+                            "编目规则:",
+                            actions,
+                            true,
+                            out catalogingRule,
+                            out strError);
+                        if (nRet == -1 || nRet == 0)
+                            return -1;  // TODO: 弹出一个对话框可以选择跳过这一条处理继续后面的处理，还是全部中断
+#if REMOVED
+                        // 只好人工选择编目规则
+                        catalogingRule = ListDialog.GetInput(Program.MainForm,
+                            $"(针对 '{Global.GetDbName(strBiblioRecPath)}')转换为何种编目规则?",
+                            "编目规则:",
+                            actions,
+                            -1);
+                        if (catalogingRule == null)
+                        {
+                            strError = $"放弃从集合 '{StringUtil.MakePathList(actions, ",")}' 中选择转换目标编目规则";
+                            return -1;
+                        }
+#endif
+                    }
+                }
+
+                nRet = EntityForm._verifyData(
+    strBiblioRecPath,
+    strMARC,
+    operation, // "verify",
+    catalogingRule,
+    null,
+    out VerifyHost hostObj,
+    out error);
+                if (nRet == -1)
+                {
+                    errors.Add($"{operation} MARC 格式时出错({catalogingRule}): {error}");
+                    goto END1;
+                }
+
+                // convert 功能如果没有返回 ChangedMarc，则直接用 marc 代替，一定要弹出对话框
+                if (operation == "convert"
+                    && hostObj.VerifyResult.Value != -1
+                    && string.IsNullOrEmpty(hostObj.VerifyResult.ChangedMarc) == true)
+                {
+                    BiblioSearchForm.SetCatalogingRule(record, catalogingRule);
+                    // 为新记录内容添加 998$l
+                    var link_id = BiblioSearchForm.EnsureCatalogingRuleLinkID(record,
+                        null,
+                        out bool changed);
+                    if (changed)
+                    {
+                        MarcRecord temp = new MarcRecord(strMARC);
+                        EnsureCatalogingRuleLinkID(temp,
+                            link_id,
+                            out changed);
+                        if (changed)
+                        {
+                            // 把改变兑现到 strXml 中(现有记录)
+                            nRet = MarcUtil.Marc2XmlEx(temp.Text,
+                                strMarcSyntax,
+                                ref strXml,
+                                out strError);
+                            if (nRet == -1)
+                                return -1;
+                            strChangedXml = strXml;
+                        }
+
+                    }
+                    hostObj.VerifyResult.ChangedMarc = record.Text;
+
+                    hostObj.VerifyResult.Result += "\r\n(MARC 记录内容转换后没有发生实质性变化)";   // 注: 998$c 有可能变化
+                }
+
+                string verify_result_text = "";
+                if (hostObj.VerifyResult.Value != -1)
+                {
+                    // 如果 MARC 记录被修改了
+                    if (string.IsNullOrEmpty(hostObj.VerifyResult.ChangedMarc) == false)
+                    {
+                        nRet = MarcUtil.Marc2XmlEx(hostObj.VerifyResult.ChangedMarc,
+                            strMarcSyntax,
+                            ref strXml,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+                        if (operation == "verify")
+                            strChangedXml = strXml;
+                        else
+                            strNewXml = strXml;
+                    }
+
+                    if (string.IsNullOrEmpty(hostObj.VerifyResult.Result) == false)
+                        verify_result_text = hostObj.VerifyResult.Result;  // 经过校验发现问题
+                    else
+                        verify_result_text = "经过校验没有发现任何错误。";
+                }
+                else
+                {
+                    verify_result_text = hostObj.VerifyResult.ErrorInfo;
+                }
+
+                if (string.IsNullOrEmpty(verify_result_text) == false)
+                    errors.AddRange(StringUtil.SplitList(verify_result_text, "\r\n"));
+            }
+
+        END1:
             if (errors.Count > 0)
             {
-                strError = StringUtil.MakePathList(errors, "; ");
+                strError = StringUtil.MakePathList(errors, "\r\n");
                 return 1;
             }
+            return 0;
+        }
+
+        // 从多种编目规则中选择一个的结果缓存
+        static Hashtable _crTable = new Hashtable();
+
+        // parameters:
+        //      
+        // return:
+        //      -1  出错
+        //      0   放弃选择
+        //      1   已经选择
+        public static int SelectCatalogingRule(
+            string dlg_title,
+            string title,
+            List<string> actions,
+            bool use_cache,
+            out string catalogingRule,
+            out string strError)
+        {
+            strError = "";
+
+            string key = StringUtil.MakePathList(actions);
+            if (use_cache)
+            {
+                catalogingRule = _crTable[key] as string;
+                if (string.IsNullOrEmpty(catalogingRule) == false)
+                    return 1;
+            }
+
+            // 只好人工选择编目规则
+            catalogingRule = ListDialog.GetInput(Program.MainForm,
+                dlg_title,
+                title,
+                actions,
+                -1,
+                Program.MainForm.Font);
+            if (catalogingRule == null)
+            {
+                strError = $"放弃从集合 '{StringUtil.MakePathList(actions, ",")}' 中选择转换目标编目规则";
+                return 0;
+            }
+
+            if (use_cache)
+                _crTable[key] = catalogingRule;
+            return 1;
+        }
+
+        // 探测一条 MARC 记录的编目规则
+        // return:
+        //      -1  出错
+        //      0   没有找到
+        //      1   找到
+        public static int DetectCatalogingRule(
+            string strBiblioRecPath,
+            MarcRecord record,
+            out string catalogingRule,
+            out string strError)
+        {
+            strError = "";
+            catalogingRule = "";
+
+            // 1)
+            // 从书目记录的 998$c 中找
+            catalogingRule = record.select("field[@name='998']/subfield[@name='c']").FirstContent;
+            if (string.IsNullOrEmpty(catalogingRule) == false)
+                return 1;
+
+            // 2)
+            // 从书目库的角色 cr:xxx 中找
+            var strDbName = Global.GetDbName(strBiblioRecPath);
+            if (string.IsNullOrEmpty(strDbName))
+            {
+                strError = $"无法解析书目记录路径 '{strBiblioRecPath}' 的库名部分";
+                return -1;
+            }
+
+            // 尝试从书目库角色中获得 cr:xxx 子参数，从而探知当前这条书目记录的编目规则
+            var prop = Program.MainForm.GetBiblioDbProperty(strDbName);
+            if (prop == null)
+            {
+                strError = $"找不到书目库 '{strDbName}' 的属性";
+                return -1;
+            }
+
+            catalogingRule = StringUtil.GetParameterByPrefix(prop.Role, "cr");
+            if (string.IsNullOrEmpty(catalogingRule) == false)
+                return 1;
+
+            return 0;
+        }
+
+        // 在 998$c 中记载编目规则
+        // 注: 如果修改前 998$c 子字段已经存在，修改后尽量不改变它的位置
+        public static void SetCatalogingRule(MarcRecord record,
+            string catalogingRule)
+        {
+            // 删除 998$c
+            if (string.IsNullOrEmpty(catalogingRule))
+            {
+                var subfields = record.select("field[@name='998']/subfield[@name='c']");
+                foreach (MarcSubfield subfield in subfields)
+                {
+                    subfield.detach();
+                }
+            }
+            // 修改第一个 998$c
+            if (string.IsNullOrEmpty(catalogingRule) == false)
+                record.setFirstSubfield("998", "c", catalogingRule);
+        }
+
+        // 确保创建了 998$l
+        public static string EnsureCatalogingRuleLinkID(
+            MarcRecord record,
+            string new_id,
+            out bool changed)
+        {
+            changed = false;
+            var content = record.select("field[@name='998']/subfield[@name='l']").FirstContent;
+            if (string.IsNullOrEmpty(content))
+            {
+                if (string.IsNullOrEmpty(new_id))
+                    content = Guid.NewGuid().ToString();
+                else
+                    content = new_id;
+                record.setFirstSubfield("998", "l", content);
+                changed = true;
+            }
+            return content;
+        }
+
+        public class RecordInfo
+        {
+            public string Path { get; set; }
+
+            public string Xml { get; set; }
+
+            public byte[] Timestamp { get; set; }
+        }
+
+        // 根据编目规则键检索书目记录
+        // parameters:
+        //      start_recpath   起点书目记录路径
+        //      crKey   查重键。格式为 "998$l内容/998$c内容"。检索为前方一致方式
+        //      start_marcSyntax    起点书目 MARC 格式。
+        //                  如果为 null, 表示所有命中的书目记录不管是何种 MARC 格式都返回；
+        //                  如果为非空的值，表示只返回这样的 MARC 格式的书目库内的命中记录
+        //      results    [out] 返回命中的书目记录信息的集合。其中已经排除了 start_path 值
+        // return:
+        //      -1  出错
+        //      0   没有命中
+        //      >0  命中的条数。注意不包含 start_path 指向的这一条记录
+        public static int SearchBiblioByCrKey(
+            LibraryChannel channel,
+            Stop stop,
+            string start_path,
+            string crKey,
+            string start_marcSyntax,
+            out List<RecordInfo> results,
+            out string strError)
+        {
+            strError = "";
+            results = new List<RecordInfo>();
+
+            string dbname_list = "<全部>";
+            if (string.IsNullOrEmpty(start_marcSyntax) == false)
+            {
+                var dbs = Program.MainForm.BiblioDbProperties
+                    .Where(o => o.Syntax == start_marcSyntax)
+                    .Select(o => o.DbName).ToList();
+                dbname_list = StringUtil.MakePathList(dbs);
+            }
+
+            string resultsetName = "~crkey";
+            long ret = channel.SearchBiblio(stop,
+                dbname_list,
+                crKey,
+                100,
+                "crKey",
+                "left",
+                "zh",
+                resultsetName,
+                "",
+                "",
+                "",
+                out _,
+                out strError);
+            if (ret == -1)
+                return -1;
+            if (ret == 0)
+                return 0;
+            ResultSetLoader loader = new ResultSetLoader(channel,
+                stop,
+                resultsetName,
+                "id,xml,timestamp");
+            foreach (DigitalPlatform.LibraryClient.localhost.Record record in loader)
+            {
+                if (record.Path == start_path)
+                    continue;
+                // TODO: 筛选和发起记录相同的 MARC 格式的命中记录?
+                results.Add(new RecordInfo
+                {
+                    Path = record.Path,
+                    Xml = record.RecordBody?.Xml,
+                    Timestamp = record.RecordBody?.Timestamp
+                });
+            }
+
+            return results.Count;
+        }
+
+        // 在 XML 找到编目规则键
+        // return:
+        //      -1  出错
+        //      0   没有找到
+        //      1   找到
+        static int GetCrKey(string xml,
+            out string crKey,
+            out string strError)
+        {
+            strError = "";
+            crKey = "";
+
+            int nRet = MarcUtil.Xml2Marc(xml,
+    Xml2MarcStyle.Warning,
+    null,
+    out string strMarcSyntax,
+    out string strMARC,
+    out string strFragmentXml,
+    out strError);
+            if (nRet == -1)
+                return -1;
+            MarcRecord record = new MarcRecord(strMARC);
+            var id = record.select("field[@name='998']/subfield[@name='l']").FirstContent;
+            var rule = record.select("field[@name='998']/subfield[@name='c']").FirstContent;
+            if (string.IsNullOrEmpty(id))
+                return 0;
+            crKey = id + "/" + rule;
+            return 1;
+        }
+
+        // .NewXml 中的部分 MARC 字段内容要采用 .OldXml 的:
+        // 856 字段，998 字段(除了$c$l以外)，dprms:file 元素
+
+        static int MergeOldNewXml(string old_xml,
+            ref string new_xml,
+            out string strError)
+        {
+            strError = "";
+
+            int nRet = MarcUtil.Xml2Marc(old_xml,
+Xml2MarcStyle.Warning,
+null,
+out string syntax,
+out string old_marc,
+out string old_fragment,
+out strError);
+            if (nRet == -1)
+                return -1;
+
+            nRet = MarcUtil.Xml2Marc(new_xml,
+Xml2MarcStyle.Warning,
+null,
+out _,
+out string new_marc,
+out string new_fragment,
+out strError);
+            if (nRet == -1)
+                return -1;
+
+            MarcRecord old_record = new MarcRecord(old_marc);
+            MarcRecord new_record = new MarcRecord(new_marc);
+
+            var fields0 = old_record.select("field[@name='998']");
+
+            new_record.select("field[@name='856']").detach();
+            foreach(MarcField field in old_record.select("field[@name='856']"))
+            {
+                new_record.ChildNodes.insertSequence(field,
+                    InsertSequenceStyle.PreferTail);
+            }
+
+            // 为了让对比显示时不会出现差异。但其实 997 是 dp2library 在保存时会强制修改的
+            new_record.select("field[@name='997']").detach();
+            foreach (MarcField field in old_record.select("field[@name='997']"))
+            {
+                new_record.ChildNodes.insertSequence(field.detach(),
+                    InsertSequenceStyle.PreferTail);
+            }
+
+            new_record.select("field[@name='998']").detach();
+            var fields = old_record.select("field[@name='998']");
+            foreach (MarcField field in fields)
+            {
+                new_record.ChildNodes.insertSequence(field.detach(),
+                    InsertSequenceStyle.PreferTail);
+            }
+
+            new_xml = old_xml;  // 把 MARC 以外的片段带入 new_xml
+            nRet = MarcUtil.Marc2XmlEx(new_record.Text,
+    syntax,
+    ref new_xml,
+    out strError);
+            if (nRet == -1)
+                return -1;
+            return 0;
+        }
+
+        // 校验 MARC 格式
+        int VerifyMarc(
+            string strBiblioRecPath,
+            MarcRecord record,
+            out string strError)
+        {
+            strError = "";
+
+
             return 0;
         }
 
@@ -4283,10 +4822,15 @@ bQuickLoad);
         }
 
         // 校验书目记录
-        int VerifyBiblioRecord(out string strError)
+        int VerifyBiblioRecord(string operation,
+            out string strError)
         {
             strError = "";
             // int nRet = 0;
+
+            string operation_caption = "校验";
+            if (operation == "convert")
+                operation_caption = "转换";
 
             if (this.listView_records.SelectedItems.Count == 0)
             {
@@ -4297,7 +4841,7 @@ bQuickLoad);
             // if (_stop != null && _stop.State == 0)    // 0 表示正在处理
             if (HasLooping())
             {
-                strError = "目前有长操作正在进行，无法进行校验书目记录的操作";
+                strError = $"目前有长操作正在进行，无法进行书目记录{operation_caption}的操作";
                 return -1;
             }
 
@@ -4307,7 +4851,7 @@ bQuickLoad);
             int nCount = 0;
 
             Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
-                + " 开始进行书目记录校验</div>");
+                + $" 开始进行书目记录{operation_caption}</div>");
 
             LibraryChannel channel = this.GetChannel();
 
@@ -4320,7 +4864,7 @@ bQuickLoad);
             _stop.Initial("正在进行校验书目记录的操作 ...");
             _stop.BeginLoop();
             */
-            var looping = BeginLoop(this.DoStop, "正在进行校验书目记录的操作 ...", "halfstop");
+            var looping = BeginLoop(this.DoStop, $"正在进行书目记录{operation_caption}的操作 ...", "halfstop");
 
             this.EnableControls(false);
             try
@@ -4335,12 +4879,43 @@ bQuickLoad);
 
                     items.Add(item);
                 }
+
+                bool bOldSource = true; // 是否要从 OldXml 开始做起
+
+                int nChangeCount = this.GetItemsChangeCount(items);
+                if (nChangeCount > 0)
+                {
+                    bool bHideMessageBox = true;
+                    DialogResult result = MessageDialog.Show(this,
+                        "当前选定的 " + items.Count.ToString() + " 个事项中有 " + nChangeCount + " 项修改尚未保存。\r\n\r\n请问如何进行修改? \r\n\r\n(重新修改) 重新进行修改，忽略以前内存中的修改; \r\n(继续修改) 以上次的修改为基础继续修改; \r\n(放弃) 放弃整个操作",
+        MessageBoxButtons.YesNoCancel,
+        MessageBoxDefaultButton.Button1,
+        null,
+        ref bHideMessageBox,
+        new string[] { "重新修改", "继续修改", "放弃" });
+                    if (result == DialogResult.Cancel)
+                    {
+                        // strError = "放弃";
+                        return 0;
+                    }
+                    if (result == DialogResult.No)
+                    {
+                        bOldSource = false;
+                    }
+                }
+
+
                 ListViewBiblioLoader loader = new ListViewBiblioLoader(channel, // this.Channel,
                     looping.Progress,
                     items,
-                    items.Count > MAX_CACHE_ITEMS ? null : this.m_biblioTable);
+                    // items.Count > MAX_CACHE_ITEMS ? null : this.m_biblioTable
+                    this.m_biblioTable);
                 loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
                 loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
+
+                // 要追加保存去的书目库名。用于 convert operation
+                string strTargetDbName = "";
+                _crTable.Clear();   // 清除以前的编目规则选择缓存
 
                 int i = 0;
                 foreach (LoaderItem item in loader)
@@ -4355,13 +4930,32 @@ bQuickLoad);
 
                     BiblioInfo info = item.BiblioInfo;
 
+                    string strXml = "";
+                    if (bOldSource == true)
+                    {
+                        strXml = info.OldXml;
+                        // 放弃上一次的修改
+                        if (string.IsNullOrEmpty(info.NewXml) == false)
+                        {
+                            info.NewXml = "";
+                            this.m_nChangedCount--;
+                        }
+                    }
+                    else
+                    {
+                        if (string.IsNullOrEmpty(info.NewXml) == false)
+                            strXml = info.NewXml;
+                        else
+                            strXml = info.OldXml;
+                    }
+
                     XmlDocument itemdom = new XmlDocument();
                     try
                     {
-                        string xml = info.OldXml;
-                        if (string.IsNullOrEmpty(xml))
-                            xml = "<root />";
-                        itemdom.LoadXml(xml);
+                        // string xml = info.OldXml;
+                        if (string.IsNullOrEmpty(strXml))
+                            itemdom.LoadXml("<root />");
+                        itemdom.LoadXml(strXml);
                     }
                     catch (Exception ex)
                     {
@@ -4372,24 +4966,196 @@ bQuickLoad);
                     List<string> errors = new List<string>();
 
                     // 校验 XML 记录中是否有非法字符
-                    string strReplaced = DomUtil.ReplaceControlCharsButCrLf(info.OldXml, '*');
-                    if (strReplaced != info.OldXml)
+                    string strReplaced = DomUtil.ReplaceControlCharsButCrLf(strXml, '*');
+                    if (strReplaced != strXml)
                     {
                         errors.Add("XML 记录中有非法字符");
                     }
 
-                    // 校验一条书目记录
+                    // 询问目标书目库名字
+                    if (string.IsNullOrEmpty(strTargetDbName)
+                        && operation == "convert")
+                    {
+                        var current_dbName = Global.GetDbName(info.RecPath);
+                        var prop = Program.MainForm.GetBiblioDbProperty(current_dbName);
+                        string strCurSyntax = Program.MainForm.GetBiblioSyntax(current_dbName);
+                        if (strCurSyntax == null)
+                        {
+                            strError = "书目库名 '" + current_dbName + "' 的 MARC 格式没有找到";
+                            errors.Add(strError);
+                            goto CONTINUE;
+                        }
+                        // 获得一个目标库名
+                        GetAcceptTargetDbNameDlg dlg = new GetAcceptTargetDbNameDlg();
+                        MainForm.SetControlFont(dlg, this.Font, false);
+                        dlg.AutoFinish = true;
+                        dlg.SeriesMode = (string.IsNullOrEmpty(prop?.IssueDbName) == false);
+                        // dlg.DbName = this.BiblioDbName;
+                        // 根据当前所在的库的marc syntax限制一下目标库的范围
+                        dlg.MarcSyntax = strCurSyntax;
+                        dlg.ShowDialog(this);
+                        if (dlg.DialogResult == DialogResult.Cancel)
+                            return 0;
+                        strTargetDbName = dlg.DbName;
+                    }
+
+                    string strBiblioRecPath = info.RecPath;
+                    if (operation == "convert")
+                    {
+                        // 这里使用一种 GUID 式的路径，等保存后再转为实际路径
+                        strBiblioRecPath = strTargetDbName + "/?" + GetTempId();
+                    }
+
+                    // 校验一条书目记录，或者对数据记录进行格式转换
+                    // parameters:
+                    //      strBiblioRecPath    书目记录路径。校验时，为正在校验的书目记录的路径；格式转换时，为格式转换后拟保存去的书目库的一个追加形态的路径
+                    //      operation       动作。为 verify 和 convert 之一。
+                    //      strChangedXml   动作为 verify 或者 convert 时可能发生对现有记录的修改，这是修改后的内容
+                    //      strNewXml       动作为 convert 时创建的新记录内容
+                    //      strError        [out] 返回出错信息。字符串里面可能会包含 \r\n，表示多行报错信息
                     // return:
                     //      -1  校验过程出错
                     //      0   校验成功
                     //      1   校验发现记录有错
                     int nRet = VerifyBiblio(
                         channel,
-                        info.RecPath,
-                        info.OldXml,
+                        strBiblioRecPath,
+                        strXml,
+                        operation,
+                        out string strChangedXml,
+                        out string strNewXml,
                         out strError);
                     if (nRet == -1 || nRet == 1)
-                        errors.Add(strError);
+                        errors.AddRange(StringUtil.SplitList(strError, "\r\n"));
+
+                    // 为当前记录添加 998$l 字段
+                    if (operation == "convert")
+                    {
+
+                    }
+
+                    // 2024/5/19
+                    if (info != null
+                        && string.IsNullOrEmpty(strChangedXml) == false)
+                    {
+                        if (string.IsNullOrEmpty(info.NewXml) == true)
+                            this.m_nChangedCount++;
+                        info.NewXml = strChangedXml;
+                        /*
+                        // 迫使修改后的记录保存的时候，用追加方式保存
+                        if (operation == "convert")
+                        {
+                            ChangeRecPath(info, strBiblioRecPath);
+                            ListViewUtil.ChangeItemText(item.ListViewItem, 0, info.RecPath);
+                        }
+                        */
+
+                        this.TryInvoke(() =>
+                        {
+                            item.ListViewItem.BackColor = GlobalParameters.ChangedBackColor;    // SystemColors.Info;
+                            item.ListViewItem.ForeColor = GlobalParameters.ChangedForeColor;     // SystemColors.InfoText;
+                        });
+                    }
+
+                    // 2024/5/31
+                    // 把转换后的内容在 ListView 里面新增一个 item
+                    if (info != null
+    && string.IsNullOrEmpty(strNewXml) == false
+    && operation == "convert")
+                    {
+                        BiblioInfo new_info = new BiblioInfo
+                        {
+                            RecPath = strBiblioRecPath, // 追加型的记录路径
+                            OldXml = "<biblio />",
+                            NewXml = strNewXml,
+                            Format = info.Format,
+                        };
+
+                        // TODO: 对编目规则键进行检索，看看是否已经存在目标书目记录。
+                        // 如果已经存在，那就是覆盖这条已经存在的记录。
+                        // return:
+                        //      -1  出错
+                        //      0   没有找到
+                        //      1   找到
+                        nRet = GetCrKey(strNewXml,
+                            out string crKey,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strError = $"在获得 crKey 过程中出错: {strError}";
+                            errors.Add(strError);
+                            goto CONTINUE;
+                        }
+                        if (nRet == 1)
+                        {
+                            string biblio_dbname = Global.GetDbName(strBiblioRecPath);
+                            string marc_syntax = Program.MainForm.GetBiblioSyntax(biblio_dbname);
+                            // return:
+                            //      -1  出错
+                            //      0   没有命中
+                            //      >0  命中的条数。注意不包含 start_path 指向的这一条记录
+                            nRet = SearchBiblioByCrKey(
+                                channel,
+                                looping.Progress,
+                                null,
+                                crKey,
+                                marc_syntax,
+                                out List<RecordInfo> results,
+                                out strError);
+                            if (nRet == -1)
+                            {
+                                strError = $"在检索编目规则键 '{crKey}' 过程中出错: {strError}";
+                                errors.Add(strError);
+                                goto CONTINUE;
+                            }
+                            if (nRet > 1)
+                            {
+                                var paths = results.Select(o => o.Path).ToList();
+                                strError = $"检索编目规则键 '{crKey}' 命中 '{nRet}' 条书目记录({StringUtil.MakePathList(paths)})，请系统管理员注意合并重复的记录";
+                                errors.Add(strError);
+                                goto CONTINUE;
+                            }
+                            if (nRet == 1)
+                            {
+                                new_info.RecPath = results[0].Path;
+                                new_info.OldXml = results[0].Xml;
+                                new_info.Timestamp = results[0].Timestamp;
+
+                                // .NewXml 中的部分 MARC 字段内容要采用 .OldXml 的:
+                                // 856 字段，998 字段(除了$c$l以外)，dprms:file 元素
+                                string new_xml = new_info.NewXml;
+                                nRet = MergeOldNewXml(new_info.OldXml,
+    ref new_xml,
+    out strError);
+                                if (nRet == -1)
+                                {
+                                    strError = $"在合并两条 XML 记录过程中出错: {strError}";
+                                    errors.Add(strError);
+                                    goto CONTINUE;
+                                }
+                                new_info.NewXml = new_xml;
+                            }
+                        }
+
+
+                        lock (this.m_biblioTable)
+                        {
+                            this.m_biblioTable[new_info.RecPath] = new_info;
+                        }
+                        var new_listview_item = Clone(item.ListViewItem);
+                        ListViewUtil.ChangeItemText(new_listview_item, 0, new_info.RecPath);
+                        // TODO: 刷新浏览行的显示。
+                        this.listView_records.Items.Add(new_listview_item);
+                        this.m_nChangedCount++;
+
+                        this.TryInvoke(() =>
+                        {
+                            new_listview_item.BackColor = GlobalParameters.ChangedBackColor;    // SystemColors.Info;
+                            new_listview_item.ForeColor = GlobalParameters.ChangedForeColor;     // SystemColors.InfoText;
+                        });
+                    }
+
+
 #if NO
                     // 验证唯一性
                     {
@@ -4413,6 +5179,7 @@ bQuickLoad);
                     }
 #endif
 
+                    CONTINUE:
                     if (errors.Count > 0)
                     {
                         Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
@@ -4421,6 +5188,9 @@ bQuickLoad);
                             Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(error) + "</div>");
                         }
 
+                        // 2024/5/31
+                        // 如果 errors 中有至少一行为 [error] 级别，则要把行背景颜色改为红色
+                        if (ContainsError(errors))
                         {
                             item.ListViewItem.BackColor = Color.FromArgb(155, 0, 0);
                             item.ListViewItem.ForeColor = Color.FromArgb(255, 255, 255);
@@ -4431,6 +5201,7 @@ bQuickLoad);
                     looping.Progress.SetProgressValue(++i);
                 }
 
+                RefreshPropertyView(false);
                 return nCount;
             }
             finally
@@ -4453,6 +5224,35 @@ bQuickLoad);
                 Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
                     + " 结束执行书目记录校验</div>");
             }
+        }
+
+        static bool ContainsError(List<string> errors)
+        {
+            foreach (var error in errors)
+            {
+                if (error == null)
+                    continue;
+                if (error.Contains("[error]")
+                    || error.Contains("[错误]"))
+                    return true;
+            }
+
+            return false;
+        }
+
+        static ListViewItem Clone(ListViewItem item)
+        {
+            var result = new ListViewItem();
+            result.SubItems.AddRange(item.SubItems.Cast<ListViewItem.ListViewSubItem>().ToArray());
+            return result;
+        }
+
+        // "中文图书/?1" 之中的 ID 种子
+        int _append_id_seed = 0;
+
+        string GetTempId()
+        {
+            return (++_append_id_seed).ToString();
         }
 
         // 修改 XML 中的 seller 元素值
@@ -5089,6 +5889,25 @@ MessageBoxDefaultButton.Button2);
                                         return ProcessParts.Basic;
                                     }
 
+                                    // 2024/5/17
+                                    if (c.Type == "biblio_itemPrice")
+                                    {
+                                        // return:
+                                        //      -1  出错
+                                        //      0   没有找到
+                                        //      1   成功
+                                        var ret = Utility.GetTotalPrice(
+                                            channel,
+                                            looping.Progress,
+                                            strRecPath,
+                                            out string strResult,
+                                            out string error);
+                                        v = strResult;
+                                        if (ret == -1)
+                                            v = "error:" + error;
+                                        return ProcessParts.Basic;
+                                    }
+
                                     // 2023/11/9
                                     if (c.Type == "biblio_itemCount")
                                     {
@@ -5703,12 +6522,15 @@ MessageBoxDefaultButton.Button2);
 
                     looping.Progress.SetMessage("正在保存书目记录 " + strRecPath);
 
+                    bool append = (info.RecPath != null && info.RecPath.Contains("?"));
+
+
                     int nRedoCount = 0;
                 REDO_SAVE:
                     long lRet = channel.SetBiblioInfo(
                         looping.Progress,
-                        "change",
-                        strRecPath,
+                        append ? "new" : "change",
+                        BiblioInfo.GetPath(strRecPath),
                         "xml",
                         info.NewXml,
                         info.Timestamp,
@@ -5867,6 +6689,12 @@ MessageBoxDefaultButton.Button2);
                     info.Timestamp = baNewTimestamp;
                     info.OldXml = info.NewXml;
                     info.NewXml = "";
+                    // 2024/5/20
+                    if (append)
+                    {
+                        ChangeRecPath(info, strOutputPath);
+                        ListViewUtil.ChangeItemText(item, 0, info.RecPath);
+                    }
 
                     item.BackColor = SystemColors.Window;
                     item.ForeColor = SystemColors.WindowText;
@@ -5926,6 +6754,17 @@ MessageBoxDefaultButton.Button2);
             }
 
             return new NormalResult();
+        }
+
+        // TODO: 将来改用 SearchFormBase::ChangeBiblioInfoKey()
+        void ChangeRecPath(BiblioInfo info, string strRecPath)
+        {
+            // 从 hashtable 中摘掉原来的 key
+            this.m_biblioTable.Remove(info.RecPath);
+
+            // 加入新的 key
+            info.RecPath = strRecPath;
+            this.m_biblioTable[strRecPath] = info;
         }
 
         /// <summary>
@@ -9730,6 +10569,8 @@ message,
                     return;
             }
 
+            var backup_mode = dlg.BackupMode;
+
             int nProcessRemoteRecord = 0;   // 0: 本变量尚未使用; 1: 处理外部记录; -1: 跳过外部记录
 
             this.EnableControls(false);
@@ -9787,9 +10628,14 @@ message,
                 ListViewBiblioLoader loader = new ListViewBiblioLoader(channel, // this.Channel,
                     looping.Progress,
                     items,
-                    items.Count > MAX_CACHE_ITEMS ? null : this.m_biblioTable);
+                    backup_mode || items.Count > MAX_CACHE_ITEMS ? null : this.m_biblioTable);
                 loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
                 loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
+
+                if (backup_mode)
+                    loader.Format = "xml:backup";
+                else
+                    loader.Format = "xml";
 
                 int i = 0;
                 foreach (LoaderItem item in loader)

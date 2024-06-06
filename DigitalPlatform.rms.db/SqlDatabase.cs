@@ -12702,7 +12702,7 @@ handle.CancelTokenSource.Token).Result;
                 bool bSimulate = StringUtil.IsInList("simulate", strStyle);
 
                 bool bPushTailNo = false;
-                // 对 ？ 创建尾记录号
+                // 尝试对 ? 创建尾记录号。如果 bPushTailNo 为 true，表示发生了尾号推动
                 bPushTailNo = this.EnsureID(ref strRecordID, bSimulate);
 
                 // bPushed == true 说明没有必要 select 获取原有 records 行
@@ -13203,6 +13203,17 @@ handle.CancelTokenSource.Token).Result;
 
             if (strID == "?")
                 strID = "-1";
+
+            // 2024/5/12
+            // 在推动尾号之前，检查 checkcreatingtimestamp。而如果推动后再检查和报错，尾号已经被推动过，可能会形成一种攻击效果
+            if (strID == "-1"
+                && StringUtil.IsInList("checkcreatingtimestamp", strStyle)
+                && inputTimestamp != null)
+            {
+                strError = $"当追加记录时，时间戳应该为 null，而不应为 '{ByteArray.GetHexTimeStampString(inputTimestamp)}'";
+                outputTimestamp = null;   // 返回给前端，让前端能够得知应使用的时间戳
+                return -2;
+            }
 
             bool bSimulate = StringUtil.IsInList("simulate", strStyle);
 
@@ -14667,6 +14678,9 @@ handle.CancelTokenSource.Token).Result;
                 }
                 else
                 {
+                    // 这里报错已经晚了一步，尾号被推动过了，会形成攻击效果。
+                    // 已经改到更早的地方，也就是尾号还没有被推动过的地方进行此项检查报错
+#if REMOVED
                     // 2022/7/6
                     if (StringUtil.IsInList("checkcreatingtimestamp", strStyle)
                         && baInputTimestamp != null)
@@ -14675,6 +14689,7 @@ handle.CancelTokenSource.Token).Result;
                         baOutputTimestamp = null;   // 返回给前端，让前端能够得知应使用的时间戳
                         return -2;
                     }
+#endif
                 }
             }
 
@@ -21320,6 +21335,13 @@ handle.CancelTokenSource.Token).Result;
             bool bDeleteKeysByID = StringUtil.IsInList("deletekeysbyid", strStyle);
             // 2015/9/4
             bool bIgnoreCheckTimestamp = StringUtil.IsInList("ignorechecktimestamp", strStyle);
+
+            // 2024/5/20
+            if (strRecordID == "?")
+            {
+                strError = $"记录 ID '{strRecordID}' 不能用于删除操作。必须是一个明确的数字";
+                return -1;
+            }
 
             strRecordID = DbPath.GetID10(strRecordID);
 

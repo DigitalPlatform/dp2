@@ -831,6 +831,12 @@ out string strError)
         }
 
         // 构造出适合保存的新事项记录
+        // parameters:
+        //      bForce  是否为强制保存?
+        //              如果是强制保存，则直接把 strOriginXml 当作结果；
+        //              否则，会将 strExistingXml(已存在内容) 和 strOriginXml(新内容) 按照当前账户权限合并
+        //      strExistingXml  创建前，原位置已经存在的记录内容
+        //      strOriginXml    打算创建的新内容
         // return:
         //      -1  出错
         //      0   正确
@@ -840,6 +846,7 @@ out string strError)
             SessionInfo sessioninfo,
             bool bForce,
             string strBiblioRecId,
+            string strExistingXml,
             string strOriginXml,
             out string strXml,
             out string strError)
@@ -858,6 +865,7 @@ out string strError)
             int nRet = base.BuildNewItemRecord(sessioninfo,
             bForce,
             strBiblioRecId,
+            strExistingXml,
             strOriginXml,
             out strXml,
             out strError);
@@ -879,6 +887,12 @@ out string strError)
                 strError = "装载 strXml 到DOM时出错: " + ex.Message;
                 return -1;
             }
+
+
+            // 2024/5/24
+            if (bForce)
+                goto END1;
+
 
             /*
             // 如果 ID 为非空，才会主动修改/写入 parent 元素
@@ -902,11 +916,11 @@ out string strError)
                 "libraryCode",
                 sessioninfo.LibraryCodeList);
 
-            /*
-            // 2017/1/13
-            DomUtil.RemoveEmptyElements(dom.DocumentElement);
-            */
-
+        /*
+        // 2017/1/13
+        DomUtil.RemoveEmptyElements(dom.DocumentElement);
+        */
+        END1:
             strXml = dom.OuterXml;
             if (string.IsNullOrEmpty(warning) == false)
                 strError = warning;

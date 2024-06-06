@@ -39,18 +39,20 @@
             this.webBrowser1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.webBrowser1.Location = new System.Drawing.Point(12, 12);
-            this.webBrowser1.MinimumSize = new System.Drawing.Size(20, 20);
+            this.webBrowser1.Location = new System.Drawing.Point(22, 21);
+            this.webBrowser1.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
+            this.webBrowser1.MinimumSize = new System.Drawing.Size(37, 35);
             this.webBrowser1.Name = "webBrowser1";
-            this.webBrowser1.Size = new System.Drawing.Size(486, 211);
+            this.webBrowser1.Size = new System.Drawing.Size(891, 369);
             this.webBrowser1.TabIndex = 0;
             // 
             // button_loadSaved
             // 
             this.button_loadSaved.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_loadSaved.Location = new System.Drawing.Point(250, 229);
+            this.button_loadSaved.Location = new System.Drawing.Point(458, 401);
+            this.button_loadSaved.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.button_loadSaved.Name = "button_loadSaved";
-            this.button_loadSaved.Size = new System.Drawing.Size(167, 23);
+            this.button_loadSaved.Size = new System.Drawing.Size(306, 40);
             this.button_loadSaved.TabIndex = 2;
             this.button_loadSaved.Text = "装入实际保存后的记录";
             this.button_loadSaved.UseVisualStyleBackColor = true;
@@ -60,9 +62,10 @@
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button_Cancel.Location = new System.Drawing.Point(423, 229);
+            this.button_Cancel.Location = new System.Drawing.Point(776, 401);
+            this.button_Cancel.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.button_Cancel.Name = "button_Cancel";
-            this.button_Cancel.Size = new System.Drawing.Size(75, 23);
+            this.button_Cancel.Size = new System.Drawing.Size(138, 40);
             this.button_Cancel.TabIndex = 3;
             this.button_Cancel.Text = "返回";
             this.button_Cancel.UseVisualStyleBackColor = true;
@@ -72,25 +75,28 @@
             // 
             this.button_compareEdit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.button_compareEdit.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button_compareEdit.Location = new System.Drawing.Point(12, 229);
+            this.button_compareEdit.Location = new System.Drawing.Point(22, 401);
+            this.button_compareEdit.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.button_compareEdit.Name = "button_compareEdit";
-            this.button_compareEdit.Size = new System.Drawing.Size(143, 23);
+            this.button_compareEdit.Size = new System.Drawing.Size(262, 40);
             this.button_compareEdit.TabIndex = 1;
             this.button_compareEdit.Text = "双窗口对比编辑";
             this.button_compareEdit.UseVisualStyleBackColor = true;
             this.button_compareEdit.Visible = false;
+            this.button_compareEdit.Click += new System.EventHandler(this.button_compareEdit_Click);
             // 
             // PartialDeniedDialog
             // 
             this.AcceptButton = this.button_loadSaved;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
-            this.ClientSize = new System.Drawing.Size(510, 264);
+            this.ClientSize = new System.Drawing.Size(935, 462);
             this.Controls.Add(this.button_compareEdit);
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_loadSaved);
             this.Controls.Add(this.webBrowser1);
+            this.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.Name = "PartialDeniedDialog";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;

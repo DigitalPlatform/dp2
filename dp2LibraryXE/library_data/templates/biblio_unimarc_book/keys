@@ -336,6 +336,26 @@
 		<caption lang="en">Uniform Code</caption>
 	</table>
 
+	<!-- 2024/5/31 -->
+	<key>
+		<xpath scripting="on">getCrKey</xpath>
+		<!--
+    		<xpath nstable="">concat(//marc:record/marc:datafield[@tag='998']/marc:subfield[@code='l'],"/",//marc:record/marc:datafield[@tag='998']/marc:subfield[@code='c'])</xpath>
+		-->
+		<from>crkey</from>
+		<table ref="crkey" />
+	</key>
+	<table name="crkey" id="22" type="crkey">
+    		<convert>
+			<string style="upper" />
+		</convert>
+		<convertquery>
+			<string style="upper" />
+		</convertquery>
+		<caption lang="zh-CN">编目规则码</caption>
+		<caption lang="en">Catalog Rule Code</caption>
+	</table>
+
 	<!-- ******************配置非用字**************************************** -->
 	<stopword>
 		<stopwordTable name="title">
@@ -474,6 +494,30 @@ public partial class MyKeysHost : KeysHost
 
        this.ResultString = issn;
   }
+
+	// 2024/5/31
+	public void getCrKey()
+	{
+            		var mngr = new XmlNamespaceManager(new NameTable());
+                	mngr.AddNamespace("marc", "http://dp2003.com/UNIMARC");
+
+  	    	var node = this.DataDom.SelectSingleNode("//marc:record/marc:datafield[@tag='998']/marc:subfield[@code='l']", mngr) as XmlElement;
+		if (node == null)
+			return;
+
+		string id = node.InnerText;
+    
+		node = this.DataDom.SelectSingleNode("//marc:record/marc:datafield[@tag='998']/marc:subfield[@code='c']", mngr) as XmlElement;
+        		if (node == null)
+		{
+			this.ResultString = id + "/";
+			return;
+		}
+
+		var cr = node.InnerText;
+
+		this.ResultString = id + "/" + cr;
+	}
 
 }
 

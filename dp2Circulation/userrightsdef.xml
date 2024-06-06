@@ -386,7 +386,7 @@
 		<comment lang="zh">设置种次号尾号</comment>
 		<comment lang="en">Set Tail Number</comment>
 	</property>
-	<!--出版者-->
+	<!--词典-->
 	<property name="getdictionaryinfo" risklevel="1">
 		<comment lang="zh">获得词典数据</comment>
 		<comment lang="en">get dictionary info</comment>
@@ -402,6 +402,23 @@
 	<property name="setdictionaryobject" risklevel="2">
 		<comment lang="zh">写入词典下属对象</comment>
 		<comment lang="en">set dictionary object</comment>
+	</property>
+	<!--消息(2024/5/21)-->
+	<property name="getmessageinfo" risklevel="1">
+		<comment lang="zh">获得消息信息</comment>
+		<comment lang="en">get message info</comment>
+	</property>
+	<property name="getmessageobject" risklevel="1">
+		<comment lang="zh">获取消息下属对象</comment>
+		<comment lang="en">get message object</comment>
+	</property>
+	<property name="setmessageinfo" risklevel="2">
+		<comment lang="zh">修改消息数据</comment>
+		<comment lang="en">set publisher info</comment>
+	</property>
+	<property name="setmessageobject" risklevel="2">
+		<comment lang="zh">写入消息下属对象</comment>
+		<comment lang="en">set message object</comment>
 	</property>
 	<!--开馆日历(calendar)-->
 	<property name="getcalendar" risklevel="1">

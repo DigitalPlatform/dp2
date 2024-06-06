@@ -1031,6 +1031,7 @@ string strError)
         // 检索
         private void toolButton_search_Click(object sender, EventArgs e)
         {
+            bool control = (Control.ModifierKeys == Keys.Control);
             EnableStateCollection save = DisableToolButtons();
             try
             {
@@ -1044,7 +1045,7 @@ string strError)
                 else if (this.ActiveMdiChild is DtlpSearchForm)
                 {
                     DtlpSearchForm dtlpsearchform = (DtlpSearchForm)this.ActiveMdiChild;
-                    dtlpsearchform.DoSearch();
+                    dtlpsearchform.DoSearch(control);
                 }
                 else if (this.ActiveMdiChild is dp2SearchForm)
                 {

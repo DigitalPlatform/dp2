@@ -1137,6 +1137,7 @@ namespace DigitalPlatform.LibraryServer
                     dom,
                     attachment,
                     strStyle,
+                    func_warning,
                     out strError);
             }
             else if (strOperation == "setCalendar")

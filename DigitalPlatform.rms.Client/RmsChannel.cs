@@ -4604,7 +4604,8 @@ namespace DigitalPlatform.rms.Client
                     if (result.ErrorCode == ErrorCodeValue.TimestampMismatch)
                     {
                         this.ErrorCode = ChannelErrorCode.TimestampMismatch;
-                        strError = "时间戳不匹配。\r\n\r\n请求的时间戳 [" + ByteArray.GetHexTimeStampString(baInputTimestamp) + "] 响应的时间戳 [" + ByteArray.GetHexTimeStampString(baOutputTimestamp) + "]";
+                        // strError = "时间戳不匹配。\r\n\r\n请求的时间戳 [" + ByteArray.GetHexTimeStampString(baInputTimestamp) + "] 响应的时间戳 [" + ByteArray.GetHexTimeStampString(baOutputTimestamp) + "]";
+                        strError += $"。\r\n\r\n请求的时间戳 [{ByteArray.GetHexTimeStampString(baInputTimestamp)}] 响应的时间戳 [{ByteArray.GetHexTimeStampString(baOutputTimestamp)}]";
                         return -1;
                     }
 
@@ -4787,7 +4788,8 @@ namespace DigitalPlatform.rms.Client
                         if (result.ErrorCode == ErrorCodeValue.TimestampMismatch)
                         {
                             this.ErrorCode = ChannelErrorCode.TimestampMismatch;
-                            strError = "时间戳不匹配。\r\n\r\n请求的时间戳 [" + ByteArray.GetHexTimeStampString(baInputTimeStamp) + "] 响应的时间戳 [" + ByteArray.GetHexTimeStampString(output_timestamp/*baOutputTimeStamp*/) + "]";
+                            // strError = "时间戳不匹配。\r\n\r\n请求的时间戳 [" + ByteArray.GetHexTimeStampString(baInputTimeStamp) + "] 响应的时间戳 [" + ByteArray.GetHexTimeStampString(output_timestamp/*baOutputTimeStamp*/) + "]";
+                            strError += $"。\r\n\r\n请求的时间戳 [{ByteArray.GetHexTimeStampString(baInputTimeStamp)}] 响应的时间戳 [{ByteArray.GetHexTimeStampString(output_timestamp)}]";
                             return -1;
                         }
 
@@ -4918,7 +4920,8 @@ namespace DigitalPlatform.rms.Client
                     {
                         this.ErrorCode = ChannelErrorCode.TimestampMismatch;
                         Debug.Assert(output_timestamp != null, "WebService API DeleteRes() TimestampMismatch时必须返回旧时间戳 ...");
-                        strError = "时间戳不匹配。\r\n\r\n请求的时间戳 [" + ByteArray.GetHexTimeStampString(timestamp) + "] 响应的时间戳 [" + ByteArray.GetHexTimeStampString(output_timestamp) + "]";
+                        // strError = "时间戳不匹配。\r\n\r\n请求的时间戳 [" + ByteArray.GetHexTimeStampString(timestamp) + "] 响应的时间戳 [" + ByteArray.GetHexTimeStampString(output_timestamp) + "]";
+                        strError += $"。\r\n\r\n请求的时间戳 [{ByteArray.GetHexTimeStampString(timestamp)}] 响应的时间戳 [{ByteArray.GetHexTimeStampString(output_timestamp)}]";
                         return -1;
                     }
 
@@ -5810,9 +5813,9 @@ ref strNewStyle);	// 不要数据体和metadata
                     lTotalLength = result.Value;
 
                     if (StringUtil.IsInList("timestamp", strStyle) == true
-                         /*
-                         && lTotalLength > 0
-                          * */ )    // 2012/1/11
+                          /*
+                          && lTotalLength > 0
+                           * */ )    // 2012/1/11
                     {
                         if (input_timestamp != null)
                         {
@@ -6028,7 +6031,8 @@ ref strNewStyle);	// 不要数据体和metadata
                     if (result.ErrorCode == ErrorCodeValue.TimestampMismatch)
                     {
                         this.ErrorCode = ChannelErrorCode.TimestampMismatch;
-                        strError = "时间戳不匹配。\r\n\r\n请求的时间戳 [" + ByteArray.GetHexTimeStampString(timestamp) + "] 响应的时间戳 [" + ByteArray.GetHexTimeStampString(output_timestamp) + "]";
+                        // strError = "时间戳不匹配。\r\n\r\n请求的时间戳 [" + ByteArray.GetHexTimeStampString(timestamp) + "] 响应的时间戳 [" + ByteArray.GetHexTimeStampString(output_timestamp) + "]";
+                        strError += $"。\r\n\r\n请求的时间戳 [{ByteArray.GetHexTimeStampString(timestamp)}] 响应的时间戳 [{ByteArray.GetHexTimeStampString(output_timestamp)}]";
                         return -1;
                     }
 
@@ -6381,7 +6385,8 @@ out strError);
                     {
                         this.ErrorCode = ChannelErrorCode.TimestampMismatch;
                         // output_timestamp 在出错情况下，也会返回服务器端希望的时间戳
-                        strError = "时间戳不匹配。\r\n\r\n请求的时间戳 [" + ByteArray.GetHexTimeStampString(timestamp) + "] 响应的时间戳 [" + ByteArray.GetHexTimeStampString(output_timestamp) + "]";
+                        // strError = "时间戳不匹配。\r\n\r\n请求的时间戳 [" + ByteArray.GetHexTimeStampString(timestamp) + "] 响应的时间戳 [" + ByteArray.GetHexTimeStampString(output_timestamp) + "]";
+                        strError += $"。\r\n\r\n请求的时间戳 [{ByteArray.GetHexTimeStampString(timestamp)}] 响应的时间戳 [{ByteArray.GetHexTimeStampString(output_timestamp)}]";
                         return -1;
                     }
 

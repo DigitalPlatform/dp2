@@ -105,6 +105,7 @@ namespace dp2Circulation
             }
 #endif
 
+            this._openMarcFileDialog.IsOutput = false;  // 2024/6/4
             // 输入的ISO2709文件名
             this._openMarcFileDialog.FileName = Program.MainForm.AppInfo.GetString(
                 "iso2709statisform",
@@ -326,6 +327,10 @@ namespace dp2Circulation
                 else if (strProjectName == "#将dt1000读者MARC转换为dp2的XML格式")
                 {
                     objStatis = new ConvertDt1000ReaderToXml();
+                }
+                else if (strProjectName == "#对dt1000导出的ISO2909文件整理-01字段")
+                {
+                    objStatis = new ProcessDt1000G01();
                 }
                 else
                 {

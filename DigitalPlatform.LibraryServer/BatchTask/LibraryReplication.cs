@@ -1439,6 +1439,7 @@ namespace DigitalPlatform.LibraryServer
                         // 删除源书目记录
                         lRet = channel.DoDeleteRes(strOldRecPath,
                             timestamp,
+                            "ignorechecktimestamp", //2024/5/16
                             out output_timestamp,
                             out strError);
                         if (lRet == -1)
@@ -1497,6 +1498,7 @@ namespace DigitalPlatform.LibraryServer
                         // 删除书目记录
                         lRet = channel.DoDeleteRes(strRecPath,
                             timestamp,
+                            "ignorechecktimestamp", //2024/5/16
                             out output_timestamp,
                             out strError);
                         if (lRet == -1)

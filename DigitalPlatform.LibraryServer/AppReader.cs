@@ -972,8 +972,12 @@ unprocessed_element_names.Except(_auto_maintain_element_names)));
             // 条件化的失效期
             TimeSpan expireLength = GetConditionalPatronPasswordExpireLength(dom);
 
-            XmlDocument domOperLog = null;
+            // XmlDocument domOperLog = null;
+
             // 修改读者密码
+            // parameters:
+            //      domOperLog  日志记录 XmlDocument。本函数会在里面写入一个 newPassword 和 type 和 expire 元素。type 和 expireDate 元素可能会缺省。
+            //                  如果为 null，表示不写入记录。
             // return:
             //      -1  error
             //      0   成功
@@ -981,7 +985,7 @@ unprocessed_element_names.Except(_auto_maintain_element_names)));
                 dom,
                 strNewPassword,
                 expireLength,   // _patronPasswordExpirePeriod,
-                ref domOperLog,
+                null,   // domOperLog,
                 out strError);
             if (nRet == -1)
             {
@@ -1185,6 +1189,7 @@ unprocessed_element_names.Except(_auto_maintain_element_names)));
         //      strNewXml   希望保存的记录体
         //      strOldXml   原先获得的旧记录体。可以为空。
         //      baOldTimestamp  原先获得旧记录的时间戳。可以为空。
+        //      strStyle    (2024/5/16 增加)风格。如果包含 ignorechecktimestamp，表示不检查时间戳
         //      strExistringXml 覆盖操作失败时，返回数据库中已经存在的记录，供前端参考
         //      strSavedXml 实际保存的新记录。内容可能和strNewXml有所差异。
         //      strSavedRecPath 实际保存的记录路径
@@ -1538,9 +1543,8 @@ unprocessed_element_names.Except(_auto_maintain_element_names)));
                 if (lRet == -1)
                     goto ERROR1;
 
-                XmlDocument readerdom = null;
                 nRet = LibraryApplication.LoadToDom(xml,
-                    out readerdom,
+                    out XmlDocument readerdom,
                     out strError);
                 if (nRet == -1)
                 {
@@ -2160,6 +2164,7 @@ out List<string> send_skips);
                 // 兑现一个命令
                 if (strAction == "new")
                 {
+                    string existing_xml = "";
 
                     // 检查新记录的路径中的id部分是否正确
                     // 库名部分，前面已经统一检查过了
@@ -2223,6 +2228,58 @@ out List<string> send_skips);
                             goto ERROR1;
                         }
                         */
+
+                        // 2025/5/21: 改变行为。force == true 的时候，new 允许覆盖一个已经存在记录的确定路径
+
+                        // 2024/5/17
+                        // 检查 new 操作时如果给出确定路径，此位置是否已经存在一条记录
+                        // 2025/5/21 注: bForce 为 true 的时候不管不顾继续向前处理
+                        if (strID != "?" /*&& bForce == false*/)
+                        {
+                            lRet = channel.GetRes(strRecPath,
+"data,content,timestamp,outputpath",
+out existing_xml,
+out string _,
+out byte[] _,
+out _,
+out strError);
+                            if (lRet == -1)
+                            {
+                                if (channel.IsNotFound())
+                                {
+
+                                }
+                                else
+                                {
+                                    strError = $"检查路径 '{strRecPath}' 中是否已经存在记录的时候出错: {strError}";
+                                    goto ERROR1;
+                                }
+                            }
+                            else
+                            {
+                                // 2024/5/22 新增的根据 style 判断处理
+                                // 注: 以前版本这里相当于 ifExist:error 效果
+                                var if_exist = StringUtil.GetParameterByPrefix(strStyle, "ifExist");
+                                if (if_exist == null || if_exist == "error")
+                                {
+                                    strError = $"路径 '{strRecPath}' 中已经存在记录，无法进行创建读者记录(new)操作。可改用修改读者记录(change)操作";
+                                    result.ErrorCode = ErrorCode.AlreadyExist;
+                                    goto ERROR1;
+                                }
+                                else
+                                {
+                                    // TODO: 改为 action "change" 继续向前处理
+                                    if (bForce == false)
+                                    {
+                                        /*
+                                        strError = $"路径 '{strRecPath}' 中已经存在记录，暂不支持 ifExist:{if_exist} 处理";
+                                        result.ErrorCode = ErrorCode.SystemError;
+                                        goto ERROR1;
+                                        */
+                                    }
+                                }
+                            }
+                        }
                     }
 
                     // bool fileElementFiltered = false;
@@ -2231,27 +2288,61 @@ out List<string> send_skips);
                     // 构造出适合保存的新读者记录
                     if (bForce == false)
                     {
-                        // 主要是为了把待加工的记录中，可能出现的属于“流通信息”的字段去除，避免出现安全性问题
-                        // parameters:
-                        //          useClientRefID  [out]是否使用了前端给出的 RefID?
-                        // return:
-                        //      -1  出错
-                        //      0   没有实质性修改
-                        //      1   发生了实质性修改
-                        nRet = BuildNewReaderRecord(domNewRec,
+                        bool useClientRefID = false;
+                        if (string.IsNullOrEmpty(existing_xml))
+                        {
+                            // 主要是为了把待加工的记录中，可能出现的属于“流通信息”的字段去除，避免出现安全性问题
+                            // parameters:
+                            //          useClientRefID  [out]是否使用了前端给出的 RefID?
+                            // return:
+                            //      -1  出错
+                            //      0   没有实质性修改
+                            //      1   发生了实质性修改
+                            nRet = BuildNewReaderRecord(domNewRec,
+                                element_names,
+                                CanonicalizeElementNames(important_fields),
+                                // string.IsNullOrEmpty(important_fields) ? null : important_fields.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries),
+                                sessioninfo.RightsOrigin,
+                                out useClientRefID,
+                                // out fileElementFiltered,
+                                out string xml,
+                                out denied_element_names,
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+
+                            domNewRec.LoadXml(xml);
+                        }
+                        else
+                        {
+                            // *** 原记录已经存在。原记录和新内容合并
+                            XmlDocument existing_dom = new XmlDocument();
+                            existing_dom.LoadXml(existing_xml);
+                            // return:
+                            //      -1  出错
+                            //      0   成功
+                            //      1   成功，并且 refID 元素是利用上了 domNew 里面的 refID 元素
+                            nRet = MergeTwoReaderXml(
                             element_names,
+                            strAction == "new" ? "change" : strAction,
+                            existing_dom,
+                            domNewRec,
                             CanonicalizeElementNames(important_fields),
-                            // string.IsNullOrEmpty(important_fields) ? null : important_fields.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries),
                             sessioninfo.RightsOrigin,
-                            out bool useClientRefID,
-                            // out fileElementFiltered,
-                            out string xml,
+                            out XmlDocument output_dom,
                             out denied_element_names,
                             out strError);
-                        if (nRet == -1)
-                            goto ERROR1;
+                            if (nRet == -1)
+                            {
+                                // strError = "修改被拒绝。" + strError + "。" + elementset_comment;
+                                goto ERROR1;
+                            }
+                            if (nRet == 1)
+                                useClientRefID = true;
 
-                        domNewRec.LoadXml(xml);
+                            domNewRec.LoadXml(output_dom.OuterXml);
+                        }
+
                         strSavedXml = domNewRec.OuterXml;   // 2024/2/26
 
                         if (useClientRefID)
@@ -2315,8 +2406,21 @@ out List<string> send_skips);
                     */
                     // 2021/7/15
                     // 给 domNewRec 中添加 libraryCode 元素
+                    if (bForce == false)
                     {
                         DomUtil.SetElementText(domNewRec.DocumentElement, "libraryCode", strLibraryCode);
+
+                        // 2024/5/16
+                        nRet = this.ReplaceOperation(
+ref domNewRec,
+string.IsNullOrEmpty(existing_xml) ? "create" : "change",
+sessioninfo.UserID,
+"",
+10,
+out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+
                         strSavedXml = domNewRec.OuterXml;   // 2024/2/26
                     }
 
@@ -2394,12 +2498,14 @@ out List<string> send_skips);
                         }
                     }
 
-                    // TODO: 添加 libraryCode 元素
+                    string style = "content";
+                    // 2024/5/12
+                    InheritTimestampStyle(ref style, strStyle);
 
                     lRet = channel.DoSaveTextRes(strRecPath,
                         domNewRec.OuterXml, // strSavedXml,
                         false,   // include preamble?
-                        "content",
+                        style,
                         baOldTimestamp,
                         out byte[] output_timestamp,
                         out string strOutputPath,
@@ -2409,15 +2515,20 @@ out List<string> send_skips);
                         strSavedXml = "";
                         strSavedRecPath = strOutputPath;    // 2011/9/6 add
                         baNewTimestamp = output_timestamp;
+                        /*
                         if (channel.OriginErrorCode == ErrorCodeValue.TimestampMismatch)
                         {
                             // 2011/9/6 add
                             strError = "创建新读者记录的时候，数据库内核决定创建新记录的位置 '" + strOutputPath + "' 居然已经存在记录。这通常是因为该数据库的尾号不正常导致的。请提醒系统管理员及时处理这个故障。原始错误信息: " + strError;
                         }
-                        else
-                            strError = "保存新记录的操作发生错误:" + strError;
+                        else */
+                        strError = "保存新记录的操作发生错误:" + strError;
                         kernel_errorcode = channel.OriginErrorCode;
-                        goto ERROR1;
+                        result.ErrorCode = LibraryServerResult.FromErrorValue(channel.OriginErrorCode);
+                        result.ErrorInfo = strError;
+                        result.Value = -1;
+                        return result;
+                        // goto ERROR1;
                     }
                     else // 成功
                     {
@@ -2433,13 +2544,17 @@ out List<string> send_skips);
                             //      ""      找到了前缀，并且 level 部分为空
                             //      其他     返回 level 部分
                             string read_level = GetReaderInfoLevel("getreaderinfo", sessioninfo.RightsOrigin);
-                            FilterByLevel(domNewRec,
+                            XmlDocument temp = new XmlDocument();
+                            temp.LoadXml(domNewRec.OuterXml);
+                            // 注意这里不应该修改 domNewRec。因为此时 domNewRec 中有 password 元素等，要写入操作日志
+                            FilterByLevel(temp, // domNewRec,
                                 read_level,
                                 "read",
                                 this.PatronMaskDefinition,
                                 out _);
 
-                            strSavedXml = domNewRec.OuterXml;
+                            // strSavedXml 是用来返回给前端的，要去掉 password 等敏感元素
+                            strSavedXml = temp.OuterXml;    // domNewRec.OuterXml;
                         }
 
                         if (denied_element_names != null && denied_element_names.Count > 0)
@@ -2458,12 +2573,22 @@ strLibraryCode);    // 读者所在的馆代码
 
                         DomUtil.SetElementText(domOperLog.DocumentElement, "action", "new");
 
-                        // 不创建<oldRecord>元素
+                        // 2024/5/25
+                        // 要创建<oldRecord>元素
+                        if (string.IsNullOrEmpty(existing_xml) == false)
+                        {
+                            var node = DomUtil.SetElementText(domOperLog.DocumentElement,
+    "oldRecord",
+    existing_xml);
+                            node.SetAttribute("recPath", strOutputPath);
+                        }
 
-                        XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
-                            "record",
-                            domNewRec.OuterXml);  // strNewXml  // 2024/2/26 改掉这个 bug
-                        DomUtil.SetAttr(node, "recPath", strOutputPath);
+                        {
+                            XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
+                                "record",
+                                domNewRec.OuterXml);  // strNewXml  // 2024/2/26 改掉这个 bug
+                            DomUtil.SetAttr(node, "recPath", strOutputPath);
+                        }
 
                         // 新记录保存成功，需要返回信息元素。因为需要返回新的时间戳和实际保存的记录路径
                         strSavedRecPath = strOutputPath;
@@ -2732,6 +2857,12 @@ strLibraryCode);    // 读者所在的馆代码
                 // 写入日志
                 if (domOperLog != null)
                 {
+                    // 2024/5/16
+                    if (string.IsNullOrEmpty(strStyle) == false)
+                        DomUtil.SetElementText(domOperLog.DocumentElement,
+                            "style",
+                            strStyle);
+
                     string strOperTime = app.Clock.GetClock();
                     DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
                         sessioninfo.UserID);   // 操作者
@@ -2775,7 +2906,8 @@ strLibraryCode);    // 读者所在的馆代码
         ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
-            result.ErrorCode = ErrorCode.SystemError;
+            if (result.ErrorCode == ErrorCode.NoError)
+                result.ErrorCode = ErrorCode.SystemError;
             return result;
         }
 
@@ -3252,11 +3384,16 @@ root, strLibraryCode);
                 out strError);
             if (lRet == -1)
             {
+                /*
                 if (bForce == true)
                 {
-                    strExistingXml = "<root />";
+                    // 2024/5/21
+                    if (channel.IsNotFound())
+                        strExistingXml = "<root />";
+                    else
+                        goto ERROR1;
                 }
-                else
+                else */
                 {
                     if (channel.IsNotFound())    // 2021/8/27
                     {
@@ -3436,8 +3573,13 @@ root, strLibraryCode);
 
             Debug.Assert(strRecPath != "", "");
 
+            string style = "";
+            // 2024/5/12
+            InheritTimestampStyle(ref style, strStyle);
+
             lRet = channel.DoDeleteRes(strRecPath,
                 baOldTimestamp,
+                style,
                 out byte[] output_timestamp,
                 out strError);
             if (lRet == -1)
@@ -3577,7 +3719,7 @@ root, strLibraryCode);
             int nRet = 0;
             long lRet = 0;
 
-            string strExistXml = "";
+            string existing_xml = "";
             byte[] exist_timestamp = null;
             string strOutputPath = "";
             string strMetaData = "";
@@ -3594,21 +3736,66 @@ root, strLibraryCode);
             bool bObjectNotFound = false;
             // 先读出数据库中此位置的已有记录
             lRet = channel.GetRes(strRecPath,
-                out strExistXml,
+                out existing_xml,
                 out strMetaData,
                 out exist_timestamp,
                 out strOutputPath,
                 out strError);
+            string strExistXml = existing_xml;
             if (lRet == -1)
             {
                 if (channel.IsNotFoundOrDamaged())    // 2019/6/12
                 {
-                    bObjectNotFound = channel.ErrorCode == ChannelErrorCode.NotFoundObjectFile;
-                    // 如果记录不存在, 则构造一条空的记录
-                    bExist = false;
-                    strExistXml = "<root />";
-                    exist_timestamp = null;
-                    strOutputPath = strRecPath;
+                    // 2024/5/22
+                    // 注: 以前版本这里相当于 ifNotExist:continue 效果
+                    var if_not_exist = StringUtil.GetParameterByPrefix(strStyle, "ifNotExist");
+                    if (if_not_exist == "continue"
+                        /*|| bForce == true*/)
+                    {
+                        bObjectNotFound = channel.ErrorCode == ChannelErrorCode.NotFoundObjectFile;
+                        bExist = false;
+                        exist_timestamp = null;
+                        strOutputPath = strRecPath;
+                        // 如果记录不存在, 则构造一条空的记录
+                        // strExistXml = "<root />";   // TODO: 这里有个问题就是记录中不存在 password 元素
+
+                        // 2024/5/29
+                        // 按照新创建读者记录的要求，生成一条背景记录(假装是数据库中已经存在的记录内容，即将用于和前端提交的新记录内容合并)
+                        // 疑问: 如果一个低权限账户用 action "change" 保存到一个不存在的路径，则客观上起到了操纵创建一些他原本不能写入的字段内容，这样算不算有安全性隐患?
+                        {
+                            string important_fields = domNewRec.DocumentElement?.GetAttribute("importantFields");
+                            if (domNewRec.DocumentElement != null)
+                                domNewRec.DocumentElement.RemoveAttribute("importantFields");
+
+                            // parameters:
+                            //          useClientRefID  [out]是否使用了前端给出的 RefID?
+                            // return:
+                            //      -1  出错
+                            //      0   没有实质性修改
+                            //      1   发生了实质性修改
+                            nRet = BuildNewReaderRecord(domNewRec,
+                                element_names,
+                                CanonicalizeElementNames(important_fields),
+                                sessioninfo.RightsOrigin,
+                                out bool useClientRefID,
+                                out strExistXml,
+                                out _,  // List<string> denied_element_names,
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+
+                            // 按照 new 的要求处理 strExistXml 中的 operations? 
+
+                        }
+                    }
+                    else
+                    {
+                        // 2024/5/16
+                        strError = $"覆盖保存操作发生错误, 位置 '{strRecPath}' 的原有记录不存在";
+                        library_errorcode = ErrorCode.NotFound;
+                        kernel_errorcode = channel.OriginErrorCode;
+                        return -1;
+                    }
                 }
                 else
                 {
@@ -4325,24 +4512,43 @@ root, strLibraryCode);
                 }
             }
 
+            if (bForce == false)
+            {
+                // 2024/5/16
+                nRet = this.ReplaceOperation(
+    ref domNewRec,
+    string.IsNullOrEmpty(existing_xml) ? "create" : "change",
+    sessioninfo.UserID,
+    "",
+    10,
+    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+            }
+
+            string style = "content";
+            // 2024/5/12
+            InheritTimestampStyle(ref style, strStyle);
+
         REDO_SAVE:
             // 保存新记录
             byte[] output_timestamp = null;
             lRet = channel.DoSaveTextRes(strRecPath,
     domNewRec.OuterXml, // strNewXml,
     false,   // include preamble?
-    "content",
-    exist_timestamp,
+    style,  // "content",
+    baOldTimestamp, // exist_timestamp,
     out output_timestamp,
     out strOutputPath,
     out strError);
             if (lRet == -1)
             {
-                if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
+                if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch
+                    && bExist == true)
                 {
-                    if (nRedoCount > 10)
+                    if (nRedoCount > 5)
                     {
-                        strError = "反复遇到时间戳冲突, 超过10次重试仍然失败";
+                        strError = "反复遇到时间戳冲突, 超过 5 次重试仍然失败";
                         goto ERROR1;
                     }
                     // 发现时间戳不匹配
@@ -4360,6 +4566,7 @@ root, strLibraryCode);
 
                 strError = "保存操作发生错误:" + strError;
                 kernel_errorcode = channel.OriginErrorCode;
+                baNewTimestamp = output_timestamp;
                 return -1;
             }
             else // 成功
@@ -4373,8 +4580,13 @@ root, strLibraryCode);
                 XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement, "record", domNewRec.OuterXml);  // strNewXml
                 DomUtil.SetAttr(node, "recPath", strRecPath);
 
-                node = DomUtil.SetElementText(domOperLog.DocumentElement, "oldRecord", strExistXml);
-                DomUtil.SetAttr(node, "recPath", strRecPath);
+                if (string.IsNullOrEmpty(existing_xml) == false)
+                {
+                    node = DomUtil.SetElementText(domOperLog.DocumentElement,
+                        "oldRecord",
+                        existing_xml);
+                    DomUtil.SetAttr(node, "recPath", strRecPath);
+                }
 
                 // 保存成功，需要返回信息元素。因为需要返回新的时间戳
                 baNewTimestamp = output_timestamp;
@@ -6522,6 +6734,7 @@ out strError);
                 }
             }
 
+            /*
             {
                 if (readerdom != null)
                 {
@@ -6530,6 +6743,7 @@ out strError);
                     strXml = null;  // 从此以后不用 strXml，而用 readerdom
                 }
             }
+            */
 
             nRet = BuildReaderResults(
                 sessioninfo,
@@ -6876,11 +7090,16 @@ out strError);
                 }
             }
 
-            XmlDocument filtered_readerdom = new XmlDocument();
+            // 原始的，未过滤的读者 XML
+            string origin_xml = "";
             if (readerdom != null)
-                filtered_readerdom.LoadXml(readerdom.OuterXml);
+                origin_xml = (readerdom.OuterXml);
             else
-                filtered_readerdom.LoadXml(strXml);
+                origin_xml = (strXml);
+
+            // 过滤以后的 XmlDocument
+            XmlDocument filtered_readerdom = new XmlDocument();
+            filtered_readerdom.LoadXml(origin_xml);
 
             FilterByLevel(filtered_readerdom,
             level,
@@ -6941,19 +7160,39 @@ out strError);
                     SetResult(results_list, i, strCalendarName);
                 }
                 // else if (String.Compare(strResultType, "xml", true) == 0)
-                else if (IsResultType(strResultType, "xml") == true
-                    || IsResultType(strResultType, "json") == true)
+                else if (IsResultType(strResultType, "xml", out string parameters) == true
+                    || IsResultType(strResultType, "json", out parameters) == true)
                 {
                     string strResultXml = "";
-                    nRet = GetPatronXml(filtered_readerdom.OuterXml, // strXml,
-        strResultType,
-        strReaderLibraryCode,
-        out strResultXml,
-        out strError);
-                    if (nRet == -1)
+                    // 2024/5/26
+                    if (parameters == "backup")
                     {
-                        strError = "获取 " + strResultType + " 格式的 XML 字符串时出错: " + strError;
-                        goto ERROR1;
+                        if (StringUtil.IsInList("backup", sessioninfo.Rights))
+                            strResultXml = origin_xml;  // 直接返回从数据库中获得的原始 XML。注意里面可能会包含 password 元素
+                        else
+                        {
+                            strError = $"当前账户不具备 backup 权限，无法使用 xml:backup 或 json:backup 格式";
+                            goto ERROR1;
+                        }
+                    }
+                    else
+                    {
+                        if (parameters != "backup" && parameters.Contains("backup"))
+                        {
+                            strError = $"格式 xml:'{parameters}' 不合法。如果冒号后使用 'bakckup' 格式，则应当仅用 'backup'，不能再包含其它部分";
+                            goto ERROR1;
+                        }
+
+                        nRet = GetPatronXml(filtered_readerdom.OuterXml, // strXml,
+            strResultType,
+            strReaderLibraryCode,
+            out strResultXml,
+            out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "获取 " + strResultType + " 格式的 XML 字符串时出错: " + strError;
+                            goto ERROR1;
+                        }
                     }
 
                     if (IsResultType(strResultType, "json") == true)
@@ -7213,11 +7452,26 @@ out strError);
             return -1;
         }
 
-        static bool IsResultType(string strResultType, string strName)
+        static bool IsResultType(string strResultType,
+            string strName)
         {
-            if (String.Compare(strResultType, strName, true) == 0
-                   || StringUtil.HasHead(strResultType, strName + ":") == true)
+            return IsResultType(strResultType,
+    strName,
+    out _);
+        }
+
+        static bool IsResultType(string strResultType,
+            string strName,
+            out string parameters)
+        {
+            parameters = "";
+            if (String.Compare(strResultType, strName, true) == 0)
                 return true;
+            if (StringUtil.HasHead(strResultType, strName + ":") == true)
+            {
+                parameters = strResultType.Substring((strName + ":").Length);
+                return true;
+            }
             return false;
         }
 
@@ -7270,8 +7524,9 @@ out strError);
         public LibraryServerResult MoveReaderInfo(
             SessionInfo sessioninfo,
             string strSourceRecPath,
-            string strStyle,    // 2024/5/10 增加
             ref string strTargetRecPath,
+            string strNewReader,
+            string strStyle,    // 2024/5/10 增加
             out byte[] target_timestamp)
         {
             string strError = "";
@@ -7536,8 +7791,8 @@ out strError);
                 lRet = channel.DoCopyRecord(strSourceRecPath,
                      strTargetRecPath,
                      true,   // bDeleteSourceRecord
-                            "file_reserve_source",  // 2024/4/28
-                            out _,
+                     "file_reserve_source",  // 2024/4/28
+                     out _,
                      out target_timestamp,
                      out strOutputRecPath,
                      out strError);
@@ -7551,33 +7806,29 @@ out strError);
 
                 // TODO: 如果新位置的 libraryCode 变了，还要专门改写一次新位置的 XML 记录
 
-                /*
-                if (String.IsNullOrEmpty(strNewBiblio) == false)
+                // 2024/5/21
+                if (String.IsNullOrEmpty(strNewReader) == false)
                 {
-                    this.BiblioLocks.LockForWrite(strOutputRecPath);
-
+                    this.ReaderLocks.LockForWrite(strTargetRecPath);
                     try
                     {
-                        // TODO: 如果新的、已存在的xml没有不同，或者新的xml为空，则这步保存可以省略
-                        string strOutputBiblioRecPath = "";
-                        lRet = channel.DoSaveTextRes(strOutputRecPath,
-                            strNewBiblio,
+                        // string strOutputBiblioRecPath = "";
+                        lRet = channel.DoSaveTextRes(strTargetRecPath,
+                            strNewReader,
                             false,
                             "content", // ,ignorechecktimestamp
-                            output_timestamp,
-                            out baOutputTimestamp,
-                            out strOutputBiblioRecPath,
+                            target_timestamp,
+                            out byte[] baOutputTimestamp,
+                            out _,
                             out strError);
                         if (lRet == -1)
                             goto ERROR1;
                     }
                     finally
                     {
-                        this.BiblioLocks.UnlockForWrite(strOutputRecPath);
+                        this.ReaderLocks.UnlockForWrite(strTargetRecPath);
                     }
                 }
-                */
-
             }
             catch (Exception ex)
             {
@@ -7618,7 +7869,8 @@ out strError);
                 strOperTimeString);
 
             XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
-                "record", "");
+                "record",
+                strNewReader);    // 2024/5/21 前 record 元素都没有文本内容
             DomUtil.SetAttr(node, "recPath", strTargetRecPath);
 
             node = DomUtil.SetElementText(domOperLog.DocumentElement,

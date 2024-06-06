@@ -923,6 +923,9 @@ namespace DigitalPlatform.LibraryClient.localhost {
         Compressed = 25,
         
         [System.Runtime.Serialization.EnumMemberAttribute()]
+        NotFoundTargetDb = 26,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
         RequestError = 100,
         
         [System.Runtime.Serialization.EnumMemberAttribute()]
@@ -4114,18 +4117,18 @@ namespace DigitalPlatform.LibraryClient.localhost {
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetReaderInfo(out string[] results, out string strRecPath, out byte[] baTimestamp, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SetReaderInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/SetReaderInfoResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetReaderInfo(out string strExistingXml, out string strSavedXml, out string strSavedRecPath, out byte[] baNewTimestamp, out DigitalPlatform.LibraryClient.localhost.ErrorCodeValue kernel_errorcode, string strAction, string strRecPath, string strNewXml, string strOldXml, byte[] baOldTimestamp);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetReaderInfo(out string strExistingXml, out string strSavedXml, out string strSavedRecPath, out byte[] baNewTimestamp, out DigitalPlatform.LibraryClient.localhost.ErrorCodeValue kernel_errorcode, string strAction, string strRecPath, string strNewXml, string strOldXml, byte[] baOldTimestamp, string strStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SetReaderInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/SetReaderInfoResponse")]
-        System.IAsyncResult BeginSetReaderInfo(string strAction, string strRecPath, string strNewXml, string strOldXml, byte[] baOldTimestamp, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginSetReaderInfo(string strAction, string strRecPath, string strNewXml, string strOldXml, byte[] baOldTimestamp, string strStyle, System.AsyncCallback callback, object asyncState);
         
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetReaderInfo(out string strExistingXml, out string strSavedXml, out string strSavedRecPath, out byte[] baNewTimestamp, out DigitalPlatform.LibraryClient.localhost.ErrorCodeValue kernel_errorcode, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/MoveReaderInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/MoveReaderInfoResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult MoveReaderInfo(string strSourceRecPath, ref string strTargetRecPath, out byte[] target_timestamp);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult MoveReaderInfo(string strSourceRecPath, ref string strTargetRecPath, out byte[] target_timestamp, string strNewReader, string strStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/MoveReaderInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/MoveReaderInfoResponse")]
-        System.IAsyncResult BeginMoveReaderInfo(string strSourceRecPath, ref string strTargetRecPath, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginMoveReaderInfo(string strSourceRecPath, ref string strTargetRecPath, string strNewReader, string strStyle, System.AsyncCallback callback, object asyncState);
         
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndMoveReaderInfo(ref string strTargetRecPath, out byte[] target_timestamp, System.IAsyncResult result);
         
@@ -11137,13 +11140,13 @@ namespace DigitalPlatform.LibraryClient.localhost {
                         strResultTypeList}, this.onEndGetReaderInfoDelegate, this.onGetReaderInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetReaderInfo(out string strExistingXml, out string strSavedXml, out string strSavedRecPath, out byte[] baNewTimestamp, out DigitalPlatform.LibraryClient.localhost.ErrorCodeValue kernel_errorcode, string strAction, string strRecPath, string strNewXml, string strOldXml, byte[] baOldTimestamp) {
-            return base.Channel.SetReaderInfo(out strExistingXml, out strSavedXml, out strSavedRecPath, out baNewTimestamp, out kernel_errorcode, strAction, strRecPath, strNewXml, strOldXml, baOldTimestamp);
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetReaderInfo(out string strExistingXml, out string strSavedXml, out string strSavedRecPath, out byte[] baNewTimestamp, out DigitalPlatform.LibraryClient.localhost.ErrorCodeValue kernel_errorcode, string strAction, string strRecPath, string strNewXml, string strOldXml, byte[] baOldTimestamp, string strStyle) {
+            return base.Channel.SetReaderInfo(out strExistingXml, out strSavedXml, out strSavedRecPath, out baNewTimestamp, out kernel_errorcode, strAction, strRecPath, strNewXml, strOldXml, baOldTimestamp, strStyle);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginSetReaderInfo(string strAction, string strRecPath, string strNewXml, string strOldXml, byte[] baOldTimestamp, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginSetReaderInfo(strAction, strRecPath, strNewXml, strOldXml, baOldTimestamp, callback, asyncState);
+        public System.IAsyncResult BeginSetReaderInfo(string strAction, string strRecPath, string strNewXml, string strOldXml, byte[] baOldTimestamp, string strStyle, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginSetReaderInfo(strAction, strRecPath, strNewXml, strOldXml, baOldTimestamp, strStyle, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
@@ -11157,7 +11160,8 @@ namespace DigitalPlatform.LibraryClient.localhost {
             string strNewXml = ((string)(inValues[2]));
             string strOldXml = ((string)(inValues[3]));
             byte[] baOldTimestamp = ((byte[])(inValues[4]));
-            return this.BeginSetReaderInfo(strAction, strRecPath, strNewXml, strOldXml, baOldTimestamp, callback, asyncState);
+            string strStyle = ((string)(inValues[5]));
+            return this.BeginSetReaderInfo(strAction, strRecPath, strNewXml, strOldXml, baOldTimestamp, strStyle, callback, asyncState);
         }
         
         private object[] OnEndSetReaderInfo(System.IAsyncResult result) {
@@ -11183,11 +11187,11 @@ namespace DigitalPlatform.LibraryClient.localhost {
             }
         }
         
-        public void SetReaderInfoAsync(string strAction, string strRecPath, string strNewXml, string strOldXml, byte[] baOldTimestamp) {
-            this.SetReaderInfoAsync(strAction, strRecPath, strNewXml, strOldXml, baOldTimestamp, null);
+        public void SetReaderInfoAsync(string strAction, string strRecPath, string strNewXml, string strOldXml, byte[] baOldTimestamp, string strStyle) {
+            this.SetReaderInfoAsync(strAction, strRecPath, strNewXml, strOldXml, baOldTimestamp, strStyle, null);
         }
         
-        public void SetReaderInfoAsync(string strAction, string strRecPath, string strNewXml, string strOldXml, byte[] baOldTimestamp, object userState) {
+        public void SetReaderInfoAsync(string strAction, string strRecPath, string strNewXml, string strOldXml, byte[] baOldTimestamp, string strStyle, object userState) {
             if ((this.onBeginSetReaderInfoDelegate == null)) {
                 this.onBeginSetReaderInfoDelegate = new BeginOperationDelegate(this.OnBeginSetReaderInfo);
             }
@@ -11202,16 +11206,17 @@ namespace DigitalPlatform.LibraryClient.localhost {
                         strRecPath,
                         strNewXml,
                         strOldXml,
-                        baOldTimestamp}, this.onEndSetReaderInfoDelegate, this.onSetReaderInfoCompletedDelegate, userState);
+                        baOldTimestamp,
+                        strStyle}, this.onEndSetReaderInfoDelegate, this.onSetReaderInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult MoveReaderInfo(string strSourceRecPath, ref string strTargetRecPath, out byte[] target_timestamp) {
-            return base.Channel.MoveReaderInfo(strSourceRecPath, ref strTargetRecPath, out target_timestamp);
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult MoveReaderInfo(string strSourceRecPath, ref string strTargetRecPath, out byte[] target_timestamp, string strNewReader, string strStyle) {
+            return base.Channel.MoveReaderInfo(strSourceRecPath, ref strTargetRecPath, out target_timestamp, strNewReader, strStyle);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginMoveReaderInfo(string strSourceRecPath, ref string strTargetRecPath, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginMoveReaderInfo(strSourceRecPath, ref strTargetRecPath, callback, asyncState);
+        public System.IAsyncResult BeginMoveReaderInfo(string strSourceRecPath, ref string strTargetRecPath, string strNewReader, string strStyle, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginMoveReaderInfo(strSourceRecPath, ref strTargetRecPath, strNewReader, strStyle, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
@@ -11222,7 +11227,9 @@ namespace DigitalPlatform.LibraryClient.localhost {
         private System.IAsyncResult OnBeginMoveReaderInfo(object[] inValues, System.AsyncCallback callback, object asyncState) {
             string strSourceRecPath = ((string)(inValues[0]));
             string strTargetRecPath = ((string)(inValues[1]));
-            return this.BeginMoveReaderInfo(strSourceRecPath, ref strTargetRecPath, callback, asyncState);
+            string strNewReader = ((string)(inValues[2]));
+            string strStyle = ((string)(inValues[3]));
+            return this.BeginMoveReaderInfo(strSourceRecPath, ref strTargetRecPath, strNewReader, strStyle, callback, asyncState);
         }
         
         private object[] OnEndMoveReaderInfo(System.IAsyncResult result) {
@@ -11242,11 +11249,11 @@ namespace DigitalPlatform.LibraryClient.localhost {
             }
         }
         
-        public void MoveReaderInfoAsync(string strSourceRecPath, string strTargetRecPath) {
-            this.MoveReaderInfoAsync(strSourceRecPath, strTargetRecPath, null);
+        public void MoveReaderInfoAsync(string strSourceRecPath, string strTargetRecPath, string strNewReader, string strStyle) {
+            this.MoveReaderInfoAsync(strSourceRecPath, strTargetRecPath, strNewReader, strStyle, null);
         }
         
-        public void MoveReaderInfoAsync(string strSourceRecPath, string strTargetRecPath, object userState) {
+        public void MoveReaderInfoAsync(string strSourceRecPath, string strTargetRecPath, string strNewReader, string strStyle, object userState) {
             if ((this.onBeginMoveReaderInfoDelegate == null)) {
                 this.onBeginMoveReaderInfoDelegate = new BeginOperationDelegate(this.OnBeginMoveReaderInfo);
             }
@@ -11258,7 +11265,9 @@ namespace DigitalPlatform.LibraryClient.localhost {
             }
             base.InvokeAsync(this.onBeginMoveReaderInfoDelegate, new object[] {
                         strSourceRecPath,
-                        strTargetRecPath}, this.onEndMoveReaderInfoDelegate, this.onMoveReaderInfoCompletedDelegate, userState);
+                        strTargetRecPath,
+                        strNewReader,
+                        strStyle}, this.onEndMoveReaderInfoDelegate, this.onMoveReaderInfoCompletedDelegate, userState);
         }
         
         public DigitalPlatform.LibraryClient.localhost.LibraryServerResult DevolveReaderInfo(string strSourceReaderBarcode, string strTargetReaderBarcode) {
@@ -14843,18 +14852,18 @@ namespace DigitalPlatform.LibraryClient.localhost {
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetReaderInfo(out string[] results, out string strRecPath, out byte[] baTimestamp, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetReaderInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetReaderInfoResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetReaderInfo(out string strExistingXml, out string strSavedXml, out string strSavedRecPath, out byte[] baNewTimestamp, out DigitalPlatform.LibraryClient.localhost.ErrorCodeValue kernel_errorcode, string strAction, string strRecPath, string strNewXml, string strOldXml, byte[] baOldTimestamp);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetReaderInfo(out string strExistingXml, out string strSavedXml, out string strSavedRecPath, out byte[] baNewTimestamp, out DigitalPlatform.LibraryClient.localhost.ErrorCodeValue kernel_errorcode, string strAction, string strRecPath, string strNewXml, string strOldXml, byte[] baOldTimestamp, string strStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetReaderInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetReaderInfoResponse")]
-        System.IAsyncResult BeginSetReaderInfo(string strAction, string strRecPath, string strNewXml, string strOldXml, byte[] baOldTimestamp, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginSetReaderInfo(string strAction, string strRecPath, string strNewXml, string strOldXml, byte[] baOldTimestamp, string strStyle, System.AsyncCallback callback, object asyncState);
         
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetReaderInfo(out string strExistingXml, out string strSavedXml, out string strSavedRecPath, out byte[] baNewTimestamp, out DigitalPlatform.LibraryClient.localhost.ErrorCodeValue kernel_errorcode, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/MoveReaderInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/MoveReaderInfoResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult MoveReaderInfo(string strSourceRecPath, ref string strTargetRecPath, out byte[] target_timestamp);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult MoveReaderInfo(string strSourceRecPath, ref string strTargetRecPath, out byte[] target_timestamp, string strNewReader, string strStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/MoveReaderInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/MoveReaderInfoResponse")]
-        System.IAsyncResult BeginMoveReaderInfo(string strSourceRecPath, ref string strTargetRecPath, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginMoveReaderInfo(string strSourceRecPath, ref string strTargetRecPath, string strNewReader, string strStyle, System.AsyncCallback callback, object asyncState);
         
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndMoveReaderInfo(ref string strTargetRecPath, out byte[] target_timestamp, System.IAsyncResult result);
         
@@ -21866,13 +21875,13 @@ namespace DigitalPlatform.LibraryClient.localhost {
                         strResultTypeList}, this.onEndGetReaderInfoDelegate, this.onGetReaderInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetReaderInfo(out string strExistingXml, out string strSavedXml, out string strSavedRecPath, out byte[] baNewTimestamp, out DigitalPlatform.LibraryClient.localhost.ErrorCodeValue kernel_errorcode, string strAction, string strRecPath, string strNewXml, string strOldXml, byte[] baOldTimestamp) {
-            return base.Channel.SetReaderInfo(out strExistingXml, out strSavedXml, out strSavedRecPath, out baNewTimestamp, out kernel_errorcode, strAction, strRecPath, strNewXml, strOldXml, baOldTimestamp);
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetReaderInfo(out string strExistingXml, out string strSavedXml, out string strSavedRecPath, out byte[] baNewTimestamp, out DigitalPlatform.LibraryClient.localhost.ErrorCodeValue kernel_errorcode, string strAction, string strRecPath, string strNewXml, string strOldXml, byte[] baOldTimestamp, string strStyle) {
+            return base.Channel.SetReaderInfo(out strExistingXml, out strSavedXml, out strSavedRecPath, out baNewTimestamp, out kernel_errorcode, strAction, strRecPath, strNewXml, strOldXml, baOldTimestamp, strStyle);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginSetReaderInfo(string strAction, string strRecPath, string strNewXml, string strOldXml, byte[] baOldTimestamp, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginSetReaderInfo(strAction, strRecPath, strNewXml, strOldXml, baOldTimestamp, callback, asyncState);
+        public System.IAsyncResult BeginSetReaderInfo(string strAction, string strRecPath, string strNewXml, string strOldXml, byte[] baOldTimestamp, string strStyle, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginSetReaderInfo(strAction, strRecPath, strNewXml, strOldXml, baOldTimestamp, strStyle, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
@@ -21886,7 +21895,8 @@ namespace DigitalPlatform.LibraryClient.localhost {
             string strNewXml = ((string)(inValues[2]));
             string strOldXml = ((string)(inValues[3]));
             byte[] baOldTimestamp = ((byte[])(inValues[4]));
-            return this.BeginSetReaderInfo(strAction, strRecPath, strNewXml, strOldXml, baOldTimestamp, callback, asyncState);
+            string strStyle = ((string)(inValues[5]));
+            return this.BeginSetReaderInfo(strAction, strRecPath, strNewXml, strOldXml, baOldTimestamp, strStyle, callback, asyncState);
         }
         
         private object[] OnEndSetReaderInfo(System.IAsyncResult result) {
@@ -21912,11 +21922,11 @@ namespace DigitalPlatform.LibraryClient.localhost {
             }
         }
         
-        public void SetReaderInfoAsync(string strAction, string strRecPath, string strNewXml, string strOldXml, byte[] baOldTimestamp) {
-            this.SetReaderInfoAsync(strAction, strRecPath, strNewXml, strOldXml, baOldTimestamp, null);
+        public void SetReaderInfoAsync(string strAction, string strRecPath, string strNewXml, string strOldXml, byte[] baOldTimestamp, string strStyle) {
+            this.SetReaderInfoAsync(strAction, strRecPath, strNewXml, strOldXml, baOldTimestamp, strStyle, null);
         }
         
-        public void SetReaderInfoAsync(string strAction, string strRecPath, string strNewXml, string strOldXml, byte[] baOldTimestamp, object userState) {
+        public void SetReaderInfoAsync(string strAction, string strRecPath, string strNewXml, string strOldXml, byte[] baOldTimestamp, string strStyle, object userState) {
             if ((this.onBeginSetReaderInfoDelegate == null)) {
                 this.onBeginSetReaderInfoDelegate = new BeginOperationDelegate(this.OnBeginSetReaderInfo);
             }
@@ -21931,16 +21941,17 @@ namespace DigitalPlatform.LibraryClient.localhost {
                         strRecPath,
                         strNewXml,
                         strOldXml,
-                        baOldTimestamp}, this.onEndSetReaderInfoDelegate, this.onSetReaderInfoCompletedDelegate, userState);
+                        baOldTimestamp,
+                        strStyle}, this.onEndSetReaderInfoDelegate, this.onSetReaderInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult MoveReaderInfo(string strSourceRecPath, ref string strTargetRecPath, out byte[] target_timestamp) {
-            return base.Channel.MoveReaderInfo(strSourceRecPath, ref strTargetRecPath, out target_timestamp);
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult MoveReaderInfo(string strSourceRecPath, ref string strTargetRecPath, out byte[] target_timestamp, string strNewReader, string strStyle) {
+            return base.Channel.MoveReaderInfo(strSourceRecPath, ref strTargetRecPath, out target_timestamp, strNewReader, strStyle);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginMoveReaderInfo(string strSourceRecPath, ref string strTargetRecPath, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginMoveReaderInfo(strSourceRecPath, ref strTargetRecPath, callback, asyncState);
+        public System.IAsyncResult BeginMoveReaderInfo(string strSourceRecPath, ref string strTargetRecPath, string strNewReader, string strStyle, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginMoveReaderInfo(strSourceRecPath, ref strTargetRecPath, strNewReader, strStyle, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
@@ -21951,7 +21962,9 @@ namespace DigitalPlatform.LibraryClient.localhost {
         private System.IAsyncResult OnBeginMoveReaderInfo(object[] inValues, System.AsyncCallback callback, object asyncState) {
             string strSourceRecPath = ((string)(inValues[0]));
             string strTargetRecPath = ((string)(inValues[1]));
-            return this.BeginMoveReaderInfo(strSourceRecPath, ref strTargetRecPath, callback, asyncState);
+            string strNewReader = ((string)(inValues[2]));
+            string strStyle = ((string)(inValues[3]));
+            return this.BeginMoveReaderInfo(strSourceRecPath, ref strTargetRecPath, strNewReader, strStyle, callback, asyncState);
         }
         
         private object[] OnEndMoveReaderInfo(System.IAsyncResult result) {
@@ -21971,11 +21984,11 @@ namespace DigitalPlatform.LibraryClient.localhost {
             }
         }
         
-        public void MoveReaderInfoAsync(string strSourceRecPath, string strTargetRecPath) {
-            this.MoveReaderInfoAsync(strSourceRecPath, strTargetRecPath, null);
+        public void MoveReaderInfoAsync(string strSourceRecPath, string strTargetRecPath, string strNewReader, string strStyle) {
+            this.MoveReaderInfoAsync(strSourceRecPath, strTargetRecPath, strNewReader, strStyle, null);
         }
         
-        public void MoveReaderInfoAsync(string strSourceRecPath, string strTargetRecPath, object userState) {
+        public void MoveReaderInfoAsync(string strSourceRecPath, string strTargetRecPath, string strNewReader, string strStyle, object userState) {
             if ((this.onBeginMoveReaderInfoDelegate == null)) {
                 this.onBeginMoveReaderInfoDelegate = new BeginOperationDelegate(this.OnBeginMoveReaderInfo);
             }
@@ -21987,7 +22000,9 @@ namespace DigitalPlatform.LibraryClient.localhost {
             }
             base.InvokeAsync(this.onBeginMoveReaderInfoDelegate, new object[] {
                         strSourceRecPath,
-                        strTargetRecPath}, this.onEndMoveReaderInfoDelegate, this.onMoveReaderInfoCompletedDelegate, userState);
+                        strTargetRecPath,
+                        strNewReader,
+                        strStyle}, this.onEndMoveReaderInfoDelegate, this.onMoveReaderInfoCompletedDelegate, userState);
         }
         
         public DigitalPlatform.LibraryClient.localhost.LibraryServerResult DevolveReaderInfo(string strSourceReaderBarcode, string strTargetReaderBarcode) {

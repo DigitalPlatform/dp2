@@ -138,6 +138,7 @@
             this.button_accessNo_sort = new System.Windows.Forms.Button();
             this.label20 = new System.Windows.Forms.Label();
             this.textBox_accessNo_lines = new System.Windows.Forms.TextBox();
+            this.button_addCrLf_countRecords = new System.Windows.Forms.Button();
             this.tabControl_main.SuspendLayout();
             this.tabPage_sjhm.SuspendLayout();
             this.tabPage_xmlEditor.SuspendLayout();
@@ -1352,6 +1353,7 @@
             // 
             // tabPage_addCrLf
             // 
+            this.tabPage_addCrLf.Controls.Add(this.button_addCrLf_countRecords);
             this.tabPage_addCrLf.Controls.Add(this.label19);
             this.tabPage_addCrLf.Controls.Add(this.button_addCrLf_begin);
             this.tabPage_addCrLf.Controls.Add(this.label18);
@@ -1512,6 +1514,17 @@
             this.textBox_accessNo_lines.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.textBox_accessNo_lines.Size = new System.Drawing.Size(928, 483);
             this.textBox_accessNo_lines.TabIndex = 3;
+            // 
+            // button_addCrLf_countRecords
+            // 
+            this.button_addCrLf_countRecords.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_addCrLf_countRecords.Location = new System.Drawing.Point(766, 206);
+            this.button_addCrLf_countRecords.Name = "button_addCrLf_countRecords";
+            this.button_addCrLf_countRecords.Size = new System.Drawing.Size(167, 40);
+            this.button_addCrLf_countRecords.TabIndex = 14;
+            this.button_addCrLf_countRecords.Text = "记录条数";
+            this.button_addCrLf_countRecords.UseVisualStyleBackColor = true;
+            this.button_addCrLf_countRecords.Click += new System.EventHandler(this.button_addCrLf_countRecords_Click);
             // 
             // UtilityForm
             // 
@@ -1693,5 +1706,6 @@
         private System.Windows.Forms.Label label20;
         private System.Windows.Forms.Button button_accessNo_sort;
         private System.Windows.Forms.Button button_accessNo_removeRangeEnd;
+        private System.Windows.Forms.Button button_addCrLf_countRecords;
     }
 }
