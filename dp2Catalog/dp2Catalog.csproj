@@ -51,7 +51,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>57</ApplicationRevision>
+    <ApplicationRevision>63</ApplicationRevision>
     <ApplicationVersion>3.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -454,6 +454,9 @@
     <Content Include="SRU\sample_marcxml.xml" />
     <Content Include="SRU\sample_mods.xml" />
     <Content Include="SRU\sample_unimarcxml.xml" />
+    <Content Include="verify.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="zserver.xml" />
     <EmbeddedResource Include="AdvertiseForm.resx">
       <DependentUpon>AdvertiseForm.cs</DependentUpon>
@@ -1281,6 +1284,16 @@
       <FileType>File</FileType>
     </PublishFile>
     <PublishFile Include="page_blank_128.png">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="verify.css">
       <Visible>False</Visible>
       <Group>
       </Group>

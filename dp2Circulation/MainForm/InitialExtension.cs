@@ -1922,7 +1922,7 @@ MessageBoxDefaultButton.Button1);
                 var result = RfidManager.GetState("getVersion");
                 if (result.Value == -1)
                 {
-                    // errors.Add("所连接的 RFID 中心版本太低。请升级到最新版本");
+                    // _errors.Add("所连接的 RFID 中心版本太低。请升级到最新版本");
                     Program.MainForm?.OperHistory?.AppendHtml($"<div class='debug error'>{HttpUtility.HtmlEncode($"获得 RFID 中心版本号时出错: {result.ErrorInfo}")}</div>");
                     return null;
                 }

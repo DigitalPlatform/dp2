@@ -5250,7 +5250,8 @@ MessageBoxDefaultButton.Button1);
                 return true;
             }
 
-            return false;
+            return base.ProcessDialogKey(keyData);
+            // return false;
         }
 
         // 获得根节点的名字空间

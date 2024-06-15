@@ -219,8 +219,8 @@ namespace DigitalPlatform.EasyMarc
                 return true;
             }
 
-
-            return false;
+            return base.ProcessDialogKey(keyData);
+            // return false;
         }
 
         private void listView_fieldNameList_SelectedIndexChanged(object sender, EventArgs e)

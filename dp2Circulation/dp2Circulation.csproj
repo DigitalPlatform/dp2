@@ -53,7 +53,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>563</ApplicationRevision>
+    <ApplicationRevision>569</ApplicationRevision>
     <ApplicationVersion>3.78.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -1274,6 +1274,12 @@
     </Compile>
     <Compile Include="SearchForms\ExportMarcHoldingDialog.Designer.cs">
       <DependentUpon>ExportMarcHoldingDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SearchForms\GetConvertTargetDbNameDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SearchForms\GetConvertTargetDbNameDlg.Designer.cs">
+      <DependentUpon>GetConvertTargetDbNameDlg.cs</DependentUpon>
     </Compile>
     <Compile Include="SearchForms\GlobalParameters.cs" />
     <Compile Include="SearchForms\InvoiceSearchForm.cs">
@@ -2624,6 +2630,10 @@
     <EmbeddedResource Include="SearchForms\ExportMarcHoldingDialog.resx">
       <DependentUpon>ExportMarcHoldingDialog.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="SearchForms\GetConvertTargetDbNameDlg.resx">
+      <DependentUpon>GetConvertTargetDbNameDlg.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="SearchForms\InvoiceSearchForm.resx">
       <DependentUpon>InvoiceSearchForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -3395,6 +3405,9 @@
     </Content>
     <Content Include="userrightsdef.xml">
       <SubType>Designer</SubType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="verify.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="x64\SQLite.Interop.dll">
@@ -4581,6 +4594,16 @@
       <FileType>File</FileType>
     </PublishFile>
     <PublishFile Include="usmarc_cfgs\marc_browse.fltx">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="verify.css">
       <Visible>False</Visible>
       <Group>
       </Group>

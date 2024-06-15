@@ -439,7 +439,7 @@ namespace dp2Catalog
             if (bCut == true)
             {
                 list.BeginUpdate();
-                ListViewUtil.ClearSelection(list);
+                ListViewUtil.DeleteSelectedItems(list);
                 /*
                 for (int i = indices.Count - 1; i >= 0; i--)
                 {

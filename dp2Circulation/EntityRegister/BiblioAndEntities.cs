@@ -1575,11 +1575,11 @@ MessageBoxDefaultButton.Button2);
         }
 
         // 检查书目记录的格式是否正确
-        //      errors  返回册记录出错信息。每个元素返回一个错误信息，顺次对应于每个有错的字段或者子字段
+        //      _errors  返回册记录出错信息。每个元素返回一个错误信息，顺次对应于每个有错的字段或者子字段
         // return:
         //      -1  检查过程出错。错误信息在 strError 中。和返回 1 的区别是，这里是某些因素导致无法检查了，而不是因为册记录格式有错
         //      0   正确
-        //      1   有错。错误信息在 errors 中
+        //      1   有错。错误信息在 _errors 中
         public int VerifyBiblio(
             string strStyle,
             out List<BiblioError> errors,
@@ -1784,11 +1784,11 @@ MessageBoxDefaultButton.Button2);
 
         // 检查册记录的格式是否正确
         // parameters:
-        //      errors  返回册记录出错信息。每个元素返回一个错误信息，顺次对应于每个有错的册记录。文字中有说明，是那个册记录出错
+        //      _errors  返回册记录出错信息。每个元素返回一个错误信息，顺次对应于每个有错的册记录。文字中有说明，是那个册记录出错
         // return:
         //      -1  检查过程出错。错误信息在 strError 中。和返回 1 的区别是，这里是某些因素导致无法检查了，而不是因为册记录格式有错
         //      0   正确
-        //      1   有错。错误信息在 errors 中
+        //      1   有错。错误信息在 _errors 中
         public int VerifyEntities(
             string strStyle,
             out List<string> errors,
@@ -2658,7 +2658,7 @@ MessageBoxDefaultButton.Button2);
             return results;
         }
 #endif
-        // 返回 errors 中的涉及到的字段超过 name_list 的范围的部分列表
+        // 返回 _errors 中的涉及到的字段超过 name_list 的范围的部分列表
         public static List<string> GetFieldNames(List<BiblioError> errors)
         {
             List<string> results = new List<string>();

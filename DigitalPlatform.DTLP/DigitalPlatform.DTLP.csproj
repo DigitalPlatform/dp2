@@ -232,6 +232,7 @@
     <Compile Include="SelectRecordTemplateDialog.Designer.cs">
       <DependentUpon>SelectRecordTemplateDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="TcpClientWithTimeout.cs" />
     <Compile Include="TemplateRecordDialog.cs">
       <SubType>Form</SubType>
     </Compile>

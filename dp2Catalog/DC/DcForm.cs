@@ -2133,7 +2133,8 @@ channel,
                 return true;
             }
 
-            return false;
+            return base.ProcessDialogKey(keyData);
+            // return false;
         }
 
         // 自动加工数据

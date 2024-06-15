@@ -369,7 +369,7 @@ namespace dp2Catalog
                         strError = "获取日志记录:\r\n"
                             + "路径: " + strPath + "\r\n"
                             + "错误码: " + errorcode + "\r\n"
-                            + "错误信息: " + this.Channel.GetErrorString(errorcode) + "\r\n";
+                            + "错误信息: " + DtlpChannel.GetErrorString(errorcode) + "\r\n";
                         return -1;
                     }
 

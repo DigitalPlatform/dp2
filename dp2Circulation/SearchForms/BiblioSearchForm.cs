@@ -4183,6 +4183,7 @@ bQuickLoad);
         //      strNewXml       动作为 convert 时创建的新记录内容
         //      strError        [out] 返回出错信息。字符串里面可能会包含 \r\n，表示多行报错信息
         // return:
+        //      -2  源记录和目标编目规则冲突了
         //      -1  校验过程出错
         //      0   校验成功
         //      1   校验发现记录有错
@@ -4191,6 +4192,7 @@ bQuickLoad);
             string strBiblioRecPath,
             string strXml,
             string operation,
+            string targetCatalogingRule,  // 希望转换到何种目标编目规则。如果为空，本函数会自动弹出对话框让操作者选择
             out string strChangedXml,   // verify 或 convert 对现有记录修改后的内容
             out string strNewXml,   // convert 创建的新记录内容
             out string strError)
@@ -4217,36 +4219,39 @@ bQuickLoad);
             List<string> errors = new List<string>();
 
             MarcRecord record = new MarcRecord(strMARC);
-            var targetRecPath = record.select("field[@name='998']/subfield[@name='t']").FirstContent;
-            if (string.IsNullOrEmpty(targetRecPath) == false)
+            if (operation == "verify")
             {
-                if (targetRecPath == strBiblioRecPath)
-                    errors.Add($"本记录中 998$t 引用了自己 {strBiblioRecPath}");
-                else
+                var targetRecPath = record.select("field[@name='998']/subfield[@name='t']").FirstContent;
+                if (string.IsNullOrEmpty(targetRecPath) == false)
                 {
-                    // 检查所链接的记录的题名是否和本记录一致
-                    string title = "";
-                    if (strMarcSyntax == "unimarc")
-                        title = record.select("field[@name='200']/subfield[@name='a']").FirstContent;
-                    else
-                        title = record.select("field[@name='245']/subfield[@name='a']").FirstContent;
-
-                    // return:
-                    //      -1  出错
-                    //      0   书目记录没有找到
-                    //      1   成功
-                    nRet = GetLinkBiblioTitle(channel,
-                        targetRecPath,
-                        out string link_title,
-                        out strError);
-                    if (nRet == -1)
-                        errors.Add($"尝试获得书目记录 {targetRecPath} 过程出错：{strError}");
-                    else if (nRet == 0)
-                        errors.Add($"(998$t 指向的)书目记录 {targetRecPath} 不存在");
+                    if (targetRecPath == strBiblioRecPath)
+                        errors.Add($"本记录中 998$t 引用了自己 {strBiblioRecPath}");
                     else
                     {
-                        if (title != link_title)
-                            errors.Add($"本记录的题名 '{title}' 和 998$t({targetRecPath}) 指向的目标书目记录的题名 '{link_title}' 不一致。将来典藏转移的时候会出现错误转移");
+                        // 检查所链接的记录的题名是否和本记录一致
+                        string title = "";
+                        if (strMarcSyntax == "unimarc")
+                            title = record.select("field[@name='200']/subfield[@name='a']").FirstContent;
+                        else
+                            title = record.select("field[@name='245']/subfield[@name='a']").FirstContent;
+
+                        // return:
+                        //      -1  出错
+                        //      0   书目记录没有找到
+                        //      1   成功
+                        nRet = GetLinkBiblioTitle(channel,
+                            targetRecPath,
+                            out string link_title,
+                            out strError);
+                        if (nRet == -1)
+                            errors.Add($"尝试获得书目记录 {targetRecPath} 过程出错：{strError}");
+                        else if (nRet == 0)
+                            errors.Add($"(998$t 指向的)书目记录 {targetRecPath} 不存在");
+                        else
+                        {
+                            if (title != link_title)
+                                errors.Add($"本记录的题名 '{title}' 和 998$t({targetRecPath}) 指向的目标书目记录的题名 '{link_title}' 不一致。将来典藏转移的时候会出现错误转移");
+                        }
                     }
                 }
             }
@@ -4260,17 +4265,17 @@ bQuickLoad);
                 // return:
                 //      -1  出错
                 //      0   没有找到配置文件
-                //      1   成功获得 actions
-                nRet = EntityForm.GetVerifyActions(
+                //      1   成功获得 rules
+                nRet = EntityForm.GetVerifyRules(
                     strBiblioRecPath,
                     operation, // "verify",
                     strMARC,
                     null,
-                    out List<string> actions,
+                    out List<string> rules,
                     out string error);
                 if (nRet == -1)
                 {
-                    errors.Add($"获得 MARC {operation}脚本的 actions 时出错: {error}");
+                    errors.Add($"获得 MARC {operation}脚本的 rules 时出错: {error}");
                     goto END1;
                 }
                 // 没有定义配置文件，无法校验
@@ -4280,8 +4285,11 @@ bQuickLoad);
                     goto END1;
                 }
 
+                // 转换前的源记录的编目规则
+                string sourceCatalogingRule = "";
+
                 string catalogingRule = "";
-                if (actions.Count > 0)
+                if (rules.Count > 0)
                 {
                     // 探测一条 MARC 记录的编目规则
                     // return:
@@ -4301,48 +4309,63 @@ bQuickLoad);
                     if (nRet == 0)
                     {
                         // TODO1: 校验的时候，如果当前 MARC 记录没有明确的编目规则，
-                        // 但 actions 中有若干可选的编目规则，这里需要弹出一个列表对话框提供选择。
+                        // 但 rules 中有若干可选的编目规则，这里需要弹出一个列表对话框提供选择。
                         // 注意校验完成后，自动在 MARC 记录中添加 998$c，这样避免以后再次进行校验的时候再次遇到选择
 
 
 
-                        // errors.Add($"无法获得书目记录的编目规则，因而无法进行 MARC 格式{operation}");
+                        // _errors.Add($"无法获得书目记录的编目规则，因而无法进行 MARC 格式{operation}");
                         // goto END1;
                     }
+
+                    sourceCatalogingRule = catalogingRule;
                 }
 
                 // 找到当前编目规则以外的其它规则，这些规则正是可选的转换目标规则
                 if (operation == "convert")
                 {
-                    actions.Remove(catalogingRule);
-                    if (actions.Count == 1)
-                        catalogingRule = actions[0];
-                    else if (actions.Count == 0)
+                    if (string.IsNullOrEmpty(targetCatalogingRule) == false)
                     {
-                        // TODO: 要测试验证一下，其实 "" 触发转换并成功也是可能的？
-                        strError = $"书目库 '{Global.GetDbName(strBiblioRecPath)}' 没有可用的编目规则，无法执行格式转换";
-                        return -1;
+                        if (sourceCatalogingRule == targetCatalogingRule)
+                        {
+                            strError = $"源书目记录 {strBiblioRecPath} 的编目规则 {sourceCatalogingRule} 和目标编目规则 {targetCatalogingRule} 冲突了";
+                            return -2;
+                        }
+
+                        catalogingRule = targetCatalogingRule;
+                        // TODO: 注意核实目标编目规则是否允许写入所选的目标库
                     }
                     else
                     {
-                        // TODO2: 因为这里是批处理，如果每条记录都让选择一次，就比较痛苦了，
-                        // 那么建议针对同样的情况，缓存一种先前选择过的编目规则，可以提供静默自动选择。
-                        // 注意缓存的 key 可以是 actions 变换为一个逗号间隔的字符串，value 是曾经选择好的一个编目规则名称
+                        rules.Remove(catalogingRule);
+                        if (rules.Count == 1)
+                            catalogingRule = rules[0];
+                        else if (rules.Count == 0)
+                        {
+                            // TODO: 要测试验证一下，其实 "" 触发转换并成功也是可能的？
+                            strError = $"书目库 '{Global.GetDbName(strBiblioRecPath)}' 没有可用的编目规则，无法执行格式转换";
+                            return -1;
+                        }
+                        else
+                        {
+                            // TODO2: 因为这里是批处理，如果每条记录都让选择一次，就比较痛苦了，
+                            // 那么建议针对同样的情况，缓存一种先前选择过的编目规则，可以提供静默自动选择。
+                            // 注意缓存的 key 可以是 rules 变换为一个逗号间隔的字符串，value 是曾经选择好的一个编目规则名称
 
-                        // actions.Count > 1
-                        // return:
-                        //      -1  出错
-                        //      0   放弃选择
-                        //      1   已经选择
-                        nRet = SelectCatalogingRule(
-                            $"(针对 '{Global.GetDbName(strBiblioRecPath)}')转换为何种编目规则?",
-                            "编目规则:",
-                            actions,
-                            true,
-                            out catalogingRule,
-                            out strError);
-                        if (nRet == -1 || nRet == 0)
-                            return -1;  // TODO: 弹出一个对话框可以选择跳过这一条处理继续后面的处理，还是全部中断
+                            // rules.Count > 1
+                            // return:
+                            //      -1  出错
+                            //      0   放弃选择
+                            //      1   已经选择
+                            nRet = SelectCatalogingRule(
+                                $"(针对 '{Global.GetDbName(strBiblioRecPath)}')转换为何种编目规则?",
+                                "编目规则:",
+                                rules,
+                                true,
+                                out catalogingRule,
+                                out strError);
+                            if (nRet == -1 || nRet == 0)
+                                return -1;  // TODO: 弹出一个对话框可以选择跳过这一条处理继续后面的处理，还是全部中断
 #if REMOVED
                         // 只好人工选择编目规则
                         catalogingRule = ListDialog.GetInput(Program.MainForm,
@@ -4356,12 +4379,46 @@ bQuickLoad);
                             return -1;
                         }
 #endif
+                        }
                     }
+                }
+
+                // *** 转换前，对源 MARC 记录进行一些必要的增补修改
+                string link_id = "";
+                bool source_changed = false;
+                // 确保处理前 MARC 记录创建过 998$l
+                if (operation == "convert")
+                {
+                    link_id = BiblioSearchForm.EnsureCatalogingRuleLinkID(
+                        record,
+                        null,
+                        out bool changed);
+                    if (changed)
+                        source_changed = true;
+                }
+                if (string.IsNullOrEmpty(sourceCatalogingRule) == false)
+                {
+                    var old = record.Text;
+                    BiblioSearchForm.SetCatalogingRule(record, sourceCatalogingRule);
+                    if (old != record.Text)
+                        source_changed = true;
+                }
+
+                if (source_changed)
+                {
+                    // 把改变兑现到 strXml 中(现有记录)
+                    nRet = MarcUtil.Marc2XmlEx(record.Text,
+                        strMarcSyntax,
+                        ref strXml,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                    strChangedXml = strXml;
                 }
 
                 nRet = EntityForm._verifyData(
     strBiblioRecPath,
-    strMARC,
+    record.Text,
     operation, // "verify",
     catalogingRule,
     null,
@@ -4373,38 +4430,46 @@ bQuickLoad);
                     goto END1;
                 }
 
-                // convert 功能如果没有返回 ChangedMarc，则直接用 marc 代替，一定要弹出对话框
+                // convert 功能如果没有返回 TargetNewMarc，则直接用 marc 代替，一定要弹出对话框
                 if (operation == "convert"
-                    && hostObj.VerifyResult.Value != -1
-                    && string.IsNullOrEmpty(hostObj.VerifyResult.ChangedMarc) == true)
+                    && hostObj.VerifyResult.Value != -1)
                 {
-                    BiblioSearchForm.SetCatalogingRule(record, catalogingRule);
-                    // 为新记录内容添加 998$l
-                    var link_id = BiblioSearchForm.EnsureCatalogingRuleLinkID(record,
-                        null,
-                        out bool changed);
-                    if (changed)
+                    if (string.IsNullOrEmpty(hostObj.VerifyResult.ChangedMarc) == true)
                     {
-                        MarcRecord temp = new MarcRecord(strMARC);
-                        EnsureCatalogingRuleLinkID(temp,
-                            link_id,
-                            out changed);
+                        BiblioSearchForm.SetCatalogingRule(record, catalogingRule);
+                        /*
+                        // 为新记录内容添加 998$l
+                        var link_id = BiblioSearchForm.EnsureCatalogingRuleLinkID(record,
+                            null,
+                            out bool changed);
                         if (changed)
                         {
-                            // 把改变兑现到 strXml 中(现有记录)
-                            nRet = MarcUtil.Marc2XmlEx(temp.Text,
-                                strMarcSyntax,
-                                ref strXml,
-                                out strError);
-                            if (nRet == -1)
-                                return -1;
-                            strChangedXml = strXml;
+                            MarcRecord temp = new MarcRecord(strMARC);
+                            EnsureCatalogingRuleLinkID(temp,
+                                link_id,
+                                out changed);
+                            if (changed)
+                            {
+                                // 把改变兑现到 strXml 中(现有记录)
+                                nRet = MarcUtil.Marc2XmlEx(temp.Text,
+                                    strMarcSyntax,
+                                    ref strXml,
+                                    out strError);
+                                if (nRet == -1)
+                                    return -1;
+                                strChangedXml = strXml;
+                            }
                         }
-
+                        */
+                        hostObj.VerifyResult.ChangedMarc = record.Text;
+                        hostObj.VerifyResult.AddInfo("(MARC 记录内容转换后没有发生实质性变化)");   // 注: 998$c 有可能变化
                     }
-                    hostObj.VerifyResult.ChangedMarc = record.Text;
-
-                    hostObj.VerifyResult.Result += "\r\n(MARC 记录内容转换后没有发生实质性变化)";   // 注: 998$c 有可能变化
+                    else
+                    {
+                        MarcRecord temp = new MarcRecord(hostObj.VerifyResult.ChangedMarc);
+                        BiblioSearchForm.SetCatalogingRule(temp, catalogingRule);
+                        hostObj.VerifyResult.ChangedMarc = temp.Text;
+                    }
                 }
 
                 string verify_result_text = "";
@@ -4425,8 +4490,8 @@ bQuickLoad);
                             strNewXml = strXml;
                     }
 
-                    if (string.IsNullOrEmpty(hostObj.VerifyResult.Result) == false)
-                        verify_result_text = hostObj.VerifyResult.Result;  // 经过校验发现问题
+                    if (hostObj.VerifyResult.Errors?.Count > 0)
+                        verify_result_text = VerifyError.BuildTextLines(hostObj.VerifyResult.Errors);  // 经过校验发现问题
                     else
                         verify_result_text = "经过校验没有发现任何错误。";
                 }
@@ -4460,14 +4525,14 @@ bQuickLoad);
         public static int SelectCatalogingRule(
             string dlg_title,
             string title,
-            List<string> actions,
+            List<string> rules,
             bool use_cache,
             out string catalogingRule,
             out string strError)
         {
             strError = "";
 
-            string key = StringUtil.MakePathList(actions);
+            string key = StringUtil.MakePathList(rules);
             if (use_cache)
             {
                 catalogingRule = _crTable[key] as string;
@@ -4479,12 +4544,12 @@ bQuickLoad);
             catalogingRule = ListDialog.GetInput(Program.MainForm,
                 dlg_title,
                 title,
-                actions,
+                rules,
                 -1,
                 Program.MainForm.Font);
             if (catalogingRule == null)
             {
-                strError = $"放弃从集合 '{StringUtil.MakePathList(actions, ",")}' 中选择转换目标编目规则";
+                strError = $"放弃从集合 '{StringUtil.MakePathList(rules, ",")}' 中选择转换目标编目规则";
                 return 0;
             }
 
@@ -4557,6 +4622,9 @@ bQuickLoad);
         }
 
         // 确保创建了 998$l
+        // parameters:
+        //      new_id  如果记录中原本没有 998$l，要赋给记录的新的 ID。
+        //              若为空，则本函数会自动发生一个随机的 ID
         public static string EnsureCatalogingRuleLinkID(
             MarcRecord record,
             string new_id,
@@ -4678,8 +4746,39 @@ bQuickLoad);
             if (nRet == -1)
                 return -1;
             MarcRecord record = new MarcRecord(strMARC);
+
+            /*
             var id = record.select("field[@name='998']/subfield[@name='l']").FirstContent;
             var rule = record.select("field[@name='998']/subfield[@name='c']").FirstContent;
+            if (string.IsNullOrEmpty(id))
+                return 0;
+            crKey = id + "/" + rule;
+            return 1;
+            */
+            return GetCrKey(record,
+                null,
+                out crKey,
+                out strError);
+        }
+
+        // 在 MARC 记录中找到编目规则键
+        // parameters:
+        //      rule    编目规则。如果为 null，则从 record 中 998$c 中获得编目规则
+        // return:
+        //      -1  出错
+        //      0   没有找到
+        //      1   找到
+        public static int GetCrKey(MarcRecord record,
+            string rule,
+            out string crKey,
+            out string strError)
+        {
+            strError = "";
+            crKey = "";
+
+            var id = record.select("field[@name='998']/subfield[@name='l']").FirstContent;
+            if (rule == null)
+                rule = record.select("field[@name='998']/subfield[@name='c']").FirstContent;
             if (string.IsNullOrEmpty(id))
                 return 0;
             crKey = id + "/" + rule;
@@ -4718,10 +4817,11 @@ out strError);
             MarcRecord old_record = new MarcRecord(old_marc);
             MarcRecord new_record = new MarcRecord(new_marc);
 
+#if REMOVED
             var fields0 = old_record.select("field[@name='998']");
 
             new_record.select("field[@name='856']").detach();
-            foreach(MarcField field in old_record.select("field[@name='856']"))
+            foreach (MarcField field in old_record.select("field[@name='856']"))
             {
                 new_record.ChildNodes.insertSequence(field,
                     InsertSequenceStyle.PreferTail);
@@ -4742,6 +4842,8 @@ out strError);
                 new_record.ChildNodes.insertSequence(field.detach(),
                     InsertSequenceStyle.PreferTail);
             }
+#endif
+            MergeOldNew(old_record, new_record);
 
             new_xml = old_xml;  // 把 MARC 以外的片段带入 new_xml
             nRet = MarcUtil.Marc2XmlEx(new_record.Text,
@@ -4751,6 +4853,34 @@ out strError);
             if (nRet == -1)
                 return -1;
             return 0;
+        }
+
+        public static void MergeOldNew(MarcRecord old_record, MarcRecord new_record)
+        {
+            var fields0 = old_record.select("field[@name='998']");
+
+            new_record.select("field[@name='856']").detach();
+            foreach (MarcField field in old_record.select("field[@name='856']"))
+            {
+                new_record.ChildNodes.insertSequence(field,
+                    InsertSequenceStyle.PreferTail);
+            }
+
+            // 为了让对比显示时不会出现差异。但其实 997 是 dp2library 在保存时会强制修改的
+            new_record.select("field[@name='997']").detach();
+            foreach (MarcField field in old_record.select("field[@name='997']"))
+            {
+                new_record.ChildNodes.insertSequence(field.detach(),
+                    InsertSequenceStyle.PreferTail);
+            }
+
+            new_record.select("field[@name='998']").detach();
+            var fields = old_record.select("field[@name='998']");
+            foreach (MarcField field in fields)
+            {
+                new_record.ChildNodes.insertSequence(field.detach(),
+                    InsertSequenceStyle.PreferTail);
+            }
         }
 
         // 校验 MARC 格式
@@ -4826,7 +4956,7 @@ out strError);
             out string strError)
         {
             strError = "";
-            // int nRet = 0;
+            int nRet = 0;
 
             string operation_caption = "校验";
             if (operation == "convert")
@@ -4879,6 +5009,9 @@ out strError);
 
                     items.Add(item);
                 }
+
+                bool hide_conflict_box = false;
+                DialogResult conflict_result = DialogResult.Yes;
 
                 bool bOldSource = true; // 是否要从 OldXml 开始做起
 
@@ -4972,6 +5105,8 @@ out strError);
                         errors.Add("XML 记录中有非法字符");
                     }
 
+                    string targetCatalogingRule = "";
+
                     // 询问目标书目库名字
                     if (string.IsNullOrEmpty(strTargetDbName)
                         && operation == "convert")
@@ -4985,14 +5120,53 @@ out strError);
                             errors.Add(strError);
                             goto CONTINUE;
                         }
+
+                        // 选择一个目标编目规则
+                        // return:
+                        //      -1  出错
+                        //      0   没有找到配置文件
+                        //      1   成功获得 rules
+                        nRet = EntityForm.GetVerifyRules(
+                            info.RecPath,
+                            operation,
+                            "", // strMARC,
+                            null,
+                            out List<string> rules,
+                            out string error);
+                        if (nRet == -1)
+                        {
+                            strError = ($"获得书目记录 {info.RecPath} 相关的编目规则配置时出错: {error}");
+                            return -1;
+                        }
+                        // 没有定义配置文件，无法校验
+                        if (nRet == 0)
+                        {
+                            strError = error;
+                            return -1;
+                        }
+                        // return:
+                        //      -1  出错
+                        //      0   放弃选择
+                        //      1   已经选择
+                        nRet = SelectCatalogingRule(
+                            $"转换为何种编目规则?",
+                            "目标编目规则:",
+                            rules,
+                            true,
+                            out targetCatalogingRule,
+                            out strError);
+                        if (nRet == -1 || nRet == 0)
+                            return -1;  // TODO: 弹出一个对话框可以选择跳过这一条处理继续后面的处理，还是全部中断
+
                         // 获得一个目标库名
-                        GetAcceptTargetDbNameDlg dlg = new GetAcceptTargetDbNameDlg();
+                        var dlg = new GetConvertTargetDbNameDlg();
                         MainForm.SetControlFont(dlg, this.Font, false);
                         dlg.AutoFinish = true;
                         dlg.SeriesMode = (string.IsNullOrEmpty(prop?.IssueDbName) == false);
                         // dlg.DbName = this.BiblioDbName;
                         // 根据当前所在的库的marc syntax限制一下目标库的范围
                         dlg.MarcSyntax = strCurSyntax;
+                        dlg.CatalogingRuleFilter = targetCatalogingRule;
                         dlg.ShowDialog(this);
                         if (dlg.DialogResult == DialogResult.Cancel)
                             return 0;
@@ -5000,12 +5174,14 @@ out strError);
                     }
 
                     string strBiblioRecPath = info.RecPath;
+                    string strSourceBiblioRecPath = strBiblioRecPath;
                     if (operation == "convert")
                     {
                         // 这里使用一种 GUID 式的路径，等保存后再转为实际路径
                         strBiblioRecPath = strTargetDbName + "/?" + GetTempId();
                     }
 
+                REDO:
                     // 校验一条书目记录，或者对数据记录进行格式转换
                     // parameters:
                     //      strBiblioRecPath    书目记录路径。校验时，为正在校验的书目记录的路径；格式转换时，为格式转换后拟保存去的书目库的一个追加形态的路径
@@ -5014,24 +5190,44 @@ out strError);
                     //      strNewXml       动作为 convert 时创建的新记录内容
                     //      strError        [out] 返回出错信息。字符串里面可能会包含 \r\n，表示多行报错信息
                     // return:
+                    //      -2  源记录和目标编目规则冲突了
                     //      -1  校验过程出错
                     //      0   校验成功
                     //      1   校验发现记录有错
-                    int nRet = VerifyBiblio(
+                    nRet = VerifyBiblio(
                         channel,
-                        strBiblioRecPath,
+                        strSourceBiblioRecPath, // strBiblioRecPath,
                         strXml,
                         operation,
+                        targetCatalogingRule,
                         out string strChangedXml,
                         out string strNewXml,
                         out strError);
                     if (nRet == -1 || nRet == 1)
                         errors.AddRange(StringUtil.SplitList(strError, "\r\n"));
-
-                    // 为当前记录添加 998$l 字段
-                    if (operation == "convert")
+                    if (nRet == -2)
                     {
+                        string message = strError;
+                        if (hide_conflict_box == false)
+                        {
+                            conflict_result = this.TryGet(() =>
+                            {
+                                return MessageDialog.Show(this,
+                                $"{message}",
+                                MessageBoxButtons.YesNoCancel,
+                                MessageBoxDefaultButton.Button1,
+                                "此后不再出现本对话框",
+                                ref hide_conflict_box,
+                                new string[] { "重试", "跳过", "中断批处理" });
+                            });
+                        }
 
+                        if (conflict_result == DialogResult.Cancel)
+                            return -1;
+                        if (conflict_result == DialogResult.Yes)
+                            goto REDO;
+                        if (conflict_result == DialogResult.No)
+                            goto CONTINUE;
                     }
 
                     // 2024/5/19
@@ -5179,7 +5375,7 @@ out strError);
                     }
 #endif
 
-                    CONTINUE:
+                CONTINUE:
                     if (errors.Count > 0)
                     {
                         Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
@@ -5189,7 +5385,7 @@ out strError);
                         }
 
                         // 2024/5/31
-                        // 如果 errors 中有至少一行为 [error] 级别，则要把行背景颜色改为红色
+                        // 如果 _errors 中有至少一行为 [error] 级别，则要把行背景颜色改为红色
                         if (ContainsError(errors))
                         {
                             item.ListViewItem.BackColor = Color.FromArgb(155, 0, 0);
@@ -5243,7 +5439,7 @@ out strError);
         static ListViewItem Clone(ListViewItem item)
         {
             var result = new ListViewItem();
-            result.SubItems.AddRange(item.SubItems.Cast<ListViewItem.ListViewSubItem>().ToArray());
+            result.SubItems.AddRange(item.SubItems.Cast<ListViewItem.ListViewSubItem>().Skip(1).ToArray());
             return result;
         }
 
@@ -11383,7 +11579,7 @@ message,
 #endif
 
         // 输出 HTML/docx 新书通报
-        void menu_saveToNewBookFile_Click(object sender, EventArgs e)
+        async void menu_saveToNewBookFile_Click(object sender, EventArgs e)
         {
             string strError = "";
             if (this.listView_records.SelectedItems.Count == 0)
@@ -11408,16 +11604,19 @@ message,
                 biblioRecPathList.Add(strRecPath);
             }
 
-            var result = _saveToNewBookFile(biblioRecPathList,
+            var result = await _saveToNewBookFileAsync(
+                biblioRecPathList,
                 null);
             if (result.Value == -1)
             {
                 strError = result.ErrorInfo;
                 goto ERROR1;
             }
+            if (string.IsNullOrEmpty(result.ErrorInfo) == false)
+                MessageDlg.Show(this, result.ErrorInfo, "处理过程中出现警告");
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            MessageDlg.Show(this, strError, "处理出错");
         }
 
 

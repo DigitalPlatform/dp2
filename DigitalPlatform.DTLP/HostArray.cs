@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Collections;
 
 using DigitalPlatform.Xml;
+using System.Threading.Tasks;
 
 namespace DigitalPlatform.DTLP
 {
@@ -125,10 +126,7 @@ namespace DigitalPlatform.DTLP
                 }
             }
         }
-
-
     }
-
 
     /// <summary>
     /// Summary description for HostArray.
@@ -342,20 +340,23 @@ namespace DigitalPlatform.DTLP
 
             try
             {
-
                 client = new TcpClient(strHostName, nPort);
                 //client.ReceiveTimeout;
                 //client.SendTimeout;
-            }
 
+                /*
+                var temp = new TcpClientWithTimeout(strHostName,
+                    nPort,
+                    Convert.ToInt32(this._sendTimeout.TotalMilliseconds));
+                client = temp.Connect();
+                */
+            }
             catch (SocketException)
             {
                 nErrorNo = DtlpChannel.GL_CONNECT;
                 // 是否返回错误字符串? 精确区分错误类型
                 return -1;
             }
-
-
 
             return 0;
             /*
@@ -483,6 +484,7 @@ namespace DigitalPlatform.DTLP
                     if (result.IsCompleted)
                         break;
 
+                    // 2024/6/6
                     if (DateTime.Now - start_time > _sendTimeout)
                     {
                         nErrorNo = DtlpChannel.GL_SEND;
@@ -645,9 +647,9 @@ namespace DigitalPlatform.DTLP
             // TODO: 是否要关闭 NetworkStream !!!
             NetworkStream stream = client.GetStream();
 
+            var start_time = DateTime.Now;
             while (nInLen < nLen)
             {
-
                 /*
                 if (Container.Container.Container.procIdle != null)
                 {
@@ -662,6 +664,19 @@ namespace DigitalPlatform.DTLP
                      * */
                     if (Container.Container.Container.DoIdle(this) == true)
                         goto ERROR1;
+
+                    // 2024/6/6
+                    if (DateTime.Now - start_time > _recvTimeout)
+                    {
+                        nErrorNo = DtlpChannel.GL_RECV;
+                        if (client != null)
+                        {
+                            client.Close();
+                            client = null;
+                        }
+                        return -1;
+                    }
+
                     continue;
                 }
                 /*
@@ -674,7 +689,6 @@ namespace DigitalPlatform.DTLP
                     goto ERROR1;
                 }
 
-                var start_time = DateTime.Now;
                 IAsyncResult result = stream.BeginRead(baPackage, nInLen, baPackage.Length - nInLen,
                     null, null);
                 for (; ; )
@@ -691,6 +705,7 @@ namespace DigitalPlatform.DTLP
                     if (result.IsCompleted)
                         break;
 
+                    // 2024/6/6
                     if (DateTime.Now - start_time > _recvTimeout)
                     {
                         nErrorNo = DtlpChannel.GL_RECV;

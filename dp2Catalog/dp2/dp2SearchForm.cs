@@ -5130,7 +5130,8 @@ namespace dp2Catalog
                 return true;
             }
 
-            return false;
+            return base.ProcessDialogKey(keyData);
+            // return false;
         }
 
         private void dp2SearchForm_Activated(object sender, EventArgs e)

@@ -243,6 +243,8 @@ namespace DigitalPlatform.GUI
 
                 list.BeginUpdate();
 
+                // var start_time = DateTime.Now;
+
                 // 2021/6/11 新方法
                 var indices = list.SelectedIndices.Cast<int>().Reverse();
                 foreach (var index in indices)
@@ -250,6 +252,16 @@ namespace DigitalPlatform.GUI
                     list.Items.RemoveAt(index);
                 }
 
+                /*
+                var items = list.SelectedItems.Cast<ListViewItem>();
+                foreach (var item in items)
+                {
+                    list.Items.Remove(item);
+                }
+                */
+
+                // MessageBox.Show(list, $"耗时 {DateTime.Now - start_time}");
+                
                 /*
                 for (int i = indices.Length - 1; i >= 0; i--)
                 {

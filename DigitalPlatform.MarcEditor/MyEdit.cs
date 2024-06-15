@@ -322,7 +322,6 @@ namespace DigitalPlatform.Marc
             // 2008/11/30 changed
             Keys pure_key = (keyData & (~(Keys.Control | Keys.Shift | Keys.Alt)));
 
-
             if (_k)
             {
                 this.MarcEditor.DoCtrlK(pure_key);

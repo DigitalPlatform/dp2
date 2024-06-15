@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Windows.Forms;
 
 using DigitalPlatform.IO;
@@ -12,14 +15,19 @@ namespace dp2Circulation
     public partial class VerifyMarcResultDialog : Form
     {
         /// <summary>
-        /// 原始记录。显示在左侧
+        /// 源记录。显示在左侧
         /// </summary>
-        public string OriginMarc = "";
+        public string SourceMarc = "";
 
         /// <summary>
-        /// 修改后的记录。显示在右侧
+        /// 目标记录的原有内容
         /// </summary>
-        public string ChangedMarc = "";
+        public string TargetOldMarc = "";
+
+        /// <summary>
+        /// 目标记录的修改后内容。显示在右侧
+        /// </summary>
+        public string TargetNewMarc = "";
 
 
         public VerifyMarcResultDialog()
@@ -31,8 +39,137 @@ namespace dp2Circulation
         {
             if (this.DesignMode)
                 return;
-            this.Display();
+
+            // index 大的在上
+            _buttons.Add(this.toolStripButton_targetOld);
+            _buttons.Add(this.toolStripButton_source);
+            _buttons.Add(this.toolStripButton_targetNew);
+
+            if (string.IsNullOrEmpty(this.TargetOldMarc))
+                this.toolStripButton_targetOld.Visible = false;
+
+            var strings = GetStrings();
+            Display(strings[0].Title,
+                strings[0].Text,
+                strings[1].Title,
+                strings[1].Text);
         }
+
+        public string ButtonSourceCaption
+        {
+            get
+            {
+                return this.toolStripButton_source.Text;
+            }
+            set
+            {
+                this.toolStripButton_source.Text = value;
+            }
+        }
+
+        public string ButtonTargetOldCaption
+        {
+            get
+            {
+                return this.toolStripButton_targetOld.Text;
+            }
+            set
+            {
+                this.toolStripButton_targetOld.Text = value;
+            }
+        }
+
+        public string ButtonTargetNewCaption
+        {
+            get
+            {
+                return this.toolStripButton_targetNew.Text;
+            }
+            set
+            {
+                this.toolStripButton_targetNew.Text = value;
+            }
+        }
+
+        List<ToolStripButton> _buttons = new List<ToolStripButton>();
+
+        // 重新安排按钮按下状态
+        void PressButton(ToolStripButton button)
+        {
+            _buttons.Remove(button);
+            _buttons.Add(button);
+        }
+
+        class TitleAndText
+        {
+            public string Title { get; set; }
+            public string Text { get; set; }
+        }
+
+        // 获得上层的两个按钮对应的字符串
+        List<TitleAndText> GetStrings()
+        {
+            List<TitleAndText> results = new List<TitleAndText>();
+            var buttons = new List<ToolStripButton>();
+            buttons.AddRange(_buttons);
+            buttons.RemoveAt(0);
+
+            if (buttons.IndexOf(this.toolStripButton_source) != -1)
+                results.Add(new TitleAndText
+                {
+                    Title = this.toolStripButton_source.Text,
+                    Text = this.SourceMarc
+                });
+            if (buttons.IndexOf( this.toolStripButton_targetOld) != -1)
+                results.Add(new TitleAndText
+                {
+                    Title = this.toolStripButton_targetOld.Text,
+                    Text = this.TargetOldMarc
+                });
+            if (buttons.IndexOf( this.toolStripButton_targetNew) != -1)
+                results.Add(new TitleAndText
+                {
+                    Title = this.toolStripButton_targetNew.Text,
+                    Text = this.TargetNewMarc
+                });
+
+            int i = 0;
+            foreach (var button in _buttons)
+            {
+                if (i > 0)
+                {
+                    button.Checked = true;
+                    /*
+                    if (button == this.toolStripButton_source)
+                        results.Add(new TitleAndText
+                        {
+                            Title = this.toolStripButton_source.Text,
+                            Text = this.SourceMarc
+                        });
+                    else if (button == this.toolStripButton_targetOld)
+                        results.Add(new TitleAndText
+                        {
+                            Title = this.toolStripButton_targetOld.Text,
+                            Text = this.TargetOldMarc
+                        });
+                    else if (button == this.toolStripButton_targetNew)
+                        results.Add(new TitleAndText
+                        {
+                            Title = this.toolStripButton_targetNew.Text,
+                            Text = this.TargetNewMarc
+                        });
+                    */
+                }
+                else
+                    button.Checked = false;
+                i++;
+            }
+
+            Debug.Assert(results.Count == 2);
+
+            return results;
+        }
+
 
         private void VerifyMarcResultDialog_FormClosed(object sender, FormClosedEventArgs e)
         {
@@ -53,16 +190,22 @@ namespace dp2Circulation
             this.Close();
         }
 
-        void Display()
+        void Display(
+            string leftTitle,
+            string left,
+            string rightTitle,
+            string right)
         {
             string strError = "";
             string strHtml2 = "";
 
             int nRet = GetHtml(
-    this.OriginMarc,
-    this.ChangedMarc,
-    out strHtml2,
-    out strError);
+                leftTitle,
+                left,
+                rightTitle,
+                right,
+                out strHtml2,
+                out strError);
             if (nRet == -1)
                 goto ERROR1;
 
@@ -207,7 +350,9 @@ strHtml2 +
         }
 #endif
         int GetHtml(
+            string oldTitle,
 string strOldMARC,
+string newTitle,
 string strNewMARC,
 out string strHtml2,
 out string strError)
@@ -227,11 +372,11 @@ out string strError)
                 //      -1  出错
                 //      0   成功
                 nRet = MarcDiff.DiffHtml(
-                    _leftTitle,
+                    oldTitle,
                     strOldMARC,
                     strOldFragmentXml,
                     "",
-                    _rightTitle,
+                    newTitle,
                     strNewMARC,
                     strNewFragmentXml,
                     "",
@@ -260,18 +405,19 @@ out string strError)
             return 0;
         }
 
-
-        internal string _leftTitle = "原始记录";
-        internal string _rightTitle = "修改后的记录";
+        //internal string _leftTitle = "原始记录";
+        //internal string _rightTitle = "修改后的记录";
 
         private void toolStripButton_copyLeftToClipboard_Click(object sender, EventArgs e)
         {
-            TextToClipboardFormat(this.OriginMarc);
+            var strings = GetStrings();
+            TextToClipboardFormat(strings[0].Text);
         }
 
         private void toolStripButton_copyRightToClipboard_Click(object sender, EventArgs e)
         {
-            TextToClipboardFormat(this.ChangedMarc);
+            var strings = GetStrings();
+            TextToClipboardFormat(strings[1].Text);
         }
 
         public static void TextToClipboardFormat(string strText)
@@ -301,5 +447,19 @@ out string strError)
             });
         }
 
+        private void toolStripButton_source_Click(object sender, EventArgs e)
+        {
+            PressButton(sender as ToolStripButton);
+            var strings = GetStrings();
+            Display(strings[0].Title,
+                strings[0].Text,
+                strings[1].Title,
+                strings[1].Text);
+
+            if (_buttons.IndexOf(this.toolStripButton_targetNew) == 0)
+                this.button_acceptChangedMarc.Enabled = false;
+            else
+                this.button_acceptChangedMarc.Enabled = true;
+        }
     }
 }

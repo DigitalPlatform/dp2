@@ -35,7 +35,14 @@
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripButton_copyLeftToClipboard = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_copyRightToClipboard = new System.Windows.Forms.ToolStripButton();
+            this.toolStrip_records = new System.Windows.Forms.ToolStrip();
+            this.toolStripButton_source = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripButton_targetOld = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripButton_targetNew = new System.Windows.Forms.ToolStripButton();
             this.toolStrip1.SuspendLayout();
+            this.toolStrip_records.SuspendLayout();
             this.SuspendLayout();
             // 
             // webBrowser1
@@ -43,11 +50,11 @@
             this.webBrowser1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.webBrowser1.Location = new System.Drawing.Point(15, 14);
+            this.webBrowser1.Location = new System.Drawing.Point(15, 48);
             this.webBrowser1.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.webBrowser1.MinimumSize = new System.Drawing.Size(37, 35);
             this.webBrowser1.Name = "webBrowser1";
-            this.webBrowser1.Size = new System.Drawing.Size(891, 395);
+            this.webBrowser1.Size = new System.Drawing.Size(891, 361);
             this.webBrowser1.TabIndex = 1;
             // 
             // button_Cancel
@@ -83,9 +90,9 @@
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton_copyLeftToClipboard,
             this.toolStripButton_copyRightToClipboard});
-            this.toolStrip1.Location = new System.Drawing.Point(9, 403);
+            this.toolStrip1.Location = new System.Drawing.Point(9, 409);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(359, 44);
+            this.toolStrip1.Size = new System.Drawing.Size(305, 38);
             this.toolStrip1.TabIndex = 7;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -95,7 +102,7 @@
             this.toolStripButton_copyLeftToClipboard.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_copyLeftToClipboard.Image")));
             this.toolStripButton_copyLeftToClipboard.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_copyLeftToClipboard.Name = "toolStripButton_copyLeftToClipboard";
-            this.toolStripButton_copyLeftToClipboard.Size = new System.Drawing.Size(142, 38);
+            this.toolStripButton_copyLeftToClipboard.Size = new System.Drawing.Size(142, 32);
             this.toolStripButton_copyLeftToClipboard.Text = "复制左侧记录";
             this.toolStripButton_copyLeftToClipboard.ToolTipText = "复制左侧记录到剪贴板";
             this.toolStripButton_copyLeftToClipboard.Click += new System.EventHandler(this.toolStripButton_copyLeftToClipboard_Click);
@@ -106,10 +113,69 @@
             this.toolStripButton_copyRightToClipboard.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_copyRightToClipboard.Image")));
             this.toolStripButton_copyRightToClipboard.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_copyRightToClipboard.Name = "toolStripButton_copyRightToClipboard";
-            this.toolStripButton_copyRightToClipboard.Size = new System.Drawing.Size(142, 38);
+            this.toolStripButton_copyRightToClipboard.Size = new System.Drawing.Size(142, 32);
             this.toolStripButton_copyRightToClipboard.Text = "复制右侧记录";
             this.toolStripButton_copyRightToClipboard.ToolTipText = "复制右侧记录到剪贴板";
             this.toolStripButton_copyRightToClipboard.Click += new System.EventHandler(this.toolStripButton_copyRightToClipboard_Click);
+            // 
+            // toolStrip_records
+            // 
+            this.toolStrip_records.ImageScalingSize = new System.Drawing.Size(28, 28);
+            this.toolStrip_records.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripButton_source,
+            this.toolStripSeparator1,
+            this.toolStripButton_targetOld,
+            this.toolStripSeparator2,
+            this.toolStripButton_targetNew});
+            this.toolStrip_records.Location = new System.Drawing.Point(0, 0);
+            this.toolStrip_records.Name = "toolStrip_records";
+            this.toolStrip_records.Size = new System.Drawing.Size(921, 38);
+            this.toolStrip_records.TabIndex = 8;
+            this.toolStrip_records.Text = "toolStrip2";
+            // 
+            // toolStripButton_source
+            // 
+            this.toolStripButton_source.Checked = true;
+            this.toolStripButton_source.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.toolStripButton_source.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_source.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_source.Image")));
+            this.toolStripButton_source.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_source.Name = "toolStripButton_source";
+            this.toolStripButton_source.Size = new System.Drawing.Size(40, 32);
+            this.toolStripButton_source.Text = "源";
+            this.toolStripButton_source.Click += new System.EventHandler(this.toolStripButton_source_Click);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 38);
+            // 
+            // toolStripButton_targetOld
+            // 
+            this.toolStripButton_targetOld.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_targetOld.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_targetOld.Image")));
+            this.toolStripButton_targetOld.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_targetOld.Name = "toolStripButton_targetOld";
+            this.toolStripButton_targetOld.Size = new System.Drawing.Size(135, 32);
+            this.toolStripButton_targetOld.Text = "目标[已存在]";
+            this.toolStripButton_targetOld.Click += new System.EventHandler(this.toolStripButton_source_Click);
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 38);
+            // 
+            // toolStripButton_targetNew
+            // 
+            this.toolStripButton_targetNew.Checked = true;
+            this.toolStripButton_targetNew.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.toolStripButton_targetNew.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_targetNew.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_targetNew.Image")));
+            this.toolStripButton_targetNew.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_targetNew.Name = "toolStripButton_targetNew";
+            this.toolStripButton_targetNew.Size = new System.Drawing.Size(93, 32);
+            this.toolStripButton_targetNew.Text = "目标[新]";
+            this.toolStripButton_targetNew.Click += new System.EventHandler(this.toolStripButton_source_Click);
             // 
             // VerifyMarcResultDialog
             // 
@@ -118,6 +184,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
             this.ClientSize = new System.Drawing.Size(921, 482);
+            this.Controls.Add(this.toolStrip_records);
             this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_acceptChangedMarc);
@@ -130,6 +197,8 @@
             this.Load += new System.EventHandler(this.VerifyMarcResultDialog_Load);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
+            this.toolStrip_records.ResumeLayout(false);
+            this.toolStrip_records.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -143,5 +212,11 @@
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripButton toolStripButton_copyLeftToClipboard;
         private System.Windows.Forms.ToolStripButton toolStripButton_copyRightToClipboard;
+        private System.Windows.Forms.ToolStrip toolStrip_records;
+        private System.Windows.Forms.ToolStripButton toolStripButton_source;
+        private System.Windows.Forms.ToolStripButton toolStripButton_targetOld;
+        private System.Windows.Forms.ToolStripButton toolStripButton_targetNew;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
     }
 }

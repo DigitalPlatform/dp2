@@ -21,7 +21,15 @@ using DocumentFormat.OpenXml.Wordprocessing;
 
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
+using DocumentFormat.OpenXml.Vml;
+// using DocumentFormat.OpenXml.Drawing.Charts;
+using SixLabors.ImageSharp.PixelFormats;
+/*
+using SixLabors.ImageSharp.Drawing.Processing;
+using SixColor = SixLabors.ImageSharp.Color;
+using SixLabors.ImageSharp.Processing;
 // using SixLabors.ImageSharp;
+*/
 
 namespace DigitalPlatform.Typography
 {
@@ -32,8 +40,19 @@ namespace DigitalPlatform.Typography
 
     public static class TypoUtility
     {
+        class Context
+        {
+            public delegate_progress func_progress { get; set; }
+
+            public delegate_error func_error { get; set; }
+
+            public WordprocessingDocument doc { get; set; }
+        }
+
         public static void XmlToWord(string xmlFileName,
-            string wordFileName)
+            string wordFileName,
+            delegate_progress func_progress,
+            delegate_error func_error)
         {
             // 检查 wordFileName 是否可写
             if (File.Exists(wordFileName))
@@ -51,6 +70,12 @@ namespace DigitalPlatform.Typography
                 }
             }
 
+            Context context = new Context
+            {
+                func_progress = func_progress,
+                func_error = func_error
+            };
+
             XmlDocument dom = new XmlDocument();
             dom.Load(xmlFileName);
 
@@ -59,6 +84,8 @@ namespace DigitalPlatform.Typography
 
             using (WordprocessingDocument doc = WordprocessingDocument.Create(wordFileName, WordprocessingDocumentType.Document))
             {
+                context.doc = doc;
+
                 // Add a main document part. 
                 MainDocumentPart mainPart = doc.AddMainDocumentPart();
 
@@ -68,7 +95,9 @@ namespace DigitalPlatform.Typography
                 Debug.Assert(body == mainPart.Document.Body);
 
                 var first_level_nodes = dom.DocumentElement.SelectNodes("*");
-                CreateNodes(doc,
+                CreateNodes(
+                    context,
+                    // doc,
     mainPart.Document.Body,
     first_level_nodes);
 #if REMOVED
@@ -99,11 +128,17 @@ namespace DigitalPlatform.Typography
 
                 var headers_node = dom.DocumentElement.SelectSingleNode("headers") as XmlElement;
                 if (headers_node != null)
-                    CreateHeaders(doc, headers_node);
+                    CreateHeaders(
+                        context,
+                        //doc,
+                        headers_node);
 
                 var footers_node = dom.DocumentElement.SelectSingleNode("footers") as XmlElement;
                 if (footers_node != null)
-                    CreateFooters(doc, footers_node);
+                    CreateFooters(
+                        context,
+                        //doc,
+                        footers_node);
 
                 var settings_nodes = dom.DocumentElement.SelectSingleNode("settings") as XmlElement;
                 if (settings_nodes != null)
@@ -158,9 +193,13 @@ namespace DigitalPlatform.Typography
         }
 
         // https://social.technet.microsoft.com/Forums/en-US/afbb713d-00b6-42d3-b045-2cc3aa5dd338/how-to-change-the-header-and-footer-in-the-section-breaks-next-page-using-openxml
-        static void CreateHeaders(WordprocessingDocument doc,
-    XmlElement headers_node)
+        static void CreateHeaders(
+            Context context,
+            // WordprocessingDocument doc,
+            XmlElement headers_node)
         {
+            var doc = context.doc;
+
             SectionProperties sectPr = EnsureSectionProperty(doc);
 
             HeaderPart headerPart2 = doc.MainDocumentPart.AddNewPart<HeaderPart>("rIdHeader");
@@ -169,7 +208,10 @@ namespace DigitalPlatform.Typography
             {
                 if (headerPart2.Header == null)
                     headerPart2.Header = new Header();
-                CreateNodes(doc, headerPart2.Header, header_node.ChildNodes);
+                CreateNodes(
+                    context,
+                    // doc, 
+                    headerPart2.Header, header_node.ChildNodes);
             }
 
             // GenerateHeaderPartContent(headerPart2);
@@ -202,9 +244,13 @@ namespace DigitalPlatform.Typography
         }
         */
 
-        static void CreateFooters(WordprocessingDocument doc,
-XmlElement footers_node)
+        static void CreateFooters(
+            Context context,
+            // WordprocessingDocument doc,
+            XmlElement footers_node)
         {
+            var doc = context.doc;
+
             SectionProperties sectPr = EnsureSectionProperty(doc);
 
             var footerPart2 = doc.MainDocumentPart.AddNewPart<FooterPart>("rIdFooter");
@@ -213,7 +259,10 @@ XmlElement footers_node)
             {
                 if (footerPart2.Footer == null)
                     footerPart2.Footer = new Footer();
-                CreateNodes(doc, footerPart2.Footer, footer_node.ChildNodes);
+                CreateNodes(
+                    context,
+                    // doc, 
+                    footerPart2.Footer, footer_node.ChildNodes);
             }
 
             sectPr.GetFirstChild<FooterReference>()?.Remove();
@@ -318,10 +367,13 @@ doc.MainDocumentPart.Document.Body.Elements<SectionProperties>().ToList();
             }
         }
 
-        static void CreateNodes(WordprocessingDocument doc,
+        static void CreateNodes(
+            Context context,
+            // WordprocessingDocument doc,
             OpenXmlElement body,
             XmlNodeList nodes)
         {
+            var doc = context.doc;
             // var p_nodes = nodes.Cast<XmlNode>().Where(n => n.Name == "p").ToList();
 
             Paragraph p = null;
@@ -358,7 +410,9 @@ doc.MainDocumentPart.Document.Body.Elements<SectionProperties>().ToList();
                         null,
                         StyleValues.Character);
                     if (new_style != null)
-                        CreateTextStream(doc,
+                        CreateTextStream(
+                            context,
+                            // doc,
                             p,
                             node.ChildNodes,
                             new_style);
@@ -375,7 +429,9 @@ doc.MainDocumentPart.Document.Body.Elements<SectionProperties>().ToList();
                 // p 元素
                 if (node.Name == "p")
                 {
-                    CreateParagraph(doc,
+                    CreateParagraph(
+                        context,
+                        // doc,
                         p == null ? body : p,
                         node as XmlElement);
                     continue;
@@ -384,7 +440,9 @@ doc.MainDocumentPart.Document.Body.Elements<SectionProperties>().ToList();
                 // table 元素
                 if (node.Name == "table")
                 {
-                    CreateTable(doc,
+                    CreateTable(
+                        context,
+                        // doc,
                         p == null ? body : p,
                         node as XmlElement);
                     continue;
@@ -645,10 +703,13 @@ doc.MainDocumentPart.StyleDefinitionsPart;
 
         // https://docs.microsoft.com/en-us/office/open-xml/how-to-apply-a-style-to-a-paragraph-in-a-word-processing-document
         // https://docs.microsoft.com/en-us/office/open-xml/working-with-paragraphs
-        static Paragraph CreateParagraph(WordprocessingDocument doc,
+        static Paragraph CreateParagraph(
+            Context context,
+            // WordprocessingDocument doc,
             OpenXmlElement body,
             XmlElement paragraph)
         {
+            var doc = context.doc;
             // Body body = doc.MainDocumentPart.Document.Body;
 
             Paragraph p = body.AppendChild(new Paragraph());
@@ -735,7 +796,10 @@ doc.MainDocumentPart.StyleDefinitionsPart;
 #endif
 
             // p 元素的下级节点
-            CreateTextStream(doc, p, paragraph.ChildNodes);
+            CreateTextStream(
+                context,
+                // doc, 
+                p, paragraph.ChildNodes);
 #if REMOVED
             foreach (XmlNode child_node in paragraph.ChildNodes)
             {
@@ -1150,14 +1214,19 @@ out string error);
             throw new Exception($"未知的单位 '{unit}' ('{text}')");
         }
 
+        static HttpClient _httpClient = null;
+
         // parameters:
         //      style    氛围 style
         static void CreateTextStream(
-            WordprocessingDocument doc,
+            Context context,
+            // WordprocessingDocument doc,
             OpenXmlElement p,
             XmlNodeList nodes,
             Style style = null)
         {
+            var doc = context.doc;
+
             bool parent_is_paragraph = p is Paragraph;
             Paragraph temp_paragraph = null;
             // p 元素的下级节点
@@ -1187,7 +1256,9 @@ out string error);
                 // p 元素
                 if (child_node.Name == "p")
                 {
-                    CreateParagraph(doc,
+                    CreateParagraph(
+                        context,
+                        // doc,
                         p,
                         child_node as XmlElement);
                     temp_paragraph = null;  // 打断
@@ -1203,7 +1274,9 @@ out string error);
                         child_node as XmlElement);
                     continue;
                     */
-                    CreateTable(doc,
+                    CreateTable(
+                        context,
+                        // doc,
                         p == null ? doc.MainDocumentPart.Document.Body : p,
                         child_node as XmlElement);
                     // temp_paragraph = null;  // 打断
@@ -1215,43 +1288,82 @@ out string error);
                     XmlElement e = child_node as XmlElement;
                     string src = e.GetAttribute("src");
 
-                    HttpClient client = new HttpClient();
-                    // TODO: 捕获这里的异常，然后创建一幅含有报错文字的图片并显示出来
-                    var response = client.GetAsync(src).Result;
-
-                    var contentType = response.Content.Headers.ContentType?.MediaType;
-
-                    int width = 0;
-                    int height = 0;
-                    ImagePart imagePart = null;
-                    using (var stream = response.Content.ReadAsStreamAsync().Result)
+                    int nRedoCount = 0;
+                REDO:
+                    try
                     {
-                        //    Stream theStream = client.GetStreamAsync(src).Result;
+                        context.func_progress?.Invoke(-1,-1, $"正在获取图片文件 {src}");
 
-                        /*
-                        var ext = Path.GetExtension(imageFileName);
-                        ImagePartType type = ImagePartType.Jpeg;
-                        Enum.TryParse<ImagePartType>(ext, true, out type);
-                        */
-                        var type = GetImageType(contentType);
-                        imagePart = doc.MainDocumentPart.AddImagePart(type);
+                        if (_httpClient == null)
+                            _httpClient = new HttpClient();
+                        // TODO: 这里不要阻塞界面线程
+                        // TODO: 捕获这里的异常，然后创建一幅含有报错文字的图片并显示出来
+                        var response = _httpClient.GetAsync(src).Result;
 
-                        using (var image = SixLabors.ImageSharp.Image.Load(stream))
+                        var contentType = response.Content.Headers.ContentType?.MediaType;
+
+                        int width = 0;
+                        int height = 0;
+                        ImagePart imagePart = null;
+                        using (var stream = response.Content.ReadAsStreamAsync().Result)
                         {
-                            width = image.Width;
-                            height = image.Height;
+                            if (stream.Length == 0)
+                                throw new Exception("图象尺寸为零");
+
+                            //    Stream theStream = client.GetStreamAsync(src).Result;
+
+                            /*
+                            var ext = Path.GetExtension(imageFileName);
+                            ImagePartType type = ImagePartType.Jpeg;
+                            Enum.TryParse<ImagePartType>(ext, true, out type);
+                            */
+                            var type = GetImageType(contentType);
+                            imagePart = doc.MainDocumentPart.AddImagePart(type);
+
+                            using (var image = SixLabors.ImageSharp.Image.Load(stream))
+                            {
+                                width = image.Width;
+                                height = image.Height;
+                            }
+                        }
+
+                        response = _httpClient.GetAsync(src).Result;
+                        using (var stream = response.Content.ReadAsStreamAsync().Result)
+                        {
+                            imagePart.FeedData(stream);
+                        }
+
+                        var relationshipId = doc.MainDocumentPart.GetIdOfPart(imagePart);
+                        var d = NewDrawing(relationshipId, width, height);
+                        Run run = CreateParagraphIfNeed().AppendChild(new Run(d));
+                        continue;
+                    }
+                    catch (Exception ex)
+                    {
+                        if (nRedoCount >= 2)
+                        {
+                            string error = $"元素 '{e.OuterXml}' 中 src 属性所描述的资源出现异常: {ex.Message}";
+                            if (context.func_error != null)
+                            {
+                                var ret = context.func_error.Invoke(error, "getImageError");
+                                if (ret == false)
+                                    throw new Exception($"元素 '{e.OuterXml}' 中 src 属性所描述的资源出现异常: {ex.Message}");
+                            }
+
+                            Run run = CreateParagraphIfNeed().AppendChild(new Run());
+                            run.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Text($"error: {error}"));
+                            continue;
+                        }
+                        else
+                        {
+                            nRedoCount++;
+                            goto REDO;
                         }
                     }
-
-                    response = client.GetAsync(src).Result;
-                    using (var stream = response.Content.ReadAsStreamAsync().Result)
+                    finally
                     {
-                        imagePart.FeedData(stream);
+                        context.func_progress?.Invoke(-1, -1, null);
                     }
-                    var relationshipId = doc.MainDocumentPart.GetIdOfPart(imagePart);
-                    var d = NewDrawing(relationshipId, width, height);
-                    Run run = CreateParagraphIfNeed().AppendChild(new Run(d));
-                    continue;
                 }
 
                 if (child_node.Name == "br")
@@ -1329,7 +1441,9 @@ out string error);
                     part.Styles.Append(new_style);
                     */
                     if (new_style != null)
-                        CreateTextStream(doc,
+                        CreateTextStream(
+                            context,
+                            // doc,
                             p,
                             child_node.ChildNodes,
                             new_style);
@@ -1353,12 +1467,84 @@ out string error);
 
         }
 
+#if REMOVED
+        static ImagePart GetImagePart(
+            WordprocessingDocument doc,
+            string src)
+        {
+            try
+            {
+                HttpClient client = new HttpClient();
+                // TODO: 捕获这里的异常，然后创建一幅含有报错文字的图片并显示出来
+                var response = client.GetAsync(src).Result;
+
+                var contentType = response.Content.Headers.ContentType?.MediaType;
+
+                int width = 0;
+                int height = 0;
+                ImagePart imagePart = null;
+                using (var stream = response.Content.ReadAsStreamAsync().Result)
+                {
+                    //    Stream theStream = client.GetStreamAsync(src).Result;
+
+                    /*
+                    var ext = Path.GetExtension(imageFileName);
+                    ImagePartType type = ImagePartType.Jpeg;
+                    Enum.TryParse<ImagePartType>(ext, true, out type);
+                    */
+                    var type = GetImageType(contentType);
+                    imagePart = doc.MainDocumentPart.AddImagePart(type);
+
+                    using (var image = SixLabors.ImageSharp.Image.Load(stream))
+                    {
+                        width = image.Width;
+                        height = image.Height;
+                    }
+                }
+
+                response = client.GetAsync(src).Result;
+                using (var stream = response.Content.ReadAsStreamAsync().Result)
+                {
+                    imagePart.FeedData(stream);
+                }
+
+                return imagePart;
+            }
+            catch (Exception ex)
+            {
+                SixLabors.Fonts.Font font = new SixLabors.Fonts.Font(new SixLabors.Fonts.FontFamily(), 5F);
+                using (Image<Rgba32> image = new Image<Rgba32>(600, 400))
+                {
+                    RichTextOptions options = new RichTextOptions(font)
+                    {
+                        Origin = new PointF(100, 100), // Set the rendering origin.
+                        TabWidth = 8, // A tab renders as 8 spaces wide
+                        WrappingLength = 100, // Greater than zero so we will word wrap at 100 pixels wide
+                        HorizontalAlignment = SixLabors.Fonts.HorizontalAlignment.Right // Right align
+                    };
+
+                    PatternBrush brush = Brushes.Horizontal(SixColor.Red, SixColor.Blue);
+                    PatternPen pen = Pens.DashDot(SixColor.Green, 5);
+                    string text = "sample text";
+
+                    // Draws the text with horizontal red and blue hatching with a dash-dot pattern outline.
+                    image.Mutate(x => x.DrawText(options, text, brush, pen));
+
+                } 
+
+            }
+        }
+#endif
+
         // https://docs.microsoft.com/en-us/office/open-xml/how-to-insert-a-table-into-a-word-processing-document?view=openxml-2.8.1
         static Table CreateTable(
-            WordprocessingDocument doc,
+            Context context,
+            // WordprocessingDocument doc,
             OpenXmlElement body,
             XmlElement table)
         {
+            var doc = context.doc;
+
             if (table.ParentNode.Name == "p")
                 throw new ArgumentException($"p 元素下级不允许使用 table 元素");
 
@@ -1582,7 +1768,9 @@ out string error);
                         tc1.AppendChild(new_paragraph);
                     }
 
-                    CreateTextStream(doc,
+                    CreateTextStream(
+                        context,
+                        // doc,
                         new_paragraph == null ? (OpenXmlElement)tc1 : new_paragraph,
                         td.ChildNodes);
                     /*
@@ -2195,6 +2383,17 @@ out string error);
 
         #endregion
     }
+
+    // 发生了错误
+    // return:
+    //      true    继续向后处理
+    //      false   中断处理
+    public delegate bool delegate_error(string error_text, string error_code);
+
+    // 处理进度
+    public delegate void delegate_progress(long total, long current, string text);
+
+
 
     /*
 DigitalPlatform.Typography

@@ -3100,7 +3100,7 @@ out strError);
         }
 
         // 输出 HTML/docx 新书通报
-        void menu_saveToNewBookFile_Click(object sender, EventArgs e)
+        async void menu_saveToNewBookFile_Click(object sender, EventArgs e)
         {
             string strError = "";
             if (this.listView_records.SelectedItems.Count == 0)
@@ -3128,16 +3128,19 @@ out strError);
                     goto ERROR1;
             }
 
-            var result = _saveToNewBookFile(biblioRecPathList,
+            var result = await _saveToNewBookFileAsync(
+                biblioRecPathList,
                 groupTable);
             if (result.Value == -1)
             {
                 strError = result.ErrorInfo;
                 goto ERROR1;
             }
+            if (string.IsNullOrEmpty(result.ErrorInfo) == false)
+                MessageDlg.Show(this, result.ErrorInfo, "处理过程中出现警告");
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            MessageDlg.Show(this, strError, "处理出错");
         }
 
         string _used_nearCode = null;

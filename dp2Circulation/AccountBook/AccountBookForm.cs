@@ -4418,11 +4418,36 @@ strTotalPrice);
             return value;
         }
 
+        public class ScriptHost
+        {
+            public string BiblioRecPath { get; set; }
+
+            // 通用的参数往返传递措施
+            // key: "biblio_items_style"
+            public Hashtable ParamTable = new Hashtable();
+        }
+
+        // 兼容以前接口
+        public static string RunBiblioScript(
+    string result,
+    string strMARC,
+    string strOutMarcSyntax,
+    string strScript)
+        {
+            return RunBiblioScript(
+            null,
+            result,
+            strMARC,
+            strOutMarcSyntax,
+            strScript);
+        }
+
         // 执行 JavaScript 脚本
         // parameters:
         //      result 待处理的字符串内容。本函数用对象名 result 提供给脚本处理
         //      strItemXml  待处理的册记录 XML 内容。本函数用对象名 item 提供给脚本处理
         public static string RunBiblioScript(
+            ScriptHost host,
             string result,
             string strMARC,
             string strOutMarcSyntax,
@@ -4437,6 +4462,11 @@ result);
 "biblio",
 new MarcRecord(strMARC));
 
+            // 2024/6/7
+            SetValue(engine,
+"host",
+host);
+
             SetValue(engine,
                 "syntax",
                 strOutMarcSyntax);
@@ -4448,8 +4478,19 @@ new MarcRecord(strMARC));
                 ;
             result = GetString(engine, "result", "(请返回 result)");
             string message = GetString(engine, "message", "");
-
+            if (string.IsNullOrEmpty(message) == false)
+                throw new ScriptException(message, strScript);
             return result;
+        }
+
+        public class ScriptException : Exception 
+        {
+            public string Code { get; set; }
+            public ScriptException(string message,
+                string code) : base(message)
+            {
+                Code = code;
+            }
         }
 
         // 获得栏目内容

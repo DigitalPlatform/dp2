@@ -871,7 +871,6 @@ namespace DigitalPlatform.Marc
             // 数字资源
             if (StringUtil.IsInList("object", strStyle))
             {
-
                 string objectTable = ScriptUtil.BuildObjectXmlTable(strMARC,
                     StringUtil.IsInList("object_template", strStyle) ? BuildObjectHtmlTableStyle.Template | BuildObjectHtmlTableStyle.TemplateMultiHit : BuildObjectHtmlTableStyle.None,
                     "unimarc",
@@ -1639,16 +1638,26 @@ namespace DigitalPlatform.Marc
             strError = "";
             results = new List<NameValueLine>();
 
+            if (strStyle == null)
+                strStyle = "";
+
             MarcRecord record = new MarcRecord(strMARC);
 
             if (record.ChildNodes.count == 0)
                 return 0;
 
-            string strImageUrl = ScriptUtil.GetCoverImageUrl(strMARC, "LargeImage");    // LargeImage
-            if (string.IsNullOrEmpty(strImageUrl) == false)
-                results.Add(new NameValueLine("_coverImage", strImageUrl,
-                    "coverimageurl" // 2019/7/19 添加
-                    ));
+            if (StringUtil.IsInList("*", strStyle) // strStyle == "*" 
+    || string.IsNullOrEmpty(strStyle))
+                strStyle += ",areas,coverimageurl,titlepinyin,object,summary,subjects,classes";
+
+            if (StringUtil.IsInList("coverimageurl", strStyle))
+            {
+                string strImageUrl = ScriptUtil.GetCoverImageUrl(strMARC, "LargeImage");    // LargeImage
+                if (string.IsNullOrEmpty(strImageUrl) == false)
+                    results.Add(new NameValueLine("_coverImage", strImageUrl,
+                        "coverimageurl" // 2019/7/19 添加
+                        ));
+            }
 
             // LC control no.
             MarcNodeList nodes = record.select("field[@name='010']/subfield[@name='a']");
@@ -1686,16 +1695,23 @@ namespace DigitalPlatform.Marc
             }
 
             // Main title
-            fields = record.select("field[@name='245']");
-            if (fields.count > 0)
+            if (StringUtil.IsInList("areas,title_area", strStyle))
             {
-                results.Add(new NameValueLine("Main title", BuildFields(fields), "title_area")); // 原 title
+                fields = record.select("field[@name='245']");
+                if (fields.count > 0)
+                {
+                    results.Add(new NameValueLine("Main title", BuildFields(fields), "title_area")); // 原 title
+                }
             }
 
-            // TODO: 选择除了著者以外的子字段，构成题名字符串
-            if (fields.count > 0)
+            if (StringUtil.IsInList("title", strStyle))
             {
-                results.Add(new NameValueLine("Title", BuildFields(fields, "abhnp"), "title"));
+                fields = record.select("field[@name='245']");
+                // TODO: 选择除了著者以外的子字段，构成题名字符串
+                if (fields.count > 0)
+                {
+                    results.Add(new NameValueLine("Title", BuildFields(fields, "abhnp"), "title"));
+                }
             }
 #if NO
             foreach (MarcNode field in fields)
@@ -1762,10 +1778,13 @@ namespace DigitalPlatform.Marc
             }
 
             // ISBN
-            fields = record.select("field[@name='020']");
-            if (fields.count > 0)
+            if (StringUtil.IsInList("isbn", strStyle))
             {
-                results.Add(new NameValueLine("ISBN", BuildFields(fields), "isbn"));
+                fields = record.select("field[@name='020']");
+                if (fields.count > 0)
+                {
+                    results.Add(new NameValueLine("ISBN", BuildFields(fields), "isbn"));
+                }
             }
 
             // Current frequency
@@ -1797,24 +1816,31 @@ namespace DigitalPlatform.Marc
             }
 
             // ISSN
-            MarcNodeList subfields = record.select("field[@name='022']/subfield[@name='a']");
-            if (subfields.count > 0)
+            if (StringUtil.IsInList("issn", strStyle))
             {
-                results.Add(new NameValueLine("ISSN", ConcatSubfields(subfields), "issn"));
+                var subfields = record.select("field[@name='022']/subfield[@name='a']");
+                if (subfields.count > 0)
+                {
+                    results.Add(new NameValueLine("ISSN", ConcatSubfields(subfields), "issn"));
+                }
             }
 
             // Linking ISSN
-            subfields = record.select("field[@name='022']/subfield[@name='l']");
-            if (subfields.count > 0)
             {
-                results.Add(new NameValueLine("Linking ISSN", ConcatSubfields(subfields)));
+                var subfields = record.select("field[@name='022']/subfield[@name='l']");
+                if (subfields.count > 0)
+                {
+                    results.Add(new NameValueLine("Linking ISSN", ConcatSubfields(subfields)));
+                }
             }
 
             // Invalid LCCN
-            subfields = record.select("field[@name='010']/subfield[@name='z']");
-            if (subfields.count > 0)
             {
-                results.Add(new NameValueLine("Invalid LCCN", ConcatSubfields(subfields)));
+                var subfields = record.select("field[@name='010']/subfield[@name='z']");
+                if (subfields.count > 0)
+                {
+                    results.Add(new NameValueLine("Invalid LCCN", ConcatSubfields(subfields)));
+                }
             }
 
             // Contents
@@ -1880,12 +1906,68 @@ namespace DigitalPlatform.Marc
                 results.Add(new NameValueLine("Series", BuildFields(fields), "series_area"));
             }
 
+            // 分类号
+            if (StringUtil.IsInList("classes", strStyle))
+            {
+                fields = record.select("field[@name='080' or @name='082' or @name='050' or @name='093' or @name='094' or @name='095' or @name='084']");
+                if (fields.count > 0)
+                    results.Add(new NameValueLine("分类号", BuildUnimarcFields(fields, strStyle), "classes"));
+            }
+
+            // 中图法分类号
+            if (StringUtil.IsInList("clc_class", strStyle))
+            {
+                StringBuilder text = new StringBuilder();
+                record.select("field[@name='093']/subfield[@name='a']")
+                    .List.ForEach((o) =>
+                    {
+                        if (text.Length > 0)
+                            text.Append(CRLF);
+                        text.Append(o.Content);
+                    });
+                if (text.Length > 0)
+                    results.Add(new NameValueLine("中图法分类号", text.ToString(), "clc_class"));
+            }
+
+            // 科图法分类号
+            if (StringUtil.IsInList("ktf_class", strStyle))
+            {
+                StringBuilder text = new StringBuilder();
+                record.select("field[@name='094']/subfield[@name='a']")
+                    .List.ForEach((o) =>
+                    {
+                        if (text.Length > 0)
+                            text.Append(CRLF);
+                        text.Append(o.Content);
+                    });
+                if (text.Length > 0)
+                    results.Add(new NameValueLine("科图法分类号", text.ToString(), "ktf_class"));
+            }
+
+            // 人大法分类号
+            if (StringUtil.IsInList("rdf_class", strStyle))
+            {
+                StringBuilder text = new StringBuilder();
+                record.select("field[@name='095']/subfield[@name='a']")
+                    .List.ForEach((o) =>
+                    {
+                        if (text.Length > 0)
+                            text.Append(CRLF);
+                        text.Append(o.Content);
+                    });
+                if (text.Length > 0)
+                    results.Add(new NameValueLine("人大法分类号", text.ToString(), "rdf_class"));
+            }
+
 
             // LC classification
-            fields = record.select("field[@name='050']");
-            if (fields.count > 0)
+            if (StringUtil.IsInList("lcc_class", strStyle))
             {
-                results.Add(new NameValueLine("LC classification", BuildFields(fields)));
+                fields = record.select("field[@name='050']");
+                if (fields.count > 0)
+                {
+                    results.Add(new NameValueLine("LC classification", BuildFields(fields)));
+                }
             }
 #if NO
             foreach (MarcNode field in fields)
@@ -1908,10 +1990,13 @@ namespace DigitalPlatform.Marc
 
             // Dewey class no.
             // 不要 $2
-            fields = record.select("field[@name='082']");
-            if (fields.count > 0)
+            if (StringUtil.IsInList("ddc_class", strStyle))
             {
-                results.Add(new NameValueLine("Dewey class no.", BuildFields(fields, "a")));
+                fields = record.select("field[@name='082']");
+                if (fields.count > 0)
+                {
+                    results.Add(new NameValueLine("Dewey class no.", BuildFields(fields, "a")));
+                }
             }
 
             // NAL class no.

@@ -328,7 +328,7 @@ namespace dp2Circulation
                 {
                     objStatis = new ConvertDt1000ReaderToXml();
                 }
-                else if (strProjectName == "#对dt1000导出的ISO2909文件整理-01字段")
+                else if (strProjectName == "#对dt1000导出的ISO2709文件整理-01字段")
                 {
                     objStatis = new ProcessDt1000G01();
                 }

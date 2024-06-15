@@ -440,7 +440,10 @@ namespace dp2Circulation
                 return content;
             else
             {
-                return MyForm.RunItemScript(content, dom.DocumentElement?.OuterXml, property.Evalue);
+                return MyForm.RunItemScript(null,
+                    content,
+                    dom.DocumentElement?.OuterXml, 
+                    property.Evalue);
             }
         }
 

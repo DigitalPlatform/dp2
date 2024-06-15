@@ -225,6 +225,7 @@
     <Compile Include="SelPinyinDlg.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="VerifyError.cs" />
     <Compile Include="VerifyViewerForm.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -6,13 +6,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+
 using DigitalPlatform.Marc;
 
 namespace dp2Circulation.ISO2709Statis
 {
     // 2024/6/6
     /// <summary>
-    /// #对dt1000导出的ISO2909文件整理-01字段
+    /// #对dt1000导出的ISO2709文件整理-01字段
     /// </summary>
     public class ProcessDt1000G01 : Iso2709Statis
     {
@@ -89,6 +90,15 @@ out string timestamp);
                 return -1;
             }
 
+            // 进行一些整理：
+            // 1) 如果第一个字符是 '/'，则删除这个 '/'; (这是 dt1000 导出来的 -01)
+            // 2) 如果前方一致 "TCPIP网络/", 则替换为 ""; (这是 dt1000 插件模式导致的，比较啰嗦，需要缩短一点)
+            // 3) 中间的 "/ctlno/" 替换为 "/"。 
+            if (path.StartsWith("/") == true)
+                path = path.Substring(1);
+            if (path.StartsWith("TCPIP网络/"))
+                path = path.Replace("TCPIP网络/", "");
+            path = path.Replace("/ctlno/", "/");
             return 0;
         }
 
@@ -96,13 +106,18 @@ out string timestamp);
         {
             string strError = "";
 
+            string suggest_output_filename =
+                Path.GetFileNameWithoutExtension(this.InputFilename)
+                + "_output"
+                + Path.GetExtension(this.InputFilename);
+
             // 询问文件名
             SaveFileDialog dlg = new SaveFileDialog();
 
             dlg.Title = "请指定要创建的 ISO2709 文件名";
             dlg.CreatePrompt = false;
             dlg.OverwritePrompt = true;
-            dlg.FileName = "";
+            dlg.FileName = suggest_output_filename;
             dlg.Filter = "ISO2709文件 (*.iso)|*.iso|All files (*.*)|*.*";
 
             dlg.RestoreDirectory = true;
@@ -143,6 +158,7 @@ out string timestamp);
             if (nRet == -1)
                 goto ERROR1;
 
+            /*
             string strXml = "";
             nRet = MarcUtil.Marc2XmlEx(this.MARC,
     this.Syntax,
@@ -150,6 +166,7 @@ out string timestamp);
     out strError);
             if (nRet == -1)
                 goto ERROR1;
+            */
 
             record.select("field[@name='-01']").detach();
             record.ChildNodes.insertSequence(

@@ -7421,9 +7421,9 @@ MessageBoxDefaultButton.Button1);
                 }
 
                 /*
-                if (errors.Count > 0)
+                if (_errors.Count > 0)
                 {
-                    strError = StringUtil.MakePathList(errors, "\r\n");
+                    strError = StringUtil.MakePathList(_errors, "\r\n");
                     return -1;
                 }
 

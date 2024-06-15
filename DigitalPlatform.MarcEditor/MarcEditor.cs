@@ -4257,7 +4257,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             return result;
         }
 
-        internal static string ClipboardToTextFormat()
+        internal static string ClipboardToTextFormat(bool replace = true)
         {
             string result = "";
 
@@ -4287,6 +4287,9 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                 result = null;
             });
 
+            // 2024/6/15
+            if (replace)
+                return result.Replace("ǂ", MarcQuery.SUBFLD).Replace("\r\n", "\n").Replace("\n", MarcQuery.FLDEND);
             return result;
         }
 
@@ -5138,7 +5141,14 @@ SYS	011528318
             else
                 dlg.AutoComplete = (nAutoComplete == 1 ? true : false);
 
-            dlg.FieldName = this.DefaultFieldName;
+            // 2024/6/14
+            var start_field_name = this.DefaultFieldName;
+            if (nFieldIndex == 0)
+                start_field_name = "001";
+            else
+                start_field_name = this.Record.Fields[nFieldIndex].Name;
+
+            dlg.FieldName = start_field_name; //  this.DefaultFieldName;
             dlg.MarcDefDom = this.MarcDefDom;
             dlg.Lang = this.Lang;
 

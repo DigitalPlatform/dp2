@@ -450,3 +450,31 @@ dp2library 版本升级而发生变化，因而也就免去了升级后管理员
 ~~~
 格式转换生成 MARC 内容后冲掉另外一条记录中原有的 MARC，要注意保留原来 MARC
 记录中的 856 字段。另外原来 XML 记录中的 dprms:file 元素也要得到保留
+
+~~~
+MARC 编辑器的背景，用淡色字体显示它的编目规则名称
+
+~~~
+内务系统管理窗“内核”属性页上传的 dp2circulation_marc_verify.cs 文件，
+要在上传以前先统一把 encoding 改为 utf-8 才行
+
+~~~
+检查书目记录完整性的功能，要增加一个子功能，可以检查 856 中用到对象是否
+完好无损。有损坏的要能出现报错。
+另外，需要一个方便使用的，从操作日志中寻找和恢复对象内容的功能
+
+~~~
+TypoUtility 的 XmlToWord() 功能，要放在单独的线程中运行，避免冻结
+界面线程。
+XmlToWord() 功能中获得 https 图像文件的时候，要能通过回调函数显示
+正在获取什么 URL。
+XmlToWord() 功能可以显示执行的进度。进度可以用某一层处理 XML 元素的
+进度来表示。
+
+~~~
+https://andrewlock.net/exporing-the-code-behind-ihttpclientfactory/#:~:text=To%20use%20the%20factory%2C%20and%20create%20an%20HttpClient%2C,use%20the%20default%20name%2C%20%22%22%20%28the%20empty%20string%29.
+
+https://learn.microsoft.com/en-us/dotnet/fundamentals/networking/http/httpclient-guidelines
+
+https://josef.codes/you-are-probably-still-using-httpclient-wrong-and-it-is-destabilizing-your-software/
+

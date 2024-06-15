@@ -34,6 +34,8 @@ using DigitalPlatform.RFID;
 using DigitalPlatform.Core;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Typography;
+using static dp2Circulation.AccountBookForm;
+using System.Data.Sql;
 
 // 2013/3/16 添加 XML 注释
 
@@ -3376,6 +3378,7 @@ out strError);
             List<Order.ColumnProperty> titles,
             string style,
             delegate_getColumnValue func_getValue,
+            AccountBookForm.ScriptHost host,
             out string strTableXml,
             out string strError)
         {
@@ -3522,6 +3525,7 @@ out strError);
                             if (existing_line != null)
                                 result = existing_line.GetAttribute("value");
                             result = AccountBookForm.RunBiblioScript(
+                                host,
                                 result,
                                 strMARC,
                                 strMarcSyntax,
@@ -3578,6 +3582,25 @@ out strError);
             }
         }
 
+
+        public int GetTable(
+    string strRecPath,
+    // string strStyleList,
+    List<Order.ColumnProperty> titles,
+    string style,
+    delegate_getColumnValue func_getValue,
+    out string strTableXml,
+    out string strError)
+        {
+            return GetTable(
+            strRecPath,
+            titles,
+            style,
+            func_getValue,
+            null,
+            out strTableXml,
+            out strError);
+        }
         public void OnLoaderPrompt(object sender, MessagePromptEventArgs e)
         {
             // TODO: 不再出现此对话框。不过重试有个次数限制，同一位置失败多次后总要出现对话框才好
@@ -3870,7 +3893,8 @@ Keys keyData)
         //      -1  出错
         //      0   放弃
         //      1   成功
-        internal NormalResult _saveToNewBookFile(List<string> biblioRecPathList,
+        internal async Task<NormalResult> _saveToNewBookFileAsync(
+            List<string> biblioRecPathList,
             Hashtable groupTable)
         {
             string strError = "";
@@ -3971,6 +3995,8 @@ MessageBoxDefaultButton.Button2);
 
             var looping = BeginLoop(this.DoStop, "正在导出到 HTML 文件 ...");
 
+            List<string> warnings = new List<string>();
+
             string outputFileName = dlg.OutputFileName;
             if (format == "docx")
             {
@@ -3999,46 +4025,50 @@ MessageBoxDefaultButton.Button2);
 
                     // writer 开头
                     if (format == "html")
-                        writer.Write("<html><head>"
+                        await writer.WriteAsync("<html><head>"
                             + $"<LINK href='{pureCssFileName}' type='text/css' rel='stylesheet' />"
                             + "</head><body>\r\n");
                     else if (format == "docx")
-                        writer.Write("<root>");
+                        await writer.WriteAsync("<root>");
 
                     // docx styles
                     if (format == "docx")
                     {
-                        writer.Write("<styles>");
-                        writer.Write("<style name='small' size='9pt' font='ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman' color='AAAAAA' style='bold'/>");
-                        writer.Write("<style name='small_name' size='9pt' font='ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman'/>");
-                        writer.Write("<style name='default' font='ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman'/>");
-                        writer.Write("<style name='default' type='character' font='ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman'/>");
-                        writer.Write("<style name='default_name' font='ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman' color='AAAAAA' style='bold' alignment='right'/>");
-                        writer.Write("<style name='default_name' type='character' font='ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman' color='AAAAAA' style='bold'/>");
-                        writer.Write("<style name='hr'>");
-                        writer.Write("<border><bottom value='single' size='0.5pt' color='000000' /></border>");
-                        writer.Write("</style>");
-                        writer.Write("<style name='vl' type='td'>");
-                        writer.Write("<border><right value='dotted' size='1pt' space='2pt' color='999999' /></border>");
-                        writer.Write("</style>");
-                        writer.Write("<style name='val' type='td'>");
-                        writer.Write("<border><left value='nil' space='2pt'/></border>");
-                        writer.Write("</style>"); writer.Write("</styles>");
+                        await writer.WriteAsync("<styles>");
+                        await writer.WriteAsync("<style name='small' size='9pt' font='ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman' color='AAAAAA' style='bold'/>");
+                        await writer.WriteAsync("<style name='small_name' size='9pt' font='ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman'/>");
+                        await writer.WriteAsync("<style name='default' font='ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman'/>");
+                        await writer.WriteAsync("<style name='default' type='character' font='ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman'/>");
+                        await writer.WriteAsync("<style name='default_name' font='ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman' color='AAAAAA' style='bold' alignment='right'/>");
+                        await writer.WriteAsync("<style name='default_name' type='character' font='ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman' color='AAAAAA' style='bold'/>");
+                        await writer.WriteAsync("<style name='items' size='9pt' font='ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman'/>");
+                        await writer.WriteAsync("<style name='items' type='character' size='9pt' font='ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman'/>");
+                        await writer.WriteAsync("<style name='items_line' size='9pt' spacing='before:1.9pt,after:1.6pt,line:0exact' font='ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman'/>");
+                        await writer.WriteAsync("<style name='hr'>");
+                        await writer.WriteAsync("<border><bottom value='single' size='0.5pt' color='000000' /></border>");
+                        await writer.WriteAsync("</style>");
+                        await writer.WriteAsync("<style name='vl' type='td'>");
+                        await writer.WriteAsync("<border><right value='dotted' size='1pt' space='2pt' color='999999' /></border>");
+                        await writer.WriteAsync("</style>");
+                        await writer.WriteAsync("<style name='val' type='td'>");
+                        await writer.WriteAsync("<border><left value='nil' space='2pt'/></border>");
+                        await writer.WriteAsync("</style>");
+                        await writer.WriteAsync("</styles>");
                     }
 
                     if (layout_style == "整体表格")
                     {
                         if (format == "docx")
                         {
-                            writer.Write("<table cellMarginDefault='2pt,2pt,2pt,2pt' class='biblio'>");
-                            writer.Write("<tableGrid>");
-                            writer.Write("<gridColumn gridWidth='23'/>");
+                            await writer.WriteAsync("<table cellMarginDefault='2pt,2pt,2pt,2pt' class='biblio'>");
+                            await writer.WriteAsync("<tableGrid>");
+                            await writer.WriteAsync("<gridColumn gridWidth='23'/>");
                             if (hide_biblio_fieldname == false)
-                                writer.Write("<gridColumn gridWidth='23'/>");
-                            writer.Write("</tableGrid>");
+                                await writer.WriteAsync("<gridColumn gridWidth='23'/>");
+                            await writer.WriteAsync("</tableGrid>");
                         }
                         else
-                            writer.Write("<table class='biblio'>");
+                            await writer.WriteAsync("<table class='biblio'>");
                     }
                     int i = 0;
                     // foreach (ListViewItem item in items)
@@ -4084,6 +4114,7 @@ MessageBoxDefaultButton.Button2);
 
                         string strXml = results[0];
                         */
+                        var host = new AccountBookForm.ScriptHost();
                         // return:
                         //      -1  出错
                         //      0   没有找到
@@ -4180,6 +4211,7 @@ MessageBoxDefaultButton.Button2);
                                 }
                                 return ProcessParts.None;
                             },
+                            host,
                             out string strXml,
                             out strError);
                         if (nRet == 0)
@@ -4214,18 +4246,18 @@ MessageBoxDefaultButton.Button2);
                                     hr = "<p style='hr'/>";
                                 if (layout_style == "独立表格")
                                 {
-                                    writer.Write($"{hr}\r\n");
+                                    await writer.WriteAsync($"{hr}\r\n");
                                 }
                                 else if (layout_style == "整体表格")
                                 {
-                                    writer.Write($"<tr class='biblio_seperator'><td colspan='{(hide_biblio_fieldname ? "1" : "2")}'>{hr}</td></tr>\r\n");
+                                    await writer.WriteAsync($"<tr class='biblio_seperator'><td colspan='{(hide_biblio_fieldname ? "1" : "2")}'>{hr}</td></tr>\r\n");
                                 }
                                 else if (layout_style == "自然段")
                                 {
                                     if (format == "docx")
-                                        writer.Write($"{hr}\r\n");
+                                        await writer.WriteAsync($"{hr}\r\n");
                                     else
-                                        writer.Write($"<{DIV} class='biblio_seperator'>{hr}</{DIV}>\r\n");
+                                        await writer.WriteAsync($"<{DIV} class='biblio_seperator'>{hr}</{DIV}>\r\n");
                                 }
 
                                 string content = BuildBiblioHtml(
@@ -4252,8 +4284,9 @@ MessageBoxDefaultButton.Button2);
         groupTable == null ? strRecPath : null,
         item_recpaths,
         entity_title_list,
+        host,
         format,
-        layout_style);
+        host.ParamTable["biblio_items_style"] as string);
                                 string items_line = "";
                                 string caption = "册";
                                 if (layout_style == "自然段")
@@ -4262,7 +4295,7 @@ MessageBoxDefaultButton.Button2);
                                 if (items_area_style == "没有册时不输出")
                                 {
                                     if (string.IsNullOrEmpty(items_table) == false)
-                                        items_line = BuildItemsLine();
+                                        items_line = BuildItemsLine(host.ParamTable["biblio_items_style"] as string);
 #if REMOVED
                                     if (layout_style == "自然段")
                                     {
@@ -4321,12 +4354,12 @@ MessageBoxDefaultButton.Button2);
                                     else
                                         items_line = $"<tr class='items'><td class='name'>{HttpUtility.HtmlEncode(caption)}</td><td class='value'>{items_table}</td></tr>";
                                     */
-                                    items_line = BuildItemsLine();
+                                    items_line = BuildItemsLine(host.ParamTable["biblio_items_style"] as string);
                                 }
                                 else
                                     items_line = "";
 
-                                string BuildItemsLine()
+                                string BuildItemsLine(string style)
                                 {
                                     if (layout_style == "自然段")
                                     {
@@ -4367,7 +4400,7 @@ MessageBoxDefaultButton.Button2);
                                 }
 
                                 content = content.Replace("{items}", items_line);
-                                writer.Write(content);
+                                await writer.WriteAsync(content);
                                 // 给根元素设置几个参数
                                 //DomUtil.SetAttr(_dom.DocumentElement, "path", DpNs.dprms, Program.MainForm.LibraryServerUrl + "?" + item.BiblioInfo.RecPath);  // strRecPath
                                 //DomUtil.SetAttr(_dom.DocumentElement, "timestamp", DpNs.dprms, ByteArray.GetHexTimeStampString(item.BiblioInfo.Timestamp));   // baTimestamp
@@ -4380,18 +4413,34 @@ MessageBoxDefaultButton.Button2);
                     }
 
                     if (layout_style == "整体表格")
-                        writer.Write("</table>");
+                        await writer.WriteAsync("</table>");
 
                     // writer 收尾
                     if (format == "html")
-                        writer.Write("</body></html>\r\n");
+                        await writer.WriteAsync("</body></html>\r\n");
                     else if (format == "docx")
-                        writer.Write("</root>");
+                        await writer.WriteAsync("</root>");
                 }
 
                 if (format == "docx")
                 {
-                    TypoUtility.XmlToWord(outputFileName, dlg.OutputFileName);
+                    await Task.Factory.StartNew(() =>
+                    {
+                        TypoUtility.XmlToWord(outputFileName,
+                            dlg.OutputFileName,
+                            (total, current, text) =>
+                            {
+                                looping.Progress.SetMessage(text);
+                            },
+                            (error, code) =>
+                            {
+                                warnings.Add(error);
+                                return true;    // 继续处理
+                            });
+                    },
+default,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
                     /*
                     try
                     {
@@ -4435,7 +4484,11 @@ MessageBoxDefaultButton.Button2);
             System.Diagnostics.Process.Start(// "iexplore",
         dlg.OutputFileName);
 
-            return new NormalResult { Value = 1 };
+            return new NormalResult
+            {
+                Value = 1,
+                ErrorInfo = StringUtil.MakePathList(warnings, "\r\n")
+            };
         }
 
 
@@ -4446,18 +4499,39 @@ MessageBoxDefaultButton.Button2);
             string biblio_recpath,
             List<string> item_recpath_list,
             List<Order.ColumnProperty> entity_title_list,
+            ScriptHost host,
             string format,
             string layout_style)
         {
             string strError = "";
 
+            // 2024/6/7
+            int max_lines = -1;
+            var max_lines_string = StringUtil.GetParameterByPrefix(layout_style, "max_lines");
+            if (string.IsNullOrEmpty(max_lines_string) == false)
+            {
+                if (Int32.TryParse(max_lines_string, out max_lines) == false)
+                {
+                    throw new ArgumentException($"layout_style '{layout_style}' 中最大行数值 '{max_lines_string}' 不合法。应为一个整数");
+                }
+            }
+
+            // 2024/6/12
+            var free_text = StringUtil.IsInList("free_text", layout_style);
+            var ignore_title_line = StringUtil.IsInList("ignore_title_line", layout_style);
+
             int line_count = 0;
             StringBuilder result = new StringBuilder();
-            if (format == "docx")
-                result.Append("<table cellMarginDefault='1pt,0,1pt,0' width='100%' class='items'>"); // cellMarginDefault='1pt,1pt,1pt,1pt'
-            else
-                result.Append("<table class='items'>");
-            result.Append(BuildEntityTitle(entity_title_list, format));
+            if (free_text == false)
+            {
+                if (format == "docx")
+                    result.Append("<table cellMarginDefault='1pt,0,1pt,0' width='100%' class='items'>"); // cellMarginDefault='1pt,1pt,1pt,1pt'
+                else
+                    result.Append("<table class='items'>");
+            }
+
+            if (ignore_title_line == false)
+                result.Append(BuildEntityTitle(entity_title_list, format, free_text));
             if (string.IsNullOrEmpty(biblio_recpath) == false)
             {
                 /*
@@ -4486,7 +4560,13 @@ MessageBoxDefaultButton.Button2);
                         strError = "路径为 '" + info.OldRecPath + "' 的册记录装载中发生错误: " + info.ErrorInfo;  // NewRecPath
                         goto ERROR1;
                     }
-                    result.Append(BuildEntityLine(entity_title_list, info.OldRecord, info.OldRecPath, format));
+                    if (max_lines == -1 || line_count < max_lines)
+                        result.Append(BuildEntityLine(host,
+                            entity_title_list,
+                            info.OldRecord,
+                            info.OldRecPath,
+                            format,
+                            free_text));
                     line_count++;
                 }
             }
@@ -4503,12 +4583,28 @@ MessageBoxDefaultButton.Button2);
                         out strError);
                     if (ret == -1)
                         goto ERROR1;
-                    result.Append(BuildEntityLine(entity_title_list, item_xml, path, format));
+                    if (max_lines == -1 || line_count < max_lines)
+                        result.Append(BuildEntityLine(host,
+                            entity_title_list,
+                            item_xml,
+                            path,
+                            format,
+                            free_text));
                     line_count++;
                 }
             }
 
-            result.Append("</table>");
+            if (max_lines != -1 && line_count > max_lines)
+            {
+                if (free_text)
+                    result.Append(HttpUtility.HtmlEncode($"(此后略去 {line_count - max_lines} 册 ...)"));
+                else
+                    result.Append($"<tr><td colspan='{entity_title_list.Count}'>{HttpUtility.HtmlEncode($"(此后略去 {line_count - max_lines} 册 ...)")}</td></tr>");
+            }
+
+            if (free_text == false)
+                result.Append("</table>");
+
             /*
             // https://github.com/jgm/pandoc/issues/6983
             if (format == "docx" && layout_style != "自然段")
@@ -4521,10 +4617,13 @@ MessageBoxDefaultButton.Button2);
             return $"<p>{HttpUtility.HtmlEncode(strError)}</p>";
         }
 
-        static string BuildEntityLine(List<Order.ColumnProperty> entity_title_list,
+        static string BuildEntityLine(
+            ScriptHost host,
+            List<Order.ColumnProperty> entity_title_list,
             string item_xml,
             string item_recpath,
-            string format)
+            string format,
+            bool free_text = false)
         {
             XmlDocument item_dom = new XmlDocument();
             try
@@ -4538,7 +4637,10 @@ MessageBoxDefaultButton.Button2);
             }
 
             StringBuilder text = new StringBuilder();
-            text.Append("<tr>");
+            if (free_text == false)
+                text.Append("<tr>");
+            else
+                text.Append("<p style='items_line'>");
             foreach (var column in entity_title_list)
             {
                 var type = column.Type;
@@ -4554,7 +4656,7 @@ MessageBoxDefaultButton.Button2);
                     {
                         content = DomUtil.GetElementText(item_dom.DocumentElement, type);
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         // column.Type 名称不适合作为 XML Element Name 使用
                         content = $"列名称 '{type}' (原始值为 '{column.Type}') 不适合作为 XML 元素名使用";
@@ -4564,7 +4666,19 @@ MessageBoxDefaultButton.Button2);
                 // 2023/7/29
                 if (string.IsNullOrEmpty(column.Evalue) == false)
                 {
-                    content = RunItemScript(content, item_xml, column.Evalue);
+                    content = RunItemScript(host,
+                        content,
+                        item_xml,
+                        column.Evalue);
+                }
+
+                // 2024/6/12
+                if (free_text)
+                {
+                    if (text.Length > 0)
+                        text.Append(" ");
+                    text.Append(HttpUtility.HtmlEncode(content));
+                    continue;
                 }
 
                 if (format == "docx")
@@ -4572,7 +4686,10 @@ MessageBoxDefaultButton.Button2);
                 else
                     text.Append($"<td class='item_{type}'>{HttpUtility.HtmlEncode(content)}</td>");
             }
-            text.Append("</tr>");
+            if (free_text == false)
+                text.Append("</tr>");
+            else
+                text.Append("</p>");
             return text.ToString();
         }
 
@@ -4597,7 +4714,8 @@ item);
                 ;
             string result = GetString(engine, "result", "(请返回 result)");
             string message = GetString(engine, "message", "");
-
+            if (string.IsNullOrEmpty(message) == false)
+                throw new ScriptException(message, strScript);
             return result;
         }
 #endif
@@ -4615,11 +4733,12 @@ item);
         result = "(" + result + ")";
         * */
         public static string RunItemScript(
+            ScriptHost host,
             string result,
             string strItemXml,
             string strScript)
         {
-            Engine engine = new Engine(cfg => 
+            Engine engine = new Engine(cfg =>
             cfg
             .AllowClr(typeof(XDoc)
             .Assembly));
@@ -4631,6 +4750,11 @@ result);
             SetValue(engine,
 "item",
 item);
+            // 2024/6/8
+            SetValue(engine,
+"host",
+host);
+
             engine.Execute("var DigitalPlatform = importNamespace('DigitalPlatform');\r\n"
                 + strScript) // execute a statement
                 ?.GetCompletionValue() // get the latest statement completion value
@@ -4638,9 +4762,11 @@ item);
                 ;
             result = GetString(engine, "result", "(请返回 result)");
             string message = GetString(engine, "message", "");
-
+            if (string.IsNullOrEmpty(message) == false)
+                throw new ScriptException(message, strScript);
             return result;
         }
+
         static void SetValue(Engine engine, string name, object o)
         {
             if (o == null)
@@ -4661,19 +4787,34 @@ item);
         #endregion
 
         static string BuildEntityTitle(List<Order.ColumnProperty> entity_title_list,
-            string format)
+            string format,
+            bool free_text = false)
         {
             StringBuilder text = new StringBuilder();
-            text.Append("<tr>");
+            if (free_text == false)
+                text.Append("<tr>");
+            else
+                text.Append("<p style='items_line'>");
             foreach (var column in entity_title_list)
             {
                 var caption = column.Caption;
+                // 2024/6/12
+                if (free_text == true)
+                {
+                    if (text.Length > 0)
+                        text.Append(" ");
+                    text.Append(HttpUtility.HtmlEncode(caption));
+                    continue;
+                }
                 if (format == "docx")
                     text.Append($"<td noWrap='true'><p style='small'>{HttpUtility.HtmlEncode(caption)}</p></td>");
                 else
                     text.Append($"<td>{HttpUtility.HtmlEncode(caption)}</td>");
             }
-            text.Append("</tr>");
+            if (free_text == false)
+                text.Append("</tr>");
+            else
+                text.Append("</p>");
             return text.ToString();
         }
 
@@ -4762,7 +4903,7 @@ item);
                     else
                         continue;
                     // result.AppendLine($"<tr class='biblio_{type}'><td class='name'></td><td class='value'><img alt='封面图片' src='{url}'></img></td></tr>");   //  style1='width:100pt;'
-                    OutputLineRaw($"biblio_{type}", "", $"<img alt='封面图片' src='{url}'></img>");
+                    OutputLineRaw($"biblio_{type}", "", $"<img alt='封面图片 {biblio_recpath}' src='{url}'></img>");
                     continue;
                 }
 

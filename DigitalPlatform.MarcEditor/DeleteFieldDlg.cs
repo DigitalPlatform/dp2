@@ -20,12 +20,11 @@ namespace DigitalPlatform.Marc
 
         private void DeleteFieldDlg_Load(object sender, EventArgs e)
         {
-            this.AcceptButton = this.button_no;
+            // this.AcceptButton = this.button_no;
         }
 
         private void button_yes_Click(object sender, EventArgs e)
         {
-
             this.DialogResult = DialogResult.Yes;
             this.Close();
         }
@@ -34,7 +33,6 @@ namespace DigitalPlatform.Marc
         {
             this.DialogResult = DialogResult.No;
             this.Close();
-
         }
 
         public string Message
@@ -64,7 +62,7 @@ namespace DigitalPlatform.Marc
                 return true;
             }
 
-            return false;
+            return base.ProcessDialogKey(keyData);
         }
     }
 }

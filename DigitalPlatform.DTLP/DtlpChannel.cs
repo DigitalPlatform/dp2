@@ -271,7 +271,6 @@ namespace DigitalPlatform.DTLP
 					return null;
 				m_HostArray.Add(entry);
 				entry.Container = m_HostArray;
-
 			}
 
 			// 如果TCP/IP连接尚未建立
@@ -467,7 +466,7 @@ namespace DigitalPlatform.DTLP
                 + strError;
         }
 
-		public string GetErrorString(int lErrno)
+		public static string GetErrorString(int lErrno)
 		{
 			switch (lErrno) 
 			{
@@ -2165,7 +2164,7 @@ namespace DigitalPlatform.DTLP
 				if (nErrorCode == DtlpChannel.GL_NOTEXIST) 
 					return 0;	// not found
 
-				string strText = this.GetErrorString(nErrorCode);
+				string strText = DtlpChannel.GetErrorString(nErrorCode);
 
 				string strHex = String.Format("0X{0,8:X}",nErrorCode);
 
@@ -2310,7 +2309,7 @@ namespace DigitalPlatform.DTLP
                     // 时间戳不匹配
                 }
 
-                string strText = this.GetErrorString(nErrorCode);
+                string strText = DtlpChannel.GetErrorString(nErrorCode);
                 string strHex = String.Format("0X{0,8:X}", nErrorCode);
 
                 strError = "保存配置文件 '" + strCfgFilePath + " ' 时发生错误: "
@@ -2327,7 +2326,7 @@ namespace DigitalPlatform.DTLP
         {
             int nErrorCode = this.GetLastErrno();
 
-            string strText = this.GetErrorString(nErrorCode);
+            string strText = DtlpChannel.GetErrorString(nErrorCode);
             string strHex = String.Format("0X{0,8:X}", nErrorCode);
 
             return "错误码 "
@@ -2382,7 +2381,7 @@ namespace DigitalPlatform.DTLP
                     if (nErrorCode == DtlpChannel.GL_NOTEXIST)
                         return 0;	// not found
 
-                    string strText = this.GetErrorString(nErrorCode);
+                    string strText = DtlpChannel.GetErrorString(nErrorCode);
 
                     string strHex = String.Format("0X{0,8:X}", nErrorCode);
 

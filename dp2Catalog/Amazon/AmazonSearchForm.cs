@@ -559,7 +559,6 @@ MessageBoxDefaultButton.Button1);
 
             if (this.MainForm != null && this.MainForm.AppInfo != null)
             {
-
                 string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_browse);
                 this.MainForm.AppInfo.SetString(
                     "amazonsearchform",
@@ -3376,7 +3375,8 @@ MessageBoxDefaultButton.Button1);
                 return true;
             }
 
-            return false;
+            return base.ProcessDialogKey(keyData);
+            // return false;
         }
 
         // TODO: 加入一旦窗口关闭就跳出循环的逻辑

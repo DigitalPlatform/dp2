@@ -7697,6 +7697,7 @@ Keys keyData)
             {
                 m_verifyViewer = new VerifyViewerForm();
                 // GuiUtil.SetControlFont(m_viewer, this.Font, false);
+                m_verifyViewer.CssFileName = Path.Combine(Program.MainForm.DataDir, "verify.css");  // 2024/6/15
             }
 
             // m_viewer.MainForm = this.MainForm;  // 必须是第一句

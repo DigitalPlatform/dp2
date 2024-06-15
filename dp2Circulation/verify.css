@@ -1,0 +1,56 @@
+﻿body {
+    font-family: Microsoft YaHei, Tahoma, Arial, Helvetica, sans-serif;
+    font-size: 11pt;
+    margin: 0px;
+    padding: 0px;
+}
+
+A:link, A:visited, A:active {
+    text-decoration: none;
+    color: #aaaaaa;
+}
+
+A:hover {
+    font-weight: bold;
+}
+
+.line {
+    padding: 2px;
+    padding-left: 8px;
+    border-width: 0px;
+    border-left-width: 4px;
+    border-color: Gray;
+    border-style: solid;
+}
+
+    .line.begin {
+        margin-top: 8px;
+        background-color: #bbbbbb;
+        color: White;
+    }
+
+    .line.end {
+        margin-bottom: 8px;
+        background-color: #bbbbbb;
+        color: White;
+    }
+
+    .line.info {
+        background-color: #ffff99;
+        color: Black;
+    }
+
+    .line.warning {
+        background-color: #ffff99;
+        color: Black;
+    }
+
+    .line.error {
+        background-color: #990000;
+        color: White;
+    }
+
+    .line.succeed {
+        background-color: #009900;
+        color: White;
+    }

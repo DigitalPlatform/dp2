@@ -19,6 +19,9 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.GUI;
 using dp2Catalog.DTLP;
 using DigitalPlatform.CommonControl;
+using System.Web;
+using DocumentFormat.OpenXml.EMMA;
+using DocumentFormat.OpenXml.Bibliography;
 
 namespace dp2Catalog
 {
@@ -409,7 +412,8 @@ namespace dp2Catalog
             /*
             Stop temp_stop = this.stop;
             */
-            var looping = BeginLoop(this.DoStop, "正在获取记录 ...");
+            var looping = BeginLoop(this.DoStop,
+                $"正在获取记录 {strPath} ...");
 
             DtlpChannel channel = null;
 
@@ -418,8 +422,12 @@ namespace dp2Catalog
                 channel = this.DtlpChannel;
             else
             {
+                looping.Progress.SetMessage($"正在为获取记录 {strPath} 准备通道 ...");
+
                 channel = this.DtlpChannels.CreateChannel(0);
                 bNewChannel = true;
+
+                looping.Progress.SetMessage($"正在获取记录 {strPath} ...");
 
                 /*
                 temp_stop = new Stop();
@@ -455,7 +463,7 @@ namespace dp2Catalog
                     strError = "检索出错:\r\n"
                         + "检索式: " + strPath + "\r\n"
                         + "错误码: " + errorcode + "\r\n"
-                        + "错误信息: " + channel.GetErrorString(errorcode) + "\r\n";
+                        + "错误信息: " + DtlpChannel.GetErrorString(errorcode) + "\r\n";
                     goto ERROR1;
                 }
 
@@ -768,14 +776,40 @@ namespace dp2Catalog
 
         public void LoadSize()
         {
-            // 设置窗口尺寸状态
-            MainForm.AppInfo.LoadMdiChildFormStates(this,
+            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            {
+                // 设置窗口尺寸状态
+                MainForm.AppInfo.LoadMdiChildFormStates(this,
                 "mdi_form_state",
                 SizeStyle.All,
                 MainForm.DefaultMdiWindowWidth,
                 MainForm.DefaultMdiWindowHeight);
 
+                // 获得splitContainer_main的状态
+                this.MainForm.LoadSplitterPos(
+                    this.splitContainer_main,
+                    "dtlpsearchform",
+                    "splitContainer_main");
 
+                // 获得splitContainer_up的状态
+                this.MainForm.LoadSplitterPos(
+                    this.splitContainer_up,
+                    "dtlpsearchform",
+                    "splitContainer_up");
+
+                string strWidths = this.MainForm.AppInfo.GetString(
+"dtlpsearchform",
+"record_list_column_width",
+"");
+                if (String.IsNullOrEmpty(strWidths) == false)
+                {
+                    ListViewUtil.SetColumnHeaderWidth(this.listView_browse,
+                        strWidths,
+                        true);
+                }
+            }
+
+#if REMOVED
             // 获得splitContainer_main的状态
             int nValue = MainForm.AppInfo.GetInt(
             "dtlpsearchform",
@@ -807,6 +841,7 @@ namespace dp2Catalog
                 {
                 }
             }
+#endif
 
             // 2008/3/24
             if (this.dtlpResDirControl1.SelectedNode != null)
@@ -821,6 +856,24 @@ namespace dp2Catalog
                     "mdi_form_state");
 
                 // 保存splitContainer_main的状态
+                this.MainForm.SaveSplitterPos(
+                    this.splitContainer_main,
+                    "dtlpsearchform",
+                    "splitContainer_main");
+
+                this.MainForm.SaveSplitterPos(
+                    this.splitContainer_up,
+                    "dtlpsearchform",
+                    "splitContainer_up");
+
+                // 保存 listview 的各列宽度
+                string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_browse);
+                this.MainForm.AppInfo.SetString(
+                    "dtlpsearchform",
+                    "record_list_column_width",
+                    strWidths);
+#if REMOVED
+                // 保存splitContainer_main的状态
                 MainForm.AppInfo.SetInt(
                     "dtlpsearchform",
                     "splitContainer_main",
@@ -830,6 +883,7 @@ namespace dp2Catalog
                     "dtlpsearchform",
                     "splitContainer_up",
                     this.splitContainer_up.SplitterDistance);
+#endif
             }
         }
 
@@ -1075,7 +1129,7 @@ Stack:
                             strError = "检索出错:\r\n"
                                 + "检索式: " + strPath + "\r\n"
                                 + "错误码: " + errorcode + "\r\n"
-                                + "错误信息: " + this.DtlpChannel.GetErrorString(errorcode) + "\r\n";
+                                + "错误信息: " + DtlpChannel.GetErrorString(errorcode) + "\r\n";
                             goto ERROR1;
                         }
 
@@ -1481,8 +1535,8 @@ Stack:
                 return true;
             }
 
-            base.ProcessDialogKey(keyData);
-            return false;
+            return base.ProcessDialogKey(keyData);
+            // return false;
         }
 
         private void dtlpResDirControl1_ItemSelected(object sender, ItemSelectedEventArgs e)
@@ -1599,6 +1653,10 @@ Stack:
                 menuItem.Enabled = false;
             contextMenu.Items.Add(menuItem);
 
+            menuItem = new ToolStripMenuItem("test");
+            menuItem.Click += new System.EventHandler(this.menu_testAddItems_Click);
+            contextMenu.Items.Add(menuItem);
+
             // ---
             sep = new ToolStripSeparator();
             contextMenu.Items.Add(sep);
@@ -1610,12 +1668,20 @@ Stack:
             contextMenu.Items.Add(menuItem);
 
             // 保存原始记录到ISO2709文件
-            menuItem = new ToolStripMenuItem($"保存到 MARC 文件 [{nSelectedCount}] (&S)");
+            menuItem = new ToolStripMenuItem($"保存到 MARC 文件 [{nSelectedCount}] [带操作历史](&S) ...");
             if (nSelectedCount > 0 /*&& this.m_bInSearching == false*/)
                 menuItem.Enabled = true;
             else
                 menuItem.Enabled = false;
-            menuItem.Click += new EventHandler(menuItem_saveOriginRecordToIso2709_Click);
+            menuItem.Click += new EventHandler(menuItem_saveOriginRecordToIso2709_history_Click);
+            contextMenu.Items.Add(menuItem);
+
+            menuItem = new ToolStripMenuItem($"保存到 MARC 文件 [{nSelectedCount}] [带日志文件](&L) ...");
+            if (nSelectedCount > 0 /*&& this.m_bInSearching == false*/)
+                menuItem.Enabled = true;
+            else
+                menuItem.Enabled = false;
+            menuItem.Click += new EventHandler(menuItem_saveOriginRecordToIso2709_log_Click);
             contextMenu.Items.Add(menuItem);
 
             // ---
@@ -1728,7 +1794,7 @@ Stack:
                     {
                         current_shift = (Control.ModifierKeys == Keys.Shift);
                         if (shift == true || current_shift == true)
-                        { 
+                        {
                             // shift 按下的情况下，中途始终不刷新显示
                         }
                         else
@@ -2058,31 +2124,46 @@ Stack:
             this.listView_browse.EndUpdate();
         }
 
+        void menu_testAddItems_Click(object sender, EventArgs e)
+        {
+            Cursor oldCursor = this.Cursor;
+            this.Cursor = Cursors.WaitCursor;
+            this.listView_browse.BeginUpdate();
+            for (int i = 0; i < 100 * 1000; i++)
+            {
+                this.listView_browse.Items.Add(new ListViewItem($"{i + 1}"));
+            }
+            this.listView_browse.EndUpdate();
+            this.Cursor = oldCursor;
+        }
+
         // 从窗口中移走所选择的事项
         void menu_removeSelectedItems_Click(object sender, EventArgs e)
         {
-
             Cursor oldCursor = this.Cursor;
             this.Cursor = Cursors.WaitCursor;
 
-            this.listView_browse.BeginUpdate();
-            ListViewUtil.ClearSelection(this.listView_browse);
+            ListViewUtil.DeleteSelectedItems(this.listView_browse);
             /*
             for (int i = this.listView_browse.SelectedIndices.Count - 1; i >= 0; i--)
             {
                 this.listView_browse.Items.RemoveAt(this.listView_browse.SelectedIndices[i]);
             }
             */
-            this.listView_browse.EndUpdate();
             this.Cursor = oldCursor;
         }
 
-        void menuItem_saveOriginRecordToIso2709_Click(object sender, EventArgs e)
+        void menuItem_saveOriginRecordToIso2709_log_Click(object sender, EventArgs e)
         {
-            this.SaveOriginRecordToIso2709();
+            this.SaveOriginRecordToIso2709("write_log_file");
         }
 
-        public void SaveOriginRecordToIso2709()
+        void menuItem_saveOriginRecordToIso2709_history_Click(object sender, EventArgs e)
+        {
+            this.SaveOriginRecordToIso2709("write_oper_history");
+        }
+
+        public void SaveOriginRecordToIso2709(string style)
         {
             string strError = "";
             int nRet = 0;
@@ -2094,6 +2175,9 @@ Stack:
                 strError = "尚未选定要保存的记录";
                 goto ERROR1;
             }
+
+            bool write_log_file = StringUtil.IsInList("write_log_file", style);
+            bool write_oper_history = StringUtil.IsInList("write_oper_history", style);
 
             Encoding preferredEncoding = this.CurrentEncoding;
 
@@ -2189,12 +2273,23 @@ Stack:
                 }
             }
 
+            TextWriter log_writer = null;
+            string log_filename = dlg.FileName + ".log";
+            if (write_log_file)
+                log_writer = new StreamWriter(log_filename,
+                    false,
+                    Encoding.GetEncoding("gb2312"));
+
             MainForm.LastIso2709FileName = dlg.FileName;
             MainForm.LastCrLfIso2709 = dlg.CrLf;
             MainForm.LastEncodingName = dlg.EncodingName;
             MainForm.LastRemoveField998 = dlg.RemoveField998;
 
             this.EnableControls(false);
+
+            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString() + " 开始保存 MARC 文件 " + dlg.FileName) + "</div>");
+            if (write_log_file)
+                this.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode("操作过程会自动写入日志文件 " + log_filename) + "</div>");
 
             var looping = BeginLoop(this.DoStop, "正在保存到 MARC 文件 ...");
 
@@ -2215,6 +2310,7 @@ Stack:
             }
 
             bool bHideMessageBox = false;
+            Hashtable silently_errorcode_table = new Hashtable();   // 记忆需要静默跳过的错误码
             DialogResult error_result = DialogResult.No;
 
             int nCount = 0;
@@ -2244,14 +2340,6 @@ Stack:
 
                     byte[] baTarget = null;
 
-                    string strRecord = "";
-                    string strOutputPath = "";
-                    string strOutStyle = "";
-                    byte[] baTimestamp = null;
-                    DigitalPlatform.OldZ3950.Record record = null;
-                    Encoding currrentEncoding;
-                // string strXmlFragment = "";
-
                 REDO_GET:
                     // 获得一条MARC/XML记录
                     // parameters:
@@ -2266,40 +2354,59 @@ Stack:
                         "marc",
                         strPath,
                         "current",
-                        out strRecord,
-                        out strOutputPath,
-                        out strOutStyle,
-                        out baTimestamp,
-                        out record,
-                        out currrentEncoding,
+                        out string strRecord,
+                        out string strOutputPath,
+                        out string strOutStyle,
+                        out byte[] baTimestamp,
+                        out DigitalPlatform.OldZ3950.Record record,
+                        out Encoding currrentEncoding,
                         out int errorcode,
                         out strError);
                     if (nRet == -1)
                     {
+                        WriteLog($"*** {strPath} 获取时出错: {strError}");
+
+                        bool dialog_opened = false;
                         if (bHideMessageBox == false
-                            || errorcode != DtlpChannel.GL_NOTEXIST)
+                            || silently_errorcode_table.ContainsKey(errorcode) == false)
                         {
                             Application.DoEvents();
 
                             error_result = MessageDialog.Show(this,
-    $"获得书目记录 {strPath} 时发生错误: {strError}。\r\n\r\n请问是否重试获得记录?\r\n[Y]重试 [N]跳过本条继续后面的处理 [C]中断处理",
+    $"获得书目记录 {strPath} 时发生错误: {strError}。\r\n\r\n请问是否重试获得记录?\r\n[重试]重试 [跳过]跳过本条继续后面的处理 [中断]中断整个批导出过程",
     MessageBoxButtons.YesNoCancel,
     MessageBoxDefaultButton.Button1,
     "以后不再提示，按本次的选择处理",
     ref bHideMessageBox,
     new string[] { "重试", "跳过", "中断" });
+
+                            dialog_opened = true;
                         }
 
                         if (error_result == DialogResult.Yes)
                         {
-                            // TODO: 出错信息进入操作历史面板
+                            WriteLog($"对记录 {strPath} 及错误码 {String.Format("0X{0,8:X}", errorcode)} 选择重试获取 ...", false);
                             goto REDO_GET;
                         }
                         if (error_result == DialogResult.No)
+                        {
+                            if (bHideMessageBox && dialog_opened)
+                            {
+                                silently_errorcode_table[errorcode] = 1;
+                                WriteLog($"{strPath} 对错误码 {String.Format("0X{0,8:X}", errorcode)} 首次选择静默跳过 ...", false);
+                            }
+                            else
+                            {
+                                WriteLog($"{strPath} 被跳过", false);
+                            }
+
                             goto CONTINUE;
+                        }
 
                         goto ERROR1;
                     }
+
+                    WriteLog($"成功导出 {strPath}", false);
 
                     string strMarcSyntax = "";
 
@@ -2356,7 +2463,6 @@ MessageBoxDefaultButton.Button2);
                         temp.select("field[@name='-01']").detach();
                         temp.setFirstField("-01", "", $"{strOutputPath}|{ByteArray.GetHexTimeStampString(baTimestamp)}");
                         strRecord = temp.Text;
-
                     }
 
                     // 将MARC机内格式转换为ISO2709格式
@@ -2404,6 +2510,7 @@ MessageBoxDefaultButton.Button2);
             finally
             {
                 s.Close();
+                log_writer?.Close();
 
                 /*
                 stop.EndLoop();
@@ -2414,6 +2521,8 @@ MessageBoxDefaultButton.Button2);
                 EndLoop(looping);
 
                 this.EnableControls(true);
+
+                this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString() + " 结束保存 MARC 文件 " + dlg.FileName) + "</div>");
             }
 
         END1:
@@ -2427,7 +2536,22 @@ MessageBoxDefaultButton.Button2);
 
             return;
         ERROR1:
+            this.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString() + $" 出错: {strError}") + "</div>");
             MessageBox.Show(this, strError);
+            return;
+
+            void WriteLog(string text, bool error = true)
+            {
+                if (write_log_file)
+                    log_writer?.WriteLine($"{DateTime.Now.ToLongTimeString()} {text}");
+                if (write_oper_history)
+                {
+                    if (error)
+                        this.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(text) + "</div>");
+                    else
+                        this.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(text) + "</div>");
+                }
+            }
         }
 
 

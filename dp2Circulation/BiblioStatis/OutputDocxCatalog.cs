@@ -452,7 +452,10 @@ alignment="center"/>
         {
             OutputEnd();
 
-            TypoUtility.XmlToWord(_outputFileName, _wordFileName);
+            TypoUtility.XmlToWord(_outputFileName, 
+                _wordFileName,
+                null,
+                null);
 
             try
             {

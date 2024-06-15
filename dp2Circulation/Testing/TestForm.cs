@@ -2024,7 +2024,7 @@ this,
             var fileName = Path.Combine(Program.MainForm.UserTempDir, "~xml");
             var outputFileName = Path.Combine(Program.MainForm.UserTempDir, "~test.docx");
             File.WriteAllText(fileName, this.textBox_typography_xml.Text, Encoding.UTF8);
-            TypoUtility.XmlToWord(fileName, outputFileName);
+            TypoUtility.XmlToWord(fileName, outputFileName, null, null);
             Process.Start(outputFileName);
         }
 

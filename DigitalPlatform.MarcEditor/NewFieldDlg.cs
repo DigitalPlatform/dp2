@@ -7,6 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Xml;
 
+using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
 
 namespace DigitalPlatform.Marc
@@ -33,13 +34,21 @@ namespace DigitalPlatform.Marc
 
             this.AcceptButton = this.button_OK;
 
-            string strError = "";
-            int nRet = LoadFieldNames(out strError);
+            int nRet = FillFieldNameList(out string strError);
             if (nRet == -1)
                 MessageBox.Show(this, strError);
+
+            // 2024/6/14
+            SelectListLine(this.textBox_fieldName.Text, true);
         }
 
-        int LoadFieldNames(out string strError)
+        class NameAndLabel
+        {
+            public string Name { get; set; }
+            public string Label { get; set; }
+        }
+
+        int FillFieldNameList(out string strError)
         {
             strError = "";
 
@@ -48,15 +57,16 @@ namespace DigitalPlatform.Marc
             if (this.MarcDefDom == null)
                 return 0;
 
+            List<NameAndLabel> lines = new List<NameAndLabel>();
             XmlNodeList nodes = this.MarcDefDom.DocumentElement.SelectNodes("Field");
-
-            for (int i = 0; i < nodes.Count; i++)
+            // for (int i = 0; i < nodes.Count; i++)
+            foreach (XmlElement node in nodes)
             {
-                XmlNode node = nodes[i];
+                // XmlNode node = nodes[i];
 
                 string strName = DomUtil.GetAttr(node, "name");
 
-                if (strName == "###")
+                if (strName == "###" || strName == "hdr")
                     continue;   // 跳过头标区
 
                 string strLabel = "";
@@ -98,10 +108,22 @@ namespace DigitalPlatform.Marc
                     strLabel = DomUtil.GetNodeText(nodeLabel);
                 }
 #endif
+                lines.Add(new NameAndLabel
+                {
+                    Name = strName,
+                    Label = strLabel
+                });
+            }
 
-                ListViewItem item = new ListViewItem(strName);
-                item.SubItems.Add(strLabel);
+            lines.Sort((a, b) =>
+            {
+                return string.CompareOrdinal(a.Name, b.Name);
+            });
 
+            foreach (var line in lines)
+            {
+                ListViewItem item = new ListViewItem(line.Name);
+                item.SubItems.Add(line.Label);
                 this.listView_fieldNameList.Items.Add(item);
             }
 
@@ -197,8 +219,8 @@ namespace DigitalPlatform.Marc
                 return true;
             }
 
-
-            return false;
+            return base.ProcessDialogKey(keyData);
+            // return false;
         }
 
         private void listView_fieldNameList_SelectedIndexChanged(object sender, EventArgs e)
@@ -218,10 +240,6 @@ namespace DigitalPlatform.Marc
             button_OK_Click(null, null);
         }
 
-        private void textBox_fieldName_KeyPress(object sender, KeyPressEventArgs e)
-        {
-
-        }
 
         private void textBox_fieldName_KeyUp(object sender, KeyEventArgs e)
         {
@@ -260,6 +278,7 @@ namespace DigitalPlatform.Marc
 
             try
             {
+                string input_text = this.textBox_fieldName.Text;
                 // bool bScrolled = false;
                 int nStart = -1;
                 int nEnd = -1;
@@ -269,25 +288,25 @@ namespace DigitalPlatform.Marc
 
                     bool bHilight = false;
 
-                    if (this.textBox_fieldName.Text.Length == 0)
+                    if (input_text.Length == 0)
                     {
                         bHilight = false;
                         goto CHANGE_COLOR;
                     }
                     else
                     {
-                        if (this.textBox_fieldName.Text.Length < 3)
+                        if (input_text.Length < 3)
                         {
-                            string strPart = strText.Substring(0, this.textBox_fieldName.Text.Length);
+                            string strPart = strText.Substring(0, input_text.Length);
 
-                            if (this.textBox_fieldName.Text == strPart)
+                            if (input_text == strPart)
                             {
                                 bHilight = true;
                                 goto CHANGE_COLOR;
                             }
                         }
 
-                        if (this.textBox_fieldName.Text == strText)
+                        if (input_text == strText)
                         {
                             bHilight = true;
                             goto CHANGE_COLOR;
@@ -328,6 +347,11 @@ namespace DigitalPlatform.Marc
                 if (nStart != -1)
                     this.listView_fieldNameList.EnsureVisible(nStart);
 
+                // 2024/6/14
+                if (nStart != -1)
+                {
+                    ListViewUtil.SelectLine(this.listView_fieldNameList, nStart, true);
+                }
             }
             finally
             {
@@ -335,5 +359,44 @@ namespace DigitalPlatform.Marc
             }
         }
 
+        bool SelectListLine(string field_name,
+            bool wild_match)
+        {
+            nNested++;  // 防止选择引起 textbox 内容被改变
+            try
+            {
+                int i = 0;
+                foreach (ListViewItem item in this.listView_fieldNameList.Items)
+                {
+                    if (item.Text == field_name
+                        || (wild_match && string.CompareOrdinal(item.Text, field_name) > 0)
+                        )
+                    {
+                        ListViewUtil.ClearSelection(this.listView_fieldNameList);
+                        item.Selected = true;
+                        item.EnsureVisible();
+                        return true;
+                    }
+                    i++;
+                }
+
+                return false;
+            }
+            finally
+            {
+                nNested--;
+            }
+        }
+
+        private void textBox_fieldName_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Up || e.KeyCode == Keys.Down)
+            {
+                var ret = ListViewUtil.MoveSelectedUpDown(this.listView_fieldNameList, e.KeyCode == Keys.Up);
+                if (ret == true)
+                    this.listView_fieldNameList.SelectedItems[0].EnsureVisible();
+                e.Handled = true;
+            }
+        }
     }
 }
