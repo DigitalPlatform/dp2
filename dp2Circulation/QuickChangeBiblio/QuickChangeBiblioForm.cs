@@ -554,7 +554,7 @@ MessageBoxDefaultButton.Button1);
                     changed = true;
                 else if (string.IsNullOrEmpty(strError) == false)
                 {
-                    Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>&nbsp;" + HttpUtility.HtmlEncode($"{strError}") + "</div>");
+                    Program.MainForm.OperHistory.AppendHtml("<div class='debug info'>&nbsp;" + HttpUtility.HtmlEncode($"{strError}") + "</div>");
                 }
             }
 
@@ -596,7 +596,7 @@ MessageBoxDefaultButton.Button1);
                     changed = true;
                 else if (string.IsNullOrEmpty(strError) == false)
                 {
-                    Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>&nbsp;" + HttpUtility.HtmlEncode($"{strError}") + "</div>");
+                    Program.MainForm.OperHistory.AppendHtml("<div class='debug info'>&nbsp;" + HttpUtility.HtmlEncode($"{strError}") + "</div>");
                 }
             }
 

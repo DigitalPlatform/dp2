@@ -14314,8 +14314,10 @@ out strError);
         // 会自动清除此前的所有内容行
         void WriteVerifyError(VerifyError error)
         {
-            this._verifyErrors = new List<VerifyError>();
-            this._verifyErrors.Add(error);
+            this._verifyErrors = new List<VerifyError>
+            {
+                error
+            };
             this.m_verifyViewer?.WriteErrors(this._verifyErrors);
         }
 
@@ -17864,6 +17866,19 @@ out string error);
         public void AddInfo(string text)
         {
             VerifyError.AddInfo(_errors, text);
+        }
+
+        public void AddSucceed(string text)
+        {
+            VerifyError.AddSucceed(_errors, text);
+        }
+
+        public void AddTestingErrors()
+        {
+            AddInfo("这是 info 行");
+            AddWarning("这是 warning 行");
+            AddError("这是 error 行");
+            AddSucceed("这是 succeed 行");
         }
     }
 

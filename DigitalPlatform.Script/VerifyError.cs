@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DigitalPlatform.Text;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,6 +16,33 @@ namespace DigitalPlatform.Script
         // 错误级别。为 info warning error 三种
         public string Level { get; set; }
         public string Text { get; set; }
+
+        public static VerifyError FromLine(string line,
+            bool convert_level = true)
+        {
+            if (line.StartsWith("[") == false)
+                return new VerifyError { Text = line };
+            var parts = StringUtil.ParseTwoPart(line, "]");
+            var level = parts[0]?.TrimStart('[', ' ');
+            var text = parts[1]?.TrimStart(' ');
+            var error =  new VerifyError
+            {
+                Level = level,
+                Text = text
+            };
+            if (convert_level)
+            {
+                if (error.Level == "错误")
+                    error.Level = "error";
+                else if (error.Level == "警告")
+                    error.Level = "warning";
+                else if (error.Level == "信息")
+                    error.Level = "info";
+                else if (error.Level == "成功")
+                    error.Level = "succeed";
+            }
+            return error;
+        }
 
         public static void AddError(List<VerifyError> errors,
             string text)
@@ -42,6 +70,16 @@ namespace DigitalPlatform.Script
             errors.Add(new VerifyError
             {
                 Level = "info",
+                Text = text
+            });
+        }
+
+        public static void AddSucceed(List<VerifyError> errors,
+string text)
+        {
+            errors.Add(new VerifyError
+            {
+                Level = "succeed",
                 Text = text
             });
         }

@@ -4461,7 +4461,7 @@ out strError);
         void DisplayTitle(Stop stop, string strText)
         {
             stop?.SetMessage(strText);
-            Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(strText) + "</div>");
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug info'>" + HttpUtility.HtmlEncode(strText) + "</div>");
         }
         void DisplayOK(string strText)
         {

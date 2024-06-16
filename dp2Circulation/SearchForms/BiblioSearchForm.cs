@@ -5379,10 +5379,13 @@ out strError);
                     if (errors.Count > 0)
                     {
                         Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
+                        /*
                         foreach (string error in errors)
                         {
                             Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(error) + "</div>");
                         }
+                        */
+                        DisplayErrors(errors);
 
                         // 2024/5/31
                         // 如果 _errors 中有至少一行为 [error] 级别，则要把行背景颜色改为红色
@@ -5419,6 +5422,25 @@ out strError);
 
                 Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
                     + " 结束执行书目记录校验</div>");
+            }
+        }
+
+        void DisplayErrors(List<string> errors)
+        {
+            foreach (string error in errors)
+            {
+                var item = VerifyError.FromLine(error);
+                string style = "info";
+                if (item.Level == "error")
+                    style = "error";
+                else if (item.Level == "warning")
+                    style = "warning";
+                else if (item.Level == "info")
+                    style = "info";
+                else if (item.Level == "succeed")
+                    style = "green";
+
+                Program.MainForm.OperHistory.AppendHtml($"<div class='debug {style}'>" + HttpUtility.HtmlEncode(item.Text) + "</div>");
             }
         }
 
