@@ -43,6 +43,8 @@
             this.comboBox_items_style = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
             this.tabPage_cfg = new System.Windows.Forms.TabPage();
+            this.label4 = new System.Windows.Forms.Label();
+            this.textBox_docx_style = new System.Windows.Forms.TextBox();
             this.tabControl_main.SuspendLayout();
             this.tabPage_output.SuspendLayout();
             this.tabPage_cfg.SuspendLayout();
@@ -215,6 +217,8 @@
             // 
             // tabPage_cfg
             // 
+            this.tabPage_cfg.Controls.Add(this.textBox_docx_style);
+            this.tabPage_cfg.Controls.Add(this.label4);
             this.tabPage_cfg.Controls.Add(this.button_biblioColumns);
             this.tabPage_cfg.Controls.Add(this.button_entityColumns);
             this.tabPage_cfg.Location = new System.Drawing.Point(4, 31);
@@ -225,6 +229,27 @@
             this.tabPage_cfg.TabIndex = 1;
             this.tabPage_cfg.Text = "配置";
             this.tabPage_cfg.UseVisualStyleBackColor = true;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(17, 119);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(118, 21);
+            this.label4.TabIndex = 33;
+            this.label4.Text = "docx 样式:";
+            // 
+            // textBox_docx_style
+            // 
+            this.textBox_docx_style.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_docx_style.Location = new System.Drawing.Point(21, 143);
+            this.textBox_docx_style.Multiline = true;
+            this.textBox_docx_style.Name = "textBox_docx_style";
+            this.textBox_docx_style.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox_docx_style.Size = new System.Drawing.Size(690, 234);
+            this.textBox_docx_style.TabIndex = 34;
             // 
             // SaveEntityNewBookFileDialog
             // 
@@ -246,6 +271,7 @@
             this.tabPage_output.ResumeLayout(false);
             this.tabPage_output.PerformLayout();
             this.tabPage_cfg.ResumeLayout(false);
+            this.tabPage_cfg.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -266,5 +292,7 @@
         private System.Windows.Forms.ComboBox comboBox_layout_style;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.CheckBox checkBox_hideBiblioFieldName;
+        private System.Windows.Forms.TextBox textBox_docx_style;
+        private System.Windows.Forms.Label label4;
     }
 }

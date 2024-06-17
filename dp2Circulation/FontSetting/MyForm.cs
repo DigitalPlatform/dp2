@@ -3948,6 +3948,11 @@ MessageBoxDefaultButton.Button2);
                 return dlg.HideBiblioFieldName;
             });
 
+            var docx_style = this.TryGet(() =>
+            {
+                return dlg.DocxStyle;
+            });
+
             string ext = Path.GetExtension(dlg.OutputFileName);
             string format = "html";
             if (ext.ToLower() == ".docx")
@@ -4034,26 +4039,34 @@ MessageBoxDefaultButton.Button2);
                     // docx styles
                     if (format == "docx")
                     {
-                        await writer.WriteAsync("<styles>");
-                        await writer.WriteAsync("<style name='small' size='9pt' font='ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman' color='AAAAAA' style='bold'/>");
-                        await writer.WriteAsync("<style name='small_name' size='9pt' font='ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman'/>");
-                        await writer.WriteAsync("<style name='default' font='ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman'/>");
-                        await writer.WriteAsync("<style name='default' type='character' font='ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman'/>");
-                        await writer.WriteAsync("<style name='default_name' font='ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman' color='AAAAAA' style='bold' alignment='right'/>");
-                        await writer.WriteAsync("<style name='default_name' type='character' font='ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman' color='AAAAAA' style='bold'/>");
-                        await writer.WriteAsync("<style name='items' size='9pt' font='ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman'/>");
-                        await writer.WriteAsync("<style name='items' type='character' size='9pt' font='ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman'/>");
-                        await writer.WriteAsync("<style name='items_line' size='9pt' spacing='before:1.9pt,after:1.6pt,line:0exact' font='ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman'/>");
-                        await writer.WriteAsync("<style name='hr'>");
-                        await writer.WriteAsync("<border><bottom value='single' size='0.5pt' color='000000' /></border>");
-                        await writer.WriteAsync("</style>");
-                        await writer.WriteAsync("<style name='vl' type='td'>");
-                        await writer.WriteAsync("<border><right value='dotted' size='1pt' space='2pt' color='999999' /></border>");
-                        await writer.WriteAsync("</style>");
-                        await writer.WriteAsync("<style name='val' type='td'>");
-                        await writer.WriteAsync("<border><left value='nil' space='2pt'/></border>");
-                        await writer.WriteAsync("</style>");
-                        await writer.WriteAsync("</styles>");
+                        if (string.IsNullOrEmpty(docx_style))
+                        {
+                            await writer.WriteAsync("<styles>");
+                            await writer.WriteAsync("<style name='small' size='9pt' font='ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman' color='AAAAAA' style='bold'/>");
+                            await writer.WriteAsync("<style name='small_name' size='9pt' font='ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman'/>");
+                            await writer.WriteAsync("<style name='default' font='ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman'/>");
+                            await writer.WriteAsync("<style name='default' type='character' font='ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman'/>");
+                            await writer.WriteAsync("<style name='default_name' font='ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman' color='AAAAAA' style='bold' alignment='right'/>");
+                            await writer.WriteAsync("<style name='default_name' type='character' font='ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman' color='AAAAAA' style='bold'/>");
+                            await writer.WriteAsync("<style name='items' size='9pt' font='ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman'/>");
+                            await writer.WriteAsync("<style name='items' type='character' size='9pt' font='ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman'/>");
+                            await writer.WriteAsync("<style name='items_line' size='9pt' spacing='before:1.9pt,after:1.6pt,line:0exact' font='ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman'/>");
+                            await writer.WriteAsync("<style name='hr'>");
+                            await writer.WriteAsync("<border><bottom value='single' size='0.5pt' color='000000' /></border>");
+                            await writer.WriteAsync("</style>");
+                            await writer.WriteAsync("<style name='vl' type='td'>");
+                            await writer.WriteAsync("<border><right value='dotted' size='1pt' space='2pt' color='999999' /></border>");
+                            await writer.WriteAsync("</style>");
+                            await writer.WriteAsync("<style name='val' type='td'>");
+                            await writer.WriteAsync("<border><left value='nil' space='2pt'/></border>");
+                            await writer.WriteAsync("</style>");
+                            await writer.WriteAsync("</styles>");
+                        }
+                        else
+                        {
+                            // TODO: 验证一下 docx_style 是不是合法的 XML
+                            await writer.WriteAsync(docx_style);
+                        }
                     }
 
                     if (layout_style == "整体表格")

@@ -133,6 +133,7 @@ namespace dp2Circulation
                 controls.Add(this.comboBox_items_style);
                 controls.Add(this.comboBox_layout_style);
                 controls.Add(this.checkBox_hideBiblioFieldName);
+                controls.Add(this.textBox_docx_style);
                 return GuiState.GetUiState(controls);
             }
             set
@@ -142,6 +143,7 @@ namespace dp2Circulation
                 controls.Add(this.comboBox_items_style);
                 controls.Add(this.comboBox_layout_style);
                 controls.Add(this.checkBox_hideBiblioFieldName);
+                controls.Add(this.textBox_docx_style);
                 GuiState.SetUiState(controls, value);
             }
         }
@@ -238,6 +240,18 @@ dlg.UiState);
         private void SaveDistributeExcelFileDialog_Load(object sender, EventArgs e)
         {
 
+        }
+
+        public string DocxStyle
+        {
+            get
+            {
+                return this.textBox_docx_style.Text;
+            }
+            set
+            {
+                this.textBox_docx_style.Text = value;
+            }
         }
     }
 

@@ -10772,6 +10772,7 @@ out strError);
                 }
 
                 EntityForm new_entity_form = null;
+                if (operation == "convert")
                 {
                     MarcRecord record = new MarcRecord(marc);
                     // 对编目规则键进行检索，看看是否已经存在目标书目记录。
@@ -10906,7 +10907,7 @@ out strError);
                     }
                     else
                     {
-                        // *** operation 为 "#convert"
+                        // *** operation 为 "convert"
 
                         {
                             // 先对照显示，让操作者决定是否接受新内容

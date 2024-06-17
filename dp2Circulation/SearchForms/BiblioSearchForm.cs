@@ -4979,6 +4979,7 @@ out strError);
             Program.MainForm.ActivateFixPage("history");
 
             int nCount = 0;
+            string targetCatalogingRule = "";
 
             Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
                 + $" 开始进行书目记录{operation_caption}</div>");
@@ -5036,7 +5037,6 @@ out strError);
                         bOldSource = false;
                     }
                 }
-
 
                 ListViewBiblioLoader loader = new ListViewBiblioLoader(channel, // this.Channel,
                     looping.Progress,
@@ -5105,10 +5105,8 @@ out strError);
                         errors.Add("XML 记录中有非法字符");
                     }
 
-                    string targetCatalogingRule = "";
-
                     // 询问目标书目库名字
-                    if (string.IsNullOrEmpty(strTargetDbName)
+                    if ((string.IsNullOrEmpty(strTargetDbName) || string.IsNullOrEmpty(targetCatalogingRule))
                         && operation == "convert")
                     {
                         var current_dbName = Global.GetDbName(info.RecPath);
