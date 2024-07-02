@@ -1109,6 +1109,10 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
             entities = null;
             int nRet = 0;
 
+            // 2024/6/23
+            if (this.Items == null)
+                this.Items = new TC();
+
             Debug.Assert(this.Items != null, "");
 
             var detect = StringUtil.IsInList("detect", strStyle);

@@ -36,6 +36,9 @@ using DigitalPlatform.Z3950;
 // using DocumentFormat.OpenXml.Office2010.Excel;
 using UcsUpload;
 using System.Web.UI.HtmlControls;
+using DocumentFormat.OpenXml.Vml.Office;
+using Jint.Parser.Ast;
+using System.Globalization;
 // using DocumentFormat.OpenXml.Office2021.DocumentTasks;
 
 namespace dp2Circulation
@@ -234,7 +237,7 @@ namespace dp2Circulation
                 }
 
                 // 刷新窗口标题
-                // this.Text = "种册 " + value;
+                // this.Text = "种册 " + p;
                 this.SetTitle(value);
 
                 // 迫使获得新的配置文件
@@ -1095,8 +1098,8 @@ true);
                 string path = e.Value as string;
                 if (path != null)
                 {
-                    path = path.ToLower().Replace("\\", "/");
-                    Program.MainForm.AssemblyCache.Clear(path);
+                    //path = path.ToLower().Replace("\\", "/");
+                    //Program.MainForm.AssemblyCache.Clear(path);
                     if (EndsWith(path, _verify_filenames))
                     {
                         ClearVerifyDropDownMenus();
@@ -3047,7 +3050,7 @@ true);
 
                 if (this.m_marcEditor != null)
                 {
-                    // this.m_marcEditor.Changed = value;
+                    // this.m_marcEditor.Changed = p;
                     this.SetMarcChanged(value);
                 }
 
@@ -6791,9 +6794,9 @@ out strError);
         在 System.Windows.Forms.Control.CreateHandle()
         在 System.Windows.Forms.Form.CreateHandle()
         在 System.Windows.Forms.Control.get_Handle()
-        在 System.Windows.Forms.Control.SetVisibleCore(Boolean value)
-        在 System.Windows.Forms.Form.SetVisibleCore(Boolean value)
-        在 System.Windows.Forms.Control.set_Visible(Boolean value)
+        在 System.Windows.Forms.Control.SetVisibleCore(Boolean p)
+        在 System.Windows.Forms.Form.SetVisibleCore(Boolean p)
+        在 System.Windows.Forms.Control.set_Visible(Boolean p)
         在 dp2Circulation.EntityForm.ShowBrowseWindow(Int64 lHitCount)
         在 dp2Circulation.EntityForm.button_search_Click(Object sender, EventArgs e)
         在 System.Windows.Forms.Control.OnClick(EventArgs e)
@@ -10691,6 +10694,93 @@ out strError);
                 if (operation != null && operation.StartsWith("#"))
                     operation = operation.Substring(1);
 
+                string operation_caption = "校验";
+                if (operation == "convert")
+                    operation_caption = "格式转换";
+
+                string sourceCatalogingRule = "";
+                {
+                    // 探测一条 MARC 记录的编目规则
+                    // return:
+                    //      -1  出错
+                    //      0   没有找到
+                    //      1   找到
+                    int nRet = BiblioSearchForm.DetectCatalogingRule(
+                        this.BiblioRecPath,
+                        new MarcRecord(marc),
+                        out sourceCatalogingRule,
+                        out string error);
+                    if (nRet == -1)
+                    {
+                        strError = $"获得源头书目记录的编目规则时出错: {error}";
+                        goto ERROR1;
+                    }
+                    if (nRet == 0)
+                    {
+                        if (operation == "verify"
+                            && string.IsNullOrEmpty(rule) == false)
+                            sourceCatalogingRule = rule;
+                        else
+                        {
+                            // TODO:
+                            // convert 时通过 rule 和 rules 反推 sourceCatalogingRule
+                            // verify 时通过 rule 得知 sourceCatalogingRule
+
+                            // return:
+                            //      -1  出错
+                            //      0   没有找到配置文件
+                            //      1   成功获得 rules
+                            nRet = GetVerifyRules(
+                                this.BiblioRecPath,
+                                operation,  // TODO: 去掉 #
+                                marc,
+                                null,
+                                out List<string> rules,
+                                out error);
+                            if (nRet == -1)
+                            {
+                                strError = $"获得 MARC {operation}脚本的 rules 时出错: {error}";
+                                goto ERROR1;
+                            }
+                            // 没有定义配置文件，无法校验
+                            if (nRet == 0)
+                            {
+                                strError = error;
+                                goto ERROR1;
+                            }
+                            if (rules.Count > 0)
+                            {
+                                if (rules.Count == 1)
+                                    sourceCatalogingRule = rules[0];
+                                else if (rules.Count == 0)
+                                {
+                                    // TODO: 要测试验证一下，其实 "" 触发转换并成功也是可能的？
+                                    strError = $"书目库 '{Global.GetDbName(this.BiblioRecPath)}' 没有可用的编目规则，无法执行{operation_caption}";
+                                    goto ERROR1;
+                                }
+                                else
+                                {
+                                    // rules.Count > 1
+                                    // return:
+                                    //      -1  出错
+                                    //      0   放弃选择
+                                    //      1   已经选择
+                                    nRet = BiblioSearchForm.SelectCatalogingRule(
+                                        $"(请指定记录 '{Global.GetDbName(this.BiblioRecPath)}') 原本的编目规则",
+                                        "编目规则:",
+                                        rules,
+                                        false,
+                                        out sourceCatalogingRule,
+                                        out strError);
+                                    if (nRet == -1 || nRet == 0)
+                                        goto ERROR1;
+                                }
+                            }
+
+                        }
+                    }
+                }
+
                 if (string.IsNullOrEmpty(rule))
                 {
                     // TODO: 要设法加快找不到配置文件时候的速度。
@@ -10710,7 +10800,7 @@ out strError);
                         out string error);
                     if (nRet == -1)
                     {
-                        strError = ($"获得 MARC {operation}脚本的 rules 时出错: {error}");
+                        strError = $"获得 MARC {operation}脚本的 rules 时出错: {error}";
                         goto ERROR1;
                     }
                     // 没有定义配置文件，无法校验
@@ -10723,6 +10813,8 @@ out strError);
                     string catalogingRule = "";
                     if (rules.Count > 0)
                     {
+                        catalogingRule = sourceCatalogingRule;
+#if REMOVED
                         // 探测一条 MARC 记录的编目规则
                         // return:
                         //      -1  出错
@@ -10735,17 +10827,18 @@ out strError);
                             out error);
                         if (nRet == -1)
                         {
-                            strError = ($"获得书目记录的编目规则时出错: {error}");
+                            strError = $"获得书目记录的编目规则时出错: {error}";
                             goto ERROR1;
                         }
-                        if (nRet == 0)
+#endif
+                        if (string.IsNullOrEmpty(sourceCatalogingRule))
                         {
                             if (rules.Count == 1)
                                 catalogingRule = rules[0];
                             else if (rules.Count == 0)
                             {
                                 // TODO: 要测试验证一下，其实 "" 触发转换并成功也是可能的？
-                                strError = $"书目库 '{Global.GetDbName(this.BiblioRecPath)}' 没有可用的编目规则，无法执行校验";
+                                strError = $"书目库 '{Global.GetDbName(this.BiblioRecPath)}' 没有可用的编目规则，无法执行{operation_caption}";
                                 goto ERROR1;
                             }
                             else
@@ -10756,7 +10849,7 @@ out strError);
                                 //      0   放弃选择
                                 //      1   已经选择
                                 nRet = BiblioSearchForm.SelectCatalogingRule(
-                                    $"(针对 '{Global.GetDbName(this.BiblioRecPath)}') 选择一种编目规则进行校验",
+                                    $"(针对 '{Global.GetDbName(this.BiblioRecPath)}') 选择一种编目规则进行{operation_caption}",
                                     "编目规则:",
                                     rules,
                                     false,
@@ -10839,11 +10932,14 @@ out strError);
                 if (operation == "convert")
                 {
                     MarcRecord record = new MarcRecord(marc);
+                    // 2024/6/22
+                    BiblioSearchForm.SetCatalogingRule(record,
+                        sourceCatalogingRule);
                     link_id = BiblioSearchForm.EnsureCatalogingRuleLinkID(
                         record,
                         null,
                         out bool changed);
-                    if (changed)
+                    if (record.Text != marc)
                     {
                         marc = record.Text;
                         this.MarcEditor.Marc = marc;
@@ -12494,7 +12590,7 @@ out strError);
                 //      -1  有错。此时不排除有些信息保存成功。
                 //      0   成功。
                 nRet = DoSaveAll();
-                if (nRet == -1)
+                if (nRet == -1 || nRet == -2)
                 {
                     strError = "保存操作出错";
                     goto ERROR1;
@@ -15699,7 +15795,12 @@ out strError);
                     else
                     {
                         if (Program.MainForm.CurrentPropertyControl != m_commentViewer.MainControl)
+                        {
+                            // 2024/6/24
+                            // m_commentViewer.Show(this);
+
                             m_commentViewer.DoDock(false); // 不会自动显示FixedPanel
+                        }
                     }
                 }
             });
@@ -16529,8 +16630,8 @@ out strError);
             this.MessageBoxShow(strError);
         }
 
-        // 此函数没有用了。table xml 中应该本来“数字资源” line 元素就是元素直接构造的方式(不是 htmlEncode 方式的 value 属性)
-        // 把 table 格式 xml 中的 name="数字资源" value="..." 的 value 部分展开为 XML 结构
+        // 此函数没有用了。table xml 中应该本来“数字资源” line 元素就是元素直接构造的方式(不是 htmlEncode 方式的 p 属性)
+        // 把 table 格式 xml 中的 name="数字资源" p="..." 的 p 部分展开为 XML 结构
         static string ExpandTableXml(string strTableXml)
         {
             XmlDocument dom = new XmlDocument();
@@ -17529,6 +17630,14 @@ out strError);
     /// </summary>
     public class VerifyHost : IDisposable
     {
+        public static MainForm MainForm
+        {
+            get
+            {
+                return Program.MainForm;
+            }
+        }
+
         /// <summary>
         /// 种册窗
         /// </summary>
@@ -17795,6 +17904,170 @@ out string error);
                 out strError);
         }
 
+        public static string SafeSubstring(string text, int start, int length)
+        {
+            if (text == null)
+                return null;
+            try
+            {
+                return text.Substring(start, length);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+
+
+        // 从 MARC 记录中删除所有类似 $A $F 这样的拼音子字段
+        public static void RemoveUpperLetterPinyinSubfields(MarcRecord record)
+        {
+            foreach (MarcSubfield subfield in record.select("//subfield"))
+            {
+                if (char.IsUpper(subfield.Name[0]))
+                    subfield.detach();
+            }
+        }
+
+        // 检查英文标点符号的正确性
+        public static string CheckEnglishPointing(string text)
+        {
+            // 逗号后有一个空格“,#” ，
+            // "/"前后都有空格“#/#” ，
+            // 分号前后都有空格“#;#”
+            for (int i = 0; i < text.Length; i++)
+            {
+                char left = (char)0;
+                if (i > 0)
+                    left = text[i - 1];
+                char current = text[i];
+                char right = (char)0;
+                if (i < text.Length - 1)
+                    right = text[i + 1];
+
+                if (current == ',' && left == ' ')
+                    return "逗号','左边不应该有空格";
+                if (current == ',' && right != ' ' && right != (char)0)
+                    return "逗号','右边应该有一个空格";
+
+                if (current == '/' && left != ' ' && left != (char)0)
+                    return "斜杠'/'左边应该有一个空格";
+                if (current == '/' && right != ' ' && right != (char)0)
+                    return "斜杠'/'右边应该有一个空格";
+
+                if (current == ';' && left != ' ' && left != (char)0)
+                    return "分号';'左边应该有一个空格";
+                if (current == ';' && right != ' ' && right != (char)0)
+                    return "分号';'右边应该有一个空格";
+
+                if (current == '.' && left == ' ')
+                    return "点'.'左边不应该有空格";
+                if (current == '.' && right != ' ' && right != (char)0)
+                    return "点'.'右边应该有一个空格";
+            }
+
+            return null;
+        }
+
+        public static int CountChar(string text, char ch)
+        {
+            return text.Where(o => o == ch).Count();
+        }
+
+        public static string VerifyUnimarc005(string content)
+        {
+            if (content == null || content.Length != 16)
+                return $"内容应为 16 字符。但现在为 {content?.Length} 字符";
+            if (DateTime.TryParseExact(content,
+                "yyyyMMddHHmmss.f",
+                DateTimeFormatInfo.InvariantInfo,
+                DateTimeStyles.None,
+                out DateTime result) == false)
+                return $"时间字符串 '{content}' 格式不正确";
+            return null;
+        }
+
+        public static MarcNode FirstOrDefault(MarcNodeList list)
+        {
+            return list.List.FirstOrDefault();
+        }
+
+        string[] sample_cfg_lines = new string[] {
+"高中生-->高中",
+"初中生-->初中",
+"小学生-->小学",
+"高职高专-->高职",
+"职业教育-->职业教育",
+"中等专业/中等职业-->中职",
+"技术学校-->技校",
+"漫画、连环画(休闲)-->漫画 连环画",
+"漫画、连环画(娱乐)-->漫画 连环画",
+"成人教育/成人高考-->成人教育",
+"高等教育自学考试-->高自考",
+"老年人-->老年",
+"教材-->教材",
+"幼儿/儿童/少儿-->儿童",
+"青少年-->青少年",
+};
+
+        public static string Verify960a(string[] cfg_lines,
+            List<string> sources,
+            List<string> targets)
+        {
+            foreach (string line in cfg_lines)
+            {
+                var right_word = MatchLeft(line, sources);
+                if (right_word != null
+                    && Contains(targets, right_word) == false)
+                    return $"应当包含 '{right_word}'";
+            }
+
+            return null;
+        }
+
+        static bool Contains(List<string> list, string word)
+        {
+            foreach(var s in list)
+            {
+                if (s.Contains(word))
+                    return true;
+            }
+            return false;
+        }
+
+        static string MatchLeft(string cfg_line, List<string> values)
+        {
+            foreach(string value in values)
+            {
+                var ret = MatchLeft(cfg_line, value);
+                if (ret != null)
+                    return ret;
+            }
+
+            return null;
+        }
+
+        // 匹配左侧的单词，然后如果命中返回右侧的单词
+        // parameters:
+        //      cfg_line "幼儿/儿童/少儿-->儿童"
+        static string MatchLeft(string cfg_line, string text)
+        {
+            if (text == null)
+                return null;
+            var parts = StringUtil.ParseTwoPart(cfg_line, "-->");
+            var left = parts[0];
+            var right = parts[1];
+            var list = StringUtil.SplitList(left, '/');
+            foreach(var s in list)
+            {
+                if (text.Contains(s))
+                    return right;
+            }
+
+            return null;
+        }
+
         #endregion
     }
 
@@ -17880,6 +18153,196 @@ out string error);
             AddWarning("这是 warning 行");
             AddError("这是 error 行");
             AddSucceed("这是 succeed 行");
+        }
+
+        public void AutoSetIndicator(string field_name,
+            string new_indicator)
+        {
+            foreach(MarcField field in this.Record.select("field[@name='461']"))
+            {
+                if (field.Indicator != new_indicator)
+                {
+                    AddInfo($"{field_name} 字段的指示符已经从 '{DisplayIndicator(field.Indicator)}' 自动修改为 '{DisplayIndicator(new_indicator)}'");
+                    field.Indicator = new_indicator;
+                }
+            }
+        }
+
+        // 校验字段的必备性，指示符值，字段中子字段的必备性
+        // 注: 单字符参数的含义如下:
+        // r 必备
+        // o 可选
+        // n 可重复
+        // 1 不可重复
+        // parameters:
+        //      condition   校验要求。
+        //                  field:xxxx 字段要求
+        //                  subfield:axxxx|bxxxx|cxxxx 子字段要求
+        //                  indicator:xx|xx|xx 指示符值要求。注意空格用下划线替代
+        public void VerifyField(
+            string field_name,
+            string condition)
+        {
+            var fields = this.Record.select($"field[@name='{field_name}']");
+
+            var field_properties = StringUtil.GetParameterByPrefix(condition, "field");
+            if (field_properties != null)
+            {
+                // r 必备
+                // o 可选
+                // n 可重复
+                // 1 不可重复
+
+                foreach (char value in field_properties)
+                {
+                    if (value == 'r')
+                    {
+                        if (fields.count == 0)
+                            AddError($"缺乏必备的 {field_name} 字段");
+                    }
+                    if (value == '1')
+                    {
+                        if (fields.count > 1)
+                            AddError($"{field_name} 字段多于 1 个");
+                    }
+                    if (value == 'n')
+                    {
+
+                    }
+                }
+            }
+
+
+            var subfield_properties = StringUtil.GetParameterByPrefix(condition, "subfield");
+            if (subfield_properties != null)
+            {
+                foreach (MarcField field in fields)
+                {
+                    // subfield:a|b|c 参数中的名字部分集合
+                    var names = GetSubfieldNames(subfield_properties);
+                    
+                    // 看看 field 中的各个子字段，名字是否超过 names 范围
+                    foreach(MarcSubfield subfield in field.select("subfield"))
+                    {
+                        if (names.IndexOf(subfield.Name) == -1)
+                            AddError($"{field.Name} 字段 ${subfield.Name} 超出定义范围");
+                    }
+                    
+                    foreach (var name in names)
+                    {
+                        var parameter = GetSufieldParameter(subfield_properties, name);
+                        if (parameter != null)
+                        {
+                            var current_subfields = field.select($"subfield[@name='{name}']");
+                            foreach (char p in parameter)
+                            {
+                                // r 必备
+                                // o 可选
+                                // n 可重复
+                                // 1 不可重复
+                                if (p == 'r')
+                                {
+                                    if (current_subfields.count == 0)
+                                        AddError($"{field_name} 字段内缺乏必备的 ${name} 子字段");
+                                }
+                                if (p == '1')
+                                {
+                                    if (current_subfields.count > 1)
+                                        AddError($"{field_name}字段内 ${name} 子字段多于 1 个");
+                                }
+                                if (p == 'n')
+                                {
+
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            var indicator_values = StringUtil.GetParameterByPrefix(condition, "indicator");
+            {
+                string[] values = null;
+                if (indicator_values != null)
+                {
+                    indicator_values = indicator_values.Replace("_", " ");
+                    values = indicator_values.Split('|');
+                }
+                if (fields.count == 1 && values != null)
+                {
+                    MarcField field = fields[0] as MarcField;
+                    if (Array.IndexOf(values, field.Indicator) == -1)
+                        AddError($"{field_name} 字段指示符应为 {IndicatorsToString(values)}。但现在是 '{field.Indicator.Replace(" ", "#")}'");
+                }
+            }
+        }
+
+        // 得到可用于显示的指示符集合字符串
+        static string IndicatorsToString(string[] values)
+        {
+            StringBuilder text = new StringBuilder();
+            foreach (var value in values)
+            {
+                if (text.Length > 0)
+                    text.Append("、");
+                text.Append($"'{value.Replace(" ", "#")}'");
+            }
+
+            return text.ToString();
+        }
+
+        // 获得可用于显示的两位指示符字符。即，把空格替换为 '#'
+        public static string DisplayIndicator(string text)
+        {
+            if (text == null)
+                return text;
+            return text.Replace(" ", "#");
+        }
+
+        // 获得 a?|b?|c? 参数的名字部分。即 a,b,c
+        static List<string> GetSubfieldNames(string subfield_properties)
+        {
+            List<string> results = new List<string>();
+            string[] values = subfield_properties.Split('|');
+
+            foreach (string s in values)
+            {
+                if (string.IsNullOrEmpty(s))
+                    throw new ArgumentException($"subfield 子参数值 '{subfield_properties}' 不合法。'|' 之间至少要有一个字符");
+                string name = s.Substring(0, 1);
+                results.Add(name);
+            }
+
+            return results;
+        }
+
+        // 获得 a?|b?|c? 参数中，指定名字对应的值部分。例如名字 a 对应的就是 ?
+        static string GetSufieldParameter(string subfield_properties,
+            string subfield_name)
+        {
+            string[] values = subfield_properties.Split('|');
+
+            foreach (string s in values)
+            {
+                if (string.IsNullOrEmpty(s))
+                    throw new ArgumentException($"subfield 子参数值 '{subfield_properties}' 不合法。'|' 之间至少要有一个字符");
+                string name = s.Substring(0, 1);
+
+                if (name == subfield_name)
+                {
+                    var result = s.Substring(1);
+                    // r 必备
+                    // o 可选
+                    // n 可重复
+                    // 1 不可重复
+                    if (result.Contains("o") && result.Contains("r"))
+                        throw new ArgumentException($"子字段子参数中的 o 和 r 不允许同时出现。('{result}')");
+                    if (result.Contains("1") && result.Contains("n"))
+                        throw new ArgumentException($"子字段子参数中的 1 和 n 不允许同时出现。('{result}')");
+                }
+            }
+
+            return null;
         }
     }
 

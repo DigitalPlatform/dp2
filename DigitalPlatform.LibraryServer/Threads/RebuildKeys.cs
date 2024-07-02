@@ -8,6 +8,8 @@ using System.Diagnostics;
 using DigitalPlatform.Text;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryServer.Common;
+using DigitalPlatform.Xml;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -34,6 +36,7 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
+#if REMOVED
         #region 参数字符串处理
         // 这些函数也被 dp2Library 前端使用
 
@@ -74,18 +77,20 @@ namespace DigitalPlatform.LibraryServer
         public static int ParseTaskParam(string strParam,
             out string strFunction,
             out bool bClearFirst,
+            out bool quick_mode,
             out string strError)
         {
             strError = "";
             bClearFirst = false;
             strFunction = "";
+            quick_mode = false;
 
             if (String.IsNullOrEmpty(strParam) == true)
                 return 0;
 
             Hashtable table = StringUtil.ParseParameters(strParam);
             strFunction = (string)table["function"];
-
+            quick_mode = (bool)table["quick"];
             string strClearFirst = (string)table["clear_first"];
             if (strClearFirst.ToLower() == "yes"
                 || strClearFirst.ToLower() == "true")
@@ -98,15 +103,18 @@ namespace DigitalPlatform.LibraryServer
 
         static string BuildTaskParam(
             string strFunction,
-            bool bClearFirst)
+            bool bClearFirst,
+            bool quick_mode)
         {
             Hashtable table = new Hashtable();
             table["function"] = strFunction;
             table["clear_first"] = bClearFirst ? "yes" : "no";
+            table["quick"] = quick_mode;
             return StringUtil.BuildParameterString(table);
         }
 
         #endregion
+#endif
 
         // 一次操作循环
         public override void Worker()
@@ -132,7 +140,7 @@ namespace DigitalPlatform.LibraryServer
                     startinfo = new BatchTaskStartInfo();   // 按照缺省值来
 
                 string strDbNameList = "";
-                int nRet = ParseStart(startinfo.Start,
+                int nRet = RebuildKeysParam.ParseStart(startinfo.Start,
                     out strDbNameList,
                     out strError);
                 if (nRet == -1)
@@ -147,9 +155,10 @@ namespace DigitalPlatform.LibraryServer
                 //
                 string strFunction = "";
                 bool bClearFirst = false;
-                nRet = ParseTaskParam(startinfo.Param,
+                nRet = RebuildKeysParam.ParseTaskParam(startinfo.Param,
                     out strFunction,
                     out bClearFirst,
+                    out bool quick_mode,
                     out strError);
                 if (nRet == -1)
                 {
@@ -176,7 +185,11 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 // 构造用于复制然后同步的断点信息
-                BreakPointCollection all_breakpoints = BreakPointCollection.BuildFromDbNameList(strDbNameList, strFunction);
+                BreakPointCollection all_breakpoints =
+                    BreakPointCollection.BuildFromDbNameList(
+                        strDbNameList,
+                        strFunction,
+                        quick_mode);
 
                 // 进行处理
                 BreakPointCollection breakpoints = null;
@@ -497,6 +510,11 @@ out strError);
             BreakPointInfo info,
             out string strError);
 
+        // 2024/6/24
+        delegate int Delegate_endLoop(RmsChannel channel,
+    BreakPointInfo info,
+    out string strError);
+
         // return:
         //      -1  出错
         //      0   结束
@@ -504,6 +522,7 @@ out strError);
         delegate int Delegate_processRecord(RmsChannel channel,
             ref bool bFirst,
             string strRecPath,
+            bool quick_mode,
             out string strNextRecPath,
             out string strError);
 
@@ -511,25 +530,177 @@ out strError);
 
         #region 重建检索点
 
+        /*
+         * beginfastappend 开始快速模式。注意此时并不清除 keys 表中的行，因此 dp2kernel 的这个库的所有记录还能正常检索和修改
+         * initializekeystable 清掉 keys 表中的所有行
+         *      DoRebuildResKeys(recpath='中文图书/1' style=rebuildkeys,fastmode)
+         *      DoRebuildResKeys(recpath='中文图书/2' style=rebuildkeys,fastmode)
+         *      DoRebuildResKeys(recpath='中文图书/3' style=rebuildkeys,fastmode)
+         *      ... (若干次，直到对数据库中所有记录均调用完成)
+         * start_endfastappend 进入收尾阶段
+         *      detect_endfastappend
+         *      detect_endfastappend
+         *      detect_endfastappend
+         *      ... (若干次，直到探测到收尾阶段完成)
+         *      
+         * 注1: 如果在 DoRebuildResKeys() 循环内中断，要调用一次
+         *      stopfastappend，以便 dp2kernel 把数据库的一个计数器减一。
+         *      正常情况如果到达收尾阶段(start_endfastappend进入)，这个计数器也会减一。
+         *      beginfastappend 时这个计数器则会加一。
+         * */
+
         int beginLoop(
             RmsChannel channel,
             BreakPointInfo info,
             out string strError)
         {
+            string action = "begin";
+            bool clear_all_keytables = false;
+            if (info.QuickMode)
+            {
+                action = "beginfastappend";
+                // clear_all_keytables = true;
+            }
             // Refresh数据库定义
             long lRet = channel.DoRefreshDB(
-                "begin",
+                action,
                 info.DbName,
-                false,  // bClearKeysAtBegin == true ? true : false,
+                clear_all_keytables,  // bClearKeysAtBegin == true ? true : false,
                 out strError);
             if (lRet == -1)
                 return -1;
             return 0;
         }
 
+        int stopLoop(
+RmsChannel channel,
+BreakPointInfo info,
+out string strError)
+        {
+            strError = "";
+            if (info.QuickMode == false)
+            {
+
+            }
+            else
+            {
+                try
+                {
+                    long lRet = channel.DoRefreshDB(
+    "stopfastappend",
+    info.DbName,
+    false,  // 此参数不使用
+    out strError);
+                    if (lRet == -1)
+                    {
+                        strError = $"中断快速模式时出错: {strError}";
+                        return -1;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    strError = "在中断快速模式时出现异常: " + ExceptionUtil.GetDebugText(ex);
+                    return -1;
+                }
+            }
+
+            return 0;
+        }
+
+
+        int endLoop(
+    RmsChannel channel,
+    BreakPointInfo info,
+    out string strError)
+        {
+            if (info.QuickMode == false)
+            {
+                // Refresh数据库定义
+                long lRet = channel.DoRefreshDB(
+                    "end",
+                    info.DbName,
+                    false,  // bClearKeysAtBegin == true ? true : false,
+                    out strError);
+                if (lRet == -1)
+                    return -1;
+            }
+            else
+            {
+                //LibraryChannelManager.Log?.Debug($"开始对数据库{url}进行快速导入模式的最后收尾工作");
+                try
+                {
+                    // initializekeystable
+                    long lRet = channel.DoRefreshDB(
+    "initializekeystable",
+    info.DbName,
+    false,  // 此参数不使用
+    out strError);
+                    if (lRet == -1)
+                    {
+                        strError = $"快速导入的收尾阶段，初始化 keys 表时出错: {strError}";
+                        return -1;
+                    }
+
+                    lRet = channel.DoRefreshDB(
+"start_endfastappend",
+info.DbName,
+false,
+out strError);
+                    if (lRet == -1)
+                    {
+                        strError = $"快速导入的收尾阶段，start_endfastappend 时出错: {strError}";
+                        return -1;
+                    }
+                    else if (lRet == 1)
+                    {
+                        while (true)
+                        {
+                            //                  detect_endfastappend 探寻任务的状态。返回 0 表示任务尚未结束; 1 表示任务已经结束
+                            lRet = channel.DoRefreshDB(
+"detect_endfastappend",
+info.DbName,
+false,
+out strError);
+                            if (lRet == -1)
+                            {
+                                strError = $"快速导入的收尾阶段，detect_endfastappend 时出错: {strError}";
+                                return -1;
+                            }
+                            if (lRet == 1)
+                                break;
+                        }
+                    }
+                    else if (lRet == 2)
+                    {
+                        //      2   本次已经减少计数 1，但依然不够，还剩下一定的计数当重新请求直到计数为零才会自动启动“收尾快速导入”任务
+                        // throw new Exception(strQuickModeError);
+                        // TODO: 也可以尝试再次调用 ManageKeysIndex(url, "start_endfastappend",
+                        return -1;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    strError = "在等待快速模式收尾的阶段出现异常: " + ExceptionUtil.GetDebugText(ex);
+                    return -1;
+                }
+                finally
+                {
+                    //LibraryChannelManager.Log?.Debug($"结束对数据库{url}进行快速导入模式的最后收尾工作");
+                }
+            }
+
+            return 0;
+        }
+
+
+        // return:
+        //      -1  出错
+        //      0   结束处理。(本次调用没有处理记录)
+        //      1   成功。后面可以继续向后处理(strNextRecPath返回了刚处理过的记录的路径)
         int processRecord(RmsChannel channel,
             ref bool bFirst,
             string strRecPath,
+            bool quick_mode,
             out string strNextRecPath,
             out string strError)
         {
@@ -537,10 +708,12 @@ out strError);
             strError = "";
 
             string strStyle = "";
-
             strStyle = "timestamp,outputpath";	// 优化
 
-            strStyle += ",forcedeleteoldkeys";
+            if (quick_mode)
+                strStyle += ",rebuildkeys,fastmode";
+            else
+                strStyle += ",forcedeleteoldkeys";
 
             if (bFirst == true)
             {
@@ -624,7 +797,7 @@ out strError);
         }
 
         int RebuildKeyDatabase(BreakPointInfo info,
-    out string strError)
+            out string strError)
         {
             strError = "";
 
@@ -639,6 +812,8 @@ out strError);
             return ProcessDatabase(info,
                 beginLoop,
                 processRecord,
+                endLoop,
+                stopLoop,
                 out strError);
         }
 
@@ -721,7 +896,7 @@ out strError);
             return 0;
         }
 
-        #endregion
+#endregion
 
         #region 重建查重键
 
@@ -738,6 +913,7 @@ out strError);
         int processBiblioRecord(RmsChannel channel,
     ref bool bFirst,
     string strRecPath,
+    bool quick_mode,
     out string strNextRecPath,
     out string strError)
         {
@@ -881,6 +1057,8 @@ out string strError)
             return ProcessDatabase(info,
                 beginLoop1,
                 processBiblioRecord,
+                null,
+                null,
                 out strError);
         }
 
@@ -891,6 +1069,8 @@ out string strError)
         int ProcessDatabase(BreakPointInfo info,
             Delegate_beginLoop procBeginLoop,
             Delegate_processRecord procProcessRecord,
+            Delegate_beginLoop procEndLoop,
+            Delegate_beginLoop procStopLoop,
             out string strError)
         {
             strError = "";
@@ -906,11 +1086,8 @@ out string strError)
             string strStartNo = "1";
             string strEndNo = "9999999999";
 
-            string strOutputStartNo = "";
-            string strOutputEndNo = "";
-
             if (string.IsNullOrEmpty(info.RecID) == false)
-                strStartNo = info.RecID;
+                strStartNo = info.RecID;    // 注意 info.RecID 可能为 "32+" 形态
 
             // 校验起止号
             // return:
@@ -920,8 +1097,8 @@ out string strError)
                 info.DbName,
                 strStartNo,
                 strEndNo,
-                out strOutputStartNo,
-                out strOutputEndNo,
+                out string strOutputStartNo,
+                out string strOutputEndNo,
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -967,26 +1144,36 @@ out string strError)
             string strID = strStartNo;
 
             bool bFirst = true;	// 是否为第一次取记录
-
-            // 循环
-            for (; ; )
+            bool finish = false;    // 是否处理完成所有记录
+            try
             {
-                if (this.Stopped == true)
+                // 循环
+                for (; ; )
                 {
-                    strError = "中断";
-                    return -1;
-                }
+                    if (this.Stopped == true)
+                    {
+                        strError = $"中断。已经处理到记录 ID '{info.RecID}'";
+                        return -1;
+                    }
 
-                string strPath = info.DbName + "/" + strID;
-                string strOutputPath = "";
+                    string strPath = info.DbName + "/" + strID;
 
-                nRet = procProcessRecord(channel, ref bFirst, strPath, out strOutputPath, out strError);
-                //if (nRet == 1)
-                //    goto CONTINUE;
-                if (nRet == 0)
-                    return 0;
-                if (nRet == -1)
-                    return -1;
+                    // return:
+                    //      -1  出错
+                    //      0   结束处理。(本次调用没有处理记录)
+                    //      1   成功。后面可以继续向后处理(strNextRecPath返回了刚处理过的记录的路径)
+                    nRet = procProcessRecord(channel,
+                        ref bFirst,
+                        strPath,
+                        info.QuickMode,
+                        out string strOutputPath,
+                        out strError);
+                    //if (nRet == 1)
+                    //    goto CONTINUE;
+                    if (nRet == 0)
+                        return 0;
+                    if (nRet == -1)
+                        return -1;
 #if NO
                     // string strDirectionComment = "";
 
@@ -1082,37 +1269,68 @@ out string strError)
                     bFoundRecord = true;
 #endif
 
-                // 把id解析出来
-                strID = ResPath.GetRecordId(strOutputPath);
+                    // 把id解析出来
+                    strID = ResPath.GetRecordId(strOutputPath);
 
-                info.RecID = strID; // 记忆
+                    info.RecID = strID; // 记忆
+                    if (bFirst == false)
+                        info.RecID += "+";
 
-                // 每 100 条显示一行
-                if ((m_nRecordCount % 100) == 0)
-                    this.AppendResultText("已重建检索点 记录 " + strOutputPath + "  " + (m_nRecordCount + 1).ToString() + "\r\n");
+                    // 每 100 条显示一行
+                    if ((m_nRecordCount % 100) == 0)
+                        this.AppendResultText("已重建检索点 记录 " + strOutputPath + "  " + (m_nRecordCount + 1).ToString() + "\r\n");
 
-                // CONTINUE:
+                    // CONTINUE:
 
-                // 是否超过循环范围
-                if (Int64.TryParse(strID, out nCur) == false)
-                {
-                    strError = "数据库 '" + info.DbName + "' 当前记录 ID '" + strID + "' 不合法";
-                    return -1;
+                    // 是否超过循环范围
+                    if (Int64.TryParse(strID, out nCur) == false)
+                    {
+                        strError = "数据库 '" + info.DbName + "' 当前记录 ID '" + strID + "' 不合法";
+                        return -1;
+                    }
+                    if (nCur > nEnd)
+                        break;
+
+                    //if (bFoundRecord == true)
+                    //    m_nRecordCount++;
+
+                    SetProgressText((nCur - nStart + 1).ToString());
+
+                    // 对已经作过的进行判断
+                    if (nCur >= nEnd)
+                        break;
                 }
-                if (nCur > nEnd)
-                    break;
 
-                //if (bFoundRecord == true)
-                //    m_nRecordCount++;
-
-                SetProgressText((nCur - nStart + 1).ToString());
-
-                // 对已经作过的进行判断
-                if (nCur >= nEnd)
-                    break;
+                finish = true;
+                nRet = 0;
+                // 2024/6/24
+                if (procEndLoop != null)
+                {
+                    this.AppendResultText($"开始收尾 {info.DbName}\r\n");
+                    nRet = procEndLoop(channel, info, out strError);
+                    if (nRet == -1)
+                        return -1;
+                    this.AppendResultText($"结束收尾 {info.DbName}\r\n");
+                }
+            }
+            finally
+            {
+                // 2024/6/28
+                if (finish == false)
+                {
+                    if (procStopLoop != null)
+                    {
+                        this.AppendResultText($"中断处理 {info.DbName}。已经处理到记录 ID '{info.RecID}'\r\n");
+                        nRet = procStopLoop(channel, info, out strError);
+                        //if (nRet == -1)
+                        //    return -1;
+                    }
+                }
             }
 
             this.AppendResultText($"共处理记录 {m_nRecordCount} 条\r\n");
+            if (nRet == -1)
+                return -1;
             return 0;
         }
 
@@ -1349,7 +1567,7 @@ out string strError)
             finally
             {
 #if NO
-                                    if (bClearKeysAtBegin == true)
+                    if (bClearKeysAtBegin == true)
                     {
                 // 结束Refresh数据库定义
                 lRet = channel.DoRefreshDB(
@@ -1369,6 +1587,9 @@ out string strError)
 #endif
 
         // 校验起止号
+        // parameters:
+        //      strIntputStartNo    起始 ID。一般是一个数字。
+        //                          特殊地，如果字符串末尾为 '+'，表示希望获得比这个号码更大的相邻记录 ID
         // return:
         //      0   不存在记录
         //      1   存在记录
@@ -1388,19 +1609,29 @@ out string strError)
             bool bEndNotFound = false;
 
             // 如果输入参数中为空，则假定为“全部范围”
-            if (strInputStartNo == "")
+            if (string.IsNullOrEmpty(strInputStartNo) == true)
                 strInputStartNo = "1";
 
-            if (strInputEndNo == "")
+            if (string.IsNullOrEmpty(strInputEndNo) == true)
                 strInputEndNo = "9999999999";
 
+            bool start_sibling = false; // 是否要获得起始号码的相邻的记录号码
+            if (strInputStartNo.EndsWith("+"))
+            {
+                start_sibling = true;
+                strInputStartNo = strInputStartNo.Substring(0, strInputStartNo.Length - 1);
+            }
 
             bool bAsc = true;
 
             Int64 nStart = 0;
             Int64 nEnd = 9999999999;
 
-
+            if (Int64.TryParse(strInputStartNo, out nStart)== false)
+            {
+                strError = $"起始号码 '{strInputStartNo}' 不合法。应为一个纯数字";
+            }
+            /*
             try
             {
                 nStart = Convert.ToInt64(strInputStartNo);
@@ -1408,8 +1639,13 @@ out string strError)
             catch
             {
             }
+            */
 
-
+            if (Int64.TryParse(strInputEndNo, out nEnd) == false)
+            {
+                strError = $"结束号码 '{strInputEndNo}' 不合法。应为一个纯数字";
+            }
+            /*
             try
             {
                 nEnd = Convert.ToInt64(strInputEndNo);
@@ -1417,7 +1653,7 @@ out string strError)
             catch
             {
             }
-
+            */
 
             if (nStart > nEnd)
                 bAsc = false;
@@ -1428,9 +1664,13 @@ out string strError)
             string strStyle = "outputpath";
 
             if (bAsc == true)
-                strStyle += ",next,myself";
+                strStyle += ",next";
             else
-                strStyle += ",prev,myself";
+                strStyle += ",prev";
+
+            // 2024/7/2
+            if (start_sibling == false)
+                strStyle += ",myself";
 
             string strResult;
             string strMetaData;
@@ -1506,7 +1746,6 @@ out string strError)
                 {
                     strError += "校验endno时出错： " + strError0 + " ";
                 }
-
             }
             else
             {
@@ -1603,6 +1842,9 @@ out string strError)
             // 2017/1/11
             public string Function = "";    // 功能。重建检索点/重建查重键 空等于 "重建检索点"
 
+            // 2024/6/24
+            public bool QuickMode = false;
+
             // 通过字符串构造
             public static BreakPointInfo Build(string strText)
             {
@@ -1612,6 +1854,7 @@ out string strError)
                 info.DbName = (string)table["dbname"];
                 info.RecID = (string)table["recid"];
                 info.Function = (string)table["function"];
+                info.QuickMode = DomUtil.IsBooleanTrue((string)table["quick"], false);
                 return info;
             }
 
@@ -1622,6 +1865,8 @@ out string strError)
                 table["dbname"] = this.DbName;
                 table["recid"] = this.RecID;
                 table["function"] = this.Function;
+                if (this.QuickMode == true)
+                    table["quick"] = this.QuickMode ? "true" : "false";
                 return StringUtil.BuildParameterString(table);
             }
 
@@ -1631,6 +1876,8 @@ out string strError)
                 string strResult = "";
                 strResult += this.DbName;
                 strResult += "(功能=" + this.Function + ")";
+                if (QuickMode)
+                    strResult += "(快速模式)";
                 if (string.IsNullOrEmpty(this.RecID) == false)
                 {
                     strResult += " : 从ID " + this.RecID.ToString() + " 开始";
@@ -1672,7 +1919,9 @@ out string strError)
             }
 
             // 通过数据库名列表字符串构造
-            public static BreakPointCollection BuildFromDbNameList(string strText, string strFunction)
+            public static BreakPointCollection BuildFromDbNameList(string strText,
+                string strFunction,
+                bool quick_mode)
             {
                 BreakPointCollection infos = new BreakPointCollection();
 
@@ -1682,6 +1931,7 @@ out string strError)
                     BreakPointInfo info = new BreakPointInfo();
                     info.DbName = dbname;
                     info.Function = strFunction;
+                    info.QuickMode = quick_mode;
                     infos.Add(info);
                 }
 

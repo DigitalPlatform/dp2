@@ -90,6 +90,7 @@
     <Compile Include="TestAuthorNumber.cs" />
     <Compile Include="BarcodeValidator\TestBarcodeValidator.cs" />
     <Compile Include="TestBiblioTable.cs" />
+    <Compile Include="TestCalendar.cs" />
     <Compile Include="TestCMIS.cs" />
     <Compile Include="TestCompactData.cs" />
     <Compile Include="TestDp2Library.cs" />

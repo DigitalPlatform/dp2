@@ -1,0 +1,29 @@
+body {
+    font-family: Microsoft YaHei, Tahoma, Arial, Helvetica, sans-serif;
+    font-size: 10pt;
+    margin: 16px;
+    padding: 4px;
+}
+
+A:link, A:visited, A:active {
+    text-decoration: none;
+    color: #aaaaaa;
+}
+
+A:hover {
+    font-weight: bold;
+}
+
+pre,
+code {
+    font-family: Menlo, Monaco, "Courier New", monospace;
+}
+
+pre {
+    background-color: #eeeeee;
+    font-size: .8rem;
+    overflow-x: scroll;
+    padding: 1.125em;
+}
+
+

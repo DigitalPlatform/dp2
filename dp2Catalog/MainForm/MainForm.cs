@@ -5286,7 +5286,7 @@ out string strError)
             {
                 if (StringUtil.IsInList("clientscanvirus", channel.Rights) == true)
                 {
-                    if (DetectVirus.DetectXXX() == true || DetectVirus.DetectGuanjia() == true)
+                    if (DetectVirus.DetectXXX(out _) == true || DetectVirus.DetectGuanjia(out _) == true)
                     {
                         {
                             channel.Close();

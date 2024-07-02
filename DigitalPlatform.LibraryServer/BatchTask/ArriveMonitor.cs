@@ -535,13 +535,10 @@ namespace DigitalPlatform.LibraryServer
 
 
             // 解析期限值
-            string strPeriodUnit = "";
-            long lPeriodValue = 0;
-
             int nRet = LibraryApplication.ParsePeriodUnit(
                 this.App.ArrivedReserveTimeSpan,
-                out lPeriodValue,
-                out strPeriodUnit,
+                out long lPeriodValue,
+                out string strPeriodUnit,
                 out strError);
             if (nRet == -1)
             {
@@ -562,15 +559,12 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
-
-            DateTime timeEnd = DateTime.MinValue;
-
             nRet = LibraryApplication.GetOverTime(
                 calendar,
                 notifydate,
                 lPeriodValue,
                 strPeriodUnit,
-                out timeEnd,
+                out DateTime timeEnd,
                 out strError);
             if (nRet == -1)
             {
@@ -589,12 +583,10 @@ namespace DigitalPlatform.LibraryServer
 
             TimeSpan delta = now - timeEnd;
 
-            long lDelta = 0;
-
             nRet = LibraryApplication.ParseTimeSpan(
                 delta,
                 strPeriodUnit,
-                out lDelta,
+                out long lDelta,
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -639,7 +631,7 @@ namespace DigitalPlatform.LibraryServer
                 strReaderBarcode,
                 out string strReaderXml,
                 out string strOutputReaderRecPath,
-                out byte [] reader_timestamp,
+                out byte[] reader_timestamp,
                 out strError);
             if (nRet == 0)
             {
@@ -778,9 +770,9 @@ namespace DigitalPlatform.LibraryServer
             //      0   没有超过
             //      1   已经超过
             nRet = CheckeOutOfReservation(
-                    calendar,
-                    queue_dom,
-                    out strError);
+                calendar,
+                queue_dom,
+                out strError);
             if (nRet == -1)
                 return -1;
 
@@ -890,7 +882,7 @@ namespace DigitalPlatform.LibraryServer
                     strReaderBarcode,
                     out string strReaderXml,
                     out string strOutputReaderRecPath,
-                    out byte [] reader_timestamp,
+                    out byte[] reader_timestamp,
                     out strError);
                 if (nRet == 0)
                 {
@@ -959,7 +951,7 @@ namespace DigitalPlatform.LibraryServer
                     false,
                     "content",  // ,ignorechecktimestamp
                     reader_timestamp,
-                    out byte [] output_timestamp,
+                    out byte[] output_timestamp,
                     out string strOutputPath,
                     out strError);
                 if (lRet == -1)
@@ -1060,7 +1052,7 @@ namespace DigitalPlatform.LibraryServer
                     out string strItemXml,
                     100,
                     out List<string> aPath,
-                    out byte [] item_timestamp,
+                    out byte[] item_timestamp,
                     out strError);
                 if (nRet == 0)
                 {

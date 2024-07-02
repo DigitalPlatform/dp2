@@ -145,6 +145,18 @@ namespace DigitalPlatform.LibraryServer
                         out strError);
                 }
 
+                if (strAction == "compressTailNo")
+                {
+                    return CompressTailNo(
+    sessioninfo,
+    channel,
+    strLibraryCodeList,
+    strDatabaseNames,
+    strStyle,
+    out strOutputInfo,
+    out strError);
+                }
+
                 strError = "未知的strAction值 '" + strAction + "'";
                 return -1;
             }
@@ -9517,6 +9529,102 @@ out strError);
                 results.Add(strThis);
                 GetSubdirs(strThis, ref results);
             }
+        }
+
+        // parameters:
+        //      strLibraryCodeList  当前用户的管辖分馆代码列表
+        //      strStyle    指定一些特性
+        // return:
+        //      -1  出错
+        //      0   没有找到
+        //      1   成功
+        int CompressTailNo(
+            SessionInfo sessioninfo,
+            RmsChannel channel,
+            string strLibraryCodeList,
+            string strDatabaseNames,
+            string strStyle,
+            out string strOutputInfo,
+            out string strError)
+        {
+            strOutputInfo = "";
+            strError = "";
+
+            //if (String.IsNullOrEmpty(strDatabaseNames) == true)
+            //    strDatabaseNames = "#biblio,#reader,#authority,#arrived,#amerce,#invoice,#util,#message,#pinyin,#gcat,#word,#_accessLog,#_hitcount,#_chargingOper,#_biblioSummary";  // 注: #util 相当于 #zhongcihao,#publisher,#dictionary,#inventory
+
+            List<string> names = StringUtil.SplitList(strDatabaseNames, ',');
+            for (int i = 0; i < names.Count; i++)
+            {
+                string strName = names[i].Trim();
+                if (String.IsNullOrEmpty(strName) == true)
+                    continue;
+
+                List<string> parts = StringUtil.ParseTwoPart(strName, "#");
+                strName = parts[0];
+                // string strDbType = parts[1];
+
+                long ret = channel.DoRefreshDB(
+                    "compressTailNo",
+                    strName, 
+                    false,
+                    out strError);
+                if (ret == -1)
+                {
+                    strError = $"调用内核 RefreshDB() API 时出错: {strError}";
+                    return -1;
+                }
+
+                /*
+                strError = "不存在数据库名 '" + strName + "'";
+                return -1;
+                */
+            }
+
+            // 写入操作日志
+            if (StringUtil.IsInList("skipOperLog", strStyle) == false)
+            {
+                XmlDocument domOperLog = new XmlDocument();
+                domOperLog.LoadXml("<root />");
+
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+                    "operation",
+                    "manageDatabase");
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+    "action",
+    "compressTailNo");  // 2024/6/20 verion 1.10 开始才有的这个 action 值
+                
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+                    "libraryCode", strLibraryCodeList);
+
+                // 记载请求 API 时的 strDatabaseNames 参数值
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+                    "databaseNames",
+                    strDatabaseNames);
+
+                // 记载风格
+                if (string.IsNullOrEmpty(strStyle) == false)
+                    DomUtil.SetElementText(domOperLog.DocumentElement, "style", strStyle);
+
+                DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
+                    sessioninfo.UserID);
+
+                string strOperTime = this.Clock.GetClock();
+
+                DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
+                    strOperTime);
+
+                int nRet = this.OperLog.WriteOperLog(domOperLog,
+sessioninfo.ClientAddress,
+out strError);
+                if (nRet == -1)
+                {
+                    strError = "ManageDatabase() API compressTailNo 写入日志时发生错误: " + strError;
+                    return -1;
+                }
+            }
+
+            return 1;
         }
 
         // 获得数据库信息

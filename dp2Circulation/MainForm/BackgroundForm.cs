@@ -47,26 +47,34 @@ namespace dp2Circulation
         public void ShowProgressMessage(string strID,
             string strText)
         {
-            if (this.webBrowser1 == null || this.webBrowser1.IsDisposed == true)
-                return;
-
-            if (this.webBrowser1.InvokeRequired)
+            try
             {
-                this.webBrowser1.Invoke(new Action<string, string>(ShowProgressMessage), strID, strText);
-                return;
+                if (this.webBrowser1 == null || this.webBrowser1.IsDisposed == true)
+                    return;
+
+                if (this.webBrowser1.InvokeRequired)
+                {
+                    this.webBrowser1.Invoke(new Action<string, string>(ShowProgressMessage), strID, strText);
+                    return;
+                }
+
+                if (webBrowser1.Document == null)
+                    return;
+
+
+                HtmlElement obj = this.webBrowser1.Document.GetElementById(strID);
+                if (obj != null)
+                {
+                    obj.InnerText = strText;
+                    return;
+                }
+
+                AppendHtml("<div id='" + strID + "'>" + HttpUtility.HtmlEncode(strText) + "</div>");
             }
-
-            if (webBrowser1.Document == null)
-                return;
-
-            HtmlElement obj = this.webBrowser1.Document.GetElementById(strID);
-            if (obj != null)
+            catch (ObjectDisposedException)  // 2024/6/24
             {
-                obj.InnerText = strText;
-                return;
-            }
 
-            AppendHtml("<div id='" + strID + "'>" + HttpUtility.HtmlEncode(strText) + "</div>");
+            }
         }
 
         private void BackgroundForm_FormClosed(object sender, FormClosedEventArgs e)
@@ -76,8 +84,10 @@ namespace dp2Circulation
 
         private void BackgroundForm_FormClosing(object sender, FormClosingEventArgs e)
         {
+            /*
             if (e.CloseReason == CloseReason.UserClosing)   // 2014/8/13
                 e.Cancel = true;
+            */
         }
 
         private void BackgroundForm_Activated(object sender, EventArgs e)

@@ -2078,6 +2078,113 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             return 0;
         }
 
+        // 为书目记录添加缺乏的 998$c。如果 998$c 已经存在，则检查是否符合缺省规则
+        // 调用前需要根据书目库名，获得书目库 role cr:xxx
+        // return:
+        //      -1  出错
+        //      0   strMARC 没有发生修改
+        //      1   strMARC 发生了修改
+        public static int CreateCatalogingRuleByMarc(
+            string default_rule,
+            ref string strMARC,
+            out string strError)
+        {
+            strError = "";
+
+            bool changed = false;
+            MarcRecord record = new MarcRecord(strMARC);
+
+            var content_998c = record.select("field[@name='998']/subfield[@name='c']").FirstContent;
+            if (string.IsNullOrEmpty(content_998c) == false
+                && string.IsNullOrEmpty(default_rule) == false
+                && content_998c != default_rule)
+            {
+                strError = $"998$c内容 '{content_998c}' 和当前书目库的默认规则 '{default_rule}' 不一致";
+                return -1;
+            }
+            
+            var content_998l = record.select("field[@name='998']/subfield[@name='l']").FirstContent;
+            if (string.IsNullOrEmpty(content_998l) == false
+                && string.IsNullOrEmpty(content_998c) == true)
+            {
+                if (string.IsNullOrEmpty(default_rule))
+                {
+                    strError = "记录内缺乏 998$c (当具备 998$l 时必须也具备 998$c)";
+                    return -1;
+                }
+                // 自动添加 998$c
+                record.setFirstSubfield("998", "c", default_rule);
+                changed = true;
+            }
+
+            if (changed)
+            {
+                strMARC = record.Text;
+                return 1;
+            }
+            return 0;
+        }
+
+        // return:
+        //      -1  出错
+        //      0   strBiblioXml 没有发生修改
+        //      1   strBiblioXml 发生了修改
+        public static int CreateCatalogingRule(
+            string default_rule,
+            ref string strBiblioXml,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            if (string.IsNullOrEmpty(strBiblioXml) == true)
+                return 0;
+
+            // 将MARCXML格式的xml记录转换为marc机内格式字符串
+            // parameters:
+            //		bWarning	== true, 警告后继续转换,不严格对待错误; = false, 非常严格对待错误,遇到错误后不继续转换
+            //		strMarcSyntax	指示marc语法,如果==""，则自动识别
+            //		strOutMarcSyntax	out参数，返回marc，如果strMarcSyntax == ""，返回找到marc语法，否则返回与输入参数strMarcSyntax相同的值
+            nRet = MarcUtil.Xml2Marc(strBiblioXml,
+                true,
+                "", // this.CurMarcSyntax,
+                out string strMarcSyntax,
+                out string strMarc,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            if (string.IsNullOrEmpty(strMarcSyntax) == true)
+                return 0;   // 不是 MARC 格式
+
+            bool changed = false;
+
+            {
+                nRet = LibraryServerUtil.CreateCatalogingRuleByMarc(
+                    default_rule,
+                    ref strMarc,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 1)
+                    changed = true;
+            }
+
+            if (changed == true)
+            {
+                nRet = MarcUtil.Marc2XmlEx(strMarc,
+                    strMarcSyntax,
+                    ref strBiblioXml,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                return 1;
+            }
+
+            return 0;
+        }
+
+
         public static string TrimEndChar(string strText, string strDelimeters = "./,;:")
         {
             if (string.IsNullOrEmpty(strText) == true)

@@ -12594,6 +12594,9 @@ out string _);
         // 中间要排除所有非工作日
         // parameters:
         //      calendar    日历对象。可以为 null
+        // return:
+        //      -1  出错
+        //      0   成功
         public static int GetOverTime(
             Calendar calendar,
             DateTime timeStart,

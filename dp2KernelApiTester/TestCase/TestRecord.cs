@@ -1388,8 +1388,8 @@ out string strError);
                 {
                     // 每个数据库要进行一次快速模式的准备操作
                     int nRet = ManageKeysIndex(
-                        channel,
-                        strDbUrl,
+                            channel,
+                            strDbUrl,
                             "beginfastappend",
                             "正在对数据库 " + strDbUrl + " 进行快速导入模式的准备工作 ...",
                             out string error);
@@ -1583,10 +1583,10 @@ out string strError);
 
         static int ManageKeysIndex(
             RmsChannel channel,
-        string strDbUrl,
-        string strAction,
-        string strMessage,
-        out string strError)
+            string strDbUrl,
+            string strAction,
+            string strMessage,
+            out string strError)
         {
             strError = "";
 

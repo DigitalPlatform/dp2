@@ -298,8 +298,9 @@ namespace DigitalPlatform.IO
 27) dp2Circulation.exe
 
  * */
-        public static bool DetectXXX()
+        public static bool DetectXXX(out string debug_info)
         {
+            debug_info = "";
 #if ENABLE_DETECT
             ServiceController[] devices = ServiceController.GetDevices();
 
@@ -308,7 +309,10 @@ namespace DigitalPlatform.IO
             {
                 if (controller.DisplayName.StartsWith("360netmon", StringComparison.OrdinalIgnoreCase)
                     || controller.DisplayName.StartsWith("360SelfProtection", StringComparison.OrdinalIgnoreCase))
+                {
+                    debug_info = $"xxx controller.DisplayName='{controller.DisplayName}'";
                     return true;
+                }
             }
 
             // 再检测系统进程
@@ -318,7 +322,10 @@ namespace DigitalPlatform.IO
             {
                 if (name.StartsWith("360Tray", StringComparison.OrdinalIgnoreCase)
                     || name.StartsWith("zhudongfangyu", StringComparison.OrdinalIgnoreCase))
+                {
+                    debug_info = $"xxx name='{name}'";
                     return true;
+                }
             }
 
             return false;
@@ -327,8 +334,9 @@ namespace DigitalPlatform.IO
 #endif
         }
 
-        public static bool DetectGuanjia()
+        public static bool DetectGuanjia(out string debug_info)
         {
+            debug_info = "";
 #if ENABLE_DETECT
             // 再检测系统进程
             List<string> names = ProcessUtil.GetProcessNameList();
@@ -337,7 +345,10 @@ namespace DigitalPlatform.IO
             {
                 if (name.StartsWith("qqpctray", StringComparison.OrdinalIgnoreCase)
                     || name.StartsWith("qqpcrtp", StringComparison.OrdinalIgnoreCase))
+                {
+                    debug_info = $"name='{name}'";
                     return true;
+                }
             }
 
             return false;

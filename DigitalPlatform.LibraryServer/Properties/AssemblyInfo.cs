@@ -32,8 +32,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.159.*")]
-[assembly: AssemblyFileVersion("3.159.0.0")]
+[assembly: AssemblyVersion("3.160.*")]
+[assembly: AssemblyFileVersion("3.160.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -388,4 +388,10 @@ ItemCanReturn()
 //		3.157 (2024/2/8) VerifyBarcode() API 中增加判断 @refID:xxx 形态的参考 ID 到底是读者类型还是册类型的功能
 //		3.158 (2024/4/9) SetReaderInfo() API 中 strAction 增加 "changereaderrefid" 这一种动作
 //		3.159 (2024/4/28) "strMergeStyle 中不允许包含 file_reserve_source 或 file_reserve_target。这两个值已经废止"
+//		3.160 (2024/6/24) ManageDatabase() API 的各种 action 允许使用存取定义来精确控制账户权限。
+//						ManageDatabase() API 增加了一种 action 为 compressTailNo。
+//						SetBiblioInfo() API 的 delete 功能允许使用一个 style 子参数 compressTailNo，在删除记录的同时压缩这个书目库的尾号
+//						书目记录用 SetBiblioInfo() API 或者 CopyBiblioInfo() API 保存的时候，查重功能增加了对“编目规则码”自动进行查重的效果
+//						当利用 SetBiblioInfo() API 保存书目记录的时候，如果提交保存的记录里面具有 998$l，API 会自动检查 998$c 是否存在。如果不存在，并且这个书目库定义了 cr:xxx 角色，则自动添加这样内容的 998$c 然后保存；如果没有定义 cr:xxx 角色，则报错说必须要具备 998$c。
+//						如果提交保存的记录中不具有 998$l，则 API 不会进行上述检查和自动增补。
 

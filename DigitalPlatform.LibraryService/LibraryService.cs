@@ -11817,13 +11817,78 @@ Stack:
                         return result;
                     }
 
-                    // 权限判断
-                    if (StringUtil.IsInList("managedatabase", sessioninfo.RightsOrigin) == false)
+                    // 具备 managedatabase，或者存取定义
+                    // 检查存取权限
+                    string strAccessParameters = "";
+                    bool passed = false;
+
+                    // 检查存取权限 managedatabase
                     {
-                        result.Value = -1;
-                        result.ErrorInfo = $"管理数据库的操作 '{strAction}' 被拒绝。不具备managedatabase权限。";
-                        result.ErrorCode = ErrorCode.AccessDenied;
-                        return result;
+                        if (String.IsNullOrEmpty(sessioninfo.Access) == false)
+                        {
+                            string dbname_list = strDatabaseName;
+                            string strAccessActionList = "";
+                            // return:
+                            //      null    指定的操作类型的权限没有定义
+                            //      ""      定义了指定类型的操作权限，但是否定的定义
+                            //      其它      权限列表。* 表示通配的权限列表
+                            strAccessActionList = LibraryApplication.GetDbOperRights(
+                                sessioninfo.Access,
+                                dbname_list,
+                                "managedatabase");
+                            if (strAccessActionList == null)
+                            {
+                                strAccessActionList = LibraryApplication.GetDbOperRights(
+                                    sessioninfo.Access,
+                                    "",
+                                    "managedatabase");
+                                if (strAccessActionList == null)
+                                {
+                                    // 对所有书目库都没有定义任何存取权限，这时候要退而使用普通权限
+                                    strAccessActionList = sessioninfo.Rights;
+                                }
+                                else
+                                {
+                                    strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{dbname_list}' 执行 初始化 操作的存取权限";
+                                    result.Value = -1;
+                                    result.ErrorInfo = strError;
+                                    result.ErrorCode = ErrorCode.AccessDenied;
+                                    return result;
+                                }
+                            }
+
+                            if (strAccessActionList == "*")
+                            {
+                                // 通配
+                                passed = true;
+                            }
+                            else
+                            {
+                                if (LibraryApplication.IsInAccessList(strAction,
+                                    strAccessActionList,
+                                    true,
+                                    out strAccessParameters) == false)
+                                {
+                                    strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{dbname_list}' 执行 出纳 {strAction} 操作的存取权限";
+                                    result.Value = -1;
+                                    result.ErrorInfo = strError;
+                                    result.ErrorCode = ErrorCode.AccessDenied;
+                                    return result;
+                                }
+                            }
+                        }
+                    }
+
+                    if (passed == false)
+                    {
+                        // 普通权限判断
+                        if (StringUtil.IsInList("managedatabase", sessioninfo.RightsOrigin) == false)
+                        {
+                            result.Value = -1;
+                            result.ErrorInfo = $"管理数据库的操作 '{strAction}' 被拒绝。不具备managedatabase权限。";
+                            result.ErrorCode = ErrorCode.AccessDenied;
+                            return result;
+                        }
                     }
                 }
 

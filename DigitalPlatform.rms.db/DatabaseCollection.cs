@@ -30,6 +30,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Core;
 using System.Security.Cryptography;
+using System.Runtime.Remoting.Activation;
 
 namespace DigitalPlatform.rms
 {
@@ -1641,7 +1642,8 @@ namespace DigitalPlatform.rms
             // return:
             //		-1  出错
             //		0   成功
-            return db.InitialPhysicalDatabase(out strError);
+            return db.InitialPhysicalDatabase(
+                out strError);
         }
 
         // 刷新数据库定义
@@ -1707,6 +1709,22 @@ namespace DigitalPlatform.rms
             {
                 strError = "您的帐户名为 '" + user.Name + "'，对 '" + strDbName + "' 数据库没有'初始化或刷新定义(clear)'权限，目前的权限值为'" + strExistRights + "'。";
                 return -6;
+            }
+
+            // 2024/6/20
+            // 重设(压缩)数据库尾号
+            if (strAction == "compressTailNo")
+            {
+                var ret = db.CompressTailNo(out strError);
+                if (ret == -1)
+                {
+                    strError = $"重设数据库尾号时出错: {strError}";
+                    return -1;
+                }
+                if (this.Changed == true)
+                    this.SaveXmlSafety(true);
+
+                return 0;
             }
 
             if (strAction == "begin")
@@ -1779,7 +1797,21 @@ namespace DigitalPlatform.rms
                     "delete",
                     out strError);
 #endif
+                // 2024/6/27
+                int nRet = db.RefreshPhysicalDatabase(bClearAllKeyTables, out strError);
+                if (nRet == -1)
+                    return -1;
                 return 0;
+            }
+            else if (strAction == "stopfastappend")
+            {
+                // 把计数器减一。用于中断 fastappend 过程时调用。
+                // 注:
+                // 正常的调用顺序：beginfastappend ... 处理记录 ... endfastappend
+                // 中断情况下: beginfastappend ... 处理记录 ... stopfastappend
+                // 中断后又重新开始继续处理: beginfastappend ... 处理余下记录 ... endfastappend
+                db.FastAppendTaskCount--;
+                return db.FastAppendTaskCount;
             }
             else if (strAction == "endfastappend"
                 || strAction == "start_endfastappend")
@@ -1943,7 +1975,11 @@ namespace DigitalPlatform.rms
                 strError = "任务尚未结束";
                 return 0;
             }
-
+            else if (strAction == "initializekeystable")
+            {
+                // 仅仅刷新 keys 表和清除其记录。records 表依然保留原样
+                return db.RefreshPhysicalDatabase(true, out strError);
+            }
             strError = "API_RefreshPhysicalDatabase() 未知的 strAction 参数值 '" + strAction + "'";
             return -1;
         }
@@ -1994,6 +2030,12 @@ namespace DigitalPlatform.rms
             int nRet = 0;
             string strError = "";
 
+            var change_value = false;
+            if (db.InRebuildingKey == false)
+            {
+                db.InRebuildingKey = true;
+                change_value = true;
+            }
             try
             {
                 Debug.Assert(db.FastAppendTaskCount == 0, "");
@@ -2079,6 +2121,11 @@ namespace DigitalPlatform.rms
             {
                 strError = $"EndFastAppend() 出现异常: " + ExceptionUtil.GetExceptionText(ex);
                 goto ERROR1;
+            }
+            finally
+            {
+                if (change_value)
+                    db.InRebuildingKey = false;
             }
         ERROR1:
             return new NormalResult { Value = -1, ErrorInfo = strError };
@@ -5750,6 +5797,7 @@ namespace DigitalPlatform.rms
         //						记录: 库名/记录号
         //		user	当前帐户对象，不能为null
         //		baInputTimestamp	输入的时间戳
+        //      strStyle        如果包含 compressTailNo，表示删除操作后会数据库压缩尾号到尽可能小
         //		baOutputTimestamp	out参数，返回时间戳
         //		strError	out参数，返回出错信息
         // return:
@@ -5903,6 +5951,31 @@ namespace DigitalPlatform.rms
                             strStyle,
                             out baOutputTimestamp,
                             out strError);
+                        // 2024/6/20
+                        if (StringUtil.IsInList("compressTailNo", strStyle))
+                        {
+                            if (nRet == 0 || nRet == -4)
+                            {
+                                var ret = db.CompressTailNo(out string error);
+                                if (ret == -1)
+                                {
+                                    if (nRet == -4)
+                                    {
+                                        strError = $"{strError}。并且重设数据库尾号时出错: {error}";
+                                        return -4;
+                                    }
+                                    else
+                                    {
+                                        strError = $"删除资源 '{strResPath}' 成功。但重设数据库尾号时出错: {error}";
+                                        return -1;
+                                    }
+                                }
+                                if (this.Changed == true)
+                                    this.SaveXml();
+                                return nRet;
+                            }
+                        }
+
                         if (nRet <= -1)
                             return nRet;
                     }
@@ -6030,7 +6103,6 @@ namespace DigitalPlatform.rms
                         return -6;
                     }
 
-                    string strOutputID = "";
                     // return:
                     //		-1  一般性错误
                     //		-2  时间戳不匹配
@@ -6038,7 +6110,7 @@ namespace DigitalPlatform.rms
                     //		0   成功
                     nRet = db.RebuildRecordKeys(strRecordID,
                         strStyle,
-                        out strOutputID,
+                        out string strOutputID,
                         out strError);
 
                     if (StringUtil.IsInList("outputpath", strStyle) == true)

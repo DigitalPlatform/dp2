@@ -91,7 +91,8 @@ string text)
             StringBuilder result = new StringBuilder();
             foreach (var error in errors)
             {
-                result.AppendLine($"[{error.Level}] {error.Text}");
+                // error.Text 中原有的 \r\n 要处理为特殊符号 [CR]
+                result.AppendLine($"[{error.Level}] {error.Text?.Replace("\r\n", "[CR]")}");
             }
 
             return result.ToString();

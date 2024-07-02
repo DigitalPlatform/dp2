@@ -404,8 +404,9 @@ namespace dp2Circulation
             }
             catch (FileLoadException ex)
             {
-                if (DetectVirus.DetectXXX() == true)
+                if (DetectVirus.DetectXXX(out string debug_info) == true)
                 {
+                    WriteErrorLog($"DetectXXX() debug_info: {debug_info}");
                     MessageBox.Show($"dp2Circulation (内务)受到 {DetectVirus.ViruName} 软件干扰而无法启动。请关闭或者卸载 {DetectVirus.ViruName} 软件然后再重新启动 dp2Circulation (内务)");
                     throw ex;
                 }
@@ -507,7 +508,7 @@ namespace dp2Circulation
                     this.MenuItem_displayPalmprintDialog.Text = "指纹窗";
 #endif
 
-                OpenBackgroundForm();
+                // OpenBackgroundForm();
 
                 InitialFixedPanel();
             }
@@ -619,9 +620,10 @@ Stack:
                 // && ApplicationDeployment.IsNetworkDeployed
                 )
             {
-                if (DetectVirus.DetectXXX() == true)
+                if (DetectVirus.DetectXXX(out string debug_info) == true)
                 {
-                    Program.PromptAndExit(this, "dp2Circulation (内务)受到 360 软件干扰而无法启动 [文件" + strFontFilePath + "不存在]。请关闭或者卸载 360 软件然后再重新启动 dp2Circulation (内务)");
+                    WriteErrorLog($"DetectXXX() debug_info: {debug_info}");
+                    Program.PromptAndExit(this, $"dp2Circulation (内务)受到 {DetectVirus.ViruName} 软件干扰而无法启动 [文件 {strFontFilePath} 不存在]。请关闭或者卸载 {DetectVirus.ViruName} 软件然后再重新启动 dp2Circulation (内务)");
                     return;
                 }
             }
@@ -857,6 +859,16 @@ Stack:
         }
 
         CancellationTokenSource _cancel = new CancellationTokenSource();
+
+        public CancellationToken CancelToken
+        {
+            get
+            {
+                if (_cancel == null)
+                    return default;
+                return _cancel.Token;
+            }
+        }
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
@@ -3240,9 +3252,10 @@ false);
             {
                 if (StringUtil.IsInList("clientscanvirus", channel.Rights) == true)
                 {
-                    if (DetectVirus.DetectXXX() == true || DetectVirus.DetectGuanjia() == true)
+                    if (DetectVirus.DetectXXX(out string debug_info) == true || DetectVirus.DetectGuanjia(out debug_info) == true)
                     {
                         channel.Close();
+                        WriteErrorLog($"DetectXXX() 或 DetectGuanjia() debug_info: {debug_info}");
                         Program.PromptAndExit(this, "dp2Circulation 被木马软件干扰，无法启动。");
                         throw new InterruptException("dp2Circulation 被木马软件干扰，无法启动。");
                     }

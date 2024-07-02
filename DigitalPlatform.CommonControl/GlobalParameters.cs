@@ -15,8 +15,8 @@ namespace DigitalPlatform.CommonControl
     {
         // 2020/7/11
         // 修改过的浏览行颜色
-        public static Color ChangedBackColor = SystemColors.Info;
-        public static Color ChangedForeColor = SystemColors.InfoText;
+        public static Color ChangedBackColor = Color.FromArgb(215, 215, 0);    // SystemColors.Info;
+        public static Color ChangedForeColor = Color.FromArgb(0, 0, 0);    // SystemColors.InfoText;
 
     }
 }

@@ -36,6 +36,7 @@ using DigitalPlatform.Drawing;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Core;
 using DigitalPlatform.RFID;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace dp2Circulation
 {
@@ -115,6 +116,8 @@ namespace dp2Circulation
         {
             if (ApplicationDeployment.IsNetworkDeployed)
             {
+                OpenBackgroundForm();
+
                 this.DisplayBackgroundTextLn("开始自动更新(ClickOnce安装)");
                 ApplicationDeployment deployment = ApplicationDeployment.CurrentDeployment;
                 deployment.CheckForUpdateCompleted -= new CheckForUpdateCompletedEventHandler(ad_CheckForUpdateCompleted);
@@ -160,6 +163,13 @@ namespace dp2Circulation
 
         void ad_CheckForUpdateCompleted(object sender, CheckForUpdateCompletedEventArgs e)
         {
+            // 2024/6/24
+            // 延时关闭背景窗
+            _ = Task.Run(async () => {
+                await Task.Delay(TimeSpan.FromSeconds(30), CancelToken);
+                CloseBackgroundForm();
+            });
+
             if (e.Error != null)
             {
                 this.DisplayBackgroundTextLn("ERROR: Could not retrieve new version of the application. Reason: \r\n" + e.Error.Message + "\r\nPlease report this error to the system administrator.");
@@ -209,6 +219,7 @@ namespace dp2Circulation
 
             _updateState = UpdateState.Update;
 
+            OpenBackgroundForm();
             try
             {
                 deployment.UpdateAsync();
@@ -229,6 +240,13 @@ namespace dp2Circulation
 
         void ad_UpdateCompleted(object sender, AsyncCompletedEventArgs e)
         {
+            // 2024/6/24
+            // 延时关闭背景窗
+            _ = Task.Run(async () => {
+                await Task.Delay(TimeSpan.FromSeconds(30), CancelToken);
+                CloseBackgroundForm();
+            });
+
             _updateState = UpdateState.Finish;
 
             if (e.Cancelled)
@@ -1470,103 +1488,104 @@ MessageBoxDefaultButton.Button1);
 
             this.SetMenuItemState();
 
-            LinkStopToBackgroundForm(true);
-
-            // TODO: 是否每次重新启动 dp2circulation 都自动清除一次缓存？
-            // cfgcache
-            Debug.Assert(string.IsNullOrEmpty(this.UserDir) == false, "");
-            // 2015/10/3 改在 UserDir 下
-            nRet = cfgCache.Load(Path.Combine(this.UserDir, "cfgcache.xml"),    // this.DataDir
-                out strError);
-            if (nRet == -1)
-            {
-                if (IsFirstRun == false)
-                    MessageBox.Show(strError + "\r\n\r\n程序稍后会尝试自动创建这个文件");
-            }
-
-            cfgCache.TempDir = Path.Combine(this.UserDir, "cfgcache");  // this.DataDir
-            cfgCache.InstantSave = true;
-
-            // 2013/4/12
-            // 清除以前残余的文件
-            cfgCache.Upgrade();
-
-            if (this.AppInfo != null)
-            {
-                // 消除上次程序意外终止时遗留的短期保存密码
-                bool bSavePasswordLong =
-        AppInfo.GetBoolean(
-        "default_account",
-        "savepassword_long",
-        false);
-
-                if (bSavePasswordLong == false)
-                {
-                    AppInfo.SetString(
-                        "default_account",
-                        "password",
-                        "");
-                }
-            }
-
-            // 第一次复制绿色版本
-            _ = Task.Factory.StartNew(
-                () =>
-                {
-                    CopyGreen();
-                },
-    this._cancel.Token,
-    TaskCreationOptions.LongRunning,
-    TaskScheduler.Default);
-            // _ = Task.Factory.StartNew(() => CopyGreen());
-
-            StartPrepareNames(true, true);
-
-            if (this.MdiClient != null)
-                this.MdiClient.ClientSizeChanged += new EventHandler(MdiClient_ClientSizeChanged);
-
-            // GuiUtil.RegisterIE9DocMode();
-
-            // 迁移统计方案文件
-            MigrateProjectDirectory();
-
-            CopyJavascriptDirectories();
-
-            MigratePrintTemplatesDirectory();
-
-            #region 脚本支持
-            ScriptManager.applicationInfo = this.AppInfo;
-            // ScriptManager.CfgFilePath = Path.Combine(this.DataDir, "mainform_statis_projects.xml");
-            // ScriptManager.DataDir = this.DataDir;
-            ScriptManager.CfgFilePath = Path.Combine(this.UserDir, "mainform_statis_projects.xml");
-            ScriptManager.DataDir = this.UserDir;
-
-            ScriptManager.CreateDefaultContent -= new CreateDefaultContentEventHandler(scriptManager_CreateDefaultContent);
-            ScriptManager.CreateDefaultContent += new CreateDefaultContentEventHandler(scriptManager_CreateDefaultContent);
-
+            OpenBackgroundForm();   // 2024/6/19
             try
             {
-                ScriptManager.Load();
-            }
-            catch (FileNotFoundException)
-            {
-                // 不必报错 2009/2/4 
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
-            }
-            #endregion
+                // TODO: 是否每次重新启动 dp2circulation 都自动清除一次缓存？
+                // cfgcache
+                Debug.Assert(string.IsNullOrEmpty(this.UserDir) == false, "");
+                // 2015/10/3 改在 UserDir 下
+                nRet = cfgCache.Load(Path.Combine(this.UserDir, "cfgcache.xml"),    // this.DataDir
+                    out strError);
+                if (nRet == -1)
+                {
+                    if (IsFirstRun == false)
+                        MessageBox.Show(strError + "\r\n\r\n程序稍后会尝试自动创建这个文件");
+                }
 
-            if (this.qrRecognitionControl1 != null)
-            {
-                this.qrRecognitionControl1.Catched += new DigitalPlatform.Drawing.CatchedEventHandler(qrRecognitionControl1_Catched);
-                this.qrRecognitionControl1.CurrentCamera = AppInfo.GetString(
-                    "mainform",
-                    "current_camera",
-                    "");
-                this.qrRecognitionControl1.EndCatch();  // 一开始的时候并不打开摄像头 2013/5/25
-            }
+                cfgCache.TempDir = Path.Combine(this.UserDir, "cfgcache");  // this.DataDir
+                cfgCache.InstantSave = true;
+
+                // 2013/4/12
+                // 清除以前残余的文件
+                cfgCache.Upgrade();
+
+                if (this.AppInfo != null)
+                {
+                    // 消除上次程序意外终止时遗留的短期保存密码
+                    bool bSavePasswordLong =
+            AppInfo.GetBoolean(
+            "default_account",
+            "savepassword_long",
+            false);
+
+                    if (bSavePasswordLong == false)
+                    {
+                        AppInfo.SetString(
+                            "default_account",
+                            "password",
+                            "");
+                    }
+                }
+
+                // 第一次复制绿色版本
+                _ = Task.Factory.StartNew(
+                    () =>
+                    {
+                        CopyGreen();
+                    },
+        this._cancel.Token,
+        TaskCreationOptions.LongRunning,
+        TaskScheduler.Default);
+                // _ = Task.Factory.StartNew(() => CopyGreen());
+
+                StartPrepareNames(true, true);
+
+                if (this.MdiClient != null)
+                    this.MdiClient.ClientSizeChanged += new EventHandler(MdiClient_ClientSizeChanged);
+
+                // GuiUtil.RegisterIE9DocMode();
+
+                // 迁移统计方案文件
+                MigrateProjectDirectory();
+
+                CopyJavascriptDirectories();
+
+                MigratePrintTemplatesDirectory();
+
+                #region 脚本支持
+                ScriptManager.applicationInfo = this.AppInfo;
+                // ScriptManager.CfgFilePath = Path.Combine(this.DataDir, "mainform_statis_projects.xml");
+                // ScriptManager.DataDir = this.DataDir;
+                ScriptManager.CfgFilePath = Path.Combine(this.UserDir, "mainform_statis_projects.xml");
+                ScriptManager.DataDir = this.UserDir;
+
+                ScriptManager.CreateDefaultContent -= new CreateDefaultContentEventHandler(scriptManager_CreateDefaultContent);
+                ScriptManager.CreateDefaultContent += new CreateDefaultContentEventHandler(scriptManager_CreateDefaultContent);
+
+                try
+                {
+                    ScriptManager.Load();
+                }
+                catch (FileNotFoundException)
+                {
+                    // 不必报错 2009/2/4 
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
+                }
+                #endregion
+
+                if (this.qrRecognitionControl1 != null)
+                {
+                    this.qrRecognitionControl1.Catched += new DigitalPlatform.Drawing.CatchedEventHandler(qrRecognitionControl1_Catched);
+                    this.qrRecognitionControl1.CurrentCamera = AppInfo.GetString(
+                        "mainform",
+                        "current_camera",
+                        "");
+                    this.qrRecognitionControl1.EndCatch();  // 一开始的时候并不打开摄像头 2013/5/25
+                }
 
 #if GCAT_SERVER
             this.m_strPinyinGcatID = this.AppInfo.GetString("entity_form", "gcat_pinyin_api_id", "");
@@ -1598,47 +1617,53 @@ MessageBoxDefaultButton.Button1);
                 }
             }
 #endif
-            if (CopyDefaultCfgFiles(out strError) == false)
-            {
-                // Application.Exit();
-                Program.PromptAndExit(this, strError);
-                return;
-            }
+                if (CopyDefaultCfgFiles(out strError) == false)
+                {
+                    // Application.Exit();
+                    Program.PromptAndExit(this, strError);
+                    return;
+                }
 
-            // this.PropertyTaskList.MainForm = this;
-            this.PropertyTaskList.BeginThread();
+                // this.PropertyTaskList.MainForm = this;
+                this.PropertyTaskList.BeginThread();
 
-            StartOrStopRfidManager();
+                StartOrStopRfidManager();
 
 #if NEWFINGER
-            // 2022/6/7
-            // 迁移以前的 fingerprintReaderUrl 到 palmprintReaderUrl
-            if (string.IsNullOrEmpty(this.PalmprintReaderUrl))
-            {
-                var old_url = this.AppInfo.GetString("fingerprint",
-                    "fingerPrintReaderUrl",
-                    "");
-                if (string.IsNullOrEmpty(old_url) == false)
+                // 2022/6/7
+                // 迁移以前的 fingerprintReaderUrl 到 palmprintReaderUrl
+                if (string.IsNullOrEmpty(this.PalmprintReaderUrl))
                 {
-                    this.AppInfo.SetString("palmprint",
-                    "palmPrintReaderUrl",
-                    old_url);
-                    this.AppInfo.SetString("fingerprint",
-                    "fingerPrintReaderUrl",
-                    "");
+                    var old_url = this.AppInfo.GetString("fingerprint",
+                        "fingerPrintReaderUrl",
+                        "");
+                    if (string.IsNullOrEmpty(old_url) == false)
+                    {
+                        this.AppInfo.SetString("palmprint",
+                        "palmPrintReaderUrl",
+                        old_url);
+                        this.AppInfo.SetString("fingerprint",
+                        "fingerPrintReaderUrl",
+                        "");
+                    }
                 }
-            }
 #endif
 
-            // 2020/1/3
-            _ = StartOrStopPalmManagerAsync();
+                // 2020/1/3
+                _ = StartOrStopPalmManagerAsync();
 
-            // 2019/9/13
-            StartProcessManager();
+                // 2019/9/13
+                StartProcessManager();
 
-            // 2021/3/13
-            // 启动后台日志统计线程
-            StartStatisLogWorker(_cancel.Token);
+                // 2021/3/13
+                // 启动后台日志统计线程
+                StartStatisLogWorker(_cancel.Token);
+
+            }
+            finally
+            {
+                CloseBackgroundForm();
+            }
         }
 
         #region RFID
@@ -2434,30 +2459,47 @@ MessageBoxDefaultButton.Button1);
 
         #region Background Form
 
+        int _backgroundOpenCount = 0;
+
         void OpenBackgroundForm()
         {
-            if (this.m_backgroundForm != null)
-                return;
-
-            // 获得MdiClient窗口
+            _backgroundOpenCount++;
+            if (_backgroundOpenCount == 1)
             {
-                Type t = typeof(Form);
-                PropertyInfo pi = t.GetProperty("MdiClient", BindingFlags.Instance | BindingFlags.NonPublic);
-                this.MdiClient = (MdiClient)pi.GetValue(this, null);
-                this.MdiClient.SizeChanged += new EventHandler(MdiClient_SizeChanged);
+                if (this.m_backgroundForm != null)
+                    return;
 
-                m_backgroundForm = new BackgroundForm();
-                m_backgroundForm.MdiParent = this;
-                m_backgroundForm.Dock = DockStyle.Fill;
+                // 获得MdiClient窗口
+                {
+                    Type t = typeof(Form);
+                    PropertyInfo pi = t.GetProperty("MdiClient", BindingFlags.Instance | BindingFlags.NonPublic);
+                    this.MdiClient = (MdiClient)pi.GetValue(this, null);
+                    this.MdiClient.SizeChanged -= new EventHandler(MdiClient_SizeChanged);
+                    this.MdiClient.SizeChanged += new EventHandler(MdiClient_SizeChanged);
 
-                m_backgroundForm.Show();
+                    this.TryInvoke(() =>
+                    {
+                        m_backgroundForm = new BackgroundForm();
+                        m_backgroundForm.MdiParent = this;
+                        m_backgroundForm.Dock = DockStyle.Fill;
+                        m_backgroundForm.Show();
+                    });
+                }
+
+                this.TryInvoke(() =>
+                {
+                    ClearBackground();
+                });
+
+                LinkStopToBackgroundForm(true);
             }
-
-            ClearBackground();
         }
 
         void ClearBackground()
         {
+            if (m_backgroundForm == null)
+                return;
+
             Debug.Assert(string.IsNullOrEmpty(this.DataDir) == false, "");
             {
                 string strCssUrl = PathUtil.MergePath(this.DataDir, "background.css");
@@ -2510,17 +2552,31 @@ MessageBoxDefaultButton.Button1);
 
         void MdiClient_SizeChanged(object sender, EventArgs e)
         {
-            m_backgroundForm.Size = new System.Drawing.Size(this.MdiClient.ClientSize.Width, this.MdiClient.ClientSize.Height);
+            if (m_backgroundForm != null)
+                m_backgroundForm.Size = new System.Drawing.Size(this.MdiClient.ClientSize.Width, this.MdiClient.ClientSize.Height);
         }
 
         void CloseBackgroundForm()
         {
-            if (this.m_backgroundForm != null)
+            _backgroundOpenCount--;
+            if (_backgroundOpenCount == 0)
             {
-                // TODO: 最好有个淡出的功能
-                this.MdiClient.SizeChanged -= new EventHandler(MdiClient_SizeChanged);
-                this.m_backgroundForm.Close();
-                this.m_backgroundForm = null;
+                if (this.m_backgroundForm != null)
+                {
+                    LinkStopToBackgroundForm(false);
+
+                    // TODO: 最好有个淡出的功能
+                    this.MdiClient.SizeChanged -= new EventHandler(MdiClient_SizeChanged);
+                    this.TryInvoke(() =>
+                    {
+                        /*
+                        this.m_backgroundForm.MdiParent = null;
+                        this.m_backgroundForm.Dock = DockStyle.None;
+                        */
+                        this.m_backgroundForm.Close();
+                    });
+                    this.m_backgroundForm = null;
+                }
             }
         }
 
@@ -2791,7 +2847,7 @@ TaskScheduler.Default);
             }
 
             var looping = Looping(null);
-
+            OpenBackgroundForm();   // 2024/6/19
             try
             {
                 string strError = "";
@@ -3285,6 +3341,7 @@ TaskScheduler.Default);
                     // _ = Task.Factory.StartNew(() => CopyGreen());
                 }
 
+                // 注意此函数中会用到背景窗口
                 BeginUpdateClickOnceApplication();    // 自动探测更新 dp2circulation
 
                 BeginUpdateGreenApplication(); // 自动进行绿色更新
@@ -3313,8 +3370,7 @@ TaskScheduler.Default);
                     //this.m_backgroundForm = null;
                 }
 #endif
-                // CloseBackgroundForm();
-                LinkStopToBackgroundForm(false);
+                CloseBackgroundForm();  // 2024/6/19
             }
 
 
@@ -5931,10 +5987,10 @@ out strError);
         {
             get
             {
-                string password =AppInfo.GetString(
+                string password = AppInfo.GetString(
 "ucsUpload",
 "password",
-""); 
+"");
                 return Program.MainForm.DecryptPasssword(password);
             }
         }

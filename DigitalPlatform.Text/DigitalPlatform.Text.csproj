@@ -168,6 +168,7 @@
     <Compile Include="ParamList.cs" />
     <Compile Include="PriceUtil.cs" />
     <Compile Include="QuickList.cs" />
+    <Compile Include="RomanToNumber.cs" />
     <Compile Include="SectionPropertyString.cs" />
     <Compile Include="ShortGuid.cs" />
     <Compile Include="StringUtil.cs" />

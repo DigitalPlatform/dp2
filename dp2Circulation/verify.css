@@ -21,6 +21,8 @@ A:hover {
     border-left-width: 4px;
     border-color: Gray;
     border-style: solid;
+    margin-top: 2px;
+    margin-bottom: 2px;
 }
 
     .line.begin {
@@ -36,7 +38,7 @@ A:hover {
     }
 
     .line.info {
-        background-color: #ffff99;
+        background-color: #ffffff;
         color: Black;
     }
 

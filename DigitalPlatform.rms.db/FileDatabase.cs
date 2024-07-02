@@ -122,7 +122,8 @@ namespace DigitalPlatform.rms
         //		0   成功
         // 线: 安全的
         // 为什么要做加锁:因为DeleteDir(),seed
-        public override int InitialPhysicalDatabase(out string strError)
+        public override int InitialPhysicalDatabase(
+            out string strError)
         {
             strError = "";
             //************对数据库加写锁*********

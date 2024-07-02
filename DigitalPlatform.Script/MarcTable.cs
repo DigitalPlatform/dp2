@@ -1756,6 +1756,38 @@ namespace DigitalPlatform.Marc
                 }
             }
 
+            // 载体形态项
+            // 300 字段
+            // 5: Material description area(e.g., number of pages in a book or number of CDs issued as a unit)
+            if (StringUtil.IsInList("areas,material_description_area", strStyle))
+            {
+                fields = record.select("field[@name='300']");
+                if (fields.count > 0)
+                    results.Add(new NameValueLine("载体形态项", BuildFields(fields), "material_description_area"));
+            }
+
+            // 丛编项
+            // 6: Series area
+            // 440 字段
+            if (StringUtil.IsInList("areas,series_area", strStyle))
+            {
+                fields = record.select("field[@name='440']");
+                if (fields.count > 0)
+                    results.Add(new NameValueLine("丛编项", BuildFields(fields), "series_area"));
+            }
+
+
+            // 获得方式
+            // 8: resource_identifier_area
+            // 8: Resource identifier and terms of availability area(e.g., ISBN, ISSN)
+            // 020
+            if (StringUtil.IsInList("areas,resource_identifier_area", strStyle))
+            {
+                fields = record.select("field[@name='020']");
+                if (fields.count > 0)
+                    results.Add(new NameValueLine("获得方式项", BuildFields(fields), "resource_identifier_area"));
+            }
+
             // Related names
             fields = record.select("field[@name='700' or @name='710' or @name='711']");
             if (fields.count > 0)

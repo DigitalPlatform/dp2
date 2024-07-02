@@ -623,6 +623,7 @@ string style = null)
             if (this.UseLooping == true)
             {
                 this._loopingHost.StopManager.DeleteGroup(this.GetGroupName());
+                this._loopingHost.GroupName = ""; // 2024/7/1
             }
 
             // 原来

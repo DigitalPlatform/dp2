@@ -139,7 +139,7 @@ namespace TestDp2Library
         public void test_ParseBandwidth_02()
         {
             var source = "5K";
-            long correct = 5*1024;
+            long correct = 5 * 1024;
 
             var result = LibraryServerUtil.ParseBandwidth(source);
             Assert.AreEqual(correct, result);
@@ -179,5 +179,120 @@ namespace TestDp2Library
             {
             }
         }
+
+        // 2024/6/28
+        [TestMethod]
+        public void test_romanToNumber_01()
+        {
+            // MCMXCIV --> 1994
+            var ret = RomanToNumber.RomanToInt("MCMXCIV");
+            Assert.AreEqual(1994, ret);
+        }
+
+        // 2024/6/28
+        [TestMethod]
+        public void test_romanToNumber_02()
+        {
+            int ret = RomanToNumber.RomanToInt("I");
+            Assert.AreEqual(1, ret);
+
+            ret = RomanToNumber.RomanToInt("II");
+            Assert.AreEqual(2, ret);
+
+            ret = RomanToNumber.RomanToInt("III");
+            Assert.AreEqual(3, ret);
+
+            ret = RomanToNumber.RomanToInt("IV");
+            Assert.AreEqual(4, ret);
+
+            ret = RomanToNumber.RomanToInt("V");
+            Assert.AreEqual(5, ret);
+
+            ret = RomanToNumber.RomanToInt("VI");
+            Assert.AreEqual(6, ret);
+
+            ret = RomanToNumber.RomanToInt("VII");
+            Assert.AreEqual(7, ret);
+
+            ret = RomanToNumber.RomanToInt("VIII");
+            Assert.AreEqual(8, ret);
+
+            ret = RomanToNumber.RomanToInt("VIIII");
+            Assert.AreEqual(9, ret);
+
+            ret = RomanToNumber.RomanToInt("IX");
+            Assert.AreEqual(9, ret);
+
+            ret = RomanToNumber.RomanToInt("X");
+            Assert.AreEqual(10, ret);
+
+            ret = RomanToNumber.RomanToInt("XI");
+            Assert.AreEqual(11, ret);
+
+            ret = RomanToNumber.RomanToInt("XII");
+            Assert.AreEqual(12, ret);
+        }
+
+        [TestMethod]
+        public void test_romanToNumber_10()
+        {
+            {
+                string source = "MCMXCIV, 其余部分";
+                string target = "1994, 其余部分";
+
+                var ret = RomanToNumber.ReplaceRomanDigitToNumber(source);
+                Assert.AreEqual(target, ret);
+            }
+
+            {
+                string source = "前导MCMXCIV, 其余部分";
+                string target = "前导1994, 其余部分";
+
+                var ret = RomanToNumber.ReplaceRomanDigitToNumber(source);
+                Assert.AreEqual(target, ret);
+            }
+
+            {
+                string source = "前导MCMXCIV";
+                string target = "前导1994";
+
+                var ret = RomanToNumber.ReplaceRomanDigitToNumber(source);
+                Assert.AreEqual(target, ret);
+            }
+
+            {
+                string source = "MCMXCIV";
+                string target = "1994";
+
+                var ret = RomanToNumber.ReplaceRomanDigitToNumber(source);
+                Assert.AreEqual(target, ret);
+            }
+
+            {
+                string source = "前导mcmxciv, 其余部分";
+                string target = "前导1994, 其余部分";
+
+                var ret = RomanToNumber.ReplaceRomanDigitToNumber(source);
+                Assert.AreEqual(target, ret);
+            }
+
+            {
+                string source = "前导viII, 其余部分";
+                string target = "前导6II, 其余部分";
+
+                var ret = RomanToNumber.ReplaceRomanDigitToNumber(source);
+                Assert.AreEqual(target, ret);
+            }
+
+
+            {
+                string source = "没有包含罗马数字";
+                string target = "没有包含罗马数字";
+
+                var ret = RomanToNumber.ReplaceRomanDigitToNumber(source);
+                Assert.AreEqual(target, ret);
+            }
+        }
+
     }
 }

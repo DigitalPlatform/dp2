@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.ResultSet;
+using System.Data.SqlClient;
 
 namespace DigitalPlatform.rms
 {
@@ -825,7 +826,7 @@ namespace DigitalPlatform.rms
                 //调SetIfGreaten()函数，如果本记录号大于尾号,自动推动尾号为最大
                 //这种情况发生在我们给的记录号超过尾号时
                 bool bPushTailNo = false;
-                bPushTailNo = this.AdjustTailNo(Convert.ToInt32(strRealTailNo),
+                bPushTailNo = this.AdjustTailNo(Convert.ToInt64(strRealTailNo),
                     false);
             }
 
@@ -923,7 +924,7 @@ namespace DigitalPlatform.rms
         // parameter:
         //		 nSeed  传入的尾号数
         // 线: 不安全
-        protected void ChangeTailNo(Int64 nSeed)  //设为protected是因为在初始化时被访问
+        protected bool ChangeTailNo(Int64 nSeed)  //设为protected是因为在初始化时被访问
         {
             XmlNode nodeSeed =
                 this.PropertyNode.SelectSingleNode("seed");
@@ -931,10 +932,70 @@ namespace DigitalPlatform.rms
             // 2016/12/10
             if (nodeSeed == null)
                 throw new Exception("服务器配置文件错误,未找到<seed>元素。");
+            if (nodeSeed.InnerText != Convert.ToString(nSeed))  // 2024/6/20
+            {
+                nodeSeed.InnerText = Convert.ToString(nSeed);   // 2012/2/16
+                this.container.Changed = true;
+                return true;
+            }
 
-            nodeSeed.InnerText = Convert.ToString(nSeed);   // 2012/2/16
-            this.container.Changed = true;
+            return false;
         }
+
+        // 重置数据库尾号
+        internal int CompressTailNo(
+            out string strError)
+        {
+            if (this.m_bTailNoVerified == false)
+            {
+                strError = "复位数据库 '" + this.GetCaption("zh") + "' 的最大记录号时出错: 当前数据库处于尾号尚未校验的状态";
+                return -1;
+            }
+
+            //****************对数据库尾号加写锁***********
+            this.m_TailNolock.AcquireWriterLock(m_nTimeOut);
+#if DEBUG_LOCK
+			this.container.WriteDebugInfo("TryDecreaseTailNo()，对'" + this.GetCaption("zh-CN") + "'数据库尾号加写锁。");
+#endif
+            try
+            {
+                // return:
+                //		-1  出错
+                //      0   未找到
+                //      1   找到
+                int nRet = this.GetRecordID("-1",
+                    "prev",
+                    out string strRealTailNo,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "复位数据库 '" + this.GetCaption("zh") + "' 的最大记录号时出错: " + strError;
+                    return -1;
+                }
+
+                Int64 nNumber = 0;
+                if (nRet == 1)
+                {
+                    if (Int64.TryParse(strRealTailNo, out nNumber) == false)
+                    {
+                        strError = "复位数据库 '" + this.GetCaption("zh") + "' 的最大记录号时出错: 转换尾号 '' 时出错，号码非法";
+                        return -1;
+                    }
+                }
+
+                ChangeTailNo(nNumber);
+                return 0;
+            }
+            finally
+            {
+                //***************对数据库尾号解写锁************
+                this.m_TailNolock.ReleaseWriterLock();
+#if DEBUG_LOCK
+				this.container.WriteDebugInfo("TryDecreaseTailNo()，对'" + this.GetCaption("zh-CN") + "'数据库尾号解写锁。");
+#endif
+            }
+        }
+
 
         // 有条件地减量数据库记忆的尾号
         // 所谓条件是：strDeletedID 这个号码刚好是当前最尾一个号码
@@ -1012,11 +1073,13 @@ namespace DigitalPlatform.rms
         // 修改完后再降级为读锁
         // parameter:
         //		nID         传入ID
+        //      action      动作。push / reset 之一。分别表示推动尾号，和重设尾号(为当前实际存在的最大记录号)
         //		isExistReaderLock   是否已存在读锁。若已经存在则本函数就不加锁了
         // 线: 安全的
         // return:
         //      是否发生了推动尾号的情况
         protected bool AdjustTailNo(Int64 nID,
+            // string action,
             bool isExistReaderLock)
         {
             bool bTailNoChanged = false;
@@ -1290,7 +1353,8 @@ namespace DigitalPlatform.rms
         //		-1  出错
         //		0   成功
         // 线: 安全的,在派生类里加锁
-        public virtual int InitialPhysicalDatabase(out string strError)
+        public virtual int InitialPhysicalDatabase(
+            out string strError)
         {
             strError = "";
             return 0;
@@ -2020,7 +2084,7 @@ namespace DigitalPlatform.rms
                 }
 
                 return Math.Max(1, nRet);   // 避免返回 0 和没有找到的情况混淆
-                ERROR1:
+            ERROR1:
                 // 2018/10/10
                 if (cols == null || cols.Length == 0)
                 {
@@ -2438,7 +2502,7 @@ namespace DigitalPlatform.rms
                     nRet = keysCfg.BuildKeys(newDom,
                         strID,
                         "zh",//strLang,
-                        // "",//strStyle,
+                             // "",//strStyle,
                         this.KeySize,
                         out newKeys,
                         out strError);
@@ -2478,7 +2542,7 @@ namespace DigitalPlatform.rms
                     nRet = keysCfg.BuildKeys(oldDom,
                         strID,
                         "zh",//strLang,
-                        // "",//strStyle,
+                             // "",//strStyle,
                         this.KeySize,
                         out oldKeys,
                         out strError);

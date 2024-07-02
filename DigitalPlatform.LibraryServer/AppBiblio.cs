@@ -26,6 +26,8 @@ using System.Data.SqlClient;
 using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolTip;
 using MongoDB.Driver.Core.Clusters.ServerSelectors;
+using System.Data;
+using System.Web;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -5778,6 +5780,23 @@ out strError);
 
                 }
 
+                // 处理 998 字段
+                {
+                    // 获得默认的编目规则
+                    nRet = GetDefaultCatalogingRule(strBiblioRecPath,
+    out string default_rule,
+    out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    nRet = LibraryServerUtil.CreateCatalogingRule(
+                        default_rule,
+                        ref strBiblio,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                }
+
                 // return:
                 //      -1  出错
                 //      0   没有命中
@@ -5872,6 +5891,24 @@ out strError);
                         goto ERROR1;
                     if (bChangePartDenied == true && string.IsNullOrEmpty(strError) == false)
                         strDeniedComment += " " + strError;
+
+                    // 处理 998 字段
+                    {
+                        // 获得默认的编目规则
+                        nRet = GetDefaultCatalogingRule(strBiblioRecPath,
+        out string default_rule,
+        out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+
+                        nRet = LibraryServerUtil.CreateCatalogingRule(
+                            default_rule,
+                            ref strBiblio,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                    }
+
                 }
 
                 // 书目记录强制查重(指针对查重空间)
@@ -6072,6 +6109,23 @@ out strError);
                         goto ERROR1;
                     if (bChangePartDenied == true && string.IsNullOrEmpty(strError) == false)
                         strDeniedComment += " " + strError;
+
+                    // 处理 998 字段
+                    {
+                        // 获得默认的编目规则
+                        nRet = GetDefaultCatalogingRule(strBiblioRecPath,
+        out string default_rule,
+        out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+
+                        nRet = LibraryServerUtil.CreateCatalogingRule(
+                            default_rule,
+                            ref strBiblio,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                    }
                 }
 
                 if (bSimulate == false)
@@ -6597,6 +6651,27 @@ out strError);
             if (result.ErrorCode == ErrorCode.NoError)
                 result.ErrorCode = ErrorCode.SystemError;
             return result;
+        }
+
+        // return:
+        //      -1  出错
+        //      0   成功
+        int GetDefaultCatalogingRule(string strBiblioRecPath,
+            out string default_rule,
+            out string strError)
+        {
+            strError = "";
+            default_rule = "";
+
+            var dbName = ResPath.GetDbName(strBiblioRecPath);
+            var prop = GetBiblioDbCfg(dbName);  // GetBiblioRole()
+            if (prop == null)
+            {
+                strError = $"书目库 '{dbName}' 的定义没有找到";
+                return -1;
+            }
+            default_rule = StringUtil.GetParameterByPrefix(prop.Role, "cr");
+            return 0;
         }
 
         // 移除 MARCXML 中的工作用元素和字段
@@ -7963,6 +8038,22 @@ out strError);
                             return result;
                         }
 
+                        // 处理 998 字段
+                        {
+                            // 获得默认的编目规则
+                            nRet = GetDefaultCatalogingRule(strNewBiblioRecPath,
+            out string default_rule,
+            out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+
+                            nRet = LibraryServerUtil.CreateCatalogingRule(
+                                default_rule,
+                                ref strNewBiblio,
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                        }
                         /*
                         // 2011/11/30
                         nRet = this.ReplaceOperation(
@@ -9094,17 +9185,20 @@ out strError);
             return false;
         }
 
-        static string Get997a(string strBiblioXml, out string strError)
+        // parameters:
+        //      crKey   [out] 编目规则键
+        static string Get997a(string strBiblioXml,
+            out string crKey,
+            out string strError)
         {
             strError = "";
+            crKey = "";
 
-            string strMarcSyntax = "";
-            string strMarc = "";
             int nRet = MarcUtil.Xml2Marc(strBiblioXml,
         true,
         "", // this.CurMarcSyntax,
-        out strMarcSyntax,
-        out strMarc,
+        out _,
+        out string strMarc,
         out strError);
             if (nRet == -1)
                 return null;
@@ -9117,8 +9211,42 @@ out strError);
                 return null;
             }
 
+            // return:
+            //      -1  出错
+            //      0   没有找到
+            //      1   找到
+            GetCrKey(record,
+                null,
+                out crKey,
+                out _);
+
             return strKey;
         }
+
+        // 在 MARC 记录中找到编目规则键
+        // parameters:
+        //      rule    编目规则。如果为 null，则从 record 中 998$c 中获得编目规则
+        // return:
+        //      -1  出错
+        //      0   没有找到
+        //      1   找到
+        public static int GetCrKey(MarcRecord record,
+            string rule,
+            out string crKey,
+            out string strError)
+        {
+            strError = "";
+            crKey = "";
+
+            var id = record.select("field[@name='998']/subfield[@name='l']").FirstContent;
+            if (rule == null)
+                rule = record.select("field[@name='998']/subfield[@name='c']").FirstContent;
+            if (string.IsNullOrEmpty(id))
+                return 0;
+            crKey = id + "/" + rule;
+            return 1;
+        }
+
 
         // 对书目或者规范库做强制查重
         // 注：书目库和规范库的名字即便混合起来配置在一个空间内也不怕
@@ -9158,7 +9286,9 @@ out strError);
             if (IsEmptyXml(strBiblioXml))
                 return 0;
 
-            string strKey = Get997a(strBiblioXml, out strError);
+            string strKey = Get997a(strBiblioXml,
+                out string crKey,
+                out strError);
             if (strKey == null)
                 return -1;
             //if (strKey == null)
@@ -9174,6 +9304,68 @@ out strError);
                 return 0;
             }
 
+            RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+            if (channel == null)
+            {
+                strError = "GetChannel() return null";
+                return -1;
+            }
+
+            int nRet1 = 0;
+            List<string> recpaths1 = new List<string>();
+            if (string.IsNullOrEmpty(strKey) == false)
+            {
+                nRet1 = SearchDup(
+        channel,
+        dbnames,
+        strBiblioRecPath,
+        strKey,
+        "ukey",
+        strResultSetName,
+        out recpaths1,
+        out strError);
+                if (nRet1 == -1)
+                    return -1;
+            }
+
+            int nRet2 = 0;
+            if (string.IsNullOrEmpty(crKey) == false)
+            {
+                nRet2 = SearchDup(
+    channel,
+    dbnames,
+    strBiblioRecPath,
+    crKey,
+    "crKey",
+    strResultSetName,
+    out List<string> recpaths2,
+    out strError);
+                if (nRet2 == -1)
+                    return -1;
+                recpaths1.AddRange(recpaths2);
+            }
+
+            if (nRet1 == 0 && nRet2 == 0)
+                return 0;
+
+            if (string.IsNullOrEmpty(crKey) == false)
+            {
+                recpaths1.Sort();
+                StringUtil.RemoveDup(ref recpaths1, true);
+            }
+
+            // 去掉额外需要排除的记录路径
+            if (exclude_recpaths != null)
+            {
+                foreach (string recpath in exclude_recpaths)
+                {
+                    recpaths1.Remove(recpath);
+                }
+            }
+
+            strError = StringUtil.MakePathList(recpaths1);
+            return recpaths1.Count;
+#if REMOVED
             // 构造检索书目库的 XML 检索式
             // return:
             //      -2  没有找到指定风格的检索途径
@@ -9211,16 +9403,6 @@ out strError);
                 return -1;
             }
 
-#if NO
-            long lRet = channel.DoSearch(strQueryXml,
-                strResultSetName,   // "default",
-                "", // strOutputStyle,
-                out strError);
-            if (lRet == -1)
-                return -1;
-            if (lRet == 0)
-                return 0;   // not found
-#endif
             long lRet = channel.DoSearchEx(strQueryXml,
         strResultSetName,   // "default",
         "", // strOutputStyle,
@@ -9270,6 +9452,114 @@ out strError);
             }
 
             strError = StringUtil.MakePathList(recpaths);
+            return recpaths.Count;
+#endif
+        }
+
+        int SearchDup(
+            RmsChannel channel,
+            List<string> dbnames,
+            string strBiblioRecPath,
+            string strKey,
+            string strFromStyle,
+            string strResultSetName,
+            out List<string> recpaths,
+            out string strError)
+        {
+            strError = "";
+            recpaths = new List<string>();
+
+            // 构造检索书目库的 XML 检索式
+            // return:
+            //      -2  没有找到指定风格的检索途径
+            //      -1  出错
+            //      0   没有发现任何书目库定义
+            //      1   成功
+            int nRet = this.BuildSearchBiblioQuery(
+        StringUtil.MakePathList(dbnames),
+        strKey,
+        100,
+        strFromStyle,   // "ukey",
+        "exact",
+        "zh",
+        "", // strSearchStyle,
+        out List<string> dbTypes,
+        out string strQueryXml,
+                out strError);
+            if (nRet == -1 || nRet == 0)
+                return -1;
+            if (nRet == -2)
+            {
+#if NO
+                    result.Value = -1;
+                    result.ErrorInfo = strError;
+                    result.ErrorCode = ErrorCode.FromNotFound;
+                    return result;
+#endif
+                return -1;
+            }
+
+            /*
+            RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+            if (channel == null)
+            {
+                strError = "GetChannel() return null";
+                return -1;
+            }
+            */
+
+            long lRet = channel.DoSearchEx(strQueryXml,
+        strResultSetName,   // "default",
+        "", // strOutputStyle,
+        1000,
+            "zh",
+            "id",
+            out Record[] records,
+            out strError);
+            if (lRet == -1)
+                return -1;
+            if (lRet == 0)
+                return 0;   // not found
+
+            // 如果命中 1 条，则需要提取出来看看是否为 strBiblioRecPath 自己
+            if (lRet == 1)
+            {
+                if (records == null || records.Length < 1)
+                {
+                    strError = "records == null || records.Length < 1";
+                    return -1;
+                }
+                if (records[0].Path == strBiblioRecPath)
+                    return 0;
+            }
+
+            recpaths = new List<string>();
+            foreach (Record record in records)
+            {
+                recpaths.Add(record.Path);
+            }
+
+            // 2018/10/25
+            // 对命中的记录路径进行去重
+            recpaths.Sort();
+            StringUtil.RemoveDup(ref recpaths, true);
+
+            // 去掉查重发起记录的路径
+            recpaths.Remove(strBiblioRecPath);
+
+            /*
+            // 去掉额外需要排除的记录路径
+            if (exclude_recpaths != null)
+            {
+                foreach (string recpath in exclude_recpaths)
+                {
+                    recpaths.Remove(recpath);
+                }
+            }
+
+            strError = StringUtil.MakePathList(recpaths);
+            return recpaths.Count;
+            */
             return recpaths.Count;
         }
 

@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using System.IO;
 using System.Collections;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
@@ -14,8 +15,8 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Core;
-using System.Diagnostics;
 using DigitalPlatform.LibraryServer;
+using System.Data.SqlClient;
 
 namespace DigitalPlatform.CirculationClient
 {
@@ -25,6 +26,9 @@ namespace DigitalPlatform.CirculationClient
     public partial class KernelResTree : System.Windows.Forms.TreeView
     {
         public IApplicationInfo AppInfo = null;
+
+        // MarkDown 转为 HTML 渲染时需要的 CSS 文件全路径
+        public string CssFileName { get; set; }
 
         public event UploadFilesEventHandler UploadFiles = null;
 
@@ -508,11 +512,18 @@ namespace DigitalPlatform.CirculationClient
             ContextMenu contextMenu = new ContextMenu();
             MenuItem menuItem = null;
 
-            menuItem = new MenuItem("编辑配置文件(&E)");
-            menuItem.Click += new System.EventHandler(this.menu_editCfgFile);
-            if (this.SelectedNode == null || this.SelectedNode.ImageIndex != RESTYPE_FILE)
-                menuItem.Enabled = false;
-            contextMenu.MenuItems.Add(menuItem);
+            var selected_node = this.SelectedNode;
+
+            {
+                string text = "";
+                if (selected_node != null && selected_node.ImageIndex == RESTYPE_FILE)
+                    text = selected_node?.Text;
+                menuItem = new MenuItem($"编辑配置文件 {text} (&E)");
+                menuItem.Click += new System.EventHandler(this.menu_editCfgFile);
+                if (this.SelectedNode == null || this.SelectedNode.ImageIndex != RESTYPE_FILE)
+                    menuItem.Enabled = false;
+                contextMenu.MenuItems.Add(menuItem);
+            }
 
             // ---
             menuItem = new MenuItem("-");
@@ -560,6 +571,17 @@ namespace DigitalPlatform.CirculationClient
 
             menuItem = new MenuItem($"在 {GetNodePath(this.SelectedNode)} 下级创建新目录(&N)");
             menuItem.Click += new System.EventHandler(this.menu_newDirectory);
+            if (this.SelectedNode != null
+                && (this.SelectedNode.ImageIndex == RESTYPE_SERVER
+                || this.SelectedNode.ImageIndex == RESTYPE_DB
+                || this.SelectedNode.ImageIndex == RESTYPE_FOLDER))
+                menuItem.Enabled = true;
+            else
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem($"在 {GetNodePath(this.SelectedNode)} 下级创建新文件(&F)");
+            menuItem.Click += new System.EventHandler(this.menu_newFile);
             if (this.SelectedNode != null
                 && (this.SelectedNode.ImageIndex == RESTYPE_SERVER
                 || this.SelectedNode.ImageIndex == RESTYPE_DB
@@ -741,6 +763,124 @@ namespace DigitalPlatform.CirculationClient
 
             if (contextMenu != null)
                 contextMenu.Show(this, new Point(e.X, e.Y));
+        }
+
+        void menu_newFile(object sender, EventArgs e)
+        {
+            string strError = "";
+            if (this.SelectedNode == null)
+            {
+                strError = "尚未选择要在其下级创建新文件的节点";
+                goto ERROR1;
+            }
+
+            var dir_name = InputDlg.GetInput(this,
+                "在下级创建文件",
+                "文件名",
+                "",
+                this.Font);
+            if (dir_name == null)
+                return;
+
+            if (dir_name.StartsWith("/") || dir_name.StartsWith("\\"))
+            {
+                strError = $"文件名 '{dir_name}' 不合法。第一个字符不允许为斜杠";
+                goto ERROR1;
+            }
+
+            LibraryChannel channel = null;
+            TimeSpan old_timeout = new TimeSpan(0);
+
+            channel = this.CallGetChannel(out Looping looping);
+
+            old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 5, 0);
+            try
+            {
+                string strPath = GetNodePath(this.SelectedNode) + "/" + dir_name;
+
+                /*
+                long nRet = channel.WriteRes(
+                    null,
+                    strPath,
+                    null,
+                    0,
+                    null,
+                    null,
+                    "createdir,autocreatedir",
+                    null,
+                    out _,
+                    out _,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                */
+                ConfigInfo info = new ConfigInfo
+                {
+                    MIME = "text",
+                    Content = ""
+                };
+
+                // 编辑配置文件
+                var dlg = EnsureEditCfgDialog(true, this.SelectedNode);
+                dlg.Text = "编辑 " + strPath;
+                dlg.Font = GuiUtil.GetDefaultFont();
+                dlg.ServerUrl = channel.Url;
+                dlg.Content = info.Content;
+                dlg.MIME = info.MIME;
+                dlg.CssFileName = this.CssFileName;
+                // dlg.Path = strPath;
+                dlg.SetPath(strPath);
+                /*
+                if (this.AppInfo != null)
+                    this.AppInfo.LinkFormState(dlg, "CfgFileEditDlg_state");
+                else
+                    dlg.StartPosition = FormStartPosition.CenterScreen;
+                */
+
+                if (KernelCfgFileDialog.IsMarkDownPath(strPath))
+                    dlg.ActivePage = "preview";
+                else
+                    dlg.ActivePage = "content";
+
+                if (dlg.Visible == false)
+                    dlg.Show(this);
+
+#if REMOVED
+                if (dlg.DialogResult == DialogResult.Cancel)
+                    return;
+
+                info.Content = dlg.Content;
+                info.MIME = dlg.MIME;
+
+                int nRet = SaveConfigFile(channel,
+                    strPath,
+                    info,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                this.ConfigFileChanged?.Invoke(this, new ConfigFileChangedEventArgs
+                {
+                    Path = strPath,
+                    Condition = "changed"
+                });
+#endif
+            }
+            finally
+            {
+                channel.Timeout = old_timeout;
+
+                this.CallReturnChannel(channel, looping);
+            }
+
+            /*
+            // 刷新显示
+            this.Fill(this.SelectedNode);
+            */
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
 
         void menu_newDirectory(object sender, EventArgs e)
@@ -1541,6 +1681,99 @@ MessageBoxDefaultButton.Button2);
             return results;
         }
 
+        static KernelCfgFileDialog _editCfgDialog = null;
+        static List<TreeNode> _refreshNodes = new List<TreeNode>();
+
+        KernelCfgFileDialog EnsureEditCfgDialog(bool trigger_save = true,
+            TreeNode delay_refresh_node = null)
+        {
+            if (delay_refresh_node != null)
+                _refreshNodes.Add(delay_refresh_node);
+
+            if (_editCfgDialog == null)
+            {
+                _editCfgDialog = new KernelCfgFileDialog();
+                if (this.AppInfo != null)
+                    this.AppInfo.LinkFormState(_editCfgDialog, "CfgFileEditDlg_state");
+                else
+                    _editCfgDialog.StartPosition = FormStartPosition.CenterScreen;
+
+                _editCfgDialog.SaveConfig += (o, e) =>
+                {
+                    var dlg = o as KernelCfgFileDialog;
+                    if (dlg.Changed == false)
+                        return;
+
+                    var channel = this.CallGetChannel(out Looping looping);
+
+                    var old_timeout = channel.Timeout;
+                    channel.Timeout = new TimeSpan(0, 5, 0);
+                    try
+                    {
+                        ConfigInfo info = new ConfigInfo();
+                        info.Path = dlg.Path;
+                        info.Content = dlg.Content;
+                        info.MIME = dlg.MIME;
+
+                        int nRet = SaveConfigFile(channel,
+                            info.Path,
+                            info,
+                            out string strError);
+                        if (nRet == -1)
+                        {
+                            MessageBox.Show(this, strError);
+                            return;
+                        }
+
+                        // 刷新显示
+                        foreach (var node in _refreshNodes)
+                        {
+                            this.Fill(node);
+                        }
+                        _refreshNodes.Clear();
+
+                        this.ConfigFileChanged?.Invoke(this, new ConfigFileChangedEventArgs
+                        {
+                            Path = info.Path,
+                            Condition = "changed"
+                        });
+                    }
+                    finally
+                    {
+                        channel.Timeout = old_timeout;
+
+                        this.CallReturnChannel(channel, looping);
+                    }
+                };
+                _editCfgDialog.FormClosed += (o, e) =>
+                {
+                    _editCfgDialog = null;
+                };
+            }
+            else
+            {
+                if (trigger_save == true
+                    && _editCfgDialog.Changed == true)
+                {
+                    // TODO: 可以提醒上一个文件尚未保存，是否保存
+                    _editCfgDialog.TriggerSave();
+                }
+            }
+
+            return _editCfgDialog;
+        }
+
+        void CloseEditCfgDialog(bool auto_save)
+        {
+            if (_editCfgDialog != null)
+            {
+                if (auto_save && _editCfgDialog.Changed == true)
+                    _editCfgDialog.TriggerSave();
+                _editCfgDialog.Close();
+                _editCfgDialog = null;
+            }
+        }
+
         // 编辑配置文件
         void menu_editCfgFile(object sender, System.EventArgs e)
         {
@@ -1582,25 +1815,31 @@ MessageBoxDefaultButton.Button2);
                     goto ERROR1;
 
                 // 编辑配置文件
-                KernelCfgFileDialog dlg = new KernelCfgFileDialog();
+                var dlg = EnsureEditCfgDialog();
                 dlg.Text = "编辑 " + strPath;
                 dlg.Font = GuiUtil.GetDefaultFont();
                 dlg.ServerUrl = channel.Url;
-                dlg.Path = strPath;
                 dlg.Content = info.Content;
                 dlg.MIME = info.MIME;
-                if (this.AppInfo != null)
-                    this.AppInfo.LinkFormState(dlg, "CfgFileEditDlg_state");
-                else
-                    dlg.StartPosition = FormStartPosition.CenterScreen;
+                dlg.CssFileName = this.CssFileName;
+                //  dlg.Path = strPath;
+                dlg.SetPath(strPath);
+                /*
+                 if (this.AppInfo != null)
+                     this.AppInfo.LinkFormState(dlg, "CfgFileEditDlg_state");
+                 else
+                     dlg.StartPosition = FormStartPosition.CenterScreen;
+                 */
 
                 if (KernelCfgFileDialog.IsMarkDownPath(strPath))
                     dlg.ActivePage = "preview";
                 else
                     dlg.ActivePage = "content";
 
-                dlg.ShowDialog(this);
+                if (dlg.Visible == false)
+                    dlg.Show(this);
 
+#if REMOVED
                 if (dlg.DialogResult == DialogResult.Cancel)
                     return;
 
@@ -1619,6 +1858,7 @@ MessageBoxDefaultButton.Button2);
                     Path = strPath,
                     Condition = "changed"
                 });
+#endif
             }
             finally
             {
@@ -1933,6 +2173,51 @@ out strError);
                 // ClearChildrenCheck(node);	// 暂时不递归
             }
         }
+
+        TreeNode _prevSelectedNode = null;
+
+        protected override void OnAfterSelect(TreeViewEventArgs e)
+        {
+            base.OnAfterSelect(e);
+
+            if (_editCfgDialog != null
+                && this.SelectedNode != null
+                && this.SelectedNode != _prevSelectedNode
+                && this.SelectedNode.ImageIndex == RESTYPE_FILE)
+            {
+                // TODO: 防范二进制文件内容进入文本编辑器
+                menu_editCfgFile(this, new EventArgs());
+            }
+            else
+            {
+                CloseEditCfgDialog(true);
+            }
+
+            _prevSelectedNode = this.SelectedNode;
+        }
+
+        protected override void OnDoubleClick(EventArgs e)
+        {
+            base.OnDoubleClick(e);
+
+            if (this.SelectedNode != null
+    && this.SelectedNode.ImageIndex == RESTYPE_FILE)
+            {
+                // TODO: 防范二进制文件内容进入文本编辑器
+                menu_editCfgFile(this, new EventArgs());
+            }
+        }
+
+        // 让右鼠标键点取一个 Node 的时候选中它
+        protected override void OnNodeMouseClick(TreeNodeMouseClickEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right
+                && e.Node != null)
+                this.SelectedNode = e.Node;
+
+            base.OnNodeMouseClick(e);
+        }
+
     }
 
     /// <summary>

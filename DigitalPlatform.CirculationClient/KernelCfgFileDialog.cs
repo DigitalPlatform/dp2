@@ -18,6 +18,8 @@ namespace DigitalPlatform.CirculationClient
     /// </summary>
     public partial class KernelCfgFileDialog : Form
     {
+        public string CssFileName { get; set; }
+
         public bool Changed
         {
             get
@@ -34,6 +36,8 @@ namespace DigitalPlatform.CirculationClient
 
         bool _changed = false;
 
+        public event EventHandler SaveConfig = null;
+
         public KernelCfgFileDialog()
         {
             InitializeComponent();
@@ -48,18 +52,35 @@ namespace DigitalPlatform.CirculationClient
 
         private void KernelCfgFileDialog_Load(object sender, EventArgs e)
         {
-            this.Changed = false;
+            SetPath(this.Path);
 
-            if (IsMarkDownPath(this.Path) == false)
+            this.BeginInvoke(new Action(FocusEdit));
+        }
+
+        public void SetPath(string path)
+        {
+            this.Changed = false;
+            this.Path = path;
+
+            if (IsMarkDownPath(path) == false)
             {
-                this.tabControl_main.TabPages.Remove(this.tabPage_preview);
-                ControlExtention.AddFreeControl(_freeControls, this.tabPage_preview);
+                if (this.tabControl_main.TabPages.IndexOf(this.tabPage_preview) != -1)
+                {
+                    this.tabControl_main.TabPages.Remove(this.tabPage_preview);
+                    ControlExtention.AddFreeControl(_freeControls, this.tabPage_preview);
+                }
+            }
+            else
+            {
+                if (this.tabControl_main.TabPages.IndexOf(this.tabPage_preview) == -1)
+                {
+                    this.tabControl_main.TabPages.Add(this.tabPage_preview);
+                    ControlExtention.RemoveFreeControl(_freeControls, this.tabPage_preview);
+                }
             }
 
             // 2022/5/20
-            tabControl_main_SelectedIndexChanged(sender, e);
-
-            this.BeginInvoke(new Action(FocusEdit));
+            tabControl_main_SelectedIndexChanged(this, new EventArgs());
         }
 
         private void KernelCfgFileDialog_FormClosing(object sender, FormClosingEventArgs e)
@@ -86,12 +107,29 @@ namespace DigitalPlatform.CirculationClient
 
         }
 
+        public void TriggerSave()
+        {
+            if (this.SaveConfig != null)
+            {
+                this.SaveConfig?.Invoke(this, new EventArgs());
+                this.Changed = false;
+            }
+        }
+
         private void button_OK_Click(object sender, EventArgs e)
         {
-            this.Changed = false;
+            if (this.SaveConfig != null)
+            {
+                this.SaveConfig?.Invoke(this, new EventArgs());
+                this.Changed = false;
+            }
+            else
+                this.Changed = false;
 
-            this.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.Close();
+            {
+                this.DialogResult = System.Windows.Forms.DialogResult.OK;
+                this.Close();
+            }
         }
 
         private void button_Cancel_Click(object sender, EventArgs e)
@@ -208,11 +246,17 @@ namespace DigitalPlatform.CirculationClient
 
         void RefreshMarkDownPreview()
         {
+            string links = "";
+            if (string.IsNullOrEmpty(this.CssFileName) == false)
+                links = $"<link href='{this.CssFileName}' type='text/css' rel='stylesheet'></link>";
+
             string text = this.textBox_content.Text;
             // Configure the pipeline with all advanced extensions active
-            var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
+            var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions()
+                .UseSoftlineBreakAsHardlineBreak()
+                .Build();
             var html = Markdown.ToHtml(text, pipeline);
-            this.webBrowser1.DocumentText = $"<html><head></head><body>{html}</body></html>";
+            this.webBrowser1.DocumentText = $"<html><head>{links}</head><body>{html}</body></html>";
 
             _previewVersion = _textVersion;
         }

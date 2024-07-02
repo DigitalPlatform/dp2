@@ -265,9 +265,18 @@ namespace dp2Circulation
         {
             this.TryInvoke(() =>
             {
+                bool size_changed = false;
+                FormWindowState old_state = FormWindowState.Normal;
                 // return; // 测试内存泄漏
                 if (Program.MainForm.CurrentPropertyControl != this.tabControl_main)
                 {
+                    if (this.Visible == false)
+                    {
+                        old_state = this.WindowState;
+                        this.WindowState = FormWindowState.Minimized;
+                        this.Show();
+                        size_changed = true;
+                    }
                     Program.MainForm.CurrentPropertyControl = this.tabControl_main;
                     // 防止内存泄漏
                     ControlExtention.AddFreeControl(_freeControls, this.tabControl_main);
@@ -279,6 +288,8 @@ namespace dp2Circulation
 
                 this.Docked = true;
                 this.Visible = false;
+                if (size_changed)
+                    this.WindowState = old_state;
             });
         }
 

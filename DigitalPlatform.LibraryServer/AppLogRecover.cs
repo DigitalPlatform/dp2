@@ -12452,6 +12452,28 @@ out error);
                             if (nRet == -1)
                                 return -1;
                         }
+                        else if (strAction == "compressTailNo")
+                        {
+                            // *** 压缩数据库尾号
+                            var strDatabaseNames = DomUtil.GetElementText(domLog.DocumentElement,
+                                "databaseNames");
+
+                            // return:
+                            //      -1  出错
+                            //      0   没有找到
+                            //      1   成功
+                            nRet = this.CompressTailNo(
+                                temp_sessioninfo,
+                                channel,
+                                strLibraryCode,
+                                strDatabaseNames,
+                                MergeStyle(strStyle, style, "skipOperLog"),
+                                out string strOutputInfo,
+                                out strError);
+                            if (nRet == -1)
+                                return -1;
+                            // 注: CompressTailNo() 中似乎不会改变 this.Changed
+                        }
                         else
                         {
                             strError = "不可识别的strAction值 '" + strAction + "'";

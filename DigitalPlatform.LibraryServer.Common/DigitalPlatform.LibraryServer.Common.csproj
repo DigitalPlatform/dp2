@@ -74,6 +74,7 @@
     <Compile Include="LogRecoverParam.cs" />
     <Compile Include="OperLogFileCache.cs" />
     <Compile Include="OperLogUtility.cs" />
+    <Compile Include="RebuildKeysParam.cs" />
     <Compile Include="ServerDatabaseUtility.cs" />
     <Compile Include="LibraryServerUtil.cs" />
     <Compile Include="LoanParam.cs" />

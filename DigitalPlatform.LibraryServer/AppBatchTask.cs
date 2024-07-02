@@ -527,7 +527,7 @@ out strError);
         {
             Hashtable table = new Hashtable();
             if (string.IsNullOrEmpty(this.Param) == false)
-                table["Param"] = this.Param;
+                table["Param"] = StringUtil.EscapeString(this.Param, ",:"); // 2024/6/27
             if (string.IsNullOrEmpty(this.BreakPoint) == false)
                 table["BreakPoint"] = this.BreakPoint;
             if (string.IsNullOrEmpty(this.Start) == false)
@@ -547,7 +547,7 @@ out strError);
         {
             BatchTaskStartInfo info = new BatchTaskStartInfo();
             Hashtable table = StringUtil.ParseParameters(strText, ',', ':');
-            info.Param = (string)table["Param"];
+            info.Param = StringUtil.UnescapeString((string)table["Param"]); // 2024/6/27
             info.BreakPoint = (string)table["BreakPoint"];
             info.Start = (string)table["Start"];
             info.Count = (string)table["Count"];

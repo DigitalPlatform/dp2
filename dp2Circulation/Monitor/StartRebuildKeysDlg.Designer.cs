@@ -36,13 +36,14 @@
             this.button_OK = new System.Windows.Forms.Button();
             this.comboBox_function = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
+            this.checkBox_quickMode = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // checkBox_startAtServerBreakPoint
             // 
             this.checkBox_startAtServerBreakPoint.AutoSize = true;
             this.checkBox_startAtServerBreakPoint.Location = new System.Drawing.Point(15, 72);
-            this.checkBox_startAtServerBreakPoint.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.checkBox_startAtServerBreakPoint.Margin = new System.Windows.Forms.Padding(4);
             this.checkBox_startAtServerBreakPoint.Name = "checkBox_startAtServerBreakPoint";
             this.checkBox_startAtServerBreakPoint.Size = new System.Drawing.Size(342, 25);
             this.checkBox_startAtServerBreakPoint.TabIndex = 2;
@@ -56,7 +57,7 @@
             this.textBox_dbNameList.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_dbNameList.Location = new System.Drawing.Point(15, 147);
-            this.textBox_dbNameList.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBox_dbNameList.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_dbNameList.Multiline = true;
             this.textBox_dbNameList.Name = "textBox_dbNameList";
             this.textBox_dbNameList.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
@@ -77,8 +78,8 @@
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button_Cancel.Location = new System.Drawing.Point(479, 374);
-            this.button_Cancel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_Cancel.Location = new System.Drawing.Point(479, 435);
+            this.button_Cancel.Margin = new System.Windows.Forms.Padding(4);
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(103, 38);
             this.button_Cancel.TabIndex = 6;
@@ -89,8 +90,8 @@
             // button_OK
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_OK.Location = new System.Drawing.Point(367, 374);
-            this.button_OK.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_OK.Location = new System.Drawing.Point(367, 435);
+            this.button_OK.Margin = new System.Windows.Forms.Padding(4);
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(103, 38);
             this.button_OK.TabIndex = 5;
@@ -123,13 +124,24 @@
             this.label1.TabIndex = 0;
             this.label1.Text = "功能:";
             // 
+            // checkBox_quickMode
+            // 
+            this.checkBox_quickMode.Location = new System.Drawing.Point(15, 327);
+            this.checkBox_quickMode.Margin = new System.Windows.Forms.Padding(4);
+            this.checkBox_quickMode.Name = "checkBox_quickMode";
+            this.checkBox_quickMode.Size = new System.Drawing.Size(560, 72);
+            this.checkBox_quickMode.TabIndex = 7;
+            this.checkBox_quickMode.Text = "快速模式(&Q) \r\n[警告: 处理期间会让 dp2library 服务器暂停服务]";
+            this.checkBox_quickMode.UseVisualStyleBackColor = true;
+            // 
             // StartRebuildKeysDlg
             // 
             this.AcceptButton = this.button_OK;
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
-            this.ClientSize = new System.Drawing.Size(598, 430);
+            this.ClientSize = new System.Drawing.Size(598, 491);
+            this.Controls.Add(this.checkBox_quickMode);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.comboBox_function);
             this.Controls.Add(this.label2);
@@ -138,7 +150,7 @@
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "StartRebuildKeysDlg";
             this.ShowInTaskbar = false;
             this.Text = "启动 重建检索点 任务";
@@ -158,5 +170,6 @@
         private System.Windows.Forms.Button button_OK;
         private System.Windows.Forms.ComboBox comboBox_function;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.CheckBox checkBox_quickMode;
     }
 }

@@ -3972,7 +3972,7 @@ TaskScheduler.Default);
             if (StringUtil.IsInList("skipVirusCheck", this.Function) == false)
             {
                 // 2019/11/27
-                if (DetectVirus.DetectXXX() || DetectVirus.DetectGuanjia())
+                if (DetectVirus.DetectXXX(out _) || DetectVirus.DetectGuanjia(out _))
                     errors.Add("dp2library 被木马软件干扰，无法启动");
             }
 
@@ -5103,6 +5103,12 @@ TaskScheduler.Default);
                     return StringUtil.IsInList("orderWork", cfg.Role);
             }
             return false;
+        }
+
+        // 获得一个书目库的角色字段
+        public string GetBiblioRole(string strBiblioDbName)
+        {
+            return this.ItemDbs.Where(o => o.BiblioDbName == strBiblioDbName).Select(o => o.Role).FirstOrDefault();
         }
 
         // 是否在配置的期库名之列?

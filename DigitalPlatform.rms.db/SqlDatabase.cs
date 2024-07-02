@@ -886,7 +886,8 @@ VerifyFull - Always use SSL. Fail if the host name is not correct.
         //		0   成功
         // 线: 安全的
         // 加写锁的原因，修改记录尾号，另外对SQL的操作不必担心锁
-        public override int InitialPhysicalDatabase(out string strError)
+        public override int InitialPhysicalDatabase(
+            out string strError)
         {
             strError = "";
             int nRet = 0;
@@ -999,6 +1000,7 @@ VerifyFull - Always use SSL. Fail if the host name is not correct.
 
                                 if (IsOracle() || IsPgsql())
                                 {
+                                    // TODO: 只继承 style 中的 records 和 keys
                                     nRet = DropAllTables(
      connection,
      this.m_strSqlDbName,
@@ -1011,6 +1013,7 @@ VerifyFull - Always use SSL. Fail if the host name is not correct.
                                 // 4.建表
                                 nRet = this.GetCreateTablesString(
                                     this.container.SqlServerType,
+                                    // style,
                                     out strCommand,
                                     out strError);
                                 if (nRet == -1)
@@ -1062,7 +1065,6 @@ VerifyFull - Always use SSL. Fail if the host name is not correct.
                     {
                         connection.Close();
                     }
-
                 }
             }
             finally
@@ -1195,7 +1197,7 @@ ex);
                 // 2022/9/2
                 // https://www.tutorialgateway.org/get-table-names-from-sql-server-database/
                 // strCommand = $"use { this.m_strSqlDbName }\n SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES\n use master\n";
-                strCommand = $"use { this.m_strSqlDbName }\n SELECT name FROM sys.objects WHERE type_desc = 'USER_TABLE'\n use master\n";
+                strCommand = $"use {this.m_strSqlDbName}\n SELECT name FROM sys.objects WHERE type_desc = 'USER_TABLE'\n use master\n";
             }
             else if (this.IsSqlite())
             {
@@ -2108,68 +2110,86 @@ ex);
         }
 
         // 得到建表命令字符串
+        // parameters:
+        //      style   风格。
+        //              records 要创建 records 表
+        //              keys 要创建 keys 表
         // return
         //		-1	出错
         //		0	成功
         private int GetCreateTablesString(
             SqlServerType strSqlServerType,
+            // string style,
             out string strCommand,
             out string strError)
         {
             strCommand = "";
             strError = "";
 
+            /*
+            var process_records = StringUtil.IsInList("records", style);
+            var process_keys = StringUtil.IsInList("keys", style);
+            */
+
+            var process_records = true;
+            var process_keys = true;
+
             #region MS SQL Server
             if (strSqlServerType == SqlServerType.MsSqlServer)
             {
+                strCommand = "use " + this.m_strSqlDbName + "\n";
                 // 创建records表
-                strCommand = "use " + this.m_strSqlDbName + "\n"
-                    + $"if exists (select * from {sysobjects} where id = object_id(N'[dbo].[records]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)" + "\n"
-                    + $"drop table [dbo].[records]" + "\n"
-                    + $"CREATE TABLE [dbo].[records]" + "\n"
-                    + "(" + "\n"
-                    + "[id] [nvarchar] (255) NULL UNIQUE," + "\n"
-                    + "[data] [image] NULL ," + "\n"
-                    + "[newdata] [image] NULL ," + "\n"
-                    + "[range] [nvarchar] (4000) NULL," + "\n"
-                    + "[dptimestamp] [nvarchar] (100) NULL ," + "\n"
-                    + "[newdptimestamp] [nvarchar] (100) NULL ," + "\n"   // 2012/1/19
-                    + "[metadata] [nvarchar] (4000) NULL ," + "\n"
-                    + "[filename] [nvarchar] (255) NULL, \n"
-                    + "[newfilename] [nvarchar] (255) NULL\n"
-                    + ") ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]" + "\n" + "\n";
-                // UNIQUE为2008/3/13新加入
-
-                KeysCfg keysCfg = null;
-                int nRet = this.GetKeysCfg(out keysCfg,
-                    out strError);
-                if (nRet == -1)
-                    return -1;
-
-                if (keysCfg != null)
+                if (process_records)
                 {
-                    List<TableInfo> aTableInfo = null;
-                    nRet = keysCfg.GetTableInfosRemoveDup(
-                        out aTableInfo,
+                    strCommand += $"if exists (select * from {sysobjects} where id = object_id(N'[dbo].[records]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)" + "\n"
+                        + $"drop table [dbo].[records]" + "\n"
+                        + $"CREATE TABLE [dbo].[records]" + "\n"
+                        + "(" + "\n"
+                        + "[id] [nvarchar] (255) NULL UNIQUE," + "\n"
+                        + "[data] [image] NULL ," + "\n"
+                        + "[newdata] [image] NULL ," + "\n"
+                        + "[range] [nvarchar] (4000) NULL," + "\n"
+                        + "[dptimestamp] [nvarchar] (100) NULL ," + "\n"
+                        + "[newdptimestamp] [nvarchar] (100) NULL ," + "\n"   // 2012/1/19
+                        + "[metadata] [nvarchar] (4000) NULL ," + "\n"
+                        + "[filename] [nvarchar] (255) NULL, \n"
+                        + "[newfilename] [nvarchar] (255) NULL\n"
+                        + ") ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]" + "\n" + "\n";
+                    // UNIQUE为2008/3/13新加入
+                }
+
+                if (process_keys)
+                {
+                    int nRet = this.GetKeysCfg(out KeysCfg keysCfg,
                         out strError);
                     if (nRet == -1)
                         return -1;
 
-                    // 建检索点表
-                    for (int i = 0; i < aTableInfo.Count; i++)
+                    if (keysCfg != null)
                     {
-                        TableInfo tableInfo = aTableInfo[i];
+                        List<TableInfo> aTableInfo = null;
+                        nRet = keysCfg.GetTableInfosRemoveDup(
+                            out aTableInfo,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
 
-                        strCommand += "\n" +
-                            $"if exists (select * from {sysobjects} where id = object_id(N'[dbo].[{tableInfo.SqlTableName}]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)" + "\n" +
-                            $"drop table [dbo].[" + tableInfo.SqlTableName + "]" + "\n" +
-                            $"CREATE TABLE [dbo].[" + tableInfo.SqlTableName + "]" + "\n" +
-                            "(" + "\n" +
-                            "[keystring] [nvarchar] (" + Convert.ToString(this.KeySize) + ") Null," + "\n" +         //keystring的长度由配置文件定
-                            "[fromstring] [nvarchar] (255) NULL ," + "\n" +
-                            "[idstring] [nvarchar] (255)  NULL ," + "\n" +
-                            "[keystringnum] [bigint] NULL " + "\n" +
-                            ")" + "\n" + "\n";
+                        // 建检索点表
+                        for (int i = 0; i < aTableInfo.Count; i++)
+                        {
+                            TableInfo tableInfo = aTableInfo[i];
+
+                            strCommand += "\n" +
+                                $"if exists (select * from {sysobjects} where id = object_id(N'[dbo].[{tableInfo.SqlTableName}]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)" + "\n" +
+                                $"drop table [dbo].[" + tableInfo.SqlTableName + "]" + "\n" +
+                                $"CREATE TABLE [dbo].[" + tableInfo.SqlTableName + "]" + "\n" +
+                                "(" + "\n" +
+                                "[keystring] [nvarchar] (" + Convert.ToString(this.KeySize) + ") Null," + "\n" +         //keystring的长度由配置文件定
+                                "[fromstring] [nvarchar] (255) NULL ," + "\n" +
+                                "[idstring] [nvarchar] (255)  NULL ," + "\n" +
+                                "[keystringnum] [bigint] NULL " + "\n" +
+                                ")" + "\n" + "\n";
+                        }
                     }
                 }
 
@@ -2182,49 +2202,55 @@ ex);
             else if (strSqlServerType == SqlServerType.SQLite)
             {
                 // 创建records表
-                strCommand = "CREATE TABLE records "
-                    + "(" + " "
-                    + "id nvarchar (255) NULL UNIQUE," + " "
-                    + "range nvarchar (4000) NULL," + " "
-                    + "dptimestamp nvarchar (100) NULL ," + " "
-                    + "newdptimestamp nvarchar (100) NULL ," + " "   // 2012/1/19
-                    + "metadata nvarchar (4000) NULL ," + " "
-                    + "filename nvarchar (255) NULL,  "
-                    + "newfilename nvarchar (255) NULL "
-                    + ") ; ";
-
-                KeysCfg keysCfg = null;
-                int nRet = this.GetKeysCfg(out keysCfg,
-                    out strError);
-                if (nRet == -1)
-                    return -1;
-
-                if (keysCfg != null)
+                if (process_records)
                 {
-                    List<TableInfo> aTableInfo = null;
-                    nRet = keysCfg.GetTableInfosRemoveDup(
-                        out aTableInfo,
+                    strCommand += "CREATE TABLE records "
+                        + "(" + " "
+                        + "id nvarchar (255) NULL UNIQUE," + " "
+                        + "range nvarchar (4000) NULL," + " "
+                        + "dptimestamp nvarchar (100) NULL ," + " "
+                        + "newdptimestamp nvarchar (100) NULL ," + " "   // 2012/1/19
+                        + "metadata nvarchar (4000) NULL ," + " "
+                        + "filename nvarchar (255) NULL,  "
+                        + "newfilename nvarchar (255) NULL "
+                        + ") ; ";
+                }
+
+
+                if (process_keys)
+                {
+                    int nRet = this.GetKeysCfg(out KeysCfg keysCfg,
                         out strError);
                     if (nRet == -1)
                         return -1;
 
-
-                    // 建检索点表
-                    for (int i = 0; i < aTableInfo.Count; i++)
+                    if (keysCfg != null)
                     {
-                        TableInfo tableInfo = aTableInfo[i];
+                        List<TableInfo> aTableInfo = null;
+                        nRet = keysCfg.GetTableInfosRemoveDup(
+                            out aTableInfo,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
 
-                        strCommand += " " +
-                            "CREATE TABLE " + tableInfo.SqlTableName + " " +
-                            "(" + " " +
-                            "keystring nvarchar (" + Convert.ToString(this.KeySize) + ") NULL," + " " +         //keystring的长度由配置文件定
-                            "fromstring nvarchar (255) NULL ," + " " +
-                            "idstring nvarchar (255)  NULL ," + " " +
-                            "keystringnum bigint NULL " + " " +
-                            ")" + " ; ";
+
+                        // 建检索点表
+                        for (int i = 0; i < aTableInfo.Count; i++)
+                        {
+                            TableInfo tableInfo = aTableInfo[i];
+
+                            strCommand += " " +
+                                "DROP TABLE if exists " + tableInfo.SqlTableName + " ;\n" + // 2024/6/27 增加
+                                "CREATE TABLE " + tableInfo.SqlTableName + " " +
+                                "(" + " " +
+                                "keystring nvarchar (" + Convert.ToString(this.KeySize) + ") NULL," + " " +         //keystring的长度由配置文件定
+                                "fromstring nvarchar (255) NULL ," + " " +
+                                "idstring nvarchar (255)  NULL ," + " " +
+                                "keystringnum bigint NULL " + " " +
+                                ")" + " ; ";
+                        }
                     }
                 }
-
                 return 0;
             }
             #endregion // SQLite
@@ -2235,48 +2261,53 @@ ex);
                 string strCharset = ""; // " CHARACTER SET utf8mb4 "; // COLLATE utf8_bin ";
 
                 // 创建records表
-                strCommand = // "use `" + this.m_strSqlDbName + "` ;\n" +
-                    $"DROP TABLE IF EXISTS {db_prefix}records" + " ;\n"
-                    + $"CREATE TABLE {db_prefix}records" + " \n"
-                    + "(" + "\n"
-                    + "id varchar (255) " + strCharset + " NULL UNIQUE," + "\n"
-                    + "`range` varchar (4000) " + strCharset + " NULL," + "\n"
-                    + "dptimestamp varchar (100) " + strCharset + " NULL ," + "\n"
-                    + "newdptimestamp varchar (100) " + strCharset + " NULL ," + "\n"
-                    + "metadata varchar (4000) " + strCharset + " NULL ," + "\n"
-                    + "filename varchar (255) " + strCharset + " NULL, \n"
-                    + "newfilename varchar (255) " + strCharset + " NULL\n"
-                    + ") ;\n";
-
-                KeysCfg keysCfg = null;
-                int nRet = this.GetKeysCfg(out keysCfg,
-                    out strError);
-                if (nRet == -1)
-                    return -1;
-
-                if (keysCfg != null)
+                if (process_records)
                 {
-                    List<TableInfo> aTableInfo = null;
-                    nRet = keysCfg.GetTableInfosRemoveDup(
-                        out aTableInfo,
+                    strCommand += // "use `" + this.m_strSqlDbName + "` ;\n" +
+                        $"DROP TABLE IF EXISTS {db_prefix}records" + " ;\n"
+                        + $"CREATE TABLE {db_prefix}records" + " \n"
+                        + "(" + "\n"
+                        + "id varchar (255) " + strCharset + " NULL UNIQUE," + "\n"
+                        + "`range` varchar (4000) " + strCharset + " NULL," + "\n"
+                        + "dptimestamp varchar (100) " + strCharset + " NULL ," + "\n"
+                        + "newdptimestamp varchar (100) " + strCharset + " NULL ," + "\n"
+                        + "metadata varchar (4000) " + strCharset + " NULL ," + "\n"
+                        + "filename varchar (255) " + strCharset + " NULL, \n"
+                        + "newfilename varchar (255) " + strCharset + " NULL\n"
+                        + ") ;\n";
+                }
+
+                if (process_keys)
+                {
+                    int nRet = this.GetKeysCfg(out KeysCfg keysCfg,
                         out strError);
                     if (nRet == -1)
                         return -1;
 
-                    // 建检索点表
-                    for (int i = 0; i < aTableInfo.Count; i++)
+                    if (keysCfg != null)
                     {
-                        TableInfo tableInfo = aTableInfo[i];
+                        List<TableInfo> aTableInfo = null;
+                        nRet = keysCfg.GetTableInfosRemoveDup(
+                            out aTableInfo,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
 
-                        strCommand += "\n" +
-                            $"DROP TABLE IF EXISTS {db_prefix}{tableInfo.SqlTableName} ;\n" +
-                            $"CREATE TABLE {db_prefix}{tableInfo.SqlTableName}\n" +
-                            "(" + "\n" +
-                            "keystring varchar (" + Convert.ToString(this.KeySize) + ") " + strCharset + " NULL," + "\n" +         //keystring的长度由配置文件定
-                            "fromstring varchar (255) " + strCharset + " NULL ," + "\n" +
-                            "idstring varchar (255) " + strCharset + " NULL ," + "\n" +
-                            "keystringnum bigint NULL " + "\n" +
-                            ")" + " ;\n";
+                        // 建检索点表
+                        for (int i = 0; i < aTableInfo.Count; i++)
+                        {
+                            TableInfo tableInfo = aTableInfo[i];
+
+                            strCommand += "\n" +
+                                $"DROP TABLE IF EXISTS {db_prefix}{tableInfo.SqlTableName} ;\n" +
+                                $"CREATE TABLE {db_prefix}{tableInfo.SqlTableName}\n" +
+                                "(" + "\n" +
+                                "keystring varchar (" + Convert.ToString(this.KeySize) + ") " + strCharset + " NULL," + "\n" +         //keystring的长度由配置文件定
+                                "fromstring varchar (255) " + strCharset + " NULL ," + "\n" +
+                                "idstring varchar (255) " + strCharset + " NULL ," + "\n" +
+                                "keystringnum bigint NULL " + "\n" +
+                                ")" + " ;\n";
+                        }
                     }
                 }
                 return 0;
@@ -2287,16 +2318,19 @@ ex);
             else if (strSqlServerType == SqlServerType.Oracle)
             {
                 // 创建records表
-                strCommand = $"CREATE TABLE {db_prefix}records " + "\n"
-                    + "(" + "\n"
-                    + "id nvarchar2 (255) NULL UNIQUE," + "\n"
-                    + "range nvarchar2 (2000) NULL," + "\n"
-                    + "dptimestamp nvarchar2 (100) NULL ," + "\n"
-                    + "newdptimestamp nvarchar2 (100) NULL ," + "\n"
-                    + "metadata nvarchar2 (2000) NULL ," + "\n"
-                    + "filename nvarchar2 (255) NULL, \n"
-                    + "newfilename nvarchar2 (255) NULL\n"
-                    + ") \n";
+                if (process_records)
+                {
+                    strCommand += $"CREATE TABLE {db_prefix}records " + "\n"
+                        + "(" + "\n"
+                        + "id nvarchar2 (255) NULL UNIQUE," + "\n"
+                        + "range nvarchar2 (2000) NULL," + "\n"
+                        + "dptimestamp nvarchar2 (100) NULL ," + "\n"
+                        + "newdptimestamp nvarchar2 (100) NULL ," + "\n"
+                        + "metadata nvarchar2 (2000) NULL ," + "\n"
+                        + "filename nvarchar2 (255) NULL, \n"
+                        + "newfilename nvarchar2 (255) NULL\n"
+                        + ") \n";
+                }
 
                 /*
                 string strTemp = this.m_strSqlDbName + "_" + "_records";
@@ -2307,51 +2341,54 @@ ex);
                 }
                 */
 
-                KeysCfg keysCfg = null;
-                int nRet = this.GetKeysCfg(out keysCfg,
-                    out strError);
-                if (nRet == -1)
-                    return -1;
-
-                if (keysCfg != null)
+                if (process_keys)
                 {
-                    List<TableInfo> aTableInfo = null;
-                    nRet = keysCfg.GetTableInfosRemoveDup(
-                        out aTableInfo,
+                    int nRet = this.GetKeysCfg(out KeysCfg keysCfg,
                         out strError);
                     if (nRet == -1)
                         return -1;
 
-                    // 建检索点表
-                    for (int i = 0; i < aTableInfo.Count; i++)
+                    if (keysCfg != null)
                     {
-                        TableInfo tableInfo = aTableInfo[i];
-
-                        if (string.IsNullOrEmpty(strCommand) == false)
-                            strCommand += " ; ";
-
-                        // TODO 要防止keys表名和records撞车
-
-                        /*
-                        strTemp = this.m_strSqlDbName + "_" + tableInfo.SqlTableName;
-                        if (strTemp.Length > 30)
-                        {
-                            strError = "表名字 '" + strTemp + "' 的字符数超过 30。请使用更短的 SQL 数据库名。";
+                        List<TableInfo> aTableInfo = null;
+                        nRet = keysCfg.GetTableInfosRemoveDup(
+                            out aTableInfo,
+                            out strError);
+                        if (nRet == -1)
                             return -1;
+
+                        // 建检索点表
+                        for (int i = 0; i < aTableInfo.Count; i++)
+                        {
+                            TableInfo tableInfo = aTableInfo[i];
+
+                            if (string.IsNullOrEmpty(strCommand) == false)
+                                strCommand += " ; ";
+
+                            // TODO 要防止keys表名和records撞车
+
+                            /*
+                            strTemp = this.m_strSqlDbName + "_" + tableInfo.SqlTableName;
+                            if (strTemp.Length > 30)
+                            {
+                                strError = "表名字 '" + strTemp + "' 的字符数超过 30。请使用更短的 SQL 数据库名。";
+                                return -1;
+                            }
+                            */
+
+                            // int16 number(5)
+                            // int32 number(10)
+                            // int64 number(19)
+
+                            // TODO: 增加 if ... drop
+                            strCommand += $" CREATE TABLE {db_prefix}{tableInfo.SqlTableName} " + "\n" +
+                                "(" + "\n" +
+                                "keystring nvarchar2 (" + Convert.ToString(this.KeySize) + ") NULL," + "\n" +
+                                "fromstring nvarchar2 (255) NULL ," + "\n" +
+                                "idstring nvarchar2 (255)  NULL ," + "\n" +
+                                "keystringnum NUMBER(19) NULL " + "\n" +  //
+                                ")" + " \n";
                         }
-                        */
-
-                        // int16 number(5)
-                        // int32 number(10)
-                        // int64 number(19)
-
-                        strCommand += $" CREATE TABLE {db_prefix}{tableInfo.SqlTableName} " + "\n" +
-                            "(" + "\n" +
-                            "keystring nvarchar2 (" + Convert.ToString(this.KeySize) + ") NULL," + "\n" +
-                            "fromstring nvarchar2 (255) NULL ," + "\n" +
-                            "idstring nvarchar2 (255)  NULL ," + "\n" +
-                            "keystringnum NUMBER(19) NULL " + "\n" +  //
-                            ")" + " \n";
                     }
                 }
                 return 0;
@@ -2362,58 +2399,63 @@ ex);
             else if (strSqlServerType == SqlServerType.Pgsql)
             {
                 // 创建records表
-                strCommand =
-                    $"DROP TABLE IF EXISTS {db_prefix}records ;\n"
-                    + $"CREATE TABLE {db_prefix}records " + "\n"
-                    + "(" + "\n"
-                    + "id varchar (255) NULL UNIQUE," + "\n"
-                    + "data bytea NULL ," + "\n"
-                    + "newdata bytea NULL ," + "\n"
-                    + "range varchar (2000) NULL," + "\n"
-                    + "dptimestamp varchar (100) NULL ," + "\n"
-                    + "newdptimestamp varchar (100) NULL ," + "\n"
-                    + "metadata varchar (2000) NULL ," + "\n"
-                    + "filename varchar (255) NULL, \n"
-                    + "newfilename varchar (255) NULL\n"
-                    + ") ;\n";
-                // https://www.cybertec-postgresql.com/en/binary-data-performance-in-postgresql/
-                strCommand += $"ALTER TABLE {db_prefix}records ALTER COLUMN data SET STORAGE EXTERNAL;\n";
-                strCommand += $"ALTER TABLE {db_prefix}records ALTER COLUMN newdata SET STORAGE EXTERNAL;\n";
-                strCommand += $"ALTER TABLE {db_prefix}records SET (toast.autovacuum_enabled = true);\n";
-
-                KeysCfg keysCfg = null;
-                int nRet = this.GetKeysCfg(out keysCfg,
-                    out strError);
-                if (nRet == -1)
-                    return -1;
-
-                if (keysCfg != null)
+                if (process_records)
                 {
-                    nRet = keysCfg.GetTableInfosRemoveDup(
-                        out List<TableInfo> aTableInfo,
+                    strCommand +=
+                        $"DROP TABLE IF EXISTS {db_prefix}records ;\n"
+                        + $"CREATE TABLE {db_prefix}records " + "\n"
+                        + "(" + "\n"
+                        + "id varchar (255) NULL UNIQUE," + "\n"
+                        + "data bytea NULL ," + "\n"
+                        + "newdata bytea NULL ," + "\n"
+                        + "range varchar (2000) NULL," + "\n"
+                        + "dptimestamp varchar (100) NULL ," + "\n"
+                        + "newdptimestamp varchar (100) NULL ," + "\n"
+                        + "metadata varchar (2000) NULL ," + "\n"
+                        + "filename varchar (255) NULL, \n"
+                        + "newfilename varchar (255) NULL\n"
+                        + ") ;\n";
+                    // https://www.cybertec-postgresql.com/en/binary-data-performance-in-postgresql/
+                    strCommand += $"ALTER TABLE {db_prefix}records ALTER COLUMN data SET STORAGE EXTERNAL;\n";
+                    strCommand += $"ALTER TABLE {db_prefix}records ALTER COLUMN newdata SET STORAGE EXTERNAL;\n";
+                    strCommand += $"ALTER TABLE {db_prefix}records SET (toast.autovacuum_enabled = true);\n";
+                }
+
+                if (process_keys)
+                {
+                    int nRet = this.GetKeysCfg(out KeysCfg keysCfg,
                         out strError);
                     if (nRet == -1)
                         return -1;
 
-                    // 建检索点表
-                    for (int i = 0; i < aTableInfo.Count; i++)
+                    if (keysCfg != null)
                     {
-                        TableInfo tableInfo = aTableInfo[i];
+                        nRet = keysCfg.GetTableInfosRemoveDup(
+                            out List<TableInfo> aTableInfo,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
 
-                        if (string.IsNullOrEmpty(strCommand) == false)
-                            strCommand += " ; ";
+                        // 建检索点表
+                        for (int i = 0; i < aTableInfo.Count; i++)
+                        {
+                            TableInfo tableInfo = aTableInfo[i];
 
-                        // TODO 要防止keys表名和records撞车
+                            if (string.IsNullOrEmpty(strCommand) == false)
+                                strCommand += " ; ";
 
-                        strCommand +=
-                            $"DROP TABLE IF EXISTS {db_prefix}{tableInfo.SqlTableName} ;\n"
-                            + $" CREATE TABLE {db_prefix}{tableInfo.SqlTableName} " + "\n" +
-                            "(" + "\n" +
-                            "keystring varchar (" + Convert.ToString(this.KeySize) + ") NULL," + "\n" +
-                            "fromstring varchar (255) NULL ," + "\n" +
-                            "idstring varchar (255)  NULL ," + "\n" +
-                            "keystringnum bigint NULL " + "\n" +
-                            ")" + " \n";
+                            // TODO 要防止keys表名和records撞车
+
+                            strCommand +=
+                                $"DROP TABLE IF EXISTS {db_prefix}{tableInfo.SqlTableName} ;\n"
+                                + $" CREATE TABLE {db_prefix}{tableInfo.SqlTableName} " + "\n" +
+                                "(" + "\n" +
+                                "keystring varchar (" + Convert.ToString(this.KeySize) + ") NULL," + "\n" +
+                                "fromstring varchar (255) NULL ," + "\n" +
+                                "idstring varchar (255)  NULL ," + "\n" +
+                                "keystringnum bigint NULL " + "\n" +
+                                ")" + " \n";
+                        }
                     }
                 }
                 return 0;
@@ -10210,6 +10252,16 @@ handle.CancelTokenSource.Token).Result;
                         byte[] baPreamble = null;
                         strOldXml = DatabaseUtil.ByteArrayToString(baOldData,
                             out baPreamble);
+                    }
+                }
+                else
+                {
+                    // 2024/6/24
+                    strOldXml = info.record?.Xml;
+                    if (string.IsNullOrEmpty(strOldXml))
+                    {
+                        strError = "info.row_info 为空时, info.record.Xml 不应为空";
+                        return -1;
                     }
                 }
 
@@ -18839,7 +18891,7 @@ handle.CancelTokenSource.Token).Result;
                 strError = "connection为null";
                 return -1;
             }
-#region MS SQL Server
+            #region MS SQL Server
             if (connection.SqlServerType == SqlServerType.MsSqlServer)
             {
                 if (connection.SqlConnection == null)
@@ -18854,9 +18906,9 @@ handle.CancelTokenSource.Token).Result;
                 }
                 return 0;
             }
-#endregion // MS SQL Server
+            #endregion // MS SQL Server
 
-#region SQLite
+            #region SQLite
             if (connection.SqlServerType == SqlServerType.SQLite)
             {
                 if (connection.SQLiteConnection == null)
@@ -18871,9 +18923,9 @@ handle.CancelTokenSource.Token).Result;
                 }
                 return 0;
             }
-#endregion // SQLite
+            #endregion // SQLite
 
-#region MySql
+            #region MySql
             if (connection.SqlServerType == SqlServerType.MySql)
             {
                 if (connection.MySqlConnection == null)
@@ -18888,9 +18940,9 @@ handle.CancelTokenSource.Token).Result;
                 }
                 return 0;
             }
-#endregion // MySql
+            #endregion // MySql
 
-#region Oracle
+            #region Oracle
             if (connection.SqlServerType == SqlServerType.Oracle)
             {
                 if (connection.OracleConnection == null)
@@ -18906,7 +18958,7 @@ handle.CancelTokenSource.Token).Result;
                 }
                 return 0;
             }
-#endregion // Oracle
+            #endregion // Oracle
 
             return 0;
         }
@@ -21612,6 +21664,8 @@ handle.CancelTokenSource.Token).Result;
         //      strStyle    next prev outputpath forcedeleteoldkeys
         //                  forcedeleteoldkeys 表示是否要在创建新 keys 前强制依据 record id 删除一次本记录有关的全部旧有的 keys? 如果为包含，则强制删除原有的keys；如果为不包含，则试探着创建新的keys，如果有旧的keys和新打算创建的keys重合，那就不重复创建；如果旧的keys有残余没有被删除，也不管它们了
         //                          包含 一般用在单条记录的处理；不包含 一般用在预先删除了所有keys表的内容行以后在循环重建库中每条记录的批处理方式
+        //                  注: strStyle 中包含 next，表示先根据 strRecordID 找到相邻的下一条记录，实际上处理的是这个下一条记录。然后 strOutputID 中返回这下一条记录的 ID。注意函数返回值是针对下一条记录的。比如一上来寻找下一条记录，如果记录不存在，就返回 -4 了，此时下一条记录并没有来得及处理重建检索点
+        //                  TODO: 将来可以考虑增加一种，先处理当前 ID 的记录，然后返回前顺便找一下下一条记录的 ID 返回到 strOutputID 的功能和相应的 strStyle 子参数。可以命名为 return_next 和 return_prev。此时函数返回值是对应于当前 ID 的处理过程的。比如 -4 表示当前 ID 的记录找不到。而如果在处理结束时遇到寻找下一条记录不存在，则 strOutputID 中返回空即可
         //		strError        out参数,返回出错信息
         // return:
         //		-1  一般性错误
@@ -21632,7 +21686,23 @@ handle.CancelTokenSource.Token).Result;
                 this.FastMode = true;
             bool bFastMode = StringUtil.IsInList("fastmode", strStyle) || this.FastMode;
 
+            // 2024/6/24
+            bool bRebuildKeys = StringUtil.IsInList("rebuildkeys", strStyle);
+            bool bDeleteKeys = StringUtil.IsInList("deletekeys", strStyle);
+
+            // 注： rebuildkeys表示本函数的主要功能是重建检索点。
+            // 如果和 deletekeys 配套使用，则表示对每条记录重建的当时，就删除了已经存在的旧有检索点
+            // 如果不配套 deletekeys，那么应当是在整个批处理前，全部删除 keys 表内容，使得本次重建检索点过程中不必再考虑逐条删除旧有检索点了，只需要创建就行
+            // 如果配套 fastmode 使用，表示需要创建的 keys 延迟创建，最后 Bulkcopy 进入 keys 表。
+            // 如果配套了 fastmode，并且没有预先删除全部 keys，则应当保持 keys 表的 B+ 树索引，这样才能让逐条删除旧有 keys 变得可行。不过，在 Bulkcopy 前仍需要注意删除 B+ 树索引，完成后重新创建
+
             strRecordID = DbPath.GetID10(strRecordID);
+
+            if (bRebuildKeys == true && strRecordID == "-1")
+            {
+                strError = "不允许用不确定的记录ID来重建检索点";
+                return -1;
+            }
 
             //********对数据库加读锁*********************
             m_db_lock.AcquireReaderLock(m_nTimeOut);
@@ -21663,7 +21733,6 @@ handle.CancelTokenSource.Token).Result;
                     if (StringUtil.IsInList("prev", strStyle) == true
                         || StringUtil.IsInList("next", strStyle) == true)
                     {
-                        string strTempOutputID = "";
                         // return:
                         //		-1  出错
                         //      0   未找到
@@ -21671,7 +21740,7 @@ handle.CancelTokenSource.Token).Result;
                         nRet = this.GetRecordID(connection,
                             strRecordID,
                             strStyle,
-                            out strTempOutputID,
+                            out string strTempOutputID,
                             out strError);
                         if (nRet == -1)
                             return -1;
@@ -21729,6 +21798,33 @@ handle.CancelTokenSource.Token).Result;
                         {
                             if (nRet <= -1)
                                 return nRet;
+                        }
+
+                        // 仅重建检索点
+                        if (bRebuildKeys == true)
+                        {
+                            if (bFastMode == false && bDeleteKeys == false)
+                            {
+                                strError = "RebuildRecordKeys() 执行 rebuildkeys 功能时， 如果 style 中不包含 fastmode，则必须包含 deletekeys";
+                                return -1;
+                            }
+                            var info = new WriteInfo
+                            {
+                                ID = strRecordID,
+                                record = new RecordBody { Xml = strXml }
+                            };
+
+                            // 更新 Keys
+                            nRet = RebuildKeysRows(
+                                connection,
+                                bDeleteKeys,
+                                bFastMode,
+                                new List<WriteInfo> { info },
+                                // out temp,
+                                out strError);
+                            if (nRet == -1)
+                                return -1;
+                            return nRet;
                         }
 
                         XmlDocument newDom = null;

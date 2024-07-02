@@ -30,10 +30,9 @@ namespace dp2Circulation
          * */
 
         /// <summary>
-        /// 是否为期刊模式? 
-        /// 如果为true，只列出有下属期库的书目库名；否则只列出没有下属期库的书目库名 
+        /// 期刊、图书筛选 
         /// </summary>
-        public bool SeriesMode = false; // 2008/12/29
+        public string SeriesMode = "series,book";
 
         /// <summary>
         /// MARC 具体格式。"unimarc"和"usmarc"之一
@@ -130,17 +129,14 @@ namespace dp2Circulation
                             continue;
                     }
 
-                    // 2008/12/29
-                    if (this.SeriesMode == true)
-                    {
-                        if (String.IsNullOrEmpty(prop.IssueDbName) == true)
-                            continue;
-                    }
-                    else
-                    {
-                        if (String.IsNullOrEmpty(prop.IssueDbName) == false)
-                            continue;
-                    }
+                    // 2024/6/20
+                    if (String.IsNullOrEmpty(prop.IssueDbName) == true
+                        && StringUtil.IsInList("book", this.SeriesMode) == false)
+                        continue;
+
+                    if (String.IsNullOrEmpty(prop.IssueDbName) == false
+                        && StringUtil.IsInList("series", this.SeriesMode) == false)
+                        continue;
 
                     string strDbName = prop.DbName;
 
@@ -160,7 +156,7 @@ namespace dp2Circulation
 
 
 
-                        ListViewItem item = new ListViewItem();
+                    ListViewItem item = new ListViewItem();
                     ListViewUtil.ChangeItemText(item, 0, strDbName);
                     if (string.IsNullOrEmpty(cr) == false)
                         ListViewUtil.ChangeItemText(item, 1, cr);

@@ -478,3 +478,25 @@ https://learn.microsoft.com/en-us/dotnet/fundamentals/networking/http/httpclient
 
 https://josef.codes/you-are-probably-still-using-httpclient-wrong-and-it-is-destabilizing-your-software/
 
+~~~
+书目查询窗的浏览列表中应允许选择两条记录进行右侧固定面板区对照显示。
+可以用于查重的记录之间的比对观察。
+另外可以选定两条记录，上下文菜单打开一个对照窗口进行显示。
+
+可以选定多条记录，分别都装入一个新开的种册窗。不过，要限制最多条数，避免
+内存爆掉。
+
+~~~
+系统管理窗“内核”属性页修改了一个 .cs 脚本以后，书目查询窗这里的格式转换
+和校验功能似乎还是在使用以前 cache 的旧 .cs 脚本的内容。
+
+~~~
+书目查询窗编写利用 997 查重的 MarcQuery 脚本。成熟后可以上升为一次开发
+功能。初步设想，是可以一边查重，一边留下发生了重复的浏览行，没有发生重复的
+浏览行就自动移除了。
+
+~~~
+https://khalidabuhakmeh.com/how-to-write-a-dotnet-markdig-extension-for-markdown-processing
+
+https://xoofx.github.io/blog/2016/06/13/implementing-a-markdown-processor-for-dotnet/
+

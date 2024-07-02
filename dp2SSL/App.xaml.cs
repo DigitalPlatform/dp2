@@ -181,7 +181,7 @@ namespace dp2SSL
             if (CheckRunType() == false)
                 return;
 
-            if (DetectVirus.DetectXXX() || DetectVirus.DetectGuanjia())
+            if (DetectVirus.DetectXXX(out _) || DetectVirus.DetectGuanjia(out _))
             {
                 StartErrorBox("dp2SSL 被木马软件干扰，无法启动");
                 System.Windows.Application.Current.Shutdown();

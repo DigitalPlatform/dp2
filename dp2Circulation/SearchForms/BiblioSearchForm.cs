@@ -32,6 +32,8 @@ using DigitalPlatform.Z3950.UI;
 using DigitalPlatform.Z3950;
 using static dp2Circulation.Order.ExportExcelFile;
 using static DigitalPlatform.Marc.MarcUtil;
+using dp2Circulation.SearchForms;
+using System.Data;
 
 namespace dp2Circulation
 {
@@ -3784,10 +3786,24 @@ bQuickLoad);
                 subMenuItem = new MenuItem("-");
                 menuItem.MenuItems.Add(subMenuItem);
 
+                /*
                 subMenuItem = new MenuItem("删除书目记录 [" + this.listView_records.SelectedItems.Count.ToString() + "] (&D)");
                 subMenuItem.Click += new System.EventHandler(this.menu_deleteSelectedRecords_Click);
                 if (this.listView_records.SelectedItems.Count == 0
                     || this.InSearching == true)
+                    subMenuItem.Enabled = false;
+                menuItem.MenuItems.Add(subMenuItem);
+                */
+                string text = "";
+                if (this.listView_records.SelectedItems.Count > 0)
+                    text = "删除书目记录 [" + this.listView_records.SelectedItems.Count.ToString() + "] (&D)";
+                else
+                    text = "整库删除书目记录 (&E) ...";
+
+
+                subMenuItem = new MenuItem(text);
+                subMenuItem.Click += new System.EventHandler(this.menu_deleteBiblioRecords_Click);
+                if (this.InSearching == true)
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
             }
@@ -4288,7 +4304,7 @@ bQuickLoad);
                 // 转换前的源记录的编目规则
                 string sourceCatalogingRule = "";
 
-                string catalogingRule = "";
+                // string targetCatalogingRule = "";
                 if (rules.Count > 0)
                 {
                     // 探测一条 MARC 记录的编目规则
@@ -4299,7 +4315,7 @@ bQuickLoad);
                     nRet = DetectCatalogingRule(
                         strBiblioRecPath,
                         record,
-                        out catalogingRule,
+                        out sourceCatalogingRule,
                         out error);
                     if (nRet == -1)
                     {
@@ -4316,9 +4332,38 @@ bQuickLoad);
 
                         // _errors.Add($"无法获得书目记录的编目规则，因而无法进行 MARC 格式{operation}");
                         // goto END1;
+
+                        // convert 时，根据目标编目规则(和可用的编目规则)推定源头编目规则
+                        if (operation == "convert")
+                        {
+                            var temp = new List<string>(rules);
+                            temp.Remove(targetCatalogingRule);
+                            if (temp.Count == 1)
+                                sourceCatalogingRule = temp[0];
+                            else
+                            {
+                                // 弹出对话框让操作者选择一个原本的编目规则
+                                // return:
+                                //      -1  出错
+                                //      0   放弃选择
+                                //      1   已经选择
+                                nRet = BiblioSearchForm.SelectCatalogingRule(
+                                    $"(请指定记录 '{Global.GetDbName(strBiblioRecPath)}') 原本的编目规则",
+                                    "编目规则:",
+                                    rules,
+                                    false,
+                                    out sourceCatalogingRule,
+                                    out strError);
+                                if (nRet == -1 || nRet == 0)
+                                {
+                                    errors.Add($"选择原本编目规则时出错: {strError}");
+                                    goto END1;
+                                }
+                            }
+                        }
                     }
 
-                    sourceCatalogingRule = catalogingRule;
+                    // sourceCatalogingRule = catalogingRule;
                 }
 
                 // 找到当前编目规则以外的其它规则，这些规则正是可选的转换目标规则
@@ -4332,14 +4377,14 @@ bQuickLoad);
                             return -2;
                         }
 
-                        catalogingRule = targetCatalogingRule;
+                        // catalogingRule = targetCatalogingRule;
                         // TODO: 注意核实目标编目规则是否允许写入所选的目标库
                     }
                     else
                     {
-                        rules.Remove(catalogingRule);
+                        rules.Remove(sourceCatalogingRule);
                         if (rules.Count == 1)
-                            catalogingRule = rules[0];
+                            targetCatalogingRule = rules[0];
                         else if (rules.Count == 0)
                         {
                             // TODO: 要测试验证一下，其实 "" 触发转换并成功也是可能的？
@@ -4362,25 +4407,20 @@ bQuickLoad);
                                 "编目规则:",
                                 rules,
                                 true,
-                                out catalogingRule,
+                                out targetCatalogingRule,
                                 out strError);
                             if (nRet == -1 || nRet == 0)
                                 return -1;  // TODO: 弹出一个对话框可以选择跳过这一条处理继续后面的处理，还是全部中断
-#if REMOVED
-                        // 只好人工选择编目规则
-                        catalogingRule = ListDialog.GetInput(Program.MainForm,
-                            $"(针对 '{Global.GetDbName(strBiblioRecPath)}')转换为何种编目规则?",
-                            "编目规则:",
-                            actions,
-                            -1);
-                        if (catalogingRule == null)
-                        {
-                            strError = $"放弃从集合 '{StringUtil.MakePathList(actions, ",")}' 中选择转换目标编目规则";
-                            return -1;
-                        }
-#endif
                         }
                     }
+                }
+
+                // 检查 verify 情况下的 targetCataloginRule
+                if (operation == "verify")
+                {
+                    // 2024/7/1
+                    if (string.IsNullOrEmpty(targetCatalogingRule))
+                        targetCatalogingRule = sourceCatalogingRule;
                 }
 
                 // *** 转换前，对源 MARC 记录进行一些必要的增补修改
@@ -4420,13 +4460,13 @@ bQuickLoad);
     strBiblioRecPath,
     record.Text,
     operation, // "verify",
-    catalogingRule,
+    targetCatalogingRule,
     null,
     out VerifyHost hostObj,
     out error);
                 if (nRet == -1)
                 {
-                    errors.Add($"{operation} MARC 格式时出错({catalogingRule}): {error}");
+                    errors.Add($"{operation} MARC 格式时出错({targetCatalogingRule}): {error}");
                     goto END1;
                 }
 
@@ -4436,7 +4476,7 @@ bQuickLoad);
                 {
                     if (string.IsNullOrEmpty(hostObj.VerifyResult.ChangedMarc) == true)
                     {
-                        BiblioSearchForm.SetCatalogingRule(record, catalogingRule);
+                        BiblioSearchForm.SetCatalogingRule(record, targetCatalogingRule);
                         /*
                         // 为新记录内容添加 998$l
                         var link_id = BiblioSearchForm.EnsureCatalogingRuleLinkID(record,
@@ -4467,7 +4507,7 @@ bQuickLoad);
                     else
                     {
                         MarcRecord temp = new MarcRecord(hostObj.VerifyResult.ChangedMarc);
-                        BiblioSearchForm.SetCatalogingRule(temp, catalogingRule);
+                        BiblioSearchForm.SetCatalogingRule(temp, targetCatalogingRule);
                         hostObj.VerifyResult.ChangedMarc = temp.Text;
                     }
                 }
@@ -4493,7 +4533,7 @@ bQuickLoad);
                     if (hostObj.VerifyResult.Errors?.Count > 0)
                         verify_result_text = VerifyError.BuildTextLines(hostObj.VerifyResult.Errors);  // 经过校验发现问题
                     else
-                        verify_result_text = "经过校验没有发现任何错误。";
+                        verify_result_text = operation == "verify" ? "经过校验没有发现任何错误。" : "格式转换完成。";
                 }
                 else
                 {
@@ -5097,6 +5137,7 @@ out strError);
                     }
 
                     List<string> errors = new List<string>();
+                    // List<VerifyError> errors = new List<VerifyError>();
 
                     // 校验 XML 记录中是否有非法字符
                     string strReplaced = DomUtil.ReplaceControlCharsButCrLf(strXml, '*');
@@ -5160,7 +5201,7 @@ out strError);
                         var dlg = new GetConvertTargetDbNameDlg();
                         MainForm.SetControlFont(dlg, this.Font, false);
                         dlg.AutoFinish = true;
-                        dlg.SeriesMode = (string.IsNullOrEmpty(prop?.IssueDbName) == false);
+                        dlg.SeriesMode = (string.IsNullOrEmpty(prop?.IssueDbName) == false) ? "series" : "book";
                         // dlg.DbName = this.BiblioDbName;
                         // 根据当前所在的库的marc syntax限制一下目标库的范围
                         dlg.MarcSyntax = strCurSyntax;
@@ -5202,7 +5243,9 @@ out strError);
                         out string strNewXml,
                         out strError);
                     if (nRet == -1 || nRet == 1)
+                    {
                         errors.AddRange(StringUtil.SplitList(strError, "\r\n"));
+                    }
                     if (nRet == -2)
                     {
                         string message = strError;
@@ -5230,7 +5273,8 @@ out strError);
 
                     // 2024/5/19
                     if (info != null
-                        && string.IsNullOrEmpty(strChangedXml) == false)
+                        && string.IsNullOrEmpty(strChangedXml) == false
+                        /*&& strChangedXml != info.OldXml*/)
                     {
                         if (string.IsNullOrEmpty(info.NewXml) == true)
                             this.m_nChangedCount++;
@@ -5328,6 +5372,9 @@ out strError);
                                     goto CONTINUE;
                                 }
                                 new_info.NewXml = new_xml;
+                                // TODO: 专用的比较 XML 是否等同的函数
+                                if (new_info.OldXml == new_info.NewXml)
+                                    new_info.NewXml = "";
                             }
                         }
 
@@ -5340,13 +5387,16 @@ out strError);
                         ListViewUtil.ChangeItemText(new_listview_item, 0, new_info.RecPath);
                         // TODO: 刷新浏览行的显示。
                         this.listView_records.Items.Add(new_listview_item);
-                        this.m_nChangedCount++;
 
-                        this.TryInvoke(() =>
+                        if (string.IsNullOrEmpty(new_info.NewXml) == false)
                         {
-                            new_listview_item.BackColor = GlobalParameters.ChangedBackColor;    // SystemColors.Info;
-                            new_listview_item.ForeColor = GlobalParameters.ChangedForeColor;     // SystemColors.InfoText;
-                        });
+                            this.m_nChangedCount++;
+                            this.TryInvoke(() =>
+                            {
+                                new_listview_item.BackColor = GlobalParameters.ChangedBackColor;    // SystemColors.Info;
+                                new_listview_item.ForeColor = GlobalParameters.ChangedForeColor;     // SystemColors.InfoText;
+                            });
+                        }
                     }
 
 
@@ -5438,7 +5488,7 @@ out strError);
                 else if (item.Level == "succeed")
                     style = "green";
 
-                Program.MainForm.OperHistory.AppendHtml($"<div class='debug {style}'>" + HttpUtility.HtmlEncode(item.Text) + "</div>");
+                Program.MainForm.OperHistory.AppendHtml($"<div class='debug {style}'>" + HttpUtility.HtmlEncode(item.Text)?.Replace("[CR]", "<br/>") + "</div>");
             }
         }
 
@@ -7605,6 +7655,8 @@ TaskScheduler.Default);
             this.EnableControls(false);
 
             EnableRecordList(false);
+            this.listView_records.SelectedIndexChanged -= new System.EventHandler(this.listView_records_SelectedIndexChanged);
+            //this.listView_records.BeginUpdate();
             try
             {
                 if (looping.Progress != null)
@@ -7826,7 +7878,9 @@ TaskScheduler.Default);
 
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
-
+                //this.listView_records.EndUpdate();
+                this.listView_records.SelectedIndexChanged += new System.EventHandler(this.listView_records_SelectedIndexChanged);
+                listView_records_SelectedIndexChanged(null, null);
                 this.EnableControls(true);
 
                 Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束执行脚本 " + dlg.FileName + "</div>");
@@ -9303,6 +9357,9 @@ out string strError)
 
                 List<ListViewItem> new_items = new List<ListViewItem>();
 
+                // 2024/6/23
+                looping.Progress.SetProgressRange(0, items.Count);
+
                 int i = 0;
                 foreach (LoaderItem item in loader)
                 {
@@ -10193,6 +10250,332 @@ TaskScheduler.Default);
             Global.InvalidateAllControls(this);
         }
 
+        // 删除书目记录
+        async void menu_deleteBiblioRecords_Click(object sender, EventArgs e)
+        {
+            await Task.Factory.StartNew(
+                () =>
+                {
+                    try
+                    {
+                        _deleteBiblioRecords();
+                    }
+                    catch (Exception ex)
+                    {
+                        this.MessageBoxShow($"_deleteDatabaseRecords() 异常: {ExceptionUtil.GetDebugText(ex)}");
+                    }
+                },
+default,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
+
+        void _deleteBiblioRecords()
+        {
+            // 询问要删除记录的数据库名
+            long start_no = 1;
+            long end_no = 9999999999;
+            bool deleting = false;
+            string delete_style = "";
+            string source_name = "";
+            string strDbName = "";
+            var dlg_ret = this.TryGet(() =>
+            {
+                // 获得一个目标库名
+                var dlg = new ExportDatabaseDialog();
+                MainForm.SetControlFont(dlg, this.Font, false);
+                dlg.Text = "删除书目记录";
+                dlg.DbNameList = ExportDatabaseDialog.GetAllBiblioDbNames();
+                dlg.DeletingVisible = false;
+                dlg.SelectedItemCount = this.listView_records.SelectedItems.Count;
+                dlg.ShowDialog(this);
+                if (dlg.DialogResult == DialogResult.Cancel)
+                    return dlg.DialogResult;
+                start_no = dlg.StartNo;
+                end_no = dlg.EndNo;
+                deleting = dlg.Deleting;
+                if (dlg.NoEventLog)
+                    delete_style += ",noeventlog";
+                if (dlg.CompressTailNo)
+                    delete_style += ",compressTailNo";
+                source_name = dlg.SourceName;
+                strDbName = dlg.DbName;
+                return dlg.DialogResult;
+            });
+
+            if (dlg_ret != DialogResult.OK)
+                return;
+
+            // 可以考虑在删除的最后一次才压缩尾号。或者删除完成后单独调用一次压缩尾号功能
+
+            /*
+            DialogResult result = this.TryGet(() =>
+            {
+                return MessageBox.Show(this,
+        $"确实要从数据库 '{strDbName}' 中删除全部书目记录?\r\n\r\n{(string.IsNullOrEmpty(delete_style) == false ? "style:" + delete_style : "")}\r\n\r\n(警告：书目记录被删除后，无法恢复。如果删除书目记录，则其下属的册、期、订购、评注记录和对象资源会一并删除)\r\n\r\n(OK 删除；Cancel 取消)",
+        "BiblioSearchForm",
+        MessageBoxButtons.OKCancel,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button2);
+            });
+            if (result == System.Windows.Forms.DialogResult.Cancel)
+                return;
+            */
+
+            string strError = "";
+            int nDeleteCount = 0;
+
+            // 检查前端权限
+            bool bDeleteSub = StringUtil.IsInList("client_deletebibliosubrecords",
+                // this.Channel.Rights
+                Program.MainForm.GetCurrentUserRights()
+                );
+
+            DialogResult dialog_result = DialogResult.Yes;  // yes no cancel
+            List<string> skipped_recpath = new List<string>();
+
+            LibraryChannel channel = this.GetChannel();
+
+            var looping = BeginLoop(this.DoStop, "正在删除书目记录 ...", "halfstop");
+
+            this.EnableControlsInSearching(false);
+            EnableRecordList(false);
+            try
+            {
+                ResultSetLoader loader = null;
+                IEnumerator iterator = null;
+                List<ListViewItem> items = new List<ListViewItem>();
+
+                if (source_name == "database")
+                {
+                    int ret = GetDatabaseRecordEnumerator(channel,
+        looping,
+        strDbName,
+        start_no,
+        end_no,
+        out loader,
+        out strError);
+                    if (ret == -1)
+                        goto ERROR1;
+                    iterator = loader.GetEnumerator();
+                }
+                else
+                {
+                    items = ListViewUtil.GetSelectedItems(this.listView_records);
+                    looping.Progress.SetProgressRange(0, items.Count);
+                    iterator = items.GetEnumerator();
+                }
+
+                while (true)
+                // foreach(DigitalPlatform.LibraryClient.localhost.Record record in loader)
+                {
+                    if (looping.Stopped)
+                    {
+                        strError = "已中断";
+                        goto ERROR1;
+                    }
+
+                    if (iterator.MoveNext() == false)
+                        break;
+
+                    ListViewItem item = null;
+                    string strRecPath = "";
+                    if (source_name == "database")
+                    {
+                        var record = iterator.Current as DigitalPlatform.LibraryClient.localhost.Record;
+                        strRecPath = record.Path;
+                    }
+                    else
+                    {
+                        item = iterator.Current as ListViewItem;
+                        strRecPath = ListViewUtil.GetItemText(item, 0);
+                    }
+
+                    // byte[] baTimestamp = record.RecordBody?.Timestamp;
+
+                    string[] results = null;
+                    byte[] baTimestamp = null;
+                    string strOutputPath = "";
+                    string[] formats = null;
+                    if (bDeleteSub == false
+                        && StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.30") >= 0)
+                    {
+                        formats = new string[1];
+                        formats[0] = "subcount";
+                    }
+
+                    looping.Progress.SetMessage("正在删除书目记录 " + strRecPath);
+
+                    int nRedoCount = 0;
+                REDO_LOAD:
+                    long lRet = channel.GetBiblioInfos(
+                        looping.Progress,
+                        strRecPath,
+                        "",
+                        formats,   // formats
+                        out results,
+                        out baTimestamp,
+                        out strError);
+                    if (lRet == 0)
+                    {
+                        // 记录不存在。接着处理后面的删除
+                        skipped_recpath.Add(strRecPath);
+                        continue;
+                        // goto ERROR1;
+                    }
+                    if (lRet == -1)
+                    {
+                        if (channel.ErrorCode == ErrorCode.NotFound)
+                        {
+                            skipped_recpath.Add(strRecPath);
+                            continue;
+                        }
+
+                        string message = $"在获得记录 {strRecPath} 时间戳时出错:\r\n{strError}\r\n---\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)";
+                        dialog_result = this.TryGet(() =>
+                        {
+                            // return:
+                            //      DialogResult.Retry 表示超时了
+                            //      DialogResult.OK 表示点了 OK 按钮
+                            //      DialogResult.Cancel 表示点了右上角的 Close 按钮
+                            return AutoCloseMessageBox.Show(this,
+message,
+20 * 1000,
+"BiblioSearchForm");
+                        });
+                        if (dialog_result != DialogResult.Cancel)
+                        {
+                            // 重试次数太多了还不行，就跳过
+                            if (nRedoCount >= 10)
+                            {
+                                skipped_recpath.Add(strRecPath);
+                                continue;
+                            }
+
+                            nRedoCount++;
+                            goto REDO_LOAD;
+                        }
+
+                        goto ERROR1;
+                    }
+
+                    if (bDeleteSub == false)
+                    {
+                        string strSubCount = "";
+                        if (results != null && results.Length > 0)
+                            strSubCount = results[0];
+
+                        if (string.IsNullOrEmpty(strSubCount) == true || strSubCount == "0")
+                        {
+                        }
+                        else
+                        {
+                            var result = this.TryGet(() =>
+                            {
+                                return MessageBox.Show(this,
+        "书目记录 '" + strRecPath + "' 包含 " + strSubCount + " 个下级记录，而当前用户并不具备 client_deletebibliosubrecords 权限，无法删除这条书目记录。\r\n\r\n是否继续后面的操作? \r\n\r\n(Yes 继续；No 终止未完成的全部删除操作)",
+        "BiblioSearchForm",
+        MessageBoxButtons.YesNo,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button2);
+                            });
+                            if (result == System.Windows.Forms.DialogResult.No)
+                            {
+                                strError = "中断操作";
+                                goto ERROR1;
+                            }
+                            continue;
+                        }
+                    }
+
+                REDO_DELETE:
+                    channel.Timeout = new TimeSpan(0, 5, 0);
+                    lRet = channel.SetBiblioInfo(
+                        looping.Progress,
+                        "delete",
+                        strRecPath,
+                        "xml",
+                        "", // strXml,
+                        baTimestamp,
+                        "",
+                        delete_style,
+                        out strOutputPath,
+                        out byte[] baNewTimestamp,
+                        out strError);
+                    if (lRet == -1)
+                    {
+                        if (channel.ErrorCode == ErrorCode.NotFound)
+                        {
+                            skipped_recpath.Add(strRecPath);
+                            continue;
+                        }
+
+                        string message = $"删除书目记录 {strRecPath} 时出错:\r\n{strError}\r\n---\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)";
+                        dialog_result = this.TryGet(() =>
+                        {
+                            // return:
+                            //      DialogResult.Retry 表示超时了
+                            //      DialogResult.OK 表示点了 OK 按钮
+                            //      DialogResult.Cancel 表示点了右上角的 Close 按钮
+                            return AutoCloseMessageBox.Show(this,
+message,
+20 * 1000,
+"BiblioSearchForm");
+                        });
+                        if (dialog_result != DialogResult.Cancel)
+                        {
+                            // 重试次数太多了还不行，就跳过
+                            if (nRedoCount >= 10)
+                            {
+                                skipped_recpath.Add(strRecPath);
+                                continue;
+                            }
+
+                            nRedoCount++;
+                            if (channel.ErrorCode == ErrorCode.TimestampMismatch)
+                                goto REDO_LOAD;
+
+                            goto REDO_DELETE;
+                        }
+
+                        goto ERROR1;
+                    }
+
+                    nDeleteCount++;
+
+                    looping.Progress.SetProgressValue(nDeleteCount);
+
+                    if (source_name == "selected")
+                    {
+                        this.TryInvoke(() =>
+                        {
+                            this.listView_records.Items.Remove(item);
+                        });
+                    }
+                }
+            }
+            finally
+            {
+                EndLoop(looping);
+
+                this.ReturnChannel(channel);
+
+                this.EnableControlsInSearching(true);
+                EnableRecordList(true);
+            }
+
+            {
+                string message = "成功删除书目记录 " + nDeleteCount + " 条";
+                if (skipped_recpath.Count > 0)
+                    message += $"。但有 {skipped_recpath} 条书目记录跳过了删除";
+                this.MessageBoxShow(message);
+            }
+            return;
+        ERROR1:
+            this.MessageBoxShow(strError);
+        }
+
+
         // 删除所选择的书目记录
         async void menu_deleteSelectedRecords_Click(object sender, EventArgs e)
         {
@@ -10508,6 +10891,50 @@ message,
             this.MessageBoxShow(strError);
         }
 
+        int GetDatabaseRecordEnumerator(LibraryChannel channel,
+            Looping looping,
+            string strDbName,
+            long start_no,
+            long end_no,
+            out ResultSetLoader loader,
+            out string strError)
+        {
+            strError = "";
+            loader = null;
+
+            // 检索全部书目记录
+            string resultSetName = "delete_resultset";
+            long ret = channel.SearchBiblio(looping.Progress,
+                strDbName,
+                $"{start_no}-{end_no}",
+                -1,
+                "recid",
+                "left",
+                this.Lang,
+                resultSetName,
+                "",
+                "",
+                "",
+                out _,
+                out strError);
+            if (ret == -1)
+                return -1;
+            if (ret == 0)
+            {
+                strError = $"书目库 '{strDbName}' 中没有任何记录可供删除";
+                return -1;
+            }
+            looping.Progress.SetProgressRange(0, ret);
+
+            loader = new ResultSetLoader(
+                channel,
+                looping.Progress,
+                resultSetName,
+                "id",
+                this.Lang);
+            return 0;
+        }
+
         void EnableRecordList(bool enable)
         {
             this.TryInvoke(() =>
@@ -10545,6 +10972,7 @@ message,
             {
                 // this.listView_records.EndUpdate();
                 this.listView_records.SelectedIndexChanged += new System.EventHandler(this.listView_records_SelectedIndexChanged);
+                listView_records_SelectedIndexChanged(null, null);
                 this.Cursor = oldCursor;
             }
         }

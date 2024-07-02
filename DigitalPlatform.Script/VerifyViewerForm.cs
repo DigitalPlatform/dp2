@@ -119,7 +119,7 @@ namespace DigitalPlatform.Script
             else if (error.Level == "succeed")
                 style = "succeed";
 
-            var html = $"<div class='line {style}'>{HttpUtility.HtmlEncode(error.Text)}</div>";
+            var html = $"<div class='line {style}'>{HttpUtility.HtmlEncode(error.Text).Replace("\r\n","<br/>")}</div>";
             WriteHtml(webBrowser_verifyResult, html);
         }
 

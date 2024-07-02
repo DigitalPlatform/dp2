@@ -21,6 +21,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.CommonControl;
+using System.IO;
 
 namespace dp2Circulation
 {
@@ -132,6 +133,7 @@ namespace dp2Circulation
             this.listView_location_list.Tag = prop1;
 
             this.kernelResTree1.AppInfo = Program.MainForm.AppInfo;
+            this.kernelResTree1.CssFileName = Path.Combine(Program.MainForm.DataDir, "markdown/default.css");  // 2024/7/1
             this.kernelResTree1.HideIndices = new int[] { KernelResTree.RESTYPE_FROM };
             this.kernelResTree1.DownloadFilesAsync += kernelResTree1_DownloadFilesAsync;
             this.kernelResTree1.UploadFiles += KernelResTree1_UploadFiles;
@@ -145,6 +147,20 @@ namespace dp2Circulation
             e1.Section = "serverConfigFileChanged";
             e1.Entry = e.Condition;
             e1.Value = e.Path;
+
+            {
+                if (e1.Section == "serverConfigFileChanged")
+                {
+                    string path = e1.Value as string;
+                    if (path != null)
+                    {
+                        path = path.ToLower().Replace("\\", "/");
+                        Program.MainForm.AssemblyCache.Clear(path);
+                    }
+                }
+            }
+
+
             Program.MainForm.NotifyAllMdiChildren(e1);
         }
 
@@ -1256,6 +1272,37 @@ namespace dp2Circulation
             }
         }
 
+        // 2024/6/20
+        public int CompressDatabasesTailNo(
+    string strDatabaseNames,
+    out string strOutputInfo,
+    out string strError)
+        {
+            strError = "";
+
+            var looping = Looping(out LibraryChannel channel,
+                "正在压缩数据库 " + strDatabaseNames + " 的尾号...",
+                "disableControl");
+            try
+            {
+                long lRet = channel.ManageDatabase(
+                    looping.Progress,
+                    "compressTailNo",
+                    strDatabaseNames,
+                    "",
+                    "",
+                    out strOutputInfo,
+                    out strError);
+                if (lRet == -1)
+                    return -1;
+                return (int)lRet;
+            }
+            finally
+            {
+                looping.Dispose();
+            }
+        }
+
         // 2008/11/16
         //      strDatabaseInfo 要刷新的下属文件特性。<refreshStyle include="keys,browse" exclude="">(表示只刷新keys和browse两个重要配置文件)或者<refreshStyle include="*" exclude="template">(表示刷新全部文件，但是不要刷新template) 如果参数值为空，表示全部刷新
         // 
@@ -2193,31 +2240,44 @@ namespace dp2Circulation
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
-            if (this.listView_databases.SelectedItems.Count == 1)
-                strText = "初始化" + strType + "库 '" + strName + "'(&I)";
-            else
-                strText = "初始化所选 " + this.listView_databases.SelectedItems.Count.ToString() + " 个数据库(&I)";
+            {
+                if (this.listView_databases.SelectedItems.Count == 1)
+                    strText = "初始化" + strType + "库 '" + strName + "'(&I)";
+                else
+                    strText = "初始化所选 " + this.listView_databases.SelectedItems.Count.ToString() + " 个数据库(&I)";
 
-            menuItem = new MenuItem(strText);
-            menuItem.Click += new System.EventHandler(this.toolStripButton_initializeDatabase_Click);
-            if (this.listView_databases.SelectedItems.Count == 0)
-                menuItem.Enabled = false;
-            contextMenu.MenuItems.Add(menuItem);
+                menuItem = new MenuItem(strText);
+                menuItem.Click += new System.EventHandler(this.toolStripButton_initializeDatabase_Click);
+                if (this.listView_databases.SelectedItems.Count == 0)
+                    menuItem.Enabled = false;
+                contextMenu.MenuItems.Add(menuItem);
+            }
 
+            {
+                if (this.listView_databases.SelectedItems.Count == 1)
+                    strText = "刷新" + strType + "库 '" + strName + "' 的定义(&R)";
+                else
+                    strText = "刷新所选 " + this.listView_databases.SelectedItems.Count.ToString() + " 个数据库的定义(&R)";
 
-            if (this.listView_databases.SelectedItems.Count == 1)
-                strText = "刷新" + strType + "库 '" + strName + "' 的定义(&R)";
-            else
-                strText = "刷新所选 " + this.listView_databases.SelectedItems.Count.ToString() + " 个数据库的定义(&R)";
+                menuItem = new MenuItem(strText);
+                menuItem.Click += new System.EventHandler(this.toolStripButton_refreshDatabaseDef_Click);
+                if (this.listView_databases.SelectedItems.Count == 0)
+                    menuItem.Enabled = false;
+                contextMenu.MenuItems.Add(menuItem);
+            }
 
-            menuItem = new MenuItem(strText);
-            menuItem.Click += new System.EventHandler(this.toolStripButton_refreshDatabaseDef_Click);
-            if (this.listView_databases.SelectedItems.Count == 0)
-                menuItem.Enabled = false;
-            contextMenu.MenuItems.Add(menuItem);
+            {
+                if (this.listView_databases.SelectedItems.Count == 1)
+                    strText = "压缩" + strType + "库 '" + strName + "' 的尾号(&P)";
+                else
+                    strText = "压缩所选 " + this.listView_databases.SelectedItems.Count.ToString() + " 个数据库的尾号(&P)";
 
-
-
+                menuItem = new MenuItem(strText);
+                menuItem.Click += new System.EventHandler(this.toolStripButton_compressDatabaseTailNo_Click);
+                if (this.listView_databases.SelectedItems.Count == 0)
+                    menuItem.Enabled = false;
+                contextMenu.MenuItems.Add(menuItem);
+            }
 
             // ---
             menuItem = new MenuItem("-");
@@ -2588,6 +2648,67 @@ namespace dp2Circulation
             }
 
             strDbPaths = strResult;
+        }
+
+        // 2024/6/20
+        // 压缩数据库尾号
+        private void toolStripButton_compressDatabaseTailNo_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+            if (this.listView_databases.SelectedIndices.Count == 0)
+            {
+                strError = "尚未选择要压缩尾号的数据库事项";
+                goto ERROR1;
+            }
+
+            string strDbNameList = ListViewUtil.GetItemNameList(this.listView_databases.SelectedItems);
+
+            // 对话框警告
+            DialogResult result = MessageBox.Show(this,
+                "确实要压缩数据库 " + strDbNameList + " 的尾号?",
+                "ManagerForm",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button2);
+            if (result != DialogResult.Yes)
+                return;
+
+            // 为确认身份而登录
+            // return:
+            //      -1  出错
+            //      0   放弃登录
+            //      1   登录成功
+            nRet = ConfirmLogin(out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            if (nRet == 0)
+            {
+                strError = "压缩数据库尾号的操作被放弃";
+                goto ERROR1;
+            }
+
+            EnableControls(false);
+            try
+            {
+                nRet = CompressDatabasesTailNo(strDbNameList,
+                    out _,
+                    out strError);
+            }
+            finally
+            {
+                EnableControls(true);
+            }
+
+            if (String.IsNullOrEmpty(strError) == false)
+                MessageBox.Show(this, strError);
+
+            // 2015/6/13
+            // 重新获得各种库名、列表
+            // Program.MainForm.StartPrepareNames(false, false);
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
 
         // 刷新数据库定义

@@ -19,7 +19,7 @@ using DigitalPlatform.CirculationClient;
 namespace dp2Circulation
 {
 
-    static class Program
+    public static class Program
     {
         /// <summary>
         /// 前端，也就是 dp2circulation.exe 的版本号
