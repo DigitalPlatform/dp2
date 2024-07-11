@@ -20,9 +20,13 @@ namespace DigitalPlatform
 
         private void ListDialog_Load(object sender, EventArgs e)
         {
-            Task.Factory.StartNew(() => {
-                this.TryInvoke(() => {
+            Task.Factory.StartNew(() =>
+            {
+                this.TryInvoke(() =>
+                {
                     this.listBox1.Focus();
+                    if (this.listBox1.Items.Count > 0)
+                        this.listBox1.SelectedIndex = 0;
                 });
             });
         }
@@ -168,7 +172,8 @@ namespace DigitalPlatform
     Font font = null)
         {
             string temp = null;
-            var ret = owner.TryGet(() => {
+            var ret = owner.TryGet(() =>
+            {
                 return GetInput(
                 (IWin32Window)owner,
                 strDlgTitle,
@@ -248,6 +253,11 @@ namespace DigitalPlatform
 
             text = dlg.textBox1.Text;
             return dlg.listBox1.SelectedItem as string;
+        }
+
+        private void listBox1_DoubleClick(object sender, EventArgs e)
+        {
+            button_OK_Click(sender, e);
         }
     }
 }

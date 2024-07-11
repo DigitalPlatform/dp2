@@ -1,7 +1,9 @@
-﻿using DigitalPlatform.Core;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Xml;
+
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.Text
 {
@@ -801,6 +803,122 @@ out string strPureName);
 
         #endregion
 
+        #region 宏替换
+
+        public delegate string delgate_convert(string macro);
+
+        public static string MacroString(string strText,
+            string left,
+            string right,
+            delgate_convert func_convert)
+        {
+            if (String.IsNullOrEmpty(strText) == true)
+                return strText;
+
+            StringBuilder text = new StringBuilder();
+            int nStart = 0;
+            int nEnd = 0;
+            int nPos = 0;
+            for (; ; )
+            {
+                nStart = strText.IndexOf(left, nPos);
+                if (nStart == -1)
+                    break;
+                text.Append(strText.Substring(nPos, nStart - nPos));
+                nPos = nStart + left.Length;
+                nEnd = strText.IndexOf(right, nPos);
+                if (nEnd == -1)
+                    break;
+                nPos = nEnd + right.Length;
+                /*
+                if (nEnd <= nStart + right.Length)
+                {
+                    text.Append(strText.Substring(nStart, nPos - nStart));
+                    continue;
+                }
+                */
+                string strPart = strText.Substring(nStart + left.Length, nEnd - nStart - left.Length).Trim();
+
+                /*
+                if (String.IsNullOrEmpty(strPart) == true)
+                {
+                    text.Append(strText.Substring(nStart, nPos - nStart));
+                    continue;
+                }
+                */
+                // 如果 strPart == ""，则回调函数可以选择返回 ""，这样结果中 {} 就不会出现
+                // 如果想在结果中出现 {}，则回调函数此时可以直接返回 "{}" 即可。
+                // 总之这样把控制权交给了回调函数，比较灵活
+
+                var result = func_convert(strPart);
+                text.Append(result);
+            }
+
+            text.Append(strText.Substring(nPos));
+            return text.ToString();
+        }
+
+        /// <summary>
+        /// 兑现时间宏值
+        /// </summary>
+        /// <param name="strMacro">要处理的宏字符串</param>
+        /// <returns>兑现宏以后的字符串</returns>
+        public static string MacroTimeValue(string strMacro)
+        {
+            DateTime time = DateTime.Now;
+
+            // utime
+            strMacro = strMacro.Replace("%utime%", time.ToString("u"));
+
+            // 年 year
+            strMacro = strMacro.Replace("%year%", Convert.ToString(time.Year).PadLeft(4, '0'));
+
+            // 年 y2
+            strMacro = strMacro.Replace("%y2%", time.Year.ToString().PadLeft(4, '0').Substring(2, 2));
+
+            // 月 month
+            strMacro = strMacro.Replace("%month%", Convert.ToString(time.Month));
+
+            // 月 m2
+            strMacro = strMacro.Replace("%m2%", Convert.ToString(time.Month).PadLeft(2, '0'));
+
+            // 日 day
+            strMacro = strMacro.Replace("%day%", Convert.ToString(time.Day));
+
+            // 日 d2
+            strMacro = strMacro.Replace("%d2%", Convert.ToString(time.Day).PadLeft(2, '0'));
+
+            // 时 hour
+            strMacro = strMacro.Replace("%hour%", Convert.ToString(time.Hour));
+
+            // 时 h2
+            strMacro = strMacro.Replace("%h2%", Convert.ToString(time.Hour).PadLeft(2, '0'));
+
+            // 分 minute
+            strMacro = strMacro.Replace("%minute%", Convert.ToString(time.Minute));
+
+            // 分 min2
+            strMacro = strMacro.Replace("%min2%", Convert.ToString(time.Minute).PadLeft(2, '0'));
+
+            // 秒 second
+            strMacro = strMacro.Replace("%second%", Convert.ToString(time.Second));
+
+            // 秒 sec2
+            strMacro = strMacro.Replace("%sec2%", Convert.ToString(time.Second).PadLeft(2, '0'));
+
+            // 百分秒 hsec
+            strMacro = strMacro.Replace("%hsec%", Convert.ToString(time.Millisecond / 100));
+
+            // 毫秒 msec
+            strMacro = strMacro.Replace("%msec%", Convert.ToString(time.Millisecond));
+
+
+            return strMacro;
+        }
+
+
+
+        #endregion
     }
 
 

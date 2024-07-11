@@ -8,6 +8,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.Text;
+using static DigitalPlatform.Text.dp2StringUtil;
 
 namespace TestDp2Library
 {
@@ -294,5 +295,244 @@ namespace TestDp2Library
             }
         }
 
+        [TestMethod]
+        public void test_macroString_01()
+        {
+            string source = "{macro}";
+            string correct = "macro_value";
+            var result = dp2StringUtil.MacroString(source,
+    "{",
+    "}",
+    (macro) =>
+    {
+        return $"{macro}_value";
+    });
+            Assert.AreEqual(correct, result);
+        }
+
+        [TestMethod]
+        public void test_macroString_02()
+        {
+            string source = "1{macro}";
+            string correct = "1macro_value";
+            var result = dp2StringUtil.MacroString(source,
+    "{",
+    "}",
+    (macro) =>
+    {
+        return $"{macro}_value";
+    });
+            Assert.AreEqual(correct, result);
+        }
+
+        [TestMethod]
+        public void test_macroString_03()
+        {
+            string source = "{macro}2";
+            string correct = "macro_value2";
+            var result = dp2StringUtil.MacroString(source,
+    "{",
+    "}",
+    (macro) =>
+    {
+        return $"{macro}_value";
+    });
+            Assert.AreEqual(correct, result);
+        }
+
+        [TestMethod]
+        public void test_macroString_04()
+        {
+            string source = "1{macro}2";
+            string correct = "1macro_value2";
+            var result = dp2StringUtil.MacroString(source,
+    "{",
+    "}",
+    (macro) =>
+    {
+        return $"{macro}_value";
+    });
+            Assert.AreEqual(correct, result);
+        }
+
+        [TestMethod]
+        public void test_macroString_05()
+        {
+            string source = "12{macro}34";
+            string correct = "12macro_value34";
+            var result = dp2StringUtil.MacroString(source,
+    "{",
+    "}",
+    (macro) =>
+    {
+        return $"{macro}_value";
+    });
+            Assert.AreEqual(correct, result);
+        }
+
+        [TestMethod]
+        public void test_macroString_06()
+        {
+            string source = "{}";
+            string correct = "_value";
+            var result = dp2StringUtil.MacroString(source,
+    "{",
+    "}",
+    (macro) =>
+    {
+        return $"{macro}_value";
+    });
+            Assert.AreEqual(correct, result);
+        }
+
+        [TestMethod]
+        public void test_macroString_07()
+        {
+            string source = "1{}";
+            string correct = "1_value";
+            var result = dp2StringUtil.MacroString(source,
+    "{",
+    "}",
+    (macro) =>
+    {
+        return $"{macro}_value";
+    });
+            Assert.AreEqual(correct, result);
+        }
+
+        [TestMethod]
+        public void test_macroString_08()
+        {
+            string source = "{}2";
+            string correct = "_value2";
+            var result = dp2StringUtil.MacroString(source,
+    "{",
+    "}",
+    (macro) =>
+    {
+        return $"{macro}_value";
+    });
+            Assert.AreEqual(correct, result);
+        }
+
+        [TestMethod]
+        public void test_macroString_09()
+        {
+            string source = "12{}34";
+            string correct = "12_value34";
+            var result = dp2StringUtil.MacroString(source,
+    "{",
+    "}",
+    (macro) =>
+    {
+        return $"{macro}_value";
+    });
+            Assert.AreEqual(correct, result);
+        }
+
+        [TestMethod]
+        public void test_macroString_10()
+        {
+            string source = "{}{}";
+            string correct = "_value_value";
+            var result = dp2StringUtil.MacroString(source,
+    "{",
+    "}",
+    (macro) =>
+    {
+        return $"{macro}_value";
+    });
+            Assert.AreEqual(correct, result);
+        }
+
+        [TestMethod]
+        public void test_macroString_11()
+        {
+            string source = "{macro1}{macro2}";
+            string correct = "macro1_valuemacro2_value";
+            var result = dp2StringUtil.MacroString(source,
+    "{",
+    "}",
+    (macro) =>
+    {
+        return $"{macro}_value";
+    });
+            Assert.AreEqual(correct, result);
+        }
+
+        [TestMethod]
+        public void test_macroString_12()
+        {
+            string source = "{macro1}A{macro2}";
+            string correct = "macro1_valueAmacro2_value";
+            var result = dp2StringUtil.MacroString(source,
+    "{",
+    "}",
+    (macro) =>
+    {
+        return $"{macro}_value";
+    });
+            Assert.AreEqual(correct, result);
+        }
+
+        [TestMethod]
+        public void test_macroString_13()
+        {
+            string source = "A{macro1}B{macro2}C";
+            string correct = "Amacro1_valueBmacro2_valueC";
+            var result = dp2StringUtil.MacroString(source,
+    "{",
+    "}",
+    (macro) =>
+    {
+        return $"{macro}_value";
+    });
+            Assert.AreEqual(correct, result);
+        }
+
+        [TestMethod]
+        public void test_macroString_14()
+        {
+            string source = "{macro1}{macro2}B";
+            string correct = "macro1_valuemacro2_valueB";
+            var result = dp2StringUtil.MacroString(source,
+    "{",
+    "}",
+    (macro) =>
+    {
+        return $"{macro}_value";
+    });
+            Assert.AreEqual(correct, result);
+        }
+
+        [TestMethod]
+        public void test_macroString_15()
+        {
+            string source = "A{macro1}{macro2}";
+            string correct = "Amacro1_valuemacro2_value";
+            var result = dp2StringUtil.MacroString(source,
+    "{",
+    "}",
+    (macro) =>
+    {
+        return $"{macro}_value";
+    });
+            Assert.AreEqual(correct, result);
+        }
+
+        [TestMethod]
+        public void test_macroString_21()
+        {
+            string source = "A{{macro1}}B{{macro2}}C";
+            string correct = "Amacro1_valueBmacro2_valueC";
+            var result = dp2StringUtil.MacroString(source,
+    "{{",
+    "}}",
+    (macro) =>
+    {
+        return $"{macro}_value";
+    });
+            Assert.AreEqual(correct, result);
+        }
     }
 }

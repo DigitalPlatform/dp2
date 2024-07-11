@@ -4618,6 +4618,49 @@ bQuickLoad);
             if (string.IsNullOrEmpty(catalogingRule) == false)
                 return 1;
 
+#if REMOVED
+            // 2)
+            // 从书目库的角色 cr:xxx 中找
+            var strDbName = Global.GetDbName(strBiblioRecPath);
+            if (string.IsNullOrEmpty(strDbName))
+            {
+                strError = $"无法解析书目记录路径 '{strBiblioRecPath}' 的库名部分";
+                return -1;
+            }
+
+            // 尝试从书目库角色中获得 cr:xxx 子参数，从而探知当前这条书目记录的编目规则
+            var prop = Program.MainForm.GetBiblioDbProperty(strDbName);
+            if (prop == null)
+            {
+                strError = $"找不到书目库 '{strDbName}' 的属性";
+                return -1;
+            }
+
+            catalogingRule = StringUtil.GetParameterByPrefix(prop.Role, "cr");
+            if (string.IsNullOrEmpty(catalogingRule) == false)
+                return 1;
+
+            return 0;
+#endif
+            return DetectDefaultCatalogingRule(
+    strBiblioRecPath,
+    out catalogingRule,
+    out strError);
+        }
+
+        // 获得数据库默认的编目规则
+        // return:
+        //      -1  出错
+        //      0   没有找到
+        //      1   找到
+        public static int DetectDefaultCatalogingRule(
+        string strBiblioRecPath,
+    out string catalogingRule,
+    out string strError)
+        {
+            strError = "";
+            catalogingRule = "";
+
             // 2)
             // 从书目库的角色 cr:xxx 中找
             var strDbName = Global.GetDbName(strBiblioRecPath);
@@ -12332,6 +12375,7 @@ message,
             dlg.EncodingComment = "注: 原始编码方式为 " + Global.GetEncodingName(preferredEncoding);
             dlg.MarcSyntax = "<自动>";    // strPreferedMarcSyntax;
             dlg.EnableMarcSyntax = false;
+#if REMOVED
             dlg.ShowDialog(this);
 
             // 放在这里的意图是即便 Cancel 了，对话框里面的内容也能被记住
@@ -12343,6 +12387,41 @@ message,
 
             if (dlg.DialogResult != DialogResult.OK)
                 return;
+#endif
+
+            ExportMarcHoldingDialog dlg_905 = new ExportMarcHoldingDialog();
+            {
+                MainForm.SetControlFont(dlg_905, this.Font);
+                dlg_905.AttachPanel(dlg.MainPanel, "文件名");
+                dlg_905.FilterScriptDirectory = ExportMarcHoldingDialog.PrepareScriptDirectory();
+                dlg_905.UiState = Program.MainForm.AppInfo.GetString(
+                    "BiblioSearchForm",
+                    "ExportMarcHoldingDialog_uiState",
+                    "");
+                Program.MainForm.AppInfo.LinkFormState(dlg_905, "BiblioSearchForm_ExportMarcHoldingDialog_state");
+                dlg_905.ShowDialog(this);
+
+                Program.MainForm.AppInfo.SetString(
+                    "BiblioSearchForm",
+                    "ExportMarcHoldingDialog_uiState",
+                    dlg_905.UiState);
+
+                {
+                    // 放在这里的意图是即便 Cancel 了，对话框里面的内容也能被记住
+                    this.LastIso2709FileName = dlg.FileName;
+                    this.LastCrLfIso2709 = dlg.CrLf;
+                    this.LastEncodingName = dlg.EncodingName;
+                    this.LastCatalogingRule = dlg.Rule;
+                    this.LastRemoveField998 = dlg.RemoveField998;
+                }
+
+                if (dlg_905.DialogResult != DialogResult.OK)
+                    return;
+            }
+
+            var removeFieldNames = dlg_905.RemoveFieldNames;
+            var filterCode = dlg_905.ScriptCode;
+            var cacheKey = ExportMarcHoldingDialog.BuildCacheKey(dlg_905.ScriptFileName);
 
             bool unimarc_modify_100 = dlg.UnimarcModify100;
 
@@ -12362,27 +12441,6 @@ message,
 
             string strLastFileName = this.LastIso2709FileName;
             string strLastEncodingName = this.LastEncodingName;
-
-            ExportMarcHoldingDialog dlg_905 = new ExportMarcHoldingDialog();
-            {
-                MainForm.SetControlFont(dlg_905, this.Font);
-
-                dlg_905.UiState = Program.MainForm.AppInfo.GetString(
-                    "BiblioSearchForm",
-                    "ExportMarcHoldingDialog_uiState",
-                    "");
-
-                Program.MainForm.AppInfo.LinkFormState(dlg_905, "BiblioSearchForm_ExportMarcHoldingDialog_state");
-                dlg_905.ShowDialog(this);
-
-                Program.MainForm.AppInfo.SetString(
-                    "BiblioSearchForm",
-                    "ExportMarcHoldingDialog_uiState",
-                    dlg_905.UiState);
-
-                if (dlg_905.DialogResult != DialogResult.OK)
-                    return;
-            }
 
             bool bExist = File.Exists(dlg.FileName);
             bool bAppend = false;
@@ -12541,27 +12599,46 @@ message,
                     nRet = MarcUtil.GetMappedRecord(ref strMARC,
                         strCatalogingRule);
 
+                    MarcRecord record = new MarcRecord(strMARC);
+
                     if (dlg.RemoveField998 == true)
                     {
-                        MarcRecord record = new MarcRecord(strMARC);
                         record.select("field[@name='998']").detach();
                         record.select("field[@name='997']").detach();
-                        strMARC = record.Text;
+                        // strMARC = record.Text;
                     }
                     if (dlg.Mode880 == true && strMarcSyntax == "usmarc")
                     {
-                        MarcRecord record = new MarcRecord(strMARC);
+                        // MarcRecord record = new MarcRecord(strMARC);
                         MarcQuery.To880(record);
-                        strMARC = record.Text;
+                        // strMARC = record.Text;
                     }
 
                     // 2021/4/8
                     if (dlg.AddG01 == true)
                     {
                         string verify = BuildVerifyString(); // 用于防止小语种字符被修改的验证字符串
-                        MarcRecord record = new MarcRecord(strMARC);
+                        // MarcRecord record = new MarcRecord(strMARC);
                         record.Fields.insertSequence(new MarcField($"-01{item.BiblioInfo.RecPath},verify:{verify}"));
-                        strMARC = record.Text;
+                        // strMARC = record.Text;
+                    }
+
+                    // TODO: 如果要移除的字段，涉及到 906 等字段，要警告一下
+                    if (string.IsNullOrEmpty(removeFieldNames) == false)
+                    {
+                        ExportMarcHoldingDialog.FilterBiblioRecord(record, dlg_905.RemoveFieldNames);
+                    }
+
+                    if (string.IsNullOrEmpty(filterCode) == false)
+                    {
+                        var ret = ExportMarcHoldingDialog.FilterRecord(
+cacheKey,
+filterCode,
+"",
+record,
+out string error);
+                        if (ret == -1)
+                            throw new Exception(error);
                     }
 
                     // 2019/5/22
@@ -12571,7 +12648,7 @@ message,
                     if ((dlg_905.Create905 || dlg_905.Create906)
                         && isLocal)
                     {
-                        MarcRecord record = new MarcRecord(strMARC);
+                        // MarcRecord record = new MarcRecord(strMARC);
 
                         if (dlg_905.Create905 && dlg_905.RemoveOld905)
                             record.select("field[@name='905']").detach();
@@ -12591,7 +12668,7 @@ message,
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
-                        strMARC = record.Text;
+                        // strMARC = record.Text;
                     }
 
                     // 将MARC机内格式转换为ISO2709格式
@@ -12604,7 +12681,7 @@ message,
                     //      -1  出错
                     //      0   成功
                     nRet = MarcUtil.CvtJineiToISO2709(
-                        strMARC,
+                        record.Text,
                         strMarcSyntax,
                         targetEncoding,
                         unimarc_modify_100 ? "unimarc_100" : "",

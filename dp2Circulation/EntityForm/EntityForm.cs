@@ -35,11 +35,6 @@ using DigitalPlatform.Drawing;
 using DigitalPlatform.Z3950;
 // using DocumentFormat.OpenXml.Office2010.Excel;
 using UcsUpload;
-using System.Web.UI.HtmlControls;
-using DocumentFormat.OpenXml.Vml.Office;
-using Jint.Parser.Ast;
-using System.Globalization;
-// using DocumentFormat.OpenXml.Office2021.DocumentTasks;
 
 namespace dp2Circulation
 {
@@ -187,6 +182,9 @@ namespace dp2Circulation
                 return Global.GetDbName(this.BiblioRecPath);
             }
         }
+
+        // 书目记录路径 textbox 的缓存内容。直接访问它能够加快访问速度
+        string _biblioRecPathCache = "";
 
         // thread: ui 线程外安全
         /// <summary>
@@ -426,6 +424,8 @@ namespace dp2Circulation
             try
             {
                 InitializeComponent();
+
+                this.MarcEditor.HorzGridColor = Color.FromArgb(244, 244, 244);
             }
             catch
             {
@@ -433,7 +433,34 @@ namespace dp2Circulation
             }
 
             this.MemoNumbers = new List<CallNumberForm.MemoTailNumber>();
+
+            this.m_marcEditor.LostFocus += (o, e) =>
+            {
+                Debug.WriteLine("MarcEditor LostFocus");
+            };
+
+            _worker = new BackgroundWorker();
+            _worker.WorkerSupportsCancellation = true;
+            _worker.DoWork += (o, e) =>
+            {
+                while (true)
+                {
+                    Thread.Sleep(100);
+                    ProcessRuleChangeList();
+
+                    if (_worker.CancellationPending)
+                    {
+                        // Set the e.Cancel flag so that the WorkerCompleted event
+                        // knows that the process was cancelled.
+                        e.Cancel = true;
+                        return;
+                    }
+                }
+            };
+            _worker.RunWorkerAsync();
         }
+
+        BackgroundWorker _worker;
 
         // thread: ui 线程外安全
         void EnableItemsPage(bool bEnable)
@@ -4716,12 +4743,25 @@ out string strErrorCode)
             return -1;
         }
 
+        int SetBiblioRecordToMarcEditor(string strXml,
+    out string strError)
+        {
+            return SetBiblioRecordToMarcEditor(strXml,
+            null,
+            out strError);
+        }
+
+        delegate string delegate_replace(string marc);
+
         // 将XML格式的书目记录装入MARC窗中
+        // parameters:
+        //      func_replace    回调函数，用于替换 MARC 字符串中的部分内容
         // return:
         //      -1  error
         //      0   空的记录
         //      1   成功
         int SetBiblioRecordToMarcEditor(string strXml,
+            delegate_replace func_replace,
             out string strError)
         {
             strError = "";
@@ -4759,6 +4799,8 @@ out string strErrorCode)
                 }
                 // this.m_marcEditor.Marc = strMarc;
                 this.MarcSyntax = strOutMarcSyntax;
+                if (func_replace != null)
+                    strMarc = func_replace(strMarc);
                 this.SetMarc(strMarc);
                 return 1;
             }
@@ -4918,7 +4960,7 @@ out string strErrorCode)
                 // 如果记录路径表明这是一条待存的新记录，那就需要准备好strXmlBody，以便获取宏的时候使用
                 nRet = this.GetBiblioXml(
                     "", // 迫使从记录路径中看marc格式
-                    true,   // 包含资源ID
+                    "includeFileID,replaceMacro",    // true,   // 包含资源ID
                     out strXmlBody,
                     out strError);
                 if (nRet == -1)
@@ -8214,6 +8256,10 @@ out strError);
             // 按住 Shift 使用本功能，可重新出现对话框
             bool bShift = (Control.ModifierKeys == Keys.Shift);
 
+            // 按住 Control 使用本功能，可以出现原始的宏定义(方便修改原始模板然后保存回去)。否则宏定义会被兑现
+            // TODO: 如果宏被兑现过了，则保存的时候要警告，说这样保存会毁掉宏定义
+            bool control = (Control.ModifierKeys == Keys.Control);
+
             if (this.BiblioChanged == true
                 || this.EntitiesChanged == true
                 || this.IssuesChanged == true
@@ -8293,20 +8339,15 @@ out strError);
             this.BiblioRecPath = dbname_dlg.DbName + "/?";  // 为了追加保存
 
             // 下载配置文件
-            string strContent = "";
-            string strError = "";
-
-            // string strCfgFilePath = respath.Path + "/cfgs/template";
-            byte[] baCfgOutputTimestamp = null;
             // return:
             //      -1  error
             //      0   not found
             //      1   found
             nRet = this.GetCfgFileContent(strBiblioDbName,
                 "template",
-                out strContent,
-                out baCfgOutputTimestamp,
-                out strError);
+                out string strContent,
+                out byte[] baCfgOutputTimestamp,
+                out string strError);
             if (nRet == -1)
             {
                 this.BiblioTimestamp = null;
@@ -8387,12 +8428,55 @@ out strError);
             this.BiblioOriginPath = ""; // 保存从数据库中来的原始path
 
             // this.TimeStamp = baTimeStamp;
+            delegate_replace func = null;
+            if (control == false)
+                func = (source) =>
+                {
+                    if (source.IndexOf("{{") == -1)
+                        return source;
+                    return dp2StringUtil.MacroString(source,
+                        "{{",
+                        "}}",
+                        (cmd) =>
+                        {
+                            // 从命令 macro:%year%%m2%%d2%%h2%%min2%%sec2%.%hsec%,trigger:save 中解析各个参数
+                            var macro = StringUtil.GetParameterByPrefix(cmd, "macro");
+                            var trigger = StringUtil.GetParameterByPrefix(cmd, "trigger");
+                            if (trigger == null)
+                                trigger = "load";
+                            if (trigger != "load")
+                                return $"{{{{{cmd}}}}}";  // 把此时处理不了的宏还回去
+                            /*
+                            var ret = m_macroutil.Parse(
+                            false,
+                            macro,
+                            out string result,
+                            out string error);
+                            if (nRet == -1)
+                            {
+                                return $"[error:{error}]";
+                            }
+                            return result;
+                            */
+                            var e1 = new ParseMacroEventArgs();
+                            e1.Macro = macro;
+                            e1.Simulate = false;
+                            MarcEditor_ParseMacro(this, e1);
+                            if (string.IsNullOrEmpty(e1.ErrorInfo) == false)
+                            {
+                                return $"[error:{e1.ErrorInfo}]";
+                            }
+                            return e1.Value;
+                        });
+                };
 
             // return:
             //      -1  error
             //      0   空的记录
             //      1   成功
-            nRet = SetBiblioRecordToMarcEditor(select_temp_dlg.SelectedRecordXml,
+            nRet = SetBiblioRecordToMarcEditor(
+                select_temp_dlg.SelectedRecordXml,
+                func,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -8555,12 +8639,16 @@ out strError);
         //      bIncludeFileID  是否要根据当前rescontrol内容合成<dprms:file>元素?
         int GetBiblioXml(
             string strBiblioDbName,
-            bool bIncludeFileID,
+            // bool bIncludeFileID,
+            string style,
             out string strXml,
             out string strError)
         {
             strError = "";
             strXml = "";
+
+            bool bIncludeFileID = StringUtil.IsInList("includeFileID", style);
+            bool replaceMacro = StringUtil.IsInList("replaceMacro", style);
 
             string strMarcSyntax = "";
 
@@ -8591,6 +8679,37 @@ out strError);
 
             // 2008/5/16 changed
             string strMARC = this.GetMarc();    //  this.m_marcEditor.Marc;
+            
+            if (replaceMacro && strMARC.IndexOf("{{") != -1)
+            {
+                // TODO: 这里有个问题，就是宏替换以后，MARC 编辑器中的内容还是没有被宏替换的原始命令，
+                // 是否需要刷新 MARC 编辑器内容为替换后的内容？刷新的优点和缺点都有。
+                // 缺点是如果本次保存失败，再次保存时，相关内容不再会动态变化
+                // 也许好的做法是，等保存成功以后主动重新装载记录，那时候自然就是替换后的状态le 
+                strMARC = dp2StringUtil.MacroString(strMARC,
+                        "{{",
+                        "}}",
+                        (cmd) =>
+                        {
+                            // 从命令 macro:%year%%m2%%d2%%h2%%min2%%sec2%.%hsec%,trigger:save 中解析各个参数
+                            var macro = StringUtil.GetParameterByPrefix(cmd, "macro");
+                            var trigger = StringUtil.GetParameterByPrefix(cmd, "trigger");
+                            if (trigger == null)
+                                trigger = "load";
+                            if (trigger != "save")
+                                return $"{{{{{cmd}}}}}";  // 把此时处理不了的宏还回去
+                            var e1 = new ParseMacroEventArgs();
+                            e1.Macro = macro;
+                            e1.Simulate = false;
+                            MarcEditor_ParseMacro(this, e1);
+                            if (string.IsNullOrEmpty(e1.ErrorInfo) == false)
+                            {
+                                return $"[error:{e1.ErrorInfo}]";
+                            }
+                            return e1.Value;
+                        });
+            }
+
             int nRet = MarcUtil.Marc2Xml(strMARC,
                 strMarcSyntax,
                 out XmlDocument domMarc,
@@ -8728,7 +8847,7 @@ out strError);
                 strXml = "";
                 nRet = this.GetBiblioXml(
                     "", // 迫使从记录路径中看marc格式
-                    true,
+                    "includeFileID,replaceMacro",    // true,
                     out strXml,
                     out strError);
                 if (nRet == -1)
@@ -9009,11 +9128,10 @@ out strError);
             }
 
             // 获得书目记录XML格式
-            string strXmlBody = "";
             nRet = this.GetBiblioXml(
                 "", // 迫使从记录路径中看marc格式
-                bIncludeFileID,
-                out strXmlBody,
+                bIncludeFileID ? "includeFileID,replaceMacro" : "replaceMacro",
+                out string strXmlBody,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -9706,11 +9824,10 @@ out strError);
 
 
             // 获得书目记录XML格式
-            string strXmlBody = "";
             int nRet = this.GetBiblioXml(
                 strBiblioDbName,
-                false,  // 不要包含资源ID
-                out strXmlBody,
+                "", // false,  // 不要包含资源ID，不要替换宏
+                out string strXmlBody,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -10118,6 +10235,10 @@ out strError);
             // 清除校验按钮下方的 DropDown 菜单项，迫使以后重新产生
             ClearVerifyDropDownMenus();
 
+            // 探测当前书目记录编目规则(包括 998$c 和书目记录路径)的变化。如果发生变化，则调用 GenerateData() 的 "!createMenu" 功能
+            // 把 TextChanged 消息延迟堆积到一定程度，然后集中 GetMarc() 运算一次
+            DelayProcessRuleChange();
+
             this.SetSaveAllButtonState(!InDisabledState);
 
             this._marcEditorVersion++;
@@ -10311,6 +10432,15 @@ out strError);
             string strResult = "";
             string strError = "";
 
+            string strOutputValue = dp2StringUtil.MacroTimeValue(e.Macro);
+            if (strOutputValue.IndexOf("%") == -1)
+            {
+                e.Value = strOutputValue;
+                return;
+            }
+
+            e.Macro = strOutputValue;
+
             // 借助于MacroUtil进行处理
             int nRet = m_macroutil.Parse(
                 e.Simulate,
@@ -10325,6 +10455,7 @@ out strError);
 
             e.Value = strResult;
         }
+
 
 #if NO
         // MARC格式校验
@@ -10558,7 +10689,7 @@ out strError);
         }
 
 
-        static int CompileVerifyCs(
+        public static int CompileVerifyCs(
     string strCode,
     string strRef,
     out Assembly assembly,
@@ -10605,7 +10736,7 @@ out strError);
                                     Environment.CurrentDirectory + "\\dp2circulation.exe"
                                 };
 
-            if (saAddRef != null)
+            if (saAddRef != null && saAddRef.Length > 0)
             {
                 string[] saTemp = new string[saRef.Length + saAddRef.Length];
                 Array.Copy(saRef, 0, saTemp, 0, saRef.Length);
@@ -11560,7 +11691,7 @@ out strError);
             */
         }
 
-        static int NewVerifyHostObject(Assembly assembly,
+        public static int NewVerifyHostObject(Assembly assembly,
             out VerifyHost hostObj,
             out string strError)
         {
@@ -11887,6 +12018,7 @@ out strError);
             return 0;
         }
 #endif
+
 
         /*public*/
         int PrepareMarcFilter(
@@ -12300,7 +12432,7 @@ out strError);
             // 获得书目记录XML格式
             int nRet = this.GetBiblioXml(
                 "", // 迫使从记录路径中看marc格式
-                true,   // 包含资源ID
+                "includeFileID,replaceMacro",    // true,   // 包含资源ID
                 out string strXmlBody,
                 out string strError);
             if (nRet == -1)
@@ -13161,16 +13293,21 @@ out strError);
 
         private void MarcEditor_ControlLetterKeyPress(object sender, ControlLetterKeyPressEventArgs e)
         {
+            /* // Keys.T 被 Cut 占用。装载空白工作单已经有 F4 功能键
             if (e.KeyData == Keys.T)
             {
                 e.Handled = true;
                 this.LoadBiblioTemplate(true);
                 return;
             }
+            */
+
+
             if (e.KeyData == Keys.D)
             {
                 e.Handled = true;
-                this.ToolStripMenuItem_searchDupInExistWindow_Click(this, e);
+                // this.ToolStripMenuItem_searchDupInExistWindow_Click(this, e);
+                // TODO: 调用删除拼音
                 return;
             }
 
@@ -13988,7 +14125,7 @@ out strError);
             string strXmlBody = "";
             int nRet = this.GetBiblioXml(
                 "", // 迫使从记录路径中看marc格式
-                true,
+                "includeFileID,replaceMacro",    // true,
                 out strXmlBody,
                 out strError);
             if (nRet == -1)
@@ -14330,6 +14467,87 @@ out strError);
             button_save_Click(sender, e);
         }
 
+        protected override bool ProcessCmdKey(ref Message m, Keys keyData)
+        {
+            // Debug.WriteLine($"EntityForm ProcessCmdKey {keyData}");
+
+            /*
+            // TODO: 调用自动创建数据过程中，为了明显，
+            // 可以用 FloatingMessage 显示。
+            // 如果命令发现不适合完成，可以用 floatingMessage 报错。(例如，插入符在 701 上面点 Ctrl+A，因为 701 有内容了，没有执行功能，需要报错提示)
+            if (keyData == (Keys.A | Keys.Control))
+            {
+                this.MarcEditor.FireSelectedFieldChanged(); // 令数据加工菜单敏感
+                MarcEditor_GenerateData(this.m_marcEditor, new GenerateDataEventArgs());
+                return true;
+            }
+
+            if (keyData == (Keys.Control | Keys.S))
+            {
+                // MessageBox.Show(this, "Call 加拼音");
+
+                GenerateDataEventArgs e1 = new GenerateDataEventArgs();
+                e1.ScriptEntry = "AddPinyin";
+                e1.FocusedControl = this.m_marcEditor;
+                MarcEditor_GenerateData(this.m_marcEditor, e1);
+
+                return true;
+            }
+            if (keyData == (Keys.Control | Keys.D))
+            {
+                // MessageBox.Show(this, "Call 删除拼音");
+
+                GenerateDataEventArgs e1 = new GenerateDataEventArgs();
+                e1.ScriptEntry = "RemovePinyin";
+                e1.FocusedControl = this.m_marcEditor;
+                MarcEditor_GenerateData(this.m_marcEditor, e1);
+
+                return true;
+            }
+            */
+
+            if (keyData == (Keys.D1 | Keys.Control))
+            {
+                this.MarcEditor.Focus();
+                return true;
+            }
+
+
+            if (keyData == (Keys.D2 | Keys.Control))
+            {
+                Program.MainForm.ActivateGenerateDataPage();
+                MainForm.FocusDpTable(Program.MainForm.CurrentGenerateDataControl);
+                return true;
+            }
+
+            if (keyData == (Keys.PageUp | Keys.Control)
+                || keyData == (Keys.NumPad9 | Keys.Control))
+            {
+                var task = this.LoadRecordOldAsync(this.BiblioRecPath,
+                    "prev", true);
+                while (task.IsCompleted == false)
+                {
+                    Application.DoEvents();
+                }
+                var result = task.Result;
+                return true;
+            }
+
+            if (keyData == (Keys.PageDown | Keys.Control)
+                || keyData == (Keys.NumPad3 | Keys.Control))
+            {
+                var task = this.LoadRecordOldAsync(this.BiblioRecPath,
+                    "next", true);
+                while (task.IsCompleted == false)
+                {
+                    Application.DoEvents();
+                }
+                var result = task.Result; return true;
+            }
+
+            return base.ProcessCmdKey(ref m, keyData);
+        }
+
         /// <summary>
         /// 处理对话框键
         /// </summary>
@@ -14338,6 +14556,9 @@ out strError);
         protected override bool ProcessDialogKey(
         Keys keyData)
         {
+            // 去掉Control/Shift/Alt 以后的纯净的键码
+            Keys pure_key = (keyData & (~(Keys.Control | Keys.Shift | Keys.Alt)));
+
             /*
             if (keyData == Keys.Enter)
             {
@@ -14352,34 +14573,51 @@ out strError);
                 return true;
             }
 
-            if (keyData == Keys.F2
-                || keyData == (Keys.Control | Keys.Shift | Keys.S))
+            if (keyData == Keys.F2/*
+                || keyData == (Keys.Control | Keys.Shift | Keys.S)*/)
             {
+                // 注: Ctrl+S 被用作创建拼音
                 this.DoSaveAll();
                 return true;
             }
 
-            // 另存
+            /*
+            if (pure_key == Keys.ControlKey
+                && (keyData & Keys.Control) == Keys.Control)
+            {
+                MarcEditor_GenerateData(this.m_marcEditor, new GenerateDataEventArgs());
+                return true;
+            }
+            */
+
+            // 复制到(另存)
             if (keyData == Keys.F3)
             {
                 this.toolStripButton1_marcEditor_saveTo_Click(this, null);
                 return true;
             }
 
+            // 改用了 F7
+            /*
             // 移动
             if (keyData == (Keys.Alt | Keys.M))
             {
                 toolStripButton_marcEditor_moveTo_Click(this, null);
                 return true;
             }
+            */
 
+            /*
             // 保存(非“全部保存”)
             if (keyData == (Keys.Control | Keys.S))
             {
                 toolStripButton_marcEditor_save_Click(this, null);
                 return true;
             }
+            */
+            // TODO: Ctrl+S 让给“加拼音”
 
+            // 装载空白工作单
             if (keyData == Keys.F4)
             {
                 this.toolStrip_marcEditor.Enabled = false;
@@ -14394,9 +14632,18 @@ out strError);
                 return true;
             }
 
+            // 刷新
             if (keyData == Keys.F5)
             {
                 _ = this.Reload();
+                return true;
+            }
+
+            // 移动到
+            // 2024/7/8
+            if (keyData == Keys.F7)
+            {
+                this.toolStripButton_marcEditor_moveTo_Click(this, null);
                 return true;
             }
 
@@ -14745,8 +14992,14 @@ out strError);
 
         string GetBiblioRecPathOrSyntax()
         {
+            /*
             if (string.IsNullOrEmpty(this.BiblioRecPath) == false)
                 return this.BiblioRecPath;
+            */
+
+            if (string.IsNullOrEmpty(_biblioRecPathCache) == false)
+                return _biblioRecPathCache;
+
             if (string.IsNullOrEmpty(this.MarcSyntax) == false)
                 return "format:" + this.MarcSyntax;
             return "";
@@ -15569,7 +15822,7 @@ out strError);
             string strXmlBody = "";
             int nRet = this.GetBiblioXml(
                 "", // 迫使从记录路径中看marc格式
-                true,   // 包含资源ID
+                "includeFileID,replaceMacro",    // true,   // 包含资源ID
                 out strXmlBody,
                 out strError);
             if (nRet == -1)
@@ -15625,7 +15878,7 @@ out strError);
             string strXmlBody = "";
             int nRet = this.GetBiblioXml(
                 "", // 迫使从记录路径中看marc格式
-                true,   // 包含资源ID
+                "includeFileID,replaceMacro",    // true,   // 包含资源ID
                 out strXmlBody,
                 out strError);
             if (nRet == -1)
@@ -15687,7 +15940,7 @@ out strError);
             // 获得书目记录XML格式
             int nRet = this.GetBiblioXml(
                 "", // 迫使从记录路径中看marc格式
-                true,   // 包含资源ID
+                "includeFileID,replaceMacro",    // true,   // 包含资源ID
                 out strXml,
                 out strError);
             if (nRet == -1)
@@ -16466,7 +16719,7 @@ out strError);
             string strBiblioXml = "";
             int nRet = this.GetBiblioXml(
                 "", // 迫使从记录路径中看marc格式
-                false,
+                "replaceMacro", // false,
                 out strBiblioXml,
                 out strError);
             if (nRet == -1)
@@ -17503,6 +17756,82 @@ out strError);
         {
             // 2024/5/20
             ClearVerifyDropDownMenus();
+
+            _biblioRecPathCache = this.textBox_biblioRecPath.Text;
+
+            DelayProcessRuleChange();
+        }
+
+        List<DateTime> _changedTimes = new List<DateTime>();
+        TimeSpan _changeDelayLength = TimeSpan.FromMilliseconds(1000);
+        string _lastRule = "";
+
+        public string LastRule
+        {
+            get
+            {
+                return _lastRule;
+            }
+        }
+
+        // 延迟堆积处理编目规则变化事件。
+        // 通过 BiblioRecPath 变化，和 MarcEditor 中内容变化，可以判断当前书目记录的编目规则是否真正发生了变化
+        void DelayProcessRuleChange()
+        {
+            lock (_changedTimes)
+            {
+                _changedTimes.Add(DateTime.Now);
+            }
+        }
+
+        void ProcessRuleChangeList()
+        {
+            DateTime last_time = DateTime.MinValue;
+            lock (_changedTimes)
+            {
+                if (_changedTimes.Count == 0)
+                    return;
+                last_time = _changedTimes[_changedTimes.Count - 1];
+                if (DateTime.Now - last_time > _changeDelayLength)
+                    _changedTimes.Clear();
+                else
+                    return;
+            }
+
+            string rule = this.m_marcEditor.Record.Fields.GetFirstSubfield("998", "c");
+
+            if (string.IsNullOrEmpty(rule))
+            {
+                // 探测一条 MARC 记录的编目规则
+                // return:
+                //      -1  出错
+                //      0   没有找到
+                //      1   找到
+                int nRet = BiblioSearchForm.DetectDefaultCatalogingRule(
+                    _biblioRecPathCache,
+                    out rule,
+                    out string strError);
+                if (nRet == -1)
+                    return; // TODO: 如何报错?
+            }
+
+            if (rule == null)
+                rule = "";
+
+            if (_lastRule != rule)
+            {
+                _lastRule = rule;
+
+                // 通知数据加工菜单重新创建
+                this._genData.AutoGenerate(this.m_marcEditor,
+                    new GenerateDataEventArgs
+                    {
+                        ScriptEntry = "!createMenu"
+                    },
+                    GetBiblioRecPathOrSyntax());
+            }
+
+            _lastRule = rule;
         }
 
         // 清除校验按钮下方的 DropDown 菜单项，迫使以后重新产生
@@ -17625,739 +17954,4 @@ out strError);
         public string PrevNextStyle = "";
     }
 
-    /// <summary>
-    /// 校验数据的宿主类
-    /// </summary>
-    public class VerifyHost : IDisposable
-    {
-        public static MainForm MainForm
-        {
-            get
-            {
-                return Program.MainForm;
-            }
-        }
-
-        /// <summary>
-        /// 种册窗
-        /// </summary>
-        public EntityForm DetailForm = null;
-
-        /// <summary>
-        /// 结果字符串
-        /// </summary>
-        // public string ResultString = "";
-
-        public VerifyResult VerifyResult { get; set; }
-
-        /// <summary>
-        /// 脚本编译后的 Assembly
-        /// </summary>
-        public Assembly Assembly = null;
-
-        public void Dispose()
-        {
-            // 2017/4/23
-            if (this.DetailForm != null)
-                this.DetailForm = null;
-        }
-
-        /// <summary>
-        /// 调用一个功能函数
-        /// </summary>
-        /// <param name="strFuncName">功能名称</param>
-        public void Invoke(string strFuncName)
-        {
-            Type classType = this.GetType();
-
-            // 调用成员函数
-            classType.InvokeMember(strFuncName,
-                BindingFlags.DeclaredOnly |
-                BindingFlags.Public | BindingFlags.NonPublic |
-                BindingFlags.Instance | BindingFlags.InvokeMethod
-                ,
-                null,
-                this,
-                null);
-        }
-
-#if REMOVED
-        /// <summary>
-        /// 入口函数
-        /// </summary>
-        /// <param name="sender">事件触发者</param>
-        /// <param name="e">事件参数</param>
-        public virtual void Main(object sender, HostEventArgs e)
-        {
-            // 要触发转换 MARC 功能，需要在 e.e.ScriptEntry 中放入 "#convertMarc"，
-            // 并在 e.e.Parameter 中放入动作名称
-
-            {
-                var marc = this.DetailForm.GetMarc();
-                var action = e.e.Parameter as string;
-                var result = this.Verify(action, marc);
-                if (result.Value == -1)
-                {
-                    this.ResultString = result.ErrorInfo;
-                    return;
-                }
-
-                this.ResultString = result.Result;
-                // this.DetailForm.SetMarc(result.Result);
-            }
-        }
-#endif
-
-        // 2024/5/9
-        // 获得动作列表
-        // parameters:
-        //      operation   目前为 "verify" 或 "convert"
-        public virtual List<string> GetRules(string marc)
-        {
-            return new List<string>();
-        }
-
-        // 2024/5/14
-        // 进行校验
-        public virtual VerifyResult Verify(string rule, string marc)
-        {
-            return new VerifyResult
-            {
-                Value = -1,
-                ErrorInfo = "尚未实现"
-            };
-        }
-
-        public static string ChangeString(string text,
-            int start,
-            string new_value)
-        {
-            if (text.Length < start)
-                return text + (new string(' ', start - text.Length)) + new_value;
-            var left = text.Substring(0, start);
-            if (text.Length < start + new_value.Length)
-                return left + new_value;
-            var right = text.Substring(start + new_value.Length);
-            return left + new_value + right;
-        }
-
-        #region 实用函数
-
-        // 是否为"n版"的形态
-        public static bool IsNumberPlusVersion(string text)
-        {
-            var ret = PriceUtil.ParsePriceUnit(text,
-                out string prefix,
-                out string value,
-                out string postfix,
-                out string error);
-            if (ret == -1)
-                return false;
-            if (string.IsNullOrEmpty(prefix) == true
-                && StringUtil.IsPureNumber(value)
-                && postfix == "版")
-                return true;
-            return false;
-        }
-
-        public static string ReplaceNumberPlusVersion(string content)
-        {
-            int ret = PriceUtil.ParsePriceUnit(content,
-out string prefix,
-out string value,
-out string postfix,
-out string error);
-            if (ret == -1)
-                return content;
-            if (prefix == "第"
-                && StringUtil.IsPureNumber(value)
-                && postfix == "版")
-            {
-                return value + postfix;
-            }
-
-            return content;
-        }
-
-        // 根据丛书名查找记录中的 4xx 字段
-        // return:
-        //      找到的 4xx 字段对象集合
-        public static List<MarcField> Find4xx(
-            MarcRecord record,
-            string field_name,
-            string title)
-        {
-            List<MarcField> results = new List<MarcField>();
-            var subfields = record.select($"field[@name='{field_name}']/field[@name='200']/subfield[@name='a']");
-            foreach (MarcSubfield subfield in subfields)
-            {
-                if (subfield.Content == title)
-                    results.Add(subfield.Parent.Parent as MarcField);
-            }
-
-            return results;
-        }
-
-        // 把所有 $a 子字段内容连接起来成为一个字符串。中间间隔空格
-        public static string JoinSubfield_a(List<MarcField> fields)
-        {
-            StringBuilder text = new StringBuilder();
-            var nodes = new MarcNodeList();
-            foreach (var field in fields)
-            {
-                nodes.add(field);
-            }
-            var subfields = nodes.select("*/subfield[@name='a']");
-            foreach (MarcSubfield subfield in subfields)
-            {
-                if (string.IsNullOrEmpty(subfield.Content))
-                    continue;
-                if (text.Length > 0)
-                    text.Append(" ");
-                text.Append(subfield.Content);
-            }
-            return text.ToString();
-        }
-
-        public static List<string> FindResponseTypes(MarcRecord record)
-        {
-            List<string> results = new List<string>();
-            // 获得 200$f$g 中的编著方式
-            var subfields_fg = record.select("field[@name='200']/subfield[@name='f' or @name='g']");
-            foreach (MarcSubfield subfield in subfields_fg)
-            {
-                if (subfield.Content.Contains("[等]"))
-                {
-                    int index = subfield.Content.IndexOf("[等]");
-                    if (index != -1)
-                    {
-                        var text = subfield.Content.Substring(index + "[等]".Length);
-                        if (string.IsNullOrWhiteSpace(text) == false)
-                            results.Add(text);
-                    }
-                }
-            }
-
-            // 细节调整
-            for (int i = 0; i < results.Count; i++)
-            {
-                if (results[i].EndsWith("著"))
-                {
-                    results[i] = results[i] + "者";
-                    continue;
-                }
-
-                if (results[i].Length == 1)
-                    results[i] = results[i] + "者";
-            }
-
-            return results;
-        }
-
-        public static List<string> GetContents(MarcNodeList list)
-        {
-            return list.List.Select(o => o.Content).ToList();
-        }
-
-        public static List<string> GetNames(MarcNodeList list)
-        {
-            return list.List.Select(o => o.Name).ToList();
-        }
-
-        // 删除一个字符串末尾的(半角)逗号
-        public static string RemoveTailComma(string text)
-        {
-            if (string.IsNullOrEmpty(text)
-                || text.EndsWith(",") == false)
-                return text;
-            return text.Substring(0, text.Length - 1);
-        }
-
-        // 探测当前是否已经存在 $A(或者 $9)。如果已经存在 $9，会自动改为 $A
-        // return:
-        //      false   不存在
-        //      true    已经存在
-        public static bool HasPinyinA(MarcRecord record,
-            string field_name)
-        {
-            // 把已经存在的 $9 变为 $A
-            record.select($"field[@name='{field_name}']/subfield[@name='9']").Name = "A";
-            return record.select($"field[@name='{field_name}']/subfield[@name='A']").count > 0;
-        }
-
-        // return
-        //      -1: 出错;
-        //      0: 用户希望中断;
-        //      1: 正常;
-        //      2: 结果字符串中有没有找到拼音的汉字
-        public static int GetPinyin(string strHanzi,
-            PinyinStyle style,
-            out string strPinyin,
-            out string strError)
-        {
-            return Program.MainForm.GetPinyin(
-                Program.MainForm,
-                strHanzi,
-                style,  // PinyinStyle.None,
-                true,
-                out strPinyin,
-                out strError);
-        }
-
-        public static string SafeSubstring(string text, int start, int length)
-        {
-            if (text == null)
-                return null;
-            try
-            {
-                return text.Substring(start, length);
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-
-
-        // 从 MARC 记录中删除所有类似 $A $F 这样的拼音子字段
-        public static void RemoveUpperLetterPinyinSubfields(MarcRecord record)
-        {
-            foreach (MarcSubfield subfield in record.select("//subfield"))
-            {
-                if (char.IsUpper(subfield.Name[0]))
-                    subfield.detach();
-            }
-        }
-
-        // 检查英文标点符号的正确性
-        public static string CheckEnglishPointing(string text)
-        {
-            // 逗号后有一个空格“,#” ，
-            // "/"前后都有空格“#/#” ，
-            // 分号前后都有空格“#;#”
-            for (int i = 0; i < text.Length; i++)
-            {
-                char left = (char)0;
-                if (i > 0)
-                    left = text[i - 1];
-                char current = text[i];
-                char right = (char)0;
-                if (i < text.Length - 1)
-                    right = text[i + 1];
-
-                if (current == ',' && left == ' ')
-                    return "逗号','左边不应该有空格";
-                if (current == ',' && right != ' ' && right != (char)0)
-                    return "逗号','右边应该有一个空格";
-
-                if (current == '/' && left != ' ' && left != (char)0)
-                    return "斜杠'/'左边应该有一个空格";
-                if (current == '/' && right != ' ' && right != (char)0)
-                    return "斜杠'/'右边应该有一个空格";
-
-                if (current == ';' && left != ' ' && left != (char)0)
-                    return "分号';'左边应该有一个空格";
-                if (current == ';' && right != ' ' && right != (char)0)
-                    return "分号';'右边应该有一个空格";
-
-                if (current == '.' && left == ' ')
-                    return "点'.'左边不应该有空格";
-                if (current == '.' && right != ' ' && right != (char)0)
-                    return "点'.'右边应该有一个空格";
-            }
-
-            return null;
-        }
-
-        public static int CountChar(string text, char ch)
-        {
-            return text.Where(o => o == ch).Count();
-        }
-
-        public static string VerifyUnimarc005(string content)
-        {
-            if (content == null || content.Length != 16)
-                return $"内容应为 16 字符。但现在为 {content?.Length} 字符";
-            if (DateTime.TryParseExact(content,
-                "yyyyMMddHHmmss.f",
-                DateTimeFormatInfo.InvariantInfo,
-                DateTimeStyles.None,
-                out DateTime result) == false)
-                return $"时间字符串 '{content}' 格式不正确";
-            return null;
-        }
-
-        public static MarcNode FirstOrDefault(MarcNodeList list)
-        {
-            return list.List.FirstOrDefault();
-        }
-
-        string[] sample_cfg_lines = new string[] {
-"高中生-->高中",
-"初中生-->初中",
-"小学生-->小学",
-"高职高专-->高职",
-"职业教育-->职业教育",
-"中等专业/中等职业-->中职",
-"技术学校-->技校",
-"漫画、连环画(休闲)-->漫画 连环画",
-"漫画、连环画(娱乐)-->漫画 连环画",
-"成人教育/成人高考-->成人教育",
-"高等教育自学考试-->高自考",
-"老年人-->老年",
-"教材-->教材",
-"幼儿/儿童/少儿-->儿童",
-"青少年-->青少年",
-};
-
-        public static string Verify960a(string[] cfg_lines,
-            List<string> sources,
-            List<string> targets)
-        {
-            foreach (string line in cfg_lines)
-            {
-                var right_word = MatchLeft(line, sources);
-                if (right_word != null
-                    && Contains(targets, right_word) == false)
-                    return $"应当包含 '{right_word}'";
-            }
-
-            return null;
-        }
-
-        static bool Contains(List<string> list, string word)
-        {
-            foreach(var s in list)
-            {
-                if (s.Contains(word))
-                    return true;
-            }
-            return false;
-        }
-
-        static string MatchLeft(string cfg_line, List<string> values)
-        {
-            foreach(string value in values)
-            {
-                var ret = MatchLeft(cfg_line, value);
-                if (ret != null)
-                    return ret;
-            }
-
-            return null;
-        }
-
-        // 匹配左侧的单词，然后如果命中返回右侧的单词
-        // parameters:
-        //      cfg_line "幼儿/儿童/少儿-->儿童"
-        static string MatchLeft(string cfg_line, string text)
-        {
-            if (text == null)
-                return null;
-            var parts = StringUtil.ParseTwoPart(cfg_line, "-->");
-            var left = parts[0];
-            var right = parts[1];
-            var list = StringUtil.SplitList(left, '/');
-            foreach(var s in list)
-            {
-                if (text.Contains(s))
-                    return right;
-            }
-
-            return null;
-        }
-
-        #endregion
-    }
-
-    // .Value:
-    //      -1  执行过程出错(也就是说校验没有完成)
-    //      0   校验正确
-    //      1   校验产生警告
-    //      2   校验产生错误(也可能同时包含警告)
-    // 注: 如果执行出错，.Value 为 -1。此时出错信息放到 .ErrorInfo 中。执行成功时，.Value 为非 -1 的值，此时 .ErrorInfo 中也可以有内容，表示过程信息
-    // 如果执行成功，产生的结果内容放到 .Result 中。.Result 的数据格式放到 .Format 中
-    //  .TargetNewMarc 在 .Value 返回 -1 的时候没有值。其它情况都可能有值
-    public class VerifyResult : NormalResult
-    {
-        // [out] 被改变后的 MARC 机内格式记录
-        public string ChangedMarc { get; set; }
-
-        // [out] Result 的格式
-        public string Format { get; set; }
-
-        // [out] 返回校验结果集合
-        public List<VerifyError> Errors { get; set; }
-
-        public void AddError(string text)
-        {
-            if (Errors == null)
-                Errors = new List<VerifyError>();
-            VerifyError.AddError(Errors, text);
-        }
-
-        public void AddWarning(string text)
-        {
-            if (Errors == null)
-                Errors = new List<VerifyError>();
-            VerifyError.AddWarning(Errors, text);
-        }
-
-        public void AddInfo(string text)
-        {
-            if (Errors == null)
-                Errors = new List<VerifyError>();
-            VerifyError.AddInfo(Errors, text);
-        }
-    }
-
-
-    public class VerifyBase
-    {
-        public MarcRecord Record { get; set; }
-
-        List<VerifyError> _errors = new List<VerifyError>();
-
-        public List<VerifyError> Errors
-        {
-            get
-            {
-                return new List<VerifyError>(_errors);
-            }
-        }
-
-        public void AddError(string text)
-        {
-            VerifyError.AddError(_errors, text);
-        }
-
-        public void AddWarning(string text)
-        {
-            VerifyError.AddWarning(_errors, text);
-        }
-
-        public void AddInfo(string text)
-        {
-            VerifyError.AddInfo(_errors, text);
-        }
-
-        public void AddSucceed(string text)
-        {
-            VerifyError.AddSucceed(_errors, text);
-        }
-
-        public void AddTestingErrors()
-        {
-            AddInfo("这是 info 行");
-            AddWarning("这是 warning 行");
-            AddError("这是 error 行");
-            AddSucceed("这是 succeed 行");
-        }
-
-        public void AutoSetIndicator(string field_name,
-            string new_indicator)
-        {
-            foreach(MarcField field in this.Record.select("field[@name='461']"))
-            {
-                if (field.Indicator != new_indicator)
-                {
-                    AddInfo($"{field_name} 字段的指示符已经从 '{DisplayIndicator(field.Indicator)}' 自动修改为 '{DisplayIndicator(new_indicator)}'");
-                    field.Indicator = new_indicator;
-                }
-            }
-        }
-
-        // 校验字段的必备性，指示符值，字段中子字段的必备性
-        // 注: 单字符参数的含义如下:
-        // r 必备
-        // o 可选
-        // n 可重复
-        // 1 不可重复
-        // parameters:
-        //      condition   校验要求。
-        //                  field:xxxx 字段要求
-        //                  subfield:axxxx|bxxxx|cxxxx 子字段要求
-        //                  indicator:xx|xx|xx 指示符值要求。注意空格用下划线替代
-        public void VerifyField(
-            string field_name,
-            string condition)
-        {
-            var fields = this.Record.select($"field[@name='{field_name}']");
-
-            var field_properties = StringUtil.GetParameterByPrefix(condition, "field");
-            if (field_properties != null)
-            {
-                // r 必备
-                // o 可选
-                // n 可重复
-                // 1 不可重复
-
-                foreach (char value in field_properties)
-                {
-                    if (value == 'r')
-                    {
-                        if (fields.count == 0)
-                            AddError($"缺乏必备的 {field_name} 字段");
-                    }
-                    if (value == '1')
-                    {
-                        if (fields.count > 1)
-                            AddError($"{field_name} 字段多于 1 个");
-                    }
-                    if (value == 'n')
-                    {
-
-                    }
-                }
-            }
-
-
-            var subfield_properties = StringUtil.GetParameterByPrefix(condition, "subfield");
-            if (subfield_properties != null)
-            {
-                foreach (MarcField field in fields)
-                {
-                    // subfield:a|b|c 参数中的名字部分集合
-                    var names = GetSubfieldNames(subfield_properties);
-                    
-                    // 看看 field 中的各个子字段，名字是否超过 names 范围
-                    foreach(MarcSubfield subfield in field.select("subfield"))
-                    {
-                        if (names.IndexOf(subfield.Name) == -1)
-                            AddError($"{field.Name} 字段 ${subfield.Name} 超出定义范围");
-                    }
-                    
-                    foreach (var name in names)
-                    {
-                        var parameter = GetSufieldParameter(subfield_properties, name);
-                        if (parameter != null)
-                        {
-                            var current_subfields = field.select($"subfield[@name='{name}']");
-                            foreach (char p in parameter)
-                            {
-                                // r 必备
-                                // o 可选
-                                // n 可重复
-                                // 1 不可重复
-                                if (p == 'r')
-                                {
-                                    if (current_subfields.count == 0)
-                                        AddError($"{field_name} 字段内缺乏必备的 ${name} 子字段");
-                                }
-                                if (p == '1')
-                                {
-                                    if (current_subfields.count > 1)
-                                        AddError($"{field_name}字段内 ${name} 子字段多于 1 个");
-                                }
-                                if (p == 'n')
-                                {
-
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            var indicator_values = StringUtil.GetParameterByPrefix(condition, "indicator");
-            {
-                string[] values = null;
-                if (indicator_values != null)
-                {
-                    indicator_values = indicator_values.Replace("_", " ");
-                    values = indicator_values.Split('|');
-                }
-                if (fields.count == 1 && values != null)
-                {
-                    MarcField field = fields[0] as MarcField;
-                    if (Array.IndexOf(values, field.Indicator) == -1)
-                        AddError($"{field_name} 字段指示符应为 {IndicatorsToString(values)}。但现在是 '{field.Indicator.Replace(" ", "#")}'");
-                }
-            }
-        }
-
-        // 得到可用于显示的指示符集合字符串
-        static string IndicatorsToString(string[] values)
-        {
-            StringBuilder text = new StringBuilder();
-            foreach (var value in values)
-            {
-                if (text.Length > 0)
-                    text.Append("、");
-                text.Append($"'{value.Replace(" ", "#")}'");
-            }
-
-            return text.ToString();
-        }
-
-        // 获得可用于显示的两位指示符字符。即，把空格替换为 '#'
-        public static string DisplayIndicator(string text)
-        {
-            if (text == null)
-                return text;
-            return text.Replace(" ", "#");
-        }
-
-        // 获得 a?|b?|c? 参数的名字部分。即 a,b,c
-        static List<string> GetSubfieldNames(string subfield_properties)
-        {
-            List<string> results = new List<string>();
-            string[] values = subfield_properties.Split('|');
-
-            foreach (string s in values)
-            {
-                if (string.IsNullOrEmpty(s))
-                    throw new ArgumentException($"subfield 子参数值 '{subfield_properties}' 不合法。'|' 之间至少要有一个字符");
-                string name = s.Substring(0, 1);
-                results.Add(name);
-            }
-
-            return results;
-        }
-
-        // 获得 a?|b?|c? 参数中，指定名字对应的值部分。例如名字 a 对应的就是 ?
-        static string GetSufieldParameter(string subfield_properties,
-            string subfield_name)
-        {
-            string[] values = subfield_properties.Split('|');
-
-            foreach (string s in values)
-            {
-                if (string.IsNullOrEmpty(s))
-                    throw new ArgumentException($"subfield 子参数值 '{subfield_properties}' 不合法。'|' 之间至少要有一个字符");
-                string name = s.Substring(0, 1);
-
-                if (name == subfield_name)
-                {
-                    var result = s.Substring(1);
-                    // r 必备
-                    // o 可选
-                    // n 可重复
-                    // 1 不可重复
-                    if (result.Contains("o") && result.Contains("r"))
-                        throw new ArgumentException($"子字段子参数中的 o 和 r 不允许同时出现。('{result}')");
-                    if (result.Contains("1") && result.Contains("n"))
-                        throw new ArgumentException($"子字段子参数中的 1 和 n 不允许同时出现。('{result}')");
-                }
-            }
-
-            return null;
-        }
-    }
-
-
-    /// <summary>
-    /// 用于数据校验的 FilterDocument 派生类(MARC 过滤器文档类)
-    /// </summary>
-    public class VerifyFilterDocument : FilterDocument
-    {
-        /// <summary>
-        /// 宿主对象
-        /// </summary>
-        public VerifyHost FilterHost = null;
-
-        // 2024/5/14
-        public string Action { get; set; }
-    }
 }

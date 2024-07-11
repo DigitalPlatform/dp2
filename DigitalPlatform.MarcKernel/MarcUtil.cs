@@ -3250,7 +3250,6 @@ out strError);
                     if (nPos >= i && nPos <= i + nChars)
                         return strText[i + 1];
                 }
-
             }
 
             return (char)0;

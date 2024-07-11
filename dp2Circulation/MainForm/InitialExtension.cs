@@ -2561,21 +2561,22 @@ MessageBoxDefaultButton.Button1);
             _backgroundOpenCount--;
             if (_backgroundOpenCount == 0)
             {
-                if (this.m_backgroundForm != null)
+                var backgroundForm = this.m_backgroundForm;
+                if (backgroundForm != null)
                 {
                     LinkStopToBackgroundForm(false);
 
                     // TODO: 最好有个淡出的功能
                     this.MdiClient.SizeChanged -= new EventHandler(MdiClient_SizeChanged);
+                    this.m_backgroundForm = null;   // 先摘离 this，然后再 Close()。避免并发使用的其它地方遇到 backgroundForm.Created 为 false 情况
                     this.TryInvoke(() =>
                     {
                         /*
                         this.m_backgroundForm.MdiParent = null;
                         this.m_backgroundForm.Dock = DockStyle.None;
                         */
-                        this.m_backgroundForm.Close();
+                        backgroundForm.Close();
                     });
-                    this.m_backgroundForm = null;
                 }
             }
         }

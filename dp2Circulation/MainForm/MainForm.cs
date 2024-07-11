@@ -45,6 +45,7 @@ using DigitalPlatform.Core;
 using DigitalPlatform.Z3950;
 using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.RFID;
+using System.Linq;
 
 namespace dp2Circulation
 {
@@ -8682,6 +8683,42 @@ dp2Circulation 版本: dp2Circulation, Version=2.30.6509.21065, Culture=neutral,
 
         }
 
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == (Keys.D1 | Keys.Control))
+            {
+                if (this.ActiveMdiChild is EntityForm)
+                {
+                    var entity_form = this.ActiveMdiChild as EntityForm;
+                    entity_form.MarcEditor.Focus();
+                }
+                return true;
+            }
+
+            if (keyData == (Keys.D2 | Keys.Control))
+            {
+                Program.MainForm.ActivateGenerateDataPage();
+                FocusDpTable(Program.MainForm.CurrentGenerateDataControl);
+                return true;
+            }
+
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
+        static DpTable FindTable(Control control)
+        {
+            if (control == null)
+                return null;
+            return control.Controls.Cast<Control>().Where(o => o is DpTable).FirstOrDefault() as DpTable;
+        }
+
+        public static void FocusDpTable(Control control)
+        {
+            var table = FindTable(control);
+            if (table != null)
+                table.Focus();
+        }
+
         /// <summary>
         /// 处理对话框键
         /// </summary>
@@ -8690,6 +8727,18 @@ dp2Circulation 版本: dp2Circulation, Version=2.30.6509.21065, Culture=neutral,
         protected override bool ProcessDialogKey(
 Keys keyData)
         {
+            var m = Control.ModifierKeys;
+
+            // 去掉Control/Shift/Alt 以后的纯净的键码
+            Keys pure_key = (keyData & (~(Keys.Control | Keys.Shift | Keys.Alt)));
+
+            /*
+            if (pure_key == Keys.A)
+            {
+                MessageBox.Show(this, "MainForm catch Ctrl+A");
+                return true;
+            }
+            */
 #if NO
             if (keyData == Keys.Escape)
             {

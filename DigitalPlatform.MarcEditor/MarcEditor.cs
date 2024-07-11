@@ -16,6 +16,7 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
+using System.Linq;
 
 namespace DigitalPlatform.Marc
 {
@@ -133,6 +134,14 @@ namespace DigitalPlatform.Marc
             }
         }
 
+        // 2024/7/7
+        // 是否要绘制渐变背景色
+        internal bool GradientBack = false;
+
+        // 2024/7/7
+        // 是否要绘制老式内陷式单元边框
+        internal bool InsetStyleCellBorder = true;
+
         // 横线条的颜色
         internal Color defaultHorzGridColor = Color.LightGray;
 
@@ -167,6 +176,38 @@ namespace DigitalPlatform.Marc
             set
             {
                 this.defaultNameCaptionTextColor = value;
+                this.Invalidate();
+            }
+        }
+
+        // 2024/7/5
+        internal Color defaultSelectedBackColor = SystemColors.Highlight;   // Color.FromArgb(90, 90, 255);
+
+        public Color SelectedBackColor
+        {
+            get
+            {
+                return this.defaultSelectedBackColor;
+            }
+            set
+            {
+                this.defaultSelectedBackColor = value;
+                this.Invalidate();
+            }
+        }
+
+        // 2024/7/5
+        internal Color defaultSelectedTextColor = SystemColors.HighlightText;   // Color.FromArgb(255, 255, 255); 
+
+        public Color SelectedTextColor
+        {
+            get
+            {
+                return this.defaultSelectedTextColor;
+            }
+            set
+            {
+                this.defaultSelectedTextColor = value;
                 this.Invalidate();
             }
         }
@@ -377,7 +418,20 @@ namespace DigitalPlatform.Marc
 
         // 当前获得焦点字段索引号与列号
         // 1: 字段名 2: 指示符 3:字段内容
-        internal int m_nFocusCol = 2;
+        internal int m_nFocusCol
+        {
+            get
+            {
+                return _focusCol;
+            }
+            set
+            {
+                _focusCol = value;
+            }
+        }
+
+        private int _focusCol = 2;
+
         // public int m_nFocusedFieldIndex = -1;
 
         // Shift连续选择时的基准点
@@ -558,6 +612,7 @@ namespace DigitalPlatform.Marc
                 ControlLetterKeyPressEventArgs e = new ControlLetterKeyPressEventArgs();
                 e.KeyData = keyData;
                 e.Handled = false;
+                // 过程中可能会改变 e.Handled
                 this.ControlLetterKeyPress(this, e);
                 return e.Handled;
             }
@@ -977,19 +1032,22 @@ namespace DigitalPlatform.Marc
                 case WM_LEFTRIGHT_MOVED:
                     {
                         char current = this.FocusedSubfieldName;
+                        // TODO: 注意区别同名的子字段
                         if (current != m_chOldSubfieldName)
                         {
                             m_chOldSubfieldName = current;
-                            if (this.SelectedFieldChanged != null)
-                            {
-                                this.SelectedFieldChanged(this, new EventArgs());
-                            }
+                            this.FireSelectedFieldChanged();
                         }
                     }
                     break;
                 case API.WM_SETFOCUS:
                     {
-                        this.SetEditPos();
+                        if (GetFocusParameter() == "dont_seteditpos")
+                        {
+
+                        }
+                        else
+                            this.SetEditPos();
                     }
                     return;
 
@@ -1050,25 +1108,29 @@ namespace DigitalPlatform.Marc
                         }
                     }
                     break;
-                    /*
-                case API.WM_LBUTTONDBLCLK:
-                    {
-                        API.SendMessage(this.curEdit.Handle,
-                            m.Msg,
-                            m.WParam, 
-                            m.LParam);
-                        return;
-                    }
-                    break;
-                     */
-                    /*
-                    // 2008/11/26
+                /*
+            case API.WM_LBUTTONDBLCLK:
+                {
+                    API.SendMessage(this.curEdit.Handle,
+                        m.Msg,
+                        m.WParam, 
+                        m.LParam);
+                    return;
+                }
+                break;
+                 */
+                /*
+                // 2008/11/26
+            case API.WM_GETDLGCODE:
+                {
+                    m.Result = new IntPtr(API.DLGC_WANTALLKEYS);
+                    return;
+                }*/
+                // 2024/7/5
+                // 要求容器 Form 把所有方向键发给本控件
                 case API.WM_GETDLGCODE:
-                    {
-                        m.Result = new IntPtr(API.DLGC_WANTALLKEYS);
-                        return;
-                    }*/
-
+                    m.Result = new IntPtr(API.DLGC_WANTALLKEYS | API.DLGC_WANTARROWS | API.DLGC_WANTCHARS);
+                    return;
             }
             base.DefWndProc(ref m);
         }
@@ -1302,7 +1364,6 @@ namespace DigitalPlatform.Marc
             {
                 if (curEdit.Font != this.Font)
                     curEdit.Font = this.Font;
-
             }
 
             if (nCol == 1)  // 字段名
@@ -1470,7 +1531,6 @@ namespace DigitalPlatform.Marc
         // TODO: 把Edit内容送回内存对象后，应为Edit changed设置false，表示这以后没有额外的改变
         internal void EditControlTextToItem()
         {
-
             if (m_nEditControlTextToItemNested > 0)
                 return; // 防止递归
             m_nEditControlTextToItemNested++;
@@ -1543,7 +1603,9 @@ namespace DigitalPlatform.Marc
         // 不负责修改屏幕图像，Edit控件位置大小可能不正确
         // TODO: 把内存对象内容送给Edit后，应为Edit changed设置false，表示这时候两者内容是一致的
         // 送以前要检查Edit changed是否已经为true，如果那样，表明上一次的eidt内容尚未兑现到内存
-        internal void ItemTextToEditControl()
+        // parameters:
+        //      caret_pos 插入符需要设置到的字符位置。如果为 -1 表示不设置插入符位置
+        internal void ItemTextToEditControl(int caret_pos = 0)
         {
             if (this.FocusedFieldIndex == -1)
             {
@@ -1571,6 +1633,7 @@ namespace DigitalPlatform.Marc
             {
 #if BIDI_SUPPORT
                 // string strNewValue = this.FocusedField.m_strValue.Replace(new string(Record.KERNEL_SUBFLD, 1), "\x200e" + new string(Record.KERNEL_SUBFLD, 1));
+
                 string strNewValue = AddBidi(this.FocusedField.m_strValue);
                 if (strNewValue != curEdit.Text)
                 {
@@ -1591,7 +1654,13 @@ namespace DigitalPlatform.Marc
             curEdit.ContentIsNull = false;
 
             // 为了避免在最后一个字段的字段名最后一个字符输入后，小edit转向指示符域的时候，当前焦点突然不在可视范围内了的一个bug
-            curEdit.SelectionStart = 0; // 2006/5/27 xietao add
+            if (caret_pos != -1)
+            {
+                if (caret_pos > curEdit.Text.Length)
+                    caret_pos = curEdit.Text.Length;
+                curEdit.SelectionStart = caret_pos;
+                curEdit.SelectionLength = 0;
+            }
         }
 
         // 添加 BIDI 字符
@@ -1782,8 +1851,12 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             if (this.m_captionFont == null)
                 this.m_captionFont = this.CreateCaptionFont();
             */
+            int focus_line = -1;
+            if (this.SelectedFieldIndices.Count == 1
+                && this.curEdit.Visible)
+                focus_line = this.SelectedFieldIndices[0];
 
-            this.record?.Paint(pe, x, y);
+            this.record?.Paint(pe, x, y, focus_line);
         }
 
         /// <summary>
@@ -1820,10 +1893,10 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             //this.WriteErrorInfo("走到OnMouseDown里");
             this.Capture = true;
 
+            ClearBlockMode();
 
             Point p = new Point(e.X, e.Y);
 
-            int nCol, nField;
             // 测算单击点的位置
             // parameters:
             //		p	输入位置点
@@ -1835,8 +1908,8 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             //		1	在缝隙上
             // 注: 文档的上下左右空白不算record
             int nRet = HitTest(p,
-                out nField,
-                out nCol);
+                out int nField,
+                out int nCol);
             if (nRet == 1)
             {
                 nDragCol = nCol;
@@ -1850,23 +1923,30 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                 if (nField == -1 || nCol == -1)
                     Debug.Assert(false, "不可能的情况");
 
-                // 如果是右键菜单，且在选中项上单击，而且是第一列, 则跳过，不再做选中某项的事情
-                if (e.Button == MouseButtons.Right && nCol == 0)
+                // 2024/7/5
+                if (e.Button == MouseButtons.Right)
                 {
+                    PopupMenu(new Point(e.X, e.Y));
+                    return;
+                }
 
+                // 如果是右键菜单，且在选中项上单击，而且是第一列, 则跳过，不再做选中某项的事情
+                if (e.Button == MouseButtons.Right
+                    && nCol == 0)
+                {
                     if (this.SelectedFieldIndices.IndexOf(nField) != -1)
                     {
                         PopupMenu(new Point(e.X, e.Y));
                         return;
                     }
-
                 }
 
                 // 如果当前选项为一项，且在自身上单击
                 if (this.SelectedFieldIndices.Count == 1
                     && this.FocusedFieldIndex == nField)
                 {
-                    if (this.m_nFocusCol != nCol)
+                    if (this.m_nFocusCol != nCol
+                        || this.curEdit.Visible == false/* 2024/7/5 */)
                     {
                         this.SetActiveField(nField, nCol);
 
@@ -1965,6 +2045,186 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             }
         END1:
             base.OnMouseDown(e);
+        }
+
+        // 是否处在定义块的状态
+        internal bool _block_mode = false;
+        // 连续拖动定义字段块时，开始的字段编号
+        internal int _nCurrentFieldIndex = -1;
+
+        /*
+         * 进入方向键定义字段块的状态：
+         * nStartFieldIndex 表示起点字段号
+         * _nCurrentFieldIndex 表示当前字段号
+         * 在响应击键的模块，可以用 _nCurrentFieldIndex 得知当前所在的字段编号。减一就是上一个字段，加一就是下一个字段
+         * 当方向键移动的时候，就不断修改 _nCurrentFieldIndex 的值，并且不断修改 SelectedIndices 集合
+         * 这时候，小 edit 应该是隐藏的状态。可以考虑用一个虚线框子显示 focus 所在的字段
+         * */
+
+#if REMOVED
+        internal bool CaretMove(int field_no, bool shift)
+        {
+            if (shift == false)
+            {
+                // 确保当前唯一选定的字段为 field_no
+                nStartFieldIndex = field_no;
+                _nCurrentFieldIndex = field_no;
+                _block_mode = false;
+            }
+            else // shift 按下
+            {
+                if (_block_mode == false)
+                {
+                    _block_mode = true;
+                    nStartFieldIndex = field_no;
+                    _nCurrentFieldIndex = field_no;
+                    this.AddSelectedField(field_no, field_no, true);
+                }
+                else
+                {
+                    _nCurrentFieldIndex = field_no;
+                    this.AddSelectedField(nStartFieldIndex, field_no, true);
+                }
+            }
+
+            if (_block_mode)
+                return true;
+            return false;
+        }
+#endif
+
+        internal bool BlockStart(int direction)
+        {
+            if (Control.ModifierKeys != Keys.Shift)
+            {
+                _block_mode = false;
+                return false;
+            }
+
+            if (_block_mode == false)
+            {
+                _block_mode = true;
+                nStartFieldIndex = this.FocusedFieldIndex;
+                _nCurrentFieldIndex = nStartFieldIndex;
+                if (direction == -1)
+                {
+                    if (_nCurrentFieldIndex > 0)
+                        _nCurrentFieldIndex--;
+                }
+                else if (direction == 1)
+                {
+                    if (_nCurrentFieldIndex < this.record.Fields.Count - 1)
+                        _nCurrentFieldIndex++;
+                }
+
+                this.AddSelectedField(nStartFieldIndex, _nCurrentFieldIndex, true);
+                EnsureCurrentVisible();
+                return true;
+            }
+
+            return false;
+        }
+
+        // 块定义状态，做一次 up 动作
+        internal bool BlockUp()
+        {
+            if (_block_mode == false)
+                return false;
+
+            bool shift = Control.ModifierKeys == Keys.Shift;
+            if (shift == false)
+            {
+                LeaveBlockMode();
+                return true;
+            }
+
+            if (_nCurrentFieldIndex > 0)
+            {
+                _nCurrentFieldIndex--;
+                this.AddSelectedField(nStartFieldIndex, _nCurrentFieldIndex, true);
+                EnsureCurrentVisible();
+            }
+
+            return true;
+        }
+
+        internal bool BlockDown()
+        {
+            if (_block_mode == false)
+                return false;
+
+            bool shift = Control.ModifierKeys == Keys.Shift;
+            if (shift == false)
+            {
+                LeaveBlockMode();
+                return true;
+            }
+
+            if (_nCurrentFieldIndex < this.record.Fields.Count - 1)
+            {
+                _nCurrentFieldIndex++;
+                this.AddSelectedField(nStartFieldIndex, _nCurrentFieldIndex, true);
+                EnsureCurrentVisible();
+            }
+
+            return true;
+        }
+
+        void LeaveBlockMode()
+        {
+            // 脱离 block mode。并 SetActiveField() 到 _nCurrentFieldIndex 字段
+            _block_mode = false;
+            this.SetActiveField(_nCurrentFieldIndex, 1);
+            // this.curEdit.SelectionStart = 0;
+        }
+
+        List<string> _setFocus_parameters = new List<string>();
+        void AddFocusParameter(string text, bool clear_before)
+        {
+            lock (_setFocus_parameters)
+            {
+                if (clear_before || this._setFocus_parameters.Count > 100)
+                    this._setFocus_parameters.Clear();
+
+                this._setFocus_parameters.Add(text);
+            }
+        }
+
+        string GetFocusParameter()
+        {
+            lock (_setFocus_parameters)
+            {
+                if (_setFocus_parameters.Count == 0)
+                    return null;
+                string value = _setFocus_parameters[0];
+                _setFocus_parameters.RemoveAt(0);
+                return value;
+            }
+        }
+
+        void EnsureCurrentVisible()
+        {
+            this.HideTextBox();
+
+            if (this.Focused == false)
+            {
+                // 希望执行 WM_SETFOCUS 时不要自动调用 SetEditPos();
+                this.AddFocusParameter("dont_seteditpos", true);
+                this.Focus();
+                // Debug.WriteLine("EnsureCurrentVisible SetFocus()");
+            }
+
+            var field = this.Record.Fields[_nCurrentFieldIndex];
+
+            EnsureVisible(_nCurrentFieldIndex,
+                3,
+                new Rectangle(0, 0, 10, field.TotalHeight));
+        }
+
+        // 清除字段块标志
+        internal void ClearBlockMode()
+        {
+            _block_mode = false;
         }
 
         void DrawTraker()
@@ -2265,7 +2525,7 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             contextMenu.MenuItems.Add(menuItem);
 
             // 剪切
-            menuItem = new MenuItem("剪切字段");// + strName);
+            menuItem = new MenuItem("剪切字段(Ctrl+X)");// + strName);
             menuItem.Click += new System.EventHandler(this.menuItem_Cut);
             contextMenu.MenuItems.Add(menuItem);
             if (this.SelectedFieldIndices.Count > 0
@@ -2275,7 +2535,7 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                 menuItem.Enabled = false;
 
             //复制
-            menuItem = new MenuItem("复制字段");// + strName);
+            menuItem = new MenuItem("复制字段(Ctrl+C)");// + strName);
             menuItem.Click += new System.EventHandler(this.menuItem_Copy);
             contextMenu.MenuItems.Add(menuItem);
             if (this.SelectedFieldIndices.Count > 0)
@@ -2735,7 +2995,7 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             MessageBox.Show(this, strError);
         }
 
-        void menuItem_sortFields(object sender, EventArgs e)
+        internal void menuItem_sortFields(object sender, EventArgs e)
         {
             bool bHasFocus = this.Focused;
 
@@ -2774,14 +3034,18 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
         // 右键弹出上下文菜单
         private void PopupMenu(Point p)
         {
-            if (this.m_nFocusCol == 0 || this.SelectedFieldIndices.Count > 1)
+            if (this.curEdit.Visible == false)
+            // if (this.m_nFocusCol == 0 || this.SelectedFieldIndices.Count > 1)
             {
+                // 小 edit 不可见时，包括选择了一个或者多个字段的各种情况
                 ContextMenu contextMenu = new ContextMenu();
-                AppendMenu(contextMenu, true);
+                this.AppendMenu(contextMenu, true);
                 contextMenu.Show(this, p);
             }
             else
             {
+                // 小 edit 可见时
+
                 this.curEdit.PopupMenu(this, p);
 
                 /*
@@ -2832,6 +3096,82 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             base.OnFontChanged(e);
         }
 
+        protected override void OnKeyPress(KeyPressEventArgs e)
+        {
+            if (this.ReadOnly == false
+                && (Control.ModifierKeys & (Keys.Control | Keys.Alt)) == 0)
+            {
+
+                // 当小 edit 隐藏的情况下，击键消息会发到这里来。
+                // 一般的内容字符，需要先观察当前是否存在块定义。如果存在，
+                // 则，清除块内容。然后把这个字符作为字段名的第一个字符，创建
+                // 一个全新的字段，最后把输入焦点放到这个字段的字段名上
+                if (this.SelectedFieldIndices.Count > 0)
+                {
+                    int start_line = this.SelectedFieldIndices.Min();
+                    DeleteFieldWithDlg(false);
+
+                    var field = this.record.Fields.Insert(start_line,
+    e.KeyChar + "  ",
+    "  ", //指示符
+    "");
+                    this.SetActiveField(field, 1);
+                    this.curEdit.SelectionStart = 1;
+
+                    e.Handled = true;
+                }
+            }
+
+            base.OnKeyPress(e);
+        }
+
+#if REMOVED
+        protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e)
+        {
+            switch (e.KeyCode)
+            {
+                case Keys.Delete:
+                    {
+                        if (this.SelectedFieldIndices.Count > 0)
+                            this.DeleteFieldWithDlg();
+                        // e.Handled = true;
+                    }
+                    break;
+                case Keys.Up:
+                    if (this.BlockUp())
+                    {
+                        //e.Handled = true;
+                        return;
+                    }
+                    break;
+                case Keys.Down:
+                    if (this.BlockDown())
+                    {
+                        //e.Handled = true;
+                        return;
+                    }
+                    break;
+                case Keys.Left:
+                    if (this.BlockUp())
+                    {
+                        //e.Handled = true;
+                        return;
+                    }
+                    break;
+                case Keys.Right:
+                    if (this.BlockDown())
+                    {
+                        //e.Handled = true;
+                        return;
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+            base.OnPreviewKeyDown(e);
+        }
+#endif
         //
         // 摘要:
         //     引发 System.Windows.Forms.Control.KeyDown 事件。
@@ -2851,19 +3191,95 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                 return;
             }
 
-            base.OnKeyDown(e);
             switch (e.KeyCode)
             {
                 case Keys.Delete:
+                case Keys.Back:
                     {
                         if (this.SelectedFieldIndices.Count > 0)
+                        {
                             this.DeleteFieldWithDlg();
+                            e.Handled = true;
+                            /*
+                            {
+                                int start_line = this.SelectedFieldIndices.Min();
+                                DeleteFieldWithDlg(false);
+                                if (start_line < this.Record.Fields.Count)
+                                    AddSelectedField(start_line, start_line, true);
+                            }
+                            */
+                        }
+                    }
+                    break;
+                case Keys.Up:
+                    if (this.BlockUp())
+                    {
+                        e.Handled = true;
+                        return;
+                    }
+                    break;
+                case Keys.Down:
+                    if (this.BlockDown())
+                    {
+                        e.Handled = true;
+                        return;
+                    }
+                    break;
+                case Keys.Left:
+                    if (this.BlockUp())
+                    {
+                        e.Handled = true;
+                        return;
+                    }
+                    break;
+                case Keys.Right:
+                    if (this.BlockDown())
+                    {
+                        e.Handled = true;
+                        return;
+                    }
+                    break;
+                case Keys.A:
+                    if (e.Control == true)
+                    {
+                        MessageBox.Show(this, "MarcEditor OnKeyDown catch Ctrl+A");
+                        e.Handled = true;
+                    }
+                    break;
+                case Keys.X:
+                    if (e.Control)
+                    {
+                        this.menuItem_Cut(null, null);
+                        e.Handled = true;
+                    }
+                    break;
+                case Keys.C:
+                    if (e.Control)
+                    {
+                        this.menuItem_Copy(null, null);
+                        e.Handled = true;
+                    }
+                    break;
+                case Keys.V:
+                    if (e.Control)
+                    {
+                        this.menuItem_PasteOverwrite(null, null);
+                        e.Handled = true;
+                    }
+                    break;
+                case Keys.Y:
+                    if (e.Control)
+                    {
+                        GenerateDataEventArgs ea = new GenerateDataEventArgs();
+                        this.OnVerifyData(ea);
+                        e.Handled = true;
                     }
                     break;
                 default:
                     break;
             }
 
+            base.OnKeyDown(e);
         }
 
         //
@@ -2893,7 +3309,7 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             }
             else
             {
-                this.nStartFieldIndex = -1;
+                // this.nStartFieldIndex = -1;
                 //MessageBox.Show(this,"有shift");
             }
             base.OnKeyUp(e);
@@ -3053,6 +3469,24 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             }
         }
 
+        public string GetCurrentLocationString()
+        {
+            if (this.curEdit == null)
+                throw new Exception("this.curEdit 为 null，无法执行 GetCurrentLocationString()");
+            if (this.curEdit.Visible == false)
+                return "";
+
+            // 当前插入符所在位置
+            int current_offs = this.curEdit.SelectionStart;
+            // 探测点取中间位置
+            if (this.curEdit.SelectionLength > 0)
+                current_offs += this.curEdit.SelectionLength / 2;
+
+            return this.Record.GetSubfieldLocationString(
+                this.FocusedFieldIndex,
+                current_offs);
+        }
+
         internal void Test()
         {
             char subfieldname = MarcUtil.SubfieldNameByOffs(
@@ -3198,8 +3632,12 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                 if (this.DesignMode && this.record == null)
                     return;
 
+                var line = this.FocusedFieldIndex;
+                var col = this._focusCol;
+                var caret_pos = 0;
                 if (this.curEdit != null)
                 {
+                    caret_pos = this.curEdit.SelectionStart;
                     this.curEdit.Hide();
                     this.curEdit.Dispose();
                     this.curEdit = null;
@@ -3220,6 +3658,14 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                         else
                             throw (new Exception("SetMarc()出错，原因：" + strError));
                     }
+
+                    // 2024/7/10
+                    if (line >= this.Record.Fields.Count)
+                        line = this.Record.Fields.Count - 1;
+                    if (col < 1)
+                        col = 1;
+                    if (line >= 0)
+                        this.SetActiveField(line, col, caret_pos, false);
                 }
 
                 // 2014/7/10
@@ -3340,18 +3786,31 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
         internal void SetActiveField(int nFieldIndex,
             int nCol)
         {
-            this.SetActiveField(nFieldIndex, nCol, true);
+            this.SetActiveField(nFieldIndex, nCol, 0, true);
+        }
+
+        // 兼容以前调用
+        internal void SetActiveField(int nFieldIndex,
+    int nCol,
+    bool bFocus)
+        {
+            SetActiveField(nFieldIndex,
+    nCol,
+    0,
+    bFocus);
         }
 
         // 把一个字段设为当前活动的字段
         // parameters:
+        //      caret_pos   小 edit 要设置的插入符的字符位置。从本区域单独计数
         //      bFocus  是否将焦点放到上面
         internal void SetActiveField(int nFieldIndex,
             int nCol,
+            int caret_pos,
             bool bFocus)
         {
             if (nFieldIndex < 0 || nFieldIndex >= this.record.Fields.Count)
-                throw new Exception("ActiveField()调用错误，不能设当前活动字段为'" + Convert.ToString(nFieldIndex) + "'。下标越界。");
+                throw new ArgumentException("ActiveField()调用错误，不能设当前活动字段为'" + Convert.ToString(nFieldIndex) + "'。下标越界。");
 
             if (this.SelectedFieldIndices.Count == 1)
             {
@@ -3407,7 +3866,7 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             this.SetEditPos(bFocus);
 
             // 把新内容赋到小edit控件里
-            this.ItemTextToEditControl();
+            this.ItemTextToEditControl(caret_pos);
 
             this.FocusedField.Selected = true;
             if (nFieldIndex != -1 && nFieldIndex < this.record.Fields.Count)
@@ -3492,6 +3951,14 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             {
                 this.SelectedFieldChanged(this, new EventArgs());
                 m_chOldSubfieldName = this.FocusedSubfieldName;
+            }
+        }
+
+        public void FireSelectedFieldChanged()
+        {
+            if (this.SelectedFieldChanged != null)
+            {
+                this.SelectedFieldChanged(this, new EventArgs());
             }
         }
 
@@ -4352,8 +4819,94 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
 
             // 2007/7/17
             AdjustOriginY();
-
         }
+
+#if REMOVED
+        // 当小 edit 隐藏时，通过这里接管Ctrl+各种键
+        /// <summary>
+        /// 处理对话框键
+        /// </summary>
+        /// <param name="keyData">System.Windows.Forms.Keys 值之一，它表示要处理的键。</param>
+        /// <returns>如果控件处理并使用击键，则为 true；否则为 false，以允许进一步处理</returns>
+        protected override bool ProcessDialogKey(
+            Keys keyData)
+        {
+            // 去掉Control/Shift/Alt 以后的纯净的键码
+            Keys pure_key = (keyData & (~(Keys.Control | Keys.Shift | Keys.Alt)));
+
+            if (Control.ModifierKeys == Keys.Control
+                && (pure_key == Keys.Enter || pure_key == Keys.LineFeed))
+            {
+                // TODO: 回车换行
+                return true;
+            }
+
+            /*
+            // Ctrl + M
+            if (Control.ModifierKeys == Keys.Control
+                && pure_key == Keys.M)
+            {
+                EditControlTextToItem();
+                // 调定长模板
+                GetValueFromTemplate();
+                return true;
+            }
+            */
+
+            // Ctrl + X
+            // ? 好像不管用
+            if ((keyData & Keys.Control) == Keys.Control
+                && pure_key == Keys.X)
+            {
+                this.menuItem_Cut(null, null);
+                return true;
+            }
+
+            // Ctrl + C
+            if ((keyData & Keys.Control) == Keys.Control
+                && pure_key == Keys.C)
+            {
+                this.menuItem_Copy(null, null);
+                return true;
+            }
+
+            // Ctrl + V
+            if ((keyData & Keys.Control) == Keys.Control
+                && pure_key == Keys.V)
+            {
+                this.menuItem_PasteOverwrite(null, null);
+                return true;
+            }
+
+            // Ctrl+Y 校验数据
+            if (keyData == (Keys.Y | Keys.Control))
+            {
+                GenerateDataEventArgs ea = new GenerateDataEventArgs();
+                this.OnVerifyData(ea);
+                return true;
+            }
+
+            // 其余未处理的键
+            if ((keyData & Keys.Control) == Keys.Control)
+            {
+                bool bRet = this.OnControlLetterKeyPress(pure_key);
+                if (bRet == true)
+                    return true;
+            }
+
+            // Del 删除所选的若干字段
+            if (keyData == Keys.Delete)
+            {
+                int start_line = this.SelectedFieldIndices.Min();
+                DeleteFieldWithDlg(false);
+                if (start_line < this.Record.Fields.Count)
+                    AddSelectedField(start_line, start_line, true);
+                return true;
+            }
+
+            return base.ProcessDialogKey(keyData);
+        }
+#endif
 
         public void DoCtrlK(Keys key)
         {
@@ -4853,17 +5406,31 @@ SYS	011528318
         private void menuItem_PasteOverwrite(object sender,
             System.EventArgs e)
         {
+            /*
+            if (this.SelectedFieldIndices.Count == 0)
+            {
+                MessageBox.Show(this, "没有找到插入位置");
+                return;
+            }
+
             Debug.Assert(this.SelectedFieldIndices.Count >= 1, "在粘贴覆盖时，SelectedFieldIndices必须>=1。");
+            */
 
             // 先删除选定的所有字段
+            /*
             int[] fieldIndices = new int[this.SelectedFieldIndices.Count];
             for (int i = 0; i < fieldIndices.Length; i++)
             {
                 fieldIndices[i] = (int)this.SelectedFieldIndices[i];
             }
             this.record.Fields.RemoveAt(fieldIndices);
+            */
+            var indices = this.SelectedFieldIndices.ToArray();
+            this.record.Fields.RemoveAt(indices);
 
-            int nFirstIndex = fieldIndices[0];
+            int nFirstIndex = 0;// fieldIndices[0];
+            if (indices.Length > 0)
+                nFirstIndex = indices[0];
 
             // 2007/7/17
             // 在被删除的第一个index处进行插入
@@ -5307,44 +5874,47 @@ SYS	011528318
         // return:
         //      false   放弃
         //      true    已经处理
-        internal bool DeleteFieldWithDlg()
+        internal bool DeleteFieldWithDlg(bool show_dialog = true)
         {
             Debug.Assert(this.SelectedFieldIndices.Count > 0, "在'删除'时，SelectedFieldIndices个数必须大于0");
 
-            string strFieldInfo = "";
-            if (this.SelectedFieldIndices.Count == 1)
+            if (show_dialog)
             {
-                strFieldInfo = "'" + this.FocusedField.Name + "'";
+                string strFieldInfo = "";
+                if (this.SelectedFieldIndices.Count == 1)
+                {
+                    strFieldInfo = "'" + this.FocusedField.Name + "'";
+                }
+                else
+                {
+                    strFieldInfo = "选中的'"
+                        + Convert.ToString(this.SelectedFieldIndices.Count)//this.FocusedField.m_strName 
+                        + "'个";
+                }
+
+                string strText = "确实要删除"
+                    + strFieldInfo
+                    + "字段吗?";
+                /*
+                DialogResult result = MessageBox.Show(this,
+                    strText,
+                    "MarcEditor",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question,
+                    MessageBoxDefaultButton.Button1);
+                if (result == DialogResult.No) 
+                    return false;
+                 */
+
+                DeleteFieldDlg dlg = new DeleteFieldDlg();
+                GuiUtil.AutoSetDefaultFont(dlg);
+
+                dlg.Message = strText;
+                dlg.StartPosition = FormStartPosition.CenterScreen;
+                dlg.ShowDialog(this);
+                if (dlg.DialogResult != DialogResult.Yes)
+                    return false;
             }
-            else
-            {
-                strFieldInfo = "选中的'"
-                    + Convert.ToString(this.SelectedFieldIndices.Count)//this.FocusedField.m_strName 
-                    + "'个";
-            }
-
-            string strText = "确实要删除"
-                + strFieldInfo
-                + "字段吗?";
-            /*
-			DialogResult result = MessageBox.Show(this,
-				strText,
-				"MarcEditor",
-				MessageBoxButtons.YesNo,
-				MessageBoxIcon.Question,
-				MessageBoxDefaultButton.Button1);
-			if (result == DialogResult.No) 
-				return false;
-             */
-
-            DeleteFieldDlg dlg = new DeleteFieldDlg();
-            GuiUtil.AutoSetDefaultFont(dlg);
-
-            dlg.Message = strText;
-            dlg.StartPosition = FormStartPosition.CenterScreen;
-            dlg.ShowDialog(this);
-            if (dlg.DialogResult != DialogResult.Yes)
-                return false;
 
             int[] fieldIndices = new int[this.SelectedFieldIndices.Count];
             for (int i = 0; i < fieldIndices.Length; i++)
@@ -5355,7 +5925,6 @@ SYS	011528318
 
             // 2007/7/17
             AdjustOriginY();
-
             return true;
         }
 
@@ -5822,7 +6391,7 @@ SYS	011528318
             {
                 if (bSimulate == false)
                     Console.Beep();
-                return null;
+                return new List<string>();
             }
 
             List<string> results = new List<string>();
@@ -5859,7 +6428,7 @@ SYS	011528318
             }
             else
             {
-                return null;
+                return new List<string>();
             }
 
             string strError;
@@ -5887,7 +6456,7 @@ SYS	011528318
                     goto ERROR1;
 
                 if (nRet == 0)
-                    return null;
+                    return new List<string>();
 
                 // 如果当前插入符在内容上,则不要包含指示符部分
                 if (this.m_nFocusCol == 3
@@ -5953,7 +6522,7 @@ SYS	011528318
                 }
 
                 if (nRet == 0)
-                    return null;
+                    return new List<string>();
 
                 if (bSimulate == true)
                     return results;
@@ -5989,7 +6558,7 @@ SYS	011528318
             }
 
             MessageBox.Show(this, strError);
-            return null;
+            return new List<string>();
         }
 
         // 获得宏值
@@ -6210,64 +6779,6 @@ SYS	011528318
 
 #endif
 
-        /// <summary>
-        /// 兑现时间宏值
-        /// </summary>
-        /// <param name="strMacro">要处理的宏字符串</param>
-        /// <returns>兑现宏以后的字符串</returns>
-        public static string MacroTimeValue(string strMacro)
-        {
-            DateTime time = DateTime.Now;
-
-            // utime
-            strMacro = strMacro.Replace("%utime%", time.ToString("u"));
-
-            // 年 year
-            strMacro = strMacro.Replace("%year%", Convert.ToString(time.Year).PadLeft(4, '0'));
-
-            // 年 y2
-            strMacro = strMacro.Replace("%y2%", time.Year.ToString().PadLeft(4, '0').Substring(2, 2));
-
-            // 月 month
-            strMacro = strMacro.Replace("%month%", Convert.ToString(time.Month));
-
-            // 月 m2
-            strMacro = strMacro.Replace("%m2%", Convert.ToString(time.Month).PadLeft(2, '0'));
-
-            // 日 day
-            strMacro = strMacro.Replace("%day%", Convert.ToString(time.Day));
-
-            // 日 d2
-            strMacro = strMacro.Replace("%d2%", Convert.ToString(time.Day).PadLeft(2, '0'));
-
-            // 时 hour
-            strMacro = strMacro.Replace("%hour%", Convert.ToString(time.Hour));
-
-            // 时 h2
-            strMacro = strMacro.Replace("%h2%", Convert.ToString(time.Hour).PadLeft(2, '0'));
-
-            // 分 minute
-            strMacro = strMacro.Replace("%minute%", Convert.ToString(time.Minute));
-
-            // 分 min2
-            strMacro = strMacro.Replace("%min2%", Convert.ToString(time.Minute).PadLeft(2, '0'));
-
-            // 秒 second
-            strMacro = strMacro.Replace("%second%", Convert.ToString(time.Second));
-
-            // 秒 sec2
-            strMacro = strMacro.Replace("%sec2%", Convert.ToString(time.Second).PadLeft(2, '0'));
-
-            // 百分秒 hsec
-            strMacro = strMacro.Replace("%hsec%", Convert.ToString(time.Millisecond / 100));
-
-            // 毫秒 msec
-            strMacro = strMacro.Replace("%msec%", Convert.ToString(time.Millisecond));
-
-
-            return strMacro;
-        }
-
         // 通过模板取固定字段的值
         // parameter:
         //		strFieldName	字段名称
@@ -6441,7 +6952,7 @@ SYS	011528318
             // 将一些基本的宏兑现
             // %year%%m2%%d2%%h2%%min2%%sec2%.%hsec%
 
-            string strOutputValue = MacroTimeValue(e.Macro);
+            string strOutputValue = dp2StringUtil.MacroTimeValue(e.Macro);
 
             // 替换下划线
             // 只替换前面连续的'_'
@@ -6987,6 +7498,22 @@ SYS	011528318
                 }
             }
         }
+
+        public int CalcuTextLineHeight(Graphics g_param)
+        {
+            Graphics g = g_param;
+            if (g == null)
+                g = Graphics.FromHwnd(this.Handle);
+
+            var size = TextRenderer.MeasureText(g,
+                "lg",
+                this.Font,
+                new Size(100, -1),
+                MarcEditor.editflags);
+
+            return size.Height;
+        }
+
     }
 
     internal class InvalidateRect

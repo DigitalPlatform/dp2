@@ -220,6 +220,7 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 设置种次号尾号
+        // TODO: 增强 strZhongcihaoGroupName 语义，允许直接表达“种次号库名”
         public LibraryServerResult SetZhongcihaoTailNumber(
             SessionInfo sessioninfo,
             string strAction,

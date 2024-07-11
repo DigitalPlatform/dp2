@@ -717,7 +717,7 @@ namespace dp2Circulation
                 this.DetailForm.MarcEditor.Focus();
             }
             return 0;
-            ERROR1:
+        ERROR1:
             if (string.IsNullOrEmpty(strError) == false)
             {
                 if (strError[0] != ' ')
@@ -906,7 +906,7 @@ namespace dp2Circulation
                 this.DetailForm.MarcEditor.Focus();
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this.DetailForm, strError);
         }
         /*
@@ -1996,7 +1996,7 @@ namespace dp2Circulation
             dlg.Show();
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this.DetailForm, strError);
         }
 
@@ -2305,10 +2305,10 @@ namespace dp2Circulation
             int nRet = 0;
 
             List<string> types = StringUtil.SplitList(strQufenhaoTypes);
-            
+
             // 2023/10/16
             // 如果 types 中同时含有 GCAT 和 Cutter，GCAT 应该放到 Cutter 前面处理
-            if (types.Count > 1 
+            if (types.Count > 1
                 && types.IndexOf("GCAT") != -1
                 && types[0] != "GCAT")
             {
@@ -2462,7 +2462,7 @@ namespace dp2Circulation
                 string type = one.Type;
                 string strAuthor = one.Author;
                 Debug.Assert(String.IsNullOrEmpty(strAuthor) == false, "");
-                REDO:
+            REDO:
 
                 if (type == "GCAT")
                 {
@@ -2607,8 +2607,8 @@ namespace dp2Circulation
                     goto ERROR1;
                 }
             }
-            //return 0;
-            ERROR1:
+        //return 0;
+        ERROR1:
             return -1;
         }
 
@@ -2831,7 +2831,7 @@ namespace dp2Circulation
                     strError = "MARC记录中 700/710/720/701/711/702/712/200 中均未发现包含汉字的 $a 子字段内容，无法获得著者字符串";
                     fLevel = 0;
                     return 0;
-                    FOUND:
+                FOUND:
                     // TODO: 检查内容中是否有 "(美)"这样的开头部分，如果有，则报错
                     Debug.Assert(results.Count > 0, "");
                     strAuthor = results[0];
@@ -2925,7 +2925,7 @@ namespace dp2Circulation
                     strError = "MARC记录中 700/710/720/701/711/702/712/200 中均未发现不含汉字的 $a 子字段内容，无法获得西文著者字符串";
                     fLevel = 0;
                     return 0;
-                    FOUND:
+                FOUND:
                     Debug.Assert(results.Count > 0, "");
                     strAuthor = results[0];
                 }
@@ -4371,7 +4371,7 @@ chi	中文	如果是中文，则为空。
             }
 
             return 1;
-            ERROR1:
+        ERROR1:
             e.ErrorInfo = strError;
             return -1;
         }
@@ -4470,7 +4470,7 @@ chi	中文	如果是中文，则为空。
                 goto ERROR1;
             }
             return;
-            ERROR1:
+        ERROR1:
             e.ErrorInfo = strError;
             if (e.ShowErrorBox == true)
             {
@@ -4676,7 +4676,7 @@ chi	中文	如果是中文，则为空。
                 }
             }
 
-            REDO_INPUT:
+        REDO_INPUT:
             Program.MainForm.AppInfo.LinkFormState(dlg, "ctrl_a_field856dialog_state");
             dlg.ShowDialog(this.DetailForm);
             Program.MainForm.AppInfo.UnlinkFormState(dlg);
@@ -4835,9 +4835,81 @@ chi	中文	如果是中文，则为空。
 #endif
             this.DetailForm.MarcEditor.EnsureVisible();
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this.DetailForm, strError);
         }
+
+        // 2024/7/11
+        // 当前详细窗口中的书目记录的编目规则
+        public string LastRule
+        {
+            get
+            {
+                return this.DetailForm.LastRule;
+            }
+        }
+
+        // TODO: 为何本函数速度慢?
+        // 获得当前正在编辑的 MARC 记录，和编目规则
+        // return:
+        //      -1  出错
+        //      0   没有找到
+        //      1   找到
+        public int GetMarcRecord(
+            string style,
+            out MarcRecord record,
+            out string rule,
+            out string locationString,
+            out string strError)
+        {
+            strError = "";
+            rule = "";
+
+            locationString = this.DetailForm.MarcEditor.GetCurrentLocationString();
+
+            record = new MarcRecord(this._detailWindow.GetMarc());
+
+            rule = this.DetailForm.LastRule;
+#if REMOVED
+            var show_dialog = StringUtil.IsInList("show_dialog", style);
+
+            // 探测一条 MARC 记录的编目规则
+            // return:
+            //      -1  出错
+            //      0   没有找到
+            //      1   找到
+            int nRet = BiblioSearchForm.DetectCatalogingRule(
+                this.DetailForm.BiblioRecPath,
+                record,
+                out rule,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            if (nRet == 0)
+            {
+                if (show_dialog)
+                {
+                    // return:
+                    //      -1  出错
+                    //      0   放弃选择
+                    //      1   已经选择
+                    nRet = BiblioSearchForm.SelectCatalogingRule(
+                        $"请指定加拼音依据的编目规则",
+                        "编目规则:",
+                        new List<string> { "NLC", "CALIS" },
+                        false,
+                        out rule,
+                        out strError);
+                    if (nRet == -1 || nRet == 0)
+                        return -1;
+                }
+                else
+                    return 0;
+            }
+#endif
+            return 1;
+        }
+
     }
 
 

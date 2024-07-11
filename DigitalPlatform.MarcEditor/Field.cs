@@ -6,6 +6,8 @@ using System.Collections;
 using System.Collections.Generic;
 
 using System.Drawing.Drawing2D;
+using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 
 
 namespace DigitalPlatform.Marc
@@ -319,7 +321,8 @@ namespace DigitalPlatform.Marc
         {
             if (this.Name == "###") // 头标区
             {
-                this.m_strValue = this.m_strValue.PadRight(24, '?');
+                if (this.m_strValue.Length < 24)
+                    this.m_strValue = this.m_strValue.PadRight(24, '?');
                 return this.m_strValue;
             }
 
@@ -340,11 +343,12 @@ namespace DigitalPlatform.Marc
 
                     if (this.m_strIndicator.Length > 2)
                         this.m_strIndicator = this.m_strIndicator.Substring(0, 2);
-                    else
+                    else if (this.m_strIndicator.Length < 2)
                         this.m_strIndicator = this.m_strIndicator.PadLeft(2, ' ');
                 }
-
             }
+
+            // TODO: 看看这里的 string 拼接是否可以加速
             string strFieldMarc = this.m_strName + this.m_strIndicator + this.m_strValue;
 
             if (bAddFLDEND == true)
@@ -548,24 +552,31 @@ namespace DigitalPlatform.Marc
             }
         }
 
+
         // 把本行绘制出来
         // parameters:
         //		pe	用PaintEventArgs对象而不用Graphics对象的目的是为了其有ClipRectangle成员，所以使绘制优化
         //		nBaseX	x坐标
         //		nBaseY	y坐标
+        //      edit_on 小编辑器是否处在本字段上。
+        //              如果是，.Select 也绘制为普通状态(本函数调主会考虑绘制 focus 虚线框)。
+        //              如果否，.Selected 绘制为选中状态
         // return:
         //		void
         internal void Paint(PaintEventArgs pe,
             int nBaseX,
-            int nBaseY)
+            int nBaseY,
+            bool edit_on)
         {
+            var record = this.container.record;
+
             // -----------------------------------------
             // 计算出本行的总共区域
             // 每行区域中包括左上的线，不包括右下的线
             Rectangle totalRect = new Rectangle(
                 nBaseX,
                 nBaseY,
-                this.container.record.TotalLineWidth,
+                record.TotalLineWidth,
                 this.TotalHeight);
 
             // 优化
@@ -579,51 +590,56 @@ namespace DigitalPlatform.Marc
             Rectangle nameCaptionRect = new Rectangle(
                 nBaseX,
                 nBaseY,
-                this.container.record.NameCaptionTotalWidth,
+                record.NameCaptionTotalWidth,
                 this.TotalHeight);
             if (nameCaptionRect.IntersectsWith(pe.ClipRectangle) == true)
             {
                 this.DrawCell(pe.Graphics,
                     0,
-                    nameCaptionRect);
+                    nameCaptionRect,
+                    edit_on);
             }
 
             // 绘Name
             Rectangle nameRect = new Rectangle(
-                nBaseX + this.container.record.NameCaptionTotalWidth,
+                nBaseX + record.NameCaptionTotalWidth,
                 nBaseY,
-                this.container.record.NameTotalWidth,
+                record.NameTotalWidth - record.CellBlanking,
                 this.TotalHeight);
             if (nameRect.IntersectsWith(pe.ClipRectangle) == true)
             {
                 this.DrawCell(pe.Graphics,
                     1,
-                    nameRect);
+                    nameRect,
+                    edit_on);
             }
 
             // 绘Indicator
             Rectangle indicatorRect = new Rectangle(
-                nBaseX + this.container.record.NameCaptionTotalWidth + this.container.record.NameTotalWidth,
+                nBaseX + record.NameCaptionTotalWidth + this.container.record.NameTotalWidth,
                 nBaseY,
-                this.container.record.IndicatorTotalWidth,
+                record.IndicatorTotalWidth - record.CellBlanking,
                 this.TotalHeight);
             if (indicatorRect.IntersectsWith(pe.ClipRectangle) == true)
             {
                 this.DrawCell(pe.Graphics,
                     2,
-                    indicatorRect);
+                    indicatorRect,
+                    edit_on);
             }
+
             // 绘m_strValue
             Rectangle valueRect = new Rectangle(
-                nBaseX + this.container.record.NameCaptionTotalWidth + this.container.record.NameTotalWidth + this.container.record.IndicatorTotalWidth /*+ this.container.Indicator2TotalWidth*/,
+                nBaseX + record.NameCaptionTotalWidth + record.NameTotalWidth + this.container.record.IndicatorTotalWidth /*+ this.container.Indicator2TotalWidth*/,
                 nBaseY,
-                this.container.record.ValueTotalWidth,
+                record.ValueTotalWidth,
                 this.TotalHeight);
             if (valueRect.IntersectsWith(pe.ClipRectangle) == true)
             {
                 this.DrawCell(pe.Graphics,
                     3,
-                    valueRect);
+                    valueRect,
+                    edit_on);
             }
         }
 
@@ -640,16 +656,25 @@ namespace DigitalPlatform.Marc
         //		void
         internal void DrawCell(Graphics g,
             int nCol,
-            Rectangle rect)
+            Rectangle rect,
+            bool edit_on)
         {
             Debug.Assert(g != null, "g参数不能为null");
 
             string strText = "";
             int nWidth = 0;
 
-            bool bEnabled = this.container.MarcEditor.Enabled;
-            bool bReadOnly = this.container.MarcEditor.ReadOnly;
+            var marcEditor = this.container.MarcEditor;
+            var record = this.container.record;
 
+            bool bEnabled = marcEditor.Enabled;
+            bool bReadOnly = marcEditor.ReadOnly;
+            bool selected = this.Selected;
+            if (edit_on)
+                selected = false;
+
+            var is_control_field = Record.IsControlFieldName(this.Name);
+            var inset = marcEditor.InsetStyleCellBorder;
             Brush brush = null;
             try
             {
@@ -662,21 +687,19 @@ namespace DigitalPlatform.Marc
                     if (bEnabled == false || bReadOnly == true)
                         backColor = SystemColors.Control;
                     else
-                        backColor = this.container.MarcEditor.defaultNameCaptionBackColor;
-
+                        backColor = marcEditor.defaultNameCaptionBackColor;
 
                     // 如果本行为当前活动行，则名称部分高亮显示
-                    if (this.Selected == true)//this.container.marcEditor.CurField == this)
+                    if (selected)   //marcEditor.CurField == this)
                     {
                         if (backColor.GetBrightness() < 0.5f)
                             backColor = ControlPaint.Light(backColor);
                         else
                             backColor = ControlPaint.Dark(backColor);
-
                     }
 
                     strText = this.m_strNameCaption;
-                    nWidth = this.container.record.NameCaptionPureWidth;
+                    nWidth = record.NameCaptionPureWidth;
                     brush = new SolidBrush(backColor);
                 }
                 else if (nCol == 1)
@@ -684,22 +707,26 @@ namespace DigitalPlatform.Marc
                     // Name
                     Color backColor;
 
-                    if (bEnabled == false || bReadOnly == true)
+                    if (selected)
+                        backColor = marcEditor.defaultSelectedBackColor;
+                    else if (bEnabled == false || bReadOnly == true)
                         backColor = SystemColors.Control;
                     else
-                        backColor = this.container.MarcEditor.defaultNameBackColor;
+                        backColor = marcEditor.defaultNameBackColor;
 
                     if (this.Name == "###")
-                        backColor = this.container.record.marcEditor.defaultNameCaptionBackColor;
+                        backColor = record.marcEditor.defaultNameCaptionBackColor;
 
+                    /*
                     // 如果本行为当前活动行，则名称部分高亮显示
-                    if (this.Selected == true)//this.container.marcEditor.FocusedField == this)
+                    if (this.Selected == true)  // marcEditor.FocusedField == this)
                     {
                         backColor = ControlPaint.Light(backColor);
                     }
+                    */
 
                     strText = this.m_strName;
-                    nWidth = this.container.record.NamePureWidth;
+                    nWidth = record.NamePureWidth;
                     brush = new SolidBrush(backColor);
                 }
                 else if (nCol == 2)
@@ -707,108 +734,170 @@ namespace DigitalPlatform.Marc
                     // Indicator
                     Color backColor;
 
-                    if (bEnabled == false || bReadOnly == true)
+                    if (selected)
+                        backColor = marcEditor.defaultSelectedBackColor;
+                    else if (bEnabled == false || bReadOnly == true)
                         backColor = SystemColors.Control;
                     else
-                        backColor = this.container.MarcEditor.defaultIndicatorBackColor;
+                        backColor = marcEditor.defaultIndicatorBackColor;
 
-                    if (Record.IsControlFieldName(this.Name) == true)
-                        backColor = this.container.MarcEditor.defaultIndicatorBackColorDisabled;
+                    if (is_control_field)
+                        backColor = marcEditor.defaultIndicatorBackColorDisabled;
 
+                    /*
                     // 如果本行为当前活动行，则名称部分高亮显示
-                    if (this.Selected == true)//this.container.marcEditor.FocusedField == this)
+                    if (this.Selected == true)  // marcEditor.FocusedField == this)
                     {
                         backColor = ControlPaint.Light(backColor);
                     }
+                    */
 
                     strText = this.m_strIndicator;
-                    nWidth = this.container.record.IndicatorPureWidth;
+                    nWidth = record.IndicatorPureWidth;
                     brush = new SolidBrush(backColor);
                 }
                 else if (nCol == 3)
                 {
                     // m_strValue
                     strText = this.m_strValue;
-                    nWidth = this.container.record.ValuePureWidth + 0;  // 1为微调,正好!
-                    if (bEnabled == false || bReadOnly == true)
+                    nWidth = record.ValuePureWidth + 0;  // 1为微调,正好!
+                    if (selected)
+                        brush = new SolidBrush(marcEditor.defaultSelectedBackColor);
+                    else if (bEnabled == false || bReadOnly == true)
                         brush = new SolidBrush(SystemColors.Control);
                     else
-                        brush = new SolidBrush(this.container.MarcEditor.defaultContentBackColor);
+                        brush = new SolidBrush(marcEditor.defaultContentBackColor);
                 }
                 else
                 {
                     Debug.Assert(false, "nCol的值'" + Convert.ToString(nCol) + "'不合法");
                 }
 
-                //               new Point(-this.container.MarcEditor.DocumentOrgX + 0, -this.container.MarcEditor.DocumentOrgY + this.container.MarcEditor.DocumentHeight),
-                //new Point(-this.container.MarcEditor.DocumentOrgX + this.container.MarcEditor.DocumentWidth, - this.container.MarcEditor.DocumentOrgY + 0),
+                //               new Point(-marcEditor.DocumentOrgX + 0, -marcEditor.DocumentOrgY + marcEditor.DocumentHeight),
+                //new Point(-marcEditor.DocumentOrgX + marcEditor.DocumentWidth, - marcEditor.DocumentOrgY + 0),
 
-                using (LinearGradientBrush linGrBrush = new LinearGradientBrush(
-       new Point(0, 0),
-       new Point(this.container.MarcEditor.DocumentWidth, 0),
-       Color.FromArgb(255, 240, 240, 240),  // 240, 240, 240
-       Color.FromArgb(255, 255, 255, 255)   // Opaque red
-       ))  // Opaque blue
+                if (marcEditor.GradientBack)
                 {
-                    linGrBrush.GammaCorrection = true;
-
-                    // --------画背景----------------------------
-
-                    if ((nCol == 1 || nCol == 2 || nCol == 3)
-                        && (bEnabled == true && bReadOnly == false))
+                    using (LinearGradientBrush linGrBrush = new LinearGradientBrush(
+           new Point(0, 0),
+           new Point(marcEditor.DocumentWidth, 0),
+           Color.FromArgb(255, 240, 240, 240),  // 240, 240, 240
+           Color.FromArgb(255, 255, 255, 255)   // Opaque red
+           ))  // Opaque blue
                     {
-                        g.FillRectangle(linGrBrush, rect);
+                        linGrBrush.GammaCorrection = true;
+
+                        // --------画背景----------------------------
+
+                        if ((nCol == 1 || nCol == 2 || nCol == 3)
+                            && (bEnabled == true && bReadOnly == false && selected == false))
+                        {
+                            g.FillRectangle(linGrBrush, rect);
+                        }
+                        else
+                            g.FillRectangle(brush, rect);
                     }
-                    else
-                        g.FillRectangle(brush, rect);
                 }
+                else
+                    g.FillRectangle(brush, rect);
 
                 // --------画线条----------------------------
 
                 // 只画上，左
 
-                // 画上方的线条
-                Field.DrawLines(g,
-                    rect,
-                    this.container.record.GridHorzLineHeight,
-                    0,
-                    0,
-                    0,
-                    this.container.record.marcEditor.defaultHorzGridColor);
-
-                // 画左方的线条
-                int nGridWidth = 0;
-                if (nCol == 1)
-                    nGridWidth = this.container.record.GridVertLineWidthForSplit;
-                else
-                    nGridWidth = this.container.record.GridVertLineWidth;
-
-                // indicator左边的竖线短一点
-                if (nCol == 2)
+                // *** 绘制陷入效果的边框
+                if (inset)
                 {
-                    rect.Y += 2;
-                    rect.Height = this.container.record.NamePureHeight;
+                    // 2024/7/7
+                    if (nCol == 1 || (nCol == 2 && is_control_field == false))
+                    {
+                        // 四边边框
+                        {
+                            Rectangle temp_rect = rect;
+                            temp_rect.Height = 4 + record.NamePureHeight;
+                            ControlPaint.DrawBorder(g,
+                                temp_rect,
+                                SystemColors.Control, 2, ButtonBorderStyle.Inset,
+                                SystemColors.Control, 2, ButtonBorderStyle.Inset,
+                                SystemColors.Control, 2, ButtonBorderStyle.Inset,
+                                SystemColors.Control, 2, ButtonBorderStyle.Inset);
+                        }
+                        // 下方坚硬部分
+                        {
+                            Rectangle temp_rect = rect;
+                            int delta = 4 + record.NamePureHeight;
+                            if (temp_rect.Height > delta)
+                            {
+                                temp_rect.Y += delta;
+                                temp_rect.Height -= delta;
+                                using (var brush0 = new SolidBrush(SystemColors.Control))
+                                {
+                                    g.FillRectangle(brush0, temp_rect);
+                                }
+                            }
+                        }
+                    }
+                    else if (nCol == 3)
+                    {
+                        // 只有左侧一根竖线
+                        ControlPaint.DrawBorder(g,
+        rect,
+        SystemColors.Control, 2, ButtonBorderStyle.Inset,
+        Color.White, 0, ButtonBorderStyle.None,
+        Color.White, 0, ButtonBorderStyle.None,
+        Color.White, 0, ButtonBorderStyle.None);
+                    }
                 }
 
-                Field.DrawLines(g,
-                    rect,
-                    0,
-                    0,
-                    nGridWidth,//this.container.GridVertLineWidth,
-                    0,
-                    this.container.MarcEditor.defaultVertGridColor);
+                int nGridWidth = 0;
+                if (nCol == 1)
+                    nGridWidth = record.GridVertLineWidthForSplit;
+                else
+                    nGridWidth = record.GridVertLineWidth;
 
-                if (nCol == 2)  // 还原
+                if (inset == false)
                 {
-                    rect.Y -= 2;
+                    // *** 绘制平坦风格的背景
+
+                    // 画上方的线条
+                    Field.DrawLines(g,
+                        rect,
+                        record.GridHorzLineHeight,   // 上
+                        0,
+                        0,
+                        0,
+                        marcEditor.defaultHorzGridColor);
+
+                    // 画左方的线条
+                    // 
+
+                    // indicator左边的竖线短一点
+                    if (nCol == 2)
+                    {
+                        rect.Y += 2;
+                        rect.Height = record.NamePureHeight;
+                    }
+
+                    Field.DrawLines(g,
+                        rect,
+                        0,
+                        0,
+                        nGridWidth, // 左
+                        0,
+                        marcEditor.defaultVertGridColor);
+
+                    if (nCol == 2)  // 还原
+                    {
+                        rect.Y -= 2;
+                    }
                 }
 
                 // --------画文字----------------------------
                 if (nWidth > 0)
                 {
                     Rectangle textRect = new Rectangle(
-                        rect.X + nGridWidth/*this.container.GridVertLineWidth*/ + this.container.record.CellLeftBlank,
-                        rect.Y + this.container.record.GridHorzLineHeight + this.container.record.CellTopBlank,
+                        rect.X + nGridWidth/*this.container.GridVertLineWidth*/ + record.CellLeftBlank,
+                        rect.Y + this.container.record.GridHorzLineHeight + record.CellTopBlank,
                         nWidth,
                         this.PureHeight);
 
@@ -816,22 +905,22 @@ namespace DigitalPlatform.Marc
                     Font font = null;
                     if (nCol == 0)
                     {
-                        font = this.container.MarcEditor.CaptionFont;
+                        font = marcEditor.CaptionFont;
                         //Debug.Assert(font != null, "");
                     }
                     else if (nCol == 1 || nCol == 2)
                     {
-                        font = this.container.MarcEditor.FixedSizeFont;
+                        font = marcEditor.FixedSizeFont;
                         //Debug.Assert(font != null, "");
                     }
                     else
                     {
-                        font = this.container.MarcEditor.Font;
+                        font = marcEditor.Font;
                         // Debug.Assert(font != null, "");
                     }
 
                     if (font == null)
-                        font = this.container.MarcEditor.Font;
+                        font = marcEditor.Font;
 
                     Debug.Assert(font != null, "");
 
@@ -850,10 +939,12 @@ namespace DigitalPlatform.Marc
                             format);
                          */
 
-                        Color textcolor = this.container.MarcEditor.defaultNameCaptionTextColor;
+                        Color textcolor = marcEditor.defaultNameCaptionTextColor;
 
-                        if (this.Selected == true)
+                        if (selected == true)
                         {
+                            // textcolor = marcEditor.defaultSelectedTextColor;
+
                             textcolor = ReverseColor(textcolor);
                         }
 
@@ -868,37 +959,68 @@ namespace DigitalPlatform.Marc
                     }
                     else if (nCol == 1)    // 字段名
                     {
+                        Color textcolor = marcEditor.defaultNameTextColor;
+                        if (selected)
+                            textcolor = marcEditor.defaultSelectedTextColor;
+
                         TextRenderer.DrawText(
                             g,
                             strText,
                             font,
                             textRect,
-                            this.container.MarcEditor.defaultNameTextColor,
+                            textcolor,
                             MarcEditor.editflags);  // TextFormatFlags.TextBoxControl | TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
                     }
                     else if (nCol == 2)    // 指示符
                     {
+                        Color textcolor = marcEditor.defaultIndicatorTextColor;
+                        if (selected)
+                            textcolor = marcEditor.defaultSelectedTextColor;
+
                         TextRenderer.DrawText(
                             g,
                             strText,
                             font,
                             textRect,
-                            this.container.MarcEditor.defaultIndicatorTextColor,
+                            textcolor,
                             MarcEditor.editflags);  // TextFormatFlags.TextBoxControl | TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
                     }
                     else
                     {   // 内容
+                        Color textcolor = marcEditor.m_contentTextColor;
+                        if (selected)
+                            textcolor = marcEditor.defaultSelectedTextColor;
+
 #if BIDI_SUPPORT
                         // strText = strText.Replace(new string(Record.KERNEL_SUBFLD, 1), "\x200e" + new string(Record.KERNEL_SUBFLD, 1));
                         strText = MarcEditor.AddBidi(strText);
 #endif
+
                         TextRenderer.DrawText(
                             g,
                             strText,
                             font,
                             textRect,
-                            this.container.MarcEditor.m_contentTextColor,
+                            textcolor,
                             MarcEditor.editflags);  // TextFormatFlags.TextBoxControl | TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
+
+#if REMOVED
+                        int flags = DT_CALCRECT | DT_WORDBREAK | DT_EDITCONTROL;
+                        IntPtr dc = g.GetHdc();
+                        try
+                        {
+                            Rect drawTextRC = new Rect(textRect);
+                            int height = DrawText(dc, 
+                                strText,
+                                strText.Length,
+                                ref drawTextRC,
+                                flags);
+                        }
+                        finally
+                        {
+                            g.ReleaseHdc(dc);
+                        }
+#endif
                     }
                 }
             }
@@ -922,6 +1044,7 @@ namespace DigitalPlatform.Marc
         }
 
         // 画线条
+        // 上、下、左、右 四根线条
         internal static void DrawLines(Graphics g,
             Rectangle myRect,
             int nTopBorderHeight,
@@ -1155,5 +1278,34 @@ namespace DigitalPlatform.Marc
                 }
             }
         }
+
+#if REMOVED
+        #region DrawText
+
+        [DllImport("coredll.dll")]
+        static extern int DrawText(IntPtr hdc, string lpStr, int nCount, ref Rect lpRect, int wFormat);
+
+        private const int DT_CALCRECT = 0x00000400;
+        private const int DT_WORDBREAK = 0x00000010;
+        private const int DT_EDITCONTROL = 0x00002000;
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct Rect
+        {
+            public int Left;
+            public int Top;
+            public int Right;
+            public int Bottom;
+            public Rect(Rectangle r)
+            {
+                this.Left = r.Left;
+                this.Top = r.Top;
+                this.Bottom = r.Bottom;
+                this.Right = r.Right;
+            }
+        }
+
+        #endregion
+#endif
     }
 }

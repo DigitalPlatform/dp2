@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DigitalPlatform;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -32,15 +33,18 @@ namespace dp2Circulation
         // 线程安全
         public void AppendHtml(string strText)
         {
-            this.Invoke((Action)(() =>
+            // 当窗口 Close() 掉以后, Created 会变成 false
+            if (this.Created == false)
+                return;
+
+            this.TryInvoke(() =>
             {
-                Global.WriteHtml(this.WebBrowser,
-                strText);
+                Global.WriteHtml(this.WebBrowser, strText);
 
                 // 因为HTML元素总是没有收尾，其他有些方法可能不奏效
                 this.WebBrowser.Document.Window.ScrollTo(0,
         this.WebBrowser.Document.Body.ScrollRectangle.Height);
-            }));
+            });
         }
 
         // 线程安全

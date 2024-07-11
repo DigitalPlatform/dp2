@@ -71,6 +71,7 @@
             this.listBox1.Name = "listBox1";
             this.listBox1.Size = new System.Drawing.Size(775, 242);
             this.listBox1.TabIndex = 6;
+            this.listBox1.DoubleClick += new System.EventHandler(this.listBox1_DoubleClick);
             // 
             // label_listBox
             // 

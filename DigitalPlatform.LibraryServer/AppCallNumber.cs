@@ -485,6 +485,7 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 设置种次号尾号
+        // TODO: 增强 strArrangeGroupName 语义，允许直接表达“种次号库名”
         public LibraryServerResult SetOneClassTailNumber(
             SessionInfo sessioninfo,
             string strAction,

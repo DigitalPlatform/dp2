@@ -500,3 +500,52 @@ https://khalidabuhakmeh.com/how-to-write-a-dotnet-markdig-extension-for-markdown
 
 https://xoofx.github.io/blog/2016/06/13/implementing-a-markdown-processor-for-dotnet/
 
+~~~
+需要一个支持多行文本输入的 InputDlg.GetInput() 函数
+
+~~~
+导出 MARC 文件时，按照子字段名删除后，可能会产生一些内容为空的字段，这样的空字段也要随后删除
+新建 ComboBox 下拉事项的时候，刚新建出来的代码内容为空。用户可以从此开始输入内容
+
+
+~~~
+
+override void OnPreviewKeyDown()
+可以预览到各种击键，即便一个控件它通过响应 GetDlgCode 消息声明自己不想获得某些
+键，也能预览到。
+
+父窗口通过 GetDlgCode 消息询问一个控件，知道控件的类型。比如有些控件
+希望父窗口直接截获方向键，实现多个控件之间的焦点转移，这是对话框的一种
+常见功能。
+
+~~~
+https://www.c-sharpcorner.com/UploadFile/4aac15/positioning-caret-in-textbox/
+https://www.codeproject.com/Tips/794589/NET-Get-correct-caret-position-from-TextBox-contro
+
+~~~
+在已经有字段块定义的情况下，点 Home 到块的第一行，点 End 到块的最后一行
+
+普通输入情况下，点 Ctrl+Home 到第一行，点 Ctrl+End 到最后一行
+
+上下方向键时候，要保持对出发点 x 坐标的张力，一直尝试模拟点击这个位置。
+
+允许 textbox 输入的一行，背景要显示为虚框的 focus 状态
+
+书目查询窗刚打开的时候，输入焦点应该定位到检索词 textbox 上面
+
+MarcEditor 中鼠标滚轮不起作用
+
+~~~~
+https://stackoverflow.com/questions/3938998/wrapping-text-in-a-rich-textbox-but-not-word-wrapping-it/3955553#3955553
+
+https://github.com/dahall/Vanara/blob/bc3d5fa7ea14084755558237f2c242df4d75cbdf/PInvoke/Usp10/Usp10.cs#L213
+
+https://github.com/LayoutFarm/Typography
+
+https://learn.microsoft.com/en-us/windows/win32/inputdev/using-keyboard-input
+
+~~~
+Ctrl+A 时如果发现没有可用的命令，则 Beep() 响一声，输入焦点依然在 MarcEditor 上。
+此时编目员可以设法用另外的热键切换到数据加工菜单，用键盘选择命令进行。或者有一个热键可以 Popup 数据加工菜单，进行选择调用
+
+需要一个切换到 MARC 编辑器的热键。Ctrl+1。数据加工为 Ctrl+2。

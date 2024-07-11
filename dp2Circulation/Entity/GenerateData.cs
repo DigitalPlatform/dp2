@@ -100,7 +100,7 @@ namespace dp2Circulation
             {
                 //this._myForm.TryInvoke(() =>
                 //{
-                    this.m_genDataViewer.Clear();
+                this.m_genDataViewer.Clear();
                 //});
             }
         }
@@ -111,7 +111,7 @@ namespace dp2Circulation
             {
                 //this._myForm.TryInvoke(() =>
                 //{
-                    this.m_genDataViewer.RefreshState();
+                this.m_genDataViewer.RefreshState();
                 //});
             }
         }
@@ -472,6 +472,8 @@ out strError);
         // 自动加工数据
         // parameters:
         //      sender    从何处启动? MarcEditor EntityEditForm BindingForm
+        //      e.ScriptEntry   如果为 "!createMenu" 表示重新初始化菜单事项
+        //                      如果为 "!getActiveMenu" 表示查询获得当前 active 状态的菜单事项
         public void AutoGenerate(object sender,
             GenerateDataEventArgs e,
             string strBiblioRecPath,
@@ -595,10 +597,14 @@ out strError);
                         if (this.m_genDataViewer != null)
                         {
                             this._myForm.TryInvoke(() =>
-                            {                            // 出现菜单界面
+                            {
+                                // 迫使重新创建菜单
+                                if (e.ScriptEntry == "!createMenu")
+                                    this.m_genDataViewer.Clear();
+
+                                // 出现菜单界面
                                 if (this.m_genDataViewer.Count == 0)
                                 {
-
                                     dynamic o = this.m_detailHostObj;
                                     o.CreateMenu(sender, e);
 
@@ -608,19 +614,26 @@ out strError);
                                 // 根据当前插入符位置刷新加亮事项
                                 this.m_genDataViewer.RefreshState();
                             });
+
+                            if (e.ScriptEntry == "!createMenu")
+                                return;
                         }
 
-                        if (String.IsNullOrEmpty(e.ScriptEntry) == false)
+                        // 执行 ScriptEntry 入口函数名
+                        if (String.IsNullOrEmpty(e.ScriptEntry) == false
+                            && e.ScriptEntry.StartsWith("!") == false)
                         {
                             this.m_detailHostObj.Invoke(e.ScriptEntry,
                                 sender,
                                 e);
+                            return; // 2024/7/10
                         }
                         else
                         {
                             if (Program.MainForm.PanelFixedVisible == true
                                 && bOnlyFillMenu == false
-                                && Program.MainForm.CurrentGenerateDataControl != null)
+                                && Program.MainForm.CurrentGenerateDataControl != null
+                                && e.ScriptEntry != "!getActiveMenu")
                             {
                                 TableLayoutPanel table = (TableLayoutPanel)Program.MainForm.CurrentGenerateDataControl;
                                 for (int i = 0; i < table.Controls.Count; i++)
@@ -656,6 +669,16 @@ out strError);
                 }
 
                 this.m_autogenSender = sender;  // 记忆最近一次的调用发起者
+
+                // 2024/7/9
+                // 获得当前可用的菜单
+                if (e.ScriptEntry == "!getActiveMenu"
+                    && this.m_genDataViewer != null)
+                {
+                    var actions = this.m_genDataViewer.GetSelectedActions();
+                    e.Parameter = GenerateDataForm.ActionsToXml(actions);
+                    return;
+                }
 
                 if (bOnlyFillMenu == false
                     && this.m_genDataViewer != null)
@@ -804,6 +827,27 @@ out strError);
 
             Type classType = m_detailHostObj.GetType();
 
+#if REMOVED
+            // 2024/7/10
+            {
+                string strFuncName = "beginSetMenu";
+
+                DigitalPlatform.Script.SetMenuEventArgs e1 = new DigitalPlatform.Script.SetMenuEventArgs();
+                e1.Action = new ScriptAction();
+                e1.sender = e.sender;
+                e1.e = e.e;
+
+                ScriptUtil.InvokeMember(classType,
+                    strFuncName,
+                    this.m_detailHostObj,
+                    new object[] { sender, e1 });
+
+                // 此时 m_detailHostObj.ScriptActions 可能被改变
+                if (e1.Result == "actions_changed")
+                    this.m_genDataViewer.Actions = this.m_detailHostObj.ScriptActions;
+            }
+#endif
+
             foreach (ScriptAction action in e.Actions)
             {
                 string strFuncName = action.ScriptEntry + "_setMenu";
@@ -859,6 +903,23 @@ out strError);
 
 #endif
             }
+
+#if REMOVED
+            // 2024/7/10
+            {
+                string strFuncName = "endSetMenu";
+
+                DigitalPlatform.Script.SetMenuEventArgs e1 = new DigitalPlatform.Script.SetMenuEventArgs();
+                e1.Action = new ScriptAction();
+                e1.sender = e.sender;
+                e1.e = e.e;
+
+                ScriptUtil.InvokeMember(classType,
+                    strFuncName,
+                    this.m_detailHostObj,
+                    new object[] { sender, e1 });
+            }
+#endif
         }
 
         void m_genDataViewer_TriggerAction(object sender, TriggerActionArgs e)
@@ -1080,7 +1141,7 @@ out strError);
         }
 
 
-        #endregion
+#endregion
 
     }
 }

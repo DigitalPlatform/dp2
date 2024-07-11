@@ -10,6 +10,8 @@ using System.Diagnostics;
 
 using DigitalPlatform;
 using DigitalPlatform.CommonControl;
+using System.Xml;
+using Newtonsoft.Json;
 
 namespace DigitalPlatform.Script
 {
@@ -373,6 +375,38 @@ namespace DigitalPlatform.Script
             this.Table.Visible = false;   // 2015/8/17
         }
 
+        public static string ActionsToXml(List<ScriptAction> actions)
+        {
+            // return JsonConvert.SerializeObject(actions);
+
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml("<root />");
+            foreach (var action in actions)
+            {
+                var new_element = dom.CreateElement("action");
+                new_element.SetAttribute("name", action.Name);
+                new_element.SetAttribute("scriptEntry", action.ScriptEntry);
+                dom.DocumentElement.AppendChild(new_element);
+            }
+
+            return dom.DocumentElement.OuterXml;
+        }
+
+        public List<ScriptAction> GetSelectedActions()
+        {
+            /*
+            List<ScriptAction> results = new List<ScriptAction>();
+            foreach(var row in this.ActionTable.SelectedRows)
+            {
+                var action = row.Tag as ScriptAction;
+                results.Add(action);
+            }
+
+            return results;
+            */
+            return this.m_actions.Where(o => o.Active == true).ToList();
+        }
+
         private void ActionTable_DoubleClick(object sender, EventArgs e)
         {
             if (this._processing > 0)
@@ -460,6 +494,7 @@ namespace DigitalPlatform.Script
 
             this.TryInvoke(() =>
             {
+
                 RefreshMenuEventArgs e = new RefreshMenuEventArgs();
                 e.Actions = this.Actions;
                 e.sender = this.sender;
@@ -739,5 +774,9 @@ RefreshMenuEventArgs e);
         public ScriptAction Action = null;
         public object sender = null;
         public GenerateDataEventArgs e = null;
+
+        // 2024/7/10
+        // [out] 用于返回各种信息
+        public string Result = null;
     }
 }

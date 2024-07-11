@@ -1332,10 +1332,14 @@ namespace DigitalPlatform.Script
             out string[] saRef,
             out string strError)
         {
-            saRef = null;
+            saRef = new string[0];
             strError = "";
-            XmlDocument dom = new XmlDocument();
 
+            // 2024/7/3
+            if (string.IsNullOrEmpty(strRefXml))
+                return 0;
+
+            XmlDocument dom = new XmlDocument();
             try
             {
                 dom.LoadXml(strRefXml);

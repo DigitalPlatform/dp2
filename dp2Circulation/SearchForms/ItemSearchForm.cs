@@ -10943,6 +10943,7 @@ TaskScheduler.Default);
 
             OpenMarcFileDlg dlg = null;
 
+#if REMOVED
             var dialog_result = this.TryGet(() =>
             {
                 dlg = new OpenMarcFileDlg();
@@ -10976,6 +10977,69 @@ TaskScheduler.Default);
 
             if (dialog_result != DialogResult.OK)
                 return;
+#endif
+
+            var panel = this.TryGet(() =>
+            {
+                dlg = new OpenMarcFileDlg();
+                MainForm.SetControlFont(dlg, this.Font);
+
+                dlg.IsOutput = true;
+                dlg.AddG01Visible = true;
+                if (bTableExists == false)
+                {
+                    dlg.RuleVisible = true;
+                    dlg.Rule = this.LastCatalogingRule;
+                }
+                dlg.FileName = this.LastIso2709FileName;
+                // dlg.CrLf = this.LastCrLfIso2709;
+                dlg.CrLfVisible = false;   // 2020/3/9
+                dlg.EncodingListItems = Global.GetEncodingList(false);
+                dlg.EncodingName =
+                    (String.IsNullOrEmpty(this.LastEncodingName) == true ? Global.GetEncodingName(preferredEncoding) : this.LastEncodingName);
+                dlg.EncodingComment = "注: 原始编码方式为 " + Global.GetEncodingName(preferredEncoding);
+                dlg.MarcSyntax = "<自动>";    // strPreferedMarcSyntax;
+                dlg.EnableMarcSyntax = false;
+                return dlg.MainPanel;
+            });
+
+            ExportMarcHoldingDialog dlg_905 = null;
+
+            var dialog_905_result = this.TryGet(() =>
+            {
+                dlg_905 = new ExportMarcHoldingDialog();
+                MainForm.SetControlFont(dlg_905, this.Font);
+                dlg_905.AttachPanel(panel, "文件名");
+                dlg_905.FilterScriptDirectory = ExportMarcHoldingDialog.PrepareScriptDirectory();
+                dlg_905.UiState = Program.MainForm.AppInfo.GetString(
+                    "ItemSearchForm",
+                    "ExportMarcHoldingDialog_uiState",
+                    "");
+                Program.MainForm.AppInfo.LinkFormState(dlg_905, "ItemSearchForm_ExportMarcHoldingDialog_state");
+                dlg_905.ShowDialog(this);
+
+                Program.MainForm.AppInfo.SetString(
+                    "ItemSearchForm",
+                    "ExportMarcHoldingDialog_uiState",
+                    dlg_905.UiState);
+
+                return dlg_905.DialogResult;
+            });
+
+            this.TryInvoke(() =>
+            {
+                this.LastIso2709FileName = dlg.FileName;
+                this.LastCrLfIso2709 = dlg.CrLf;
+                this.LastEncodingName = dlg.EncodingName;
+                this.LastCatalogingRule = dlg.Rule;
+            });
+
+            if (dialog_905_result != DialogResult.OK)
+                return;
+
+            var removeFieldNames = dlg_905.RemoveFieldNames;
+            var filterCode = dlg_905.ScriptCode;
+            var cacheKey = ExportMarcHoldingDialog.BuildCacheKey(dlg_905.ScriptFileName);
 
             bool unimarc_modify_100 = dlg.UnimarcModify100;
 
@@ -11000,32 +11064,6 @@ TaskScheduler.Default);
 
             string strLastFileName = this.LastIso2709FileName;
             string strLastEncodingName = this.LastEncodingName;
-
-            ExportMarcHoldingDialog dlg_905 = null;
-
-            var dialog_905_result = this.TryGet(() =>
-            {
-                dlg_905 = new ExportMarcHoldingDialog();
-                MainForm.SetControlFont(dlg_905, this.Font);
-
-                dlg_905.UiState = Program.MainForm.AppInfo.GetString(
-                    "ItemSearchForm",
-                    "ExportMarcHoldingDialog_uiState",
-                    "");
-
-                Program.MainForm.AppInfo.LinkFormState(dlg_905, "ItemSearchForm_ExportMarcHoldingDialog_state");
-                dlg_905.ShowDialog(this);
-
-                Program.MainForm.AppInfo.SetString(
-                    "ItemSearchForm",
-                    "ExportMarcHoldingDialog_uiState",
-                    dlg_905.UiState);
-
-                return dlg_905.DialogResult;
-            });
-
-            if (dialog_905_result != DialogResult.OK)
-                return;
 
             bool bExist = File.Exists(dlg.FileName);
             bool bAppend = false;
@@ -11277,6 +11315,21 @@ TaskScheduler.Default);
                     // 结束书目记录处理
                     (biblio_info) =>
                     {
+                        // TODO: 如果要移除的字段，涉及到 906 等字段，要警告一下
+                        ExportMarcHoldingDialog.FilterBiblioRecord(record, removeFieldNames);
+                        if (string.IsNullOrEmpty(filterCode) == false)
+                        {
+                            var ret = ExportMarcHoldingDialog.FilterRecord(
+    cacheKey,
+    filterCode,
+    "",
+    record,
+    out string error);
+                            if (ret == -1)
+                                throw new Exception(error);
+                        }
+
+
                         if (dlg_905.Create905 && dlg_905.RemoveOld905)
                             record.select("field[@name='905']").detach();
 
