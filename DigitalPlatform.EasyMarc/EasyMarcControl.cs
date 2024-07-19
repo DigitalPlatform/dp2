@@ -1709,7 +1709,7 @@ namespace DigitalPlatform.EasyMarc
             // 将一些基本的宏兑现
             // %year%%m2%%d2%%h2%%min2%%sec2%.%hsec%
 
-            string strOutputValue = MacroTimeValue(e.Macro);
+            string strOutputValue = dp2StringUtil.MacroTimeValue(e.Macro);
 
             // 替换下划线
             // 只替换前面连续的'_'
@@ -1744,6 +1744,7 @@ namespace DigitalPlatform.EasyMarc
             }
         }
 
+#if REMOVED
         /// <summary>
         /// 兑现时间宏值
         /// </summary>
@@ -1751,6 +1752,9 @@ namespace DigitalPlatform.EasyMarc
         /// <returns>兑现宏以后的字符串</returns>
         public static string MacroTimeValue(string strMacro)
         {
+            if (string.IsNullOrEmpty(strMacro))
+                return strMacro;
+
             DateTime time = DateTime.Now;
 
             // utime
@@ -1801,6 +1805,7 @@ namespace DigitalPlatform.EasyMarc
 
             return strMacro;
         }
+#endif
 
         #endregion
 

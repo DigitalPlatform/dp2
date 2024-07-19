@@ -188,6 +188,7 @@ namespace dp2Circulation
 
         public void TriggerSelectedIndexChanged()
         {
+#if REMOVED
             if (this._timer == null)
             {
                 this._timer = new Timer();
@@ -195,6 +196,16 @@ namespace dp2Circulation
                 this._timer.Tick += new EventHandler(_timer_Tick);
             }
             this._timer.Start();
+#endif
+            // 2024/7/16
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(500);
+                this.TryInvoke(() =>
+                {
+                    OnSelectedIndexChanged();
+                });
+            });
         }
 
         void _timer_Tick(object sender, EventArgs e)

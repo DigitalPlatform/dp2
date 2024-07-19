@@ -1051,7 +1051,7 @@ namespace dp2Catalog
             string strSubfieldName,
             string strSubfieldValue)
         {
-            this.DetailForm.MarcEditor.Record.Fields.SetFirstSubfield(
+            this.DetailForm.MarcEditor.SetFirstSubfield(
                     strFieldName,
                     strSubfieldName,
                     strSubfieldValue);

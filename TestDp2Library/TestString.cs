@@ -534,5 +534,51 @@ namespace TestDp2Library
     });
             Assert.AreEqual(correct, result);
         }
+
+        // 测试畸形的情况
+        [TestMethod]
+        public void test_macroString_31()
+        {
+            string source = "{{%year%}";
+            string correct = "{{%year%}";
+            var result = dp2StringUtil.MacroString(source,
+    "{{",
+    "}}",
+    (macro) =>
+    {
+        return $"{macro}_value";
+    });
+            Assert.AreEqual(correct, result);
+        }
+
+        [TestMethod]
+        public void test_macroString_32()
+        {
+            string source = "{%year%}}";
+            string correct = "{%year%}}";
+            var result = dp2StringUtil.MacroString(source,
+    "{{",
+    "}}",
+    (macro) =>
+    {
+        return $"{macro}_value";
+    });
+            Assert.AreEqual(correct, result);
+        }
+
+        [TestMethod]
+        public void test_macroString_33()
+        {
+            string source = "{%year%}";
+            string correct = "{%year%}";
+            var result = dp2StringUtil.MacroString(source,
+    "{{",
+    "}}",
+    (macro) =>
+    {
+        return $"{macro}_value";
+    });
+            Assert.AreEqual(correct, result);
+        }
     }
 }

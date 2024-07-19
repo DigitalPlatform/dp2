@@ -431,6 +431,11 @@ namespace dp2Circulation
                     "print_label_mode",
                     false);
 
+                this.textBox_ui_loginWelcomeText.Text = ap.GetString(
+                    "login",
+                    "welcomeText",
+                    "");
+
                 // *** 入馆登记
                 // passgate
                 this.numericUpDown_passgate_maxListItemsCount.Value = ap.GetInt(
@@ -1275,6 +1280,11 @@ namespace dp2Circulation
                     "MainForm",
                     "print_label_mode",
                     this.checkBox_ui_printLabelMode.Checked);
+
+                ap.SetString(
+    "login",
+    "welcomeText",
+    this.textBox_ui_loginWelcomeText.Text);
 
                 // passgate
                 // 入馆登记

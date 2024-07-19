@@ -53,7 +53,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>591</ApplicationRevision>
+    <ApplicationRevision>597</ApplicationRevision>
     <ApplicationVersion>3.78.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -1281,6 +1281,9 @@
     </Compile>
     <Compile Include="SearchForms\ExportMarcHoldingDialog.Designer.cs">
       <DependentUpon>ExportMarcHoldingDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SearchForms\FilterSearch.cs">
+      <SubType>Form</SubType>
     </Compile>
     <Compile Include="SearchForms\GetConvertTargetDbNameDlg.cs">
       <SubType>Form</SubType>

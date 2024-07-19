@@ -990,7 +990,7 @@ namespace dp2Circulation
             string strSubfieldName,
             string strSubfieldValue)
         {
-            this.DetailForm.MarcEditor.Record.Fields.SetFirstSubfield(
+            this.DetailForm.MarcEditor.SetFirstSubfield(
                     strFieldName,
                     strSubfieldName,
                     strSubfieldValue);
@@ -4710,7 +4710,7 @@ chi	中文	如果是中文，则为空。
                 if (field_856 == null)
                 {
                     // this.DetailForm.MarcEditor.Flush();
-                    field_856 = this.DetailForm.MarcEditor.Record.Fields.Add("856", "  ", "", true);
+                    field_856 = this.DetailForm.MarcEditor.AddField("856", "  ", "", true);
                 }
 
                 field_856.IndicatorAndValue = dlg.Value;
@@ -4865,11 +4865,13 @@ chi	中文	如果是中文，则为空。
             strError = "";
             rule = "";
 
-            locationString = this.DetailForm.MarcEditor.GetCurrentLocationString();
+            var detail_form = this.DetailForm;
 
-            record = new MarcRecord(this._detailWindow.GetMarc());
+            locationString = detail_form.MarcEditor.GetCurrentLocationString();
 
-            rule = this.DetailForm.LastRule;
+            record = new MarcRecord(detail_form.GetMarc());
+
+            rule = detail_form.LastRule;
 #if REMOVED
             var show_dialog = StringUtil.IsInList("show_dialog", style);
 

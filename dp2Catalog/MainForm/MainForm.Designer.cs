@@ -830,7 +830,7 @@
             this.toolButton_verify.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
             this.toolButton_verify.Name = "toolButton_verify";
             this.toolButton_verify.Size = new System.Drawing.Size(40, 32);
-            this.toolButton_verify.Text = "校验数据 (Ctrl+Y)";
+            this.toolButton_verify.Text = "校验数据 (Ctrl+U)";
             this.toolButton_verify.Click += new System.EventHandler(this.toolButton_verify_Click);
             // 
             // toolStripSeparator11

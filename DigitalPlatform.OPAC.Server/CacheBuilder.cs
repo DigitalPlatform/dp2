@@ -478,7 +478,7 @@ namespace DigitalPlatform.OPAC.Server
 
                 if (strPart[0] == '%')
                 {
-                    text.Append(MacroTimeValue(strPart));
+                    text.Append(dp2StringUtil.MacroTimeValue(strPart));
                 }
                 else
                 {
@@ -541,6 +541,7 @@ namespace DigitalPlatform.OPAC.Server
             }
         }
 
+#if REMOVED
         /// <summary>
         /// 兑现时间宏值
         /// </summary>
@@ -548,6 +549,9 @@ namespace DigitalPlatform.OPAC.Server
         /// <returns>兑现宏以后的字符串</returns>
         public static string MacroTimeValue(string strMacro)
         {
+            if (string.IsNullOrEmpty(strMacro))
+                return strMacro;
+
             DateTime time = DateTime.Now;
 
             // utime
@@ -605,6 +609,7 @@ namespace DigitalPlatform.OPAC.Server
 
             return strMacro;
         }
+#endif
 
         // 创建一个缓存(一套)
         // (注：采用了代理账户)

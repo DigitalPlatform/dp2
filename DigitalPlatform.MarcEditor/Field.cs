@@ -18,6 +18,29 @@ namespace DigitalPlatform.Marc
     /// </summary>
 	public class Field
     {
+        public static List<Field> Clone(List<Field> fields)
+        {
+            var results = new List<Field>();
+            foreach(var field in fields)
+            {
+                results.Add(field.Clone());
+            }
+
+            return results;
+        }
+
+        public Field Clone()
+        {
+            var result = new Field { 
+            m_strName = m_strName,
+            m_strIndicator = m_strIndicator,
+            m_strValue = m_strValue,
+            m_strNameCaption = m_strNameCaption,
+            PureHeight = PureHeight,
+            Selected = Selected,
+            };
+            return result;
+        }
         /// <summary>
         /// 容器，也就是当前字段对象所从属的字段对象数组
         /// </summary>

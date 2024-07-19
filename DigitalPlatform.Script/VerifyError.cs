@@ -98,6 +98,21 @@ string text)
 
             return result.ToString();
         }
+
+        public static int GetErrorCount(List<VerifyError> errors)
+        {
+            return errors.Where(o=>o.Level == "error").Count();
+        }
+
+        public static int GetWarningCount(List<VerifyError> errors)
+        {
+            return errors.Where(o => o.Level == "warning").Count();
+        }
+
+        public static int GetInfoCount(List<VerifyError> errors)
+        {
+            return errors.Where(o => o.Level == "info").Count();
+        }
     }
 
 }

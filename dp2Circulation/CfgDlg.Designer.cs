@@ -273,6 +273,7 @@
             this.checkBox_message_shareBiblio = new System.Windows.Forms.CheckBox();
             this.tabPage_z3950 = new System.Windows.Forms.TabPage();
             this.groupBox7 = new System.Windows.Forms.GroupBox();
+            this.button_ucs_testUpload = new System.Windows.Forms.Button();
             this.textBox_ucs_databaseName = new System.Windows.Forms.TextBox();
             this.label47 = new System.Windows.Forms.Label();
             this.textBox_ucs_password = new System.Windows.Forms.TextBox();
@@ -284,7 +285,8 @@
             this.button_z3950_servers = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
             this.button_Cancel = new System.Windows.Forms.Button();
-            this.button_ucs_testUpload = new System.Windows.Forms.Button();
+            this.textBox_ui_loginWelcomeText = new System.Windows.Forms.TextBox();
+            this.label48 = new System.Windows.Forms.Label();
             this.tabControl_main.SuspendLayout();
             this.tabPage_server.SuspendLayout();
             this.toolStrip_server.SuspendLayout();
@@ -1376,6 +1378,8 @@
             // tabPage_ui
             // 
             this.tabPage_ui.AutoScroll = true;
+            this.tabPage_ui.Controls.Add(this.textBox_ui_loginWelcomeText);
+            this.tabPage_ui.Controls.Add(this.label48);
             this.tabPage_ui.Controls.Add(this.checkBox_ui_printLabelMode);
             this.tabPage_ui.Controls.Add(this.checkBox_ui_fixedPanelAnimationEnabled);
             this.tabPage_ui.Controls.Add(this.button_ui_getDefaultFont);
@@ -3274,6 +3278,16 @@
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = "UCS 上传接口";
             // 
+            // button_ucs_testUpload
+            // 
+            this.button_ucs_testUpload.Location = new System.Drawing.Point(172, 234);
+            this.button_ucs_testUpload.Name = "button_ucs_testUpload";
+            this.button_ucs_testUpload.Size = new System.Drawing.Size(219, 35);
+            this.button_ucs_testUpload.TabIndex = 8;
+            this.button_ucs_testUpload.Text = "测试上传记录";
+            this.button_ucs_testUpload.UseVisualStyleBackColor = true;
+            this.button_ucs_testUpload.Click += new System.EventHandler(this.button_ucs_testUpload_Click);
+            // 
             // textBox_ucs_databaseName
             // 
             this.textBox_ucs_databaseName.Location = new System.Drawing.Point(172, 79);
@@ -3375,15 +3389,25 @@
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
-            // button_ucs_testUpload
+            // textBox_ui_loginWelcomeText
             // 
-            this.button_ucs_testUpload.Location = new System.Drawing.Point(172, 234);
-            this.button_ucs_testUpload.Name = "button_ucs_testUpload";
-            this.button_ucs_testUpload.Size = new System.Drawing.Size(219, 35);
-            this.button_ucs_testUpload.TabIndex = 8;
-            this.button_ucs_testUpload.Text = "测试上传记录";
-            this.button_ucs_testUpload.UseVisualStyleBackColor = true;
-            this.button_ucs_testUpload.Click += new System.EventHandler(this.button_ucs_testUpload_Click);
+            this.textBox_ui_loginWelcomeText.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_ui_loginWelcomeText.Location = new System.Drawing.Point(253, 376);
+            this.textBox_ui_loginWelcomeText.Margin = new System.Windows.Forms.Padding(5);
+            this.textBox_ui_loginWelcomeText.Name = "textBox_ui_loginWelcomeText";
+            this.textBox_ui_loginWelcomeText.Size = new System.Drawing.Size(633, 31);
+            this.textBox_ui_loginWelcomeText.TabIndex = 9;
+            // 
+            // label48
+            // 
+            this.label48.AutoSize = true;
+            this.label48.Location = new System.Drawing.Point(5, 381);
+            this.label48.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.label48.Name = "label48";
+            this.label48.Size = new System.Drawing.Size(201, 21);
+            this.label48.TabIndex = 8;
+            this.label48.Text = "登录画面欢迎语(&W):";
             // 
             // CfgDlg
             // 
@@ -3757,5 +3781,7 @@
         private System.Windows.Forms.TextBox textBox_ucs_databaseName;
         private System.Windows.Forms.Label label47;
         private System.Windows.Forms.Button button_ucs_testUpload;
+        private System.Windows.Forms.TextBox textBox_ui_loginWelcomeText;
+        private System.Windows.Forms.Label label48;
     }
 }

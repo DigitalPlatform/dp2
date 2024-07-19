@@ -194,6 +194,16 @@ namespace DigitalPlatform.Marc
             return results;
         }
 
+        public Field SetFirstSubfield(string strFieldName,
+    string strSubfieldName,
+    string strSubfieldValue)
+        {
+            return SetFirstSubfield(strFieldName,
+            strSubfieldName,
+            strSubfieldValue,
+            out _);
+        }
+
         /// <summary>
         /// 设置指定字段名的第一个字段内的指定子字段名的第一个子字段的值。
         /// 如果不存在这样的字段和子字段，则次第创建
@@ -201,10 +211,13 @@ namespace DigitalPlatform.Marc
         /// <param name="strFieldName">字段名</param>
         /// <param name="strSubfieldName">子字段名</param>
         /// <param name="strSubfieldValue">子字段值</param>
-        public void SetFirstSubfield(string strFieldName,
+        /// <param name="old_field"></param>
+        public Field SetFirstSubfield(string strFieldName,
             string strSubfieldName,
-            string strSubfieldValue)
+            string strSubfieldValue,
+            out Field old_field)
         {
+            old_field = null;
             Field field = this.GetOneField(strFieldName, 0);
             if (field == null)
             {
@@ -213,6 +226,11 @@ namespace DigitalPlatform.Marc
                     "",
                     true);
             }
+            else
+            {
+                old_field = field.Clone();
+            }
+
             if (field == null)
                 throw new Exception("不可能的情况");
 
@@ -226,6 +244,8 @@ namespace DigitalPlatform.Marc
                 subfield.m_strValue = strSubfieldValue;
                 field.Subfields.Add(subfield, true);
             }
+
+            return field;
         }
 
         internal MarcEditor MarcEditor
@@ -240,6 +260,7 @@ namespace DigitalPlatform.Marc
 
         // 追加一个新字段，只供内部使用，
         // 因为该函数只处理内存对象，不涉及界面的事情
+        // 操作历史: 无
         // parameters:
         //		strName	新字段名称
         //		strIndicator	新字段指示符
@@ -303,6 +324,7 @@ namespace DigitalPlatform.Marc
         // 对内
         // 追加一个新字段，供外部使用
         // 该函数不仅处理内存对象，还处理界面的事情
+        // 操作历史: 无
         // parameters:
         //		strName	新字段名称
         //		strIndicator	新字段指示符
@@ -391,6 +413,7 @@ namespace DigitalPlatform.Marc
 
         // 前插一个新字段，只供内部使用，
         // 因为该函数只处理内存对象，不涉及界面的事情
+        // 操作历史: 无
         // parameters:
         //		nIndex	参考的位置
         //		strName	新字段名称
@@ -429,7 +452,8 @@ namespace DigitalPlatform.Marc
             return field;
         }
 
-        // 根据通过的Marc字段串，给nIndex位置前新增多个字段
+        // 根据机内格式的表示多个字段的字符串，给nIndex位置前新增多个字段
+        // 操作历史: 无
         // parameters:
         //		nIndex	位置
         //		strFieldMarc	marc字符串
@@ -451,6 +475,7 @@ namespace DigitalPlatform.Marc
             this.InsertInternal(nIndex, fields);
         }
 
+        // 操作历史: 无
         internal void InsertInternal(int nIndex,
             List<string> fields)
         {
@@ -541,6 +566,7 @@ namespace DigitalPlatform.Marc
 
         // 前插一个新字段，可供内部或外部使用，
         // 该函数不仅处理内存对象，还处理界面的事情
+        // 操作历史: 无
         // parameters:
         //		nIndex	参考的位置
         //		strName	新字段名称
@@ -574,6 +600,7 @@ namespace DigitalPlatform.Marc
         }
 
         // 前插一个字段
+        // 操作历史: 无
         /// <summary>
         /// 插入一个字段对象
         /// </summary>
@@ -617,6 +644,7 @@ namespace DigitalPlatform.Marc
 
         // 后插一个新字段，可供内部或外部使用，
         // 该函数不仅处理内存对象，还处理界面的事情
+        // 操作历史: 无
         // parameters:
         //		nIndex	参考的位置
         //		strName	新字段名称
@@ -650,6 +678,7 @@ namespace DigitalPlatform.Marc
         }
 
         // 后插字段
+        // 操作历史: 无
         /// <summary>
         /// 插入一个新的字段对象，在参考位置的后面
         /// </summary>
@@ -685,21 +714,26 @@ namespace DigitalPlatform.Marc
         //--------------------------删除字段-------------------
 
         // 删除一个字段，只供内部使用，
+        // 操作历史: 无
         // 因为该函数只处理内存对象，不涉及界面的事情
         // parameters:
         //		nFieldIndex	字段索引号
         // return:
         //		void
-        internal void RemoveAtInternal(int nFieldIndex)
+        internal Field RemoveAtInternal(int nFieldIndex)
         {
+            var old_field = this[nFieldIndex];
             base.RemoveAt(nFieldIndex);
 
             // 文档发生改变
             this.MarcEditor.FireTextChanged();
+
+            return old_field;
         }
 
         // 删除一个字段，可供内部或外部使用，
         // 该函数不仅处理内存对象，还处理界面的事情
+        // 操作历史: 无
         // parameters:
         //		nFieldIndex	字段索引号
         /// <summary>
@@ -726,6 +760,7 @@ namespace DigitalPlatform.Marc
                 iRect);
         }
 
+        // 操作历史: 无
         /// <summary>
         /// 删除若干字段对象
         /// </summary>
@@ -762,6 +797,20 @@ namespace DigitalPlatform.Marc
             this.MarcEditor.AfterDocumentChanged(ScrollBarMember.Vert,
                 iRect);
         }
+
+        #region 仅操作集合，不触发任何事件
+
+        internal void _removeAt(int field_index)
+        {
+            base.RemoveAt(field_index);
+        }
+
+        internal void _insert(int field_index, Field field)
+        {
+            base.Insert(field_index, field);
+        }
+
+        #endregion
     }
 
     /// <summary>

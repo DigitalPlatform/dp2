@@ -825,8 +825,8 @@ out string strPureName);
                 if (nStart == -1)
                     break;
                 text.Append(strText.Substring(nPos, nStart - nPos));
-                nPos = nStart + left.Length;
-                nEnd = strText.IndexOf(right, nPos);
+                nPos = nStart;  //  + left.Length;
+                nEnd = strText.IndexOf(right, nPos + left.Length);
                 if (nEnd == -1)
                     break;
                 nPos = nEnd + right.Length;
@@ -865,6 +865,9 @@ out string strPureName);
         /// <returns>兑现宏以后的字符串</returns>
         public static string MacroTimeValue(string strMacro)
         {
+            if (string.IsNullOrEmpty(strMacro))
+                return "";  // 避免返回 null
+
             DateTime time = DateTime.Now;
 
             // utime

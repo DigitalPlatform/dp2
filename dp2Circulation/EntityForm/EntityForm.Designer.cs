@@ -72,6 +72,10 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_saveAll = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_marcEditor_save = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSplitButton_loadBiblioTemplate = new System.Windows.Forms.ToolStripSplitButton();
+            this.ToolStripMenuItem_loadBiblioTemplateUseDialog = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_loadBiblioTemplateForChanging = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_saveToBiblioTemplate = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripButton_marcEditor_loadTemplate = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator9 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_marcEditor_delete = new System.Windows.Forms.ToolStripButton();
@@ -587,6 +591,7 @@
             this.toolStripSeparator1,
             this.toolStripButton_saveAll,
             this.toolStripButton_marcEditor_save,
+            this.toolStripSplitButton_loadBiblioTemplate,
             this.toolStripButton_marcEditor_loadTemplate,
             this.toolStripSeparator9,
             this.toolStripButton_marcEditor_delete,
@@ -656,6 +661,42 @@
             this.toolStripButton_marcEditor_save.ToolTipText = "保存书目记录(不保存册信息) Ctrl+S";
             this.toolStripButton_marcEditor_save.Click += new System.EventHandler(this.toolStripButton_marcEditor_save_Click);
             // 
+            // toolStripSplitButton_loadBiblioTemplate
+            // 
+            this.toolStripSplitButton_loadBiblioTemplate.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripSplitButton_loadBiblioTemplate.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ToolStripMenuItem_loadBiblioTemplateUseDialog,
+            this.ToolStripMenuItem_loadBiblioTemplateForChanging,
+            this.ToolStripMenuItem_saveToBiblioTemplate});
+            this.toolStripSplitButton_loadBiblioTemplate.Image = ((System.Drawing.Image)(resources.GetObject("toolStripSplitButton_loadBiblioTemplate.Image")));
+            this.toolStripSplitButton_loadBiblioTemplate.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripSplitButton_loadBiblioTemplate.Name = "toolStripSplitButton_loadBiblioTemplate";
+            this.toolStripSplitButton_loadBiblioTemplate.Size = new System.Drawing.Size(48, 32);
+            this.toolStripSplitButton_loadBiblioTemplate.Text = "装载书目模板";
+            this.toolStripSplitButton_loadBiblioTemplate.ToolTipText = "装载书目模板(Ctrl+T)";
+            this.toolStripSplitButton_loadBiblioTemplate.ButtonClick += new System.EventHandler(this.toolStripSplitButton_loadBiblioTemplate_ButtonClick);
+            // 
+            // ToolStripMenuItem_loadBiblioTemplateUseDialog
+            // 
+            this.ToolStripMenuItem_loadBiblioTemplateUseDialog.Name = "ToolStripMenuItem_loadBiblioTemplateUseDialog";
+            this.ToolStripMenuItem_loadBiblioTemplateUseDialog.Size = new System.Drawing.Size(404, 40);
+            this.ToolStripMenuItem_loadBiblioTemplateUseDialog.Text = "装载书目模板[出现对话框](&D)";
+            this.ToolStripMenuItem_loadBiblioTemplateUseDialog.Click += new System.EventHandler(this.ToolStripMenuItem_loadBiblioTemplateUseDialog_Click);
+            // 
+            // ToolStripMenuItem_loadBiblioTemplateForChanging
+            // 
+            this.ToolStripMenuItem_loadBiblioTemplateForChanging.Name = "ToolStripMenuItem_loadBiblioTemplateForChanging";
+            this.ToolStripMenuItem_loadBiblioTemplateForChanging.Size = new System.Drawing.Size(404, 40);
+            this.ToolStripMenuItem_loadBiblioTemplateForChanging.Text = "装载书目模板[为修改模板](&C)";
+            this.ToolStripMenuItem_loadBiblioTemplateForChanging.Click += new System.EventHandler(this.ToolStripMenuItem_loadBiblioTemplateForChanging_Click);
+            // 
+            // ToolStripMenuItem_saveToBiblioTemplate
+            // 
+            this.ToolStripMenuItem_saveToBiblioTemplate.Name = "ToolStripMenuItem_saveToBiblioTemplate";
+            this.ToolStripMenuItem_saveToBiblioTemplate.Size = new System.Drawing.Size(404, 40);
+            this.ToolStripMenuItem_saveToBiblioTemplate.Text = "保存到书目模板(&S)";
+            this.ToolStripMenuItem_saveToBiblioTemplate.Click += new System.EventHandler(this.ToolStripMenuItem_saveToBiblioTemplate_Click);
+            // 
             // toolStripButton_marcEditor_loadTemplate
             // 
             this.toolStripButton_marcEditor_loadTemplate.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -666,6 +707,7 @@
             this.toolStripButton_marcEditor_loadTemplate.Size = new System.Drawing.Size(40, 32);
             this.toolStripButton_marcEditor_loadTemplate.Text = "装载书目模板";
             this.toolStripButton_marcEditor_loadTemplate.ToolTipText = "装载书目模板(Ctrl+T)";
+            this.toolStripButton_marcEditor_loadTemplate.Visible = false;
             this.toolStripButton_marcEditor_loadTemplate.Click += new System.EventHandler(this.toolStripButton_marcEditor_loadTemplate_Click);
             // 
             // toolStripSeparator9
@@ -938,7 +980,7 @@
             this.toolStripButton_verifyData.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
             this.toolStripButton_verifyData.Name = "toolStripButton_verifyData";
             this.toolStripButton_verifyData.Size = new System.Drawing.Size(40, 32);
-            this.toolStripButton_verifyData.Text = "校验数据 (Ctrl+Y)";
+            this.toolStripButton_verifyData.Text = "校验数据 (Ctrl+U)";
             this.toolStripButton_verifyData.Visible = false;
             this.toolStripButton_verifyData.Click += new System.EventHandler(this.toolStripButton_verifyData_Click);
             // 
@@ -949,7 +991,7 @@
             this.toolStripSplitButton_verify.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
             this.toolStripSplitButton_verify.Name = "toolStripSplitButton_verify";
             this.toolStripSplitButton_verify.Size = new System.Drawing.Size(48, 32);
-            this.toolStripSplitButton_verify.Text = "校验数据 (Ctrl+Y)";
+            this.toolStripSplitButton_verify.Text = "校验数据 (Ctrl+U)";
             this.toolStripSplitButton_verify.ButtonClick += new System.EventHandler(this.toolStripSplitButton_verify_ButtonClick);
             this.toolStripSplitButton_verify.DropDownOpening += new System.EventHandler(this.toolStripSplitButton_verify_DropDownOpening);
             // 
@@ -1463,5 +1505,9 @@
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_searchDupBySelected;
         private System.Windows.Forms.ToolStripButton toolStripButton_uploadToUcs;
         private System.Windows.Forms.ToolStripSplitButton toolStripSplitButton_verify;
+        private System.Windows.Forms.ToolStripSplitButton toolStripSplitButton_loadBiblioTemplate;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_loadBiblioTemplateForChanging;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_saveToBiblioTemplate;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_loadBiblioTemplateUseDialog;
     }
 }

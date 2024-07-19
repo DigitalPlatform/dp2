@@ -80,6 +80,8 @@
             this.tabPage_simple = new System.Windows.Forms.TabPage();
             this.tabPage_logic = new System.Windows.Forms.TabPage();
             this.dp2QueryControl1 = new DigitalPlatform.CommonControl.dp2QueryControl();
+            this.tabPage_filter = new System.Windows.Forms.TabPage();
+            this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.listView_records = new DigitalPlatform.GUI.ListViewNF();
             this.columnHeader_path = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -94,6 +96,8 @@
             this.tabControl_query.SuspendLayout();
             this.tabPage_simple.SuspendLayout();
             this.tabPage_logic.SuspendLayout();
+            this.tabPage_filter.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
             // label2
@@ -584,6 +588,7 @@
             // 
             this.tabControl_query.Controls.Add(this.tabPage_simple);
             this.tabControl_query.Controls.Add(this.tabPage_logic);
+            this.tabControl_query.Controls.Add(this.tabPage_filter);
             this.tabControl_query.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl_query.Location = new System.Drawing.Point(0, 0);
             this.tabControl_query.Margin = new System.Windows.Forms.Padding(5);
@@ -631,6 +636,31 @@
             this.dp2QueryControl1.ViewXml += new System.EventHandler(this.dp2QueryControl1_ViewXml);
             this.dp2QueryControl1.AppendMenu += new DigitalPlatform.ApendMenuEventHandler(this.dp2QueryControl1_AppendMenu);
             this.dp2QueryControl1.GetFromStyle += new DigitalPlatform.CommonControl.GetFromStyleHandler(this.dp2QueryControl1_GetFromStyle);
+            // 
+            // tabPage_filter
+            // 
+            this.tabPage_filter.Controls.Add(this.dataGridView1);
+            this.tabPage_filter.Location = new System.Drawing.Point(4, 31);
+            this.tabPage_filter.Name = "tabPage_filter";
+            this.tabPage_filter.Size = new System.Drawing.Size(879, 255);
+            this.tabPage_filter.TabIndex = 2;
+            this.tabPage_filter.Text = "筛选";
+            this.tabPage_filter.UseVisualStyleBackColor = true;
+            // 
+            // dataGridView1
+            // 
+            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridView1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dataGridView1.Location = new System.Drawing.Point(0, 0);
+            this.dataGridView1.Name = "dataGridView1";
+            this.dataGridView1.RowHeadersWidth = 72;
+            this.dataGridView1.RowTemplate.Height = 33;
+            this.dataGridView1.Size = new System.Drawing.Size(879, 255);
+            this.dataGridView1.TabIndex = 6;
+            this.dataGridView1.ColumnHeaderMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridView1_ColumnHeaderMouseClick);
+            this.dataGridView1.RowHeaderMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridView1_RowHeaderMouseClick);
+            this.dataGridView1.RowHeaderMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridView1_RowHeaderMouseDoubleClick);
+            this.dataGridView1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.dataGridView1_MouseUp);
             // 
             // listView_records
             // 
@@ -695,6 +725,8 @@
             this.tabPage_simple.ResumeLayout(false);
             this.tabPage_simple.PerformLayout();
             this.tabPage_logic.ResumeLayout(false);
+            this.tabPage_filter.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -752,5 +784,7 @@
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_findInList;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_idOrder;
+        private System.Windows.Forms.TabPage tabPage_filter;
+        private System.Windows.Forms.DataGridView dataGridView1;
     }
 }

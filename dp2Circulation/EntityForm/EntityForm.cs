@@ -1450,7 +1450,7 @@ true);
 
             if (this.LinkedRecordReadonly == true)
             {
-                this.m_marcEditor.Record.Fields.SetFirstSubfield("998", "t", e.TargetRecPath);
+                this.m_marcEditor.SetFirstSubfield("998", "t", e.TargetRecPath);
                 if (String.IsNullOrEmpty(e.TargetRecPath) == false)
                     this.m_marcEditor.ReadOnly = true;
                 else
@@ -2289,11 +2289,11 @@ true);
                     Field temp = this.m_marcEditor.Record.Fields[i];
                     if (temp.Name == "998")
                     {
-                        this.m_marcEditor.Record.Fields.RemoveAt(i);
+                        this.m_marcEditor.RemoveField(i);
                         i--;
                     }
                 }
-                this.m_marcEditor.Record.Fields.Insert(this.m_marcEditor.Record.Fields.Count,
+                this.m_marcEditor.InsertField(this.m_marcEditor.Record.Fields.Count,
                     old_998.Name,
                     old_998.Indicator,
                     old_998.Value);
@@ -5203,7 +5203,10 @@ TaskScheduler.Default);
                     && bVerified == false)
                 {
                     // TODO: 注意中途关闭 EntityForm 会发生什么
-                    API.PostMessage(this.Handle, WM_VERIFY_DATA, 0, 0);
+                    this.TryInvoke(() =>
+                    {
+                        API.PostMessage(this.Handle, WM_VERIFY_DATA, 0, 0);
+                    });
                 }
 
                 return 0;
@@ -8243,22 +8246,33 @@ out strError);
         /// <summary>
         /// 装载书目模板
         /// </summary>
-        /// <param name="bAutoSave">是否自动保存窗口内先前的修改</param>
+        /// <param name="style"></param>
         /// <returns>
         /// <para>-1: 出错</para>
         /// <para>0: 放弃</para>
         /// <para>1: 成功装载</para>
         /// </returns>
-        public int LoadBiblioTemplate(bool bAutoSave = true)
+        // public int LoadBiblioTemplate(bool bAutoSave = true)
+        public int LoadBiblioTemplate(string style = "auto_save")
         {
             int nRet = 0;
 
-            // 按住 Shift 使用本功能，可重新出现对话框
-            bool bShift = (Control.ModifierKeys == Keys.Shift);
+            bool bAutoSave = StringUtil.IsInList("auto_save", style);
 
+            /*
+            // 按住 Shift 使用本功能，可重新出现对话框
+            bool show_dialog = (Control.ModifierKeys == Keys.Shift);
+            */
+
+            bool show_dialog = StringUtil.IsInList("show_dialog", style);
+
+            /*
             // 按住 Control 使用本功能，可以出现原始的宏定义(方便修改原始模板然后保存回去)。否则宏定义会被兑现
             // TODO: 如果宏被兑现过了，则保存的时候要警告，说这样保存会毁掉宏定义
-            bool control = (Control.ModifierKeys == Keys.Control);
+            bool dont_replace_macro = (Control.ModifierKeys == Keys.Control);
+            */
+            bool dont_replace_macro = StringUtil.IsInList("dont_replace_macro", style);
+
 
             if (this.BiblioChanged == true
                 || this.EntitiesChanged == true
@@ -8307,7 +8321,7 @@ out strError);
             if (selected != null)
             {
                 dbname_dlg.NotAsk = selected.NotAskDbName;
-                dbname_dlg.AutoClose = (bShift == true ? false : selected.NotAskDbName);
+                dbname_dlg.AutoClose = (show_dialog == true ? false : selected.NotAskDbName);
             }
 
             dbname_dlg.EnableNotAsk = true;
@@ -8379,7 +8393,7 @@ out strError);
             }
 
             select_temp_dlg.SelectedName = strSelectedTemplateName;
-            select_temp_dlg.AutoClose = (bShift == true ? false : bNotAskTemplateName);
+            select_temp_dlg.AutoClose = (show_dialog == true ? false : bNotAskTemplateName);
             select_temp_dlg.NotAsk = bForceAsk == false ? bNotAskTemplateName : false;
             select_temp_dlg.EnableNotAsk = true;    // 2015/5/11
 
@@ -8429,7 +8443,7 @@ out strError);
 
             // this.TimeStamp = baTimeStamp;
             delegate_replace func = null;
-            if (control == false)
+            if (dont_replace_macro == false)
                 func = (source) =>
                 {
                     if (source.IndexOf("{{") == -1)
@@ -8441,6 +8455,8 @@ out strError);
                         {
                             // 从命令 macro:%year%%m2%%d2%%h2%%min2%%sec2%.%hsec%,trigger:save 中解析各个参数
                             var macro = StringUtil.GetParameterByPrefix(cmd, "macro");
+                            if (macro == null)
+                                return $"{{{{{cmd}}}}}";  // 没有包含 macro:xxx 子参数。把此时处理不了的宏还回去
                             var trigger = StringUtil.GetParameterByPrefix(cmd, "trigger");
                             if (trigger == null)
                                 trigger = "load";
@@ -8679,7 +8695,7 @@ out strError);
 
             // 2008/5/16 changed
             string strMARC = this.GetMarc();    //  this.m_marcEditor.Marc;
-            
+
             if (replaceMacro && strMARC.IndexOf("{{") != -1)
             {
                 // TODO: 这里有个问题，就是宏替换以后，MARC 编辑器中的内容还是没有被宏替换的原始命令，
@@ -8693,6 +8709,8 @@ out strError);
                         {
                             // 从命令 macro:%year%%m2%%d2%%h2%%min2%%sec2%.%hsec%,trigger:save 中解析各个参数
                             var macro = StringUtil.GetParameterByPrefix(cmd, "macro");
+                            if (macro == null)
+                                return $"{{{{{cmd}}}}}";  // 没有包含 macro:xxx 子参数。把此时处理不了的宏还回去
                             var trigger = StringUtil.GetParameterByPrefix(cmd, "trigger");
                             if (trigger == null)
                                 trigger = "load";
@@ -10081,7 +10099,7 @@ out strError);
             this.toolStrip_marcEditor.Enabled = false;
             try
             {
-                LoadBiblioTemplate(true);
+                LoadBiblioTemplate("auto_save");
             }
             finally
             {
@@ -10420,7 +10438,7 @@ out strError);
                 GetBiblioRecPathOrSyntax());
         }
 
-        // MARC 编辑器 Ctrl+Y 触发校验 MARC
+        // MARC 编辑器 Ctrl+U 触发校验 MARC
         private void MarcEditor_VerifyData(object sender, GenerateDataEventArgs e)
         {
             // this.VerifyData(sender, e);
@@ -10825,6 +10843,9 @@ out strError);
                 if (operation != null && operation.StartsWith("#"))
                     operation = operation.Substring(1);
 
+                if (string.IsNullOrEmpty(operation))
+                    operation = "verify";
+
                 string operation_caption = "校验";
                 if (operation == "convert")
                     operation_caption = "格式转换";
@@ -11180,29 +11201,56 @@ out strError);
 
                 if (operation == "verify")
                 {
-                    //bool bVerifyFail = false;
-                    if (hostObj.VerifyResult.Value != -1)
+                    List<VerifyError> errors = new List<VerifyError>();
+                    //if (this.m_verifyViewer != null)
+                    //{
+                    if (hostObj.VerifyResult.Errors.Count > 0)
                     {
-                        if (this.m_verifyViewer != null)
-                        {
-                            if (hostObj.VerifyResult.Errors.Count > 0)
-                            {
-                                // this.m_verifyViewer.ResultString = VerifyError.BuildTextLines(hostObj.VerifyResult.Errors);  // 经过校验发现问题
-
-                                this.WriteVerifyErrors(hostObj.VerifyResult.Errors);
-                            }
-                            else
-                            {
-                                // this.m_verifyViewer.ResultString = "经过校验没有发现任何错误。";
-                                this.WriteVerifyError(new VerifyError
-                                {
-                                    Level = "succeed",
-                                    Text = "经过校验没有发现任何错误。"
-                                });
-                            }
-                        }
+                        // this.m_verifyViewer.ResultString = VerifyError.BuildTextLines(hostObj.VerifyResult.Errors);  // 经过校验发现问题
+                        // this.WriteVerifyErrors(hostObj.VerifyResult.Errors);
+                        errors.AddRange(hostObj.VerifyResult.Errors);
                     }
                     else
+                    {
+                        // this.m_verifyViewer.ResultString = "经过校验没有发现任何错误。";
+                        /*
+                        this.WriteVerifyError(new VerifyError
+                        {
+                            Level = "succeed",
+                            Text = "经过校验没有发现任何错误。"
+                        });
+                        */
+                        errors.Add(new VerifyError
+                        {
+                            Level = "succeed",
+                            Text = "经过校验没有发现任何错误。"
+                        });
+                    }
+                    // }
+
+                    if (hostObj.VerifyResult.Value == -1)
+                    {
+                        /*
+                        this.WriteVerifyError(new VerifyError
+                        {
+                            Level = hostObj.VerifyResult.Value == -1 ? "error" : "info",
+                            Text = hostObj.VerifyResult.ErrorInfo
+                        });
+                        */
+                        errors.Add(new VerifyError
+                        {
+                            Level = hostObj.VerifyResult.Value == -1 ? "error" : "info",
+                            Text = hostObj.VerifyResult.ErrorInfo
+                        });
+                    }
+
+                    if (errors.Count > 0)
+                        this.WriteVerifyErrors(errors);
+
+                    var error_count = VerifyError.GetErrorCount(hostObj.VerifyResult.Errors);
+                    var warning_count = VerifyError.GetWarningCount(hostObj.VerifyResult.Errors);
+
+                    if (error_count > 0)
                     {
                         if (bAutoVerify == true)
                         {
@@ -11210,17 +11258,19 @@ out strError);
                             DoViewVerifyResult(Program.MainForm.PanelFixedVisible == false ? true : false);
                         }
                         // this.m_verifyViewer.ResultString = hostObj.VerifyResult.ErrorInfo;
-                        this.WriteVerifyError(new VerifyError
-                        {
-                            Level = hostObj.VerifyResult.Value == -1 ? "error" : "info",
-                            Text = hostObj.VerifyResult.ErrorInfo
-                        });
+
 
                         Program.MainForm.ActivateVerifyResultPage();   // 2014/7/3
                         //bVerifyFail = true;
                     }
 
                     this.SetSaveAllButtonState(!InDisabledState);   // 2009/3/29 
+                    if (hostObj.VerifyResult.Value == -1)
+                        return -1;
+                    if (error_count > 0)
+                        return 2;
+                    if (warning_count > 0)
+                        return 1;
                     return hostObj.VerifyResult.Value;
                 }
                 else if (operation == "convert")
@@ -13757,13 +13807,13 @@ out strError);
                     Field temp = this.m_marcEditor.Record.Fields[i];
                     if (temp.Name == "998")
                     {
-                        this.m_marcEditor.Record.Fields.RemoveAt(i);
+                        this.m_marcEditor.RemoveField(i);
                         i--;
                     }
                 }
                 if (old_998 != null)
                 {
-                    this.m_marcEditor.Record.Fields.Insert(this.m_marcEditor.Record.Fields.Count,
+                    this.m_marcEditor.InsertField(this.m_marcEditor.Record.Fields.Count,
                         old_998.Name,
                         old_998.Indicator,
                         old_998.Value);
@@ -13773,7 +13823,7 @@ out strError);
         SET:
 
             if (String.IsNullOrEmpty(strTargetBiblioRecPath) == false)
-                this.m_marcEditor.Record.Fields.SetFirstSubfield("998", "t", strTargetBiblioRecPath);
+                this.m_marcEditor.SetFirstSubfield("998", "t", strTargetBiblioRecPath);
             else
             {
                 this.Remove998t();
@@ -14623,7 +14673,7 @@ out strError);
                 this.toolStrip_marcEditor.Enabled = false;
                 try
                 {
-                    LoadBiblioTemplate(true);
+                    LoadBiblioTemplate("auto_save");
                 }
                 finally
                 {
@@ -14665,84 +14715,89 @@ out strError);
             this.m_verifyViewer?.WriteErrors(this._verifyErrors);
         }
 
-        void WriteVerifyErrors(List<VerifyError> errors)
+        void WriteVerifyErrors(List<VerifyError> errors,
+            bool clear_before = true)
         {
             this._verifyErrors = new List<VerifyError>();
             this._verifyErrors.AddRange(errors);
-            this.m_verifyViewer?.WriteErrors(this._verifyErrors);
+            this.m_verifyViewer?.WriteErrors(this._verifyErrors, clear_before);
         }
 
         void DoViewVerifyResult(bool bOpenWindow)
         {
-            // string strError = "";
-
-            // 优化，避免无谓地进行服务器调用
-            if (bOpenWindow == false)
+            this.TryInvoke(() =>
             {
-                if (Program.MainForm.PanelFixedVisible == false
-                    && (m_verifyViewer == null || m_verifyViewer.Visible == false))
-                    return;
-            }
+                // string strError = "";
 
-
-            if (this.m_verifyViewer == null
-                || (bOpenWindow == true && this.m_verifyViewer.Visible == false))
-            {
-                m_verifyViewer = new VerifyViewerForm();
-                m_verifyViewer.CssFileName = Path.Combine(Program.MainForm.DataDir, "verify.css");  // 2024/6/15
-                MainForm.SetControlFont(m_verifyViewer, this.Font, false);
-
-                // m_viewer.MainForm = Program.MainForm;  // 必须是第一句
-                m_verifyViewer.Text = "校验结果";
-                // m_verifyViewer.ResultString = this.m_strVerifyResult;
-                // 恢复以前记忆的内容
-                m_verifyViewer.WriteErrors(this._verifyErrors, true);
-
-                m_verifyViewer.DoDockEvent -= new DoDockEventHandler(m_viewer_DoDockEvent);
-                m_verifyViewer.DoDockEvent += new DoDockEventHandler(m_viewer_DoDockEvent);
-
-                m_verifyViewer.FormClosed -= new FormClosedEventHandler(m_viewer_FormClosed);
-                m_verifyViewer.FormClosed += new FormClosedEventHandler(m_viewer_FormClosed);
-
-                m_verifyViewer.Locate -= new LocateEventHandler(m_viewer_Locate);
-                m_verifyViewer.Locate += new LocateEventHandler(m_viewer_Locate);
-
-            }
-
-            if (bOpenWindow == true)
-            {
-                if (m_verifyViewer.Visible == false)
+                // 优化，避免无谓地进行服务器调用
+                if (bOpenWindow == false)
                 {
-                    Program.MainForm.AppInfo.LinkFormState(m_verifyViewer, "verify_viewer_state");
-                    m_verifyViewer.Show(this);
-                    m_verifyViewer.Activate();
+                    if (Program.MainForm.PanelFixedVisible == false
+                        && (m_verifyViewer == null || m_verifyViewer.Visible == false))
+                        return;
+                }
 
-                    Program.MainForm.CurrentVerifyResultControl = null;
+
+                if (this.m_verifyViewer == null
+                    || (bOpenWindow == true && this.m_verifyViewer.Visible == false))
+                {
+
+                    m_verifyViewer = new VerifyViewerForm();
+                    m_verifyViewer.CssFileName = Path.Combine(Program.MainForm.DataDir, "verify.css");  // 2024/6/15
+                    MainForm.SetControlFont(m_verifyViewer, this.Font, false);
+
+                    // m_viewer.MainForm = Program.MainForm;  // 必须是第一句
+                    m_verifyViewer.Text = "校验结果";
+                    // m_verifyViewer.ResultString = this.m_strVerifyResult;
+                    // 恢复以前记忆的内容
+                    m_verifyViewer.WriteErrors(this._verifyErrors, true);
+
+                    m_verifyViewer.DoDockEvent -= new DoDockEventHandler(m_viewer_DoDockEvent);
+                    m_verifyViewer.DoDockEvent += new DoDockEventHandler(m_viewer_DoDockEvent);
+
+                    m_verifyViewer.FormClosed -= new FormClosedEventHandler(m_viewer_FormClosed);
+                    m_verifyViewer.FormClosed += new FormClosedEventHandler(m_viewer_FormClosed);
+
+                    m_verifyViewer.Locate -= new LocateEventHandler(m_viewer_Locate);
+                    m_verifyViewer.Locate += new LocateEventHandler(m_viewer_Locate);
+
+                }
+
+                if (bOpenWindow == true)
+                {
+                    if (m_verifyViewer.Visible == false)
+                    {
+                        Program.MainForm.AppInfo.LinkFormState(m_verifyViewer, "verify_viewer_state");
+                        m_verifyViewer.Show(this);
+                        m_verifyViewer.Activate();
+
+                        Program.MainForm.CurrentVerifyResultControl = null;
+                    }
+                    else
+                    {
+                        if (m_verifyViewer.WindowState == FormWindowState.Minimized)
+                            m_verifyViewer.WindowState = FormWindowState.Normal;
+                        m_verifyViewer.Activate();
+                    }
                 }
                 else
                 {
-                    if (m_verifyViewer.WindowState == FormWindowState.Minimized)
-                        m_verifyViewer.WindowState = FormWindowState.Normal;
-                    m_verifyViewer.Activate();
-                }
-            }
-            else
-            {
-                if (m_verifyViewer.Visible == true)
-                {
+                    if (m_verifyViewer.Visible == true)
+                    {
 
+                    }
+                    else
+                    {
+                        if (Program.MainForm.CurrentVerifyResultControl != m_verifyViewer.ResultControl)
+                            m_verifyViewer.DoDock(false); // 不会自动显示FixedPanel
+                    }
                 }
-                else
-                {
-                    if (Program.MainForm.CurrentVerifyResultControl != m_verifyViewer.ResultControl)
-                        m_verifyViewer.DoDock(false); // 不会自动显示FixedPanel
-                }
-            }
-            return;
-            /*
-        ERROR1:
-            MessageBox.Show(this, "DoViewVerifyResult() 出错: " + strError);
-             * */
+                return;
+                /*
+            ERROR1:
+                MessageBox.Show(this, "DoViewVerifyResult() 出错: " + strError);
+                 * */
+            });
         }
 
         void m_viewer_DoDockEvent(object sender, DoDockEventArgs e)
@@ -15533,7 +15588,7 @@ out strError);
                         {
                             // 保存当前记录的998字段
                             old_998 = this.m_marcEditor.Record.Fields.GetOneField("998", 0);
-                            this.m_marcEditor.Record.Fields.SetFirstSubfield("998", "t", strOldBiblioRecPath);
+                            this.m_marcEditor.SetFirstSubfield("998", "t", strOldBiblioRecPath);
                         }
                     }
                     else
@@ -15810,7 +15865,7 @@ out strError);
         {
             string strError = "";
 
-            // var control = ((Control.ModifierKeys & Keys.Control) == Keys.Control);
+            // var dont_replace_macro = ((Control.ModifierKeys & Keys.Control) == Keys.Control);
 
             // 2022/1/26
             string projectName = null;
@@ -16445,8 +16500,10 @@ out strError);
                             // TODO: 出现对话框
                         }
                         else
-                            field_856 = this.m_marcEditor.Record.Fields.Add("856", "  ", "", true);
-
+                        {
+                            // field_856 = this.m_marcEditor.Record.Fields.Add("856", "  ", "", true);
+                            field_856 = this.m_marcEditor.AddField("856", "  ", "", true);
+                        }
 #if NO
                         field_856.IndicatorAndValue = ("72$3Cover Image$" + DetailHost.LinkSubfieldName + "uri:" + strID + "$xtype:" + strType + ";size:" + strSize
                             + (string.IsNullOrEmpty(type.ProcessCommand) == true ? "" : ";clip:" + StringUtil.EscapeString(type.ProcessCommand, ";:"))
@@ -16601,7 +16658,10 @@ out strError);
                     // TODO: 出现对话框
                 }
                 else
-                    field_856 = this.m_marcEditor.Record.Fields.Add("856", "  ", "", true);
+                {
+                    // field_856 = this.m_marcEditor.Record.Fields.Add("856", "  ", "", true);
+                    field_856 = this.m_marcEditor.AddField("856", "  ", "", true);
+                }
 
                 // field_856.IndicatorAndValue = ("72$3Cover Image$" + DetailHost.LinkSubfieldName + "uri:" + strID + "$xtype:" + strType + ";size:" + strSize + "$2dp2res").Replace('$', (char)31);
                 field_856.IndicatorAndValue = Build856IndiAndValue(
@@ -17434,7 +17494,9 @@ out strError);
             var changed = (strMARC != record.Text);
 
             if (changed)
+            {
                 this.MarcEditor.Marc = record.Text;
+            }
 
             return changed;
         }
@@ -17841,6 +17903,58 @@ out strError);
             {
                 this.toolStripSplitButton_verify.DropDownItems.Clear();
             });
+        }
+
+        private void toolStripSplitButton_loadBiblioTemplate_ButtonClick(object sender, EventArgs e)
+        {
+            this.toolStrip_marcEditor.Enabled = false;
+            try
+            {
+                LoadBiblioTemplate("auto_save");
+            }
+            finally
+            {
+                this.toolStrip_marcEditor.Enabled = true;
+            }
+        }
+
+        private void ToolStripMenuItem_loadBiblioTemplateForChanging_Click(object sender, EventArgs e)
+        {
+            this.toolStrip_marcEditor.Enabled = false;
+            try
+            {
+                LoadBiblioTemplate("auto_save,dont_replace_macro");
+            }
+            finally
+            {
+                this.toolStrip_marcEditor.Enabled = true;
+            }
+        }
+
+        private void ToolStripMenuItem_saveToBiblioTemplate_Click(object sender, EventArgs e)
+        {
+            this.toolStrip_marcEditor.Enabled = false;
+            try
+            {
+                SaveBiblioToTemplate();
+            }
+            finally
+            {
+                this.toolStrip_marcEditor.Enabled = true;
+            }
+        }
+
+        private void ToolStripMenuItem_loadBiblioTemplateUseDialog_Click(object sender, EventArgs e)
+        {
+            this.toolStrip_marcEditor.Enabled = false;
+            try
+            {
+                LoadBiblioTemplate("auto_save,show_dialog");
+            }
+            finally
+            {
+                this.toolStrip_marcEditor.Enabled = true;
+            }
         }
 
 

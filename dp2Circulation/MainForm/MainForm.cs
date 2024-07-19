@@ -1879,6 +1879,17 @@ false);
             }
         }
 
+        public string WelcomeText
+        {
+            get
+            {
+                return this.AppInfo.GetString(
+                    "login",
+                    "welcomeText",
+                    "");
+            }
+        }
+
         List<ToolStripItem> _save_menu_items = null;
 
         // 设置标签打印模式
@@ -10148,6 +10159,14 @@ TaskScheduler.Default);
     "<head>" +
     "<LINK href='" + strCssFilePath + "' type='text/css' rel='stylesheet'>" +
     "</head>";
+        }
+
+        public void ClearCommentViewer()
+        {
+            if (m_commentViewer != null)
+            {
+                m_commentViewer.Clear();
+            }
         }
 
         // 打开 CommentViewer 窗口

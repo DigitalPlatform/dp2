@@ -1938,6 +1938,15 @@ namespace DigitalPlatform.Marc
                 results.Add(new NameValueLine("Series", BuildFields(fields), "series_area"));
             }
 
+            // 提要文摘
+            // 520 字段
+            if (StringUtil.IsInList("summary", strStyle))
+            {
+                fields = record.select("field[@name='520']");
+                if (fields.count > 0)
+                    results.Add(new NameValueLine("提要文摘", BuildFields(fields), "summary"));
+            }
+
             // 分类号
             if (StringUtil.IsInList("classes", strStyle))
             {

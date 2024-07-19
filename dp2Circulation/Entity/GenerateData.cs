@@ -673,8 +673,13 @@ out strError);
                 // 2024/7/9
                 // 获得当前可用的菜单
                 if (e.ScriptEntry == "!getActiveMenu"
-                    && this.m_genDataViewer != null)
+                    /*&& this.m_genDataViewer != null*/)
                 {
+                    if (this.m_genDataViewer == null)
+                    {
+                        e.ErrorInfo = "m_genDataViewer == null";
+                        return;
+                    }
                     var actions = this.m_genDataViewer.GetSelectedActions();
                     e.Parameter = GenerateDataForm.ActionsToXml(actions);
                     return;

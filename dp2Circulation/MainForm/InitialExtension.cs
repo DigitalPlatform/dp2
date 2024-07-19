@@ -2993,10 +2993,13 @@ TaskScheduler.Default);
                     {
                         this.TryInvoke(() =>
                         {
+                            var text = "首次登录";
+                            if (string.IsNullOrEmpty(this.WelcomeText) == false)
+                                text = this.WelcomeText.Replace("\\r\\n", "\r\n");
                             SetDefaultAccount(
                                 null,
                                 "登录", // "指定缺省帐户",
-                                "首次登录", // "请指定后面操作中即将用到的缺省帐户信息。",
+                                text, // "请指定后面操作中即将用到的缺省帐户信息。",
                                 LoginFailCondition.None,
                                 this,
                                 false);

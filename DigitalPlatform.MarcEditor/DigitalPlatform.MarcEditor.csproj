@@ -166,6 +166,7 @@
     <Compile Include="AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="ChangeAction.cs" />
     <Compile Include="DeleteFieldDlg.cs">
       <SubType>Form</SubType>
     </Compile>

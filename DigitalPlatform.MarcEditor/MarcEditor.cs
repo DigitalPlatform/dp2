@@ -17,6 +17,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
 using System.Linq;
+using DigitalPlatform.MarcEditor;
 
 namespace DigitalPlatform.Marc
 {
@@ -1524,6 +1525,381 @@ namespace DigitalPlatform.Marc
             ChangeEditSizeAndMove(nField, this.m_nFocusCol);
         }
 
+        internal List<Field> GetFields(int start_index,
+            int length)
+        {
+            List<Field> results = new List<Field>();
+            for (int i = start_index;
+                i < Math.Min(start_index + length, this.record.Fields.Count);
+                i++)
+            {
+                results.Add(this.record.Fields[i]);
+            }
+
+            return results;
+        }
+
+        int _historyIndex = 0; // 当前 _changeHistory 中新增事项的位置
+        List<ChangeAction> _changeHistory = new List<ChangeAction>();
+
+        public void AppendFieldsDelete(List<Field> old_fields)
+        {
+#if REMOVED
+#if DEBUG
+            var first = old_fields[0];
+            if (this.record.Fields.IndexOf(first) != 0)
+                throw new ArgumentException($"old_field 中的第一项应该是 .record.Fields 中的第一项");
+#endif
+#endif
+            int i = 0;
+            foreach (var old_field in old_fields)
+            {
+                AppendFieldDelete(i, new List<Field>() { old_field });
+                i++;
+            }
+        }
+
+        // indices 里面的索引值和 old_fields 集合中的对象一一对应
+        public void AppendFieldsDelete(IEnumerable<int> indices,
+            List<Field> old_fields)
+        {
+            int i = 0;
+            foreach (var v in indices)
+            {
+                AppendFieldDelete(v, new List<Field>() { old_fields[i] });
+                i++;
+            }
+        }
+
+        static int MAX_HISTORY = 1000;
+
+        public void AppendFieldDelete(int start_index,
+            List<Field> old_fields)
+        {
+#if REMOVED
+            discardHistory();
+            _changeHistory.Add(new ChangeAction
+            {
+                Action = "FieldDelete",
+                Offs = start_index.ToString(),
+                OldFields = Field.Clone(old_fields),
+                NewFields = new List<Field>()
+            });
+            _historyIndex = _changeHistory.Count;
+            limitHistory();
+#endif
+            AppendFieldAction("FieldDelete",
+                start_index,
+                Field.Clone(old_fields),
+                new List<Field>());
+        }
+
+        public bool CanUndo()
+        {
+            if (_historyIndex <= 0)
+                return false;
+            return true;
+        }
+
+        public bool CanRedo()
+        {
+            if (_historyIndex >= _changeHistory.Count)
+                return false;
+            return true;
+        }
+
+        // return:
+        //      true    成功
+        //      false   被拒绝
+        public bool Undo()
+        {
+            if (_historyIndex <= 0)
+                return false;
+
+            bool has_focus = this.Focused || this.curEdit.Focused;
+            this.ClearSelectFieldIndices("hidetextbox,invalidate");
+
+            _historyIndex--;
+            var item = _changeHistory[_historyIndex];
+            undoAction(item);
+
+            if (this.record != null)
+            {
+                // 把所有字段的高度计算一下
+                this.record.CalculateFieldsHeight(0, -1, true);
+
+                // 客户区发生变化后，文档与发生变化
+                InvalidateRect iRect = new InvalidateRect();
+                iRect.bAll = true;
+                this.AfterDocumentChanged(ScrollBarMember.Both,
+                    iRect);
+            }
+
+
+            if (has_focus)
+            {
+                int line = item.TryGetFieldIndex();
+                if (line < 0)
+                    line = 0;
+                int col = item.CaretCol;
+                if (col < 1)
+                    col = 1;
+                int pos = item.CaretPos;
+                if (pos < 0)
+                    pos = 0;
+                this.SetActiveField(line, col, pos, true);
+
+                // this.Focus();
+            }
+            return true;
+        }
+
+        void undoAction(ChangeAction action)
+        {
+            // FieldInsert 插入一个或者多个连续的字段 Offs(格式为 field_index) NewFields (OldField 为空) 
+            // FieldChange 替换一个或者多个连续的字段 Offs(格式为 field_index) Length NewFields OldFields
+            // FieldDelete 删除一个或者多个连续的字段 Offs(格式为 field_index) NewFields(空) OldFields(.Count 表明被删除的字段个数)
+            int start_index = Convert.ToInt32(action.Offs);
+            if (action.Action == "FieldInsert")
+            {
+                // 从 offs 位置删除 n 个字段
+                if (action.NewFields != null)
+                {
+                    for (int i = 0; i < action.NewFields.Count; i++)
+                    {
+                        this.record.Fields._removeAt(start_index);
+                    }
+                }
+                return;
+            }
+            else if (action.Action == "FieldChange")
+            {
+                // 在 offs 位置删除 m 个字段
+                if (action.NewFields != null)
+                {
+                    for (int i = 0; i < action.NewFields.Count; i++)
+                    {
+                        // var field = action.NewFields[i];
+                        this.record.Fields._removeAt(start_index);
+                    }
+                }
+                // 在 offs 位置还原 n 个字段
+                if (action.OldFields != null)
+                {
+                    for (int i = 0; i < action.OldFields.Count; i++)
+                    {
+                        var field = action.OldFields[i];
+                        field.container = this.record.Fields;
+                        field.Selected = false;
+                        this.record.Fields._insert(start_index + i, field);
+                    }
+                }
+                return;
+            }
+            else if (action.Action == "FieldDelete")
+            {
+                // 在 offs 位置还原 n 个字段
+                if (action.OldFields != null)
+                {
+                    for (int i = 0; i < action.OldFields.Count; i++)
+                    {
+                        var field = action.OldFields[i];
+                        field.container = this.record.Fields;
+                        field.Selected = false;
+                        this.record.Fields._insert(start_index + i, field);
+                    }
+                }
+                return;
+            }
+            else
+                throw new ArgumentException($"无法识别的 action.Action '{action.Action}'");
+        }
+
+        // return:
+        //      true    成功
+        //      false   被拒绝
+        public bool Redo()
+        {
+            if (_historyIndex >= _changeHistory.Count)
+                return false;
+
+            bool has_focus = this.Focused || this.curEdit.Focused;
+
+            this.ClearSelectFieldIndices("hidetextbox,invalidate");
+
+            var item = _changeHistory[_historyIndex];
+            redoAction(item);
+            _historyIndex++;
+
+            // TODO: 把 SelectedIndices 复原。是否可以记载在 ChangeAction 中。或者临时推断(比如恢复的字段就是 Focused 的字段)
+
+            if (this.record != null)
+            {
+                // 把所有字段的高度计算一下
+                this.record.CalculateFieldsHeight(0, -1, true);
+
+                // 客户区发生变化后，文档与发生变化
+                InvalidateRect iRect = new InvalidateRect();
+                iRect.bAll = true;
+                this.AfterDocumentChanged(ScrollBarMember.Both,
+                    iRect);
+            }
+
+            if (has_focus)
+            {
+                int line = item.TryGetFieldIndex();
+                if (line < 0)
+                    line = 0;
+                int col = item.CaretCol;
+                if (col < 1)
+                    col = 1;
+                int pos = item.CaretPos;
+                if (pos < 0)
+                    pos = 0;
+                this.SetActiveField(line, col, pos, true);
+
+                // this.Focus();
+            }
+            return true;
+        }
+
+        void redoAction(ChangeAction action)
+        {
+            // FieldInsert 插入一个或者多个连续的字段 Offs(格式为 field_index) NewFields (OldField 为空) 
+            // FieldChange 替换一个或者多个连续的字段 Offs(格式为 field_index) Length NewFields OldFields
+            // FieldDelete 删除一个或者多个连续的字段 Offs(格式为 field_index) NewFields(空) OldFields(.Count 表明被删除的字段个数)
+            int start_index = Convert.ToInt32(action.Offs);
+            if (action.Action == "FieldInsert")
+            {
+                // 在 offs 位置插入 n 个字段
+                if (action.NewFields != null)
+                {
+                    for (int i = 0; i < action.NewFields.Count; i++)
+                    {
+                        var field = action.NewFields[i];
+                        field.container = this.record.Fields;
+                        field.Selected = false;
+                        this.record.Fields._insert(start_index + i, field);
+                    }
+                }
+                return;
+            }
+            else if (action.Action == "FieldChange")
+            {
+                // 在 offs 位置删除 m 个字段，然后插入 n 个字段
+                if (action.OldFields != null)
+                {
+                    for (int i = 0; i < action.OldFields.Count; i++)
+                    {
+                        this.record.Fields._removeAt(start_index);
+                    }
+                }
+                if (action.NewFields != null)
+                {
+                    for (int i = 0; i < action.NewFields.Count; i++)
+                    {
+                        var field = action.NewFields[i];
+                        field.container = this.record.Fields;
+                        field.Selected = false;
+                        this.record.Fields._insert(start_index + i, field);
+                    }
+                }
+                return;
+            }
+            else if (action.Action == "FieldDelete")
+            {
+                // 在 offs 位置删除 n 个字段
+                if (action.OldFields != null)
+                {
+                    for (int i = 0; i < action.OldFields.Count; i++)
+                    {
+                        this.record.Fields._removeAt(start_index);
+                    }
+                }
+                return;
+            }
+            else
+                throw new ArgumentException($"无法识别的 action.Action '{action.Action}'");
+        }
+
+
+        // 丢弃 _historyIndex 以后的集合元素
+        void discardHistory()
+        {
+            while (_changeHistory.Count > _historyIndex)
+            {
+                _changeHistory.RemoveAt(_historyIndex);
+            }
+        }
+
+        // 限制修改历史集合的最大尺寸
+        void limitHistory()
+        {
+            while (_changeHistory.Count > MAX_HISTORY)
+            {
+                _changeHistory.RemoveAt(0);
+            }
+            if (_historyIndex > _changeHistory.Count)
+                _historyIndex = _changeHistory.Count;
+        }
+
+        public void AppendInsertFields(int start_index,
+            List<Field> new_fields)
+        {
+            AppendFieldAction(
+"FieldInsert",
+start_index,
+new List<Field>(),
+new_fields);
+        }
+
+        // 重设 MARC 全部内容以后，调用本函数
+        public void AppendReset(List<Field> old_fields,
+            List<Field> new_fields)
+        {
+            AppendFieldAction(
+"FieldChange",
+0,
+old_fields,
+new_fields);
+        }
+
+        public void AppendFieldChange(
+            string action,
+            int field_index,
+            Field old_field,
+            Field new_field)
+        {
+            AppendFieldAction(
+    action,
+    field_index,
+    old_field == null ? new List<Field>() : new List<Field> { old_field },
+    new_field == null ? new List<Field>() : new List<Field> { new_field });
+        }
+        public void AppendFieldAction(
+            string action,
+            int field_index,
+            List<Field> old_fields,
+            List<Field> new_fields)
+        {
+            discardHistory();
+            int caret_pos = 0;
+            if (this.curEdit != null)
+                caret_pos = this.curEdit.SelectionStart;
+            _changeHistory.Add(new ChangeAction
+            {
+                Action = action,
+                Offs = field_index.ToString(),
+                OldFields = old_fields == null ? null : Field.Clone(old_fields),
+                NewFields = new_fields == null ? null : Field.Clone(new_fields),
+                CaretCol = this._focusCol,
+                CaretPos = caret_pos,
+            });
+            _historyIndex = _changeHistory.Count;
+            limitHistory();
+        }
+
+
         int m_nEditControlTextToItemNested = 0;
 
         // 将Edit控件中的文字内容兑现到nCurLine指向的内存Field对象
@@ -1554,20 +1930,25 @@ namespace DigitalPlatform.Marc
 
                 Debug.Assert(this.FocusedField != null, "此时FocusedField不可能为null");
 
+                var field = this.FocusedField;
+                var field_index = this.record.Fields.IndexOf(field);
+                var old_field = field.Clone();
+                Field new_field = null;
                 if (this.m_nFocusCol == 1)
                 {
-                    if (this.FocusedField.m_strName != curEdit.Text)
+                    if (field.m_strName != curEdit.Text)
                     {
-                        ChangeFieldName(this.FocusedField, curEdit.Text);
-                        //this.FocusedField.m_strName = curEdit.Text;
+                        ChangeFieldName(field, curEdit.Text);
+                        new_field = field.Clone();
                     }
                 }
                 else if (this.m_nFocusCol == 2)
                 {
-                    if (this.FocusedField.m_strIndicator != curEdit.Text)
+                    if (field.m_strIndicator != curEdit.Text)
                     {
-                        this.FocusedField.m_strIndicator = curEdit.Text;
+                        field.m_strIndicator = curEdit.Text;
                         this.FireTextChanged();
+                        new_field = field.Clone();
                     }
                 }
                 else if (this.m_nFocusCol == 3)
@@ -1575,10 +1956,11 @@ namespace DigitalPlatform.Marc
 #if BIDI_SUPPORT
                     // string strNewText = curEdit.Text.Replace("\x200e", "");
                     string strNewText = RemoveBidi(curEdit.Text);
-                    if (this.FocusedField.m_strValue != strNewText)
+                    if (field.m_strValue != strNewText)
                     {
-                        this.FocusedField.m_strValue = strNewText;
+                        field.m_strValue = strNewText;
                         this.FireTextChanged();
+                        new_field = field.Clone();
                     }
 #else
                     if (this.FocusedField.m_strValue != curEdit.Text)
@@ -1592,6 +1974,12 @@ namespace DigitalPlatform.Marc
                 {
                     Debug.Assert(false, "列号不正确。");
                 }
+
+                if (new_field != null)
+                    AppendFieldChange("FieldChange",
+                        field_index,
+                        old_field,
+                        new_field);
             }
             finally
             {
@@ -1613,20 +2001,31 @@ namespace DigitalPlatform.Marc
                 return;
             }
 
+            // 2024/7/17
+            if (this.DesignMode && this.FocusedField == null)
+                return;
+
             Debug.Assert(this.FocusedField != null, "此时FocusedField不可能为null");
 
-            if (this.m_nFocusCol == 1)
+            var field = this.FocusedField;
+            var col = this.m_nFocusCol;
+
+            /*
+            // 在 curEdit 中记载所编辑的局部内容处在整个 MARC 记录机内格式中的偏移
+            this.curEdit.Offs = this.record.GetFieldOffs(field, col);
+            */
+            if (col == 1)
             {
-                if (this.FocusedField.m_strName != curEdit.Text)
+                if (field.m_strName != curEdit.Text)
                 {
-                    curEdit.Text = this.FocusedField.m_strName;
+                    curEdit.Text = field.m_strName;
                 }
             }
             else if (this.m_nFocusCol == 2)
             {
-                if (this.FocusedField.m_strIndicator != curEdit.Text)
+                if (field.m_strIndicator != curEdit.Text)
                 {
-                    curEdit.Text = this.FocusedField.m_strIndicator;
+                    curEdit.Text = field.m_strIndicator;
                 }
             }
             else if (this.m_nFocusCol == 3)
@@ -1634,7 +2033,7 @@ namespace DigitalPlatform.Marc
 #if BIDI_SUPPORT
                 // string strNewValue = this.FocusedField.m_strValue.Replace(new string(Record.KERNEL_SUBFLD, 1), "\x200e" + new string(Record.KERNEL_SUBFLD, 1));
 
-                string strNewValue = AddBidi(this.FocusedField.m_strValue);
+                string strNewValue = AddBidi(field.m_strValue);
                 if (strNewValue != curEdit.Text)
                 {
                     curEdit.Text = strNewValue;
@@ -2524,6 +2923,22 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
+            // 撤消
+            menuItem = new MenuItem("撤消(&U)\tCtrl+Z");
+            menuItem.Click += new System.EventHandler(this.menuItem_Undo);
+            contextMenu.MenuItems.Add(menuItem);
+            menuItem.Enabled = this.CanUndo();
+
+            // 重做
+            menuItem = new MenuItem("重做(&R)\tCtrl+Y");
+            menuItem.Click += new System.EventHandler(this.menuItem_Redo);
+            menuItem.Enabled = this.CanRedo();
+            contextMenu.MenuItems.Add(menuItem);
+
+            //--------------
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
             // 剪切
             menuItem = new MenuItem("剪切字段(Ctrl+X)");// + strName);
             menuItem.Click += new System.EventHandler(this.menuItem_Cut);
@@ -3003,8 +3418,14 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             if (this.curEdit != null)
                 this.curEdit.ContentIsNull = true;    // 防止后面调用时送回内存
 
+            var old_fields = Field.Clone(GetFields(0, this.record.Fields.Count));
             this.Record.Fields.Sort(new FieldComparer());
             this.Invalidate();
+
+            this.AppendFieldAction("FieldChange",
+                0,
+                old_fields,
+                this.record.Fields);
 
             // 设第一个节点为当前活动焦点
             if (bHasFocus == true)
@@ -3111,7 +3532,7 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                     int start_line = this.SelectedFieldIndices.Min();
                     DeleteFieldWithDlg(false);
 
-                    var field = this.record.Fields.Insert(start_line,
+                    var field = this.InsertField(start_line,
     e.KeyChar + "  ",
     "  ", //指示符
     "");
@@ -3253,6 +3674,20 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                         e.Handled = true;
                     }
                     break;
+                case Keys.Z:
+                    if (e.Control)
+                    {
+                        this.menuItem_Undo(null, null);
+                        e.Handled = true;
+                    }
+                    break;
+                case Keys.Y:
+                    if (e.Control)
+                    {
+                        this.menuItem_Redo(null, null);
+                        e.Handled = true;
+                    }
+                    break;
                 case Keys.C:
                     if (e.Control)
                     {
@@ -3267,7 +3702,7 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                         e.Handled = true;
                     }
                     break;
-                case Keys.Y:
+                case Keys.U:
                     if (e.Control)
                     {
                         GenerateDataEventArgs ea = new GenerateDataEventArgs();
@@ -3395,7 +3830,8 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                 this.Flush();
 
                 // 毁坏了FocusField
-                this.SelectedFieldIndices = new List<int>();    //  new ArrayList();
+                // this.SelectedFieldIndices = new List<int>();    //  new ArrayList();
+                this.ClearSelectFieldIndices("");   // 除了 .Clear() 以外，还会把相关 Field 对象的 Selected 设置为 false
 
                 if (value != -1)
                 {
@@ -3623,53 +4059,61 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
         {
             get
             {
-                if (this.DesignMode && this.record == null)
-                    return default_marc;
-                return this.record?.GetMarc();
+                return this.TryGet(() =>
+                {
+                    if (this.DesignMode && this.record == null)
+                        return default_marc;
+                    return this.record?.GetMarc();
+                });
             }
             set
             {
-                if (this.DesignMode && this.record == null)
-                    return;
-
-                var line = this.FocusedFieldIndex;
-                var col = this._focusCol;
-                var caret_pos = 0;
-                if (this.curEdit != null)
+                this.TryInvoke(() =>
                 {
-                    caret_pos = this.curEdit.SelectionStart;
-                    this.curEdit.Hide();
-                    this.curEdit.Dispose();
-                    this.curEdit = null;
-                }
-                // this.HideTextBox();
+                    if (this.DesignMode && this.record == null)
+                        return;
 
-                if (this.record != null)
-                {
-                    int nRet = this.record.SetMarc(value,
-                        true,
-                        out string strError);
-                    if (nRet == -1)
+                    var line = this.FocusedFieldIndex;
+                    var col = this._focusCol;
+                    var caret_pos = 0;
+                    if (this.curEdit != null)
                     {
-                        if (this.DesignMode == true)
+                        caret_pos = this.curEdit.SelectionStart;
+                        this.curEdit.Hide();
+                        this.curEdit.Dispose();
+                        this.curEdit = null;
+                    }
+                    // this.HideTextBox();
+
+                    if (this.record != null)
+                    {
+                        var old_fields = Field.Clone(this.record.Fields);
+                        int nRet = this.record.SetMarc(value,
+                            true,
+                            out string strError);
+                        if (nRet == -1)
                         {
-                            // 绘制报错文字图象
+                            if (this.DesignMode == true)
+                            {
+                                // 绘制报错文字图象
+                            }
+                            else
+                                throw (new Exception("SetMarc()出错，原因：" + strError));
                         }
-                        else
-                            throw (new Exception("SetMarc()出错，原因：" + strError));
+                        AppendReset(old_fields, this.Record.Fields);
+
+                        // 2024/7/10
+                        if (line >= this.Record.Fields.Count)
+                            line = this.Record.Fields.Count - 1;
+                        if (col < 1)
+                            col = 1;
+                        if (line >= 0)
+                            this.SetActiveField(line, col, caret_pos, false);
                     }
 
-                    // 2024/7/10
-                    if (line >= this.Record.Fields.Count)
-                        line = this.Record.Fields.Count - 1;
-                    if (col < 1)
-                        col = 1;
-                    if (line >= 0)
-                        this.SetActiveField(line, col, caret_pos, false);
-                }
-
-                // 2014/7/10
-                AdjustOriginY();
+                    // 2014/7/10
+                    AdjustOriginY();
+                });
             }
         }
 
@@ -3734,10 +4178,13 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
         /// <summary>
         /// 清除表示当前选定字段的若干下标
         /// </summary>
-        internal void ClearSelectFieldIndices()
+        internal void ClearSelectFieldIndices(string style = "flush,hidetextbox,invalidate")
         {
             // 把最新的内容保存到内存对象中
-            this.Flush();
+            if (StringUtil.IsInList("flush", style))
+                this.Flush();
+
+            var invalidate = StringUtil.IsInList("invalidate", style);
 
             // 失效原来全部的字段
             foreach (int nIndex in this.SelectedFieldIndices)
@@ -3749,14 +4196,42 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                 }
                 Field field = this.record.Fields[nIndex];
                 field.Selected = false;
-                // 失效该行
-                Rectangle rect1 = this.GetItemBounds(nIndex,
+                if (invalidate)
+                {
+                    // 失效该行
+                    Rectangle rect1 = this.GetItemBounds(nIndex,
                     1,
                     BoundsPortion.Field);
-                this.Invalidate(rect1);
+                    this.Invalidate(rect1);
+                }
             }
             this.SelectedFieldIndices.Clear();
-            this.HideTextBox();
+            if (StringUtil.IsInList("hidetextbox", style))
+                this.HideTextBox();
+        }
+
+        public bool SetActiveField(string locationString,
+            bool set_focus)
+        {
+            // 把 locationString 转换为 field_index col
+            this.Record.GetLocation(locationString,
+                out int field_index,
+                out int col,
+                out int caret_pos);
+            if (field_index == -1)
+                return false;
+            if (col == -1)
+                col = 3;
+            this.SetActiveField(field_index, col, set_focus);
+            if (this.curEdit != null
+                && this.curEdit.Visible)
+            {
+                if (caret_pos == -1)
+                    caret_pos = 0;
+                this.curEdit.SelectionStart = caret_pos;
+                this.curEdit.SelectionLength = 0;
+            }
+            return true;
         }
 
         // 包装版本
@@ -4790,6 +5265,22 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             dlg.ShowDialog(this);
         }
 
+        void menuItem_Undo(object sender, EventArgs e)
+        {
+            if (this.CanUndo())
+            {
+                this.Undo();
+            }
+        }
+
+        void menuItem_Redo(object sender, EventArgs e)
+        {
+            if (this.CanRedo())
+            {
+                this.Redo();
+            }
+        }
+
         // 剪切
         private void menuItem_Cut(object sender,
             System.EventArgs e)
@@ -4815,7 +5306,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             {
                 fieldIndices[i] = (int)this.SelectedFieldIndices[i];
             }
-            this.record.Fields.RemoveAt(fieldIndices);
+            // this.record.Fields.RemoveAt(fieldIndices);
+            this.RemoveFields(fieldIndices);
 
             // 2007/7/17
             AdjustOriginY();
@@ -4878,8 +5370,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                 return true;
             }
 
-            // Ctrl+Y 校验数据
-            if (keyData == (Keys.Y | Keys.Control))
+            // Ctrl+U 校验数据
+            if (keyData == (Keys.U | Keys.Control))
             {
                 GenerateDataEventArgs ea = new GenerateDataEventArgs();
                 this.OnVerifyData(ea);
@@ -5178,8 +5670,7 @@ SYS	011528318
                 bool bHasFocus = this.Focused;
 
                 // 先删除所有字段
-                this.record.Fields.Clear();
-                this.SelectedFieldIndices.Clear();
+                ClearFields();
 
                 int nFirstIndex = 0;
 
@@ -5190,7 +5681,12 @@ SYS	011528318
                 // TODO: 这个函数可以改造为两步实现：
                 // 1) 一个函数切分MARC多字段字符串为一个一个字段单独字符串
                 // 2) 根据上一步切分出来的字符串数组，进行插入或者替换等操作
+                /*
                 this.record.Fields.InsertInternal(nFirstIndex,
+                    strFieldsMarc,
+                    out nNewFieldsCount);
+                */
+                InsertFields(nFirstIndex,
                     strFieldsMarc,
                     out nNewFieldsCount);
 
@@ -5214,27 +5710,6 @@ SYS	011528318
         // 从 机内格式 粘贴整个记录
         void menuItem_PasteFromJinei(object sender, EventArgs e)
         {
-            /*
-            bool bHasFocus = this.Focused;
-
-            // 先删除所有字段
-            this.record.Fields.Clear();
-            this.SelectedFieldIndices.Clear();
-
-            string strFieldsMarc = MarcEditor.ClipboardToTextFormat();
-            this.record.Fields.InsertInternal(0,
-                strFieldsMarc,
-                out int nNewFieldsCount);
-            this.SetScrollBars(ScrollBarMember.Both);
-            this.Invalidate();
-
-            // 设第一个节点为当前活动焦点
-            if (bHasFocus == true)
-            {
-                if (this.record.Fields.Count > 0)
-                    this.SetActiveField(0, 3, true);
-            }
-            */
             string strFieldsMarc = MarcEditor.ClipboardToTextFormat();
             this.Marc = strFieldsMarc;
         }
@@ -5246,8 +5721,7 @@ SYS	011528318
             bool bHasFocus = this.Focused;
 
             // 先删除所有字段
-            this.record.Fields.Clear();
-            this.SelectedFieldIndices.Clear();
+            ClearFields();
 
             int nFirstIndex = 0;
 
@@ -5258,9 +5732,14 @@ SYS	011528318
             // TODO: 这个函数可以改造为两步实现：
             // 1) 一个函数切分MARC多字段字符串为一个一个字段单独字符串
             // 2) 根据上一步切分出来的字符串数组，进行插入或者替换等操作
+            /*
             this.record.Fields.InsertInternal(nFirstIndex,
                 strFieldsMarc,
                 out nNewFieldsCount);
+            */
+            InsertFields(nFirstIndex,
+    strFieldsMarc,
+    out nNewFieldsCount);
 
             this.SetScrollBars(ScrollBarMember.Both);
             this.Invalidate();
@@ -5280,8 +5759,7 @@ SYS	011528318
             bool bHasFocus = this.Focused;
 
             // 先删除所有字段
-            this.record.Fields.Clear();
-            this.SelectedFieldIndices.Clear();
+            ClearFields();
 
             int nFirstIndex = 0;
 
@@ -5292,7 +5770,12 @@ SYS	011528318
             // TODO: 这个函数可以改造为两步实现：
             // 1) 一个函数切分MARC多字段字符串为一个一个字段单独字符串
             // 2) 根据上一步切分出来的字符串数组，进行插入或者替换等操作
+            /*
             this.record.Fields.InsertInternal(nFirstIndex,
+                strFieldsMarc,
+                out nNewFieldsCount);
+            */
+            InsertFields(nFirstIndex,
                 strFieldsMarc,
                 out nNewFieldsCount);
 
@@ -5315,8 +5798,7 @@ SYS	011528318
             bool bHasFocus = this.Focused;
 
             // 先删除所有字段
-            this.record.Fields.Clear();
-            this.SelectedFieldIndices.Clear();
+            ClearFields();
 
             int nFirstIndex = 0;
 
@@ -5327,7 +5809,12 @@ SYS	011528318
             // TODO: 这个函数可以改造为两步实现：
             // 1) 一个函数切分MARC多字段字符串为一个一个字段单独字符串
             // 2) 根据上一步切分出来的字符串数组，进行插入或者替换等操作
+            /*
             this.record.Fields.InsertInternal(nFirstIndex,
+                strFieldsMarc,
+                out nNewFieldsCount);
+            */
+            this.InsertFields(nFirstIndex,
                 strFieldsMarc,
                 out nNewFieldsCount);
 
@@ -5349,8 +5836,7 @@ SYS	011528318
             bool bHasFocus = this.Focused;
 
             // 先删除所有字段
-            this.record.Fields.Clear();
-            this.SelectedFieldIndices.Clear();
+            ClearFields();
 
             int nFirstIndex = 0;
 
@@ -5361,7 +5847,12 @@ SYS	011528318
             // TODO: 这个函数可以改造为两步实现：
             // 1) 一个函数切分MARC多字段字符串为一个一个字段单独字符串
             // 2) 根据上一步切分出来的字符串数组，进行插入或者替换等操作
+            /*
             this.record.Fields.InsertInternal(nFirstIndex,
+                strFieldsMarc,
+                out nNewFieldsCount);
+            */
+            InsertFields(nFirstIndex,
                 strFieldsMarc,
                 out nNewFieldsCount);
 
@@ -5425,8 +5916,10 @@ SYS	011528318
             }
             this.record.Fields.RemoveAt(fieldIndices);
             */
+            // 记忆被删除的字段
             var indices = this.SelectedFieldIndices.ToArray();
-            this.record.Fields.RemoveAt(indices);
+            // this.record.Fields.RemoveAt(indices);
+            this.RemoveFields(indices);
 
             int nFirstIndex = 0;// fieldIndices[0];
             if (indices.Length > 0)
@@ -5442,7 +5935,12 @@ SYS	011528318
             // TODO: 这个函数可以改造为两步实现：
             // 1) 一个函数切分MARC多字段字符串为一个一个字段单独字符串
             // 2) 根据上一步切分出来的字符串数组，进行插入或者替换等操作
+            /*
             this.record.Fields.InsertInternal(nFirstIndex,
+                strFieldsMarc,
+                out nNewFieldsCount);
+            */
+            InsertFields(nFirstIndex,
                 strFieldsMarc,
                 out nNewFieldsCount);
 
@@ -5494,11 +5992,13 @@ SYS	011528318
             if (this.record.Fields.Count == 0)
             {
                 string strError = "";
+                var old_fields = Field.Clone(this.record.Fields);
                 int nRet = this.record.SetMarc(strFieldsMarc,
                     false,
                     out strError);
                 if (nRet == -1)
                     MessageBox.Show(this, strError);
+                AppendReset(old_fields, this.Record.Fields);
                 return;
             }
 
@@ -5511,7 +6011,13 @@ SYS	011528318
                 nIndex = this.record.Fields.Count;
 
             int nNewFieldsCount = 0;
+            /*
             this.record.Fields.InsertInternal(nIndex,
+                strFieldsMarc,
+                out nNewFieldsCount);
+            */
+            // 自带写入操作历史能力
+            this.InsertFields(nIndex,
                 strFieldsMarc,
                 out nNewFieldsCount);
 
@@ -5545,7 +6051,13 @@ SYS	011528318
             this.ClearSelectFieldIndices();
 
             int nNewFieldsCount = 0;
+            /*
             this.record.Fields.InsertInternal(nIndex,
+                strFieldsMarc,
+                out nNewFieldsCount);
+            */
+            // 自带写入操作历史能力
+            this.InsertFields(nIndex,
                 strFieldsMarc,
                 out nNewFieldsCount);
 
@@ -5576,7 +6088,13 @@ SYS	011528318
             int nStartIndex = nIndex + 1;
 
             int nNewFieldsCount = 0;
+            /*
             this.record.Fields.InsertInternal(nStartIndex,
+                strFieldsMarc,
+                out nNewFieldsCount);
+            */
+            // 自带写入操作历史能力
+            this.InsertFields(nStartIndex,
                 strFieldsMarc,
                 out nNewFieldsCount);
 
@@ -5593,6 +6111,60 @@ SYS	011528318
                 BoundsPortion.FieldAndBottom);
             this.AfterDocumentChanged(ScrollBarMember.Both,
                 iRect);
+        }
+
+        List<Field> GetFields(IEnumerable<int> indices)
+        {
+            List<Field> results = new List<Field>();
+            foreach (var v in indices)
+            {
+                results.Add(this.Record.Fields[v].Clone());
+            }
+            return results;
+        }
+
+        // 检查一个整数集合是否为连续增量的值
+        static bool IsIndexContinue(IEnumerable<int> indices)
+        {
+            int prev = -1;
+            int i = 0;
+            foreach (var v in indices)
+            {
+                if (i > 0 && v != prev + 1)
+                    return false;
+                i++;
+            }
+
+            return true;
+        }
+
+        public void InsertFields(int start_index,
+            string fields_marc,
+            out int new_fields_count)
+        {
+            this.record.Fields.InsertInternal(start_index,
+    fields_marc,
+    out new_fields_count);
+            var new_fields = GetFields(start_index, new_fields_count);
+            this.AppendInsertFields(start_index,
+                new_fields);
+        }
+
+        public void ReplaceFields(int start_index,
+    string fields_marc,
+    out int new_fields_count)
+        {
+            // 如果这里的 index 不连续，则只能整体保存
+            var indices = this.SelectedFieldIndices.ToArray();
+            this.record.Fields.RemoveAt(indices);
+            this.RemoveFields(indices);
+
+            this.record.Fields.InsertInternal(start_index,
+    fields_marc,
+    out new_fields_count);
+            var new_fields = GetFields(start_index, new_fields_count);
+            this.AppendInsertFields(start_index,
+                new_fields);
         }
 
         // 显示Marc记录
@@ -5620,7 +6192,7 @@ SYS	011528318
                 strDefaultValue = new string((char)31, 1) + "a";
 
 
-            this.record.Fields.Insert(this.FocusedFieldIndex,
+            this.InsertField(this.FocusedFieldIndex,
                 this.DefaultFieldName,
                 "  ", //" " strIndicator
                 strDefaultValue);
@@ -5637,12 +6209,11 @@ SYS	011528318
                 strDefaultValue = new string((char)31, 1) + "a";
 
             // 调InsertAfterField，把界面也管了
-            this.record.Fields.InsertAfter(this.FocusedFieldIndex,
+            this.InsertFieldAfter(this.FocusedFieldIndex,
                 this.DefaultFieldName,
-                "  ",//"  ",//指示符
+                "  ",
                 strDefaultValue);
             this.EnsureVisible();
-
         }
 
         // 后插字段
@@ -5797,14 +6368,14 @@ SYS	011528318
                     return false;
                 }
 
-                this.record.Fields.Insert(nFieldIndex,
+                var ret = this.InsertField(nFieldIndex,
                     dlg.FieldName,
                     strIndicator,//"  ",//指示符
                     strDefaultValue);
             }
             else
             {
-                this.record.Fields.InsertAfter(nFieldIndex,
+                var ret = this.InsertFieldAfter(nFieldIndex,
                     dlg.FieldName,
                     strIndicator,//"  ",//指示符
                     strDefaultValue);
@@ -5862,13 +6433,116 @@ SYS	011528318
                 strDefaultValue = new string((char)31, 1) + "a";
 
 
+            /*
             this.record.Fields.Add(this.DefaultFieldName,
                 "  ",//strIndicator
                 strDefaultValue,
                 false);
+            */
+            AddField(this.DefaultFieldName,
+                "  ",
+                strDefaultValue,
+                false);
 
             this.EnsureVisible();
+
         }
+
+        #region 对外 API
+
+        public void ClearFields()
+        {
+            if (this.record.Fields.Count == 0)
+                return;
+
+            var old_fields = GetFields(0, this.record.Fields.Count);
+            this.record.Fields.Clear();
+            this.SelectedFieldIndices.Clear();
+            this.AppendFieldsDelete(old_fields);
+        }
+
+        public Field RemoveField(int field_index)
+        {
+            var old_field = this.record.Fields[field_index];
+            this.record.Fields.RemoveAt(field_index);
+            this.AppendFieldDelete(field_index, new List<Field> { old_field });
+            return old_field;
+        }
+
+        public void RemoveFields(IEnumerable<int> indices)
+        {
+            var old_fields = GetFields(indices);
+            this.record.Fields.RemoveAt(indices.ToArray());
+            this.AppendFieldsDelete(indices, old_fields);
+        }
+
+        public Field InsertFieldAfter(int field_index,
+            string field_name,
+            string indicator,
+            string default_value)
+        {
+            var old_count = this.record.Fields.Count;
+            var ret = this.record.Fields.InsertAfter(field_index,
+                field_name,
+                indicator,
+                default_value);
+            this.AppendInsertFields(field_index,
+                new List<Field> { ret });
+            return ret;
+        }
+
+        public Field InsertField(int field_index,
+            string field_name,
+            string indicator,
+            string default_value)
+        {
+            var old_count = this.record.Fields.Count;
+            var ret = this.record.Fields.Insert(field_index,
+                field_name,
+                indicator,
+                default_value);
+            this.AppendInsertFields(field_index,
+                new List<Field> { ret });
+            return ret;
+        }
+
+        // 在末尾添加一个字段
+        public Field AddField(string field_name,
+            string indicator,
+            string default_value,
+            bool in_order)
+        {
+            int old_count = this.record.Fields.Count;
+            var ret = this.record.Fields.Add(field_name,
+    indicator,
+    default_value,
+    in_order);
+            // 2024/7/14
+            // 添加操作历史
+            var new_fields = new List<Field> { this.record.Fields[old_count] };
+            this.AppendInsertFields(old_count, new_fields);
+
+            return ret;
+        }
+
+        public Field SetFirstSubfield(string strFieldName,
+    string strSubfieldName,
+    string strSubfieldValue)
+        {
+            int old_count = this.record.Fields.Count;
+            var ret = this.record.Fields.SetFirstSubfield(strFieldName,
+    strSubfieldName,
+    strSubfieldValue,
+    out Field old_field);
+            var index = this.record.Fields.IndexOf(ret);
+            if (index == -1)
+                AppendInsertFields(old_count, new List<Field> { ret });
+            else
+                AppendFieldChange("FieldChange", index, old_field, ret);
+            return ret;
+        }
+
+        #endregion
 
         // 带对话框的删除字段
         // return:
@@ -5921,7 +6595,8 @@ SYS	011528318
             {
                 fieldIndices[i] = (int)this.SelectedFieldIndices[i];
             }
-            this.record.Fields.RemoveAt(fieldIndices);
+            // this.record.Fields.RemoveAt(fieldIndices);
+            this.RemoveFields(fieldIndices);
 
             // 2007/7/17
             AdjustOriginY();
@@ -6395,6 +7070,13 @@ SYS	011528318
             }
 
             List<string> results = new List<string>();
+
+            // 2024/7/17
+            if (this.FocusedField == null)
+            {
+                Console.Beep();
+                return new List<string>();
+            }
 
             Debug.Assert(this.FocusedField != null, "FocusedField不可能为null");
 

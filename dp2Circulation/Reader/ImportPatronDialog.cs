@@ -16,7 +16,6 @@ using DigitalPlatform;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
-// using DocumentFormat.OpenXml.Wordprocessing;
 
 namespace dp2Circulation.Reader
 {

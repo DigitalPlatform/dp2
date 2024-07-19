@@ -30,10 +30,9 @@ using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.Z3950.UI;
 using DigitalPlatform.Z3950;
-using static dp2Circulation.Order.ExportExcelFile;
+// using static dp2Circulation.Order.ExportExcelFile;
 using static DigitalPlatform.Marc.MarcUtil;
 using dp2Circulation.SearchForms;
-using System.Data;
 
 namespace dp2Circulation
 {
@@ -884,6 +883,8 @@ bQuickLoad,
 lHitCount,
 0,
 _query,
+null,
+null,
 ref lTotalHitCount,
 out strError);
                 if (nRet == -1)
@@ -1340,6 +1341,15 @@ out strError);
 
         // string _lastBrowseStyle = "";   // 最近一次 GetSearchResult() 所使用过的 browse style
 
+        // 是否正在过滤检索模式
+        bool IsFilterQuery()
+        {
+            return this.TryGet(() =>
+            {
+                return this.tabControl_query.SelectedTab == this.tabPage_filter;
+            });
+        }
+
         public async Task _doSearch(bool bOutputKeyCount,
             bool bOutputKeyID,
             ItemQueryParam input_query = null)
@@ -1427,6 +1437,7 @@ out strError);
             var first_query_word = GetFirstQueryWord(this.QueryWord);
             long lTotalHitCount = 0;
             bool multiline = this.MultiLine;
+            bool filter_query = IsFilterQuery();
 
             LibraryChannel channel = this.GetChannel();
             var old_timeout = channel.Timeout;
@@ -1524,29 +1535,48 @@ out strError);
                     bNeedShareSearch = true;
                 }
 
-                List<string> query_words = new List<string>();
+
+
+                List<QueryLine> query_lines = null;
+                if (filter_query)
+                    query_lines = BuildQueryLines();
+                else
                 {
-                    query_words = StringUtil.SplitList(this.QueryWord.Replace("\r\n", "\r"), '\r');
-                    StringUtil.RemoveBlank(ref query_words);
-                    if (query_words.Count == 0 /*&& multiline == false*/)
-                        query_words.Add("");
-                    if (multiline == false)
+                    List<string> query_words = new List<string>();
                     {
-                        if (query_words.Count > 1)
-                            query_words.RemoveRange(1, query_words.Count - 1);
+                        query_words = StringUtil.SplitList(this.QueryWord.Replace("\r\n", "\r"), '\r');
+                        StringUtil.RemoveBlank(ref query_words);
+                        if (query_words.Count == 0 /*&& multiline == false*/)
+                            query_words.Add("");
+                        if (multiline == false && filter_query == false)
+                        {
+                            if (query_words.Count > 1)
+                                query_words.RemoveRange(1, query_words.Count - 1);
+                        }
+                    }
+
+                    query_lines = new List<QueryLine>();
+                    foreach (var query_word in query_words)
+                    {
+                        query_lines.Add(new QueryLine
+                        {
+                            QueryWord = query_word,
+                            FieldName = strFromStyle,
+                        });
                     }
                 }
 
-                if (multiline/*query_words.Count > 1*/)
+                if (multiline || filter_query)
                 {
-                    looping.Progress.SetProgressRange(0, query_words.Count);
+                    looping.Progress.SetProgressRange(0, query_lines.Count);
                 }
                 looping.Progress.Style = StopStyle.EnableHalfStop;
 
                 bool zserver_loaded = false;
 
                 int word_index = 0;
-                foreach (string query_word in query_words)
+                // foreach (string query_word in query_words)
+                foreach (var query_line in query_lines)
                 {
                     // Application.DoEvents(); // 出让界面控制权
 
@@ -1556,12 +1586,14 @@ out strError);
                         return;
                     }
 
-                    if (multiline/*query_words.Count > 1*/)
+                    string query_word = query_line.QueryWord;
+
+                    if (multiline || filter_query)
                     {
                         looping.Progress?.SetProgressValue(word_index);
-                        looping.Progress?.SetMessage($"正在检索 '{query_word}' ({word_index + 1}/{query_words.Count})...");
+                        looping.Progress?.SetMessage($"正在检索 '{query_word}' ({word_index + 1}/{query_lines.Count})...");
 
-                        this.ShowMessage($"正在检索 '{query_word}' ({word_index + 1}/{query_words.Count})...");
+                        this.ShowMessage($"正在检索 '{query_word}' ({word_index + 1}/{query_lines.Count})...");
                     }
                     else
                     {
@@ -1592,19 +1624,21 @@ out strError);
                         }
                     }
 
-                    string strResultSetName = GetResultSetName(multiline);
+                    string strResultSetName = GetResultSetName(multiline || filter_query);
 
                     channel.Timeout = new TimeSpan(0, 15, 0);
 
                     int max_count = MaxSearchResultCount;
-                    if (multiline)
+                    if (multiline || filter_query)
                         max_count = MultilineMaxSearchResultCount;
-
+                    var current_from = strFromStyle;
+                    if (string.IsNullOrEmpty(query_line.FieldName) == false)
+                        current_from = query_line.FieldName;
                     long lRet = channel.SearchBiblio(looping.Progress,
                         this.DbNames,
                         query_word, // this.textBox_queryWord.Text,
                         max_count,  // this.MaxSearchResultCount,  // 1000
-                        strFromStyle,
+                        current_from,
                         strMatchStyle,  // "left", TODO: "exact" 和 strSearchStyle "desc" 组合 dp2library 会抛出异常
                         this.Lang,
                         strResultSetName,
@@ -1625,14 +1659,14 @@ out strError);
 
                     this.m_lHitCount = lHitCount;
 
-                    if (multiline == false/*query_words.Count <= 1*/)
+                    if (multiline == false && filter_query == false)
                         this.LabelMessage = "检索共命中 " + lHitCount.ToString() + " 条书目记录";
                     else
                         this.LabelMessage = "检索已累积命中 " + lTotalHitCount.ToString() + " 条书目记录";
 
                     Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode($"'{query_word}' 命中 {lHitCount} 条") + "</div>");
 
-                    if (multiline == false/*query_words.Count <= 1*/)
+                    if (multiline == false && filter_query == false)
                     {
                         looping.Progress.SetProgressRange(0, lHitCount);
                         looping.Progress.Style = StopStyle.EnableHalfStop;
@@ -1644,6 +1678,16 @@ out strError);
                     _outputKeyID = bOutputKeyID;
                     _query = query;
 
+                    delegate_filterRecord func_filter = null;
+                    if (query_line.FilterItems != null
+                        && query_line.FilterItems.Count > 0)
+                    {
+                        func_filter = (recpath, xml) =>
+                        {
+                            return FilterRecord(query_line, recpath, xml);
+                        };
+                    }
+
                     nRet = LoadResultSet(
     looping.Progress,
     channel,
@@ -1654,6 +1698,15 @@ out strError);
     lHitCount,
     0,
     query,
+    (item) =>
+    {
+        query_line.AddHitItem(item);
+        this.TryInvoke(() =>
+        {
+            query_line.UpdateViewRow();
+        });
+    },
+    func_filter,
     ref lTotalHitCount,
     out strError);
                     if (nRet == -1)
@@ -1843,7 +1896,7 @@ out strError);
                         this.ShowMessage("等待 Z39.50 检索响应 ...");
 
                         {
-                            if (multiline)
+                            if (multiline || filter_query)
                             {
                                 _zsearcher.PresentBatchSize = max_count;
                                 // 2021/3/9
@@ -1890,7 +1943,7 @@ out strError);
                                             r.Records,
                                             item);
                                     UpdateCommandLine(item, c, r);
-                                    if (multiline)
+                                    if (multiline || filter_query)
                                         item.Tag = null;
                                 }));
                             }
@@ -1935,7 +1988,7 @@ out strError);
 
                 if (lTotalHitCount == 0)
                 {
-                    if (query_words.Count == 0)
+                    if (query_lines.Count == 0)
                         this.ShowMessage("没有检索词参与检索", "yellow", true);
                     else
                         this.ShowMessage("未命中", "yellow", true);
@@ -1944,7 +1997,7 @@ out strError);
 
                 if (lTotalHitCount == 0)
                 {
-                    if (query_words.Count == 0)
+                    if (query_lines.Count == 0)
                         this.LabelMessage = "没有检索词参与检索";
                     else
                         this.LabelMessage = "未命中";
@@ -2063,6 +2116,15 @@ out strError);
         bool _outputKeyID = false;
         ItemQueryParam _query = null;
 
+        delegate void delegate_newItem(ListViewItem item);
+        // return:
+        //      true    表示记录要被利用
+        //      false   表示记录要被忽略
+        delegate bool delegate_filterRecord(string recpath, string xml);
+
+        // parameters:
+        //      func_newItem    每当创建一个 ListViewItem 时此函数被触发一次
+        //      func_filterRecord   用于过滤命中记录的函数
         int LoadResultSet(
             Stop stop,
             LibraryChannel channel,
@@ -2073,6 +2135,8 @@ out strError);
             long lHitCount,
             long lStart,
             ItemQueryParam query,
+            delegate_newItem func_newItem,
+            delegate_filterRecord func_filterRecord,
             ref long lTotalHitCount,
             out string strError)
         {
@@ -2087,11 +2151,21 @@ out strError);
 
             bool bPushFillingBrowse = PushFillingBrowse;
             bool multiline = this.MultiLine;
+            bool filter_query = this.IsFilterQuery();
 
-            string strBrowseStyle = GetBrowseStyle(
-                bOutputKeyCount,
-                bOutputKeyID,
-                bQuickLoad);
+            string GetCurrentBrowseStyle()
+            {
+                string strBrowseStyle = GetBrowseStyle(
+                    bOutputKeyCount,
+                    bOutputKeyID,
+                    bQuickLoad);
+
+                // 如果要进行过滤，则还需要在获取浏览记录时获得记录 XML 
+                if (func_filterRecord != null)
+                    strBrowseStyle += ",xml";
+
+                return strBrowseStyle;
+            }
 
             // _lastBrowseStyle = strBrowseStyle;
 
@@ -2100,8 +2174,8 @@ out strError);
             ResultSetLoader loader = new ResultSetLoader(channel,
 stop,
 strResultSetName,
-strBrowseStyle);
-            if (multiline)
+GetCurrentBrowseStyle());
+            if (multiline || filter_query)
                 loader.MaxResultCount = MultilineMaxSearchResultCount;
 
             loader.Start = lStart;
@@ -2112,16 +2186,14 @@ strBrowseStyle);
                 EndUpdate();
                 this.m_lLoaded = e1.Start;
 
-                if (multiline == false/*query_words.Count <= 1*/)
+                if (multiline == false && filter_query == false)
                 {
                     stop?.SetMessage("正在装入浏览信息 " + (e1.Start + 1).ToString() + " - " + (e1.Start + e1.PerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
                     stop?.SetProgressValue(e1.Start);
                 }
 
                 // 允许中途(通过感知 Shift 键)改变详略级别
-                loader.FormatList = GetBrowseStyle(bOutputKeyCount,
-bOutputKeyID,
-bQuickLoad);
+                loader.FormatList = GetCurrentBrowseStyle();
                 // _lastBrowseStyle = loader.FormatList;
 
 
@@ -2146,6 +2218,15 @@ bQuickLoad);
                     {
                         strError = "用户中断";
                         return -1;
+                    }
+
+                    if (func_filterRecord != null)
+                    {
+                        var ret = func_filterRecord.Invoke(
+                            searchresult.Path, 
+                            searchresult.RecordBody?.Xml);
+                        if (ret == false)
+                            continue;
                     }
 
                     // 调整命中数
@@ -2252,6 +2333,10 @@ bQuickLoad);
                         Debug.Assert(query != null);
                         query.Items.Add(item);
                     }
+
+                    if (item != null && func_newItem != null)
+                        func_newItem(item);
+
                     count++;
                 }
 
@@ -2319,9 +2404,10 @@ bQuickLoad);
             // int index = insert_pos.ListView.Items.IndexOf(insert_pos);
 
             bool multiline = this.MultiLine;
+            bool filter_query = this.IsFilterQuery();
 
             int i = 0;
-            if (multiline)
+            if (multiline || filter_query)
             {
                 // 2021/4/1
                 // i 需要是一个全局的行索引
@@ -7698,7 +7784,7 @@ TaskScheduler.Default);
             this.EnableControls(false);
 
             EnableRecordList(false);
-            this.listView_records.SelectedIndexChanged -= new System.EventHandler(this.listView_records_SelectedIndexChanged);
+            //this.listView_records.SelectedIndexChanged -= new System.EventHandler(this.listView_records_SelectedIndexChanged);
             //this.listView_records.BeginUpdate();
             try
             {
@@ -7922,7 +8008,7 @@ TaskScheduler.Default);
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
                 //this.listView_records.EndUpdate();
-                this.listView_records.SelectedIndexChanged += new System.EventHandler(this.listView_records_SelectedIndexChanged);
+                //this.listView_records.SelectedIndexChanged += new System.EventHandler(this.listView_records_SelectedIndexChanged);
                 listView_records_SelectedIndexChanged(null, null);
                 this.EnableControls(true);
 
@@ -13418,6 +13504,8 @@ out string error);
         lHitCount,
         lStart,
         _query,
+        null,
+        null,
         ref lTotalHitCount,
         out strError);
                         if (nRet == -1)
@@ -14015,7 +14103,8 @@ out string error);
                 ListViewItem item = null;
                 this.TryInvoke(() =>
                 {
-                    if (this.listView_records.SelectedItems.Count == 1)
+                    item = this.listView_records.FocusedItem;
+                    if (item == null && this.listView_records.SelectedItems.Count >= 1)
                         item = this.listView_records.SelectedItems[0];
                 });
 
@@ -14043,10 +14132,18 @@ out string error);
         void _doViewProperty(ListViewItem item, bool bOpenWindow)
         {
             if (this.m_biblioTable == null)
+            {
+                // 显示一个空画面
+                Program.MainForm.ClearCommentViewer();
                 return;
+            }
 
             if (item == null)
-                return; // 是否要显示一个空画面?
+            {
+                // 显示一个空画面
+                Program.MainForm.ClearCommentViewer();
+                return;
+            }
 
             Program.MainForm.OpenCommentViewer(bOpenWindow);
 
@@ -15031,6 +15128,8 @@ out string error);
         {
             return this.listView_records.TryGet(func);
         }
+
+
     }
 
     // 为一行存储的书目信息
