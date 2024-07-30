@@ -32,7 +32,25 @@ namespace DigitalPlatform.CommonControl
         public dp2QueryControl()
         {
             InitializeComponent();
+
+            // 2024/7/20
+            SetDpiXY(DpiUtil.GetDpiXY(this));
+
         }
+
+        public static SizeF DpiXY = new SizeF(96, 96);
+
+        public void SetDpiXY(SizeF dpi_xy)
+        {
+            DpiXY = dpi_xy;
+
+            // TODO: 设置一些关于尺寸的变量值
+            /*
+            m_nLineHeight = DpiUtil.GetScalingY(dpi_xy, 26);
+            m_nLabelWidth = DpiUtil.GetScalingX(dpi_xy, 40);
+            */
+        }
+
 
         public void OnEnterPress(object sender, EventArgs e)
         {
@@ -839,6 +857,17 @@ namespace DigitalPlatform.CommonControl
 
         public dp2QueryLine(dp2QueryControl control)
         {
+            var dpi_xy = dp2QueryControl.DpiXY;
+            int H = DpiUtil.GetScalingY(dpi_xy, 28);
+            int x(int v)
+            {
+                return DpiUtil.GetScalingX(dpi_xy, v);
+            }
+            int y(int v)
+            {
+                return DpiUtil.GetScalingY(dpi_xy, v);
+            }
+
             this.Container = control;
 
             label_state = new Label();
@@ -851,9 +880,9 @@ namespace DigitalPlatform.CommonControl
             comboBox_logicOperator.DropDownStyle = ComboBoxStyle.DropDownList;
             comboBox_logicOperator.FlatStyle = FlatStyle.Flat;
             comboBox_logicOperator.Dock = DockStyle.Fill;
-            comboBox_logicOperator.MaximumSize = new Size(150, 28);
-            comboBox_logicOperator.Size = new Size(80, 28);
-            comboBox_logicOperator.MinimumSize = new Size(50, 28);
+            comboBox_logicOperator.MaximumSize = new Size(x(150), H);
+            comboBox_logicOperator.Size = new Size(x(80), H);
+            comboBox_logicOperator.MinimumSize = new Size(x(50), H);
             comboBox_logicOperator.Items.AddRange(new object[] {
                 "AND 与",
                 "OR  或",
@@ -868,52 +897,56 @@ namespace DigitalPlatform.CommonControl
                 comboBox_server.Visible = false;
             comboBox_server.FlatStyle = FlatStyle.Flat;
             comboBox_server.Dock = DockStyle.Fill;
-            comboBox_server.MaximumSize = new Size(150, 28);
-            comboBox_server.Size = new Size(120, 28);
-            comboBox_server.MinimumSize = new Size(100, 28);
+            comboBox_server.MaximumSize = new Size(x(150), H);
+            comboBox_server.Size = new Size(x(120), H);
+            comboBox_server.MinimumSize = new Size(x(100), H);
             comboBox_server.Text = "";
-            comboBox_server.DropDownWidth = 150;
+            comboBox_server.DropDownWidth = y(150);
 
             // dbname
             comboBox_dbName = new ComboBox();
             // comboBox_dbName.DropDownStyle = ComboBoxStyle.DropDownList;
             comboBox_dbName.FlatStyle = FlatStyle.Flat;
             comboBox_dbName.Dock = DockStyle.Fill;
-            comboBox_dbName.MaximumSize = new Size(150, 28);
-            comboBox_dbName.Size = new Size(120, 28);
-            comboBox_dbName.MinimumSize = new Size(100, 28);
+            comboBox_dbName.MaximumSize = new Size(x(150), H);
+            comboBox_dbName.Size = new Size(x(120), H);
+            comboBox_dbName.MinimumSize = new Size(x(100), H);
             comboBox_dbName.Text = "";
-            comboBox_dbName.DropDownWidth = 150;
+            comboBox_dbName.DropDownWidth = y(150);
 
+            int h = DpiUtil.GetScalingY(dpi_xy, 22);
+            int m = DpiUtil.GetScalingY(dpi_xy, 4);
             //
             textBox_word = new TextBox();
             textBox_word.BorderStyle = BorderStyle.None;
             textBox_word.Font = new Font(this.Container.Font, FontStyle.Bold);
             textBox_word.Dock = DockStyle.Fill;
-            textBox_word.MaximumSize = new Size(200, 28);
-            textBox_word.Size = new Size(150, 28);
-            textBox_word.MinimumSize = new Size(100, 28);
+            textBox_word.MaximumSize = new Size(x(200), h);
+            textBox_word.Size = new Size(x(150), h);
+            textBox_word.MinimumSize = new Size(x(100), h);
+            textBox_word.Margin = new Padding(m, m, m, m);
+
             // textBox_word.Margin = new Padding(-1, -1, -1, -1);
 
             //
             comboBox_from = new ComboBox();
             // comboBox_from.DropDownStyle = ComboBoxStyle.DropDownList;
             comboBox_from.FlatStyle = FlatStyle.Flat;
-            comboBox_from.DropDownHeight = 300;
-            comboBox_from.DropDownWidth = 200;
+            comboBox_from.DropDownHeight = y(300);
+            comboBox_from.DropDownWidth = x(200);
             comboBox_from.Dock = DockStyle.Fill;
-            comboBox_from.MaximumSize = new Size(150, 28);
-            comboBox_from.Size = new Size(100, 28);
-            comboBox_from.MinimumSize = new Size(50, 28);
+            comboBox_from.MaximumSize = new Size(x(150), H);
+            comboBox_from.Size = new Size(x(100), H);
+            comboBox_from.MinimumSize = new Size(x(50), H);
 
             // matchstyle
             comboBox_matchStyle = new ComboBox();
             comboBox_matchStyle.DropDownStyle = ComboBoxStyle.DropDownList;
             comboBox_matchStyle.FlatStyle = FlatStyle.Flat;
             comboBox_matchStyle.Dock = DockStyle.Fill;
-            comboBox_matchStyle.MaximumSize = new Size(150, 28);
-            comboBox_matchStyle.Size = new Size(80, 28);
-            comboBox_matchStyle.MinimumSize = new Size(50, 28);
+            comboBox_matchStyle.MaximumSize = new Size(x(150), H);
+            comboBox_matchStyle.Size = new Size(x(80), H);
+            comboBox_matchStyle.MinimumSize = new Size(x(50), H);
             comboBox_matchStyle.Items.AddRange(new object[] {
                 "前方一致",
                 "中间一致",

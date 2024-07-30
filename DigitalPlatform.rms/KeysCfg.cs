@@ -8,22 +8,17 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Reflection;
-//using System.CodeDom;
-//using System.CodeDom.Compiler;
 using System.Globalization;
 using System.Linq;
 
-using Microsoft.CSharp;
-using Microsoft.VisualBasic;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Emit;
 
 using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.Core;
+using System.Runtime.Remoting.Activation;
 
 
 namespace DigitalPlatform.rms
@@ -711,7 +706,7 @@ namespace DigitalPlatform.rms
             string strFromName = "";
             string strFromValue = "";
             string strSqlTableName = "";
-            string strNum = "";
+            // string strNum = "";
 
             for (int i = 0; i < keyList.Count; i++)
             {
@@ -722,7 +717,7 @@ namespace DigitalPlatform.rms
                 strFromName = "";
                 strFromValue = "";
                 strSqlTableName = "";
-                strNum = "";
+                // strNum = "";
 
                 // TODO: 用 GetElementsByTagName 优化
                 XmlNode nodeFrom = nodeKey.SelectSingleNode("from");
@@ -881,14 +876,14 @@ namespace DigitalPlatform.rms
                         continue;
 
                     strKeyNoProcess = strKey;
-                    strNum = "-1";
+                    // strNum = "-1";
 
-                    List<string> outputKeys = new List<string>();
-                    if (tableInfo.nodeConvertKeyString != null)
+                    List<KeyAndFrom> outputKeys = new List<KeyAndFrom>();
+                    if (tableInfo.nodesConvertKeyString?.Count > 0)
                     {
                         nRet = ConvertKeyWithStringNode(domData,
                             strKey,
-                            tableInfo.nodeConvertKeyString,
+                            tableInfo.nodesConvertKeyString,
                             out outputKeys,
                             out strError);
                         if (nRet == -1)
@@ -896,21 +891,34 @@ namespace DigitalPlatform.rms
                     }
                     else
                     {
+                        /*
                         outputKeys = new List<string>();
                         outputKeys.Add(strKey);
+                        */
+                        outputKeys.Add(new KeyAndFrom
+                        {
+                            Key = strKey,
+                            From = null
+                        });
                     }
 
-                    for (int k = 0; k < outputKeys.Count; k++)
+                    List<string> numbers = new List<string>();
+                    // for (int k = 0; k < outputKeys.Count; k++)
+                    foreach (var key in outputKeys)
                     {
-                        string strOneKey = outputKeys[k];
+                        // string strOneKey = outputKeys[k];
+
+                        string strOneKey = key.Key;
+
                         //根据自身的配置进行处理,得到num
-                        if (tableInfo.nodeConvertKeyNumber != null)
+                        if (tableInfo.nodesConvertKeyNumber != null
+                            && tableInfo.nodesConvertKeyNumber.Count > 0)
                         {
                             nRet = ConvertKeyWithNumberNode(
                                 domData,
                                 strOneKey,
-                                tableInfo.nodeConvertKeyNumber,
-                                out strNum,
+                                tableInfo.nodesConvertKeyNumber,
+                                out numbers,
                                 out strError);
                             if (nRet == -1)
                                 return -1;
@@ -918,28 +926,39 @@ namespace DigitalPlatform.rms
                             {
                                 // 2010/9/27
                                 strOneKey = strError + " -- " + strOneKey;
-                                strNum = "-1";
+                                // strNum = "-1";
+                                numbers.Add("-1");
                             }
 
+                            /*
                             // 2010/11/20
                             if (String.IsNullOrEmpty(strNum) == true)
                                 continue;
+                            */
                         }
+
+                        if (numbers.Count == 0)
+                            numbers.Add("-1");
 
                         if (strOneKey.Length > nKeySize)
                             strOneKey = strOneKey.Substring(0, nKeySize);
-                        if (strNum.Length >= 20)
-                            strNum = strNum.Substring(0, 19);
+                        foreach (var number in numbers)
+                        {
+                            string strNum = number;
 
-                        KeyItem keyItem = new KeyItem(strSqlTableName,
-                            strOneKey,
-                            strFromValue,
-                            strRecordID,
-                            strNum,
-                            strKeyNoProcess,
-                            strFromName);
+                            if (strNum.Length >= 20)
+                                strNum = strNum.Substring(0, 19);
 
-                        keys.Add(keyItem);
+                            KeyItem keyItem = new KeyItem(strSqlTableName,
+                                strOneKey,
+                                string.IsNullOrEmpty(key.From) ? strFromValue : key.From,
+                                strRecordID,
+                                strNum,
+                                strKeyNoProcess,
+                                strFromName);
+
+                            keys.Add(keyItem);
+                        }
                     }
                 }
             }
@@ -947,6 +966,68 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
+        // 执行脚本函数
+        // parameters:
+        //      dataDom         数据dom
+        //      strFunctionName 函数名
+        //      strResultString out参数，返回结果字符串
+        //      strError        out参数，返回出错信息
+        // return:
+        //      -1  出错
+        //      0   成功
+        public int DoScriptFunction(XmlDocument dataDom,
+            string strFunctionName,
+            List<KeyAndFrom> keys,
+            out string strError)
+        {
+            strError = "";
+
+            // Debug.Assert(dataDom != null,"DoScriptFunction()调用错误，dataDom参数值不能为null。");
+            Debug.Assert(strFunctionName != null && strFunctionName != "", "DoScriptFunction()调用错误，strFunctionName参数值不能为null。");
+
+            if (keys == null)
+                return 0;
+
+            int nRet = 0;
+
+            var resultstrings = new List<KeyAndFrom>();
+
+            foreach (var key in keys)
+            {
+                string strInputString = key.Key;
+
+                // string strOutputString = "";
+                List<string> OutputStrings = null;
+                nRet = this.DoScriptFunction(dataDom,
+                    strFunctionName,
+                    strInputString,
+                    // out strOutputString,
+                    out OutputStrings,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                if (OutputStrings != null)
+                {
+                    resultstrings.AddRange(BuildKeyList(OutputStrings, key.From));
+                }
+                if (resultstrings.Count == 0
+                    && dataDom == null)
+                    resultstrings.Add(new KeyAndFrom
+                    {
+                        Key = "",
+                        From = key.From
+                    });  // 防止加工检索词的时候报错
+            }
+
+            keys.Clear();
+            keys.AddRange(resultstrings);
+            return 0;
+        }
+
+
+
+#if REMOVED
         // 执行脚本函数
         // parameters:
         //      dataDom         数据dom
@@ -1008,7 +1089,7 @@ namespace DigitalPlatform.rms
 
             return 0;
         }
-
+#endif
 
         // 执行脚本函数
         // parameters:
@@ -1362,7 +1443,53 @@ namespace DigitalPlatform.rms
         }
 
 
-#region 加工字符串的静态函数
+        #region 加工字符串的静态函数
+
+        // return:
+        //		-1	出错
+        //		0	成功
+        //      1   转换为数字的过程失败 strError中有报错信息 2010/9/27
+        public int ConvertKeyWithNumberNode(
+            XmlDocument dataDom,
+            string strText,
+            List<XmlElement> nodes,
+            out List<string> keys,
+            out string strError)
+        {
+            strError = "";
+            keys = new List<string>();
+
+            List<string> convert_errors = new List<string>();
+            foreach (var node in nodes)
+            {
+                // return:
+                //		-1	出错
+                //		0	成功
+                //      1   转换为数字的过程失败 strError中有报错信息 2010/9/27
+                var ret = ConvertKeyWithNumberNode(
+                    dataDom,
+                    strText,
+                    node,
+                    out string current_key,
+                    out strError);
+                if (ret == -1)
+                    return -1;
+                if (ret == 1)
+                    convert_errors.Add(strError);
+                if (ret != 1 && string.IsNullOrEmpty(current_key) == false)
+                    keys.Add(current_key);
+            }
+
+            StringUtil.RemoveDup(ref keys, false);
+
+            if (keys.Count == 0
+                && convert_errors.Count > 0)
+            {
+                strError = StringUtil.MakePathList(convert_errors);
+                return 1;
+            }
+            return 0;
+        }
 
         // 注1: convertquery/number 元素的 style 属性值，是一个逗号间隔的列表，
         // 语义是逐步叠加效果加工处理检索词字符串。但似乎 utime,rfc1123time 有的时候
@@ -1382,10 +1509,10 @@ namespace DigitalPlatform.rms
         //		-1	出错
         //		0	成功
         //      1   转换为数字的过程失败 strError中有报错信息 2010/9/27
-        public int ConvertKeyWithNumberNode(
+        private int ConvertKeyWithNumberNode(
             XmlDocument dataDom,
             string strText,
-            XmlNode numberNode,
+            XmlElement numberNode,
             out string strKey,
             out string strError)
         {
@@ -1459,7 +1586,7 @@ namespace DigitalPlatform.rms
                         strKey = Convert.ToString(nTicks);
                     }
                 }
-                else if (strOneStyleLower == "utime")// 2010/2/12
+                else if (strOneStyleLower == "utime")   // 2010/2/12
                 {
                     if (string.IsNullOrEmpty(strKey) == true)
                     {
@@ -1480,6 +1607,7 @@ namespace DigitalPlatform.rms
                         // 2010/01/01 12:01:01Z
                         strKey = strKey.Replace("/", "-");
 
+                        /*
                         long nTicks = -1; //缺省值-1
                         try
                         {
@@ -1491,6 +1619,14 @@ namespace DigitalPlatform.rms
                             strError = "时间字符串 '" + strKey + "' 不是合法的utime格式";
                             return 1;
                         }
+                        */
+                        long nTicks = -1; //缺省值-1
+                        if (TryParseUTimeString(strKey, out DateTime value) == false)
+                        {
+                            strError = "时间字符串 '" + strKey + "' 不是合法的 utime 格式";
+                            return 1;
+                        }
+                        nTicks = value.Ticks;
 
                         strKey = Convert.ToString(nTicks);
                     }
@@ -1545,17 +1681,17 @@ namespace DigitalPlatform.rms
                             return -1;
 
                         }
-                        List<String> keys = new List<string>();
-                        keys.Add(strKey);
+                        List<KeyAndFrom> keys = new List<KeyAndFrom>();
+                        keys.Add(new KeyAndFrom { Key = strKey });
                         int nRet = this.DoScriptFunction(dataDom,
                             strFunctionName,
-                            ref keys,
+                            keys,
                             out strError);
                         if (nRet == -1)
                             return -1;
 
                         if (keys.Count > 0)
-                            strKey = keys[0];
+                            strKey = keys[0].Key;
                         else
                             strKey = null;
                     }
@@ -1572,6 +1708,18 @@ namespace DigitalPlatform.rms
                 }
             }
             return 0;
+        }
+
+        // 注: utime 格式实际上对应 u 和 s 两种
+        static bool TryParseUTimeString(string time,
+            out DateTime value)
+        {
+            IFormatProvider culture = new CultureInfo("zh-CN", true);
+            return DateTime.TryParseExact(time,
+                new string[] { "u", "s" },
+                culture,    // DateTimeFormatInfo.InvariantInfo,
+                DateTimeStyles.None,
+                out value);
         }
 
         // https://blogs.infosupport.com/normalizing-unicode-strings-in-c/
@@ -1594,20 +1742,78 @@ namespace DigitalPlatform.rms
             return normalizedOutputBuilder.ToString();
         }
 
+        // 一个 Key 和它适用的 from 值
+        public class KeyAndFrom
+        {
+            public string Key { get; set; }
+            public string From { get; set; }
+
+            public override string ToString()
+            {
+                if (string.IsNullOrEmpty(From))
+                    return Key;
+                return $"{Key}:{From}";
+            }
+
+            public static string ToString(IEnumerable<KeyAndFrom> keys)
+            {
+                StringBuilder text = new StringBuilder();
+                foreach (var key in keys)
+                {
+                    if (text.Length > 0)
+                        text.Append("; ");
+                    text.Append(key.ToString());
+                }
+                return text.ToString();
+            }
+        }
+
+        public int ConvertKeyWithStringNode(
+    XmlDocument dataDom,
+    string strText,
+    List<XmlElement> string_nodes,
+    out List<KeyAndFrom> keys,
+    out string strError)
+        {
+            strError = "";
+            keys = new List<KeyAndFrom>();
+
+            if (string_nodes == null)
+            {
+                strError = "string_nodes 参数不应为空";
+                return -1;
+            }
+
+            foreach (var node in string_nodes)
+            {
+                var ret = ConvertKeyWithStringNode(
+            dataDom,
+            strText,
+            node,
+            out List<KeyAndFrom> current_keys,
+            out strError);
+                if (ret == -1)
+                    return -1;
+                keys.AddRange(current_keys);
+            }
+
+            return 0;
+        }
+
         // 对字符串类型的检索点进行加工
         // parameter:
         //		strText	待加工的字符串
-        //		stringNode	string节点
+        //		stringNode	convertquerystring 或者 convertquerynumber 节点
         //		keys	out 加工后的检索点数组
         //		strError	out 出错信息
         // return:
         //		-1	出错
         //		0	成功
-        public int ConvertKeyWithStringNode(
+        private int ConvertKeyWithStringNode(
             XmlDocument dataDom,
             string strText,
-            XmlNode stringNode,
-            out List<string> keys,
+            XmlElement stringNode,
+            out List<KeyAndFrom> keys,
             out string strError)
         {
             strError = "";
@@ -1620,7 +1826,7 @@ namespace DigitalPlatform.rms
                 return -1;
             }
 
-            keys = new List<string>();
+            keys = new List<KeyAndFrom>();
 
             // 2020/6/9
             try
@@ -1632,14 +1838,23 @@ namespace DigitalPlatform.rms
 
             }
 
+            // 用于细部区分的(keys 表内) from 字段值。缺省则直接用 table@name 属性
+            // string 元素和 convert 元素和 table 元素都可以定义 filter 属性
+            string filter = GetFilter(stringNode);
+
             // 把传入的字符串作为第一个项
-            keys.Add(strText);
+            keys.Add(new KeyAndFrom
+            {
+                Key = strText,
+                From = filter
+            });
 
             // 得到风格定义
             string strStyles = DomUtil.GetAttr(stringNode, "style");
             string[] styles = strStyles.Split(new char[] { ',' });
             bool bHasFoundStopword = false;
             string strStopwordTableName = DomUtil.GetAttr(stringNode, "stopwordTable"); // BUG !!! 2012/4/18 以前为stopwordtable
+
             foreach (string strOneStyleParam in styles)
             {
                 string strOneStyle = strOneStyleParam.Trim();
@@ -1652,25 +1867,26 @@ namespace DigitalPlatform.rms
                 if (strOneStyleLower == "upper")
                 {
                     // 将一个字符串数组的内容都变成大写
-                    KeysCfg.DoUpper(ref keys);
+                    KeysCfg.DoUpper(keys);
                 }
                 else if (strOneStyleLower == "lower")
                 {
                     // 将一个字符串数组的内容都变成小写
-                    KeysCfg.DoLower(ref keys);
+                    KeysCfg.DoLower(keys);
                 }
                 else if (strOneStyleLower == "removeblank")
                 {
                     // 去掉空格
-                    KeysCfg.RemoveBlank(ref keys);
+                    KeysCfg.RemoveBlank(keys);
                 }
                 else if (strOneStyleLower == "removecmdcr")
                 {
                     // 2012/11/6
                     // 去掉 {cr:...} 命令部分
-                    for (int i = 0; i < keys.Count; i++)
+                    List<KeyAndFrom> remove_items = new List<KeyAndFrom>();
+                    foreach (var key in keys)
                     {
-                        string strKey = keys[i];
+                        string strKey = key.Key;    //  keys[i];
                         string strCmd = StringUtil.GetLeadingCommand(strKey);
                         if (string.IsNullOrEmpty(strCmd) == false
                             && StringUtil.HasHead(strCmd, "cr:") == true)
@@ -1678,37 +1894,48 @@ namespace DigitalPlatform.rms
                             strKey = strKey.Substring(strCmd.Length + 2);
                             if (string.IsNullOrEmpty(strKey) == true)
                             {
+                                /*
                                 keys.RemoveAt(i);
                                 i--;
+                                */
+                                remove_items.Add(key);
                                 continue;
                             }
 
-                            keys[i] = strKey;
+                            // keys[i] = strKey;
+                            key.Key = strKey;
                         }
+                    }
+                    foreach (var item in remove_items)
+                    {
+                        keys.Remove(item);
                     }
                 }
                 else if (strOneStyleLower == "pinyinab")
                 {
                     // 拼音缩写字头
-                    KeysCfg.DoPinyinAb(ref keys);
+                    KeysCfg.DoPinyinAb(keys);
                 }
                 else if (strOneStyleLower == "simplify")
                 {
                     // 将一个字符串数组的内容都变成简体
-                    KeysCfg.DoSimplify(ref keys);
+                    KeysCfg.DoSimplify(keys);
                 }
                 else if (strOneStyleLower == "traditionalize")
                 {
                     // 将一个字符串数组的内容都变成繁体
-                    KeysCfg.DoTraditionalize(ref keys);
+                    KeysCfg.DoTraditionalize(keys);
                 }
                 else if (strOneStyleLower == "fulltext")
                 {
-                    List<string> result = new List<string>();
-                    for (int i = 0; i < keys.Count; i++)
+                    var result = new List<KeyAndFrom>();
+                    foreach (var key in keys)
                     {
-                        List<string> lines = SplitFullTextContent(keys[i]);
-                        result.AddRange(lines);
+                        if (string.IsNullOrEmpty(key.Key))
+                            continue;
+                        List<string> lines = SplitFullTextContent(key.Key);
+                        result.AddRange(BuildKeyList(lines, key.From));
+
                     }
 
                     keys = result;
@@ -1739,11 +1966,13 @@ namespace DigitalPlatform.rms
                     }
                      */
 
-                    List<string> result = new List<string>();
-                    for (int i = 0; i < keys.Count; i++)
+                    List<KeyAndFrom> result = new List<KeyAndFrom>();
+                    foreach (var key in keys)
                     {
-                        string[] tempKeys = keys[i].Split(new char[] { ',', '，', ' ', '　' }, StringSplitOptions.RemoveEmptyEntries);   // 半角和全角的逗号和空格
-                        result.AddRange(tempKeys);
+                        if (string.IsNullOrEmpty(key.Key))
+                            continue;
+                        string[] tempKeys = key.Key.Split(new char[] { ',', '，', ' ', '　' }, StringSplitOptions.RemoveEmptyEntries);   // 半角和全角的逗号和空格
+                        result.AddRange(BuildKeyList(tempKeys, key.From));
                     }
 
                     keys = result;
@@ -1765,7 +1994,7 @@ namespace DigitalPlatform.rms
                     //		-1	出错
                     //		0	成功
                     nRet = this.StopwordCfg.DoStopword(strStopwordTableName,
-                        ref keys,
+                        keys,
                         out strError);
                     if (nRet == -1)
                         return -1;
@@ -1775,13 +2004,12 @@ namespace DigitalPlatform.rms
                 else if (strOneStyleLower == "distribute_refids")
                 {
                     // 2008/10/22
-                    List<string> results = new List<string>();
+                    List<KeyAndFrom> results = new List<KeyAndFrom>();
 
-                    for (int i = 0; i < keys.Count; i++)
+                    foreach (var key in keys)
                     {
-                        List<string> temp_ids = GetDistributeRefIDs(keys[i]);
-                        if (temp_ids.Count > 0)
-                            results.AddRange(temp_ids);
+                        List<string> temp_ids = GetDistributeRefIDs(key.Key);
+                        results.AddRange(BuildKeyList(temp_ids, key.From));
                     }
 
                     keys = results;
@@ -1789,13 +2017,12 @@ namespace DigitalPlatform.rms
                 else if (strOneStyleLower == "distribute_locations")
                 {
                     // 2019/11/22
-                    List<string> results = new List<string>();
+                    List<KeyAndFrom> results = new List<KeyAndFrom>();
 
-                    for (int i = 0; i < keys.Count; i++)
+                    foreach (var key in keys)
                     {
-                        List<string> temp_ids = GetDistributeLocations(keys[i]);
-                        if (temp_ids.Count > 0)
-                            results.AddRange(temp_ids);
+                        List<string> temp_ids = GetDistributeLocations(key.Key);
+                        results.AddRange(BuildKeyList(temp_ids, key.From));
                     }
 
                     keys = results;
@@ -1820,7 +2047,7 @@ namespace DigitalPlatform.rms
 
                         nRet = this.DoScriptFunction(dataDom,
                             strFunctionName,
-                            ref keys,
+                            keys,
                             out strError);
                         if (nRet == -1)
                             return -1;
@@ -1834,6 +2061,40 @@ namespace DigitalPlatform.rms
             }
 
             return 0;
+        }
+
+        static List<KeyAndFrom> BuildKeyList(IEnumerable<string> temp_ids,
+            string from)
+        {
+            var results = new List<KeyAndFrom>();
+            foreach (var t in temp_ids)
+            {
+                if (string.IsNullOrEmpty(t))
+                    continue;
+                results.Add(new KeyAndFrom
+                {
+                    Key = t,
+                    From = from
+                });
+            }
+            return results;
+        }
+
+        static string GetFilter(XmlElement start)
+        {
+            while(start != null)
+            {
+                if (start.HasAttribute("filter"))
+                    return start.GetAttribute("filter");
+
+                // 不越过 table 元素以上
+                if (start.Name == "table")
+                    return null;
+
+                start = start.ParentNode as XmlElement;
+            }
+
+            return null;
         }
 
         // 按照回车换行来切割，如果还不够小，则按逗号、句号、感叹号、问号书名号等来进一步切割
@@ -1986,6 +2247,14 @@ namespace DigitalPlatform.rms
             }
         }
 
+        public static void DoUpper(List<KeyAndFrom> items)
+        {
+            foreach (var item in items)
+            {
+                item.Key = item.Key?.ToUpper();
+            }
+        }
+
         // 将一个字符串数组的内容都变成小写
         public static void DoLower(ref List<string> texts)
         {
@@ -1995,13 +2264,30 @@ namespace DigitalPlatform.rms
             }
         }
 
-        // 将一个字符串数组的内容都变成小写
+        public static void DoLower(List<KeyAndFrom> items)
+        {
+            foreach (var item in items)
+            {
+                item.Key = item.Key?.ToLower();
+            }
+        }
+
+        // 将一个字符串数组的内容都去掉空格
         public static void RemoveBlank(ref List<string> texts)
         {
             for (int i = 0; i < texts.Count; i++)
             {
                 texts[i] = texts[i].Replace(" ", "");
                 texts[i] = texts[i].Replace("　", "");
+            }
+        }
+
+        public static void RemoveBlank(List<KeyAndFrom> items)
+        {
+            foreach (var item in items)
+            {
+                item.Key = item.Key?.Replace(" ", "");
+                item.Key = item.Key?.Replace("　", "");
             }
         }
 
@@ -2013,6 +2299,14 @@ namespace DigitalPlatform.rms
                 string strText = texts[i];
 
                 texts[i] = PinyinAb(strText);
+            }
+        }
+
+        public static void DoPinyinAb(List<KeyAndFrom> items)
+        {
+            foreach (var item in items)
+            {
+                item.Key = PinyinAb(item.Key);
             }
         }
 
@@ -2046,6 +2340,14 @@ namespace DigitalPlatform.rms
             }
         }
 
+        public static void DoSimplify(List<KeyAndFrom> items)
+        {
+            foreach (var item in items)
+            {
+                item.Key = API.ChineseT2S(item.Key);
+            }
+        }
+
         // 将一个字符串数组的内容都变成繁体
         public static void DoTraditionalize(ref List<string> texts)
         {
@@ -2055,7 +2357,15 @@ namespace DigitalPlatform.rms
             }
         }
 
-#endregion
+        public static void DoTraditionalize(List<KeyAndFrom> items)
+        {
+            foreach (var item in items)
+            {
+                item.Key = API.ChineseS2T(item.Key);
+            }
+        }
+
+        #endregion
 
     }
 

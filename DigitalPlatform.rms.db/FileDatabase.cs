@@ -11,6 +11,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.Core;
+using static DigitalPlatform.rms.KeysCfg;
 
 namespace DigitalPlatform.rms
 {
@@ -2363,8 +2364,8 @@ namespace DigitalPlatform.rms
         //		nodeCovertQuery 处理检索词的配置节点
         // 可能会抛出的异常:NoMatchException(检索方式与数据类型)
         private int GetKeyCondition(SearchItem searchItem,
-            XmlNode nodeConvertQueryString,
-            XmlNode nodeConvertQueryNumber,
+            XmlElement nodeConvertQueryString,
+            XmlElement nodeConvertQueryNumber,
             out string strKeyCondition,
             out string strError)
         {
@@ -2388,12 +2389,11 @@ namespace DigitalPlatform.rms
                 if (nodeConvertQueryString != null
                     && keysCfg != null)
                 {
-                    List<string> keys = null;
                     nRet = keysCfg.ConvertKeyWithStringNode(
                         null, //dataDom
                         strKeyValue,
-                        nodeConvertQueryString,
-                        out keys,
+                        new List<XmlElement> { nodeConvertQueryString },
+                        out List<KeyAndFrom>keys,
                         out strError);
                     if (nRet == -1)
                         return -1;
@@ -2403,7 +2403,7 @@ namespace DigitalPlatform.rms
                         strError = "不支持把检索词通过'split'样式加工成多个.";
                         return -1;
                     }
-                    strKeyValue = keys[0];
+                    strKeyValue = keys[0].Key;
                 }
             }
             else if (searchItem.DataType == "number")
@@ -2415,12 +2415,13 @@ namespace DigitalPlatform.rms
                     nRet = keysCfg.ConvertKeyWithNumberNode(
                         null,
                         strKeyValue,
-                        nodeConvertQueryNumber,
-                        out strMyKey,
+                        new List<XmlElement>{ nodeConvertQueryNumber},
+                        out List<string> keys,  // strMyKey,
                         out strError);
                     if (nRet == -1 || nRet == 1)
                         return -1;
-                    strKeyValue = strMyKey;
+                    // strKeyValue = strMyKey;
+                    strKeyValue = keys[0];
                 }
             }
             strKeyValue = strKeyValue.Trim();
@@ -2484,11 +2485,10 @@ namespace DigitalPlatform.rms
                                 && keysCfg != null)
                             {
                                 // 加工首
-                                List<string> keys = null;
                                 nRet = keysCfg.ConvertKeyWithStringNode(null,//dataDom
                                     strStartText,
-                                    nodeConvertQueryString,
-                                    out keys,
+                                    new List<XmlElement> { nodeConvertQueryString },
+                                    out List<KeyAndFrom> keys,
                                     out strError);
                                 if (nRet == -1)
                                     return -1;
@@ -2497,13 +2497,13 @@ namespace DigitalPlatform.rms
                                     strError = "不支持把检索词通过'split'样式加工成多个.";
                                     return -1;
                                 }
-                                strStartText = keys[0];
+                                strStartText = keys[0].Key;
 
 
                                 // 加工尾
                                 nRet = keysCfg.ConvertKeyWithStringNode(null,//dataDom
                                     strEndText,
-                                    nodeConvertQueryString,
+                                    new List<XmlElement> { nodeConvertQueryString },
                                     out keys,
                                     out strError);
                                 if (nRet == -1)
@@ -2513,7 +2513,7 @@ namespace DigitalPlatform.rms
                                     strError = "不支持把检索词通过'split'样式加工成多个.";
                                     return -1;
                                 }
-                                strEndText = keys[0];
+                                strEndText = keys[0].Key;
                             }
                             strKeyCondition = " keystring >= '"
                                 + strStartText
@@ -2530,23 +2530,25 @@ namespace DigitalPlatform.rms
                                 nRet = keysCfg.ConvertKeyWithNumberNode(
                                     null,
                                     strStartText,
-                                    nodeConvertQueryNumber,
-                                    out strMyKey,
+                                    new List<XmlElement> { nodeConvertQueryNumber },
+                                    out List<string> keys,  // strMyKey,
                                     out strError);
                                 if (nRet == -1 || nRet == 1)
                                     return -1;
-                                strStartText = strMyKey;
+                                // strStartText = strMyKey;
+                                strStartText = keys[0];
 
                                 // 尾
                                 nRet = keysCfg.ConvertKeyWithNumberNode(
                                     null,
                                     strEndText,
-                                    nodeConvertQueryNumber,
-                                    out strMyKey,
+                                    new List<XmlElement> { nodeConvertQueryNumber },
+                                    out keys,  // strMyKey,
                                     out strError);
                                 if (nRet == -1 || nRet == 1)
                                     return -1;
-                                strEndText = strMyKey;
+                                // strEndText = strMyKey;
+                                strEndText = keys[0];
 
                             }
                             strKeyCondition = " keystringnum >= "
@@ -2571,11 +2573,10 @@ namespace DigitalPlatform.rms
                             if (nodeConvertQueryString != null
                                 && keysCfg != null)
                             {
-                                List<string> keys = null;
                                 nRet = keysCfg.ConvertKeyWithStringNode(null,//dataDom
                                     strRealText,
-                                    nodeConvertQueryString,
-                                    out keys,
+                                    new List<XmlElement> { nodeConvertQueryString },
+                                    out List<KeyAndFrom> keys,
                                     out strError);
                                 if (nRet == -1)
                                     return -1;
@@ -2584,7 +2585,7 @@ namespace DigitalPlatform.rms
                                     strError = "不支持把检索词通过'split'样式加工成多个.";
                                     return -1;
                                 }
-                                strRealText = keys[0];
+                                strRealText = keys[0].Key;
                             }
 
                             strKeyCondition = "keystring" +
@@ -2596,17 +2597,17 @@ namespace DigitalPlatform.rms
                             if (nodeConvertQueryNumber != null
                                 && keysCfg != null)
                             {
-                                string strMyKey;
+                                // string strMyKey;
                                 nRet = keysCfg.ConvertKeyWithNumberNode(
                                     null,
                                     strRealText,
-                                    nodeConvertQueryNumber,
-                                    out strMyKey,
+                                    new List<XmlElement> { nodeConvertQueryNumber },
+                                    out List<string> keys,  // strMyKey,
                                     out strError);
                                 if (nRet == -1 || nRet == 1)
                                     return -1;
-                                strRealText = strMyKey;
-
+                                // strRealText = strMyKey;
+                                strRealText = keys[0];
                             }
                             strKeyCondition = "keystringnum" +
                                 strOperator +
@@ -2694,8 +2695,8 @@ namespace DigitalPlatform.rms
                     {
                         nRet = GetKeyCondition(
                             searchItem,
-                            tableInfo.nodeConvertQueryString,
-                            tableInfo.nodeConvertQueryNumber,
+                            FirstNode(tableInfo.nodesConvertQueryString),
+                            FirstNode(tableInfo.nodesConvertQueryNumber),
                             out strTiaoJian,
                             out strError);
                         if (nRet == -1)
@@ -2758,6 +2759,15 @@ namespace DigitalPlatform.rms
 				this.container.WriteDebugInfo("SearchByUnion()，对'" + this.GetCaption("zh-CN") + "'数据库解读锁。");
 #endif
             }
+        }
+
+        public static XmlElement FirstNode(List<XmlElement> nodes)
+        {
+            if (nodes == null)
+                return null;
+            if (nodes.Count == 0)
+                return null;
+            return nodes[0];
         }
 
         // 检查一个文件是不是记录

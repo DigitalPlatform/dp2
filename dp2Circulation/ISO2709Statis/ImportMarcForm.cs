@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -13,6 +14,7 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.Core;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Marc;
+using DigitalPlatform.Script;
 using DigitalPlatform.Text;
 using static dp2Circulation.MainForm;
 
@@ -140,6 +142,7 @@ this.UiState);
                     this.textBox_batchNo,
                     this.tabComboBox_dupProject,
                     this.checkBox_dontImportDupRecords,
+                    this.textBox_source,
                     /*
                     new ControlWrapper(this.checkBox_cfg_autoChangePassword, true),
                     new ControlWrapper(this.checkBox_forceCreate, false),
@@ -159,6 +162,7 @@ this.UiState);
                     this.textBox_batchNo,
                     this.tabComboBox_dupProject,
                     this.checkBox_dontImportDupRecords,
+                    this.textBox_source,
                     /*
                     new ControlWrapper(this.checkBox_cfg_autoChangePassword, true),
                     new ControlWrapper(this.checkBox_forceCreate, false),
@@ -386,7 +390,7 @@ this.UiState);
                     range = new RangeList(strRange);
                     range.Sort();
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     strError = $"导入记录范围 '{strRange}' 不合法: {ex.Message}";
                     goto ERROR1;
@@ -394,10 +398,14 @@ this.UiState);
             }
 
             // 编目批次号
-            string batchNo = (string)this.Invoke(new Func<string>(() =>
+            string batchNo = this.TryGet(() =>
             {
                 return this.textBox_batchNo.Text;
-            }));
+            });
+            string source = this.TryGet(() =>
+            {
+                return this.textBox_source.Text;
+            });
 
             Stream file = null;
 
@@ -427,6 +435,8 @@ this.UiState);
             int overwrite_count = 0;
             int append_count = 0;
             int skip_count = 0;
+
+            GenerateData genData = new GenerateData(this, null);
 
             /*
             _stop.OnStop += new StopEventHandler(this.DoStop);
@@ -546,28 +556,6 @@ this.UiState);
                         || strMARC.Length <= 24)
                         continue;
 
-                    if (this.InputMode880 == true
-                        && (this.InputMarcSyntax == "usmarc" || this.InputMarcSyntax == "<自动>"))
-                    {
-                        MarcRecord temp = new MarcRecord(strMARC);
-                        MarcQuery.ToParallel(temp);
-                        strMARC = temp.Text;
-                    }
-
-                    // 2022/10/25
-                    if (string.IsNullOrEmpty(batchNo) == false)
-                    {
-                        MarcRecord temp = new MarcRecord(strMARC);
-                        if (batchNo == "[清除]")
-                        {
-                            temp.select("field[@name='998']/subfield[@name='a']").detach();
-                        }
-                        else
-                        {
-                            temp.setFirstSubfield("998", "a", batchNo);
-                        }
-                        strMARC = temp.Text;
-                    }
 
                     // 处理
                     string strBiblioRecPath = strTargetDbName + "/?";
@@ -710,6 +698,89 @@ out strError);
                     }
 
 
+                    nRet = MarcUtil.Xml2Marc(new_xml,    // info.OldXml,
+true,
+null,
+out string strMarcSyntax,
+out strMARC,
+out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "XML转换到MARC记录时出错: " + strError;
+                        goto ERROR1;
+                    }
+                    MarcRecord record = new MarcRecord(strMARC);
+                    var record_changed = false;
+                    // 2024/7/26
+                    // 执行保存前的预处理操作
+                    {
+                        nRet = genData.InitialAutogenAssembly(strBiblioRecPath,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (genData.DetailHostObj != null)
+                        {
+                            BeforeSaveRecordEventArgs e = new BeforeSaveRecordEventArgs();
+                            this.TryInvoke(() =>
+                            {
+                                genData.DetailHostObj.Invoke("BeforeSaveRecord",
+                                    record,
+                                    e);
+                            });
+                            if (string.IsNullOrEmpty(e.ErrorInfo) == false)
+                            {
+                                strError = e.ErrorInfo;
+                                goto ERROR1;
+                            }
+                            if (e.Changed)
+                                record_changed = true;
+                        }
+                    }
+
+                    if (this.InputMode880 == true
+                        && (this.InputMarcSyntax == "usmarc" || this.InputMarcSyntax == "<自动>"))
+                    {
+                        MarcQuery.ToParallel(record);
+                        record_changed = true;
+                    }
+
+                    // 2022/10/25
+                    if (string.IsNullOrEmpty(batchNo) == false)
+                    {
+                        if (batchNo == "[清除]")
+                        {
+                            record.select("field[@name='998']/subfield[@name='a']").detach();
+                        }
+                        else
+                        {
+                            record.setFirstSubfield("998", "a", batchNo);
+                        }
+                        record_changed = true;
+                    }
+
+                    // 2024/7/27
+                    if (string.IsNullOrEmpty(source) == false)
+                    {
+                        if (batchNo == "[清除]")
+                        {
+                            record.select("field[@name='998']/subfield[@name='f']").detach();
+                        }
+                        else
+                        {
+                            record.setFirstSubfield("998", "f", source);
+                        }
+                        record_changed = true;
+                    }
+
+                    if (record_changed)
+                    {
+                        nRet = MarcUtil.Marc2XmlEx(record.Text,
+        strMarcSyntax,
+        ref new_xml,
+        out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                    }
 
                     if (dup_form != null
                         && overwrite == false)
@@ -750,6 +821,8 @@ out strError);
                             }
                         }
                     }
+
+                    //
 
                     lRet = channel.SetBiblioInfo(
                         looping.Progress,
@@ -884,6 +957,8 @@ out strError);
                         dup_form = null;
                     });
                 }
+
+                genData.Dispose();
             }
         ERROR1:
             Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(strError) + "</div>");

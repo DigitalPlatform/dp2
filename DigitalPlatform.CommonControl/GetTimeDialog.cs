@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
@@ -63,7 +64,7 @@ namespace DigitalPlatform.CommonControl
         private void button_clearHMS_2_Click(object sender, EventArgs e)
         {
             DateTime old_value = this.Value2;
-            this.Value2 = new DateTime(old_value.Year, old_value.Month, old_value.Day);
+            this.Value2 = new DateTime(old_value.Year, old_value.Month, old_value.Day) + (TimeSpan.FromDays(1) - TimeSpan.FromSeconds(1));
         }
 
         bool m_bRangeMode = false;
@@ -107,7 +108,7 @@ namespace DigitalPlatform.CommonControl
                     strStart = DateTimeUtil.Rfc1123DateTimeStringEx(this.Value);
 
                 string strEnd = "";
-                if (this.Value2 != DateTimePicker.MaximumDateTime)
+                if (this.Value2 != MaximumDateTime)
                     strEnd = DateTimeUtil.Rfc1123DateTimeStringEx(this.Value2);
 
                 return strStart
@@ -141,7 +142,7 @@ namespace DigitalPlatform.CommonControl
                     this.Value = DateTimeUtil.FromRfc1123DateTimeString(strStart).ToLocalTime();
 
                 if (string.IsNullOrEmpty(strEnd) == true)
-                    this.Value2 = DateTimePicker.MaximumDateTime;
+                    this.Value2 = MaximumDateTime;
                 else
                     this.Value2 = DateTimeUtil.FromRfc1123DateTimeString(strEnd).ToLocalTime();
             }
@@ -153,16 +154,16 @@ namespace DigitalPlatform.CommonControl
             {
                 if (this.RangeMode == false)
                 {
-                    return this.Value.ToString("u");
+                    return this.Value.ToUniversalTime().ToString("u");
                 }
 
                 string strStart = "";
                 if (this.Value != DateTimePicker.MinimumDateTime)
-                    strStart = this.Value.ToString("u");
+                    strStart = this.Value.ToUniversalTime().ToString("u");
 
                 string strEnd = "";
-                if (this.Value2 != DateTimePicker.MaximumDateTime)
-                    strEnd = this.Value2.ToString("u");
+                if (this.Value2 != MaximumDateTime)
+                    strEnd = this.Value2.ToUniversalTime().ToString("u");
 
                 return strStart
                     + "~"
@@ -173,7 +174,7 @@ namespace DigitalPlatform.CommonControl
                 if (this.RangeMode == false)
                 {
                     // 注意：可能会抛出异常
-                    this.Value = DateTimeUtil.FromUTimeString(value);
+                    this.Value = DateTimeUtil.FromUTimeString(value).ToLocalTime();
                     return;
                 }
 
@@ -192,12 +193,89 @@ namespace DigitalPlatform.CommonControl
                 if (string.IsNullOrEmpty(strStart) == true)
                     this.Value = DateTimePicker.MinimumDateTime;
                 else
-                    this.Value = DateTimeUtil.FromUTimeString(strStart);
+                    this.Value = DateTimeUtil.FromUTimeString(strStart).ToLocalTime();
 
                 if (string.IsNullOrEmpty(strEnd) == true)
-                    this.Value2 = DateTimePicker.MaximumDateTime;
+                    this.Value2 = MaximumDateTime;
                 else
-                    this.Value2 = DateTimeUtil.FromUTimeString(strEnd);
+                    this.Value2 = DateTimeUtil.FromUTimeString(strEnd).ToLocalTime();
+            }
+        }
+
+        public string sString
+        {
+            get
+            {
+                if (this.RangeMode == false)
+                {
+                    return this.Value.ToString("s");
+                }
+
+                string strStart = "";
+                if (this.Value != DateTimePicker.MinimumDateTime)
+                    strStart = this.Value.ToString("s");
+
+                string strEnd = "";
+                if (this.Value2 != MaximumDateTime)
+                    strEnd = this.Value2.ToString("s");
+
+                return strStart
+                    + "~"
+                    + strEnd;
+            }
+            set
+            {
+                if (this.RangeMode == false)
+                {
+                    // 注意：可能会抛出异常
+                    this.Value = FromSTimeString(value);
+                    return;
+                }
+
+                string strStart = "";
+                string strEnd = "";
+
+                int nRet = value.IndexOf("~");
+                if (nRet == -1)
+                    strStart = value.Trim();
+                else
+                {
+                    strStart = value.Substring(0, nRet).Trim();
+                    strEnd = value.Substring(nRet + 1).Trim();
+                }
+
+                if (string.IsNullOrEmpty(strStart) == true)
+                    this.Value = DateTimePicker.MinimumDateTime;
+                else
+                    this.Value = FromSTimeString(strStart);
+
+                if (string.IsNullOrEmpty(strEnd) == true)
+                    this.Value2 = MaximumDateTime;
+                else
+                    this.Value2 = FromSTimeString(strEnd);
+            }
+        }
+
+        public static DateTime FromSTimeString(string strTime)
+        {
+            // 自定义格式字符串为“yyyy'-'MM'-'dd HH':'mm':'ss'Z'”。 
+            // 无法描述时区。隐含表达。
+            IFormatProvider culture = new CultureInfo("zh-CN", true);
+            return DateTime.ParseExact(strTime,
+                "s",
+                culture);
+        }
+
+        DateTime MaximumDateTime
+        {
+            get
+            {
+                var value = DateTimePicker.MaximumDateTime;
+                // 把时分秒部分推到最大
+                // value += TimeSpan.FromDays(1) - TimeSpan.FromSeconds(1);
+                value = new DateTime(value.Year, 1, 1);
+                value -= TimeSpan.FromSeconds(1);
+                return value;
             }
         }
 
@@ -215,7 +293,7 @@ namespace DigitalPlatform.CommonControl
                     strStart = DateTimeUtil.DateTimeToString8(this.Value);
 
                 string strEnd = "";
-                if (this.Value2 != DateTimePicker.MaximumDateTime)
+                if (this.Value2 != MaximumDateTime)
                     strEnd = DateTimeUtil.DateTimeToString8(this.Value2);
 
                 if (string.IsNullOrEmpty(strStart) && string.IsNullOrEmpty(strEnd))
@@ -257,7 +335,7 @@ namespace DigitalPlatform.CommonControl
                     this.Value = DateTimeUtil.Long8ToDateTime(strStart);
 
                 if (string.IsNullOrEmpty(strEnd) == true)
-                    this.Value2 = DateTimePicker.MaximumDateTime;
+                    this.Value2 = MaximumDateTime;
                 else
                     this.Value2 = DateTimeUtil.Long8ToDateTime(strEnd);
             }
@@ -270,7 +348,7 @@ namespace DigitalPlatform.CommonControl
 
         private void button_setMax2_Click(object sender, EventArgs e)
         {
-            this.Value2 = DateTimePicker.MaximumDateTime;
+            this.Value2 = MaximumDateTime;
         }
     }
 }

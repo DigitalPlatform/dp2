@@ -36,6 +36,9 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Core;
+using static DigitalPlatform.rms.KeysCfg;
+using System.Windows.Forms;
+using System.Linq;
 
 namespace DigitalPlatform.rms
 {
@@ -4458,8 +4461,8 @@ handle.CancelTokenSource.Token).Result;
         // 线：不安全
         // ???该函数抛出异常的处理不太顺
         private int GetKeyCondition(SearchItem searchItem,
-            XmlNode nodeConvertQueryString,
-            XmlNode nodeConvertQueryNumber,
+            List<XmlElement> nodesConvertQueryString,
+            List<XmlElement> nodesConvertQueryNumber,
             string strPostfix,
             ref List<DbParameter> aSqlParameter,
             out string strKeyCondition,
@@ -4489,52 +4492,73 @@ handle.CancelTokenSource.Token).Result;
             if (nRet == -1)
                 return -1;
 
+            StringBuilder text = new StringBuilder();
 
             //3.根据数据类型，对检索词进行加工
             string strKeyValue = searchItem.Word.Trim();
+            List<KeyAndFrom> keys = new List<KeyAndFrom>();
+
             if (searchItem.DataType == "string")    //字符类型调字符的配置，对检索词进行加工
             {
-                if (nodeConvertQueryString != null && keysCfg != null)
+                if (nodesConvertQueryString?.Count > 0
+                    && keysCfg != null)
                 {
-                    List<string> keys = null;
                     nRet = keysCfg.ConvertKeyWithStringNode(
                         null,//dataDom
                         strKeyValue,
-                        nodeConvertQueryString,
+                        nodesConvertQueryString,
                         out keys,
                         out strError);
                     if (nRet == -1)
                         return -1;
+#if REMOVED
                     if (keys.Count != 1)
                     {
+                        /*
                         string[] list = new string[keys.Count];
                         keys.CopyTo(list);
                         strError = "不支持把检索词 '" + strKeyValue + "' 通过'split'样式加工成多个(" + string.Join(",", list) + ")";
+                        */
+                        strError = $"不支持把检索词 '{ strKeyValue }' 通过'split'样式加工成多个({KeyAndFrom.ToString(keys)})";
                         return -1;
                     }
-                    strKeyValue = keys[0];
+                    strKeyValue = keys[0].Key;
+#endif
                 }
             }
             else if (searchItem.DataType == "number"   //数字型调数字格式的配置，对检索词进行加工
                      && (searchItem.Relation != "draw" && searchItem.Relation != "range"))  // 2009/9/26 add
             {
-                if (nodeConvertQueryNumber != null
+                if (nodesConvertQueryNumber?.Count > 0
                     && keysCfg != null)
                 {
-                    string strMyKey;
+                    // string strMyKey;
                     nRet = keysCfg.ConvertKeyWithNumberNode(
                         null,
                         strKeyValue,
-                        nodeConvertQueryNumber,
-                        out strMyKey,
+                        nodesConvertQueryNumber,
+                        out List<string> keys1,   // strMyKey,
                         out strError);
                     if (nRet == -1 || nRet == 1)
                         return -1;
-                    strKeyValue = strMyKey;
+                    // strKeyValue = strMyKey;
+#if REMOVED
+                    strKeyValue = keys[0];
+#endif
+                    keys.Clear();
+                    foreach (var key in keys1)
+                    {
+                        keys.Add(new KeyAndFrom { Key = key });
+                    }
                 }
             }
 
-            string strParameterName;
+            if (keys.Count == 0)
+                keys = new List<KeyAndFrom> {
+                    new KeyAndFrom { Key = strKeyValue }
+                };
+
+            // string strParameterName;
             //4.根据match的值，分别得到不同的检索表达式
             if (searchItem.Match == "left"
                 || searchItem.Match == "")  //如果strMatch为空，则按"左方一致"
@@ -4546,12 +4570,24 @@ handle.CancelTokenSource.Token).Result;
                         new NoMatchException("在匹配方式值为left或空时，与数据类型值" + searchItem.DataType + "矛盾，数据类型应该为string");
                     throw (ex);
                 }
-                strParameterName = "@keyValue" + strPostfix;
-                strKeyCondition = "keystring LIKE "
+
+                AppendCondition(text,
+                    strPostfix,
+                    "left",
+                    keys,
+                    aSqlParameter);
+#if REMOVED
+                strParameterName = $"@keyValue" + strPostfix;
+
+                strKeyCondition += " keystring LIKE "
                     + strParameterName + " ";
 
-                var temp = CreateParameter(strParameterName, DbType.String, strKeyValue + "%");
+                var temp = CreateParameter(strParameterName,
+                    DbType.String,
+                    strKeyValue + "%");
                 aSqlParameter.Add(temp);
+
+#endif
 
 #if OLD_CODE
                 if (this.container.SqlServerType == SqlServerType.MsSqlServer)
@@ -4589,12 +4625,22 @@ handle.CancelTokenSource.Token).Result;
                     NoMatchException ex = new NoMatchException("在匹配方式值为middle或空时，与数据类型值" + searchItem.DataType + "矛盾，数据类型应该为string");
                     throw (ex);
                 }
+
+                AppendCondition(text,
+                    strPostfix,
+                    "middle",
+                    keys,
+                    aSqlParameter);
+
+#if REMOVED
                 strParameterName = "@keyValue" + strPostfix;
+
                 strKeyCondition = "keystring LIKE "
                     + strParameterName + " "; //N'%" + strKeyValue + "'";
 
                 var temp = CreateParameter(strParameterName, DbType.String, "%" + strKeyValue + "%");
                 aSqlParameter.Add(temp);
+#endif
 
 #if OLD_CODE
                 if (this.container.SqlServerType == SqlServerType.MsSqlServer)
@@ -4631,12 +4677,21 @@ handle.CancelTokenSource.Token).Result;
                     NoMatchException ex = new NoMatchException("在匹配方式值为left或空时，与数据类型值" + searchItem.DataType + "矛盾，数据类型应该为string");
                     throw (ex);
                 }
+
+                AppendCondition(text,
+                    strPostfix,
+                    "right",
+                    keys,
+                    aSqlParameter);
+
+#if REMOVED
                 strParameterName = "@keyValue" + strPostfix;
                 strKeyCondition = "keystring LIKE "
                     + strParameterName + " "; //N'%" + strKeyValue + "'";
 
                 var temp = CreateParameter(strParameterName, DbType.String, "%" + strKeyValue);
                 aSqlParameter.Add(temp);
+#endif
 
 #if OLD_CODE
                 if (this.container.SqlServerType == SqlServerType.MsSqlServer)
@@ -4673,10 +4728,11 @@ handle.CancelTokenSource.Token).Result;
                 {
                     nRet = ProcessList(searchItem.Word,
             ref aSqlParameter,
-            out strKeyCondition,
+            out string temp,
             out strError);
                     if (nRet == -1)
                         return -1;
+                    text.Append(temp);
                 }
                 //从词中汲取,较复杂，注意
                 else if (searchItem.Relation == "draw"
@@ -4699,49 +4755,49 @@ handle.CancelTokenSource.Token).Result;
                     {
                         if (searchItem.DataType == "string")
                         {
-                            if (nodeConvertQueryString != null
+                            if (nodesConvertQueryString?.Count > 0
                                 && keysCfg != null)
                             {
                                 // 加工首
-                                List<string> keys = null;
                                 nRet = keysCfg.ConvertKeyWithStringNode(
                                     null,//dataDom
                                     strStartText,
-                                    nodeConvertQueryString,
-                                    out keys,
+                                    nodesConvertQueryString,
+                                    out List<KeyAndFrom> keys1,
                                     out strError);
                                 if (nRet == -1)
                                     return -1;
-                                if (keys.Count != 1)
+                                if (keys1.Count != 1)
                                 {
-                                    strError = "不支持把检索词通过'split'样式加工成多个.";
+                                    strError = $"不支持把检索词通过'split'样式加工成多个({KeyAndFrom.ToString(keys1)})";
                                     return -1;
                                 }
-                                strStartText = keys[0];
+                                strStartText = keys1[0].Key;
 
 
                                 // 加工尾
                                 nRet = keysCfg.ConvertKeyWithStringNode(
                                     null,//dataDom
                                     strEndText,
-                                    nodeConvertQueryString,
-                                    out keys,
+                                    nodesConvertQueryString,
+                                    out List<KeyAndFrom> keys2,
                                     out strError);
                                 if (nRet == -1)
                                     return -1;
-                                if (keys.Count != 1)
+                                if (keys2.Count != 1)
                                 {
-                                    strError = "不支持把检索词通过'split'样式加工成多个.";
+                                    strError = $"不支持把检索词通过'split'样式加工成多个({KeyAndFrom.ToString(keys2)})";
                                     return -1;
                                 }
-                                strEndText = keys[0];
+                                strEndText = keys2[0].Key;
                             }
                             string strParameterMinName = "@keyValueMin" + strPostfix;
                             string strParameterMaxName = "@keyValueMax" + strPostfix;
 
-                            strKeyCondition = " " + strParameterMinName
+                            string result = " " + strParameterMinName
                                 + " <=keystring and keystring<= "
                                 + strParameterMaxName + " ";
+                            text.Append(result);
 
                             var temp = CreateParameter(strParameterMinName, DbType.String, strStartText);
                             aSqlParameter.Add(temp);
@@ -4795,7 +4851,7 @@ handle.CancelTokenSource.Token).Result;
                         }
                         else if (searchItem.DataType == "number")
                         {
-                            if (nodeConvertQueryNumber != null
+                            if (nodesConvertQueryNumber?.Count > 0
                                 && keysCfg != null)
                             {
                                 // 首
@@ -4803,28 +4859,31 @@ handle.CancelTokenSource.Token).Result;
                                 nRet = keysCfg.ConvertKeyWithNumberNode(
                                     null,
                                     strStartText,
-                                    nodeConvertQueryNumber,
-                                    out strMyKey,
+                                    nodesConvertQueryNumber,
+                                    out List<string> keys1,  // strMyKey,
                                     out strError);
                                 if (nRet == -1 || nRet == 1)
                                     return -1;
-                                strStartText = strMyKey;
+                                // strStartText = strMyKey;
+                                strStartText = keys1[0];
 
                                 // 尾
                                 nRet = keysCfg.ConvertKeyWithNumberNode(
                                     null,
                                     strEndText,
-                                    nodeConvertQueryNumber,
-                                    out strMyKey,
+                                    nodesConvertQueryNumber,
+                                    out List<string> keys2,   // strMyKey,
                                     out strError);
                                 if (nRet == -1 || nRet == 1)
                                     return -1;
-                                strEndText = strMyKey;
+                                // strEndText = strMyKey;
+                                strEndText = keys2[0];
                             }
-                            strKeyCondition = strStartText
+                            string result = strStartText
                                 + " <= keystringnum and keystringnum <= "
                                 + strEndText +
                                 " and keystringnum <> -1";
+                            text.Append(result);
                         }
                     }
                     else
@@ -4839,27 +4898,37 @@ handle.CancelTokenSource.Token).Result;
 
                         if (searchItem.DataType == "string")
                         {
-                            if (nodeConvertQueryString != null
+                            List<KeyAndFrom> keys1 = new List<KeyAndFrom> {
+                            new KeyAndFrom{ Key = strRealText }
+                            };
+                            if (nodesConvertQueryString?.Count > 0
                                 && keysCfg != null)
                             {
-                                List<string> keys = null;
                                 nRet = keysCfg.ConvertKeyWithStringNode(
                                     null,//dataDom
                                     strRealText,
-                                    nodeConvertQueryString,
-                                    out keys,
+                                    nodesConvertQueryString,
+                                    out keys1,
                                     out strError);
                                 if (nRet == -1)
                                     return -1;
-                                if (keys.Count != 1)
+                                if (keys1.Count != 1)
                                 {
-                                    strError = "不支持把检索词通过'split'样式加工成多个.";
+                                    strError = $"不支持把检索词通过'split'样式加工成多个({KeyAndFrom.ToString(keys1)})";
                                     return -1;
                                 }
-                                strRealText = keys[0];
+                                strRealText = keys1[0].Key;
+
 
                             }
 
+                            AppendConditionOperator(text,
+    strPostfix,
+    strOperator,
+    keys1,
+    aSqlParameter);
+
+#if REMOVED
                             strParameterName = "@keyValue" + strPostfix;
                             strKeyCondition = " keystring"
                                 + strOperator
@@ -4867,6 +4936,7 @@ handle.CancelTokenSource.Token).Result;
 
                             var temp = CreateParameter(strParameterName, DbType.String, strRealText);
                             aSqlParameter.Add(temp);
+#endif
 
 #if OLD_CODE
                             if (this.container.SqlServerType == SqlServerType.MsSqlServer)
@@ -4898,25 +4968,40 @@ handle.CancelTokenSource.Token).Result;
                         }
                         else if (searchItem.DataType == "number")
                         {
-                            if (nodeConvertQueryNumber != null
+                            List<string> keys1 = new List<string> { strRealText };
+
+                            if (nodesConvertQueryNumber?.Count > 0
                                 && keysCfg != null)
                             {
-                                string strMyKey;
+                                // string strMyKey;
                                 nRet = keysCfg.ConvertKeyWithNumberNode(
                                     null,
                                     strRealText,
-                                    nodeConvertQueryNumber,
-                                    out strMyKey,
+                                    nodesConvertQueryNumber,
+                                    out keys1,  // strMyKey,
                                     out strError);
                                 if (nRet == -1 || nRet == 1)
                                     return -1;
-                                strRealText = strMyKey;
+                                // strRealText = strMyKey;
+
+
+#if REMOVED
+                                strRealText = keys1[0];
+#endif
                             }
 
+                            AppendConditionNumber(text,
+    strOperator,
+    strPostfix,
+    keys1,
+    aSqlParameter);
+
+#if REMOVED
                             strKeyCondition = " keystringnum"
                                 + strOperator
                                 + strRealText
                                 + " and keystringnum <> -1";
+#endif
                         }
                     }
                 }
@@ -4930,6 +5015,12 @@ handle.CancelTokenSource.Token).Result;
 
                     if (searchItem.DataType == "string")
                     {
+                        AppendConditionOperator(text,
+                            strPostfix,
+                            searchItem.Relation,
+                            keys,
+                            aSqlParameter);
+#if REMOVED
                         strParameterName = "@keyValue" + strPostfix;
 
                         strKeyCondition = " keystring "
@@ -4939,6 +5030,7 @@ handle.CancelTokenSource.Token).Result;
                         // 2022/2/17
                         var temp = CreateParameter(strParameterName, DbType.String, strKeyValue);
                         aSqlParameter.Add(temp);
+#endif
 
 #if OLD_CODE
                         if (this.container.SqlServerType == SqlServerType.MsSqlServer)
@@ -4976,6 +5068,12 @@ handle.CancelTokenSource.Token).Result;
                     }
                     else if (searchItem.DataType == "number")
                     {
+                        AppendConditionNumber(text,
+                            strPostfix,
+                            searchItem.Relation,
+                            string.IsNullOrEmpty(strKeyValue) ? new List<string>() : keys.Select(o => o.Key).ToList(),
+                            aSqlParameter);
+#if REMOVED
                         if (string.IsNullOrEmpty(strKeyValue) == false)
                             strKeyCondition = " keystringnum "
                                 + searchItem.Relation
@@ -4983,11 +5081,135 @@ handle.CancelTokenSource.Token).Result;
                                 + " and keystringnum <> -1";
                         else
                             strKeyCondition = " keystringnum <> -1";    // 2012/3/29
+#endif
                     }
                 }
             }
 
+            strKeyCondition = text.ToString();
             return 0;
+        }
+
+        void AppendConditionNumber(
+StringBuilder condition,
+string strPostfix,
+string strOperator,
+List<string> keys,
+List<DbParameter> aSqlParameter)
+        {
+            if (keys.Count > 0)
+            {
+                int i = 0;
+                condition.Append(" (");
+                foreach (var key in keys)
+                {
+                    if (i > 0)
+                        condition.Append(" OR");
+                    condition.Append($" keystringnum {strOperator} {key}");
+                    i++;
+                }
+                condition.Append(") AND");
+            }
+
+            condition.Append(" keystringnum <> -1");
+        }
+
+
+        void AppendConditionOperator(
+    StringBuilder condition,
+    string strPostfix,
+    string strOperator,
+    List<KeyAndFrom> keys,
+    List<DbParameter> aSqlParameter)
+        {
+            int i = 0;
+            foreach (var key in keys)
+            {
+                string value = key.Key;
+
+                string strParameterName = $"@keyValue{i}" + strPostfix;
+
+                {
+                    var temp = CreateParameter(strParameterName,
+                        DbType.String,
+                        value);
+                    aSqlParameter.Add(temp);
+                }
+
+                if (i > 0)
+                    condition.Append(" OR");
+
+                if (string.IsNullOrEmpty(key.From))
+                    condition.Append($" keystring {strOperator} {strParameterName} ");
+                else
+                {
+                    string strParameterName1 = $"@fromValue{i}" + strPostfix;
+
+                    {
+                        var temp = CreateParameter(strParameterName1,
+                            DbType.String,
+                            key.From);
+                        aSqlParameter.Add(temp);
+                    }
+
+                    condition.Append($" (keystring {strOperator} {strParameterName} AND fromstring = {strParameterName1}) ");
+                }
+
+                i++;
+            }
+        }
+
+
+        void AppendCondition(
+            StringBuilder condition,
+            string strPostfix,
+            string match_style,
+            List<KeyAndFrom> keys,
+            List<DbParameter> aSqlParameter)
+        {
+            int i = 0;
+            foreach (var key in keys)
+            {
+                string value = key.Key;
+                if (match_style == "left")
+                    value = key.Key + "%";
+                else if (match_style == "middle")
+                    value = "%" + key.Key + "%";
+                else if (match_style == "right")
+                    value = "%" + key.Key;
+                else
+                    throw new ArgumentException($"无法识别的 match_style '{match_style}'");
+
+                string strParameterName = $"@keyValue{i}" + strPostfix;
+
+                {
+                    var temp = CreateParameter(strParameterName,
+                        DbType.String,
+                        value);
+                    aSqlParameter.Add(temp);
+                }
+
+                if (i > 0)
+                    condition.Append(" OR");
+
+                if (string.IsNullOrEmpty(key.From))
+                    condition.Append($" keystring LIKE {strParameterName} ");
+                else
+                {
+                    string strParameterName1 = $"@fromValue{i}" + strPostfix;
+
+                    {
+                        var temp = CreateParameter(strParameterName1,
+                            DbType.String,
+                            key.From);
+                        aSqlParameter.Add(temp);
+                    }
+
+                    condition.Append($" (keystring LIKE {strParameterName} AND fromstring = {strParameterName1}) ");
+                }
+
+                i++;
+            }
         }
 
         static OutputStyle GetOutputStyle(string strOutputStyle)
@@ -5124,8 +5346,8 @@ handle.CancelTokenSource.Token).Result;
                     {
                         nRet = GetKeyCondition(
                             searchItem,
-                            tableInfo.nodeConvertQueryString,
-                            tableInfo.nodeConvertQueryNumber,
+                            tableInfo.nodesConvertQueryString,
+                            tableInfo.nodesConvertQueryNumber,
                             strPostfix,
                             ref aSqlParameter,
                             out strConditionAboutKey,

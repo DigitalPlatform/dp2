@@ -53,7 +53,7 @@
 		<from>titlePinyin</from>
 		<table ref="titlePinyin" />
 	</key>
-	<table name="titlePinyin" id="3" type="pinyin_title">
+	<table name="titlePinyin" id="3" type="pinyin_title" filter="ab">
 		<convert>
 			<string style="upper,pinyinab,stopword" stopwordTable="pinyin"/>
 		</convert>
@@ -67,7 +67,7 @@
 	<key>
 		<xpath nstable="">//marc:record/marc:datafield[@tag='200' or @tag='225' or @tag='500' or @tag='501' or @tag='503' or @tag='510' or @tag='512' or @tag='513' or @tag='514' or @tag='515' or @tag='516' or @tag='517' or @tag='518' or @tag='520' or @tag='530' or @tag='531' or @tag='532' or @tag='540' or @tag='541' or @tag='545']/marc:subfield[@code='A' or @code='9']</xpath>
 		<from>titlePinyin</from>
-		<table name="titlePinyin" id="311">
+		<table name="titlePinyin" id="311" filter="full">
 			<convert>
 				<string style="stopword,upper,removeblank" stopwordTable="pinyin"/>
 			</convert>
@@ -147,7 +147,7 @@
 		<from>contributorPinyin</from>
 		<table ref="contributorPinyin" />
 	</key>
-	<table name="contributorPinyin" id="8" type="pinyin_contributor">
+	<table name="contributorPinyin" id="8" type="pinyin_contributor" filter="ab">
 		<convert>
 			<string style="upper,pinyinab" />
 		</convert>
@@ -161,7 +161,7 @@
 	<key>
 		<xpath nstable="">//marc:record/marc:datafield[@tag='700' or @tag='701' or @tag='702' or @tag='710' or @tag='711' or @tag='712']/marc:subfield[@code='9' or @code='A']</xpath>
 		<from>contributorPinyin</from>
-		<table name="contributorPinyin" id="811">
+		<table name="contributorPinyin" id="811" filter="full">
 			<convert>
 				<string style="stopword,upper,removeblank" stopwordTable="pinyin"/>
 			</convert>

@@ -30,6 +30,7 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryServer;
 using Microsoft.CodeAnalysis.Operations;
+using DocumentFormat.OpenXml.EMMA;
 // using DocumentFormat.OpenXml.Spreadsheet;
 
 
@@ -11135,7 +11136,7 @@ TaskScheduler.Default);
 
             this.EnableControls(false);
             Stream s = null;
-
+            bool clear_file = false;
             int nOutputCount = 0;
             try
             {
@@ -11324,9 +11325,26 @@ TaskScheduler.Default);
     filterCode,
     "",
     record,
+    out VerifyHost host,
     out string error);
-                            if (ret == -1)
-                                throw new Exception(error);
+                            if (ret < 0)
+                            {
+                                if (ret == -2)
+                                    clear_file = true;
+                                strError = $"脚本处理 {biblio_info.RecPath} 过程中出错: {error}";
+                                throw new Exception(strError);
+                            }
+                            if (host != null
+    && host.VerifyResult != null
+    && host.VerifyResult.Errors != null
+    && host.VerifyResult.Errors.Count > 0
+    && VerifyError.GetErrorCount(host.VerifyResult.Errors) > 0)
+                            {
+                                var text = VerifyError.BuildTextLines(host.VerifyResult.Errors);
+                                strError = $"脚本处理 {biblio_info.RecPath} 过程中出错: {text}";
+                                throw new Exception(strError);
+                            }
+
                         }
 
 
@@ -11401,6 +11419,8 @@ TaskScheduler.Default);
             {
                 this.EnableControls(true);
                 s.Close();
+                if (clear_file && File.Exists(this.LastIso2709FileName))
+                    File.Delete(this.LastIso2709FileName);
 
                 this.ReturnChannel(channel);
 

@@ -479,13 +479,20 @@ public class MyVerifyHost : VerifyHost
         }
 
         // 导出 MARC 前过滤和处理 MARC 字段
+        // return:
+        //      -1  出错
+        //      其它  使用 hostObj.VerifyResult.Value 返回值(-1 除外)
+        //              此处做一个基本约定:
+        //              -2:出错，并且希望把此前包含已经导出的所有记录的文件删除掉(注意这样做追加保存情形会有瑕疵)
         public static int FilterRecord(
             string cacheKey,
             string strCode,
             string strRef,
             MarcRecord record,
+            out VerifyHost hostObj,
             out string strError)
         {
+            hostObj = null;
             int nRet = ExportMarcHoldingDialog.GetAssembly(
                 cacheKey,
                 strCode,
@@ -496,7 +503,7 @@ public class MyVerifyHost : VerifyHost
                 return -1;
 
             nRet = EntityForm.NewVerifyHostObject(assembly,
-out VerifyHost hostObj,
+out hostObj,
 out strError);
             if (nRet == -1)
                 return -1;

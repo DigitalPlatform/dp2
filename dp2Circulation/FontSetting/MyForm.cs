@@ -1186,7 +1186,38 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
             base.OnFormClosed(e);
             this.OnMyFormClosed();  // 这里的顺序调整过 2015/11/10
 
+            // 2024/7/27
+            // 在这里把当前窗口的 WindowState 改变为 Normal
+            // (或者从 MdiChildren 集合中摘除当前窗口?)
+            {
+                if (this.WindowState == FormWindowState.Maximized)
+                {
+                    SuspendDrawing(this.MdiParent);
+                    var old_state = this.WindowState;
+                    this.WindowState = FormWindowState.Normal;
+                    foreach (var child in this.MdiParent.MdiChildren)
+                    {
+                        if (child != this)
+                            child.WindowState = FormWindowState.Maximized;
+                    }
+                    ResumeDrawing(this.MdiParent);
+                }
+            }
+
             this.DisposeFreeControls();
+        }
+
+        private const int WM_SETREDRAW = 0xB;
+
+        public static void SuspendDrawing(Control control)
+        {
+            API.SendMessage(control.Handle, WM_SETREDRAW, IntPtr.Zero, IntPtr.Zero);
+        }
+
+        public static void ResumeDrawing(Control control)
+        {
+            API.SendMessage(control.Handle, WM_SETREDRAW, new IntPtr(1), IntPtr.Zero);
+            control.Invalidate(true);
         }
 
         /// <summary>

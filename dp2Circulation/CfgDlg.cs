@@ -2175,6 +2175,14 @@ MessageBoxDefaultButton.Button2);
                 dlg.XmlFileName = Path.Combine(Program.MainForm.UserDir, "zserver.xml");
                 dlg.SourceServerFileName = Path.Combine(Program.MainForm.DataDir, "source_zserver.xml");
                 dlg.StartPosition = FormStartPosition.CenterParent;
+                dlg.ScriptChanged += (o1, e1) => {
+                    // 触发 AssemblyCache 刷新
+                    if (string.IsNullOrEmpty(e1.OldName) == false)
+                    {
+                        var cacheKey = BiblioSearchForm.BuildZ3950ScriptCacheKey(e1.OldName);
+                        Program.MainForm.AssemblyCache.Clear(cacheKey);
+                    }
+                };
                 dlg.ShowDialog(this);
             }
         }

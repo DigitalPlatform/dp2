@@ -2150,10 +2150,12 @@ namespace DigitalPlatform.LibraryServer
 
             foreach (AccessKeyInfo key in keys)
             {
-                XmlNode node = dom.CreateElement("k");
+                var node = dom.CreateElement("k");
                 dom.DocumentElement.AppendChild(node);
                 DomUtil.SetAttr(node, "k", key.Key);
-                DomUtil.SetAttr(node, "f", key.FromName);
+                DomUtil.SetAttr(node, "fn", key.FromName);  // f
+                node.SetAttribute("fv", key.FromValue);
+                node.SetAttribute("n", key.Num);
             }
 
             strResultXml = dom.DocumentElement.OuterXml;
@@ -5680,20 +5682,19 @@ out strError);
                 // 检查书目记录原来的创建者 998$z
                 if (bOwnerOnly)
                 {
-                    string strOwner = "";
-
                     // 获得书目记录的创建者
                     // return:
                     //      -1  出错
                     //      0   没有找到 998$z子字段
                     //      1   找到
                     nRet = GetBiblioOwner(strExistingXml,
-                        out strOwner,
+                        out string strOwner,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
 
-                    if (strOwner != sessioninfo.UserID)
+                    if (string.IsNullOrEmpty(strOwner) == false // strOwner 为空的是无主的记录，谁都可以来操作
+                        && strOwner != sessioninfo.UserID)
                     {
                         strError = $"{GetCurrentUserName(sessioninfo)} 不是{strDbTypeCaption}记录 '{strBiblioRecPath}' 的创建者(998$z) '{strOwner}'，因此 setbiblio(authority)info {strAction} 操作被拒绝";
                         result.Value = -1;

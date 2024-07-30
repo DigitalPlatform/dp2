@@ -500,12 +500,28 @@ null);
             int nDefaultWidth,
             int nDefaultHeight)
         {
+            // MyForm.SuspendDrawing(form);
             if ((style & SizeStyle.Size) != 0)
             {
+
                 form.Size = new Size(this.GetInt(
                     strCfgTitle, "width", nDefaultWidth),
                     this.GetInt(
                     strCfgTitle, "height", nDefaultHeight));
+
+                // 恢复最大化状态
+                // 注: 只有当第一个 MDI 子窗口打开的时候才有这个必要。而如果已经打开了一个或以上的 MDI 子窗口，后继打开的会自动沿用前面的 Maximum 状态
+                if (form.MdiParent != null && form.MdiParent.MdiChildren.Count() == 1)
+                {
+                    var state_string = this.GetString(strCfgTitle,
+                        "windowState",
+                        "");
+                    if (Enum.TryParse<FormWindowState>(state_string, out FormWindowState value) == true)
+                    {
+                        form.WindowState = value;
+                    }
+                }
+
             }
 
             if ((style & SizeStyle.Layout) != 0)
@@ -513,6 +529,8 @@ null);
                 if (this.LoadMdiLayout != null)
                     this.LoadMdiLayout(form, null);
             }
+
+            // MyForm.ResumeDrawing(form);
         }
 
         public void SaveMdiChildFormStates(Form form,
@@ -548,6 +566,9 @@ null);
 
                 this.SetInt(strCfgTitle, "x", location.X);
                 this.SetInt(strCfgTitle, "y", location.Y);
+
+                // 2024/7/27
+                this.SetString(strCfgTitle, "windowState", form.WindowState.ToString());
             }
 
             if ((style & SizeStyle.Layout) != 0)
@@ -592,28 +613,31 @@ null);
             this.SetInt(strCfgTitle, "x", location.X); // form.Location.X
             this.SetInt(strCfgTitle, "y", location.Y); // form.Location.Y
 
-            // 保存MDI窗口状态 -- 是否最大化？
-            if (form.ActiveMdiChild != null)
+            if (form.IsMdiChild)
             {
-                if (form.ActiveMdiChild.WindowState == FormWindowState.Minimized)
-                    this.SetString(
-                        strCfgTitle,
-                        "mdi_child_window_state",
-                        Enum.GetName(typeof(FormWindowState),
-                        FormWindowState.Normal));
+                // 保存MDI窗口状态 -- 是否最大化？
+                if (form.ActiveMdiChild != null)
+                {
+                    if (form.ActiveMdiChild.WindowState == FormWindowState.Minimized)
+                        this.SetString(
+                            strCfgTitle,
+                            "mdi_child_window_state",
+                            Enum.GetName(typeof(FormWindowState),
+                            FormWindowState.Normal));
+                    else
+                        this.SetString(
+                            strCfgTitle,
+                            "mdi_child_window_state",
+                            Enum.GetName(typeof(FormWindowState),
+                            form.ActiveMdiChild.WindowState));
+                }
                 else
+                {
                     this.SetString(
                         strCfgTitle,
                         "mdi_child_window_state",
-                        Enum.GetName(typeof(FormWindowState),
-                        form.ActiveMdiChild.WindowState));
-            }
-            else
-            {
-                this.SetString(
-                    strCfgTitle,
-                    "mdi_child_window_state",
-                    "");
+                        "");
+                }
             }
         }
 

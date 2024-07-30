@@ -420,6 +420,8 @@ namespace dp2Circulation
         /// </summary>
         public EntityForm()
         {
+            MyForm.SuspendDrawing(this);
+
             this.UseLooping = true; // 2022/11/1
             try
             {
@@ -591,6 +593,7 @@ namespace dp2Circulation
 
                 if (bStateChanged == true)
                     form.WindowState = savestate;
+
             }
 
             if (this.AcceptMode == true)
@@ -890,6 +893,8 @@ true);
             {
                 selected_templates.Build(strSelectedTemplates);
             }
+
+            MyForm.ResumeDrawing(this);
         }
 
         // 默认的列定义
@@ -5096,7 +5101,10 @@ TaskScheduler.Default);
                         nRet = this.VerifyData(this, e1, true);
                         if (nRet == 2)
                         {
-                            this.MessageBoxShow("MARC 记录经校验发现有错，被拒绝保存。请修改 MARC 记录后重新保存");
+                            var error1 = "MARC 记录经校验发现有错，被拒绝保存。请修改 MARC 记录后重新保存";
+                            // this.MessageBoxShow(error1);
+                            info.ErrorCount++;
+                            info.Errors.Add(error1);
                             return -1;
                         }
 
@@ -8828,8 +8836,10 @@ out strError);
             strOutputBiblioRecPath = "";
             int nRet = 0;
 
+#if REMOVED
             string strOldMarc = this.GetMarc();    //  this.m_marcEditor.Marc;
             bool bOldChanged = this.GetMarcChanged();   //  this.m_marcEditor.Changed;
+#endif
 
             try
             {
@@ -8873,6 +8883,7 @@ out strError);
             }
             finally
             {
+#if REMOVED
                 // 复原当前窗口的记录
                 if (this.GetMarc() /*this.m_marcEditor.Marc*/ != strOldMarc)
                 {
@@ -8884,6 +8895,7 @@ out strError);
                     // this.m_marcEditor.Changed = bOldChanged;
                     this.SetMarcChanged(bOldChanged);
                 }
+#endif
             }
 
 #if NO
@@ -11135,28 +11147,32 @@ out strError);
                 {
                     if (operation == "verify")
                     {
-                        // TODO: 可以用一个成员保存，在 EntityForm 被关闭时关闭它
-                        var dlg = new VerifyMarcResultDialog();
-                        dlg.Text = "MARC 格式校验";
-                        dlg.SourceMarc = marc;
-                        dlg.TargetNewMarc = hostObj.VerifyResult.ChangedMarc;
-                        dlg.ButtonSourceCaption = $"现有";
-                        dlg.ButtonTargetNewCaption = $"修改后";
-                        Program.MainForm.AppInfo.LinkFormState(dlg, "VerifyMarcResultDialog_state");
-                        dlg.Closed += (s1, e1) =>
+                        this.TryInvoke(() =>
                         {
-                            if (dlg.DialogResult == DialogResult.OK)
+                            // TODO: 可以用一个成员保存，在 EntityForm 被关闭时关闭它
+                            var dlg = new VerifyMarcResultDialog();
+                            dlg.Text = "MARC 格式校验";
+                            dlg.SourceMarc = marc;
+                            dlg.TargetNewMarc = hostObj.VerifyResult.ChangedMarc;
+                            dlg.ButtonSourceCaption = $"现有";
+                            dlg.ButtonTargetNewCaption = $"修改后";
+                            Program.MainForm.AppInfo.LinkFormState(dlg, "VerifyMarcResultDialog_state");
+                            dlg.Closed += (s1, e1) =>
                             {
-                                if (this.IsHandleCreated/* 避免 EntityForm 释放后再访问*/)
-                                    this.SetMarc(hostObj.VerifyResult.ChangedMarc);
-                            }
-                        };
-                        dlg.Show(this);
+                                if (dlg.DialogResult == DialogResult.OK)
+                                {
+                                    if (this.IsHandleCreated/* 避免 EntityForm 释放后再访问*/)
+                                        this.SetMarc(hostObj.VerifyResult.ChangedMarc);
+                                }
+                            };
+                            dlg.Show(this);
+                        });
                     }
                     else
                     {
                         // *** operation 为 "convert"
 
+                        this.TryInvoke(() =>
                         {
                             // 先对照显示，让操作者决定是否接受新内容
                             var dlg = new VerifyMarcResultDialog();
@@ -11195,7 +11211,7 @@ out strError);
                                 }
                             };
                             dlg.Show(this);
-                        }
+                        });
                     }
                 }
 
@@ -12621,7 +12637,7 @@ out strError);
          * $k查重键中的附加信息。此子字段可以重复。用于区分实际上不同的两种书目记录，避免查重键完全一样
          * $l相同书目记录之间的关联 ID。此子字段不可重复。两种书目记录之间若 $l 中的关联 ID 相同，但 $c 中的编目规则不同，表明虽然编目规则不同，但描述的图书是同一种图书。
          * $t目标记录路径。表示当前记录(一般是多库流程中的订购或临时编目书目记录)最终进入中央库的时候，要合并保存到 $t 指向的路径
-         * $u记录创建时间。u 格式时间字符串。
+         * $u记录创建时间。u 格式时间字符串(也可以用 s 格式时间字符串)。
          * $z记录创建者。账户名。
          * */
 
@@ -14606,6 +14622,14 @@ out strError);
         protected override bool ProcessDialogKey(
         Keys keyData)
         {
+            // 当 floatingMessage 层有文字内容的时候，按回车键可以清除浮动层的文字
+            if (keyData == Keys.Return
+                && string.IsNullOrEmpty(_floatingMessage.Text) == false)
+            {
+                _floatingMessage.Text = "";
+                return true;
+            }
+
             // 去掉Control/Shift/Alt 以后的纯净的键码
             Keys pure_key = (keyData & (~(Keys.Control | Keys.Shift | Keys.Alt)));
 

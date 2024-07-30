@@ -6,9 +6,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
+using System.Globalization;
+using System.IO;
+
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using ClosedXML.Excel;
-using dp2Circulation.Reader;
 
 using DigitalPlatform;
 using DigitalPlatform.Text;
@@ -16,7 +19,10 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Marc;
 using DigitalPlatform.MarcDom;
-// using System.Web.UI.WebControls;
+using DigitalPlatform.dp2.Statis;
+using dp2Circulation.Reader;
+using static dp2Circulation.BiblioSearchForm;
+
 
 namespace dp2Circulation
 {
@@ -55,7 +61,7 @@ namespace dp2Circulation
             }
         }
 
-        // 获得 合并键 字段名
+        // 获得 检索键 字段名
         public string GetMergeKeyName()
         {
             var merge_key_columns = _columns.Where(o => o.IsMergeKey).ToList();
@@ -141,6 +147,8 @@ namespace dp2Circulation
                 }
                 else
                     sheet_name = sheet_names[0];
+
+                _sheet_name = sheet_name;
 
                 this.ClearColumns();
 
@@ -264,6 +272,30 @@ namespace dp2Circulation
             return parts[1];
         }
 
+        // 根据 dp2library 服务器一端的检索途径信息，刷新
+        // _mergekey_field_names 和 _patron_field_names
+        public void RefreshFilterFieldNames()
+        {
+            List<string> mergekey_list = new List<string>();
+            List<string> list = new List<string>(_patron_field_names);
+            foreach (var info in Program.MainForm.BiblioDbFromInfos)
+            {
+                var style = info.Style;
+                // 去掉 _ 开头的 style
+                var parts = StringUtil.SplitList(style, ",");
+                var first_style = parts.Where(o => o.StartsWith("_") == false).FirstOrDefault();
+
+                if (string.IsNullOrEmpty(first_style) == false)
+                    mergekey_list.Add(first_style);
+
+                if (list.Where(o => GetLeft(o) == first_style).Count() == 0)
+                    list.Add($"{first_style}:{info.Caption}");
+            }
+
+            _mergekey_field_names = mergekey_list.ToArray();
+            _patron_field_names = list.ToArray();
+        }
+
         // 适合用作检索键的字段名列表
         static string[] _mergekey_field_names = new string[]
         {
@@ -355,12 +387,19 @@ recid	记录ID
             field_caption = "";
             foreach (var s in _patron_field_names)
             {
+                string field_name = GetLeft(s);
                 string captions = GetRight(s);
+
+                if (field_name == caption)
+                {
+                    field_caption = StringUtil.SplitList(captions).FirstOrDefault();
+                    return field_name;
+                }
+
                 if (string.IsNullOrEmpty(captions))
                     continue;
                 if (StringUtil.IsInList(caption, captions))
                 {
-                    string field_name = GetLeft(s);
                     field_caption = StringUtil.SplitList(captions).FirstOrDefault();
                     return field_name;
                 }
@@ -405,13 +444,56 @@ recid	记录ID
             contextMenu.Show(this.dataGridView1, this.dataGridView1.PointToClient(Control.MousePosition));
         }
 
+        static string[] _match_styles = new string[] {
+        "前方一致\tleft",
+        "精确一致\texact",
+        "中间一致\tmiddle",
+        "后方一致\tright",
+        };
+
+        string _selectedMatchStyle = "left";
+
         void AppendCommonItems(ContextMenu contextMenu)
         {
             var menuItem = new MenuItem("从 Excel 文件装载(&L) ...");
             menuItem.Click += MenuItem_loadFromExcel_Click;
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("开始检索(&S)");
+            if (this.dataGridView1.Rows.Count == 0)
+            {
+                bool bHasClipboardObject = false;
+                IDataObject iData = Clipboard.GetDataObject();
+                if (iData != null
+                    && (iData.GetDataPresent(DataFormats.UnicodeText) == true
+                    || iData.GetDataPresent(DataFormats.Text) == true))
+                    bHasClipboardObject = true;
+
+                menuItem = new MenuItem($"粘贴 (&P)");
+                if (bHasClipboardObject == false)
+                    menuItem.Enabled = false;
+                menuItem.Tag = 0;
+                menuItem.Click += new System.EventHandler(this.menu_pasteQueryFromClipboard_Click);
+                contextMenu.MenuItems.Add(menuItem);
+            }
+
+            // TODO: 设定检索键的匹配方式
+            menuItem = new MenuItem("检索键的匹配方式");
+            contextMenu.MenuItems.Add(menuItem);
+            foreach (var style_string in _match_styles)
+            {
+                var style_value = StringUtil.ParseTwoPart(style_string, "\t")[1];
+                var submenu = new MenuItem(style_string);
+                if (style_string.EndsWith(_selectedMatchStyle))
+                    submenu.Checked = true;
+                submenu.Tag = style_value;
+                submenu.Click += (o2, e2) =>
+                {
+                    _selectedMatchStyle = (o2 as MenuItem).Tag as string;
+                };
+                menuItem.MenuItems.Add(submenu);
+            }
+
+            menuItem = new MenuItem($"开始检索 [{this.dataGridView1.Rows.Count}](&S)");
             menuItem.Click += MenuItem_beginSearch_Click;
             contextMenu.MenuItems.Add(menuItem);
 
@@ -419,7 +501,27 @@ recid	记录ID
 
         private async void MenuItem_beginSearch_Click(object sender, EventArgs e)
         {
+            string strError = "";
+            // 检查检索键是否具备了
+            {
+                var merge_key_columns = _columns.Where(o => o.IsMergeKey).ToList();
+                if (merge_key_columns.Count == 0)
+                {
+                    strError = "尚未指定检索键列";
+                    goto ERROR1;
+                }
+
+                if (merge_key_columns.Count > 1)
+                {
+                    strError = $"检索键列不允许超过 1 个。(但现在是 {merge_key_columns.Count} 个)";
+                    goto ERROR1;
+                }
+            }
+
             await DoSearch(false, false);
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
 
         private void MenuItem_loadFromExcel_Click(object sender, EventArgs e)
@@ -446,8 +548,8 @@ recid	记录ID
                     string caption = StringUtil.SplitList(captions).FirstOrDefault();
 
                     MenuItem subMenuItem = new MenuItem(name + "\t" + caption);
-                    if (HasFieldNameUsed(name))
-                        subMenuItem.Enabled = false;
+                    //if (HasFieldNameUsed(name))
+                    //    subMenuItem.Enabled = false;
                     subMenuItem.Tag = new MenuInfo
                     {
                         Caption = caption,
@@ -479,7 +581,7 @@ recid	记录ID
 
             if (true)
             {
-                menuItem = new MenuItem("合并键");
+                menuItem = new MenuItem("检索键");
                 // menuItem.Enabled = this.MergeMode;
                 if (current_column.IsMergeKey)
                     menuItem.Checked = true;
@@ -521,26 +623,6 @@ recid	记录ID
                 contextMenu.MenuItems.Add(menuItem);
             }
 
-            {
-                int count = dataGridView1
-                    .SelectedRows
-                    .Cast<DataGridViewRow>()
-                    .Where(o => o.IsNewRow == false)
-                    .Count();
-                // GetSelectedRowCount();
-                menuItem = new MenuItem($"移除选定行[{count}]");
-                /*
-                var current_row = this.dataGridView1.Rows[e.RowIndex];
-                if (current_row.IsNewRow)
-                    menuItem.Enabled = false;
-                menuItem.Tag = e.RowIndex;
-                */
-                if (count == 0)
-                    menuItem.Enabled = false;
-                menuItem.Click += new System.EventHandler(this.menu_removeSelectedLine_Click);
-                contextMenu.MenuItems.Add(menuItem);
-            }
-
             /*
             {
                 int hit_count = GetHitCount();
@@ -579,22 +661,368 @@ recid	记录ID
                 contextMenu.MenuItems.Add(menuItem);
             }
 
+            contextMenu.MenuItems.Add(new MenuItem("-"));
+
+            int selected_count = dataGridView1
+    .SelectedRows
+    .Cast<DataGridViewRow>()
+    .Where(o => o.IsNewRow == false)
+    .Count();
+
+            {
+                menuItem = new MenuItem($"剪切 [{selected_count}] (&T)");
+                if (selected_count == 0)
+                    menuItem.Enabled = false;
+                menuItem.Click += new System.EventHandler(this.menu_cutQueryToClipboard_Click);
+                contextMenu.MenuItems.Add(menuItem);
+            }
+
+            {
+                menuItem = new MenuItem($"复制 [{selected_count}] (&C)");
+                if (selected_count == 0)
+                    menuItem.Enabled = false;
+                menuItem.Click += new System.EventHandler(this.menu_copyQueryToClipboard_Click);
+                contextMenu.MenuItems.Add(menuItem);
+            }
+
+            {
+                bool bHasClipboardObject = false;
+                IDataObject iData = Clipboard.GetDataObject();
+                if (iData != null
+                    && (iData.GetDataPresent(DataFormats.UnicodeText) == true
+                    || iData.GetDataPresent(DataFormats.Text) == true))
+                    bHasClipboardObject = true;
+
+                menuItem = new MenuItem($"粘贴 (&P)");
+                if (bHasClipboardObject == false)
+                    menuItem.Enabled = false;
+                menuItem.Tag = e.RowIndex;
+                menuItem.Click += new System.EventHandler(this.menu_pasteQueryFromClipboard_Click);
+                contextMenu.MenuItems.Add(menuItem);
+            }
+
+            contextMenu.MenuItems.Add(new MenuItem("-"));
+
+            {
+                menuItem = new MenuItem($"复制到 Excel 文件 [{selected_count}] ... (&C)");
+                if (selected_count == 0)
+                    menuItem.Enabled = false;
+                menuItem.Click += new System.EventHandler(this.menu_copyQueryToExcelFile_Click);
+                contextMenu.MenuItems.Add(menuItem);
+            }
+
+            contextMenu.MenuItems.Add(new MenuItem("-"));
+
+
+            {
+
+                // GetSelectedRowCount();
+                menuItem = new MenuItem($"移除选定行[{selected_count}]");
+                /*
+                var current_row = this.dataGridView1.Rows[e.RowIndex];
+                if (current_row.IsNewRow)
+                    menuItem.Enabled = false;
+                menuItem.Tag = e.RowIndex;
+                */
+                if (selected_count == 0)
+                    menuItem.Enabled = false;
+                menuItem.Click += new System.EventHandler(this.menu_removeSelectedLine_Click);
+                contextMenu.MenuItems.Add(menuItem);
+            }
+
+
             AppendCommonItems(contextMenu);
 
             contextMenu.Show(this.dataGridView1, this.dataGridView1.PointToClient(Control.MousePosition));
         }
 
+        static string ToString(DataGridViewRow row)
+        {
+            StringBuilder text = new StringBuilder();
+            foreach (DataGridViewCell cell in row.Cells)
+            {
+                var value = cell.Value?.ToString();
+                if (text.Length > 0)
+                    text.Append("\t");
+                text.Append(value);
+            }
+
+            return text.ToString();
+        }
+
+        void menu_copyQueryToExcelFile_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            using (var looping = Looping("正在保存到 Excel 文件..."))
+            {
+                var ret = SaveToExcel(looping.Progress,
+                    _sheet_name,
+                    out strError);
+                if (ret == -1)
+                    goto ERROR1;
+            }
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        string _sheet_name = null;
+
+        // return:
+        //      -1  出错
+        //      0   放弃或中断
+        //      1   成功
+        public int SaveToExcel(
+            Stop stop,
+            string sheet_name,
+            out string strError)
+        {
+            strError = "";
+
+            // 询问文件名
+            SaveFileDialog dlg = new SaveFileDialog
+            {
+                Title = "请指定要输出的 Excel 文件名",
+                CreatePrompt = false,
+                OverwritePrompt = true,
+                Filter = "Excel 文件 (*.xlsx)|*.xlsx|All files (*.*)|*.*",
+                RestoreDirectory = true
+            };
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return 0;
+
+            XLWorkbook doc = null;
+
+            try
+            {
+                doc = new XLWorkbook(XLEventTracking.Disabled);
+                File.Delete(dlg.FileName);
+            }
+            catch (Exception ex)
+            {
+                strError = ExceptionUtil.GetAutoText(ex);
+                return -1;
+            }
+
+            using (doc)
+            {
+                if (string.IsNullOrEmpty(sheet_name))
+                    sheet_name = "表格";
+
+                IXLWorksheet sheet = null;
+                sheet = doc.Worksheets.Add(sheet_name);
+
+                var rows = GetSelectedRows();
+
+                if (stop != null)
+                    stop.SetProgressRange(0, rows.Count);
+
+                // 每个列的最大字符数
+                List<int> column_max_chars = new List<int>();
+
+                /*
+                List<XLAlignmentHorizontalValues> alignments = new List<XLAlignmentHorizontalValues>();
+                foreach (ColumnHeader header in list.Columns)
+                {
+                    if (header.TextAlign == HorizontalAlignment.Center)
+                        alignments.Add(XLAlignmentHorizontalValues.Center);
+                    else if (header.TextAlign == HorizontalAlignment.Right)
+                        alignments.Add(XLAlignmentHorizontalValues.Right);
+                    else
+                        alignments.Add(XLAlignmentHorizontalValues.Left);
+
+                    column_max_chars.Add(0);
+                }
+
+                Debug.Assert(alignments.Count == list.Columns.Count, "");
+                */
+
+                string strFontName = this.Font.FontFamily.Name;
+
+                int nRowIndex = 1;
+                int nColIndex = 1;
+                foreach (var column in _columns)
+                {
+                    IXLCell cell = sheet.Cell(nRowIndex, nColIndex).SetValue(DomUtil.ReplaceControlCharsButCrLf(column.PatronFieldName, '*'));
+                    cell.Style.Alignment.WrapText = true;
+                    cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                    cell.Style.Font.Bold = true;
+                    cell.Style.Font.FontName = strFontName;
+                    // cell.Style.Alignment.Horizontal = alignments[nColIndex - 1];
+                    nColIndex++;
+                }
+                nRowIndex++;
+
+                foreach (var row in rows)
+                {
+                    Application.DoEvents();
+
+                    if (stop != null && stop.State != 0)
+                    {
+                        strError = "用户中断";
+                        return 0;
+                    }
+
+                    nColIndex = 1;
+                    foreach (DataGridViewCell cell0 in row.Cells)
+                    {
+                        // 统计最大字符数
+                        // int nChars = column_max_chars[nColIndex - 1];
+                        var value = cell0.Value?.ToString();
+                        if (value != null)
+                        {
+                            ClosedXmlUtil.SetMaxChars(/*ref*/ column_max_chars, nColIndex - 1, value.Length);
+                        }
+                        IXLCell cell = sheet.Cell(nRowIndex, nColIndex).SetValue(DomUtil.ReplaceControlCharsButCrLf(value, '*'));
+                        cell.Style.Alignment.WrapText = true;
+                        cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                        cell.Style.Font.FontName = strFontName;
+                        /*
+                        if (nColIndex - 1 < alignments.Count)
+                            cell.Style.Alignment.Horizontal = alignments[nColIndex - 1];
+                        else
+                            cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Left;
+                        */
+                        nColIndex++;
+                    }
+
+                    if (stop != null)
+                        stop.SetProgressValue(nRowIndex - 1);
+
+                    nRowIndex++;
+                }
+
+                if (stop != null)
+                    stop.SetMessage("正在调整列宽度 ...");
+                Application.DoEvents();
+
+                double char_width = ClosedXmlUtil.GetAverageCharPixelWidth(this.dataGridView1);
+
+                // 字符数太多的列不要做 width auto adjust
+                const int MAX_CHARS = 30;   // 60
+                int i = 0;
+                foreach (IXLColumn column in sheet.Columns())
+                {
+                    // int nChars = column_max_chars[i];
+                    int nChars = ClosedXmlUtil.GetMaxChars(column_max_chars, i);
+
+                    if (nChars < MAX_CHARS)
+                        column.AdjustToContents();
+                    else
+                    {
+                        int nColumnWidth = 100;
+                        /*
+                        if (i >= 0 && i < _columns.Count)
+                            nColumnWidth = _columns[i].Width;
+                        */
+                        column.Width = (double)nColumnWidth / char_width;  // Math.Min(MAX_CHARS, nChars);
+                    }
+                    i++;
+                }
+
+                // sheet.Columns().AdjustToContents();
+
+                // sheet.Rows().AdjustToContents();
+
+                doc.SaveAs(dlg.FileName);
+            }
+
+            try
+            {
+                System.Diagnostics.Process.Start(dlg.FileName);
+            }
+            catch
+            {
+
+            }
+            return 1;
+        }
+
+
+        void menu_copyQueryToClipboard_Click(object sender, EventArgs e)
+        {
+            StringBuilder text = new StringBuilder();
+            foreach (DataGridViewRow row in this.dataGridView1.Rows)
+            {
+                if (row.IsNewRow)
+                    continue;
+                if (row.Selected)
+                    text.AppendLine(ToString(row));
+            }
+
+            ClipboardUtil.SetClipboardText(text.ToString());
+        }
+
+        void menu_cutQueryToClipboard_Click(object sender, EventArgs e)
+        {
+            StringBuilder text = new StringBuilder();
+            foreach (DataGridViewRow row in this.dataGridView1.Rows)
+            {
+                if (row.IsNewRow)
+                    continue;
+                if (row.Selected)
+                {
+                    text.AppendLine(ToString(row));
+                    this.dataGridView1.Rows.Remove(row);
+                }
+            }
+
+            ClipboardUtil.SetClipboardText(text.ToString());
+        }
+
+        void menu_pasteQueryFromClipboard_Click(object sender, EventArgs e)
+        {
+            var menuItem = sender as MenuItem;
+            var row_index = 0;
+            if (menuItem.Tag != null)
+                row_index = (int)menuItem.Tag;
+            var text = ClipboardUtil.GetClipboardText();
+            if (text == null)
+                return;
+
+            EnsureColumnsCount(1);
+
+            using (StringReader sr = new StringReader(text))
+            {
+                //if (text != null)
+                //    text = text.Replace("\r\n", "\n");
+                //var lines = text.Split('\n');
+                //foreach (var line in lines)
+                while (true)
+                {
+                    var line = sr.ReadLine();
+                    if (line == null)
+                        break;
+
+                    this.dataGridView1.Rows.Insert(row_index, 1);
+                    DataGridViewRow grid_row = this.dataGridView1.Rows[row_index];
+
+                    var cols = line.Split('\t');
+                    EnsureColumnsCount(cols.Length);
+                    int i = 0;
+                    foreach (var s in cols)
+                    {
+                        grid_row.Cells[i].Value = s;
+                        i++;
+                    }
+
+                    row_index++;
+                }
+            }
+        }
+
         /*
         void menu_removeHitLine_Click(object sender, EventArgs e)
         {
-            var count = GetHitCount(true);
-            MessageBox.Show(this, $"共移除 {count} 行");
+            var selected_count = GetHitCount(true);
+            MessageBox.Show(this, $"共移除 {selected_count} 行");
         }
 
         void menu_removeNotHitLine_Click(object sender, EventArgs e)
         {
-            var count = GetNotHitCount(true);
-            MessageBox.Show(this, $"共移除 {count} 行");
+            var selected_count = GetNotHitCount(true);
+            MessageBox.Show(this, $"共移除 {selected_count} 行");
         }
         */
 
@@ -658,11 +1086,24 @@ recid	记录ID
             return results;
         }
 
+        List<DataGridViewRow> GetSelectedRows()
+        {
+            List<DataGridViewRow> results = new List<DataGridViewRow>();
+            foreach (var row in this.Rows)
+            {
+                if (row.IsNewRow)
+                    continue;
+                if (row.Selected)
+                    results.Add(row);
+            }
+            return results;
+        }
+
         /*
         
         int GetHitCount(bool remove = false)
         {
-            int count = 0;
+            int selected_count = 0;
             var rows = new List<DataGridViewRow>(this.Rows);
             foreach(var row in rows)
             {
@@ -673,17 +1114,17 @@ recid	记录ID
                     continue;
                 if (query_line.HitItems.Count > 0)
                 {
-                    count++;
+                    selected_count++;
                     if (remove)
                         this.dataGridView1.Rows.Remove(row);
                 }
             }
-            return count;
+            return selected_count;
         }
 
         int GetNotHitCount(bool remove = false)
         {
-            int count = 0;
+            int selected_count = 0;
             var rows = new List<DataGridViewRow>(this.Rows);
             foreach (var row in rows)
             {
@@ -693,19 +1134,19 @@ recid	记录ID
                 var query_line = row.Tag as QueryLine;
                 if (query_line == null || query_line.HitItems == null)
                 {
-                    count++;
+                    selected_count++;
                     if (remove)
                         this.dataGridView1.Rows.Remove(row);
                     continue;
                 }
                 if (query_line.HitItems.Count == 0)
                 {
-                    count++;
+                    selected_count++;
                     if (remove)
                         this.dataGridView1.Rows.Remove(row);
                 }
             }
-            return count;
+            return selected_count;
         }
         */
 
@@ -756,7 +1197,7 @@ recid	记录ID
             info.Column.PatronFieldName = info.Name;
             info.Column.ViewColumn.Name = info.Name;
 
-            // 如果是不适合作为合并键的字段，要清除 IsMergeKey 状态
+            // 如果是不适合作为检索键的字段，要清除 IsMergeKey 状态
             if (Array.IndexOf(_mergekey_field_names, info.Column.PatronFieldName) == -1)
                 info.Column.IsMergeKey = false;
 
@@ -843,10 +1284,76 @@ recid	记录ID
             return dom;
         }
 
-        QueryLine BuildQueryLine(DataGridViewRow row)
+        QueryLine BuildQueryLine(DataGridViewRow row,
+    bool clear_hitcount)
         {
             QueryLine line = new QueryLine();
-            line.FilterItems = new List<FilterItem>();
+            line.FilterItems = new List<QueryFilterItem>();
+            int i = 0;
+            foreach (DataGridViewCell cell in row.Cells)
+            {
+                var column = _columns[i];
+                var field_name = column.PatronFieldName;
+                if (string.IsNullOrEmpty(field_name))
+                    continue;
+
+                string value = null;
+                if (cell.Value is DateTime)
+                {
+                    if (field_name == "publishtime")
+                        value = ((DateTime)cell.Value).ToString("yyyy.M.d");
+                    else
+                        value = ((DateTime)cell.Value).ToString();
+                }
+                /*
+                if (field_name.ToLower().Contains("time")
+                    || field_name.ToLower().Contains("date"))
+                {
+                    if (cell.Value is DateTime)
+                        value = DateTimeUtil.Rfc1123DateTimeStringEx((DateTime)cell.Value);
+                    else
+                        value = cell.Value?.ToString();
+                }
+                */
+                else
+                    value = cell.Value?.ToString();  //  (string)cell.Value;
+
+                if (string.IsNullOrEmpty(value))
+                    goto CONTINUE;
+
+                if (column.IsMergeKey)
+                {
+                    line.QueryWord = value;
+                    line.FieldName = field_name;
+                    line.MatchStyle = _selectedMatchStyle;
+                }
+                else
+                {
+                    line.FilterItems.Add(new QueryFilterItem
+                    {
+                        FieldName = field_name,
+                        FilterWord = value
+                    });
+                }
+
+            CONTINUE:
+                i++;
+            }
+
+            if (string.IsNullOrEmpty(line.QueryWord))
+                return null;
+            line.Tag = row;
+            line.UpdateViewRowHitCount();
+            return line;
+        }
+
+
+#if REMOVED
+        QueryLine BuildQueryLine(DataGridViewRow row,
+            bool clear_hitcount)
+        {
+            QueryLine line = new QueryLine();
+            line.FilterItems = new List<QueryFilterItem>();
             foreach (var s in _patron_field_names)
             {
                 string field_name = GetLeft(s);
@@ -878,10 +1385,11 @@ recid	记录ID
                 {
                     line.QueryWord = value;
                     line.FieldName = field_name;
+                    line.MatchStyle = _selectedMatchStyle;
                 }
                 else
                 {
-                    line.FilterItems.Add(new FilterItem
+                    line.FilterItems.Add(new QueryFilterItem
                     {
                         FieldName = field_name,
                         FilterWord = value
@@ -892,16 +1400,17 @@ recid	记录ID
             if (string.IsNullOrEmpty(line.QueryWord))
                 return null;
             line.Tag = row;
+            line.UpdateViewRowHitCount();
             return line;
         }
+#endif
 
-
-        public List<QueryLine> BuildQueryLines()
+        public List<QueryLine> BuildQueryLines(bool clear_hitcount)
         {
             List<QueryLine> lines = new List<QueryLine>();
             foreach (var row in this.Rows)
             {
-                var line = BuildQueryLine(row);
+                var line = BuildQueryLine(row, clear_hitcount);
                 if (line != null)
                 {
                     lines.Add(line);
@@ -920,7 +1429,7 @@ recid	记录ID
             string recpath,
             MarcRecord record,
             string syntax,
-            FilterItem filter_item)
+            QueryFilterItem filter_item)
         {
             MarcNodeList nodes = null;
             if (syntax == "unimarc")
@@ -928,15 +1437,15 @@ recid	记录ID
                 switch (filter_item.FieldName)
                 {
                     case "title":
-                        nodes = record.select("field[@name='200']/subfield[@name='a']");
+                        nodes = record.select("field[@name='200' or @name='225']/subfield[@name='a'] | field[@name='200']/subfield[@name='e']");
                         break;
                     case "pinyin_title":
                         nodes = record.select("field[@name='200']/subfield[@name='A' or @name='9']");
                         break;
                     case "contributor":
                         return MatchUnimarcAuthor(record, filter_item.FilterWord);
-                        //nodes = record.select("field[@name='700' or @name='701' or @name='702' or @name='711' or @name='712']/subfield[@name='a']");
-                        //break;
+                    //nodes = record.select("field[@name='700' or @name='701' or @name='702' or @name='711' or @name='712']/subfield[@name='a']");
+                    //break;
                     case "pinyin_contributor":
                         nodes = record.select("field[@name='700' or @name='701' or @name='702' or @name='711' or @name='712']/subfield[@name='A' or @name='9']");
                         break;
@@ -945,9 +1454,9 @@ recid	记录ID
                         nodes = record.select("field[@name='210']/subfield[@name='c']");
                         break;
                     case "publishtime":
-                        // TODO: 归一化为中立形态以后进行匹配。另外还可以考虑支持按照年，按照年月匹配
-                        nodes = record.select("field[@name='210']/subfield[@name='d']");
-                        break;
+                        // nodes = record.select("field[@name='210']/subfield[@name='d']");
+                        // 归一化为中立形态以后进行匹配。大小范围按照是否有交叉来判断
+                        return MatchUnimarcPublishTime(record, filter_item.FilterWord);
                     case "clc":
                         nodes = record.select("field[@name='690']/subfield[@name='a']");
                         break;
@@ -965,9 +1474,10 @@ recid	记录ID
                         nodes = record.select("field[@name='600' or @name='601' or @name='606' or @name='610']/subfield[@name='a']");
                         break;
                     case "isbn":
-                        // TODO: 归一化以后再匹配
-                        nodes = record.select("field[@name='010']/subfield[@name='a' or @name='z']");
-                        break;
+                        // 归一化以后再匹配
+                        return MatchUnimarcIsbn(record, filter_item.FilterWord);
+                        // nodes = record.select("field[@name='010']/subfield[@name='a' or @name='z']");
+                        // break;
                     case "issn":
                         // TODO: 归一化以后再匹配
                         nodes = record.select("field[@name='011']/subfield[@name='a' or @name='z']");
@@ -1045,6 +1555,52 @@ recid	记录ID
         }
 
         #region 匹配著者
+
+        public static bool MatchUnimarcIsbn(MarcRecord record,
+            string isbn_string)
+        {
+            var nodes = record.select("field[@name='010' or @name='701']/subfield[@name='a' or @name='z']");
+            var isbn_words = isbn_string.Split(' ', ',', '，', ';', '；', '、');
+            foreach (MarcSubfield subfield in nodes)
+            {
+                foreach (var word in isbn_words)
+                {
+                    var content = CanonicalizeISBN(subfield.Content);
+                    if (content == CanonicalizeISBN(word))
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
+        // 归一化 ISBN 字符串
+        public static string CanonicalizeISBN(string input)
+        {
+            string isbn = input.Trim();
+            isbn = isbn.Replace("-", "");   //去除ISBN中的"-"连接符号
+            isbn = isbn.Replace("—", ""); //为稳妥，去除ISBN中的全角"—"连接符号
+
+            if (isbn.Length < 3)
+                return isbn; //如果ISBN不足3位，原样输出
+
+            string head = isbn.Substring(0, 3);       //获得新旧ISBN号的判断依据
+
+            if (head == "978" || head == "979")
+            {
+                isbn = isbn.Substring(3, isbn.Length - 3);
+
+                if (isbn.Length >= 10)
+                    isbn = isbn.Substring(0, 9);
+            }
+            else
+            {
+                if (isbn.Length >= 10)
+                    isbn = isbn.Substring(0, 9);
+            }
+
+            return isbn;
+        }
 
         public static bool MatchUnimarcAuthor(MarcRecord record,
             string author_string)
@@ -1163,6 +1719,150 @@ recid	记录ID
             return new_text.Substring(end + 1).Trim();
         }
 
+
+        #endregion
+
+        #region 匹配出版时间
+
+        public static bool MatchUnimarcPublishTime(MarcRecord record,
+            string publish_time)
+        {
+            var nodes = record.select("field[@name='210']/subfield[@name='d']");
+            var ret = DateRange.TryParse(publish_time, out DateRange publish_time_range);
+            foreach (MarcSubfield subfield in nodes)
+            {
+                DateRange.TryParse(subfield.Content, out DateRange current);
+                if (DateRange.IsCross(publish_time_range, current))
+                    return true;
+            }
+
+            return false;
+        }
+
+        // 表达出版时间(范围)的类
+        public class DateRange
+        {
+            public DateTime Start { get; set; }
+            public DateTime End { get; set; }
+
+            // 原始文本形态的时间字符串
+            public string OriginText { get; set; }
+
+            // 是否为解析失败状态的 DateRange。所谓解析失败就是 Start 和 End 无效，只有 OriginText 有效
+            public bool ParseFailed
+            {
+                get
+                {
+                    return Start == DateTime.MinValue && End == DateTime.MinValue;
+                }
+            }
+
+            // 检查一个时间点是否包含在当前对象的范围内
+            public bool Contains(DateTime time)
+            {
+                if (time >= this.Start && time <= this.End)
+                    return true;
+                return false;
+            }
+
+            public static bool TryParse(string text,
+                out DateRange range)
+            {
+                range = new DateRange();
+                range.OriginText = text;
+
+                string[] formats_year = {
+                "yyyy",
+                };
+
+                string[] formats_month = {
+                "yyyy.M",
+                "yyyy.MM",
+                "yyyy.MMM",
+                "yyyy/M",
+                "yyyy/MM",
+                "yyyy/MMM",
+                };
+
+                string[] formats_day = {
+                "yyyy.M.d",
+                "yyyy.MM.dd",
+                "yyyy.MMM.ddd",
+
+                "yyyy/M/d",
+                "yyyy/MM/dd",
+                "yyyy/MMM/ddd",
+                };
+
+                {
+                    var ret = DateTime.TryParseExact(text,
+        formats_year,
+        DateTimeFormatInfo.InvariantInfo,
+        DateTimeStyles.None,
+        out DateTime time);
+                    if (ret == true)
+                    {
+                        range.Start = new DateTime(time.Year, 1, 1);
+                        range.End = new DateTime(time.Year, 12, 31);
+                        return true;
+                    }
+                }
+
+                {
+                    var ret = DateTime.TryParseExact(text,
+        formats_month,
+        DateTimeFormatInfo.InvariantInfo,
+        DateTimeStyles.None,
+        out DateTime time);
+                    if (ret == true)
+                    {
+                        range.Start = new DateTime(time.Year, time.Month, 1);
+                        if (time.Month < 12)
+                            range.End = new DateTime(time.Year, time.Month + 1, 1) - TimeSpan.FromDays(1);
+                        else
+                            range.End = new DateTime(time.Year + 1, 1, 1) - TimeSpan.FromDays(1);
+                        return true;
+                    }
+                }
+
+                {
+                    var ret = DateTime.TryParseExact(text,
+        formats_day,
+        DateTimeFormatInfo.InvariantInfo,
+        DateTimeStyles.None,
+        out DateTime time);
+                    if (ret == true)
+                    {
+                        range.Start = new DateTime(time.Year, time.Month, time.Day);
+                        range.End = range.Start;
+                        return true;
+                    }
+                }
+
+                {
+                    range.Start = DateTime.MinValue;
+                    range.End = DateTime.MinValue;
+                    return false;
+                }
+            }
+
+            // 检查两个 range 之间是否存在交叉
+            public static bool IsCross(DateRange range1,
+                DateRange range2)
+            {
+                if (range1.ParseFailed == false
+                    && range2.ParseFailed == false)
+                {
+                    if (range1.Contains(range2.Start) || range1.Contains(range2.End)
+                        || range2.Contains(range1.Start) || range2.Contains(range1.End))
+                        return true;
+                    return false;
+                }
+
+                return range1.OriginText == range2.OriginText;
+            }
+        }
+
         #endregion
 
         // return:
@@ -1171,8 +1871,10 @@ recid	记录ID
         public static bool FilterRecord(
             QueryLine query_line,
             string recpath,
-            string xml)
+            string xml,
+            StringBuilder process_info = null)
         {
+            process_info?.Append($"针对 {recpath}");
             var ret = MarcUtil.Xml2Marc(xml,
                 true,
                 null,
@@ -1180,17 +1882,28 @@ recid	记录ID
                 out string marc,
                 out string error);
             if (ret == -1)
+            {
+                process_info?.AppendLine($"Xml2Marc 出错: {error}");
                 return true;
+            }
             MarcRecord record = new MarcRecord(marc);
+            int i = 0;
             foreach (var item in query_line.FilterItems)
             {
+                process_info?.Append($" {i + 1}) 以 '{item.FilterWord}:{item.FieldName}' 过滤，");
                 var ret1 = Match(
                     recpath,
                     record,
                     syntax,
                     item);
                 if (ret1 == false)
+                {
+                    process_info?.AppendLine("不匹配");
                     return false;
+                }
+
+                process_info?.AppendLine("匹配");
+                i++;
             }
 
             return true;
@@ -1205,12 +1918,14 @@ recid	记录ID
         // 主检索途径
         public string FieldName { get; set; }
 
+        public string MatchStyle { get; set; }
+
         public object Tag { get; set; }
 
         public List<ListViewItem> HitItems { get; set; }
 
         // 筛选事项集合
-        public List<FilterItem> FilterItems { get; set; }
+        public List<QueryFilterItem> FilterItems { get; set; }
 
         public void AddHitItem(ListViewItem item)
         {
@@ -1219,22 +1934,232 @@ recid	记录ID
             this.HitItems.Add(item);
         }
 
-        public void UpdateViewRow()
+        // 更新行标题上的命中结果数字文字显示
+        public void UpdateViewRowHitCount()
         {
             var row = this.Tag as DataGridViewRow;
             if (row == null)
                 return;
             row.HeaderCell.Value = this.HitItems?.Count.ToString();
         }
+
+        public override string ToString()
+        {
+            StringBuilder text = new StringBuilder();
+            text.Append($"主检索词:'{QueryWord}', 字段名:'{FieldName}', 筛选列=");
+            List<string> items = new List<string>();
+            if (this.FilterItems != null
+                && this.FilterItems.Count > 0)
+            {
+                foreach (var item in this.FilterItems)
+                {
+                    items.Add(item.ToString());
+                }
+
+                text.Append(StringUtil.MakePathList(items, "|"));
+            }
+
+            return text.ToString();
+        }
+
+        // 把检索字符串根据标点符号切割为多个部分。注意第一个元素是没有切割的检索字符串
+        public static List<string> SplitQueryString(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return new List<string> { text };
+            List<string> results = new List<string>();
+            var segments = text.Split(' ', ';', '；', ':', '：', '/', '.');
+            if (segments.Length == 1)
+                return new List<string> { text };
+            results.Add(text);
+            foreach (var s in segments)
+            {
+                string current = s.Trim();
+                if (string.IsNullOrEmpty(current) == false)
+                    results.Add(current);
+            }
+
+            return results;
+        }
     }
 
-    public class FilterItem
+    public class QueryFilterItem
     {
         // 筛选字段名
         public string FieldName { get; set; }
 
         // 筛选检索词
         public string FilterWord { get; set; }
+
+        public override string ToString()
+        {
+            return $"{FilterWord}:{FieldName}";
+        }
+    }
+
+    [TestClass]
+    public class TestTimeRange
+    {
+        [TestMethod]
+        public void test_timerange_01()
+        {
+            string time_string1 = "1990.01";
+            string time_string2 = "1990.01.02";
+
+            var ret = DateRange.TryParse(
+                time_string1,
+                out DateRange range1);
+            Assert.AreEqual(true, ret);
+
+            ret = DateRange.TryParse(
+                time_string2,
+                out DateRange range2);
+            Assert.AreEqual(true, ret);
+
+            ret = DateRange.IsCross(range1, range2);
+            Assert.AreEqual(true, ret);
+        }
+
+        [TestMethod]
+        public void test_timerange_02()
+        {
+            string time_string1 = "1990";
+            string time_string2 = "1990.01";
+
+            var ret = DateRange.TryParse(
+                time_string1,
+                out DateRange range1);
+            Assert.AreEqual(true, ret);
+
+            ret = DateRange.TryParse(
+                time_string2,
+                out DateRange range2);
+            Assert.AreEqual(true, ret);
+
+            ret = DateRange.IsCross(range1, range2);
+            Assert.AreEqual(true, ret);
+        }
+
+        [TestMethod]
+        public void test_timerange_03()
+        {
+            string time_string1 = "1990";
+            string time_string2 = "1990.12.31";
+
+            var ret = DateRange.TryParse(
+                time_string1,
+                out DateRange range1);
+            Assert.AreEqual(true, ret);
+
+            ret = DateRange.TryParse(
+                time_string2,
+                out DateRange range2);
+            Assert.AreEqual(true, ret);
+
+            ret = DateRange.IsCross(range1, range2);
+            Assert.AreEqual(true, ret);
+        }
+
+        [TestMethod]
+        public void test_timerange_11()
+        {
+            string time_string1 = "1990";
+            string time_string2 = "1991";
+
+            var ret = DateRange.TryParse(
+                time_string1,
+                out DateRange range1);
+            Assert.AreEqual(true, ret);
+
+            ret = DateRange.TryParse(
+                time_string2,
+                out DateRange range2);
+            Assert.AreEqual(true, ret);
+
+            ret = DateRange.IsCross(range1, range2);
+            Assert.AreEqual(false, ret);
+        }
+
+        [TestMethod]
+        public void test_timerange_12()
+        {
+            string time_string1 = "1990.12";
+            string time_string2 = "1991";
+
+            var ret = DateRange.TryParse(
+                time_string1,
+                out DateRange range1);
+            Assert.AreEqual(true, ret);
+
+            ret = DateRange.TryParse(
+                time_string2,
+                out DateRange range2);
+            Assert.AreEqual(true, ret);
+
+            ret = DateRange.IsCross(range1, range2);
+            Assert.AreEqual(false, ret);
+        }
+
+        [TestMethod]
+        public void test_timerange_13()
+        {
+            string time_string1 = "1990.12.1";
+            string time_string2 = "1991";
+
+            var ret = DateRange.TryParse(
+                time_string1,
+                out DateRange range1);
+            Assert.AreEqual(true, ret);
+
+            ret = DateRange.TryParse(
+                time_string2,
+                out DateRange range2);
+            Assert.AreEqual(true, ret);
+
+            ret = DateRange.IsCross(range1, range2);
+            Assert.AreEqual(false, ret);
+        }
+
+        [TestMethod]
+        public void test_timerange_14()
+        {
+            string time_string1 = "1990.12.1";
+            string time_string2 = "1991.5";
+
+            var ret = DateRange.TryParse(
+                time_string1,
+                out DateRange range1);
+            Assert.AreEqual(true, ret);
+
+            ret = DateRange.TryParse(
+                time_string2,
+                out DateRange range2);
+            Assert.AreEqual(true, ret);
+
+            ret = DateRange.IsCross(range1, range2);
+            Assert.AreEqual(false, ret);
+        }
+
+        [TestMethod]
+        public void test_timerange_15()
+        {
+            string time_string1 = "1990.12.1";
+            string time_string2 = "1990.12.2";
+
+            var ret = DateRange.TryParse(
+                time_string1,
+                out DateRange range1);
+            Assert.AreEqual(true, ret);
+
+            ret = DateRange.TryParse(
+                time_string2,
+                out DateRange range2);
+            Assert.AreEqual(true, ret);
+
+            ret = DateRange.IsCross(range1, range2);
+            Assert.AreEqual(false, ret);
+        }
+
     }
 
 }

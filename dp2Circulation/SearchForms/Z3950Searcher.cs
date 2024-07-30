@@ -90,7 +90,9 @@ namespace dp2Circulation
                     ServerName = server.GetAttribute("name"),
                     ZClient = new ZClient(),
                     TargetInfo = targetInfo,
-                    Enabled = ZServerListDialog.IsEnabled(server.GetAttribute("enabled"), true)
+                    Enabled = ZServerListDialog.IsEnabled(server.GetAttribute("enabled"), true),
+                    ScriptName = server.GetAttribute("name"),
+                    Script = server.SelectSingleNode("script")?.InnerText,
                 };
                 _channels.Add(channel);
             }
@@ -544,6 +546,10 @@ namespace dp2Circulation
 
         // 服务器是否启用了
         public bool Enabled { get; set; }
+
+        // 2024/7/25
+        public string Script { get; set; }
+        public string ScriptName { get; set; }
 
         internal string _query = "";    // 检索式
         internal long _resultCount = 0;   // 检索命中条数

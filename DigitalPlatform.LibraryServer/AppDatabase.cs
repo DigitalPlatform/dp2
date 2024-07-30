@@ -9004,6 +9004,7 @@ out strError);
                         continue;
                         */
 
+
                     if (strIncludeFilenames != "*")
                     {
                         if (IsInclude(strName, strIncludeFilenames) == false)
@@ -9196,6 +9197,11 @@ out strError);
                         File.Copy(strFullPath, strNewTargetFilePath);
                         nCfgFileCount++;
                     }
+
+                    // 2024/7/26
+                    if (strName == "browse"
+                        || strName.StartsWith("browse_"))
+                        this.ClearBrowseCfgCache(strPath);
                 }
 
                 if (nCfgFileCount > 0
@@ -9228,6 +9234,7 @@ out strError);
                     }
                     return 1;
                 }
+
 
                 return 0;
             }

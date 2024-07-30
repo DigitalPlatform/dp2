@@ -644,7 +644,7 @@
             this.tabPage_filter.Name = "tabPage_filter";
             this.tabPage_filter.Size = new System.Drawing.Size(879, 255);
             this.tabPage_filter.TabIndex = 2;
-            this.tabPage_filter.Text = "筛选";
+            this.tabPage_filter.Text = "组合";
             this.tabPage_filter.UseVisualStyleBackColor = true;
             // 
             // dataGridView1

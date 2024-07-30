@@ -11,6 +11,7 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.MarcDom;
 using DigitalPlatform.Script;
 using DigitalPlatform.Text;
+using Jint.Parser.Ast;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace dp2Circulation
@@ -1171,7 +1172,7 @@ out string error);
     || name.EndsWith("编写"))
                 name = name.Substring(0, name.Length - 2);
             // 撰
-            else if (name.EndsWith("撰") 
+            else if (name.EndsWith("撰")
                 || name.EndsWith("编")
                 || name.EndsWith("著"))
                 name = name.Substring(0, name.Length - 1);
@@ -1449,6 +1450,359 @@ ref string locationString)
                 result = result.NextSibling as MarcSubfield;
             }
             return result;
+        }
+
+        // 预处理
+        // parameters:
+        //      locationString  [in] 调用前插入符所在的子字段定位
+        //                      [out] 调用后插入符应当去到的子字段定位。如果为空，表示无需改变当前插入符位置
+        public static bool Preprocessing(MarcRecord record,
+    string rule,
+    ref string locationString)
+        {
+            string old_marc = record.Text;
+
+            // 1）全字段删除拼音子字段$9、$A、$H、$I、$F、$B、$E、$F
+            record.select("//subfield[@name='9']").detach();
+            foreach (MarcSubfield subfield in record.select("//subfield"))
+            {
+                if (subfield.Name == "9" || char.IsUpper(subfield.Name[0]))
+                    subfield.detach();
+            }
+
+            /*
+2）删除以下字段
+000
+001
+005
+009
+035
+049
+090
+096
+200$b
+696
+9**（除906和999字段，因为906有工号信息，999有数据来源信息）
+410$f
+            * 
+             * */
+            record.select("field[@name='000' or @name='001' or @name='005' or @name='009' or @name='035' or @name='049' or @name='090' or @name='096' or @name='696']").detach();
+            record.select("field[@name='200']/subfield[@name='b']").detach();
+            record.select("field[@name='410']/field[@name='200']/subfield[@name='f']").detach();
+            foreach (MarcField field in record.select("field[substring(@name,1,1)='9']"))
+            {
+                if (field.Name != "906" && field.Name != "999")
+                    field.detach();
+            }
+
+            // 3）遇到无320字段时，需增加：320##$a有书目#(第页)#和索引  其中#为空格
+            if (record.select("field[@name='320']").count == 0)
+                record.ChildNodes.insertSequence(
+    new MarcField("320  $a有书目 (第页) 和索引"
+    .Replace("$", MarcQuery.SUBFLD)),
+    InsertSequenceStyle.PreferTail);
+
+            // 4）遇到无333字段时，需增加：333##$a
+            if (record.select("field[@name='333']").count == 0)
+                record.ChildNodes.insertSequence(
+    new MarcField("333  $a"
+    .Replace("$", MarcQuery.SUBFLD)),
+    InsertSequenceStyle.PreferTail);
+
+            // 5）如果原来没有906字段，新增906$a
+            // （说明：906$a为工号字段，如果新内务能够自动添加编目员工号，906字段可以省略）
+            if (record.select("field[@name='906']").count == 0)
+                record.ChildNodes.insertSequence(
+    new MarcField($"906  $a{Program.MainForm.CurrentUserName}"
+    .Replace("$", MarcQuery.SUBFLD)),
+    InsertSequenceStyle.PreferTail);
+
+            // 6）如果存在960$a转成960$e，如果不存在创建960##$e，内容为空。
+            {
+                var fields_960 = record.select("field[@name='960']");
+                foreach (MarcField field in fields_960)
+                {
+                    if (field.select("subfield[@name='a']").count == 0
+    && field.select("subfield[@name='e']").count == 0)
+                    {
+                        field.ChildNodes.insertSequence(new MarcSubfield("e", ""), InsertSequenceStyle.PreferTail);
+                        continue;
+                    }
+                    if (field.select("subfield[@name='a']").count > 0
+                        && field.select("subfield[@name='e']").count == 0)
+                        field.select("subfield[@name='a']")[0].Name = "e";
+                }
+            }
+
+            // 7）如果不存在690$v5，增加690$v5
+            {
+                var fields_690 = record.select("field[@name='690']");
+                foreach (MarcField field in fields_690)
+                {
+                    var subfields = field.select("subfield[@name='v']");
+                    if (subfields.count > 0)
+                        subfields[0].Content = "5";
+                }
+            }
+
+            // 8）100$a从第28位更新成"50  "
+            {
+                var subfields = record.select("field[@name='100']/subfield[@name='a']");
+                foreach (MarcSubfield subfield in subfields)
+                {
+                    subfield.Content = VerifyHost.ChangeString(subfield.Content, 28, "50  ");
+                }
+            }
+
+            // 9）005字段、100字段0-7字符位、801$c子字段的时间自动更新为当天年月日
+            {
+                record.setFirstField("005", null, DateTime.Now.ToString("yyyyMMddHHmmss.f"));
+
+                var content_100a = record.select("field[@name='100']/subfield[@name='a']").FirstContent;
+                if (content_100a != null)
+                    record.setFirstSubfield("100", "a", VerifyHost.ChangeString(content_100a, 0, DateTime.Now.ToString("yyyyMMdd")));
+
+                /*
+                var content_801c = record.select("field[@name='801']/subfield[@name='c']").FirstContent;
+                if (content_801c != null)
+                    record.setFirstSubfield("801", "c", DateTime.Now.ToString("yyyyMMdd"));
+                */
+            }
+
+            // 10）删除801字段，新增801$aCN $b百万庄$c20240705（当天制作年月日）
+            {
+                record.select("field[@name='801']").detach();
+                record.ChildNodes.insertSequence(new MarcField($"801  $aCN$b百万庄$c{DateTime.Now.ToString("yyyyMMdd")}"
+                    .Replace("$", MarcQuery.SUBFLD)),
+                    InsertSequenceStyle.PreferTail);
+            }
+
+            // 11）461或462字段时全替换为410字段
+            {
+                record.select("field[@name='461' or @name='462']").Name = "410";
+            }
+
+            // 12）当215e是光盘时，将307$a拷贝到016$a
+            // 如果 016$a 已经存在，或者 307$a 不存在，则不做这种拷贝
+            {
+                var content_215e = record.select("field[@name='215']/subfield[@name='e']").FirstContent;
+                var content_307a = record.select("field[@name='307']/subfield[@name='a']").FirstContent;
+
+                if (record.select("field[@name='016']/subfield[@name='a']").count == 0
+                    && content_215e != null && content_215e == "光盘"
+                    && content_307a != null)
+                {
+                    record.setFirstSubfield("016", "a", content_307a);
+                }
+            }
+
+            // 13）把225$v拷贝到410 中的 200 字段的 $v
+            {
+                var subfields_225v = record.select("field[@name='225']/subfield[@name='v']");
+                var field_200 = VerifyHost.FirstOrDefault(record.select("field[@name='410']/field[@name='200']"));
+                if (subfields_225v.count > 0 && field_200 != null)
+                {
+                    field_200.select("subfield[@name='v']").detach();
+                    field_200.ChildNodes.insertSequence(new MarcSubfield("v", subfields_225v[0].Content));
+                }
+            }
+
+            locationString = "";
+            return old_marc != record.Text;
+        }
+
+        // 导出前检查
+        // parameters:
+        //      locationString  [in] 调用前插入符所在的子字段定位
+        //                      [out] 调用后插入符应当去到的子字段定位。如果为空，表示无需改变当前插入符位置
+        public static bool ExportChecking(MarcRecord record,
+    string rule,
+    ref string locationString)
+        {
+            string old_marc = record.Text;
+
+            List<string> errors = new List<string>();
+            // 1. 010$a或091$a或011$a，三者必备其一。
+            {
+                var subfields_010a = record.select("field[@name='010']/subfield[@name='a']");
+                var subfields_091a = record.select("field[@name='091']/subfield[@name='a']");
+                var subfields_011a = record.select("field[@name='011']/subfield[@name='a']");
+                if (subfields_010a.count + subfields_011a.count + subfields_091a.count == 0)
+                    errors.Add($"010$a 091$a 011$a 均缺乏");
+            }
+
+            // 2. 010$d或091$d或011$d，三者必备其一。
+            {
+                var subfields_010d = record.select("field[@name='010']/subfield[@name='d']");
+                var subfields_091d = record.select("field[@name='091']/subfield[@name='d']");
+                var subfields_011d = record.select("field[@name='011']/subfield[@name='d']");
+                if (subfields_010d.count + subfields_011d.count + subfields_091d.count == 0)
+                    errors.Add($"010$d 091$d 011$d 均缺乏");
+            }
+
+            // 3. 必备200$a
+            {
+                if (record.select("field[@name='200']/subfield[@name='a']").count == 0)
+                    errors.Add("缺乏 200$a");
+            }
+
+            // 4. 必备210$a$c$d
+            {
+                if (record.select("field[@name='210']/subfield[@name='a']").count == 0)
+                    errors.Add("缺乏 210$a");
+                if (record.select("field[@name='210']/subfield[@name='c']").count == 0)
+                    errors.Add("缺乏 210$c");
+                if (record.select("field[@name='210']/subfield[@name='d']").count == 0)
+                    errors.Add("缺乏 210$d");
+            }
+
+            // 1）全字段删除拼音子字段$9、$A、$H、$I、$F、$B、$E、$F
+            record.select("//subfield[@name='9']").detach();
+            foreach (MarcSubfield subfield in record.select("//subfield"))
+            {
+                if (subfield.Name == "9" || char.IsUpper(subfield.Name[0]))
+                    subfield.detach();
+            }
+
+            /*
+2）删除以下字段
+000
+001
+005
+009
+035
+049
+090
+096
+200$b
+696
+9**（除906和999字段，因为906有工号信息，999有数据来源信息）
+410$f
+            * 
+             * */
+            record.select("field[@name='000' or @name='001' or @name='005' or @name='009' or @name='035' or @name='049' or @name='090' or @name='096' or @name='696']").detach();
+            record.select("field[@name='200']/subfield[@name='b']").detach();
+            record.select("field[@name='410']/field[@name='200']/subfield[@name='f']").detach();
+            foreach (MarcField field in record.select("field[substring(@name,1,1)='9']"))
+            {
+                if (field.Name != "906" && field.Name != "999")
+                    field.detach();
+            }
+
+            // 3）遇到无320字段时，需增加：320##$a有书目#(第页)#和索引  其中#为空格
+            if (record.select("field[@name='320']").count == 0)
+                record.ChildNodes.insertSequence(
+    new MarcField("320  $a有书目 (第页) 和索引"
+    .Replace("$", MarcQuery.SUBFLD)),
+    InsertSequenceStyle.PreferTail);
+
+            // 4）遇到无333字段时，需增加：333##$a
+            if (record.select("field[@name='333']").count == 0)
+                record.ChildNodes.insertSequence(
+    new MarcField("333  $a"
+    .Replace("$", MarcQuery.SUBFLD)),
+    InsertSequenceStyle.PreferTail);
+
+            // 5）如果原来没有906字段，新增906$a
+            // （说明：906$a为工号字段，如果新内务能够自动添加编目员工号，906字段可以省略）
+            if (record.select("field[@name='906']").count == 0)
+                record.ChildNodes.insertSequence(
+    new MarcField($"906  $a{Program.MainForm.CurrentUserName}"
+    .Replace("$", MarcQuery.SUBFLD)),
+    InsertSequenceStyle.PreferTail);
+
+            // 6）如果存在960$a转成960$e，如果不存在创建960##$e，内容为空。
+            {
+                var fields_960 = record.select("field[@name='960']");
+                foreach (MarcField field in fields_960)
+                {
+                    if (field.select("subfield[@name='a']").count == 0
+    && field.select("subfield[@name='e']").count == 0)
+                    {
+                        field.ChildNodes.insertSequence(new MarcSubfield("e", ""), InsertSequenceStyle.PreferTail);
+                        continue;
+                    }
+                    if (field.select("subfield[@name='a']").count > 0
+                        && field.select("subfield[@name='e']").count == 0)
+                        field.select("subfield[@name='a']")[0].Name = "e";
+                }
+            }
+
+            // 7）如果不存在690$v5，增加690$v5
+            {
+                var fields_690 = record.select("field[@name='690']");
+                foreach (MarcField field in fields_690)
+                {
+                    var subfields = field.select("subfield[@name='v']");
+                    if (subfields.count > 0)
+                        subfields[0].Content = "5";
+                }
+            }
+
+            // 8）100$a从第28位更新成"50  "
+            {
+                var subfields = record.select("field[@name='100']/subfield[@name='a']");
+                foreach (MarcSubfield subfield in subfields)
+                {
+                    subfield.Content = VerifyHost.ChangeString(subfield.Content, 28, "50  ");
+                }
+            }
+
+            // 9）005字段、100字段0-7字符位、801$c子字段的时间自动更新为当天年月日
+            {
+                record.setFirstField("005", null, DateTime.Now.ToString("yyyyMMddHHmmss.f"));
+
+                var content_100a = record.select("field[@name='100']/subfield[@name='a']").FirstContent;
+                if (content_100a != null)
+                    record.setFirstSubfield("100", "a", VerifyHost.ChangeString(content_100a, 0, DateTime.Now.ToString("yyyyMMdd")));
+
+                /*
+                var content_801c = record.select("field[@name='801']/subfield[@name='c']").FirstContent;
+                if (content_801c != null)
+                    record.setFirstSubfield("801", "c", DateTime.Now.ToString("yyyyMMdd"));
+                */
+            }
+
+            // 10）删除801字段，新增801$aCN $b百万庄$c20240705（当天制作年月日）
+            {
+                record.select("field[@name='801']").detach();
+                record.ChildNodes.insertSequence(new MarcField($"801  $aCN$b百万庄$c{DateTime.Now.ToString("yyyyMMdd")}"
+                    .Replace("$", MarcQuery.SUBFLD)),
+                    InsertSequenceStyle.PreferTail);
+            }
+
+            // 11）461或462字段时全替换为410字段
+            {
+                record.select("field[@name='461' or @name='462']").Name = "410";
+            }
+
+            // 12）当215e是光盘时，将307$a拷贝到016$a
+            // 如果 016$a 已经存在，或者 307$a 不存在，则不做这种拷贝
+            {
+                var content_215e = record.select("field[@name='215']/subfield[@name='e']").FirstContent;
+                var content_307a = record.select("field[@name='307']/subfield[@name='a']").FirstContent;
+
+                if (record.select("field[@name='016']/subfield[@name='a']").count == 0
+                    && content_215e != null && content_215e == "光盘"
+                    && content_307a != null)
+                {
+                    record.setFirstSubfield("016", "a", content_307a);
+                }
+            }
+
+            // 13）把225$v拷贝到410 中的 200 字段的 $v
+            {
+                var subfields_225v = record.select("field[@name='225']/subfield[@name='v']");
+                var field_200 = VerifyHost.FirstOrDefault(record.select("field[@name='410']/field[@name='200']"));
+                if (subfields_225v.count > 0 && field_200 != null)
+                {
+                    field_200.select("subfield[@name='v']").detach();
+                    field_200.ChildNodes.insertSequence(new MarcSubfield("v", subfields_225v[0].Content));
+                }
+            }
+
+            locationString = "";
+            return old_marc != record.Text;
         }
 
     }

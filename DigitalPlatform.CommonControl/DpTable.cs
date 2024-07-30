@@ -8,7 +8,6 @@ using System.Text;
 using System.Windows.Forms;
 using System.Drawing.Drawing2D;
 using System.Diagnostics;
-// using System.Windows.Media;
 
 using System.Runtime.InteropServices;
 

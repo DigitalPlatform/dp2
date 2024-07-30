@@ -14,6 +14,8 @@ namespace DigitalPlatform.Z3950.UI
 {
     public partial class ZServerListDialog : Form
     {
+        public event CodeChangedEventHandler ScriptChanged;
+
         public string XmlFileName { get; set; }
         public bool Changed { get; set; }
 
@@ -135,6 +137,14 @@ MessageBoxDefaultButton.Button2);
 
             using (ZServerPropertyForm dlg = new ZServerPropertyForm())
             {
+                string name = server.GetAttribute("name");
+                string old_code = server.SelectSingleNode("script")?.InnerText;
+                CodeChangedEventArgs e1 = new CodeChangedEventArgs
+                {
+                    OldName = name,
+                    OldCode = old_code,
+                };
+
                 GuiUtil.SetControlFont(dlg, this.Font);
                 dlg.UnionCatalogPageVisible = false;
                 dlg.XmlNode = server;
@@ -145,13 +155,21 @@ MessageBoxDefaultButton.Button2);
                     return;
 
                 // 对 server name 进行查重
-                string name = server.GetAttribute("name");
+                // string name = server.GetAttribute("name");
                 if (SearchDup(ref name, item) == true)
                     server.SetAttribute("name", name);
 
                 {
                     ListViewUtil.ChangeItemText(item, COLUMN_NAME, server.GetAttribute("name"));
                     ListViewUtil.ChangeItemText(item, COLUMN_DATABASE, ZServerUtil.GetDatabaseList(server));
+                }
+
+                var new_code = dlg.ScriptCode;
+                if (new_code != old_code)
+                {
+                    e1.NewName = name;
+                    e1.NewCode = new_code;
+                    this.ScriptChanged?.Invoke(this, e1);
                 }
 
                 this.Changed = true;
@@ -570,6 +588,23 @@ MessageBoxDefaultButton.Button2);
                     this.listView1.Items.Add(item);
                 }
 
+
+
+                var new_code = dlg.ScriptCode;
+                if (string.IsNullOrEmpty(new_code) == false)
+                {
+                    CodeChangedEventArgs e1 = new CodeChangedEventArgs
+                    {
+                        OldName = "",
+                        NewName = name,
+                        OldCode = "",
+                        NewCode = new_code,
+                    };
+                    e1.NewName = name;
+                    e1.NewCode = new_code;
+                    this.ScriptChanged?.Invoke(this, e1);
+                }
+
                 this.Changed = true;
             }
         }
@@ -792,5 +827,21 @@ detectmarcsyntax='1'
                     NeedAuthentication = o.GetAttribute("_authentication") == "require"
                 }).ToList();
         }
+
+    }
+
+    public delegate void CodeChangedEventHandler(object sender,
+CodeChangedEventArgs e);
+
+    /// <summary>
+    /// 获得值列表的参数
+    /// </summary>
+    public class CodeChangedEventArgs : EventArgs
+    {
+        public string OldName { get; set; }
+        public string NewName { get; set; }
+
+        public string OldCode { get; set; }
+        public string NewCode { get; set; }
     }
 }

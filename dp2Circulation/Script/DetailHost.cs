@@ -282,15 +282,26 @@ namespace dp2Circulation
             if (sender == null)
                 return;
 
-            int nRet = 0;
-            string strError = "";
-            bool bChanged = false;
-
             try
             {
                 // 对MARC记录进行处理
                 if (sender is MarcEditor)
                 {
+                    var marcEditor = sender as MarcEditor;
+                    ChangeMarcRecord(e,
+                        (p1, p2) =>
+                        {
+                            return marcEditor.GetFirstSubfield(p1, p2);
+                        },
+                        (p1, p2, p3) =>
+                        {
+                            marcEditor.SetFirstSubfield(p1, p2, p3);
+                        });
+#if REMOVED
+                    int nRet = 0;
+                    string strError = "";
+                    bool bChanged = false;
+
                     // 编目批次号
                     string strBatchNo = this.GetFirstSubfield("998", "a");
                     if (string.IsNullOrEmpty(strBatchNo) == true)
@@ -341,6 +352,20 @@ namespace dp2Circulation
                     }
 
                     e.Changed = bChanged;
+#endif
+                }
+                else if (sender is MarcRecord)
+                {
+                    var record = sender as MarcRecord;
+                    ChangeMarcRecord(e,
+                        (p1, p2) =>
+                        {
+                            return record.select($"field[@name='{p1}']/subfield[@name='{p2}']").FirstContent;
+                        },
+                        (p1, p2, p3) =>
+                        {
+                            record.setFirstSubfield(p1, p2, p3);
+                        });
                 }
             }
             catch (Exception ex)
@@ -348,6 +373,74 @@ namespace dp2Circulation
                 e.ErrorInfo = ex.Message;
             }
         }
+
+        delegate void delegate_setFirstSubfield(string field_name,
+            string subfield_name,
+            string value);
+        delegate string delegate_getFirstSubfield(string field_name,
+            string subfield_name);
+
+        static void ChangeMarcRecord(
+            BeforeSaveRecordEventArgs e,
+            delegate_getFirstSubfield func_getFirstSubfield,
+            delegate_setFirstSubfield func_setFirstSubfield)
+        {
+            bool bChanged = false;
+            // 编目批次号
+            string strBatchNo = func_getFirstSubfield("998", "a");
+            if (string.IsNullOrEmpty(strBatchNo) == true)
+            {
+                // 检查本地 %catalog_batchno% 宏是否存在
+                // 从marceditor_macrotable.xml文件中解析宏
+                // return:
+                //      -1  error
+                //      0   not found
+                //      1   found
+                int nRet = MacroUtil.GetFromLocalMacroTable(
+                    // PathUtil.MergePath(Program.MainForm.DataDir, "marceditor_macrotable.xml"),
+                    PathUtil.MergePath(Program.MainForm.UserDir, "marceditor_macrotable.xml"),
+                        "catalog_batchno",
+                        false,
+                        out string strValue,
+                        out string strError);
+                if (nRet == -1)
+                {
+                    e.ErrorInfo = strError;
+                    return;
+                }
+                if (nRet == 1 && string.IsNullOrEmpty(strValue) == false)
+                {
+                    func_setFirstSubfield("998", "a", strValue);
+                    bChanged = true;
+                }
+            }
+
+            // 记录创建时间
+            string strCreateTime = func_getFirstSubfield("998", "u");
+            if (string.IsNullOrEmpty(strCreateTime) == true)
+            {
+                DateTime now = DateTime.Now;
+                strCreateTime = now.ToString("u");
+                func_setFirstSubfield("998", "u", strCreateTime);
+                bChanged = true;
+            }
+
+            // 记录创建者
+            string strCreator = func_getFirstSubfield("998", "z");
+            if (string.IsNullOrEmpty(strCreator) == true)
+            {
+                if (string.IsNullOrEmpty(e.CurrentUserName) == false)
+                    strCreator = e.CurrentUserName;
+                else
+                    strCreator = Program.MainForm.CurrentUserName;
+                func_setFirstSubfield("998", "z", strCreator);
+                bChanged = true;
+            }
+
+            e.Changed = bChanged;
+            return;
+        }
+
 
         // 验收创建册记录后的处理工作
         /// <summary>
@@ -975,7 +1068,7 @@ namespace dp2Circulation
         public string GetFirstSubfield(string strFieldName,
             string strSubfieldName)
         {
-            return this.DetailForm.MarcEditor.Record.Fields.GetFirstSubfield(
+            return this.DetailForm.MarcEditor.GetFirstSubfield(
                     strFieldName,
                     strSubfieldName);
         }
@@ -4851,6 +4944,8 @@ chi	中文	如果是中文，则为空。
 
         // TODO: 为何本函数速度慢?
         // 获得当前正在编辑的 MARC 记录，和编目规则
+        // parameters:
+        //      record  [out] 返回 MarcRecord 对象。注意 4XX 字段是嵌套字段的结构
         // return:
         //      -1  出错
         //      0   没有找到
@@ -4869,7 +4964,7 @@ chi	中文	如果是中文，则为空。
 
             locationString = detail_form.MarcEditor.GetCurrentLocationString();
 
-            record = new MarcRecord(detail_form.GetMarc());
+            record = new MarcRecord(detail_form.GetMarc(), "4**");
 
             rule = detail_form.LastRule;
 #if REMOVED

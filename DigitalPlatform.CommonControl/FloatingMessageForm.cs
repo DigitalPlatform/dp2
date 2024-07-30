@@ -303,9 +303,8 @@ size.Height);
             {
                 bChanged = true;
                 StopDelayClear();  // 文字被主动修改后，延时清除就被取消了
+                base.Text = value;
             }
-
-            base.Text = value;
 
             if (bChanged == true)
                 this.Invalidate();

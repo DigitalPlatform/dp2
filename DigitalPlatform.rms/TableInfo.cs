@@ -31,11 +31,20 @@ namespace DigitalPlatform.rms
         public string TypeString = "";        // 表类型，风格
         public string ExtTypeString = "";       // _time 等检索特性
 
+        // 2024/7/29
+        public List<XmlElement> nodesConvertQueryString = null;
+        public List<XmlElement> nodesConvertQueryNumber = null;
+
+        public List<XmlElement> nodesConvertKeyString = null;
+        public List<XmlElement> nodesConvertKeyNumber = null;
+
+        /*
         public XmlNode nodeConvertQueryString = null;	// 处理检索词的字符串形态的配置节点 
         public XmlNode nodeConvertQueryNumber = null;	// 处理检索词的数字形态的配置节点
 
         public XmlNode nodeConvertKeyString = null;		// 处理检索点的字符串形态配置节点
         public XmlNode nodeConvertKeyNumber = null;		// 处理检索点的数字形态的配置节点
+        */
 
         public bool Dup = false;
 
@@ -106,25 +115,50 @@ namespace DigitalPlatform.rms
                 }
             }
 
+            this.nodesConvertKeyString = BuildList(node.SelectSingleNode("convert/string") as XmlElement);
+            this.nodesConvertKeyNumber = BuildList(node.SelectSingleNode("convert/number") as XmlElement);
+
+            this.nodesConvertQueryString = BuildList(node.SelectSingleNode("convertquery/string") as XmlElement);
+            this.nodesConvertQueryNumber = BuildList(node.SelectSingleNode("convertquery/number") as XmlElement);
+
+            /*
             this.nodeConvertKeyString = node.SelectSingleNode("convert/string");
             this.nodeConvertKeyNumber = node.SelectSingleNode("convert/number");
 
             this.nodeConvertQueryString = node.SelectSingleNode("convertquery/string");
             this.nodeConvertQueryNumber = node.SelectSingleNode("convertquery/number");
+            */
 
             SetExtTypeString();
             return 0;
         }
 
+        static List<XmlElement> BuildList(XmlElement node)
+        {
+            if (node == null)
+                return null;
+            return new List<XmlElement> { node };
+        }
+
         // 2012/5/16
         void SetExtTypeString()
         {
-            if (this.nodeConvertKeyNumber != null
-                && this.nodeConvertQueryNumber != null)
+            XmlNode nodeConvertKeyNumber = null;
+            if (nodesConvertKeyNumber != null
+                && nodesConvertKeyNumber.Count > 0)
+                nodeConvertKeyNumber = nodesConvertKeyNumber[0];
+
+            XmlNode nodeConvertQueryNumber = null;
+            if (nodesConvertQueryNumber != null
+                && nodesConvertQueryNumber.Count > 0)
+                nodeConvertQueryNumber = nodesConvertQueryNumber[0];
+
+            if (nodeConvertKeyNumber != null
+                && nodeConvertQueryNumber != null)
             {
                 string strExtStyle = "";
-                string strStyleKey = DomUtil.GetAttr(this.nodeConvertKeyNumber, "style");
-                string strStyleQuery = DomUtil.GetAttr(this.nodeConvertKeyNumber, "style");
+                string strStyleKey = DomUtil.GetAttr(nodeConvertKeyNumber, "style");
+                string strStyleQuery = DomUtil.GetAttr(nodeConvertKeyNumber, "style");
                 if (StringUtil.IsInList("freetime", strStyleQuery) == true)
                 {
                     StringUtil.SetInList(ref strExtStyle, "_time", true);
@@ -289,7 +323,7 @@ namespace DigitalPlatform.rms
             {
                 nObjectID = Convert.ToInt32(tableInfo.ID);
             }
-            catch 
+            catch
             {
                 bError = true;
             }

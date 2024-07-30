@@ -118,6 +118,40 @@ namespace DigitalPlatform.rms
         //		-1	出错
         //		0	成功
         public int DoStopword(string strStopwordTableName,
+            List<KeysCfg.KeyAndFrom> keys,
+            out string strError)
+        {
+            strError = "";
+
+            //if (this.dom == null)
+            //	return 0;
+
+            StopwordTable stopwordTable = (StopwordTable)this.tableStopwordTable[strStopwordTableName];
+            if (stopwordTable == null)
+            {
+                strError = "没找到名为'" + strStopwordTableName + "'的<stopwordTable>元素。";
+                return -1;
+            }
+
+            foreach (var key in keys)
+            {
+                key.Key = DeleteStopword(key.Key,
+                    stopwordTable);
+            }
+            return 0;
+        }
+
+#if REMOVED
+        // 对一个字符串数组进行去非用字
+        // parameter:
+        //		texts	待加工的字符串数组
+        //		strStopwordFileName	非字用文件名
+        //		strStopwordTable	具体使用非用字哪个表 为""或null表示取第一个表
+        //		strError	out 出错信息
+        // return:
+        //		-1	出错
+        //		0	成功
+        public int DoStopword(string strStopwordTableName,
             ref List<string> texts,
             out string strError)
         {
@@ -140,6 +174,7 @@ namespace DigitalPlatform.rms
             }
             return 0;
         }
+#endif
 
         // 对一个字符串删除非用字
         // parameter:

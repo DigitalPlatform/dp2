@@ -3219,6 +3219,15 @@ false);
 
         bool _virusScanned = false;
 
+        // 2024/7/23
+        public string CurrentUserName
+        {
+            get
+            {
+                return _currentUserName;
+            }
+        }
+
         internal string _currentUserName = "";
         internal string _currentUserRights = "";
         internal string _currentLibraryCodeList = "";

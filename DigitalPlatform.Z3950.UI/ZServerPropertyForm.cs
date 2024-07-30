@@ -6,7 +6,7 @@ using System.Text;
 
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
-using DigitalPlatform.GUI;    // GetDp2ResDlg
+using DigitalPlatform.GUI;
 
 namespace DigitalPlatform.Z3950.UI
 {
@@ -42,6 +42,25 @@ namespace DigitalPlatform.Z3950.UI
                 }
                 else
                     this.tabControl_main.TabPages.Remove(this.tabPage_unionCatalog);
+            }
+        }
+
+        // 2024/7/25
+        public bool ScriptPageVisible
+        {
+            get
+            {
+                return this.tabControl_main.TabPages.Contains(this.tabPage_script);
+            }
+            set
+            {
+                if (value == true)
+                {
+                    if (this.tabControl_main.TabPages.Contains(this.tabPage_script) == false)
+                        this.tabControl_main.TabPages.Add(this.tabPage_script);
+                }
+                else
+                    this.tabControl_main.TabPages.Remove(this.tabPage_script);
             }
         }
 
@@ -249,6 +268,13 @@ DomUtil.GetAttr(this.XmlNode,
 
             this.textBox_unionCatalog_bindingUcServerUrl.Text = DomUtil.GetAttr(
     this.XmlNode, "unionCatalog_bindingUcServerUrl");
+
+            // 脚本
+            {
+                var node = this.XmlNode.SelectSingleNode("script");
+                if (node != null)
+                    this.textBox_biblio_filterScriptCode.Text = node.InnerText;
+            }
         }
 
         public static void FillEncodingList(ComboBox list,
@@ -668,10 +694,21 @@ this.checkBox_forceIssn8.Checked == true ? null : "0");
             SetTextAttr("unionCatalog_bindingUcServerUrl",
     this.textBox_unionCatalog_bindingUcServerUrl.Text);
 
+            // 脚本
+            {
+                var node = this.XmlNode.SelectSingleNode("script");
+                if (node == null)
+                {
+                    node = this.XmlNode.OwnerDocument.CreateElement("script");
+                    this.XmlNode.AppendChild(node);
+                }
+                node.InnerText = this.textBox_biblio_filterScriptCode.Text;
+            }
+
             this.DialogResult = DialogResult.OK;
             this.Close();
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -979,6 +1016,18 @@ this.checkBox_forceIssn8.Checked == true ? null : "0");
             {
                 MessageBox.Show(this, $"所输入的值 '{this.textBox_serverAddr.Text}' 不合法。不允许包含冒号。请重新输入");
                 e.Cancel = true;
+            }
+        }
+
+        // 可以考虑用代码的 MD5 hash 字符串来当作它的名字，把 Assembly 存储到 Cache 中
+        public string ScriptCode
+        {
+            get
+            {
+                return this.TryGet(() =>
+                {
+                    return this.textBox_biblio_filterScriptCode.Text;
+                });
             }
         }
     }

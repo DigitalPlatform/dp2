@@ -16832,6 +16832,7 @@ out baOutputTimestamp);
                         }
 
                         // 2023/4/6
+                        // 如果打算修改的是数据库下的 browse 配置文件，则需要清除 browse 缓存
                         if (LibraryApplication.IsBrowseCfgPath(strResPath))
                         {
                             app.ClearBrowseCfgCache(strResPath);

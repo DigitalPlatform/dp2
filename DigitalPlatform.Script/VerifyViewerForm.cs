@@ -44,15 +44,18 @@ namespace DigitalPlatform.Script
             }
             set
             {
-                // this.textBox_verifyResult.Text = value;
-                _text = value;
-                ClearHtml(CssFileName);
-                WriteHtml(this.webBrowser_verifyResult,
-                    /*"<div class='line info'>" +
-                    HttpUtility.HtmlEncode(_text)
-                    .Replace("\r\n", "<br/>")
-                    + "</div>"*/
-                    BuildHtml(value));
+                this.TryInvoke(() =>
+                {
+                    // this.textBox_verifyResult.Text = value;
+                    _text = value;
+                    ClearHtml(CssFileName);
+                    WriteHtml(this.webBrowser_verifyResult,
+                        /*"<div class='line info'>" +
+                        HttpUtility.HtmlEncode(_text)
+                        .Replace("\r\n", "<br/>")
+                        + "</div>"*/
+                        BuildHtml(value));
+                });
             }
         }
 
@@ -88,51 +91,60 @@ namespace DigitalPlatform.Script
         public void WriteError(string text,
             bool clear_before)
         {
-            if (clear_before)
-                ClearHtml(CssFileName);
-            if (string.IsNullOrEmpty(text))
-                return;
-            var lines = text.Replace("\r\n", "\n").Split('\n');
-            foreach (var line in lines)
+            this.TryInvoke(() =>
             {
-                WriteError(new VerifyError
+                if (clear_before)
+                    ClearHtml(CssFileName);
+                if (string.IsNullOrEmpty(text))
+                    return;
+                var lines = text.Replace("\r\n", "\n").Split('\n');
+                foreach (var line in lines)
                 {
-                    Level = "error",
-                    Text = line,
-                });
-            }
+                    WriteError(new VerifyError
+                    {
+                        Level = "error",
+                        Text = line,
+                    });
+                }
+            });
         }
 
         public void WriteError(VerifyError error,
             bool clear_before = false)
         {
-            if (clear_before)
-                ClearHtml(CssFileName);
+            this.TryInvoke(() =>
+            {
+                if (clear_before)
+                    ClearHtml(CssFileName);
 
-            string style = "info";
-            if (error.Level == "error")
-                style = "error";
-            else if (error.Level == "warning")
-                style = "warning";
-            else if (error.Level == "info")
-                style = "info";
-            else if (error.Level == "succeed")
-                style = "succeed";
+                string style = "info";
+                if (error.Level == "error")
+                    style = "error";
+                else if (error.Level == "warning")
+                    style = "warning";
+                else if (error.Level == "info")
+                    style = "info";
+                else if (error.Level == "succeed")
+                    style = "succeed";
 
-            var html = $"<div class='line {style}'>{HttpUtility.HtmlEncode(error.Text).Replace("\r\n","<br/>")}</div>";
-            WriteHtml(webBrowser_verifyResult, html);
+                var html = $"<div class='line {style}'>{HttpUtility.HtmlEncode(error.Text).Replace("\r\n", "<br/>")}</div>";
+                WriteHtml(webBrowser_verifyResult, html);
+            });
         }
 
         public void WriteErrors(List<VerifyError> errors,
             bool clear_before = true)
         {
-            if (clear_before)
-                ClearHtml(CssFileName);
-
-            foreach (var error in errors)
+            this.TryInvoke(() =>
             {
-                WriteError(error);
-            }
+                if (clear_before)
+                    ClearHtml(CssFileName);
+
+                foreach (var error in errors)
+                {
+                    WriteError(error);
+                }
+            });
         }
 
         private void toolStripButton_dock_Click(object sender, EventArgs e)
@@ -210,8 +222,9 @@ namespace DigitalPlatform.Script
             // strJs = "<SCRIPT language='javaSCRIPT' src='" + PathUtil.MergePath(Program.MainForm.DataDir, "getsummary.js") + "'></SCRIPT>";
 
             {
-                HtmlDocument doc = this.webBrowser_verifyResult.Document;
+                HtmlDocument doc = null;
 
+                doc = this.webBrowser_verifyResult.Document;
                 if (doc == null)
                 {
                     this.webBrowser_verifyResult.Navigate("about:blank");

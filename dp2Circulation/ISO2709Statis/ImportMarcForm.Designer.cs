@@ -32,6 +32,7 @@
             this.tabControl_main = new System.Windows.Forms.TabControl();
             this.tabPage_source = new System.Windows.Forms.TabPage();
             this.tabPage_selectTarget = new System.Windows.Forms.TabPage();
+            this.checkBox_lockTargetDbName = new System.Windows.Forms.CheckBox();
             this.checkBox_dontImportDupRecords = new System.Windows.Forms.CheckBox();
             this.tabComboBox_dupProject = new DigitalPlatform.CommonControl.TabComboBox();
             this.label4 = new System.Windows.Forms.Label();
@@ -47,7 +48,8 @@
             this.webBrowser1_running = new System.Windows.Forms.WebBrowser();
             this.tabPage_print = new System.Windows.Forms.TabPage();
             this.button_print = new System.Windows.Forms.Button();
-            this.checkBox_lockTargetDbName = new System.Windows.Forms.CheckBox();
+            this.textBox_source = new System.Windows.Forms.TextBox();
+            this.label5 = new System.Windows.Forms.Label();
             this.tabControl_main.SuspendLayout();
             this.tabPage_selectTarget.SuspendLayout();
             this.tabPage_runImport.SuspendLayout();
@@ -94,6 +96,8 @@
             // 
             // tabPage_selectTarget
             // 
+            this.tabPage_selectTarget.Controls.Add(this.textBox_source);
+            this.tabPage_selectTarget.Controls.Add(this.label5);
             this.tabPage_selectTarget.Controls.Add(this.checkBox_lockTargetDbName);
             this.tabPage_selectTarget.Controls.Add(this.checkBox_dontImportDupRecords);
             this.tabPage_selectTarget.Controls.Add(this.tabComboBox_dupProject);
@@ -114,10 +118,21 @@
             this.tabPage_selectTarget.Text = " 选定目标";
             this.tabPage_selectTarget.UseVisualStyleBackColor = true;
             // 
+            // checkBox_lockTargetDbName
+            // 
+            this.checkBox_lockTargetDbName.AutoSize = true;
+            this.checkBox_lockTargetDbName.Location = new System.Drawing.Point(561, 21);
+            this.checkBox_lockTargetDbName.Name = "checkBox_lockTargetDbName";
+            this.checkBox_lockTargetDbName.Size = new System.Drawing.Size(78, 25);
+            this.checkBox_lockTargetDbName.TabIndex = 10;
+            this.checkBox_lockTargetDbName.Text = "锁定";
+            this.checkBox_lockTargetDbName.UseVisualStyleBackColor = true;
+            this.checkBox_lockTargetDbName.CheckedChanged += new System.EventHandler(this.checkBox_lockTargetDbName_CheckedChanged);
+            // 
             // checkBox_dontImportDupRecords
             // 
             this.checkBox_dontImportDupRecords.AutoSize = true;
-            this.checkBox_dontImportDupRecords.Location = new System.Drawing.Point(220, 271);
+            this.checkBox_dontImportDupRecords.Location = new System.Drawing.Point(220, 212);
             this.checkBox_dontImportDupRecords.Name = "checkBox_dontImportDupRecords";
             this.checkBox_dontImportDupRecords.Size = new System.Drawing.Size(162, 25);
             this.checkBox_dontImportDupRecords.TabIndex = 9;
@@ -128,7 +143,7 @@
             // 
             this.tabComboBox_dupProject.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.tabComboBox_dupProject.FormattingEnabled = true;
-            this.tabComboBox_dupProject.Location = new System.Drawing.Point(220, 232);
+            this.tabComboBox_dupProject.Location = new System.Drawing.Point(220, 173);
             this.tabComboBox_dupProject.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabComboBox_dupProject.Name = "tabComboBox_dupProject";
             this.tabComboBox_dupProject.Size = new System.Drawing.Size(334, 32);
@@ -138,7 +153,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(7, 235);
+            this.label4.Location = new System.Drawing.Point(7, 176);
             this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(138, 21);
@@ -147,7 +162,7 @@
             // 
             // textBox_batchNo
             // 
-            this.textBox_batchNo.Location = new System.Drawing.Point(220, 173);
+            this.textBox_batchNo.Location = new System.Drawing.Point(220, 261);
             this.textBox_batchNo.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.textBox_batchNo.Name = "textBox_batchNo";
             this.textBox_batchNo.Size = new System.Drawing.Size(334, 31);
@@ -156,7 +171,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(11, 177);
+            this.label2.Location = new System.Drawing.Point(7, 264);
             this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(159, 21);
@@ -187,7 +202,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(11, 118);
+            this.label1.Location = new System.Drawing.Point(7, 117);
             this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(180, 21);
@@ -271,16 +286,23 @@
             this.button_print.Text = "打印统计结果(&P)";
             this.button_print.UseVisualStyleBackColor = true;
             // 
-            // checkBox_lockTargetDbName
+            // textBox_source
             // 
-            this.checkBox_lockTargetDbName.AutoSize = true;
-            this.checkBox_lockTargetDbName.Location = new System.Drawing.Point(561, 21);
-            this.checkBox_lockTargetDbName.Name = "checkBox_lockTargetDbName";
-            this.checkBox_lockTargetDbName.Size = new System.Drawing.Size(78, 25);
-            this.checkBox_lockTargetDbName.TabIndex = 10;
-            this.checkBox_lockTargetDbName.Text = "锁定";
-            this.checkBox_lockTargetDbName.UseVisualStyleBackColor = true;
-            this.checkBox_lockTargetDbName.CheckedChanged += new System.EventHandler(this.checkBox_lockTargetDbName_CheckedChanged);
+            this.textBox_source.Location = new System.Drawing.Point(220, 298);
+            this.textBox_source.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.textBox_source.Name = "textBox_source";
+            this.textBox_source.Size = new System.Drawing.Size(334, 31);
+            this.textBox_source.TabIndex = 12;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(7, 301);
+            this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(96, 21);
+            this.label5.TabIndex = 11;
+            this.label5.Text = "来源(&S):";
             // 
             // ImportMarcForm
             // 
@@ -326,5 +348,7 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.CheckBox checkBox_dontImportDupRecords;
         private System.Windows.Forms.CheckBox checkBox_lockTargetDbName;
+        private System.Windows.Forms.TextBox textBox_source;
+        private System.Windows.Forms.Label label5;
     }
 }

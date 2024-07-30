@@ -1647,7 +1647,8 @@ namespace DigitalPlatform.Marc
                 int pos = item.CaretPos;
                 if (pos < 0)
                     pos = 0;
-                this.SetActiveField(line, col, pos, true);
+                if (this.record.Fields.Count > 0)
+                    this.SetActiveField(line, col, pos, true);
 
                 // this.Focus();
             }
@@ -2442,6 +2443,20 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                     // return;
                 }
             }
+
+            if (nRet == -1)
+            {
+                // 2024/7/30
+                if (e.Button == MouseButtons.Right)
+                {
+                    PopupMenu(new Point(e.X, e.Y));
+                    return;
+                }
+
+                if (e.Button == MouseButtons.Left)
+                    this.Focus();
+            }
+
         END1:
             base.OnMouseDown(e);
         }
@@ -6486,7 +6501,7 @@ SYS	011528318
                 field_name,
                 indicator,
                 default_value);
-            this.AppendInsertFields(field_index,
+            this.AppendInsertFields(field_index + 1,
                 new List<Field> { ret });
             return ret;
         }
@@ -6523,6 +6538,14 @@ SYS	011528318
             this.AppendInsertFields(old_count, new_fields);
 
             return ret;
+        }
+
+        public string GetFirstSubfield(string strFieldName,
+            string strSubfieldName)
+        {
+            return this.record.Fields.GetFirstSubfield(
+        strFieldName,
+        strSubfieldName);
         }
 
         public Field SetFirstSubfield(string strFieldName,

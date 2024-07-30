@@ -30,7 +30,6 @@ using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.Z3950.UI;
 using DigitalPlatform.Z3950;
-// using static dp2Circulation.Order.ExportExcelFile;
 using static DigitalPlatform.Marc.MarcUtil;
 using dp2Circulation.SearchForms;
 
@@ -210,6 +209,9 @@ namespace dp2Circulation
                 Program.MainForm.FillBiblioFromList(this.comboBox_from);
             else if (this._dbType == "authority")
                 FillAuthorityFromList(this.comboBox_from);
+
+            // 2024/7/24
+            RefreshFilterFieldNames();
 
             this.m_strUsedMarcQueryFilename = Program.MainForm.AppInfo.GetString(
                 this._dbType + "searchform",
@@ -1539,7 +1541,7 @@ out strError);
 
                 List<QueryLine> query_lines = null;
                 if (filter_query)
-                    query_lines = BuildQueryLines();
+                    query_lines = BuildQueryLines(true);
                 else
                 {
                     List<string> query_words = new List<string>();
@@ -1562,6 +1564,7 @@ out strError);
                         {
                             QueryWord = query_word,
                             FieldName = strFromStyle,
+                            MatchStyle = strMatchStyle,
                         });
                     }
                 }
@@ -1634,13 +1637,16 @@ out strError);
                     var current_from = strFromStyle;
                     if (string.IsNullOrEmpty(query_line.FieldName) == false)
                         current_from = query_line.FieldName;
-                    long lRet = channel.SearchBiblio(looping.Progress,
+                    long lRet = SearchBiblio(
+                        channel,
+                        looping.Progress,
                         this.DbNames,
                         query_word, // this.textBox_queryWord.Text,
+                        filter_query,
                         max_count,  // this.MaxSearchResultCount,  // 1000
                         current_from,
-                        strMatchStyle,  // "left", TODO: "exact" 和 strSearchStyle "desc" 组合 dp2library 会抛出异常
-                        this.Lang,
+                        query_line.MatchStyle,  // strMatchStyle,  // "left", TODO: "exact" 和 strSearchStyle "desc" 组合 dp2library 会抛出异常
+                                                // this.Lang,
                         strResultSetName,
                         "",    // strSearchStyle
                         strOutputStyle,
@@ -1664,7 +1670,7 @@ out strError);
                     else
                         this.LabelMessage = "检索已累积命中 " + lTotalHitCount.ToString() + " 条书目记录";
 
-                    Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode($"'{query_word}' 命中 {lHitCount} 条") + "</div>");
+                    Program.MainForm.OperHistory.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode($"'{query_word}' 命中 {lHitCount} 条") + "</div>");
 
                     if (multiline == false && filter_query == false)
                     {
@@ -1684,7 +1690,13 @@ out strError);
                     {
                         func_filter = (recpath, xml) =>
                         {
-                            return FilterRecord(query_line, recpath, xml);
+                            StringBuilder debug_info = new StringBuilder();
+                            var ret = FilterRecord(query_line,
+                                recpath,
+                                xml,
+                                debug_info);
+                            Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(debug_info.ToString()).Replace("\r\n", "<br/>") + "</div>");
+                            return ret;
                         };
                     }
 
@@ -1703,7 +1715,7 @@ out strError);
         query_line.AddHitItem(item);
         this.TryInvoke(() =>
         {
-            query_line.UpdateViewRow();
+            query_line.UpdateViewRowHitCount();
         });
     },
     func_filter,
@@ -1941,7 +1953,9 @@ out strError);
                                             c.ZClient.ForcedRecordsEncoding == null ? c.TargetInfo.DefaultRecordsEncoding : c.ZClient.ForcedRecordsEncoding,
                                             c.ServerName,
                                             r.Records,
-                                            item);
+                                            item,
+                                            c.ScriptName,
+                                            c.Script);
                                     UpdateCommandLine(item, c, r);
                                     if (multiline || filter_query)
                                         item.Tag = null;
@@ -2056,6 +2070,55 @@ out strError);
             {
 
             }
+        }
+
+        // 把检索字符串切割为多个，然后逐一进行检索，直到有命中为止
+        long SearchBiblio(LibraryChannel channel,
+            Stop stop,
+            string dbnames,
+            string query_string,
+            bool split,
+            int max_count,
+            string current_from,
+            string strMatchStyle,
+            string strResultSetName,
+            string strSearchStyle,
+            string strOutputStyle,
+            string filter,
+            out string strQueryXml,
+            out string strError)
+        {
+            strQueryXml = "";
+            strError = "";
+            List<string> words = null;
+            if (split)
+                words = QueryLine.SplitQueryString(query_string);
+            else
+                words = new List<string> { query_string };
+            foreach (var word in words)
+            {
+                long lRet = channel.SearchBiblio(stop,
+        dbnames,
+        word,
+        max_count,
+        current_from,
+        strMatchStyle,
+        this.Lang,
+        strResultSetName,
+        strSearchStyle,
+        strOutputStyle,
+        filter,
+        out strQueryXml,
+        out strError);
+                if (words.Count > 1)    // .Count == 1 其实是没有有效拆分的情况
+                    Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode($"-- '{query_string}' 拆分后的检索词 '{word}' 检索返回 {lRet}").Replace("\r\n", "<br/>") + "</div>");
+
+                if (lRet == -1)
+                    return -1;
+                if (lRet != 0)
+                    return lRet;
+            }
+            return 0;
         }
 
         // 存储全局结果集名
@@ -2223,7 +2286,7 @@ GetCurrentBrowseStyle());
                     if (func_filterRecord != null)
                     {
                         var ret = func_filterRecord.Invoke(
-                            searchresult.Path, 
+                            searchresult.Path,
                             searchresult.RecordBody?.Xml);
                         if (ret == false)
                             continue;
@@ -2399,7 +2462,9 @@ GetCurrentBrowseStyle());
             Encoding encoding,
             string strLibraryName,
             DigitalPlatform.Z3950.RecordCollection records,
-            ListViewItem insert_pos)
+            ListViewItem insert_pos,
+            string script_name,
+            string script_code)
         {
             // int index = insert_pos.ListView.Items.IndexOf(insert_pos);
 
@@ -2486,6 +2551,38 @@ GetCurrentBrowseStyle());
 
                     // 把自动识别的结果保存下来
                     record.AutoDetectedSyntaxOID = strSytaxOID;
+                }
+
+                // 对 MARC 记录进行过滤
+                if (string.IsNullOrEmpty(script_code) == false)
+                {
+                    MarcRecord marc = new MarcRecord(strMARC);
+                    // hostObj.VerifyResult.Value
+                    var ret = ExportMarcHoldingDialog.FilterRecord(
+BuildZ3950ScriptCacheKey(script_name),
+script_code,
+"",
+marc,
+out VerifyHost host,
+out string error);
+                    if (ret < 0)
+                    {
+                        AddErrorLine(strRecPath,
+                            "记录 " + strRecPath + " 创建浏览格式时(执行脚本阶段)出错: " + error);
+                        goto CONTINUE;
+                    }
+                    if (host != null
+                        && host.VerifyResult != null
+                        && host.VerifyResult.Errors != null
+                        && host.VerifyResult.Errors.Count > 0
+                        && VerifyError.GetErrorCount(host.VerifyResult.Errors) > 0)
+                    {
+                        var text = VerifyError.BuildTextLines(host.VerifyResult.Errors);
+                        AddErrorLine(strRecPath,
+                            "记录 " + strRecPath + " 创建浏览格式时(执行脚本阶段)发现校验错误: " + text);
+                        goto CONTINUE;
+                    }
+                    strMARC = marc.Text;
                 }
 
                 nRet = MyForm.BuildMarcBrowseText(
@@ -2785,6 +2882,21 @@ GetCurrentBrowseStyle());
                 ListViewItem item = Global.AppendNewLine(
         this.listView_records,
         "error",
+        cols);
+            }
+        ));
+        }
+
+        // 加入一个错误文本行
+        void AddErrorLine(string id, string strError)
+        {
+            string[] cols = new string[1];
+            cols[0] = strError;
+            this.Invoke((Action)(() =>
+            {
+                ListViewItem item = Global.AppendNewLine(
+        this.listView_records,
+        id,
         cols);
             }
         ));
@@ -3533,7 +3645,9 @@ GetCurrentBrowseStyle());
                                 channel.ZClient.ForcedRecordsEncoding == null ? channel.TargetInfo.DefaultRecordsEncoding : channel.ZClient.ForcedRecordsEncoding,
                                 channel.ServerName,
                                 present_result.Records,
-                                item);
+                                item,
+                                channel.ScriptName,
+                                channel.Script);
                         UpdateCommandLine(item, channel, present_result);
                     }
 
@@ -6867,6 +6981,8 @@ MessageBoxDefaultButton.Button2);
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromMinutes(2);
 
+            GenerateData genData = new GenerateData(this, null);
+
             /*
             _stop.Style = StopStyle.EnableHalfStop;
             _stop.OnStop += new StopEventHandler(this.DoStop);
@@ -6919,13 +7035,60 @@ MessageBoxDefaultButton.Button2);
 
                     bool append = (info.RecPath != null && info.RecPath.Contains("?"));
 
+                    string biblio_rec_path = BiblioInfo.GetPath(strRecPath);
+
+                    {
+                        // 2024/7/23
+                        int nRet = genData.InitialAutogenAssembly(biblio_rec_path,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (genData.DetailHostObj != null)
+                        {
+                            nRet = MarcUtil.Xml2Marc(info.NewXml,    // info.OldXml,
+    true,
+    null,
+    out string strMarcSyntax,
+    out string strMARC,
+    out strError);
+                            if (nRet == -1)
+                            {
+                                strError = "XML转换到MARC记录时出错: " + strError;
+                                goto ERROR1;
+                            }
+
+                            MarcRecord record = new MarcRecord(strMARC);
+                            BeforeSaveRecordEventArgs e = new BeforeSaveRecordEventArgs();
+                            this.TryInvoke(() =>
+                            {
+                                genData.DetailHostObj.Invoke("BeforeSaveRecord",
+                                    record,
+                                    e);
+                            });
+                            if (string.IsNullOrEmpty(e.ErrorInfo) == false)
+                            {
+                                strError = e.ErrorInfo;
+                                goto ERROR1;
+                            }
+                            if (e.Changed)
+                            {
+                                nRet = MarcUtil.Marc2XmlEx(record.Text,
+                                    strMarcSyntax,
+                                    ref info.NewXml,
+                                    out strError);
+                                if (nRet == -1)
+                                    goto ERROR1;
+                            }
+                        }
+                    }
+
 
                     int nRedoCount = 0;
                 REDO_SAVE:
                     long lRet = channel.SetBiblioInfo(
                         looping.Progress,
                         append ? "new" : "change",
-                        BiblioInfo.GetPath(strRecPath),
+                        biblio_rec_path,
                         "xml",
                         info.NewXml,
                         info.Timestamp,
@@ -7115,6 +7278,8 @@ MessageBoxDefaultButton.Button2);
                 */
                 EndLoop(looping);
 
+                genData.Dispose();
+
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
 
@@ -7149,6 +7314,12 @@ MessageBoxDefaultButton.Button2);
             }
 
             return new NormalResult();
+        ERROR1:
+            return new NormalResult
+            {
+                Value = -1,
+                ErrorInfo = strError
+            };
         }
 
         // TODO: 将来改用 SearchFormBase::ChangeBiblioInfoKey()
@@ -8844,6 +9015,8 @@ out string strError)
                     strAction = "move";
             }
 
+            GenerateData genData = new GenerateData(this, null);
+
             bool bHideMessageBox = false;
             bool bHideMessageBox1 = false;
             DialogResult copy_result = DialogResult.Cancel;
@@ -8890,6 +9063,64 @@ out string strError)
                     byte[] baOutputTimestamp = null;
                     string strOutputBiblio = "";
 
+                    BiblioInfo info = (BiblioInfo)this.m_biblioTable[strRecPath];
+                    if (info == null
+                        && strRecPath.IndexOf("@") != -1)
+                        goto CONTINUE;
+                    string strXml = info.NewXml;
+                    if (string.IsNullOrEmpty(strXml))
+                        strXml = info.OldXml;
+                    if (string.IsNullOrEmpty(strXml) == true
+                        && strRecPath.IndexOf("@") != -1)
+                        goto CONTINUE;
+
+                    // 2024/7/23
+                    int nRet = genData.InitialAutogenAssembly(dlg.RecPath,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    bool xml_changed = false;
+                    if (genData.DetailHostObj != null)
+                    {
+                        nRet = MarcUtil.Xml2Marc(strXml,    // info.OldXml,
+true,
+null,
+out string strMarcSyntax,
+out string strMARC,
+out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "XML转换到MARC记录时出错: " + strError;
+                            goto ERROR1;
+                        }
+
+                        MarcRecord record = new MarcRecord(strMARC);
+                        BeforeSaveRecordEventArgs e = new BeforeSaveRecordEventArgs();
+                        this.TryInvoke(() =>
+                        {
+                            genData.DetailHostObj.Invoke("BeforeSaveRecord",
+                                record,
+                                e);
+                        });
+                        if (string.IsNullOrEmpty(e.ErrorInfo) == false)
+                        {
+                            strError = e.ErrorInfo;
+                            goto ERROR1;
+                        }
+                        if (e.Changed)
+                        {
+                            nRet = MarcUtil.Marc2XmlEx(record.Text,
+                                strMarcSyntax,
+                                ref strXml,
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                            xml_changed = true;
+                        }
+                    }
+
+
                     looping.Progress.SetMessage("正在" + strActionName + "书目记录 '" + strRecPath + "' 到 '" + dlg.RecPath + "' ...");
 
                     // 2016/3/23
@@ -8897,6 +9128,7 @@ out string strError)
 
                 REDO:
                     long lRet = 0;
+                    // *** 外来的书目记录
                     if (strRecPath.IndexOf("@") != -1)
                     {
                         // 如果是移动操作，需要警告一下操作被转换为复制执行
@@ -8926,14 +9158,7 @@ out string strError)
                             }
                         }
 
-                        BiblioInfo info = (BiblioInfo)this.m_biblioTable[strRecPath];
-                        if (info == null)
-                            goto CONTINUE;
-                        string strXml = info.NewXml;
-                        if (string.IsNullOrEmpty(strXml))
-                            strXml = info.OldXml;
-                        if (string.IsNullOrEmpty(strXml) == true)
-                            goto CONTINUE;
+
                         lRet = channel.SetBiblioInfo(
         looping.Progress,
         "new",
@@ -8957,6 +9182,8 @@ out string strError)
                     }
                     else
                     {
+                        // *** 本系统的书目记录
+
                         // 2024/4/28
                         string strMergeStyle = "";
                         if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.159") < 0)
@@ -8974,9 +9201,9 @@ out string strError)
                             strRecPath,
                             "xml",
                             null,
-                            null,    // this.BiblioTimestamp,
+                            xml_changed ? info.Timestamp : null,    // this.BiblioTimestamp,
                             dlg.RecPath,
-                            null,   // strXml,
+                            xml_changed ? strXml : null,
                             strMergeStyle,  // "file_reserve_source",  // 2017/4/19
                             out strOutputBiblio,
                             out strOutputBiblioRecPath,
@@ -9045,6 +9272,8 @@ out string strError)
 
                 this.EnableControlsInSearching(true);
                 this.listView_records.Enabled = true;
+
+                genData.Dispose();
             }
 
             return 1;
@@ -10696,7 +10925,7 @@ message,
             {
                 string message = "成功删除书目记录 " + nDeleteCount + " 条";
                 if (skipped_recpath.Count > 0)
-                    message += $"。但有 {skipped_recpath} 条书目记录跳过了删除";
+                    message += $"。但有 {skipped_recpath.Count} 条书目记录跳过了删除";
                 this.MessageBoxShow(message);
             }
             return;
@@ -11012,7 +11241,7 @@ message,
             {
                 string message = "成功删除书目记录 " + nDeleteCount + " 条";
                 if (skipped_recpath.Count > 0)
-                    message += $"。但有 {skipped_recpath} 条书目记录跳过了删除";
+                    message += $"。但有 {skipped_recpath.Count} 条书目记录跳过了删除";
                 this.MessageBoxShow(message);
             }
             return;
@@ -12575,7 +12804,7 @@ message,
             }
 
             Stream s = null;
-
+            bool clear_file = false;
             try
             {
                 s = File.Open(this.LastIso2709FileName,
@@ -12722,9 +12951,25 @@ cacheKey,
 filterCode,
 "",
 record,
+out VerifyHost host,
 out string error);
-                        if (ret == -1)
-                            throw new Exception(error);
+                        if (ret < 0)
+                        {
+                            if (ret == -2)
+                                clear_file = true;
+                            strError = $"脚本处理 {info.RecPath} 过程中出错: {error}";
+                            goto ERROR1;
+                        }
+                        if (host != null
+    && host.VerifyResult != null
+    && host.VerifyResult.Errors != null
+    && host.VerifyResult.Errors.Count > 0
+    && VerifyError.GetErrorCount(host.VerifyResult.Errors) > 0)
+                        {
+                            strError = VerifyError.BuildTextLines(host.VerifyResult.Errors);
+                            strError = $"脚本处理 {info.RecPath} 过程中出错: {strError}";
+                            goto ERROR1;
+                        }
                     }
 
                     // 2019/5/22
@@ -12798,6 +13043,8 @@ out string error);
             finally
             {
                 s.Close();
+                if (clear_file && File.Exists(this.LastIso2709FileName))
+                    File.Delete(this.LastIso2709FileName);
 
                 /*
                 _stop.EndLoop();
@@ -13882,7 +14129,7 @@ out string error);
             dlg.RangeMode = false;
             try
             {
-                dlg.uString = this.textBox_queryWord.Text;
+                dlg.sString = this.textBox_queryWord.Text;
             }
             catch
             {
@@ -13896,7 +14143,7 @@ out string error);
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
 
-            this.textBox_queryWord.Text = dlg.uString;
+            this.textBox_queryWord.Text = dlg.sString;
 
         }
 
@@ -13930,7 +14177,7 @@ out string error);
             dlg.RangeMode = true;
             try
             {
-                dlg.uString = this.textBox_queryWord.Text;
+                dlg.sString = this.textBox_queryWord.Text;
             }
             catch
             {
@@ -13944,7 +14191,7 @@ out string error);
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
 
-            this.textBox_queryWord.Text = dlg.uString;
+            this.textBox_queryWord.Text = dlg.sString;
         }
 
         private async void toolStripMenuItem_searchKeys_Click(object sender, EventArgs e)
@@ -15067,8 +15314,23 @@ out string error);
                 dlg.XmlFileName = Path.Combine(Program.MainForm.UserDir, "zserver.xml");
                 dlg.SourceServerFileName = Path.Combine(Program.MainForm.DataDir, "source_zserver.xml");
                 dlg.StartPosition = FormStartPosition.CenterParent;
+                dlg.ScriptChanged += (o1, e1) =>
+                {
+                    // 触发 AssemblyCache 刷新
+                    if (string.IsNullOrEmpty(e1.OldName) == false)
+                    {
+                        var cacheKey = BuildZ3950ScriptCacheKey(e1.OldName);
+                        Program.MainForm.AssemblyCache.Clear(cacheKey);
+                    }
+                };
                 dlg.ShowDialog(this);
             }
+        }
+
+
+        public static string BuildZ3950ScriptCacheKey(string name)
+        {
+            return "z3950export:" + name;
         }
 
         private void toolStripButton_multiLine_CheckedChanged(object sender, EventArgs e)
@@ -15128,7 +15390,6 @@ out string error);
         {
             return this.listView_records.TryGet(func);
         }
-
 
     }
 
