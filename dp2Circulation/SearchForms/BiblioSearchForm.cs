@@ -2563,6 +2563,7 @@ BuildZ3950ScriptCacheKey(script_name),
 script_code,
 "",
 marc,
+null,
 out VerifyHost host,
 out string error);
                     if (ret < 0)
@@ -12655,6 +12656,67 @@ message,
             MessageBox.Show(this, strError);
         }
 
+        /* 定制脚本样例
+         * VerifyHost 基类有个成员叫做 Table，是个 Hashtable，方便在宿主和脚本之间来回传递信息。宿主在触发脚本以前，会在 Table 里面准备好一个名为 "originMarc" 的字符串，表示这是数据库中原始的 MARC 记录内容。脚本返回前，如果给 Table 添加了一个名为 "changedMarc" 的字符串，表示希望宿主根据这个字符串去覆盖修改数据库中的原始记录。如果不希望宿主去修改，则不要添加这个 "changedMarc" 字符串即可。
+         * 而脚本中重载的 Verify() 函数的 marc 参数，提供了即将导出的 MARC 记录内容，脚本可以修改这个内容，达到控制导出的目的。Verify() 函数返回的 VerifyResult 类型对象的用法，和以前一样，如果在 VerifyResult 对象的 ChangedMarc 成员中返回 MARC 记录，这是指要导出的记录内容，注意，和修改数据库原始记录无关。
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Drawing;
+using System.Windows.Forms;
+using System.Xml;
+using System.Diagnostics;
+using System.Threading;
+using System.IO;
+using System.Reflection;
+using System.Threading.Tasks;
+using System.Web;
+using System.Text;
+using System.Data;
+using System.Linq;
+using System.Globalization;
+
+using dp2Circulation;
+
+using DigitalPlatform;
+using DigitalPlatform.Text;
+using DigitalPlatform.Core;
+using DigitalPlatform.Marc;
+using DigitalPlatform.Script;
+
+public class MyVerifyHost : VerifyHost
+{
+    public override VerifyResult Verify(string action, string marc)
+    {
+        // 对来自数据库中的原始记录进行修改
+        {
+            string origin_marc = this.Table["originMarc"] as string;
+            var origin_record = new MarcRecord(origin_marc, "4**");
+
+            var state = origin_record.select("field[@name='998']/subfield[@name='s']").FirstContent;
+            state = MarcRecordUtility.SetStageStyle(state, "_已经导出");
+            origin_record.setFirstSubfield("998", "s", state);
+            this.Table["changedMarc"] = origin_record.Text;
+        }
+
+        // 对即将输出的记录内容进行修改
+        // 注意 marc 参数中的内容可能已经经过了宿主的某些处理，和原始记录有某些差异
+        string old_marc = marc;
+        var record = new MarcRecord(marc, "4**");
+
+        record.select("field[@name='998' or @name='997']").detach();
+
+        return new VerifyResult
+        {
+            Value = 0,
+            ChangedMarc = old_marc != record.Text ? record.Text : null,
+            ErrorInfo = "",
+        };
+    }
+}
+         * */
+
         // 2015/10/10
         // 保存到 MARC 文件
         void menu_saveToMarcFile_Click(object sender, EventArgs e)
@@ -12854,6 +12916,30 @@ message,
                     items.Add(item);
                 }
 
+                bool bOldSource = true; // 是否要从 OldXml 开始做起
+
+                int nChangeCount = this.GetItemsChangeCount(items);
+                if (nChangeCount > 0)
+                {
+                    bool bHideMessageBox = true;
+                    DialogResult result = MessageDialog.Show(this,
+                        "当前选定的 " + items.Count.ToString() + " 个事项中有 " + nChangeCount + " 项修改尚未保存。\r\n\r\n请问如何进行修改? \r\n\r\n(重新修改) 重新进行修改，忽略以前内存中的修改; \r\n(继续修改) 以上次的修改为基础继续修改; \r\n(放弃) 放弃整个操作",
+        MessageBoxButtons.YesNoCancel,
+        MessageBoxDefaultButton.Button1,
+        null,
+        ref bHideMessageBox,
+        new string[] { "重新修改", "继续修改", "放弃" });
+                    if (result == DialogResult.Cancel)
+                    {
+                        // strError = "放弃";
+                        return;
+                    }
+                    if (result == DialogResult.No)
+                    {
+                        bOldSource = false;
+                    }
+                }
+
                 ListViewBiblioLoader loader = new ListViewBiblioLoader(channel, // this.Channel,
                     looping.Progress,
                     items,
@@ -12875,6 +12961,25 @@ message,
                     BiblioInfo info = item.BiblioInfo;
 
                     string strXml = "";
+                    /*
+                    {
+                        if (string.IsNullOrEmpty(info.NewXml) == false)
+                            strXml = info.NewXml;
+                        else
+                            strXml = info.OldXml;
+                    }
+                    */
+                    if (bOldSource == true)
+                    {
+                        strXml = info.OldXml;
+                        // 放弃上一次的修改
+                        if (string.IsNullOrEmpty(info.NewXml) == false)
+                        {
+                            info.NewXml = "";
+                            this.m_nChangedCount--;
+                        }
+                    }
+                    else
                     {
                         if (string.IsNullOrEmpty(info.NewXml) == false)
                             strXml = info.NewXml;
@@ -12899,6 +13004,8 @@ message,
                         strError = "XML转换到MARC记录时出错: " + strError;
                         goto ERROR1;
                     }
+
+                    string originMarc = strMARC;
 
                     byte[] baTarget = null;
 
@@ -12951,6 +13058,10 @@ cacheKey,
 filterCode,
 "",
 record,
+(o) => {
+    o.Table = new Hashtable();
+    o.Table["originMarc"] = originMarc;
+},
 out VerifyHost host,
 out string error);
                         if (ret < 0)
@@ -12969,6 +13080,41 @@ out string error);
                             strError = VerifyError.BuildTextLines(host.VerifyResult.Errors);
                             strError = $"脚本处理 {info.RecPath} 过程中出错: {strError}";
                             goto ERROR1;
+                        }
+
+                        if (host != null
+&& host.Table != null
+&& host.Table.ContainsKey("changedMarc")
+)
+                        {
+                            // 要保存回数据库的记录
+                            var save_marc = host.Table["changedMarc"] as string;
+                            if (string.IsNullOrEmpty(save_marc) == false)
+                            {
+                                strXml = info.OldXml;
+                                nRet = MarcUtil.Marc2XmlEx(save_marc,
+                                    strMarcSyntax,
+                                    ref strXml,
+                                    out strError);
+                                if (nRet == -1)
+                                    goto ERROR1;
+
+                                if (info.OldXml != strXml)
+                                {
+                                    if (info != null)
+                                    {
+                                        if (string.IsNullOrEmpty(info.NewXml) == true)
+                                            this.m_nChangedCount++;
+                                        info.NewXml = strXml;
+                                    }
+
+                                    this.TryInvoke(() =>
+                                    {
+                                        item.ListViewItem.BackColor = GlobalParameters.ChangedBackColor;    // SystemColors.Info;
+                                        item.ListViewItem.ForeColor = GlobalParameters.ChangedForeColor;     // SystemColors.InfoText;
+                                    });
+                                }
+                            }
                         }
                     }
 
@@ -13059,6 +13205,8 @@ out string error);
 
                 this.EnableControls(true);
             }
+
+            RefreshPropertyView(false);
 
             // 
             if (bAppend == true)

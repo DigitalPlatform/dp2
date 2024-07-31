@@ -146,6 +146,28 @@ namespace dp2Circulation
                         return 0;
                     }
                 }
+
+                // 2024/7/31
+                // 需要将修改后的书目记录保存回书目库
+                if (string.IsNullOrEmpty(biblio_info.NewXml) == false)
+                {
+                    lRet = channel.SetBiblioInfo(
+                        stop,
+                        "change",
+                        biblio_info.RecPath,
+                        "xml",
+                        biblio_info.NewXml,
+                        biblio_info.Timestamp,
+                        "",
+                        "",
+                        out string output_recpath,
+                        out byte[] output_timestamp,
+                        out strError);
+                    if (lRet == -1)
+                        return -1;  // TODO: 允许重试
+                    biblio_info.RecPath = output_recpath;
+                    biblio_info.Timestamp = output_timestamp;
+                }
             }
 
             return 1;

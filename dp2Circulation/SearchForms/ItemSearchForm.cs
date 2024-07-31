@@ -31,6 +31,7 @@ using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryServer;
 using Microsoft.CodeAnalysis.Operations;
 using DocumentFormat.OpenXml.EMMA;
+using System.Data.SqlTypes;
 // using DocumentFormat.OpenXml.Spreadsheet;
 
 
@@ -11172,6 +11173,7 @@ TaskScheduler.Default);
                 string strMARC = "";
                 string strMarcSyntax = "";
                 MarcRecord record = null;
+                string originMarc = "";
                 int nItemIndex = 0;
                 List<BiblioInfo> sub_items = new List<BiblioInfo>();
 
@@ -11204,6 +11206,8 @@ TaskScheduler.Default);
                         }
 
                         Debug.Assert(strMarcSyntax != "", "");
+
+                        originMarc = strMARC;
 
                         record = new MarcRecord(strMARC);
 
@@ -11325,6 +11329,11 @@ TaskScheduler.Default);
     filterCode,
     "",
     record,
+    (o) =>
+    {
+        o.Table = new Hashtable();
+        o.Table["originMarc"] = originMarc;
+    },
     out VerifyHost host,
     out string error);
                             if (ret < 0)
@@ -11344,6 +11353,29 @@ TaskScheduler.Default);
                                 strError = $"脚本处理 {biblio_info.RecPath} 过程中出错: {text}";
                                 throw new Exception(strError);
                             }
+
+                            if (host != null
+&& host.Table != null
+&& host.Table.ContainsKey("changedMarc")
+)
+                            {
+                                // 要保存回数据库的记录
+                                var save_marc = host.Table["changedMarc"] as string;
+                                if (string.IsNullOrEmpty(save_marc) == false)
+                                {
+                                    string strXml = biblio_info.OldXml;
+                                    nRet = MarcUtil.Marc2XmlEx(save_marc,
+                                    strMarcSyntax,
+                                        ref strXml,
+                                        out strError);
+                                    if (nRet == -1)
+                                        throw new Exception(strError);
+
+                                    if (biblio_info.OldXml != strXml)
+                                        biblio_info.NewXml = strXml;
+                                }
+                            }
+
 
                         }
 

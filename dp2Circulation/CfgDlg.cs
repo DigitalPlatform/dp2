@@ -865,6 +865,12 @@ namespace dp2Circulation
                     false);
                 _disableShareBiblioChangedEvent--;
 
+                {
+                    var rights = Program.MainForm.GetCurrentUserRights();
+                    if (StringUtil.IsInList("client_denysharebiblio", rights))
+                        this.label_message_denysharebiblio.Text = "注: 当前账户具有 client_denysharebiblio 权限，已被禁用共享书目";
+                }
+
                 this.textBox_message_userName.Text =
         ap.GetString(
         "message",

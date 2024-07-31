@@ -1098,6 +1098,25 @@ out string strError)
             return 1;
         }
 #endif
+        // 兼容以前接口
+        public int AddPinyin(
+    MarcRecord record,
+    string strCfgXml,
+    PinyinStyle style = PinyinStyle.None,
+    string strPrefix = "",
+    bool bAutoSel = false)
+        {
+            return AddPinyin(
+                record,
+                strCfgXml,
+                null,
+                style,
+                strPrefix,
+                bAutoSel);
+        }
+
+        // 如果返回 null，表示不加这个拼音子字段
+        public delegate string delegate_processPinyin(MarcSubfield subfield, string pinyin);
 
         // parameters:
         //      strPrefix   要加入拼音子字段内容前部的前缀字符串。例如 {cr:NLC} 或 {cr:CALIS}
@@ -1109,6 +1128,7 @@ out string strError)
         /// </summary>
         /// <param name="record">MARC 记录对象</param>
         /// <param name="strCfgXml">拼音配置 XML</param>
+        /// <param name="func_process">对拼音字符串的预处理函数</param>
         /// <param name="style">风格</param>
         /// <param name="strPrefix">前缀字符串。缺省为空</param>
         /// <param name="bAutoSel">是否自动选择多音字</param>
@@ -1116,6 +1136,7 @@ out string strError)
         public int AddPinyin(
             MarcRecord record,
             string strCfgXml,
+            delegate_processPinyin func_process,
             PinyinStyle style = PinyinStyle.None,
             string strPrefix = "",
             bool bAutoSel = false)
@@ -1211,8 +1232,10 @@ out string strError)
                         string from = new string(item.From[k], 1);
                         string to = new string(item.To[k], 1);
 
+                        /*
                         // 删除已经存在的目标子字段
                         field.select("subfield[@name='" + to + "']").detach();
+                        */
 
                         MarcNodeList subfields = field.select("subfield[@name='" + from + "']");
 
@@ -1221,6 +1244,11 @@ out string strError)
                             strHanzi = subfield.Content;
 
                             if (DetailHost.ContainHanzi(strHanzi) == false)
+                                continue;
+
+                            // TODO: 如果当前子字段后面紧挨着一个目标子字段，则表明不需要加拼音了
+                            var next_sibling = GetNextSibling(subfield, to);
+                            if (next_sibling != null)
                                 continue;
 
                             string strSubfieldPrefix = "";  // 当前子字段内容本来具有的前缀
@@ -1241,8 +1269,6 @@ out string strError)
                                 strHanzi = strHanzi.Substring(strCmd.Length + 2); // 去掉 {} 部分
                                 strSubfieldPrefix = "{" + strCmd + "}";
                             }
-
-                            string strPinyin = "";
 
 #if NO
                             // 把字符串中的汉字和拼音分离
@@ -1283,7 +1309,7 @@ out string strError)
                                 strHanzi,
                                 style,
                                 bAutoSel,
-                                out strPinyin,
+                                out string strPinyin,
                                 out strError);
                             if (nRet == -1)
                             {
@@ -1295,6 +1321,7 @@ out string strError)
                                 goto ERROR1;
                             }
 
+
                             string strContent = strPinyin;
 
                             if (string.IsNullOrEmpty(strPrefix) == false)
@@ -1302,7 +1329,11 @@ out string strError)
                             else if (string.IsNullOrEmpty(strSubfieldPrefix) == false)
                                 strContent = strSubfieldPrefix + strPinyin;
 
-                            subfield.after(MarcQuery.SUBFLD + to + strPinyin);
+                            strContent = func_process?.Invoke(subfield, strContent);
+                            if (strContent == null)
+                                continue;
+
+                            subfield.after(MarcQuery.SUBFLD + to + strContent);   // strPinyin
                         }
                     }
                 }
@@ -1316,6 +1347,18 @@ out string strError)
                     this.MessageBoxShow(strError);
             }
             return -1;
+        }
+
+        static MarcSubfield GetNextSibling(
+            MarcSubfield current,
+            string next_name)
+        {
+            var next_sibling = current.NextSibling as MarcSubfield;
+            if (next_sibling == null)
+                return null;
+            if (next_sibling.Name == next_name)
+                return next_sibling;
+            return null;
         }
 
         /// <summary>

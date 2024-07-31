@@ -117,6 +117,8 @@
             this.checkBox_itemManagement_cataloging = new System.Windows.Forms.CheckBox();
             this.checkBox_itemManagement_verifyItemBarcode = new System.Windows.Forms.CheckBox();
             this.tabPage_ui = new System.Windows.Forms.TabPage();
+            this.textBox_ui_loginWelcomeText = new System.Windows.Forms.TextBox();
+            this.label48 = new System.Windows.Forms.Label();
             this.checkBox_ui_printLabelMode = new System.Windows.Forms.CheckBox();
             this.checkBox_ui_fixedPanelAnimationEnabled = new System.Windows.Forms.CheckBox();
             this.button_ui_getDefaultFont = new System.Windows.Forms.Button();
@@ -285,8 +287,7 @@
             this.button_z3950_servers = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
             this.button_Cancel = new System.Windows.Forms.Button();
-            this.textBox_ui_loginWelcomeText = new System.Windows.Forms.TextBox();
-            this.label48 = new System.Windows.Forms.Label();
+            this.label_message_denysharebiblio = new System.Windows.Forms.Label();
             this.tabControl_main.SuspendLayout();
             this.tabPage_server.SuspendLayout();
             this.toolStrip_server.SuspendLayout();
@@ -1395,6 +1396,26 @@
             this.tabPage_ui.TabIndex = 4;
             this.tabPage_ui.Text = "外观";
             this.tabPage_ui.UseVisualStyleBackColor = true;
+            // 
+            // textBox_ui_loginWelcomeText
+            // 
+            this.textBox_ui_loginWelcomeText.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_ui_loginWelcomeText.Location = new System.Drawing.Point(253, 376);
+            this.textBox_ui_loginWelcomeText.Margin = new System.Windows.Forms.Padding(5);
+            this.textBox_ui_loginWelcomeText.Name = "textBox_ui_loginWelcomeText";
+            this.textBox_ui_loginWelcomeText.Size = new System.Drawing.Size(633, 31);
+            this.textBox_ui_loginWelcomeText.TabIndex = 9;
+            // 
+            // label48
+            // 
+            this.label48.AutoSize = true;
+            this.label48.Location = new System.Drawing.Point(5, 381);
+            this.label48.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.label48.Name = "label48";
+            this.label48.Size = new System.Drawing.Size(201, 21);
+            this.label48.TabIndex = 8;
+            this.label48.Text = "登录画面欢迎语(&W):";
             // 
             // checkBox_ui_printLabelMode
             // 
@@ -3101,6 +3122,7 @@
             // tabPage_message
             // 
             this.tabPage_message.AutoScroll = true;
+            this.tabPage_message.Controls.Add(this.label_message_denysharebiblio);
             this.tabPage_message.Controls.Add(this.groupBox_dp2mserver);
             this.tabPage_message.Controls.Add(this.groupBox_message_compactShelf);
             this.tabPage_message.Controls.Add(this.label_message_shareBiblio_comment);
@@ -3389,25 +3411,14 @@
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
-            // textBox_ui_loginWelcomeText
+            // label_message_denysharebiblio
             // 
-            this.textBox_ui_loginWelcomeText.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_ui_loginWelcomeText.Location = new System.Drawing.Point(253, 376);
-            this.textBox_ui_loginWelcomeText.Margin = new System.Windows.Forms.Padding(5);
-            this.textBox_ui_loginWelcomeText.Name = "textBox_ui_loginWelcomeText";
-            this.textBox_ui_loginWelcomeText.Size = new System.Drawing.Size(633, 31);
-            this.textBox_ui_loginWelcomeText.TabIndex = 9;
-            // 
-            // label48
-            // 
-            this.label48.AutoSize = true;
-            this.label48.Location = new System.Drawing.Point(5, 381);
-            this.label48.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.label48.Name = "label48";
-            this.label48.Size = new System.Drawing.Size(201, 21);
-            this.label48.TabIndex = 8;
-            this.label48.Text = "登录画面欢迎语(&W):";
+            this.label_message_denysharebiblio.AutoSize = true;
+            this.label_message_denysharebiblio.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label_message_denysharebiblio.Location = new System.Drawing.Point(222, 48);
+            this.label_message_denysharebiblio.Name = "label_message_denysharebiblio";
+            this.label_message_denysharebiblio.Size = new System.Drawing.Size(0, 21);
+            this.label_message_denysharebiblio.TabIndex = 28;
             // 
             // CfgDlg
             // 
@@ -3783,5 +3794,6 @@
         private System.Windows.Forms.Button button_ucs_testUpload;
         private System.Windows.Forms.TextBox textBox_ui_loginWelcomeText;
         private System.Windows.Forms.Label label48;
+        private System.Windows.Forms.Label label_message_denysharebiblio;
     }
 }

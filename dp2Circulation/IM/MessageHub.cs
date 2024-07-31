@@ -901,6 +901,11 @@ strError);
                 // 共享书目数据
                 if (Program.MainForm == null || Program.MainForm.AppInfo == null)
                     return false;
+
+                var rights = Program.MainForm.GetCurrentUserRights();
+                if (StringUtil.IsInList("client_denysharebiblio", rights))
+                    return false;
+
                 return Program.MainForm.AppInfo.GetBoolean(
                     "message",
                     "share_biblio",

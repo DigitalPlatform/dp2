@@ -2507,7 +2507,11 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
         }
 #endif
 
-        internal bool BlockStart(int direction)
+        // parameters:
+        //      direction   (选择字段)运动方向。-1 上, 0 不动, +1 下
+        //      delta   微调起点字段 index
+        internal bool BlockStart(int direction,
+            int delta = 0)
         {
             if (Control.ModifierKeys != Keys.Shift)
             {
@@ -2518,7 +2522,7 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             if (_block_mode == false)
             {
                 _block_mode = true;
-                nStartFieldIndex = this.FocusedFieldIndex;
+                nStartFieldIndex = this.FocusedFieldIndex + delta;
                 _nCurrentFieldIndex = nStartFieldIndex;
                 if (direction == -1)
                 {

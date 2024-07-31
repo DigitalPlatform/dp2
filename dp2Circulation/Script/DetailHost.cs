@@ -420,7 +420,7 @@ namespace dp2Circulation
             if (string.IsNullOrEmpty(strCreateTime) == true)
             {
                 DateTime now = DateTime.Now;
-                strCreateTime = now.ToString("u");
+                strCreateTime = now.ToString("s"); // 2024/7/30 改为 s 格式 // now.ToUniversalTime().ToString("u");
                 func_setFirstSubfield("998", "u", strCreateTime);
                 bChanged = true;
             }
@@ -689,6 +689,11 @@ namespace dp2Circulation
 
                                 // 2013/6/13
                                 if (DetailHost.ContainHanzi(strHanzi) == false)
+                                    continue;
+
+                                // 2024/7/30
+                                // 如果遇到已经有拼音子字段了，则不会再加和修改
+                                if (strNextSubfieldName == to)
                                     continue;
 
                                 string strSubfieldPrefix = "";  // 当前子字段内容本来具有的前缀

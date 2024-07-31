@@ -2186,7 +2186,7 @@ MarcEditor.WM_LEFTRIGHT_MOVED,
                                 || (shift == true && _caret_pos >= this.Text.Length))
                                 && this.MarcEditor.FocusedFieldIndex < this.MarcEditor.Record.Fields.Count - 1)
                             {
-                                if (this.MarcEditor.BlockStart(+1))
+                                if (this.MarcEditor.BlockStart(+1))   // 0, 1
                                 {
                                     e.Handled = true;
                                     return;

@@ -478,6 +478,8 @@ public class MyVerifyHost : VerifyHost
             return "export:" + pure_fileName;
         }
 
+        public delegate void delagate_initializeHost(VerifyHost host);
+
         // 导出 MARC 前过滤和处理 MARC 字段
         // return:
         //      -1  出错
@@ -489,6 +491,7 @@ public class MyVerifyHost : VerifyHost
             string strCode,
             string strRef,
             MarcRecord record,
+            delagate_initializeHost func_init,
             out VerifyHost hostObj,
             out string strError)
         {
@@ -511,6 +514,8 @@ out strError);
             // 为Host派生类设置参数
             hostObj.DetailForm = null;
             hostObj.Assembly = assembly;
+
+            func_init?.Invoke(hostObj);
 
             hostObj.VerifyResult = hostObj.Verify("", record.Text);
             if (hostObj.VerifyResult != null

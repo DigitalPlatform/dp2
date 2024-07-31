@@ -10064,9 +10064,6 @@ out strError);
 
             try
             {
-                string strOutputPath = "";
-                byte[] baNewTimestamp = null;
-
                 long lRet = channel.SetBiblioInfo(
                     looping.Progress,
                     strAction,  // "delete",
@@ -10076,8 +10073,8 @@ out strError);
                     baTimestamp,
                     "",
                     strStyle,
-                    out strOutputPath,
-                    out baNewTimestamp,
+                    out string strOutputPath,
+                    out byte [] baNewTimestamp,
                     out strError);
                 if (lRet == -1)
                 {
@@ -12636,6 +12633,7 @@ out strError);
          * $c编目规则。例如 "NLC" 或 "CALIS"。此子字段不可重复。
          * $k查重键中的附加信息。此子字段可以重复。用于区分实际上不同的两种书目记录，避免查重键完全一样
          * $l相同书目记录之间的关联 ID。此子字段不可重复。两种书目记录之间若 $l 中的关联 ID 相同，但 $c 中的编目规则不同，表明虽然编目规则不同，但描述的图书是同一种图书。
+         * $s状态。表示当前记录的状态，内容是一个逗号间隔的字符串
          * $t目标记录路径。表示当前记录(一般是多库流程中的订购或临时编目书目记录)最终进入中央库的时候，要合并保存到 $t 指向的路径
          * $u记录创建时间。u 格式时间字符串(也可以用 s 格式时间字符串)。
          * $z记录创建者。账户名。
