@@ -32,6 +32,7 @@ using DigitalPlatform.LibraryServer;
 using Microsoft.CodeAnalysis.Operations;
 using DocumentFormat.OpenXml.EMMA;
 using System.Data.SqlTypes;
+using dp2Circulation.Script;
 // using DocumentFormat.OpenXml.Spreadsheet;
 
 
@@ -11040,7 +11041,16 @@ TaskScheduler.Default);
                 return;
 
             var removeFieldNames = dlg_905.RemoveFieldNames;
-            var filterCode = dlg_905.ScriptCode;
+            string filterCode = "";
+            try
+            {
+                filterCode = dlg_905.ScriptCode;
+            }
+            catch(Exception ex)
+            {
+                strError = ex.Message;
+                goto ERROR1;
+            }
             var cacheKey = ExportMarcHoldingDialog.BuildCacheKey(dlg_905.ScriptFileName);
 
             bool unimarc_modify_100 = dlg.UnimarcModify100;
@@ -11139,23 +11149,25 @@ TaskScheduler.Default);
             Stream s = null;
             bool clear_file = false;
             int nOutputCount = 0;
-            try
-            {
-                s = File.Open(this.LastIso2709FileName,
-                     FileMode.OpenOrCreate);
-                if (bAppend == false)
-                    s.SetLength(0);
-                else
-                    s.Seek(0, SeekOrigin.End);
-            }
-            catch (Exception ex)
-            {
-                strError = "打开或创建文件 " + this.LastIso2709FileName + " 失败，原因: " + ex.Message;
-                goto ERROR1;
-            }
+            int instantly_save_count = 0;
 
             try
             {
+                try
+                {
+                    s = File.Open(this.LastIso2709FileName,
+                         FileMode.OpenOrCreate);
+                    if (bAppend == false)
+                        s.SetLength(0);
+                    else
+                        s.Seek(0, SeekOrigin.End);
+                }
+                catch (Exception ex)
+                {
+                    strError = "打开或创建文件 " + this.LastIso2709FileName + " 失败，原因: " + ex.Message;
+                    goto ERROR1;
+                }
+
                 List<string> biblioRecPathList = new List<string>();   // 按照出现先后的顺序存储书目记录路径
 
                 Hashtable groupTable = new Hashtable();   // 书目记录路径 --> List<string> (册记录路径列表)
@@ -11178,6 +11190,7 @@ TaskScheduler.Default);
                 List<BiblioInfo> sub_items = new List<BiblioInfo>();
 
                 looping.Progress.SetProgressRange(0, selected_items.Count);
+
 
                 nRet = DumpBiblioAndPartsSubItems.Dump(
                     looping.Progress,
@@ -11320,11 +11333,13 @@ TaskScheduler.Default);
                     // 结束书目记录处理
                     (biblio_info) =>
                     {
+                        bool skip_export = false;
+
                         // TODO: 如果要移除的字段，涉及到 906 等字段，要警告一下
-                        ExportMarcHoldingDialog.FilterBiblioRecord(record, removeFieldNames);
+                        ScriptDialog.FilterBiblioRecord(record, removeFieldNames);
                         if (string.IsNullOrEmpty(filterCode) == false)
                         {
-                            var ret = ExportMarcHoldingDialog.FilterRecord(
+                            var ret = ScriptDialog.FilterRecord(
     cacheKey,
     filterCode,
     "",
@@ -11372,11 +11387,20 @@ TaskScheduler.Default);
                                         throw new Exception(strError);
 
                                     if (biblio_info.OldXml != strXml)
+                                    {
                                         biblio_info.NewXml = strXml;
+                                        instantly_save_count++;
+                                    }
                                 }
                             }
 
-
+                            if (host != null
+    && host.Table != null
+    && host.Table.ContainsKey("skipExport")
+    )
+                            {
+                                skip_export = (bool)host.Table["skipExport"];
+                            }
                         }
 
 
@@ -11393,38 +11417,41 @@ TaskScheduler.Default);
                             record,
                             sub_items);
 
-                        // 将MARC机内格式转换为ISO2709格式
-                        // parameters:
-                        //      strSourceMARC   [in]机内格式MARC记录。
-                        //      strMarcSyntax   [in]为"unimarc"或"usmarc"
-                        //      targetEncoding  [in]输出ISO2709的编码方式。为UTF8、codepage-936等等
-                        //      baResult    [out]输出的ISO2709记录。编码方式受targetEncoding参数控制。注意，缓冲区末尾不包含0字符。
-                        // return:
-                        //      -1  出错
-                        //      0   成功
-                        nRet = MarcUtil.CvtJineiToISO2709(
-                            record.Text,
-                            strMarcSyntax,
-                            targetEncoding,
-                            unimarc_modify_100 ? "unimarc_100" : "",
-                            out byte[] baTarget,
-                            out strError);
-                        if (nRet == -1)
-                            throw new Exception(strError);
-
-                        s.Write(baTarget, 0,
-                            baTarget.Length);
-
-                        if (dlg.CrLf == true)
+                        if (skip_export == false)
                         {
-                            byte[] baCrLf = targetEncoding.GetBytes("\r\n");
-                            s.Write(baCrLf, 0,
-                                baCrLf.Length);
+                            // 将MARC机内格式转换为ISO2709格式
+                            // parameters:
+                            //      strSourceMARC   [in]机内格式MARC记录。
+                            //      strMarcSyntax   [in]为"unimarc"或"usmarc"
+                            //      targetEncoding  [in]输出ISO2709的编码方式。为UTF8、codepage-936等等
+                            //      baResult    [out]输出的ISO2709记录。编码方式受targetEncoding参数控制。注意，缓冲区末尾不包含0字符。
+                            // return:
+                            //      -1  出错
+                            //      0   成功
+                            nRet = MarcUtil.CvtJineiToISO2709(
+                                record.Text,
+                                strMarcSyntax,
+                                targetEncoding,
+                                unimarc_modify_100 ? "unimarc_100" : "",
+                                out byte[] baTarget,
+                                out strError);
+                            if (nRet == -1)
+                                throw new Exception(strError);
+
+                            s.Write(baTarget, 0,
+                                baTarget.Length);
+
+                            if (dlg.CrLf == true)
+                            {
+                                byte[] baCrLf = targetEncoding.GetBytes("\r\n");
+                                s.Write(baCrLf, 0,
+                                    baCrLf.Length);
+                            }
+
+                            looping.Progress.SetProgressValue(nItemIndex);
+
+                            nOutputCount++;
                         }
-
-                        looping.Progress.SetProgressValue(nItemIndex);
-
-                        nOutputCount++;
 
                         return true;
                     },
@@ -11433,14 +11460,6 @@ TaskScheduler.Default);
                 if (nRet == -1)
                     goto ERROR1;
 
-                // 
-                if (bAppend == true)
-                    MainForm.StatusBarMessage = nOutputCount.ToString()
-                        + "条记录成功追加到文件 " + this.LastIso2709FileName + " 尾部";
-                else
-                    MainForm.StatusBarMessage = nOutputCount.ToString()
-                        + "条记录成功保存到新文件 " + this.LastIso2709FileName + " 尾部";
-                return;
             }
             catch (Exception ex)
             {
@@ -11450,7 +11469,8 @@ TaskScheduler.Default);
             finally
             {
                 this.EnableControls(true);
-                s.Close();
+                if (s != null)
+                    s.Close();
                 if (clear_file && File.Exists(this.LastIso2709FileName))
                     File.Delete(this.LastIso2709FileName);
 
@@ -11465,8 +11485,23 @@ TaskScheduler.Default);
                 EndLoop(looping);
             }
 
+            // 
+            string succeed_text = "";
+            if (bAppend == true)
+                succeed_text = nOutputCount.ToString()
+                    + "条记录成功追加到文件 " + this.LastIso2709FileName + " 尾部";
+            else
+                succeed_text = nOutputCount.ToString()
+                    + "条记录成功保存到新文件 " + this.LastIso2709FileName + " 尾部";
+            if (instantly_save_count > 0)
+                succeed_text += $"。数据库修改兑现 {instantly_save_count} 条";
+
+            MainForm.StatusBarMessage = succeed_text;
+
+            MessageDlg.Show(this, succeed_text, "导出完成");
+            return;
         ERROR1:
-            ShowMessageBox(strError);
+            ShowMessageDlg(strError, "导出过程出错");
         }
 
         static void Create905(

@@ -32,6 +32,7 @@ using DigitalPlatform.Z3950.UI;
 using DigitalPlatform.Z3950;
 using static DigitalPlatform.Marc.MarcUtil;
 using dp2Circulation.SearchForms;
+using dp2Circulation.Script;
 
 namespace dp2Circulation
 {
@@ -822,6 +823,10 @@ Keys keyData)
             this.EnableControlsInSearching(false);
             try
             {
+                // 清理废弃的全局结果集
+                CleanFreeResultSet(looping.Progress,
+                    channel,
+                    out _);
 
                 // string strBrowseStyle = "id,cols";
                 string strOutputStyle = "";
@@ -1459,6 +1464,11 @@ out strError);
             this.EnableControlsInSearching(false);
             try
             {
+                // 清理废弃的全局结果集
+                CleanFreeResultSet(looping.Progress,
+                    channel,
+                    out _);
+
                 string from = this.From;
                 if (from == "")
                 {
@@ -2121,6 +2131,52 @@ out strError);
             return 0;
         }
 
+        // 清理废弃的结果集
+        // TODO: 可以考虑改进为，用一个后台线程在空闲的时候请求 dp2library 服务器删除废弃的结果集，这样的好处是不用每次 Search() 前都要先发出一个 GetSearchResult() API 请求
+        int CleanFreeResultSet(
+            Stop stop,
+            LibraryChannel channel,
+            out string strError)
+        {
+            strError = "";
+
+            List<string> names = new List<string>();
+            lock (_free_resultset_names)
+            {
+                if (_free_resultset_names.Count == 0)
+                    return 0;
+                names.AddRange(_free_resultset_names);
+                _free_resultset_names.Clear();
+            }
+            var list = StringUtil.MakePathList(names);
+
+            var ret = channel.GetSearchResult(stop,
+                null,
+                0,
+                0,
+                $"@remove:{list}",
+                "zh",
+                out _,
+                out strError);
+            if (ret == -1)
+            {
+                lock (_free_resultset_names)
+                {
+                    _free_resultset_names.AddRange(names);
+                    while (_free_resultset_names.Count > MAX_FREE_RESULTSET_COUNT)
+                    {
+                        _free_resultset_names.RemoveAt(0);
+                    }
+                }
+            }
+            return (int)ret;
+        }
+
+        const int MAX_FREE_RESULTSET_COUNT = 1000;
+
+        // 已经废弃的全局结果集名字
+        List<string> _free_resultset_names = new List<string>();
+
         // 存储全局结果集名
         string _resultSetName = "";
 
@@ -2128,8 +2184,22 @@ out strError);
         {
             if (multiline_search)
                 return "multiline";
-            if (string.IsNullOrEmpty(_resultSetName))
-                _resultSetName = "#" + Guid.NewGuid().ToString();
+
+            // if (string.IsNullOrEmpty(_resultSetName))
+            _resultSetName = "#" + Guid.NewGuid().ToString();
+
+            if (string.IsNullOrEmpty(_resultSetName) == false)
+            {
+                lock (_free_resultset_names)
+                {
+                    _free_resultset_names.Add(_resultSetName);
+                    while (_free_resultset_names.Count > MAX_FREE_RESULTSET_COUNT)
+                    {
+                        _free_resultset_names.RemoveAt(0);
+                    }
+                }
+            }
+
             return _resultSetName;
         }
 
@@ -2558,7 +2628,7 @@ GetCurrentBrowseStyle());
                 {
                     MarcRecord marc = new MarcRecord(strMARC);
                     // hostObj.VerifyResult.Value
-                    var ret = ExportMarcHoldingDialog.FilterRecord(
+                    var ret = ScriptDialog.FilterRecord(
 BuildZ3950ScriptCacheKey(script_name),
 script_code,
 "",
@@ -7060,6 +7130,7 @@ MessageBoxDefaultButton.Button2);
 
                             MarcRecord record = new MarcRecord(strMARC);
                             BeforeSaveRecordEventArgs e = new BeforeSaveRecordEventArgs();
+                            e.TargetRecPath = biblio_rec_path;
                             this.TryInvoke(() =>
                             {
                                 genData.DetailHostObj.Invoke("BeforeSaveRecord",
@@ -7068,7 +7139,7 @@ MessageBoxDefaultButton.Button2);
                             });
                             if (string.IsNullOrEmpty(e.ErrorInfo) == false)
                             {
-                                strError = e.ErrorInfo;
+                                strError = $"记录 '{biblio_rec_path}' 准备阶段出现错误: {e.ErrorInfo}。批处理中断";
                                 goto ERROR1;
                             }
                             if (e.Changed)
@@ -8983,6 +9054,10 @@ out string strError)
                 dlg.MessageText += "\r\n\r\n注：\r\n1) 当前执行的是移动而不是复制操作;\r\n2) 书目记录下属的册、期、订购、实体记录和对象资源会被一并移动到目标位置";
                 dlg.EnableCopyChildRecords = false;
             }
+
+            if (bCopy)
+                dlg.EnableCompressTailNo = false;
+
             // TODO: 要让记录ID为问号，并且不可改动
 
             dlg.CurrentBiblioRecPath = "";  // 源记录路径？ 但是批处理情况下源记录路径并不确定阿
@@ -9016,6 +9091,11 @@ out string strError)
                     strAction = "move";
             }
 
+            var compressTailNo = this.TryGet(() =>
+            {
+                return dlg.CompressTailNo;
+            });
+
             GenerateData genData = new GenerateData(this, null);
 
             bool bHideMessageBox = false;
@@ -9036,11 +9116,30 @@ out string strError)
             this.listView_records.Enabled = false;
             try
             {
-                looping.Progress.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+
+                var items = this.TryGet(() =>
+                {
+                    return this.listView_records.SelectedItems
+                    .Cast<ListViewItem>()
+                    .AsQueryable()
+                    .Where(o => string.IsNullOrEmpty(o.Text) == false && IsCmdLine(o.Text) == false)
+                    .ToList();
+                });
+
+                // looping.Progress.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                looping.Progress.SetProgressRange(0, items.Count);
+
+                ListViewBiblioLoader loader = new ListViewBiblioLoader(channel, // this.Channel,
+                    looping.Progress,
+                    items,
+                    this.m_biblioTable);
+                loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
+                loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
 
                 List<ListViewItem> moved_items = new List<ListViewItem>();
                 int i = 0;
-                foreach (ListViewItem item in this.listView_records.SelectedItems)
+                // foreach (ListViewItem item in this.listView_records.SelectedItems)
+                foreach (LoaderItem l_item in loader)
                 {
                     Application.DoEvents(); // 出让界面控制权
 
@@ -9049,6 +9148,8 @@ out string strError)
                         strError = "用户中断";
                         goto ERROR1;
                     }
+
+                    ListViewItem item = l_item.ListViewItem;
 
                     string strRecPath = ListViewUtil.GetItemText(item, 0);
 
@@ -9064,16 +9165,15 @@ out string strError)
                     byte[] baOutputTimestamp = null;
                     string strOutputBiblio = "";
 
-                    BiblioInfo info = (BiblioInfo)this.m_biblioTable[strRecPath];
-                    if (info == null
-                        && strRecPath.IndexOf("@") != -1)
-                        goto CONTINUE;
-                    string strXml = info.NewXml;
-                    if (string.IsNullOrEmpty(strXml))
-                        strXml = info.OldXml;
-                    if (string.IsNullOrEmpty(strXml) == true
-                        && strRecPath.IndexOf("@") != -1)
-                        goto CONTINUE;
+                    // BiblioInfo info = (BiblioInfo)this.m_biblioTable[strRecPath];
+                    var info = l_item.BiblioInfo;
+                    string strXml = "";
+                    if (info != null)
+                    {
+                        strXml = info.NewXml;
+                        if (string.IsNullOrEmpty(strXml))
+                            strXml = info.OldXml;
+                    }
 
                     // 2024/7/23
                     int nRet = genData.InitialAutogenAssembly(dlg.RecPath,
@@ -9082,7 +9182,8 @@ out string strError)
                         goto ERROR1;
 
                     bool xml_changed = false;
-                    if (genData.DetailHostObj != null)
+                    if (genData.DetailHostObj != null
+                        && string.IsNullOrEmpty(strXml) == false)
                     {
                         nRet = MarcUtil.Xml2Marc(strXml,    // info.OldXml,
 true,
@@ -9098,6 +9199,7 @@ out strError);
 
                         MarcRecord record = new MarcRecord(strMARC);
                         BeforeSaveRecordEventArgs e = new BeforeSaveRecordEventArgs();
+                        e.TargetRecPath = dlg.RecPath;
                         this.TryInvoke(() =>
                         {
                             genData.DetailHostObj.Invoke("BeforeSaveRecord",
@@ -9106,7 +9208,7 @@ out strError);
                         });
                         if (string.IsNullOrEmpty(e.ErrorInfo) == false)
                         {
-                            strError = e.ErrorInfo;
+                            strError = $"记录 '{strRecPath}'-->'{dlg.RecPath}' 准备阶段出现错误: {e.ErrorInfo}。批处理中断";
                             goto ERROR1;
                         }
                         if (e.Changed)
@@ -9159,6 +9261,13 @@ out strError);
                             }
                         }
 
+                        if (info == null
+    && strRecPath.IndexOf("@") != -1)
+                            goto CONTINUE;
+
+                        if (string.IsNullOrEmpty(strXml) == true
+    && strRecPath.IndexOf("@") != -1)
+                            goto CONTINUE;
 
                         lRet = channel.SetBiblioInfo(
         looping.Progress,
@@ -9192,6 +9301,9 @@ out strError);
                         else
                             strMergeStyle = "";
 
+                        if (compressTailNo)
+                            StringUtil.SetInList(ref strMergeStyle, "compressTailNo", true);
+
                         // result.Value:
                         //      -1  出错
                         //      0   成功，没有警告信息。
@@ -9202,7 +9314,7 @@ out strError);
                             strRecPath,
                             "xml",
                             null,
-                            xml_changed ? info.Timestamp : null,    // this.BiblioTimestamp,
+                            xml_changed ? info?.Timestamp : null,    // this.BiblioTimestamp,
                             dlg.RecPath,
                             xml_changed ? strXml : null,
                             strMergeStyle,  // "file_reserve_source",  // 2017/4/19
@@ -12698,6 +12810,7 @@ public class MyVerifyHost : VerifyHost
             state = MarcRecordUtility.SetStageStyle(state, "_已经导出");
             origin_record.setFirstSubfield("998", "s", state);
             this.Table["changedMarc"] = origin_record.Text;
+            this.Table["instantlySaveChangedMarc"] = true;
         }
 
         // 对即将输出的记录内容进行修改
@@ -12723,6 +12836,7 @@ public class MyVerifyHost : VerifyHost
         {
             string strError = "";
             int nRet = 0;
+            List<ListViewItem> saved_items = new List<ListViewItem>();  // 发生过立即保存的浏览行 
 
             if (this.listView_records.SelectedItems.Count == 0)
             {
@@ -12797,7 +12911,16 @@ public class MyVerifyHost : VerifyHost
             }
 
             var removeFieldNames = dlg_905.RemoveFieldNames;
-            var filterCode = dlg_905.ScriptCode;
+            string filterCode = "";
+            try
+            {
+                filterCode = dlg_905.ScriptCode;
+            }
+            catch(Exception ex)
+            {
+                strError = ex.Message;
+                goto ERROR1;
+            }
             var cacheKey = ExportMarcHoldingDialog.BuildCacheKey(dlg_905.ScriptFileName);
 
             bool unimarc_modify_100 = dlg.UnimarcModify100;
@@ -12882,7 +13005,8 @@ public class MyVerifyHost : VerifyHost
                 goto ERROR1;
             }
 
-            int nCount = 0;
+            int nCount = 0; // 导出的记录数
+            int instantly_save_count = 0;   // 立即保存的记录数
 
             LibraryChannel channel = this.GetChannel();
 
@@ -13048,17 +13172,18 @@ public class MyVerifyHost : VerifyHost
                     // TODO: 如果要移除的字段，涉及到 906 等字段，要警告一下
                     if (string.IsNullOrEmpty(removeFieldNames) == false)
                     {
-                        ExportMarcHoldingDialog.FilterBiblioRecord(record, dlg_905.RemoveFieldNames);
+                        ScriptDialog.FilterBiblioRecord(record, dlg_905.RemoveFieldNames);
                     }
 
                     if (string.IsNullOrEmpty(filterCode) == false)
                     {
-                        var ret = ExportMarcHoldingDialog.FilterRecord(
+                        var ret = ScriptDialog.FilterRecord(
 cacheKey,
 filterCode,
 "",
 record,
-(o) => {
+(o) =>
+{
     o.Table = new Hashtable();
     o.Table["originMarc"] = originMarc;
 },
@@ -13101,21 +13226,74 @@ out string error);
 
                                 if (info.OldXml != strXml)
                                 {
-                                    if (info != null)
+                                    bool instantly_save = false;
+                                    if (host != null
+&& host.Table != null
+&& host.Table.ContainsKey("instantlySaveChangedMarc")
+)
                                     {
-                                        if (string.IsNullOrEmpty(info.NewXml) == true)
-                                            this.m_nChangedCount++;
-                                        info.NewXml = strXml;
+                                        instantly_save = (bool)host.Table["instantlySaveChangedMarc"];
                                     }
 
-                                    this.TryInvoke(() =>
+                                    // 如果要立即保存
+                                    if (instantly_save)
                                     {
-                                        item.ListViewItem.BackColor = GlobalParameters.ChangedBackColor;    // SystemColors.Info;
-                                        item.ListViewItem.ForeColor = GlobalParameters.ChangedForeColor;     // SystemColors.InfoText;
-                                    });
+                                        var lRet = channel.SetBiblioInfo(
+    looping.Progress,
+    "change",
+    info.RecPath,
+    "xml",
+    strXml,
+    info.Timestamp,
+    "",
+    "",
+    out string output_recpath,
+    out byte[] output_timestamp,
+    out strError);
+                                        if (lRet == -1)
+                                            goto ERROR1;  // TODO: 允许重试
+                                        info.RecPath = output_recpath;
+                                        info.Timestamp = output_timestamp;
+                                        info.OldXml = strXml;
+                                        if (string.IsNullOrEmpty(info.NewXml) == false)
+                                        {
+                                            info.NewXml = "";
+                                            this.m_nChangedCount--;
+                                        }
+                                        instantly_save_count++;
+                                        saved_items.Add(item.ListViewItem);
+                                    }
+                                    else
+                                    {
+                                        if (info != null)
+                                        {
+                                            if (string.IsNullOrEmpty(info.NewXml) == true)
+                                                this.m_nChangedCount++;
+                                            info.NewXml = strXml;
+                                        }
+
+                                        this.TryInvoke(() =>
+                                        {
+                                            item.ListViewItem.BackColor = GlobalParameters.ChangedBackColor;    // SystemColors.Info;
+                                            item.ListViewItem.ForeColor = GlobalParameters.ChangedForeColor;     // SystemColors.InfoText;
+                                        });
+                                    }
                                 }
                             }
                         }
+
+
+                        bool skip_export = false;
+                        if (host != null
+&& host.Table != null
+&& host.Table.ContainsKey("skipExport")
+)
+                        {
+                            skip_export = (bool)host.Table["skipExport"];
+                        }
+
+                        if (skip_export == true)
+                            continue;
                     }
 
                     // 2019/5/22
@@ -13206,18 +13384,42 @@ out string error);
                 this.EnableControls(true);
             }
 
+            // 对已经保存过的行刷新浏览显示
+            if (saved_items.Count > 0)
+            {
+                var ret = _refreshListViewLines(saved_items);
+                if (ret.Value == -1)
+                    MessageBox.Show(this, $"刷新浏览行时出错: {ret.ErrorInfo}");
+            }
+
             RefreshPropertyView(false);
 
             // 
+            string succeed_text = "";
             if (bAppend == true)
-                MainForm.StatusBarMessage = nCount.ToString()
+                succeed_text = nCount.ToString()
                     + "条记录成功追加到文件 " + this.LastIso2709FileName + " 尾部";
             else
-                MainForm.StatusBarMessage = nCount.ToString()
+                succeed_text = nCount.ToString()
                     + "条记录成功保存到新文件 " + this.LastIso2709FileName;
+            if (instantly_save_count > 0)
+                succeed_text += $"。数据库修改兑现 {instantly_save_count} 条";
+
+            MainForm.StatusBarMessage = succeed_text;
+
+            MessageDlg.Show(this, succeed_text, "导出完成");
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            // 对已经保存过的行刷新浏览显示
+            if (saved_items.Count > 0)
+            {
+                var ret = _refreshListViewLines(saved_items);
+                if (ret.Value == -1)
+                    MessageBox.Show(this, $"刷新浏览行时出错: {ret.ErrorInfo}");
+            }
+            RefreshPropertyView(false);
+
+            MessageDlg.Show(this, strError, "导出过程出错");
         }
 
         // 构造校验字符串
@@ -13862,14 +14064,15 @@ out string error);
                 {
                     string strError = "";
 
-                    string strResultSetName = GetResultSetName(false);
-
                     long lHitCount = this.m_lHitCount;
                     if (this.listView_records.Items.Count >= lHitCount)
                     {
                         strError = "浏览信息已经全部装载完毕了，没有必要继续装载";
                         goto ERROR1;
                     }
+
+                    // string strResultSetName = GetResultSetName(false);
+                    string strResultSetName = _resultSetName;
 
                     bool bQuickLoad = false;
                     if ((Control.ModifierKeys & Keys.Shift) == Keys.Shift)

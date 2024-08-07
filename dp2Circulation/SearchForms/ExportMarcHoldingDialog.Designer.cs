@@ -39,10 +39,8 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage_ext = new System.Windows.Forms.TabPage();
             this.tabPage_biblio = new System.Windows.Forms.TabPage();
-            this.button_biblio_deleteScriptFile = new System.Windows.Forms.Button();
-            this.button_biblio_createScriptFile = new System.Windows.Forms.Button();
-            this.textBox_biblio_filterScriptCode = new System.Windows.Forms.TextBox();
-            this.comboBox_biblio_filterScript = new System.Windows.Forms.ComboBox();
+            this.button_biblio_findFilterScriptFileName = new System.Windows.Forms.Button();
+            this.textBox_biblio_filterScriptFileName = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.textBox_biblio_removeFieldNameList = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
@@ -150,10 +148,8 @@
             // 
             // tabPage_biblio
             // 
-            this.tabPage_biblio.Controls.Add(this.button_biblio_deleteScriptFile);
-            this.tabPage_biblio.Controls.Add(this.button_biblio_createScriptFile);
-            this.tabPage_biblio.Controls.Add(this.textBox_biblio_filterScriptCode);
-            this.tabPage_biblio.Controls.Add(this.comboBox_biblio_filterScript);
+            this.tabPage_biblio.Controls.Add(this.button_biblio_findFilterScriptFileName);
+            this.tabPage_biblio.Controls.Add(this.textBox_biblio_filterScriptFileName);
             this.tabPage_biblio.Controls.Add(this.label2);
             this.tabPage_biblio.Controls.Add(this.textBox_biblio_removeFieldNameList);
             this.tabPage_biblio.Controls.Add(this.label1);
@@ -165,55 +161,25 @@
             this.tabPage_biblio.Text = "书目";
             this.tabPage_biblio.UseVisualStyleBackColor = true;
             // 
-            // button_biblio_deleteScriptFile
+            // button_biblio_findFilterScriptFileName
             // 
-            this.button_biblio_deleteScriptFile.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_biblio_deleteScriptFile.Location = new System.Drawing.Point(565, 142);
-            this.button_biblio_deleteScriptFile.Name = "button_biblio_deleteScriptFile";
-            this.button_biblio_deleteScriptFile.Size = new System.Drawing.Size(82, 30);
-            this.button_biblio_deleteScriptFile.TabIndex = 6;
-            this.button_biblio_deleteScriptFile.Text = "删除";
-            this.button_biblio_deleteScriptFile.UseVisualStyleBackColor = true;
-            this.button_biblio_deleteScriptFile.Click += new System.EventHandler(this.button_biblio_deleteScriptFile_Click);
+            this.button_biblio_findFilterScriptFileName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_biblio_findFilterScriptFileName.Location = new System.Drawing.Point(566, 142);
+            this.button_biblio_findFilterScriptFileName.Name = "button_biblio_findFilterScriptFileName";
+            this.button_biblio_findFilterScriptFileName.Size = new System.Drawing.Size(81, 31);
+            this.button_biblio_findFilterScriptFileName.TabIndex = 5;
+            this.button_biblio_findFilterScriptFileName.Text = "...";
+            this.button_biblio_findFilterScriptFileName.UseVisualStyleBackColor = true;
+            this.button_biblio_findFilterScriptFileName.Click += new System.EventHandler(this.button_biblio_findFilterScriptFileName_Click);
             // 
-            // button_biblio_createScriptFile
+            // textBox_biblio_filterScriptFileName
             // 
-            this.button_biblio_createScriptFile.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_biblio_createScriptFile.Location = new System.Drawing.Point(470, 142);
-            this.button_biblio_createScriptFile.Name = "button_biblio_createScriptFile";
-            this.button_biblio_createScriptFile.Size = new System.Drawing.Size(89, 30);
-            this.button_biblio_createScriptFile.TabIndex = 5;
-            this.button_biblio_createScriptFile.Text = "创建";
-            this.button_biblio_createScriptFile.UseVisualStyleBackColor = true;
-            this.button_biblio_createScriptFile.Click += new System.EventHandler(this.button_biblio_createScriptFile_Click);
-            // 
-            // textBox_biblio_filterScriptCode
-            // 
-            this.textBox_biblio_filterScriptCode.AcceptsReturn = true;
-            this.textBox_biblio_filterScriptCode.AcceptsTab = true;
-            this.textBox_biblio_filterScriptCode.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_biblio_filterScriptFileName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_biblio_filterScriptCode.HideSelection = false;
-            this.textBox_biblio_filterScriptCode.Location = new System.Drawing.Point(22, 178);
-            this.textBox_biblio_filterScriptCode.Multiline = true;
-            this.textBox_biblio_filterScriptCode.Name = "textBox_biblio_filterScriptCode";
-            this.textBox_biblio_filterScriptCode.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_biblio_filterScriptCode.Size = new System.Drawing.Size(625, 207);
-            this.textBox_biblio_filterScriptCode.TabIndex = 4;
-            this.textBox_biblio_filterScriptCode.TextChanged += new System.EventHandler(this.textBox_biblio_filterScriptCode_TextChanged);
-            // 
-            // comboBox_biblio_filterScript
-            // 
-            this.comboBox_biblio_filterScript.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.comboBox_biblio_filterScript.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBox_biblio_filterScript.FormattingEnabled = true;
-            this.comboBox_biblio_filterScript.Location = new System.Drawing.Point(22, 142);
-            this.comboBox_biblio_filterScript.Name = "comboBox_biblio_filterScript";
-            this.comboBox_biblio_filterScript.Size = new System.Drawing.Size(441, 29);
-            this.comboBox_biblio_filterScript.TabIndex = 3;
-            this.comboBox_biblio_filterScript.SelectedIndexChanged += new System.EventHandler(this.comboBox_biblio_filterScript_SelectedIndexChanged);
+            this.textBox_biblio_filterScriptFileName.Location = new System.Drawing.Point(22, 142);
+            this.textBox_biblio_filterScriptFileName.Name = "textBox_biblio_filterScriptFileName";
+            this.textBox_biblio_filterScriptFileName.Size = new System.Drawing.Size(537, 31);
+            this.textBox_biblio_filterScriptFileName.TabIndex = 4;
             // 
             // label2
             // 
@@ -297,10 +263,8 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox textBox_biblio_removeFieldNameList;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.ComboBox comboBox_biblio_filterScript;
-        private System.Windows.Forms.TextBox textBox_biblio_filterScriptCode;
-        private System.Windows.Forms.Button button_biblio_createScriptFile;
-        private System.Windows.Forms.Button button_biblio_deleteScriptFile;
         private System.Windows.Forms.TabPage tabPage_ext;
+        private System.Windows.Forms.TextBox textBox_biblio_filterScriptFileName;
+        private System.Windows.Forms.Button button_biblio_findFilterScriptFileName;
     }
 }

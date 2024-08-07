@@ -5,14 +5,14 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
+
+
 using DigitalPlatform;
 using DigitalPlatform.Marc;
 using DigitalPlatform.MarcDom;
 using DigitalPlatform.Script;
 using DigitalPlatform.Text;
-using Jint.Parser.Ast;
+
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace dp2Circulation
@@ -271,7 +271,8 @@ out string error);
             return text.Substring(0, text.Length - 1);
         }
 
-        // 探测当前是否已经存在 $A(或者 $9)。如果已经存在 $9，会自动改为 $A
+        // 探测当前是否已经存在 $A(或者 $9)。
+        // 如果已经存在 $9，会自动改为 $A，然后再统计并返回 $A 是否存在的 bool
         // return:
         //      false   不存在
         //      true    已经存在
@@ -632,6 +633,23 @@ out string error);
                         if (parameter != null)
                         {
                             var current_subfields = field.select($"subfield[@name='{name}']");
+
+                            // 2024/8/1
+                            // 如果当前子字段名为 A 或者 9，并且发现子字段不存在，则要观察对应的 a 子字段是否没有包含任何汉字。如果是，则当作此子字段“存在”
+                            if (current_subfields.count == 0
+                                && (char.IsUpper(name[0]) || name == "9"))
+                            {
+                                string origin_name = "a";
+                                if (char.IsUpper(name[0]))
+                                    origin_name = name.ToLower();
+
+                                if (is_all_english(field, origin_name) == true)
+                                {
+                                    // 假装这个子字段存在(一个)
+                                    current_subfields = new MarcNodeList(new MarcSubfield(name, ""));
+                                }
+                            }
+
                             foreach (char p in parameter)
                             {
                                 // r 必备
@@ -672,6 +690,21 @@ out string error);
                     if (Array.IndexOf(values, field.Indicator) == -1)
                         AddError($"{field_name} 字段指示符应为 {IndicatorsToString(values)}。但现在是 '{field.Indicator.Replace(" ", "#")}'");
                 }
+            }
+
+            // 判断一个子字段名对应的所有子字段内容是否都是非汉字内容
+            bool is_all_english(MarcField field, string origin_name)
+            {
+                var origin_contents = field.select($"subfield[@name='{origin_name}']").Contents;
+                if (origin_contents.Count == 0)
+                    return false;
+                foreach (var content in origin_contents)
+                {
+                    if (StringUtil.ContainHanzi(content) == true)
+                        return false;
+                }
+
+                return true;
             }
         }
 

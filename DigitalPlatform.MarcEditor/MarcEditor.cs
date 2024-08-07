@@ -5226,6 +5226,9 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             {
                 IDataObject ido = Clipboard.GetDataObject();
 
+                if (ido == null)
+                    return;
+
                 if (ido.GetDataPresent(typeof(MarcEditorData)) == true)
                 {
                     MarcEditorData data = (MarcEditorData)ido.GetData(typeof(MarcEditorData));
@@ -8065,7 +8068,9 @@ SYS	011528318
             int nCurSubfieldX = -1;
             for (int i = 0; i < strFieldValue.Length; i++)
             {
-                if (i >= nSelectionStart)
+                // 2024/8/2 之前为 i > nSelectionStart
+                if ((i > 0 && i >= nSelectionStart)
+                    || (i == 0 && i > nSelectionStart)/*专门针对插入符在内容区域偏移 0 的情况*/)
                     break;
 
                 char ch = strFieldValue[i];

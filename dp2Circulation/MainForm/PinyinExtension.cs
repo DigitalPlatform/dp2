@@ -1329,9 +1329,12 @@ out string strError)
                             else if (string.IsNullOrEmpty(strSubfieldPrefix) == false)
                                 strContent = strSubfieldPrefix + strPinyin;
 
-                            strContent = func_process?.Invoke(subfield, strContent);
-                            if (strContent == null)
-                                continue;
+                            if (func_process != null)
+                            {
+                                strContent = func_process?.Invoke(subfield, strContent);
+                                if (strContent == null)
+                                    continue;
+                            }
 
                             subfield.after(MarcQuery.SUBFLD + to + strContent);   // strPinyin
                         }

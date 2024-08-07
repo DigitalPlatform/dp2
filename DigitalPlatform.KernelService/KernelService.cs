@@ -516,6 +516,7 @@ namespace dp2Kernel
             if (result.Value == -1)
                 return;
 
+            /*
             if (sessioninfo.InSearching > 0)
             {
                 // if (sessioninfo.ChannelHandle != null)
@@ -523,6 +524,8 @@ namespace dp2Kernel
 
                 app.MyWriteDebugInfo("因后一个stop的到来，前一个search不得不中断 ");
             }
+            */
+            StopPrevious();
         }
 
         // 2012/1/5
@@ -554,6 +557,7 @@ namespace dp2Kernel
             if (result.Value == -1)
                 return result;
 
+            /*
             if (sessioninfo.InSearching > 0)
             {
                 // if (sessioninfo.ChannelHandle != null)
@@ -561,6 +565,8 @@ namespace dp2Kernel
 
                 app.MyWriteDebugInfo("因后一个search(ex)的到来，前一个search(ex)不得不中断 ");
             }
+            */
+            StopPrevious();
 
             sessioninfo.BeginSearch();
             try
@@ -578,6 +584,8 @@ namespace dp2Kernel
 
                 using (ChannelHandle handle = new ChannelHandle(app))
                 {
+                    handle.ResultSetName = strResultSetName;
+
                     handle.Idle += new ChannelIdleEventHandler(handle_Idle);
                     handle.Stop += new EventHandler(handle_Stop);
 
@@ -709,6 +717,27 @@ namespace dp2Kernel
             return result;
         }
 
+        void StopPrevious()
+        {
+            if (sessioninfo.InSearching > 0)
+            {
+                var handle = sessioninfo?.ChannelHandle;
+                if (handle != null)
+                {
+                    handle?.DoStop();
+
+                    // 如果是全局结果集，把它改名为一个随机名字。
+                    // 这样后继请求获得结果集内容的时候，就会找不到这个结果集名，
+                    // 这样避免了前端请求在获得结果集的过程中被另外的线程突然 Clear() 造成报错
+                    // TODO: 改名后的这个结果集对象，可以设法让它加速自动被清除，因为再也不会有人用到它。可以考虑给名字带上特征
+                    if (KernelApplication.IsGlobalResultSetName(handle.ResultSetName) == true)
+                        app.ResultSets.RenameResultSet(handle.ResultSetName.Substring(1), "free_" + Guid.NewGuid().ToString());
+                }
+
+                app.MyWriteDebugInfo("因后一个search的到来，前一个search不得不中断 ");
+            }
+        }
+
         // 检索
         // parameter:
         //		strQuery	XML检索式
@@ -726,13 +755,21 @@ namespace dp2Kernel
             if (result.Value == -1)
                 return result;
 
+            /*
             if (sessioninfo.InSearching > 0)
             {
-                // if (sessioninfo.ChannelHandle != null)
-                sessioninfo?.ChannelHandle?.DoStop();
+                var handle = sessioninfo?.ChannelHandle;
+                if (handle != null)
+                {
+                    handle?.DoStop();
+                    if (KernelApplication.IsGlobalResultSetName(handle.ResultSetName) == true)
+                        app.ResultSets.SetResultset(strResultSetName, null);
+                }
 
                 app.MyWriteDebugInfo("因后一个search的到来，前一个search不得不中断 ");
             }
+            */
+            StopPrevious();
 
             sessioninfo.BeginSearch();
             try
@@ -757,6 +794,8 @@ namespace dp2Kernel
 
                 using (ChannelHandle handle = new ChannelHandle(app))
                 {
+                    handle.ResultSetName = strResultSetName;
+
                     handle.Idle += new ChannelIdleEventHandler(handle_Idle);
                     handle.Stop += new EventHandler(handle_Stop);
 
@@ -837,7 +876,6 @@ namespace dp2Kernel
                                     app.ResultSets.SetResultset(strResultSetName.Substring(1), resultSet);
                                 else
                                     sessioninfo.SetResultSet1(strResultSetName, resultSet);
-
                             }
 
                         } // end of lock
@@ -2862,7 +2900,7 @@ namespace dp2Kernel
             return result;
         }
 
-        // 拷贝一条源记录到目标记录
+        // 拷贝(或移动)一条源记录到目标记录
         // 根据目标记录路径追加或覆盖
         // parameter:
         //		strOriginRecordPath	源记录路径

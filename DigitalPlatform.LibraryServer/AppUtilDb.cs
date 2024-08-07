@@ -409,6 +409,15 @@ out byte[] baOutputTimestamp)
                 StringUtil.SetInList(ref style, "checkcreatingtimestamp", true);
         }
 
+        public static void InheritStyle(ref string style, string strRefStyle,
+            string name)
+        {
+            if (StringUtil.IsInList(name, strRefStyle))
+                StringUtil.SetInList(ref style, name, true);
+            if (StringUtil.IsInList(name, strRefStyle))
+                StringUtil.SetInList(ref style, name, true);
+        }
+
         // 权限判断
         // parameters:
         //      strAction   new/change/delete

@@ -28,6 +28,7 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolTip;
 using MongoDB.Driver.Core.Clusters.ServerSelectors;
 using System.Data;
 using System.Web;
+using System.Web.UI.WebControls;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -8234,6 +8235,8 @@ out strError);
                                     string strError_1 = "";
 
                                     string style = "file_reserve_source";
+                                    InheritStyle(ref style, strMergeStyle, "compressTailNo");
+
                                     // 2024/5/12
                                     // InheritTimestampStyle(ref style, strStyle);
 
@@ -9134,6 +9137,9 @@ out strError);
                 StringUtil.SetInList(ref copy_style, "file_reserve_target", true);
             else
                 StringUtil.SetInList(ref copy_style, "file_reserve_source", true);
+
+            // 2024/8/1
+            InheritStyle(ref copy_style, strMergeStyle, "compressTailNo");
 
             return copy_style;
         }

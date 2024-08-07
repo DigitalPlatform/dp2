@@ -3465,7 +3465,13 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                                     this.m_detailHostObj.BeforeSaveRecord(this.MarcEditor, e);
                                     if (string.IsNullOrEmpty(e.ErrorInfo) == false)
                                     {
-                                        MessageBox.Show(this, "保存前的准备工作失败: " + e.ErrorInfo + "\r\n\r\n但保存操作仍将继续");
+                                        if (e.Cancel == false)
+                                            MessageBox.Show(this, "保存前的准备工作失败: " + e.ErrorInfo + "\r\n\r\n但保存操作仍将继续");
+                                    }
+                                    if (e.Cancel == true)
+                                    {
+                                        strError = e.ErrorInfo;
+                                        goto ERROR1;
                                     }
                                 }
                                 finally

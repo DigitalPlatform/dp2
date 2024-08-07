@@ -16862,15 +16862,15 @@ List<DbParameter> aSqlParameter)
                 nSourceTotalLength = (int)streamSource.Length;
              * */
 
-            long lOutputLength = 0;
+            // 注: 2024/731 从 GetRealLength() 改为 GetRealLengthNew()。为了避免 lStart == lTotalLength 条件报错
             // return:
             //		-1  出错
             //		0   成功
-            nRet = ConvertUtil.GetRealLength(nStartOfSource,
+            nRet = ConvertUtil.GetRealLengthNew(nStartOfSource,
                 nNeedReadLength,
                 nSourceTotalLength,
                 -1,//nMaxLength
-                out lOutputLength,
+                out long lOutputLength,
                 out strError);
             if (nRet == -1)
                 return -1;

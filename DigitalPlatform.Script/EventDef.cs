@@ -7,8 +7,18 @@ namespace DigitalPlatform.Script
 {
     public class BeforeSaveRecordEventArgs : EventArgs
     {
+        // 2024/7/31
+        // [in]打算保存到的目标路径
+        public string TargetRecPath { get; set; }
+
+        // [out] 当出错时(也就是 ErrorInfo 中有内容)是否中断后续处理
+        public bool Cancel { get; set; }
+
+
         public string CurrentUserName = ""; // [in](备选的)当前用户名
+        
         public string ErrorInfo = "";   // [out]
+        
         /// <summary>
         /// 内容是否发生过修改
         /// </summary>

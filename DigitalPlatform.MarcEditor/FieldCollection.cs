@@ -466,7 +466,7 @@ namespace DigitalPlatform.Marc
 
             // 先找到有几个字段
             strFieldsMarc = strFieldsMarc.Replace(Record.SUBFLD, Record.KERNEL_SUBFLD);
-            List<string> fields = Record.GetFields(strFieldsMarc);
+            List<string> fields = Record.GetFields(strFieldsMarc, out _);
             if (fields == null || fields.Count == 0)
                 return;
 

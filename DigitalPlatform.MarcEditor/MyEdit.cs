@@ -321,12 +321,16 @@ namespace DigitalPlatform.Marc
 
         DoubleClickInfo _double_info = new DoubleClickInfo();
 
+        bool _inSimulateClicking = false;
+
         // TODO: 双击一次选中子字段内容，再双击一次选中整个子字段内容(即包括子字段符号、子字段名和内容)
         // return:
         //      false   需要执行缺省窗口过程
         //      true    不要执行缺省窗口过程。即消息接管了。
         bool DoDoubleClick()
         {
+            if (_inSimulateClicking)
+                return false;
             // OnMouseDoubleClick那里接管不行。因为那里edit原有动作已经执行,this.SelectionStart值已经被破坏
 
             if (this.MarcEditor.m_nFocusCol != 3)
@@ -524,8 +528,16 @@ namespace DigitalPlatform.Marc
             else
             {
                 // e.Parameter 中返回了 XML 格式的菜单项
+                string xml = e.Parameter as string;
+                if (string.IsNullOrEmpty(xml))
+                {
+                    Console.Beep();
+                    var menuItem = new MenuItem($"error: e.Parameter 为空");
+                    contextMenu.MenuItems.Add(menuItem);
+                    goto END1;
+                }
                 XmlDocument dom = new XmlDocument();
-                dom.LoadXml(e.Parameter as string);
+                dom.LoadXml(xml);
 
                 var actions = dom.DocumentElement.SelectNodes("action");
 
@@ -559,6 +571,7 @@ namespace DigitalPlatform.Marc
                 return;
             }
 
+            END1:
             //if (contextMenu.MenuItems.Count > 0)
             //    contextMenu.MenuItems[0].PerformSelect();
 
@@ -1277,7 +1290,7 @@ namespace DigitalPlatform.Marc
 
                 // 先找到有几个字段
 
-                List<string> fields = Record.GetFields(strFieldsMarc);
+                List<string> fields = Record.GetFields(strFieldsMarc, out bool contains_field_end);
                 if (fields == null || fields.Count == 0)
                     return;
 
@@ -1286,7 +1299,7 @@ namespace DigitalPlatform.Marc
                 // 比如，粘贴进入字段名 edit 的部分，不让超过 3 chars；
                 // 粘贴进入指示符 edit 的部分，不让超过 2 chars；
                 // 粘贴进入内容 edit 的部分，无 chars 限制。
-                if (fields.Count == 1)
+                if (fields.Count == 1 && contains_field_end == false)
                 {
                     string strThisText = fields[0];
                     int nOldSelectionStart = this.SelectionStart;
@@ -1318,6 +1331,7 @@ namespace DigitalPlatform.Marc
                             this.Text = this.Text.Substring(0, 2);
                     }
 
+                    // TODO: 确保小 edit 的高度调整
                     this.MarcEditor.Flush();    // 促使通知外界
                 }
                 else if (fields.Count > 1)
@@ -1366,7 +1380,7 @@ namespace DigitalPlatform.Marc
 
                 // 先找到有几个字段
 
-                List<string> fields = Record.GetFields(strFieldsMarc);
+                List<string> fields = Record.GetFields(strFieldsMarc, out bool contains_field_end);
                 if (fields == null || fields.Count == 0)
                     return;
 
@@ -1375,7 +1389,7 @@ namespace DigitalPlatform.Marc
                 // 比如，粘贴进入字段名 edit 的部分，不让超过 3 chars；
                 // 粘贴进入指示符 edit 的部分，不让超过 2 chars；
                 // 粘贴进入内容 edit 的部分，无 chars 限制。
-                if (fields.Count == 1)
+                if (fields.Count == 1 && contains_field_end == false)
                 {
                     string strThisText = fields[0];
                     int nOldSelectionStart = this.SelectionStart;
@@ -1409,7 +1423,8 @@ namespace DigitalPlatform.Marc
 
                     this.MarcEditor.Flush();    // 促使通知外界
                 }
-                else if (fields.Count > 1)
+                else if (fields.Count > 1
+                    || contains_field_end == true)
                 {
                     // *** 粘贴进入一个或者多个完整字段
                     // 根据当前插入符所在的小 edit 区域，如果处在字段名和指示符区域，则本字段前面插入；处在内容区域上，则在本字段后面插入
@@ -1534,6 +1549,7 @@ namespace DigitalPlatform.Marc
                 _selection_start = this.SelectionStart;
                 Debug.WriteLine($"mousedown1 记忆 _current_selection_start={_selection_start}");
 
+                MemoryCaretX();
             }
 
             if (e.Button == MouseButtons.Right)
@@ -1886,6 +1902,33 @@ dp2Circulation 版本: dp2Circulation, Version=2.30.6506.29202, Culture=neutral,
             }
         }
 
+        // 上下移动插入符时要遵循的 x 坐标像素位置。这个位置会被左右移动插入符时改变
+        int _upDown_x = 0;
+
+        void MemoryCaretX(bool delay = false)
+        {
+            if (_inSimulateClicking)
+                return;
+            if (delay)
+            {
+                Task.Run(async () =>
+                {
+                    await Task.Delay(100);
+                    this.TryInvoke(() =>
+                    {
+                        MemoryCaretX(false);
+                    });
+                });
+                return;
+            }
+
+            POINT point = new POINT();
+            point.x = 0;
+            point.y = 0;
+            bool bRet = API.GetCaretPos(ref point);
+            _upDown_x = point.x;
+        }
+
         // 按下键
         protected override void OnKeyDown(KeyEventArgs e)
         {
@@ -1934,24 +1977,37 @@ dp2Circulation 版本: dp2Circulation, Version=2.30.6506.29202, Culture=neutral,
                                 return;
                             }
 
-                            this.MarcEditor.SetActiveField(this.MarcEditor.FocusedFieldIndex - 1,
-                                col);
-
+                            /*
+                            // 先做
                             POINT point = new POINT();
                             point.x = 0;
                             point.y = 0;
                             bool bRet = API.GetCaretPos(ref point);
-                            point.y = this.ClientSize.Height - 2;
-                            API.SendMessage(this.Handle,
-                                API.WM_LBUTTONDOWN,
-                                new UIntPtr(API.MK_LBUTTON),	//	UIntPtr wParam,
-                                API.MakeLParam(point.x, point.y));
+                            */
 
-                            API.SendMessage(this.Handle,
-                                API.WM_LBUTTONUP,
-                                new UIntPtr(API.MK_LBUTTON),	//	UIntPtr wParam,
-                                API.MakeLParam(point.x, point.y));
+                            this.MarcEditor.SetActiveField(this.MarcEditor.FocusedFieldIndex - 1,
+                                col);
 
+                            _inSimulateClicking = true;
+                            try
+                            {
+                                POINT point = new POINT();
+                                point.x = _upDown_x;
+                                point.y = this.ClientSize.Height - 2;
+                                API.SendMessage(this.Handle,
+                                    API.WM_LBUTTONDOWN,
+                                    new UIntPtr(API.MK_LBUTTON),    //	UIntPtr wParam,
+                                    API.MakeLParam(point.x, point.y));
+
+                                API.SendMessage(this.Handle,
+                                    API.WM_LBUTTONUP,
+                                    new UIntPtr(API.MK_LBUTTON),    //	UIntPtr wParam,
+                                    API.MakeLParam(point.x, point.y));
+                            }
+                            finally
+                            {
+                                _inSimulateClicking = false;
+                            }
                             e.Handled = true;
                         }
 #if BIDI_SUPPORT
@@ -1975,33 +2031,63 @@ dp2Circulation 版本: dp2Circulation, Version=2.30.6506.29202, Culture=neutral,
                         if (y >= nTemp - 1
                             && this.MarcEditor.FocusedFieldIndex < this.MarcEditor.Record.Fields.Count - 1)
                         {
-                            if (this.MarcEditor.BlockStart(1))
+                            var has_selection = this.SelectionLength > 0;
+                            var at_tail = _caret_pos >= this.Text.Length;
+
+                            if (at_tail == false || has_selection == true)
                             {
-                                e.Handled = true;
-                                return;
+                                if (this.MarcEditor.BlockStart(1))
+                                {
+                                    e.Handled = true;
+                                    return;
+                                }
                             }
 
-                            this.MarcEditor.SetActiveField(this.MarcEditor.FocusedFieldIndex + 1, col);
 
+                            /*
+                            // 先做
                             POINT point = new POINT();
                             point.x = 0;
                             point.y = 0;
                             bool bRet = API.GetCaretPos(ref point);
+                            */
+
+                            this.MarcEditor.SetActiveField(this.MarcEditor.FocusedFieldIndex + 1, col);
+
+                            if (!(at_tail == false || has_selection == true))
+                            {
+                                // (当前字段已经处在下一个字段上)定义本字段为一个块
+                                if (this.MarcEditor.BlockStart(0))   // 0, 1
+                                {
+                                    e.Handled = true;
+                                    return;
+                                }
+                            }
+
 
                             {
-                                point.y = 1;
-                                API.SendMessage(this.Handle,
-                                    API.WM_LBUTTONDOWN,
-                                    new UIntPtr(API.MK_LBUTTON),	//	UIntPtr wParam,
-                                    API.MakeLParam(point.x, point.y));
+                                _inSimulateClicking = true;
+                                try
+                                {
+                                    POINT point = new POINT();
+                                    point.x = _upDown_x;
+                                    point.y = 1;
+                                    API.SendMessage(this.Handle,
+                                        API.WM_LBUTTONDOWN,
+                                        new UIntPtr(API.MK_LBUTTON),    //	UIntPtr wParam,
+                                        API.MakeLParam(point.x, point.y));
 
-                                API.SendMessage(this.Handle,
-                                    API.WM_LBUTTONUP,
-                                    new UIntPtr(API.MK_LBUTTON),	//	UIntPtr wParam,
-                                    API.MakeLParam(point.x, point.y));
+                                    API.SendMessage(this.Handle,
+                                        API.WM_LBUTTONUP,
+                                        new UIntPtr(API.MK_LBUTTON),    //	UIntPtr wParam,
+                                        API.MakeLParam(point.x, point.y));
+                                }
+                                finally
+                                {
+                                    _inSimulateClicking = false;
+                                }
+                                e.Handled = true;
                             }
-                            e.Handled = true;
-
 
                         }
 #if BIDI_SUPPORT
@@ -2012,6 +2098,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.30.6506.29202, Culture=neutral,
                     break;
                 case Keys.Left:
                     {
+                        MemoryCaretX(true);
+
                         if (this.MarcEditor.BlockUp())
                         {
                             e.Handled = true;
@@ -2123,6 +2211,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.30.6506.29202, Culture=neutral,
                     break;
                 case Keys.Right:    // 右方向键
                     {
+                        MemoryCaretX(true);
+
                         if (this.MarcEditor.BlockDown())
                         {
                             e.Handled = true;
@@ -2186,14 +2276,29 @@ MarcEditor.WM_LEFTRIGHT_MOVED,
                                 || (shift == true && _caret_pos >= this.Text.Length))
                                 && this.MarcEditor.FocusedFieldIndex < this.MarcEditor.Record.Fields.Count - 1)
                             {
-                                if (this.MarcEditor.BlockStart(+1))   // 0, 1
+                                var has_selection = this.SelectionLength > 0;
+                                if (has_selection)
                                 {
-                                    e.Handled = true;
-                                    return;
+                                    if (this.MarcEditor.BlockStart(+1))   // 0, 1
+                                    {
+                                        e.Handled = true;
+                                        return;
+                                    }
                                 }
 
                                 this.MarcEditor.SetActiveField(this.MarcEditor.FocusedFieldIndex + 1, 1);
                                 this.SelectionStart = 0;
+
+                                if (has_selection == false)
+                                {
+                                    // (当前字段已经处在下一个字段上)定义本字段为一个块
+                                    if (this.MarcEditor.BlockStart(0))   // 0, 1
+                                    {
+                                        e.Handled = true;
+                                        // return;
+                                    }
+                                }
+
                                 e.Handled = true;
                                 break;
                             }
@@ -2225,6 +2330,8 @@ MarcEditor.WM_LEFTRIGHT_MOVED,
                     break;
                 case Keys.End:
                     {
+                        MemoryCaretX(true);
+
                         if (col == 3)
                         {
                             // 目前正在内容上
@@ -2248,6 +2355,8 @@ MarcEditor.WM_LEFTRIGHT_MOVED,
                     break;
                 case Keys.Home:
                     {
+                        MemoryCaretX(true);
+
                         if (this.SelectionStart == 0)
                         {
                             if (col == 3)

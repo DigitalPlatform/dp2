@@ -3699,6 +3699,11 @@ namespace dp2Library
         // 主要是确保在需要过滤的时候获得 xml 列
         static string GetModifiedStyle(string strBrowseInfoStyle)
         {
+            // 2024/8/2
+            // strBrowseInfoStyle 中可能是 @share 或者 @remove 命令，这时候不做加工
+            if (strBrowseInfoStyle.StartsWith("@"))
+                return strBrowseInfoStyle;
+
             string modified_style = strBrowseInfoStyle + ",id";
             if (StringUtil.IsInList("cols", strBrowseInfoStyle))
                 modified_style += ",xml";

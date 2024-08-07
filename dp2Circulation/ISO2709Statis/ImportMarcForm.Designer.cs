@@ -32,6 +32,13 @@
             this.tabControl_main = new System.Windows.Forms.TabControl();
             this.tabPage_source = new System.Windows.Forms.TabPage();
             this.tabPage_selectTarget = new System.Windows.Forms.TabPage();
+            this.button_biblio_findFilterScriptFileName = new System.Windows.Forms.Button();
+            this.textBox_biblio_filterScriptFileName = new System.Windows.Forms.TextBox();
+            this.label7 = new System.Windows.Forms.Label();
+            this.textBox_operator = new System.Windows.Forms.TextBox();
+            this.label6 = new System.Windows.Forms.Label();
+            this.textBox_source = new System.Windows.Forms.TextBox();
+            this.label5 = new System.Windows.Forms.Label();
             this.checkBox_lockTargetDbName = new System.Windows.Forms.CheckBox();
             this.checkBox_dontImportDupRecords = new System.Windows.Forms.CheckBox();
             this.tabComboBox_dupProject = new DigitalPlatform.CommonControl.TabComboBox();
@@ -48,8 +55,6 @@
             this.webBrowser1_running = new System.Windows.Forms.WebBrowser();
             this.tabPage_print = new System.Windows.Forms.TabPage();
             this.button_print = new System.Windows.Forms.Button();
-            this.textBox_source = new System.Windows.Forms.TextBox();
-            this.label5 = new System.Windows.Forms.Label();
             this.tabControl_main.SuspendLayout();
             this.tabPage_selectTarget.SuspendLayout();
             this.tabPage_runImport.SuspendLayout();
@@ -59,7 +64,7 @@
             // button_next
             // 
             this.button_next.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_next.Location = new System.Drawing.Point(532, 402);
+            this.button_next.Location = new System.Drawing.Point(625, 537);
             this.button_next.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button_next.Name = "button_next";
             this.button_next.Size = new System.Drawing.Size(139, 38);
@@ -81,7 +86,7 @@
             this.tabControl_main.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabControl_main.Name = "tabControl_main";
             this.tabControl_main.SelectedIndex = 0;
-            this.tabControl_main.Size = new System.Drawing.Size(671, 376);
+            this.tabControl_main.Size = new System.Drawing.Size(764, 511);
             this.tabControl_main.TabIndex = 9;
             // 
             // tabPage_source
@@ -89,13 +94,18 @@
             this.tabPage_source.Location = new System.Drawing.Point(4, 31);
             this.tabPage_source.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabPage_source.Name = "tabPage_source";
-            this.tabPage_source.Size = new System.Drawing.Size(663, 341);
+            this.tabPage_source.Size = new System.Drawing.Size(756, 476);
             this.tabPage_source.TabIndex = 4;
             this.tabPage_source.Text = "数据来源";
             this.tabPage_source.UseVisualStyleBackColor = true;
             // 
             // tabPage_selectTarget
             // 
+            this.tabPage_selectTarget.Controls.Add(this.button_biblio_findFilterScriptFileName);
+            this.tabPage_selectTarget.Controls.Add(this.textBox_biblio_filterScriptFileName);
+            this.tabPage_selectTarget.Controls.Add(this.label7);
+            this.tabPage_selectTarget.Controls.Add(this.textBox_operator);
+            this.tabPage_selectTarget.Controls.Add(this.label6);
             this.tabPage_selectTarget.Controls.Add(this.textBox_source);
             this.tabPage_selectTarget.Controls.Add(this.label5);
             this.tabPage_selectTarget.Controls.Add(this.checkBox_lockTargetDbName);
@@ -113,10 +123,77 @@
             this.tabPage_selectTarget.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabPage_selectTarget.Name = "tabPage_selectTarget";
             this.tabPage_selectTarget.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.tabPage_selectTarget.Size = new System.Drawing.Size(663, 341);
+            this.tabPage_selectTarget.Size = new System.Drawing.Size(756, 476);
             this.tabPage_selectTarget.TabIndex = 1;
             this.tabPage_selectTarget.Text = " 选定目标";
             this.tabPage_selectTarget.UseVisualStyleBackColor = true;
+            // 
+            // button_biblio_findFilterScriptFileName
+            // 
+            this.button_biblio_findFilterScriptFileName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_biblio_findFilterScriptFileName.Location = new System.Drawing.Point(667, 254);
+            this.button_biblio_findFilterScriptFileName.Name = "button_biblio_findFilterScriptFileName";
+            this.button_biblio_findFilterScriptFileName.Size = new System.Drawing.Size(81, 31);
+            this.button_biblio_findFilterScriptFileName.TabIndex = 17;
+            this.button_biblio_findFilterScriptFileName.Text = "...";
+            this.button_biblio_findFilterScriptFileName.UseVisualStyleBackColor = true;
+            this.button_biblio_findFilterScriptFileName.Click += new System.EventHandler(this.button_biblio_findFilterScriptFileName_Click);
+            // 
+            // textBox_biblio_filterScriptFileName
+            // 
+            this.textBox_biblio_filterScriptFileName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_biblio_filterScriptFileName.Location = new System.Drawing.Point(220, 254);
+            this.textBox_biblio_filterScriptFileName.Name = "textBox_biblio_filterScriptFileName";
+            this.textBox_biblio_filterScriptFileName.Size = new System.Drawing.Size(441, 31);
+            this.textBox_biblio_filterScriptFileName.TabIndex = 16;
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(7, 257);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(180, 21);
+            this.label7.TabIndex = 15;
+            this.label7.Text = "过滤脚本文件(&S):";
+            // 
+            // textBox_operator
+            // 
+            this.textBox_operator.Location = new System.Drawing.Point(220, 379);
+            this.textBox_operator.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.textBox_operator.Name = "textBox_operator";
+            this.textBox_operator.Size = new System.Drawing.Size(334, 31);
+            this.textBox_operator.TabIndex = 14;
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(7, 382);
+            this.label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(117, 21);
+            this.label6.TabIndex = 13;
+            this.label6.Text = "操作者(&O):";
+            // 
+            // textBox_source
+            // 
+            this.textBox_source.Location = new System.Drawing.Point(220, 342);
+            this.textBox_source.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.textBox_source.Name = "textBox_source";
+            this.textBox_source.Size = new System.Drawing.Size(334, 31);
+            this.textBox_source.TabIndex = 12;
+            this.textBox_source.Visible = false;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(7, 345);
+            this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(96, 21);
+            this.label5.TabIndex = 11;
+            this.label5.Text = "来源(&S):";
+            this.label5.Visible = false;
             // 
             // checkBox_lockTargetDbName
             // 
@@ -162,7 +239,7 @@
             // 
             // textBox_batchNo
             // 
-            this.textBox_batchNo.Location = new System.Drawing.Point(220, 261);
+            this.textBox_batchNo.Location = new System.Drawing.Point(220, 305);
             this.textBox_batchNo.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.textBox_batchNo.Name = "textBox_batchNo";
             this.textBox_batchNo.Size = new System.Drawing.Size(334, 31);
@@ -171,7 +248,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(7, 264);
+            this.label2.Location = new System.Drawing.Point(7, 308);
             this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(159, 21);
@@ -196,7 +273,7 @@
             this.textBox_importRange.Location = new System.Drawing.Point(220, 114);
             this.textBox_importRange.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.textBox_importRange.Name = "textBox_importRange";
-            this.textBox_importRange.Size = new System.Drawing.Size(431, 31);
+            this.textBox_importRange.Size = new System.Drawing.Size(524, 31);
             this.textBox_importRange.TabIndex = 3;
             // 
             // label1
@@ -238,7 +315,7 @@
             this.tabPage_runImport.Location = new System.Drawing.Point(4, 31);
             this.tabPage_runImport.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabPage_runImport.Name = "tabPage_runImport";
-            this.tabPage_runImport.Size = new System.Drawing.Size(663, 341);
+            this.tabPage_runImport.Size = new System.Drawing.Size(756, 476);
             this.tabPage_runImport.TabIndex = 3;
             this.tabPage_runImport.Text = " 执行统计 ";
             this.tabPage_runImport.UseVisualStyleBackColor = true;
@@ -271,7 +348,7 @@
             this.tabPage_print.Location = new System.Drawing.Point(4, 31);
             this.tabPage_print.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabPage_print.Name = "tabPage_print";
-            this.tabPage_print.Size = new System.Drawing.Size(663, 341);
+            this.tabPage_print.Size = new System.Drawing.Size(756, 476);
             this.tabPage_print.TabIndex = 2;
             this.tabPage_print.Text = " 打印结果 ";
             this.tabPage_print.UseVisualStyleBackColor = true;
@@ -286,29 +363,11 @@
             this.button_print.Text = "打印统计结果(&P)";
             this.button_print.UseVisualStyleBackColor = true;
             // 
-            // textBox_source
-            // 
-            this.textBox_source.Location = new System.Drawing.Point(220, 298);
-            this.textBox_source.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.textBox_source.Name = "textBox_source";
-            this.textBox_source.Size = new System.Drawing.Size(334, 31);
-            this.textBox_source.TabIndex = 12;
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(7, 301);
-            this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(96, 21);
-            this.label5.TabIndex = 11;
-            this.label5.Text = "来源(&S):";
-            // 
             // ImportMarcForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(671, 458);
+            this.ClientSize = new System.Drawing.Size(764, 593);
             this.Controls.Add(this.button_next);
             this.Controls.Add(this.tabControl_main);
             this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
@@ -350,5 +409,10 @@
         private System.Windows.Forms.CheckBox checkBox_lockTargetDbName;
         private System.Windows.Forms.TextBox textBox_source;
         private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.TextBox textBox_operator;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Button button_biblio_findFilterScriptFileName;
+        private System.Windows.Forms.TextBox textBox_biblio_filterScriptFileName;
+        private System.Windows.Forms.Label label7;
     }
 }

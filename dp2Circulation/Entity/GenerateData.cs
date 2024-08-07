@@ -502,7 +502,11 @@ out strError);
                 if (nRet == 0)
                 {
                     if (this.m_detailHostObj == null)
+                    {
+                        if (string.IsNullOrEmpty(strBiblioRecPath))
+                            e.ErrorInfo = $"数据库名为空，无法初始化 Assembly";
                         return; // 库名不具备，无法初始化
+                    }
                 }
                 if (nRet == 1)
                     bAssemblyReloaded = true;
@@ -1146,7 +1150,7 @@ out strError);
         }
 
 
-#endregion
+        #endregion
 
     }
 }

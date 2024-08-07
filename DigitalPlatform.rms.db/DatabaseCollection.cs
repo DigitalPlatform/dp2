@@ -2659,7 +2659,7 @@ namespace DigitalPlatform.rms
 
         #endregion
 
-        // 拷贝一条源记录到目标记录，要求对源记录有读权限，对目标记录有写权限
+        // 拷贝(或移动)一条源记录到目标记录，要求对源记录有读权限，对目标记录有写权限
         // 关键点是锁的问题
         // Parameter:
         //      user                    用户对象
@@ -2669,6 +2669,7 @@ namespace DigitalPlatform.rms
         //      strMergeStyle           如何合并两条记录的 XML 部分和下属对象?
         //                              关于 XML 部分: reserve_source / reserve_target 之一。 缺省两者，则表示 reserve_source
         //                              关于下属对象部分：file_reserve_source 和 file_reserve_target 组合使用。如果两者都没有出现，表示最后的目标记录中会被去掉所有 file 元素。这是 2017/4/19 新增的参数值。以前版本都是自动合并源和目标的全部 files 元素
+        //                              compressTailNo 表示删除源记录后自动压缩数据库尾号到尽可能小
         //      strOutputRecordPath     返回目标记录的路径，用于目标记录是新建一条记录
         //      baOutputRecordTimestamp 返回目标记录的时间戳
         //      strChangeList           返回 id 修改的状况
@@ -3123,6 +3124,9 @@ namespace DigitalPlatform.rms
             // 删除源记录
             if (bDeleteOriginRecord == true)
             {
+                string style = bSimulate ? "simulate" : "";
+                if (StringUtil.IsInList("compressTailNo", strMergeStyle))
+                    StringUtil.SetInList(ref style, "compressTailNo", true);
                 // return:
                 //      -1	一般性错误，例如输入参数不合法等
                 //      -2	时间戳不匹配    // 建议忽略时间戳，不应出现这种情况
@@ -3134,7 +3138,7 @@ namespace DigitalPlatform.rms
                 nRet = this.API_DeleteRes(strOriginRecordPath,
                     user,
                     baOriginRecordOutputTimestamp,
-                    bSimulate ? "simulate" : "",
+                    style,
                     out baOriginRecordOutputTimestamp,
                     out strError);
                 if (nRet <= -1)
@@ -7164,6 +7168,26 @@ ChannelIdleEventArgs e);
         public event ChannelIdleEventHandler Idle = null;
         public event EventHandler Stop = null;
 
+        // 正在检索的结果集名字
+        public string ResultSetName { get; set; }
+
+#if REMOVED
+        // 正在检索的结果集对象
+        DpResultSet _resultSet = null;
+
+        public DpResultSet ResultSet
+        {
+            get
+            {
+                return _resultSet;
+            }
+            set
+            {
+                _resultSet = value;
+            }
+        }
+#endif
+
         public ChannelHandle(KernelApplication app)
         {
             this.App = app;
@@ -7486,7 +7510,7 @@ dp2LibraryXE 版本: dp2LibraryXE, Version=1.1.5939.41661, Culture=neutral, Publ
         }
     }
 #endif
-    #endregion
+#endregion
 
     // 资源项信息
     // 当时放在DigitalPlatform.rms.Service里，后来要在Database.xml里使用，所以移动到这儿

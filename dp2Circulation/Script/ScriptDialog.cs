@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using DigitalPlatform;
@@ -14,205 +15,81 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.IO;
 using DigitalPlatform.Marc;
 using DigitalPlatform.Text;
-using dp2Circulation.Script;
 
-namespace dp2Circulation
+namespace dp2Circulation.Script
 {
-    /// <summary>
-    /// 指定如何在 MARC 记录中包含册记录信息的对话框
-    /// </summary>
-    public partial class ExportMarcHoldingDialog : Form
+    public partial class ScriptDialog : Form
     {
         // 存放过滤脚本 .cs 文件的子目录
         public string FilterScriptDirectory { get; set; }
 
-
-        public ExportMarcHoldingDialog()
+        public ScriptDialog()
         {
             InitializeComponent();
         }
 
-        List<Control> _freeControls = new List<Control>();
-
-        void DisposeFreeControls()
+        public Panel MainPanel
         {
-            ControlExtention.DisposeFreeControls(_freeControls);
+            get
+            {
+                return this.panel_main;
+            }
         }
 
-        private void ExportMarcHoldingDialog_FormClosed(object sender, FormClosedEventArgs e)
+        private void ScriptDialog_Load(object sender, EventArgs e)
         {
-            // SaveScriptFile();
-        }
-
-        private void ExportMarcHoldingDialog_Load(object sender, EventArgs e)
-        {
-            //if (this.comboBox_biblio_filterScript.Items.Count == 0)
-            //    FillScriptNames(false);
+            if (this.comboBox_biblio_filterScript.Items.Count == 0)
+                FillScriptNames(false);
         }
 
         private void button_OK_Click(object sender, EventArgs e)
         {
-            this.DialogResult = System.Windows.Forms.DialogResult.OK;
+            if (string.IsNullOrEmpty(this.comboBox_biblio_filterScript.Text))
+            {
+                MessageBox.Show(this, "尚未指定脚本文件名");
+                return;
+            }
+
+            this.DialogResult = DialogResult.OK;
             this.Close();
         }
 
         private void button_Cancel_Click(object sender, EventArgs e)
         {
-            this.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.DialogResult = DialogResult.Cancel;
             this.Close();
-        }
-
-        public bool Create905
-        {
-            get
-            {
-                return this.TryGet(() =>
-                {
-                    return this.checkBox_905.Checked;
-                });
-            }
-            set
-            {
-                this.TryInvoke(() =>
-                {
-                    this.checkBox_905.Checked = value;
-                });
-            }
-        }
-
-        public bool RemoveOld905
-        {
-            get
-            {
-                return this.TryGet(() =>
-                {
-                    return this.checkBox_removeOld905.Checked;
-                });
-            }
-            set
-            {
-                this.TryInvoke(() =>
-                {
-                    this.checkBox_removeOld905.Checked = value;
-                });
-            }
-        }
-
-        // 如何创建 905 字段?
-        public string Style905
-        {
-            get
-            {
-                return this.TryGet(() =>
-                {
-                    return this.comboBox_905_style.Text;
-                });
-            }
-            set
-            {
-                this.TryInvoke(() =>
-                {
-                    this.comboBox_905_style.Text = value;
-                });
-            }
-        }
-
-        public bool Create906
-        {
-            get
-            {
-                return this.TryGet(() =>
-                {
-                    return this.checkBox_906.Checked;
-                });
-            }
-            set
-            {
-                this.TryInvoke(() =>
-                {
-                    this.checkBox_906.Checked = value;
-                });
-            }
-        }
-
-        // 导出时希望滤除的字段名列表。逗号间隔
-        public string RemoveFieldNames
-        {
-            get
-            {
-                return this.TryGet(() =>
-                {
-                    return this.textBox_biblio_removeFieldNameList.Text;
-                });
-            }
-            set
-            {
-                this.TryInvoke(() =>
-                {
-                    this.textBox_biblio_removeFieldNameList.Text = value;
-                });
-            }
         }
 
         public string UiState
         {
             get
             {
-                /*
                 // 防止 combobox 初始化状态失败
                 if (this.comboBox_biblio_filterScript.Items.Count == 0)
                 {
                     FillScriptNames();
                 }
-                */
 
                 List<object> controls = new List<object>();
-                controls.Add(this.checkBox_905);
-                controls.Add(this.comboBox_905_style);
-                controls.Add(this.checkBox_removeOld905);
-                controls.Add(this.checkBox_906);
-                controls.Add(this.textBox_biblio_removeFieldNameList);
-                // controls.Add(this.comboBox_biblio_filterScript);
-                controls.Add(this.textBox_biblio_filterScriptFileName);
+                controls.Add(this.comboBox_biblio_filterScript);
                 return GuiState.GetUiState(controls);
             }
             set
             {
-                /*
                 // 防止 combobox 初始化状态失败
                 if (this.comboBox_biblio_filterScript.Items.Count == 0)
                 {
                     FillScriptNames();
                 }
-                */
 
                 List<object> controls = new List<object>();
-                controls.Add(this.checkBox_905);
-                controls.Add(this.comboBox_905_style);
-                controls.Add(this.checkBox_removeOld905);
-                controls.Add(this.checkBox_906);
-                controls.Add(this.textBox_biblio_removeFieldNameList);
-                // controls.Add(this.comboBox_biblio_filterScript);
-                controls.Add(this.textBox_biblio_filterScriptFileName);
+                controls.Add(this.comboBox_biblio_filterScript);
                 GuiState.SetUiState(controls, value);
             }
         }
 
-        private void checkBox_905_CheckedChanged(object sender, EventArgs e)
-        {
-            if (this.checkBox_905.Checked)
-            {
-                this.comboBox_905_style.Visible = true;
-                this.checkBox_removeOld905.Visible = true;
-            }
-            else
-            {
-                this.comboBox_905_style.Visible = false;
-                this.checkBox_removeOld905.Visible = false;
-            }
-        }
 
-        // public const string DO_NOT_USE_SCRIPT = "<不使用脚本>";
+        public const string DO_NOT_USE_SCRIPT = "<不使用脚本>";
 
         public string ScriptFileName
         {
@@ -220,31 +97,23 @@ namespace dp2Circulation
             {
                 string value = this.TryGet(() =>
                 {
-                    return this.textBox_biblio_filterScriptFileName.Text;
+                    return this.comboBox_biblio_filterScript.Text;
                 });
-                if (value == ScriptDialog.DO_NOT_USE_SCRIPT)
+                if (value == DO_NOT_USE_SCRIPT)
                     return "";
 
                 return value;
             }
-        }
-
-        public bool TryGetScriptCode(out string code)
-        {
-            try
+            set
             {
-                string temp = this.TryGet(() =>
+                this.TryInvoke(() =>
                 {
-                    return this.ScriptCode;
-                });
-                code = temp;
-                return true;
+                    // 确保 dropdown list 先有内容
+                    if (this.comboBox_biblio_filterScript.Items.Count == 0)
+                        FillScriptNames(false);
 
-            }
-            catch (FileNotFoundException)
-            {
-                code = "";
-                return false;
+                    this.comboBox_biblio_filterScript.Text = value;
+                });
             }
         }
 
@@ -253,25 +122,12 @@ namespace dp2Circulation
         {
             get
             {
-                /*
                 return this.TryGet(() =>
                 {
                     return this.textBox_biblio_filterScriptCode.Text;
                 });
-                */
-
-                if (string.IsNullOrEmpty(ScriptFileName))
-                    return "";
-
-                var scriptFileName = Path.Combine(FilterScriptDirectory, ScriptFileName);
-
-                if (File.Exists(scriptFileName))
-                    return File.ReadAllText(scriptFileName);
-                throw new FileNotFoundException($"脚本文件 '{scriptFileName}' 不存在 ...");
             }
         }
-
-#if REMOVED
 
         void FillScriptNames(bool auto_select_first = false)
         {
@@ -367,6 +223,7 @@ namespace dp2Circulation
 
         string _scriptFileName = null;  // 当前正在观察和编辑的文件名
         bool _codeChanged = false;
+
 
         private void comboBox_biblio_filterScript_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -499,8 +356,6 @@ public class MyVerifyHost : VerifyHost
             MessageBox.Show(this, strError);
         }
 
-#endif
-
         // 准备默认的 MARC 输出过滤脚本目录
         public static string PrepareScriptDirectory()
         {
@@ -509,19 +364,10 @@ public class MyVerifyHost : VerifyHost
             return path;
         }
 
-#if REMOVED
         private void textBox_biblio_filterScriptCode_TextChanged(object sender, EventArgs e)
         {
             _codeChanged = true;
         }
-#endif
-
-        public static string BuildCacheKey(string pure_fileName)
-        {
-            return "export:" + pure_fileName;
-        }
-
-#if REMOVED
 
         public delegate void delagate_initializeHost(VerifyHost host);
 
@@ -541,7 +387,7 @@ public class MyVerifyHost : VerifyHost
             out string strError)
         {
             hostObj = null;
-            int nRet = ExportMarcHoldingDialog.GetAssembly(
+            int nRet = GetAssembly(
                 cacheKey,
                 strCode,
                 strRef,
@@ -566,7 +412,7 @@ out strError);
             {
                 hostObj.VerifyResult = hostObj.Verify("", record.Text);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 strError = $"在执行脚本的过程中出现异常: {ExceptionUtil.GetDebugText(ex)}";
                 return -1;
@@ -618,63 +464,7 @@ out strError);
             return 1;
         }
 
-        private void button_biblio_deleteScriptFile_Click(object sender, EventArgs e)
-        {
-            if (string.IsNullOrEmpty(_scriptFileName) == false
-                && File.Exists(_scriptFileName) == true)
-            {
-                File.Delete(_scriptFileName);
-                this.comboBox_biblio_filterScript.Text = "";
-                this.textBox_biblio_filterScriptCode.Text = "";
-                FillScriptNames(true);
-            }
-            else
-            {
-                MessageBox.Show(this, "没有文件可供删除");
-            }
-        }
-#endif
 
-
-        public void AttachPanel(Panel panel, string page_title)
-        {
-            if (this.tabControl1.TabPages.IndexOf(this.tabPage_ext) == -1)
-            {
-                this.tabControl1.TabPages.Add(this.tabPage_ext);
-                ControlExtention.RemoveFreeControl(_freeControls, this.tabPage_ext);
-            }
-
-            this.tabPage_ext.Text = page_title;
-            this.tabPage_ext.Padding = new Padding(4, 4, 4, 4);
-            this.tabPage_ext.Controls.Add(panel);
-            panel.Dock = DockStyle.Fill;
-        }
-
-        public void HideExtPage()
-        {
-            if (this.tabControl1.TabPages.IndexOf(this.tabPage_ext) != -1)
-            {
-                this.tabControl1.TabPages.Remove(this.tabPage_ext);
-                ControlExtention.AddFreeControl(_freeControls, this.tabPage_ext);
-            }
-        }
-
-        private void button_biblio_findFilterScriptFileName_Click(object sender, EventArgs e)
-        {
-            using (ScriptDialog dlg = new ScriptDialog())
-            {
-                dlg.Font = this.Font;
-                dlg.FilterScriptDirectory = this.FilterScriptDirectory;
-                dlg.ScriptFileName = this.textBox_biblio_filterScriptFileName.Text;
-                dlg.ShowDialog(this);
-                Program.MainForm.AppInfo.LinkFormState(dlg, "holding_script_dialog");
-                if (dlg.DialogResult == DialogResult.Cancel)
-                    return;
-                this.textBox_biblio_filterScriptFileName.Text = dlg.ScriptFileName;
-            }
-        }
-
-#if REMOVED
         public static void FilterBiblioRecord(MarcRecord record,
             string removeFieldNames)
         {
@@ -710,7 +500,7 @@ out strError);
                     }
 
                     // 检查这些父节点是否 Content 为空。为空则删除这个父节点
-                    foreach(var parent in parents)
+                    foreach (var parent in parents)
                     {
                         if (string.IsNullOrEmpty(parent.Content))
                             parent.detach();
@@ -718,6 +508,27 @@ out strError);
                 }
             }
         }
-#endif
+
+
+        private void button_biblio_deleteScriptFile_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(_scriptFileName) == false
+    && File.Exists(_scriptFileName) == true)
+            {
+                File.Delete(_scriptFileName);
+                this.comboBox_biblio_filterScript.Text = "";
+                this.textBox_biblio_filterScriptCode.Text = "";
+                FillScriptNames(true);
+            }
+            else
+            {
+                MessageBox.Show(this, "没有文件可供删除");
+            }
+        }
+
+        private void ScriptDialog_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            SaveScriptFile();
+        }
     }
 }

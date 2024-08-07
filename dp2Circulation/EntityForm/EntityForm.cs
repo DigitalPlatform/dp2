@@ -8858,16 +8858,24 @@ out strError);
                         return -1;
                     if (this._genData.DetailHostObj != null)
                     {
+                        BeforeSaveRecordEventArgs e = new BeforeSaveRecordEventArgs();
                         this.TryInvoke(() =>    // 2023/2/1
                         {
-                            BeforeSaveRecordEventArgs e = new BeforeSaveRecordEventArgs();
+                            e.TargetRecPath = strTargetBiblioRecPath;
                             // this._genData.DetailHostObj.BeforeSaveRecord(this.m_marcEditor, e);
                             this._genData.DetailHostObj.Invoke("BeforeSaveRecord", this.m_marcEditor, e);
                             if (string.IsNullOrEmpty(e.ErrorInfo) == false)
                             {
-                                this.MessageBoxShow("保存前的准备工作失败: " + e.ErrorInfo + "\r\n\r\n但保存操作仍将继续");
+                                if (e.Cancel == false)
+                                    this.MessageBoxShow("保存前的准备工作失败: " + e.ErrorInfo + "\r\n\r\n但保存操作仍将继续");
                             }
                         });
+
+                        if (e.Cancel == true)
+                        {
+                            strError = e.ErrorInfo;
+                            return -1;
+                        }
                     }
                 }
 
@@ -9116,6 +9124,9 @@ out strError);
                         dlg.MarcSyntax = strMarcSyntax;
                     }
 
+                    // 2024/8/1
+                    dlg.EnableCompressTailNo = false;
+
                     dlg.CurrentBiblioRecPath = this.BiblioRecPath;
                     Program.MainForm.AppInfo.LinkFormState(dlg, "entityform_BiblioSaveToDlg_state");
                     dlg.ShowDialog(this);
@@ -9144,16 +9155,23 @@ out strError);
                     goto ERROR1;
                 if (this._genData.DetailHostObj != null)
                 {
+                    BeforeSaveRecordEventArgs e = new BeforeSaveRecordEventArgs();
                     this.TryInvoke(() =>    // 2023/2/1
                     {
-                        BeforeSaveRecordEventArgs e = new BeforeSaveRecordEventArgs();
+                        e.TargetRecPath = strTargetPath;
                         // this._genData.DetailHostObj.BeforeSaveRecord(this.m_marcEditor, e);
                         this._genData.DetailHostObj.Invoke("BeforeSaveRecord", this.m_marcEditor, e);
                         if (string.IsNullOrEmpty(e.ErrorInfo) == false)
                         {
-                            this.MessageBoxShow("保存前的准备工作失败: " + e.ErrorInfo + "\r\n\r\n但保存操作仍将继续");
+                            if (e.Cancel == false)
+                                this.MessageBoxShow("保存前的准备工作失败: " + e.ErrorInfo + "\r\n\r\n但保存操作仍将继续");
                         }
                     });
+                    if (e.Cancel == true)
+                    {
+                        strError = e.ErrorInfo;
+                        goto ERROR1;
+                    }
                 }
             }
 
@@ -10074,7 +10092,7 @@ out strError);
                     "",
                     strStyle,
                     out string strOutputPath,
-                    out byte [] baNewTimestamp,
+                    out byte[] baNewTimestamp,
                     out strError);
                 if (lRet == -1)
                 {
@@ -12742,6 +12760,9 @@ out strError);
                 dlg.MarcSyntax = strMarcSyntax;
             }
 
+            // 2024/8/1
+            dlg.EnableCompressTailNo = false;
+
             dlg.CurrentBiblioRecPath = this.BiblioRecPath;
             Program.MainForm.AppInfo.LinkFormState(dlg, "entityform_BiblioSaveToDlg_state");
             dlg.ShowDialog(this);
@@ -15288,6 +15309,9 @@ out strError);
                 dlg.MarcSyntax = strMarcSyntax;
             }
 
+            // 2024/8/1
+            dlg.EnableCompressTailNo = true;
+
             Program.MainForm.AppInfo.LinkFormState(dlg, "entityform_BiblioMoveToDlg_state");
             dlg.ShowDialog(this);
 
@@ -15305,7 +15329,9 @@ out strError);
         "move_to_used_path",
         dlg.RecPath);
 
-            nRet = MoveTo(dlg.RecPath, out strError);
+            nRet = MoveTo(dlg.RecPath,
+                dlg.CompressTailNo,
+                out strError);
             if (nRet == -1)
                 goto ERROR1;
             return;
@@ -15314,13 +15340,25 @@ out strError);
         }
 
         public int MoveTo(string strTargetRecPathParam,
-        out string strError)
+            out string strError)
         {
             return MoveTo(
                 "move",
                 strTargetRecPathParam,
                 null,
                 MergeStyle.None,
+                out strError);
+        }
+
+        public int MoveTo(string strTargetRecPathParam,
+            bool compressTailNo,
+            out string strError)
+        {
+            return MoveTo(
+                "move",
+                strTargetRecPathParam,
+                null,
+                compressTailNo ? MergeStyle.CompressTailNo : MergeStyle.None,
                 out strError);
         }
 
@@ -15718,6 +15756,10 @@ out strError);
 
                 if (strAction == "move")
                 {
+                    // 2024/8/1
+                    if ((auto_mergeStyle & MergeStyle.CompressTailNo) != 0)
+                        StringUtil.SetInList(ref strMergeStyle, "compressTailNo", true);
+
                     nRet = CopyBiblio(
                         looping.Progress,
                         channel,

@@ -308,7 +308,15 @@ namespace DigitalPlatform.rms
                     if (resultset.Permanent == true)
                         continue;
 
-                    if ((DateTime.Now - resultset.LastUsedTime) >= delta)
+                    // 2024/8/2
+                    // 加速释放。最后使用时刻距现在一分钟以上的就会释放
+                    if (key != null
+                        && (key.StartsWith("free_") || key.StartsWith("#key_"))
+                        && (DateTime.Now - resultset.LastUsedTime) >= TimeSpan.FromMinutes(1))
+                    {
+                        remove_keys.Add(key);
+                    }
+                    else if ((DateTime.Now - resultset.LastUsedTime) >= delta)
                     {
                         remove_keys.Add(key);   // 这里暂时无法删除，因为 foreach 还要用枚举器
                     }

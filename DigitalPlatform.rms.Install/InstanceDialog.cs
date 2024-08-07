@@ -1790,7 +1790,17 @@ MessageBoxDefaultButton.Button1);
                         info.XmlFileNotFound = false;
                         info.XmlFileContentError = false;
                         // TODO: 是否要进行备份?
-                        File.Delete(PathUtil.MergePath(strDataDir, "databases.xml"));
+                        // 2024/8/2 增加 try .. catch
+                        try
+                        {
+                            var path = PathUtil.MergePath(strDataDir, "databases.xml");
+                            if (File.Exists(path))
+                                File.Delete(path);
+                        }
+                        catch (DirectoryNotFoundException)
+                        {
+
+                        }
                     }
                     if (result == System.Windows.Forms.DialogResult.Cancel)
                     {
@@ -3077,7 +3087,7 @@ MessageBoxDefaultButton.Button1);
             string strFilename = Path.Combine(strDataDir, "databases.xml");
             if (File.Exists(strFilename) == false)
                 return 0;
-            
+
             XmlDocument dom = new XmlDocument();
             try
             {
@@ -3097,7 +3107,7 @@ MessageBoxDefaultButton.Button1);
             var nodes = dom.DocumentElement.SelectNodes("dbs/database");
             if (nodes.Count == 0)
                 return 0;
-            foreach(XmlElement database in nodes)
+            foreach (XmlElement database in nodes)
             {
                 string type = database.GetAttribute("type");
                 if (StringUtil.IsInList("account", type))

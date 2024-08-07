@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Emit;
 
 namespace DigitalPlatform
@@ -262,9 +263,11 @@ warnings);
                 // 
                 List<MetadataReference> ref_list = GetRefList(refs);
 
+                var options = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+                    // .WithEmitDebugInformation(true);
+                    ;
                 var compilation = CSharpCompilation.Create(fileName)
-      .WithOptions(
-        new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
+      .WithOptions(options)
       .AddReferences(ref_list.ToArray())
       .AddSyntaxTrees(tree);
 

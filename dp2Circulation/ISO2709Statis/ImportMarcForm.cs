@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data.SqlTypes;
 using System.Diagnostics;
@@ -12,11 +13,13 @@ using System.Xml;
 using DigitalPlatform;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Core;
+using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Marc;
 using DigitalPlatform.Script;
 using DigitalPlatform.Text;
-using static dp2Circulation.MainForm;
+using DocumentFormat.OpenXml.EMMA;
+using dp2Circulation.Script;
 
 namespace dp2Circulation
 {
@@ -43,6 +46,8 @@ namespace dp2Circulation
             {
                 MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
+
+            PrepareScriptDirectory();
 
             this._openMarcFileDialog.IsOutput = false;  // 2024/6/4
             // 输入的ISO2709文件名
@@ -142,7 +147,9 @@ this.UiState);
                     this.textBox_batchNo,
                     this.tabComboBox_dupProject,
                     this.checkBox_dontImportDupRecords,
-                    this.textBox_source,
+                    //this.textBox_source,
+                    this.textBox_operator,
+                    this.textBox_biblio_filterScriptFileName,
                     /*
                     new ControlWrapper(this.checkBox_cfg_autoChangePassword, true),
                     new ControlWrapper(this.checkBox_forceCreate, false),
@@ -162,7 +169,9 @@ this.UiState);
                     this.textBox_batchNo,
                     this.tabComboBox_dupProject,
                     this.checkBox_dontImportDupRecords,
-                    this.textBox_source,
+                    //this.textBox_source,
+                    this.textBox_operator,
+                    this.textBox_biblio_filterScriptFileName,
                     /*
                     new ControlWrapper(this.checkBox_cfg_autoChangePassword, true),
                     new ControlWrapper(this.checkBox_forceCreate, false),
@@ -313,6 +322,60 @@ this.UiState);
             }
         }
 
+        public bool TryGetScriptCode(out string code)
+        {
+            try
+            {
+                string temp = this.TryGet(() =>
+                {
+                    return this.ScriptCode;
+                });
+                code = temp;
+                return true;
+
+            }
+            catch (FileNotFoundException)
+            {
+                code = "";
+                return false;
+            }
+        }
+
+        public string ScriptCode
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(ScriptFileName))
+                    return "";
+
+                var scriptFileName = Path.Combine(FilterScriptDirectory, ScriptFileName);
+
+                if (File.Exists(scriptFileName))
+                    return File.ReadAllText(scriptFileName);
+                throw new FileNotFoundException($"脚本文件 '{scriptFileName}' 不存在 ...");
+            }
+        }
+
+        public string ScriptFileName
+        {
+            get
+            {
+                string value = this.TryGet(() =>
+                {
+                    return this.textBox_biblio_filterScriptFileName.Text;
+                });
+                if (value == ScriptDialog.DO_NOT_USE_SCRIPT)
+                    return "";
+
+                return value;
+            }
+        }
+
+        public static string BuildCacheKey(string pure_fileName)
+        {
+            return "import:" + pure_fileName;
+        }
+
         // return:
         //      0   普通返回
         //      1   要全部中断
@@ -402,10 +465,32 @@ this.UiState);
             {
                 return this.textBox_batchNo.Text;
             });
+            /*
             string source = this.TryGet(() =>
             {
                 return this.textBox_source.Text;
             });
+            */
+            string operator_string = this.TryGet(() =>
+            {
+                return this.textBox_operator.Text;
+            });
+
+
+
+            var scriptFileName = this.TryGet(() =>
+            {
+                return this.ScriptFileName;
+            });
+
+            if (TryGetScriptCode(out string filterCode) == false)
+            {
+                strError = $"脚本代码文件 {scriptFileName} 不存在";
+                goto ERROR1;
+            }
+
+            var cacheKey = ExportMarcHoldingDialog.BuildCacheKey(scriptFileName);
+
 
             Stream file = null;
 
@@ -428,7 +513,7 @@ this.UiState);
             }));
 
             Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
-+ $" 开始导入 MARC 文件 {strInputFileName}</div>");
+    + $" 开始导入 MARC 文件 {strInputFileName}</div>");
 
             bool dont_display_retry_dialog = false;   //  不再出现重试对话框
             bool dont_display_compare_dialog = false;  // 不再出现两条书目记录对比的对话框
@@ -589,9 +674,9 @@ this.UiState);
 
                         /*
                         nRet = MarcUtil.Marc2Xml(strMARC,
-strBiblioSyntax,
-out domNew,
-out strError);
+    strBiblioSyntax,
+    out domNew,
+    out strError);
                         if (nRet == -1)
                             goto ERROR1;
                         */
@@ -699,11 +784,11 @@ out strError);
 
 
                     nRet = MarcUtil.Xml2Marc(new_xml,    // info.OldXml,
-true,
-null,
-out string strMarcSyntax,
-out strMARC,
-out strError);
+    true,
+    null,
+    out string strMarcSyntax,
+    out strMARC,
+    out strError);
                     if (nRet == -1)
                     {
                         strError = "XML转换到MARC记录时出错: " + strError;
@@ -721,6 +806,7 @@ out strError);
                         if (genData.DetailHostObj != null)
                         {
                             BeforeSaveRecordEventArgs e = new BeforeSaveRecordEventArgs();
+                            e.TargetRecPath = strBiblioRecPath;
                             this.TryInvoke(() =>
                             {
                                 genData.DetailHostObj.Invoke("BeforeSaveRecord",
@@ -737,6 +823,50 @@ out strError);
                         }
                     }
 
+                    // 2024/8/6
+                    if (string.IsNullOrEmpty(filterCode) == false)
+                    {
+                        var ret = ScriptDialog.FilterRecord(
+    cacheKey,
+    filterCode,
+    "",
+    record,
+    (o) =>
+    {
+        o.Table = new Hashtable();
+    },
+    out VerifyHost host,
+    out string error);
+                        if (ret < 0)
+                        {
+                            strError = $"脚本处理 {strBiblioRecPath} 过程中出错: {error}";
+                            goto ERROR1;
+                        }
+                        if (host != null
+    && host.VerifyResult != null
+    && host.VerifyResult.Errors != null
+    && host.VerifyResult.Errors.Count > 0
+    && VerifyError.GetErrorCount(host.VerifyResult.Errors) > 0)
+                        {
+                            strError = VerifyError.BuildTextLines(host.VerifyResult.Errors);
+                            strError = $"脚本处理 {strBiblioRecPath} 过程中出错: {strError}";
+                            goto ERROR1;
+                        }
+
+                        bool skip_import = false;
+                        if (host != null
+    && host.Table != null
+    && host.Table.ContainsKey("skipImport")
+    )
+                        {
+                            skip_import = (bool)host.Table["skipExport"];
+                        }
+
+                        if (skip_import == true)
+                            continue;
+                    }
+
+
                     if (this.InputMode880 == true
                         && (this.InputMarcSyntax == "usmarc" || this.InputMarcSyntax == "<自动>"))
                     {
@@ -748,27 +878,35 @@ out strError);
                     if (string.IsNullOrEmpty(batchNo) == false)
                     {
                         if (batchNo == "[清除]")
-                        {
                             record.select("field[@name='998']/subfield[@name='a']").detach();
-                        }
                         else
-                        {
                             record.setFirstSubfield("998", "a", batchNo);
-                        }
                         record_changed = true;
                     }
 
+                    /*
                     // 2024/7/27
                     if (string.IsNullOrEmpty(source) == false)
                     {
-                        if (batchNo == "[清除]")
-                        {
+                        if (source == "[清除]")
                             record.select("field[@name='998']/subfield[@name='f']").detach();
+                        else
+                            record.setFirstSubfield("998", "f", source);
+                        record_changed = true;
+                    }
+                    */
+
+                    // 2024/7/31
+                    if (string.IsNullOrEmpty(operator_string) == false)
+                    {
+                        if (operator_string == "[清除]")
+                        {
+                            record.select("field[@name='998']/subfield[@name='z']").detach();
+                            // 把操作时间也连带清除
+                            record.select("field[@name='998']/subfield[@name='u']").detach();
                         }
                         else
-                        {
-                            record.setFirstSubfield("998", "f", source);
-                        }
+                            record.setFirstSubfield("998", "z", operator_string);
                         record_changed = true;
                     }
 
@@ -944,7 +1082,7 @@ out strError);
                 */
 
                 Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
-+ $" 结束导入 MARC 文件 {strInputFileName}</div>");
+    + $" 结束导入 MARC 文件 {strInputFileName}</div>");
 
                 if (file != null)
                     file.Close();
@@ -1194,6 +1332,30 @@ out strError);
                 this.comboBox_targetDbName.Enabled = false;
             else
                 this.comboBox_targetDbName.Enabled = true;
+        }
+
+        // 存放过滤脚本 .cs 文件的子目录
+        public string FilterScriptDirectory { get; set; }
+
+        public void PrepareScriptDirectory()
+        {
+            this.FilterScriptDirectory = Path.Combine(Program.MainForm.UserDir, "import_marc_scripts");
+            PathUtil.CreateDirIfNeed(this.FilterScriptDirectory);
+        }
+
+        private void button_biblio_findFilterScriptFileName_Click(object sender, EventArgs e)
+        {
+            using (ScriptDialog dlg = new ScriptDialog())
+            {
+                dlg.Font = this.Font;
+                dlg.FilterScriptDirectory = this.FilterScriptDirectory;
+                dlg.ScriptFileName = this.textBox_biblio_filterScriptFileName.Text;
+                dlg.ShowDialog(this);
+                Program.MainForm.AppInfo.LinkFormState(dlg, "impor_marc_script_dialog");
+                if (dlg.DialogResult == DialogResult.Cancel)
+                    return;
+                this.textBox_biblio_filterScriptFileName.Text = dlg.ScriptFileName;
+            }
         }
     }
 }

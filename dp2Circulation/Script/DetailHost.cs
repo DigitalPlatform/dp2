@@ -270,6 +270,22 @@ namespace dp2Circulation
                 null);
         }
 
+        // 根据 BeforeSaveRecord() 函数的 sender 参数获得 MARC 记录
+        public static MarcRecord GetMarcRecord(object sender)
+        {
+            if (sender is MarcEditor)
+            {
+                var marcEditor = sender as MarcEditor;
+                return new MarcRecord(marcEditor.Marc);
+            }
+            else if (sender is MarcRecord)
+            {
+                return sender as MarcRecord;
+            }
+            else
+                throw new ArgumentException($"GetMarcRecord(object) 无法支持 sender 的类型 '{sender.GetType().ToString()}'");
+        }
+
         // 数据保存前的处理工作
         /// <summary>
         /// 数据保存前的处理工作

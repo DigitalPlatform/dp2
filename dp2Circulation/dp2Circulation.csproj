@@ -53,7 +53,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>615</ApplicationRevision>
+    <ApplicationRevision>627</ApplicationRevision>
     <ApplicationVersion>3.78.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -1071,6 +1071,12 @@
     <Compile Include="Script\ItemHost.cs" />
     <Compile Include="Script\MarcQueryHost.cs" />
     <Compile Include="Script\PatronHost.cs" />
+    <Compile Include="Script\ScriptDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Script\ScriptDialog.Designer.cs">
+      <DependentUpon>ScriptDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Script\StatisHostBase.cs" />
     <Compile Include="Script\StatisHostBase0.cs" />
     <Compile Include="SearchForms\ArriveSearchForm.cs">
@@ -2280,6 +2286,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Script\EditDialog.resx">
       <DependentUpon>EditDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Script\ScriptDialog.resx">
+      <DependentUpon>ScriptDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SearchForms\BiblioSearchForm.resx">
       <SubType>Designer</SubType>

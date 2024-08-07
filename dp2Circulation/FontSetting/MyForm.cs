@@ -214,6 +214,25 @@ namespace dp2Circulation
             OnSelectedIndexChanged();
         }
 
+        public DialogResult ShowMessageDlg(string strText,
+            string strTitle)
+        {
+            if (this.IsHandleCreated)
+                return this.TryGet(() =>
+                {
+                    try
+                    {
+                        return MessageDlg.Show(this, strText, strTitle);
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        return DialogResult.None;
+                    }
+                });
+            else
+                return DialogResult.None;
+        }
+
         public void ShowMessageBox(string strText)
         {
             if (this.IsHandleCreated)

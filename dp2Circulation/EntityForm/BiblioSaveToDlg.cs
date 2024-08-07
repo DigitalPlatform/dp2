@@ -174,6 +174,32 @@ namespace dp2Circulation
             }
         }
 
+        public bool CompressTailNo
+        {
+            get
+            {
+                return this.checkBox_compressTailNo.Checked;
+            }
+            set
+            {
+                this.checkBox_compressTailNo.Checked = value;
+            }
+        }
+
+        public bool EnableCompressTailNo
+        {
+            get
+            {
+                return this.checkBox_compressTailNo.Enabled;
+            }
+            set
+            {
+                this.checkBox_compressTailNo.Enabled = value;
+            }
+        }
+
+
+
         private void comboBox_biblioDbName_DropDown(object sender, EventArgs e)
         {
             if (this.comboBox_biblioDbName.Items.Count > 0)

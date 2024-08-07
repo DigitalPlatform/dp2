@@ -343,5 +343,8 @@ namespace dp2Circulation
         ReserveTargetBiblio = 0x10,     // 书目记录，采用目标书目记录 (对象都全部合并)
 
         SubRecordMask = 0x01 | 0x02 | 0x04, // 下级记录部分的掩码
+    
+        // 2024/8/1
+        CompressTailNo = 0x0100,
     }
 }
