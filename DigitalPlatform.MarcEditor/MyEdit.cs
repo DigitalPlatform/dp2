@@ -13,6 +13,7 @@ using System.Xml;
 
 
 using DigitalPlatform.Text;
+using DigitalPlatform.CommonControl;
 
 
 namespace DigitalPlatform.Marc
@@ -54,12 +55,50 @@ namespace DigitalPlatform.Marc
         public int Offs { get; set; }
 #endif
 
+        [DllImport("user32.dll")]
+        static extern bool CreateCaret(IntPtr hWnd, IntPtr hBitmap, int nWidth, int nHeight);
+        [DllImport("user32.dll")]
+        static extern bool ShowCaret(IntPtr hWnd);
+
         protected override void CreateHandle()
         {
             base.CreateHandle();
 
             SetNewWordBreak();
+
+            /*
+            // https://stackoverflow.com/questions/609927/custom-caret-for-winforms-textbox
+            CreateCaret(this.Handle, IntPtr.Zero, 10, this.Height);
+            ShowCaret(this.Handle);
+            */
+            // BlinkingCaret(_cancel.Token);
         }
+
+        /*
+        void BlinkingCaret(CancellationToken token)
+        {
+            Task.Run(async () =>
+            {
+                while (token.IsCancellationRequested == false)
+                {
+                    await Task.Delay(500);
+                    this.TryInvoke(() =>
+                    {
+                        CreateCaret(this.Handle, IntPtr.Zero, 10, this.Height);
+                        ShowCaret(this.Handle);
+                    });
+                }
+            });
+        }
+
+        CancellationTokenSource _cancel = new CancellationTokenSource();
+
+        protected override void DestroyHandle()
+        {
+            base.DestroyHandle();
+            _cancel.Cancel();
+        }
+        */
 
 #if REMOVED
         protected override void CreateHandle()
@@ -151,6 +190,12 @@ namespace DigitalPlatform.Marc
                     nStart = i;
                     break;
                 }
+            }
+
+            // 2024/8/12
+            if (bFoundPrevDollar == false)
+            {
+                return 0;
             }
 
             // 向右找到$符号
@@ -571,7 +616,7 @@ namespace DigitalPlatform.Marc
                 return;
             }
 
-            END1:
+        END1:
             //if (contextMenu.MenuItems.Count > 0)
             //    contextMenu.MenuItems[0].PerformSelect();
 
@@ -587,6 +632,9 @@ namespace DigitalPlatform.Marc
         protected override bool ProcessCmdKey(ref Message m, Keys keyData)
         {
             Debug.WriteLine($"MyEdit ProcessCmdKey {keyData}");
+
+            if (_k)
+                return base.ProcessCmdKey(ref m, keyData);
 
             // TODO: 调用自动创建数据过程中，为了明显，
             // 可以用 FloatingMessage 显示。
@@ -654,12 +702,33 @@ namespace DigitalPlatform.Marc
                 return true;
             }
             */
+            if (keyData == (Keys.Home | Keys.Control))
+            {
+                this.MarcEditor.SetActiveField(0, 0);
+                return true;
+            }
+
+            if (keyData == (Keys.End | Keys.Control))
+            {
+                var tail = this.MarcEditor.Record.Fields.Count - 1;
+                if (tail >= 0)
+                    this.MarcEditor.SetActiveField(tail, 0);
+                return true;
+            }
 
             return base.ProcessCmdKey(ref m, keyData);
         }
 
+        public bool InCtrlK
+        {
+            get
+            {
+                return _k;
+            }
+        }
 
-        bool _k = false;    // 是否在 Ctrl+K 状态
+
+        internal bool _k = false;    // 是否在 Ctrl+K 状态
 
         // 接管Ctrl+各种键
         /// <summary>
@@ -702,7 +771,8 @@ namespace DigitalPlatform.Marc
             if (Control.ModifierKeys == Keys.Control
                 && (pure_key == Keys.Enter || pure_key == Keys.LineFeed))
             {
-                // 禁止插入回车换行
+                // 插入一个新的字段
+                this.MarcEditor.InsertField(this.MarcEditor.FocusedFieldIndex, 0, 1);
                 return true;
             }
 
@@ -1406,7 +1476,10 @@ namespace DigitalPlatform.Marc
                         this.Text = strTempText;
                     }
 
-                    this.SelectionStart = nOldSelectionStart + strThisText.Length;
+                    // this.SelectionStart = nOldSelectionStart + strThisText.Length;
+                    // 选中刚粘贴进入的部分
+                    this.SelectionStart = nOldSelectionStart;
+                    this.SelectionLength = strThisText.Length;
 
                     // 字段名，确保3字符
                     if (this.MarcEditor.m_nFocusCol == 1)
@@ -1692,12 +1765,25 @@ dp2Circulation 版本: dp2Circulation, Version=2.30.6506.29202, Culture=neutral,
                         }
                         else
                         {
-                            // 后插字段
-                            // this.MarcEditor.InsertAfterFieldWithoutDlg();
+                            bool insert_mode = false;
+                            if (insert_mode)
+                            {
+                                // 后插字段
+                                // this.MarcEditor.InsertAfterFieldWithoutDlg();
 
-                            // parameters:
-                            //      nAutoComplate   0: false; 1: true; -1:保持当前记忆状态
-                            this.MarcEditor.InsertField(this.MarcEditor.FocusedFieldIndex, 0, 1);   // false, true
+                                // parameters:
+                                //      nAutoComplate   0: false; 1: true; -1:保持当前记忆状态
+                                this.MarcEditor.InsertField(this.MarcEditor.FocusedFieldIndex, 0, 1);   // false, true
+                            }
+                            else
+                            {
+                                // 到下一行内容开头
+                                if (this.MarcEditor.FocusedFieldIndex < this.MarcEditor.Record.Fields.Count - 1)
+                                {
+                                    this.MarcEditor.SetActiveField(this.MarcEditor.FocusedFieldIndex + 1, 3);
+                                    this.SelectionStart = 0;
+                                }
+                            }
                         }
                         e.Handled = true;
                         return;
@@ -2098,6 +2184,14 @@ dp2Circulation 版本: dp2Circulation, Version=2.30.6506.29202, Culture=neutral,
                     break;
                 case Keys.Left:
                     {
+                        if (this.SelectionLength > 0 && shift == false)
+                        {
+                            this.SelectionLength = 0;
+                            e.Handled = true;
+                            return;
+                            break;
+                        }
+
                         MemoryCaretX(true);
 
                         if (this.MarcEditor.BlockUp())
@@ -2211,6 +2305,15 @@ dp2Circulation 版本: dp2Circulation, Version=2.30.6506.29202, Culture=neutral,
                     break;
                 case Keys.Right:    // 右方向键
                     {
+                        if (this.SelectionLength > 0 && shift == false)
+                        {
+                            this.SelectionStart = this.SelectionStart + this.SelectionLength;
+                            this.SelectionLength = 0;
+                            e.Handled = true;
+                            return;
+                            break;
+                        }
+
                         MemoryCaretX(true);
 
                         if (this.MarcEditor.BlockDown())
@@ -3181,6 +3284,8 @@ MarcEditor.WM_LEFTRIGHT_MOVED,
                         }
                         else if (this.m_marcEditor.m_nFocusCol == 3)
                         {
+                            // SetHeight();
+#if REMOVED
                             // 当目前输入框是字段值时
                             bool bChangedHeight = false;
                             API.SendMessage(this.Handle,
@@ -3203,6 +3308,7 @@ MarcEditor.WM_LEFTRIGHT_MOVED,
                                 this.MarcEditor.AfterItemHeightChanged(this.MarcEditor.FocusedFieldIndex,
                                     -1);
                             }
+#endif
                         }
                     }
                     break;
@@ -3240,6 +3346,56 @@ MarcEditor.WM_LEFTRIGHT_MOVED,
                     3,
                     rect);
             }
+        }
+
+        int _lineCount = 1;
+
+        public void ClearSetHeight()
+        {
+            _lineCount = 0;
+        }
+
+        public void SetHeight()
+        {
+            var numberOfLines = API.SendMessage(this.Handle, API.EM_GETLINECOUNT, 0, 0).ToInt32();
+            numberOfLines = Math.Max(1, numberOfLines);
+
+            if (numberOfLines != _lineCount)
+            {
+                int nBorderWidth = 0;
+                if (this.BorderStyle == System.Windows.Forms.BorderStyle.Fixed3D)
+                    nBorderWidth = SystemInformation.Border3DSize.Height * 2;
+                else if (this.BorderStyle == System.Windows.Forms.BorderStyle.FixedSingle)
+                    nBorderWidth = SystemInformation.BorderSize.Height * 2;
+
+                /*
+                 * Set TextBox Height -
+http://www.codeproject.com/Articles/29140/Set-TextBox-Height
+Textboxes have a 3-pixel lower and 4-pixel upper white space around
+the font height. Therefore, the calculation increases the height by 7
+pixels.
+                 * */
+                int nNewHeight = (this.Font.Height) * numberOfLines + nBorderWidth; // +7
+                if (this.Height != nNewHeight)
+                {
+                    this.Height = nNewHeight;
+                    // this.OnHeightChanged();
+                    this.MarcEditor.Flush();
+                    this.MarcEditor.AfterItemHeightChanged(this.MarcEditor.FocusedFieldIndex,
+    -1);
+                }
+
+                _lineCount = numberOfLines;
+            }
+        }
+
+
+        protected override void OnFontChanged(EventArgs e)
+        {
+            base.OnFontChanged(e);
+
+            if (this.Visible == true)
+                _lineCount = 0; // 迫使后面重新初始化 Height
         }
 
 #if NO

@@ -88,6 +88,14 @@ namespace DigitalPlatform.Marc
                 return true;
             }
 
+            /*
+            if (keyData == Keys.Back)
+            {
+                MessageBox.Show(this, "Keys.Back");
+                return true;
+            }
+            */
+
             // return false;
             return base.ProcessDialogKey(keyData);  // 2017/3/12
         }
@@ -150,8 +158,6 @@ namespace DigitalPlatform.Marc
                                 CaretPosition.LastChar);
                             e.Handled = true;
                         }
-
-
                     }
                     break;
                 case Keys.Right:    // 右方向键
@@ -196,7 +202,21 @@ namespace DigitalPlatform.Marc
                 case Keys.Delete:
                     {
                         // 禁止Delete键的作用 2008/5/27
-                        Console.Beep();
+                        // Console.Beep();
+                        // e.Handled = true;
+
+                        // 2024/8/13
+                        // 将插入符左侧的字符修改为 ' '
+                        var start = this.SelectionStart;
+                        if (start <= this.Text.Length - 1)
+                        {
+                            var left = this.Text.Substring(0, start);
+                            var right = this.Text.Substring(start + 1);
+                            this.Text = left + " " + right;
+                            this.SelectionStart = start;
+                        }
+                        else
+                            Console.Beep();
                         e.Handled = true;
                     }
                     break;
@@ -276,7 +296,29 @@ namespace DigitalPlatform.Marc
                             case (int)Keys.Back:
                                 {
                                     // 禁止Backspace键的作用 2008/7/4
-                                    Console.Beep();
+                                    // Console.Beep();
+
+                                    // 2024/8/13
+                                    // 将插入符左侧的字符修改为 ' '
+                                    var start = this.SelectionStart;
+                                    if (start >= 1)
+                                    {
+                                        var left = this.Text.Substring(0, start - 1);
+                                        var right = this.Text.Substring(start);
+                                        this.Text = left + " " + right;
+                                        this.SelectionStart = start - 1;
+                                    }
+                                    else
+                                    {
+                                        // Console.Beep();
+
+                                        // 转到上一行末尾
+                                        if (this.nIndex != 0)
+                                        {
+                                            fixedFieldCtrl.SwitchFocus(this.nIndex - 1,
+                                                CaretPosition.LastChar);
+                                        }
+                                    }
                                     return;
                                 }
                                 break;

@@ -4301,6 +4301,8 @@ TaskScheduler.Default);
 
                 this.LibraryName = strValue;
 
+                this.SetTitle();
+
                 this.SetServerName(channel.Url, this.LibraryName);
 
                 lRet = channel.GetSystemParameter(

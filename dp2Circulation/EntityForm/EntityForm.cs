@@ -3518,6 +3518,13 @@ out string strErrorCode)
             return false;
         }
 
+        // 2024/8/12
+        public void ClearVerifyViewer()
+        {
+            if (this.m_verifyViewer != null)
+                this.m_verifyViewer.Clear();
+        }
+
         // 从 collection 下级元素中获得指定元素名的部分
         static EntityInfo[] GetItems(XmlDocument collection_dom,
             string strElementName)
@@ -10833,6 +10840,9 @@ out strError);
             bool bAutoVerify)
         {
             string strError = "";
+
+            VerifyMarcResultDialog modeless_dialog = null;
+
             if (this != null)
                 this._processing++;
             try
@@ -10859,7 +10869,9 @@ out strError);
 
                         // 2011/8/17
                         if (Program.MainForm.PanelFixedVisible == true)
+                        {
                             Program.MainForm.ActivateVerifyResultPage();
+                        }
                     }
                 }
                 var marc = this.GetMarc();
@@ -11166,6 +11178,7 @@ out strError);
                         {
                             // TODO: 可以用一个成员保存，在 EntityForm 被关闭时关闭它
                             var dlg = new VerifyMarcResultDialog();
+                            modeless_dialog = dlg;
                             dlg.Text = "MARC 格式校验";
                             dlg.SourceMarc = marc;
                             dlg.TargetNewMarc = hostObj.VerifyResult.ChangedMarc;
@@ -11181,6 +11194,7 @@ out strError);
                                 }
                             };
                             dlg.Show(this);
+                            // dlg.Activate();
                         });
                     }
                     else
@@ -11191,7 +11205,7 @@ out strError);
                         {
                             // 先对照显示，让操作者决定是否接受新内容
                             var dlg = new VerifyMarcResultDialog();
-
+                            modeless_dialog = dlg;
                             string oldMarc = new_entity_form != null ? new_entity_form.GetMarc() : "";
                             string newMarc = hostObj.VerifyResult.ChangedMarc;
                             if (string.IsNullOrEmpty(oldMarc) == false)
@@ -11226,6 +11240,7 @@ out strError);
                                 }
                             };
                             dlg.Show(this);
+                            // dlg.Activate();
                         });
                     }
                 }
@@ -11291,7 +11306,8 @@ out strError);
                         // this.m_verifyViewer.ResultString = hostObj.VerifyResult.ErrorInfo;
 
 
-                        Program.MainForm.ActivateVerifyResultPage();   // 2014/7/3
+                        Program.MainForm.ActivateVerifyResultPage();
+                        // 2014/7/3
                         //bVerifyFail = true;
                     }
 
@@ -11381,6 +11397,33 @@ out strError);
             finally
             {
                 this._processing--;
+
+                // 2024/8/12
+                if (modeless_dialog != null)
+                {
+                    _ = Task.Run(async () => {
+                        await Task.Delay(500);
+                        this.TryInvoke(() =>
+                        {
+                            modeless_dialog.Activate();
+                            modeless_dialog.FocusToWebControl();
+                        });
+                    });
+                }
+                else
+                {
+                    /*
+                    _ = Task.Run(async () => {
+                        await Task.Delay(500);
+                        this.TryInvoke(() =>
+                        {
+                            this.MarcEditor.Focus();
+                        });
+                    });
+                    */
+                    // 焦点回到 MARC 编辑器
+                    SwitchFocus(MARC_EDITOR);
+                }
             }
         ERROR1:
             this.MessageBoxShow(strError);
@@ -14557,40 +14600,6 @@ out strError);
             // Debug.WriteLine($"EntityForm ProcessCmdKey {keyData}");
 
             /*
-            // TODO: 调用自动创建数据过程中，为了明显，
-            // 可以用 FloatingMessage 显示。
-            // 如果命令发现不适合完成，可以用 floatingMessage 报错。(例如，插入符在 701 上面点 Ctrl+A，因为 701 有内容了，没有执行功能，需要报错提示)
-            if (keyData == (Keys.A | Keys.Control))
-            {
-                this.MarcEditor.FireSelectedFieldChanged(); // 令数据加工菜单敏感
-                MarcEditor_GenerateData(this.m_marcEditor, new GenerateDataEventArgs());
-                return true;
-            }
-
-            if (keyData == (Keys.Control | Keys.S))
-            {
-                // MessageBox.Show(this, "Call 加拼音");
-
-                GenerateDataEventArgs e1 = new GenerateDataEventArgs();
-                e1.ScriptEntry = "AddPinyin";
-                e1.FocusedControl = this.m_marcEditor;
-                MarcEditor_GenerateData(this.m_marcEditor, e1);
-
-                return true;
-            }
-            if (keyData == (Keys.Control | Keys.D))
-            {
-                // MessageBox.Show(this, "Call 删除拼音");
-
-                GenerateDataEventArgs e1 = new GenerateDataEventArgs();
-                e1.ScriptEntry = "RemovePinyin";
-                e1.FocusedControl = this.m_marcEditor;
-                MarcEditor_GenerateData(this.m_marcEditor, e1);
-
-                return true;
-            }
-            */
-
             if (keyData == (Keys.D1 | Keys.Control))
             {
                 this.MarcEditor.Focus();
@@ -14598,12 +14607,17 @@ out strError);
             }
 
 
-            if (keyData == (Keys.D2 | Keys.Control))
+            if (keyData == (Keys.D8 | Keys.Control))
             {
                 Program.MainForm.ActivateGenerateDataPage();
                 MainForm.FocusDpTable(Program.MainForm.CurrentGenerateDataControl);
                 return true;
             }
+            */
+
+            // 让 MarcEditor 处理
+            if (this.MarcEditor.InCtrlK)
+                return base.ProcessCmdKey(ref m, keyData);
 
             if (keyData == (Keys.PageUp | Keys.Control)
                 || keyData == (Keys.NumPad9 | Keys.Control))
@@ -14627,10 +14641,16 @@ out strError);
                 {
                     Application.DoEvents();
                 }
-                var result = task.Result; return true;
+                var result = task.Result; 
+                return true;
             }
 
             return base.ProcessCmdKey(ref m, keyData);
+        }
+
+        public void FocusToQueryWord()
+        {
+            FocusTo(this.textBox_queryWord);
         }
 
         /// <summary>
@@ -14652,6 +14672,10 @@ out strError);
             // 去掉Control/Shift/Alt 以后的纯净的键码
             Keys pure_key = (keyData & (~(Keys.Control | Keys.Shift | Keys.Alt)));
 
+            // 让 MarcEditor 处理
+            if (this.MarcEditor.InCtrlK)
+                return base.ProcessDialogKey(keyData);
+
             /*
             if (keyData == Keys.Enter)
             {
@@ -14670,7 +14694,10 @@ out strError);
                 || keyData == (Keys.Control | Keys.Shift | Keys.S)*/)
             {
                 // 注: Ctrl+S 被用作创建拼音
+                bool marcedit_has_focus = this.MarcEditor.Focused;
                 this.DoSaveAll();
+                if (marcedit_has_focus)
+                    SwitchFocus(MARC_EDITOR);
                 return true;
             }
 
@@ -15887,6 +15914,10 @@ out strError);
                     }
                     this.BiblioRecPath = strOldBiblioRecPath;
                 }
+
+                // 2024/8/12
+                // 焦点回到 MARC 编辑器
+                SwitchFocus(MARC_EDITOR);
             }
 
             return 1;

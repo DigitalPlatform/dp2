@@ -5,7 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-
+using System.Windows.Forms;
 
 using DigitalPlatform;
 using DigitalPlatform.Marc;
@@ -58,6 +58,13 @@ namespace dp2Circulation
             // 2017/4/23
             if (this.DetailForm != null)
                 this.DetailForm = null;
+        }
+
+        public void ClearParameter()
+        {
+            this.VerifyResult = null;
+            this.Parameter = null;
+            this.Table = null;
         }
 
         /// <summary>
@@ -392,6 +399,7 @@ out string error);
             return list.List.FirstOrDefault();
         }
 
+#if REMOVED
         string[] sample_cfg_lines = new string[] {
 "高中生-->高中",
 "初中生-->初中",
@@ -410,62 +418,7 @@ out string error);
 "青少年-->青少年",
 };
 
-        public static string Verify960a(string[] cfg_lines,
-            List<string> sources,
-            List<string> targets)
-        {
-            foreach (string line in cfg_lines)
-            {
-                var right_word = MatchLeft(line, sources);
-                if (right_word != null
-                    && Contains(targets, right_word) == false)
-                    return $"应当包含 '{right_word}'";
-            }
-
-            return null;
-        }
-
-        static bool Contains(List<string> list, string word)
-        {
-            foreach (var s in list)
-            {
-                if (s.Contains(word))
-                    return true;
-            }
-            return false;
-        }
-
-        static string MatchLeft(string cfg_line, List<string> values)
-        {
-            foreach (string value in values)
-            {
-                var ret = MatchLeft(cfg_line, value);
-                if (ret != null)
-                    return ret;
-            }
-
-            return null;
-        }
-
-        // 匹配左侧的单词，然后如果命中返回右侧的单词
-        // parameters:
-        //      cfg_line "幼儿/儿童/少儿-->儿童"
-        static string MatchLeft(string cfg_line, string text)
-        {
-            if (text == null)
-                return null;
-            var parts = StringUtil.ParseTwoPart(cfg_line, "-->");
-            var left = parts[0];
-            var right = parts[1];
-            var list = StringUtil.SplitList(left, '/');
-            foreach (var s in list)
-            {
-                if (text.Contains(s))
-                    return right;
-            }
-
-            return null;
-        }
+#endif
 
         #endregion
     }
@@ -1039,6 +992,95 @@ out string error);
             return count;
         }
 
+        public static bool Add500(MarcRecord record,
+string rule,
+ref string locationString)
+        {
+            string old_marc = record.Text;
+
+            MarcSubfield subfield_e = null;
+            if (string.IsNullOrEmpty(locationString) == false)
+                subfield_e = LocateMarcNode(record,
+                locationString) as MarcSubfield;
+
+            bool subfield_name_match = false;
+            if (subfield_e != null && subfield_e.Name == "d")
+                subfield_name_match = true;
+
+            // 判断 subfield 是否为 200$d
+            if (subfield_e != null
+                && subfield_e.Parent?.Name == "200"
+                && subfield_name_match)
+            {
+
+            }
+            else
+                subfield_e = null;
+
+            if (subfield_e == null)
+                return false;
+
+            MarcField new_field = new MarcField("500", "10", $"‡a{subfield_e.Content.TrimStart('=',' ')}‡mChinese".Replace("‡", MarcQuery.SUBFLD));
+            record.ChildNodes.insertSequence(
+                new_field,
+                InsertSequenceStyle.PreferTail);
+            {
+                var subfield_a = VerifyHost.FirstOrDefault(new_field.select("subfield[@name='a']"));
+                locationString = MarcRecordUtility.GetLocationString(
+                    subfield_a);
+            }
+            return old_marc != record.Text;
+        }
+
+
+        /*
+## 200$d-->510
+
+当200字段出现"$d= xxx"，在200字段$d内容上按Ctrl+a自动生成510字段。
+510字段的指示符为10，格式恒定为“$axxx$mChinese” xxx是200$d中=号后的内容。
+
+         * */
+        public static bool Add510(MarcRecord record,
+    string rule,
+    ref string locationString)
+        {
+            string old_marc = record.Text;
+
+            MarcSubfield subfield_e = null;
+            if (string.IsNullOrEmpty(locationString) == false)
+                subfield_e = LocateMarcNode(record,
+                locationString) as MarcSubfield;
+
+            bool subfield_name_match = false;
+            if (subfield_e != null && subfield_e.Name == "d")
+                subfield_name_match = true;
+
+            // 判断 subfield 是否为 200$d
+            if (subfield_e != null
+                && subfield_e.Parent?.Name == "200"
+                && subfield_name_match)
+            {
+
+            }
+            else
+                subfield_e = null;
+
+            if (subfield_e == null)
+                return false;
+
+            MarcField new_field = new MarcField("510", "1 ", $"‡a{subfield_e.Content.TrimStart('=', ' ')}‡z".Replace("‡", MarcQuery.SUBFLD));
+            record.ChildNodes.insertSequence(
+                new_field,
+                InsertSequenceStyle.PreferTail);
+            {
+                var subfield_a = VerifyHost.FirstOrDefault(new_field.select("subfield[@name='a']"));
+                locationString = MarcRecordUtility.GetLocationString(
+                    subfield_a);
+            }
+            return old_marc != record.Text;
+        }
+
+
         // 根据 200$e 或 200$i 生成 517$a
         // 区分 CALIS 和 NLC 编目规则。其中 NLC 没有 $i
         public static bool Add517(MarcRecord record,
@@ -1053,10 +1095,13 @@ out string error);
                 locationString) as MarcSubfield;
 
             bool subfield_name_match = false;
-            if (rule == "CALIS" && (subfield_e.Name == "e" || subfield_e.Name == "i"))
-                subfield_name_match = true;
-            else if (subfield_e.Name == "e")
-                subfield_name_match = true;
+            if (subfield_e != null)
+            {
+                if (rule == "CALIS" && (subfield_e.Name == "e" || subfield_e.Name == "i"))
+                    subfield_name_match = true;
+                else if (subfield_e.Name == "e")
+                    subfield_name_match = true;
+            }
 
             // 判断 subfield 是否为 200$e
             if (subfield_e != null
@@ -1484,10 +1529,18 @@ ref string locationString)
         {
             string old_marc = record.Text;
 
+            MarcField field_7xx = null;
+
             MarcSubfield subfield_f = null;
             if (string.IsNullOrEmpty(locationString) == false)
-                subfield_f = LocateMarcNode(record,
-                locationString) as MarcSubfield;
+            {
+                var node = LocateMarcNode(record,
+                locationString);
+                if (node is MarcSubfield)
+                    subfield_f = node as MarcSubfield;
+                else if (node is MarcField)
+                    field_7xx = node as MarcField;
+            }
 
             // 判断subfield_f 是否为 200$f$g
             if (subfield_f != null
@@ -1496,29 +1549,282 @@ ref string locationString)
             {
 
             }
+            // 2024/8/12
+            // 是否为 701$a 或者 702$a
+            else if (subfield_f != null
+                && (subfield_f.Parent?.Name == "701" || subfield_f.Parent?.Name == "702")
+                /*&& subfield_f.Name == "a"*/)
+            {
+                field_7xx = subfield_f.Parent as MarcField;
+            }
+            else if (field_7xx != null
+                && (field_7xx.Name == "701" || field_7xx.Name == "702"))
+            {
+
+            }
             else
                 subfield_f = null;
+
+            if (field_7xx != null)
+            {
+                // 转为找到第一个 200$f
+                if (field_7xx?.Name == "701")
+                {
+                    subfield_f = VerifyHost.FirstOrDefault(record.select("field[@name='200']/subfield[@name='f']")) as MarcSubfield;
+                }
+                // 转为找到第一个 200$g
+                else if (field_7xx?.Name == "702")
+                {
+                    subfield_f = VerifyHost.FirstOrDefault(record.select("field[@name='200']/subfield[@name='g']")) as MarcSubfield;
+                }
+                else
+                    subfield_f = null;
+            }
 
             if (subfield_f == null)
                 return false;
 
             // TODO: 按照 subfield.Content 内容切割为多个著者名字符串
 
-            string content = $"‡a{subfield_f.Content}";
+            if (field_7xx == null)
+            {
+                string content = $"‡a{subfield_f.Content}";
 
-            var new_field_name = "701";
-            if (subfield_f.Name == "g")
-                new_field_name = "702";
-            var new_field = new MarcField(new_field_name, " 0", content.Replace("‡", MarcQuery.SUBFLD));
-            record.ChildNodes.insertSequence(
-                new_field,
-                InsertSequenceStyle.PreferTail);
+                var new_field_name = "701";
+                if (subfield_f.Name == "g")
+                    new_field_name = "702";
+                var new_field = new MarcField(new_field_name, " 0", content.Replace("‡", MarcQuery.SUBFLD));
+                record.ChildNodes.insertSequence(
+                    new_field,
+                    InsertSequenceStyle.PreferTail);
 
-            // 返回 7xx$a 的定位
-            var subfield_a = VerifyHost.FirstOrDefault(new_field.select("subfield[@name='a']"));
-            locationString = MarcRecordUtility.GetLocationString(
-                subfield_a);
+                // 返回 7xx$a 的定位
+                var subfield_a = VerifyHost.FirstOrDefault(new_field.select("subfield[@name='a']"));
+                locationString = MarcRecordUtility.GetLocationString(
+                    subfield_a);
+            }
+            else
+            {
+                var subfield_a = VerifyHost.FirstOrDefault(field_7xx.select("subfield[@name='a']")) as MarcSubfield;
+                if (subfield_a == null)
+                {
+                    subfield_a = new MarcSubfield("a", subfield_f.Content);
+                    field_7xx.ChildNodes.insertSequence(subfield_a);
+                }
+                else
+                    subfield_a.Content = subfield_f.Content;
+                locationString = MarcRecordUtility.GetLocationString(
+                    subfield_a);
+            }
             return old_marc != record.Text;
+        }
+
+        // 根据插入符位置把 7xx$a 切割为两部分，生成两个 7xx 字段，并删除原字段
+        // parameters:
+        //      locationString  [in] 调用前插入符所在的子字段定位
+        //                      [out] 调用后插入符应当去到的子字段定位。如果为空，表示无需改变当前插入符位置
+        public static bool Split7xx(MarcRecord record,
+    string rule,
+    ref string locationString,
+    int caret_offs_in_end_level)
+        {
+            string old_marc = record.Text;
+
+            MarcField field_7xx = null;
+
+            MarcSubfield subfield_f = null;
+            if (string.IsNullOrEmpty(locationString) == false)
+            {
+                var node = LocateMarcNode(record,
+                locationString);
+                if (node is MarcSubfield)
+                    subfield_f = node as MarcSubfield;
+            }
+
+            // 是否为 701$a 或者 702$a
+            if (subfield_f != null
+                && (subfield_f.Parent?.Name == "701" || subfield_f.Parent?.Name == "702")
+                && subfield_f.Name == "a")
+            {
+                field_7xx = subfield_f.Parent as MarcField;
+            }
+            else
+                subfield_f = null;
+
+            if (subfield_f == null)
+                return false;
+
+            if (caret_offs_in_end_level < 0
+                || caret_offs_in_end_level >= subfield_f.Text.Length)
+            {
+                // 偏移量不对
+                return false;
+            }
+
+            var offs_in_content = caret_offs_in_end_level - 2;
+            if (offs_in_content < 0)
+                return false;   // 插入符不在子字段内容上
+            var left = subfield_f.Content.Substring(0, offs_in_content);
+            var right = subfield_f.Content.Substring(offs_in_content);
+            if (string.IsNullOrEmpty(left)
+                || string.IsNullOrEmpty(right))
+                return false;   // left right 中有一个为空
+
+            // 修改 $a
+            field_7xx.select("subfield[@name='a']")[0].Content = left;
+
+            {
+                var new_field = field_7xx.clone();
+                var index = field_7xx.Parent.ChildNodes.indexOf(field_7xx);
+                field_7xx.Parent.ChildNodes.insert(index + 1, new_field);
+                /*
+                record.ChildNodes.insertSequence(
+                    new_field,
+                    InsertSequenceStyle.PreferTail);
+                */
+
+                // 修改 $a
+                new_field.select("subfield[@name='a']")[0].Content = right;
+
+                // 返回 7xx$a 的定位
+                var subfield_a = VerifyHost.FirstOrDefault(new_field.select("subfield[@name='a']"));
+                locationString = MarcRecordUtility.GetLocationString(
+                    subfield_a);
+            }
+
+            return old_marc != record.Text;
+        }
+
+        public static bool Copy333ato960e(MarcRecord record,
+string rule,
+ref string locationString)
+        {
+            string old_marc = record.Text;
+
+            MarcSubfield subfield_e = null;
+            if (string.IsNullOrEmpty(locationString) == false)
+                subfield_e = LocateMarcNode(record,
+                locationString) as MarcSubfield;
+
+            MarcSubfield source = null;
+            MarcSubfield target = null;
+            if (subfield_e != null
+                && subfield_e.Parent?.Name == "333"
+                && subfield_e.Name == "a")
+            {
+                source = subfield_e;
+            }
+            else if (subfield_e != null
+                && subfield_e.Parent?.Name == "960"
+                && subfield_e.Name == "e")
+            {
+                target = subfield_e;
+            }
+            else
+                return false;
+
+            string source_content = "";
+            if (source != null)
+                source_content = source.Content;
+            else
+            {
+                source_content = record.select("field[@name='333']/subfield[@name='a']").FirstContent;
+            }
+
+            if (string.IsNullOrEmpty(source_content))
+                return false;
+
+            if (target != null)
+                target.Content = source_content;
+            else
+                record.setFirstSubfield("960", "e", source_content);
+
+            locationString = null;
+            return old_marc != record.Text;
+        }
+
+        // parameters:
+        //      style   force13 force10 auto 之一
+        public static bool HyphenISBN(MarcRecord record,
+string rule,
+string style,   // bool force13,
+ref string locationString)
+        {
+            if (style != "force13"
+                && style != "force10"
+                && style != "auto")
+                throw new ArgumentException($"style 参数值 '{style}' 不合法。应为 force13 force10 auto 之一");
+
+            if (style == "auto")
+                throw new ArgumentException("暂未实现");
+
+            string old_marc = record.Text;
+
+            MarcNode node = null;
+            if (string.IsNullOrEmpty(locationString) == false)
+            {
+                node = LocateMarcNode(record,
+                locationString);
+            }
+
+            if (node == null)
+                node = VerifyHost.FirstOrDefault(record.select("field[@name='010']/subfield[@name='a']"));
+
+            if (node == null)
+                return false;
+
+            MarcSubfield subfield = null;
+            if (node is MarcSubfield)
+                subfield = node as MarcSubfield;
+            else if (node is MarcField)
+                subfield = VerifyHost.FirstOrDefault(node.select("subfield[@name='a']")) as MarcSubfield;
+            else
+                subfield = VerifyHost.FirstOrDefault(record.select("field[@name='010']/subfield[@name='a']")) as MarcSubfield;
+
+            if (subfield == null) 
+                return false;
+
+            if (subfield.Parent?.Name != "010"
+                || subfield.Name != "a")
+                return false;
+
+            string strISBN = subfield.Content.Trim();
+            if (string.IsNullOrEmpty(strISBN))
+                return false;
+
+            int nRet = Program.MainForm.LoadIsbnSplitter(
+                true, 
+                out string strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            nRet = Program.MainForm.IsbnSplitter.IsbnInsertHyphen(
+                strISBN,
+                style + ",strict",
+                out string strResult,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            if (nRet == 1)
+            {
+                DialogResult result = MessageBox.Show(
+                    Program.MainForm,
+                    "原ISBN '" + strISBN + "'加工成 '" + strResult + "' 后发现校验位有变化。\r\n\r\n是否接受修改?",
+                    "规整ISBN",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question,
+                    MessageBoxDefaultButton.Button2);
+                if (result != DialogResult.Yes)
+                    return false;
+            }
+
+            subfield.Content = strResult;
+            locationString = null;
+            return old_marc != record.Text;
+        ERROR1:
+            MessageBox.Show(Program.MainForm, strError);
+            return false;
         }
 
 

@@ -4963,10 +4963,27 @@ chi	中文	如果是中文，则为空。
             }
         }
 
+        public int GetMarcRecord(
+    string style,
+    out MarcRecord record,
+    out string rule,
+    out string locationString,
+    out string strError)
+        {
+            return GetMarcRecord(
+            style,
+            out record,
+            out rule,
+            out locationString,
+            out _,
+            out strError);
+        }
+
         // TODO: 为何本函数速度慢?
         // 获得当前正在编辑的 MARC 记录，和编目规则
         // parameters:
         //      record  [out] 返回 MarcRecord 对象。注意 4XX 字段是嵌套字段的结构
+        //      caret_offs_in_end_level   [out] 返回在最后一级 level 的全文(包括字段名部分)中的插入符偏移
         // return:
         //      -1  出错
         //      0   没有找到
@@ -4976,14 +4993,16 @@ chi	中文	如果是中文，则为空。
             out MarcRecord record,
             out string rule,
             out string locationString,
+            out int caret_offs_in_end_level,
             out string strError)
         {
+            caret_offs_in_end_level = 0;
             strError = "";
             rule = "";
 
             var detail_form = this.DetailForm;
 
-            locationString = detail_form.MarcEditor.GetCurrentLocationString();
+            locationString = detail_form.MarcEditor.GetCurrentLocationString(out caret_offs_in_end_level);
 
             record = new MarcRecord(detail_form.GetMarc(), "4**");
 

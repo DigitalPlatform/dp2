@@ -873,6 +873,10 @@ out string strPureName);
             // utime
             strMacro = strMacro.Replace("%utime%", time.ToString("u"));
 
+            // 2024/8/7
+            // stime
+            strMacro = strMacro.Replace("%stime%", time.ToString("s"));
+
             // 年 year
             strMacro = strMacro.Replace("%year%", Convert.ToString(time.Year).PadLeft(4, '0'));
 

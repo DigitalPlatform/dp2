@@ -372,6 +372,8 @@ public class MyVerifyHost : VerifyHost
         public delegate void delagate_initializeHost(VerifyHost host);
 
         // 导出 MARC 前过滤和处理 MARC 字段
+        // parameters:
+        //      func_init   hostObj 初始化回调函数。注意，每次调用本函数都会触发一次这个回调函数
         // return:
         //      -1  出错
         //      其它  使用 hostObj.VerifyResult.Value 返回值(-1 除外)
@@ -383,28 +385,32 @@ public class MyVerifyHost : VerifyHost
             string strRef,
             MarcRecord record,
             delagate_initializeHost func_init,
-            out VerifyHost hostObj,
+            ref VerifyHost hostObj,
             out string strError)
         {
-            hostObj = null;
-            int nRet = GetAssembly(
-                cacheKey,
-                strCode,
-                strRef,
-                out Assembly assembly,
-                out strError);
-            if (nRet == -1 || nRet == 0)
-                return -1;
+            strError = "";
 
-            nRet = EntityForm.NewVerifyHostObject(assembly,
-out hostObj,
-out strError);
-            if (nRet == -1)
-                return -1;
+            if (hostObj == null)
+            {
+                int nRet = GetAssembly(
+                    cacheKey,
+                    strCode,
+                    strRef,
+                    out Assembly assembly,
+                    out strError);
+                if (nRet == -1 || nRet == 0)
+                    return -1;
 
-            // 为Host派生类设置参数
-            hostObj.DetailForm = null;
-            hostObj.Assembly = assembly;
+                nRet = EntityForm.NewVerifyHostObject(assembly,
+    out hostObj,
+    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                // 为Host派生类设置参数
+                hostObj.DetailForm = null;
+                hostObj.Assembly = assembly;
+            }
 
             func_init?.Invoke(hostObj);
 

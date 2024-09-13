@@ -21,7 +21,7 @@ namespace DigitalPlatform.Marc
         public static List<Field> Clone(List<Field> fields)
         {
             var results = new List<Field>();
-            foreach(var field in fields)
+            foreach (var field in fields)
             {
                 results.Add(field.Clone());
             }
@@ -31,13 +31,14 @@ namespace DigitalPlatform.Marc
 
         public Field Clone()
         {
-            var result = new Field { 
-            m_strName = m_strName,
-            m_strIndicator = m_strIndicator,
-            m_strValue = m_strValue,
-            m_strNameCaption = m_strNameCaption,
-            PureHeight = PureHeight,
-            Selected = Selected,
+            var result = new Field
+            {
+                m_strName = m_strName,
+                m_strIndicator = m_strIndicator,
+                m_strValue = m_strValue,
+                m_strNameCaption = m_strNameCaption,
+                PureHeight = PureHeight,
+                Selected = Selected,
             };
             return result;
         }
@@ -534,7 +535,7 @@ namespace DigitalPlatform.Marc
                     new Size(container.record.ValuePureWidth, -1),
                     MarcEditor.editflags);
 
-                int h3 = (int)size.Height;
+                int h3 = (int)size.Height + 2;  // 2024/8/15 增加的 +2
 
                 if (h1 < h3)
                     h1 = h3;

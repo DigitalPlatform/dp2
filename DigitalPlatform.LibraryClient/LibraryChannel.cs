@@ -1442,6 +1442,21 @@ out strError);
                 return 0;
             }
 
+            // 2024/8/8
+            if (ex0 is System.ServiceModel.CommunicationException
+                && IsScheme("net.tcp"))
+            {
+                this.ErrorCode = ErrorCode.RequestError;	// 一般错误
+                this.TryAbortIt();
+                strError = GetExceptionMessage(ex0);
+                if (this.m_nRedoCount == 0)
+                {
+                    this.m_nRedoCount++;
+                    return 1;   // 重做
+                }
+                return 0;
+            }
+
             /*
             if (ex0 is CommunicationException)
             {
@@ -1458,6 +1473,15 @@ out strError);
             }
             strError = GetExceptionMessage(ex0);
             return 0;
+        }
+
+        bool IsScheme(string protocol_name)
+        {
+            Uri uri = new Uri(this.Url);
+            if (uri.Scheme.ToLower() == protocol_name)
+                return true;
+            return false;
+
         }
 
         static string GetExceptionMessage(Exception ex)

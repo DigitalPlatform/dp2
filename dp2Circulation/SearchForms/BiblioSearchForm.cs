@@ -308,6 +308,16 @@ namespace dp2Circulation
                 toolStripMenuItem_subrecords.Enabled = false;
                 DisplaySubrecords = false;
             }
+
+            // 把输入焦点定位到 检索词 textbox
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(500);
+                this.TryInvoke(() =>
+                {
+                    this.textBox_queryWord.Focus();
+                });
+            });
         }
 
         // TabComboBox版本
@@ -711,6 +721,44 @@ this.comboBox_location.Text);
             });
         }
 
+        public void FocusToQueryWord(bool select_all = false)
+        {
+            // 把输入焦点定位到 检索词 textbox
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(500);
+                this.TryInvoke(() =>
+                {
+                    this.textBox_queryWord.Focus();
+                    if (select_all)
+                        this.textBox_queryWord.SelectAll();
+                });
+            });
+        }
+
+        protected override void OnGotFocus(EventArgs e)
+        {
+            /*
+            base.OnGotFocus(e);
+
+            if (_lastActiveControl == null)
+                FocusToQueryWord();
+            else
+                FocusTo(_lastActiveControl);
+            */
+        }
+
+        Control _lastActiveControl = null;
+
+        protected override void OnLostFocus(EventArgs e)
+        {
+            /*
+            _lastActiveControl = this.ActiveControl;
+
+            base.OnLostFocus(e);
+            */
+        }
+
         /// <summary>
         /// 处理对话框键
         /// </summary>
@@ -719,10 +767,26 @@ this.comboBox_location.Text);
         protected override bool ProcessDialogKey(
 Keys keyData)
         {
+
+            // 如果输入焦点在 ListView 上，则相当于双击
+            if ((keyData == Keys.Enter || keyData == Keys.LineFeed)
+                && this.listView_records.Focused)
+            {
+                listView_records_DoubleClick(this, new EventArgs());
+                return true;
+            }
+
             if ((keyData == Keys.Enter || keyData == Keys.LineFeed)
                 && this.tabControl_query.SelectedTab == this.tabPage_logic)
             {
-                _ = this.DoLogicSearch(false);
+                // 如果输入焦点在 ListView 上，则相当于双击
+                if (this.listView_records.Focused)
+                    listView_records_DoubleClick(this, new EventArgs());
+                else
+                {
+                    // 如果输入焦点在其它位置，则当作开始检索处理
+                    _ = this.DoLogicSearch(false);
+                }
                 return true;
             }
 
@@ -2065,6 +2129,18 @@ out strError);
                 this.ReturnChannel(channel);
                 this.EnableControlsInSearching(true);
 
+                // 2024/8/13
+                // 将输入焦点定位到 ListView
+                this.TryInvoke(() =>
+                {
+                    this.listView_records.Focus();
+                    if (this.listView_records.SelectedItems.Count == 0
+                        && this.listView_records.Items.Count > 0)
+                    {
+                        ListViewUtil.SelectLine(this.listView_records.Items[0], true);
+                    }
+                });
+
                 Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
     + " 结束书目检索</div>");
             }
@@ -2627,33 +2703,40 @@ GetCurrentBrowseStyle());
                 if (string.IsNullOrEmpty(script_code) == false)
                 {
                     MarcRecord marc = new MarcRecord(strMARC);
-                    // hostObj.VerifyResult.Value
-                    var ret = ScriptDialog.FilterRecord(
-BuildZ3950ScriptCacheKey(script_name),
-script_code,
-"",
-marc,
-null,
-out VerifyHost host,
-out string error);
-                    if (ret < 0)
+                    VerifyHost host = null;
+                    try
                     {
-                        AddErrorLine(strRecPath,
-                            "记录 " + strRecPath + " 创建浏览格式时(执行脚本阶段)出错: " + error);
-                        goto CONTINUE;
+                        var ret = ScriptDialog.FilterRecord(
+    BuildZ3950ScriptCacheKey(script_name),
+    script_code,
+    "",
+    marc,
+    null,
+    ref host,
+    out string error);
+                        if (ret < 0)
+                        {
+                            AddErrorLine(strRecPath,
+                                "记录 " + strRecPath + " 创建浏览格式时(执行脚本阶段)出错: " + error);
+                            goto CONTINUE;
+                        }
+                        if (host != null
+                            && host.VerifyResult != null
+                            && host.VerifyResult.Errors != null
+                            && host.VerifyResult.Errors.Count > 0
+                            && VerifyError.GetErrorCount(host.VerifyResult.Errors) > 0)
+                        {
+                            var text = VerifyError.BuildTextLines(host.VerifyResult.Errors);
+                            AddErrorLine(strRecPath,
+                                "记录 " + strRecPath + " 创建浏览格式时(执行脚本阶段)发现校验错误: " + text);
+                            goto CONTINUE;
+                        }
+                        strMARC = marc.Text;
                     }
-                    if (host != null
-                        && host.VerifyResult != null
-                        && host.VerifyResult.Errors != null
-                        && host.VerifyResult.Errors.Count > 0
-                        && VerifyError.GetErrorCount(host.VerifyResult.Errors) > 0)
+                    finally
                     {
-                        var text = VerifyError.BuildTextLines(host.VerifyResult.Errors);
-                        AddErrorLine(strRecPath,
-                            "记录 " + strRecPath + " 创建浏览格式时(执行脚本阶段)发现校验错误: " + text);
-                        goto CONTINUE;
+                        host?.Dispose();
                     }
-                    strMARC = marc.Text;
                 }
 
                 nRet = MyForm.BuildMarcBrowseText(
@@ -3542,6 +3625,11 @@ out string error);
         private void BiblioSearchForm_Activated(object sender, EventArgs e)
         {
             Program.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
+
+            if (_lastActiveControl == null)
+                FocusToQueryWord();
+            else
+                FocusTo(_lastActiveControl);
 
             RefreshPropertyView(false);
         }
@@ -11572,6 +11660,26 @@ message,
             }
         }
 
+        public bool LastModify100
+        {
+            get
+            {
+                return Program.MainForm.AppInfo.GetBoolean(
+                    this._dbType + "searchform",
+                    "last_modify_100",
+                    true);
+            }
+            set
+            {
+                Program.MainForm.AppInfo.SetBoolean(
+                    this._dbType + "searchform",
+                    "last_modify_100",
+                    value);
+            }
+        }
+
+
+
         public static bool ExistFiles(string strDirectoryName)
         {
             if (Directory.Exists(strDirectoryName) == false)
@@ -12853,6 +12961,7 @@ public class MyVerifyHost : VerifyHost
             OpenMarcFileDlg dlg = new OpenMarcFileDlg();
             MainForm.SetControlFont(dlg, this.Font);
             dlg.IsOutput = true;
+            dlg.UnimarcModify100 = this.LastModify100;
             dlg.AddG01Visible = true;
             dlg.RuleVisible = true;
             dlg.Rule = this.LastCatalogingRule;
@@ -12904,6 +13013,7 @@ public class MyVerifyHost : VerifyHost
                     this.LastEncodingName = dlg.EncodingName;
                     this.LastCatalogingRule = dlg.Rule;
                     this.LastRemoveField998 = dlg.RemoveField998;
+                    this.LastModify100 = dlg.UnimarcModify100;
                 }
 
                 if (dlg_905.DialogResult != DialogResult.OK)
@@ -12916,7 +13026,7 @@ public class MyVerifyHost : VerifyHost
             {
                 filterCode = dlg_905.ScriptCode;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 strError = ex.Message;
                 goto ERROR1;
@@ -13022,6 +13132,7 @@ public class MyVerifyHost : VerifyHost
             */
             var looping = BeginLoop(this.DoStop, "正在导出到 MARC 文件 ...");
 
+            VerifyHost host = null;
 
             try
             {
@@ -13184,10 +13295,11 @@ filterCode,
 record,
 (o) =>
 {
+    o.ClearParameter();
     o.Table = new Hashtable();
     o.Table["originMarc"] = originMarc;
 },
-out VerifyHost host,
+ref host,
 out string error);
                         if (ret < 0)
                         {
@@ -13382,6 +13494,8 @@ out string error);
                 this.ReturnChannel(channel);
 
                 this.EnableControls(true);
+
+                host?.Dispose();
             }
 
             // 对已经保存过的行刷新浏览显示
@@ -15742,6 +15856,33 @@ out string error);
             return this.listView_records.TryGet(func);
         }
 
+        private void BiblioSearchForm_Deactivate(object sender, EventArgs e)
+        {
+            _lastActiveControl = GetFocusControl(this);
+        }
+
+        public static Control GetFocusControl(Control parent)
+        {
+            if (parent.Focused)
+                return parent;
+            foreach(Control control in parent.Controls)
+            {
+                var ret = GetFocusControl(control);
+                if (ret != null)
+                    return ret;
+            }
+
+            return null;
+        }
+
+        private void BiblioSearchForm_Leave(object sender, EventArgs e)
+        {
+        }
+
+        private void BiblioSearchForm_Enter(object sender, EventArgs e)
+        {
+
+        }
     }
 
     // 为一行存储的书目信息

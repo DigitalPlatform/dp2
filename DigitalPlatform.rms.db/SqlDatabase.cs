@@ -16715,7 +16715,7 @@ List<DbParameter> aSqlParameter)
                     if (this_length > 4096)
                         this_length = 4096;
 
-                    byte[] bytes = new byte[current_length];
+                    byte[] bytes = new byte[this_length];  // current_length // 2024/8/22 之前方括号里面是 current_length，疑为一个 bug，但没有被测出
                     string strCommand = $"UPDATE {db_prefix}records set {strImageFieldName} = overlay({strImageFieldName} placing @data from {start + 1}) where id = @id";
                     connection.Execute(strCommand,
         new

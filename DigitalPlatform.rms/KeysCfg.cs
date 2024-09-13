@@ -1649,7 +1649,7 @@ namespace DigitalPlatform.rms
                         long nTicks = -1; //缺省值-1
                         try
                         {
-                            DateTime time = DateTimeUtil.ParseFreeTimeString(strKey);
+                            DateTime time = ParseFreeTimeString(strKey);
                             nTicks = time.Ticks;
                         }
                         catch
@@ -1709,6 +1709,48 @@ namespace DigitalPlatform.rms
             }
             return 0;
         }
+
+        public static DateTime ParseFreeTimeString(string strTime)
+        {
+            string[] formats = {
+                "yyyy",
+                "yyyy.M",
+                "yyyy.MM",
+                "yyyy.MMM",
+
+                "yyyy.M.d",
+                "yyyy.MM.dd",
+                "yyyy.MMM.ddd",
+
+                "yyyy/M",
+                "yyyy/MM",
+                "yyyy/MMM",
+
+                "yyyy/M/d",
+                "yyyy/MM/dd",
+                "yyyy/MMM/ddd",
+
+                "yyyyMMdd",
+                                };
+
+            bool bRet = DateTime.TryParseExact(strTime,
+                formats,
+                DateTimeFormatInfo.InvariantInfo,
+                DateTimeStyles.None,
+                out DateTime parsedBack);
+            if (bRet == false)
+            {
+                bRet = DateTime.TryParse(strTime,
+                out parsedBack);
+                if (bRet == false)
+                {
+                    string strError = "时间字符串 '" + strTime + "' 无法解析";
+                    throw new Exception(strError);
+                }
+            }
+            return parsedBack;
+        }
+
 
         // 注: utime 格式实际上对应 u 和 s 两种
         static bool TryParseUTimeString(string time,

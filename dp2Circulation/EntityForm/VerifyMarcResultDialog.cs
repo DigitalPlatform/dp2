@@ -35,6 +35,11 @@ namespace dp2Circulation
             InitializeComponent();
         }
 
+        public void FocusToWebControl()
+        {
+            this.webBrowser1.Focus();
+        }
+
         private void VerifyMarcResultDialog_Load(object sender, EventArgs e)
         {
             if (this.DesignMode)

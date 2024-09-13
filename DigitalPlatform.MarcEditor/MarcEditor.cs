@@ -1218,6 +1218,11 @@ namespace DigitalPlatform.Marc
             curEdit.MaxLength = 0;
             curEdit.Multiline = true;
             curEdit.WordWrap = true;
+            curEdit.TextChanged += (s1, o1) =>
+            {
+                if (this._focusCol == 3)
+                    curEdit.SetHeight();
+            };
 
             // 2009/10/24
             if (curEdit.ReadOnly != this.ReadOnly)
@@ -1465,6 +1470,8 @@ namespace DigitalPlatform.Marc
             if (this.SelectedFieldIndices.Count != 1)
                 return;
 
+            this.curEdit.ClearSetHeight();
+
             int nField = this.FocusedFieldIndex;
 
             if (this.curEdit == null)
@@ -1563,12 +1570,60 @@ namespace DigitalPlatform.Marc
         public void AppendFieldsDelete(IEnumerable<int> indices,
             List<Field> old_fields)
         {
+            /*
             int i = 0;
             foreach (var v in indices)
             {
                 AppendFieldDelete(v, new List<Field>() { old_fields[i] });
                 i++;
             }
+            */
+
+            // 对于连续的 indices，可以浓缩到一个 action 中
+            if (IsConsecutive(indices))
+            {
+                AppendFieldDelete(indices.FirstOrDefault(),
+                    old_fields);
+                return;
+            }
+
+            // 不连续的，在 history 中追加若干个 action
+            List<int> values = new List<int>(indices);
+
+            for (int i = 0; i < values.Count; i++)
+            {
+                int v = values[i];
+
+                AppendFieldDelete(v, new List<Field>() { old_fields[i] });
+
+                adjust_values(v);
+            }
+
+            // 把 >= current 的都减一
+            void adjust_values(int current)
+            {
+                for (int i = 0; i < values.Count; i++)
+                {
+                    if (values[i] >= current)
+                        values[i]--;
+                }
+            }
+        }
+
+        static bool IsConsecutive(IEnumerable<int> indices)
+        {
+            int prev_value = 0;
+            int i = 0;
+            foreach (var v in indices)
+            {
+                if (i > 0 && v != prev_value + 1)
+                    return false;
+
+                prev_value = v;
+                i++;
+            }
+
+            return true;
         }
 
         static int MAX_HISTORY = 1000;
@@ -2383,12 +2438,25 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                 {
                     this.nStartFieldIndex = nField;
 
+#if REMOVED
                     // 如果已经存在选中项了，则隐藏小Edit控件
-                    if (this.SelectedFieldIndices.Count > 0)
+                    if (this.SelectedFieldIndices.Count > 1)
                     {
                         this.HideTextBox();
+                        if (this.Focused == false)
+                        {
+                            // 希望执行 WM_SETFOCUS 时不要自动调用 SetEditPos();
+                            this.AddFocusParameter("dont_seteditpos", true);
+                            this.Focus();
+                        }
                     }
+#endif
+
                     this.AddSelectedField(nField, nField, false);
+
+                    // 如果此前已经有一个字段选中了，它应该是还没有变成蓝色背景，补充一次 Invalidate()。不然先前选中的字段不会变成蓝色背景
+                    if (this.SelectedFieldIndices.Count == 2)
+                        this.Invalidate();
                 }
                 else if ((Control.ModifierKeys & Keys.Shift) == Keys.Shift)
                 {
@@ -2401,11 +2469,19 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                             nStartFieldIndex = nField;
                     }
 
+#if REMOVED
                     // 如果已经存在选中项了，则隐藏小Edit控件
-                    if (this.SelectedFieldIndices.Count > 0)
+                    if (this.SelectedFieldIndices.Count > 1)
                     {
                         this.HideTextBox();
+                        if (this.Focused == false)
+                        {
+                            // 希望执行 WM_SETFOCUS 时不要自动调用 SetEditPos();
+                            this.AddFocusParameter("dont_seteditpos", true);
+                            this.Focus();
+                        }
                     }
+#endif
 
                     this.AddSelectedField(this.nStartFieldIndex, nField, true);
                 }
@@ -3112,6 +3188,31 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             menuItem = new MenuItem("整理");
             contextMenu.MenuItems.Add(menuItem);
 
+            /*
+            {
+                subMenuItem = new MenuItem("简转繁(Ctrl+K,L)");
+                subMenuItem.Click += new System.EventHandler(this.menuItem_s2t);
+                menuItem.MenuItems.Add(subMenuItem);
+                if ((this.curEdit.Visible && string.IsNullOrEmpty(this.curEdit.SelectedText) == false)
+                    || this.SelectedFieldIndices.Count > 0)
+                    subMenuItem.Enabled = true;
+                else
+                    subMenuItem.Enabled = false;
+
+                subMenuItem = new MenuItem("繁转简(Ctrl+K,J)");
+                subMenuItem.Click += new System.EventHandler(this.menuItem_t2s);
+                menuItem.MenuItems.Add(subMenuItem);
+                if ((this.curEdit.Visible && string.IsNullOrEmpty(this.curEdit.SelectedText) == false)
+                    || this.SelectedFieldIndices.Count > 0)
+                    subMenuItem.Enabled = true;
+                else
+                    subMenuItem.Enabled = false;
+
+                subMenuItem = new MenuItem("-");
+                menuItem.MenuItems.Add(subMenuItem);
+            }
+            */
+
             // 
             subMenuItem = new MenuItem("字段重新排序(&S)");
             subMenuItem.Click += new System.EventHandler(this.menuItem_sortFields);
@@ -3278,6 +3379,69 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             menuItem = new MenuItem("属性");
             menuItem.Click += new System.EventHandler(this.Property_menu);
             contextMenu.MenuItems.Add(menuItem);
+        }
+
+        // 繁体到简体
+        void menuItem_t2s(object sender, EventArgs e)
+        {
+            T2S();
+        }
+
+        public bool T2S()
+        {
+            if (this.curEdit.Visible && string.IsNullOrEmpty(this.curEdit.SelectedText) == false)
+            {
+                var start = this.curEdit.SelectionStart;
+                var length = this.curEdit.SelectionLength;
+
+                this.curEdit.SelectedText = API.ChineseT2S(this.curEdit.SelectedText);
+
+                this.curEdit.SelectionStart = start;
+                this.curEdit.SelectionLength = length;
+                return true;
+            }
+            if (this.SelectedFieldIndices.Count > 0)
+            {
+                foreach (var i in this.SelectedFieldIndices)
+                {
+                    var field = this.Record.Fields[i];
+                    field.Value = API.ChineseT2S(field.Value);
+                }
+                return true;
+            }
+            return false;
+        }
+
+        void menuItem_s2t(object sender, EventArgs e)
+        {
+            S2T();
+        }
+
+        public bool S2T()
+        {
+            if (this.curEdit.Visible && string.IsNullOrEmpty(this.curEdit.SelectedText) == false)
+            {
+                var start = this.curEdit.SelectionStart;
+                var length = this.curEdit.SelectionLength;
+
+                this.curEdit.SelectedText = API.ChineseS2T(this.curEdit.SelectedText);
+
+                this.curEdit.SelectionStart = start;
+                this.curEdit.SelectionLength = length;
+                return true;
+            }
+
+            if (this.SelectedFieldIndices.Count > 0)
+            {
+                foreach (var i in this.SelectedFieldIndices)
+                {
+                    var field = this.Record.Fields[i];
+                    field.Value = API.ChineseS2T(field.Value);
+                }
+                return true;
+            }
+
+            return false;
         }
 
         void menuItem_removeEmptyFieldsSubfields(object sender, EventArgs e)
@@ -3612,6 +3776,7 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             base.OnPreviewKeyDown(e);
         }
 #endif
+
         //
         // 摘要:
         //     引发 System.Windows.Forms.Control.KeyDown 事件。
@@ -3629,6 +3794,21 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             {
                 base.OnKeyDown(e);
                 return;
+            }
+
+            {
+                // 去掉Control/Shift/Alt 以后的纯净的键码
+                Keys pure_key = e.KeyCode;
+
+                if (pure_key != Keys.ControlKey
+                    && this.curEdit._k)
+                {
+                    this.DoCtrlK(pure_key);
+                    this.curEdit._k = false;
+                    e.Handled = true;
+                    return;
+                }
+
             }
 
             switch (e.KeyCode)
@@ -3712,6 +3892,16 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                     {
                         this.menuItem_Copy(null, null);
                         e.Handled = true;
+                    }
+                    break;
+                case Keys.K:
+                    {
+                        // Ctrl + K
+                        if (e.Control)
+                        {
+                            this.curEdit._k = true;
+                            e.Handled = true;
+                        }
                     }
                     break;
                 case Keys.V:
@@ -3924,8 +4114,11 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             }
         }
 
-        public string GetCurrentLocationString()
+        // parameters:
+        //      caret_offs_in_end_level   [out] 返回在最后一级 level 的全文(包括字段名部分)中的插入符偏移
+        public string GetCurrentLocationString(out int caret_offs_in_end_level)
         {
+            caret_offs_in_end_level = 0;
             if (this.curEdit == null)
                 throw new Exception("this.curEdit 为 null，无法执行 GetCurrentLocationString()");
             if (this.curEdit.Visible == false)
@@ -3939,7 +4132,8 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
 
             return this.Record.GetSubfieldLocationString(
                 this.FocusedFieldIndex,
-                current_offs);
+                current_offs,
+                out caret_offs_in_end_level);
         }
 
         internal void Test()
@@ -4092,7 +4286,8 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                     if (this.DesignMode && this.record == null)
                         return;
 
-                    var line = this.FocusedFieldIndex;
+                    var line = this.SelectedFieldIndices.Count > 1 ?
+                    -1 : this.FocusedFieldIndex;
                     var col = this._focusCol;
                     var caret_pos = 0;
                     if (this.curEdit != null)
@@ -4149,8 +4344,11 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                 if (this.DesignMode)
                     return false;
 
+                /*
                 if (this.SelectedFieldIndices?.Count == 1)
                     this.EditControlTextToItem();   // 容易引起递归。已经解决
+                */
+                Flush();
                 return this.m_bChanged;
             }
             set
@@ -4182,7 +4380,7 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
         #region 内部属性 函数
 
         // 隐藏小edit
-        internal void HideTextBox()
+        internal void HideTextBox(bool setfocus_to_marceditor = false)
         {
             if (this.SelectedFieldIndices.Count == 1)
             {
@@ -4192,6 +4390,14 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
 
             if (this.curEdit != null)
                 this.curEdit.Hide();
+
+            // 2024/8/14
+            if (setfocus_to_marceditor && this.Focused == false)
+            {
+                // 希望执行 WM_SETFOCUS 时不要自动调用 SetEditPos();
+                this.AddFocusParameter("dont_seteditpos", true);
+                this.Focus();
+            }
         }
 
         /// <summary>
@@ -4439,6 +4645,19 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                     1,
                     BoundsPortion.Field);
                 this.Invalidate(rect2);
+            }
+
+            // 2024/8/15
+            // 如果已经存在选中项了，则隐藏小Edit控件
+            if (this.SelectedFieldIndices.Count > 1)
+            {
+                this.HideTextBox();
+                if (this.Focused == false)
+                {
+                    // 希望执行 WM_SETFOCUS 时不要自动调用 SetEditPos();
+                    this.AddFocusParameter("dont_seteditpos", true);
+                    this.Focus();
+                }
             }
 
             if (this.SelectedFieldChanged != null)
@@ -5189,9 +5408,9 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             // Add the data in various formats.
             // 普通格式
             data_object.SetData(DataFormats.UnicodeText, strText
-                .Replace((char)Record.SUBFLD, '$')
-                .Replace((char)Record.FLDEND, '#')
-                .Replace((char)Record.RECEND, '*'));
+                .Replace(Record.SUBFLD.ToString(), "$$")    // $
+                .Replace(Record.FLDEND.ToString(), "\r\n")  // #
+                .Replace(Record.RECEND.ToString(), "***")); // *
             // 专用格式
             data_object.SetData(new MarcEditorData(strText));
 
@@ -5253,7 +5472,11 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
 
             // 2024/6/15
             if (replace)
-                return result.Replace("ǂ", MarcQuery.SUBFLD).Replace("\r\n", "\n").Replace("\n", MarcQuery.FLDEND);
+            {
+                return result.Replace("ǂ", MarcQuery.SUBFLD)
+                    .Replace("$$", MarcQuery.SUBFLD)
+                    .Replace("\r\n", "\n").Replace("\n", MarcQuery.FLDEND);
+            }
             return result;
         }
 
@@ -5334,6 +5557,31 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             // 2007/7/17
             AdjustOriginY();
         }
+
+#if REMOVED
+        protected override bool ProcessCmdKey(ref Message m, Keys keyData)
+        {
+            // 去掉Control/Shift/Alt 以后的纯净的键码
+            Keys pure_key = (keyData & (~(Keys.Control | Keys.Shift | Keys.Alt)));
+
+            if (this.curEdit._k)
+            {
+                this.DoCtrlK(pure_key);
+                this.curEdit._k = false;
+                return true;
+            }
+
+            // Ctrl + K
+            if ((keyData & Keys.Control) == Keys.Control
+                && pure_key == Keys.K)
+            {
+                this.curEdit._k = true;
+                return true;
+            }
+
+            return base.ProcessCmdKey(ref m, keyData);
+        }
+#endif
 
 #if REMOVED
         // 当小 edit 隐藏时，通过这里接管Ctrl+各种键
@@ -5424,19 +5672,32 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
 
         public void DoCtrlK(Keys key)
         {
-            // 复制当前字段到后面
+            // 复制当前 字段 到后面
             if (key == Keys.F)
             {
                 menuItem_Copy(this, null);
                 menuItem_PasteInsert_InsertAfter(this, null);
             }
 
-            // 复制当前子字段到后面
+            // 复制当前 子字段 到后面
             if (key == Keys.S)
             {
                 this.curEdit.DupCurrentSubfield();
             }
 
+            /*
+            // 繁体 --> 简体
+            if (key == Keys.J)
+            {
+                this.T2S();
+            }
+
+            // 简体 --> 繁体
+            if (key == Keys.L)
+            {
+                this.S2T();
+            }
+            */
 
             // 插入 {cr:CALIS}
             if (key == Keys.C)
@@ -8228,6 +8489,16 @@ SYS	011528318
             return size.Height;
         }
 
+        // 是否处在 Ctrl+K 中途状态。此时需要慎重处理 Ctrl+? 快捷键
+        public bool InCtrlK
+        {
+            get
+            {
+                if (this.curEdit.Visible == false)
+                    return false;
+                return this.curEdit.InCtrlK;
+            }
+        }
     }
 
     internal class InvalidateRect

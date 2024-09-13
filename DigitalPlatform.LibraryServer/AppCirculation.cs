@@ -17919,7 +17919,7 @@ out strError);
                     var itemRefID = DomUtil.GetElementText(itemdom.DocumentElement,
                         "refID");
                     if (string.IsNullOrEmpty(itemRefID) == false)
-                        nodeLogRecord.SetAttribute("itemRefID", itemBarcode);
+                        nodeLogRecord.SetAttribute("itemRefID", itemRefID); // 2024/8/27 修改
 
                     if (attachment == null)
                     {

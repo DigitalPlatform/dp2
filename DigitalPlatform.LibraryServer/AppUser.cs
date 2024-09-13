@@ -1109,6 +1109,84 @@ out strError);
                     SetPasswordExpire(nodeAccount, _passwordExpirePeriod, DateTime.Now);
 
                 this.Changed = true;
+
+                // 2024/8/27
+                // 写入日志
+                {
+                    // ChangeUserPassword() API 恢复动作
+                    /*
+            <root>
+              <operation>changeUserPassword</operation> 
+              <userName>...</userName>
+              <newPassword>5npAUJ67/y3aOvdC0r+Dj7SeXGE=</newPassword> 
+              <type>...</type>  密码 Hash 算法类型。2024/5/21 增加。此前的日志记录中没有这个元素，恢复的时候 password 元素缺 type 属性，可能会出现故障
+              <expire>...</expire>  失效时间
+              <operator>test</operator> 
+              <operTime>Fri, 08 Dec 2006 09:01:38 GMT</operTime> 
+              <readerRecord recPath='...'>...</readerRecord>	最新读者记录
+            </root>
+            注: 2024/8/27 以前的代码缺乏这个日志记录类型
+                     * */
+
+
+                    // 准备日志DOM
+                    XmlDocument domOperLog = new XmlDocument();
+                    domOperLog.LoadXml("<root />");
+                    DomUtil.SetElementText(domOperLog.DocumentElement,
+                        "libraryCode",
+                        strLibraryCodeList);    // 工作人员所在的馆代码
+                    DomUtil.SetElementText(domOperLog.DocumentElement,
+                        "operation",
+                        "changeUserPassword");
+
+                    DomUtil.SetElementText(domOperLog.DocumentElement,
+                        "userName",
+                        strUserName);
+
+                    var nodePassword = nodeAccount.SelectSingleNode("password") as XmlElement;
+                    if (nodePassword != null)
+                    {
+                        string hashed = nodePassword.InnerText;
+                        string type = nodePassword.GetAttribute("type");
+                        string expire = nodePassword.GetAttribute("expire");
+
+                        if (string.IsNullOrEmpty(hashed) == false)
+                            DomUtil.SetElementText(domOperLog.DocumentElement,
+                                "newPassword",
+                                hashed);
+
+                        if (string.IsNullOrEmpty(type) == false)
+                            DomUtil.SetElementText(domOperLog.DocumentElement,
+                                "type",
+                                type);
+
+                        if (string.IsNullOrEmpty(expire) == false)
+                            DomUtil.SetElementText(domOperLog.DocumentElement,
+                                "expire",
+                                expire);
+                    }
+
+                    string strOperTime = this.Clock.GetClock();
+                    // 本 API 不要求登录。因此不记载 operator 元素
+                    /*
+                    DomUtil.SetElementText(domOperLog.DocumentElement,
+                        "operator",
+                        sessioninfo.UserID);   // 操作者
+                    */
+                    DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
+                        strOperTime);   // 操作时间
+
+                    nRet = this.OperLog.WriteOperLog(domOperLog,
+                        strClientIP,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "ChangeUserPassword() API 写入日志时发生错误: " + strError;
+                        return -1;
+                    }
+                }
+
+
                 return 0;
             }
             finally

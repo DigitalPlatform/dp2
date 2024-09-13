@@ -5147,6 +5147,19 @@ out string strError);
         }
 
         #endregion
+
+        public void FocusTo(Control control)
+        {
+            // 把输入焦点定位到 检索词 textbox
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(500);
+                this.TryInvoke(() =>
+                {
+                    control.Focus();
+                });
+            });
+        }
     }
 
     public class FilterHost

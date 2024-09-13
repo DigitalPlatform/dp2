@@ -1977,7 +1977,6 @@ namespace dp2Library
                 result.ErrorInfo = strErrorText;
                 return result;
             }
-
         }
 
         void SetLang(string strLang)

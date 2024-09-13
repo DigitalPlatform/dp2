@@ -661,6 +661,12 @@ recid	记录ID
                 contextMenu.MenuItems.Add(menuItem);
             }
 
+            {
+                menuItem = new MenuItem($"按照命中数排序");
+                menuItem.Click += new System.EventHandler(this.menu_sortByHitCount_Click);
+                contextMenu.MenuItems.Add(menuItem);
+            }
+
             contextMenu.MenuItems.Add(new MenuItem("-"));
 
             int selected_count = dataGridView1
@@ -1026,6 +1032,30 @@ recid	记录ID
         }
         */
 
+        // 按照命中数对所有行排序
+        void menu_sortByHitCount_Click(object sender, EventArgs e)
+        {
+            this.dataGridView1.Sort(new RowComparer());
+        }
+
+        private class RowComparer : System.Collections.IComparer
+        {
+            public RowComparer()
+            {
+            }
+
+            public int Compare(object x, object y)
+            {
+                DataGridViewRow row1 = (DataGridViewRow)x;
+                DataGridViewRow row2 = (DataGridViewRow)y;
+
+                var count1 = BiblioSearchForm.GetHitCount(row1);
+                var count2 = BiblioSearchForm.GetHitCount(row2);
+
+                return count1 - count2;
+            }
+        }
+
         void menu_selectHitLine_Click(object sender, EventArgs e)
         {
             foreach (var row in this.Rows)
@@ -1052,7 +1082,7 @@ recid	记录ID
             }
         }
 
-        static int GetHitCount(DataGridViewRow row)
+        internal static int GetHitCount(DataGridViewRow row)
         {
             var query_line = row.Tag as QueryLine;
             if (query_line == null || query_line.HitItems == null)

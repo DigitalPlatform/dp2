@@ -521,6 +521,8 @@ this.UiState);
             int append_count = 0;
             int skip_count = 0;
 
+            VerifyHost host = null;
+
             GenerateData genData = new GenerateData(this, null);
 
             /*
@@ -826,6 +828,7 @@ this.UiState);
                     // 2024/8/6
                     if (string.IsNullOrEmpty(filterCode) == false)
                     {
+                        string old_marc = record.Text;
                         var ret = ScriptDialog.FilterRecord(
     cacheKey,
     filterCode,
@@ -833,9 +836,10 @@ this.UiState);
     record,
     (o) =>
     {
+        o.ClearParameter();
         o.Table = new Hashtable();
     },
-    out VerifyHost host,
+    ref host,
     out string error);
                         if (ret < 0)
                         {
@@ -864,6 +868,9 @@ this.UiState);
 
                         if (skip_import == true)
                             continue;
+
+                        if (old_marc != record.Text)
+                            record_changed = true;
                     }
 
 
@@ -1097,6 +1104,7 @@ this.UiState);
                 }
 
                 genData.Dispose();
+                host?.Dispose();
             }
         ERROR1:
             Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(strError) + "</div>");

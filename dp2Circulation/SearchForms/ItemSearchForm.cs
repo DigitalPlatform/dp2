@@ -9767,6 +9767,25 @@ TaskScheduler.Default);
             }
         }
 
+        public bool LastModify100
+        {
+            get
+            {
+                return Program.MainForm.AppInfo.GetBoolean(
+                    "itemsearchform",
+                    "last_modify_100",
+                    true);
+            }
+            set
+            {
+                Program.MainForm.AppInfo.SetBoolean(
+                    "itemsearchform",
+                    "last_modify_100",
+                    value);
+            }
+        }
+
+
         /// <summary>
         /// 获取或设置配置参数：最近一次使用过的编目规则名称
         /// 这是 ItemSearchForm 和 BiblioSearchForm 都适用的一个配置参数
@@ -10988,6 +11007,7 @@ TaskScheduler.Default);
                 MainForm.SetControlFont(dlg, this.Font);
 
                 dlg.IsOutput = true;
+                dlg.UnimarcModify100 = this.LastModify100;
                 dlg.AddG01Visible = true;
                 if (bTableExists == false)
                 {
@@ -11035,6 +11055,7 @@ TaskScheduler.Default);
                 this.LastCrLfIso2709 = dlg.CrLf;
                 this.LastEncodingName = dlg.EncodingName;
                 this.LastCatalogingRule = dlg.Rule;
+                this.LastModify100 = dlg.UnimarcModify100;
             });
 
             if (dialog_905_result != DialogResult.OK)
@@ -11151,6 +11172,7 @@ TaskScheduler.Default);
             int nOutputCount = 0;
             int instantly_save_count = 0;
 
+            VerifyHost host = null;
             try
             {
                 try
@@ -11346,10 +11368,11 @@ TaskScheduler.Default);
     record,
     (o) =>
     {
+        o.ClearParameter();
         o.Table = new Hashtable();
         o.Table["originMarc"] = originMarc;
     },
-    out VerifyHost host,
+    ref host,
     out string error);
                             if (ret < 0)
                             {
@@ -11483,6 +11506,8 @@ TaskScheduler.Default);
                 _stop.HideProgress();
                 */
                 EndLoop(looping);
+
+                host?.Dispose();
             }
 
             // 

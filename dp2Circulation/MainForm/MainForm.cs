@@ -8611,6 +8611,12 @@ dp2Circulation 版本: dp2Circulation, Version=2.30.6509.21065, Culture=neutral,
                 if (this.qrRecognitionControl1 != null)
                     this.qrRecognitionControl1.CurrentCamera = "";
             }
+            else if (this.tabControl_panelFixed.SelectedTab == this.tabPage_verifyResult)
+            {
+                // 找到最顶层的 EntityForm，调用 m_verifyViewer.Clear()
+                var entity_form = GetTopChildWindow<EntityForm>();
+                entity_form?.ClearVerifyViewer();
+            }
         }
 
         delegate object Delegate_InvokeScript(WebBrowser webBrowser,
@@ -8711,11 +8717,50 @@ dp2Circulation 版本: dp2Circulation, Version=2.30.6509.21065, Culture=neutral,
                 {
                     var entity_form = this.ActiveMdiChild as EntityForm;
                     entity_form.MarcEditor.Focus();
+                    return true;
                 }
-                return true;
+                if (this.ActiveMdiChild is BiblioSearchForm)
+                {
+                    var search_form = this.ActiveMdiChild as BiblioSearchForm;
+                    search_form.FocusToQueryWord(true);
+                    return true;
+                }
             }
 
             if (keyData == (Keys.D2 | Keys.Control))
+            {
+                if (this.ActiveMdiChild is EntityForm)
+                {
+                    var entity_form = this.ActiveMdiChild as EntityForm;
+                    entity_form.FocusToQueryWord();
+                    return true;
+                }
+            }
+
+            // 操作历史
+            if (keyData == (Keys.D6 | Keys.Control))
+            {
+                Program.MainForm.ActivateFixPage("history");
+                FindWebControl(Program.MainForm.GetFixPageControl("history"))?.Focus();
+                return true;
+            }
+
+            // 属性
+            if (keyData == (Keys.D7 | Keys.Control))
+            {
+                Program.MainForm.ActivateFixPage("property");
+                FindTabControl(Program.MainForm.GetFixPageControl("property"))?.Focus();
+                return true;
+            }
+
+            if (keyData == (Keys.D8 | Keys.Control))
+            {
+                Program.MainForm.ActivateVerifyResultPage();
+                FindWebControl(Program.MainForm.CurrentVerifyResultControl)?.Focus();
+                return true;
+            }
+
+            if (keyData == (Keys.D9 | Keys.Control))
             {
                 Program.MainForm.ActivateGenerateDataPage();
                 FocusDpTable(Program.MainForm.CurrentGenerateDataControl);
@@ -8730,6 +8775,20 @@ dp2Circulation 版本: dp2Circulation, Version=2.30.6509.21065, Culture=neutral,
             if (control == null)
                 return null;
             return control.Controls.Cast<Control>().Where(o => o is DpTable).FirstOrDefault() as DpTable;
+        }
+
+        static WebBrowser FindWebControl(Control control)
+        {
+            if (control == null)
+                return null;
+            return control.Controls.Cast<Control>().Where(o => o is WebBrowser).FirstOrDefault() as WebBrowser;
+        }
+
+        static TabControl FindTabControl(Control control)
+        {
+            if (control == null)
+                return null;
+            return control.Controls.Cast<Control>().Where(o => o is TabControl).FirstOrDefault() as TabControl;
         }
 
         public static void FocusDpTable(Control control)
@@ -8827,12 +8886,17 @@ Keys keyData)
                 return;
             }
 
+            string libraryName = "";
+            if (string.IsNullOrEmpty(this.LibraryName) == false)
+                libraryName = " " + this.LibraryName;
+
+            // dp2Circulation V3 -- 
             if (this.TestMode == true)
-                this.Text = "dp2Circulation V3 -- 内务 [评估模式]";
+                this.Text = $"内务 [评估模式]{libraryName}";
             else if (FormClientInfo.CommunityMode == true)
-                this.Text = "dp2Circulation V3 -- 内务 [社区版]";
+                this.Text = $"内务 [社区版]{libraryName}";
             else
-                this.Text = "dp2Circulation V3 -- 内务 [专业版]";
+                this.Text = $"内务 [专业版]{libraryName}";
         }
 
 #if SN

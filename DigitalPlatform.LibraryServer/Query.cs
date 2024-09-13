@@ -447,6 +447,14 @@ namespace DigitalPlatform.LibraryServer
                 // 最后统一修改为exact。不能在一开始修改，因为strMatchStyle值还有帮助判断的作用
                 strMatchStyle = "exact";
             }
+            // 2024/8/10
+            // 如果为范围式
+            else if (String.IsNullOrEmpty(strQueryWord) == false
+                    && strQueryWord.IndexOfAny(new char[] { '~' }) != -1)
+            {
+                strRelation = "range";
+                strMatchStyle = "exact";
+            }
 
             strQueryXml = "";
             strQueryXml = "<target list='"
