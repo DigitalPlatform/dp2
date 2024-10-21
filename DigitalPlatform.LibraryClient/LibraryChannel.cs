@@ -2699,11 +2699,20 @@ out strError);
                 // this.m_nRedoCount = 0;
                 if (this.AfterLogin != null)
                 {
-                    AfterLoginEventArgs e1 = new AfterLoginEventArgs();
-                    this.AfterLogin(this, e1);
-                    if (string.IsNullOrEmpty(e1.ErrorInfo) == false)
+                    try
                     {
-                        strError = e1.ErrorInfo;
+                        AfterLoginEventArgs e1 = new AfterLoginEventArgs();
+                        this.AfterLogin(this, e1);
+                        if (string.IsNullOrEmpty(e1.ErrorInfo) == false)
+                        {
+                            strError = e1.ErrorInfo;
+                            return -1;
+                        }
+                    }
+                    catch(Exception ex)
+                    {
+                        // 2024/9/18
+                        strError = ex.Message;
                         return -1;
                     }
                 }
@@ -3399,6 +3408,80 @@ out strError);
                 if (nRet == 0)
                     return -1;
                 goto REDO;
+            }
+        }
+
+        // 2024/10/17
+        // 批检索
+        public long BatchSearch(
+    DigitalPlatform.Stop stop,
+    string biblio_dbnames,
+string[] query_words,
+int max_hitcount,   // 每个检索词检索命中的最大结果数
+int max_results,    // 每个检索词检索命中后返回的最大结果数
+string from_style,
+string match_style,
+string[] formats,
+string search_style,
+string output_style,
+string location_filter,
+out QueryResult[] results,
+    out string strError)
+        {
+            strError = "";
+            results = null;
+
+        REDO:
+            this.BeginSearch();
+            try
+            {
+                IAsyncResult soapresult = this.ws.BeginBatchSearch(
+                    biblio_dbnames,
+query_words,
+max_hitcount, 
+max_results,
+from_style,
+match_style,
+formats,
+search_style,
+output_style,
+location_filter,
+                    null,
+                    null);
+
+                WaitComplete(soapresult);
+
+                if (this.m_ws == null)
+                {
+                    strError = "用户中断";
+                    this.ErrorCode = localhost.ErrorCode.RequestCanceled;
+                    return -1;
+                }
+
+                LibraryServerResult result = this.ws.EndBatchSearch(
+                    out results,
+                    soapresult);
+                if (result.Value == -1 && result.ErrorCode == ErrorCode.NotLogin)
+                {
+                    if (DoNotLogin(ref strError) == 1)
+                        goto REDO;
+                    return -1;
+                }
+                strError = result.ErrorInfo;
+                this.ErrorCode = result.ErrorCode;
+                this.ClearRedoCount();
+                return result.Value;
+            }
+            catch (Exception ex)
+            {
+                int nRet = ConvertWebError(ex, out strError);
+                if (nRet == 0)
+                    return -1;
+                goto REDO;
+            }
+            finally
+            {
+                this.EndSearch();
             }
         }
 

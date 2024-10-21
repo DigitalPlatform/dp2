@@ -6,6 +6,8 @@ using System.IO;
 using System.Diagnostics;
 using System.Net;
 
+using dp2Circulation.Testing;
+
 using DigitalPlatform.Xml;
 using DigitalPlatform.Script;
 using DigitalPlatform.IO;
@@ -13,7 +15,6 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.Z3950.UI;
-using dp2Circulation.Testing;
 
 namespace dp2Circulation
 {
@@ -919,6 +920,12 @@ namespace dp2Circulation
                     this.textBox_ucs_password.Text = Program.MainForm.DecryptPasssword(password);
                 }
 
+                this.textBox_ucs_filterScriptCode.Text =
+    ap.GetString(
+"ucsUpload",
+"filterScriptCode",
+"");
+
                 checkBox_charging_isbnBorrow_CheckedChanged(this, null);
                 checkBox_quickCharging_isbnBorrow_CheckedChanged(this, null);
 
@@ -1706,6 +1713,11 @@ this.textBox_ucs_userName.Text);
                         password);
                 }
 
+                ap.SetString(
+"ucsUpload",
+"filterScriptCode",
+this.textBox_ucs_filterScriptCode.Text);
+
                 if (m_bServerCfgChanged == true
                     && Program.MainForm != null)
                 {
@@ -1714,6 +1726,13 @@ this.textBox_ucs_userName.Text);
                 }
 
                 Program.MainForm.FixedPanelAnimationEnabled = this.checkBox_ui_fixedPanelAnimationEnabled.Checked;
+
+                // 清除国图联合编目中心上传过滤脚本的 AssemblyCache
+                // TODO: 可改进为 进入本窗口的时候记载源代码的 MD5。最后对比修改后的源代码的 MD5，发现不同才清除 AssemblyCache 中的对应事项
+                {
+                    var cacheKey = EntityForm.UCS_UPLOAD_CACHE_KEY;
+                    Program.MainForm.AssemblyCache.Clear(cacheKey);
+                }
 
                 this.DialogResult = DialogResult.OK;
                 this.Close();
@@ -2181,7 +2200,8 @@ MessageBoxDefaultButton.Button2);
                 dlg.XmlFileName = Path.Combine(Program.MainForm.UserDir, "zserver.xml");
                 dlg.SourceServerFileName = Path.Combine(Program.MainForm.DataDir, "source_zserver.xml");
                 dlg.StartPosition = FormStartPosition.CenterParent;
-                dlg.ScriptChanged += (o1, e1) => {
+                dlg.ScriptChanged += (o1, e1) =>
+                {
                     // 触发 AssemblyCache 刷新
                     if (string.IsNullOrEmpty(e1.OldName) == false)
                     {

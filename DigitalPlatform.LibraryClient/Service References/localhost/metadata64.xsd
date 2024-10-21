@@ -735,6 +735,30 @@
       </xs:sequence>
     </xs:complexType>
   </xs:element>
+  <xs:element name="BatchSearch">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="biblio_dbnames" nillable="true" type="xs:string" />
+        <xs:element xmlns:q69="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="query_words" nillable="true" type="q69:ArrayOfstring" />
+        <xs:element minOccurs="0" name="max_hitcount" type="xs:int" />
+        <xs:element minOccurs="0" name="max_results" type="xs:int" />
+        <xs:element minOccurs="0" name="from_style" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="match_style" nillable="true" type="xs:string" />
+        <xs:element xmlns:q70="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="formats" nillable="true" type="q70:ArrayOfstring" />
+        <xs:element minOccurs="0" name="search_style" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="output_style" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="location_filter" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="BatchSearchResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q71="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="BatchSearchResult" nillable="true" type="q71:LibraryServerResult" />
+        <xs:element xmlns:q72="http://dp2003.com/dp2library/" minOccurs="0" name="results" nillable="true" type="q72:ArrayOfQueryResult" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
   <xs:element name="GetVersion">
     <xs:complexType>
       <xs:sequence />
@@ -743,7 +767,7 @@
   <xs:element name="GetVersionResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q69="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetVersionResult" nillable="true" type="q69:LibraryServerResult" />
+        <xs:element xmlns:q73="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetVersionResult" nillable="true" type="q73:LibraryServerResult" />
         <xs:element minOccurs="0" name="uid" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
@@ -760,7 +784,7 @@
   <xs:element name="LoginResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q70="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="LoginResult" nillable="true" type="q70:LibraryServerResult" />
+        <xs:element xmlns:q74="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="LoginResult" nillable="true" type="q74:LibraryServerResult" />
         <xs:element minOccurs="0" name="strOutputUserName" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="strRights" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="strLibraryCode" nillable="true" type="xs:string" />
@@ -775,7 +799,7 @@
   <xs:element name="LogoutResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q71="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="LogoutResult" nillable="true" type="q71:LibraryServerResult" />
+        <xs:element xmlns:q75="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="LogoutResult" nillable="true" type="q75:LibraryServerResult" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -789,7 +813,7 @@
   <xs:element name="SetLangResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q72="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SetLangResult" nillable="true" type="q72:LibraryServerResult" />
+        <xs:element xmlns:q76="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SetLangResult" nillable="true" type="q76:LibraryServerResult" />
         <xs:element minOccurs="0" name="strOldLang" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
@@ -810,7 +834,7 @@
   <xs:element name="VerifyReaderPasswordResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q73="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="VerifyReaderPasswordResult" nillable="true" type="q73:LibraryServerResult" />
+        <xs:element xmlns:q77="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="VerifyReaderPasswordResult" nillable="true" type="q77:LibraryServerResult" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -826,7 +850,7 @@
   <xs:element name="ChangeReaderPasswordResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q74="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="ChangeReaderPasswordResult" nillable="true" type="q74:LibraryServerResult" />
+        <xs:element xmlns:q78="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="ChangeReaderPasswordResult" nillable="true" type="q78:LibraryServerResult" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -841,8 +865,8 @@
   <xs:element name="GetReaderInfoResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q75="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetReaderInfoResult" nillable="true" type="q75:LibraryServerResult" />
-        <xs:element xmlns:q76="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="results" nillable="true" type="q76:ArrayOfstring" />
+        <xs:element xmlns:q79="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetReaderInfoResult" nillable="true" type="q79:LibraryServerResult" />
+        <xs:element xmlns:q80="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="results" nillable="true" type="q80:ArrayOfstring" />
         <xs:element minOccurs="0" name="strRecPath" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="baTimestamp" nillable="true" type="xs:base64Binary" />
       </xs:sequence>
@@ -863,12 +887,12 @@
   <xs:element name="SetReaderInfoResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q77="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SetReaderInfoResult" nillable="true" type="q77:LibraryServerResult" />
+        <xs:element xmlns:q81="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SetReaderInfoResult" nillable="true" type="q81:LibraryServerResult" />
         <xs:element minOccurs="0" name="strExistingXml" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="strSavedXml" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="strSavedRecPath" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="baNewTimestamp" nillable="true" type="xs:base64Binary" />
-        <xs:element xmlns:q78="http://dp2003.com/dp2kernel/" minOccurs="0" name="kernel_errorcode" type="q78:ErrorCodeValue" />
+        <xs:element xmlns:q82="http://dp2003.com/dp2kernel/" minOccurs="0" name="kernel_errorcode" type="q82:ErrorCodeValue" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -885,7 +909,7 @@
   <xs:element name="MoveReaderInfoResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q79="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="MoveReaderInfoResult" nillable="true" type="q79:LibraryServerResult" />
+        <xs:element xmlns:q83="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="MoveReaderInfoResult" nillable="true" type="q83:LibraryServerResult" />
         <xs:element minOccurs="0" name="strTargetRecPath" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="target_timestamp" nillable="true" type="xs:base64Binary" />
       </xs:sequence>
@@ -902,7 +926,7 @@
   <xs:element name="DevolveReaderInfoResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q80="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="DevolveReaderInfoResult" nillable="true" type="q80:LibraryServerResult" />
+        <xs:element xmlns:q84="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="DevolveReaderInfoResult" nillable="true" type="q84:LibraryServerResult" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -923,7 +947,7 @@
   <xs:element name="SearchReaderResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q81="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SearchReaderResult" nillable="true" type="q81:LibraryServerResult" />
+        <xs:element xmlns:q85="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SearchReaderResult" nillable="true" type="q85:LibraryServerResult" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -940,7 +964,7 @@
   <xs:element name="SetFriendsResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q82="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SetFriendsResult" nillable="true" type="q82:LibraryServerResult" />
+        <xs:element xmlns:q86="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SetFriendsResult" nillable="true" type="q86:LibraryServerResult" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -961,7 +985,7 @@
   <xs:element name="SearchOneDbResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q83="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SearchOneDbResult" nillable="true" type="q83:LibraryServerResult" />
+        <xs:element xmlns:q87="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SearchOneDbResult" nillable="true" type="q87:LibraryServerResult" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -977,7 +1001,7 @@
   <xs:element name="SearchResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q84="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SearchResult" nillable="true" type="q84:LibraryServerResult" />
+        <xs:element xmlns:q88="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SearchResult" nillable="true" type="q88:LibraryServerResult" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -995,8 +1019,8 @@
   <xs:element name="GetSearchResultResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q85="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetSearchResultResult" nillable="true" type="q85:LibraryServerResult" />
-        <xs:element xmlns:q86="http://dp2003.com/dp2kernel/" minOccurs="0" name="searchresults" nillable="true" type="q86:ArrayOfRecord" />
+        <xs:element xmlns:q89="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetSearchResultResult" nillable="true" type="q89:LibraryServerResult" />
+        <xs:element xmlns:q90="http://dp2003.com/dp2kernel/" minOccurs="0" name="searchresults" nillable="true" type="q90:ArrayOfRecord" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -1010,7 +1034,7 @@
   <xs:element name="GetRecordResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q87="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetRecordResult" nillable="true" type="q87:LibraryServerResult" />
+        <xs:element xmlns:q91="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetRecordResult" nillable="true" type="q91:LibraryServerResult" />
         <xs:element minOccurs="0" name="timestamp" nillable="true" type="xs:base64Binary" />
         <xs:element minOccurs="0" name="strXml" nillable="true" type="xs:string" />
       </xs:sequence>
@@ -1019,7 +1043,7 @@
   <xs:element name="GetBrowseRecords">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q88="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="paths" nillable="true" type="q88:ArrayOfstring" />
+        <xs:element xmlns:q92="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="paths" nillable="true" type="q92:ArrayOfstring" />
         <xs:element minOccurs="0" name="strBrowseInfoStyle" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
@@ -1027,8 +1051,8 @@
   <xs:element name="GetBrowseRecordsResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q89="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetBrowseRecordsResult" nillable="true" type="q89:LibraryServerResult" />
-        <xs:element xmlns:q90="http://dp2003.com/dp2kernel/" minOccurs="0" name="searchresults" nillable="true" type="q90:ArrayOfRecord" />
+        <xs:element xmlns:q93="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetBrowseRecordsResult" nillable="true" type="q93:LibraryServerResult" />
+        <xs:element xmlns:q94="http://dp2003.com/dp2kernel/" minOccurs="0" name="searchresults" nillable="true" type="q94:ArrayOfRecord" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -1043,8 +1067,8 @@
   <xs:element name="ListBiblioDbFromsResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q91="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="ListBiblioDbFromsResult" nillable="true" type="q91:LibraryServerResult" />
-        <xs:element xmlns:q92="http://dp2003.com/dp2library/" minOccurs="0" name="infos" nillable="true" type="q92:ArrayOfBiblioDbFromInfo" />
+        <xs:element xmlns:q95="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="ListBiblioDbFromsResult" nillable="true" type="q95:LibraryServerResult" />
+        <xs:element xmlns:q96="http://dp2003.com/dp2library/" minOccurs="0" name="infos" nillable="true" type="q96:ArrayOfBiblioDbFromInfo" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -1067,7 +1091,7 @@
   <xs:element name="SearchBiblioResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q93="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SearchBiblioResult" nillable="true" type="q93:LibraryServerResult" />
+        <xs:element xmlns:q97="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SearchBiblioResult" nillable="true" type="q97:LibraryServerResult" />
         <xs:element minOccurs="0" name="strQueryXml" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
@@ -1088,7 +1112,7 @@
   <xs:element name="SetBiblioInfoResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q94="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SetBiblioInfoResult" nillable="true" type="q94:LibraryServerResult" />
+        <xs:element xmlns:q98="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SetBiblioInfoResult" nillable="true" type="q98:LibraryServerResult" />
         <xs:element minOccurs="0" name="strOutputBiblioRecPath" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="baOutputTimestamp" nillable="true" type="xs:base64Binary" />
       </xs:sequence>
@@ -1111,7 +1135,7 @@
   <xs:element name="CopyBiblioInfoResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q95="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="CopyBiblioInfoResult" nillable="true" type="q95:LibraryServerResult" />
+        <xs:element xmlns:q99="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="CopyBiblioInfoResult" nillable="true" type="q99:LibraryServerResult" />
         <xs:element minOccurs="0" name="strOutputBiblio" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="strOutputBiblioRecPath" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="baOutputTimestamp" nillable="true" type="xs:base64Binary" />
@@ -1130,7 +1154,7 @@
   <xs:element name="GetBiblioInfoResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q96="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetBiblioInfoResult" nillable="true" type="q96:LibraryServerResult" />
+        <xs:element xmlns:q100="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetBiblioInfoResult" nillable="true" type="q100:LibraryServerResult" />
         <xs:element minOccurs="0" name="strBiblio" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
@@ -1140,15 +1164,15 @@
       <xs:sequence>
         <xs:element minOccurs="0" name="strBiblioRecPath" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="strBiblioXml" nillable="true" type="xs:string" />
-        <xs:element xmlns:q97="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="formats" nillable="true" type="q97:ArrayOfstring" />
+        <xs:element xmlns:q101="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="formats" nillable="true" type="q101:ArrayOfstring" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="GetBiblioInfosResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q98="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetBiblioInfosResult" nillable="true" type="q98:LibraryServerResult" />
-        <xs:element xmlns:q99="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="results" nillable="true" type="q99:ArrayOfstring" />
+        <xs:element xmlns:q102="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetBiblioInfosResult" nillable="true" type="q102:LibraryServerResult" />
+        <xs:element xmlns:q103="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="results" nillable="true" type="q103:ArrayOfstring" />
         <xs:element minOccurs="0" name="baTimestamp" nillable="true" type="xs:base64Binary" />
       </xs:sequence>
     </xs:complexType>
@@ -1171,7 +1195,7 @@
   <xs:element name="SearchItemResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q100="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SearchItemResult" nillable="true" type="q100:LibraryServerResult" />
+        <xs:element xmlns:q104="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SearchItemResult" nillable="true" type="q104:LibraryServerResult" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -1189,7 +1213,7 @@
   <xs:element name="GetItemInfoResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q101="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetItemInfoResult" nillable="true" type="q101:LibraryServerResult" />
+        <xs:element xmlns:q105="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetItemInfoResult" nillable="true" type="q105:LibraryServerResult" />
         <xs:element minOccurs="0" name="strResult" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="strItemRecPath" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="item_timestamp" nillable="true" type="xs:base64Binary" />
@@ -1209,8 +1233,8 @@
   <xs:element name="SearchItemDupResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q102="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SearchItemDupResult" nillable="true" type="q102:LibraryServerResult" />
-        <xs:element xmlns:q103="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="paths" nillable="true" type="q103:ArrayOfstring" />
+        <xs:element xmlns:q106="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SearchItemDupResult" nillable="true" type="q106:LibraryServerResult" />
+        <xs:element xmlns:q107="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="paths" nillable="true" type="q107:ArrayOfstring" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -1226,7 +1250,7 @@
   <xs:element name="GetBiblioSummaryResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q104="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetBiblioSummaryResult" nillable="true" type="q104:LibraryServerResult" />
+        <xs:element xmlns:q108="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetBiblioSummaryResult" nillable="true" type="q108:LibraryServerResult" />
         <xs:element minOccurs="0" name="strBiblioRecPath" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="strSummary" nillable="true" type="xs:string" />
       </xs:sequence>
@@ -1240,7 +1264,7 @@
         <xs:element minOccurs="0" name="strItemBarcode" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="strConfirmItemRecPath" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="bForce" type="xs:boolean" />
-        <xs:element xmlns:q105="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="saBorrowedItemBarcode" nillable="true" type="q105:ArrayOfstring" />
+        <xs:element xmlns:q109="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="saBorrowedItemBarcode" nillable="true" type="q109:ArrayOfstring" />
         <xs:element minOccurs="0" name="strStyle" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="strItemFormatList" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="strReaderFormatList" nillable="true" type="xs:string" />
@@ -1251,12 +1275,12 @@
   <xs:element name="BorrowResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q106="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="BorrowResult" nillable="true" type="q106:LibraryServerResult" />
-        <xs:element xmlns:q107="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="item_records" nillable="true" type="q107:ArrayOfstring" />
-        <xs:element xmlns:q108="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="reader_records" nillable="true" type="q108:ArrayOfstring" />
-        <xs:element xmlns:q109="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="biblio_records" nillable="true" type="q109:ArrayOfstring" />
-        <xs:element xmlns:q110="http://dp2003.com/dp2library/" minOccurs="0" name="borrow_info" nillable="true" type="q110:BorrowInfo" />
-        <xs:element xmlns:q111="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="aDupPath" nillable="true" type="q111:ArrayOfstring" />
+        <xs:element xmlns:q110="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="BorrowResult" nillable="true" type="q110:LibraryServerResult" />
+        <xs:element xmlns:q111="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="item_records" nillable="true" type="q111:ArrayOfstring" />
+        <xs:element xmlns:q112="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="reader_records" nillable="true" type="q112:ArrayOfstring" />
+        <xs:element xmlns:q113="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="biblio_records" nillable="true" type="q113:ArrayOfstring" />
+        <xs:element xmlns:q114="http://dp2003.com/dp2library/" minOccurs="0" name="borrow_info" nillable="true" type="q114:BorrowInfo" />
+        <xs:element xmlns:q115="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="aDupPath" nillable="true" type="q115:ArrayOfstring" />
         <xs:element minOccurs="0" name="strOutputReaderBarcode" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
@@ -1279,13 +1303,13 @@
   <xs:element name="ReturnResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q112="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="ReturnResult" nillable="true" type="q112:LibraryServerResult" />
-        <xs:element xmlns:q113="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="item_records" nillable="true" type="q113:ArrayOfstring" />
-        <xs:element xmlns:q114="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="reader_records" nillable="true" type="q114:ArrayOfstring" />
-        <xs:element xmlns:q115="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="biblio_records" nillable="true" type="q115:ArrayOfstring" />
-        <xs:element xmlns:q116="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="aDupPath" nillable="true" type="q116:ArrayOfstring" />
+        <xs:element xmlns:q116="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="ReturnResult" nillable="true" type="q116:LibraryServerResult" />
+        <xs:element xmlns:q117="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="item_records" nillable="true" type="q117:ArrayOfstring" />
+        <xs:element xmlns:q118="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="reader_records" nillable="true" type="q118:ArrayOfstring" />
+        <xs:element xmlns:q119="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="biblio_records" nillable="true" type="q119:ArrayOfstring" />
+        <xs:element xmlns:q120="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="aDupPath" nillable="true" type="q120:ArrayOfstring" />
         <xs:element minOccurs="0" name="strOutputReaderBarcode" nillable="true" type="xs:string" />
-        <xs:element xmlns:q117="http://dp2003.com/dp2library/" minOccurs="0" name="return_info" nillable="true" type="q117:ReturnInfo" />
+        <xs:element xmlns:q121="http://dp2003.com/dp2library/" minOccurs="0" name="return_info" nillable="true" type="q121:ReturnInfo" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -1301,7 +1325,7 @@
   <xs:element name="ReservationResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q118="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="ReservationResult" nillable="true" type="q118:LibraryServerResult" />
+        <xs:element xmlns:q122="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="ReservationResult" nillable="true" type="q122:LibraryServerResult" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -1310,15 +1334,15 @@
       <xs:sequence>
         <xs:element minOccurs="0" name="strFunction" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="strReaderBarcode" nillable="true" type="xs:string" />
-        <xs:element xmlns:q119="http://dp2003.com/dp2library/" minOccurs="0" name="amerce_items" nillable="true" type="q119:ArrayOfAmerceItem" />
+        <xs:element xmlns:q123="http://dp2003.com/dp2library/" minOccurs="0" name="amerce_items" nillable="true" type="q123:ArrayOfAmerceItem" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="AmerceResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q120="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="AmerceResult" nillable="true" type="q120:LibraryServerResult" />
-        <xs:element xmlns:q121="http://dp2003.com/dp2library/" minOccurs="0" name="failed_items" nillable="true" type="q121:ArrayOfAmerceItem" />
+        <xs:element xmlns:q124="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="AmerceResult" nillable="true" type="q124:LibraryServerResult" />
+        <xs:element xmlns:q125="http://dp2003.com/dp2library/" minOccurs="0" name="failed_items" nillable="true" type="q125:ArrayOfAmerceItem" />
         <xs:element minOccurs="0" name="strReaderXml" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
@@ -1337,8 +1361,8 @@
   <xs:element name="GetIssuesResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q122="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetIssuesResult" nillable="true" type="q122:LibraryServerResult" />
-        <xs:element xmlns:q123="http://dp2003.com/dp2library/" minOccurs="0" name="issueinfos" nillable="true" type="q123:ArrayOfEntityInfo" />
+        <xs:element xmlns:q126="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetIssuesResult" nillable="true" type="q126:LibraryServerResult" />
+        <xs:element xmlns:q127="http://dp2003.com/dp2library/" minOccurs="0" name="issueinfos" nillable="true" type="q127:ArrayOfEntityInfo" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -1346,15 +1370,15 @@
     <xs:complexType>
       <xs:sequence>
         <xs:element minOccurs="0" name="strBiblioRecPath" nillable="true" type="xs:string" />
-        <xs:element xmlns:q124="http://dp2003.com/dp2library/" minOccurs="0" name="issueinfos" nillable="true" type="q124:ArrayOfEntityInfo" />
+        <xs:element xmlns:q128="http://dp2003.com/dp2library/" minOccurs="0" name="issueinfos" nillable="true" type="q128:ArrayOfEntityInfo" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="SetIssuesResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q125="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SetIssuesResult" nillable="true" type="q125:LibraryServerResult" />
-        <xs:element xmlns:q126="http://dp2003.com/dp2library/" minOccurs="0" name="errorinfos" nillable="true" type="q126:ArrayOfEntityInfo" />
+        <xs:element xmlns:q129="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SetIssuesResult" nillable="true" type="q129:LibraryServerResult" />
+        <xs:element xmlns:q130="http://dp2003.com/dp2library/" minOccurs="0" name="errorinfos" nillable="true" type="q130:ArrayOfEntityInfo" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -1371,7 +1395,7 @@
   <xs:element name="GetIssueInfoResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q127="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetIssueInfoResult" nillable="true" type="q127:LibraryServerResult" />
+        <xs:element xmlns:q131="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetIssueInfoResult" nillable="true" type="q131:LibraryServerResult" />
         <xs:element minOccurs="0" name="strResult" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="strIssueRecPath" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="issue_timestamp" nillable="true" type="xs:base64Binary" />
@@ -1392,8 +1416,8 @@
   <xs:element name="SearchIssueDupResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q128="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SearchIssueDupResult" nillable="true" type="q128:LibraryServerResult" />
-        <xs:element xmlns:q129="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="paths" nillable="true" type="q129:ArrayOfstring" />
+        <xs:element xmlns:q132="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SearchIssueDupResult" nillable="true" type="q132:LibraryServerResult" />
+        <xs:element xmlns:q133="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="paths" nillable="true" type="q133:ArrayOfstring" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -1415,7 +1439,7 @@
   <xs:element name="SearchIssueResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q130="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SearchIssueResult" nillable="true" type="q130:LibraryServerResult" />
+        <xs:element xmlns:q134="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SearchIssueResult" nillable="true" type="q134:LibraryServerResult" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -1433,8 +1457,8 @@
   <xs:element name="GetEntitiesResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q131="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetEntitiesResult" nillable="true" type="q131:LibraryServerResult" />
-        <xs:element xmlns:q132="http://dp2003.com/dp2library/" minOccurs="0" name="entityinfos" nillable="true" type="q132:ArrayOfEntityInfo" />
+        <xs:element xmlns:q135="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetEntitiesResult" nillable="true" type="q135:LibraryServerResult" />
+        <xs:element xmlns:q136="http://dp2003.com/dp2library/" minOccurs="0" name="entityinfos" nillable="true" type="q136:ArrayOfEntityInfo" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -1442,15 +1466,15 @@
     <xs:complexType>
       <xs:sequence>
         <xs:element minOccurs="0" name="strBiblioRecPath" nillable="true" type="xs:string" />
-        <xs:element xmlns:q133="http://dp2003.com/dp2library/" minOccurs="0" name="entityinfos" nillable="true" type="q133:ArrayOfEntityInfo" />
+        <xs:element xmlns:q137="http://dp2003.com/dp2library/" minOccurs="0" name="entityinfos" nillable="true" type="q137:ArrayOfEntityInfo" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="SetEntitiesResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q134="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SetEntitiesResult" nillable="true" type="q134:LibraryServerResult" />
-        <xs:element xmlns:q135="http://dp2003.com/dp2library/" minOccurs="0" name="errorinfos" nillable="true" type="q135:ArrayOfEntityInfo" />
+        <xs:element xmlns:q138="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SetEntitiesResult" nillable="true" type="q138:LibraryServerResult" />
+        <xs:element xmlns:q139="http://dp2003.com/dp2library/" minOccurs="0" name="errorinfos" nillable="true" type="q139:ArrayOfEntityInfo" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -1468,8 +1492,8 @@
   <xs:element name="GetOrdersResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q136="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetOrdersResult" nillable="true" type="q136:LibraryServerResult" />
-        <xs:element xmlns:q137="http://dp2003.com/dp2library/" minOccurs="0" name="orderinfos" nillable="true" type="q137:ArrayOfEntityInfo" />
+        <xs:element xmlns:q140="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetOrdersResult" nillable="true" type="q140:LibraryServerResult" />
+        <xs:element xmlns:q141="http://dp2003.com/dp2library/" minOccurs="0" name="orderinfos" nillable="true" type="q141:ArrayOfEntityInfo" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -1477,15 +1501,15 @@
     <xs:complexType>
       <xs:sequence>
         <xs:element minOccurs="0" name="strBiblioRecPath" nillable="true" type="xs:string" />
-        <xs:element xmlns:q138="http://dp2003.com/dp2library/" minOccurs="0" name="orderinfos" nillable="true" type="q138:ArrayOfEntityInfo" />
+        <xs:element xmlns:q142="http://dp2003.com/dp2library/" minOccurs="0" name="orderinfos" nillable="true" type="q142:ArrayOfEntityInfo" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="SetOrdersResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q139="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SetOrdersResult" nillable="true" type="q139:LibraryServerResult" />
-        <xs:element xmlns:q140="http://dp2003.com/dp2library/" minOccurs="0" name="errorinfos" nillable="true" type="q140:ArrayOfEntityInfo" />
+        <xs:element xmlns:q143="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SetOrdersResult" nillable="true" type="q143:LibraryServerResult" />
+        <xs:element xmlns:q144="http://dp2003.com/dp2library/" minOccurs="0" name="errorinfos" nillable="true" type="q144:ArrayOfEntityInfo" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -1502,7 +1526,7 @@
   <xs:element name="GetOrderInfoResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q141="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetOrderInfoResult" nillable="true" type="q141:LibraryServerResult" />
+        <xs:element xmlns:q145="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetOrderInfoResult" nillable="true" type="q145:LibraryServerResult" />
         <xs:element minOccurs="0" name="strResult" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="strOrderRecPath" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="order_timestamp" nillable="true" type="xs:base64Binary" />
@@ -1523,8 +1547,8 @@
   <xs:element name="SearchOrderDupResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q142="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SearchOrderDupResult" nillable="true" type="q142:LibraryServerResult" />
-        <xs:element xmlns:q143="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="paths" nillable="true" type="q143:ArrayOfstring" />
+        <xs:element xmlns:q146="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SearchOrderDupResult" nillable="true" type="q146:LibraryServerResult" />
+        <xs:element xmlns:q147="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="paths" nillable="true" type="q147:ArrayOfstring" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -1546,7 +1570,7 @@
   <xs:element name="SearchOrderResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q144="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SearchOrderResult" nillable="true" type="q144:LibraryServerResult" />
+        <xs:element xmlns:q148="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SearchOrderResult" nillable="true" type="q148:LibraryServerResult" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -1560,7 +1584,7 @@
   <xs:element name="SetClockResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q145="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SetClockResult" nillable="true" type="q145:LibraryServerResult" />
+        <xs:element xmlns:q149="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SetClockResult" nillable="true" type="q149:LibraryServerResult" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -1572,7 +1596,7 @@
   <xs:element name="GetClockResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q146="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetClockResult" nillable="true" type="q146:LibraryServerResult" />
+        <xs:element xmlns:q150="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetClockResult" nillable="true" type="q150:LibraryServerResult" />
         <xs:element minOccurs="0" name="strTime" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
@@ -1588,7 +1612,7 @@
   <xs:element name="ResetPasswordResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q147="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="ResetPasswordResult" nillable="true" type="q147:LibraryServerResult" />
+        <xs:element xmlns:q151="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="ResetPasswordResult" nillable="true" type="q151:LibraryServerResult" />
         <xs:element minOccurs="0" name="strMessage" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
@@ -1604,8 +1628,8 @@
   <xs:element name="GetValueTableResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q148="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetValueTableResult" nillable="true" type="q148:LibraryServerResult" />
-        <xs:element xmlns:q149="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="values" nillable="true" type="q149:ArrayOfstring" />
+        <xs:element xmlns:q152="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetValueTableResult" nillable="true" type="q152:LibraryServerResult" />
+        <xs:element xmlns:q153="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="values" nillable="true" type="q153:ArrayOfstring" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -1624,8 +1648,8 @@
   <xs:element name="GetOperLogsResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q150="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetOperLogsResult" nillable="true" type="q150:LibraryServerResult" />
-        <xs:element xmlns:q151="http://dp2003.com/dp2library/" minOccurs="0" name="records" nillable="true" type="q151:ArrayOfOperLogInfo" />
+        <xs:element xmlns:q154="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetOperLogsResult" nillable="true" type="q154:LibraryServerResult" />
+        <xs:element xmlns:q155="http://dp2003.com/dp2library/" minOccurs="0" name="records" nillable="true" type="q155:ArrayOfOperLogInfo" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -1645,7 +1669,7 @@
   <xs:element name="GetOperLogResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q152="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetOperLogResult" nillable="true" type="q152:LibraryServerResult" />
+        <xs:element xmlns:q156="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetOperLogResult" nillable="true" type="q156:LibraryServerResult" />
         <xs:element minOccurs="0" name="strXml" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="lHintNext" type="xs:long" />
         <xs:element minOccurs="0" name="attachment_data" nillable="true" type="xs:base64Binary" />
@@ -1666,8 +1690,8 @@
   <xs:element name="GetCalendarResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q153="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetCalendarResult" nillable="true" type="q153:LibraryServerResult" />
-        <xs:element xmlns:q154="http://dp2003.com/dp2library/" minOccurs="0" name="contents" nillable="true" type="q154:ArrayOfCalenderInfo" />
+        <xs:element xmlns:q157="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetCalendarResult" nillable="true" type="q157:LibraryServerResult" />
+        <xs:element xmlns:q158="http://dp2003.com/dp2library/" minOccurs="0" name="contents" nillable="true" type="q158:ArrayOfCalenderInfo" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -1675,14 +1699,14 @@
     <xs:complexType>
       <xs:sequence>
         <xs:element minOccurs="0" name="strAction" nillable="true" type="xs:string" />
-        <xs:element xmlns:q155="http://dp2003.com/dp2library/" minOccurs="0" name="info" nillable="true" type="q155:CalenderInfo" />
+        <xs:element xmlns:q159="http://dp2003.com/dp2library/" minOccurs="0" name="info" nillable="true" type="q159:CalenderInfo" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="SetCalendarResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q156="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SetCalendarResult" nillable="true" type="q156:LibraryServerResult" />
+        <xs:element xmlns:q160="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SetCalendarResult" nillable="true" type="q160:LibraryServerResult" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -1691,15 +1715,15 @@
       <xs:sequence>
         <xs:element minOccurs="0" name="strName" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="strAction" nillable="true" type="xs:string" />
-        <xs:element xmlns:q157="http://dp2003.com/dp2library/" minOccurs="0" name="info" nillable="true" type="q157:BatchTaskInfo" />
+        <xs:element xmlns:q161="http://dp2003.com/dp2library/" minOccurs="0" name="info" nillable="true" type="q161:BatchTaskInfo" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="BatchTaskResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q158="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="BatchTaskResult" nillable="true" type="q158:LibraryServerResult" />
-        <xs:element xmlns:q159="http://dp2003.com/dp2library/" minOccurs="0" name="resultInfo" nillable="true" type="q159:BatchTaskInfo" />
+        <xs:element xmlns:q162="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="BatchTaskResult" nillable="true" type="q162:LibraryServerResult" />
+        <xs:element xmlns:q163="http://dp2003.com/dp2library/" minOccurs="0" name="resultInfo" nillable="true" type="q163:BatchTaskInfo" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -1711,7 +1735,7 @@
   <xs:element name="ClearAllDbsResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q160="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="ClearAllDbsResult" nillable="true" type="q160:LibraryServerResult" />
+        <xs:element xmlns:q164="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="ClearAllDbsResult" nillable="true" type="q164:LibraryServerResult" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -1728,7 +1752,7 @@
   <xs:element name="ManageDatabaseResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q161="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="ManageDatabaseResult" nillable="true" type="q161:LibraryServerResult" />
+        <xs:element xmlns:q165="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="ManageDatabaseResult" nillable="true" type="q165:LibraryServerResult" />
         <xs:element minOccurs="0" name="strOutputInfo" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
@@ -1746,8 +1770,8 @@
   <xs:element name="GetUserResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q162="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetUserResult" nillable="true" type="q162:LibraryServerResult" />
-        <xs:element xmlns:q163="http://dp2003.com/dp2library/" minOccurs="0" name="contents" nillable="true" type="q163:ArrayOfUserInfo" />
+        <xs:element xmlns:q166="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetUserResult" nillable="true" type="q166:LibraryServerResult" />
+        <xs:element xmlns:q167="http://dp2003.com/dp2library/" minOccurs="0" name="contents" nillable="true" type="q167:ArrayOfUserInfo" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -1755,14 +1779,14 @@
     <xs:complexType>
       <xs:sequence>
         <xs:element minOccurs="0" name="strAction" nillable="true" type="xs:string" />
-        <xs:element xmlns:q164="http://dp2003.com/dp2library/" minOccurs="0" name="info" nillable="true" type="q164:UserInfo" />
+        <xs:element xmlns:q168="http://dp2003.com/dp2library/" minOccurs="0" name="info" nillable="true" type="q168:UserInfo" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="SetUserResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q165="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SetUserResult" nillable="true" type="q165:LibraryServerResult" />
+        <xs:element xmlns:q169="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SetUserResult" nillable="true" type="q169:LibraryServerResult" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -1779,8 +1803,8 @@
   <xs:element name="GetChannelInfoResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q166="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetChannelInfoResult" nillable="true" type="q166:LibraryServerResult" />
-        <xs:element xmlns:q167="http://dp2003.com/dp2library/" minOccurs="0" name="contents" nillable="true" type="q167:ArrayOfChannelInfo" />
+        <xs:element xmlns:q170="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetChannelInfoResult" nillable="true" type="q170:LibraryServerResult" />
+        <xs:element xmlns:q171="http://dp2003.com/dp2library/" minOccurs="0" name="contents" nillable="true" type="q171:ArrayOfChannelInfo" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -1789,15 +1813,15 @@
       <xs:sequence>
         <xs:element minOccurs="0" name="strAction" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="strStyle" nillable="true" type="xs:string" />
-        <xs:element xmlns:q168="http://dp2003.com/dp2library/" minOccurs="0" name="requests" nillable="true" type="q168:ArrayOfChannelInfo" />
+        <xs:element xmlns:q172="http://dp2003.com/dp2library/" minOccurs="0" name="requests" nillable="true" type="q172:ArrayOfChannelInfo" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="ManageChannelResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q169="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="ManageChannelResult" nillable="true" type="q169:LibraryServerResult" />
-        <xs:element xmlns:q170="http://dp2003.com/dp2library/" minOccurs="0" name="results" nillable="true" type="q170:ArrayOfChannelInfo" />
+        <xs:element xmlns:q173="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="ManageChannelResult" nillable="true" type="q173:LibraryServerResult" />
+        <xs:element xmlns:q174="http://dp2003.com/dp2library/" minOccurs="0" name="results" nillable="true" type="q174:ArrayOfChannelInfo" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -1813,7 +1837,7 @@
   <xs:element name="ChangeUserPasswordResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q171="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="ChangeUserPasswordResult" nillable="true" type="q171:LibraryServerResult" />
+        <xs:element xmlns:q175="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="ChangeUserPasswordResult" nillable="true" type="q175:LibraryServerResult" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -1829,7 +1853,7 @@
   <xs:element name="VerifyBarcodeResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q172="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="VerifyBarcodeResult" nillable="true" type="q172:LibraryServerResult" />
+        <xs:element xmlns:q176="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="VerifyBarcodeResult" nillable="true" type="q176:LibraryServerResult" />
         <xs:element minOccurs="0" name="strOutputBarcode" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
@@ -1845,7 +1869,7 @@
   <xs:element name="GetSystemParameterResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q173="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetSystemParameterResult" nillable="true" type="q173:LibraryServerResult" />
+        <xs:element xmlns:q177="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="GetSystemParameterResult" nillable="true" type="q177:LibraryServerResult" />
         <xs:element minOccurs="0" name="strValue" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
@@ -1862,7 +1886,7 @@
   <xs:element name="SetSystemParameterResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q174="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SetSystemParameterResult" nillable="true" type="q174:LibraryServerResult" />
+        <xs:element xmlns:q178="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SetSystemParameterResult" nillable="true" type="q178:LibraryServerResult" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -1876,7 +1900,7 @@
   <xs:element name="UrgentRecoverResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q175="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="UrgentRecoverResult" nillable="true" type="q175:LibraryServerResult" />
+        <xs:element xmlns:q179="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="UrgentRecoverResult" nillable="true" type="q179:LibraryServerResult" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>

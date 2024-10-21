@@ -307,7 +307,7 @@ namespace dp2Library
         [OperationContract(IsInitiating = true, IsTerminating = false)]
         LibraryServerResult GetIssueInfo(
                     string strRefID,
-            // string strBiblioRecPath,
+                    // string strBiblioRecPath,
                     string strItemXml,
                     string strResultType,
                     out string strResult,
@@ -369,7 +369,7 @@ namespace dp2Library
         [OperationContract(IsInitiating = true, IsTerminating = false)]
         LibraryServerResult GetOrderInfo(
                     string strRefID,
-            // string strBiblioRecPath,
+                    // string strBiblioRecPath,
                     string strItemXml,
                     string strResultType,
                     out string strResult,
@@ -707,7 +707,7 @@ namespace dp2Library
         [OperationContract(IsInitiating = true, IsTerminating = false)]
         LibraryServerResult GetCommentInfo(
                     string strRefID,
-            // string strBiblioRecPath,
+                    // string strBiblioRecPath,
                     string strItemXml,
                     string strResultType,
                     out string strResult,
@@ -851,7 +851,21 @@ string strPinyinXml);
         string uid,
         string style,
         out List<string> results);
-    }
 
+        // 2024/10/17
+        [OperationContract(IsInitiating = true, IsTerminating = false)]
+        LibraryServerResult BatchSearch(
+string biblio_dbnames,
+string[] query_words,
+int max_hitcount,   // 每个检索词检索命中的最大结果数
+int max_results,    // 每个检索词检索命中后返回的最大结果数
+string from_style,
+string match_style,
+string[] formats,
+string search_style,
+string output_style,
+string location_filter,
+out QueryResult[] results);
+    }
 
 }

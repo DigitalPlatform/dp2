@@ -143,7 +143,7 @@ namespace DigitalPlatform.LibraryClient
                     string s = m_recpaths[index];
                     batch.Add(s);
                     if (index == m_recpaths.Count - 1)
-                        bEOF = true;
+                         bEOF = true;
                 }
 
                 // 每100个一批，或者最后一次
@@ -240,6 +240,11 @@ namespace DigitalPlatform.LibraryClient
                     for (int i = 0; i < results.Length / format_list.Count; i++)
                     {
                         BiblioItem item = new BiblioItem();
+                        /*
+                        item.Batch = batch;
+                        item.BatchCommand = strCommand;
+                        item.BatchContents = results;
+                        */
                         item.RecPath = batch[i];
                         if (nContentIndex != -1)
                         {

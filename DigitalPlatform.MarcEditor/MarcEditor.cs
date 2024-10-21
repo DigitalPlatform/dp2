@@ -2668,7 +2668,9 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
         {
             // 脱离 block mode。并 SetActiveField() 到 _nCurrentFieldIndex 字段
             _block_mode = false;
-            this.SetActiveField(_nCurrentFieldIndex, 1);
+            if (_nCurrentFieldIndex >= 0
+                && _nCurrentFieldIndex < this.Record.Fields.Count)
+                this.SetActiveField(_nCurrentFieldIndex, 1);
             // this.curEdit.SelectionStart = 0;
         }
 
@@ -2708,11 +2710,15 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                 // Debug.WriteLine("EnsureCurrentVisible SetFocus()");
             }
 
-            var field = this.Record.Fields[_nCurrentFieldIndex];
+            if (_nCurrentFieldIndex > 0
+                && _nCurrentFieldIndex < this.Record.Fields.Count)
+            {
+                var field = this.Record.Fields[_nCurrentFieldIndex];
 
-            EnsureVisible(_nCurrentFieldIndex,
-                3,
-                new Rectangle(0, 0, 10, field.TotalHeight));
+                EnsureVisible(_nCurrentFieldIndex,
+                    3,
+                    new Rectangle(0, 0, 10, field.TotalHeight));
+            }
         }
 
         // 清除字段块标志
@@ -4080,6 +4086,24 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             }
         }
 
+        // 不会抛出异常的版本
+        public int SafeFocusedFieldIndex
+        {
+            get
+            {
+                if (this.DesignMode)
+                    return 0;
+
+                if (this.SelectedFieldIndices.Count == 0)
+                    return -1;
+
+                if (this.SelectedFieldIndices.Count > 1)
+                    return -1;
+
+                return (int)this.SelectedFieldIndices[0];
+            }
+        }
+
         /*
         public Subfield FocuedSubfield
         {
@@ -4486,6 +4510,13 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
         internal void SetActiveField(int nFieldIndex,
             int nCol)
         {
+            // 2024/10/16 用户反馈上下方向键无法上下移动插入符了
+            /*
+            if (nFieldIndex > 0
+    && _nCurrentFieldIndex >= this.Record.Fields.Count)
+                return;
+            */
+
             this.SetActiveField(nFieldIndex, nCol, 0, true);
         }
 
@@ -5220,7 +5251,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             int nCol,
             Rectangle rectCaret)
         {
-            Debug.Assert(nFieldIndex >= 0 && nFieldIndex < this.record.Fields.Count, "调入错误");
+            Debug.Assert(nFieldIndex >= 0 && nFieldIndex < this.record.Fields.Count, $"nFieldIndex 值 {nFieldIndex} 不在合法范围 0-{this.record.Fields.Count} 内");
             Debug.Assert(nCol == 0
                 || nCol == 1
                 || nCol == 2
@@ -5451,7 +5482,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                 if (ido.GetDataPresent(typeof(MarcEditorData)) == true)
                 {
                     MarcEditorData data = (MarcEditorData)ido.GetData(typeof(MarcEditorData));
-                    result = data.Text;
+                    result = data?.Text;
                     return;
                 }
 
@@ -5473,6 +5504,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             // 2024/6/15
             if (replace)
             {
+                if (result == null)
+                    return null;
                 return result.Replace("ǂ", MarcQuery.SUBFLD)
                     .Replace("$$", MarcQuery.SUBFLD)
                     .Replace("\r\n", "\n").Replace("\n", MarcQuery.FLDEND);
@@ -6843,6 +6876,16 @@ SYS	011528318
         {
             Debug.Assert(this.SelectedFieldIndices.Count > 0, "在'删除'时，SelectedFieldIndices个数必须大于0");
 
+            // save focusedIndex
+            int save_focusedFieldIndex = this.SafeFocusedFieldIndex;
+            // 2024/10/16
+            // 如果选定了多个字段，则取第一个的位置 index
+            if (save_focusedFieldIndex == -1
+                && this.SelectedFieldIndices.Count > 1)
+                save_focusedFieldIndex = this.SelectedFieldIndices[0];
+
+            bool has_focus = this.Focused || this.curEdit.Focused;
+
             if (show_dialog)
             {
                 string strFieldInfo = "";
@@ -6891,6 +6934,24 @@ SYS	011528318
 
             // 2007/7/17
             AdjustOriginY();
+
+            // 2024/10/11
+            if (this.FocusedFieldIndex == -1
+                && save_focusedFieldIndex != -1)
+            {
+                if (this.Record.Fields.Count <= save_focusedFieldIndex)
+                {
+                    this.FocusedFieldIndex = this.Record.Fields.Count - 1;
+                    if (this.FocusedFieldIndex != -1)
+                    {
+                        /*
+                        this.EnsureVisible();
+                        this.Focus();
+                        */
+                        SetActiveField(this.FocusedFieldIndex, _focusCol, has_focus);
+                    }
+                }
+            }
             return true;
         }
 
@@ -6982,14 +7043,20 @@ SYS	011528318
         // 探测当前位置是否存在定长模板定义
         // parameters:
         //      strCurName  当前所在位置的字段、子字段名
-        internal bool HasTemplateOrValueListDef(
+        // return:
+        //      -1  不存在当前位置
+        //      0   存在定义
+        //      1   存在定义
+        internal int HasTemplateOrValueListDef(
             string strDefName,
             out string strCurName)
         {
             strCurName = "";
             if (this.SelectedFieldIndices.Count > 1)
-                return false;
+                return 0;
 
+            if (this.FocusedField == null)
+                return -1;
             Debug.Assert(this.FocusedField != null, "FocusedField不可能为null");
 
             string strFieldName = this.FocusedField.Name;
@@ -7019,7 +7086,7 @@ SYS	011528318
             }
             else
             {
-                return false;
+                return 0;
             }
 
             if (strSubfieldName != "" && strSubfieldName != "#indicator")
@@ -7033,7 +7100,7 @@ SYS	011528318
                 strDefName,
                 strFieldName,
                 strSubfieldName,
-                out strError);
+                out strError) == true ? 1 : 0;
         }
 
         // 菜单：设置当前字段、指示符、子字段缺省值

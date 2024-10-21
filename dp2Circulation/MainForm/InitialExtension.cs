@@ -1624,8 +1624,9 @@ MessageBoxDefaultButton.Button1);
                     return;
                 }
 
-                // this.PropertyTaskList.MainForm = this;
+#if PROPERTY_TASK_LIST
                 this.PropertyTaskList.BeginThread();
+#endif
 
                 StartOrStopRfidManager();
 
@@ -5965,7 +5966,6 @@ out strError);
             }
         }
 
-
         public string UcsDatabaseName
         {
             get
@@ -5998,6 +5998,17 @@ out strError);
 "password",
 "");
                 return Program.MainForm.DecryptPasssword(password);
+            }
+        }
+
+        public string UcsFilterScriptCode
+        {
+            get
+            {
+                return AppInfo.GetString(
+    "ucsUpload",
+    "filterScriptCode",
+    "");
             }
         }
 

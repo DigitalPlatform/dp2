@@ -24,8 +24,7 @@ using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.rms;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.rms.Client.rmsws_localhost;
-using System.Runtime.Remoting.Activation;
-
+using System.Linq;
 
 namespace dp2Library
 {
@@ -5797,6 +5796,307 @@ out timestamp);
             app.WriteDebugInfo(strTitle);
         }
 
+        #region 批检索
+
+        // parameters:
+        //      query_words 检索词集合。
+        //      formats     需要在 FormatRecord 中返回的数据格式和结构
+        //                  集合元素如果包含 "browse:xxx" 这样形态的，会被发给 GetSearchResult() 作为数据格式，得到的信息会放入 FormatRecord:Record 中
+        //                  其它集合元素则被当作 GetBiblioInfos() API 的 formats 参数，得到的信息会放入 FormatRecord.DataList
+        //      results     [out] 返回检索结果。
+        //                  如果 results 的元素个数小于 query_words 中的元素个数，说明只处理了这个数目的检索词(可能因为控制相应包最大尺寸)，那么前端注意需要把余下的检索词再次请求本 API，直到所有检索词都完成检索
+        public LibraryServerResult BatchSearch(
+string biblio_dbnames,
+string[] query_words,
+int max_hitcount,   // 每个检索词检索命中的最大结果数
+int max_results,    // 每个检索词检索命中后返回的最大结果数
+string from_style,
+string match_style,
+string[] formats,
+string search_style,
+string output_style,
+string location_filter,
+out QueryResult[] results)
+        {
+            string strError = "";
+            results = null;
+
+            LibraryServerResult result = this.PrepareEnvironment("BatchSearch", true, true);
+            if (result.Value == -1)
+                return result;
+
+            try
+            {
+                // 权限判断
+
+                // 权限字符串
+                if (StringUtil.IsInList("searchbiblio,order,searchauthority", sessioninfo.RightsOrigin) == false)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = $"检索书目或规范信息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备order、searchbiblio或searchauthority权限。";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+
+                if (query_words.Length == 0)
+                {
+                    strError = "query_words 参数中的元素不应为空。至少应该包含一个元素";
+                    goto ERROR1;
+                }
+
+                Int64 limit_maxCount = -1;
+                // 根据权限，决定如何限定最大命中数
+                if (StringUtil.IsInList("searchbiblio_unlimited", sessioninfo.RightsOrigin) == false)
+                {
+                    // library.xml 中配置一个 SearchBiblio() API 的常规限制极限命中数
+                    limit_maxCount = app.BiblioSearchMaxCount;
+                }
+
+                // long limit_maxCount = 100;
+
+                if (limit_maxCount != -1)
+                {
+                    if (max_hitcount == -1 || max_hitcount > limit_maxCount)
+                    {
+                        strError = $"检索被拒绝。因前端请求针对书目检索的最大命中结果数 {max_hitcount} 超过 {limit_maxCount} 限制";
+                        goto ERROR1;
+                    }
+                }
+
+                RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
+                if (channel == null)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "get channel error";
+                    result.ErrorCode = ErrorCode.SystemError;
+                    return result;
+                }
+
+#if REMOVED
+                // 是否要将检索词根据空白字符切割开进行试探检索。
+                // 所谓试探检索，就利用切开的每个检索词顺次检索，直到出现命中的就停止试探。
+                // var split_word = StringUtil.IsInList("splitWord", search_style);
+#endif
+
+                int total_records = 0;
+                int max_total_records = 100;    // 限制返回的全部记录总数
+                List<QueryResult> query_results = new List<QueryResult>();
+                foreach (string query_string in query_words)
+                {
+                    string resultset_name = "~batch_search";
+
+                    var words = query_string.Split('^');
+#if REMOVED
+                    if (split_word)
+                        words = SplitQueryString(query_string,
+                            new char[] { ' ', ';', '；', ':', '：', '/', '.' });
+                    else
+                        words = new List<string> { query_string };
+#endif
+
+                    LibraryServerResult current_result = null;
+                    foreach (var word in words)
+                    {
+                        current_result = SearchBiblio(
+        biblio_dbnames,
+        word,
+        max_hitcount,
+        from_style,
+        match_style,
+        "zh",
+        resultset_name,
+        search_style,
+        output_style,
+        location_filter,
+        out _);
+                        if (current_result.Value == -1
+                            || current_result.Value > 0)
+                            break;
+                    }
+
+                    if (current_result.Value == -1)
+                    {
+                        var query_result = new QueryResult
+                        {
+                            HitCount = -1,
+                            QueryWord = query_string,
+                            ErrorCode = current_result.ErrorCode.ToString(),
+                            ErrorInfo = current_result.ErrorInfo,
+                        };
+
+                        query_results.Add(query_result);
+                        continue;
+                    }
+                    var hitcount = current_result.Value;
+
+                    if (hitcount == 0)
+                    {
+                        query_results.Add(new QueryResult
+                        {
+                            QueryWord = query_string,
+                            HitCount = 0,
+                            Records = null,
+                        });
+                        continue;
+                    }
+
+                    ParseFormats(formats,
+    out string browse_formats,
+    out string biblio_formats);
+
+#if REMOVED
+                    // 用于 GetSearchResult() 的格式
+                    var browse_formats = formats
+                        .Where(o => o.StartsWith("browse:"))
+                        .FirstOrDefault();
+                    if (string.IsNullOrEmpty(browse_formats) == false)
+                        browse_formats = browse_formats.Substring("browse:".Length);
+
+                    // 用于 GetBiblioInfos() 的格式
+                    var biblio_formats = formats.ToList()
+    .Where(o => o.StartsWith("browse:") == false)
+    .ToList().ToArray();
+#endif
+
+                    // 控制返回的总记录数。如果预计当前检索词的结果加上后会超过限额，则丢弃当前检索词的这些结果
+                    int current_return_count = (int)hitcount;
+                    if (max_results > 0)
+                        current_return_count = Math.Min(current_return_count, max_results);
+                    if (total_records + current_return_count > max_total_records)
+                        break;
+
+                    // 获得最多 max_results 个检索结果
+                    SearchResultLoader loader = new SearchResultLoader(channel,
+                    null,
+                    resultset_name,
+                    browse_formats);
+                    loader.ElementType = "Record";
+
+                    // 装载检索结果
+                    {
+                        var records = new List<FormatRecord>();
+                        foreach (Record record in loader)
+                        {
+                            // 防止一个检索词命中返回的记录数过多
+                            if (max_results != -1
+                                && records.Count >= max_results)
+                                break;
+
+                            FormatRecord one = new FormatRecord();
+                            one.Record = record;
+
+                            /*
+                            if (record.RecordBody != null && record.RecordBody.Result != null
+                                && record.RecordBody.Result.Value == -1)
+                            {
+                                records.Add(new FormatRecord
+                                {
+                                    ErrorCode = record.RecordBody.Result.ErrorCode.ToString(),
+                                    ErrorInfo = record.RecordBody.Result.ErrorString,
+                                });
+                                continue;
+                            }
+                            */
+
+                            if (biblio_formats.Length > 0)
+                            {
+                                current_result = GetBiblioInfos(
+                                    record.Path,
+                                    null,
+                                    formats,
+                                    out string[] datas,
+                                    out byte[] timestamp);
+                                one.DataList = datas;
+                                if (current_result.Value == -1)
+                                {
+                                    one.ErrorCode = current_result.ErrorCode.ToString();
+                                    one.ErrorInfo = current_result.ErrorInfo;
+                                }
+                            }
+                            records.Add(one);
+                        }
+
+                        query_results.Add(new QueryResult
+                        {
+                            QueryWord = query_string,
+                            HitCount = hitcount,
+                            Records = records.ToArray(),
+                        });
+                        total_records += records.Count;
+                    }
+                }
+
+                if (query_results.Count < 1)
+                {
+                    strError = "拟返回的批次集合中元素数量错误。至少应该包含一个元素";
+                    goto ERROR1;
+                }
+                results = query_results.ToArray();
+                result.Value = query_results.Count;
+                return result;
+            ERROR1:
+                result.Value = -1;
+                result.ErrorInfo = strError;
+                result.ErrorCode = ErrorCode.SystemError;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                string strErrorText = "dp2Library BatchSearch() API出现异常: " + ExceptionUtil.GetDebugText(ex);
+                app.WriteErrorLog(strErrorText);
+
+                result.Value = -1;
+                result.ErrorCode = ErrorCode.SystemError;
+                result.ErrorInfo = strErrorText;
+                return result;
+            }
+        }
+
+        // 分离出两种不同的 formats
+        static void ParseFormats(string[] formats,
+            out string browse_formats,
+            out string biblio_formats)
+        {
+            browse_formats = null;
+            List<string> biblio_list = new List<string>();
+            foreach(var format in formats)
+            {
+                if (format.StartsWith("browse:"))
+                    browse_formats = format.Substring("browse:".Length);
+                else
+                    biblio_list.Add(format);
+            }
+
+            biblio_formats = string.Join(",", biblio_list);
+        }
+
+
+#if REMOVED
+        // 把检索字符串根据标点符号切割为多个部分。注意第一个元素是没有切割的检索字符串
+        public static List<string> SplitQueryString(string text,
+            char[] sep_chars)
+        {
+            if (string.IsNullOrEmpty(text))
+                return new List<string> { text };
+            List<string> results = new List<string>();
+            // var segments = text.Split(' ', ';', '；', ':', '：', '/', '.');
+            var segments = text.Split(sep_chars);
+            if (segments.Length == 1)
+                return new List<string> { text };
+            results.Add(text);
+            foreach (var s in segments)
+            {
+                string current = s.Trim();
+                if (string.IsNullOrEmpty(current) == false)
+                    results.Add(current);
+            }
+
+            return results;
+        }
+#endif
+
+#endregion
+
         // 检索书目信息
         // parameters:
         //      strBiblioDbNames    书目库名。可以为单个库名，也可以是逗号(半角)分割的读者库名列表。还可以为 <全部>/<all> 之一，表示全部书目库。
@@ -6121,6 +6421,7 @@ out timestamp);
                     app.RemoveMemorySetByPrefix(filePath);
                 }
 
+                /*
                 // 2021/9/12
                 {
                     string filePath = app.GetMemorySetFilePathPrefix(
@@ -6129,6 +6430,7 @@ out timestamp);
                     // 确保删除本地结果集，为检索后首次 GetSearchResult() 做好准备
                     app.RemoveMemorySetByPrefix(filePath);
                 }
+                */
 
                 BeginSearch();
                 channel.Idle += new IdleEventHandler(channel_IdleEvent);
@@ -6288,6 +6590,9 @@ out timestamp);
                        strBiblioRecPath,
                        strBiblioType);
                 }
+
+                // testing
+                // Thread.Sleep(1000*60);
 
                 return app.SetBiblioInfo(
                     sessioninfo,
@@ -19229,6 +19534,55 @@ false);
                 }
             }
         }
+    }
+
+
+    // 一个检索词检索命中的一批结果
+    [DataContract(Namespace = "http://dp2003.com/dp2library/")]
+    public class QueryResult
+    {
+        [DataMember]
+        public string QueryWord { get; set; }
+
+        // 命中的记录数(可能大于 Records 中的元素数)
+        [DataMember]
+        public long HitCount { get; set; }
+
+        // 命中的记录列表
+        [DataMember]
+        public FormatRecord[] Records { get; set; }
+
+        [DataMember]
+        public string ErrorInfo { get; set; }
+        [DataMember]
+        public string ErrorCode { get; set; }
+    }
+
+    [DataContract(Namespace = "http://dp2003.com/dp2library/")]
+    public class FormatRecord
+    {
+        // GetSearchResult() 返回的信息
+        [DataMember]
+        public Record Record { get; set; }
+
+        // GetBiblioInfos() 返回的信息
+        [DataMember]
+        public string[] DataList { get; set; }
+
+        [DataMember]
+        public string ErrorInfo { get; set; }
+
+        [DataMember]
+        public string ErrorCode { get; set; }
+
+        /*
+        public string Type { get; set; }
+        public string Path { get; set; }
+        public string Data { get; set; }
+
+        public byte [] Timestamp { get; set; }
+        public string Metadata { get; set; }
+        */
     }
 
 }

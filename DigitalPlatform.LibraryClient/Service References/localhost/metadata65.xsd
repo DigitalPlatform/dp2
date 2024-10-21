@@ -163,12 +163,6 @@
     </xs:sequence>
   </xs:complexType>
   <xs:element name="ResInfoItem" nillable="true" type="tns:ResInfoItem" />
-  <xs:complexType name="ArrayOfRecord">
-    <xs:sequence>
-      <xs:element minOccurs="0" maxOccurs="unbounded" name="Record" nillable="true" type="tns:Record" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:element name="ArrayOfRecord" nillable="true" type="tns:ArrayOfRecord" />
   <xs:complexType name="Record">
     <xs:sequence>
       <xs:element xmlns:q2="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="Cols" nillable="true" type="q2:ArrayOfstring" />
@@ -210,4 +204,10 @@
     </xs:sequence>
   </xs:complexType>
   <xs:element name="Result" nillable="true" type="tns:Result" />
+  <xs:complexType name="ArrayOfRecord">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="Record" nillable="true" type="tns:Record" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfRecord" nillable="true" type="tns:ArrayOfRecord" />
 </xs:schema>

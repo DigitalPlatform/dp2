@@ -1980,6 +1980,208 @@ namespace DigitalPlatform.LibraryClient.localhost {
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
+    [System.Runtime.Serialization.DataContractAttribute(Name="QueryResult", Namespace="http://dp2003.com/dp2library/")]
+    [System.SerializableAttribute()]
+    public partial class QueryResult : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
+        
+        [System.NonSerializedAttribute()]
+        private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string ErrorCodeField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string ErrorInfoField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private long HitCountField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string QueryWordField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private DigitalPlatform.LibraryClient.localhost.FormatRecord[] RecordsField;
+        
+        [global::System.ComponentModel.BrowsableAttribute(false)]
+        public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
+            get {
+                return this.extensionDataField;
+            }
+            set {
+                this.extensionDataField = value;
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string ErrorCode {
+            get {
+                return this.ErrorCodeField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.ErrorCodeField, value) != true)) {
+                    this.ErrorCodeField = value;
+                    this.RaisePropertyChanged("ErrorCode");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string ErrorInfo {
+            get {
+                return this.ErrorInfoField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.ErrorInfoField, value) != true)) {
+                    this.ErrorInfoField = value;
+                    this.RaisePropertyChanged("ErrorInfo");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public long HitCount {
+            get {
+                return this.HitCountField;
+            }
+            set {
+                if ((this.HitCountField.Equals(value) != true)) {
+                    this.HitCountField = value;
+                    this.RaisePropertyChanged("HitCount");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string QueryWord {
+            get {
+                return this.QueryWordField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.QueryWordField, value) != true)) {
+                    this.QueryWordField = value;
+                    this.RaisePropertyChanged("QueryWord");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public DigitalPlatform.LibraryClient.localhost.FormatRecord[] Records {
+            get {
+                return this.RecordsField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.RecordsField, value) != true)) {
+                    this.RecordsField = value;
+                    this.RaisePropertyChanged("Records");
+                }
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        protected void RaisePropertyChanged(string propertyName) {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null)) {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
+    [System.Runtime.Serialization.DataContractAttribute(Name="FormatRecord", Namespace="http://dp2003.com/dp2library/")]
+    [System.SerializableAttribute()]
+    public partial class FormatRecord : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
+        
+        [System.NonSerializedAttribute()]
+        private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string[] DataListField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string ErrorCodeField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string ErrorInfoField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private DigitalPlatform.LibraryClient.localhost.Record RecordField;
+        
+        [global::System.ComponentModel.BrowsableAttribute(false)]
+        public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
+            get {
+                return this.extensionDataField;
+            }
+            set {
+                this.extensionDataField = value;
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string[] DataList {
+            get {
+                return this.DataListField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.DataListField, value) != true)) {
+                    this.DataListField = value;
+                    this.RaisePropertyChanged("DataList");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string ErrorCode {
+            get {
+                return this.ErrorCodeField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.ErrorCodeField, value) != true)) {
+                    this.ErrorCodeField = value;
+                    this.RaisePropertyChanged("ErrorCode");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string ErrorInfo {
+            get {
+                return this.ErrorInfoField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.ErrorInfoField, value) != true)) {
+                    this.ErrorInfoField = value;
+                    this.RaisePropertyChanged("ErrorInfo");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public DigitalPlatform.LibraryClient.localhost.Record Record {
+            get {
+                return this.RecordField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.RecordField, value) != true)) {
+                    this.RecordField = value;
+                    this.RaisePropertyChanged("Record");
+                }
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        protected void RaisePropertyChanged(string propertyName) {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null)) {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
     [System.Runtime.Serialization.DataContractAttribute(Name="Record", Namespace="http://dp2003.com/dp2kernel/")]
     [System.SerializableAttribute()]
     public partial class Record : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
@@ -4052,6 +4254,14 @@ namespace DigitalPlatform.LibraryClient.localhost {
         
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndOnlineStatis(out string[] results, System.IAsyncResult result);
         
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/BatchSearch", ReplyAction="http://dp2003.com/dp2library/dp2library/BatchSearchResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult BatchSearch(out DigitalPlatform.LibraryClient.localhost.QueryResult[] results, string biblio_dbnames, string[] query_words, int max_hitcount, int max_results, string from_style, string match_style, string[] formats, string search_style, string output_style, string location_filter);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/BatchSearch", ReplyAction="http://dp2003.com/dp2library/dp2library/BatchSearchResponse")]
+        System.IAsyncResult BeginBatchSearch(string biblio_dbnames, string[] query_words, int max_hitcount, int max_results, string from_style, string match_style, string[] formats, string search_style, string output_style, string location_filter, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndBatchSearch(out DigitalPlatform.LibraryClient.localhost.QueryResult[] results, System.IAsyncResult result);
+        
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetVersion", ReplyAction="http://dp2003.com/dp2library/dp2library/GetVersionResponse")]
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetVersion(out string uid);
         
@@ -5719,6 +5929,32 @@ namespace DigitalPlatform.LibraryClient.localhost {
             get {
                 base.RaiseExceptionIfNecessary();
                 return ((string[])(this.results1[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results1[1]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class BatchSearchCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results1;
+        
+        public BatchSearchCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results1 = results;
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.QueryResult[] results {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.QueryResult[])(this.results1[0]));
             }
         }
         
@@ -7766,6 +8002,12 @@ namespace DigitalPlatform.LibraryClient.localhost {
         
         private System.Threading.SendOrPostCallback onOnlineStatisCompletedDelegate;
         
+        private BeginOperationDelegate onBeginBatchSearchDelegate;
+        
+        private EndOperationDelegate onEndBatchSearchDelegate;
+        
+        private System.Threading.SendOrPostCallback onBatchSearchCompletedDelegate;
+        
         private BeginOperationDelegate onBeginGetVersionDelegate;
         
         private EndOperationDelegate onEndGetVersionDelegate;
@@ -8248,6 +8490,8 @@ namespace DigitalPlatform.LibraryClient.localhost {
         public event System.EventHandler<SetPinyinCompletedEventArgs> SetPinyinCompleted;
         
         public event System.EventHandler<OnlineStatisCompletedEventArgs> OnlineStatisCompleted;
+        
+        public event System.EventHandler<BatchSearchCompletedEventArgs> BatchSearchCompleted;
         
         public event System.EventHandler<GetVersionCompletedEventArgs> GetVersionCompleted;
         
@@ -10717,6 +10961,76 @@ namespace DigitalPlatform.LibraryClient.localhost {
                         category,
                         uid,
                         style}, this.onEndOnlineStatisDelegate, this.onOnlineStatisCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult BatchSearch(out DigitalPlatform.LibraryClient.localhost.QueryResult[] results, string biblio_dbnames, string[] query_words, int max_hitcount, int max_results, string from_style, string match_style, string[] formats, string search_style, string output_style, string location_filter) {
+            return base.Channel.BatchSearch(out results, biblio_dbnames, query_words, max_hitcount, max_results, from_style, match_style, formats, search_style, output_style, location_filter);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginBatchSearch(string biblio_dbnames, string[] query_words, int max_hitcount, int max_results, string from_style, string match_style, string[] formats, string search_style, string output_style, string location_filter, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginBatchSearch(biblio_dbnames, query_words, max_hitcount, max_results, from_style, match_style, formats, search_style, output_style, location_filter, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndBatchSearch(out DigitalPlatform.LibraryClient.localhost.QueryResult[] results, System.IAsyncResult result) {
+            return base.Channel.EndBatchSearch(out results, result);
+        }
+        
+        private System.IAsyncResult OnBeginBatchSearch(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string biblio_dbnames = ((string)(inValues[0]));
+            string[] query_words = ((string[])(inValues[1]));
+            int max_hitcount = ((int)(inValues[2]));
+            int max_results = ((int)(inValues[3]));
+            string from_style = ((string)(inValues[4]));
+            string match_style = ((string)(inValues[5]));
+            string[] formats = ((string[])(inValues[6]));
+            string search_style = ((string)(inValues[7]));
+            string output_style = ((string)(inValues[8]));
+            string location_filter = ((string)(inValues[9]));
+            return this.BeginBatchSearch(biblio_dbnames, query_words, max_hitcount, max_results, from_style, match_style, formats, search_style, output_style, location_filter, callback, asyncState);
+        }
+        
+        private object[] OnEndBatchSearch(System.IAsyncResult result) {
+            DigitalPlatform.LibraryClient.localhost.QueryResult[] results = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.QueryResult[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndBatchSearch(out results, result);
+            return new object[] {
+                    results,
+                    retVal};
+        }
+        
+        private void OnBatchSearchCompleted(object state) {
+            if ((this.BatchSearchCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.BatchSearchCompleted(this, new BatchSearchCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void BatchSearchAsync(string biblio_dbnames, string[] query_words, int max_hitcount, int max_results, string from_style, string match_style, string[] formats, string search_style, string output_style, string location_filter) {
+            this.BatchSearchAsync(biblio_dbnames, query_words, max_hitcount, max_results, from_style, match_style, formats, search_style, output_style, location_filter, null);
+        }
+        
+        public void BatchSearchAsync(string biblio_dbnames, string[] query_words, int max_hitcount, int max_results, string from_style, string match_style, string[] formats, string search_style, string output_style, string location_filter, object userState) {
+            if ((this.onBeginBatchSearchDelegate == null)) {
+                this.onBeginBatchSearchDelegate = new BeginOperationDelegate(this.OnBeginBatchSearch);
+            }
+            if ((this.onEndBatchSearchDelegate == null)) {
+                this.onEndBatchSearchDelegate = new EndOperationDelegate(this.OnEndBatchSearch);
+            }
+            if ((this.onBatchSearchCompletedDelegate == null)) {
+                this.onBatchSearchCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnBatchSearchCompleted);
+            }
+            base.InvokeAsync(this.onBeginBatchSearchDelegate, new object[] {
+                        biblio_dbnames,
+                        query_words,
+                        max_hitcount,
+                        max_results,
+                        from_style,
+                        match_style,
+                        formats,
+                        search_style,
+                        output_style,
+                        location_filter}, this.onEndBatchSearchDelegate, this.onBatchSearchCompletedDelegate, userState);
         }
         
         public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetVersion(out string uid) {
@@ -14787,6 +15101,14 @@ namespace DigitalPlatform.LibraryClient.localhost {
         
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndOnlineStatis(out string[] results, System.IAsyncResult result);
         
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/BatchSearch", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/BatchSearchResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult BatchSearch(out DigitalPlatform.LibraryClient.localhost.QueryResult[] results, string biblio_dbnames, string[] query_words, int max_hitcount, int max_results, string from_style, string match_style, string[] formats, string search_style, string output_style, string location_filter);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/BatchSearch", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/BatchSearchResponse")]
+        System.IAsyncResult BeginBatchSearch(string biblio_dbnames, string[] query_words, int max_hitcount, int max_results, string from_style, string match_style, string[] formats, string search_style, string output_style, string location_filter, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndBatchSearch(out DigitalPlatform.LibraryClient.localhost.QueryResult[] results, System.IAsyncResult result);
+        
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetVersion", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetVersionResponse")]
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetVersion(out string uid);
         
@@ -16454,6 +16776,32 @@ namespace DigitalPlatform.LibraryClient.localhost {
             get {
                 base.RaiseExceptionIfNecessary();
                 return ((string[])(this.results1[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results1[1]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class BatchSearchCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results1;
+        
+        public BatchSearchCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results1 = results;
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.QueryResult[] results {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.QueryResult[])(this.results1[0]));
             }
         }
         
@@ -18501,6 +18849,12 @@ namespace DigitalPlatform.LibraryClient.localhost {
         
         private System.Threading.SendOrPostCallback onOnlineStatisCompletedDelegate;
         
+        private BeginOperationDelegate onBeginBatchSearchDelegate;
+        
+        private EndOperationDelegate onEndBatchSearchDelegate;
+        
+        private System.Threading.SendOrPostCallback onBatchSearchCompletedDelegate;
+        
         private BeginOperationDelegate onBeginGetVersionDelegate;
         
         private EndOperationDelegate onEndGetVersionDelegate;
@@ -18983,6 +19337,8 @@ namespace DigitalPlatform.LibraryClient.localhost {
         public event System.EventHandler<SetPinyinCompletedEventArgs1> SetPinyinCompleted;
         
         public event System.EventHandler<OnlineStatisCompletedEventArgs1> OnlineStatisCompleted;
+        
+        public event System.EventHandler<BatchSearchCompletedEventArgs1> BatchSearchCompleted;
         
         public event System.EventHandler<GetVersionCompletedEventArgs1> GetVersionCompleted;
         
@@ -21452,6 +21808,76 @@ namespace DigitalPlatform.LibraryClient.localhost {
                         category,
                         uid,
                         style}, this.onEndOnlineStatisDelegate, this.onOnlineStatisCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult BatchSearch(out DigitalPlatform.LibraryClient.localhost.QueryResult[] results, string biblio_dbnames, string[] query_words, int max_hitcount, int max_results, string from_style, string match_style, string[] formats, string search_style, string output_style, string location_filter) {
+            return base.Channel.BatchSearch(out results, biblio_dbnames, query_words, max_hitcount, max_results, from_style, match_style, formats, search_style, output_style, location_filter);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginBatchSearch(string biblio_dbnames, string[] query_words, int max_hitcount, int max_results, string from_style, string match_style, string[] formats, string search_style, string output_style, string location_filter, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginBatchSearch(biblio_dbnames, query_words, max_hitcount, max_results, from_style, match_style, formats, search_style, output_style, location_filter, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndBatchSearch(out DigitalPlatform.LibraryClient.localhost.QueryResult[] results, System.IAsyncResult result) {
+            return base.Channel.EndBatchSearch(out results, result);
+        }
+        
+        private System.IAsyncResult OnBeginBatchSearch(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string biblio_dbnames = ((string)(inValues[0]));
+            string[] query_words = ((string[])(inValues[1]));
+            int max_hitcount = ((int)(inValues[2]));
+            int max_results = ((int)(inValues[3]));
+            string from_style = ((string)(inValues[4]));
+            string match_style = ((string)(inValues[5]));
+            string[] formats = ((string[])(inValues[6]));
+            string search_style = ((string)(inValues[7]));
+            string output_style = ((string)(inValues[8]));
+            string location_filter = ((string)(inValues[9]));
+            return this.BeginBatchSearch(biblio_dbnames, query_words, max_hitcount, max_results, from_style, match_style, formats, search_style, output_style, location_filter, callback, asyncState);
+        }
+        
+        private object[] OnEndBatchSearch(System.IAsyncResult result) {
+            DigitalPlatform.LibraryClient.localhost.QueryResult[] results = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.QueryResult[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndBatchSearch(out results, result);
+            return new object[] {
+                    results,
+                    retVal};
+        }
+        
+        private void OnBatchSearchCompleted(object state) {
+            if ((this.BatchSearchCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.BatchSearchCompleted(this, new BatchSearchCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void BatchSearchAsync(string biblio_dbnames, string[] query_words, int max_hitcount, int max_results, string from_style, string match_style, string[] formats, string search_style, string output_style, string location_filter) {
+            this.BatchSearchAsync(biblio_dbnames, query_words, max_hitcount, max_results, from_style, match_style, formats, search_style, output_style, location_filter, null);
+        }
+        
+        public void BatchSearchAsync(string biblio_dbnames, string[] query_words, int max_hitcount, int max_results, string from_style, string match_style, string[] formats, string search_style, string output_style, string location_filter, object userState) {
+            if ((this.onBeginBatchSearchDelegate == null)) {
+                this.onBeginBatchSearchDelegate = new BeginOperationDelegate(this.OnBeginBatchSearch);
+            }
+            if ((this.onEndBatchSearchDelegate == null)) {
+                this.onEndBatchSearchDelegate = new EndOperationDelegate(this.OnEndBatchSearch);
+            }
+            if ((this.onBatchSearchCompletedDelegate == null)) {
+                this.onBatchSearchCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnBatchSearchCompleted);
+            }
+            base.InvokeAsync(this.onBeginBatchSearchDelegate, new object[] {
+                        biblio_dbnames,
+                        query_words,
+                        max_hitcount,
+                        max_results,
+                        from_style,
+                        match_style,
+                        formats,
+                        search_style,
+                        output_style,
+                        location_filter}, this.onEndBatchSearchDelegate, this.onBatchSearchCompletedDelegate, userState);
         }
         
         public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetVersion(out string uid) {

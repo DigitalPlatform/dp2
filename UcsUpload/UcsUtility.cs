@@ -150,11 +150,14 @@ Date=YYYYMMDD (8 位数字)
             }
             catch (Exception ex)
             {
+                var message = ex.Message;
+                if (ex.InnerException != null)
+                    message += "(" + ex.InnerException.Message + ")";
                 return new UploadResult
                 {
                     Value = -1,
                     ErrorCode = ex.GetType().ToString(),
-                    ErrorInfo = ex.Message
+                    ErrorInfo = message,
                 };
             }
         }

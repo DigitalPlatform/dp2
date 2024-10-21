@@ -352,42 +352,57 @@ namespace dp2Circulation
 
         void _doViewComment(bool bOpenWindow)
         {
-            if (this.m_biblioTable == null)
-                return;
-
-            var selected_item_count = this.TryGet(() =>
+            try
             {
-                return this._listviewRecords.SelectedItems.Count;
-            });
-            if (selected_item_count == 0)
-                return; // 是否要显示一个空画面?
+                // testing
+                // throw new Exception("test");
 
-            ListViewItem item = this.TryGet(() =>
-            {
-                return this._listviewRecords.SelectedItems[0];
-            });
+                if (this.m_biblioTable == null)
+                    return;
 
-            Program.MainForm.OpenCommentViewer(bOpenWindow);
+                var selected_item_count = this.TryGet(() =>
+                {
+                    return this._listviewRecords.SelectedItems.Count;
+                });
+                if (selected_item_count == 0)
+                    return; // 是否要显示一个空画面?
 
-            string strRecPath = ListViewUtil.GetItemText(item, 0);  // item.Text;
-            if (string.IsNullOrEmpty(strRecPath) == true)
-                return;
+                ListViewItem item = this.TryGet(() =>
+                {
+                    return this._listviewRecords.SelectedItems[0];
+                });
 
-            // 存储所获得书目记录 XML
-            BiblioInfo info = (BiblioInfo)this.m_biblioTable[strRecPath];
-            if (info == null)
-            {
-                info = new BiblioInfo();
-                info.RecPath = strRecPath;
-                this.m_biblioTable[strRecPath] = info;  // 后面任务中会填充 info 的内容，如果必要的话
+                Program.MainForm.OpenCommentViewer(bOpenWindow);
+
+                string strRecPath = ListViewUtil.GetItemText(item, 0);  // item.Text;
+                if (string.IsNullOrEmpty(strRecPath) == true)
+                    return;
+
+                // 存储所获得书目记录 XML
+                BiblioInfo info = (BiblioInfo)this.m_biblioTable[strRecPath];
+                if (info == null)
+                {
+                    info = new BiblioInfo();
+                    info.RecPath = strRecPath;
+                    this.m_biblioTable[strRecPath] = info;  // 后面任务中会填充 info 的内容，如果必要的话
+                }
+
+                ItemPropertyTask task = new ItemPropertyTask();
+                task.BiblioInfo = info;
+                task.Stop = null;   //  this._stop;
+                task.DbType = this.DbType;
+
+                // Program.MainForm.PropertyTaskList.AddTask(task, true);
+                Program.MainForm.DelayList.DelayProcess(task);
             }
-
-            ItemPropertyTask task = new ItemPropertyTask();
-            task.BiblioInfo = info;
-            task.Stop = null;   //  this._stop;
-            task.DbType = this.DbType;
-
-            Program.MainForm.PropertyTaskList.AddTask(task, true);
+            catch (Exception ex)
+            {
+                // 2024/10/16
+                this.ShowMessage($"_doViewComment() 出现异常: {ex.Message}",
+                    "red",
+                    true);
+                MainForm.WriteErrorLog($"_doViewComment() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+            }
         }
 
 #if NO

@@ -876,5 +876,20 @@ string strPinyinXml);
         string uid,
         string style,
         out List<string> results);
+
+        // 2024/10/17
+        [OperationContract]
+        LibraryServerResult BatchSearch(
+string biblio_dbnames,
+string[] query_words,
+int max_hitcount,   // 每个检索词检索命中的最大结果数
+int max_results,    // 每个检索词检索命中后返回的最大结果数
+string from_style,
+string match_style,
+string[] formats,
+string search_style,
+string output_style,
+string location_filter,
+out QueryResult[] results);
     }
 }

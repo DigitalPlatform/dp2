@@ -139,6 +139,9 @@
     <None Include="Service References\localhost\DigitalPlatform.LibraryClient.localhost.OperLogInfo.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
     </None>
+    <None Include="Service References\localhost\DigitalPlatform.LibraryClient.localhost.QueryResult.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
     <None Include="Service References\localhost\DigitalPlatform.LibraryClient.localhost.Question.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
     </None>

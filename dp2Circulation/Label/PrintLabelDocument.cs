@@ -1392,9 +1392,8 @@ namespace dp2Circulation
                                     rectText.Height);
                             }
 #endif
-
                             // 修正 target 区域为正方形
-                            if (barcode_type == "qr" || barcode_type == "qrcode")
+                            if (IsQrType(barcode_type))
                             {
                                 float min = Math.Min(target.Width, target.Height);
                                 if (target.Width > min)
@@ -1440,7 +1439,6 @@ namespace dp2Circulation
                                     g.FillRectangle(b, rectText);
                                 }
 #endif
-
                                 PaintOcrFont(
                                     g,
                                     textFontHeight,
@@ -1623,6 +1621,11 @@ namespace dp2Circulation
 
                 g.Clip = old_clip;
             } // end of using clip
+        }
+
+        static bool IsQrType(string barcode_type)
+        {
+            return (barcode_type == "qr" || barcode_type == "qrcode");
         }
 
         static void DrawAutoFitText(Graphics g,
@@ -2219,7 +2222,7 @@ format);
                 format = BarcodeFormat.CODABAR;
                 strCode = strCode.ToUpper();
             }
-            else if (strType == "qr" || strType == "qrcode")
+            else if (IsQrType(strType))// (strType == "qr" || strType == "qrcode")
             {
 
             }
@@ -2242,14 +2245,15 @@ format);
                 CharacterSet = strCharset // "UTF-8"
             };
 
-            if (strType == "39" || strType == "code_39"
-                || strType == "ean_13" || strType == "codabar")
+            //if (strType == "39" || strType == "code_39"
+            //    || strType == "ean_13" || strType == "codabar")
+            if (IsQrType(strType) == false)
                 options = new EncodingOptions
                 {
                     Width = nWidth, // 500,
                     Height = nHeight,   // 100,
                     Margin = nMargin,
-                    PureBarcode = true
+                    PureBarcode = true  // 只绘制条码部分，不绘制下面的文字
                 };
 
             var writer = new BarcodeWriter

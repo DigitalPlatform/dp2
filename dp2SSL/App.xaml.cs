@@ -2040,9 +2040,19 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             _currentUserName = channel.UserName;
             _currentUserLibraryCodeList = channel.LibraryCodeList;
 
-            // 2020/9/18
-            // 检查 rights
-            VerifyRights(channel.Rights);
+            try
+            {
+                // 2020/9/18
+                // 检查 rights
+                VerifyRights(channel.Rights);
+            }
+            catch
+            {
+                // 2024/9/18
+                // 确保 Logout()，这样下次遇到权限不足依然还会报错
+                channel.Logout(out _);
+                throw;
+            }
 
             //_currentUserRights = channel.Rights;
             //_currentLibraryCodeList = channel.LibraryCodeList;

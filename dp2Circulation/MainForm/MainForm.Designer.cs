@@ -20,8 +20,11 @@
 
             RemoveDownloader(null, true);
 
+#if PROPERTY_TASK_LIST
             if (this.PropertyTaskList != null)
                 this.PropertyTaskList.Dispose();
+#endif
+
             if (this.OperHistory != null)
                 this.OperHistory.Dispose();
 

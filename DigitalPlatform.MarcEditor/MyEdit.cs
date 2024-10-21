@@ -216,7 +216,35 @@ namespace DigitalPlatform.Marc
                 nContentStart = nStart + 2;
                 if (nContentStart > nEnd)
                     nContentStart = nEnd;
-                strSubfieldName = strFieldValue.Substring(nStart + 1, 1);   // 2024/7/4 增加 +1
+                /*
+                 * 操作类型 crashReport -- 异常报告 
+主题 dp2circulation 
+发送者 ... 
+媒体类型 text 
+内容 发生未捕获的界面线程异常: 
+Type: System.ArgumentOutOfRangeException
+Message: 索引和长度必须引用该字符串内的位置。
+参数名: length
+Stack:
+在 System.String.Substring(Int32 startIndex, Int32 length)
+在 DigitalPlatform.Marc.MyEdit.GetCurrentSubfieldCaretInfo(String strFieldValue, Int32 nCaretPos, String& strSubfieldName, String& strSufieldContent, Int32& nStart, Int32& nContentStart, Int32& nContentLength, Boolean& forbidden)
+在 DigitalPlatform.Marc.MyEdit.DoCtrlH()
+在 DigitalPlatform.Marc.MyEdit.Menu_pasteToCurrentSubfield(Object sender, EventArgs e)
+在 DigitalPlatform.Marc.MyEdit.ProcessDialogKey(Keys keyData)
+在 System.Windows.Forms.Control.PreProcessMessage(Message& msg)
+在 System.Windows.Forms.Control.PreProcessControlMessageInternal(Control target, Message& msg)
+在 System.Windows.Forms.Application.ThreadContext.PreTranslateMessage(MSG& msg)
+
+
+dp2Circulation 版本: dp2Circulation, Version=3.94.9035.22741, Culture=neutral, PublicKeyToken=null
+操作系统：Microsoft Windows NT 6.1.7601 Service Pack 1
+本机 MAC 地址: ...
+操作时间 2024/10/9 15:23:52 (Wed, 09 Oct 2024 15:23:52 +0800) 
+前端地址 ... 经由 http://dp2003.com/dp2library 
+
+                 * */
+                if (nStart + 1 < strFieldValue.Length)  // 2024/10/11 增加
+                    strSubfieldName = strFieldValue.Substring(nStart + 1, 1);   // 2024/7/4 增加 +1
             }
 
             nContentLength = nEnd - nContentStart;
@@ -631,7 +659,7 @@ namespace DigitalPlatform.Marc
 
         protected override bool ProcessCmdKey(ref Message m, Keys keyData)
         {
-            Debug.WriteLine($"MyEdit ProcessCmdKey {keyData}");
+            //Debug.WriteLine($"MyEdit ProcessCmdKey {keyData}");
 
             if (_k)
                 return base.ProcessCmdKey(ref m, keyData);
@@ -739,7 +767,7 @@ namespace DigitalPlatform.Marc
         protected override bool ProcessDialogKey(
             Keys keyData)
         {
-            Debug.WriteLine($"MyEdit ProcessDialogKey {keyData}");
+            //Debug.WriteLine($"MyEdit ProcessDialogKey {keyData}");
 
             /*
             if (keyData == (Keys.PageUp | Keys.Control))
@@ -1141,7 +1169,7 @@ namespace DigitalPlatform.Marc
             string strCurName = "";
             bool bEnable = this.MarcEditor.HasTemplateOrValueListDef(
                 "template",
-                out strCurName);
+                out strCurName) == 1;
 
             menuItem = new MenuItem("定长模板 " + strCurName + "\tCtrl+M");
             menuItem.Click += new System.EventHandler(this.MarcEditor.GetValueFromTemplate);
@@ -1155,7 +1183,7 @@ namespace DigitalPlatform.Marc
             // 值列表
             bEnable = this.MarcEditor.HasTemplateOrValueListDef(
                 "valuelist",
-                out strCurName);
+                out strCurName) == 1;
 
             menuItem = new MenuItem("值列表 " + strCurName);
             menuItem.Click += new System.EventHandler(this.MarcEditor.GetValueFromValueList);
@@ -1620,7 +1648,7 @@ namespace DigitalPlatform.Marc
             if (e.Button == MouseButtons.Left)
             {
                 _selection_start = this.SelectionStart;
-                Debug.WriteLine($"mousedown1 记忆 _current_selection_start={_selection_start}");
+                //Debug.WriteLine($"mousedown1 记忆 _current_selection_start={_selection_start}");
 
                 MemoryCaretX();
             }
@@ -1643,7 +1671,7 @@ MarcEditor.WM_LEFTRIGHT_MOVED,
             if (e.Button == MouseButtons.Left)
             {
                 _selection_start = this.SelectionStart;
-                Debug.WriteLine($"mousedown2 记忆 _current_selection_start={_selection_start}");
+                //Debug.WriteLine($"mousedown2 记忆 _current_selection_start={_selection_start}");
             }
 
             /*
@@ -1957,7 +1985,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.30.6506.29202, Culture=neutral,
             base.OnTextChanged(e);
 
             _selection_start = this.SelectionStart;
-            Debug.WriteLine($"ontextchanged 记忆 _current_selection_start={_selection_start}");
+            //Debug.WriteLine($"ontextchanged 记忆 _current_selection_start={_selection_start}");
 
         }
 
@@ -1973,10 +2001,10 @@ dp2Circulation 版本: dp2Circulation, Version=2.30.6506.29202, Culture=neutral,
             if (shift == false)
             {
                 _selection_start = current_selection_start;
-                Debug.WriteLine($"compute 记忆 _current_selection_start={_selection_start}");
+                //Debug.WriteLine($"compute 记忆 _current_selection_start={_selection_start}");
             }
 
-            Debug.WriteLine($"current_s_s={current_selection_start}, current_s_l={current_selection_length}, _selection_start={_selection_start}");
+            //Debug.WriteLine($"current_s_s={current_selection_start}, current_s_l={current_selection_length}, _selection_start={_selection_start}");
 
             _caret_pos = current_selection_start;
             if (shift)

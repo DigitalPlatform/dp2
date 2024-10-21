@@ -20,7 +20,7 @@
     <TargetFrameworkProfile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <PublishUrl>c:\publish\dp2SSL\v1\</PublishUrl>
+    <PublishUrl>c:\publish\dp2SSL\v1_dev\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Web</InstallFrom>
     <UpdateEnabled>true</UpdateEnabled>
@@ -30,13 +30,13 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <InstallUrl>http://dp2003.com/dp2ssl/v1/</InstallUrl>
+    <InstallUrl>http://dp2003.com/dp2ssl/v1_dev/</InstallUrl>
     <ProductName>dp2SSL-自助借还</ProductName>
     <PublisherName>DigitalPlatform</PublisherName>
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>97</ApplicationRevision>
+    <ApplicationRevision>98</ApplicationRevision>
     <ApplicationVersion>1.8.63.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -67,10 +67,10 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>8A609FAD04B89DDF14832D49A2DD957EC2628C66</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>D810379C850F13906F2BEE8319FADC2B37A3EDC9</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>数字平台（北京）软件有限责任公司苏州分公司.pfx</ManifestKeyFile>
+    <ManifestKeyFile>dp2SSL_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestTimestampUrl>http://timestamp.digicert.com</ManifestTimestampUrl>
@@ -906,6 +906,7 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="dp2003.pfx" />
+    <None Include="dp2SSL_TemporaryKey.pfx" />
     <None Include="OpenAPIs\Swagger.json">
       <Generator>NSwagCodeGenerator</Generator>
       <LastGenOutput>Swagger.cs</LastGenOutput>

@@ -465,7 +465,7 @@ namespace DigitalPlatform.Marc
             nNewFieldsCount = 0;
 
             // 先找到有几个字段
-            strFieldsMarc = strFieldsMarc.Replace(Record.SUBFLD, Record.KERNEL_SUBFLD);
+            strFieldsMarc = strFieldsMarc?.Replace(Record.SUBFLD, Record.KERNEL_SUBFLD);
             List<string> fields = Record.GetFields(strFieldsMarc, out _);
             if (fields == null || fields.Count == 0)
                 return;
@@ -770,12 +770,12 @@ namespace DigitalPlatform.Marc
             // 清除选中对象
             this.MarcEditor.ClearSelectFieldIndices();
 
-            int nMixIndex = 1000;
+            int nMinIndex = 1000;
             for (int i = 0; i < fieldIndices.Length; i++)
             {
                 int nIndex = fieldIndices[i];
-                if (nIndex < nMixIndex)
-                    nMixIndex = nIndex;
+                if (nIndex < nMinIndex)
+                    nMinIndex = nIndex;
                 this[nIndex] = null;
             }
 
@@ -788,8 +788,8 @@ namespace DigitalPlatform.Marc
                 }
             }
 
-            if (nMixIndex < this.Count)
-                this.MarcEditor.SetActiveField(nMixIndex, this.MarcEditor.m_nFocusCol);
+            if (nMinIndex < this.Count)
+                this.MarcEditor.SetActiveField(nMinIndex, this.MarcEditor.m_nFocusCol);
 
             // 应把失效区域计算出来，进行优化
             InvalidateRect iRect = new InvalidateRect();

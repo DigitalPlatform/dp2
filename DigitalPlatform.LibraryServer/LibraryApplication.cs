@@ -76,8 +76,8 @@ namespace DigitalPlatform.LibraryServer
 
         public DailyItemCountTable DailyItemCountTable = new DailyItemCountTable();
 
-        internal static DateTime _expire = new DateTime(2024, 9, 15);
-        // 上一个版本是 2024/3/15 2023/12/15 2023/9/15 2023/6/15 2023/3/15 2022/11/15 2022/9/15 2022/7/15 2022/5/15 2022/3/15 2021/12/15 2021/9/15 2021/7/15 2021/3/15 2020/11/15 2020/7/15 2019/2/15 2019/10/15 2019/7/15 2019/5/15 2019/2/15 2018/11/15 2018/9/15 2018/7/15 2018/5/15 2018/3/15 2017/1/15 2017/12/1 2017/9/1 2017/6/1 2017/3/1 2016/11/1
+        internal static DateTime _expire = new DateTime(2025, 9, 15);
+        // 上一个版本是 2024/9/15 2024/3/15 2023/12/15 2023/9/15 2023/6/15 2023/3/15 2022/11/15 2022/9/15 2022/7/15 2022/5/15 2022/3/15 2021/12/15 2021/9/15 2021/7/15 2021/3/15 2020/11/15 2020/7/15 2019/2/15 2019/10/15 2019/7/15 2019/5/15 2019/2/15 2018/11/15 2018/9/15 2018/7/15 2018/5/15 2018/3/15 2017/1/15 2017/12/1 2017/9/1 2017/6/1 2017/3/1 2016/11/1
 
 #if NO
         int m_nRefCount = 0;
@@ -307,6 +307,7 @@ namespace DigitalPlatform.LibraryServer
         public string ArrivedReserveTimeSpan = "";  // 通知到书后的保留时间。含时间单位
         public int OutofReservationThreshold = 10;  // 预约到书多少不取次后，被惩罚禁止预约
         public bool CanReserveOnshelf = true;   // 是否可以预约在架图书
+        public bool PrepareOnshelf = false;     // (对于在架预约)是否采用了人工备书流程
         public string NotifyDef = "";       // 提醒通知的定义。"15day,50%,70%"
         public string ArrivedNotifyTypes = "dpmail,email";   // 到书通知的类型
 
@@ -754,7 +755,9 @@ namespace DigitalPlatform.LibraryServer
                         out bValue,
                         out strError);
                     this.DebugMode = bValue;
-                    WriteErrorLog("是否为调试态: " + this.DebugMode);
+                    WriteErrorLog($"是否为调试态: {this.DebugMode}");
+                    if (this.DebugMode)
+                        WriteErrorLog("*** 注意: 调试态会在数据目录 log 子目录中产生一个巨大的 debug.txt 文件，拖慢系统运行速度 ***");
 
                     // 2013/4/10 
                     // uid
@@ -864,6 +867,7 @@ namespace DigitalPlatform.LibraryServer
                     // 预约到书
                     // 元素<arrived>
                     // 属性dbname/reserveTimeSpan/outofReservationThreshold/canReserveOnshelf/notifyTypes
+                    // 2024/9/21 增加属性 prepareOnshelf，表示是否采用人工备书流程
                     node = dom.DocumentElement.SelectSingleNode("arrived") as XmlElement;
                     if (node != null)
                     {
@@ -904,6 +908,18 @@ namespace DigitalPlatform.LibraryServer
                         else
                             app.ArrivedNotifyTypes = node.GetAttribute("notifyTypes");
 
+                        bValue = false;
+                        nRet = DomUtil.GetBooleanParam(node,
+                            "prepareOnshelf",
+                            false,
+                            out bValue,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            app.WriteErrorLog("元素 <arrived> 属性 prepareOnshelf 读入时发生错误: " + strError);
+                            goto ERROR1;
+                        }
+                        app.PrepareOnshelf = bValue;
                     }
                     else
                     {
@@ -912,6 +928,7 @@ namespace DigitalPlatform.LibraryServer
                         app.OutofReservationThreshold = 10;
                         app.CanReserveOnshelf = true;
                         app.ArrivedNotifyTypes = "dpmail,email";
+                        app.PrepareOnshelf = false;
                     }
 
                     // 2021/6/29

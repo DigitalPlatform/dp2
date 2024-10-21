@@ -992,6 +992,9 @@ namespace DigitalPlatform.LibraryServer
                     // text-level: 用户提示
                     string strMessage = string.Format(this.GetString("请注意，您刚提交的预约请求立即就得到了兑现"), // "请注意，您刚提交的预约请求立即就得到了兑现(预约到书通知消息也向您发出了，请注意查收)。所预约的册 {0} 为在架状态，已为您保留，您从现在起就可来图书馆办理借阅手续。"
                         strItemBarcode);
+                    // 2024/9/21
+                    if (this.PrepareOnshelf)
+                        strMessage = "预约请求提交成功。所预约的册 " + strItemBarcode + " 为在架状态，已进入备书流程，请耐心等待取书消息通知。";
                     // "请注意，您刚提交的预约请求立即就得到了兑现(预约到书通知消息也向您发出了，请注意查收)。所预约的册 " + strItemBarcode + " 为在架状态，已为您保留，您从现在起就可来图书馆办理借阅手续。";
                     if (OnShelfItemBarcodes.Count > 1)
                     {
@@ -2529,6 +2532,7 @@ out strError);
         // text-level: 内部处理
         // 在 预约到书 库中，追加一条新的记录，并作 email / dpmail / mq 通知
         // 注：本函数可能要删除部分通知记录
+        // (2024/9/21) 当使用 dp2mini 备书流程时，并且 bOnShelf 为 true，本函数不直接通知读者。备书流程会通知读者
         // parameters:
         //      strItemBarcode  册条码号。必须是册条码号。如果册条码号为空，参考ID需要使用 strRefID 参数
         //      strRefID        参考ID
@@ -2852,9 +2856,12 @@ out strError);
             // 发送短消息通知
             string strTotalError = "";
 
+            bool deny_message = bOnShelf && this.PrepareOnshelf;
+
             // *** dpmail
             if (this.MessageCenter != null
-                && StringUtil.IsInList("dpmail", this.ArrivedNotifyTypes))
+                && StringUtil.IsInList("dpmail", this.ArrivedNotifyTypes)
+                && !deny_message)
             {
                 string strTemplate = "";
                 // 获得邮件模板
@@ -2918,7 +2925,8 @@ out strError);
             // 2016/4/26
             // *** mq
             if (string.IsNullOrEmpty(this.OutgoingQueue) == false
-                && StringUtil.IsInList("mq", this.ArrivedNotifyTypes))
+                && StringUtil.IsInList("mq", this.ArrivedNotifyTypes)
+                && !deny_message)
             {
                 XmlDocument dom = new XmlDocument();
                 dom.LoadXml("<root />");
@@ -3021,7 +3029,8 @@ out strError);
 
             // ** email
             if (String.IsNullOrEmpty(strReaderEmailAddress) == false
-                && StringUtil.IsInList("email", this.ArrivedNotifyTypes))
+                && StringUtil.IsInList("email", this.ArrivedNotifyTypes)
+                && !deny_message)
             {
                 string strTemplate = "";
                 // 获得邮件模板
@@ -3086,7 +3095,8 @@ out strError);
             }
 
             // *** external messageinterfaces
-            if (this.m_externalMessageInterfaces != null)
+            if (this.m_externalMessageInterfaces != null
+                && !deny_message)
             {
                 foreach (MessageInterface message_interface in this.m_externalMessageInterfaces)
                 {

@@ -14,7 +14,6 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Web;
 using System.Text;
-using System.Data;
 using System.Linq;
 
 using DigitalPlatform;
@@ -33,8 +32,10 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Drawing;
 using DigitalPlatform.Z3950;
-// using DocumentFormat.OpenXml.Office2010.Excel;
+
 using UcsUpload;
+using dp2Circulation.Script;
+// using DocumentFormat.OpenXml.Wordprocessing;
 
 namespace dp2Circulation
 {
@@ -4755,8 +4756,9 @@ out string strErrorCode)
             return -1;
         }
 
-        int SetBiblioRecordToMarcEditor(string strXml,
-    out string strError)
+        public int SetBiblioRecordToMarcEditor(
+            string strXml,
+            out string strError)
         {
             return SetBiblioRecordToMarcEditor(strXml,
             null,
@@ -5078,6 +5080,8 @@ TaskScheduler.Default);
 
             string strHtml = "";
 
+            // testing
+            // Thread.Sleep(1000 * 60);
             /*
             LibraryChannel channel = this.GetChannel();
             channel.Timeout = new TimeSpan(0, 5, 0);    // 保存大量册记录时可能会耗时长一点
@@ -5088,7 +5092,7 @@ TaskScheduler.Default);
             */
             var looping = Looping(out LibraryChannel channel,
                 "正在保存记录 ...",
-                "timeout:00:05:00");
+                "timeout:00:00:30");    // 00:05:00
 
             this.ShowMessage("正在保存记录 ...");
             try
@@ -9030,6 +9034,40 @@ out strError);
             }
         }
 
+        // 将 MARC 编辑器中的书目记录内容保存到临时文件
+        static void MemoryBiblio(
+            string biblio_recpath,
+            byte[] timestamp,
+            string strXmlBody)
+        {
+            string path = Path.Combine(Program.MainForm.DataDir, "memory_biblio.txt");
+            File.WriteAllText(path, biblio_recpath + "\r\n" 
+                + ByteArray.GetHexTimeStampString(timestamp) + "\r\n"
+                + strXmlBody);
+        }
+
+        // 从临时文件中读出先前保存的书目记录内容
+        public static string GetMemoryBiblio(
+            out string biblio_recpath,
+            out byte[] timestamp,
+            bool delete = true)
+        {
+            biblio_recpath = "";
+            timestamp = null;
+            string path = Path.Combine(Program.MainForm.DataDir, "memory_biblio.txt");
+            if (File.Exists(path) == false)
+                return null;
+            var content = File.ReadAllText(path);
+            if (delete)
+                File.Delete(path);
+            using (StringReader sr = new StringReader(content))
+            {
+                biblio_recpath = sr.ReadLine();
+                timestamp = ByteArray.GetTimeStampByteArray(sr.ReadLine());
+                return sr.ReadToEnd();
+            }
+        }
+
         // 保存书目记录到数据库
         // thread: ui 线程外安全
         // parameters:
@@ -9149,39 +9187,6 @@ out strError);
                     return 0;
             }
 
-            // 保存前的准备工作
-            {
-                // 初始化 dp2circulation_marc_autogen.cs 的 Assembly，并new DetailHost对象
-                // return:
-                //      -1  error
-                //      0   没有重新初始化Assembly，而是直接用以前Cache的Assembly
-                //      1   重新(或者首次)初始化了Assembly
-                nRet = this._genData.InitialAutogenAssembly(strTargetPath,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-                if (this._genData.DetailHostObj != null)
-                {
-                    BeforeSaveRecordEventArgs e = new BeforeSaveRecordEventArgs();
-                    this.TryInvoke(() =>    // 2023/2/1
-                    {
-                        e.TargetRecPath = strTargetPath;
-                        // this._genData.DetailHostObj.BeforeSaveRecord(this.m_marcEditor, e);
-                        this._genData.DetailHostObj.Invoke("BeforeSaveRecord", this.m_marcEditor, e);
-                        if (string.IsNullOrEmpty(e.ErrorInfo) == false)
-                        {
-                            if (e.Cancel == false)
-                                this.MessageBoxShow("保存前的准备工作失败: " + e.ErrorInfo + "\r\n\r\n但保存操作仍将继续");
-                        }
-                    });
-                    if (e.Cancel == true)
-                    {
-                        strError = e.ErrorInfo;
-                        goto ERROR1;
-                    }
-                }
-            }
-
             // 获得书目记录XML格式
             nRet = this.GetBiblioXml(
                 "", // 迫使从记录路径中看marc格式
@@ -9190,298 +9195,347 @@ out strError);
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
-            LibraryChannel channel = channel_param;
-            TimeSpan old_timeout = new TimeSpan(0);
-            if (channel == null)
-            {
-                channel = Program.MainForm.GetChannel();
-                old_timeout = channel.Timeout;
-                channel.Timeout = TimeSpan.FromMinutes(2);
-            }
 
-        REDO_SAVE:
+            // 把 MARC 编辑器中的一个 MARC 记录保存到一个固定名字的临时文件
+            // 便于在 dp2circulation.exe 意外崩溃的情况下，重启后可以找回这条 MARC 记录
+            MemoryBiblio(strTargetPath, 
+                this.BiblioTimestamp,
+                strXmlBody);
             try
             {
-                bool bPartialDenied = false;
-                string strOutputPath = "";
-                byte[] baNewTimestamp = null;
-                string strWarning = "";
-                if (StringUtil.IsInList("checkUnique", strStyle) == true)
+
+                // 保存前的准备工作
                 {
-                    {
-                        nRet = Program.MainForm.DisplayDupBiblioList("",
-            out string strError1);
-                        if (nRet == -1)
-                        {
-                            strError = strError + "\r\n\r\n在显示发生重复的书目记录时出错: " + strError1;
-                            goto ERROR1;
-                        }
-                    }
-                    nRet = CheckUniqueToDatabase(
-                        stop,
-                        channel,
-                        strTargetPath,
-                        this.BiblioChanged == true ? strXmlBody : "",
-                        out strOutputPath,
-                        out strError);
-                    if (nRet == 0)
-                        this.ShowMessage("没有发现重复", "green", true);
-                }
-                else
-                {
-                    nRet = SaveXmlBiblioRecordToDatabase(
-                        stop,
-                        channel,
-                        strTargetPath,
-                        this.DeletedMode == true,
-                        strXmlBody,
-                        this.BiblioTimestamp,
-                        out strOutputPath,
-                        out baNewTimestamp,
-                        out strWarning,
-                        out strError);
-                }
-                if (nRet == -1)
-                {
-                    if (channel.ErrorCode == ErrorCode.BiblioDup)
-                    {
-                        if (this.Fixed == false)
-                        {
-                            Program.MainForm.SetMdiToNormal();
-                            this.TryInvoke(() =>
-                            {
-                                this.MenuItem_marcEditor_toggleFixed_Click(this, new EventArgs());
-                            });
-                        }
-                        nRet = Program.MainForm.DisplayDupBiblioList(strOutputPath,
-            out string strError1);
-                        if (nRet == -1)
-                        {
-                            strError = strError + "\r\n\r\n在显示发生重复的书目记录时出错: " + strError1;
-                            goto ERROR1;
-                        }
-
-                        if (StringUtil.IsInList("checkUnique", strStyle) == true)
-                            strError += "\r\n\r\n重复的书目记录已装入固定面板区的“浏览”属性页。在浏览行上双击鼠标左键，可把书目记录装入第二个种册窗进行观察";
-                        else
-                            strError += "\r\n\r\n重复的书目记录已装入固定面板区的“浏览”属性页，请合并重复书目记录后，重新提交保存";
-                    }
-                    if (channel.ErrorCode == ErrorCode.TimestampMismatch)
-                    {
-                        // 显示两条书目记录，对比显示
-                        // return:
-                        //      -1  出错
-                        //      0   放弃保存
-                        //      1   重试强行覆盖
-                        nRet = DisplayTwoBiblio(
-                            channel,
-                            strOutputPath,
-                            strXmlBody,
-                            out strError);
-                        if (nRet == -1)
-                            goto ERROR1;
-                        if (nRet == 1)
-                        {
-                            this.BiblioTimestamp = baNewTimestamp;
-                            goto REDO_SAVE;
-                        }
-                        Debug.Assert(nRet == 0, "");
-                        strError = "放弃保存书目记录";
-                    }
-
-                    goto ERROR1;
-                }
-
-                if (string.IsNullOrEmpty(strWarning) == false)
-                    this.MessageBoxShow(strWarning);
-                if (channel.ErrorCode == ErrorCode.PartialDenied)
-                    bPartialDenied = true;
-
-                if (StringUtil.IsInList("checkUnique", strStyle) == true)
-                    return 1;
-
-                this.BiblioTimestamp = baNewTimestamp;
-                this.BiblioRecPath = strOutputPath;
-                this.BiblioOriginPath = strOutputPath;
-
-                this.BiblioChanged = false;
-
-                // 如果刚才在删除后模式，现在取消这个模式 2007/10/15
-                if (this.DeletedMode == true)
-                {
-                    this.DeletedMode = false;
-
-                    // 重新装载实体记录，以便反映其listview变空的事实
-                    // 接着装入相关的所有册
-                    nRet = this.entityControl1.LoadItemRecords(
-                        stop,
-                        channel,
-                        this.BiblioRecPath,
-                        null,
-                        // this.DisplayOtherLibraryItem,
-                        this.DisplayOtherLibraryItem == true ? "getotherlibraryitem" : "",
+                    // 初始化 dp2circulation_marc_autogen.cs 的 Assembly，并new DetailHost对象
+                    // return:
+                    //      -1  error
+                    //      0   没有重新初始化Assembly，而是直接用以前Cache的Assembly
+                    //      1   重新(或者首次)初始化了Assembly
+                    nRet = this._genData.InitialAutogenAssembly(strTargetPath,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
-                }
-
-                // 清除ReadOnly状态，如果998$t已经消失
-                if (this.m_marcEditor.ReadOnly == true)
-                {
-                    string strTargetBiblioRecPath = this.m_marcEditor.Record.Fields.GetFirstSubfield("998", "t");
-                    if (String.IsNullOrEmpty(strTargetBiblioRecPath) == true)
+                    if (this._genData.DetailHostObj != null)
                     {
-                        this.TryInvoke(() =>
+                        BeforeSaveRecordEventArgs e = new BeforeSaveRecordEventArgs();
+                        this.TryInvoke(() =>    // 2023/2/1
                         {
-                            this.m_marcEditor.ReadOnly = false;
+                            e.TargetRecPath = strTargetPath;
+                            // this._genData.DetailHostObj.BeforeSaveRecord(this.m_marcEditor, e);
+                            this._genData.DetailHostObj.Invoke("BeforeSaveRecord", this.m_marcEditor, e);
+                            if (string.IsNullOrEmpty(e.ErrorInfo) == false)
+                            {
+                                if (e.Cancel == false)
+                                    this.MessageBoxShow("保存前的准备工作失败: " + e.ErrorInfo + "\r\n\r\n但保存操作仍将继续");
+                            }
                         });
+                        if (e.Cancel == true)
+                        {
+                            strError = e.ErrorInfo;
+                            goto ERROR1;
+                        }
                     }
                 }
 
-                if (bDisplaySuccess == true)
+                LibraryChannel channel = channel_param;
+                TimeSpan old_timeout = new TimeSpan(0);
+                if (channel == null)
                 {
-                    Program.MainForm.StatusBarMessage = "书目记录 '" + this.BiblioRecPath + "' 保存成功";
-                    // MessageBox.Show(this, "书目记录保存成功。");
+                    channel = Program.MainForm.GetChannel();
+                    old_timeout = channel.Timeout;
+                    channel.Timeout = TimeSpan.FromSeconds(30); // TimeSpan.FromMinutes(2);  // 2 分钟
                 }
 
-                if (bSearchDup == true)
+            REDO_SAVE:
+                try
                 {
-                    if (this.AutoSearchDup == true)
+                    bool bPartialDenied = false;
+                    string strOutputPath = "";
+                    byte[] baNewTimestamp = null;
+                    string strWarning = "";
+                    if (StringUtil.IsInList("checkUnique", strStyle) == true)
                     {
-                        this.TryInvoke(() =>
                         {
-                            API.PostMessage(this.Handle, WM_SEARCH_DUP, 0, 0);
-                        });
-                    }
-                }
-
-                // if (bPartialDenied == true)
-                {
-                    // 获得实际保存的书目记录
-                    string[] results = null;
-                    string[] formats = null;
-                    if (bPartialDenied == true)
-                    {
-                        formats = new string[2];
-                        formats[0] = "html";
-                        formats[1] = "xml";
+                            nRet = Program.MainForm.DisplayDupBiblioList("",
+                out string strError1);
+                            if (nRet == -1)
+                            {
+                                strError = strError + "\r\n\r\n在显示发生重复的书目记录时出错: " + strError1;
+                                goto ERROR1;
+                            }
+                        }
+                        nRet = CheckUniqueToDatabase(
+                            stop,
+                            channel,
+                            strTargetPath,
+                            this.BiblioChanged == true ? strXmlBody : "",
+                            out strOutputPath,
+                            out strError);
+                        if (nRet == 0)
+                            this.ShowMessage("没有发现重复", "green", true);
                     }
                     else
                     {
-                        formats = new string[1];
-                        formats[0] = "html";
+                        nRet = SaveXmlBiblioRecordToDatabase(
+                            stop,
+                            channel,
+                            strTargetPath,
+                            this.DeletedMode == true,
+                            strXmlBody,
+                            this.BiblioTimestamp,
+                            out strOutputPath,
+                            out baNewTimestamp,
+                            out strWarning,
+                            out strError);
                     }
-                    long lRet = channel.GetBiblioInfos(
-        stop,
-        strOutputPath,
-        "",
-        formats,
-        out results,
-        out baNewTimestamp,
-        out strError);
-                    if (lRet == 0)
+                    if (nRet == -1)
                     {
-                        strError = "重新装载时，路径为 '" + strOutputPath + "' 的书目记录没有找到 ...";
+                        if (channel.ErrorCode == ErrorCode.BiblioDup)
+                        {
+                            if (this.Fixed == false)
+                            {
+                                Program.MainForm.SetMdiToNormal();
+                                this.TryInvoke(() =>
+                                {
+                                    this.MenuItem_marcEditor_toggleFixed_Click(this, new EventArgs());
+                                });
+                            }
+                            nRet = Program.MainForm.DisplayDupBiblioList(strOutputPath,
+                out string strError1);
+                            if (nRet == -1)
+                            {
+                                strError = strError + "\r\n\r\n在显示发生重复的书目记录时出错: " + strError1;
+                                goto ERROR1;
+                            }
+
+                            if (StringUtil.IsInList("checkUnique", strStyle) == true)
+                                strError += "\r\n\r\n重复的书目记录已装入固定面板区的“浏览”属性页。在浏览行上双击鼠标左键，可把书目记录装入第二个种册窗进行观察";
+                            else
+                                strError += "\r\n\r\n重复的书目记录已装入固定面板区的“浏览”属性页，请合并重复书目记录后，重新提交保存";
+                        }
+                        if (channel.ErrorCode == ErrorCode.TimestampMismatch)
+                        {
+                            // 显示两条书目记录，对比显示
+                            // return:
+                            //      -1  出错
+                            //      0   放弃保存
+                            //      1   重试强行覆盖
+                            nRet = DisplayTwoBiblio(
+                                channel,
+                                strOutputPath,
+                                strXmlBody,
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                            if (nRet == 1)
+                            {
+                                this.BiblioTimestamp = baNewTimestamp;
+                                goto REDO_SAVE;
+                            }
+                            Debug.Assert(nRet == 0, "");
+                            strError = "放弃保存书目记录";
+                        }
+
                         goto ERROR1;
                     }
 
-                    if (lRet == -1)
+                    if (string.IsNullOrEmpty(strWarning) == false)
+                        this.MessageBoxShow(strWarning);
+                    if (channel.ErrorCode == ErrorCode.PartialDenied)
+                        bPartialDenied = true;
+
+                    if (StringUtil.IsInList("checkUnique", strStyle) == true)
+                        return 1;
+
+                    this.BiblioTimestamp = baNewTimestamp;
+                    this.BiblioRecPath = strOutputPath;
+                    this.BiblioOriginPath = strOutputPath;
+
+                    this.BiblioChanged = false;
+
+                    // 如果刚才在删除后模式，现在取消这个模式 2007/10/15
+                    if (this.DeletedMode == true)
                     {
-                        strError = "重新装载书目记录时出错: " + strError;
-                        errors.Add(strError);   // 暂时不作出错返回
-                    }
-                    else if (results == null)
-                    {
-                        strError = "重新装载书目记录时出错: result == null {6C619D72-73B0-48E0-8248-AB9348297D4F}";
-                        errors.Add(strError);   // 暂时不作出错返回
+                        this.DeletedMode = false;
+
+                        // 重新装载实体记录，以便反映其listview变空的事实
+                        // 接着装入相关的所有册
+                        nRet = this.entityControl1.LoadItemRecords(
+                            stop,
+                            channel,
+                            this.BiblioRecPath,
+                            null,
+                            // this.DisplayOtherLibraryItem,
+                            this.DisplayOtherLibraryItem == true ? "getotherlibraryitem" : "",
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
                     }
 
-                    if (results != null)
+                    // 清除ReadOnly状态，如果998$t已经消失
+                    if (this.m_marcEditor.ReadOnly == true)
                     {
-                        // 重新显示 OPAC 书目信息
-                        // TODO: 需要在对象保存完以后发出这个指令
-                        Debug.Assert(results.Length >= 1, "");
-                        if (results.Length > 0)
+                        string strTargetBiblioRecPath = this.m_marcEditor.Record.Fields.GetFirstSubfield("998", "t");
+                        if (String.IsNullOrEmpty(strTargetBiblioRecPath) == true)
                         {
-                            strHtml = results[0];
+                            this.TryInvoke(() =>
+                            {
+                                this.m_marcEditor.ReadOnly = false;
+                            });
+                        }
+                    }
+
+                    if (bDisplaySuccess == true)
+                    {
+                        Program.MainForm.StatusBarMessage = "书目记录 '" + this.BiblioRecPath + "' 保存成功";
+                        // MessageBox.Show(this, "书目记录保存成功。");
+                    }
+
+                    if (bSearchDup == true)
+                    {
+                        if (this.AutoSearchDup == true)
+                        {
+                            this.TryInvoke(() =>
+                            {
+                                API.PostMessage(this.Handle, WM_SEARCH_DUP, 0, 0);
+                            });
+                        }
+                    }
+
+                    // if (bPartialDenied == true)
+                    {
+                        // 获得实际保存的书目记录
+                        string[] results = null;
+                        string[] formats = null;
+                        if (bPartialDenied == true)
+                        {
+                            formats = new string[2];
+                            formats[0] = "html";
+                            formats[1] = "xml";
+                        }
+                        else
+                        {
+                            formats = new string[1];
+                            formats[0] = "html";
+                        }
+                        long lRet = channel.GetBiblioInfos(
+            stop,
+            strOutputPath,
+            "",
+            formats,
+            out results,
+            out baNewTimestamp,
+            out strError);
+                        if (lRet == 0)
+                        {
+                            strError = "重新装载时，路径为 '" + strOutputPath + "' 的书目记录没有找到 ...";
+                            goto ERROR1;
+                        }
+
+                        if (lRet == -1)
+                        {
+                            strError = "重新装载书目记录时出错: " + strError;
+                            errors.Add(strError);   // 暂时不作出错返回
+                        }
+                        else if (results == null)
+                        {
+                            strError = "重新装载书目记录时出错: result == null {6C619D72-73B0-48E0-8248-AB9348297D4F}";
+                            errors.Add(strError);   // 暂时不作出错返回
+                        }
+
+                        if (results != null)
+                        {
+                            // 重新显示 OPAC 书目信息
+                            // TODO: 需要在对象保存完以后发出这个指令
+                            Debug.Assert(results.Length >= 1, "");
+                            if (results.Length > 0)
+                            {
+                                strHtml = results[0];
 #if NO
                         this.m_webExternalHost_biblio.SetHtmlString(strHtml,
                             "entityform_biblio");
 #endif
-                        }
-                    }
-
-                    DoViewComment(false);   // 重新显示固定面板区的属性 XML 2015/7/11
-
-                    if (bPartialDenied == true)
-                    {
-                        if (results.Length < 2)
-                        {
-                            strError = "重新装载书目记录时出错: result.Length[" + results.Length.ToString() + "] 小于 2";
-                            goto ERROR1;
+                            }
                         }
 
-                        var dialog_result = this.TryGet(() =>
+                        DoViewComment(false);   // 重新显示固定面板区的属性 XML 2015/7/11
+
+                        if (bPartialDenied == true)
                         {
-                            PartialDeniedDialog dlg = new PartialDeniedDialog();
-
-                            MainForm.SetControlFont(dlg, this.Font, false);
-                            dlg.SavingXml = strXmlBody;
-                            Debug.Assert(results.Length >= 2, "");
-                            dlg.SavedXml = results[1];
-                            // dlg.MainForm = Program.MainForm;
-
-                            Program.MainForm.AppInfo.LinkFormState(dlg, "PartialDeniedDialog_state");
-                            dlg.ShowDialog(this);
-                            Program.MainForm.AppInfo.UnlinkFormState(dlg);
-                            return dlg.DialogResult;
-                        });
-
-                        if (dialog_result == System.Windows.Forms.DialogResult.OK)
-                        {
-                            string strOutputBiblioRecPath = "";
-                            string strXml = "";
-                            string strSubRecords = "";
-                            // 将实际保存的记录装入 MARC 编辑器
-                            // return:
-                            //      -1  error
-                            //      0   not found
-                            //      1   found
-                            nRet = LoadBiblioRecord(
-                                stop,
-                                channel,
-                                strOutputPath,
-                                "",
-                                false,
-                                false,
-                                out strOutputBiblioRecPath,
-                                out strXml,
-                                out strSubRecords,
-                                out strError);
-                            if (nRet == -1)
+                            if (results.Length < 2)
                             {
-                                strError = "重新装载书目记录时出错: " + strError;
+                                strError = "重新装载书目记录时出错: result.Length[" + results.Length.ToString() + "] 小于 2";
                                 goto ERROR1;
+                            }
+
+                            var dialog_result = this.TryGet(() =>
+                            {
+                                PartialDeniedDialog dlg = new PartialDeniedDialog();
+
+                                MainForm.SetControlFont(dlg, this.Font, false);
+                                dlg.SavingXml = strXmlBody;
+                                Debug.Assert(results.Length >= 2, "");
+                                dlg.SavedXml = results[1];
+                                // dlg.MainForm = Program.MainForm;
+
+                                Program.MainForm.AppInfo.LinkFormState(dlg, "PartialDeniedDialog_state");
+                                dlg.ShowDialog(this);
+                                Program.MainForm.AppInfo.UnlinkFormState(dlg);
+                                return dlg.DialogResult;
+                            });
+
+                            if (dialog_result == System.Windows.Forms.DialogResult.OK)
+                            {
+                                string strOutputBiblioRecPath = "";
+                                string strXml = "";
+                                string strSubRecords = "";
+                                // 将实际保存的记录装入 MARC 编辑器
+                                // return:
+                                //      -1  error
+                                //      0   not found
+                                //      1   found
+                                nRet = LoadBiblioRecord(
+                                    stop,
+                                    channel,
+                                    strOutputPath,
+                                    "",
+                                    false,
+                                    false,
+                                    out strOutputBiblioRecPath,
+                                    out strXml,
+                                    out strSubRecords,
+                                    out strError);
+                                if (nRet == -1)
+                                {
+                                    strError = "重新装载书目记录时出错: " + strError;
+                                    goto ERROR1;
+                                }
                             }
                         }
                     }
+
+                    // 2018/9/26
+                    if (errors.Count > 0)
+                    {
+                        strError = StringUtil.MakePathList(errors, "; ");
+                        this.ShowMessage(strError);
+                    }
+                    return 1;
+                }
+                finally
+                {
+                    if (channel_param == null)
+                    {
+                        channel.Timeout = old_timeout;
+                        Program.MainForm.ReturnChannel(channel);
+                    }
                 }
 
-                // 2018/9/26
-                if (errors.Count > 0)
-                {
-                    strError = StringUtil.MakePathList(errors, "; ");
-                    this.ShowMessage(strError);
-                }
-                return 1;
+
             }
             finally
             {
-                if (channel_param == null)
-                {
-                    channel.Timeout = old_timeout;
-                    Program.MainForm.ReturnChannel(channel);
-                }
+                GetMemoryBiblio(out _, out _);
             }
 
         ERROR1:
@@ -11401,7 +11455,8 @@ out strError);
                 // 2024/8/12
                 if (modeless_dialog != null)
                 {
-                    _ = Task.Run(async () => {
+                    _ = Task.Run(async () =>
+                    {
                         await Task.Delay(500);
                         this.TryInvoke(() =>
                         {
@@ -14641,7 +14696,7 @@ out strError);
                 {
                     Application.DoEvents();
                 }
-                var result = task.Result; 
+                var result = task.Result;
                 return true;
             }
 
@@ -14695,9 +14750,13 @@ out strError);
             {
                 // 注: Ctrl+S 被用作创建拼音
                 bool marcedit_has_focus = this.MarcEditor.Focused;
-                this.DoSaveAll();
-                if (marcedit_has_focus)
-                    SwitchFocus(MARC_EDITOR);
+                // this.DoSaveAll();
+                _ = Task.Run(async () =>
+                {
+                    await DoSaveAllAsync();
+                    if (marcedit_has_focus)
+                        SwitchFocus(MARC_EDITOR);
+                });
                 return true;
             }
 
@@ -17353,6 +17412,8 @@ out strError);
                 PlayPendingSwitchFocusCommands();
         }
 
+        public const string UCS_UPLOAD_CACHE_KEY = "z3950upload:~NLCUCS";
+
         /*
 附件 C.【049 字段】
 049 字段是联合编目中心的唯一控制号字段，
@@ -17383,6 +17444,46 @@ out strError);
 
             var strMARC = this.MarcEditor.Marc;
             var record = new MarcRecord(strMARC);
+
+            // 2024/10/13
+            // 利用脚本对 MARC 记录进行过滤
+            // 对 MARC 记录进行过滤
+            var script_code = Program.MainForm.UcsFilterScriptCode;
+            if (string.IsNullOrEmpty(script_code) == false)
+            {
+                VerifyHost host = null;
+                try
+                {
+                    var ret = ScriptDialog.FilterRecord(
+UCS_UPLOAD_CACHE_KEY,
+script_code,
+"",
+record,
+null,
+ref host,
+out string error1);
+                    if (ret < 0)
+                    {
+                        strError = $"执行脚本过滤 MARC 记录时出现错误(1): {error1}";
+                        goto ERROR1;
+                    }
+                    if (host != null
+                        && host.VerifyResult != null
+                        && host.VerifyResult.Errors != null
+                        && host.VerifyResult.Errors.Count > 0
+                        && VerifyError.GetErrorCount(host.VerifyResult.Errors) > 0)
+                    {
+                        var text = VerifyError.BuildTextLines(host.VerifyResult.Errors);
+                        strError = $"执行脚本过滤 MARC 记录时出现错误(2): {text}";
+                        goto ERROR1;
+                    }
+                }
+                finally
+                {
+                    host?.Dispose();
+                }
+            }
+
             string action = "N";
             if (Has049(record))
                 action = "U";
@@ -17418,6 +17519,15 @@ out strError);
             if (nRet == -1)
                 goto ERROR1;
 
+            var control_pressed = (Control.ModifierKeys & Keys.Control) == Keys.Control;
+            if (control_pressed)
+            {
+                var tempfilename = Path.Combine(Program.MainForm.UserTempDir, "~upload_filtered.xml");
+                var indented = DomUtil.GetIndentXml(xml);
+                File.WriteAllText(tempfilename, indented);
+                System.Diagnostics.Process.Start("notepad", tempfilename);
+                return;
+            }
 
             this.toolStripButton_uploadToUcs.Enabled = false;
             try
@@ -17524,6 +17634,17 @@ out strError);
             // 删除 997 和 998 字段
             record.select("field[@name='997' or @name='998']").detach();
 
+            // 2024/9/24
+            // 替换头标区、100、105 字段中的空格字符为 ^
+            {
+                record.Header[0, 24] = record.Header[0, 24].Replace(" ", "^").Replace("_", "^");
+
+                var subfields = record.select("field[@name='100' or @name='105']/subfield");
+                foreach (MarcSubfield subfield in subfields)
+                {
+                    subfield.Content = subfield.Content.Replace(" ", "^");
+                }
+            }
             return null;
         }
 

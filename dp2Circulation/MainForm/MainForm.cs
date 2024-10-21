@@ -46,6 +46,7 @@ using DigitalPlatform.Z3950;
 using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.RFID;
 using System.Linq;
+using DocumentFormat.OpenXml.Math;
 
 namespace dp2Circulation
 {
@@ -56,7 +57,9 @@ namespace dp2Circulation
     {
         internal ImageManager _imageManager = null;
 
+#if PROPERTY_TASK_LIST
         public PropertyTaskList PropertyTaskList = new PropertyTaskList();
+#endif
 
         internal CommentViewerForm m_commentViewer = null;
 
@@ -417,8 +420,62 @@ namespace dp2Circulation
             {
                 ReportError("dp2circulation 创建 QrRecognitionControl 过程出现异常", ExceptionUtil.GetDebugText(ex));
             }
+
+            // 用于处理 ListView 点击事件的后台线程
+            {
+                _worker = new BackgroundWorker();
+                _worker.WorkerSupportsCancellation = true;
+                _worker.DoWork += (o, e) =>
+                {
+                    while (true)
+                    {
+                        // Thread.Sleep(100);
+                        // 堵塞到收到信号，或者超时 100 毫秒
+                        // _delayList.Event.WaitOne(100);
+                        if (WaitHandle.WaitAny(
+                            new WaitHandle[] 
+                            {
+                                _delayList.Event,
+                                this.CancelToken.WaitHandle
+                            },
+                            100) == 1)
+                            break;  // 当 MainForm Close 的时候
+
+                        _delayList.ProcessChangeList((info) =>
+                        {
+                            var task = info as PropertyTask;
+                            if (task.LoadData() == false)
+                                return;
+
+                            task.ShowData();
+                        });
+
+                        if (_worker.CancellationPending)
+                        {
+                            // Set the e.Cancel flag so that the WorkerCompleted event
+                            // knows that the process was cancelled.
+                            e.Cancel = true;
+                            return;
+                        }
+                    }
+                };
+                _worker.RunWorkerAsync();
+            }
+
         }
 
+
+        BackgroundWorker _worker;
+
+        DelayChangeList _delayList = new DelayChangeList();
+
+        public DelayChangeList DelayList
+        {
+            get
+            {
+                return _delayList;
+            }
+        }
 
         /// <summary>
         /// 是否为安装后第一次运行
@@ -785,7 +842,7 @@ Stack:
             // 保存 palmprintForm 是否打开的状态
             {
                 bool visible = !(_palmprintForm == null || _palmprintForm?.IsDisposed == true);
-                this.AppInfo.SetBoolean("palmprint", "palmprintDialogVisible", visible);
+                this.AppInfo?.SetBoolean("palmprint", "palmprintDialogVisible", visible);
             }
 
             // 在前面关闭MDI子窗口的时候已经遇到了终止关闭的情况，这里就不用再次询问了
@@ -891,8 +948,9 @@ Stack:
                 RemoveExternalFonts(paths);
             }
 
+#if PROPERTY_TASK_LIST
             this.PropertyTaskList.Close();
-
+#endif
             if (this.m_commentViewer != null)
                 this.m_commentViewer.Close();
 
@@ -1243,6 +1301,27 @@ Stack:
                     this.MenuItem_openCommentSearchForm_Click(this, null);
                 else
                     continue;
+            }
+
+            // 如果先前保存书目记录中途曾经崩溃过，要打开一个种册窗装入书目记录内容
+            {
+                var content = EntityForm.GetMemoryBiblio(out string biblio_recpath,
+                    out byte[] timestamp,
+                    false);
+                if (string.IsNullOrEmpty(content) == false)
+                {
+                    var form = OpenWindow<EntityForm>();
+                    form.BiblioRecPath = biblio_recpath;
+                    form.BiblioTimestamp = timestamp;
+                    // return:
+                    //      -1  error
+                    //      0   空的记录
+                    //      1   成功
+                    int nRet = form.SetBiblioRecordToMarcEditor(content,
+                        out string strError);
+                    if (nRet == -1)
+                        MessageBox.Show(this, strError);
+                }
             }
 
             // 装载MDI子窗口状态

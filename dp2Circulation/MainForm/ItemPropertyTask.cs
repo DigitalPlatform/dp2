@@ -222,8 +222,8 @@ namespace dp2Circulation
 
         public override bool ShowData()
         {
-            if (this.Container == null
-                || Program.MainForm == null)
+            if (/*this.Container == null
+                || */Program.MainForm == null)
                 return false;
 
             if (Program.MainForm.InvokeRequired)

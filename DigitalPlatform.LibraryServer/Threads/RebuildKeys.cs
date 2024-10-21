@@ -1312,6 +1312,11 @@ out string strError)
                         return -1;
                     this.AppendResultText($"结束收尾 {info.DbName}\r\n");
                 }
+
+
+                if (nRet == -1)
+                    return -1;
+                return 0;
             }
             finally
             {
@@ -1326,12 +1331,9 @@ out string strError)
                         //    return -1;
                     }
                 }
-            }
 
-            this.AppendResultText($"共处理记录 {m_nRecordCount} 条\r\n");
-            if (nRet == -1)
-                return -1;
-            return 0;
+                this.AppendResultText($"共处理记录 {m_nRecordCount} 条\r\n");
+            }
         }
 
 #if NO

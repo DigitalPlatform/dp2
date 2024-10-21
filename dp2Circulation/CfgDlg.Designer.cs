@@ -260,6 +260,7 @@
             this.comboBox_labelPrint_accessNoSource = new System.Windows.Forms.ComboBox();
             this.label28 = new System.Windows.Forms.Label();
             this.tabPage_message = new System.Windows.Forms.TabPage();
+            this.label_message_denysharebiblio = new System.Windows.Forms.Label();
             this.groupBox_dp2mserver = new System.Windows.Forms.GroupBox();
             this.textBox_message_userName = new System.Windows.Forms.TextBox();
             this.label33 = new System.Windows.Forms.Label();
@@ -287,7 +288,8 @@
             this.button_z3950_servers = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
             this.button_Cancel = new System.Windows.Forms.Button();
-            this.label_message_denysharebiblio = new System.Windows.Forms.Label();
+            this.textBox_ucs_filterScriptCode = new System.Windows.Forms.TextBox();
+            this.label49 = new System.Windows.Forms.Label();
             this.tabControl_main.SuspendLayout();
             this.tabPage_server.SuspendLayout();
             this.toolStrip_server.SuspendLayout();
@@ -3135,6 +3137,15 @@
             this.tabPage_message.Text = "消息";
             this.tabPage_message.UseVisualStyleBackColor = true;
             // 
+            // label_message_denysharebiblio
+            // 
+            this.label_message_denysharebiblio.AutoSize = true;
+            this.label_message_denysharebiblio.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label_message_denysharebiblio.Location = new System.Drawing.Point(222, 48);
+            this.label_message_denysharebiblio.Name = "label_message_denysharebiblio";
+            this.label_message_denysharebiblio.Size = new System.Drawing.Size(0, 21);
+            this.label_message_denysharebiblio.TabIndex = 28;
+            // 
             // groupBox_dp2mserver
             // 
             this.groupBox_dp2mserver.Controls.Add(this.textBox_message_userName);
@@ -3272,6 +3283,7 @@
             // 
             // tabPage_z3950
             // 
+            this.tabPage_z3950.AutoScroll = true;
             this.tabPage_z3950.Controls.Add(this.groupBox7);
             this.tabPage_z3950.Controls.Add(this.button_z3950_servers);
             this.tabPage_z3950.Location = new System.Drawing.Point(4, 85);
@@ -3284,6 +3296,8 @@
             // 
             // groupBox7
             // 
+            this.groupBox7.Controls.Add(this.textBox_ucs_filterScriptCode);
+            this.groupBox7.Controls.Add(this.label49);
             this.groupBox7.Controls.Add(this.button_ucs_testUpload);
             this.groupBox7.Controls.Add(this.textBox_ucs_databaseName);
             this.groupBox7.Controls.Add(this.label47);
@@ -3295,14 +3309,15 @@
             this.groupBox7.Controls.Add(this.label44);
             this.groupBox7.Location = new System.Drawing.Point(19, 99);
             this.groupBox7.Name = "groupBox7";
-            this.groupBox7.Size = new System.Drawing.Size(635, 323);
+            this.groupBox7.Size = new System.Drawing.Size(635, 575);
             this.groupBox7.TabIndex = 1;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = "UCS 上传接口";
             // 
             // button_ucs_testUpload
             // 
-            this.button_ucs_testUpload.Location = new System.Drawing.Point(172, 234);
+            this.button_ucs_testUpload.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.button_ucs_testUpload.Location = new System.Drawing.Point(172, 534);
             this.button_ucs_testUpload.Name = "button_ucs_testUpload";
             this.button_ucs_testUpload.Size = new System.Drawing.Size(219, 35);
             this.button_ucs_testUpload.TabIndex = 8;
@@ -3411,14 +3426,29 @@
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
-            // label_message_denysharebiblio
+            // textBox_ucs_filterScriptCode
             // 
-            this.label_message_denysharebiblio.AutoSize = true;
-            this.label_message_denysharebiblio.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label_message_denysharebiblio.Location = new System.Drawing.Point(222, 48);
-            this.label_message_denysharebiblio.Name = "label_message_denysharebiblio";
-            this.label_message_denysharebiblio.Size = new System.Drawing.Size(0, 21);
-            this.label_message_denysharebiblio.TabIndex = 28;
+            this.textBox_ucs_filterScriptCode.AcceptsReturn = true;
+            this.textBox_ucs_filterScriptCode.AcceptsTab = true;
+            this.textBox_ucs_filterScriptCode.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_ucs_filterScriptCode.HideSelection = false;
+            this.textBox_ucs_filterScriptCode.Location = new System.Drawing.Point(172, 211);
+            this.textBox_ucs_filterScriptCode.Multiline = true;
+            this.textBox_ucs_filterScriptCode.Name = "textBox_ucs_filterScriptCode";
+            this.textBox_ucs_filterScriptCode.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox_ucs_filterScriptCode.Size = new System.Drawing.Size(457, 306);
+            this.textBox_ucs_filterScriptCode.TabIndex = 11;
+            // 
+            // label49
+            // 
+            this.label49.AutoSize = true;
+            this.label49.Location = new System.Drawing.Point(17, 211);
+            this.label49.Name = "label49";
+            this.label49.Size = new System.Drawing.Size(147, 21);
+            this.label49.TabIndex = 10;
+            this.label49.Text = "过滤用的脚本:";
             // 
             // CfgDlg
             // 
@@ -3795,5 +3825,7 @@
         private System.Windows.Forms.TextBox textBox_ui_loginWelcomeText;
         private System.Windows.Forms.Label label48;
         private System.Windows.Forms.Label label_message_denysharebiblio;
+        private System.Windows.Forms.TextBox textBox_ucs_filterScriptCode;
+        private System.Windows.Forms.Label label49;
     }
 }

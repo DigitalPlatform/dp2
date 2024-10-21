@@ -12,6 +12,7 @@ using System.Xml;
 using System.Web;
 using System.Threading;
 using System.Threading.Tasks;
+using System.ComponentModel;
 
 using ClosedXML.Excel;
 
@@ -108,6 +109,7 @@ namespace dp2Circulation
 
             prop.CompareColumn -= new CompareEventHandler(SearchFormBase.prop_CompareColumn);
             prop.CompareColumn += new CompareEventHandler(SearchFormBase.prop_CompareColumn);
+
         }
 
 #if NO
@@ -948,6 +950,7 @@ Keys keyData)
 looping.Progress,
 channel,
 strResultSetName,
+null,
 bOutputKeyCount,
 bOutputKeyID,
 bQuickLoad,
@@ -1510,6 +1513,10 @@ out strError);
             bool multiline = this.MultiLine;
             bool filter_query = IsFilterQuery();
 
+            bool dont_prompt_search_error = false;
+            DialogResult dialog_result_continue_search = DialogResult.Yes;
+
+
             LibraryChannel channel = this.GetChannel();
             var old_timeout = channel.Timeout;
 
@@ -1651,6 +1658,15 @@ out strError);
 
                 bool zserver_loaded = false;
 
+                // 存储一批检索式，一次性发起检索
+                List<QueryLine> query_batch = new List<QueryLine>();
+                // 是否使用批检索 API
+                bool use_batch = false;
+                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.161") >= 0)
+                    use_batch = filter_query;
+
+                // this.ShowMessageBox($"use_batch={use_batch}");
+
                 int word_index = 0;
                 // foreach (string query_word in query_words)
                 foreach (var query_line in query_lines)
@@ -1665,20 +1681,22 @@ out strError);
 
                     string query_word = query_line.QueryWord;
 
-                    if (multiline || filter_query)
+                    if (use_batch == false)
                     {
-                        looping.Progress?.SetProgressValue(word_index);
-                        looping.Progress?.SetMessage($"正在检索 '{query_word}' ({word_index + 1}/{query_lines.Count})...");
+                        if (multiline || filter_query)
+                        {
+                            looping.Progress?.SetProgressValue(word_index);
+                            looping.Progress?.SetMessage($"正在检索 '{query_word}' ({word_index + 1}/{query_lines.Count})...");
 
-                        this.ShowMessage($"正在检索 '{query_word}' ({word_index + 1}/{query_lines.Count})...");
-                    }
-                    else
-                    {
-                        looping.Progress?.SetMessage($"正在检索 '{query_word}' ...");
-                        this.ShowMessage($"正在检索 '{query_word}' ...");
+                            this.ShowMessage($"正在检索 '{query_word}' ({word_index + 1}/{query_lines.Count})...");
+                        }
+                        else
+                        {
+                            looping.Progress?.SetMessage($"正在检索 '{query_word}' ...");
+                            this.ShowMessage($"正在检索 '{query_word}' ...");
+                        }
                     }
 
-                    word_index++;
 
                     if (bNeedShareSearch == true)
                     {
@@ -1711,7 +1729,80 @@ out strError);
                     var current_from = strFromStyle;
                     if (string.IsNullOrEmpty(query_line.FieldName) == false)
                         current_from = query_line.FieldName;
-                    long lRet = SearchBiblio(
+
+                    long lRet = 0;
+                    if (use_batch)
+                    {
+                        query_batch.Add(query_line);
+                        if (query_batch.Count >= 10 || word_index == query_lines.Count - 1)
+                        {
+                            while (query_batch.Count > 0)
+                            {
+                                // TODO: REDO 这里也需要动态显示一下进度
+                                if (multiline || filter_query)
+                                {
+                                    looping.Progress?.SetProgressValue(word_index);
+                                    looping.Progress?.SetMessage($"正在检索 '{query_word}' 等 {query_batch.Count} 个检索词 ({word_index + 1}/{query_lines.Count})...");
+
+                                    this.ShowMessage($"正在检索 '{query_word}' 等 {query_batch.Count} 个检索词 ({word_index + 1}/{query_lines.Count})...");
+                                }
+
+                                // 触发一次批检索 API 调用
+                                lRet = BatchSearch(
+                                    channel,
+                                    looping.Progress,
+                                    query_batch,
+                                    filter_query,
+                                    current_from,
+                                    strOutputStyle,
+                                    this.GetLocationFilter(),
+                                    bOutputKeyCount,
+                                    bOutputKeyID,
+                                    bQuickLoad,
+                                    query,
+                                    (recpath, xml) =>
+                                    {
+                                        StringBuilder debug_info = new StringBuilder();
+                                        var ret = FilterRecord(query_line,
+                                            recpath,
+                                            xml,
+                                            debug_info);
+                                        Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(debug_info.ToString()).Replace("\r\n", "<br/>") + "</div>");
+                                        return ret;
+                                    },
+                                    ref lTotalHitCount,
+                                    ref dont_prompt_search_error,   // 一开始为 false
+                                    ref dialog_result_continue_search, // 一开始为 DialogResult.Yes
+                                    out int processed_query_count,
+                                    out strError);
+                                if (lRet == -1)
+                                {
+                                    Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode($"针对检索词 '{query_word}' 进行检索时出错: {strError}") + "</div>");
+                                    goto ERROR1;
+                                }
+
+                                if (processed_query_count == 0)
+                                {
+                                    strError = "BatchSearch() 返回时发现 processed_query_count 为零，表明本轮请求一个检索词也未处理。请调整相关参数";
+                                    goto ERROR1;
+                                }
+
+                                lTotalHitCount += lRet;
+                                this.m_lHitCount = lRet;
+
+                                this.LabelMessage = "检索已累积命中 " + lTotalHitCount.ToString() + " 条书目记录";
+
+                                Debug.Assert(processed_query_count <= query_batch.Count);
+                                query_batch.RemoveRange(0, processed_query_count);
+                            }
+                        }
+                        word_index++;
+                        continue;
+                    }
+
+                    word_index++;
+
+                    lRet = SearchBiblio(
                         channel,
                         looping.Progress,
                         this.DbNames,
@@ -1774,10 +1865,15 @@ out strError);
                         };
                     }
 
+                    // 2024/10/14 注:
+                    // 如果返回出错，则需要考虑重新 Search()，然后再重新 GetResultSet()
+                    // 因为错误可能是服务器端通道被切断，这样通道结果集就会全部释放，这时候单纯重试重新 GetResultSet() 是永远不会成功的
+                    // 可以考虑通过特制 Prompt 事件来实现。遇到上述情况，可以直接返回，然后重试检索(曾经装入 ListView 的部分行怎么办?)
                     nRet = LoadResultSet(
     looping.Progress,
     channel,
     strResultSetName,
+    null,
     bOutputKeyCount,
     bOutputKeyID,
     bQuickLoad,
@@ -2158,6 +2254,247 @@ out strError);
             }
         }
 
+        // parameters:
+        //      processed_query_count   [out] 返回实际被检索处理的检索词个数
+        // return:
+        //      -1  出错
+        //      其它  query_lines (中实际被处理的部分或者全部检索词)总命中记录数
+        long BatchSearch(LibraryChannel channel,
+            Stop stop,
+            List<QueryLine> query_lines,
+            bool split,
+            string from,
+            string output_style,
+            string filter,
+            bool bOutputKeyCount,
+            bool bOutputKeyID,
+            bool bQuickLoad,
+            ItemQueryParam query,
+            delegate_filterRecord func_filterRecord,
+            ref long lTotalHitCount,    // 用于微调 lTotalHitCount
+            ref bool dont_prompt,   // 一开始为 false
+            ref DialogResult dialog_result, // 一开始为 DialogResult.Yes
+            out int processed_query_count,
+            out string strError)
+        {
+            strError = "";
+            long total = 0;
+            processed_query_count = 0;
+
+            List<string> words = new List<string>();
+            foreach (var query_line in query_lines)
+            {
+                if (split)
+                {
+                    var segments = QueryLine.SplitQueryString(query_line.QueryWord);
+                    words.Add(StringUtil.MakePathList(segments, "^"));
+                }
+                else
+                    words.Add(query_line.QueryWord);
+            }
+
+            var first_query = query_lines[0];
+            var dbnames = this.DbNames.Split(',');
+
+            int max_count = MaxSearchResultCount;
+            max_count = MultilineMaxSearchResultCount;
+            var current_from = from;
+            if (string.IsNullOrEmpty(first_query.FieldName) == false)
+                current_from = first_query.FieldName;
+
+            string GetCurrentBrowseStyle()
+            {
+                string strBrowseStyle = GetBrowseStyle(
+                    bOutputKeyCount,
+                    bOutputKeyID,
+                    bQuickLoad);
+
+                // 如果要进行过滤，则还需要在获取浏览记录时获得记录 XML 
+                if (func_filterRecord != null)
+                    strBrowseStyle += ",xml";
+
+                return strBrowseStyle;
+            }
+
+            long lRet = channel.BatchSearch(stop,
+this.DbNames,
+words.ToArray(),
+1000,
+10,
+current_from,
+first_query.MatchStyle,
+new string[] { $"browse:{GetCurrentBrowseStyle()}" },
+"", // "splitWord",
+output_style,
+filter,
+out QueryResult[] batch_results,
+out strError);
+            if (lRet == -1)
+            {
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode($"针对检索词 '{StringUtil.MakePathList(words)}' 进行检索时出错: {strError}") + "</div>");
+                goto ERROR1;
+            }
+
+            processed_query_count = batch_results == null ? 0 : batch_results.Length;
+
+            // TODO: 显示 正在检索 .... 若干检索词
+
+            /*
+                if (multiline || filter_query)
+                {
+                    looping.Progress?.SetProgressValue(word_index);
+                    looping.Progress?.SetMessage($"正在检索 '{query_word}' ({word_index + 1}/{query_lines.Count})...");
+
+                    this.ShowMessage($"正在检索 '{query_word}' ({word_index + 1}/{query_lines.Count})...");
+                }
+                else
+                {
+                    looping.Progress?.SetMessage($"正在检索 '{query_word}' ...");
+                    this.ShowMessage($"正在检索 '{query_word}' ...");
+                }
+            */
+
+            //string strResultSetName = GetResultSetName(multiline || filter_query);
+
+            //channel.Timeout = new TimeSpan(0, 15, 0);
+
+#if REMOVED
+            lTotalHitCount += lHitCount;
+
+                this.m_lHitCount = lHitCount;
+
+                if (multiline == false && filter_query == false)
+                    this.LabelMessage = "检索共命中 " + lHitCount.ToString() + " 条书目记录";
+                else
+                    this.LabelMessage = "检索已累积命中 " + lTotalHitCount.ToString() + " 条书目记录";
+
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode($"'{query_word}' 命中 {lHitCount} 条") + "</div>");
+
+                if (multiline == false && filter_query == false)
+                {
+                    looping.Progress.SetProgressRange(0, lHitCount);
+                    looping.Progress.Style = StopStyle.EnableHalfStop;
+                }
+
+                // bool bPushFillingBrowse = PushFillingBrowse;
+
+                _outputKeyCount = bOutputKeyCount;
+                _outputKeyID = bOutputKeyID;
+                _query = query;
+
+                delegate_filterRecord func_filter = null;
+                if (query_line.FilterItems != null
+                    && query_line.FilterItems.Count > 0)
+                {
+                    func_filter = (recpath, xml) =>
+                    {
+                        StringBuilder debug_info = new StringBuilder();
+                        var ret = FilterRecord(query_line,
+                            recpath,
+                            xml,
+                            debug_info);
+                        Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(debug_info.ToString()).Replace("\r\n", "<br/>") + "</div>");
+                        return ret;
+                    };
+                }
+#endif
+            int i = 0;
+            if (query_lines != null)
+            {
+                foreach (var query_line in query_lines)
+                {
+                    // 注: 检索词的行数可能会多于返回的元素数(这通常是因为 dp2library 要控制响应包的大小)
+                    if (i >= batch_results.Length)
+                        break;
+
+                    var one = batch_results[i];
+
+                    // 单个检索词检索结果为报错
+                    if (one.HitCount == -1)
+                    {
+                        string error = $"针对检索词 '{one.QueryWord}' 进行检索时出错: {one.ErrorInfo}";
+                        Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(error) + "</div>");
+                        // TODO: 第一次报错的时候显示确定
+                        if (dont_prompt == false)
+                        {
+                            bool temp = dont_prompt;
+                            string message = $"{error}\r\n---\r\n是否继续检索\r\n\r\n注:\r\n[继续] 跳过出错的检索词继续检索; \r\n[中断] 中断整批检索";
+                            dialog_result = this.TryGet(() =>
+                            {
+                                return MessageDlg.Show(this,
+                                message,
+                                "BiblioSearchForm",
+                                MessageBoxButtons.YesNo,
+                                MessageBoxDefaultButton.Button1,
+                                ref temp,
+                                new string[] { "继续", "中断" },
+                                "下次不再询问");
+                            });
+                            dont_prompt = temp;
+
+                        }
+                        if (dialog_result == DialogResult.No)
+                        {
+                            strError = error;
+                            return -1;
+                        }
+
+                        goto CONTINUE;
+                    }
+
+                    /*
+                    if (one.Records == null
+                        || one.Records.Length == 0)
+                        goto CONTINUE;
+                    */
+
+                    // 注: FormatRecord.HitCount 可能比 .Records.Length 要大
+                    long lHitCount = one.Records == null ?
+                        0 : one.Records.Length;
+                    total += lHitCount;
+
+                    Program.MainForm.OperHistory.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode($"'{one.QueryWord}' 命中 {lHitCount} 条") + "</div>");
+
+                    // 2024/10/14 注:
+                    // 如果返回出错，则需要考虑重新 Search()，然后再重新 GetResultSet()
+                    // 因为错误可能是服务器端通道被切断，这样通道结果集就会全部释放，这时候单纯重试重新 GetResultSet() 是永远不会成功的
+                    // 可以考虑通过特制 Prompt 事件来实现。遇到上述情况，可以直接返回，然后重试检索(曾经装入 ListView 的部分行怎么办?)
+                    int nRet = LoadResultSet(
+        stop,
+        channel,
+        null,
+        one,
+        bOutputKeyCount,
+        bOutputKeyID,
+        bQuickLoad,
+        lHitCount,
+        0,
+        query,
+        (item) =>
+        {
+            query_line.AddHitItem(item);
+            this.TryInvoke(() =>
+        {
+            query_line.UpdateViewRowHitCount();
+        });
+        },
+        query_line.FilterItems == null || query_line.FilterItems.Count == 0 ?
+        null : func_filterRecord,
+        ref lTotalHitCount,
+        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    CONTINUE:
+                    i++;
+                }
+            }
+            // MessageBox.Show(this, Convert.ToString(lRet) + " : " + strError);
+            return total;
+        ERROR1:
+            return -1;
+        }
+
         // 把检索字符串切割为多个，然后逐一进行检索，直到有命中为止
         long SearchBiblio(LibraryChannel channel,
             Stop stop,
@@ -2184,18 +2521,18 @@ out strError);
             foreach (var word in words)
             {
                 long lRet = channel.SearchBiblio(stop,
-        dbnames,
-        word,
-        max_count,
-        current_from,
-        strMatchStyle,
-        this.Lang,
-        strResultSetName,
-        strSearchStyle,
-        strOutputStyle,
-        filter,
-        out strQueryXml,
-        out strError);
+            dbnames,
+            word,
+            max_count,
+            current_from,
+            strMatchStyle,
+            this.Lang,
+            strResultSetName,
+            strSearchStyle,
+            strOutputStyle,
+            filter,
+            out strQueryXml,
+            out strError);
                 if (words.Count > 1)    // .Count == 1 其实是没有有效拆分的情况
                     Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode($"-- '{query_string}' 拆分后的检索词 '{word}' 检索返回 {lRet}").Replace("\r\n", "<br/>") + "</div>");
 
@@ -2334,10 +2671,13 @@ out strError);
         // parameters:
         //      func_newItem    每当创建一个 ListViewItem 时此函数被触发一次
         //      func_filterRecord   用于过滤命中记录的函数
+        //      query_result    (批检索得到的)一个检索词对应的命中结果
+        //                      strResultSetName 和 query_result 参数每次调用本函数时只用其中一个
         int LoadResultSet(
             Stop stop,
             LibraryChannel channel,
             string strResultSetName,
+            QueryResult query_result,   // 2024/10/17 增加
             bool bOutputKeyCount,
             bool bOutputKeyID,
             bool bQuickLoad,
@@ -2374,6 +2714,160 @@ out strError);
                     strBrowseStyle += ",xml";
 
                 return strBrowseStyle;
+            }
+
+            // 把批检索 API 返回的结果，装入 ListView
+            if (query_result != null)
+            {
+                BeginUpdate();
+                try
+                {
+                    int count = 0;
+                    bool adjusted = false;
+
+                    if (query_result.HitCount == -1)
+                    {
+                        // TODO: 在 ListView 中插入一个提示文字行
+                    }
+
+                    if (query_result.Records != null
+                        && query_result.Records.Length > 0)
+                    {
+                        foreach (var record in query_result.Records)
+                        {
+                            if (stop != null && stop.IsStopped)
+                            {
+                                strError = "用户中断";
+                                return -1;
+                            }
+
+                            var searchresult = record.Record;
+
+                            if (func_filterRecord != null)
+                            {
+                                var ret = func_filterRecord.Invoke(
+                                    searchresult?.Path,
+                                    searchresult?.RecordBody?.Xml);
+                                if (ret == false)
+                                    continue;
+                            }
+
+                            // 调整命中数
+                            if (adjusted == false)
+                            {
+                                var new_result_count = query_result.HitCount;
+                                if (new_result_count > 0)
+                                {
+                                    var delta = new_result_count - lHitCount;
+                                    lHitCount = new_result_count;
+                                    this.m_lHitCount = lHitCount;
+                                    lTotalHitCount += delta;
+                                }
+                                adjusted = true;
+                            }
+
+                            bool bTempQuickLoad = bQuickLoad;
+
+                            if ((Control.ModifierKeys & Keys.Shift) == Keys.Shift)
+                                bTempQuickLoad = true;
+
+                            ListViewItem item = null;
+
+                            string[] cols = null;
+                            if (bOutputKeyCount == true)
+                            {
+                                // 输出keys
+                                if (searchresult?.Cols == null)
+                                {
+                                    strError = "searchresult.Cols == null";
+                                    return -1;
+                                }
+
+                                cols = new string[(searchresult.Cols == null ? 0 : searchresult.Cols.Length) + 1];
+                                cols[0] = searchresult.Path;
+                                if (cols.Length > 1)
+                                    Array.Copy(searchresult.Cols, 0, cols, 1, cols.Length - 1);
+
+                                if (bPushFillingBrowse == true)
+                                    item = Global.InsertNewLine(
+                                        this.listView_records,
+                                        "",
+                                        cols);
+                                else
+                                    item = Global.AppendNewLine(
+                                        this.listView_records,
+                                        "",
+                                        cols);
+                                item.Tag = query;
+                                goto CONTINUE;
+                            }
+                            else if (bOutputKeyID == true)
+                            {
+                                // 输出keys
+                                if (searchresult?.Cols == null
+                                    && bTempQuickLoad == false)
+                                {
+                                    strError = "searchresult.Cols == null";
+                                    return -1;
+                                }
+
+                                cols = new string[(searchresult.Cols == null ? 0 : searchresult.Cols.Length) + 1];
+                                cols[0] = LibraryChannel.BuildDisplayKeyString(searchresult.Keys);
+                                if (cols.Length > 1)
+                                    Array.Copy(searchresult.Cols, 0, cols, 1, cols.Length - 1);
+                            }
+                            else
+                            {
+                                cols = searchresult.Cols;
+                            }
+
+                            if (bPushFillingBrowse == true)
+                            {
+                                if (bTempQuickLoad == true)
+                                    item = Global.InsertNewLine(
+                                        (ListView)this.listView_records,
+                                        searchresult.Path,
+                                        cols);
+                                else
+                                    item = Global.InsertNewLine(
+                                        this.listView_records,
+                                        searchresult.Path,
+                                        cols);
+                            }
+                            else
+                            {
+                                if (bTempQuickLoad == true)
+                                    item = Global.AppendNewLine(
+                                        (ListView)this.listView_records,
+                                        searchresult.Path,
+                                        cols);
+                                else
+                                    item = Global.AppendNewLine(
+                                        this.listView_records,
+                                        searchresult.Path,
+                                        cols);
+                            }
+
+                        CONTINUE:
+                            if (query != null)
+                            {
+                                Debug.Assert(query != null);
+                                query.Items.Add(item);
+                            }
+
+                            if (item != null && func_newItem != null)
+                                func_newItem(item);
+
+                            count++;
+                        }
+                    }
+                    query = null;
+                    return 0;
+                }
+                finally
+                {
+                    EndUpdate();
+                }
             }
 
             // _lastBrowseStyle = strBrowseStyle;
@@ -11191,7 +11685,7 @@ message,
                 Program.MainForm.GetCurrentUserRights()
                 );
 
-            // bool bDontPrompt = false;
+            // bool bDontPrompt_instantlyChange = false;
             DialogResult dialog_result = DialogResult.Yes;  // yes no cancel
             List<string> skipped_recpath = new List<string>();
 
@@ -12958,6 +13452,8 @@ public class MyVerifyHost : VerifyHost
                 // 观察要保存的第一条记录的marc syntax
             }
 
+            var control_pressed = (Control.ModifierKeys & Keys.Control) == Keys.Control;
+
             OpenMarcFileDlg dlg = new OpenMarcFileDlg();
             MainForm.SetControlFont(dlg, this.Font);
             dlg.IsOutput = true;
@@ -12967,7 +13463,7 @@ public class MyVerifyHost : VerifyHost
             dlg.Rule = this.LastCatalogingRule;
             dlg.FileName = this.LastIso2709FileName;
             // dlg.CrLf = this.LastCrLfIso2709;
-            dlg.CrLfVisible = false;   // 2020/3/9
+            dlg.CrLfVisible = control_pressed;   // 2020/3/9 false
             dlg.RemoveField998 = this.LastRemoveField998;
             dlg.EncodingListItems = Global.GetEncodingList(false);
             dlg.EncodingName =
@@ -13117,6 +13613,8 @@ public class MyVerifyHost : VerifyHost
 
             int nCount = 0; // 导出的记录数
             int instantly_save_count = 0;   // 立即保存的记录数
+            bool bDontPrompt_instantlyChange = false;
+            DialogResult instantly_change_dialog_result = DialogResult.Yes;
 
             LibraryChannel channel = this.GetChannel();
 
@@ -13347,9 +13845,37 @@ out string error);
                                         instantly_save = (bool)host.Table["instantlySaveChangedMarc"];
                                     }
 
+                                    // 询问是否确实要保存
+                                    if (instantly_save && bDontPrompt_instantlyChange == false)
+                                    {
+                                        bool temp = bDontPrompt_instantlyChange;
+                                        string message = $"应脚本 {dlg_905.ScriptFileName} 请求，被修改的书目记录 {info.RecPath} 将立即提交保存\r\n---\r\n\r\n是否立即提交保存?\r\n\r\n注：\r\n[立即提交] 立即提交保存\r\n[暂缓提交] 暂缓保存，继续后面的处理\r\n[中断] 中断整批操作";
+                                        instantly_change_dialog_result = (DialogResult)Application.OpenForms[0].Invoke(new Func<DialogResult>(() =>
+                                        {
+                                            return MessageDlg.Show(this,
+                                            message,
+                                            "BiblioSearchForm",
+                                            MessageBoxButtons.YesNoCancel,
+                                            MessageBoxDefaultButton.Button1,
+                                            ref temp,
+                                            new string[] { "立即提交", "暂缓提交", "中断" },
+                                            "下次不再询问");
+                                        }));
+                                        bDontPrompt_instantlyChange = temp;
+                                        if (instantly_change_dialog_result == DialogResult.No)
+                                            instantly_save = false;
+                                        if (instantly_change_dialog_result == DialogResult.Cancel)
+                                        {
+                                            strError = "用户中断批处理";
+                                            goto ERROR1;
+                                        }
+                                    }
+
                                     // 如果要立即保存
                                     if (instantly_save)
                                     {
+
+
                                         var lRet = channel.SetBiblioInfo(
     looping.Progress,
     "change",
@@ -14210,6 +14736,7 @@ out string error);
         looping.Progress,
         channel,
         strResultSetName,
+        null,
         _outputKeyCount,
         _outputKeyID,
         bQuickLoad,
@@ -14843,48 +15370,64 @@ out string error);
 
         void _doViewProperty(ListViewItem item, bool bOpenWindow)
         {
-            if (this.m_biblioTable == null)
+            try
             {
-                // 显示一个空画面
-                Program.MainForm.ClearCommentViewer();
-                return;
-            }
+                // testing
+                // throw new Exception("test");
 
-            if (item == null)
+                if (this.m_biblioTable == null)
+                {
+                    // 显示一个空画面
+                    Program.MainForm.ClearCommentViewer();
+                    return;
+                }
+
+                if (item == null)
+                {
+                    // 显示一个空画面
+                    Program.MainForm.ClearCommentViewer();
+                    return;
+                }
+
+                Program.MainForm.OpenCommentViewer(bOpenWindow);
+
+                string strRecPath = ListViewUtil.GetItemText(item, 0);  //  item.Text;
+                if (string.IsNullOrEmpty(strRecPath) == true)
+                    return;
+
+                // TODO: 可触发显示检索式详情
+                if (IsCmdLine(strRecPath))
+                {
+                    // Program.MainForm.PropertyTaskList.AddTask(new BiblioPropertyTask { Stop = null/*this._stop*/ }, true);
+                    Program.MainForm.DelayList.DelayProcess(new BiblioPropertyTask { Stop = null/*this._stop*/ });
+                    return;
+                }
+
+                // 存储所获得书目记录 XML
+                BiblioInfo info = (BiblioInfo)this.m_biblioTable[strRecPath];
+                if (info == null)
+                {
+                    info = new BiblioInfo();
+                    info.RecPath = strRecPath;
+                    this.m_biblioTable[strRecPath] = info;  // 后面任务中会填充 info 的内容，如果必要的话
+                }
+
+                BiblioPropertyTask task = new BiblioPropertyTask();
+                task.BiblioInfo = info;
+                task.Stop = null;   /* this._stop;*/
+                task.DisplaySubrecords = DisplaySubrecords;
+
+                // Program.MainForm.PropertyTaskList.AddTask(task, true);
+                Program.MainForm.DelayList.DelayProcess(task);
+            }
+            catch (Exception ex)
             {
-                // 显示一个空画面
-                Program.MainForm.ClearCommentViewer();
-                return;
+                // 2024/10/15
+                this.ShowMessage($"_doViewProperty() 出现异常: {ex.Message}",
+                    "red",
+                    true);
+                MainForm.WriteErrorLog($"_doViewProperty() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
             }
-
-            Program.MainForm.OpenCommentViewer(bOpenWindow);
-
-            string strRecPath = ListViewUtil.GetItemText(item, 0);  //  item.Text;
-            if (string.IsNullOrEmpty(strRecPath) == true)
-                return;
-
-            // TODO: 可触发显示检索式详情
-            if (IsCmdLine(strRecPath))
-            {
-                Program.MainForm.PropertyTaskList.AddTask(new BiblioPropertyTask { Stop = null/*this._stop*/ }, true);
-                return;
-            }
-
-            // 存储所获得书目记录 XML
-            BiblioInfo info = (BiblioInfo)this.m_biblioTable[strRecPath];
-            if (info == null)
-            {
-                info = new BiblioInfo();
-                info.RecPath = strRecPath;
-                this.m_biblioTable[strRecPath] = info;  // 后面任务中会填充 info 的内容，如果必要的话
-            }
-
-            BiblioPropertyTask task = new BiblioPropertyTask();
-            task.BiblioInfo = info;
-            task.Stop = null;   /* this._stop;*/
-            task.DisplaySubrecords = DisplaySubrecords;
-
-            Program.MainForm.PropertyTaskList.AddTask(task, true);
         }
 
 #if NO
@@ -15865,7 +16408,7 @@ out string error);
         {
             if (parent.Focused)
                 return parent;
-            foreach(Control control in parent.Controls)
+            foreach (Control control in parent.Controls)
             {
                 var ret = GetFocusControl(control);
                 if (ret != null)
@@ -16080,15 +16623,17 @@ out string error);
                 string strRecPath = item.Text;
                 Debug.Assert(string.IsNullOrEmpty(strRecPath) == false, "");
 
-                if (dup_table.ContainsKey(strRecPath) == true)
+                if (this.CacheTable != null
+                    && dup_table.ContainsKey(strRecPath) == true)
                     continue;
                 BiblioInfo info = null;
-                if (this.CacheTable != null)
+                if (this.CacheTable != null)    // 2024/10/14
                     info = (BiblioInfo)this.CacheTable[strRecPath];
                 if (info == null || string.IsNullOrEmpty(info.OldXml) == true)
                 {
                     recpaths.Add(strRecPath);
-                    dup_table[strRecPath] = true;
+                    if (this.CacheTable != null)    // 2024/10/14
+                        dup_table[strRecPath] = true;
                 }
             }
 
@@ -16098,6 +16643,8 @@ out string error);
 
             var enumerator = m_loader.GetEnumerator();
 
+            int index = 0;
+            List<string> output_paths = new List<string>();
             // 开始循环
             foreach (ListViewItem item in this.Items)
             {
@@ -16122,6 +16669,19 @@ out string error);
                     }
 
                     BiblioItem biblio = (BiblioItem)enumerator.Current;
+                    // 2024/10/14
+                    // 出现错位的记录路径事项
+                    if (biblio.RecPath != strRecPath)
+                    {
+                        var ex = new MisplacementException("m_loader 和 items 的元素之间 记录路径存在严格的锁定对应关系");
+                        // 输入参数的路径
+                        ex.InputRecPaths = recpaths.ToArray();
+                        // 已经成功获得的部分路径
+                        ex.OutputRecPaths = output_paths.ToArray();
+                        ex.MismatchIndex = index;
+                        throw ex;
+                    }
+
                     Debug.Assert(biblio.RecPath == strRecPath, "m_loader 和 items 的元素之间 记录路径存在严格的锁定对应关系");
 
                     // 需要放入缓存
@@ -16134,11 +16694,32 @@ out string error);
                     info.Timestamp = biblio.Timestamp;
                     if (this.CacheTable != null)
                         this.CacheTable[strRecPath] = info;
+
+                    output_paths.Add(biblio.RecPath);
+
                     yield return new LoaderItem(info, item);
                 }
                 else
                     yield return new LoaderItem(info, item);
+
+                index++;
             }
         }
     }
+
+    public class MisplacementException : Exception
+    {
+        public string[] InputRecPaths { get; set; }
+        public string[] OutputRecPaths { get; set; }
+
+        // 出现不匹配的偏移
+        public int MismatchIndex { get; set; }
+
+        public MisplacementException(string message) : base(message)
+        {
+
+        }
+    }
+
+
 }

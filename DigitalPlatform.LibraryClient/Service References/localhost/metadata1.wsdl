@@ -250,6 +250,12 @@
   <wsdl:message name="dp2libraryREST_OnlineStatis_OutputMessage">
     <wsdl:part name="parameters" element="tns:OnlineStatisResponse" />
   </wsdl:message>
+  <wsdl:message name="dp2libraryREST_BatchSearch_InputMessage">
+    <wsdl:part name="parameters" element="tns:BatchSearch" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_BatchSearch_OutputMessage">
+    <wsdl:part name="parameters" element="tns:BatchSearchResponse" />
+  </wsdl:message>
   <wsdl:message name="dp2libraryREST_GetVersion_InputMessage">
     <wsdl:part name="parameters" element="tns:GetVersion" />
   </wsdl:message>
@@ -791,6 +797,10 @@
     <wsdl:operation name="OnlineStatis">
       <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/OnlineStatis" message="tns:dp2libraryREST_OnlineStatis_InputMessage" />
       <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/OnlineStatisResponse" message="tns:dp2libraryREST_OnlineStatis_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="BatchSearch">
+      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/BatchSearch" message="tns:dp2libraryREST_BatchSearch_InputMessage" />
+      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/BatchSearchResponse" message="tns:dp2libraryREST_BatchSearch_OutputMessage" />
     </wsdl:operation>
     <wsdl:operation name="GetVersion">
       <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetVersion" message="tns:dp2libraryREST_GetVersion_InputMessage" />

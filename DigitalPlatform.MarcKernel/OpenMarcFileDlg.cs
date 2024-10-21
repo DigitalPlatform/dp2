@@ -651,9 +651,11 @@ namespace DigitalPlatform.Marc
             {
                 return this.TryGet(() =>
                 {
+                    /*
                     // 2020/3/9
                     if (CrLfVisible == false)
                         return false;
+                    */
                     return this.checkBox_crLf.Checked;
                 });
             }
