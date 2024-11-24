@@ -622,7 +622,7 @@ namespace DigitalPlatform.LibraryServer
                 }
                 try
                 {
-                    DateTime start = DateTime.Now;
+                    DateTime start = DateTime.UtcNow;
 
                     this.DataDir = strDataDir;
                     this.HostDir = strHostDir;
@@ -2031,7 +2031,7 @@ out strError);
                     }
                     else
                     {
-                        TimeSpan delta = DateTime.Now - start;
+                        TimeSpan delta = DateTime.UtcNow - start;
                         app.WriteErrorLog("LibraryService 成功初始化。初始化操作耗费时间 " + delta.TotalSeconds.ToString() + " 秒");
 
                         // 写入down机检测文件
@@ -4615,7 +4615,7 @@ TaskScheduler.Default);
             this.WriteErrorLog("LibraryService 开始下降");
             this.AddHangup("Exit");
 
-            DateTime start = DateTime.Now;
+            DateTime start = DateTime.UtcNow;
             try
             {
 #if OLD_CODE
@@ -4690,7 +4690,7 @@ TaskScheduler.Default);
                 this.WriteErrorLog("LibraryApplication Close() 捕获异常: " + ExceptionUtil.GetDebugText(ex));
             }
 
-            TimeSpan delta = DateTime.Now - start;
+            TimeSpan delta = DateTime.UtcNow - start;
             this.WriteErrorLog("LibraryApplication 被停止。停止操作耗费时间 " + delta.TotalSeconds.ToString() + " 秒");
 
             this.RemoveAppDownDetectFile();	// 删除检测文件
@@ -17071,6 +17071,20 @@ out string db_type);
             return false;
         }
 
+        // 2024/10/22
+        public static bool IsKeysCfgPath(string strPath, out string strDbName)
+        {
+            strDbName = StringUtil.GetFirstPartPath(ref strPath);
+            string strDirectory = StringUtil.GetFirstPartPath(ref strPath);
+
+            // cfgs
+            if (strDirectory != "cfgs")
+                return false;
+            if (strPath != null && strPath.StartsWith("keys"))
+                return true;
+            return false;
+        }
+
         static bool IsRestObjectPath(string strPath)
         {
             return IsRestObjectPath(strPath, out _);
@@ -18751,7 +18765,7 @@ out string db_type);
 
         public Account()
         {
-            Random random = new Random(unchecked((int)DateTime.Now.Ticks));
+            Random random = new Random(unchecked((int)DateTime.UtcNow.Ticks));
             long number = random.Next(0, 9999);	// 4位数字
 
             Token = Convert.ToString(DateTime.Now.Ticks) + "__" + Convert.ToString(number);

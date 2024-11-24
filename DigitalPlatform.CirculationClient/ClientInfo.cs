@@ -20,6 +20,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.Core;
 using DigitalPlatform.Xml;
+using Serilog.Events;
 
 namespace DigitalPlatform.CirculationClient
 {
@@ -84,12 +85,22 @@ namespace DigitalPlatform.CirculationClient
 
         public static string ProductName = "";
 
+#if REMOVED
         // https://nblumhardt.com/2014/10/dynamically-changing-the-serilog-level/
         static LoggingLevelSwitch _loggingLevel = new LoggingLevelSwitch();
 
         public static void SetLoggingLevel(Serilog.Events.LogEventLevel level)
         {
             _loggingLevel.MinimumLevel = level;
+        }
+#endif
+        public static void InitialLogger(LogEventLevel level = LogEventLevel.Information)
+        {
+            var loggingLevel = new LoggingLevelSwitch(level);
+            Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.ControlledBy(loggingLevel)
+    .WriteTo.File(Path.Combine(UserLogDir, "log_.txt"), rollingInterval: RollingInterval.Day)
+    .CreateLogger();
         }
 
         // return:
@@ -105,7 +116,8 @@ namespace DigitalPlatform.CirculationClient
         //      true    初始化成功
         //      false   初始化失败，应立刻退出应用程序
         public static bool Initial(string product_name,
-            string style = "")
+            string style = "",
+            LogEventLevel level = LogEventLevel.Information)
         {
             ProductName = product_name;
             ClientVersion = Assembly.GetAssembly(TypeOfProgram).GetName().Version.ToString();
@@ -144,13 +156,20 @@ namespace DigitalPlatform.CirculationClient
             UserLogDir = Path.Combine(UserDir, "log");
             PathUtil.TryCreateDir(UserLogDir);
 
+            InitialLogger(level);
+
             InitialConfig(style);
 
-            Log.Logger = new LoggerConfiguration()
-// .MinimumLevel.Information()
-.MinimumLevel.ControlledBy(_loggingLevel)
-.WriteTo.File(Path.Combine(UserLogDir, "log_.txt"), rollingInterval: RollingInterval.Day)
-.CreateLogger();
+#if REMOVED
+            if (Log.Logger == null)
+            {
+                Log.Logger = new LoggerConfiguration()
+    // .MinimumLevel.Information()
+    .MinimumLevel.ControlledBy(_loggingLevel)
+    .WriteTo.File(Path.Combine(UserLogDir, "log_.txt"), rollingInterval: RollingInterval.Day)
+    .CreateLogger();
+            }
+#endif
 
             // 启动时在日志中记载当前 .exe 版本号
             // 此举也能尽早发现日志目录无法写入的问题，会抛出异常

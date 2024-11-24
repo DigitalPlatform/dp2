@@ -588,9 +588,9 @@ namespace dp2Library
         // 避免太频繁地 dump
         bool ShouldDumpChannel()
         {
-            if (DateTime.Now - _lastDumpChannel > TimeSpan.FromMinutes(30))
+            if (DateTime.UtcNow - _lastDumpChannel > TimeSpan.FromMinutes(30))
             {
-                _lastDumpChannel = DateTime.Now;
+                _lastDumpChannel = DateTime.UtcNow;
                 return true;
             }
 
@@ -5872,6 +5872,8 @@ out QueryResult[] results)
                     return result;
                 }
 
+                var skip_oversize_records = StringUtil.IsInList("skipOversizeRecords", search_style);
+
 #if REMOVED
                 // 是否要将检索词根据空白字符切割开进行试探检索。
                 // 所谓试探检索，就利用切开的每个检索词顺次检索，直到出现命中的就停止试探。
@@ -5881,9 +5883,10 @@ out QueryResult[] results)
                 int total_records = 0;
                 int max_total_records = 100;    // 限制返回的全部记录总数
                 List<QueryResult> query_results = new List<QueryResult>();
+                int query_index = 0;
                 foreach (string query_string in query_words)
                 {
-                    string resultset_name = "~batch_search";
+                    string resultset_name = $"~batch_search{query_index++}";
 
                     var words = query_string.Split('^');
 #if REMOVED
@@ -5975,50 +5978,65 @@ out QueryResult[] results)
                     // 装载检索结果
                     {
                         var records = new List<FormatRecord>();
-                        foreach (Record record in loader)
+
+                        // 实际命中记录数超过规定尺寸的情况
+                        if (skip_oversize_records
+                            && (max_results == -1
+                            || hitcount > max_results)
+                            )
                         {
-                            // 防止一个检索词命中返回的记录数过多
-                            if (max_results != -1
-                                && records.Count >= max_results)
-                                break;
-
-                            FormatRecord one = new FormatRecord();
-                            one.Record = record;
-
-                            /*
-                            if (record.RecordBody != null && record.RecordBody.Result != null
-                                && record.RecordBody.Result.Value == -1)
-                            {
-                                records.Add(new FormatRecord
-                                {
-                                    ErrorCode = record.RecordBody.Result.ErrorCode.ToString(),
-                                    ErrorInfo = record.RecordBody.Result.ErrorString,
-                                });
-                                continue;
-                            }
-                            */
-
-                            if (biblio_formats.Length > 0)
-                            {
-                                current_result = GetBiblioInfos(
-                                    record.Path,
-                                    null,
-                                    formats,
-                                    out string[] datas,
-                                    out byte[] timestamp);
-                                one.DataList = datas;
-                                if (current_result.Value == -1)
-                                {
-                                    one.ErrorCode = current_result.ErrorCode.ToString();
-                                    one.ErrorInfo = current_result.ErrorInfo;
-                                }
-                            }
-                            records.Add(one);
+                            // 不在返回结果中包含 Records
                         }
+                        else
+                        {
+                            foreach (Record record in loader)
+                            {
+                                // 防止一个检索词命中返回的记录数过多
+                                if (max_results != -1
+                                    && records.Count >= max_results)
+                                    break;
 
+
+                                // 
+
+                                FormatRecord one = new FormatRecord();
+                                one.Record = record;
+
+                                /*
+                                if (record.RecordBody != null && record.RecordBody.Result != null
+                                    && record.RecordBody.Result.Value == -1)
+                                {
+                                    records.Add(new FormatRecord
+                                    {
+                                        ErrorCode = record.RecordBody.Result.ErrorCode.ToString(),
+                                        ErrorInfo = record.RecordBody.Result.ErrorString,
+                                    });
+                                    continue;
+                                }
+                                */
+
+                                if (biblio_formats.Length > 0)
+                                {
+                                    current_result = GetBiblioInfos(
+                                        record.Path,
+                                        null,
+                                        formats,
+                                        out string[] datas,
+                                        out byte[] timestamp);
+                                    one.DataList = datas;
+                                    if (current_result.Value == -1)
+                                    {
+                                        one.ErrorCode = current_result.ErrorCode.ToString();
+                                        one.ErrorInfo = current_result.ErrorInfo;
+                                    }
+                                }
+                                records.Add(one);
+                            }
+                        }
                         query_results.Add(new QueryResult
                         {
                             QueryWord = query_string,
+                            ResultSetName = resultset_name,
                             HitCount = hitcount,
                             Records = records.ToArray(),
                         });
@@ -11450,7 +11468,7 @@ PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin)
                         return result;
                     }
 
-                    DateTime start_time = DateTime.Now;
+                    DateTime start_time = DateTime.UtcNow;
 
                 REDO:
                     // return:
@@ -11470,7 +11488,7 @@ PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin)
                         out strError);
                     if ((nRet == 2 || nRet == 1) && (records == null || records.Length == 0)
                         && StringUtil.IsInList("wait", strStyle) == true
-                        && DateTime.Now - start_time < TimeSpan.FromSeconds(30))
+                        && DateTime.UtcNow - start_time < TimeSpan.FromSeconds(30))
                     {
                         // 敏捷中断
                         Task.Delay(1000, app.AppDownToken).Wait();
@@ -16609,6 +16627,7 @@ out strError);
                 bool bWriteOperLog = true;
                 string strError = "";
                 string strLibraryCode = ""; // 实际写入操作的读者库馆代码
+                string changed_keys_dbname = ""; // 发生了 keys 配置文件修改的数据库名
 
                 bool delete = (StringUtil.IsInList("delete", strStyle) == true);
 
@@ -17158,6 +17177,14 @@ out baOutputTimestamp);
                             out baOutputTimestamp,
                             out strError);
 
+                        // 如果是修改 keys 配置文件的最后一次 chunk 并且成功，要自动刷新数据库定义
+                        if (lRet == 0
+                        && LibraryApplication.IsKeysCfgPath(strResPath, out string dbname)
+                        && ChunkMemory.IsTailChunk(strRanges, lTotalLength))
+                        {
+                            changed_keys_dbname = dbname;
+                        }
+
                         // 做错误码的翻译工作
                         // 2008/7/28
                         // result.ErrorCode = ConvertKernelErrorCode(channel.ErrorCode);
@@ -17242,6 +17269,44 @@ out baOutputTimestamp);
                     {
                         if (attachment != null)
                             attachment.Close();
+                    }
+                }
+
+                // 2024/10/22
+                if (string.IsNullOrEmpty(changed_keys_dbname) == false)
+                {
+                    RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
+                    if (channel == null)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = "get channel error";
+                        result.ErrorCode = ErrorCode.SystemError;
+                        return result;
+                    }
+
+                    // 对数据库及时调用刷新keys表的API
+                    long lRet = channel.DoRefreshDB(
+                    "begin",
+                    changed_keys_dbname,
+                    false,
+                    out strError);
+                    if (lRet == -1)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = $"对文件 '{strResPath}' 的修改已经成功，但针对数据库 '{changed_keys_dbname}' 刷新内核Keys表操作时失败: {strError}";
+                        result.ErrorCode = ErrorCode.SystemError;
+                        return result;
+                    }
+                    // 为更新书目库的检索途径，要更新 app.kdbs
+                    var ret = app.InitialKdbs(
+    channel,
+    out strError);
+                    if (ret == -1)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = $"对文件 '{strResPath}' 的修改已经成功，但 InitialKdbs() 时失败: {strError}";
+                        result.ErrorCode = ErrorCode.SystemError;
+                        return result;
                     }
                 }
 
@@ -19541,8 +19606,14 @@ false);
     [DataContract(Namespace = "http://dp2003.com/dp2library/")]
     public class QueryResult
     {
+        // 检索词
         [DataMember]
         public string QueryWord { get; set; }
+
+        // 2024/11/5
+        // 结果集名
+        [DataMember]
+        public string ResultSetName { get; set; }
 
         // 命中的记录数(可能大于 Records 中的元素数)
         [DataMember]

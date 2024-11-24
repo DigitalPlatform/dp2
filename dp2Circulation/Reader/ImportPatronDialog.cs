@@ -16,6 +16,7 @@ using DigitalPlatform;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace dp2Circulation.Reader
 {
@@ -468,6 +469,18 @@ namespace dp2Circulation.Reader
                 }
 
                 {
+                    MenuItem subMenuItem = new MenuItem("<手动输入>");
+                    subMenuItem.Tag = new MenuInfo
+                    {
+                        Caption = "<手动输入>",
+                        Name = "<手动输入>",
+                        Column = _columns[e.ColumnIndex]
+                    };
+                    subMenuItem.Click += new System.EventHandler(this.menu_setFieldName_Click);
+                    menuItem.MenuItems.Add(subMenuItem);
+                }
+
+                {
                     MenuItem subMenuItem = new MenuItem("<清除>");
                     subMenuItem.Tag = new MenuInfo
                     {
@@ -569,8 +582,36 @@ namespace dp2Circulation.Reader
                 info.Column.IsMergeKey = false;
                 return;
             }
-            info.Column.PatronFieldName = info.Name;
-            info.Column.ViewColumn.Name = info.Name;
+
+            // 2024/11/15
+            if (info.Name == "<手动输入>")
+            {
+                var elementName = InputDlg.GetInput(this,
+                    "请输入 XML 元素名",
+                    "元素名",
+                    "",
+                    this.Font);
+                if (elementName == null)
+                    return;
+
+                // 在 _patron_field_names 中检查和增补新的元素名
+                if (_patron_field_names.IndexOf(elementName) == -1)
+                {
+                    var list = new List<string>(PatronFieldNames);
+                    list.Add(elementName);
+                    _patron_field_names = list.ToArray();
+                }
+
+                info.Caption = elementName;
+                info.Name = elementName;
+                info.Column.PatronFieldName = elementName;
+                info.Column.ViewColumn.Name = elementName;
+            }
+            else
+            {
+                info.Column.PatronFieldName = info.Name;
+                info.Column.ViewColumn.Name = info.Name;
+            }
 
             // 如果是不适合作为合并键的字段，要清除 IsMergeKey 状态
             if (Array.IndexOf(_mergekey_field_names, info.Column.PatronFieldName) == -1)

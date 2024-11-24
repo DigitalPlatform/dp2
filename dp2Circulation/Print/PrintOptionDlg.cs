@@ -931,7 +931,13 @@ namespace dp2Circulation
                 if (String.IsNullOrEmpty(strFilePath) == true)
                     continue;
 
-                System.Diagnostics.Process.Start("notepad.exe", strFilePath);
+                try
+                {
+                    System.Diagnostics.Process.Start("notepad.exe", strFilePath);
+                }
+                catch
+                {
+                }
             }
             return;
         ERROR1:

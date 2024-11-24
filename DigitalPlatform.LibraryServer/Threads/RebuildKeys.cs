@@ -1104,7 +1104,26 @@ out string strError)
                 return -1;
 
             if (nRet == 0)
+            {
+                // 2024/10/22
+                // 尽管数据库中没有记录，procBeginLoop 和 procEndLoop 依然要执行
+                if (procBeginLoop != null)
+                {
+                    nRet = procBeginLoop(channel, info, out strError);
+                    if (nRet == -1)
+                        return -1;
+                }
+                if (procEndLoop != null)
+                {
+                    this.AppendResultText($"开始收尾 {info.DbName}\r\n");
+                    nRet = procEndLoop(channel, info, out strError);
+                    if (nRet == -1)
+                        return -1;
+                    this.AppendResultText($"结束收尾 {info.DbName}\r\n");
+                }
+                this.AppendResultText($"共处理记录 {m_nRecordCount} 条\r\n");
                 return 0;
+            }
 
             strStartNo = strOutputStartNo;
             strEndNo = strOutputEndNo;

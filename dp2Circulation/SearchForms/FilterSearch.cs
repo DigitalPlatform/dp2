@@ -22,6 +22,7 @@ using DigitalPlatform.MarcDom;
 using DigitalPlatform.dp2.Statis;
 using dp2Circulation.Reader;
 using static dp2Circulation.BiblioSearchForm;
+using dp2Circulation.SearchForms;
 
 
 namespace dp2Circulation
@@ -452,6 +453,10 @@ recid	记录ID
         };
 
         string _selectedMatchStyle = "left";
+        string _selectedDbNames = "";
+        string _selectedLocationFilter = "";
+        bool _selectedDontUseBatch = false;
+        bool _selectedUseDetect = false;
 
         void AppendCommonItems(ContextMenu contextMenu)
         {
@@ -593,9 +598,82 @@ recid	记录ID
                 contextMenu.MenuItems.Add(menuItem);
             }
 
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+            {
+                menuItem = new MenuItem("移除当前列");
+                menuItem.Tag = e.ColumnIndex;
+                menuItem.Click += new System.EventHandler(this.menu_removeCurrentColumn_Click);
+                contextMenu.MenuItems.Add(menuItem);
+            }
+
+            {
+                menuItem = new MenuItem("插入一个新列");
+                menuItem.Tag = e.ColumnIndex;
+                menuItem.Click += new System.EventHandler(this.menu_insertColumn_Click);
+                contextMenu.MenuItems.Add(menuItem);
+            }
+
+            {
+                menuItem = new MenuItem("在最右边追加一个新列");
+                menuItem.Tag = e.ColumnIndex;
+                menuItem.Click += new System.EventHandler(this.menu_appendColumn_Click);
+                contextMenu.MenuItems.Add(menuItem);
+            }
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+
             AppendCommonItems(contextMenu);
 
             contextMenu.Show(this.dataGridView1, this.dataGridView1.PointToClient(Control.MousePosition));
+        }
+
+        // 移除一个列
+        void menu_removeCurrentColumn_Click(object sender, EventArgs e)
+        {
+            var menu_item = (MenuItem)sender;
+            var column_index = (int)menu_item.Tag;
+            // var current_column = _columns[column_index];
+
+            this.dataGridView1.Columns.RemoveAt(column_index);
+            _columns.RemoveAt(column_index);
+        }
+
+        // 添加一个列
+        void menu_insertColumn_Click(object sender, EventArgs e)
+        {
+            var menu_item = (MenuItem)sender;
+            var column_index = (int)menu_item.Tag;
+            // var current_column = _columns[column_index];
+
+            var view_column = new DataGridViewTextBoxColumn
+            {
+                HeaderText = " ",
+                Width = 200,
+                CellTemplate = new DataGridViewTextBoxCell()
+            };
+            this.dataGridView1.Columns.Insert(column_index, view_column);
+            _columns.Insert(column_index, new PatronColumn { ViewColumn = view_column });
+        }
+
+        // 在最右边追加一个列
+        void menu_appendColumn_Click(object sender, EventArgs e)
+        {
+            //var menu_item = (MenuItem)sender;
+            //var column_index = (int)menu_item.Tag;
+            var view_column = new DataGridViewTextBoxColumn
+            {
+                HeaderText = " ",
+                Width = 200,
+                CellTemplate = new DataGridViewTextBoxCell()
+            };
+            this.dataGridView1.Columns.Insert(_columns.Count, view_column);
+            _columns.Insert(_columns.Count, new PatronColumn { ViewColumn = view_column });
         }
 
         private void dataGridView1_RowHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
@@ -662,7 +740,7 @@ recid	记录ID
             }
 
             {
-                menuItem = new MenuItem($"按照命中数排序");
+                menuItem = new MenuItem($"按照命中数排序 {(_descending == false ? "↑" : "↓")}");
                 menuItem.Click += new System.EventHandler(this.menu_sortByHitCount_Click);
                 contextMenu.MenuItems.Add(menuItem);
             }
@@ -1031,15 +1109,19 @@ recid	记录ID
             MessageBox.Show(this, $"共移除 {selected_count} 行");
         }
         */
+        bool _descending = false;
 
         // 按照命中数对所有行排序
         void menu_sortByHitCount_Click(object sender, EventArgs e)
         {
-            this.dataGridView1.Sort(new RowComparer());
+            this.dataGridView1.Sort(new RowComparer { Descending = _descending });
+            _descending = !_descending;
         }
 
         private class RowComparer : System.Collections.IComparer
         {
+            public bool Descending { get; set; }
+
             public RowComparer()
             {
             }
@@ -1052,6 +1134,8 @@ recid	记录ID
                 var count1 = BiblioSearchForm.GetHitCount(row1);
                 var count2 = BiblioSearchForm.GetHitCount(row2);
 
+                if (Descending)
+                    return count2 - count1;
                 return count1 - count2;
             }
         }
@@ -1183,6 +1267,9 @@ recid	记录ID
         // 双击行标题。加亮显示此行关联的命中 ListViewItem 行
         private void dataGridView1_RowHeaderMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
         {
+            // 2024/10/31
+            if (e == null)
+                return;
             var current_row = this.dataGridView1.Rows[e.RowIndex];
             var query_line = current_row.Tag as QueryLine;
             this.listView_records.SelectedItems.Clear();
@@ -1232,6 +1319,14 @@ recid	记录ID
                 info.Column.IsMergeKey = false;
 
             info.Column.ViewColumn.HeaderText = BuildHeaderText(info.Name, info.Caption, info.Column.IsMergeKey);
+
+            // 2024/11/1
+            // 如果当前只有一个列，则自动设为 .IsMergeKey = true
+            if (_columns.Count == 1 && _columns[0].IsMergeKey == false)
+            {
+                menu_toggleMergeKey_Click(new MenuItem { Tag = _columns[0] }, new EventArgs());
+                // _columns[0].IsMergeKey = true;
+            }
         }
 
         void menu_toggleMergeKey_Click(object sender, EventArgs e)
@@ -1312,6 +1407,14 @@ recid	记录ID
             if (dom.DocumentElement.ChildNodes.Count == 0)
                 return null;
             return dom;
+        }
+
+        string GetCombinationList()
+        {
+            var columns = _columns.Where(o => o.IsMergeKey == false)
+                .Select(o => o.PatronFieldName)
+                .ToList();
+            return StringUtil.MakePathList(columns, ", ");
         }
 
         QueryLine BuildQueryLine(DataGridViewRow row,
@@ -1435,8 +1538,64 @@ recid	记录ID
         }
 #endif
 
-        public List<QueryLine> BuildQueryLines(bool clear_hitcount)
+        public List<QueryLine> BuildQueryLines(
+            bool clear_hitcount,
+            out string dbNames,
+            out string locationFilter,
+            out bool use_detect,
+            out bool dont_use_batch)
         {
+            dbNames = "";
+            locationFilter = "";
+            use_detect = false;
+            dont_use_batch = false;
+
+            var dialog_result = this.TryGet(() =>
+            {
+                var dlg = new FilterSearchDialog();
+                MainForm.SetControlFont(dlg, this.Font);
+                dlg.QueryWord = $"{this.Rows.Count()} 个";
+                dlg.From = FindCaption(GetMergeKeyName());
+                dlg.Combinations = GetCombinationList();
+                dlg.MatchStyle = GetMatchStyleCaption(_selectedMatchStyle);
+                dlg.UiState = Program.MainForm.AppInfo.GetString(
+            "BiblioSearchForm",
+            "FilterSearchDialog_uiState",
+            "");
+                Program.MainForm.AppInfo.LinkFormState(dlg, "bibliosearchform_filtersearchdialog");
+                dlg.ShowDialog(this);
+                Program.MainForm.AppInfo.SetString(
+            "BiblioSearchForm",
+            "FilterSearchDialog_uiState",
+            dlg.UiState);
+                if (dlg.DialogResult != System.Windows.Forms.DialogResult.OK)
+                    return dlg.DialogResult;
+
+                this._selectedMatchStyle = BiblioSearchForm.GetCurrentMatchStyle(dlg.MatchStyle);
+                this._selectedDbNames = dlg.BiblioDbNames;
+                this._selectedLocationFilter = GetLocationFilter();
+                this._selectedUseDetect = dlg.UseDetect;
+                this._selectedDontUseBatch = dlg.DontUseBatch;
+
+                string GetLocationFilter()
+                {
+                    string value = dlg.LocationFilter;
+                    if (value == "<不筛选>")
+                        return "";
+                    return value;
+                }
+
+                return DialogResult.OK;
+            });
+
+            if (dialog_result == DialogResult.Cancel)
+                return null;
+
+            dbNames = this._selectedDbNames;
+            locationFilter = this._selectedLocationFilter;
+            dont_use_batch = this._selectedDontUseBatch;
+            use_detect = this._selectedUseDetect;
+
             List<QueryLine> lines = new List<QueryLine>();
             foreach (var row in this.Rows)
             {
@@ -1451,6 +1610,22 @@ recid	记录ID
             }
 
             return lines;
+        }
+
+        // 2024/11/2
+        public static string GetMatchStyleCaption(string style)
+        {
+            if (style == "null")
+                return "空值";
+            if (style == "right")
+                return "后方一致";
+            if (style == "middle")
+                return "中间一致";
+            if (style == "exact")
+                return "精确一致";
+            if (style == "left" || string.IsNullOrEmpty(style))
+                return "前方一致";
+            return style;
         }
 
         // 匹配一个字段
@@ -1506,8 +1681,8 @@ recid	记录ID
                     case "isbn":
                         // 归一化以后再匹配
                         return MatchUnimarcIsbn(record, filter_item.FilterWord);
-                        // nodes = record.select("field[@name='010']/subfield[@name='a' or @name='z']");
-                        // break;
+                    // nodes = record.select("field[@name='010']/subfield[@name='a' or @name='z']");
+                    // break;
                     case "issn":
                         // TODO: 归一化以后再匹配
                         nodes = record.select("field[@name='011']/subfield[@name='a' or @name='z']");

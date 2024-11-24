@@ -6033,7 +6033,14 @@ MessageBoxDefaultButton.Button2);
                 return;
             }
 
-            System.Diagnostics.Process.Start("notepad.exe", dlg.FileName);
+            try
+            {
+                System.Diagnostics.Process.Start("notepad.exe", dlg.FileName);
+            }
+            catch
+            {
+
+            }
 
             this.m_strUsedScriptFilename = dlg.FileName;
         }

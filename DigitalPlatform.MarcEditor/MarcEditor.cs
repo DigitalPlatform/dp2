@@ -5014,6 +5014,10 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
         internal void AfterItemHeightChanged(int nField,
             int nOldHeightParam)
         {
+            // 2024/11/9
+            if (this.record.Fields?.Count == 0)
+                return;
+
             Field field = this.record.Fields[nField];
 
             // 得到旧高度

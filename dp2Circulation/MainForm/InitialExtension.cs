@@ -17,11 +17,12 @@ using System.Threading.Tasks;
 using System.Net;
 using System.Threading;
 
-using log4net;
+// using log4net;
+using Serilog;
+using Serilog.Core;
 
 using Ionic.Zip;
 using AsyncPluggableProtocol;
-using Microsoft.Win32;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
@@ -36,7 +37,7 @@ using DigitalPlatform.Drawing;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Core;
 using DigitalPlatform.RFID;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Serilog.Events;
 
 namespace dp2Circulation
 {
@@ -1271,6 +1272,7 @@ MessageBoxDefaultButton.Button1);
                 this.UserLogDir = Path.Combine(this.UserDir, "log");
                 PathUtil.TryCreateDir(this.UserLogDir);
 
+#if REMOVED
                 var repository = log4net.LogManager.CreateRepository("main");
                 log4net.GlobalContext.Properties["LogFileName"] = Path.Combine(this.UserLogDir, "log_");
                 log4net.Config.XmlConfigurator.Configure(repository);
@@ -1278,9 +1280,11 @@ MessageBoxDefaultButton.Button1);
                 LibraryChannelManager.Log = LogManager.GetLogger("main", "channellib");
                 _log = LogManager.GetLogger("main", "dp2circulation");
 
+
                 // 启动时在日志中记载当前 dp2circulation 版本号
                 // 此举也能尽早发现日志目录无法写入的问题，会抛出异常
                 MainForm.WriteInfoLog(Assembly.GetAssembly(this.GetType()).FullName);
+#endif
 
                 // 检查 KB????
                 /*

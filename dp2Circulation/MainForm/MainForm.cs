@@ -24,7 +24,8 @@ using System.Speech.Synthesis;
 using System.Threading.Tasks;
 using System.Security.Principal;
 
-using log4net;
+// using log4net;
+using Serilog;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
@@ -441,14 +442,22 @@ namespace dp2Circulation
                             100) == 1)
                             break;  // 当 MainForm Close 的时候
 
-                        _delayList.ProcessChangeList((info) =>
+                        try
                         {
-                            var task = info as PropertyTask;
-                            if (task.LoadData() == false)
-                                return;
+                            _delayList.ProcessChangeList((info) =>
+                            {
+                                var task = info as PropertyTask;
+                                if (task.LoadData() == false)
+                                    return;
 
-                            task.ShowData();
-                        });
+                                task.ShowData();
+                            });
+                        }
+                        catch(Exception ex)
+                        {
+                            // TODO: 如何显示异常信息
+                            MainForm.WriteErrorLog($"后台线程 _delayList.ProcessChangeList() 过程出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                        }
 
                         if (_worker.CancellationPending)
                         {
@@ -9998,6 +10007,7 @@ Keys keyData)
             }
         }
 
+#if REMOVED
         static ILog _log = null;
 
         public static ILog Log
@@ -10007,6 +10017,7 @@ Keys keyData)
                 return _log;
             }
         }
+#endif
 
         // 写入错误日志文件
         public static void WriteErrorLog(string strText)
@@ -10028,6 +10039,7 @@ Keys keyData)
         {
             // Console.WriteLine(strText);
 
+#if REMOVED
             if (_log == null) // 先前写入实例的日志文件发生过错误，所以改为写入 Windows 日志。会加上实例名前缀字符串
                 Program.WriteWindowsLog(strText, EventLogEntryType.Error);
             else
@@ -10037,6 +10049,19 @@ Keys keyData)
                     _log.Info(strText);
                 else
                     _log.Error(strText);
+            }
+#endif
+            if (Log.Logger == null) // 先前写入实例的日志文件发生过错误，所以改为写入 Windows 日志。会加上实例名前缀字符串
+                Program.WriteWindowsLog(strText, EventLogEntryType.Error);
+            else
+            {
+                // 注意，这里不捕获异常
+                if (level == "info")
+                    Log.Information(strText);
+                else if (level == "debug")
+                    Log.Debug(strText);
+                else
+                    Log.Error(strText);
             }
         }
 

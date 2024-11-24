@@ -352,7 +352,7 @@ namespace dp2Circulation
             }
 
             // 馆藏地点字符串里面不能有星号
-            // string strLocation = this.entityEditControl_editing.LocationString;
+            // string strLocation = this.entityEditControl_editing.LocationFilter;
             if (strLocation.IndexOf("*") != -1)
             {
                 strError = "馆藏地点字符串中不允许出现字符 '*'";

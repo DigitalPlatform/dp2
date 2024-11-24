@@ -279,29 +279,13 @@ namespace dp2Circulation
             }
 #endif
 
-            {
-                string strError = "";
-                List<string> codes = null;
-                // 获得全部可用的图书馆代码。注意，并不包含 "" (全局)
-                int nRet = Program.MainForm.GetAllLibraryCodes(out codes,
-                out strError);
-                if (nRet == -1)
-                    MessageBox.Show(this, strError);
-                else
-                {
-                    this.comboBox_location.Items.Clear();
-                    this.comboBox_location.Items.Add("<不筛选>");
-                    foreach (string code in codes)
-                    {
-                        this.comboBox_location.Items.Add(code);
-                    }
-                }
+            // 
+            FillLocationFilterList(this.comboBox_location);
 
-                this.comboBox_location.Text = Program.MainForm.AppInfo.GetString(
-                    this._dbType + "searchform",
-    "location_filter",
-    "<不筛选>");
-            }
+            this.comboBox_location.Text = Program.MainForm.AppInfo.GetString(
+                this._dbType + "searchform",
+"location_filter",
+"<不筛选>");
 
             if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.44") >= 0)
                 toolStripMenuItem_subrecords.Checked = DisplaySubrecords;
@@ -320,6 +304,26 @@ namespace dp2Circulation
                     this.textBox_queryWord.Focus();
                 });
             });
+        }
+
+        public static void FillLocationFilterList(ComboBox combobox)
+        {
+            string strError = "";
+            List<string> codes = null;
+            // 获得全部可用的图书馆代码。注意，并不包含 "" (全局)
+            int nRet = Program.MainForm.GetAllLibraryCodes(out codes,
+            out strError);
+            if (nRet == -1)
+                MessageBox.Show(Program.MainForm, strError);
+            else
+            {
+                combobox.Items.Clear();
+                combobox.Items.Add("<不筛选>");
+                foreach (string code in codes)
+                {
+                    combobox.Items.Add(code);
+                }
+            }
         }
 
         // TabComboBox版本
@@ -616,6 +620,13 @@ this.comboBox_location.Text);
                     "biblio_search_form",
                     "multiline_max_result_count",
                     10);
+            }
+            set
+            {
+                Program.MainForm.AppInfo.SetInt(
+                    "biblio_search_form",
+                    "multiline_max_result_count",
+                    value);
             }
         }
 
@@ -1621,8 +1632,26 @@ out strError);
 
 
                 List<QueryLine> query_lines = null;
+                string filterSearch_dbNames = "";
+                string filterSearch_locationFilter = "";
+                bool use_detect = false;
+                bool dont_use_batch = false;
                 if (filter_query)
-                    query_lines = BuildQueryLines(true);
+                {
+                    query_lines = BuildQueryLines(true,
+                        out filterSearch_dbNames,
+                        out filterSearch_locationFilter,
+                        out use_detect,
+                        out dont_use_batch);
+                    if (query_lines == null)
+                    {
+                        /*
+                        strError = "放弃检索";
+                        goto ERROR1;
+                        */
+                        return;
+                    }
+                }
                 else
                 {
                     List<string> query_words = new List<string>();
@@ -1662,8 +1691,11 @@ out strError);
                 List<QueryLine> query_batch = new List<QueryLine>();
                 // 是否使用批检索 API
                 bool use_batch = false;
-                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.161") >= 0)
+                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.162") >= 0)
                     use_batch = filter_query;
+
+                if (dont_use_batch)
+                    use_batch = false;
 
                 // this.ShowMessageBox($"use_batch={use_batch}");
 
@@ -1751,11 +1783,12 @@ out strError);
                                 lRet = BatchSearch(
                                     channel,
                                     looping.Progress,
+                                    filterSearch_dbNames,
                                     query_batch,
-                                    filter_query,
+                                    use_detect, // filter_query,
                                     current_from,
                                     strOutputStyle,
-                                    this.GetLocationFilter(),
+                                    filterSearch_locationFilter,
                                     bOutputKeyCount,
                                     bOutputKeyID,
                                     bQuickLoad,
@@ -1805,9 +1838,9 @@ out strError);
                     lRet = SearchBiblio(
                         channel,
                         looping.Progress,
-                        this.DbNames,
+                        filter_query ? filterSearch_dbNames : this.DbNames,
                         query_word, // this.textBox_queryWord.Text,
-                        filter_query,
+                        filter_query ? use_detect : false,
                         max_count,  // this.MaxSearchResultCount,  // 1000
                         current_from,
                         query_line.MatchStyle,  // strMatchStyle,  // "left", TODO: "exact" 和 strSearchStyle "desc" 组合 dp2library 会抛出异常
@@ -1815,7 +1848,7 @@ out strError);
                         strResultSetName,
                         "",    // strSearchStyle
                         strOutputStyle,
-                        this.GetLocationFilter(),
+                        filter_query ? filterSearch_locationFilter : this.GetLocationFilter(),
                         out string strQueryXml,
                         out strError);
                     if (lRet == -1)
@@ -2261,6 +2294,7 @@ out strError);
         //      其它  query_lines (中实际被处理的部分或者全部检索词)总命中记录数
         long BatchSearch(LibraryChannel channel,
             Stop stop,
+            string dbNames,
             List<QueryLine> query_lines,
             bool split,
             string from,
@@ -2317,14 +2351,14 @@ out strError);
             }
 
             long lRet = channel.BatchSearch(stop,
-this.DbNames,
+dbNames,    // this.DbNames,
 words.ToArray(),
-1000,
+max_count,
 10,
 current_from,
 first_query.MatchStyle,
 new string[] { $"browse:{GetCurrentBrowseStyle()}" },
-"", // "splitWord",
+"skipOversizeRecords", // "splitWord",
 output_style,
 filter,
 out QueryResult[] batch_results,
@@ -2448,9 +2482,21 @@ out strError);
                         goto CONTINUE;
                     */
 
+                    // 结果集中的记录数量是否越过规定的传递尺寸
+                    bool over_size = false;
+                    over_size = one.HitCount > one.Records?.Length;
+
                     // 注: FormatRecord.HitCount 可能比 .Records.Length 要大
                     long lHitCount = one.Records == null ?
                         0 : one.Records.Length;
+                    if (over_size)
+                    {
+                        lHitCount = one.HitCount;
+                        /*
+                        if (max_count != -1)
+                            lHitCount = Math.Min(lHitCount, max_count);
+                        */
+                    }
                     total += lHitCount;
 
                     Program.MainForm.OperHistory.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode($"'{one.QueryWord}' 命中 {lHitCount} 条") + "</div>");
@@ -2462,8 +2508,8 @@ out strError);
                     int nRet = LoadResultSet(
         stop,
         channel,
-        null,
-        one,
+        over_size ? one.ResultSetName : null,
+        over_size ? null : one,
         bOutputKeyCount,
         bOutputKeyID,
         bQuickLoad,
@@ -8455,7 +8501,14 @@ TaskScheduler.Default);
                 return;
             }
 
-            System.Diagnostics.Process.Start("notepad.exe", dlg.FileName);
+            try
+            {
+                System.Diagnostics.Process.Start("notepad.exe", dlg.FileName);
+            }
+            catch
+            {
+
+            }
 
             this.m_strUsedMarcQueryFilename = dlg.FileName;
         }

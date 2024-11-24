@@ -512,7 +512,7 @@ namespace dp2Circulation
             }
 
             /*
-            if (this.LocationString == "")
+            if (this.LocationFilter == "")
             {
                 strError = "尚未指定线索馆藏地点";
                 return -1;

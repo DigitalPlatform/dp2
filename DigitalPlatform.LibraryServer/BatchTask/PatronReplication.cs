@@ -50,6 +50,24 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
+        // 从 .exe 接口程序创建的 XML 文件中抽取 root 元素的 error 属性值
+        static string GetErrorString(string filename)
+        {
+            if (File.Exists(filename) == false)
+                return $"GetErrorString() 出错: 数据文件 '{filename}' 没有找到";
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.Load(filename);
+            }
+            catch (Exception ex)
+            {
+                return $"装载数据文件 {filename} 到 XMLDOM 时出错: {ex.Message}";
+            }
+
+            return dom.DocumentElement?.GetAttribute("error");
+        }
+
 #if NO
         // 解析 开始 参数
         // parameters:
@@ -302,6 +320,9 @@ namespace DigitalPlatform.LibraryServer
                         if (this.ManualStart == true)
                             this.AppendResultText("已试探启动任务 '" + this.Name + "'，但因没有到每日启动时间 " + strStartTimeDef + " 而未能启动。(上次任务处理结束时间为 " + DateTimeUtil.LocalTime(strLastTime) + ")\r\n");
 
+                        // 2024/11/21
+                        this.AppendResultText($"strOldLastTime='{strOldLastTime}', strLastTime='{strLastTime}'\r\n");
+                        
                         // 2014/3/31
                         if (string.IsNullOrEmpty(strOldLastTime) == true
                             && string.IsNullOrEmpty(strLastTime) == false)
@@ -327,16 +348,57 @@ namespace DigitalPlatform.LibraryServer
 
                 string strXmlFilename = PathUtil.MergePath(this.App.PatronReplicationDir, "data.xml");
 
-                // 从卡中心获取全部记录，写入一个XML文件
-                nRet = GetAllRecordsFromCardCenter(
-                    strXmlFilename,
-                    out strError);
-                if (nRet == -1)
+                if (string.IsNullOrEmpty(this.InterfaceUrl) == false)
                 {
-                    string strErrorText = "从卡中心获取数据时出错: " + strError;
-                    this.AppendResultText(strErrorText + "\r\n");
-                    this.App.WriteErrorLog(strErrorText);
-                    return;
+                    // 从卡中心获取全部记录，写入一个XML文件
+                    nRet = GetAllRecordsFromCardCenter(
+                        strXmlFilename,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        string strErrorText = "从卡中心获取数据时出错: " + strError;
+                        this.AppendResultText(strErrorText + "\r\n");
+                        this.App.WriteErrorLog(strErrorText);
+                        return;
+                    }
+                }
+                else
+                {
+                    var exe_path = this.ExePath
+                        .Replace("%bindir%", this.App.BinDir)
+                        .Replace("%datadir%", this.App.DataDir);
+                    // 调试用的，从指定的位置拷贝一个 XML 文件过来
+                    if (exe_path.StartsWith("!copy "))
+                    {
+                        string sourceFileName = exe_path.Substring("!copy ".Length).Trim();
+                        this.AppendResultText($"(为测试验证而)复制文件 {sourceFileName} 到 {strXmlFilename}\r\n");
+                        try
+                        {
+                            File.Copy(sourceFileName, strXmlFilename, true);
+                        }
+                        catch(Exception ex)
+                        {
+                            string strErrorText = $"调用 copy '{sourceFileName} {strXmlFilename}' 时出错: " + ex.Message;
+                            this.AppendResultText(strErrorText + "\r\n");
+                            this.App.WriteErrorLog(strErrorText);
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        // 调用 .exe
+                        this.AppendResultText($"调用 '{exe_path} {strXmlFilename}' 从卡中心获取数据 ...\r\n");
+                        var process = Process.Start(exe_path, strXmlFilename);
+                        process.WaitForExit(10 * 60 * 1000);    // 十分钟
+                        if (process.ExitCode == -1)
+                        {
+                            strError = GetErrorString(strXmlFilename);
+                            string strErrorText = $"调用 '{exe_path} {strXmlFilename}' 时出错: " + strError;
+                            this.AppendResultText(strErrorText + "\r\n");
+                            this.App.WriteErrorLog(strErrorText);
+                            return;
+                        }
+                    }
                 }
 
                 this.AppendResultText("检索读者库中现有的记录集合\r\n");
@@ -597,6 +659,12 @@ namespace DigitalPlatform.LibraryServer
         {
             strError = "";
 
+            if (string.IsNullOrEmpty(this.InterfaceUrl))
+            {
+                strError = "<patronReplication> 元素内尚未配置 interfaceUrl 属性，因此无法调用 GetAllRecordsFromCardCenter()";
+                return -1;
+            }
+
             Debug.Assert(string.IsNullOrEmpty(this.InterfaceUrl) == false, "");
 
             XmlTextWriter writer = null;
@@ -735,17 +803,19 @@ patronDbName="读者库"
 idElementName="barcode"
 />
 */
-            XmlNode node = this.App.LibraryCfgDom.DocumentElement.SelectSingleNode("patronReplication");  // "//patronReplication" 2018/9/5 修改 bug
+            var node = this.App.LibraryCfgDom.DocumentElement.SelectSingleNode("patronReplication") as XmlElement;  // "//patronReplication" 2018/9/5 修改 bug
             if (node == null)
             {
                 strError = "尚未配置<patronReplication>参数";
                 return 0;
             }
 
+            this.ExePath = DomUtil.GetAttr(node, "exePath");
             this.InterfaceUrl = DomUtil.GetAttr(node, "interfaceUrl");
-            if (string.IsNullOrEmpty(this.InterfaceUrl) == true)
+            if (string.IsNullOrEmpty(this.ExePath) == true
+                && string.IsNullOrEmpty(this.InterfaceUrl) == true)
             {
-                strError = "<patronReplication> 元素内尚未配置 interfaceUrl 属性";
+                strError = "<patronReplication> 元素内尚未配置 interfaceUrl 属性或 exPath 属性。这两个属性必须配置其中一个";
                 return -1;
             }
 
@@ -763,11 +833,18 @@ idElementName="barcode"
                 this.IdElementName = "barcode";
             }
 
-            this.From = GetFromName(this.IdElementName);
-            if (string.IsNullOrEmpty(this.From) == true)
+            // patronReplication/@idFromName 一般可以缺省。
+            // 如果缺省，表示自动从 idElementName 推断 ID 检索途径的名字。对于系统标准支持的 barcode 和 cardNumber 元素，可以自动推断出来
+            // 但如果 idElementName 是一个自定义的元素名时，无法自动推断，则需要明确定义 patronReplication/@idFromName 属性值才行。
+            this.From = DomUtil.GetAttr(node, "idFromName");
+            if (string.IsNullOrEmpty(this.From))
             {
-                strError = "对于元素名 '" + this.IdElementName + "' 无法获得对应的检索点名定义";
-                return -1;
+                this.From = GetFromName(this.IdElementName);
+                if (string.IsNullOrEmpty(this.From) == true)
+                {
+                    strError = "对于元素名 '" + this.IdElementName + "' 无法获得对应的检索点名定义。需要为 patronReplication 元素增配 idFromName 属性";
+                    return -1;
+                }
             }
 
             this.ModifyOtherDbRecords = DomUtil.GetBooleanParam(node,
@@ -819,6 +896,7 @@ idElementName="barcode"
         string From = "";           // id字段检索途径名
         string IdElementName = "";  // id字段元素名，缺省为 "barcode"
         string InterfaceUrl = "";   // 接口.net remoting server的URL
+        string ExePath = "";        // (2024/11/14) .exe 接口程序的完整路径。例如 "./getreader.exe"
         bool ModifyOtherDbRecords = false;  // 同步过程是否修改指定的同步读者库以外的其它读者库中的(和卡中心记录中id匹配的那些)记录
 
         // 从XML文件中读取全部记录，同步到读者库中
@@ -952,8 +1030,30 @@ idElementName="barcode"
                             return -1;
                         }
 
+                        /*
+                        // 注意这里得到的 strID，可能和 keys 配置文件中抽取的对应检索点大小写不同，因为 keys 中可能用了 convert 转换
+                        // 为了和 Keys 里面的完全一致，需要设法把这个原始字符串经过 keys 完全相同的 convert 处理
                         string strID = DomUtil.GetElementText(source_dom.DocumentElement,
                             this.IdElementName);
+                        */
+                        string strID = "";
+                        nRet = GetIdKey(channel,
+    this.PatronDbName + "/?",
+    strSourceXml,
+    this.From,
+    out List<string> keys,
+    out strError);
+                        if (keys.Count > 0)
+                            strID = keys[0];
+                        else
+                        {
+                            // 没有 ID 的记录
+                            string strErrorText = $"*** 从接口获得的读者记录没有匹配检索途径 {this.From} 的字段。记录内容如下：\r\n{strSourceXml}";
+                            this.AppendResultText(strErrorText + "\r\n");
+                            this.App.WriteErrorLog(strErrorText);
+                            continue;
+                        }
+
                         if (string.IsNullOrEmpty(strID) == true)
                         {
                             strError = "来自卡中心的XML记录 '" + strSourceXml + "' 中没有名为 " + this.IdElementName + " 的元素，或其值为空";
@@ -1139,6 +1239,34 @@ idElementName="barcode"
             {
                 sessioninfo.CloseSession(); // 2024/2/22
             }
+        }
+
+        int GetIdKey(RmsChannel channel,
+            string strPath,
+            string strXml,
+            string strFrom,
+            out List<string> keys,
+            out string strError)
+        {
+            strError = "";
+            keys = new List<string>();
+
+            long lRet = channel.DoGetKeys(
+    strPath,
+    strXml,
+    "zh",   // strLang
+    null,   // this.stop,
+    out List<AccessKeyInfo> lines,
+    out strError);
+            if (lRet == -1)
+                return -1;
+
+            foreach (var line in lines)
+            {
+                if (line.FromName == strFrom)
+                    keys.Add(line.Key);
+            }
+            return 0;
         }
 
         // 根据两个集合的差异部分,标记删除卡中心全部记录中为包含的当前读者记录
@@ -1402,6 +1530,14 @@ idElementName="barcode"
                     domNew.DocumentElement.RemoveChild(node);
                     i--;
                 }
+
+                // 2024/11/14
+                // 删除 dprms:default 属性
+                attr = node.SelectSingleNode("@dprms:default", nsmgr);
+                if (attr != null)
+                {
+                    ((XmlElement)node).RemoveAttributeNode(attr as XmlAttribute);
+                }
             }
 
             // 合成<state>元素内容
@@ -1548,6 +1684,12 @@ idElementName="barcode"
                     XmlNode attr = node.SelectSingleNode("@dprms:missing", nsmgr);
                     if (attr != null)
                         continue;   // 依照domExist中的原始值
+
+                    // 2024/11/14
+                    attr = node.SelectSingleNode("@dprms:default", nsmgr);
+                    if (attr != null)
+                        continue;   // 依照domExist中的原始值
+
                 }
 
                 string strTextNew = DomUtil.GetElementOuterXml(domNew.DocumentElement,
@@ -1700,6 +1842,7 @@ strElementName);
                 if (lRet == -1)
                     goto ERROR1;
 
+                // 注意这里取到的 Key，在 keys 配置文件中可能经过 convert 处理变成了全大写
                 foreach (Record record in records)
                 {
                     Debug.Assert(record.Keys != null && record.Keys.Length > 0, "");

@@ -181,7 +181,9 @@ namespace RfidCenter
             {
                 // Driver1Manager.Log = LogManager.GetLogger("main", "driver1");
                 // string userLogDir = ClientInfo.UserLogDir;
+                /*
                 ClientInfo.SetLoggingLevel(Serilog.Events.LogEventLevel.Debug);
+                */
             }
 
             ClientInfo.BeginUpdate(

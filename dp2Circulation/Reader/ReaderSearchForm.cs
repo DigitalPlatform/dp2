@@ -2401,7 +2401,36 @@ TaskScheduler.Default);
             if (dialog_result != DialogResult.OK)
                 return;
 
-            string strReaderDbName = "";
+            // 2024/11/20
+            // 用于搜索的读者库名
+            string strSearchReaderDbName = "";
+            {
+                var current_readerDbName = this.TryGet(() =>
+                {
+                    return this.comboBox_readerDbName.Text;
+                });
+
+                if (current_readerDbName.StartsWith("<"))
+                    current_readerDbName = "";
+                dialog_result = this.TryGet(() =>
+                {
+                    GetDbNameDlg name_dlg = new GetDbNameDlg();
+                    MainForm.SetControlFont(name_dlg, this.Font, false);
+                    name_dlg.MultipleSelection = true;
+                    name_dlg.DbType = "reader";
+                    name_dlg.DbName = current_readerDbName;
+                    name_dlg.Text = "用于搜索的读者库名";
+                    name_dlg.StartPosition = FormStartPosition.CenterScreen;
+                    var result = name_dlg.ShowDialog(this);
+                    strSearchReaderDbName = name_dlg.DbName;
+                    return result;
+                });
+                if (dialog_result != DialogResult.OK)
+                    return;
+            }
+
+            // 用于新增记录的读者库名
+            string strAppendReaderDbName = "";
             {
                 var current_readerDbName = this.TryGet(() =>
                 {
@@ -2416,10 +2445,10 @@ TaskScheduler.Default);
                     MainForm.SetControlFont(name_dlg, this.Font, false);
                     name_dlg.DbType = "reader";
                     name_dlg.DbName = current_readerDbName;
-                    name_dlg.Text = "请选择目标读者库名";
+                    name_dlg.Text = "新增记录时的读者库名";
                     name_dlg.StartPosition = FormStartPosition.CenterScreen;
                     var result = name_dlg.ShowDialog(this);
-                    strReaderDbName = name_dlg.DbName;
+                    strAppendReaderDbName = name_dlg.DbName;
                     return result;
                 });
                 if (dialog_result != DialogResult.OK)
@@ -2496,6 +2525,9 @@ TaskScheduler.Default);
                     "正在导入读者数据 ...",
                     "disableControl"))
                 {
+                    bool dont_prompt_1 = false;
+                    DialogResult skip_result = DialogResult.Yes;
+
                     List<ListViewItem> items = new List<ListViewItem>();
                     var rows = import_dlg.Rows.ToArray();
                     looping.Progress.SetProgressRange(0, rows.Length);
@@ -2519,7 +2551,7 @@ TaskScheduler.Default);
 
 
                         // 这里使用一种 GUID 式的路径，等保存后再转为实际路径
-                        var path = strReaderDbName + "/?" + GetTempId();   //  Guid.NewGuid().ToString();
+                        var path = strAppendReaderDbName + "/?" + GetTempId();   //  Guid.NewGuid().ToString();
 
                         string existing_xml = null;
                         byte[] existing_timestamp = null;
@@ -2541,9 +2573,10 @@ TaskScheduler.Default);
                             int nRet = GetMergeRecord(
                                 looping.Progress,
                                 channel,
-                                strReaderDbName,
+                                strSearchReaderDbName,
                                 key_field_name,
                                 merge_key,
+                                DomUtil.GetIndentXml(dom.DocumentElement.OuterXml),
                                 out string existing_recpath,
                                 out existing_xml,
                                 out existing_timestamp,
@@ -2558,7 +2591,7 @@ TaskScheduler.Default);
                                     append_dialog_result = this.TryGet(() =>
                                     {
                                         return MessageDlg.Show(this,
-                                        $"根据 '{merge_key}'({key_field_name}) 检索读者记录未命中，此行无法进行数据合并。\r\n---\r\n\r\n是否改为追加?\r\n\r\n注：\r\n[追加] 改为追加\r\n[跳过] 跳过当前行，但继续后面的处理\r\n[中断] 中断整个批处理",
+                                        $"根据 '{merge_key}'(数据库:{strSearchReaderDbName},检索途径:{key_field_name}) 检索读者记录未命中，此行无法进行数据合并。\r\n---\r\n\r\n是否改为追加?\r\n\r\n注：\r\n[追加] 改为追加\r\n[跳过] 跳过当前行，但继续后面的处理\r\n[中断] 中断整个批处理",
                                         "合并读者数据",
                                         MessageBoxButtons.YesNoCancel,
                                         MessageBoxDefaultButton.Button1,
@@ -2624,16 +2657,30 @@ TaskScheduler.Default);
                         // 对记录路径进行查重
                         if (dup_table.ContainsKey(path))
                         {
-                            DialogResult result = this.TryGet(() =>
+
+                            if (dont_prompt_1 == false)
                             {
-                                return MessageBox.Show(this,
-    $"当前记录列表中已经存在路径为 '{path}' 的事项，不允许重复加入。\r\n\r\n是否继续操作?\r\n\r\n(Yes 跳过，然后继续操作；No 中断批处理)",
-    "ReaderSearchForm",
-    MessageBoxButtons.YesNo,
-    MessageBoxIcon.Question,
-    MessageBoxDefaultButton.Button2);
-                            });
-                            if (result == DialogResult.Yes)
+                                skip_result = this.TryGet(() =>
+                                {
+                                    return MessageDlg.Show(this,
+                                    $"当前记录列表中已经存在路径为 '{path}' 的事项，不允许重复加入。\r\n\r\n是否继续操作?\r\n\r\n(Yes 跳过，然后继续操作；No 中断批处理)",
+                                    "ReaderSearchForm",
+                                    MessageBoxButtons.YesNo,
+                                    MessageBoxDefaultButton.Button1,
+                                    ref dont_prompt_1,
+                                    new string[] { "跳过并继续", "中断批处理" },
+                                    "下次不再出现本对话框");
+                                    /*
+                                    return MessageBox.Show(this,
+        $"当前记录列表中已经存在路径为 '{path}' 的事项，不允许重复加入。\r\n\r\n是否继续操作?\r\n\r\n(Yes 跳过，然后继续操作；No 中断批处理)",
+        "ReaderSearchForm",
+        MessageBoxButtons.YesNo,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button2);
+                                    */
+                                });
+                            }
+                            if (skip_result == DialogResult.Yes)
                                 goto CONTINUE;
                             strError = "用户中断";
                             goto ERROR1;
@@ -3183,6 +3230,7 @@ string new_value)
             string dbName,
             string merge_field,
             string merge_key,
+            string merge_record,    // 用于显示的待合并记录内容
             out string recpath,
             out string xml,
             out byte[] timestamp,
@@ -3260,6 +3308,7 @@ stop,
             SelectPatronDialog dlg = null;
 
             string error = strError;
+            // -1:出错; 0: 取消; 1: 已经选择
             var select_ret = this.TryGet(() =>
             {
                 dlg = new SelectPatronDialog();
@@ -3283,7 +3332,7 @@ stop,
                 int nRet = dlg.Initial(
                     // Program.MainForm,
                     paths,
-                    $"'{merge_key}'({strFrom}) 命中多条读者记录。\r\n请选择一个读者记录 ...",
+                    $"'{merge_key}'({strFrom}) 命中多条读者记录。\r\n请选择一个读者记录 ...\r\n\r\n{merge_record}",
                     out error);
                 if (nRet == -1)
                     return -1;
@@ -3293,14 +3342,24 @@ stop,
                 if (dlg.DialogResult == DialogResult.Cancel)
                 {
                     error = "放弃选择";
-                    return -1;
+                    return 0;
                 }
 
-                return 0;
+                return 1;
             });
             strError = error;
             if (select_ret == -1)
                 return -1;
+            // 2024/11/15
+            if (select_ret == 0)
+            {
+                if ((Control.ModifierKeys & Keys.Control) == Keys.Control)
+                {
+                    strError = "中断批处理";
+                    return -1;
+                }
+                return 0;
+            }
 
             string path = "@path:" + dlg.SelectedRecPath;
 
@@ -6696,7 +6755,13 @@ out strFingerprint);
                 return;
             }
 
-            System.Diagnostics.Process.Start("notepad.exe", dlg.FileName);
+            try
+            {
+                System.Diagnostics.Process.Start("notepad.exe", dlg.FileName);
+            }
+            catch
+            {
+            }
 
             this.m_strUsedMarcQueryFilename = dlg.FileName;
         }

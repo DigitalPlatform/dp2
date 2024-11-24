@@ -608,9 +608,9 @@ namespace dp2Kernel
                                 resultSet.Clear();
 
                             int nRet = 0;
-
+#if DEBUG
                             app.MyWriteDebugInfo("begin searchex1 " + strQuery);
-
+#endif
                             DpResultSet old_resultset = resultSet;
                             // return:
                             //		-1	出错
@@ -624,9 +624,9 @@ namespace dp2Kernel
                                 handle,
                                 strSearchStyle,
                                 out string strError);
-
+#if DEBUG
                             app.MyWriteDebugInfo("end searchex1 lRet=" + nRet.ToString() + " " + strQuery);
-
+#endif
                             if (nRet <= -1)
                             {
                                 result.Value = -1;
@@ -699,9 +699,9 @@ namespace dp2Kernel
             {
                 string strErrorText = "SearchEx() API出现异常: " + ExceptionUtil.GetDebugText(ex);
                 app.WriteErrorLog(strErrorText);
-
+#if DEBUG
                 app.MyWriteDebugInfo("searchex throw exception " + strErrorText);
-
+#endif
                 result.Value = -1;
                 result.ErrorCode = ErrorCodeValue.CommonError;
                 result.ErrorString = ex.Message
@@ -734,7 +734,9 @@ namespace dp2Kernel
                         app.ResultSets.RenameResultSet(handle.ResultSetName.Substring(1), "free_" + Guid.NewGuid().ToString());
                 }
 
+#if DEBUG
                 app.MyWriteDebugInfo("因后一个search的到来，前一个search不得不中断 ");
+#endif
             }
         }
 
@@ -816,9 +818,9 @@ namespace dp2Kernel
 
                             int nRet = 0;
                             string strError = "";
-
+#if DEBUG
                             app.MyWriteDebugInfo("begin search1 " + strQuery);
-
+#endif
                             DpResultSet old_resultset = resultSet;
                             // return:
                             //		-1	出错
@@ -852,8 +854,9 @@ namespace dp2Kernel
                              * */
 
 
+#if DEBUG
                             app.MyWriteDebugInfo("end search1 lRet=" + nRet.ToString() + " " + strQuery);
-
+#endif
 
                             if (nRet <= -1)
                             {
@@ -894,8 +897,9 @@ namespace dp2Kernel
                 string strErrorText = "Search() API出现异常: " + ExceptionUtil.GetDebugText(ex);
                 app.WriteErrorLog(strErrorText);
 
+#if DEBUG
                 app.MyWriteDebugInfo("search throw exception " + strErrorText);
-
+#endif
                 result.Value = -1;
                 result.ErrorCode = ErrorCodeValue.CommonError;
                 result.ErrorString = ex.Message

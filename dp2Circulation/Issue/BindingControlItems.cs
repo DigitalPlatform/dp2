@@ -1440,7 +1440,7 @@ namespace dp2Circulation
                             cell.item.Container = this;
                             cell.item.Initial("<root />", out strError);
                             cell.item.RefID = strLocationRefID;
-                            cell.item.LocationString = strLocationName;
+                            cell.item.LocationFilter = strLocationName;
                             cell.item.Deleted = true;
                             SetFieldValueFromOrderInfo(
                                 false,
@@ -2349,7 +2349,7 @@ namespace dp2Circulation
                         cell.item.Container = this;
                         cell.item.Initial("<root />", out strError);
                         cell.item.RefID = location.RefID;
-                        cell.item.LocationString = location.Name;
+                        cell.item.LocationFilter = location.Name;
                         cell.item.Calculated = true;
                         cell.item.OrderInfoPosition = new Point(i, j);
                         this.SetCell(index++, cell);
@@ -2368,7 +2368,7 @@ namespace dp2Circulation
                             cell.item.Container = this;
                             cell.item.Initial("<root />", out strError);
                             cell.item.RefID = location.RefID;
-                            cell.item.LocationString = location.Name;
+                            cell.item.LocationFilter = location.Name;
                             cell.item.Deleted = true;
                             cell.item.OrderInfoPosition = new Point(i, j);
                             this.SetCell(index++, cell);
@@ -2511,7 +2511,7 @@ namespace dp2Circulation
                             cell.item.Container = this;
                             cell.item.Initial("<root />", out strError);
                             cell.item.RefID = location.RefID;
-                            cell.item.LocationString = location.Name;
+                            cell.item.LocationFilter = location.Name;
                             cell.item.Calculated = true;
                             cell.item.OrderInfoPosition = new Point(i, j);
                         }
@@ -2538,7 +2538,7 @@ namespace dp2Circulation
                             cell.item.Container = this;
                             cell.item.Initial("<root />", out strError);
                             cell.item.RefID = location.RefID;
-                            cell.item.LocationString = location.Name;
+                            cell.item.LocationFilter = location.Name;
                             cell.item.Deleted = true;
                             cell.item.OrderInfoPosition = new Point(i, j);
                             this.SetCell(index++, cell);

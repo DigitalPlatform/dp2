@@ -279,7 +279,6 @@ namespace DigitalPlatform.LibraryServer
                         bRet = false;   // 今天已经做过了
                         return 1;
                     }
-
                 }
                 catch
                 {

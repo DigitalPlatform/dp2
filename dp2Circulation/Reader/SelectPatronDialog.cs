@@ -653,6 +653,7 @@ namespace dp2Circulation
                 List<object> controls = new List<object>();
                 controls.Add(this.splitContainer_rightMain);
                 controls.Add(this.splitContainer_itemInfoMain);
+                controls.Add(this.listView_items);
                 return GuiState.GetUiState(controls);
             }
             set
@@ -660,6 +661,7 @@ namespace dp2Circulation
                 List<object> controls = new List<object>();
                 controls.Add(this.splitContainer_rightMain);
                 controls.Add(this.splitContainer_itemInfoMain);
+                controls.Add(this.listView_items);
                 GuiState.SetUiState(controls, value);
             }
         }

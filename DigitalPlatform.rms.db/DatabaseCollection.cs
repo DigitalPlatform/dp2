@@ -7236,7 +7236,9 @@ ChannelIdleEventArgs e);
 
             if (e.Continue == false)
             {
+#if DEBUG
                 this.App.MyWriteDebugInfo("abort");
+#endif
 
                 if (this._cancelTokenSource != null
                     && this._cancelTokenSource.IsCancellationRequested == false)

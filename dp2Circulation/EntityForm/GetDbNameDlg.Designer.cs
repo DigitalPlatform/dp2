@@ -41,25 +41,25 @@ namespace dp2Circulation
             // label_dbNameList
             // 
             this.label_dbNameList.AutoSize = true;
-            this.label_dbNameList.Location = new System.Drawing.Point(8, 11);
-            this.label_dbNameList.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label_dbNameList.Location = new System.Drawing.Point(15, 19);
+            this.label_dbNameList.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label_dbNameList.Name = "label_dbNameList";
-            this.label_dbNameList.Size = new System.Drawing.Size(101, 12);
+            this.label_dbNameList.Size = new System.Drawing.Size(180, 21);
             this.label_dbNameList.TabIndex = 0;
             this.label_dbNameList.Text = "书目库名列表(&L):";
             // 
             // listBox_biblioDbNames
             // 
-            this.listBox_biblioDbNames.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.listBox_biblioDbNames.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.listBox_biblioDbNames.FormattingEnabled = true;
             this.listBox_biblioDbNames.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.listBox_biblioDbNames.ItemHeight = 12;
-            this.listBox_biblioDbNames.Location = new System.Drawing.Point(10, 26);
-            this.listBox_biblioDbNames.Margin = new System.Windows.Forms.Padding(2);
+            this.listBox_biblioDbNames.ItemHeight = 21;
+            this.listBox_biblioDbNames.Location = new System.Drawing.Point(18, 46);
+            this.listBox_biblioDbNames.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.listBox_biblioDbNames.Name = "listBox_biblioDbNames";
-            this.listBox_biblioDbNames.Size = new System.Drawing.Size(321, 76);
+            this.listBox_biblioDbNames.Size = new System.Drawing.Size(585, 130);
             this.listBox_biblioDbNames.TabIndex = 1;
             this.listBox_biblioDbNames.SelectedIndexChanged += new System.EventHandler(this.listBox_dbNames_SelectedIndexChanged);
             this.listBox_biblioDbNames.DoubleClick += new System.EventHandler(this.listBox_dbNames_DoubleClick);
@@ -68,30 +68,30 @@ namespace dp2Circulation
             // 
             this.label_dbName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label_dbName.AutoSize = true;
-            this.label_dbName.Location = new System.Drawing.Point(8, 116);
-            this.label_dbName.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label_dbName.Location = new System.Drawing.Point(15, 203);
+            this.label_dbName.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label_dbName.Name = "label_dbName";
-            this.label_dbName.Size = new System.Drawing.Size(77, 12);
+            this.label_dbName.Size = new System.Drawing.Size(138, 21);
             this.label_dbName.TabIndex = 2;
             this.label_dbName.Text = "书目库名(&N):";
             // 
             // textBox_dbName
             // 
-            this.textBox_dbName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_dbName.Location = new System.Drawing.Point(86, 114);
-            this.textBox_dbName.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox_dbName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_dbName.Location = new System.Drawing.Point(158, 200);
+            this.textBox_dbName.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.textBox_dbName.Name = "textBox_dbName";
-            this.textBox_dbName.Size = new System.Drawing.Size(184, 21);
+            this.textBox_dbName.Size = new System.Drawing.Size(334, 31);
             this.textBox_dbName.TabIndex = 3;
             // 
             // button_OK
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_OK.Location = new System.Drawing.Point(274, 114);
-            this.button_OK.Margin = new System.Windows.Forms.Padding(2);
+            this.button_OK.Location = new System.Drawing.Point(502, 200);
+            this.button_OK.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.button_OK.Name = "button_OK";
-            this.button_OK.Size = new System.Drawing.Size(56, 22);
+            this.button_OK.Size = new System.Drawing.Size(103, 38);
             this.button_OK.TabIndex = 4;
             this.button_OK.Text = "确定";
             this.button_OK.UseVisualStyleBackColor = true;
@@ -101,10 +101,10 @@ namespace dp2Circulation
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button_Cancel.Location = new System.Drawing.Point(274, 141);
-            this.button_Cancel.Margin = new System.Windows.Forms.Padding(2);
+            this.button_Cancel.Location = new System.Drawing.Point(502, 247);
+            this.button_Cancel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.button_Cancel.Name = "button_Cancel";
-            this.button_Cancel.Size = new System.Drawing.Size(56, 22);
+            this.button_Cancel.Size = new System.Drawing.Size(103, 38);
             this.button_Cancel.TabIndex = 5;
             this.button_Cancel.Text = "取消";
             this.button_Cancel.UseVisualStyleBackColor = true;
@@ -115,20 +115,20 @@ namespace dp2Circulation
             this.checkBox_notAsk.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.checkBox_notAsk.AutoSize = true;
             this.checkBox_notAsk.Enabled = false;
-            this.checkBox_notAsk.Location = new System.Drawing.Point(10, 147);
-            this.checkBox_notAsk.Margin = new System.Windows.Forms.Padding(2);
+            this.checkBox_notAsk.Location = new System.Drawing.Point(18, 260);
+            this.checkBox_notAsk.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.checkBox_notAsk.Name = "checkBox_notAsk";
-            this.checkBox_notAsk.Size = new System.Drawing.Size(144, 16);
+            this.checkBox_notAsk.Size = new System.Drawing.Size(246, 25);
             this.checkBox_notAsk.TabIndex = 6;
             this.checkBox_notAsk.Text = "下次不再出现此对话框";
             // 
             // GetDbNameDlg
             // 
             this.AcceptButton = this.button_OK;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
-            this.ClientSize = new System.Drawing.Size(339, 173);
+            this.ClientSize = new System.Drawing.Size(622, 303);
             this.Controls.Add(this.checkBox_notAsk);
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
@@ -137,7 +137,7 @@ namespace dp2Circulation
             this.Controls.Add(this.listBox_biblioDbNames);
             this.Controls.Add(this.label_dbNameList);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(2);
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "GetDbNameDlg";
             this.ShowInTaskbar = false;
             this.Text = "指定书目库名";

@@ -367,11 +367,11 @@ namespace DigitalPlatform.rms
             //try
             //{
             // 评估时间
-            DateTime start_time = DateTime.Now;
+            DateTime start_time = DateTime.UtcNow;
 
             this.CommitInternal();
 
-            TimeSpan delta = DateTime.Now - start_time;
+            TimeSpan delta = DateTime.UtcNow - start_time;
             int nTicks = (int)(delta.TotalSeconds * 1000);
             if (this.m_nTimeOut < nTicks * 2)
                 this.m_nTimeOut = nTicks * 2;
@@ -5251,7 +5251,9 @@ List<DbParameter> aSqlParameter)
 
             bool bNeedSort = false;
 
-            DateTime start_time = DateTime.Now;
+#if DEBUG
+            DateTime start_time = DateTime.UtcNow;
+#endif
 
             //**********对数据库加读锁**************
             m_db_lock.AcquireReaderLock(m_nTimeOut);
@@ -5730,9 +5732,10 @@ List<DbParameter> aSqlParameter)
 #endif
 
                 // 2006/12/18 changed
-
-                TimeSpan delta = DateTime.Now - start_time;
+#if DEBUG
+                TimeSpan delta = DateTime.UtcNow - start_time;
                 Debug.WriteLine("SearchByUnion耗时 " + delta.ToString());
+#endif
             }
 
             if (bNeedSort == true)
@@ -6221,8 +6224,9 @@ List<DbParameter> aSqlParameter)
             // 通用
             if (string.IsNullOrEmpty(strCommand) == false)
             {
-                DateTime start_time = DateTime.Now;
-
+#if DEBUG
+                DateTime start_time = DateTime.UtcNow;
+#endif
                 using (var command = connection.NewCommand(strCommand))
                 {
                     try
@@ -6238,9 +6242,10 @@ List<DbParameter> aSqlParameter)
                                 dr.Read();
                                 strOutputRecordID = (string)dr[0];
 
-                                TimeSpan delta = DateTime.Now - start_time;
+#if DEBUG
+                                TimeSpan delta = DateTime.UtcNow - start_time;
                                 Debug.WriteLine($"{this.SqlServerType.ToString()} 获得数据库 '" + this.GetCaption("zh-CN") + "' 当前尾号耗费时间 " + delta.TotalSeconds.ToString() + " 秒");
-
+#endif
                                 return 1;
                             }
                         }
@@ -13467,7 +13472,7 @@ List<DbParameter> aSqlParameter)
             strError = "";
 
             List<string> time_lines = new List<string>();
-            DateTime start_time = DateTime.Now;
+            DateTime start_time = DateTime.UtcNow;
             DateTime start_time_out = new DateTime(0);  // 跳出 try 范围的开始时间
 
             if (StringUtil.IsInList("fastmode", strStyle) == true)
@@ -13495,7 +13500,7 @@ List<DbParameter> aSqlParameter)
             bPushTailNo = this.EnsureID(ref strID, bSimulate);
             if (oUser != null)
             {
-                DateTime start_time_1 = DateTime.Now;
+                DateTime start_time_1 = DateTime.UtcNow;
 
                 string strTempRecordPath = this.GetCaption("zh-CN") + "/" + strID;
                 if (bPushTailNo == true)
@@ -13569,7 +13574,7 @@ List<DbParameter> aSqlParameter)
 #endif
                 try // 记录锁
                 {
-                    DateTime start_time_open = DateTime.Now;
+                    DateTime start_time_open = DateTime.UtcNow;
 
                     Connection connection = GetConnection(
                         this.m_strConnString,
@@ -13663,7 +13668,7 @@ List<DbParameter> aSqlParameter)
                             if (string.IsNullOrEmpty(strOldXml) == true
                                 && bExist == true)
                             {
-                                DateTime start_time_getxmldata = DateTime.Now;
+                                DateTime start_time_getxmldata = DateTime.UtcNow;
 
                                 // return:
                                 //      -1  出错
@@ -13710,7 +13715,7 @@ List<DbParameter> aSqlParameter)
                         }
                         else
                         {
-                            DateTime start_time_writesqlrecord = DateTime.Now;
+                            DateTime start_time_writesqlrecord = DateTime.UtcNow;
 
                             // 写数据
                             // return:
@@ -13761,7 +13766,7 @@ List<DbParameter> aSqlParameter)
                             }
                             else
                             {
-                                DateTime start_time_getxmldata = DateTime.Now;
+                                DateTime start_time_getxmldata = DateTime.UtcNow;
 
                                 // return:
                                 //      -1  出错
@@ -13789,7 +13794,7 @@ List<DbParameter> aSqlParameter)
                             ////
                             if (string.IsNullOrEmpty(strXPath) == false)
                             {
-                                DateTime start_time_writesqlrecord = DateTime.Now;
+                                DateTime start_time_writesqlrecord = DateTime.UtcNow;
 
                                 // 根据参数中提供的局部内容创建出完整的记录
                                 nRet = BuildRecordXml(
@@ -13845,7 +13850,7 @@ List<DbParameter> aSqlParameter)
                             XmlDocument newDom = null;
                             XmlDocument oldDom = null;
 
-                            DateTime start_time_mergekeys = DateTime.Now;
+                            DateTime start_time_mergekeys = DateTime.UtcNow;
 
                             // return:
                             //      -2  出错。strOldXml 结构不合法
@@ -13885,7 +13890,7 @@ List<DbParameter> aSqlParameter)
 
                             // 调试 ---
 
-                            DateTime start_time_modifykeys = DateTime.Now;
+                            DateTime start_time_modifykeys = DateTime.UtcNow;
 
                             // 处理检索点
                             // return:
@@ -13914,7 +13919,7 @@ List<DbParameter> aSqlParameter)
 
                             // 注：如果因为旧的XML对象文件丢失，造成ModifyFiles()去创建已经存在的对象records行，那么创建自然会被忽视，没有什么副作用
 
-                            DateTime start_time_modifyfile = DateTime.Now;
+                            DateTime start_time_modifyfile = DateTime.UtcNow;
 
                             // 处理子文件
                             // return:
@@ -13936,7 +13941,7 @@ List<DbParameter> aSqlParameter)
 
                         bDelete = false;    // 此后走到 ERROR2 不会删除新创建的记录
 
-                        start_time_out = DateTime.Now;
+                        start_time_out = DateTime.UtcNow;
                     }
                     catch (SqlException sqlEx)
                     {
@@ -14001,7 +14006,7 @@ List<DbParameter> aSqlParameter)
                 if (StringUtil.IsInList("fastmode", strStyle) == false
                     && this.FastMode == true)
                 {
-                    DateTime start_time_1 = DateTime.Now;
+                    DateTime start_time_1 = DateTime.UtcNow;
 
                     // this.FastMode = false;
                     this.Commit();
@@ -14013,7 +14018,7 @@ List<DbParameter> aSqlParameter)
                 }
             }
 
-            if (DateTime.Now - start_time > new TimeSpan(0, 0, 1))
+            if (DateTime.UtcNow - start_time > new TimeSpan(0, 0, 1))
             {
                 WriteTimeUsed(
         time_lines,
@@ -14059,10 +14064,10 @@ List<DbParameter> aSqlParameter)
 
         static void WriteTimeUsed(
         List<string> lines,
-        DateTime start_time,
+        DateTime start_time_utc,
         string strPrefix)
         {
-            TimeSpan delta = DateTime.Now - start_time;
+            TimeSpan delta = DateTime.UtcNow - start_time_utc;
             lines.Add(strPrefix + " " + delta.TotalSeconds.ToString("F3"));
         }
 

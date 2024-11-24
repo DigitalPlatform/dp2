@@ -2936,6 +2936,7 @@ return result;
         // 合并联合编目的新旧书目库XML记录
         // 功能：排除新记录中对strLibraryCode定义以外的905字段的修改
         // parameters:
+        //      strDefaultOperation 为 insert replace delete 之一或者逗号间隔的组合
         //      strChangeableFieldNameList  用于限定修改范围的，可修改字段名列表。例如 "###,100-200"
         //                          如果为 null，表示不使用此参数，意思是不限制任何字段的修改
         //                          如果为 ""，则表示空集合，意思是限制所有字段的修改。那实际上此时调用本函数不会对 strNewMarc 发生任何改动
@@ -2990,6 +2991,28 @@ return result;
                     }
 
                     strError = "";
+                }
+
+                // 2024/11/9
+                if (strDefaultOperation != "delete")
+                {
+                    // 检查 MARC 记录里面是否全部字段都不存在。这种情况需要报错
+                    // return:
+                    //      -1  出错
+                    //      0   是空的
+                    //      1   不是空的
+                    int nRet = CheckEmptyMarc(strNewBiblioXml,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = $"检查 MARC 记录是否为空的过程中出错: {strError}";
+                        return -1;
+                    }
+                    if (nRet == 0)
+                    {
+                        strError = "因拟保存的书目记录中不存在任何字段，保存操作被拒绝";
+                        return -1;
+                    }
                 }
 
                 // 2016/12/14
@@ -3500,6 +3523,40 @@ out string strError)
                 out strError);
             if (nRet == -1)
                 return -1;
+
+            return 1;
+        }
+
+        // 检查是否为空 MARC 记录
+        // return:
+        //      -1  出错
+        //      0   是空的
+        //      1   不是空的
+        int CheckEmptyMarc(string strNewBiblioXml,
+            out string strError)
+        {
+            strError = "";
+
+            if (string.IsNullOrEmpty(strNewBiblioXml) == true)
+                return 0;
+
+            // 将MARCXML格式的xml记录转换为marc机内格式字符串
+            // parameters:
+            //		bWarning	==true, 警告后继续转换,不严格对待错误; = false, 非常严格对待错误,遇到错误后不继续转换
+            //		strMarcSyntax	指示marc语法,如果==""，则自动识别
+            //		strOutMarcSyntax	out参数，返回marc，如果strMarcSyntax == ""，返回找到marc语法，否则返回与输入参数strMarcSyntax相同的值
+            int nRet = MarcUtil.Xml2Marc(strNewBiblioXml,
+                true,
+                "", // this.CurMarcSyntax,
+                out string syntax,
+                out string marc,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            MarcRecord record = new MarcRecord(marc);
+            if (record.select("field[@name != '997' and @name != '998']").count == 0)
+                return 0;
 
             return 1;
         }
@@ -7702,6 +7759,60 @@ out strError);
                         bReadRightVerified = true;
                     }
 
+                    // 2024/11/24
+                    // 检查源库的可写权限
+                    if (strAction.IndexOf("move") != -1)
+                    {
+                        string strWriteAction = "delete";
+
+                        // return:
+                        //      null    指定的操作类型的权限没有定义
+                        //      ""      定义了指定类型的操作权限，但是否定的定义
+                        //      其它      权限列表。* 表示通配的权限列表
+                        string strActionList = GetDbOperRights(sessioninfo.Access,
+                            strBiblioDbName,
+                            "setbiblioinfo");
+                        if (strActionList == null)
+                        {
+                            // 看看是不是关于 setbiblioinfo 的任何权限都没有定义?
+                            strActionList = GetDbOperRights(sessioninfo.Access,
+                                "",
+                                "setbiblioinfo");
+                            if (strActionList == null)
+                            {
+                                goto SKIP_1;
+                            }
+                            else
+                            {
+                                strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{strBiblioDbName}' 执行 setbiblioinfo {strWriteAction} 操作的存取权限";
+                                result.Value = -1;
+                                result.ErrorInfo = strError;
+                                result.ErrorCode = ErrorCode.AccessDenied;
+                                return result;
+                            }
+                        }
+
+                        if (strActionList == "*")
+                        {
+                            // 通配
+                        }
+                        else
+                        {
+                            if (IsInAccessList(strWriteAction,
+                                strActionList,
+                                true,
+                                out strWriteAccessParameters) == false)
+                            {
+                                strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{strBiblioDbName}' 执行 setbiblioinfo {strWriteAction} 操作的存取权限";
+                                result.Value = -1;
+                                result.ErrorInfo = strError;
+                                result.ErrorCode = ErrorCode.AccessDenied;
+                                return result;
+                            }
+                        }
+
+                    }
+
                 SKIP_1:
 
                     // *** 第二步，检查目标数据库相关权限
@@ -7750,7 +7861,7 @@ out strError);
                                 true,   // 2023/3/20
                                 out strWriteAccessParameters) == false)
                             {
-                                strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{strBiblioDbName}' 执行 setbiblioinfo {strWriteAction} 操作的存取权限";
+                                strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{strTargetBiblioDbName}' 执行 setbiblioinfo {strWriteAction} 操作的存取权限";
                                 result.Value = -1;
                                 result.ErrorInfo = strError;
                                 result.ErrorCode = ErrorCode.AccessDenied;

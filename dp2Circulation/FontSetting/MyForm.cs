@@ -1211,15 +1211,19 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
             {
                 if (this.WindowState == FormWindowState.Maximized)
                 {
-                    SuspendDrawing(this.MdiParent);
+                    if (this.MdiParent != null)
+                        SuspendDrawing(this.MdiParent);
                     var old_state = this.WindowState;
                     this.WindowState = FormWindowState.Normal;
-                    foreach (var child in this.MdiParent.MdiChildren)
+                    if (this.MdiParent != null)
                     {
-                        if (child != this)
-                            child.WindowState = FormWindowState.Maximized;
+                        foreach (var child in this.MdiParent.MdiChildren)
+                        {
+                            if (child != this)
+                                child.WindowState = FormWindowState.Maximized;
+                        }
+                        ResumeDrawing(this.MdiParent);
                     }
-                    ResumeDrawing(this.MdiParent);
                 }
             }
 
@@ -1230,11 +1234,15 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
 
         public static void SuspendDrawing(Control control)
         {
+            if (control == null)
+                return;
             API.SendMessage(control.Handle, WM_SETREDRAW, IntPtr.Zero, IntPtr.Zero);
         }
 
         public static void ResumeDrawing(Control control)
         {
+            if (control == null)
+                return;
             API.SendMessage(control.Handle, WM_SETREDRAW, new IntPtr(1), IntPtr.Zero);
             control.Invalidate(true);
         }
@@ -3714,8 +3722,15 @@ Keys keyData)
             // TODO: 如果是多个 URL，需要出现一个对话框让用户选择。每个 URL 需要跟一个小标题
             if (string.IsNullOrEmpty(this.HelpUrl) == false)
             {
-                // Process.Start("IExplore.exe", this.HelpUrl);
-                Process.Start(this.HelpUrl);
+                try
+                {
+                    // Process.Start("IExplore.exe", this.HelpUrl);
+                    Process.Start(this.HelpUrl);
+                }
+                catch
+                {
+
+                }
                 return;
             }
             // TODO: 最好跳转到一个帮助目录页面
@@ -4555,9 +4570,15 @@ TaskScheduler.Default);
             MainForm.StatusBarMessage = biblioRecPathList.Count.ToString()
             + "条记录成功保存到文件 " + dlg.OutputFileName;
 
-            // 打开一个浏览器
-            System.Diagnostics.Process.Start(// "iexplore",
-        dlg.OutputFileName);
+            try
+            {
+                // 打开一个浏览器
+                System.Diagnostics.Process.Start(dlg.OutputFileName);
+            }
+            catch
+            {
+                // 机器上没有安装浏览器，或者浏览器没有关联 .html .htm 扩展名
+            }
 
             return new NormalResult
             {

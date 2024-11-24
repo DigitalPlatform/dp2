@@ -1098,7 +1098,14 @@ namespace dp2Circulation
 
         private void Dlg_createBiblioDatabase_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            Process.Start("https://github.com/DigitalPlatform/dp2/wiki/%E5%A6%82%E4%BD%95%E5%88%9B%E5%BB%BA%E6%88%96%E5%88%A0%E9%99%A4%E4%B9%A6%E7%9B%AE%E5%BA%93");
+            try
+            {
+                Process.Start("https://github.com/DigitalPlatform/dp2/wiki/%E5%A6%82%E4%BD%95%E5%88%9B%E5%BB%BA%E6%88%96%E5%88%A0%E9%99%A4%E4%B9%A6%E7%9B%AE%E5%BA%93");
+            }
+            catch
+            {
+
+            }
         }
 
         // 创建规范库
@@ -1879,7 +1886,14 @@ namespace dp2Circulation
 
         private void Dlg_recreateBiblioDatabase_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            Process.Start("https://github.com/DigitalPlatform/dp2/wiki/%E5%A6%82%E4%BD%95%E5%88%9B%E5%BB%BA%E6%88%96%E5%88%A0%E9%99%A4%E4%B9%A6%E7%9B%AE%E5%BA%93");
+            try
+            {
+                Process.Start("https://github.com/DigitalPlatform/dp2/wiki/%E5%A6%82%E4%BD%95%E5%88%9B%E5%BB%BA%E6%88%96%E5%88%A0%E9%99%A4%E4%B9%A6%E7%9B%AE%E5%BA%93");
+            }
+            catch
+            {
+
+            }
         }
 
         // 修改数据库特性
@@ -2376,7 +2390,14 @@ namespace dp2Circulation
 
         private void ReaderDatabaseDialog_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            Process.Start("https://github.com/DigitalPlatform/dp2/wiki/%E5%A6%82%E4%BD%95%E5%88%9B%E5%BB%BA%E6%88%96%E5%88%A0%E9%99%A4%E8%AF%BB%E8%80%85%E5%BA%93");
+            try
+            {
+                Process.Start("https://github.com/DigitalPlatform/dp2/wiki/%E5%A6%82%E4%BD%95%E5%88%9B%E5%BB%BA%E6%88%96%E5%88%A0%E9%99%A4%E8%AF%BB%E8%80%85%E5%BA%93");
+            }
+            catch
+            {
+
+            }
         }
 
         // 创建违约金库
@@ -5976,7 +5997,14 @@ namespace dp2Circulation
 
         private void DlgNewLocation_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            Process.Start("https://github.com/DigitalPlatform/dp2/wiki/%E5%A6%82%E4%BD%95%E6%96%B0%E5%A2%9E%E9%A6%86%E8%97%8F%E5%9C%B0%E5%B9%B6%E8%AE%BE%E7%BD%AE%E6%98%AF%E5%90%A6%E5%8F%82%E4%B8%8E%E6%B5%81%E9%80%9A");
+            try
+            {
+                Process.Start("https://github.com/DigitalPlatform/dp2/wiki/%E5%A6%82%E4%BD%95%E6%96%B0%E5%A2%9E%E9%A6%86%E8%97%8F%E5%9C%B0%E5%B9%B6%E8%AE%BE%E7%BD%AE%E6%98%AF%E5%90%A6%E5%8F%82%E4%B8%8E%E6%B5%81%E9%80%9A");
+            }
+            catch
+            {
+
+            }
         }
 
         // 修改馆藏地点事项
@@ -6036,7 +6064,14 @@ namespace dp2Circulation
 
         private void DlgModifyLocation_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            Process.Start("https://github.com/DigitalPlatform/dp2/wiki/%E5%A6%82%E4%BD%95%E6%96%B0%E5%A2%9E%E9%A6%86%E8%97%8F%E5%9C%B0%E5%B9%B6%E8%AE%BE%E7%BD%AE%E6%98%AF%E5%90%A6%E5%8F%82%E4%B8%8E%E6%B5%81%E9%80%9A");
+            try
+            {
+                Process.Start("https://github.com/DigitalPlatform/dp2/wiki/%E5%A6%82%E4%BD%95%E6%96%B0%E5%A2%9E%E9%A6%86%E8%97%8F%E5%9C%B0%E5%B9%B6%E8%AE%BE%E7%BD%AE%E6%98%AF%E5%90%A6%E5%8F%82%E4%B8%8E%E6%B5%81%E9%80%9A");
+            }
+            catch
+            {
+
+            }
         }
 
         const int LOCATION_COLUMN_LIBRARYCODE = 0;

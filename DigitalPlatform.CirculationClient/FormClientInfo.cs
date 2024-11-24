@@ -20,6 +20,7 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.License;
 using DigitalPlatform.Text;
 using Ionic.Zip;
+using Serilog.Events;
 using static DigitalPlatform.CirculationClient.ClientInfo;
 
 namespace DigitalPlatform.CirculationClient
@@ -40,9 +41,10 @@ namespace DigitalPlatform.CirculationClient
         //      false   初始化失败，应立刻退出应用程序
         public static bool Initial(string product_name,
             Delegate_skipSerialNumberCheck skipCheck = null,
-            string style = "")
+            string style = "",
+            LogEventLevel level = LogEventLevel.Information)
         {
-            var ret = ClientInfo.Initial(product_name, style);
+            var ret = ClientInfo.Initial(product_name, style, level);
             if (ret == false)
                 return false;
 

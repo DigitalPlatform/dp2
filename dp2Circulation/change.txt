@@ -668,3 +668,155 @@ Ctrl+A 出现的小菜单中，应该有一项列出所有命令(包括当前不
 BatchSearch() 方式耗费的时间: 18:58:48-19:51:50 21:16:55-22:14:18
 
 release 版 22:52:08-23:48:01
+
+~~~
+检索词为空的跳过检索。可以在操作历史属性页提示出现了空格检索词。
+
+~~~
+https://testbook.com/objective-questions/mcq-on-standards-of-bibliographic-record-formats-descri--64f9c0bc4bcb7c7e344965a3
+
+~~~
+种册窗保存记录的时候，如果 dp2kernel 检索点创建失败，但目前 record 记录已经创建成功。
+这样会令人迷惑。建议改进为创建检索点失败时，也把 record 记录删除。但尾号已经推动了，不好退回去了。
+如果暂时不改进，最好在报错提示中说“虽然 ... 失败，但元数据记录已经创建成功”
+
+keys 配置文件修改后，最好自动刷新一次书目查询窗的检索途径列表
+
+~~~
+提供一种管理命令，可以重新 InitialKdbs()。用于 dp2rms 等工具修改了 keys 配置文件之后
+
+~~~
+批检索出现通讯中断的时候，要能自动重试处理
+
+~~~~
+Windows 7 32bit 2G
+https://jingyan.baidu.com/article/9158e00042c4b4a255122872.html
+
+~~~
+组合检索的表格，应该允许新增一行、一列。删除一行、一列。
+移除所有行。也就是清除。分为，包括列标题，保留列标题。
+
+~~~
+https://xmanyou.com/how-to-enable-dns-over-https-on-windows/
+
+~~~
+SetBiblioInfo() API 考虑增加一个参数 comment，记载前端遇到时间戳冲突
+时强行保存的情况
+
+~~~
+把接口 .exe 程序拷贝到 dp2library 的程序文件夹。
+(这里有个问题，就是当 dp2installer 升级 dp2library 模块的时候，程序文件夹
+里面的 .exe 程序可能丢失。那这样就需要考虑把 .exe 放到数据文件夹中？不过放到
+数据文件夹里面一个问题就是，用户可以上传任意 .exe 到这里，会有一定的安全性隐患。
+还有一个办法就是放到 c:\ 下面一个固定位置，这里用户无法上传覆盖到这里)
+
+
+library.xml 中根元素下增加：
+1) 测试、从 test.xml 文件中得到数据：
+    <patronReplication exePath="!copy %datadir%/patronReplication/test.xml" patronDbName="同步读者" idElementName="qywx" idFromName="企业微信" />
+2) 正式：
+    <patronReplication exePath="%bindir%/zgyPatronReplication.exe" patronDbName="同步读者" idElementName="qywx" idFromName="企业微信" />
+
+
+
+(patronReplication/@idFromName)
+            // patronReplication/@idFromName 一般可以缺省。
+            // 如果缺省，表示自动从 idElementName 推断 ID 检索途径的名字。对于系统标准支持的 barcode 和 cardNumber 元素，可以自动推断出来
+            // 但如果 idElementName 是一个自定义的元素名时，无法自动推断，则需要明确定义 patronReplication/@idFromName 属性值才行。
+
+library.xml 中 circulation 元素内增加属性:
+    patronReplicationFields="qywx" 
+    patronAdditionalFields="qywx"
+    acceptBlankReaderBarcode="true" (注: 如果为 false，则同步的时候会报错说创建记录不允许证条码号为空)
+
+library.xml 中 monitors 元素下添加:
+        <patronReplication startTime="23:00" />
+注意 patronReplication 元素名里面没有 Monitor 字样。
+
+为所有读者库增配一个“企业微信”检索点：
+keys 文件片段:
+	<key>
+		<xpath>*/qywx</xpath>
+		<from>qywx</from>
+		<table ref="qywx" />
+	</key>
+	<table name="qywx" id="20">
+		<convert>
+			<string style="upper,split" />
+		</convert>
+		<convertquery>
+			<string style="upper" />
+		</convertquery>
+		<caption lang="zh-CN">企业微信</caption>
+		<caption lang="en">Qiye Wexin</caption>
+	</table>
+
+为所有读者库的 browse 配置文件增加一列 qywx:
+  <col title="企业微信">
+    <xpath>*/qywx</xpath>
+  </col>
+
+
+dp2library 中读者同步模块要设计一种语法，表示如果以前不存在这条记录，则某个元素采用缺省值什么什么。
+比如 <readerType dprms:default>普通</readerType>
+
+由于用户单位已经有了大概两个读者库，首先需要用企业微信里面获得的一个 .xml
+文件，去合并匹配现有的读者记录，为这些读者记录加入 qywx 元素。注意此前
+要在 library.xml 暂时删除 patronReplication 元素，禁用读者同步功能。
+
+(合并可以用读者查询窗的从 Excel 文件合并功能。Excel 文件从何而来？可以用企业
+微信里面获得的 .xml 文件，先用 dp2batch 导入一个临时的读者库，然后用内务的
+读者查询窗检索出这些记录，在浏览列表中全选导出到一个 Excel 文件。然后对 Excel 
+文件删除大部分列，只留下 qywx name department 这几列。合并时候的 key 要用 name 列。
+之所以包含 department 列，是因为在合并过程中，弹出对话框选择命中多条读者记录
+情形时，需要看到 department 列有助于进行选择)
+
+注: 上述临时读者库的 browse 文件要修改，增加 qywx 列。不然导出到 Excel 时就会缺这一列。
+注: 将来，从 Excel 导入合并到读者库的功能，要增加从(Windows 剪贴板中的) tabbed text 粘贴过来的功能
+
+合并完成后，然后在 library.xml 启用 patronReplication 元素。
+
+library.xml 通过 monitors 元素，设置好读者同步的每日时刻。避免过分频繁地进行每日同步。
+内务的批处理任务窗依然可以临时触发读者同步任务。
+
+将 library.xml 中 patronReplication 以及其它重要配置参数的配置方法，写入
+从卡中心获取数据的 .exe 源代码的注释中。
+
+关于读者库的多库安排(基于同步策略的考量)：
+
+一般原有的读者库保留不变。为了同步需要新创建一个名为“同步读者”的读者库，并在 patronReplication/@patronDbName 中使用这个读者库名。
+这样，当 dp2library 进行同步的时候，来自卡中心的读者记录，先对所有读者库按照 ID 字段进行检索，
+如果匹配上，则更新匹配上的这条记录，注意这条记录可能在原有的读者库中。如果没有匹配上，
+则会在“同步读者”库中新增一条读者记录。
+当卡中心的记录发生删除的时候，dp2library 同步的时候，会尝试从“同步读者”库中标记删除
+对应的读者记录。注意，并不会从原有的读者库中去标记删除(虽然明显可以匹配的)记录。
+这可以理解成，原有的读者库，这种身份，保护了里面的读者记录免受标记删除。
+
+另一个不常见的方案，是利用原有的唯一的读者库，在 patronReplication/@patronDbName 中使用这个读者库名，
+这样，dp2library 同步的时候，会把读者库中的所有记录和来自卡中心的记录进行集合运算，读者库中那些
+多于卡中心的读者记录，会被标记删除。也就是说，读者库里面的记录没有上述免受标记删除的待遇了。
+不过，记录被标记删除也不一定是不好的事情。
+遇到标记删除的记录，可以这样处理：如果想恢复这条记录的可用状态(为啥？...)，可尝试找到这条读者记录重复了的其它读者记录，
+如果找到了，把这条记录的 qywx 元素内容转移到被标记删除的、打算继续使用的记录中。然后把被转移的记录手动操作一下物理删除。
+注: "如果想恢复这条记录的可用状态"，动机可能是因为这条记录使用时间很长，挂着以前的借阅历史。这条记录比后来同步自动建立起来的记录更有价值。
+
+建议建立模拟环境，把两种策略都尝试验证一下。以用户单位角度，评估一下效果优劣。
+
+
+~~~~
+move 书目记录
+如果当前账户不具备针对目标库的 read 权限，则在获得 ..._autogen.cs 配置文件
+的阶段会报错说权限不够。
+中文图书/1 --> 测试/?
+中文图书:getbiblioinfo=*|setbiblioinfo=
+
+
+如果当前账户具备源库和目标库的读权限，但不具备写权限 
+中文图书/1 --> 测试/?
+中文图书:getbiblioinfo=*|setbiblioinfo=;测试:getbiblioinfo=*|setbiblioinfo=
+当前用户 'supervisor'  不具备 针对数据库 '测试' 执行 setbiblioinfo new 操作的存取权限
+
+
+中文图书/1 --> 测试/1
+中文图书:getbiblioinfo=*|setbiblioinfo=;测试:getbiblioinfo=*|setbiblioinfo=
+当前用户 'supervisor'  不具备 针对数据库 '测试' 执行 setbiblioinfo change 操作的存取权限

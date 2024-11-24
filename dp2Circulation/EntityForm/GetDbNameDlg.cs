@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
@@ -75,6 +76,12 @@ namespace dp2Circulation
                 }
             }
 
+            // 2024/11/21
+            if (this.MultipleSelection)
+            {
+                this.listBox_biblioDbNames.Items.Add("<全部>");
+            }
+
             // 选定项目
             if (String.IsNullOrEmpty(this.DbName) == false)
             {
@@ -92,6 +99,20 @@ namespace dp2Circulation
         void EnsureSelectedLineVisible()
         {
             ListBoxUtil.EnsureVisible(this.listBox_biblioDbNames, this.listBox_biblioDbNames.SelectedIndex);
+        }
+
+        // 2024/1120
+        // 是否允许多选
+        public bool MultipleSelection
+        {
+            get
+            {
+                return this.listBox_biblioDbNames.SelectionMode == SelectionMode.MultiSimple;
+            }
+            set
+            {
+                this.listBox_biblioDbNames.SelectionMode = value == true ? SelectionMode.MultiSimple : SelectionMode.One;
+            }
         }
 
         public string DbName
@@ -133,9 +154,9 @@ namespace dp2Circulation
 
         private void button_OK_Click(object sender, EventArgs e)
         {
-            if (this.textBox_dbName.Text == "")
+            if (string.IsNullOrEmpty(this.textBox_dbName.Text))
             {
-                MessageBox.Show(this, "请指定"+this.GetTypeName()+"库名");
+                MessageBox.Show(this, "请指定" + this.GetTypeName() + "库名");
                 return;
             }
             this.DialogResult = DialogResult.OK;
@@ -146,12 +167,17 @@ namespace dp2Circulation
         {
             this.DialogResult = DialogResult.Cancel;
             this.Close();
-
         }
 
         private void listBox_dbNames_SelectedIndexChanged(object sender, EventArgs e)
         {
-            this.textBox_dbName.Text = (string)this.listBox_biblioDbNames.SelectedItem;
+            if (this.MultipleSelection)
+            {
+                this.textBox_dbName.Text = string.Join(",", 
+                    this.listBox_biblioDbNames.SelectedItems.Cast<string>());
+            }
+            else
+                this.textBox_dbName.Text = (string)this.listBox_biblioDbNames.SelectedItem;
         }
 
         private void listBox_dbNames_DoubleClick(object sender, EventArgs e)

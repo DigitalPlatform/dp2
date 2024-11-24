@@ -41,7 +41,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>507</ApplicationRevision>
+    <ApplicationRevision>515</ApplicationRevision>
     <ApplicationVersion>3.135.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -493,12 +493,12 @@
   <PropertyGroup>
     <PreBuildEvent>CD /D $(ProjectDir)
 
-$(ProjectDir)..\updateAssemblyBinding\bin\debug\updateAssemblyBinding.exe source:$(ProjectDir)..\dp2opac\web.config target:$(ProjectDir)web.config
+$(ProjectDir)..\updateAssemblyBinding\bin\$(ConfigurationName)\updateAssemblyBinding.exe source:$(ProjectDir)..\dp2opac\web.config target:$(ProjectDir)web.config
 CALL copyopac.bat
 CALL copydata.bat</PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>REM ECHO copy sqlite.interop.dll to x86 and x64 from bin\debug directory
+    <PostBuildEvent>REM ECHO copy sqlite.interop.dll to x86 and x64 from bin\$(ConfigurationName) directory
 REM CD /D $(ProjectDir)
 REM MD x86
 REM xcopy $(TargetDir)x86 x86 /Y

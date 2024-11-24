@@ -32,8 +32,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.161.*")]
-[assembly: AssemblyFileVersion("3.161.0.0")]
+[assembly: AssemblyVersion("3.162.*")]
+[assembly: AssemblyFileVersion("3.162.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -395,4 +395,6 @@ ItemCanReturn()
 //						当利用 SetBiblioInfo() API 保存书目记录的时候，如果提交保存的记录里面具有 998$l，API 会自动检查 998$c 是否存在。如果不存在，并且这个书目库定义了 cr:xxx 角色，则自动添加这样内容的 998$c 然后保存；如果没有定义 cr:xxx 角色，则报错说必须要具备 998$c。
 //						如果提交保存的记录中不具有 998$l，则 API 不会进行上述检查和自动增补。
 //		3.161 (2024/10/21) 增加 BatchSearch() API
+//		3.162 (2024/11/5) 改进 BatchSearch() API: QueryResult 结构中增加 ResultSetName 成员
+//						search_style 增加 skipOversizeRecords 可用值
 

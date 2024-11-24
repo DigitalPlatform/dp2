@@ -1319,11 +1319,13 @@ InsertSequenceStyle.PreferTail);
                     var oldline = xml_diff_result.OldText.Lines[index];
 
                     XmlNode new_node = null;
-                    if (newline.Type != ChangeType.Imaginary)
+                    if (newline.Type != ChangeType.Imaginary
+                        && new_index < new_childnodes.Count/*2024/11/15*/)
                         new_node = new_childnodes[new_index++];
 
                     XmlNode old_node = null;
-                    if (oldline.Type != ChangeType.Imaginary)
+                    if (oldline.Type != ChangeType.Imaginary
+                        && old_index < old_childnodes.Count/*2024/11/15*/)
                         old_node = old_childnodes[old_index++];
 
                     if (newline.Type == ChangeType.Modified)

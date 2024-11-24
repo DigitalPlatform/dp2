@@ -1,3 +1,17 @@
+@echo off
+set argC=0
+for %%x in (%*) do set /A argC+=1
+if not "%argC%"=="1" (
+echo USAGE: 
+echo     %0 debug
+echo     -or-
+echo     %0 release
+goto :END
+)
+@echo on
+
+echo current configuration name: %1
+
 md opac_app
 cd opac_app
 
@@ -75,3 +89,5 @@ cd ..
 ..\ziputil opac_data opac_data.zip -t
 
 ..\ziputil opac_style opac_style.zip -t
+
+:END

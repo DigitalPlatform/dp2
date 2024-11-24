@@ -377,22 +377,25 @@ namespace dp2Circulation
                     if (string.IsNullOrEmpty(strFormat) == false)
                     {
                         nRet = GetCodeFromLocal(
-    strAutogenDataCfgFilename,
-out strCode,
-out strRef,
-out strError);
+                            strAutogenDataCfgFilename,
+                            out strCode,
+                            out strRef,
+                            out strError);
                     }
                     else
                     {
                         // 从服务器获得两个配置文件的内容
                         nRet = GetCode(
                             strAutogenDataCfgFilename,
-                out strCode,
-                out strRef,
-                out strError);
+                            out strCode,
+                            out strRef,
+                            out strError);
                     }
                     if (nRet == -1)
+                    {
+                        strError = $"获得配置文件 '{strAutogenDataCfgFilename}' 时出错: {strError}";
                         goto ERROR1;
+                    }
                     if (nRet == 1)
                         return 1;
 

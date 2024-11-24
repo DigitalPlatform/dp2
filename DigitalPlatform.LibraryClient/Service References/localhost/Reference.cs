@@ -2002,6 +2002,9 @@ namespace DigitalPlatform.LibraryClient.localhost {
         [System.Runtime.Serialization.OptionalFieldAttribute()]
         private DigitalPlatform.LibraryClient.localhost.FormatRecord[] RecordsField;
         
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string ResultSetNameField;
+        
         [global::System.ComponentModel.BrowsableAttribute(false)]
         public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
             get {
@@ -2073,6 +2076,19 @@ namespace DigitalPlatform.LibraryClient.localhost {
                 if ((object.ReferenceEquals(this.RecordsField, value) != true)) {
                     this.RecordsField = value;
                     this.RaisePropertyChanged("Records");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string ResultSetName {
+            get {
+                return this.ResultSetNameField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.ResultSetNameField, value) != true)) {
+                    this.ResultSetNameField = value;
+                    this.RaisePropertyChanged("ResultSetName");
                 }
             }
         }

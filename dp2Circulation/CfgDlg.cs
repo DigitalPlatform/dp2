@@ -1898,13 +1898,27 @@ this.textBox_ucs_filterScriptCode.Text);
         private void MenuItem_print_editCharingPrintCs_Click(object sender, EventArgs e)
         {
             string strFileName = Path.Combine(Program.MainForm.DataDir, "charging_print.cs");
-            System.Diagnostics.Process.Start("notepad.exe", strFileName);
+            try
+            {
+                System.Diagnostics.Process.Start("notepad.exe", strFileName);
+            }
+            catch
+            {
+
+            }
         }
 
         private void MenuItem_print_editCharingPrintCsRef_Click(object sender, EventArgs e)
         {
             string strFileName = Path.Combine(Program.MainForm.DataDir, "charging_print.cs.ref");
-            System.Diagnostics.Process.Start("notepad.exe", strFileName);
+            try
+            {
+                System.Diagnostics.Process.Start("notepad.exe", strFileName);
+            }
+            catch
+            {
+
+            }
         }
 
         // 打印方案管理
@@ -2245,14 +2259,27 @@ MessageBoxDefaultButton.Button2);
 
         private void linkLabel_installFingerprintCenter_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            var url = "https://dp2003.com/fingerprintcenter/v1/publish.htm";
-            Process.Start(url);
+            try
+            {
+                var url = "https://dp2003.com/fingerprintcenter/v1/publish.htm";
+                Process.Start(url);
+            }
+            catch
+            {
+            }
         }
 
         private void linkLabel_installFaceCenter_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            var url = "https://dp2003.com/facecenter/v1/publish.htm";
-            Process.Start(url);
+            try
+            {
+                var url = "https://dp2003.com/facecenter/v1/publish.htm";
+                Process.Start(url);
+            }
+            catch
+            {
+
+            }
         }
 
         private void button_fingerprint_setDefaultValue_new_Click(object sender, EventArgs e)

@@ -3098,12 +3098,12 @@ TaskScheduler.Default);
                         strText += "批次号 " + this.BatchNo;
 
                     /*
-                    if (String.IsNullOrEmpty(this.LocationString) == false
-                        && this.LocationString != "<不指定>")
+                    if (String.IsNullOrEmpty(this.LocationFilter) == false
+                        && this.LocationFilter != "<不指定>")
                     {
                         if (String.IsNullOrEmpty(strText) == false)
                             strText += "; ";
-                        strText += "馆藏地 " + this.LocationString;
+                        strText += "馆藏地 " + this.LocationFilter;
                     }*/
 
                     return this.BatchNo;

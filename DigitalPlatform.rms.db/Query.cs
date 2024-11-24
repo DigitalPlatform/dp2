@@ -784,9 +784,10 @@ namespace DigitalPlatform.rms
             // Delegate_isConnected isConnected,
             out string strError)
         {
-
+#if DEBUG
             DateTime start_time = DateTime.Now;
             Debug.WriteLine("Begin DoQuery()");
+#endif
 
             try
             {
@@ -877,8 +878,10 @@ namespace DigitalPlatform.rms
             }
             finally
             {
+#if DEBUG
                 TimeSpan delta = DateTime.Now - start_time;
                 Debug.WriteLine("End DoQuery() 耗时 " + delta.ToString());
+#endif
             }
         }
 
@@ -929,8 +932,10 @@ namespace DigitalPlatform.rms
             // Delegate_isConnected isConnected,
             out string strError)
         {
+#if DEBUG
             DateTime start_time = DateTime.Now;
             Debug.WriteLine("Begin ProceedRPN()");
+#endif
 
             try
             {
@@ -1416,8 +1421,10 @@ namespace DigitalPlatform.rms
             }
             finally
             {
+#if DEBUG
                 TimeSpan delta = DateTime.Now - start_time;
                 Debug.WriteLine("End ProceedRPN() 耗时 " + delta.ToString());
+#endif
             }
         }
 

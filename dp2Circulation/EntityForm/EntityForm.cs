@@ -9187,6 +9187,42 @@ out strError);
                     return 0;
             }
 
+            // 2024/11/9 注: BeforeSaveRecord 触发后，可能会导致 MARC 编辑器中的内容发生变化，
+            // 因此应该放在 GetBiblioXml() 之前完成
+
+            // 保存前的准备工作
+            {
+                // 初始化 dp2circulation_marc_autogen.cs 的 Assembly，并new DetailHost对象
+                // return:
+                //      -1  error
+                //      0   没有重新初始化Assembly，而是直接用以前Cache的Assembly
+                //      1   重新(或者首次)初始化了Assembly
+                nRet = this._genData.InitialAutogenAssembly(strTargetPath,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                if (this._genData.DetailHostObj != null)
+                {
+                    BeforeSaveRecordEventArgs e = new BeforeSaveRecordEventArgs();
+                    this.TryInvoke(() =>    // 2023/2/1
+                    {
+                        e.TargetRecPath = strTargetPath;
+                        // this._genData.DetailHostObj.BeforeSaveRecord(this.m_marcEditor, e);
+                        this._genData.DetailHostObj.Invoke("BeforeSaveRecord", this.m_marcEditor, e);
+                        if (string.IsNullOrEmpty(e.ErrorInfo) == false)
+                        {
+                            if (e.Cancel == false)
+                                this.MessageBoxShow("保存前的准备工作失败: " + e.ErrorInfo + "\r\n\r\n但保存操作仍将继续");
+                        }
+                    });
+                    if (e.Cancel == true)
+                    {
+                        strError = e.ErrorInfo;
+                        goto ERROR1;
+                    }
+                }
+            }
+
             // 获得书目记录XML格式
             nRet = this.GetBiblioXml(
                 "", // 迫使从记录路径中看marc格式
@@ -9203,39 +9239,6 @@ out strError);
                 strXmlBody);
             try
             {
-
-                // 保存前的准备工作
-                {
-                    // 初始化 dp2circulation_marc_autogen.cs 的 Assembly，并new DetailHost对象
-                    // return:
-                    //      -1  error
-                    //      0   没有重新初始化Assembly，而是直接用以前Cache的Assembly
-                    //      1   重新(或者首次)初始化了Assembly
-                    nRet = this._genData.InitialAutogenAssembly(strTargetPath,
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
-                    if (this._genData.DetailHostObj != null)
-                    {
-                        BeforeSaveRecordEventArgs e = new BeforeSaveRecordEventArgs();
-                        this.TryInvoke(() =>    // 2023/2/1
-                        {
-                            e.TargetRecPath = strTargetPath;
-                            // this._genData.DetailHostObj.BeforeSaveRecord(this.m_marcEditor, e);
-                            this._genData.DetailHostObj.Invoke("BeforeSaveRecord", this.m_marcEditor, e);
-                            if (string.IsNullOrEmpty(e.ErrorInfo) == false)
-                            {
-                                if (e.Cancel == false)
-                                    this.MessageBoxShow("保存前的准备工作失败: " + e.ErrorInfo + "\r\n\r\n但保存操作仍将继续");
-                            }
-                        });
-                        if (e.Cancel == true)
-                        {
-                            strError = e.ErrorInfo;
-                            goto ERROR1;
-                        }
-                    }
-                }
 
                 LibraryChannel channel = channel_param;
                 TimeSpan old_timeout = new TimeSpan(0);
@@ -9276,6 +9279,8 @@ out strError);
                     }
                     else
                     {
+                        // testring
+                        // strXmlBody = "";
                         nRet = SaveXmlBiblioRecordToDatabase(
                             stop,
                             channel,
@@ -9578,6 +9583,9 @@ out strError);
 
             string strXml = results[0];
 
+            // 2024/11/9
+            MainForm.WriteInfoLog($"保存书目记录 {strRecPath} 的过程中发生时间戳冲突。\r\n拟保存的记录: '{strSavingXml}'\r\n数据库中的现有记录内容:{strXml}");
+
             TimestampMismatchDialog dlg = null;
 
             var dialog_result = this.TryGet(() =>
@@ -9596,7 +9604,11 @@ out strError);
             if (dialog_result == System.Windows.Forms.DialogResult.OK)
             {
                 if (dlg.Action == "retrySave")
+                {
+                    // 2024/11/9
+                    MainForm.WriteInfoLog($"然后用户选择强行覆盖保存");
                     return 1;   // 重试强行覆盖
+                }
                 if (dlg.Action == "compareEdit")
                 {
                     if (this.Fixed == false)
@@ -9609,7 +9621,9 @@ out strError);
 
                             // 右侧打开一个新窗口显示数据库中的当前记录
                             EntityForm form = OpenNewEntityForm(strRecPath);
-                            form.ShowMessage("这是用于对比的，数据库中的记录", "green", true);
+                            form.ShowMessage("这是用于对比的，数据库中的记录", "green", false); // true
+                            // 2024/11/9
+                            MainForm.WriteInfoLog($"然后用户选择对比显示两个记录内容");
                         });
                     }
                 }
@@ -10038,6 +10052,9 @@ out strError);
             baNewTimestamp = null;
             strOutputPath = "";
 
+            // 2024/11/9
+            MainForm.WriteInfoLog($"开始保存书目记录 {strPath}。\r\nXML='{strXml}'\r\ntimestamp={ByteArray.GetHexTimeStampString(baTimestamp)}");
+
 #if NO
             Progress.OnStop += new StopEventHandler(this.DoStop);
             Progress.Initial("正在保存书目记录 ...");
@@ -10096,6 +10113,9 @@ out strError);
                 {
                     strWarning = "书目记录 '" + strPath + "' 保存成功，但所提交的字段部分被拒绝 (" + strError + ")。请留意刷新窗口，检查实际保存的效果";
                 }
+
+                // 2024/11/9
+                MainForm.WriteInfoLog($"保存记录 {strPath} 返回 lRet={lRet} strError='{strError}' strWarning='{strWarning}' strOutputPath='{strOutputPath}'");
 
                 // 2016/11/24
                 // 书目记录修改后，唯恐书目摘要也发生变化，所以这里清除本地全部书目摘要缓存
@@ -12923,7 +12943,10 @@ out strError);
             true,
             false);
                     if (string.IsNullOrEmpty(load_result.ErrorInfo) == false)
+                    {
+                        MainForm.WriteErrorLog($"记录保存成功，但重新装载进入种册窗时出错: {load_result.ErrorInfo}");
                         this.ShowMessage($"记录保存成功，但重新装载进入种册窗时出错: {load_result.ErrorInfo}", "red", true);
+                    }
                     else
                         this.ShowMessage("记录保存成功", "green", true);
                 }
@@ -14223,7 +14246,10 @@ out strError);
                 true,
                 false);
             if (result.Value != 1)
+            {
+                MainForm.WriteErrorLog($"DoPendingList() 中 LoadRecordAsync() 出错: {result.ErrorInfo}");
                 this.ShowMessage(result.ErrorInfo, "red", true);
+            }
 
             lock (this.m_listPendingLoadRequest)
             {
@@ -17525,7 +17551,14 @@ out string error1);
                 var tempfilename = Path.Combine(Program.MainForm.UserTempDir, "~upload_filtered.xml");
                 var indented = DomUtil.GetIndentXml(xml);
                 File.WriteAllText(tempfilename, indented);
-                System.Diagnostics.Process.Start("notepad", tempfilename);
+                try
+                {
+                    System.Diagnostics.Process.Start("notepad", tempfilename);
+                }
+                catch
+                {
+
+                }
                 return;
             }
 

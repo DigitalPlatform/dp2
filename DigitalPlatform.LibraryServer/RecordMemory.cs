@@ -336,6 +336,23 @@ namespace DigitalPlatform.LibraryServer
                 return true;
             return false;
         }
+
+        // 2024/10/22
+        // 判断一个范围字符串，是否为最后一个分片
+        public static bool IsTailChunk(string range, long total_length)
+        {
+            var rangeList = new RangeList(range);
+            if (rangeList.Count == 0)
+            {
+                if (total_length == 0)
+                    return true;
+                return false; // 当 range 为空字符串时，作用为写入一条空白记录
+            }
+            var tail = rangeList[rangeList.Count - 1];
+            if (tail.lStart + tail.lLength >= total_length)
+                return true;
+            return false;
+        }
     }
 
     class ChunkItem
