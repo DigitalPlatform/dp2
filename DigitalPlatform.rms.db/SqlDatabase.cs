@@ -39,6 +39,7 @@ using DigitalPlatform.Core;
 using static DigitalPlatform.rms.KeysCfg;
 using System.Windows.Forms;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace DigitalPlatform.rms
 {
@@ -4038,17 +4039,19 @@ ex);
         + "\n";
             }
 
-            int nRet = ExecuteQueryFillResultSet(
+            var result = ExecuteQueryFillResultSet(
         handle,
         strCommand,
         aSqlParameter,
         resultSet,
         searchItem.MaxCount,
         GetOutputStyle(strOutputStyle),
-        true,
-        out strError);
-            if (nRet == -1 || nRet == 0)
-                return nRet;
+        true);
+            if (result.Value == -1 || result.Value == 0)
+            {
+                strError = result.ErrorString;
+                return (int)result.Value;
+            }
 #if NO
             // SQLite采用保守连接
             Connection connection = new Connection(this,
@@ -4149,59 +4152,30 @@ handle.CancelTokenSource.Token).Result;
             ID = 3,
         }
 
-        int ExecuteQueryFillResultSet(
+        // 2024/11/30 改造为 async
+        Result ExecuteQueryFillResultSet(
         ChannelHandle handle,
         string strCommand,
         List<DbParameter> aSqlParameter,
         DpResultSet resultSet,
         int nMaxCount,
         OutputStyle style,
-        bool bRecordTable,
-        out string strError)
+        bool bRecordTable/*,
+        out string strError*/)
         {
-            strError = "";
+            string strError = "";
 
             Connection connection = null;
 
             {
                 // 注意: SQLite 这里的连接字符串是和具体数据库关联的
-                connection = new Connection(this,
-        this.m_strConnString);
+                connection = new Connection(this, this.m_strConnString);
                 connection.TryOpen();
             }
             try
             {
                 // 通用
                 var command = connection.NewCommand(strCommand) as DbCommand;
-#if OLD_CODE
-                DbCommand command = null;
-                if (this.container.SqlServerType == SqlServerType.MsSqlServer)
-                {
-                    command = new SqlCommand(strCommand,
-                    connection.SqlConnection);
-                }
-                else if (this.container.SqlServerType == SqlServerType.SQLite)
-                {
-                    command = new SQLiteCommand(strCommand,
-                    connection.SQLiteConnection
-                    //lite_connection
-                    );
-                }
-                else if (this.container.SqlServerType == SqlServerType.MySql)
-                {
-                    command = new MySqlCommand(strCommand,
-                    connection.MySqlConnection);
-                }
-                else if (this.container.SqlServerType == SqlServerType.Oracle)
-                {
-                    command = new OracleCommand(strCommand,
-                         connection.OracleConnection);
-                    ((OracleCommand)command).BindByName = true;
-                }
-                else
-                    throw new ArgumentException("未知的 connection.SqlServerType '" + connection.SqlServerType.ToString() + "'");
-#endif
-
 
                 // ****
                 using (command)
@@ -4223,9 +4197,29 @@ handle.CancelTokenSource.Token).Result;
 ).Result;
 #endif
 
+                    var task = command.ExecuteReaderAsync(CommandBehavior.CloseConnection);
+                    // 2024/11/30
+                    task.Wait(handle.CancelToken);
+                    if (handle.CancelToken.IsCancellationRequested)
+                    {
+                        // 2024/11/30
+                        command.Cancel();
+                        return new Result
+                        {
+                            Value = -1,
+                            ErrorCode = ErrorCodeValue.Canceled,
+                            ErrorString = "检索被中断"
+                        };
+                    }
+                    /*
+                    while(task.IsCompleted == false)
+                    {
+                        Thread.Sleep(1);
+                    }
+                    */
                     // 尝试一下不用 CancellationToken。因为怀疑这样用会导致触发 Cancel 的时候让 MySQL Driver 代码死锁
                     // 2019/9/8 加上的 using
-                    using (DbDataReader reader = command.ExecuteReaderAsync(CommandBehavior.CloseConnection).Result)
+                    using (DbDataReader reader = task.Result)
                     {
 
                         // 从 DbDataReader 中获取和填入记录到一个结果集对象中
@@ -4240,24 +4234,42 @@ handle.CancelTokenSource.Token).Result;
                                 nMaxCount,
                                 style,  // GetOutputStyle(strOutputStyle),
                                 bRecordTable,
+                                () => {
+                                    command.Cancel();
+                                },
                                 out strError);
                         if (nRet == -1 || nRet == 0)
-                            return nRet;
+                        {
+                            command.Cancel();
+                            return new Result
+                            {
+                                Value = nRet,
+                                ErrorString = strError
+                            };
+                        }
                     }
                 } // end of using command
 
-                return 0;
+                return new Result { Value = 0 };
             }
             catch (SqlException sqlEx)
             {
                 strError = GetSqlErrors(sqlEx);
-                return -1;
+                return new Result
+                {
+                    Value = -1,
+                    ErrorString = strError
+                };
             }
             catch (Exception ex)
             {
                 // 注意这里可能捕获到 AggregationException，所以要用 ExceptionUtil.GetExceptionText() 来输出异常信息
                 strError = "ExecuteQueryFillResultSet() exception:\r\n" + ExceptionUtil.GetExceptionText(ex) + "\r\nSQL command: " + strCommand;
-                return -1;
+                return new Result
+                {
+                    Value = -1,
+                    ErrorString = strError
+                };
             }
             finally // 连接
             {
@@ -4268,9 +4280,12 @@ handle.CancelTokenSource.Token).Result;
             }
         }
 
+        delegate void delegate_cancel();
+
         // 从 DbDataReader 中获取和填入记录到一个结果集对象中
         // parameters:
         //      bRecordTable    是否为从 record 表中 select 出来的结果？(否则就是 keys 表)
+        //      func_cancel     当放弃检索时需要触发的回调函数
         // return:
         //      -1  出错
         //      0   没有填入任何记录
@@ -4282,6 +4297,7 @@ handle.CancelTokenSource.Token).Result;
         int nMaxCount,
         OutputStyle style,
         bool bRecordTable,
+        delegate_cancel func_cancel,
         out string strError)
         {
             strError = "";
@@ -4314,8 +4330,12 @@ handle.CancelTokenSource.Token).Result;
                                         }
                                     }
 #endif
-                    if (token.IsCancellationRequested)
+                    if ((nGetedCount % 1000) == 0
+                        && token.IsCancellationRequested)
                     {
+                        // 2024/11/30
+                        // 如果不用 Command.Cancel()，则 DataReader.Close() 会滞留较长时间
+                        func_cancel?.Invoke();
                         strError = "用户中断";
                         return -1;
                     }
@@ -4358,11 +4378,15 @@ handle.CancelTokenSource.Token).Result;
                     // 超过最大数了
                     if (nMaxCount != -1
                         && nGetedCount >= nMaxCount)
+                    {
+                        func_cancel?.Invoke();
                         break;
+                    }
 
-                    // Thread.Sleep(0);
+                    /*
                     if (nGetedCount % 100 == 0)
                         Thread.Sleep(1);
+                    */
                 }
 
                 return nGetedCount;
@@ -5705,17 +5729,19 @@ List<DbParameter> aSqlParameter)
                     return -1;
                 }
 
-                nRet = ExecuteQueryFillResultSet(
+                var result = ExecuteQueryFillResultSet(
             handle,
             strCommand,
             aSqlParameter,
             resultSet,
             searchItem.MaxCount,
             GetOutputStyle(strOutputStyle),
-            false,
-            out strError);
-                if (nRet == -1 || nRet == 0)
-                    return nRet;    // ???
+            false);
+                if (result.Value == -1 || result.Value == 0)
+                {
+                    strError = result.ErrorString;
+                    return (int)result.Value;    // ???
+                }
             }
             catch (Exception ex)
             {

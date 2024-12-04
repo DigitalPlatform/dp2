@@ -1152,10 +1152,10 @@
   </wsp:Policy>
   <wsdl:types>
     <xsd:schema targetNamespace="http://dp2003.com/dp2kernel/Imports">
-      <xsd:import schemaLocation="http://localhost:8005/dp2kernel/metadata?xsd=xsd0" namespace="http://dp2003.com/dp2kernel/" />
-      <xsd:import schemaLocation="http://localhost:8005/dp2kernel/metadata?xsd=xsd1" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
-      <xsd:import schemaLocation="http://localhost:8005/dp2kernel/metadata?xsd=xsd2" namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
-      <xsd:import schemaLocation="http://localhost:8005/dp2kernel/metadata?xsd=xsd3" namespace="http://schemas.datacontract.org/2004/07/DigitalPlatform.rms" />
+      <xsd:import schemaLocation="http://localhost/dp2kernel/metadata?xsd=xsd0" namespace="http://dp2003.com/dp2kernel/" />
+      <xsd:import schemaLocation="http://localhost/dp2kernel/metadata?xsd=xsd1" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
+      <xsd:import schemaLocation="http://localhost/dp2kernel/metadata?xsd=xsd2" namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
+      <xsd:import schemaLocation="http://localhost/dp2kernel/metadata?xsd=xsd3" namespace="http://schemas.datacontract.org/2004/07/DigitalPlatform.rms" />
     </xsd:schema>
   </wsdl:types>
   <wsdl:message name="KernelService_DoTest_InputMessage">
@@ -1999,15 +1999,15 @@
   </wsdl:binding>
   <wsdl:service name="KernelService">
     <wsdl:port name="NetNamedPipeBinding_KernelService" binding="tns:NetNamedPipeBinding_KernelService">
-      <soap12:address location="net.pipe://localhost/dp2kernel/" />
+      <soap12:address location="net.pipe://localhost/dp2kernel/mysql/" />
       <wsa10:EndpointReference>
-        <wsa10:Address>net.pipe://localhost/dp2kernel/</wsa10:Address>
+        <wsa10:Address>net.pipe://localhost/dp2kernel/mysql/</wsa10:Address>
       </wsa10:EndpointReference>
     </wsdl:port>
     <wsdl:port name="WSHttpBinding_KernelService" binding="tns:WSHttpBinding_KernelService">
-      <soap12:address location="http://localhost:8005/dp2kernel" />
+      <soap12:address location="http://localhost/dp2kernel" />
       <wsa10:EndpointReference>
-        <wsa10:Address>http://localhost:8005/dp2kernel</wsa10:Address>
+        <wsa10:Address>http://localhost/dp2kernel</wsa10:Address>
         <Identity xmlns="http://schemas.xmlsoap.org/ws/2006/02/addressingidentity">
           <KeyInfo xmlns="http://www.w3.org/2000/09/xmldsig#">
             <X509Data>

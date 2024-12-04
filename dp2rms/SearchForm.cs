@@ -228,13 +228,13 @@ namespace dp2rms
             this.comboBox_complex_db1 = new System.Windows.Forms.ComboBox();
             this.textBox_complex_word1 = new System.Windows.Forms.TextBox();
             this.tabPage_queryXml = new System.Windows.Forms.TabPage();
-            this.button_xmlQuerySearch = new System.Windows.Forms.Button();
+            this.splitContainer_xml = new System.Windows.Forms.SplitContainer();
             this.textBox_xmlQueryString = new System.Windows.Forms.TextBox();
+            this.textBox_xmlQuery_comment = new System.Windows.Forms.TextBox();
+            this.button_xmlQuerySearch = new System.Windows.Forms.Button();
             this.toolTip_serverUrl = new System.Windows.Forms.ToolTip(this.components);
             this.splitContainer_main = new System.Windows.Forms.SplitContainer();
             this.listView_browse = new DigitalPlatform.rms.Client.BrowseList();
-            this.splitContainer_xml = new System.Windows.Forms.SplitContainer();
-            this.textBox_xmlQuery_comment = new System.Windows.Forms.TextBox();
             this.tabControl_query.SuspendLayout();
             this.tabPage_querySimple.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_simpleQeury)).BeginInit();
@@ -244,14 +244,14 @@ namespace dp2rms
             this.panel_simpleQueryOther.SuspendLayout();
             this.tabPage_queryAdvance.SuspendLayout();
             this.tabPage_queryXml.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).BeginInit();
-            this.splitContainer_main.Panel1.SuspendLayout();
-            this.splitContainer_main.Panel2.SuspendLayout();
-            this.splitContainer_main.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_xml)).BeginInit();
             this.splitContainer_xml.Panel1.SuspendLayout();
             this.splitContainer_xml.Panel2.SuspendLayout();
             this.splitContainer_xml.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).BeginInit();
+            this.splitContainer_main.Panel1.SuspendLayout();
+            this.splitContainer_main.Panel2.SuspendLayout();
+            this.splitContainer_main.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl_query
@@ -263,7 +263,7 @@ namespace dp2rms
             this.tabControl_query.Location = new System.Drawing.Point(0, 0);
             this.tabControl_query.Name = "tabControl_query";
             this.tabControl_query.SelectedIndex = 0;
-            this.tabControl_query.Size = new System.Drawing.Size(536, 231);
+            this.tabControl_query.Size = new System.Drawing.Size(671, 314);
             this.tabControl_query.TabIndex = 0;
             this.tabControl_query.SelectedIndexChanged += new System.EventHandler(this.tabControl_query_SelectedIndexChanged);
             // 
@@ -271,10 +271,10 @@ namespace dp2rms
             // 
             this.tabPage_querySimple.BackColor = System.Drawing.Color.Transparent;
             this.tabPage_querySimple.Controls.Add(this.splitContainer_simpleQeury);
-            this.tabPage_querySimple.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_querySimple.Location = new System.Drawing.Point(4, 31);
             this.tabPage_querySimple.Name = "tabPage_querySimple";
             this.tabPage_querySimple.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_querySimple.Size = new System.Drawing.Size(528, 205);
+            this.tabPage_querySimple.Size = new System.Drawing.Size(663, 279);
             this.tabPage_querySimple.TabIndex = 0;
             this.tabPage_querySimple.Text = "简单";
             this.tabPage_querySimple.UseVisualStyleBackColor = true;
@@ -292,8 +292,8 @@ namespace dp2rms
             // splitContainer_simpleQeury.Panel2
             // 
             this.splitContainer_simpleQeury.Panel2.Controls.Add(this.panel_simpleQueryOther);
-            this.splitContainer_simpleQeury.Size = new System.Drawing.Size(522, 199);
-            this.splitContainer_simpleQeury.SplitterDistance = 209;
+            this.splitContainer_simpleQeury.Size = new System.Drawing.Size(657, 273);
+            this.splitContainer_simpleQeury.SplitterDistance = 263;
             this.splitContainer_simpleQeury.TabIndex = 0;
             // 
             // treeView_simpleQueryResTree
@@ -304,7 +304,7 @@ namespace dp2rms
             this.treeView_simpleQueryResTree.Location = new System.Drawing.Point(0, 0);
             this.treeView_simpleQueryResTree.Name = "treeView_simpleQueryResTree";
             this.treeView_simpleQueryResTree.SelectedImageIndex = 0;
-            this.treeView_simpleQueryResTree.Size = new System.Drawing.Size(209, 199);
+            this.treeView_simpleQueryResTree.Size = new System.Drawing.Size(263, 273);
             this.treeView_simpleQueryResTree.TabIndex = 0;
             // 
             // panel_simpleQueryOther
@@ -318,14 +318,14 @@ namespace dp2rms
             this.panel_simpleQueryOther.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel_simpleQueryOther.Location = new System.Drawing.Point(0, 0);
             this.panel_simpleQueryOther.Name = "panel_simpleQueryOther";
-            this.panel_simpleQueryOther.Size = new System.Drawing.Size(309, 199);
+            this.panel_simpleQueryOther.Size = new System.Drawing.Size(390, 273);
             this.panel_simpleQueryOther.TabIndex = 2;
             // 
             // button_test
             // 
-            this.button_test.Location = new System.Drawing.Point(6, 52);
+            this.button_test.Location = new System.Drawing.Point(11, 89);
             this.button_test.Name = "button_test";
-            this.button_test.Size = new System.Drawing.Size(75, 23);
+            this.button_test.Size = new System.Drawing.Size(137, 40);
             this.button_test.TabIndex = 6;
             this.button_test.Text = "Test";
             this.button_test.UseVisualStyleBackColor = true;
@@ -335,49 +335,49 @@ namespace dp2rms
             // button_simpleQueryProperty
             // 
             this.button_simpleQueryProperty.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_simpleQueryProperty.Location = new System.Drawing.Point(249, 176);
+            this.button_simpleQueryProperty.Location = new System.Drawing.Point(280, 233);
             this.button_simpleQueryProperty.Name = "button_simpleQueryProperty";
-            this.button_simpleQueryProperty.Size = new System.Drawing.Size(60, 23);
+            this.button_simpleQueryProperty.Size = new System.Drawing.Size(110, 40);
             this.button_simpleQueryProperty.TabIndex = 5;
             this.button_simpleQueryProperty.Text = "属性(&P)";
             this.button_simpleQueryProperty.Click += new System.EventHandler(this.button_simpleQueryProperty_Click);
             // 
             // textBox_simpleQuery_comment
             // 
-            this.textBox_simpleQuery_comment.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.textBox_simpleQuery_comment.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_simpleQuery_comment.Location = new System.Drawing.Point(8, 88);
+            this.textBox_simpleQuery_comment.Location = new System.Drawing.Point(15, 151);
             this.textBox_simpleQuery_comment.Multiline = true;
             this.textBox_simpleQuery_comment.Name = "textBox_simpleQuery_comment";
             this.textBox_simpleQuery_comment.ReadOnly = true;
-            this.textBox_simpleQuery_comment.Size = new System.Drawing.Size(297, 82);
+            this.textBox_simpleQuery_comment.Size = new System.Drawing.Size(368, 72);
             this.textBox_simpleQuery_comment.TabIndex = 4;
             // 
             // label1
             // 
-            this.label1.Location = new System.Drawing.Point(6, 6);
+            this.label1.Location = new System.Drawing.Point(11, 10);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(90, 18);
+            this.label1.Size = new System.Drawing.Size(165, 31);
             this.label1.TabIndex = 2;
             this.label1.Text = "检索词(&W):";
             // 
             // textBox_simpleQueryWord
             // 
-            this.textBox_simpleQueryWord.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.textBox_simpleQueryWord.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_simpleQueryWord.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBox_simpleQueryWord.Location = new System.Drawing.Point(6, 25);
+            this.textBox_simpleQueryWord.Location = new System.Drawing.Point(11, 43);
             this.textBox_simpleQueryWord.Name = "textBox_simpleQueryWord";
-            this.textBox_simpleQueryWord.Size = new System.Drawing.Size(303, 21);
+            this.textBox_simpleQueryWord.Size = new System.Drawing.Size(379, 31);
             this.textBox_simpleQueryWord.TabIndex = 1;
             // 
             // button_simpleQuerySearch
             // 
             this.button_simpleQuerySearch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_simpleQuerySearch.Location = new System.Drawing.Point(249, 52);
+            this.button_simpleQuerySearch.Location = new System.Drawing.Point(280, 89);
             this.button_simpleQuerySearch.Name = "button_simpleQuerySearch";
-            this.button_simpleQuerySearch.Size = new System.Drawing.Size(60, 23);
+            this.button_simpleQuerySearch.Size = new System.Drawing.Size(110, 40);
             this.button_simpleQuerySearch.TabIndex = 3;
             this.button_simpleQuerySearch.Text = "检索(&S)";
             this.button_simpleQuerySearch.Click += new System.EventHandler(this.button_simpleQuerySearch_Click);
@@ -406,31 +406,31 @@ namespace dp2rms
             this.tabPage_queryAdvance.Controls.Add(this.comboBox_complex_from1);
             this.tabPage_queryAdvance.Controls.Add(this.comboBox_complex_db1);
             this.tabPage_queryAdvance.Controls.Add(this.textBox_complex_word1);
-            this.tabPage_queryAdvance.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_queryAdvance.Location = new System.Drawing.Point(4, 31);
             this.tabPage_queryAdvance.Name = "tabPage_queryAdvance";
             this.tabPage_queryAdvance.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_queryAdvance.Size = new System.Drawing.Size(528, 205);
+            this.tabPage_queryAdvance.Size = new System.Drawing.Size(975, 361);
             this.tabPage_queryAdvance.TabIndex = 1;
             this.tabPage_queryAdvance.Text = "高级";
             this.tabPage_queryAdvance.UseVisualStyleBackColor = true;
             // 
             // textBox_complexQuery_comment
             // 
-            this.textBox_complexQuery_comment.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.textBox_complexQuery_comment.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_complexQuery_comment.Location = new System.Drawing.Point(13, 139);
+            this.textBox_complexQuery_comment.Location = new System.Drawing.Point(24, 238);
             this.textBox_complexQuery_comment.Multiline = true;
             this.textBox_complexQuery_comment.Name = "textBox_complexQuery_comment";
             this.textBox_complexQuery_comment.ReadOnly = true;
-            this.textBox_complexQuery_comment.Size = new System.Drawing.Size(504, 53);
+            this.textBox_complexQuery_comment.Size = new System.Drawing.Size(924, 76);
             this.textBox_complexQuery_comment.TabIndex = 20;
             // 
             // button_complexQuerySearch
             // 
-            this.button_complexQuerySearch.Location = new System.Drawing.Point(13, 109);
+            this.button_complexQuerySearch.Location = new System.Drawing.Point(24, 187);
             this.button_complexQuerySearch.Name = "button_complexQuerySearch";
-            this.button_complexQuerySearch.Size = new System.Drawing.Size(80, 23);
+            this.button_complexQuerySearch.Size = new System.Drawing.Size(146, 39);
             this.button_complexQuerySearch.TabIndex = 19;
             this.button_complexQuerySearch.Text = "检索(&S)";
             this.button_complexQuerySearch.Click += new System.EventHandler(this.button_complexQuerySearch_Click);
@@ -440,9 +440,9 @@ namespace dp2rms
             this.button_complex_server4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_complex_server4.ImageIndex = 0;
             this.button_complex_server4.ImageList = this.imageList_complex_serverButton;
-            this.button_complex_server4.Location = new System.Drawing.Point(236, 81);
+            this.button_complex_server4.Location = new System.Drawing.Point(433, 139);
             this.button_complex_server4.Name = "button_complex_server4";
-            this.button_complex_server4.Size = new System.Drawing.Size(24, 23);
+            this.button_complex_server4.Size = new System.Drawing.Size(44, 39);
             this.button_complex_server4.TabIndex = 16;
             this.button_complex_server4.Click += new System.EventHandler(this.button_complex_server4_Click);
             this.button_complex_server4.MouseMove += new System.Windows.Forms.MouseEventHandler(this.button_complex_server4_MouseMove);
@@ -458,9 +458,9 @@ namespace dp2rms
             this.button_complex_server3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_complex_server3.ImageIndex = 0;
             this.button_complex_server3.ImageList = this.imageList_complex_serverButton;
-            this.button_complex_server3.Location = new System.Drawing.Point(236, 57);
+            this.button_complex_server3.Location = new System.Drawing.Point(433, 98);
             this.button_complex_server3.Name = "button_complex_server3";
-            this.button_complex_server3.Size = new System.Drawing.Size(24, 23);
+            this.button_complex_server3.Size = new System.Drawing.Size(44, 39);
             this.button_complex_server3.TabIndex = 11;
             this.button_complex_server3.Click += new System.EventHandler(this.button_complex_server3_Click);
             this.button_complex_server3.MouseMove += new System.Windows.Forms.MouseEventHandler(this.button_complex_server3_MouseMove);
@@ -470,9 +470,9 @@ namespace dp2rms
             this.button_complex_server2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_complex_server2.ImageIndex = 0;
             this.button_complex_server2.ImageList = this.imageList_complex_serverButton;
-            this.button_complex_server2.Location = new System.Drawing.Point(236, 33);
+            this.button_complex_server2.Location = new System.Drawing.Point(433, 57);
             this.button_complex_server2.Name = "button_complex_server2";
-            this.button_complex_server2.Size = new System.Drawing.Size(24, 23);
+            this.button_complex_server2.Size = new System.Drawing.Size(44, 39);
             this.button_complex_server2.TabIndex = 6;
             this.button_complex_server2.Click += new System.EventHandler(this.button_complex_server2_Click);
             this.button_complex_server2.MouseMove += new System.Windows.Forms.MouseEventHandler(this.button_complex_server2_MouseMove);
@@ -482,136 +482,136 @@ namespace dp2rms
             this.button_complex_server1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_complex_server1.ImageIndex = 0;
             this.button_complex_server1.ImageList = this.imageList_complex_serverButton;
-            this.button_complex_server1.Location = new System.Drawing.Point(236, 9);
+            this.button_complex_server1.Location = new System.Drawing.Point(433, 15);
             this.button_complex_server1.Name = "button_complex_server1";
-            this.button_complex_server1.Size = new System.Drawing.Size(24, 23);
+            this.button_complex_server1.Size = new System.Drawing.Size(44, 40);
             this.button_complex_server1.TabIndex = 1;
             this.button_complex_server1.Click += new System.EventHandler(this.button_complex_server1_Click);
             this.button_complex_server1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.button_complex_server1_MouseMove);
             // 
             // comboBox_complex_logic4
             // 
-            this.comboBox_complex_logic4.Location = new System.Drawing.Point(13, 83);
+            this.comboBox_complex_logic4.Location = new System.Drawing.Point(24, 142);
             this.comboBox_complex_logic4.Name = "comboBox_complex_logic4";
-            this.comboBox_complex_logic4.Size = new System.Drawing.Size(80, 20);
+            this.comboBox_complex_logic4.Size = new System.Drawing.Size(146, 29);
             this.comboBox_complex_logic4.TabIndex = 14;
             // 
             // comboBox_complex_from4
             // 
             this.comboBox_complex_from4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.comboBox_complex_from4.Location = new System.Drawing.Point(396, 83);
+            this.comboBox_complex_from4.Location = new System.Drawing.Point(726, 142);
             this.comboBox_complex_from4.Name = "comboBox_complex_from4";
-            this.comboBox_complex_from4.Size = new System.Drawing.Size(121, 20);
+            this.comboBox_complex_from4.Size = new System.Drawing.Size(222, 29);
             this.comboBox_complex_from4.TabIndex = 18;
             // 
             // comboBox_complex_db4
             // 
             this.comboBox_complex_db4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.comboBox_complex_db4.Location = new System.Drawing.Point(269, 83);
+            this.comboBox_complex_db4.Location = new System.Drawing.Point(493, 142);
             this.comboBox_complex_db4.Name = "comboBox_complex_db4";
-            this.comboBox_complex_db4.Size = new System.Drawing.Size(121, 20);
+            this.comboBox_complex_db4.Size = new System.Drawing.Size(222, 29);
             this.comboBox_complex_db4.TabIndex = 17;
             this.comboBox_complex_db4.SelectedIndexChanged += new System.EventHandler(this.comboBox_complex_db4_SelectedIndexChanged);
             // 
             // textBox_complex_word4
             // 
-            this.textBox_complex_word4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.textBox_complex_word4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_complex_word4.Location = new System.Drawing.Point(99, 83);
+            this.textBox_complex_word4.Location = new System.Drawing.Point(182, 142);
             this.textBox_complex_word4.Name = "textBox_complex_word4";
-            this.textBox_complex_word4.Size = new System.Drawing.Size(131, 21);
+            this.textBox_complex_word4.Size = new System.Drawing.Size(240, 31);
             this.textBox_complex_word4.TabIndex = 15;
             // 
             // comboBox_complex_logic3
             // 
-            this.comboBox_complex_logic3.Location = new System.Drawing.Point(13, 59);
+            this.comboBox_complex_logic3.Location = new System.Drawing.Point(24, 101);
             this.comboBox_complex_logic3.Name = "comboBox_complex_logic3";
-            this.comboBox_complex_logic3.Size = new System.Drawing.Size(80, 20);
+            this.comboBox_complex_logic3.Size = new System.Drawing.Size(146, 29);
             this.comboBox_complex_logic3.TabIndex = 9;
             // 
             // comboBox_complex_from3
             // 
             this.comboBox_complex_from3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.comboBox_complex_from3.Location = new System.Drawing.Point(396, 59);
+            this.comboBox_complex_from3.Location = new System.Drawing.Point(726, 101);
             this.comboBox_complex_from3.Name = "comboBox_complex_from3";
-            this.comboBox_complex_from3.Size = new System.Drawing.Size(121, 20);
+            this.comboBox_complex_from3.Size = new System.Drawing.Size(222, 29);
             this.comboBox_complex_from3.TabIndex = 13;
             // 
             // comboBox_complex_db3
             // 
             this.comboBox_complex_db3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.comboBox_complex_db3.Location = new System.Drawing.Point(269, 59);
+            this.comboBox_complex_db3.Location = new System.Drawing.Point(493, 101);
             this.comboBox_complex_db3.Name = "comboBox_complex_db3";
-            this.comboBox_complex_db3.Size = new System.Drawing.Size(121, 20);
+            this.comboBox_complex_db3.Size = new System.Drawing.Size(222, 29);
             this.comboBox_complex_db3.TabIndex = 12;
             this.comboBox_complex_db3.SelectedIndexChanged += new System.EventHandler(this.comboBox_complex_db3_SelectedIndexChanged);
             // 
             // textBox_complex_word3
             // 
-            this.textBox_complex_word3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.textBox_complex_word3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_complex_word3.Location = new System.Drawing.Point(99, 59);
+            this.textBox_complex_word3.Location = new System.Drawing.Point(182, 101);
             this.textBox_complex_word3.Name = "textBox_complex_word3";
-            this.textBox_complex_word3.Size = new System.Drawing.Size(131, 21);
+            this.textBox_complex_word3.Size = new System.Drawing.Size(240, 31);
             this.textBox_complex_word3.TabIndex = 10;
             // 
             // comboBox_complex_logic2
             // 
-            this.comboBox_complex_logic2.Location = new System.Drawing.Point(13, 35);
+            this.comboBox_complex_logic2.Location = new System.Drawing.Point(24, 60);
             this.comboBox_complex_logic2.Name = "comboBox_complex_logic2";
-            this.comboBox_complex_logic2.Size = new System.Drawing.Size(80, 20);
+            this.comboBox_complex_logic2.Size = new System.Drawing.Size(146, 29);
             this.comboBox_complex_logic2.TabIndex = 4;
             // 
             // comboBox_complex_from2
             // 
             this.comboBox_complex_from2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.comboBox_complex_from2.Location = new System.Drawing.Point(396, 35);
+            this.comboBox_complex_from2.Location = new System.Drawing.Point(726, 60);
             this.comboBox_complex_from2.Name = "comboBox_complex_from2";
-            this.comboBox_complex_from2.Size = new System.Drawing.Size(121, 20);
+            this.comboBox_complex_from2.Size = new System.Drawing.Size(222, 29);
             this.comboBox_complex_from2.TabIndex = 8;
             // 
             // comboBox_complex_db2
             // 
             this.comboBox_complex_db2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.comboBox_complex_db2.Location = new System.Drawing.Point(269, 35);
+            this.comboBox_complex_db2.Location = new System.Drawing.Point(493, 60);
             this.comboBox_complex_db2.Name = "comboBox_complex_db2";
-            this.comboBox_complex_db2.Size = new System.Drawing.Size(121, 20);
+            this.comboBox_complex_db2.Size = new System.Drawing.Size(222, 29);
             this.comboBox_complex_db2.TabIndex = 7;
             this.comboBox_complex_db2.SelectedIndexChanged += new System.EventHandler(this.comboBox_complex_db2_SelectedIndexChanged);
             // 
             // textBox_complex_word2
             // 
-            this.textBox_complex_word2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.textBox_complex_word2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_complex_word2.Location = new System.Drawing.Point(99, 35);
+            this.textBox_complex_word2.Location = new System.Drawing.Point(182, 60);
             this.textBox_complex_word2.Name = "textBox_complex_word2";
-            this.textBox_complex_word2.Size = new System.Drawing.Size(131, 21);
+            this.textBox_complex_word2.Size = new System.Drawing.Size(240, 31);
             this.textBox_complex_word2.TabIndex = 5;
             // 
             // comboBox_complex_from1
             // 
             this.comboBox_complex_from1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.comboBox_complex_from1.Location = new System.Drawing.Point(396, 11);
+            this.comboBox_complex_from1.Location = new System.Drawing.Point(726, 19);
             this.comboBox_complex_from1.Name = "comboBox_complex_from1";
-            this.comboBox_complex_from1.Size = new System.Drawing.Size(121, 20);
+            this.comboBox_complex_from1.Size = new System.Drawing.Size(222, 29);
             this.comboBox_complex_from1.TabIndex = 3;
             // 
             // comboBox_complex_db1
             // 
             this.comboBox_complex_db1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.comboBox_complex_db1.Location = new System.Drawing.Point(269, 11);
+            this.comboBox_complex_db1.Location = new System.Drawing.Point(493, 19);
             this.comboBox_complex_db1.Name = "comboBox_complex_db1";
-            this.comboBox_complex_db1.Size = new System.Drawing.Size(121, 20);
+            this.comboBox_complex_db1.Size = new System.Drawing.Size(222, 29);
             this.comboBox_complex_db1.TabIndex = 2;
             this.comboBox_complex_db1.SelectedIndexChanged += new System.EventHandler(this.comboBox_complex_db1_SelectedIndexChanged);
             // 
             // textBox_complex_word1
             // 
-            this.textBox_complex_word1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.textBox_complex_word1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_complex_word1.Location = new System.Drawing.Point(99, 11);
+            this.textBox_complex_word1.Location = new System.Drawing.Point(182, 19);
             this.textBox_complex_word1.Name = "textBox_complex_word1";
-            this.textBox_complex_word1.Size = new System.Drawing.Size(131, 21);
+            this.textBox_complex_word1.Size = new System.Drawing.Size(240, 31);
             this.textBox_complex_word1.TabIndex = 0;
             // 
             // tabPage_queryXml
@@ -619,67 +619,13 @@ namespace dp2rms
             this.tabPage_queryXml.BackColor = System.Drawing.Color.Transparent;
             this.tabPage_queryXml.Controls.Add(this.splitContainer_xml);
             this.tabPage_queryXml.Controls.Add(this.button_xmlQuerySearch);
-            this.tabPage_queryXml.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_queryXml.Location = new System.Drawing.Point(4, 31);
             this.tabPage_queryXml.Name = "tabPage_queryXml";
             this.tabPage_queryXml.Padding = new System.Windows.Forms.Padding(6);
-            this.tabPage_queryXml.Size = new System.Drawing.Size(528, 205);
+            this.tabPage_queryXml.Size = new System.Drawing.Size(975, 361);
             this.tabPage_queryXml.TabIndex = 2;
             this.tabPage_queryXml.Text = "XML";
             this.tabPage_queryXml.UseVisualStyleBackColor = true;
-            // 
-            // button_xmlQuerySearch
-            // 
-            this.button_xmlQuerySearch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_xmlQuerySearch.Location = new System.Drawing.Point(625, 179);
-            this.button_xmlQuerySearch.Name = "button_xmlQuerySearch";
-            this.button_xmlQuerySearch.Size = new System.Drawing.Size(60, 20);
-            this.button_xmlQuerySearch.TabIndex = 4;
-            this.button_xmlQuerySearch.Text = "检索(&S)";
-            this.button_xmlQuerySearch.Click += new System.EventHandler(this.button_xmlQuerySearch_Click);
-            // 
-            // textBox_xmlQueryString
-            // 
-            this.textBox_xmlQueryString.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBox_xmlQueryString.Location = new System.Drawing.Point(0, 0);
-            this.textBox_xmlQueryString.Multiline = true;
-            this.textBox_xmlQueryString.Name = "textBox_xmlQueryString";
-            this.textBox_xmlQueryString.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_xmlQueryString.Size = new System.Drawing.Size(516, 111);
-            this.textBox_xmlQueryString.TabIndex = 0;
-            // 
-            // splitContainer_main
-            // 
-            this.splitContainer_main.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer_main.Location = new System.Drawing.Point(0, 0);
-            this.splitContainer_main.Name = "splitContainer_main";
-            this.splitContainer_main.Orientation = System.Windows.Forms.Orientation.Horizontal;
-            // 
-            // splitContainer_main.Panel1
-            // 
-            this.splitContainer_main.Panel1.Controls.Add(this.tabControl_query);
-            // 
-            // splitContainer_main.Panel2
-            // 
-            this.splitContainer_main.Panel2.Controls.Add(this.listView_browse);
-            this.splitContainer_main.Size = new System.Drawing.Size(536, 368);
-            this.splitContainer_main.SplitterDistance = 231;
-            this.splitContainer_main.TabIndex = 1;
-            // 
-            // listView_browse
-            // 
-            this.listView_browse.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.listView_browse.FullRowSelect = true;
-            this.listView_browse.HideSelection = false;
-            this.listView_browse.Location = new System.Drawing.Point(0, 0);
-            this.listView_browse.Name = "listView_browse";
-            this.listView_browse.Size = new System.Drawing.Size(536, 133);
-            this.listView_browse.TabIndex = 0;
-            this.listView_browse.UseCompatibleStateImageBehavior = false;
-            this.listView_browse.View = System.Windows.Forms.View.Details;
-            this.listView_browse.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView_browse_ColumnClick);
-            this.listView_browse.SelectedIndexChanged += new System.EventHandler(this.listView_browse_SelectedIndexChanged);
-            this.listView_browse.DoubleClick += new System.EventHandler(this.listView_browse_DoubleClick);
-            this.listView_browse.MouseUp += new System.Windows.Forms.MouseEventHandler(this.listView_browse_MouseUp);
             // 
             // splitContainer_xml
             // 
@@ -695,10 +641,20 @@ namespace dp2rms
             // splitContainer_xml.Panel2
             // 
             this.splitContainer_xml.Panel2.Controls.Add(this.textBox_xmlQuery_comment);
-            this.splitContainer_xml.Size = new System.Drawing.Size(516, 193);
-            this.splitContainer_xml.SplitterDistance = 111;
+            this.splitContainer_xml.Size = new System.Drawing.Size(963, 349);
+            this.splitContainer_xml.SplitterDistance = 200;
             this.splitContainer_xml.SplitterWidth = 8;
             this.splitContainer_xml.TabIndex = 5;
+            // 
+            // textBox_xmlQueryString
+            // 
+            this.textBox_xmlQueryString.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBox_xmlQueryString.Location = new System.Drawing.Point(0, 0);
+            this.textBox_xmlQueryString.Multiline = true;
+            this.textBox_xmlQueryString.Name = "textBox_xmlQueryString";
+            this.textBox_xmlQueryString.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.textBox_xmlQueryString.Size = new System.Drawing.Size(963, 200);
+            this.textBox_xmlQueryString.TabIndex = 0;
             // 
             // textBox_xmlQuery_comment
             // 
@@ -707,14 +663,58 @@ namespace dp2rms
             this.textBox_xmlQuery_comment.Multiline = true;
             this.textBox_xmlQuery_comment.Name = "textBox_xmlQuery_comment";
             this.textBox_xmlQuery_comment.ReadOnly = true;
-            this.textBox_xmlQuery_comment.Size = new System.Drawing.Size(516, 74);
+            this.textBox_xmlQuery_comment.Size = new System.Drawing.Size(963, 141);
             this.textBox_xmlQuery_comment.TabIndex = 21;
+            // 
+            // button_xmlQuerySearch
+            // 
+            this.button_xmlQuerySearch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_xmlQuerySearch.Location = new System.Drawing.Point(1146, 291);
+            this.button_xmlQuerySearch.Name = "button_xmlQuerySearch";
+            this.button_xmlQuerySearch.Size = new System.Drawing.Size(110, 35);
+            this.button_xmlQuerySearch.TabIndex = 4;
+            this.button_xmlQuerySearch.Text = "检索(&S)";
+            this.button_xmlQuerySearch.Click += new System.EventHandler(this.button_xmlQuerySearch_Click);
+            // 
+            // splitContainer_main
+            // 
+            this.splitContainer_main.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer_main.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer_main.Name = "splitContainer_main";
+            this.splitContainer_main.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitContainer_main.Panel1
+            // 
+            this.splitContainer_main.Panel1.Controls.Add(this.tabControl_query);
+            // 
+            // splitContainer_main.Panel2
+            // 
+            this.splitContainer_main.Panel2.Controls.Add(this.listView_browse);
+            this.splitContainer_main.Size = new System.Drawing.Size(671, 501);
+            this.splitContainer_main.SplitterDistance = 314;
+            this.splitContainer_main.TabIndex = 1;
+            // 
+            // listView_browse
+            // 
+            this.listView_browse.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listView_browse.FullRowSelect = true;
+            this.listView_browse.HideSelection = false;
+            this.listView_browse.Location = new System.Drawing.Point(0, 0);
+            this.listView_browse.Name = "listView_browse";
+            this.listView_browse.Size = new System.Drawing.Size(671, 183);
+            this.listView_browse.TabIndex = 0;
+            this.listView_browse.UseCompatibleStateImageBehavior = false;
+            this.listView_browse.View = System.Windows.Forms.View.Details;
+            this.listView_browse.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView_browse_ColumnClick);
+            this.listView_browse.SelectedIndexChanged += new System.EventHandler(this.listView_browse_SelectedIndexChanged);
+            this.listView_browse.DoubleClick += new System.EventHandler(this.listView_browse_DoubleClick);
+            this.listView_browse.MouseUp += new System.Windows.Forms.MouseEventHandler(this.listView_browse_MouseUp);
             // 
             // SearchForm
             // 
             this.AcceptButton = this.button_simpleQuerySearch;
-            this.AutoScaleBaseSize = new System.Drawing.Size(6, 14);
-            this.ClientSize = new System.Drawing.Size(536, 368);
+            this.AutoScaleBaseSize = new System.Drawing.Size(11, 24);
+            this.ClientSize = new System.Drawing.Size(671, 501);
             this.Controls.Add(this.splitContainer_main);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "SearchForm";
@@ -734,16 +734,16 @@ namespace dp2rms
             this.tabPage_queryAdvance.ResumeLayout(false);
             this.tabPage_queryAdvance.PerformLayout();
             this.tabPage_queryXml.ResumeLayout(false);
-            this.splitContainer_main.Panel1.ResumeLayout(false);
-            this.splitContainer_main.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).EndInit();
-            this.splitContainer_main.ResumeLayout(false);
             this.splitContainer_xml.Panel1.ResumeLayout(false);
             this.splitContainer_xml.Panel1.PerformLayout();
             this.splitContainer_xml.Panel2.ResumeLayout(false);
             this.splitContainer_xml.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_xml)).EndInit();
             this.splitContainer_xml.ResumeLayout(false);
+            this.splitContainer_main.Panel1.ResumeLayout(false);
+            this.splitContainer_main.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).EndInit();
+            this.splitContainer_main.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -1093,81 +1093,98 @@ namespace dp2rms
             stop.BeginLoop();
 
             EnableControlsInSearching(true);
-
-
-            long lTotalCount = 0;	// 命中记录总数
-            for (i = 0; i < targets.Count; i++)
+            try
             {
 
-                if (stop.State >= 1)
-                    break;
-
-                TargetItem item = (TargetItem)targets[i];
-
-                channel = Channels.GetChannel(item.Url);
-                Debug.Assert(channel != null, "Channels.GetChannel 异常");
-
-                textBox_simpleQuery_comment.Text += "检索式XML:\r\n" + DomUtil.GetIndentXml(item.Xml) + "\r\n";
-
-                // 2010/5/18
-                string strBrowseStyle = "id,cols";
-                string strOutputStyle = "";
-                if (bOutputKeyID == true)
+                long lTotalCount = 0;   // 命中记录总数
+                for (i = 0; i < targets.Count; i++)
                 {
-                    strOutputStyle = "keyid";
-                    strBrowseStyle = "keyid,id,key,cols";
+
+                    if (stop.State >= 1)
+                        break;
+
+                    TargetItem item = (TargetItem)targets[i];
+
+                    channel = Channels.GetChannel(item.Url);
+                    Debug.Assert(channel != null, "Channels.GetChannel 异常");
+
+                    channel.Idle += Channel_Idle;
+                    try
+                    {
+
+                        textBox_simpleQuery_comment.Text += "检索式XML:\r\n" + DomUtil.GetIndentXml(item.Xml) + "\r\n";
+
+                        // 2010/5/18
+                        string strBrowseStyle = "id,cols";
+                        string strOutputStyle = "";
+                        if (bOutputKeyID == true)
+                        {
+                            strOutputStyle = "keyid";
+                            strBrowseStyle = "keyid,id,key,cols";
+                        }
+
+                        // MessageBox.Show(this, item.Xml);
+                        long nRet = channel.DoSearch(item.Xml,
+                            "default",
+                            strOutputStyle,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            textBox_simpleQuery_comment.Text += "出错: " + strError + "\r\n";
+                            MessageBox.Show(this, strError);
+                            continue;
+                        }
+                        lTotalCount += nRet;
+                        textBox_simpleQuery_comment.Text += "命中记录数: " + Convert.ToString(nRet) + "\r\n";
+
+                        if (nRet == 0)
+                            continue;
+
+                        // 获取结果集
+                        nRet = channel.DoBrowse(listView_browse,
+                            listView_browse.Lang,
+                            stop,
+                            "default",
+                            strBrowseStyle,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            textBox_simpleQuery_comment.Text += "装载浏览信息时出错: " + strError + "\r\n";
+                            MessageBox.Show(this, strError);
+                            continue;
+                        }
+                    }
+                    finally
+                    {
+                        channel.Idle -= Channel_Idle;
+                    }
                 }
 
-                // MessageBox.Show(this, item.Xml);
-                long nRet = channel.DoSearch(item.Xml,
-                    "default",
-                    strOutputStyle,
-                    out strError);
-                if (nRet == -1)
+                if (targets.Count > 1)
                 {
-                    textBox_simpleQuery_comment.Text += "出错: " + strError + "\r\n";
-                    MessageBox.Show(this, strError);
-                    continue;
-                }
-                lTotalCount += nRet;
-                textBox_simpleQuery_comment.Text += "命中记录数: " + Convert.ToString(nRet) + "\r\n";
-
-                if (nRet == 0)
-                    continue;
-
-                // 获取结果集
-                nRet = channel.DoBrowse(listView_browse,
-                    listView_browse.Lang,
-                    stop,
-                    "default",
-                    strBrowseStyle,
-                    out strError);
-                if (nRet == -1)
-                {
-                    textBox_simpleQuery_comment.Text += "装载浏览信息时出错: " + strError + "\r\n";
-                    MessageBox.Show(this, strError);
-                    continue;
+                    textBox_simpleQuery_comment.Text += "命中总条数: " + Convert.ToString(lTotalCount) + "\r\n";
                 }
 
+                if (lTotalCount == 0)
+                {
+                    MessageBox.Show(this, "未命中");
+                }
+
+                channel = null;
             }
-
-            if (targets.Count > 1)
+            finally
             {
-                textBox_simpleQuery_comment.Text += "命中总条数: " + Convert.ToString(lTotalCount) + "\r\n";
+                EnableControlsInSearching(false);
+
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
             }
+        }
 
-            stop.EndLoop();
-            stop.OnStop -= new StopEventHandler(this.DoStop);
-            stop.Initial("");
-
-            if (lTotalCount == 0)
-            {
-                MessageBox.Show(this, "未命中");
-            }
-
-            EnableControlsInSearching(false);
-
-            channel = null;
+        private void Channel_Idle(object sender, IdleEventArgs e)
+        {
+            Application.DoEvents();
         }
 
         void DoStop(object sender, StopEventArgs e)
@@ -1534,38 +1551,45 @@ namespace dp2rms
                 channel = Channels.GetChannel(item.Url);
                 Debug.Assert(channel != null, "Channels.GetChannel 异常");
 
-                // MessageBox.Show(this, item.Xml);
-                long nRet = channel.DoSearch(textBox_xmlQueryString.Text,
-                    "default",
-                    strOutputStyle,
-                    out strError);
-                if (nRet == -1)
+                channel.Idle += Channel_Idle;
+                try
                 {
-                    textBox_xmlQuery_comment.Text += "出错: " + strError + "\r\n";
-                    MessageBox.Show(this, strError);
-                    continue;
+                    // MessageBox.Show(this, item.Xml);
+                    long nRet = channel.DoSearch(textBox_xmlQueryString.Text,
+                        "default",
+                        strOutputStyle,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        textBox_xmlQuery_comment.Text += "出错: " + strError + "\r\n";
+                        MessageBox.Show(this, strError);
+                        continue;
+                    }
+                    lTotalCount += nRet;
+                    textBox_xmlQuery_comment.Text += "命中记录数: " + Convert.ToString(nRet) + "\r\n";
+
+                    if (nRet == 0)
+                        continue;
+
+                    // 获取结果集
+
+                    nRet = channel.DoBrowse(listView_browse,
+                        listView_browse.Lang,
+                        stop,
+                        "default",
+                        strBrowseStyle,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        textBox_xmlQuery_comment.Text += "装载浏览信息时出错: " + strError + "\r\n";
+                        MessageBox.Show(this, strError);
+                        continue;
+                    }
                 }
-                lTotalCount += nRet;
-                textBox_xmlQuery_comment.Text += "命中记录数: " + Convert.ToString(nRet) + "\r\n";
-
-                if (nRet == 0)
-                    continue;
-
-                // 获取结果集
-
-                nRet = channel.DoBrowse(listView_browse,
-                    listView_browse.Lang,
-                    stop,
-                    "default",
-                    strBrowseStyle,
-                    out strError);
-                if (nRet == -1)
+                finally
                 {
-                    textBox_xmlQuery_comment.Text += "装载浏览信息时出错: " + strError + "\r\n";
-                    MessageBox.Show(this, strError);
-                    continue;
+                    channel.Idle -= Channel_Idle;
                 }
-
             }
 
             if (targets.Count > 1)
@@ -2199,40 +2223,50 @@ namespace dp2rms
 
                 channel = Channels.GetChannel(strServer);
                 Debug.Assert(channel != null, "Channels.GetChannel 异常");
-                textBox_complexQuery_comment.Text += "目标服务器:\t" + strServer + "\r\n";
 
-                textBox_complexQuery_comment.Text += "检索式XML:\r\n" + DomUtil.GetIndentXml(strQueryXml) + "\r\n";
-
-                // MessageBox.Show(this, item.Xml);
-                nRet = channel.DoSearch(strQueryXml,
-                    "default",
-                    strOutputStyle,
-                    out strError);
-                if (nRet == -1)
+                channel.Idle += Channel_Idle;
+                try
                 {
-                    textBox_complexQuery_comment.Text += "出错: " + strError + "\r\n";
-                    MessageBox.Show(this, strError);
-                    continue;
+
+                    textBox_complexQuery_comment.Text += "目标服务器:\t" + strServer + "\r\n";
+
+                    textBox_complexQuery_comment.Text += "检索式XML:\r\n" + DomUtil.GetIndentXml(strQueryXml) + "\r\n";
+
+                    // MessageBox.Show(this, item.Xml);
+                    nRet = channel.DoSearch(strQueryXml,
+                        "default",
+                        strOutputStyle,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        textBox_complexQuery_comment.Text += "出错: " + strError + "\r\n";
+                        MessageBox.Show(this, strError);
+                        continue;
+                    }
+                    lTotalCount += nRet;
+                    textBox_complexQuery_comment.Text += "命中记录数: " + Convert.ToString(nRet) + "\r\n";
+
+                    if (nRet == 0)
+                        continue;
+
+                    // 获取结果集
+
+                    nRet = channel.DoBrowse(listView_browse,
+                        listView_browse.Lang,
+                        stop,
+                        "default",
+                        strBrowseStyle,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        textBox_complexQuery_comment.Text += "装载浏览信息时出错: " + strError + "\r\n";
+                        MessageBox.Show(this, strError);
+                        continue;
+                    }
                 }
-                lTotalCount += nRet;
-                textBox_complexQuery_comment.Text += "命中记录数: " + Convert.ToString(nRet) + "\r\n";
-
-                if (nRet == 0)
-                    continue;
-
-                // 获取结果集
-
-                nRet = channel.DoBrowse(listView_browse,
-                    listView_browse.Lang,
-                    stop,
-                    "default",
-                    strBrowseStyle,
-                    out strError);
-                if (nRet == -1)
+                finally
                 {
-                    textBox_complexQuery_comment.Text += "装载浏览信息时出错: " + strError + "\r\n";
-                    MessageBox.Show(this, strError);
-                    continue;
+                    channel.Idle -= Channel_Idle;
                 }
             }
 

@@ -12,6 +12,7 @@ using System.Diagnostics;
 using System.Web;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
+using System.Security.Cryptography;
 
 using System.Data.SqlClient;
 using System.Data.SQLite;
@@ -29,8 +30,6 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Core;
-using System.Security.Cryptography;
-using System.Runtime.Remoting.Activation;
 
 namespace DigitalPlatform.rms
 {
@@ -2364,7 +2363,7 @@ namespace DigitalPlatform.rms
         {
             strError = "";
 
-            DateTime start = DateTime.Now;
+            DateTime start = DateTime.UtcNow;
 
             this.Commit();
 
@@ -2436,7 +2435,7 @@ namespace DigitalPlatform.rms
                 // Thread.Sleep(6000);
 
                 // 记载慢速的检索
-                TimeSpan length = DateTime.Now - start;
+                TimeSpan length = DateTime.UtcNow - start;
                 if (length >= slow_length)
                 {
                     long count = resultSet == null ? 0 : resultSet.Count;

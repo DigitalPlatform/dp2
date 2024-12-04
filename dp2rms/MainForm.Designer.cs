@@ -75,6 +75,9 @@
             this.MenuItem_preference = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_downloadPinyinXmlFile = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_downloadIsbnXmlFile = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator10 = new System.Windows.Forms.ToolStripSeparator();
+            this.MenuItem_openDataFolder = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_openProgramFolder = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip_main = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel_main = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
@@ -94,9 +97,6 @@
             this.toolStripSplitButton_moreSearch = new System.Windows.Forms.ToolStripSplitButton();
             this.ToolStripMenuItem_searchKeyID = new System.Windows.Forms.ToolStripMenuItem();
             this.toolBarButton_stop = new System.Windows.Forms.ToolStripButton();
-            this.MenuItem_openDataFolder = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_openProgramFolder = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator10 = new System.Windows.Forms.ToolStripSeparator();
             this.menuStrip_main.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
             this.toolStrip_main.SuspendLayout();
@@ -117,7 +117,7 @@
             this.menuStrip_main.MdiWindowListItem = this.MenuItem_window;
             this.menuStrip_main.Name = "menuStrip_main";
             this.menuStrip_main.Padding = new System.Windows.Forms.Padding(11, 4, 0, 4);
-            this.menuStrip_main.Size = new System.Drawing.Size(851, 41);
+            this.menuStrip_main.Size = new System.Drawing.Size(851, 40);
             this.menuStrip_main.TabIndex = 0;
             this.menuStrip_main.Text = "menuStrip1";
             // 
@@ -140,7 +140,7 @@
             this.toolStripSeparator5,
             this.MenuItem_exit});
             this.MenuItem_file.Name = "MenuItem_file";
-            this.MenuItem_file.Size = new System.Drawing.Size(97, 33);
+            this.MenuItem_file.Size = new System.Drawing.Size(97, 32);
             this.MenuItem_file.Text = "文件(&F)";
             // 
             // MenuItem_open
@@ -261,7 +261,7 @@
             this.toolStripSeparator7,
             this.MenuItem_clearCfgCache});
             this.MenuItem_function.Name = "MenuItem_function";
-            this.MenuItem_function.Size = new System.Drawing.Size(102, 33);
+            this.MenuItem_function.Size = new System.Drawing.Size(102, 32);
             this.MenuItem_function.Text = "功能(&U)";
             // 
             // MenuItem_viewAccessPoint
@@ -327,7 +327,7 @@
             this.toolStripSeparator13,
             this.MenuItem_isbnAddHypen});
             this.MenuItem_tools.Name = "MenuItem_tools";
-            this.MenuItem_tools.Size = new System.Drawing.Size(140, 33);
+            this.MenuItem_tools.Size = new System.Drawing.Size(140, 32);
             this.MenuItem_tools.Text = "实用工具(&T)";
             // 
             // MenuItem_manageZhongcihao
@@ -384,7 +384,7 @@
             this.MenuItem_ui.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MenuItem_font});
             this.MenuItem_ui.Name = "MenuItem_ui";
-            this.MenuItem_ui.Size = new System.Drawing.Size(92, 33);
+            this.MenuItem_ui.Size = new System.Drawing.Size(92, 32);
             this.MenuItem_ui.Text = "外观(&I)";
             // 
             // MenuItem_font
@@ -402,7 +402,7 @@
             this.MenuItem_cascade,
             this.MenuItem_arrangeIcons});
             this.MenuItem_window.Name = "MenuItem_window";
-            this.MenuItem_window.Size = new System.Drawing.Size(107, 33);
+            this.MenuItem_window.Size = new System.Drawing.Size(107, 32);
             this.MenuItem_window.Text = "窗口(&W)";
             // 
             // MenuItem_tileHorizontal
@@ -449,7 +449,7 @@
             this.MenuItem_openDataFolder,
             this.MenuItem_openProgramFolder});
             this.MenuItem_help.Name = "MenuItem_help";
-            this.MenuItem_help.Size = new System.Drawing.Size(102, 33);
+            this.MenuItem_help.Size = new System.Drawing.Size(102, 32);
             this.MenuItem_help.Text = "帮助(&H)";
             // 
             // MenuItem_copyright
@@ -484,6 +484,25 @@
             this.MenuItem_downloadIsbnXmlFile.Size = new System.Drawing.Size(410, 40);
             this.MenuItem_downloadIsbnXmlFile.Text = "下载isbn.xml文件到本地(&I)";
             this.MenuItem_downloadIsbnXmlFile.Click += new System.EventHandler(this.MenuItem_downloadIsbnXmlFile_Click);
+            // 
+            // toolStripSeparator10
+            // 
+            this.toolStripSeparator10.Name = "toolStripSeparator10";
+            this.toolStripSeparator10.Size = new System.Drawing.Size(407, 6);
+            // 
+            // MenuItem_openDataFolder
+            // 
+            this.MenuItem_openDataFolder.Name = "MenuItem_openDataFolder";
+            this.MenuItem_openDataFolder.Size = new System.Drawing.Size(410, 40);
+            this.MenuItem_openDataFolder.Text = "打开数据文件夹(&D)...";
+            this.MenuItem_openDataFolder.Click += new System.EventHandler(this.MenuItem_openDataFolder_Click);
+            // 
+            // MenuItem_openProgramFolder
+            // 
+            this.MenuItem_openProgramFolder.Name = "MenuItem_openProgramFolder";
+            this.MenuItem_openProgramFolder.Size = new System.Drawing.Size(410, 40);
+            this.MenuItem_openProgramFolder.Text = "打开程序文件夹(&P)...";
+            this.MenuItem_openProgramFolder.Click += new System.EventHandler(this.MenuItem_openProgramFolder_Click);
             // 
             // statusStrip_main
             // 
@@ -534,7 +553,7 @@
             this.toolBarButton_search,
             this.toolStripSplitButton_moreSearch,
             this.toolBarButton_stop});
-            this.toolStrip_main.Location = new System.Drawing.Point(0, 41);
+            this.toolStrip_main.Location = new System.Drawing.Point(0, 40);
             this.toolStrip_main.Name = "toolStrip_main";
             this.toolStrip_main.Padding = new System.Windows.Forms.Padding(0, 0, 4, 0);
             this.toolStrip_main.Size = new System.Drawing.Size(851, 38);
@@ -668,25 +687,6 @@
             this.toolBarButton_stop.Name = "toolBarButton_stop";
             this.toolBarButton_stop.Size = new System.Drawing.Size(40, 32);
             this.toolBarButton_stop.Text = "停止";
-            // 
-            // MenuItem_openDataFolder
-            // 
-            this.MenuItem_openDataFolder.Name = "MenuItem_openDataFolder";
-            this.MenuItem_openDataFolder.Size = new System.Drawing.Size(410, 40);
-            this.MenuItem_openDataFolder.Text = "打开数据文件夹(&D)...";
-            this.MenuItem_openDataFolder.Click += new System.EventHandler(this.MenuItem_openDataFolder_Click);
-            // 
-            // MenuItem_openProgramFolder
-            // 
-            this.MenuItem_openProgramFolder.Name = "MenuItem_openProgramFolder";
-            this.MenuItem_openProgramFolder.Size = new System.Drawing.Size(410, 40);
-            this.MenuItem_openProgramFolder.Text = "打开程序文件夹(&P)...";
-            this.MenuItem_openProgramFolder.Click += new System.EventHandler(this.MenuItem_openProgramFolder_Click);
-            // 
-            // toolStripSeparator10
-            // 
-            this.toolStripSeparator10.Name = "toolStripSeparator10";
-            this.toolStripSeparator10.Size = new System.Drawing.Size(407, 6);
             // 
             // MainForm
             // 

@@ -227,6 +227,7 @@ ModelManifest.xml
 !/fingerprintcenter/libzkfpcsharp.dll
 !/RfidCenter/x86/
 !/RfidCenter/x86/Drivers/
+!rfidlib_drv_UM200.dll
 !/RfidCenter/x64/
 !/RfidCenter/x64/Drivers/
 

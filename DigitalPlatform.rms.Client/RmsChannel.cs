@@ -430,6 +430,12 @@ namespace DigitalPlatform.rms.Client
                 {
                     if (this.m_bStoped == false)
                     {
+#if REMOVED
+                        if (this.m_ws != null)
+                            this.m_ws.Close();
+                        this.m_bStoped=true;
+                        this.m_ws = null;
+#endif
                         this.DoStop();
                         // TODO: 如果时间太长了不返回，则调用Abort()?
                         this.m_bStoped = true;
@@ -6424,6 +6430,25 @@ out strError);
             IAsyncResult result = this.ws.BeginStop(
                 null,
                 null);
+#if REMOVED
+            /*
+            for (; ; )
+            {
+                DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                bool bRet = result.AsyncWaitHandle.WaitOne(100, false);
+                if (bRet == true)
+                    break;
+            }
+
+            try
+            {
+                this.ws.EndStop(result);
+            }
+            catch //  (WebException ex)
+            {
+            }
+            */
+#endif
         }
 
         public int DoTest(string strText)

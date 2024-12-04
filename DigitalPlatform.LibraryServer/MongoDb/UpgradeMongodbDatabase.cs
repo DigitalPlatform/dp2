@@ -351,7 +351,7 @@ out strError);
                 count++;
             }
 
-            return 0;
+            return count;
         }
 
         /*

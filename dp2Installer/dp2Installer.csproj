@@ -63,10 +63,10 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>9771A6FF5566D26843FA84541D4331ECE4D17A3A</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>CAFE535E63CA76864AC6A2BD6E7B931C883DFD23</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>dp2Installer_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>dp2Installer_2_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>false</GenerateManifests>
@@ -211,6 +211,7 @@
     <None Include="copyopac.bat" />
     <None Include="copyzserver.bat" />
     <None Include="dp2003.pfx" />
+    <None Include="dp2Installer_2_TemporaryKey.pfx" />
     <None Include="dp2Installer_3_TemporaryKey.pfx" />
     <Content Include="opac_app.zip">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

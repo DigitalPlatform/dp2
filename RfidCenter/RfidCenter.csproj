@@ -325,9 +325,7 @@
     <Content Include="x64\Drivers\rfidlib_drv_rpan.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="x64\Drivers\rfidlib_drv_UM200.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <Content Include="x64\Drivers\rfidlib_drv_UM200.dll" />
     <Content Include="x64\MiniBookcaseLockLib.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

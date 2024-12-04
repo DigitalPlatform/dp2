@@ -35,8 +35,8 @@
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
     <IsWebBootstrapper>true</IsWebBootstrapper>
-    <ManifestCertificateThumbprint>77ACC85AA0F40BADA7125E30AE325EA18FDCFC5C</ManifestCertificateThumbprint>
-    <ManifestKeyFile>dp2Batch_2_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestCertificateThumbprint>38CA5DCEE67DEF6C8729E80359B137852948CD18</ManifestCertificateThumbprint>
+    <ManifestKeyFile>dp2Batch_3_TemporaryKey.pfx</ManifestKeyFile>
     <GenerateManifests>false</GenerateManifests>
     <SignManifests>true</SignManifests>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
@@ -346,6 +346,7 @@
     <None Include="app.config" />
     <None Include="dp2Batch_1_TemporaryKey.pfx" />
     <None Include="dp2Batch_2_TemporaryKey.pfx" />
+    <None Include="dp2Batch_3_TemporaryKey.pfx" />
     <None Include="dp2Batch_TemporaryKey.pfx" />
     <None Include="Properties\app.manifest" />
     <None Include="代码签名证书-2019.pfx" />

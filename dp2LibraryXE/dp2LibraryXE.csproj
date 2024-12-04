@@ -72,10 +72,10 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>884F348B6539126D607FC74377FBAFF5231C78C3</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>DED5AE6514E67718F75429B874D7CBACFED49FCA</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>dp2LibraryXE_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>dp2LibraryXE_2_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>false</GenerateManifests>
@@ -286,6 +286,7 @@
     <Content Include="opac_style.zip">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="dp2LibraryXE_2_TemporaryKey.pfx" />
     <None Include="dp2LibraryXE_TemporaryKey.pfx" />
     <None Include="packages.config" />
     <None Include="Properties\app.manifest" />

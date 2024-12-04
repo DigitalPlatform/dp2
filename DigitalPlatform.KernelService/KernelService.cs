@@ -34,8 +34,12 @@ namespace dp2Kernel
 
         public void Dispose()
         {
+
             if (this.sessioninfo != null)
             {
+                // 2024/11/30
+                StopPrevious();
+
                 this.sessioninfo.Close();
             }
         }
@@ -719,7 +723,8 @@ namespace dp2Kernel
 
         void StopPrevious()
         {
-            if (sessioninfo.InSearching > 0)
+            if (sessioninfo != null
+                && sessioninfo.InSearching > 0)
             {
                 var handle = sessioninfo?.ChannelHandle;
                 if (handle != null)

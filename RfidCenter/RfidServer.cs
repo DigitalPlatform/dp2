@@ -169,6 +169,13 @@ namespace RfidCenter
             return Program.Rfid.TurnShelfLamp(lampName, action);
         }
 
+        // parameters:
+        //      style   clearCache:xxx 表示清除 UID 为 xxx 的会话的缓存数据
+        //              clearCache 表示清除全部会话的缓存数据
+        //              getVersion 获得 RfidCenter 的版本号
+        //              restart 重新启动 RfidCenter
+        //              其它值 表示希望获得 RfidCenter 状态。会在 result.ErrorCode 中返回状态值，状态值为 "normal" "error" "retry"，分别表示正常、出错、正在重试初始化读写器
+        //                      当状态值为 "normal" 时，如果当前没有连接任何读写器，则 result.ErrorCode 会返回 "noReaders"
         public NormalResult GetState(string style)
         {
             if (style.StartsWith("clearCache"))
@@ -223,13 +230,15 @@ namespace RfidCenter
             };
         }
 
+        // 激活 RfidCenter 的主窗口，使其处于可见位置和状态
+        // 注: 平时用户可以点窗口右上角的关闭按钮，让 RfidCenter 的主窗口处于隐藏状态
         public NormalResult ActivateWindow()
         {
             Program.MainForm.ActivateWindow();
             return new NormalResult();
         }
 
-        // 列出当前可用的 reader
+        // 列出当前可用的读写器
         public ListReadersResult ListReaders()
         {
             // 选出已经成功打开的部分 Reader 返回
@@ -337,9 +346,11 @@ namespace RfidCenter
 
         // 增加了无标签时延迟等待功能。敏捷响应
         // parameters:
+        //      reader_name    读卡器名字列表。形态为 "*" 或 "name1,name2" 或 "name1:1|2|3|4,name2"
         //      style   风格。逗号间隔的字符串内容
         //              session:会话ID
         //              dont_delay  不根据 session 来进行探测、延迟。也就是说确保要做一次 invetnory 并且立即返回
+        //              getTagInfo  表示要在结果中返回 TagInfo
         public ListTagsResult ListTags(string reader_name, string style)
         {
             // Debug.Assert(false);

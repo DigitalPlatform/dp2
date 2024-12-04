@@ -28,6 +28,10 @@ namespace dp2Circulation
         /// </summary>
         public string SavedXml = "";
 
+        // 2024/11/25
+        public string SavingMarc = "";
+        public string SavedMarc = "";
+
         /// <summary>
         /// 框架窗口
         /// </summary>
@@ -63,8 +67,17 @@ namespace dp2Circulation
         {
             string strError = "";
             string strHtml2 = "";
+            int nRet = 0;
 
-            int nRet = GetXmlHtml(
+            if (string.IsNullOrEmpty(SavingMarc) == false
+                || string.IsNullOrEmpty(SavedMarc) == false)
+                nRet = GetMarcHtml(
+this.SavingMarc,
+this.SavedMarc,
+out strHtml2,
+out strError);
+            else
+                nRet = GetXmlHtml(
     this.SavingXml,
     this.SavedXml,
     out strHtml2,
@@ -211,8 +224,84 @@ strHtml2 +
             return 0;
         }
 
+        int GetMarcHtml(
+string strOldMARC,
+string strNewMARC,
+out string strHtml2,
+out string strError)
+        {
+            strError = "";
+            strHtml2 = "";
+            int nRet = 0;
+
+            if (string.IsNullOrEmpty(strOldMARC) == false
+                && string.IsNullOrEmpty(strNewMARC) == false)
+            {
+                // 创建展示两个 MARC 记录差异的 HTML 字符串
+                // return:
+                //      -1  出错
+                //      0   成功
+                nRet = MarcDiff.DiffHtml(
+                    _leftTitle,
+                    strOldMARC,
+                    "", // strOldFragmentXml,
+                    "",
+                    _rightTitle,
+                    strNewMARC,
+                    "", // strNewFragmentXml,
+                    "",
+                    out strHtml2,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+            }
+            else if (string.IsNullOrEmpty(strOldMARC) == false
+    && string.IsNullOrEmpty(strNewMARC) == true)
+            {
+                strHtml2 = MarcUtil.GetHtmlOfMarc(strOldMARC,
+                    "", // strOldFragmentXml,
+                    "",
+                    false);
+            }
+            else if (string.IsNullOrEmpty(strOldMARC) == true
+                && string.IsNullOrEmpty(strNewMARC) == false)
+            {
+                strHtml2 = MarcUtil.GetHtmlOfMarc(strNewMARC,
+                    "", // strNewFragmentXml,
+                    "",
+                    false);
+            }
+
+            return 0;
+        }
+
+
         internal string _leftTitle = "拟保存的记录";
         internal string _rightTitle = "实际保存后的记录";
+
+        public string LeftTitle
+        {
+            get
+            {
+                return _leftTitle;
+            }
+            set
+            {
+                _leftTitle = value;
+            }
+        }
+
+        public string RightTitle
+        {
+            get
+            {
+                return _rightTitle;
+            }
+            set
+            {
+                _rightTitle = value;
+            }
+        }
 
         public string Action { get; set; }
 

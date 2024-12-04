@@ -18,14 +18,14 @@
     <ServiceContractMappings />
   </ClientOptions>
   <MetadataSources>
-    <MetadataSource Address="http://localhost:8005/dp2kernel/metadata" Protocol="http" SourceId="1" />
+    <MetadataSource Address="http://localhost/dp2kernel/metadata" Protocol="http" SourceId="1" />
   </MetadataSources>
   <Metadata>
-    <MetadataFile FileName="metadata4.xsd" MetadataType="Schema" ID="3993cd54-32e6-4473-bada-fa587ebed996" SourceId="1" SourceUrl="http://localhost:8005/dp2kernel/metadata?xsd=xsd0" />
-    <MetadataFile FileName="KernelService1.wsdl" MetadataType="Wsdl" ID="9bb7692d-fafb-4fde-920b-ff6da4503029" SourceId="1" SourceUrl="http://localhost:8005/dp2kernel/metadata" />
-    <MetadataFile FileName="metadata41.xsd" MetadataType="Schema" ID="cf10ba47-9f2a-4dd8-8467-93de2e42a69f" SourceId="1" SourceUrl="http://localhost:8005/dp2kernel/metadata?xsd=xsd3" />
-    <MetadataFile FileName="metadata42.xsd" MetadataType="Schema" ID="62bc7aec-657f-4cf9-9f40-e175ca719306" SourceId="1" SourceUrl="http://localhost:8005/dp2kernel/metadata?xsd=xsd2" />
-    <MetadataFile FileName="metadata43.xsd" MetadataType="Schema" ID="038ba7b0-a78c-4796-a1e9-f3eecede460b" SourceId="1" SourceUrl="http://localhost:8005/dp2kernel/metadata?xsd=xsd1" />
+    <MetadataFile FileName="KernelService.wsdl" MetadataType="Wsdl" ID="9cc210d4-9a0f-4f4b-a74d-ee2f4bea3bee" SourceId="1" SourceUrl="http://localhost/dp2kernel/metadata" />
+    <MetadataFile FileName="metadata.xsd" MetadataType="Schema" ID="fec81434-48bc-43b8-af6b-a4f875595a2b" SourceId="1" SourceUrl="http://localhost/dp2kernel/metadata?xsd=xsd3" />
+    <MetadataFile FileName="metadata1.xsd" MetadataType="Schema" ID="7b0f6539-8691-40a1-848d-5fd0a43b8300" SourceId="1" SourceUrl="http://localhost/dp2kernel/metadata?xsd=xsd0" />
+    <MetadataFile FileName="metadata2.xsd" MetadataType="Schema" ID="e11fb7a4-bb2c-4dd9-9d0f-5282c762d96a" SourceId="1" SourceUrl="http://localhost/dp2kernel/metadata?xsd=xsd1" />
+    <MetadataFile FileName="metadata3.xsd" MetadataType="Schema" ID="5e974f5e-d7c3-44ec-b761-4bd8c1bdf1ad" SourceId="1" SourceUrl="http://localhost/dp2kernel/metadata?xsd=xsd2" />
   </Metadata>
   <Extensions>
     <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />

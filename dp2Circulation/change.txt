@@ -820,3 +820,51 @@ move 书目记录
 中文图书/1 --> 测试/1
 中文图书:getbiblioinfo=*|setbiblioinfo=;测试:getbiblioinfo=*|setbiblioinfo=
 当前用户 'supervisor'  不具备 针对数据库 '测试' 执行 setbiblioinfo change 操作的存取权限
+
+~~~
+导出到 ISO2709 文件的时候，可以尝试再从 ISO2709 转换回到机内格式，然后和导出前的内容对比，
+如果发现不一致，就知道到处过程发生了字符损失，这时候要出现警告信息，提醒用户注意。
+
+~~~
+检索的时候，如果使用的是中间一致或者后方一致的匹配方式，并且检索第一阶段持续的时间较长，
+应自动出现一种浮动的提示，提醒操作者，中间一致或者后方一致的检索速度较慢，请耐心等待，
+或者可以按停止按钮中断检索。
+
+~~~
+文件 D:\xxx.iso 内的数据已经成功导入下列数据库:
+
+net.pipe://localhost/dp2kernel/mysql/?中文图书
+
+共导入记录 1085041 条。
+
+总共耗费时间: 01:48:39.9982953
+
+~~~
+https://www.howtogeek.com/28609/how-can-i-tell-what-is-listening-on-a-tcpip-port-in-windows/
+
+~~~
+dp2kernel 的错误日志里面需要把 SQL 并发使用的通道数超过一定数额的情况记载下来，便于
+事后分析。
+
+~~~
+https://dba.stackexchange.com/questions/9039/sudden-mysql-error-unable-to-connect-to-any-of-the-mysql-hosts
+
+ISSUE #1 : Connection Errors
+
+Once mysql has racked up enough connection errors, the host blocks all IPs until you do one of two things:
+
+$ service mysql restart
+mysql> FLUSH HOSTS;
+According to MySQL Documentation on FLUSH HOSTS;
+
+HOSTS
+
+empties the host cache tables. You should flush the host tables if some of your hosts change IP address or if you get the error message Host 'host_name' is blocked. When more than max_connect_errors errors occur successively for a given host while connecting to the MySQL server, MySQL assumes that something is wrong and blocks the host from further connection requests. Flushing the host tables enables further connection attempts from the host. See Section C.5.2.6, “Host 'host_name' is blocked”. You can start mysqld with --max_connect_errors=999999999 to avoid this error message.
+
+Try bumping up max_connect_errors (default is 10) to some obnoxiously high number, like 999999999 (about 1 billion), in /etc/my.cnf as follows:
+
+[mysqld]
+max-connect-errors=999999999
+You will then just restar mysql. To put this new setting in place without restarting, just run this command in the mysql client:
+
+mysql> SET GLOBAL max_connect_errors = 999999999;

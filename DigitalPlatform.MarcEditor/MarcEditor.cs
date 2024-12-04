@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.Xml;
 using System.Text;
+using System.Linq;
 
 using Newtonsoft.Json;
 
@@ -16,7 +17,6 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
-using System.Linq;
 using DigitalPlatform.MarcEditor;
 
 namespace DigitalPlatform.Marc
@@ -5510,9 +5510,29 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             {
                 if (result == null)
                     return null;
+
+                // 询问是否要替换 \r\n
+                if (result.Contains("\n"))
+                {
+                    // return:
+                    //      null    用户取消对话框
+                    //      其他    所输入的值
+                    var ret = ListDialog.GetInput(Application.OpenForms[0], 
+                        "文本中出现了回车换行符号",
+                        "请问如何处理?",
+                        new string[] { "多个字段", "单个字段" },
+                        0);
+                    if (ret == null)
+                        return null;
+                    if (ret == "多个字段")
+                        result = result.Replace("\r\n", "\n").Replace("\n", MarcQuery.FLDEND);
+                    else
+                        result = result.Replace("\r", "*").Replace("\n", "*");
+                }
+
                 return result.Replace("ǂ", MarcQuery.SUBFLD)
                     .Replace("$$", MarcQuery.SUBFLD)
-                    .Replace("\r\n", "\n").Replace("\n", MarcQuery.FLDEND);
+                    ;
             }
             return result;
         }
@@ -5839,6 +5859,10 @@ SYS	011528318
                         strTotal += RemoveBlank(strTemp) + new string((char)30, 1);
                 }
             }
+
+            // 2024/11/27
+            // 删除 | 左侧的 tab 键
+            strTotal = strTotal.Replace("\t|", "|");
 
             return strHeader + strTotal.Replace("|", new string((char)31, 1));
         }
