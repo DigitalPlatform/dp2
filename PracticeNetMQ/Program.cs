@@ -1,7 +1,8 @@
-﻿using NetMQ;
-using NetMQ.Sockets;
-using System;
+﻿using System;
 using System.Threading;
+
+using NetMQ;
+using NetMQ.Sockets;
 
 namespace PracticeNetMQ
 {

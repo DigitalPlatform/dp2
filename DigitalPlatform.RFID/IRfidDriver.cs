@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 using DigitalPlatform.Text;
@@ -10,15 +11,47 @@ namespace DigitalPlatform.RFID
 {
     public interface IRfidDriver
     {
+        string State { get; set; }
+
+        bool Pause { get; }
+
+
+        void IncApiCount();
+
+
+        void DecApiCount();
+
+        List<Reader> Readers { get; }
+
+        List<ShelfLock> ShelfLocks { get; }
+
+        ReadConfigResult ReadConfig(string reader_name, uint cfg_no);
+
+        NormalResult SetConfig(string reader_name,
+    string command);
+
         InitializeDriverResult InitializeDriver(string cfgFileName,
             string style,
             List<HintInfo> hint_table);
 
+        NormalResult LoadFactoryDefault(string reader_name);
+
+        NormalResult ManageReader(string reader_name, string command);
+
+        SetEasResult SetEAS(
+string reader_name,
+string uid,
+uint antenna_id,
+bool enable,
+string style);
+
+        FindTagResult FindTagByPII(
+    string reader_name,
+    string protocols,   // 2019/8/28
+    string antenna_list,    // 2019/9/24
+    string pii);
+
         NormalResult ReleaseDriver();
-
-        // OpenReaderResult OpenReader(string serial_number);
-
-        // NormalResult CloseReader(object reader_handle);
 
         InventoryResult Inventory(string reader_name, string style);
 
@@ -27,7 +60,7 @@ namespace DigitalPlatform.RFID
         // 2020/10/10 增加 style 参数
         GetTagInfoResult GetTagInfo(string reader_name,
             InventoryInfo info,
-            string style);
+            string style = "");
 
         NormalResult WriteTagInfo(
             string reader_name,
@@ -490,6 +523,7 @@ uint new_password);
 
             return results.ToArray();
         }
+
     }
 
     // 书柜灯
@@ -523,6 +557,13 @@ uint new_password);
         // 修改后的 UID
         // 注: UHF 标签在修改 EAS 以后，UID 会发生变化
         public string ChangedUID { get; set; }
+    }
+
+    [Serializable()]
+    public class ReadConfigResult : NormalResult
+    {
+        public uint CfgNo { get; set; }
+        public byte[] Bytes { get; set; }
     }
 
 #if OLD_SHELFLOCK

@@ -7115,11 +7115,7 @@ out string number);
         public UInt32 m_commTypeSupported;
     }
 
-    public class ReadConfigResult : NormalResult
-    {
-        public uint CfgNo { get; set; }
-        public byte[] Bytes { get; set; }
-    }
+
 
     /*
     /// <summary>

@@ -434,7 +434,7 @@ namespace dp2Circulation
                         // 堵塞到收到信号，或者超时 100 毫秒
                         // _delayList.Event.WaitOne(100);
                         if (WaitHandle.WaitAny(
-                            new WaitHandle[] 
+                            new WaitHandle[]
                             {
                                 _delayList.Event,
                                 this.CancelToken.WaitHandle
@@ -453,7 +453,7 @@ namespace dp2Circulation
                                 task.ShowData();
                             });
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
                             // TODO: 如何显示异常信息
                             MainForm.WriteErrorLog($"后台线程 _delayList.ProcessChangeList() 过程出现异常: {ExceptionUtil.GetDebugText(ex)}");
@@ -8173,6 +8173,20 @@ out strError);
 "rfidCenterUrl",
 value);  // 常用值 "ipc://RfidChannel/RfidServer"
 
+            }
+        }
+
+
+        // 2024/12/16
+        public bool AutoStartRfidCenter
+        {
+            get
+            {
+                if (this.AppInfo == null)
+                    return true;
+                return this.AppInfo.GetBoolean("cardreader",
+                    "autoStartRfidCenter",
+                    true);
             }
         }
 

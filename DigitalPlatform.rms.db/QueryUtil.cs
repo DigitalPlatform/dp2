@@ -26,7 +26,8 @@ namespace DigitalPlatform.rms
         // return:
         //		-1	出错
         //		0	成功
-        public static int GetSearchInfo(XmlElement nodeItem,
+        public static int GetSearchInfo(
+            XmlElement nodeItem,
             string strOutputStyle,
             out string strTarget,
             out string strWord,
@@ -38,6 +39,7 @@ namespace DigitalPlatform.rms
             out string strOrderBy,
             out int nMaxCount,
             out string strHint,
+            out string strTimeout,
             out string strError)
         {
             strTarget = "";
@@ -50,6 +52,7 @@ namespace DigitalPlatform.rms
             strOrderBy = "";
             nMaxCount = 0;
             strHint = "";
+            strTimeout = "";
             strError = "";
 
             bool bOutputKeyCount = StringUtil.IsInList("keycount", strOutputStyle);
@@ -248,18 +251,17 @@ namespace DigitalPlatform.rms
 
 
             //-------------------------------------------
-            //最大个数
-            XmlNode nodeMaxCount = nodeItem.SelectSingleNode("maxCount");
-            /*			
-                        if (nodeMaxCount == null)
-                        {
-                            strError = "检索式的maxCount元素未定义";
-                            return -1;
-                        }
+            //最大命中数
+            /*
+            <item>
+                ...
+                <maxCount>-1</maxCount>
+            </item>
             */
-            string strMaxCount = "";
-            if (nodeMaxCount != null)
-                strMaxCount = nodeMaxCount.InnerText.Trim(); // 2012/2/16
+            //XmlNode nodeMaxCount = nodeItem.SelectSingleNode("maxCount");
+            string strMaxCount = nodeItem.SelectSingleNode("maxCount")?.InnerText?.Trim();
+            //if (nodeMaxCount != null)
+            //    strMaxCount = nodeMaxCount.InnerText.Trim(); // 2012/2/16
             if (string.IsNullOrEmpty(strMaxCount) == true)
                 strMaxCount = "-1";
             /*
@@ -284,6 +286,14 @@ namespace DigitalPlatform.rms
                 return -1;
             }
 
+            // 2024/12/6
+            /*
+            <item>
+                ...
+                <timeout>00:02:00</timeout>
+            </item>
+            */
+            strTimeout = nodeItem.SelectSingleNode("timeout")?.InnerText?.Trim();
             return 0;
         }
 

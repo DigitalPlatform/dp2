@@ -1887,13 +1887,14 @@ namespace dp2Library
                     strReaderPassword,
                     app.Clock.Now,
                     (StringBuilder)null,
+                    out bool isTempPassword,    // 2024/12/12 增加的这个参数
                     out bool passwordExpired,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
                 // 2021/7/5
-                if (passwordExpired)
+                if (passwordExpired && isTempPassword == false/*2024/12/12*/)
                 {
                     result.Value = 0;
                     result.ErrorCode = ErrorCode.PasswordExpired;
@@ -1901,6 +1902,7 @@ namespace dp2Library
                     return result;
                 }
 
+                // TODO: 返回值里面可以精细反馈出到底是正式密码匹配的，还是临时密码匹配的
                 if (nRet == 0)
                 {
                     result.Value = 0;

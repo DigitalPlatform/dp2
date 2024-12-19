@@ -19,6 +19,8 @@ using Newtonsoft.Json;
 
 using PrinterDriver.Yanke;
 using RfidDrivers.First;
+using RfidDrivers.Sike;
+
 using ShelfLockDriver.First;
 
 using DigitalPlatform;
@@ -34,7 +36,9 @@ namespace RfidCenter
 {
     public partial class MainForm : Form
     {
-        RfidDriver1 _rfidDriver = new RfidDriver1();
+        // RfidDriver1 _rfidDriver = new RfidDriver1();
+        IRfidDriver _rfidDriver = new SikeDriver();
+
         ILedDriver _ledDriver = new LedDriver1();
         IPosPrinterDriver _printerDriver = new YankePrinterDriver();
         IShelfLockDriver _shelLockDriver = new WjlLockDriver();
@@ -631,22 +635,47 @@ _cancel.Token,
 
         string GetCurrentReaderName()
         {
+            return Program.Rfid.Readers[0].Name;
+            /*
             return (string)this.Invoke((Func<string>)(() =>
             {
                 return this.comboBox_deviceList.Text;
             }));
+            */
         }
 
         InventoryInfo _inventory_info = null;
 
         private void MenuItem_inventory_Click(object sender, EventArgs e)
         {
-            InventoryResult result = _rfidDriver.Inventory(GetCurrentReaderName(), "", "only_new");
-            MessageBox.Show(this, result.ToString());
-            if (result.Results != null && result.Results.Count > 0)
-                _inventory_info = result.Results[0];
-            else
-                _inventory_info = null;
+            OutputText($"开始盘点。按 Ctrl 键中断 ...\r\n");
+
+            for (int i = 0; i < 100; i++)
+            {
+                Application.DoEvents();
+                if ((Control.ModifierKeys & Keys.Control) == Keys.Control)
+                    break;
+                InventoryResult result = _rfidDriver.Inventory(GetCurrentReaderName(), "", "only_new");
+                if (result.Value == -1
+                    || result.Results.Count == 0)
+                {
+                    MessageBox.Show(this, result.ToString());
+                    break;
+                }
+
+                OutputText($"{i}) {result.ToString()}\r\n");
+            }
+            MessageBox.Show(this, "OK");
+
+
+            /*
+                InventoryResult result = _rfidDriver.Inventory(GetCurrentReaderName(), "", "only_new");
+                MessageBox.Show(this, result.ToString());
+                if (result.Results != null && result.Results.Count > 0)
+                    _inventory_info = result.Results[0];
+                else
+                    _inventory_info = null;
+            * */
         }
 
         private void MenuItem_getTagInfo_Click(object sender, EventArgs e)

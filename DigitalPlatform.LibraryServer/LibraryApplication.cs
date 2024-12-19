@@ -10366,6 +10366,8 @@ out strError);
         //          7) 否则用证条码号进行检索
         //      strPassword 密码。如果为null，表示不进行密码判断。注意，不是""
         //      strGetToken 是否要获得 token ，和有效期。 空 / day / month / year
+        //      normalPasswordExpired [out] 正式密码是否已经失效(注: 如果 bTempPassword == true，则调主需要忽略本参数的返回值)
+        //      bTempPassword   [out] 是否匹配上了临时密码(也就意味着没有匹配上正式密码)
         // return:
         //      -2  当前没有配置任何读者库，或者可以操作的读者库
         //      -1  error
@@ -10381,7 +10383,7 @@ out strError);
             int nIndex,
             string strClientIP,
             string strGetToken,
-            out bool passwordExpired,
+            out bool normalPasswordExpired,
             out bool bTempPassword,
             out string strXml,
             out string strOutputPath,
@@ -10395,7 +10397,7 @@ out strError);
             output_timestamp = null;
             bTempPassword = false;
             strToken = "";
-            passwordExpired = false;
+            normalPasswordExpired = false;
 
             int nRet = 0;
             LibraryApplication app = this;
@@ -10638,6 +10640,7 @@ out strError);
             List<string> aOutputPath = new List<string>();
             List<byte[]> aTimestamp = new List<byte[]>();
 
+            // 可能命中多条读者记录。一条一条地进行匹配
             for (int i = 0; i < aPath.Count; i++)
             {
                 string strMetaData = "";
@@ -10684,7 +10687,7 @@ out strError);
                             this.Clock.Now,
                             debugInfo,
                             out bTempPassword,
-                            out passwordExpired,
+                            out normalPasswordExpired,
                             out strError);
                         if (nRet == -1)
                             return -1;
@@ -10933,10 +10936,23 @@ out strError);
         // 临时密码重发最短周期
         static TimeSpan _tempPasswordRetryPeriod = new TimeSpan(0, 5, 0); // 五分钟
 
+        /*
+         * 要求启用了消息队列，或者配置了 SMS 短信接口(externalMessageInterface)
+         * 如果读者的权限包含 denyresetmypassword，则不能用本 API 重设密码(注: 读者的权限和 reader 代理账户和读者记录中的 rights 元素的组合有关)
+         * 本函数在间隔五分钟以上时间后才能重新调用
+         * */
         // 重设密码
         // parameters:
-        //      strParameters   参数字符串。如果 queryword 使用 NB: 形态，注意要这样使用 NB:姓名|，因为这是采用前方一致检索的，如果没有竖线部分，可能会匹配上不该命中的较长的名字
-        //      strMessageTempate   消息文字模板。其中可以使用 %name% %barcode% %temppassword% %expiretime% %period% 等宏
+        //      strParameters   参数字符串。name tel 和 queryword 子参数是必备子参数。(name 在立即返回消息的情况下可以缺乏)
+        //                      tel 子参数内容必须为 11 位字符。
+        //                      queryword 的作用是确保 API 高效运行。用于检索得到用于初筛的结果集
+        //                      可以用以下方式组合使用：
+        //                      queryword=???,tel=???????????,barcode=?????,name=?????
+        //                      如果要限定读者所在的分馆，可以再加上 librarycode 子参数
+        //                      如果 queryword 子参数内容使用 NB: 形态，注意要这样使用 NB:姓名|，因为这是采用前方一致检索的，如果没有竖线部分，可能会匹配上不该命中的较长的名字
+        //                      style 子参数内容为 returnMessage，表示希望本 API 直接返回消息内容，而不是用短信方式发出。这样便于进行 API 测试
+        //      strMessageTempate   消息文字模板。
+        //                      其中可以使用 %name% %barcode% %temppassword% %expiretime%(临时密码失效期) %period%(五分钟) 等宏
         //      strMessage  返回拟发送给读者的消息文字
         // return:
         //      -2  读者的图书馆账户尚未注册手机号
@@ -11443,7 +11459,7 @@ out strError);
             string strOutputPath = "";
 
             byte[] timestamp = null;
-            bool bTempPassword = false;
+            // bool bTempPassword = false;
             string strToken = "";
 
             // 获得读者记录
@@ -11462,8 +11478,8 @@ out strError);
                 -1,
                 null,
                 null,
-                out bool passwordExpired,
-                out bTempPassword,
+                out bool _, // normalPasswordExpired,
+                out _,  // bTempPassword,
                 out strXml,
                 out strOutputPath,
                 out timestamp,
@@ -11677,8 +11693,9 @@ out strError);
         //      nIndex  如果有多个匹配的读者记录，此参数表示要选择其中哪一个。
         //              如果为-1，表示首次调用此函数，还不知如何选择。如此时命中多个，函数会返回>1的值
         //      strGetToken 是否要获得 token ，和有效期。 空 / day / month / year
-        //      alter_type_list 已经实施的绑定验证类型和尚未实施的类型列表
-        //      strOutputUserName   返回读者证条码号
+        //      passwordExpired [out] 密码是否已经失效？注意这里是综合判断了正式密码和临时密码以后得到的结论
+        //      alter_type_list [out] 已经实施的绑定验证类型和尚未实施的类型列表
+        //      strOutputUserName   [out] 返回读者证条码号
         // return:
         //      -1  error
         //      0   登录未成功
@@ -11823,7 +11840,7 @@ out strError);
                 nIndex,
                 sessioninfo.ClientIP,
                 strGetToken,
-                out passwordExpired,
+                out bool normalPasswordExpired,
                 out bTempPassword,
                 out strXml,
                 out strOutputPath,
@@ -11840,6 +11857,11 @@ out strError);
                 // "以登录名 '" + strLoginName + "' 登录时, 检索读者帐户记录出错: " + strError;
                 return -1;
             }
+
+            // 2024/12/12
+            // 注意 normalPasswordExpired 临时变量的值要和 bTempPassword 一起结合判断
+            if (normalPasswordExpired && bTempPassword == false)
+                passwordExpired = true;
 
             if (nRet == 0)
             {
@@ -12725,6 +12747,7 @@ out strError);
         // 验证读者密码。包括普通密码和临时密码
         // parameters:
         //      bTempPassword   [out] 是否为临时密码匹配成功
+        //      normalPasswordExpired   [out] 正式密码是否已经失效(注：如果临时密码匹配成功，那调主可以忽略本参数的返回值)
         // return:
         //      -1  error
         //      0   密码不正确
@@ -12736,7 +12759,7 @@ out strError);
             DateTime now,
             StringBuilder debugInfo,
             out bool bTempPassword,
-            out bool passwordExpired,
+            out bool normalPasswordExpired,
             out string strError)
         {
             bTempPassword = false;
@@ -12745,7 +12768,7 @@ out strError);
                 readerdom,
                 strPassword,
                 debugInfo,
-                out passwordExpired,
+                out normalPasswordExpired,
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -12760,6 +12783,8 @@ out strError);
             return nRet;
         }
 
+#if REMOVED
+        返回的 bool 值有缺陷，容易造成误用(正式密码的试销期过了，但其实临时密码匹配上了)
         // 验证读者密码。包括普通密码和临时密码，或者 token
         // return:
         //      -1  error
@@ -12790,8 +12815,11 @@ out strError);
                 now,
                 out strError);
         }
+#endif
 
         // 验证读者普通密码或者 token
+        // parameters:
+        //      passwordExpired [out] 密码是否已经失效。注: 失效的情况下也会继续判断密码是否正确，通过函数返回值返回
         // return:
         //      -1  error
         //      0   密码不正确
@@ -14022,7 +14050,8 @@ out strError);
                         strReaderOldPassword,
                         this.Clock.Now,
                         null,
-                        out bool passwordExpired,
+                        out bool _, // 2024/12/12 新增加的参数
+                        out bool _,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;

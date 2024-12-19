@@ -26,8 +26,9 @@ namespace DigitalPlatform.rms
         public string IdOrder = "";
         public string KeyOrder = "";
 
-        public string OrderBy = "";       // 排序风格
-        public int MaxCount = -1;      // 限制的最大条数 -1:不限
+        public string OrderBy = "";     // 排序风格
+        public int MaxCount = -1;       // 限制的最大条数 -1:不限
+        public string Timeout = "";     // 超时时间长度。例如 00:02:00 表示两分钟
     }
 
     // 专门的逻辑检索类,并不用考虑加锁的问题，
@@ -462,7 +463,7 @@ namespace DigitalPlatform.rms
 
         // 检索单元item的信息，对库进行检索
         // parameter:
-        //		nodeItem	item节点
+        //		nodeItem	    item节点
         //		resultSet	结果集。返回时不能确保结果集已经排序。需要看resultset.Sorted成员
         //		            传进结果集,????????每次清空，既然每次清空，那还不如返回一个结果集呢
         //		isConnected	是否连接
@@ -544,6 +545,7 @@ namespace DigitalPlatform.rms
             }
 
             // 根据nodeItem得到检索信息
+            /*
             string strTarget;
             string strWord;
             string strMatch;
@@ -554,18 +556,20 @@ namespace DigitalPlatform.rms
             string strOrderBy;
             string strHint = "";
             int nMaxCount;
+            */
             nRet = QueryUtil.GetSearchInfo(nodeItem,
                 strOutputStyle,
-                out strTarget,
-                out strWord,
-                out strMatch,
-                out strRelation,
-                out strDataType,
-                out strIdOrder,
-                out strKeyOrder,
-                out strOrderBy,
-                out nMaxCount,
-                out strHint,
+                out string strTarget,
+                out string strWord,
+                out string strMatch,
+                out string strRelation,
+                out string strDataType,
+                out string strIdOrder,
+                out string strKeyOrder,
+                out string strOrderBy,
+                out int nMaxCount,
+                out string strHint,
+                out string timeout,
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -633,6 +637,7 @@ namespace DigitalPlatform.rms
                 searchItem.KeyOrder = strKeyOrder;
                 searchItem.OrderBy = strOrderBy;
                 searchItem.MaxCount = nMaxCount;
+                searchItem.Timeout = timeout;
 
                 long prev_count = resultSet.Count;
 

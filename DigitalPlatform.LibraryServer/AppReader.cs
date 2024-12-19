@@ -8359,7 +8359,7 @@ out strError);
                     -1,  // nIndex,
                     sessioninfo.ClientIP,
                     null, // strGetToken,
-                    out bool passwordExpired,
+                    out bool normalPasswordExpired,
                     out bTempPassword,
                     out strXml,
                     out strOutputPath,
@@ -8378,7 +8378,7 @@ out strError);
                     return -1;
                 }
 
-                if (passwordExpired)
+                if (normalPasswordExpired && bTempPassword == false/*2024/12/12*/)
                 {
                     strError = "帐户 '" + strQueryWord + "' 密码已经失效";
                     return -1;

@@ -7079,6 +7079,7 @@ namespace DigitalPlatform.rms
                 searchItem.DataType = "string";
                 searchItem.MaxCount = -1;
                 searchItem.OrderBy = "";
+                searchItem.Timeout = "";
 
                 // 帐户库不能去非用字
                 // return:

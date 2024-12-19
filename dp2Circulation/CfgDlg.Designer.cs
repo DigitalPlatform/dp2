@@ -276,6 +276,8 @@
             this.checkBox_message_shareBiblio = new System.Windows.Forms.CheckBox();
             this.tabPage_z3950 = new System.Windows.Forms.TabPage();
             this.groupBox7 = new System.Windows.Forms.GroupBox();
+            this.textBox_ucs_filterScriptCode = new System.Windows.Forms.TextBox();
+            this.label49 = new System.Windows.Forms.Label();
             this.button_ucs_testUpload = new System.Windows.Forms.Button();
             this.textBox_ucs_databaseName = new System.Windows.Forms.TextBox();
             this.label47 = new System.Windows.Forms.Label();
@@ -288,8 +290,7 @@
             this.button_z3950_servers = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
             this.button_Cancel = new System.Windows.Forms.Button();
-            this.textBox_ucs_filterScriptCode = new System.Windows.Forms.TextBox();
-            this.label49 = new System.Windows.Forms.Label();
+            this.checkBox_cardReader_autoStartRfidCenter = new System.Windows.Forms.CheckBox();
             this.tabControl_main.SuspendLayout();
             this.tabPage_server.SuspendLayout();
             this.toolStrip_server.SuspendLayout();
@@ -2320,6 +2321,7 @@
             // 
             // groupBox_rfidReader
             // 
+            this.groupBox_rfidReader.Controls.Add(this.checkBox_cardReader_autoStartRfidCenter);
             this.groupBox_rfidReader.Controls.Add(this.comboBox_rfid_tagCachePolicy);
             this.groupBox_rfidReader.Controls.Add(this.label_rfid_tagCachePolicy);
             this.groupBox_rfidReader.Controls.Add(this.groupBox_uhf);
@@ -3314,6 +3316,30 @@
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = "UCS 上传接口";
             // 
+            // textBox_ucs_filterScriptCode
+            // 
+            this.textBox_ucs_filterScriptCode.AcceptsReturn = true;
+            this.textBox_ucs_filterScriptCode.AcceptsTab = true;
+            this.textBox_ucs_filterScriptCode.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_ucs_filterScriptCode.HideSelection = false;
+            this.textBox_ucs_filterScriptCode.Location = new System.Drawing.Point(172, 211);
+            this.textBox_ucs_filterScriptCode.Multiline = true;
+            this.textBox_ucs_filterScriptCode.Name = "textBox_ucs_filterScriptCode";
+            this.textBox_ucs_filterScriptCode.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox_ucs_filterScriptCode.Size = new System.Drawing.Size(457, 306);
+            this.textBox_ucs_filterScriptCode.TabIndex = 11;
+            // 
+            // label49
+            // 
+            this.label49.AutoSize = true;
+            this.label49.Location = new System.Drawing.Point(17, 211);
+            this.label49.Name = "label49";
+            this.label49.Size = new System.Drawing.Size(147, 21);
+            this.label49.TabIndex = 10;
+            this.label49.Text = "过滤用的脚本:";
+            // 
             // button_ucs_testUpload
             // 
             this.button_ucs_testUpload.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
@@ -3426,29 +3452,15 @@
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
-            // textBox_ucs_filterScriptCode
+            // checkBox_cardReader_autoStartRfidCenter
             // 
-            this.textBox_ucs_filterScriptCode.AcceptsReturn = true;
-            this.textBox_ucs_filterScriptCode.AcceptsTab = true;
-            this.textBox_ucs_filterScriptCode.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_ucs_filterScriptCode.HideSelection = false;
-            this.textBox_ucs_filterScriptCode.Location = new System.Drawing.Point(172, 211);
-            this.textBox_ucs_filterScriptCode.Multiline = true;
-            this.textBox_ucs_filterScriptCode.Name = "textBox_ucs_filterScriptCode";
-            this.textBox_ucs_filterScriptCode.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_ucs_filterScriptCode.Size = new System.Drawing.Size(457, 306);
-            this.textBox_ucs_filterScriptCode.TabIndex = 11;
-            // 
-            // label49
-            // 
-            this.label49.AutoSize = true;
-            this.label49.Location = new System.Drawing.Point(17, 211);
-            this.label49.Name = "label49";
-            this.label49.Size = new System.Drawing.Size(147, 21);
-            this.label49.TabIndex = 10;
-            this.label49.Text = "过滤用的脚本:";
+            this.checkBox_cardReader_autoStartRfidCenter.AutoSize = true;
+            this.checkBox_cardReader_autoStartRfidCenter.Location = new System.Drawing.Point(11, 74);
+            this.checkBox_cardReader_autoStartRfidCenter.Name = "checkBox_cardReader_autoStartRfidCenter";
+            this.checkBox_cardReader_autoStartRfidCenter.Size = new System.Drawing.Size(120, 25);
+            this.checkBox_cardReader_autoStartRfidCenter.TabIndex = 5;
+            this.checkBox_cardReader_autoStartRfidCenter.Text = "自动启动";
+            this.checkBox_cardReader_autoStartRfidCenter.UseVisualStyleBackColor = true;
             // 
             // CfgDlg
             // 
@@ -3827,5 +3839,6 @@
         private System.Windows.Forms.Label label_message_denysharebiblio;
         private System.Windows.Forms.TextBox textBox_ucs_filterScriptCode;
         private System.Windows.Forms.Label label49;
+        private System.Windows.Forms.CheckBox checkBox_cardReader_autoStartRfidCenter;
     }
 }

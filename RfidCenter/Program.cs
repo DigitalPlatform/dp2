@@ -22,7 +22,7 @@ namespace RfidCenter
 {
     static class Program
     {
-        public static RfidDriver1 Rfid = null;
+        public static IRfidDriver Rfid = null;
         public static ILedDriver Led = null;
         public static IPosPrinterDriver Printer = null;
         public static IShelfLockDriver ShelfLock = null;

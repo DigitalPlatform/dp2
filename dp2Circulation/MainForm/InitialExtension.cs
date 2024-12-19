@@ -2238,7 +2238,8 @@ MessageBoxDefaultButton.Button1);
                         MutexName = "{E343F372-13A0-482F-9784-9865B112C042}"
                     });
                 if (string.IsNullOrEmpty(this.RfidCenterUrl) == false
-                    && ProcessManager.IsIpcUrl(this.RfidCenterUrl))
+                    && ProcessManager.IsIpcUrl(this.RfidCenterUrl)
+                    && this.AutoStartRfidCenter)
                     infos.Add(new DigitalPlatform.IO.ProcessInfo
                     {
                         Name = "RFID中心",

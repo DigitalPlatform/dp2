@@ -356,7 +356,7 @@ USR 0C0228081004000100010000000000000000000000000000000000000000
             */
         }
 
-
+        /*
         [TestMethod]
         public void Test_decode_epc_binary_3()
         {
@@ -370,6 +370,7 @@ USR 0C0228081004000100010000000000000000000000000000000000000000
             var elements = GaoxiaoUtility.DecodeUserBank(Element.FromHexString(user_hex));
             Debug.WriteLine(elements);
         }
+        */
 
         // 解码高校 Content Parameter
         // 格式文档上的例子 00a1

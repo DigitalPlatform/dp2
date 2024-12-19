@@ -40,6 +40,8 @@ using static DigitalPlatform.rms.KeysCfg;
 using System.Windows.Forms;
 using System.Linq;
 using System.Threading.Tasks;
+using Google.Protobuf.WellKnownTypes;
+using System.Globalization;
 
 namespace DigitalPlatform.rms
 {
@@ -4045,6 +4047,7 @@ ex);
         aSqlParameter,
         resultSet,
         searchItem.MaxCount,
+        searchItem.Timeout,
         GetOutputStyle(strOutputStyle),
         true);
             if (result.Value == -1 || result.Value == 0)
@@ -4159,11 +4162,31 @@ handle.CancelTokenSource.Token).Result;
         List<DbParameter> aSqlParameter,
         DpResultSet resultSet,
         int nMaxCount,
+        string strTimeout,
         OutputStyle style,
         bool bRecordTable/*,
         out string strError*/)
         {
             string strError = "";
+
+            TimeSpan timeout = TimeSpan.FromMinutes(20);
+            if (string.IsNullOrEmpty(strTimeout) == false)
+            {
+                // https://learn.microsoft.com/zh-cn/dotnet/standard/base-types/custom-timespan-format-strings
+                if (TimeSpan.TryParseExact(strTimeout,
+                    new string[] {
+                    "%h\\:%m\\:%s",
+                    "%m\\:%s",
+                    "%s",
+                    },
+                    CultureInfo.InvariantCulture,
+                    out timeout) == false)
+                    return new Result
+                    {
+                        Value = -1,
+                        ErrorString = $"时间长度值 '{strTimeout}' 不合法"
+                    };
+            }
 
             Connection connection = null;
 
@@ -4199,11 +4222,38 @@ handle.CancelTokenSource.Token).Result;
 
                     var task = command.ExecuteReaderAsync(CommandBehavior.CloseConnection);
                     // 2024/11/30
-                    task.Wait(handle.CancelToken);
-                    if (handle.CancelToken.IsCancellationRequested)
+                    var ret = task.Wait((int)timeout.TotalMilliseconds,
+                        handle.CancelToken);
+                    if (ret == false
+                        || handle.CancelToken.IsCancellationRequested)
                     {
                         // 2024/11/30
                         command.Cancel();
+                        {
+                            var reader = task.Result;
+                            if (reader != null)
+                            {
+                                /*
+                                // 把残余的信息读完
+                                while (reader.Read())
+                                {
+
+                                }
+                                */
+                                reader.Close();
+                            }
+                        }
+
+                        if (ret == false)
+                        {
+                            return new Result
+                            {
+                                Value = -1,
+                                ErrorCode = ErrorCodeValue.RequestTimeOut,
+                                ErrorString = $"检索数据库时发生超时({strTimeout})"
+                            };
+                        }
+
                         return new Result
                         {
                             Value = -1,
@@ -4234,7 +4284,8 @@ handle.CancelTokenSource.Token).Result;
                                 nMaxCount,
                                 style,  // GetOutputStyle(strOutputStyle),
                                 bRecordTable,
-                                () => {
+                                () =>
+                                {
                                     command.Cancel();
                                 },
                                 out strError);
@@ -5735,6 +5786,7 @@ List<DbParameter> aSqlParameter)
             aSqlParameter,
             resultSet,
             searchItem.MaxCount,
+            searchItem.Timeout,
             GetOutputStyle(strOutputStyle),
             false);
                 if (result.Value == -1 || result.Value == 0)

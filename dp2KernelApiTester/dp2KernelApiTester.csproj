@@ -98,6 +98,7 @@
       <DependentUpon>SettingDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="TestCase\TestCreateDatabase.cs" />
+    <Compile Include="TestCase\TestMultiChannel.cs" />
     <Compile Include="TestCase\TestPdfPage.cs" />
     <Compile Include="TestCase\TestRebuildKeys.cs" />
     <Compile Include="TestCase\TestRecord.cs" />
@@ -163,6 +164,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="comment.txt" />
     <Content Include="history.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

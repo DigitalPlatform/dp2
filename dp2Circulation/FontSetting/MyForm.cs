@@ -35,7 +35,6 @@ using DigitalPlatform.Core;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Typography;
 using static dp2Circulation.AccountBookForm;
-using System.Data.Sql;
 
 // 2013/3/16 添加 XML 注释
 
@@ -46,6 +45,7 @@ namespace dp2Circulation
     /// </summary>
     public class MyForm : Form, IMdiWindow, ILoopingHost, IChannelHost, IEnableControl, IChannelLooping
     {
+
         #region test
 
 

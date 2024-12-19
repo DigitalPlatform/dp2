@@ -218,6 +218,16 @@ namespace DigitalPlatform.rms
                     }
                     throw ex;
                 }
+                catch(MySqlProtocolException)
+                {
+                    this.Close();
+                    continue;
+                }
+                catch(NotSupportedException)
+                {
+                    this.Close();
+                    continue;
+                }
                 return;
             }
             if (exception != null)

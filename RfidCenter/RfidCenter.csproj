@@ -81,10 +81,10 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>8A609FAD04B89DDF14832D49A2DD957EC2628C66</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>5CD5B18D4544FA144792182DF4717E768407D0DA</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>数字平台（北京）软件有限责任公司苏州分公司.pfx</ManifestKeyFile>
+    <ManifestKeyFile>RfidCenter_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestTimestampUrl>http://timestamp.digicert.com</ManifestTimestampUrl>
@@ -123,7 +123,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Serilog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
       <HintPath>..\packages\Serilog.4.0.0\lib\net471\Serilog.dll</HintPath>
@@ -234,6 +234,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <None Include="RfidCenter_TemporaryKey.pfx" />
     <None Include="代码签名证书-2019.pfx" />
     <None Include="代码签名证书-2020.pfx" />
     <None Include="数字平台（北京）软件有限责任公司.pfx" />
@@ -289,6 +290,10 @@
     <ProjectReference Include="..\RfidDrivers.First\RfidDrivers.First.csproj">
       <Project>{dfadb438-ebff-47fb-acf6-586224cef771}</Project>
       <Name>RfidDrivers.First</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RfidDrivers.Sike\RfidDrivers.Sike.csproj">
+      <Project>{2FA3E096-BD0C-425D-9AA4-839E322B8332}</Project>
+      <Name>RfidDrivers.Sike</Name>
     </ProjectReference>
     <ProjectReference Include="..\ShelfLockDriver.First\ShelfLockDriver.First.csproj">
       <Project>{6b3ccf98-d61e-48a9-9646-9d2c9831261e}</Project>

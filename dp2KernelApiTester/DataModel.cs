@@ -168,6 +168,12 @@ namespace dp2KernelApiTester
 
         }
 
+        // 创建一个临时通道。注意使用完后 .Dispose()
+        public static RmsChannel NewChannel()
+        {
+            return Channels.CreateTempChannel(DataModel.dp2kernelServerUrl);
+        }
+
         static string _currentUserName = "";
 
         public static void Clear()

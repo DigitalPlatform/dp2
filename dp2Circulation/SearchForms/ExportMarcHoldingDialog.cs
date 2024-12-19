@@ -52,6 +52,36 @@ namespace dp2Circulation
 
         private void button_OK_Click(object sender, EventArgs e)
         {
+            // 如果 OK 时正好在第一个属性页，要提醒使用者注意第二个属性页的参数
+            // if (this.tabControl1.SelectedTab == this.tabPage_ext)
+            {
+                if (string.IsNullOrEmpty(this.textBox_biblio_removeFieldNameList.Text) == false
+                    || string.IsNullOrEmpty(this.textBox_biblio_filterScriptFileName.Text) == false)
+                {
+                    bool temp = false;
+                    List<string> lines = new List<string>();
+                    if (string.IsNullOrEmpty(this.textBox_biblio_removeFieldNameList.Text) == false)
+                        lines.Add($"删除字段 '{this.textBox_biblio_removeFieldNameList.Text}'");
+                    if (string.IsNullOrEmpty(this.textBox_biblio_filterScriptFileName.Text) == false)
+                        lines.Add($"执行脚本 '{this.textBox_biblio_filterScriptFileName.Text}'");
+
+                    var result = MessageDlg.Show(this,
+                        $"确实要对导出到文件中的内容 {StringUtil.MakePathList(lines, " 并且 ")} ?",
+                        "导出时特殊效果提醒",
+                        MessageBoxButtons.OKCancel,
+                        MessageBoxDefaultButton.Button2,
+                        ref temp,
+                        new string[] { "是的", "取消" },
+                        null);
+                    if (result == DialogResult.Cancel)
+                    {
+                        this.tabControl1.SelectedTab = this.tabPage_biblio;
+                        return;
+                    }
+                }
+            }
+
+
             this.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.Close();
         }

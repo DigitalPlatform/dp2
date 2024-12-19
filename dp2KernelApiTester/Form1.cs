@@ -16,6 +16,7 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Text;
+using dp2KernelApiTester.TestCase;
 
 namespace dp2KernelApiTester
 {
@@ -582,6 +583,33 @@ string style = "")
                 });
             }
 
+        }
+
+        private async void MenuItem_test_multiChannel_Click(object sender, EventArgs e)
+        {
+            using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(this._cancelApp.Token))
+            {
+                _cancelCurrent = cancel;
+                await Task.Run(() =>
+                {
+                    EnableControls(false);
+                    try
+                    {
+                        var result = TestMultiChannel.TestAll(cancel.Token,
+                            "");
+                        if (result.Value == -1)
+                            DataModel.SetMessage(result.ErrorInfo, "error");
+                    }
+                    catch (Exception ex)
+                    {
+                        AppendString($"exception: {ex.Message}");
+                    }
+                    finally
+                    {
+                        EnableControls(true);
+                    }
+                });
+            }
         }
     }
 }

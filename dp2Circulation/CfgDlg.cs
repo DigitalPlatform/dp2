@@ -614,6 +614,12 @@ namespace dp2Circulation
         "rfidCenterUrl",
         "");  // 常用值 "ipc://RfidChannel/RfidServer"
 
+                // 2024/12/16
+                this.checkBox_cardReader_autoStartRfidCenter.Checked =
+                    ap.GetBoolean("cardreader",
+                    "autoStartRfidCenter",
+                    true);
+
                 this.comboBox_rfid_tagCachePolicy.Text =
                     ap.GetString("rfid",
         "tagCachePolicy",
@@ -1465,6 +1471,11 @@ namespace dp2Circulation
                 ap.SetString("cardreader",
                     "rfidCenterUrl",
                     this.textBox_cardReader_rfidCenterUrl.Text);  // 常用值 "ipc://RfidChannel/RfidServer"
+
+                // 2024/12/16
+                ap.SetBoolean("cardreader",
+                "autoStartRfidCenter",
+                this.checkBox_cardReader_autoStartRfidCenter.Checked);
 
                 ap.SetString("rfid",
 "tagCachePolicy",

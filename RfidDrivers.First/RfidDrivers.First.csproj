@@ -134,6 +134,10 @@
       <Project>{c5b517c1-7344-45a5-89dc-06a9b130ae36}</Project>
       <Name>DigitalPlatform.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\RfidDrivers.Sike\RfidDrivers.Sike.csproj">
+      <Project>{2fa3e096-bd0c-425d-9aa4-839e322b8332}</Project>
+      <Name>RfidDrivers.Sike</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
