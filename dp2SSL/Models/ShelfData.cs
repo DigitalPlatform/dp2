@@ -5876,7 +5876,7 @@ ShelfData.LibraryNetworkCondition == "OK" ? "" : "offline");
         // 2024/2/4
         public static void ClearLocalCoverImageFileName(IReadOnlyCollection<Entity> entities)
         {
-            foreach(var entity in entities)
+            foreach (var entity in entities)
             {
                 entity.CoverImageLocalPath = null;
             }

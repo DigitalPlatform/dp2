@@ -120,7 +120,7 @@ namespace dp2SSL
                     return new NormalResult
                     {
                         Value = -1,
-                        ErrorInfo = $"标签的 OI '{oi}' 不符合定义 '{filter_oi}'，修改册记录状态被(dp2ssl)拒绝",
+                        ErrorInfo = $"标签的 OI '{oi}' 不符合过滤定义 '{filter_oi}'，修改册记录状态被(dp2ssl)拒绝",
                         ErrorCode = "oiMismatch"
                     };
             }
@@ -201,7 +201,7 @@ namespace dp2SSL
                     return new GetLocalEntityDataResult
                     {
                         Value = -1,
-                        ErrorInfo = $"标签的 OI '{oi}' 不符合定义 '{filter_oi}'，获取册记录被(dp2ssl)拒绝",
+                        ErrorInfo = $"标签的 OI '{oi}' 不符合过滤定义 '{filter_oi}'，获取册记录被(dp2ssl)拒绝",
                         ErrorCode = "oiMismatch"
                     };
             }
@@ -518,17 +518,18 @@ namespace dp2SSL
         //      0   读者记录没有找到
         //      1   成功
         public static async Task<GetReaderInfoResult> GetReaderInfoAsync(
-            string oi,
+            string patron_oi,
             string pii)
         {
             string filter_oi = App.SipInstitution;
             if (string.IsNullOrEmpty(filter_oi) == false)
             {
-                if (oi != filter_oi)
+                if (string.IsNullOrEmpty(patron_oi) == false/*2024/12/27*/
+                    && patron_oi != filter_oi)
                     return new GetReaderInfoResult
                     {
                         Value = -1,
-                        ErrorInfo = $"读者证的 OI '{oi}' 不符合定义 '{filter_oi}'，获取读者记录被(dp2ssl)拒绝",
+                        ErrorInfo = $"读者证的 OI '{patron_oi}' 不符合过滤定义 '{filter_oi}'，获取读者记录被(dp2ssl)拒绝",
                         ErrorCode = "oiMismatch"
                     };
             }
@@ -544,7 +545,7 @@ namespace dp2SSL
 
                         int nRedoCount = 0;
                     REDO_GETITEMINFO:
-                        var get_result = await _channel.GetPatronInfoAsync(oi, pii);
+                        var get_result = await _channel.GetPatronInfoAsync(patron_oi, pii);
                         if (get_result.Value == -1)
                             return new GetReaderInfoResult
                             {
@@ -612,6 +613,7 @@ namespace dp2SSL
                                 "barcode",
                                 get_result.Result.AA_PatronIdentifier_r);
 
+
                             // 姓名
                             DomUtil.SetElementText(readerdom.DocumentElement,
 "name",
@@ -677,18 +679,19 @@ get_result.Result.AE_PersonalName_r);
             {
                 InventoryData.ParseOiPii(patronBarcode, out string patron_pii, out string patron_oi);
                 InventoryData.ParseOiPii(itemBarcode, out string item_pii, out string item_oi);
-                if (patron_oi != filter_oi)
+                if (string.IsNullOrEmpty(patron_oi) == false/*2024/12/27*/
+                    && patron_oi != filter_oi)
                     return new NormalResult
                     {
                         Value = -1,
-                        ErrorInfo = $"读者证的 OI '{patron_oi}' 不符合定义 '{filter_oi}'，借书被(dp2ssl)拒绝",
+                        ErrorInfo = $"读者证的 OI '{patron_oi}' 不符合过滤定义 '{filter_oi}'，借书被(dp2ssl)拒绝",
                         ErrorCode = "oiMismatch"
                     };
                 if (item_oi != filter_oi)
                     return new NormalResult
                     {
                         Value = -1,
-                        ErrorInfo = $"图书标签的 OI '{item_oi}' 不符合定义 '{filter_oi}'，借书被(dp2ssl)拒绝",
+                        ErrorInfo = $"图书标签的 OI '{item_oi}' 不符合过滤定义 '{filter_oi}'，借书被(dp2ssl)拒绝",
                         ErrorCode = "oiMismatch"
                     };
             }
@@ -750,7 +753,7 @@ get_result.Result.AE_PersonalName_r);
                     return new NormalResult
                     {
                         Value = -1,
-                        ErrorInfo = $"图书标签的 OI '{item_oi}' 不符合定义 '{filter_oi}'，还书被(dp2ssl)拒绝",
+                        ErrorInfo = $"图书标签的 OI '{item_oi}' 不符合过滤定义 '{filter_oi}'，还书被(dp2ssl)拒绝",
                         ErrorCode = "oiMismatch"
                     };
             }
@@ -807,18 +810,19 @@ get_result.Result.AE_PersonalName_r);
             {
                 InventoryData.ParseOiPii(patronBarcode, out string patron_pii, out string patron_oi);
                 InventoryData.ParseOiPii(itemBarcode, out string item_pii, out string item_oi);
-                if (patron_oi != filter_oi)
+                if (string.IsNullOrEmpty(patron_oi) == false/*2024/12/27*/
+                    && patron_oi != filter_oi)
                     return new NormalResult
                     {
                         Value = -1,
-                        ErrorInfo = $"读者证的 OI '{patron_oi}' 不符合定义 '{filter_oi}'，续借被(dp2ssl)拒绝",
+                        ErrorInfo = $"读者证的 OI '{patron_oi}' 不符合过滤定义 '{filter_oi}'，续借被(dp2ssl)拒绝",
                         ErrorCode = "oiMismatch"
                     };
                 if (item_oi != filter_oi)
                     return new NormalResult
                     {
                         Value = -1,
-                        ErrorInfo = $"图书标签的 OI '{item_oi}' 不符合定义 '{filter_oi}'，续借被(dp2ssl)拒绝",
+                        ErrorInfo = $"图书标签的 OI '{item_oi}' 不符合过滤定义 '{filter_oi}'，续借被(dp2ssl)拒绝",
                         ErrorCode = "oiMismatch"
                     };
             }

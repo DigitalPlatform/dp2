@@ -24,6 +24,9 @@ using DigitalPlatform.Xml;
 using DocumentFormat.OpenXml.Vml;
 // using DocumentFormat.OpenXml.Drawing.Charts;
 using SixLabors.ImageSharp.PixelFormats;
+using System.Net.Mime;
+using System.Runtime.InteropServices;
+using System.Net;
 /*
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixColor = SixLabors.ImageSharp.Color;
@@ -97,7 +100,7 @@ namespace DigitalPlatform.Typography
                 var first_level_nodes = dom.DocumentElement.SelectNodes("*");
                 CreateNodes(
                     context,
-                    // doc,
+    // doc,
     mainPart.Document.Body,
     first_level_nodes);
 #if REMOVED
@@ -1214,6 +1217,76 @@ out string error);
             throw new Exception($"未知的单位 '{unit}' ('{text}')");
         }
 
+        #region 识别文件的 MIME
+
+        public static string GetMimeTypeFromFile(string strFileName)
+        {
+            return MimeTypeFrom(ReadFirst256Bytes(strFileName),
+                "");
+        }
+
+        // 读取文件前256bytes
+        static byte[] ReadFirst256Bytes(string strFileName)
+        {
+            using (FileStream fileSource = File.Open(
+                strFileName,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.ReadWrite))
+            {
+                byte[] result = new byte[Math.Min(256, fileSource.Length)];
+                fileSource.Read(result, 0, result.Length);
+
+                return result;
+            }
+        }
+
+
+        static string MimeTypeFrom(
+    byte[] dataBytes,
+    string mimeProposed)
+        {
+            if (dataBytes == null)
+                throw new ArgumentNullException("dataBytes");
+            string mimeRet = String.Empty;
+            IntPtr suggestPtr = IntPtr.Zero, filePtr = IntPtr.Zero, outPtr = IntPtr.Zero;
+            if (mimeProposed != null && mimeProposed.Length > 0)
+            {
+                //suggestPtr = Marshal.StringToCoTaskMemUni(mimeProposed); // for your experiments ;-)
+                mimeRet = mimeProposed;
+            }
+            int ret = FindMimeFromData(IntPtr.Zero,
+                IntPtr.Zero,
+                dataBytes,
+                dataBytes.Length,
+                suggestPtr,
+                0,
+                out outPtr,
+                0);
+            if (ret == 0 && outPtr != IntPtr.Zero)
+            {
+                string value = Marshal.PtrToStringUni(outPtr);
+
+                // 2021/6/6
+                if (value == "image/pjpeg")
+                    return "image/jpeg";
+                return value;
+            }
+            return mimeRet;
+        }
+
+        [DllImport("urlmon.dll", CharSet = CharSet.Auto)]
+        public static extern int FindMimeFromData(IntPtr pBC,
+    IntPtr pwzUrl,
+    byte[] pBuffer,
+    int cbSize,
+    IntPtr pwzMimeProposed,
+    int dwMimeFlags,
+    out IntPtr ppwzMimeOut,
+    int dwReserved);
+
+        #endregion
+
         static HttpClient _httpClient = null;
 
         // parameters:
@@ -1288,50 +1361,88 @@ out string error);
                     XmlElement e = child_node as XmlElement;
                     string src = e.GetAttribute("src");
 
+                    // TODO: 为 img 元素增加一个属性 mime。当具有这个属性的时候，就可以不用去提取文件内容来探测 MIME 了
+
                     int nRedoCount = 0;
                 REDO:
                     try
                     {
-                        context.func_progress?.Invoke(-1,-1, $"正在获取图片文件 {src}");
-
-                        if (_httpClient == null)
-                            _httpClient = new HttpClient();
-                        // TODO: 这里不要阻塞界面线程
-                        // TODO: 捕获这里的异常，然后创建一幅含有报错文字的图片并显示出来
-                        var response = _httpClient.GetAsync(src).Result;
-
-                        var contentType = response.Content.Headers.ContentType?.MediaType;
+                        context.func_progress?.Invoke(-1, -1, $"正在获取图片文件 {src}");
 
                         int width = 0;
                         int height = 0;
                         ImagePart imagePart = null;
-                        using (var stream = response.Content.ReadAsStreamAsync().Result)
+
+                        if (src.StartsWith("http") || src.StartsWith("https"))
                         {
-                            if (stream.Length == 0)
-                                throw new Exception("图象尺寸为零");
-
-                            //    Stream theStream = client.GetStreamAsync(src).Result;
-
-                            /*
-                            var ext = Path.GetExtension(imageFileName);
-                            ImagePartType type = ImagePartType.Jpeg;
-                            Enum.TryParse<ImagePartType>(ext, true, out type);
-                            */
-                            var type = GetImageType(contentType);
-                            imagePart = doc.MainDocumentPart.AddImagePart(type);
-
-                            using (var image = SixLabors.ImageSharp.Image.Load(stream))
+                            if (_httpClient == null)
                             {
-                                width = image.Width;
-                                height = image.Height;
+                                // 2024/12/25
+                                var cookieContainer = new CookieContainer();
+                                var handler = new HttpClientHandler() { CookieContainer = cookieContainer };
+
+                                _httpClient = new HttpClient(handler);
+                            }
+                            // TODO: 这里不要阻塞界面线程
+                            // TODO: 捕获这里的异常，然后创建一幅含有报错文字的图片并显示出来
+                            var response = _httpClient.GetAsync(src).Result;
+
+                            var contentType = response.Content.Headers.ContentType?.MediaType;
+
+                            using (var stream = response.Content.ReadAsStreamAsync().Result)
+                            {
+                                if (stream.Length == 0)
+                                    throw new Exception($"图象 '{src}' 尺寸为零");
+
+                                //    Stream theStream = client.GetStreamAsync(src).Result;
+
+                                /*
+                                var ext = Path.GetExtension(imageFileName);
+                                ImagePartType type = ImagePartType.Jpeg;
+                                Enum.TryParse<ImagePartType>(ext, true, out type);
+                                */
+                                var type = GetImageType(contentType);
+                                imagePart = doc.MainDocumentPart.AddImagePart(type);
+
+                                using (var image = SixLabors.ImageSharp.Image.Load(stream))
+                                {
+                                    width = image.Width;
+                                    height = image.Height;
+                                }
+                            }
+
+                            response = _httpClient.GetAsync(src).Result;
+                            using (var stream = response.Content.ReadAsStreamAsync().Result)
+                            {
+                                imagePart.FeedData(stream);
                             }
                         }
-
-                        response = _httpClient.GetAsync(src).Result;
-                        using (var stream = response.Content.ReadAsStreamAsync().Result)
+                        else if (src.StartsWith("file:"))   // 2024/12/25
                         {
-                            imagePart.FeedData(stream);
+                            var path = src.Substring("file:".Length);
+                            var contentType = GetMimeTypeFromFile(path);
+                            using (var stream = File.OpenRead(path))
+                            {
+                                if (stream.Length == 0)
+                                    throw new Exception($"图像文件 '{path}' 尺寸为零");
+
+                                var type = GetImageType(contentType);
+                                imagePart = doc.MainDocumentPart.AddImagePart(type);
+
+                                using (var image = SixLabors.ImageSharp.Image.Load(stream))
+                                {
+                                    width = image.Width;
+                                    height = image.Height;
+                                }
+                            }
+
+                            using (var stream = File.OpenRead(path))
+                            {
+                                imagePart.FeedData(stream);
+                            }
                         }
+                        else
+                            throw new Exception($"元素 '{e.OuterXml}' 中 src 属性值 '{src}' 的协议部分无法识别(目前只能识别 http https file 这三种)");
 
                         var relationshipId = doc.MainDocumentPart.GetIdOfPart(imagePart);
                         var d = NewDrawing(relationshipId, width, height);

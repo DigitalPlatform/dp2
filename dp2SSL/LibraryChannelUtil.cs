@@ -853,6 +853,15 @@ namespace dp2SSL
             string old_xml,
             byte[] timestamp)
         {
+            if (string.IsNullOrEmpty(App.dp2ServerUrl))
+            {
+                var result = new SetReaderInfoResult
+                {
+                    Value = -1,
+                    ErrorInfo = "尚未配置 dp2library 服务器 URL，无法修改读者记录"
+                };
+                return Task.FromResult(result);
+            }
             return Task<SetReaderInfoResult>.Run(() =>
             {
                 LibraryChannel channel = App.CurrentApp.GetChannel();

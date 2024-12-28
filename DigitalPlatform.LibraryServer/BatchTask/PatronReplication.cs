@@ -322,7 +322,7 @@ namespace DigitalPlatform.LibraryServer
 
                         // 2024/11/21
                         this.AppendResultText($"strOldLastTime='{strOldLastTime}', strLastTime='{strLastTime}'\r\n");
-                        
+
                         // 2014/3/31
                         if (string.IsNullOrEmpty(strOldLastTime) == true
                             && string.IsNullOrEmpty(strLastTime) == false)
@@ -376,7 +376,7 @@ namespace DigitalPlatform.LibraryServer
                         {
                             File.Copy(sourceFileName, strXmlFilename, true);
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
                             string strErrorText = $"调用 copy '{sourceFileName} {strXmlFilename}' 时出错: " + ex.Message;
                             this.AppendResultText(strErrorText + "\r\n");
@@ -819,6 +819,9 @@ idElementName="barcode"
                 return -1;
             }
 
+            // 2024/12/23
+            this.MergeStyle = node.GetAttribute("mergeStyle");
+
             this.PatronDbName = DomUtil.GetAttr(node, "patronDbName");
             if (string.IsNullOrEmpty(this.PatronDbName) == true)
             {
@@ -897,6 +900,7 @@ idElementName="barcode"
         string IdElementName = "";  // id字段元素名，缺省为 "barcode"
         string InterfaceUrl = "";   // 接口.net remoting server的URL
         string ExePath = "";        // (2024/11/14) .exe 接口程序的完整路径。例如 "./getreader.exe"
+        string MergeStyle = "";     // (2024/12/23) 空/simple
         bool ModifyOtherDbRecords = false;  // 同步过程是否修改指定的同步读者库以外的其它读者库中的(和卡中心记录中id匹配的那些)记录
 
         // 从XML文件中读取全部记录，同步到读者库中
@@ -1169,6 +1173,7 @@ idElementName="barcode"
                             nRet = MergePatronXml(
                                 exist_dom,
                                 source_dom,
+                                this.MergeStyle,
                                 out string strMergedXml,
                                 out strError);
                             if (nRet == -1)
@@ -1208,12 +1213,13 @@ idElementName="barcode"
                                     this.AppendResultText(strError + "\r\n");
                                     continue;
                                 }
-                                // this.AppendResultText("更新读者记录 " + strSavedRecPath + "\r\n");
+                                this.AppendResultText("更新读者记录 " + strSavedRecPath + "\r\n");
                                 this.SetProgressText("更新读者记录 " + strSavedRecPath);
                                 nChangedCount++;
                             }
                             else
                             {
+                                this.SetProgressText("处理读者记录(未更新) " + strOutputPath);
                                 nNotChangedCount++;
                             }
 
@@ -1631,6 +1637,9 @@ idElementName="barcode"
         // TODO: 需要硬编码禁止覆盖一些流通专用的字段 borrows 等
         // TODO: <dprms:file> 元素应该不让覆盖
         // 检查记录有无修改
+        // parameters:
+        //      merge_style 如果为 "simple"，表示 domNew 中缺乏一个元素并不等于删除这个元素，而是保留 domExist 中的同名元素
+        //                  如果为 空，表示 domNew 中缺乏一个元素等于删除这个元素。如果要保留 domExsit 中的同名元素，则 domNew 中应该这样 <xxx dprms:missing />。这个方式的缺点是比较繁琐。而且无法预知未来 domExist 中会增加什么需要保留的元素名
         // return:
         //      -1  出错
         //      0   没有修改
@@ -1638,6 +1647,7 @@ idElementName="barcode"
         int MergePatronXml(
             XmlDocument domExist,
             XmlDocument domNew,
+            string merge_style,
             out string strMergedXml,
             out string strError)
         {
@@ -1678,33 +1688,16 @@ idElementName="barcode"
                 if (string.IsNullOrEmpty(strElementName) == true)
                     continue;
 
-                XmlNode node = domNew.DocumentElement.SelectSingleNode(strElementName); // 2012/12/12 加入 DocumentElement
-                if (node != null)
-                {
-                    XmlNode attr = node.SelectSingleNode("@dprms:missing", nsmgr);
-                    if (attr != null)
-                        continue;   // 依照domExist中的原始值
-
-                    // 2024/11/14
-                    attr = node.SelectSingleNode("@dprms:default", nsmgr);
-                    if (attr != null)
-                        continue;   // 依照domExist中的原始值
-
-                }
-
-                string strTextNew = DomUtil.GetElementOuterXml(domNew.DocumentElement,
-    strElementName);
-                string strTextExist = DomUtil.GetElementOuterXml(domExist.DocumentElement,
-    strElementName);
-
                 if (strElementName == "state")
                 {
                     string strTextNew0 = DomUtil.GetElementText(domNew.DocumentElement,
-strElementName);
+                        strElementName);
                     string strTextExist0 = DomUtil.GetElementText(domExist.DocumentElement,
-        strElementName);
+                        strElementName);
 
+                    // 旧记录中 "卡中心 ..." 这样的状态
                     List<string> exist_list = GetCardCenterState(strTextExist0);
+                    // 新记录中的所有状态
                     List<string> new_list = StringUtil.SplitList(strTextNew0);
                     if (StringUtil.IsEqualList(exist_list, new_list) == true)
                         continue;
@@ -1715,12 +1708,54 @@ strElementName);
                     {
                         result_list.Add("卡中心" + strText);
                     }
+
+#if REMOVED
+                    // 2024/11/26
+                    // 这里都是从卡中心实际得到的、卡中心存在的记录，
+                    // 所以要去掉以前本地记录中残留的“卡中心删除”状态
+                    result_list.Remove("卡中心删除");
+
+                    StringUtil.RemoveDupNoSort(ref result_list);
+#endif
+
                     DomUtil.SetElementText(domExist.DocumentElement,
                         strElementName,
                         StringUtil.MakePathList(result_list));
                     bChanged = true;
                     continue;
                 }
+
+
+                var node = domNew.DocumentElement.SelectSingleNode(strElementName) as XmlElement; // 2012/12/12 加入 DocumentElement
+                // domNew 中存在这个元素
+                if (node != null)
+                {
+                    // 注：读者记录中的某些字段卡中心可能缺乏对应字段，那么需要在XML记录中填入 <元素名 dprms:missing />，这样不至于造成同步时图书馆读者库中的这些字段被清除。至于读者借阅信息等字段，则不必操心
+                    XmlNode attr = node.SelectSingleNode("@dprms:missing", nsmgr);
+                    if (attr != null)
+                        continue;   // 依照domExist中的原始值
+
+                    // 2024/11/14
+                    attr = node.SelectSingleNode("@dprms:default", nsmgr);
+                    if (attr != null)
+                        continue;   // 依照domExist中的原始值
+
+                }
+                else
+                {
+                    // domNew 中没有这个元素
+
+                    // 简单合并方式下，domNew 中如果没有某个元素，则允许 domExist 中这个元素保留。注意，这不是删除元素效果
+                    if (merge_style == "simple")
+                    {
+                        continue;
+                    }
+                }
+
+                string strTextNew = DomUtil.GetElementOuterXml(domNew.DocumentElement,
+    strElementName);
+                string strTextExist = DomUtil.GetElementOuterXml(domExist.DocumentElement,
+    strElementName);
 
                 if (strTextExist != strTextNew)
                 {

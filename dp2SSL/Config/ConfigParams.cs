@@ -332,8 +332,8 @@ Description = "SIP2 通讯所用的字符集编码方式"
         // 2021/1/31
         [Display(
 Order = 5,
-Name = "机构代码",
-Description = "用于 SIP2 服务器的 RFID 标签机构代码"
+Name = "用于过滤的机构代码",
+Description = "用于 SIP2 协议方式下的前端过滤 RFID 标签用的机构代码"
 )]
         [Category("SIP2 服务器")]
         public string SipInstitution

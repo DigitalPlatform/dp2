@@ -178,6 +178,7 @@ namespace dp2OPAC
                     {
                         app.IpTable.IncIpCount(strClientIP, -1);
                         Session.Abandon();
+                        // TODO: 可以在压缩日志中记载这个突破限额的情况
                         return;
                     }
                 }

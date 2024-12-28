@@ -12,6 +12,7 @@ using DigitalPlatform.LibraryServer;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
+using Xceed.Wpf.Toolkit;
 
 namespace dp2SSL
 {
@@ -289,7 +290,7 @@ namespace dp2SSL
 
         // parameters:
         //      strict  是否为严格方式。严格方式下，如果 OI 和 AOI 为空，会返回 ".xxxx" 形态
-        public string GetOiPii(bool strict = false)
+        public virtual string GetOiPii(bool strict = false)
         {
             // 2021/5/25
             // 处理特殊 PII
@@ -1149,6 +1150,30 @@ readerType);
             {
                 _maskDefinition = value;
             }
+        }
+
+
+        // parameters:
+        //      strict  是否为严格方式。严格方式下，如果 OI 和 AOI 为空，会返回 ".xxxx" 形态
+        public override string GetOiPii(bool strict = false)
+        {
+            // 2024/12/26
+            if (string.IsNullOrEmpty(this.PII)
+                && this.Protocol == "ISO14443A")
+            {
+                if (string.IsNullOrEmpty(this.Barcode) == false)
+                {
+                    if (string.IsNullOrEmpty(this.OI) == false)
+                        return this.OI + "." + this.Barcode;
+                    else if (string.IsNullOrEmpty(this.AOI) == false)
+                        return this.AOI + "." + this.Barcode;
+
+                    return this.Barcode;
+                }
+                return this.UID;
+            }
+
+            return base.GetOiPii(strict);
         }
 
     }

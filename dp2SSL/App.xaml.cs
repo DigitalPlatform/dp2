@@ -390,27 +390,31 @@ namespace dp2SSL
             */
 
             // 获得 RFID 配置信息和 图书馆名
-            _ = Task.Run(() =>
+            // TODO: 和 pagesetting 页面中的初始化代码合并成同一个函数
+            if (string.IsNullOrEmpty(App.dp2ServerUrl) == false/*2024/12/27*/)
             {
-                try
+                _ = Task.Run(() =>
                 {
-                    var result = LibraryChannelUtil.GetRfidCfg();
-                    // WpfClientInfo.WriteInfoLog($"GetRfidCfg() return {result.ToString()}");
-                    LibraryName = result.LibraryName;
-                    ServerUid = result.ServerUid;
-
-                    if (result.XmlChanged && App.Function == "智能书柜")
+                    try
                     {
-                        WpfClientInfo.WriteInfoLog($"[1] 探测到 library.xml 中 rfid 发生变化。\r\n变化前的: {result.OldXml}\r\n变化后的: {result.Xml}");
-                        // 触发重新全量下载册和读者记录
-                        ShelfData.TriggerDownloadEntitiesAndPatrons();
+                        var result = LibraryChannelUtil.GetRfidCfg();
+                        // WpfClientInfo.WriteInfoLog($"GetRfidCfg() return {result.ToString()}");
+                        LibraryName = result.LibraryName;
+                        ServerUid = result.ServerUid;
+
+                        if (result.XmlChanged && App.Function == "智能书柜")
+                        {
+                            WpfClientInfo.WriteInfoLog($"[1] 探测到 library.xml 中 rfid 发生变化。\r\n变化前的: {result.OldXml}\r\n变化后的: {result.Xml}");
+                            // 触发重新全量下载册和读者记录
+                            ShelfData.TriggerDownloadEntitiesAndPatrons();
+                        }
                     }
-                }
-                catch (Exception ex)
-                {
-                    WpfClientInfo.WriteErrorLog($"GetRfidCfg() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
-                }
-            });
+                    catch (Exception ex)
+                    {
+                        WpfClientInfo.WriteErrorLog($"GetRfidCfg() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    }
+                });
+            }
 
             // 2020/7/5
             if (App.Function == "自助借还")
@@ -1131,6 +1135,8 @@ namespace dp2SSL
                 {
                     // 2020/9/17
                     WpfClientInfo.Config?.Set("pageShelf", "splitterPosition", PageMenu.PageShelf?.SplitterPosition);
+                    // 2024/12/19
+                    WpfClientInfo.Config?.Set("pageShelf", "layout", PageMenu.PageShelf?.GetLayout());
                 }
             }
             catch (NullReferenceException)
@@ -1193,6 +1199,8 @@ namespace dp2SSL
 
                     // 2020/9/17
                     WpfClientInfo.Config?.Set("pageShelf", "splitterPosition", PageMenu.PageShelf?.SplitterPosition);
+                    // 2024/12/19
+                    WpfClientInfo.Config?.Set("pageShelf", "layout", PageMenu.PageShelf?.GetLayout());
                 }
             }
             catch (Exception ex)
@@ -1384,6 +1392,8 @@ namespace dp2SSL
                 return WpfClientInfo.Config.Get("global", "sipEncoding", "utf-8");
             }
         }
+
+        // SIP 协议方式下，dp2ssl 前端用来过滤(检查)标签中机构代码的机构代码
 
         public static string SipInstitution
         {

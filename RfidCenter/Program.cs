@@ -9,7 +9,7 @@ using System.Reflection;
 using System.IO;
 using System.Runtime.InteropServices;
 
-using RfidDrivers.First;
+// using RfidDrivers.First;
 
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
@@ -22,7 +22,14 @@ namespace RfidCenter
 {
     static class Program
     {
-        public static IRfidDriver Rfid = null;
+        public static RfidDriverHub Rfid
+        {
+            get
+            {
+                return MainForm._rfidDriver;
+            }
+        }
+
         public static ILedDriver Led = null;
         public static IPosPrinterDriver Printer = null;
         public static IShelfLockDriver ShelfLock = null;

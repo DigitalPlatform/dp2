@@ -1145,7 +1145,7 @@ start);
 
         public static char GetBlockStatus(string map, int index)
         {
-            if (index >= map.Length)
+            if (index >= (map == null ? 0 : map.Length))
                 return '.';
             return map[index];
         }

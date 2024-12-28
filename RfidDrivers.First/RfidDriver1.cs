@@ -4180,7 +4180,7 @@ out Reader reader);
         //      reader_name 读卡器名字。可以为 "*"，表示所有读卡器，此时会自动在多个读卡器上寻找 uid 符合的标签并进行修改
         //      style   处理风格。如果包含 "detect"，表示修改之前会先读出，如果没有必要修改则不会执行修改
         // return result.Value
-        //      -1  出错
+        //      -1  出错 (如果 ErrorCode 为 "tagNotFound" 表示没有找到 uid 指定的标签)
         //      0   成功
         public SetEasResult SetEAS(
     string reader_name,
@@ -4579,11 +4579,12 @@ out Reader reader);
         // parameters:
         //      one_reader_name 不能用通配符
         //      style   randomizeEasAfiPassword
+        // return:
+        //      result.ErrorCode    tagNotFound/notSupportProtocol
         public NormalResult WriteTagInfo(// byte[] uid, UInt32 tag_type
             string one_reader_name,
             TagInfo old_tag_info,
-            TagInfo new_tag_info //,
-                                 // string style
+            TagInfo new_tag_info
             )
         {
             // 2021/1/7
@@ -4676,7 +4677,8 @@ out Reader reader);
                     return new NormalResult
                     {
                         Value = -1,
-                        ErrorInfo = "connectTag (ISO15693) Error"
+                        ErrorInfo = "connectTag (ISO15693) Error",
+                        ErrorCode = "tagNotFound"   // 2024/12/28
                     };
                 try
                 {
@@ -6265,7 +6267,7 @@ nSize);
         //      reader_name 读卡器名字。可以为 "*"，表示所有读卡器，此时会自动在多个读卡器上寻找 uid 符合的标签并进行修改
         //      type    为 read write private destroy eas/afi 之一
         // return result.Value
-        //      -1  出错
+        //      -1  出错 (如果 ErrorCode 为 "tagNotFound" 表示没有找到 uid 指定的标签)
         //      0   成功
         public NormalResult ChangePassword(
     string reader_name,

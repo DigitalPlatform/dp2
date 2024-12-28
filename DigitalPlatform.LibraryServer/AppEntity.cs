@@ -6719,6 +6719,9 @@ out strError);
                     }
 
                     // exist_timestamp此时已经反映了库中被修改后的记录的时间戳
+                    // 2024/12/26 后面 WriteRes() 时会用到 info.OldTimestamp
+                    info.OldTimestamp = exist_timestamp;
+                    info.NewTimestamp = exist_timestamp;
                 }
             }
 

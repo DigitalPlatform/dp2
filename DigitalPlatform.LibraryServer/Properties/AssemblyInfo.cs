@@ -397,4 +397,6 @@ ItemCanReturn()
 //		3.161 (2024/10/21) 增加 BatchSearch() API
 //		3.162 (2024/11/5) 改进 BatchSearch() API: QueryResult 结构中增加 ResultSetName 成员
 //						search_style 增加 skipOversizeRecords 可用值
+//		3.163 (2024/12/24) libraryx.xml 中 patronReplication 元素增加 exePath 和 idFromName 参数
+//							patronReplication 元素增加 mergeStyle 属性。
 

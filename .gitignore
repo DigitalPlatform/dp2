@@ -265,4 +265,9 @@ PalmDrivers.First/
 dp2gate/
 
 RfidDrivers.Sike/
+RfidDrivers.SikeHF/
+RfidDrivers.CykeoDriver/
+RfidDriver.Cykeo_HF01/
+RfidDrivers.Cykeo_HF01/
+
 

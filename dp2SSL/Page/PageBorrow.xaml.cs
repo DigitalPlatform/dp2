@@ -2006,6 +2006,20 @@ namespace dp2SSL
                         oi = "";
 
                     result = await SipChannelUtil.GetReaderInfoAsync(oi, pii);
+
+                    // 2024/12/28
+                    // 还原读者 XML 记录中的 ISO14443A 的绑定证号
+                    if (_patron.Protocol == "ISO14443A"
+                        && string.IsNullOrEmpty(result.ReaderXml) == false
+                        && string.IsNullOrEmpty(_patron.UID) == false)
+                    {
+                        XmlDocument readerdom = new XmlDocument();
+                        readerdom.LoadXml(result.ReaderXml);
+                        DomUtil.SetElementText(readerdom.DocumentElement,
+"cardNumber",
+_patron.UID);
+                        result.ReaderXml = readerdom.OuterXml;
+                    }
                 }
                 else
                 {
@@ -3502,8 +3516,11 @@ out string strError);
 
             // UID 和 Barcode 都不为空。这是 15693 和 14443 读者卡的场景
             if (string.IsNullOrEmpty(_patron.UID) == false
-    && string.IsNullOrEmpty(_patron.Barcode) == false)
+    && string.IsNullOrEmpty(_patron.Barcode) == false
+    && string.IsNullOrEmpty(_patron.Xml) == false/*2024/12/26*/)
+            {
                 return true;
+            }
 
             string fang = "放好";
             if (IsVerticalCardDefined()/*App.PatronReaderVertical*/)

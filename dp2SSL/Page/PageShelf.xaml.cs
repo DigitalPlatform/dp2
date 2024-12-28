@@ -31,8 +31,6 @@ using DigitalPlatform.Face;
 using DigitalPlatform.Interfaces;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.LibraryClient.localhost;
-using static dp2SSL.Patron;
-using DigitalPlatform.Script;
 
 namespace dp2SSL
 {
@@ -86,6 +84,60 @@ namespace dp2SSL
 
 
             // this.error.Text = "test";
+
+        }
+
+        string _layout = "horz";
+
+        public string GetLayout()
+        {
+            return _layout;
+        }
+
+        // parameters:
+        //      layout  horz/vert
+        public void Layout(string layout)
+        {
+            _layout = layout;
+
+            if (layout == "horz")
+            {
+                this.frame.RowDefinitions[0].Height = new GridLength(100, GridUnitType.Star);
+                this.frame.RowDefinitions[1].Height = new GridLength(0, GridUnitType.Pixel);
+                this.frame.RowDefinitions[2].Height = new GridLength(0, GridUnitType.Pixel);
+                this.frame.RowDefinitions[3].Height = new GridLength(0, GridUnitType.Pixel);
+
+                Grid.SetColumn(this.doorControlPanel, 0);
+                Grid.SetRow(this.doorControlPanel, 0);
+                Grid.SetColumnSpan(this.doorControlPanel, 1);
+
+                Grid.SetColumn(this.splitter, 1);
+                Grid.SetRow(this.splitter, 0);
+                Grid.SetColumnSpan(this.splitter, 1);
+
+                Grid.SetColumn(this.patronControlPanel, 2);
+                Grid.SetRow(this.patronControlPanel, 0);
+                Grid.SetColumnSpan(this.patronControlPanel, 1);
+            }
+            else
+            {
+                this.frame.RowDefinitions[0].Height = new GridLength(50, GridUnitType.Star);
+                this.frame.RowDefinitions[1].Height = new GridLength(10, GridUnitType.Pixel);
+                this.frame.RowDefinitions[2].Height = new GridLength(50, GridUnitType.Star);
+                this.frame.RowDefinitions[3].Height = new GridLength(0, GridUnitType.Pixel);
+
+                Grid.SetColumn(this.doorControlPanel, 0);
+                Grid.SetRow(this.doorControlPanel, 0);
+                Grid.SetColumnSpan(this.doorControlPanel, 3);
+
+                Grid.SetColumn(this.splitter, 0);
+                Grid.SetRow(this.splitter, 1);
+                Grid.SetColumnSpan(this.splitter, 3);
+
+                Grid.SetColumn(this.patronControlPanel, 0);
+                Grid.SetRow(this.patronControlPanel, 2);
+                Grid.SetColumnSpan(this.patronControlPanel, 3);
+            }
         }
 
         private void DoorControl_ContextMenuOpen111(object sender, DoorContextMenuArgs e)
@@ -932,7 +984,8 @@ namespace dp2SSL
 
             // UID 和 Barcode 都不为空。这是 15693 和 14443 读者卡的场景
             if (string.IsNullOrEmpty(patron.UID) == false
-    && string.IsNullOrEmpty(patron.Barcode) == false)
+    && string.IsNullOrEmpty(patron.Barcode) == false
+    && string.IsNullOrEmpty(patron.Xml) == false/*2024/12/28*/)
                 return true;
 
             string debug_info = $"uid:[{patron.UID}],barcode:[{patron.Barcode}]";
@@ -5291,12 +5344,19 @@ DateTime.Now);
             get
             {
                 GridLengthConverter glc = new GridLengthConverter();
-                return glc.ConvertToString(this.patronColumn.Width);
+                if (_layout == "horz")
+                    return glc.ConvertToString(this.patronColumn.Width);
+                else
+                    return glc.ConvertToString(this.patronRow.Height);
             }
             set
             {
                 GridLengthConverter glc = new GridLengthConverter();
-                this.patronColumn.Width = (GridLength)glc.ConvertFromString(value);
+
+                if (_layout == "horz")
+                    this.patronColumn.Width = (GridLength)glc.ConvertFromString(value);
+                else
+                    this.patronRow.Height = (GridLength)glc.ConvertFromString(value);
             }
         }
 

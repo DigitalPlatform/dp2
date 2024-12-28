@@ -464,7 +464,7 @@ namespace RfidTool
             _driver.IncApiCount();
             try
             {
-                InventoryResult result = new InventoryResult();
+                // InventoryResult result = new InventoryResult();
 
                 List<OneTag> tags = new List<OneTag>();
 

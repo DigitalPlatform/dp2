@@ -23,6 +23,7 @@ using DigitalPlatform.dp2.Statis;
 using dp2Circulation.Reader;
 using static dp2Circulation.BiblioSearchForm;
 using dp2Circulation.SearchForms;
+using DigitalPlatform.GUI;
 
 
 namespace dp2Circulation
@@ -852,6 +853,7 @@ recid	记录ID
 
         string _sheet_name = null;
 
+        // 保存到 Excel 文件
         // return:
         //      -1  出错
         //      0   放弃或中断
@@ -888,6 +890,17 @@ recid	记录ID
                 strError = ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
+
+            bool output_hitcount = true;
+
+            // bool output_hitcount = StringUtil.IsInList("hitcount", style);
+            DialogResult result = MessageBox.Show(this,
+"是否要输出“命中记录”这一列?\r\n\r\n(Yes: 输出; No: 不输出",
+"FilterSearch",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+            bool output_hitrecords = (result == DialogResult.Yes);
 
             using (doc)
             {
@@ -926,7 +939,17 @@ recid	记录ID
 
                 int nRowIndex = 1;
                 int nColIndex = 1;
-                foreach (var column in _columns)
+
+                // 输出时增加第一列“命中数”
+                List<PatronColumn> columns = new List<PatronColumn>();
+                // 2024/12/20
+                if (output_hitcount)
+                    columns.Add(new PatronColumn { PatronFieldName = "命中数" });
+                columns.AddRange(_columns);
+                if (output_hitrecords)
+                    columns.Add(new PatronColumn { PatronFieldName = "命中记录" });
+
+                foreach (var column in columns)
                 {
                     IXLCell cell = sheet.Cell(nRowIndex, nColIndex).SetValue(DomUtil.ReplaceControlCharsButCrLf(column.PatronFieldName, '*'));
                     cell.Style.Alignment.WrapText = true;
@@ -936,6 +959,8 @@ recid	记录ID
                     // cell.Style.Alignment.Horizontal = alignments[nColIndex - 1];
                     nColIndex++;
                 }
+
+
                 nRowIndex++;
 
                 foreach (var row in rows)
@@ -948,7 +973,27 @@ recid	记录ID
                         return 0;
                     }
 
+
                     nColIndex = 1;
+
+                    // 2024/12/20
+                    // 输出“命中数”列
+                    if (output_hitcount)
+                    {
+                        int hitcount = GetHitCount(row);
+                        string value = hitcount == 0 ? "" : hitcount.ToString();
+                        if (value != null)
+                        {
+                            ClosedXmlUtil.SetMaxChars(/*ref*/ column_max_chars, nColIndex - 1, value.Length);
+                        }
+                        IXLCell cell = sheet.Cell(nRowIndex, nColIndex).SetValue(DomUtil.ReplaceControlCharsButCrLf(value, '*'));
+                        cell.Style.Alignment.WrapText = true;
+                        cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                        cell.Style.Font.FontName = strFontName;
+                        nColIndex++;
+                    }
+
+
                     foreach (DataGridViewCell cell0 in row.Cells)
                     {
                         // 统计最大字符数
@@ -969,6 +1014,48 @@ recid	记录ID
                             cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Left;
                         */
                         nColIndex++;
+                    }
+
+
+                    // 2024/12/20
+                    // 输出“命中数”列
+                    if (output_hitrecords)
+                    {
+                        var query_line = row.Tag as QueryLine;
+                        if (query_line != null
+    && query_line.HitItems != null)
+                        {
+                            StringBuilder text = new StringBuilder();
+                            int l = 0;
+                            foreach (var item in query_line.HitItems)
+                            {
+                                if (l > 0)
+                                    text.AppendLine();
+                                text.Append($"{item.Text} {ListViewUtil.GetItemText(item, 1)}");
+                                l++;
+                            }
+
+                            {
+                                string value = text.ToString();
+                                if (value != null)
+                                {
+                                    // 测算若干行中最长一行的字符数
+                                    var lines = value.Replace("\r\n", "\n").Split('\n');
+                                    int max_length = 0;
+                                    foreach (var line in lines)
+                                    {
+                                        if (line.Length > max_length)
+                                            max_length = line.Length;
+                                    }
+                                    ClosedXmlUtil.SetMaxChars(/*ref*/ column_max_chars, nColIndex - 1, max_length);
+                                }
+                                IXLCell cell = sheet.Cell(nRowIndex, nColIndex).SetValue(DomUtil.ReplaceControlCharsButCrLf(value, '*'));
+                                cell.Style.Alignment.WrapText = true;
+                                cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                                cell.Style.Font.FontName = strFontName;
+                                nColIndex++;
+                            }
+                        }
                     }
 
                     if (stop != null)
@@ -1428,7 +1515,9 @@ recid	记录ID
                 var column = _columns[i];
                 var field_name = column.PatronFieldName;
                 if (string.IsNullOrEmpty(field_name))
-                    continue;
+                {
+                    goto CONTINUE;  // 2024/12/20
+                }
 
                 string value = null;
                 if (cell.Value is DateTime)

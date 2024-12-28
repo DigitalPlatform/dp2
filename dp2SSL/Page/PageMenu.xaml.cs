@@ -137,7 +137,10 @@ namespace dp2SSL
                 this.inventory.Visibility = Visibility.Collapsed;
                 this.borrowAndReturn.Visibility = Visibility.Collapsed;
 
-                this.bindPatronCard.Visibility = Visibility.Visible;
+                if (string.IsNullOrEmpty(App.dp2ServerUrl))
+                    this.bindPatronCard.Visibility = Visibility.Collapsed;
+                else
+                    this.bindPatronCard.Visibility = Visibility.Visible;
             }
             else if (App.Function == "自助借还")
             {
@@ -149,7 +152,10 @@ namespace dp2SSL
                 this.inventory.Visibility = Visibility.Collapsed;
                 this.borrowAndReturn.Visibility = Visibility.Visible;
 
-                this.bindPatronCard.Visibility = Visibility.Visible;
+                if (string.IsNullOrEmpty(App.dp2ServerUrl))
+                    this.bindPatronCard.Visibility = Visibility.Collapsed;
+                else
+                    this.bindPatronCard.Visibility = Visibility.Visible;
             }
             else
             {
@@ -358,6 +364,20 @@ namespace dp2SSL
             if (_pageShelf == null)
             {
                 _pageShelf = new PageShelf(mode);
+
+                // 2024/12/19
+                var layout = WpfClientInfo.Config.Get("pageShelf", "layout", "horz");
+                if (_pageShelf.GetLayout() != layout)
+                {
+                    try
+                    {
+                        _pageShelf.Layout(layout);
+                    }
+                    catch (Exception ex)
+                    {
+                        WpfClientInfo.WriteErrorLog($"settings.xml 中 pageShelf/layout 值 '{layout}' 格式不正确({ExceptionUtil.GetDebugText(ex)})。已被忽略");
+                    }
+                }
 
                 // 2020/9/17
                 var pos = WpfClientInfo.Config.Get("pageShelf", "splitterPosition", null);

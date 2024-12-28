@@ -970,6 +970,7 @@ lHitCount,
 _query,
 null,
 null,
+null,
 ref lTotalHitCount,
 out strError);
                 if (nRet == -1)
@@ -1793,10 +1794,10 @@ out strError);
                                     bOutputKeyID,
                                     bQuickLoad,
                                     query,
-                                    (recpath, xml) =>
+                                    (recpath, xml, line) =>
                                     {
                                         StringBuilder debug_info = new StringBuilder();
-                                        var ret = FilterRecord(query_line,
+                                        var ret = FilterRecord(line,
                                             recpath,
                                             xml,
                                             debug_info);
@@ -1886,10 +1887,10 @@ out strError);
                     if (query_line.FilterItems != null
                         && query_line.FilterItems.Count > 0)
                     {
-                        func_filter = (recpath, xml) =>
+                        func_filter = (recpath, xml, line) =>
                         {
                             StringBuilder debug_info = new StringBuilder();
-                            var ret = FilterRecord(query_line,
+                            var ret = FilterRecord(line,
                                 recpath,
                                 xml,
                                 debug_info);
@@ -1922,6 +1923,7 @@ out strError);
         });
     },
     func_filter,
+    query_line,
     ref lTotalHitCount,
     out strError);
                     if (nRet == -1)
@@ -2526,6 +2528,7 @@ out strError);
         },
         query_line.FilterItems == null || query_line.FilterItems.Count == 0 ?
         null : func_filterRecord,
+        query_line,
         ref lTotalHitCount,
         out strError);
                     if (nRet == -1)
@@ -2712,11 +2715,12 @@ out strError);
         // return:
         //      true    表示记录要被利用
         //      false   表示记录要被忽略
-        delegate bool delegate_filterRecord(string recpath, string xml);
+        delegate bool delegate_filterRecord(string recpath, string xml, QueryLine query_line);
 
         // parameters:
         //      func_newItem    每当创建一个 ListViewItem 时此函数被触发一次
         //      func_filterRecord   用于过滤命中记录的函数
+        //      query_line      触发 func_filterRecord 时要用到的 QueryLine 参数值
         //      query_result    (批检索得到的)一个检索词对应的命中结果
         //                      strResultSetName 和 query_result 参数每次调用本函数时只用其中一个
         int LoadResultSet(
@@ -2732,6 +2736,7 @@ out strError);
             ItemQueryParam query,
             delegate_newItem func_newItem,
             delegate_filterRecord func_filterRecord,
+            QueryLine query_line,
             ref long lTotalHitCount,
             out string strError)
         {
@@ -2793,7 +2798,8 @@ out strError);
                             {
                                 var ret = func_filterRecord.Invoke(
                                     searchresult?.Path,
-                                    searchresult?.RecordBody?.Xml);
+                                    searchresult?.RecordBody?.Xml,
+                                    query_line);
                                 if (ret == false)
                                     continue;
                             }
@@ -2973,7 +2979,8 @@ GetCurrentBrowseStyle());
                     {
                         var ret = func_filterRecord.Invoke(
                             searchresult.Path,
-                            searchresult.RecordBody?.Xml);
+                            searchresult.RecordBody?.Xml,
+                            query_line);
                         if (ret == false)
                             continue;
                     }
@@ -14796,6 +14803,7 @@ out string error);
         lHitCount,
         lStart,
         _query,
+        null,
         null,
         null,
         ref lTotalHitCount,

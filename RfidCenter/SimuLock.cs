@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static RfidDrivers.First.RfidDriver1;
+// using static RfidDrivers.First.RfidDriver1;
 
 using DigitalPlatform;
 using DigitalPlatform.RFID;

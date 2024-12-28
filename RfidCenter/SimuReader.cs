@@ -18,7 +18,7 @@ namespace RfidCenter
     /// <summary>
     /// 用于模拟 RFID 读卡器的类，以方便没有硬件的情况下进行开发调试
     /// </summary>
-    public class SimuReader
+    public class SimuReader : IRfidDriver
     {
         #region locks
 
@@ -79,6 +79,12 @@ namespace RfidCenter
                 return new List<Reader>(_readers);
             }
         }
+
+        string IRfidDriver.State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+        bool IRfidDriver.Pause => throw new NotImplementedException();
+
+        List<ShelfLock> IRfidDriver.ShelfLocks => throw new NotImplementedException();
 
         List<Reader> _readers = new List<Reader>();
 
@@ -517,7 +523,7 @@ out Reader reader);
         //      reader_name 读卡器名字。可以为 "*"，表示所有读卡器，此时会自动在多个读卡器上寻找 uid 符合的标签并进行修改
         //      style   处理风格。如果包含 "detect"，表示修改之前会先读出，如果没有必要修改则不会执行修改
         // return result.Value
-        //      -1  出错
+        //      -1  出错 (如果 ErrorCode 为 "tagNotFound" 表示没有找到 uid 指定的标签)
         //      0   成功
         public SetEasResult SetEAS(
     string reader_name,
@@ -1123,6 +1129,66 @@ out Reader reader);
 
             tag.RefreshInventoryInfo();
             return tag;
+        }
+
+        void IRfidDriver.IncApiCount()
+        {
+            throw new NotImplementedException();
+        }
+
+        void IRfidDriver.DecApiCount()
+        {
+            throw new NotImplementedException();
+        }
+
+        ReadConfigResult IRfidDriver.ReadConfig(string reader_name, uint cfg_no)
+        {
+            throw new NotImplementedException();
+        }
+
+        NormalResult IRfidDriver.SetConfig(string reader_name, string command)
+        {
+            throw new NotImplementedException();
+        }
+
+        InitializeDriverResult IRfidDriver.InitializeDriver(string cfgFileName, string style, List<HintInfo> hint_table)
+        {
+            throw new NotImplementedException();
+        }
+
+        NormalResult IRfidDriver.LoadFactoryDefault(string reader_name)
+        {
+            throw new NotImplementedException();
+        }
+
+        NormalResult IRfidDriver.ManageReader(string reader_name, string command)
+        {
+            throw new NotImplementedException();
+        }
+
+        NormalResult IRfidDriver.ReleaseDriver()
+        {
+            throw new NotImplementedException();
+        }
+
+        InventoryResult IRfidDriver.Inventory(string reader_name, string style)
+        {
+            throw new NotImplementedException();
+        }
+
+        NormalResult IRfidDriver.ChangePassword(string reader_name, string uid, string type, uint old_password, uint new_password)
+        {
+            throw new NotImplementedException();
+        }
+
+        NormalResult IRfidDriver.TurnShelfLamp(string lampName, string action)
+        {
+            throw new NotImplementedException();
+        }
+
+        NormalResult IRfidDriver.TurnSterilamp(string lampName, string action)
+        {
+            throw new NotImplementedException();
         }
 
 

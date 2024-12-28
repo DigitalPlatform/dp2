@@ -35,6 +35,8 @@ using DigitalPlatform.Core;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Typography;
 using static dp2Circulation.AccountBookForm;
+using Microsoft.SqlServer.Server;
+using DigitalPlatform.IO;
 
 // 2013/3/16 添加 XML 注释
 
@@ -4045,6 +4047,26 @@ MessageBoxDefaultButton.Button2);
                 pureCssFileName = Path.GetFileName(cssFileName);
             }
 
+            // 计划用于写入图像文件的子目录。此时子目录并未创建
+            var image_directory = Path.Combine(Path.GetDirectoryName(dlg.OutputFileName), Path.GetFileName(dlg.OutputFileName) + ".image");
+            if (format == "html" && Directory.Exists(image_directory))
+            {
+                var file_count = (new DirectoryInfo(image_directory)).GetFiles().Length;
+                if (file_count > 0)
+                {
+                    DialogResult result = MessageBox.Show(this,
+    $"图像文件子目录 {image_directory} 已经存在。\r\n\r\n继续处理将会先清除其中原有的 {file_count} 个文件。要继续处理么? (是：继续; 否: 放弃处理)",
+    "BiblioSearchForm",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+                    if (result == System.Windows.Forms.DialogResult.No)
+                        return new NormalResult();
+                }
+                PathUtil.DeleteDirectory(image_directory);
+            }
+
+
             string SPAN = "span";
             string DIV = "div";
             if (format == "docx")
@@ -4052,6 +4074,9 @@ MessageBoxDefaultButton.Button2);
                 SPAN = "style";
                 DIV = "p";
             }
+
+            // 写入磁盘的图像文件个数
+            int html_image_count = 0;
 
 
             // 准备书目列标题
@@ -4356,10 +4381,42 @@ MessageBoxDefaultButton.Button2);
                                     biblio_title_list,
                                     dom,
                                     strRecPath,
-                                    Program.MainForm.OpacServerUrl,
+                                    null,   // Program.MainForm.OpacServerUrl,
                                     layout_style,
                                     hide_biblio_fieldname,
-                                    format);
+                                    format,
+                                    (biblio_recpath, uri, output_filename) =>
+                                    {
+                                        var ret = channel.GetRes(looping.Progress,
+    ScriptUtil.MakeObjectUrl(biblio_recpath, uri),
+    output_filename,
+    "content,data,metadata,timestamp,outputpath", // ,gzip
+    out string strMetadata,
+    out _,
+    out _,
+    out string error);
+                                        if (ret == -1)
+                                            return error;
+                                        return null;
+                                    },
+                                    () =>
+                                    {
+                                        if (format == "html")
+                                        {
+                                            PathUtil.CreateDirIfNeed(image_directory);
+                                            var full_path = Path.Combine(image_directory, Guid.NewGuid().ToString());
+                                            // 简化为 ./filename.html.image/xxxxx 形态
+                                            var short_path = ".\\" + Path.GetFileName(image_directory) + "\\" + Path.GetFileName(full_path);
+                                            html_image_count++;
+                                            return new PathInfo
+                                            {
+                                                FullPath = full_path,
+                                                ShortPath = short_path
+                                            };
+                                        }
+                                        else
+                                            return new PathInfo { FullPath = Program.MainForm.GetTempFileName("newbookimage_") };
+                                    });
 
                                 string items_table = "";
 
@@ -4567,8 +4624,12 @@ TaskScheduler.Default);
 
                 this.EnableControls(true);
             }
+
             MainForm.StatusBarMessage = biblioRecPathList.Count.ToString()
             + "条记录成功保存到文件 " + dlg.OutputFileName;
+
+            if (format == "html")
+                MessageDlg.Show(this, $"有 {html_image_count} 个图像文件写入了子目录 {image_directory}。若要拷贝文件 {dlg.OutputFileName}，请将此子目录一并拷走", "图像文件");
 
             try
             {
@@ -4914,6 +4975,17 @@ host);
             return text.ToString();
         }
 
+        delegate string delegate_downloadObject(string biblio_recpath,
+            string uri,
+            string output_filename);
+        delegate PathInfo delegate_buildTempFileName();
+        class PathInfo
+        {
+            // 全路径。例如 c:\test\test.html.image\xxxx
+            public string FullPath { get; set; }
+            // 相对路径。例如 .\test.html.image\xxxxx
+            public string ShortPath { get; set; }
+        }
 
         // 构造一个 HTML 新书通报局部。
         // parameters:
@@ -4934,7 +5006,9 @@ host);
             string strOpacServerUrl,
             string layout_style,
             bool hide_biblio_fieldname,
-            string format)
+            string format,
+            delegate_downloadObject func_download = null,
+            delegate_buildTempFileName func_buildFileName = null)
         {
             string SPAN = "span";
             string DIV = "div";
@@ -4992,12 +5066,28 @@ host);
                     string url = "";
                     if (value.StartsWith("http:") || value.StartsWith("https:"))
                         url = value;
-                    else if (string.IsNullOrEmpty(strOpacServerUrl) == false)
+                    else if (string.IsNullOrEmpty(strOpacServerUrl) == false
+                        && format != "docx")
                     {
                         url = $"{strOpacServerUrl}getobject.aspx?uri={HttpUtility.UrlEncode(ScriptUtil.MakeObjectUrl(biblio_recpath, value))}";
                     }
                     else
-                        continue;
+                    {
+                        if (func_download == null || func_buildFileName == null)
+                            continue;
+                        // TODO: 对于 .html 文件来说，对象文件应该存储在一个特定的文件夹中，便于 .html 创建好以后，一并拷走
+                        var path_info = func_buildFileName();
+                        var error = func_download(biblio_recpath, value, path_info.FullPath);
+                        if (string.IsNullOrEmpty(error) == false)
+                        {
+                            OutputLine("biblio_recpath", GetCaption("recpath"), $"下载对象 biblio_recpath:{biblio_recpath} uri:{value} 时发生错误: {error}");
+                            continue;
+                        }
+                        if (string.IsNullOrEmpty(path_info.ShortPath) == false)
+                            url = $"file:{path_info.ShortPath}";
+                        else
+                            url = $"file:{path_info.FullPath}";
+                    }
                     // result.AppendLine($"<tr class='biblio_{type}'><td class='name'></td><td class='value'><img alt='封面图片' src='{url}'></img></td></tr>");   //  style1='width:100pt;'
                     OutputLineRaw($"biblio_{type}", "", $"<img alt='封面图片 {biblio_recpath}' src='{url}'></img>");
                     continue;
