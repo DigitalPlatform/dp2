@@ -344,7 +344,37 @@ namespace dp2SSL
         void NavigatePageBorrow(string buttons)
         {
             if (_pageBorrow == null)
+            {
                 _pageBorrow = new PageBorrow();
+
+                // 2025/1/5
+                var layout = WpfClientInfo.Config.Get("pageBorrow", "layout", "horz");
+                if (_pageBorrow.GetLayout() != layout)
+                {
+                    try
+                    {
+                        _pageBorrow.Layout(layout);
+                    }
+                    catch (Exception ex)
+                    {
+                        WpfClientInfo.WriteErrorLog($"settings.xml 中 pageBorrow/layout 值 '{layout}' 格式不正确({ExceptionUtil.GetDebugText(ex)})。已被忽略");
+                    }
+                }
+
+                var pos = WpfClientInfo.Config.Get("pageBorrow", "splitterPosition", null);
+                if (string.IsNullOrEmpty(pos) == false)
+                {
+                    try
+                    {
+                        _pageBorrow.SplitterPosition = pos;
+                    }
+                    catch (Exception ex)
+                    {
+                        // 2021/1/15
+                        WpfClientInfo.WriteErrorLog($"settings.xml 中 pageShelf/splitterPosition 值 '{pos}' 格式不正确({ExceptionUtil.GetDebugText(ex)})。已被忽略");
+                    }
+                }
+            }
 
             _pageBorrow.ActionButtons = buttons;
             this.NavigationService.Navigate(_pageBorrow);

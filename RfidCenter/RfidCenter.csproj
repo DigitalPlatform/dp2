@@ -300,6 +300,10 @@
       <Project>{4775482f-dae9-4c00-a465-f53466b7e4cb}</Project>
       <Name>RfidDrivers.SikeHF</Name>
     </ProjectReference>
+    <ProjectReference Include="..\RfidDrivers.Sike\RfidDrivers.Sike.csproj">
+      <Project>{2fa3e096-bd0c-425d-9aa4-839e322b8332}</Project>
+      <Name>RfidDrivers.Sike</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ShelfLockDriver.First\ShelfLockDriver.First.csproj">
       <Project>{6b3ccf98-d61e-48a9-9646-9d2c9831261e}</Project>
       <Name>ShelfLockDriver.First</Name>
@@ -335,7 +339,9 @@
     <Content Include="x64\Drivers\rfidlib_drv_rpan.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="x64\Drivers\rfidlib_drv_UM200.dll" />
+    <Content Include="x64\Drivers\rfidlib_drv_UM200.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="x64\MiniBookcaseLockLib.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

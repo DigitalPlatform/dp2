@@ -950,3 +950,18 @@ https://www.c-sharpcorner.com/blogs/auto-detecting-image-type-and-extension-from
 
 ~~~
 普通书目记录用 GetRes() API 获得的时候，style 中包含 ,gzip 还没有支持
+
+~~~
+2024/12/31
+RfidCenter 改进：
+
+在搜索读写器 XML 元数据的时候，当 antenna_count 元素内容为 0 的时候，需要进一步
+寻找 cfg_antenna 元素的 antenna_cnt 属性
+      <cfg_antenna auto_check='true' antenna_cnt='36'/>
+
+
+~~~
+
+注意 sub_id 属性：
+      <sub_id>680601</sub_id>
+提供了多个驱动 ID 映射到同一段 XML 元数据的可能。

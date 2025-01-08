@@ -7460,7 +7460,7 @@ out strError);
     out _);
         }
 
-        static bool IsResultType(string strResultType,
+        public static bool IsResultType(string strResultType,
             string strName,
             out string parameters)
         {

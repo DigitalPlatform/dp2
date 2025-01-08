@@ -5756,6 +5756,104 @@ patron_name);
             _patron.FillTime = DateTime.Now;
         }
 
+        string _layout = "horz";
+
+        public string GetLayout()
+        {
+            return _layout;
+        }
+
+        // parameters:
+        //      layout  horz/vert
+        public void Layout(string layout)
+        {
+            if (_layout == layout)
+                return;
+
+            _layout = layout;
+
+            if (layout == "horz")
+            {
+                this.frame.RowDefinitions[0].MinHeight = 0;
+                this.frame.RowDefinitions[2].MinHeight = 0;
+
+                this.frame.RowDefinitions[0].Height = new GridLength(100, GridUnitType.Star);
+                this.frame.RowDefinitions[1].Height = new GridLength(0, GridUnitType.Pixel);
+                this.frame.RowDefinitions[2].Height = new GridLength(0, GridUnitType.Pixel);
+                this.frame.RowDefinitions[3].Height = new GridLength(60, GridUnitType.Pixel);
+
+                this.frame.ColumnDefinitions[0].MinWidth = 100;
+                this.frame.ColumnDefinitions[2].MinWidth = 100;
+
+                Grid.SetColumn(this.doorControlPanel, 0);
+                Grid.SetRow(this.doorControlPanel, 0);
+                Grid.SetColumnSpan(this.doorControlPanel, 1);
+
+                Grid.SetColumn(this.splitter, 1);
+                Grid.SetRow(this.splitter, 0);
+                Grid.SetColumnSpan(this.splitter, 1);
+
+                Grid.SetColumn(this.patronControlPanel, 2);
+                Grid.SetRow(this.patronControlPanel, 0);
+                Grid.SetColumnSpan(this.patronControlPanel, 1);
+            }
+            else
+            {
+                this.frame.ColumnDefinitions[0].MinWidth = 0;
+                this.frame.ColumnDefinitions[2].MinWidth = 0;
+
+                this.frame.RowDefinitions[0].Height = new GridLength(50, GridUnitType.Star);   // .Star
+                this.frame.RowDefinitions[1].Height = new GridLength(10, GridUnitType.Pixel);
+                this.frame.RowDefinitions[2].Height = new GridLength(50, GridUnitType.Star);   // .Star
+                this.frame.RowDefinitions[3].Height = new GridLength(60, GridUnitType.Pixel);
+
+                this.frame.RowDefinitions[0].MinHeight = 50;
+                this.frame.RowDefinitions[2].MinHeight = 50;
+
+                Grid.SetColumn(this.doorControlPanel, 0);
+                Grid.SetRow(this.doorControlPanel, 0);
+                Grid.SetColumnSpan(this.doorControlPanel, 3);
+
+                Grid.SetColumn(this.splitter, 0);
+                Grid.SetRow(this.splitter, 1);
+                Grid.SetColumnSpan(this.splitter, 3);
+
+                Grid.SetColumn(this.patronControlPanel, 0);
+                Grid.SetRow(this.patronControlPanel, 2);
+                Grid.SetColumnSpan(this.patronControlPanel, 3);
+            }
+        }
+
+
+        // 获得、设置分割条位置
+        public string SplitterPosition
+        {
+            get
+            {
+                GridLengthConverter glc = new GridLengthConverter();
+                if (_layout == "horz")
+                    return glc.ConvertToString(this.patronColumn.Width);
+                else
+                    return glc.ConvertToString(this.patronRow.Height);
+            }
+            set
+            {
+                GridLengthConverter glc = new GridLengthConverter();
+
+                // 2025/1/6
+                // 分割条位置改变后，this.patronRow.Height.IsStar 依然是 true
+                // 这时可以保存绝对值，也可以考虑转换为比例以后保存
+                if (string.IsNullOrEmpty(value) == false)
+                    value = value.Replace("*", "");
+
+                if (_layout == "horz")
+                    this.patronColumn.Width = (GridLength)glc.ConvertFromString(value);
+                else
+                    this.patronRow.Height = (GridLength)glc.ConvertFromString(value);
+            }
+        }
+
+
 #if REMOVED
         #region 掌纹 Video
 

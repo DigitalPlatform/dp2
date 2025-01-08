@@ -34,6 +34,7 @@
             this.textBox_epcBankHex = new System.Windows.Forms.TextBox();
             this.textBox_userBankHex = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
+            this.label_length = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // button_cancel
@@ -90,6 +91,7 @@
             this.textBox_userBankHex.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.textBox_userBankHex.Size = new System.Drawing.Size(776, 219);
             this.textBox_userBankHex.TabIndex = 14;
+            this.textBox_userBankHex.TextChanged += new System.EventHandler(this.textBox_userBankHex_TextChanged);
             // 
             // label2
             // 
@@ -100,6 +102,16 @@
             this.label2.TabIndex = 13;
             this.label2.Text = "User Bank(Hex):";
             // 
+            // label_length
+            // 
+            this.label_length.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.label_length.AutoSize = true;
+            this.label_length.Location = new System.Drawing.Point(13, 335);
+            this.label_length.Name = "label_length";
+            this.label_length.Size = new System.Drawing.Size(76, 21);
+            this.label_length.TabIndex = 15;
+            this.label_length.Text = "Length";
+            // 
             // DuplicateUhfTagDialog
             // 
             this.AcceptButton = this.button_OK;
@@ -107,6 +119,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_cancel;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.label_length);
             this.Controls.Add(this.textBox_userBankHex);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.textBox_epcBankHex);
@@ -132,5 +145,6 @@
         private System.Windows.Forms.TextBox textBox_epcBankHex;
         private System.Windows.Forms.TextBox textBox_userBankHex;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label_length;
     }
 }

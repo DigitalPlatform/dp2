@@ -777,6 +777,17 @@ namespace DigitalPlatform.LibraryServer
 
                 if (strCategory == "circulation")
                 {
+                    // 2025/15
+                    if (strName == "canReserveOnshelf")
+                    {
+                        if (this.CanReserveOnshelf == true)
+                            strValue = "true";
+                        else
+                            strValue = "false";
+                        nRet = 1;
+                        goto END1;
+                    }
+
                     // 2016/1/1
                     if (strName == "chargingOperDatabase")
                     {

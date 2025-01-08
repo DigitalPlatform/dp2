@@ -2836,6 +2836,7 @@ namespace RfidDrivers.First
 
         static XmlDocument _product_dom = null;
 
+        // TODO: product_id 要写入 log 文件中，便于出现故障时候排查
         public static bool GetDriverName(string product_id,
             out string driver_name,
             out string product_name,
@@ -2917,6 +2918,20 @@ namespace RfidDrivers.First
                     var ret = Int32.TryParse(count.InnerText.Trim(), out antenna_count);
                     if (ret == false)
                         throw new Exception($"product_id {product_id} 中 antenna_count 值({count.InnerText.Trim()})不合法");
+
+                    // 2024/12/31
+                    if (antenna_count <= 0)
+                    {
+                        //       <cfg_antenna auto_check='true' antenna_cnt='36'/>
+                        var cfg_antenna = node_device.SelectSingleNode($"basic/cfg_antenna") as XmlElement;
+                        if (cfg_antenna != null)
+                        {
+                            var value = cfg_antenna.GetAttribute("antenna_cnt");
+                            if (Int32.TryParse(value, out int temp) == true)
+                                antenna_count = temp;
+                        }
+                    }
+
                     if (antenna_count <= 0)
                     {
                         antenna_count = 1;  // 2022/1/21
@@ -3155,12 +3170,15 @@ namespace RfidDrivers.First
                 connection_string,
                 ref hreader);
             if (iret != 0)
+            {
+                // TODO: 验证一下如果可执行文件目录 x64\drivers\rfidlib_drv_UM200.dll 文件不存在，是否会导致打开 URL105 读写器打开时返回 ret=-4
                 return new OpenReaderResult
                 {
                     Value = -1,
                     ErrorInfo = $"OpenReader error, return: {iret}",
                     ErrorCode = GetErrorCode(iret, hreader)
                 };
+            }
 
             return new OpenReaderResult { ReaderHandle = hreader };
         }
@@ -4449,6 +4467,22 @@ out Reader reader);
                                 };
                             }
                         }
+
+
+                        // 2025/1/8
+                        // 验算检查 UID 是不是一个 EPC Hex
+                        var error = VerifyEpcCrc(uid);
+                        if (error == null)
+                        {
+                            return new SetEasResult
+                            {
+                                Value = -1,
+                                ErrorInfo = $"UID 为 {uid} 标签可能是一个超高频(UHF)标签(经过验算 EPC Hex 得知)",
+                                ErrorCode = "tagNotFound",
+                                OldUID = uid,
+                            };
+                        }
+
 
                         // 写入 AFI
                         {

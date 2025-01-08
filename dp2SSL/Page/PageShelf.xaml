@@ -126,10 +126,10 @@
                 <ColumnDefinition Width="300" Name="patronColumn" MinWidth="100"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="*" Name="patronRow"/>
+                <RowDefinition Name="patronRow" Height="*" />
                 <RowDefinition Height="0"/>
 
-                <RowDefinition Height="0"/>
+                <RowDefinition Height="0" />
                 <RowDefinition Height="0"/>
 
                 <!-- 60 -->

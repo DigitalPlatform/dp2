@@ -4538,6 +4538,8 @@ out strError);
                 // 2021/8/9
                 // 不太明白为何这里要去掉 borrowHistory 的下级元素。暂时注释掉
                 // ??
+                // 2025/1/8
+                // 只去掉 borrowHistory 的下级元素，但保留 borrowHitstory 元素，是为了保留 borrowHistory 里面可能出现的某些属性值返回给前端
                 // 去掉 <borrowHistory> 的下级元素
                 XmlNodeList nodes = dom.DocumentElement.SelectNodes("borrowHistory/*");
                 foreach (XmlNode node in nodes)

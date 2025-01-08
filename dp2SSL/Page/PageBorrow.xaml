@@ -86,18 +86,25 @@
                                        Visibility="{Binding Path=GlobalError, Converter={StaticResource StringToVis}}"
                                        TextWrapping="WrapWithOverflow"/>
 -->
-        <Grid Grid.Row="1" Grid.Column="1" Background="Transparent">
+        <Grid x:Name="frame"
+            Grid.Row="1" Grid.Column="1" Background="Transparent">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" MinWidth="100"/>
                 <ColumnDefinition Width="10" />
-                <ColumnDefinition Width="300" />
+                <ColumnDefinition Width="300" Name="patronColumn" MinWidth="100"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
+                <RowDefinition Name="patronRow" Height="*"/>
+                <RowDefinition Height="0" />
+                <RowDefinition Height="0"/>
+                
                 <RowDefinition Height="60"/>
+
+
             </Grid.RowDefinitions>
             <!-- 图书信息 -->
-            <Grid Grid.Column="0">
+            <Grid x:Name="doorControlPanel" 
+                Grid.Column="0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="20"/>
                     <RowDefinition Height="*"/>
@@ -110,7 +117,8 @@
                     <local:EntityListControl x:Name="booksControl" />
                 </local:MyScrollViewer>
             </Grid>
-            <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" Background="Blue">
+            <GridSplitter x:Name="splitter" 
+                Grid.Column="1" HorizontalAlignment="Stretch" Background="Blue">
                 <!-- 
                 https://stackoverflow.com/questions/1665781/styling-gridsplitter-wpf-c-sharp 
                 -->
@@ -124,7 +132,8 @@
                 </GridSplitter.Template>
             </GridSplitter>
             <!-- 读者信息 -->
-            <Grid Grid.Column="2" MaxWidth="700">
+            <Grid x:Name="patronControlPanel"
+                Grid.Column="2" MaxWidth="700">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="20"/>
                     <RowDefinition Height="*"/>
@@ -186,7 +195,8 @@
                 </Grid>
 
             </Grid>
-            <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" Orientation="Horizontal" HorizontalAlignment="Center">
+            <StackPanel Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="3" Orientation="Horizontal" HorizontalAlignment="Center"
+                        >
                 <Button Name="borrowButton"
                     Style="{DynamicResource RoundedButtonLightStyle}" 
                     Width="160" Height="60" 

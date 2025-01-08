@@ -98,6 +98,9 @@ namespace dp2SSL
         //      layout  horz/vert
         public void Layout(string layout)
         {
+            if (_layout == layout)
+                return;
+
             _layout = layout;
 
             if (layout == "horz")
@@ -121,9 +124,9 @@ namespace dp2SSL
             }
             else
             {
-                this.frame.RowDefinitions[0].Height = new GridLength(50, GridUnitType.Star);
+                this.frame.RowDefinitions[0].Height = new GridLength(50, GridUnitType.Star);   // .Star
                 this.frame.RowDefinitions[1].Height = new GridLength(10, GridUnitType.Pixel);
-                this.frame.RowDefinitions[2].Height = new GridLength(50, GridUnitType.Star);
+                this.frame.RowDefinitions[2].Height = new GridLength(50, GridUnitType.Star);   // .Star
                 this.frame.RowDefinitions[3].Height = new GridLength(0, GridUnitType.Pixel);
 
                 Grid.SetColumn(this.doorControlPanel, 0);
@@ -985,7 +988,7 @@ namespace dp2SSL
             // UID 和 Barcode 都不为空。这是 15693 和 14443 读者卡的场景
             if (string.IsNullOrEmpty(patron.UID) == false
     && string.IsNullOrEmpty(patron.Barcode) == false
-    && string.IsNullOrEmpty(patron.Xml) == false/*2024/12/28*/)
+    /*&& (string.IsNullOrEmpty(patron.Xml) == false || patron.Protocol != "ISO14443A")*/) // /*2025/1/2 如果是 14443A 则要求 .Xml 不为空*/
                 return true;
 
             string debug_info = $"uid:[{patron.UID}],barcode:[{patron.Barcode}]";
@@ -5352,6 +5355,12 @@ DateTime.Now);
             set
             {
                 GridLengthConverter glc = new GridLengthConverter();
+
+                // 2025/1/6
+                // 分割条位置改变后，this.patronRow.Height.IsStar 依然是 true
+                // 这时可以保存绝对值，也可以考虑转换为比例以后保存
+                if (string.IsNullOrEmpty(value) == false)
+                    value = value.Replace("*", "");
 
                 if (_layout == "horz")
                     this.patronColumn.Width = (GridLength)glc.ConvertFromString(value);

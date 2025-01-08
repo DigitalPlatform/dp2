@@ -1112,6 +1112,40 @@ namespace dp2SSL
             }
         }
 
+        void SaveLayout()
+        {
+            try
+            {
+                if (PageMenu.PageShelf != null)
+                {
+                    // 2020/9/17
+                    WpfClientInfo.Config?.Set("pageShelf", "splitterPosition", PageMenu.PageShelf?.SplitterPosition);
+                    // 2024/12/19
+                    WpfClientInfo.Config?.Set("pageShelf", "layout", PageMenu.PageShelf?.GetLayout());
+                }
+            }
+            catch (NullReferenceException)
+            {
+
+            }
+
+            // 2025/1/6
+            try
+            {
+                if (PageMenu.PageBorrow != null)
+                {
+                    // 2020/9/17
+                    WpfClientInfo.Config?.Set("pageBorrow", "splitterPosition", PageMenu.PageBorrow?.SplitterPosition);
+                    // 2024/12/19
+                    WpfClientInfo.Config?.Set("pageBorrow", "layout", PageMenu.PageBorrow?.GetLayout());
+                }
+            }
+            catch (NullReferenceException)
+            {
+
+            }
+        }
+
         // 注：Windows 关机或者重启的时候，会触发 OnSessionEnding 事件，但不会触发 OnExit 事件
         protected override void OnSessionEnding(SessionEndingCancelEventArgs e)
         {
@@ -1129,20 +1163,8 @@ namespace dp2SSL
             RfidManager.TurnShelfLamp("*", "turnOff");
             WpfClientInfo.WriteInfoLog("物理关灯 OnSessionEnding()");
 
-            try
-            {
-                if (PageMenu.PageShelf != null)
-                {
-                    // 2020/9/17
-                    WpfClientInfo.Config?.Set("pageShelf", "splitterPosition", PageMenu.PageShelf?.SplitterPosition);
-                    // 2024/12/19
-                    WpfClientInfo.Config?.Set("pageShelf", "layout", PageMenu.PageShelf?.GetLayout());
-                }
-            }
-            catch (NullReferenceException)
-            {
-
-            }
+            // save size and layout
+            SaveLayout();
 
             // 保存软时钟
             ShelfData.SaveSoftClock();
@@ -1207,6 +1229,9 @@ namespace dp2SSL
             {
                 WpfClientInfo.WriteErrorLog($"PageShelf.SubmitAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
             }
+
+            // save size and layout
+            SaveLayout();
 
             // 保存软时钟
             ShelfData.SaveSoftClock();

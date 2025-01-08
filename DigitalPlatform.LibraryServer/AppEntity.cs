@@ -8630,9 +8630,29 @@ out strError);
             int i = 0;
             foreach (var format in formats)
             {
-                if (String.Compare(format, "xml", true) == 0)
+                // if (String.Compare(format, "xml", true) == 0)
+                if (IsResultType(format, "xml", out string parameters))
                 {
-                    FormatItem.SetFormat(items, i, format, item_dom?.DocumentElement?.OuterXml);
+                    var item_xml = item_dom?.DocumentElement?.OuterXml;
+                    // TODO: 需要支持 xml:noborrowhistory
+                    string strParam = parameters?.Replace("|", ",");
+                    if (StringUtil.IsInList("noborrowhistory", strParam)
+                        && string.IsNullOrEmpty(item_xml) == false)
+                    {
+                        XmlDocument temp = new XmlDocument();
+                        temp.LoadXml(item_xml);
+                        // 2025/1/8
+                        // 只去掉 borrowHistory 的下级元素，但保留 borrowHitstory 元素，是为了保留 borrowHistory 里面可能出现的某些属性值返回给前端
+                        XmlNodeList nodes = temp.DocumentElement.SelectNodes("borrowHistory/*");
+                        foreach (XmlNode node in nodes)
+                        {
+                            node.ParentNode.RemoveChild(node);
+                        }
+
+                        item_xml = temp.DocumentElement?.OuterXml;
+                    }
+
+                    FormatItem.SetFormat(items, i, format, item_xml);
                 }
                 else if (String.Compare(format, "recpath", true) == 0)
                 {
