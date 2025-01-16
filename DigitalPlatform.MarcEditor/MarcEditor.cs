@@ -5517,7 +5517,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                     // return:
                     //      null    用户取消对话框
                     //      其他    所输入的值
-                    var ret = ListDialog.GetInput(Application.OpenForms[0], 
+                    var ret = ListDialog.GetInput(Application.OpenForms[0],
                         "文本中出现了回车换行符号",
                         "请问如何处理?",
                         new string[] { "多个字段", "单个字段" },
@@ -6579,6 +6579,57 @@ SYS	011528318
             //      nAutoComplate   0: false; 1: true; -1:保持当前记忆状态
             InsertField(this.FocusedFieldIndex, -1, -1);  // true, false
         }
+
+        // 2025/1/10
+        // 从当前插入符位置把字段内容一劈为二。
+        // 当前字段内容只留下一劈为二的左侧部分。
+        // 下方新增一个字段，内容为一劈为二的右侧部分。
+        // parameters:
+        //      nFieldIndex 字段 index。如果为 -1，表示为当前插入符所在的字段
+        //      right_prev_text 分割后，要自动在右边一段文字头部增加的内容。增加后一起算作右侧内容
+        public bool SplitField(int nFieldIndex = -1,
+            string right_prev_text = "")
+        {
+            if (nFieldIndex == -1)
+                nFieldIndex = this.FocusedFieldIndex;
+
+            if (nFieldIndex == -1)
+                return false;
+
+            if (this._focusCol != 3)
+                return false;
+
+            var current_field = this.Record.Fields[nFieldIndex];
+            var start_field_name = "000";
+            if (nFieldIndex == 0)   // 头标区不允许切割
+                return false;
+            else
+                start_field_name = current_field.Name;
+
+            var indicator = current_field.Indicator;
+
+            this.curEdit.GetLeftRight(out string left,
+                out string right);
+
+            if (string.IsNullOrEmpty(right_prev_text) == false)
+                right = right_prev_text + right;
+
+            this.curEdit.Text = left;
+            this.Flush();    // 促使通知外界
+
+            var new_field = this.InsertFieldAfter(nFieldIndex,
+                start_field_name,
+                current_field.Indicator,
+                right);
+
+            // 设焦点位置
+            if (new_field != null)
+                this.SetActiveField(new_field, 3);
+
+            this.EnsureVisible();
+            return true;
+        }
+
 
         // 插入字段
         // parameters:

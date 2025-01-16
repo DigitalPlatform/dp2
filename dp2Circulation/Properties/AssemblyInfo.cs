@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.95.*")]
-[assembly: AssemblyFileVersion("3.95.0.0")]
+[assembly: AssemblyVersion("3.96.*")]
+[assembly: AssemblyFileVersion("3.96.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -244,3 +244,4 @@ using System.Runtime.InteropServices;
 //                  为实体查询窗的“导出 Excel”增加 biblio_itemPrice 书目列。
 // 3.95 2024/12/26  导出新书通报功能，html 格式的图像文件改为写入一个专门的子目录。功能执行完成后，用户如果拷走 .html 文件，要记得一并拷走这个图像文件子目录，以免封面图片显示不出来
 //                  docx 格式处理时，对于 dp2library 自己管理的封面图片对象，改为直接利用 dp2library 协议获得(此前的版本是利用 dp2OPAC 的 getobject.aspx 获取)
+// 3.96 2025/1/10   MarcEditor 增加 shift+回车 键，功能为从插入符当前位置切割为两个字段

@@ -65,6 +65,8 @@ namespace DigitalPlatform.rms
         public int m_nTimestampSeed = 0;
 
         private KeysCfg m_keysCfg = null;
+        object _syncRoot_keysCfg = new object();
+
         // private BrowseCfg m_browseCfg = null;
         // private bool m_bHasBrowse = true;
         Hashtable browse_table = new Hashtable();
@@ -155,55 +157,57 @@ namespace DigitalPlatform.rms
             strError = "";
             keysCfg = null;
 
-            // 已存在时
-            if (this.m_keysCfg != null)
+            //lock (this._syncRoot_keysCfg)
             {
+                // 已存在时
+                if (this.m_keysCfg != null)
+                {
+                    keysCfg = this.m_keysCfg;
+                    return 0;
+                }
+
+                int nRet = 0;
+
+                string strKeysFileName = "";
+
+                string strDbName = this.GetCaption("zh");
+                // return:
+                //		-1	一般性错误，比如调用错误，参数不合法等
+                //		-2	没找到节点
+                //		-3	localname属性未定义或为值空
+                //		-4	localname在本地不存在
+                //		-5	存在多个节点
+                //		0	成功
+                nRet = this.container.GetFileCfgItemLocalPath(strDbName + "/cfgs/keys",
+                    out _,
+                    out strKeysFileName,
+                    out strError);
+
+                // 未定义keys对象，按正常情况处理
+                if (nRet == -2)
+                    return 0;
+
+                // keys文件在本地不存在，按正常情况处理
+                if (nRet == -4)
+                    return 0;
+
+                if (nRet != 0)
+                    return -1;
+
+                this.m_keysCfg = new KeysCfg();
+                nRet = this.m_keysCfg.Initial(strKeysFileName,
+                    this.container.BinDir,
+                    this is SqlDatabase && this.container.SqlServerType == SqlServerType.Oracle ? "" : null,
+                    out strError);
+                if (nRet == -1)
+                {
+                    this.m_keysCfg = null;
+                    return -1;
+                }
+
                 keysCfg = this.m_keysCfg;
                 return 0;
             }
-
-            int nRet = 0;
-
-            string strKeysFileName = "";
-
-            string strDbName = this.GetCaption("zh");
-            // return:
-            //		-1	一般性错误，比如调用错误，参数不合法等
-            //		-2	没找到节点
-            //		-3	localname属性未定义或为值空
-            //		-4	localname在本地不存在
-            //		-5	存在多个节点
-            //		0	成功
-            nRet = this.container.GetFileCfgItemLocalPath(strDbName + "/cfgs/keys",
-                out _,
-                out strKeysFileName,
-                out strError);
-
-            // 未定义keys对象，按正常情况处理
-            if (nRet == -2)
-                return 0;
-
-            // keys文件在本地不存在，按正常情况处理
-            if (nRet == -4)
-                return 0;
-
-            if (nRet != 0)
-                return -1;
-
-
-            this.m_keysCfg = new KeysCfg();
-            nRet = this.m_keysCfg.Initial(strKeysFileName,
-                this.container.BinDir,
-                this is SqlDatabase && this.container.SqlServerType == SqlServerType.Oracle ? "" : null,
-                out strError);
-            if (nRet == -1)
-            {
-                this.m_keysCfg = null;
-                return -1;
-            }
-
-            keysCfg = this.m_keysCfg;
-            return 0;
         }
 
         // return:
@@ -2982,8 +2986,11 @@ namespace DigitalPlatform.rms
                     if (nRet == -1)
                         return -1;
 
-                    // 把缓冲清空
-                    this.m_keysCfg = null;
+                    //lock (this._syncRoot_keysCfg)
+                    {
+                        // 把缓冲清空
+                        this.m_keysCfg = null;
+                    }
                 }
 
                 if (strBrowseText != null)  // 2008/4/30
@@ -3289,11 +3296,15 @@ namespace DigitalPlatform.rms
                     strError = "'" + strCfgItemPath + "'路径最后是'/'，不合法。";
                     return -1;
                 }
+
                 string strPathWithoutDbName = strCfgItemPath.Substring(nPosition + 1);
                 // 如果为keys对象，则把该库的KeysCfg中的dom清空
                 if (strPathWithoutDbName == "cfgs/keys")
                 {
-                    this.m_keysCfg = null;
+                    //lock (this._syncRoot_keysCfg)
+                    {
+                        this.m_keysCfg = null;
+                    }
                 }
 
                 // 如果为browse对象

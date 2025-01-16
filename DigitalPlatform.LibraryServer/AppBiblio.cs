@@ -5655,7 +5655,8 @@ out strError);
                             goto SKIP_MEMO_OLDRECORD;
 
                         // 2024/5/22
-                        if (strAction == "delete")
+                        if (strAction == "delete"
+                            && bSimulate == false/*2025/1/16*/)
                         {
                             strError = "原有记录 '" + strBiblioRecPath + "' 不存在, 因此 setbiblioinfo " + strAction + " 操作被拒绝";
                             result.Value = -1;

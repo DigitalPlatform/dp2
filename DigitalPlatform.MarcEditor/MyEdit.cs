@@ -138,6 +138,22 @@ namespace DigitalPlatform.Marc
             }
         }
 
+        // 2025/1/10
+        // 获得当前插入符左侧和右侧的内容文字
+        // 注：已经去掉
+        public void GetLeftRight(out string left,
+            out string right)
+        {
+            // 当前插入符所在位置
+            int current = this.SelectionStart;
+            // 为了让 Ctrl+B 顺利完成，探测点取中间位置
+            if (this.SelectionLength > 0)
+                current += this.SelectionLength / 2;
+
+            left = this.Text.Substring(0, current); // .Replace(Record.KERNEL_SUBFLD, Record.SUBFLD);
+            right = this.Text.Substring(current);   // .Replace(Record.KERNEL_SUBFLD, Record.SUBFLD);
+        }
+
         // TODO: 需要补充获得子字段符号左边是否存在方向符号
         // 获得有关插入符所在当前子字段的信息
         // parameters:
@@ -801,6 +817,15 @@ dp2Circulation 版本: dp2Circulation, Version=3.94.9035.22741, Culture=neutral,
             {
                 // 插入一个新的字段
                 this.MarcEditor.InsertField(this.MarcEditor.FocusedFieldIndex, 0, 1);
+                return true;
+            }
+
+            // 2025/1/10
+            if (Control.ModifierKeys == Keys.Shift
+    && (pure_key == Keys.Enter || pure_key == Keys.LineFeed))
+            {
+                // 插入一个新的字段
+                this.MarcEditor.SplitField(this.MarcEditor.FocusedFieldIndex);
                 return true;
             }
 

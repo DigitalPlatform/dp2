@@ -57,6 +57,74 @@ namespace DigitalPlatform.LibraryServer
 
         public int Used = 0;
 
+        #region 检索中断机制
+
+        // 2025/1/9
+        // 把 _nStop m_nInSearching 等几个变量放到 SessionInfo 里面的原因，主要是 WCF 的
+        // LibraryService 对象在 rest.http 协议下，并不对应于 Per Session。而是 Per Call 的。
+        // 原来这几个变量是在 LibraryService 对象里面的。
+        public volatile int _nStop = 0;   // 0 没有中断 1 提出中断 2 已经进行了中断
+
+        volatile int m_nInSearching = 0;
+
+        public int InSearching
+        {
+            get
+            {
+                return (int)m_nInSearching;
+            }
+            set
+            {
+                m_nInSearching = value;
+            }
+        }
+
+        public int BeginSearch()
+        {
+            Debug.WriteLine($"BeginSearch() {this.SessionID}");
+
+            this._nStop = 0;
+            /*
+            lock (this.m_nInSearching)
+            {
+                int v = (int)m_nInSearching;
+                m_nInSearching = v + 1;
+                return v;
+            }
+            */
+            return Interlocked.Increment(ref m_nInSearching);
+        }
+
+        public void EndSearch()
+        {
+            Debug.WriteLine($"EndSearch() {this.SessionID}");
+
+            /*
+            lock (this.m_nInSearching)
+            {
+                int v = (int)m_nInSearching;
+                m_nInSearching = v - 1;
+            }
+            */
+            Interlocked.Decrement(ref m_nInSearching);
+
+            this._nStop = 1;
+        }
+
+        public void Stop()
+        {
+            Debug.WriteLine($"Stop() {this.SessionID}");
+            if (this.InSearching > 0)
+            {
+                this._nStop = 1;
+
+                this.App?.WriteDebugInfo("因后一个stop的到来，前一个search不得不中断 ");
+            }
+        }
+
+        #endregion
+
+
         public SessionTime SessionTime = null;
 
         public string Lang = "";
@@ -64,7 +132,7 @@ namespace DigitalPlatform.LibraryServer
         // 刚才做过的最近一次Amerce的ID列表
         public List<string> AmerceIds = null;
         // public string AmerceReaderBarcode = ""; // 注：可能包含机构代码部分
-        public string AmerceReaderRefID = ""; 
+        public string AmerceReaderRefID = "";
 
         // TODO: 所创建的临时文件要在规定的目录中
         // TODO: 观察它是否释放

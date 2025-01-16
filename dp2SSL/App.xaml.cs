@@ -1112,7 +1112,7 @@ namespace dp2SSL
             }
         }
 
-        void SaveLayout()
+        public static void SaveLayout()
         {
             try
             {
@@ -1219,10 +1219,12 @@ namespace dp2SSL
                 {
                     await PageMenu.PageShelf?.SubmitAsync(true);
 
+                    /*
                     // 2020/9/17
                     WpfClientInfo.Config?.Set("pageShelf", "splitterPosition", PageMenu.PageShelf?.SplitterPosition);
                     // 2024/12/19
                     WpfClientInfo.Config?.Set("pageShelf", "layout", PageMenu.PageShelf?.GetLayout());
+                    */
                 }
             }
             catch (Exception ex)

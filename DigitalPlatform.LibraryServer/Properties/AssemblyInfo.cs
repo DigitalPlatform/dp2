@@ -32,8 +32,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.165.*")]
-[assembly: AssemblyFileVersion("3.165.0.0")]
+[assembly: AssemblyVersion("3.167.*")]
+[assembly: AssemblyFileVersion("3.167.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -402,4 +402,6 @@ ItemCanReturn()
 //		3.164 (2025/1/5) GetSystemParameter() API 增加可用值:
 //							strCategory="circulation" strName="canReserveOnshelf"，返回值 strValue 为 "true" 或者 "false"。result.Value 为 1 表示返回了有意义的返回值，为 0 表示这个参数不存在
 //		3.165 (2025/1/8) 此前版本中 Borrow() API 中支持 item_records 返回的格式为 xml:noborrowhistory 功能不正常。这个 bug 已经修正
+//		3.166 (2025/1/9) rest.http 协议下 SearchXXX() API 无法被前端用 Stop() API 中断的 bug 已经修正
+//		3.167 (2025/1/14) dp2kernel 中解决 pgsql 检索中断后 CPU 没有立即下降的 bug。通过捕获异常并 command.Cancel() 这一方法解决的。
 

@@ -422,7 +422,7 @@ namespace DigitalPlatform.rms.Client
         }
          * */
 
-        public void Abort()
+        public bool Abort()
         {
             if (m_nInSearching > 0)
             {
@@ -436,10 +436,10 @@ namespace DigitalPlatform.rms.Client
                         this.m_bStoped=true;
                         this.m_ws = null;
 #endif
-                        this.DoStop();
+                        this.BeginStop();
                         // TODO: 如果时间太长了不返回，则调用Abort()?
                         this.m_bStoped = true;
-                        return;
+                        return true;
                     }
 
                     // 否则，就走到Abort()那里
@@ -459,6 +459,7 @@ namespace DigitalPlatform.rms.Client
 
             // 2011/1/7 add
             this.m_ws = null;
+            return false;
         }
 
 #if NO
@@ -474,9 +475,28 @@ namespace DigitalPlatform.rms.Client
         // 2015/5/4
         public void Close()
         {
+            // 2025/1/9
             if (this.m_ws != null)
             {
                 // TODO: Search()要单独处理
+                // 2025/1/9
+                if (m_nInSearching > 0)
+                {
+                    try
+                    {
+                        if (this.m_ws != null && this.m_bStoped == false)
+                        {
+                            this.BeginStop();
+                            this.m_bStoped = true;
+                        }
+                    }
+                    catch
+                    {
+
+                    }
+                }
+
+
                 try
                 {
                     if (this.m_ws.State != CommunicationState.Faulted)
@@ -484,7 +504,7 @@ namespace DigitalPlatform.rms.Client
                 }
                 catch
                 {
-                    this.m_ws.Abort();
+                        this.m_ws.Abort();
                 }
                 this.m_ws = null;
             }
@@ -907,6 +927,25 @@ namespace DigitalPlatform.rms.Client
             return 1;
         }
 
+        const int WAIT_TIME = 10;    // 100
+
+        void WaitComplete(IAsyncResult soapresult)
+        {
+            for (; ; )
+            {
+                DoIdle(); // 出让控制权，避免CPU资源耗费过度
+
+                bool bRet = soapresult.AsyncWaitHandle.WaitOne(WAIT_TIME, false);
+                if (bRet == true)
+                    break;
+                /*
+                if (soapresult.IsCompleted)
+                    break;
+                Thread.Sleep(1);
+                */
+            }
+        }
+
         // 获得dpKernel版本号
         // return:
         //		-1	出错。错误信息在strError中
@@ -924,18 +963,8 @@ namespace DigitalPlatform.rms.Client
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
-                    if (bRet == true)
-                        break;
-                    /*
-                    if (soapresult.IsCompleted)
-                        break;
-                     * */
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -1003,14 +1032,8 @@ namespace DigitalPlatform.rms.Client
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
-                    if (bRet == true)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -1131,14 +1154,8 @@ namespace DigitalPlatform.rms.Client
                         null);
                 }
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
-                    if (bRet == true)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -1251,13 +1268,8 @@ namespace DigitalPlatform.rms.Client
             REDOINITIAL:
                 IAsyncResult soapresult = this.ws.BeginInitializeDb(strDBName, null, null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
-                    bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
-                    if (bRet == true)
-                        break;
-                }
+                WaitComplete(soapresult);
+
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -1337,13 +1349,8 @@ namespace DigitalPlatform.rms.Client
                     bClearAllKeyTables,
                     null,
                     null);
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
-                    bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
-                    if (bRet == true)
-                        break;
-                }
+                WaitComplete(soapresult);
+
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -1416,13 +1423,8 @@ namespace DigitalPlatform.rms.Client
             REDOINITIAL:
                 IAsyncResult soapresult = this.ws.BeginDeleteDb(strDBName, null, null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
-                    bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
-                    if (bRet == true)
-                        break;
-                }
+                WaitComplete(soapresult);
+
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -1516,13 +1518,8 @@ namespace DigitalPlatform.rms.Client
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
-                    bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
-                    if (bRet == true)
-                        break;
-                }
+                WaitComplete(soapresult);
+
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -1615,13 +1612,8 @@ namespace DigitalPlatform.rms.Client
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
-                    bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
-                    if (bRet == true)
-                        break;
-                }
+                WaitComplete(soapresult);
+
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -1730,13 +1722,8 @@ namespace DigitalPlatform.rms.Client
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
-                    bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
-                    if (bRet == true)
-                        break;
-                }
+                WaitComplete(soapresult);
+
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -1806,13 +1793,8 @@ namespace DigitalPlatform.rms.Client
             {
                 IAsyncResult soapresult = this.ws.BeginLogout(null, null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
-                    bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
-                    if (bRet == true)
-                        break;
-                }
+                WaitComplete(soapresult);
+
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -1898,14 +1880,8 @@ namespace DigitalPlatform.rms.Client
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
-                    if (bRet == true)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -1993,14 +1969,8 @@ namespace DigitalPlatform.rms.Client
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
-                    if (bRet == true)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -2220,13 +2190,8 @@ namespace DigitalPlatform.rms.Client
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
-                    bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
-                    if (bRet == true)
-                        break;
-                }
+                WaitComplete(soapresult);
+
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -2307,13 +2272,8 @@ namespace DigitalPlatform.rms.Client
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
-                    bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
-                    if (bRet == true)
-                        break;
-                }
+                WaitComplete(soapresult);
+
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -2397,13 +2357,8 @@ namespace DigitalPlatform.rms.Client
                     strOutputStyle,
                     null, null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
-                    bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
-                    if (bRet == true)
-                        break;
-                }
+                WaitComplete(soapresult);
+
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -2463,13 +2418,8 @@ namespace DigitalPlatform.rms.Client
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
-                    bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
-                    if (bRet == true)
-                        break;
-                }
+                WaitComplete(soapresult);
+
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -2580,13 +2530,8 @@ namespace DigitalPlatform.rms.Client
                         null,
                         null);
 
-                    for (; ; )
-                    {
-                        DoIdle(); // 出让控制权，避免CPU资源耗费过度
-                        bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
-                        if (bRet == true)
-                            break;
-                    }
+                    WaitComplete(soapresult);
+
                     if (this.m_ws == null)
                     {
                         strError = "用户中断";
@@ -2821,13 +2766,8 @@ namespace DigitalPlatform.rms.Client
                         null,
                         null);
 
-                    for (; ; )
-                    {
-                        DoIdle(); // 出让控制权，避免CPU资源耗费过度
-                        bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
-                        if (bRet == true)
-                            break;
-                    }
+                    WaitComplete(soapresult);
+
                     if (this.m_ws == null)
                     {
                         strError = "用户中断";
@@ -2963,13 +2903,8 @@ namespace DigitalPlatform.rms.Client
                         null,
                         null);
 
-                    for (; ; )
-                    {
-                        DoIdle(); // 出让控制权，避免CPU资源耗费过度
-                        bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
-                        if (bRet == true)
-                            break;
-                    }
+                    WaitComplete(soapresult);
+
                     if (this.m_ws == null)
                     {
                         strError = "用户中断";
@@ -3173,13 +3108,8 @@ namespace DigitalPlatform.rms.Client
                         null,
                         null);
 
-                    for (; ; )
-                    {
-                        DoIdle(); // 出让控制权，避免CPU资源耗费过度
-                        bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
-                        if (bRet == true)
-                            break;
-                    }
+                    WaitComplete(soapresult);
+
                     if (this.m_ws == null)
                     {
                         strError = "用户中断";
@@ -3335,13 +3265,8 @@ namespace DigitalPlatform.rms.Client
                         null,
                         null);
 
-                    for (; ; )
-                    {
-                        DoIdle(); // 出让控制权，避免CPU资源耗费过度
-                        bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
-                        if (bRet == true)
-                            break;
-                    }
+                    WaitComplete(soapresult);
+
                     if (this.m_ws == null)
                     {
                         strError = "用户中断";
@@ -3497,13 +3422,8 @@ namespace DigitalPlatform.rms.Client
                         null,
                         null);
 
-                    for (; ; )
-                    {
-                        DoIdle(); // 出让控制权，避免CPU资源耗费过度
-                        bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
-                        if (bRet == true)
-                            break;
-                    }
+                    WaitComplete(soapresult);
+
                     if (this.m_ws == null)
                     {
                         strError = "用户中断";
@@ -3665,13 +3585,8 @@ namespace DigitalPlatform.rms.Client
                         null,
                         null);
 
-                    for (; ; )
-                    {
-                        DoIdle(); // 出让控制权，避免CPU资源耗费过度
-                        bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
-                        if (bRet == true)
-                            break;
-                    }
+                    WaitComplete(soapresult);
+
                     if (this.m_ws == null)
                     {
                         strError = "用户中断";
@@ -3804,13 +3719,8 @@ namespace DigitalPlatform.rms.Client
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
-                    bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
-                    if (bRet == true)
-                        break;
-                }
+                WaitComplete(soapresult);
+
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -3894,13 +3804,8 @@ namespace DigitalPlatform.rms.Client
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
-                    bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
-                    if (bRet == true)
-                        break;
-                }
+                WaitComplete(soapresult);
+
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -4025,13 +3930,8 @@ namespace DigitalPlatform.rms.Client
                         null,
                         null);
 
-                    for (; ; )
-                    {
-                        DoIdle(); // 出让控制权，避免CPU资源耗费过度
-                        bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
-                        if (bRet == true)
-                            break;
-                    }
+                    WaitComplete(soapresult);
+
                     if (this.m_ws == null)
                     {
                         strError = "用户中断";
@@ -4192,13 +4092,8 @@ namespace DigitalPlatform.rms.Client
                         null,
                         null);
 
-                    for (; ; )
-                    {
-                        DoIdle(); // 出让控制权，避免CPU资源耗费过度
-                        bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
-                        if (bRet == true)
-                            break;
-                    }
+                    WaitComplete(soapresult);
+
                     if (this.m_ws == null)
                     {
                         strError = "用户中断";
@@ -4364,13 +4259,9 @@ namespace DigitalPlatform.rms.Client
                         strStyle,
                         null,
                         null);
-                    for (; ; )
-                    {
-                        DoIdle(); // 出让控制权，避免CPU资源耗费过度
-                        bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
-                        if (bRet == true)
-                            break;
-                    }
+
+                    WaitComplete(soapresult);
+
                     if (this.m_ws == null)
                     {
                         strError = "用户中断";
@@ -4471,13 +4362,9 @@ namespace DigitalPlatform.rms.Client
                     strStyle,
                     null,
                     null);
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
-                    bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
-                    if (bRet == true)
-                        break;
-                }
+
+                WaitComplete(soapresult);
+
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -4559,13 +4446,8 @@ namespace DigitalPlatform.rms.Client
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
-                    bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
-                    if (bRet == true)
-                        break;
-                }
+                WaitComplete(soapresult);
+
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -4741,13 +4623,8 @@ namespace DigitalPlatform.rms.Client
                         null);
                     nDoCount++;
 
-                    for (; ; )
-                    {
-                        DoIdle(); // 出让控制权，避免CPU资源耗费过度
-                        bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
-                        if (bRet == true)
-                            break;
-                    }
+                    WaitComplete(soapresult);
+
                     if (this.m_ws == null)
                     {
                         strError = "用户中断";
@@ -4880,13 +4757,8 @@ namespace DigitalPlatform.rms.Client
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
-                    bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
-                    if (bRet == true)
-                        break;
-                }
+                WaitComplete(soapresult);
+
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -4983,13 +4855,8 @@ namespace DigitalPlatform.rms.Client
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
-                    bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
-                    if (bRet == true)
-                        break;
-                }
+                WaitComplete(soapresult);
+
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -5291,14 +5158,8 @@ ref strNewStyle);	// 不要数据体和metadata
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
-                    if (bRet == true)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -5414,27 +5275,8 @@ ref strNewStyle);	// 不要数据体和metadata
                         null,
                         null);
 
-                    for (; ; )
-                    {
+                    WaitComplete(soapresult);
 
-                        /*
-                        try 
-                        {
-                            Application.DoEvents();	// 出让界面控制权
-                        }
-                        catch
-                        {
-                        }
-					
-
-                        // System.Threading.Thread.Sleep(10);	// 避免CPU资源过度耗费
-                         */
-                        DoIdle(); // 出让控制权，避免CPU资源耗费过度
-
-                        bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
-                        if (bRet == true)
-                            break;
-                    }
                     if (this.m_ws == null)
                     {
                         strError = "用户中断";
@@ -5737,27 +5579,8 @@ ref strNewStyle);	// 不要数据体和metadata
                         null,
                         null);
 
-                    for (; ; )
-                    {
+                    WaitComplete(soapresult);
 
-                        /*
-                        try 
-                        {
-                            Application.DoEvents();	// 出让界面控制权
-                        }
-                        catch
-                        {
-                        }
-					
-
-                        // System.Threading.Thread.Sleep(10);	// 避免CPU资源过度耗费
-                         */
-                        DoIdle(); // 出让控制权，避免CPU资源耗费过度
-
-                        bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
-                        if (bRet == true)
-                            break;
-                    }
                     if (this.m_ws == null)
                     {
                         strError = "用户中断";
@@ -5819,9 +5642,9 @@ ref strNewStyle);	// 不要数据体和metadata
                     lTotalLength = result.Value;
 
                     if (StringUtil.IsInList("timestamp", strStyle) == true
-                          /*
-                          && lTotalLength > 0
-                           * */ )    // 2012/1/11
+                            /*
+                            && lTotalLength > 0
+                             * */ )    // 2012/1/11
                     {
                         if (input_timestamp != null)
                         {
@@ -5991,13 +5814,8 @@ ref strNewStyle);	// 不要数据体和metadata
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
-                    bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
-                    if (bRet == true)
-                        break;
-                }
+                WaitComplete(soapresult);
+
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -6344,13 +6162,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
-                    bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
-                    if (bRet == true)
-                        break;
-                }
+                WaitComplete(soapresult);
+
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -6425,11 +6238,17 @@ out strError);
             return 0;
         }
 
-        public void DoStop()
+        public void BeginStop()
         {
+            /*
             IAsyncResult result = this.ws.BeginStop(
                 null,
                 null);
+            */
+            IAsyncResult result = this.m_ws?.BeginStop(
+    null,
+    null);
+
 #if REMOVED
             /*
             for (; ; )
@@ -6451,6 +6270,7 @@ out strError);
 #endif
         }
 
+
         public int DoTest(string strText)
         {
             IAsyncResult soapresult = this.ws.BeginDoTest(
@@ -6458,13 +6278,8 @@ out strError);
                 null,
                 null);
 
-            for (; ; )
-            {
-                DoIdle(); // 出让控制权，避免CPU资源耗费过度
-                bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
-                if (bRet == true)
-                    break;
-            }
+            WaitComplete(soapresult);
+
 
             try
             {

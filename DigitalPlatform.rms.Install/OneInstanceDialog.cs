@@ -3,13 +3,10 @@ using System.Windows.Forms;
 using System.IO;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using System.Data.SqlClient;
-using static System.Net.Mime.MediaTypeNames;
 
 using DigitalPlatform.IO;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Install;
-using System.Runtime.Remoting.Activation;
 
 namespace DigitalPlatform.rms
 {

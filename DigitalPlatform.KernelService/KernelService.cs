@@ -448,6 +448,14 @@ namespace dp2Kernel
 
             try
             {
+                // 2025/1/9
+                try
+                {
+                    StopPrevious();
+                }
+                catch
+                {
+                }
 
                 if (this.sessioninfo.UserName != "")
                 {

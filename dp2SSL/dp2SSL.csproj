@@ -321,6 +321,7 @@
     <Reference Include="Microsoft.VisualStudio.OLE.Interop, Version=7.1.40304.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <HintPath>..\packages\Microsoft.VisualStudio.OLE.Interop.7.10.6071\lib\Microsoft.VisualStudio.OLE.Interop.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.VisualStudio.Shell.15.0, Version=16.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.VisualStudio.Shell.15.0.16.5.29911.84\lib\net472\Microsoft.VisualStudio.Shell.15.0.dll</HintPath>
     </Reference>
@@ -661,6 +662,45 @@
     <Compile Include="Models\PatronReplication.cs" />
     <Compile Include="NetworkUsage.cs" />
     <Compile Include="Resources\SkinResourceDictionary.cs" />
+    <Compile Include="SIP2\BaseMessage.cs" />
+    <Compile Include="SIP2\Request\BlockPatron_01.cs" />
+    <Compile Include="SIP2\Request\ChannelInformation_41.cs" />
+    <Compile Include="SIP2\Request\Checkin_09.cs" />
+    <Compile Include="SIP2\Request\Checkout_11.cs" />
+    <Compile Include="SIP2\Request\EndPatronSession_35.cs" />
+    <Compile Include="SIP2\Request\FeePaid_37.cs" />
+    <Compile Include="SIP2\Request\Hold_15.cs" />
+    <Compile Include="SIP2\Request\ItemInformation_17.cs" />
+    <Compile Include="SIP2\Request\ItemStatusUpdate_19.cs" />
+    <Compile Include="SIP2\Request\Login_93.cs" />
+    <Compile Include="SIP2\Request\PatronEnable_25.cs" />
+    <Compile Include="SIP2\Request\PatronInformation_63.cs" />
+    <Compile Include="SIP2\Request\PatronStatusRequest_23.cs" />
+    <Compile Include="SIP2\Request\RenewAll_65.cs" />
+    <Compile Include="SIP2\Request\Renew_29.cs" />
+    <Compile Include="SIP2\Request\RequestACSResend_97.cs" />
+    <Compile Include="SIP2\Request\SCStatus_99.cs" />
+    <Compile Include="SIP2\Response\ACSStatus_98.cs" />
+    <Compile Include="SIP2\Response\ChannelInformationResponse_42.cs" />
+    <Compile Include="SIP2\Response\CheckinResponse_10.cs" />
+    <Compile Include="SIP2\Response\CheckoutResponse_12.cs" />
+    <Compile Include="SIP2\Response\EndSessionResponse_36.cs" />
+    <Compile Include="SIP2\Response\FeePaidResponse_38.cs" />
+    <Compile Include="SIP2\Response\HoldResponse_16.cs" />
+    <Compile Include="SIP2\Response\ItemInformationResponse_18.cs" />
+    <Compile Include="SIP2\Response\ItemStatusUpdateResponse_20.cs" />
+    <Compile Include="SIP2\Response\LoginResponse_94.cs" />
+    <Compile Include="SIP2\Response\PatronEnableResponse_26.cs" />
+    <Compile Include="SIP2\Response\PatronInformationResponse_64.cs" />
+    <Compile Include="SIP2\Response\PatronStatusResponse_24.cs" />
+    <Compile Include="SIP2\Response\RenewAllResponse_66.cs" />
+    <Compile Include="SIP2\Response\RenewResponse_30.cs" />
+    <Compile Include="SIP2\Response\RequestSCResend_96.cs" />
+    <Compile Include="SIP2\Rule.cs" />
+    <Compile Include="SIP2\SIPConst.cs" />
+    <Compile Include="SIP2\SIPUtility.cs" />
+    <Compile Include="SIP2\UnitTest.cs" />
+    <Compile Include="SIP2\VariableLengthField.cs" />
     <Compile Include="SmoothTable.cs" />
     <Compile Include="Tasks\LampPerdayTask.cs" />
     <Compile Include="Models\RequestContext.cs" />
@@ -1002,10 +1042,6 @@
     <ProjectReference Include="..\dp-library\DigitalPlatform.Net\DigitalPlatform.Net.csproj">
       <Project>{345EF978-173D-4873-8C76-02DAF97B090B}</Project>
       <Name>DigitalPlatform.Net</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\dp-library\DigitalPlatform.SIP\DigitalPlatform.SIP.csproj">
-      <Project>{f1db315d-fc4e-4441-b438-adb591bff431}</Project>
-      <Name>DigitalPlatform.SIP</Name>
     </ProjectReference>
     <ProjectReference Include="..\GreenInstall\GreenInstall.csproj">
       <Project>{3366eaf9-b030-4bbb-a63a-77e71a5e5400}</Project>

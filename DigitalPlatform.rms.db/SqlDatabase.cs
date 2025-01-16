@@ -42,6 +42,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Google.Protobuf.WellKnownTypes;
 using System.Globalization;
+using System.Linq.Expressions;
 
 namespace DigitalPlatform.rms
 {
@@ -2407,19 +2408,20 @@ ex);
                 // 创建records表
                 if (process_records)
                 {
+                    // 2025/1/16 collate "C" 是为了加速 like "xxx%"
                     strCommand +=
                         $"DROP TABLE IF EXISTS {db_prefix}records ;\n"
                         + $"CREATE TABLE {db_prefix}records " + "\n"
                         + "(" + "\n"
-                        + "id varchar (255) NULL UNIQUE," + "\n"
+                        + "id varchar (255) collate \"C\" NULL UNIQUE," + "\n" 
                         + "data bytea NULL ," + "\n"
                         + "newdata bytea NULL ," + "\n"
-                        + "range varchar (2000) NULL," + "\n"
-                        + "dptimestamp varchar (100) NULL ," + "\n"
-                        + "newdptimestamp varchar (100) NULL ," + "\n"
-                        + "metadata varchar (2000) NULL ," + "\n"
-                        + "filename varchar (255) NULL, \n"
-                        + "newfilename varchar (255) NULL\n"
+                        + "range varchar (2000) collate \"C\" NULL," + "\n"
+                        + "dptimestamp varchar (100) collate \"C\" NULL ," + "\n"
+                        + "newdptimestamp varchar (100) collate \"C\" NULL ," + "\n"
+                        + "metadata varchar (2000) collate \"C\" NULL ," + "\n"
+                        + "filename varchar (255) collate \"C\" NULL, \n"
+                        + "newfilename varchar (255) collate \"C\" NULL\n"
                         + ") ;\n";
                     // https://www.cybertec-postgresql.com/en/binary-data-performance-in-postgresql/
                     strCommand += $"ALTER TABLE {db_prefix}records ALTER COLUMN data SET STORAGE EXTERNAL;\n";
@@ -2452,13 +2454,14 @@ ex);
 
                             // TODO 要防止keys表名和records撞车
 
+                            // 2025/1/16 增加 collate "C"，防止 like 'xxx%' 搜索时候速度慢
                             strCommand +=
                                 $"DROP TABLE IF EXISTS {db_prefix}{tableInfo.SqlTableName} ;\n"
                                 + $" CREATE TABLE {db_prefix}{tableInfo.SqlTableName} " + "\n" +
                                 "(" + "\n" +
-                                "keystring varchar (" + Convert.ToString(this.KeySize) + ") NULL," + "\n" +
-                                "fromstring varchar (255) NULL ," + "\n" +
-                                "idstring varchar (255)  NULL ," + "\n" +
+                                $"keystring varchar ({ this.KeySize }) collate \"C\" NULL," + "\n" +
+                                $"fromstring varchar (255) collate \"C\" NULL ," + "\n" +
+                                $"idstring varchar (255) collate \"C\" NULL ," + "\n" +
                                 "keystringnum bigint NULL " + "\n" +
                                 ")" + " \n";
                         }
@@ -3971,7 +3974,10 @@ ex);
                 else if (IsOracle())
                     strLimit = " WHERE rownum <= " + Convert.ToString(searchItem.MaxCount) + " ";
                 else if (IsPgsql())
-                    strLimit = " LIMIT " + Convert.ToString(searchItem.MaxCount) + " ";
+                {
+                    strLimit = $" FETCH FIRST {searchItem.MaxCount} ROWS ONLY ";
+                    // strLimit = " LIMIT " + Convert.ToString(searchItem.MaxCount) + " ";   // 2025/1/15
+                }
                 else
                     throw new Exception("未知的 SqlServerType");
             }
@@ -4197,17 +4203,23 @@ handle.CancelTokenSource.Token).Result;
             }
             try
             {
+                // testing
+                // strCommand = strCommand.Replace("DISTINCT", "").Replace("LIMIT 10", "");
+
                 // 通用
                 var command = connection.NewCommand(strCommand) as DbCommand;
+                command.CommandTimeout = 20 * 60;  // 把检索时间变大
 
                 // ****
                 using (command)
                 {
-                    foreach (DbParameter sqlParameter in aSqlParameter)
+                    // 确保抛出异常的时候 command.Cancel()
+                    try
                     {
-                        command.Parameters.Add(sqlParameter);
-                    }
-                    command.CommandTimeout = 20 * 60;  // 把检索时间变大
+                        foreach (DbParameter sqlParameter in aSqlParameter)
+                        {
+                            command.Parameters.Add(sqlParameter);
+                        }
 
 #if NO
                     DbDataReader reader = null;
@@ -4220,85 +4232,97 @@ handle.CancelTokenSource.Token).Result;
 ).Result;
 #endif
 
-                    var task = command.ExecuteReaderAsync(CommandBehavior.CloseConnection);
-                    // 2024/11/30
-                    var ret = task.Wait((int)timeout.TotalMilliseconds,
-                        handle.CancelToken);
-                    if (ret == false
-                        || handle.CancelToken.IsCancellationRequested)
-                    {
+                        // command.ExecuteReader(CommandBehavior.Default/*.CloseConnection*/);
+
+                        var task = command.ExecuteReaderAsync(CommandBehavior.CloseConnection,
+                            handle.CancelToken);
                         // 2024/11/30
-                        command.Cancel();
+                        var ret = task.Wait((int)timeout.TotalMilliseconds,
+                            handle.CancelToken);
+                        if (ret == false
+                            || handle.CancelToken.IsCancellationRequested)
                         {
-                            var reader = task.Result;
-                            if (reader != null)
+                            // 2024/11/30
+                            command.Cancel();
                             {
-                                /*
-                                // 把残余的信息读完
-                                while (reader.Read())
+                                var reader = task.Result;
+                                if (reader != null)
                                 {
+                                    /*
+                                    // 把残余的信息读完
+                                    while (reader.Read())
+                                    {
 
+                                    }
+                                    */
+                                    reader.Close();
                                 }
-                                */
-                                reader.Close();
                             }
-                        }
 
-                        if (ret == false)
-                        {
+                            if (ret == false)
+                            {
+                                return new Result
+                                {
+                                    Value = -1,
+                                    ErrorCode = ErrorCodeValue.RequestTimeOut,
+                                    ErrorString = $"检索数据库时发生超时({strTimeout})"
+                                };
+                            }
+
                             return new Result
                             {
                                 Value = -1,
-                                ErrorCode = ErrorCodeValue.RequestTimeOut,
-                                ErrorString = $"检索数据库时发生超时({strTimeout})"
+                                ErrorCode = ErrorCodeValue.Canceled,
+                                ErrorString = "检索被中断"
                             };
                         }
 
-                        return new Result
+                        /*
+                        while(task.IsCompleted == false)
                         {
-                            Value = -1,
-                            ErrorCode = ErrorCodeValue.Canceled,
-                            ErrorString = "检索被中断"
-                        };
-                    }
-                    /*
-                    while(task.IsCompleted == false)
-                    {
-                        Thread.Sleep(1);
-                    }
-                    */
-                    // 尝试一下不用 CancellationToken。因为怀疑这样用会导致触发 Cancel 的时候让 MySQL Driver 代码死锁
-                    // 2019/9/8 加上的 using
-                    using (DbDataReader reader = task.Result)
-                    {
+                            Thread.Sleep(1);
+                        }
+                        */
 
-                        // 从 DbDataReader 中获取和填入记录到一个结果集对象中
-                        // return:
-                        //      -1  出错
-                        //      0   没有填入任何记录
-                        //      >0  实际填入的记录条数
-                        int nRet = FillResultSet(
-                                handle,
-                                reader,
-                                resultSet,
-                                nMaxCount,
-                                style,  // GetOutputStyle(strOutputStyle),
-                                bRecordTable,
-                                () =>
-                                {
-                                    command.Cancel();
-                                },
-                                out strError);
-                        if (nRet == -1 || nRet == 0)
+                        // 尝试一下不用 CancellationToken。因为怀疑这样用会导致触发 Cancel 的时候让 MySQL Driver 代码死锁
+                        // 2019/9/8 加上的 using
+                        using (DbDataReader reader = task.Result)
                         {
-                            command.Cancel();
-                            return new Result
+                            // 从 DbDataReader 中获取和填入记录到一个结果集对象中
+                            // return:
+                            //      -1  出错
+                            //      0   没有填入任何记录
+                            //      >0  实际填入的记录条数
+                            int nRet = FillResultSet(
+                                    handle,
+                                    reader,
+                                    resultSet,
+                                    nMaxCount,
+                                    style,  // GetOutputStyle(strOutputStyle),
+                                    bRecordTable,
+                                    () =>
+                                    {
+                                        command.Cancel();
+                                    },
+                                    out strError);
+                            if (nRet == -1 || nRet == 0)
                             {
-                                Value = nRet,
-                                ErrorString = strError
-                            };
+                                if (nRet == -1)
+                                    command.Cancel();
+                                return new Result
+                                {
+                                    Value = nRet,
+                                    ErrorString = strError
+                                };
+                            }
                         }
                     }
+                    catch
+                    {
+                        command?.Cancel();
+                        throw;
+                    }
+
                 } // end of using command
 
                 return new Result { Value = 0 };
@@ -5454,7 +5478,7 @@ List<DbParameter> aSqlParameter)
                             if (this.container.SqlServerType == SqlServerType.MsSqlServer)
                                 strTop = " TOP " + Convert.ToString(searchItem.MaxCount) + " ";
                             else if (this.IsSqlite() || this.IsPgsql())
-                                strLimit = " LIMIT " + Convert.ToString(searchItem.MaxCount) + " ";
+                                strLimit = " LIMIT " + Convert.ToString(searchItem.MaxCount) + " ";  // 2025/1/15
                             else if (this.container.SqlServerType == SqlServerType.MySql)
                                 strLimit = " LIMIT " + Convert.ToString(searchItem.MaxCount) + " ";
                             else if (this.container.SqlServerType == SqlServerType.Oracle)
@@ -5641,7 +5665,7 @@ List<DbParameter> aSqlParameter)
                         if (this.container.SqlServerType == SqlServerType.MsSqlServer)
                             strTop = " TOP " + Convert.ToString(searchItem.MaxCount) + " ";
                         else if (this.IsSqlite() || this.IsPgsql())
-                            strLimit = " LIMIT " + Convert.ToString(searchItem.MaxCount) + " ";
+                            strLimit = " LIMIT " + Convert.ToString(searchItem.MaxCount) + " ";  // 2025/1/15
                         else if (this.container.SqlServerType == SqlServerType.MySql)
                             strLimit = " LIMIT " + Convert.ToString(searchItem.MaxCount) + " ";
                         else if (this.container.SqlServerType == SqlServerType.Oracle)

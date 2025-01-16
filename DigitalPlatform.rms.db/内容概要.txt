@@ -121,4 +121,5 @@ SQL> alter user xietao identified by test;
 SQL>
 
 
-	
+	~~~
+	https://geek-docs.com/postgresql/postgresql-questions/487_postgresql_idle_postgres_processes_taking_up_lots_of_memory.html

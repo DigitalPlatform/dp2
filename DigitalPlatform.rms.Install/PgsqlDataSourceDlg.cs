@@ -13,6 +13,7 @@ using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Install;
 using Npgsql;
+using DigitalPlatform.Text;
 
 namespace DigitalPlatform.rms
 {
@@ -165,7 +166,7 @@ namespace DigitalPlatform.rms
                 {
                     ClearCachedAdminUserName();
 
-                    MessageBox.Show(this, strError);
+                    MessageDlg.Show(this, strError, "创建用户时出错");
                     return;
                 }
 
@@ -321,7 +322,7 @@ out string strError)
             if (string.IsNullOrEmpty(strError) == false)
                 return -1;
 
-            string strConnection = $"Host={strSqlServerName};Username={strAdminUserName};Password={strAdminPassword};"; // Database={strAdminDatabase};
+            string strConnection = $"{BuildHostAndPort(strSqlServerName)};Username={strAdminUserName};Password={strAdminPassword};"; // Database={strAdminDatabase};
 
             try
             {
@@ -387,7 +388,8 @@ out string strError)
                 strError = $"strSqlServerName 内容 '{strSqlServerName}' 中不允许包含等号";
                 return -1;
             }
-            string strConnection = $"Host={strSqlServerName};Username={strSqlUserName};Password={strSqlUserPassword};"; // Database={strAdminDatabase};
+
+            string strConnection = $"{BuildHostAndPort(strSqlServerName)};Username={strSqlUserName};Password={strSqlUserPassword};"; // Database={strAdminDatabase};
 
             try
             {
@@ -437,6 +439,17 @@ out string strError)
 
 #endif
 
+        static string BuildHostAndPort(string server_name)
+        {
+            if (server_name.Contains(":"))
+            {
+                var parts = StringUtil.ParseTwoPart(server_name, ":");
+                return $"Host={parts[0]};Port={parts[1]}";
+            }
+
+            return $"Host={server_name}";
+        }
+
         public delegate string Delegate_getAdminUserName(
             string title,
             string defaultUserName,
@@ -466,7 +479,7 @@ out string strError)
             if (string.IsNullOrEmpty(strError) == false)
                 return -1;
 
-            string strConnection = $"Host={strSqlServerName};Username={strAdminUserName};Password={strAdminPassword};"; // Database={strAdminDatabase};
+            string strConnection = $"{BuildHostAndPort(strSqlServerName)};Username={strAdminUserName};Password={strAdminPassword};"; // Database={strAdminDatabase};
 
             try
             {
@@ -498,14 +511,14 @@ out string strError)
                     }
                     catch (Exception ex)
                     {
-                        strError = $"创建用户 {strSqlUserName} 出错: {ex.Message}";
+                        strError = $"创建用户 {strSqlUserName} 出错: {ExceptionUtil.GetDebugText(ex)}";
                         return -1;
                     }
                 }
             }
             catch (Exception ex)
             {
-                strError = "建立连接出错：" + ex.Message + " 类型:" + ex.GetType().ToString();
+                strError = "CreateUser() 建立连接出错：" + ExceptionUtil.GetDebugText(ex) + "\r\n类型:" + ex.GetType().ToString();
                 return -1;
             }
             return 0;
@@ -537,7 +550,7 @@ out string strError)
             if (string.IsNullOrEmpty(strError) == false)
                 return -1;
 
-            string strConnection = $"Host={strSqlServerName};Username={strAdminUserName};Password={strAdminPassword};"; // Database={strAdminDatabase};
+            string strConnection = $"{BuildHostAndPort(strSqlServerName)};Username={strAdminUserName};Password={strAdminPassword};"; // Database={strAdminDatabase};
 
             try
             {
@@ -579,7 +592,7 @@ out string strError)
             }
             catch (Exception ex)
             {
-                strError = "建立连接出错：" + ex.Message + " 类型:" + ex.GetType().ToString();
+                strError = "DeleteUser() 建立连接出错：" + ex.Message + " 类型:" + ex.GetType().ToString();
                 return -1;
             }
             return 0;
@@ -608,7 +621,7 @@ out string strError)
             if (string.IsNullOrEmpty(strError) == false)
                 return -1;
 
-            string strConnection = $"Host={strSqlServerName};Username={strAdminUserName};Password={strAdminPassword};"; // Database={strAdminDatabase};
+            string strConnection = $"{BuildHostAndPort(strSqlServerName)};Username={strAdminUserName};Password={strAdminPassword};"; // Database={strAdminDatabase};
 
             try
             {
@@ -648,7 +661,7 @@ out string strError)
             }
             catch (Exception ex)
             {
-                strError = "建立连接出错：" + ex.Message + " 类型:" + ex.GetType().ToString();
+                strError = "CreateDatabase() 建立连接出错：" + ex.Message + " 类型:" + ex.GetType().ToString();
                 return -1;
             }
             return 0;
@@ -671,7 +684,8 @@ out string strError)
                 strError = $"strSqlServerName 内容 '{strSqlServerName}' 中不允许包含等号";
                 return -1;
             }
-            string strConnection = $"Host={strSqlServerName};Username={strSqlUserName};Password={strSqlUserPassword};Database={strAdminDatabase};"; // Database={strDatabaseName}
+
+            string strConnection = $"{BuildHostAndPort(strSqlServerName)};Username={strSqlUserName};Password={strSqlUserPassword};Database={strAdminDatabase};"; // Database={strDatabaseName}
 
             try
             {
@@ -732,8 +746,9 @@ out string strError)
                 strError = $"strSqlServerName 内容 '{strSqlServerName}' 中不允许包含等号";
                 return -1;
             }
+
             // strSqlServerName 的内容一般为 "localhost;Database=postgres" 形态。等于包含了 database 参数
-            string strConnection = $"Host={strSqlServerName};Username={strSqlUserName};Password={strSqlUserPassword};Database={strDatabaseName};"; // Database={strDatabaseName}
+            string strConnection = $"{BuildHostAndPort(strSqlServerName)};Username={strSqlUserName};Password={strSqlUserPassword};Database={strDatabaseName};"; // Database={strDatabaseName}
 
             try
             {
@@ -759,7 +774,7 @@ out string strError)
             }
             catch (Exception ex)
             {
-                strError = "建立连接出错：" + ex.Message + " 类型:" + ex.GetType().ToString();
+                strError = "VerifySqlServer() 建立连接出错：" + ex.Message + " 类型:" + ex.GetType().ToString();
                 return -1;
             }
             return 0;

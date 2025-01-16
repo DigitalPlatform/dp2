@@ -7254,7 +7254,7 @@ ChannelIdleEventArgs e);
         {
             if (this._cancelTokenSource != null
                 && this._cancelTokenSource.IsCancellationRequested == false)
-                this._cancelTokenSource.Cancel();
+                this._cancelTokenSource?.Cancel();
 
             this.m_bStop = true;
 

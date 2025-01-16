@@ -9,6 +9,7 @@ using System.Xml;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Threading;
+using System.IO;
 
 
 using DigitalPlatform;
@@ -21,7 +22,6 @@ using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.CommonControl;
-using System.IO;
 
 namespace dp2Circulation
 {
@@ -1249,7 +1249,7 @@ namespace dp2Circulation
             */
             var looping = Looping(out LibraryChannel channel,
                 "正在删除数据库 " + strDatabaseNames + "...",
-                "disableControl");
+                "disableControl,timeout:0:25:0");
             try
             {
                 long lRet = channel.ManageDatabase(
@@ -1404,7 +1404,7 @@ namespace dp2Circulation
             */
             var looping = Looping(out LibraryChannel channel,
                 "正在初始化数据库 " + strDatabaseNames + "...",
-                "disableControl");
+                "disableControl,timeout:0:25:0");
             try
             {
                 long lRet = channel.ManageDatabase(

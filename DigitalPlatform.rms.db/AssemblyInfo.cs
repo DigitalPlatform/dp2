@@ -59,8 +59,8 @@ using System.Runtime.InteropServices;
 // 您可以指定所有这些值，也可以使用“修订号”和“内部版本号”的默认值，方法是按
 // 如下所示使用 '*':
 
-[assembly: AssemblyVersion("3.6.*")]
-[assembly: AssemblyFileVersion("3.6.0.0")]
+[assembly: AssemblyVersion("3.7.*")]
+[assembly: AssemblyFileVersion("3.7.0.0")]
 
 //      2.2 第一个具有版本号的版本。特点是增加了SearchEx() API，另外Record结构也有改动，增加了RecordBody成员
 //      2.3 records 表中会自动增加一个列 newdptimestamp
@@ -98,5 +98,6 @@ using System.Runtime.InteropServices;
 //      3.4 2021/6/9 MySQL 前端连接库换用 MySqlConnector https://github.com/mysql-net/MySqlConnector
 //      3.5 2022/1/25 keycount 方式检索的时候，在 doItem() 函数中增加一步合并 key count(调用新增的 MergeCount() 函数)
 //		3.6 2022/10/20 当数据库关闭的时候，增加了关闭 StreamCache 和 PageCache 的语句。早先版本因为缺乏这些语句造成了 bug，在有的情况下 dp2kernel service 停止了还无法删除对象目录中的某些没有被关闭的对象文件
+//      3.7 2025/1/16 pgsql 各种表中可能用到 like 'xxx%' 算法的字段，都增加了 collate "C" 定义
 
 

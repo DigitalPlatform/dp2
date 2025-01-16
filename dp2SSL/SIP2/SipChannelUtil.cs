@@ -14,8 +14,10 @@ using static dp2SSL.LibraryChannelUtil;
 
 using DigitalPlatform;
 using DigitalPlatform.IO;
+/*
 using DigitalPlatform.RFID;
 using DigitalPlatform.SIP2;
+*/
 using DigitalPlatform.Text;
 using DigitalPlatform.WPF;
 using DigitalPlatform.Xml;

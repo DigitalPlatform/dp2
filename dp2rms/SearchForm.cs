@@ -409,7 +409,7 @@ namespace dp2rms
             this.tabPage_queryAdvance.Location = new System.Drawing.Point(4, 31);
             this.tabPage_queryAdvance.Name = "tabPage_queryAdvance";
             this.tabPage_queryAdvance.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_queryAdvance.Size = new System.Drawing.Size(975, 361);
+            this.tabPage_queryAdvance.Size = new System.Drawing.Size(663, 279);
             this.tabPage_queryAdvance.TabIndex = 1;
             this.tabPage_queryAdvance.Text = "¸ß¼¶";
             this.tabPage_queryAdvance.UseVisualStyleBackColor = true;
@@ -423,7 +423,7 @@ namespace dp2rms
             this.textBox_complexQuery_comment.Multiline = true;
             this.textBox_complexQuery_comment.Name = "textBox_complexQuery_comment";
             this.textBox_complexQuery_comment.ReadOnly = true;
-            this.textBox_complexQuery_comment.Size = new System.Drawing.Size(924, 76);
+            this.textBox_complexQuery_comment.Size = new System.Drawing.Size(612, 0);
             this.textBox_complexQuery_comment.TabIndex = 20;
             // 
             // button_complexQuerySearch
@@ -440,7 +440,7 @@ namespace dp2rms
             this.button_complex_server4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_complex_server4.ImageIndex = 0;
             this.button_complex_server4.ImageList = this.imageList_complex_serverButton;
-            this.button_complex_server4.Location = new System.Drawing.Point(433, 139);
+            this.button_complex_server4.Location = new System.Drawing.Point(121, 139);
             this.button_complex_server4.Name = "button_complex_server4";
             this.button_complex_server4.Size = new System.Drawing.Size(44, 39);
             this.button_complex_server4.TabIndex = 16;
@@ -458,7 +458,7 @@ namespace dp2rms
             this.button_complex_server3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_complex_server3.ImageIndex = 0;
             this.button_complex_server3.ImageList = this.imageList_complex_serverButton;
-            this.button_complex_server3.Location = new System.Drawing.Point(433, 98);
+            this.button_complex_server3.Location = new System.Drawing.Point(121, 98);
             this.button_complex_server3.Name = "button_complex_server3";
             this.button_complex_server3.Size = new System.Drawing.Size(44, 39);
             this.button_complex_server3.TabIndex = 11;
@@ -470,7 +470,7 @@ namespace dp2rms
             this.button_complex_server2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_complex_server2.ImageIndex = 0;
             this.button_complex_server2.ImageList = this.imageList_complex_serverButton;
-            this.button_complex_server2.Location = new System.Drawing.Point(433, 57);
+            this.button_complex_server2.Location = new System.Drawing.Point(121, 57);
             this.button_complex_server2.Name = "button_complex_server2";
             this.button_complex_server2.Size = new System.Drawing.Size(44, 39);
             this.button_complex_server2.TabIndex = 6;
@@ -482,7 +482,7 @@ namespace dp2rms
             this.button_complex_server1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_complex_server1.ImageIndex = 0;
             this.button_complex_server1.ImageList = this.imageList_complex_serverButton;
-            this.button_complex_server1.Location = new System.Drawing.Point(433, 15);
+            this.button_complex_server1.Location = new System.Drawing.Point(121, 15);
             this.button_complex_server1.Name = "button_complex_server1";
             this.button_complex_server1.Size = new System.Drawing.Size(44, 40);
             this.button_complex_server1.TabIndex = 1;
@@ -499,7 +499,7 @@ namespace dp2rms
             // comboBox_complex_from4
             // 
             this.comboBox_complex_from4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.comboBox_complex_from4.Location = new System.Drawing.Point(726, 142);
+            this.comboBox_complex_from4.Location = new System.Drawing.Point(414, 142);
             this.comboBox_complex_from4.Name = "comboBox_complex_from4";
             this.comboBox_complex_from4.Size = new System.Drawing.Size(222, 29);
             this.comboBox_complex_from4.TabIndex = 18;
@@ -507,7 +507,7 @@ namespace dp2rms
             // comboBox_complex_db4
             // 
             this.comboBox_complex_db4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.comboBox_complex_db4.Location = new System.Drawing.Point(493, 142);
+            this.comboBox_complex_db4.Location = new System.Drawing.Point(181, 142);
             this.comboBox_complex_db4.Name = "comboBox_complex_db4";
             this.comboBox_complex_db4.Size = new System.Drawing.Size(222, 29);
             this.comboBox_complex_db4.TabIndex = 17;
@@ -519,7 +519,7 @@ namespace dp2rms
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_complex_word4.Location = new System.Drawing.Point(182, 142);
             this.textBox_complex_word4.Name = "textBox_complex_word4";
-            this.textBox_complex_word4.Size = new System.Drawing.Size(240, 31);
+            this.textBox_complex_word4.Size = new System.Drawing.Size(0, 31);
             this.textBox_complex_word4.TabIndex = 15;
             // 
             // comboBox_complex_logic3
@@ -532,7 +532,7 @@ namespace dp2rms
             // comboBox_complex_from3
             // 
             this.comboBox_complex_from3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.comboBox_complex_from3.Location = new System.Drawing.Point(726, 101);
+            this.comboBox_complex_from3.Location = new System.Drawing.Point(414, 101);
             this.comboBox_complex_from3.Name = "comboBox_complex_from3";
             this.comboBox_complex_from3.Size = new System.Drawing.Size(222, 29);
             this.comboBox_complex_from3.TabIndex = 13;
@@ -540,7 +540,7 @@ namespace dp2rms
             // comboBox_complex_db3
             // 
             this.comboBox_complex_db3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.comboBox_complex_db3.Location = new System.Drawing.Point(493, 101);
+            this.comboBox_complex_db3.Location = new System.Drawing.Point(181, 101);
             this.comboBox_complex_db3.Name = "comboBox_complex_db3";
             this.comboBox_complex_db3.Size = new System.Drawing.Size(222, 29);
             this.comboBox_complex_db3.TabIndex = 12;
@@ -552,7 +552,7 @@ namespace dp2rms
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_complex_word3.Location = new System.Drawing.Point(182, 101);
             this.textBox_complex_word3.Name = "textBox_complex_word3";
-            this.textBox_complex_word3.Size = new System.Drawing.Size(240, 31);
+            this.textBox_complex_word3.Size = new System.Drawing.Size(0, 31);
             this.textBox_complex_word3.TabIndex = 10;
             // 
             // comboBox_complex_logic2
@@ -565,7 +565,7 @@ namespace dp2rms
             // comboBox_complex_from2
             // 
             this.comboBox_complex_from2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.comboBox_complex_from2.Location = new System.Drawing.Point(726, 60);
+            this.comboBox_complex_from2.Location = new System.Drawing.Point(414, 60);
             this.comboBox_complex_from2.Name = "comboBox_complex_from2";
             this.comboBox_complex_from2.Size = new System.Drawing.Size(222, 29);
             this.comboBox_complex_from2.TabIndex = 8;
@@ -573,7 +573,7 @@ namespace dp2rms
             // comboBox_complex_db2
             // 
             this.comboBox_complex_db2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.comboBox_complex_db2.Location = new System.Drawing.Point(493, 60);
+            this.comboBox_complex_db2.Location = new System.Drawing.Point(181, 60);
             this.comboBox_complex_db2.Name = "comboBox_complex_db2";
             this.comboBox_complex_db2.Size = new System.Drawing.Size(222, 29);
             this.comboBox_complex_db2.TabIndex = 7;
@@ -585,13 +585,13 @@ namespace dp2rms
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_complex_word2.Location = new System.Drawing.Point(182, 60);
             this.textBox_complex_word2.Name = "textBox_complex_word2";
-            this.textBox_complex_word2.Size = new System.Drawing.Size(240, 31);
+            this.textBox_complex_word2.Size = new System.Drawing.Size(0, 31);
             this.textBox_complex_word2.TabIndex = 5;
             // 
             // comboBox_complex_from1
             // 
             this.comboBox_complex_from1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.comboBox_complex_from1.Location = new System.Drawing.Point(726, 19);
+            this.comboBox_complex_from1.Location = new System.Drawing.Point(414, 19);
             this.comboBox_complex_from1.Name = "comboBox_complex_from1";
             this.comboBox_complex_from1.Size = new System.Drawing.Size(222, 29);
             this.comboBox_complex_from1.TabIndex = 3;
@@ -599,7 +599,7 @@ namespace dp2rms
             // comboBox_complex_db1
             // 
             this.comboBox_complex_db1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.comboBox_complex_db1.Location = new System.Drawing.Point(493, 19);
+            this.comboBox_complex_db1.Location = new System.Drawing.Point(181, 19);
             this.comboBox_complex_db1.Name = "comboBox_complex_db1";
             this.comboBox_complex_db1.Size = new System.Drawing.Size(222, 29);
             this.comboBox_complex_db1.TabIndex = 2;
@@ -611,7 +611,7 @@ namespace dp2rms
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_complex_word1.Location = new System.Drawing.Point(182, 19);
             this.textBox_complex_word1.Name = "textBox_complex_word1";
-            this.textBox_complex_word1.Size = new System.Drawing.Size(240, 31);
+            this.textBox_complex_word1.Size = new System.Drawing.Size(0, 31);
             this.textBox_complex_word1.TabIndex = 0;
             // 
             // tabPage_queryXml
@@ -622,7 +622,7 @@ namespace dp2rms
             this.tabPage_queryXml.Location = new System.Drawing.Point(4, 31);
             this.tabPage_queryXml.Name = "tabPage_queryXml";
             this.tabPage_queryXml.Padding = new System.Windows.Forms.Padding(6);
-            this.tabPage_queryXml.Size = new System.Drawing.Size(975, 361);
+            this.tabPage_queryXml.Size = new System.Drawing.Size(663, 279);
             this.tabPage_queryXml.TabIndex = 2;
             this.tabPage_queryXml.Text = "XML";
             this.tabPage_queryXml.UseVisualStyleBackColor = true;
@@ -641,19 +641,20 @@ namespace dp2rms
             // splitContainer_xml.Panel2
             // 
             this.splitContainer_xml.Panel2.Controls.Add(this.textBox_xmlQuery_comment);
-            this.splitContainer_xml.Size = new System.Drawing.Size(963, 349);
-            this.splitContainer_xml.SplitterDistance = 200;
+            this.splitContainer_xml.Size = new System.Drawing.Size(651, 267);
+            this.splitContainer_xml.SplitterDistance = 153;
             this.splitContainer_xml.SplitterWidth = 8;
             this.splitContainer_xml.TabIndex = 5;
             // 
             // textBox_xmlQueryString
             // 
+            this.textBox_xmlQueryString.AcceptsReturn = true;
             this.textBox_xmlQueryString.Dock = System.Windows.Forms.DockStyle.Fill;
             this.textBox_xmlQueryString.Location = new System.Drawing.Point(0, 0);
             this.textBox_xmlQueryString.Multiline = true;
             this.textBox_xmlQueryString.Name = "textBox_xmlQueryString";
             this.textBox_xmlQueryString.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_xmlQueryString.Size = new System.Drawing.Size(963, 200);
+            this.textBox_xmlQueryString.Size = new System.Drawing.Size(651, 153);
             this.textBox_xmlQueryString.TabIndex = 0;
             // 
             // textBox_xmlQuery_comment
@@ -663,13 +664,13 @@ namespace dp2rms
             this.textBox_xmlQuery_comment.Multiline = true;
             this.textBox_xmlQuery_comment.Name = "textBox_xmlQuery_comment";
             this.textBox_xmlQuery_comment.ReadOnly = true;
-            this.textBox_xmlQuery_comment.Size = new System.Drawing.Size(963, 141);
+            this.textBox_xmlQuery_comment.Size = new System.Drawing.Size(651, 106);
             this.textBox_xmlQuery_comment.TabIndex = 21;
             // 
             // button_xmlQuerySearch
             // 
             this.button_xmlQuerySearch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_xmlQuerySearch.Location = new System.Drawing.Point(1146, 291);
+            this.button_xmlQuerySearch.Location = new System.Drawing.Point(834, 209);
             this.button_xmlQuerySearch.Name = "button_xmlQuerySearch";
             this.button_xmlQuerySearch.Size = new System.Drawing.Size(110, 35);
             this.button_xmlQuerySearch.TabIndex = 4;

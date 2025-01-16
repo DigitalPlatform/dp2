@@ -37,7 +37,7 @@ namespace dp2Library
         SessionInfo sessioninfo = null;
         bool RestMode = false;
 
-        int _nStop = 0;   // 0 没有中断 1 提出中断 2 已经进行了中断
+        // volatile int _nStop = 0;   // 0 没有中断 1 提出中断 2 已经进行了中断
 
         string _ip = "";    // 没有 sessioninfo 的通道，记载 ip，便于最后释放计数
 
@@ -46,6 +46,8 @@ namespace dp2Library
         {
             if (_disposed == true)
                 return;
+
+            // Stop(); // 2025/1/9
 #if NO
             if (this.RestMode == false && this.sessioninfo != null)
             {
@@ -89,6 +91,19 @@ namespace dp2Library
             }
 
             _disposed = true;
+        }
+
+        public void Stop()
+        {
+            // rest.http 模式下，app.sessioninfo 是需要用 PrepareEnvironment() 准备的。不然就是 null
+            if (this.sessioninfo == null)
+            {
+                LibraryServerResult result = this.PrepareEnvironment("Stop()", true);
+                if (result.Value == -1)
+                    return;
+            }
+
+            sessioninfo?.Stop();
         }
 
         /*
@@ -1563,6 +1578,8 @@ namespace dp2Library
             if (result.Value == -1)
                 return result;
 
+            Stop(); // 2025/1/9
+
             string session_dumptext = "(null)";
             try
             {
@@ -1623,56 +1640,6 @@ namespace dp2Library
              * */
         }
 
-        object m_nInSearching = 0;
-
-        public int InSearching
-        {
-            get
-            {
-                return (int)m_nInSearching;
-            }
-            set
-            {
-                m_nInSearching = value;
-            }
-        }
-
-        public int BeginSearch()
-        {
-            this._nStop = 0;
-            lock (this.m_nInSearching)
-            {
-                int v = (int)m_nInSearching;
-                m_nInSearching = v + 1;
-                return v;
-            }
-        }
-
-        public void EndSearch()
-        {
-            lock (this.m_nInSearching)
-            {
-                int v = (int)m_nInSearching;
-                m_nInSearching = v - 1;
-            }
-            this._nStop = 1;
-        }
-
-        public void Stop()
-        {
-            /*
-            LibraryServerResult result = this.PrepareEnvironment(true);
-            if (result.Value == -1)
-                return;
-             * */
-
-            if (this.InSearching > 0)
-            {
-                this._nStop = 1;
-
-                WriteDebugInfo("因后一个stop的到来，前一个search不得不中断 ");
-            }
-        }
 
         // 验证读者密码
         // parameters:
@@ -2970,14 +2937,24 @@ namespace dp2Library
         // 如果通讯中断，则也切断和dp2Kernel的通讯。
         void channel_IdleEvent(object sender, IdleEventArgs e)
         {
-            if (this._nStop == 1)
+            if (sessioninfo == null)
+                return;
+
+            if (sessioninfo._nStop == 1)
             {
                 RmsChannel channel = (RmsChannel)sender;
-                channel.Abort();
-                this._nStop = 2;
+                try
+                {
+                    channel.Abort();
+                }
+                catch   // 2025/1/9
+                {
+
+                }
+                sessioninfo._nStop = 2;
                 WriteDebugInfo("channel call abort");
             }
-            else if (this._nStop == 2)
+            else if (sessioninfo._nStop == 2)
             {
                 // 已经实施了中断，但是还没有来得及生效
                 Thread.Sleep(10);
@@ -7119,6 +7096,16 @@ out QueryResult[] results)
                 result.ErrorInfo = strErrorText;
                 return result;
             }
+        }
+
+        void BeginSearch()
+        {
+            sessioninfo?.BeginSearch();
+        }
+
+        void EndSearch()
+        {
+            sessioninfo?.EndSearch();
         }
 
         // 检索册信息
@@ -18990,12 +18977,13 @@ out strError);
                 this.BeginSearch();
                 try
                 {
+                    var temp = sessioninfo._nStop;
                     nRet = app.Exists(
-                        ref this._nStop,
-        strDateRangeString,
-        out dates,
-        out strError);
-
+                        ref temp,
+                        strDateRangeString,
+                        out dates,
+                        out strError);
+                    sessioninfo._nStop = temp;
                     if (nRet == -1)
                         goto ERROR1;
                 }
@@ -19047,14 +19035,17 @@ out strError);
                 try
                 {
                     // 合并时间范围内的多个XML文件
+                    var temp = sessioninfo._nStop;
                     nRet = app.MergeXmlFiles(
                         "", // sessioninfo.LibraryCodeList,
-                        ref this._nStop,
+                        ref temp,
                         strDateRangeString,
                         strStyle,
                         strOutputFilename,
                         out info,
                         out strError);
+                    sessioninfo._nStop = temp;
+
                     if (nRet == -1)
                         goto ERROR1;
 

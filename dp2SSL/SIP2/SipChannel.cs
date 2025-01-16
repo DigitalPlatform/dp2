@@ -8,10 +8,13 @@ using System.Text;
 using System.Threading.Tasks;
 
 using DigitalPlatform;
+/*
 using DigitalPlatform.SIP2;
 using DigitalPlatform.SIP2.Request;
 using DigitalPlatform.SIP2.Response;
+*/
 using DigitalPlatform.WPF;
+using dp2SSL.SIP2;
 
 namespace dp2SSL
 {
@@ -1000,7 +1003,7 @@ namespace dp2SSL
                 AO_InstitutionId_r = oi,
                 AB_ItemIdentifier_r = itemBarcode,
             };
-            request.SetDefaultValue();//设置其它默认值
+            //request.SetDefaultValue();//设置其它默认值
 
             // 发送和接收消息
             string requestText = request.ToText();
@@ -1055,7 +1058,7 @@ namespace dp2SSL
                 CH_ItemProperties_r = ""
 
             };
-            request.SetDefaultValue();
+            //request.SetDefaultValue();
             request.AB_ItemIdentifier_r = itemBarcode;
 
             if (Location != null)
@@ -1113,7 +1116,7 @@ namespace dp2SSL
                 AO_InstitutionId_r = oi,
                 AA_PatronIdentifier_r = patronBarcode,
             };
-            request.SetDefaultValue();//设置其它默认值
+            //request.SetDefaultValue();//设置其它默认值
 
             // 发送和接收消息
             string requestText = request.ToText();
@@ -1168,7 +1171,7 @@ namespace dp2SSL
                 AB_ItemIdentifier_r = itemBarcode,
                 AO_InstitutionId_r = filter_oi, // SIPConst.AO_Value,
             };
-            request.SetDefaultValue();//设置其它默认值
+            //request.SetDefaultValue();//设置其它默认值
 
             // 发送和接收消息
             string requestText = request.ToText();
@@ -1223,7 +1226,7 @@ namespace dp2SSL
                 AB_ItemIdentifier_r = itemBarcode,
                 AO_InstitutionId_r = filter_oi,
             };
-            request.SetDefaultValue();//设置其它默认值
+            //request.SetDefaultValue();//设置其它默认值
 
             // 发送和接收消息
             string requestText = request.ToText();
@@ -1279,7 +1282,7 @@ namespace dp2SSL
                 AA_PatronIdentifier_r = patronBarcode,
                 AB_ItemIdentifier_o = itemBarcode,
             };
-            request.SetDefaultValue();//设置其它默认值
+            //request.SetDefaultValue();//设置其它默认值
 
             // 发送和接收消息
             string requestText = request.ToText();

@@ -18,7 +18,6 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.Core;
-using System.Runtime.Remoting.Activation;
 
 
 namespace DigitalPlatform.rms
@@ -1272,6 +1271,8 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
+        static object _syncRoot_tableInfo = new object();
+
         // 得到配置文件中定义TableInfo数组，有重复的
         // parameters:
         //      aTableInfo  out参数，返回TableInfo对象数组
@@ -1286,58 +1287,57 @@ namespace DigitalPlatform.rms
             strError = "";
             aTableInfo = new List<TableInfo>();
 
-            if (this.m_aTableInfoForForm != null)
+            // lock (_syncRoot_tableInfo)  // 2025/1/16 锁定。避免多线程争夺 m_aTableInfoForForm
             {
-                aTableInfo = this.m_aTableInfoForForm;
-                return 0;
-            }
+                if (this.m_aTableInfoForForm != null)
+                {
+                    aTableInfo = this.m_aTableInfoForForm;
+                    return 0;
+                }
 
-            if (this._dom == null)
-                return 0;
+                if (this._dom == null)
+                    return 0;
 
+                int nRet = 0;
 
-            int nRet = 0;
+                // 找到<key>下级的所有不带ref属性的 <table>
+                string strXpath = "//table[not(@ref)]";
+                XmlNodeList nodeListTable = this._dom.DocumentElement.SelectNodes(strXpath);//"//key/table");
+                for (int i = 0; i < nodeListTable.Count; i++)
+                {
+                    XmlNode nodeTable = nodeListTable[i];
 
-            // 找到<key>下级的所有不带ref属性的 <table>
-            string strXpath = "//table[not(@ref)]";
-            XmlNodeList nodeListTable = this._dom.DocumentElement.SelectNodes(strXpath);//"//key/table");
-            for (int i = 0; i < nodeListTable.Count; i++)
-            {
-                XmlNode nodeTable = nodeListTable[i];
+                    TableInfo tableInfo = null;
+                    // return:
+                    //		-1	出错
+                    //		0	成功
+                    nRet = this.GetTableInfo(nodeTable,
+                        out tableInfo,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
 
-                TableInfo tableInfo = null;
-                // return:
-                //		-1	出错
-                //		0	成功
-                nRet = this.GetTableInfo(nodeTable,
-                    out tableInfo,
+                    tableInfo.OriginPosition = i + 1; //原始序
+
+                    string strStyle = DomUtil.GetAttr(nodeTable, "style");
+                    if (StringUtil.IsInList("query", strStyle) == true)
+                        tableInfo.m_bQuery = true;
+                    else
+                        tableInfo.m_bQuery = false;
+
+                    aTableInfo.Add(tableInfo);
+                }
+
+                // aTableInfo.Sort();   // 这里排序到底是按照什么来排的？莫名其妙
+
+                nRet = this.MaskDup(aTableInfo,
                     out strError);
                 if (nRet == -1)
                     return -1;
 
-                tableInfo.OriginPosition = i + 1; //原始序
-
-                string strStyle = DomUtil.GetAttr(nodeTable, "style");
-                if (StringUtil.IsInList("query", strStyle) == true)
-                    tableInfo.m_bQuery = true;
-                else
-                    tableInfo.m_bQuery = false;
-
-
-
-                aTableInfo.Add(tableInfo);
+                this.m_aTableInfoForForm = aTableInfo;
+                return 0;
             }
-
-            // aTableInfo.Sort();   // 这里排序到底是按照什么来排的？莫名其妙
-
-            nRet = this.MaskDup(aTableInfo,
-                out strError);
-            if (nRet == -1)
-                return -1;
-
-            this.m_aTableInfoForForm = aTableInfo;
-
-            return 0;
         }
 
 
@@ -2124,7 +2124,7 @@ namespace DigitalPlatform.rms
 
         static string GetFilter(XmlElement start)
         {
-            while(start != null)
+            while (start != null)
             {
                 if (start.HasAttribute("filter"))
                     return start.GetAttribute("filter");

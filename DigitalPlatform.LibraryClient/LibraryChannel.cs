@@ -1327,8 +1327,6 @@ out strError);
 #endif
         void DoIdle()
         {
-            System.Threading.Thread.Sleep(1);	// 避免CPU资源过度耗费
-
             // bool bDoEvents = true;
             if (this.Idle != null)
             {
@@ -1344,7 +1342,7 @@ out strError);
             }
 #endif
 
-            System.Threading.Thread.Sleep(1);	// 避免CPU资源过度耗费
+            // System.Threading.Thread.Sleep(1);	// 避免CPU资源过度耗费
         }
 
         // return:
@@ -2709,7 +2707,7 @@ out strError);
                             return -1;
                         }
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         // 2024/9/18
                         strError = ex.Message;
@@ -3438,7 +3436,7 @@ out QueryResult[] results,
                 IAsyncResult soapresult = this.ws.BeginBatchSearch(
                     biblio_dbnames,
 query_words,
-max_hitcount, 
+max_hitcount,
 max_results,
 from_style,
 match_style,
@@ -3785,18 +3783,26 @@ location_filter,
             }
         }
 
+        const int WAIT_TIME = 10;    // 100
+
         void WaitComplete(IAsyncResult soapresult)
         {
             TimeSpan timeout = this.SendTimeout + this.Timeout;
-            DateTime start = DateTime.Now;
+            DateTime start = DateTime.UtcNow;
             for (; ; )
             {
                 DoIdle(); // 出让控制权，避免CPU资源耗费过度
 
+                /*
                 if (soapresult.IsCompleted)
                     break;
+                System.Threading.Thread.Sleep(1);	// 避免CPU资源过度耗费
+                */
+                bool bRet = soapresult.AsyncWaitHandle.WaitOne(WAIT_TIME, false);
+                if (bRet == true)
+                    break;
 
-                if (DateTime.Now - start > timeout)
+                if (DateTime.UtcNow - start > timeout)
                     throw new TimeoutException("通道超时 " + timeout.ToString());
             }
         }
@@ -10435,7 +10441,7 @@ string strPinyinXml,
             }
         }
 
-        public void DoStop()
+        public void BeginStop()
         {
             // 2015/7/30 增加捕获异常语句
             try
@@ -10459,17 +10465,14 @@ string strPinyinXml,
         {
             if (m_nInSearching > 0)
             {
-                if (this.m_ws != null)
+                if (this.m_ws != null && this.m_bStoped == false)
                 {
-                    if (this.m_bStoped == false)
-                    {
-                        this.DoStop();
-                        // TODO: 如果时间太长了不返回，则调用Abort()?
-                        this.m_bStoped = true;
-                        return;
-                    }
-                    // 否则，就走到Abort()那里
+                    this.BeginStop();
+                    // TODO: 如果时间太长了不返回，则调用Abort()?
+                    this.m_bStoped = true;
+                    return;
                 }
+                // 否则，就走到Abort()那里
             }
 
             if (this.m_ws != null)
@@ -10521,6 +10524,17 @@ Stack:
                 if (this.m_ws != null)
                 {
                     // TODO: Search()要单独处理
+                    // 2025/1/9
+                    if (this.IsInSearching > 0)
+                    {
+                        if (this.m_ws != null && this.m_bStoped == false)
+                        {
+                            this.BeginStop();
+                            // TODO: 如果时间太长了不返回，则调用Abort()?
+                            this.m_bStoped = true;
+                        }
+                    }
+
                     try
                     {
                         // this.Timeout = new TimeSpan(0,0,4); // 2015/11/28

@@ -300,8 +300,11 @@ namespace dp2SSL
         {
             get
             {
+#if REMOVED
                 if (_pageBorrow == null)
                     _pageBorrow = new PageBorrow();
+#endif
+                EnsurePageBorrow();
 
                 return _pageBorrow;
             }
@@ -309,6 +312,9 @@ namespace dp2SSL
 
         public static void ClearPages()
         {
+            // 2025/1/8
+            App.SaveLayout();
+
             _pageBorrow = null;
             _pageSetting = null;
             _pageShelf = null;
@@ -343,6 +349,48 @@ namespace dp2SSL
 
         void NavigatePageBorrow(string buttons)
         {
+#if REMOVED
+            if (_pageBorrow == null)
+            {
+                _pageBorrow = new PageBorrow();
+
+                // 2025/1/5
+                var layout = WpfClientInfo.Config.Get("pageBorrow", "layout", "horz");
+                if (_pageBorrow.GetLayout() != layout)
+                {
+                    try
+                    {
+                        _pageBorrow.Layout(layout);
+                    }
+                    catch (Exception ex)
+                    {
+                        WpfClientInfo.WriteErrorLog($"settings.xml 中 pageBorrow/layout 值 '{layout}' 格式不正确({ExceptionUtil.GetDebugText(ex)})。已被忽略");
+                    }
+                }
+
+                var pos = WpfClientInfo.Config.Get("pageBorrow", "splitterPosition", null);
+                if (string.IsNullOrEmpty(pos) == false)
+                {
+                    try
+                    {
+                        _pageBorrow.SplitterPosition = pos;
+                    }
+                    catch (Exception ex)
+                    {
+                        // 2021/1/15
+                        WpfClientInfo.WriteErrorLog($"settings.xml 中 pageShelf/splitterPosition 值 '{pos}' 格式不正确({ExceptionUtil.GetDebugText(ex)})。已被忽略");
+                    }
+                }
+            }
+#endif
+            EnsurePageBorrow();
+
+            _pageBorrow.ActionButtons = buttons;
+            this.NavigationService.Navigate(_pageBorrow);
+        }
+
+        static void EnsurePageBorrow()
+        {
             if (_pageBorrow == null)
             {
                 _pageBorrow = new PageBorrow();
@@ -376,8 +424,6 @@ namespace dp2SSL
                 }
             }
 
-            _pageBorrow.ActionButtons = buttons;
-            this.NavigationService.Navigate(_pageBorrow);
         }
 
         public static PageShelf PageShelf
@@ -391,9 +437,18 @@ namespace dp2SSL
 
         void NavigatePageShelf(string mode)
         {
+            EnsurePageShelf();
+
+            _pageShelf.Mode = mode;
+
+            this.NavigationService.Navigate(_pageShelf);
+        }
+
+        static void EnsurePageShelf()
+        {
             if (_pageShelf == null)
             {
-                _pageShelf = new PageShelf(mode);
+                _pageShelf = new PageShelf();
 
                 // 2024/12/19
                 var layout = WpfClientInfo.Config.Get("pageShelf", "layout", "horz");
@@ -424,10 +479,6 @@ namespace dp2SSL
                     }
                 }
             }
-            else
-                _pageShelf.Mode = mode;
-
-            this.NavigationService.Navigate(_pageShelf);
         }
 
         public static PageInventory PageInventory

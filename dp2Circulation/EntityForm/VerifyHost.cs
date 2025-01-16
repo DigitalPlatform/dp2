@@ -1020,7 +1020,7 @@ ref string locationString)
             if (subfield_e == null)
                 return false;
 
-            MarcField new_field = new MarcField("500", "10", $"‡a{subfield_e.Content.TrimStart('=',' ')}‡mChinese".Replace("‡", MarcQuery.SUBFLD));
+            MarcField new_field = new MarcField("500", "10", $"‡a{subfield_e.Content.TrimStart('=', ' ')}‡mChinese".Replace("‡", MarcQuery.SUBFLD));
             record.ChildNodes.insertSequence(
                 new_field,
                 InsertSequenceStyle.PreferTail);
@@ -1619,12 +1619,27 @@ ref string locationString)
             return old_marc != record.Text;
         }
 
+        // 2025/1/10
+        // 兼容原来用法
+        public static bool Split7xx(MarcRecord record,
+string rule,
+ref string locationString,
+int caret_offs_in_end_level)
+        {
+            return Split7xx(record,
+    rule,
+    "701,702,711,712",
+    ref locationString,
+    caret_offs_in_end_level);
+        }
+
         // 根据插入符位置把 7xx$a 切割为两部分，生成两个 7xx 字段，并删除原字段
         // parameters:
         //      locationString  [in] 调用前插入符所在的子字段定位
         //                      [out] 调用后插入符应当去到的子字段定位。如果为空，表示无需改变当前插入符位置
         public static bool Split7xx(MarcRecord record,
     string rule,
+    string field_names,
     ref string locationString,
     int caret_offs_in_end_level)
         {
@@ -1643,7 +1658,7 @@ ref string locationString)
 
             // 是否为 701$a 或者 702$a
             if (subfield_f != null
-                && (subfield_f.Parent?.Name == "701" || subfield_f.Parent?.Name == "702")
+                && StringUtil.IsInList(subfield_f.Parent?.Name, field_names, false)
                 && subfield_f.Name == "a")
             {
                 field_7xx = subfield_f.Parent as MarcField;
@@ -1781,7 +1796,7 @@ ref string locationString)
             else
                 subfield = VerifyHost.FirstOrDefault(record.select("field[@name='010']/subfield[@name='a']")) as MarcSubfield;
 
-            if (subfield == null) 
+            if (subfield == null)
                 return false;
 
             if (subfield.Parent?.Name != "010"
@@ -1793,7 +1808,7 @@ ref string locationString)
                 return false;
 
             int nRet = Program.MainForm.LoadIsbnSplitter(
-                true, 
+                true,
                 out string strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -1826,6 +1841,40 @@ ref string locationString)
             MessageBox.Show(Program.MainForm, strError);
             return false;
         }
+
+        // parameters:
+        //      style   calis/nlc 之一或者逗号间隔组合
+        public static bool RemovePinyin(MarcRecord record,
+string rule,
+// string style,
+ref string locationString)
+        {
+            string old_marc = record.Text;
+
+            if (rule == "CALIS" || string.IsNullOrEmpty(rule))
+            {
+                var subfields = record.select("field/subfield");
+                foreach(MarcSubfield subfield in subfields)
+                {
+                    if (char.IsUpper(subfield.Name[0]))
+                        subfield.detach();
+                }
+            }
+
+            if (rule == "NLC" || string.IsNullOrEmpty(rule))
+            {
+                record.select("field/subfield[@name='9']").detach();
+            }
+
+            locationString = null;
+            return old_marc != record.Text;
+            /*
+        ERROR1:
+            MessageBox.Show(Program.MainForm, strError);
+            return false;
+            */
+        }
+
 
 
         static MarcSubfield GetNextAuthor(MarcSubfield current)
