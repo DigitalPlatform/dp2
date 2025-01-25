@@ -39,7 +39,7 @@ namespace DigitalPlatform.rms
         internal DatabaseCollection container; // 容器
 
         // 数据库根节点
-        internal XmlNode m_selfNode = null;
+        internal XmlElement m_selfNode = null;
 
         // 数据库属性节点
         XmlNode m_propertyNode = null;
@@ -89,7 +89,7 @@ namespace DigitalPlatform.rms
         // return:
         //      -1  出错
         //      0   成功
-        internal virtual int Initial(XmlNode node,
+        internal virtual int Initial(XmlElement node,
             out string strError)
         {
             strError = "";
@@ -157,7 +157,7 @@ namespace DigitalPlatform.rms
             strError = "";
             keysCfg = null;
 
-            //lock (this._syncRoot_keysCfg)
+            lock (this._syncRoot_keysCfg)
             {
                 // 已存在时
                 if (this.m_keysCfg != null)
@@ -455,6 +455,26 @@ namespace DigitalPlatform.rms
             strResult = GetCaptionInternal(strLang);
             this.m_captionTable[strLang == null ? "<null>" : strLang] = strResult;
             return strResult;
+        }
+
+        // 2025/1/22
+        // 获得数据库算法版本
+        public string GetDatabaseVersion()
+        {
+            return this.m_selfNode?.GetAttribute("version");
+        }
+
+        // 0.01 早先版本
+        // 0.02 (2025/1/22) pgsql 的 records 和 keys 表里面若干字段开始具有 collate "C" 定义
+        public void SetDatabaseVersion(string version)
+        {
+            if (this.m_selfNode == null)
+                return;
+
+            if (version == null)
+                this.m_selfNode.RemoveAttribute("version");
+            else
+                this.m_selfNode.SetAttribute("version", version);
         }
 
         // 得到某语言的数据库名
@@ -1342,6 +1362,7 @@ namespace DigitalPlatform.rms
             // Delegate_isConnected isConnected,
             DpResultSet resultSet,
             int nWarningLevel,
+            StringBuilder explainInfo,
             out string strError,
             out string strWarning)
         {

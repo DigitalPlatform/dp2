@@ -221,6 +221,7 @@
     <xs:complexType>
       <xs:sequence>
         <xs:element minOccurs="0" name="SearchResult" nillable="true" type="tns:Result" />
+        <xs:element minOccurs="0" name="explain" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -241,6 +242,7 @@
       <xs:sequence>
         <xs:element minOccurs="0" name="SearchExResult" nillable="true" type="tns:Result" />
         <xs:element minOccurs="0" name="records" nillable="true" type="tns:ArrayOfRecord" />
+        <xs:element minOccurs="0" name="explain" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>

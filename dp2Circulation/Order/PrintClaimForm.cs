@@ -808,6 +808,7 @@ false);
                          "", // strOutputStyle
                          "",
                          out strQueryXml,
+                         out _,
                          out strError);
                     if (lRet == -1)
                         return -1;
@@ -828,6 +829,7 @@ false);
                          "", // strOutputStyle
                          "",
                          out strQueryXml,
+                         out _,
                          out strError);
                     if (lRet == -1)
                         return -1;
@@ -2123,6 +2125,7 @@ false);
                             "", // strOutputStyle
                             "",
                             out strQueryXml,
+                            out _,
                             out strError);
                         if (lRet == -1)
                             goto ERROR1;
@@ -2143,6 +2146,7 @@ false);
                             "", // strOutputStyle
                             "",
                             out strQueryXml,
+                            out _,
                             out strError);
                         if (lRet == -1)
                             goto ERROR1;

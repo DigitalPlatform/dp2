@@ -994,6 +994,7 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
                         "", //strOutputStyle, // (bOutputKeyCount == true ? "keycount" : ""),
                         "",
                         out strQueryXml,
+                        out _,
                         out strError);
                     if (lRet == -1)
                         return -1;
@@ -1399,6 +1400,7 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
                         "keyid", //strOutputStyle, // (bOutputKeyCount == true ? "keycount" : ""),
                         "",
                         out strQueryXml,
+                        out _,
                         out strError);
                     if (lRet == -1)
                     {
@@ -6285,6 +6287,7 @@ MessageBoxDefaultButton.Button2);
                             "", //strOutputStyle, // (bOutputKeyCount == true ? "keycount" : ""),
                             "",
                             out strQueryXml,
+                            out _,
                             out strError);
                         if (lRet == -1)
                             return -1;
@@ -6312,6 +6315,7 @@ MessageBoxDefaultButton.Button2);
                                 "keyid", //strOutputStyle, // (bOutputKeyCount == true ? "keycount" : ""),
                                 "",
                                 out strQueryXml,
+                                out _,
                                 out strError);
                             if (lRet == -1)
                             {

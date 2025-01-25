@@ -16,7 +16,6 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Core;
 using DigitalPlatform.LibraryServer;
-using System.Data.SqlClient;
 
 namespace DigitalPlatform.CirculationClient
 {

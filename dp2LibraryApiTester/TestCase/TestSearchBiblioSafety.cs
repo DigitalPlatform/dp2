@@ -221,6 +221,7 @@ namespace dp2LibraryApiTester
         "", // output_style
         "", // location_filter
         out string query_xml,
+        out _,
         out strError);
                 else
                 {

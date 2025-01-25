@@ -447,7 +447,7 @@ namespace DigitalPlatform.rms.Client
             }
 
             if (this.m_ws != null)
-                ws.Abort();
+                this.m_ws.Abort();
 
             // ws.servicepoint.CloseConnectionGroup(ws.ConnectionGroupName);
             /*
@@ -499,12 +499,12 @@ namespace DigitalPlatform.rms.Client
 
                 try
                 {
-                    if (this.m_ws.State != CommunicationState.Faulted)
-                        this.m_ws.Close();
+                    if (this.m_ws?.State != CommunicationState.Faulted)
+                        this.m_ws?.Close();
                 }
                 catch
                 {
-                        this.m_ws.Abort();
+                        this.m_ws?.Abort();
                 }
                 this.m_ws = null;
             }
@@ -698,6 +698,8 @@ namespace DigitalPlatform.rms.Client
 
         static string GetExceptionMessage(Exception ex)
         {
+            // return ExceptionUtil.GetDebugText(ex);
+
             string strResult = ex.GetType().ToString() + ":" + ex.Message;
             while (ex != null)
             {
@@ -2150,6 +2152,26 @@ namespace DigitalPlatform.rms.Client
         }
 #endif
 
+        public long DoSearchEx(string strQueryXml,
+    string strResultSetName,
+    string strSearchStyle,
+    long lRecordCount,
+    string strLang,
+    string strRecordStyle,
+    out Record[] records,
+    out string strError)
+        {
+            return DoSearchEx(strQueryXml,
+            strResultSetName,
+            strSearchStyle,
+            lRecordCount,
+            strLang,
+            strRecordStyle,
+            out records,
+            out _,
+            out strError);
+        }
+
         // ( 扩展功能后的)检索
         // parameters:
         //		strQuery	XML检索式
@@ -2170,10 +2192,12 @@ namespace DigitalPlatform.rms.Client
             string strLang,
             string strRecordStyle,
             out Record[] records,
+            out string explain,
             out string strError)
         {
             strError = "";
             records = null;
+            explain = null;
 
         REDO:
             this.BeginSearch();
@@ -2201,6 +2225,7 @@ namespace DigitalPlatform.rms.Client
 
                 Result result = this.ws.EndSearchEx(
                     out records,
+                    out explain,
                     soapresult);
 
                 // ---------
@@ -2248,6 +2273,18 @@ namespace DigitalPlatform.rms.Client
             }
         }
 
+        public long DoSearch(string strQueryXml,
+    string strResultSetName,
+    string strOutputStyle,
+    out string strError)
+        {
+            return DoSearch(strQueryXml,
+            strResultSetName,
+            strOutputStyle,
+            out _,
+            out strError);
+        }
+
         // 检索
         // return:
         //		-1	error
@@ -2256,9 +2293,11 @@ namespace DigitalPlatform.rms.Client
         public long DoSearch(string strQueryXml,
             string strResultSetName,
             string strOutputStyle,
+            out string explain,
             out string strError)
         {
             strError = "";
+            explain = null;
 
         REDO:
             this.BeginSearch();
@@ -2281,7 +2320,9 @@ namespace DigitalPlatform.rms.Client
                     return -1;
                 }
 
-                Result result = this.ws.EndSearch(soapresult);
+                Result result = this.ws.EndSearch(
+                    out explain,
+                    soapresult);
 
                 // ---------
                 // 2023/2/27
@@ -2365,7 +2406,8 @@ namespace DigitalPlatform.rms.Client
                     this.ErrorCode = ChannelErrorCode.RequestCanceled;
                     return -1;
                 }
-                Result result = this.ws.EndSearch(soapresult);
+                Result result = this.ws.EndSearch(out _,
+                    soapresult);
 
                 // ---------
                 // 2023/2/27

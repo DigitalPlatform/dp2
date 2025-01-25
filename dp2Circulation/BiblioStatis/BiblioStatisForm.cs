@@ -1247,6 +1247,7 @@ Stack:
                              "", // strOutputStyle
                              "",
                              out strQueryXml,
+                             out _,
                              out strError);
                         if (lRet == -1)
                             return -1;
@@ -1266,6 +1267,7 @@ Stack:
                              "", // strOutputStyle
                              "",
                              out strQueryXml,
+                             out _,
                              out strError);
                         if (lRet == -1)
                             return -1;

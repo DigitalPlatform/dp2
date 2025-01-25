@@ -13,6 +13,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.ResultSet;
+using System.Text;
 
 namespace dp2Kernel
 {
@@ -38,7 +39,9 @@ namespace dp2Kernel
             if (this.sessioninfo != null)
             {
                 // 2024/11/30
-                StopPrevious();
+                // TODO: 把 StopPrevious() 代码转移到 SessionInfo() 中，确保能被 .Close() 调用
+                // 验证 dp2kernel.exe 退出时会 Cancel() 所有的 MySQL Connection Command
+                // ();
 
                 this.sessioninfo.Close();
             }
@@ -448,16 +451,10 @@ namespace dp2Kernel
 
             try
             {
-                // 2025/1/9
-                try
-                {
-                    StopPrevious();
-                }
-                catch
-                {
-                }
+                // 2025/1/17
+                sessioninfo?.TryStopPrevious();
 
-                if (this.sessioninfo.UserName != "")
+                if (string.IsNullOrEmpty(this.sessioninfo?.UserName) == false)
                 {
                     string strError = "";
                     // return:
@@ -537,7 +534,7 @@ namespace dp2Kernel
                 app.MyWriteDebugInfo("因后一个stop的到来，前一个search不得不中断 ");
             }
             */
-            StopPrevious();
+            sessioninfo?.TryStopPrevious();
         }
 
         // 2012/1/5
@@ -546,10 +543,18 @@ namespace dp2Kernel
         //		strQuery	XML检索式
         //      strResultSetName    结果集名
         //      strSearchStyle  检索风格
+        //                      如果包含"keycount"，表示输出 key + count形式
+        //                      如果包含"keyid"，表示输出 key + id 形式
+        //                      如果 keycount 和 keyid 都不具备，则表示为一般输出 id 形式
+        //                      当处于 keycount 或 keyid 状态时，可以包含 sortby:key 或 sortby:id 分别代表按照命中 key 排序和按照命中 id 排序。(缺省为 sortby:id)
+        //                      可以包含 desc，表示对命中结果排序采用降序。
         //      lRecordCount    希望获得的记录数量。-1表示尽可能多。如果为0，表示不想获得任何记录
         //                      总是从偏移量0开始获得记录
         //      strRecordStyle  获得记录的风格。以逗号分隔，id表示取id,cols表示取浏览格式
         //                      xml timestamp metadata 分别表示要获取的记录体的XML字符串、时间戳、元数据
+        //                      如果包含"keycount"，表示输出 key + count形式
+        //                      如果包含"keyid"，表示输出 key + id 形式
+        //                      如果 keycount 和 keyid 都不具备，则表示为一般输出 id 形式
         // return:
         //		Result对象
         //		Value -1	出错
@@ -561,9 +566,11 @@ namespace dp2Kernel
             long lRecordCount,
             string strLang,
             string strRecordStyle,
-            out Record[] records)
+            out Record[] records,
+            out string explain)
         {
             records = null;
+            explain = null;
 
             Result result = this.PrepareEnvironment(true);
             if (result.Value == -1)
@@ -578,8 +585,6 @@ namespace dp2Kernel
                 app.MyWriteDebugInfo("因后一个search(ex)的到来，前一个search(ex)不得不中断 ");
             }
             */
-            StopPrevious();
-
             sessioninfo.BeginSearch();
             try
             {
@@ -620,6 +625,11 @@ namespace dp2Kernel
                                 resultSet.Clear();
 
                             int nRet = 0;
+
+                            StringBuilder explainInfo = null;
+                            if (StringUtil.IsInList("explain", strSearchStyle))
+                                explainInfo = new StringBuilder();
+
 #if DEBUG
                             app.MyWriteDebugInfo("begin searchex1 " + strQuery);
 #endif
@@ -635,10 +645,14 @@ namespace dp2Kernel
                                 user,           //注意测一下没有权限的帐户
                                 handle,
                                 strSearchStyle,
+                                explainInfo,
                                 out string strError);
 #if DEBUG
                             app.MyWriteDebugInfo("end searchex1 lRet=" + nRet.ToString() + " " + strQuery);
 #endif
+                            if (explainInfo != null)
+                                explain = explainInfo.ToString();
+
                             if (nRet <= -1)
                             {
                                 result.Value = -1;
@@ -696,7 +710,6 @@ namespace dp2Kernel
                             }
 
                         } // end of lock
-
                     }
                     finally
                     {
@@ -729,6 +742,7 @@ namespace dp2Kernel
             return result;
         }
 
+#if REMOVED
         void StopPrevious()
         {
             if (sessioninfo != null
@@ -752,11 +766,17 @@ namespace dp2Kernel
 #endif
             }
         }
+#endif
 
         // 检索
         // parameter:
         //		strQuery	XML检索式
         //      strResultSetName    结果集名
+        //      strOutputStyle  如果包含"keycount"，表示输出 key + count形式
+        //                      如果包含"keyid"，表示输出 key + id 形式
+        //                      如果 keycount 和 keyid 都不具备，则表示为一般输出 id 形式
+        //                      当处于 keycount 或 keyid 状态时，可以包含 sortby:key 或 sortby:id 分别代表按照命中 key 排序和按照命中 id 排序。(缺省为 sortby:id)
+        //                      可以包含 desc，表示对命中结果排序采用降序。
         // return:
         //		Result对象
         //		Value -1	出错
@@ -764,8 +784,11 @@ namespace dp2Kernel
         //			   >=1	命中的记录数
         public Result Search(string strQuery,
             string strResultSetName,
-            string strOutputStyle)
+            string strOutputStyle,
+            out string explain)
         {
+            explain = null;
+
             Result result = this.PrepareEnvironment(true);
             if (result.Value == -1)
                 return result;
@@ -784,8 +807,6 @@ namespace dp2Kernel
                 app.MyWriteDebugInfo("因后一个search的到来，前一个search不得不中断 ");
             }
             */
-            StopPrevious();
-
             sessioninfo.BeginSearch();
             try
             {
@@ -834,6 +855,10 @@ namespace dp2Kernel
 #if DEBUG
                             app.MyWriteDebugInfo("begin search1 " + strQuery);
 #endif
+                            StringBuilder explainInfo = null;
+                            if (StringUtil.IsInList("explain", strOutputStyle))
+                                explainInfo = new StringBuilder();
+
                             DpResultSet old_resultset = resultSet;
                             // return:
                             //		-1	出错
@@ -847,6 +872,7 @@ namespace dp2Kernel
                                 handle,
                                 // procIsConnected,
                                 strOutputStyle,
+                                explainInfo,
                                 out strError);
 
                             /*
@@ -870,6 +896,8 @@ namespace dp2Kernel
 #if DEBUG
                             app.MyWriteDebugInfo("end search1 lRet=" + nRet.ToString() + " " + strQuery);
 #endif
+                            if (explainInfo != null)
+                                explain = explainInfo.ToString();
 
                             if (nRet <= -1)
                             {
@@ -1319,6 +1347,9 @@ namespace dp2Kernel
         //		lLength	长度. -1表示从lStart到末尾
         //		strLang	语言版本，用来获得记录路径
         //		strStyle	样式,以逗号分隔，id:表示取id,cols表示取浏览格式
+        //                      如果包含"keycount"，表示输出 key + count形式
+        //                      如果包含"keyid"，表示输出 key + id 形式
+        //                      如果 keycount 和 keyid 都不具备，则表示为一般输出 id 形式
         //		records	得到的记录数组，成员为类型为Record
         // Result.Value
         //		value == -1	出错。如果错误码为 ErrorCodeValue.NotFound，表示结果集不存在

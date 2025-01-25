@@ -1287,7 +1287,7 @@ namespace DigitalPlatform.rms
             strError = "";
             aTableInfo = new List<TableInfo>();
 
-            // lock (_syncRoot_tableInfo)  // 2025/1/16 锁定。避免多线程争夺 m_aTableInfoForForm
+            lock (_syncRoot_tableInfo)  // 2025/1/16 锁定。避免多线程争夺 m_aTableInfoForForm
             {
                 if (this.m_aTableInfoForForm != null)
                 {

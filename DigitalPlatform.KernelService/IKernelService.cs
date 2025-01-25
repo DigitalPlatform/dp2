@@ -35,7 +35,8 @@ namespace dp2Kernel
         [OperationContract(IsInitiating = true, IsTerminating = false)]
         Result Search(string strQuery,
             string strResultSetName,
-            string strOutputStyle);
+            string strOutputStyle,
+            out string explain);
 
         // 2012/1/5
         [OperationContract(IsInitiating = true, IsTerminating = false)]
@@ -45,7 +46,8 @@ namespace dp2Kernel
     long lRecordCount,
     string strLang,
     string strRecordStyle,
-    out Record[] records);
+    out Record[] records,
+    out string explain);
 
         [OperationContract(IsOneWay = true, IsInitiating = false, IsTerminating = false)]
         void Stop();

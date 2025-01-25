@@ -35,7 +35,7 @@ namespace DigitalPlatform.rms
         // return:
         //      -1  出错
         //      0   成功
-        internal override int Initial(XmlNode node,
+        internal override int Initial(XmlElement node,
             out string strError)
         {
             strError = "";
@@ -2648,6 +2648,7 @@ namespace DigitalPlatform.rms
             // Delegate_isConnected isConnected,
             DpResultSet resultSet,
             int nWarningLevel,
+            StringBuilder explainInfo,
             out string strError,
             out string strWarning)
         {

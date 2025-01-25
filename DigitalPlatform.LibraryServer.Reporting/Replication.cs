@@ -811,6 +811,7 @@ out strError);
                         "", //strOutputStyle, // (bOutputKeyCount == true ? "keycount" : ""),
                         "",
                         out strQueryXml,
+                        out _,
                         out strError);
                     if (lRet == -1)
                         return -1;
@@ -2018,6 +2019,7 @@ LibraryChannel channel,
     "", //strOutputStyle, // (bOutputKeyCount == true ? "keycount" : ""),
     "",
     out string strQueryXml,
+    out _,
     out string error);
                     return new NormalResult { Value = (int)lRet, ErrorInfo = error };
                 },

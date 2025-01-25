@@ -1677,6 +1677,7 @@ namespace dp2Catalog
                         "", // strOutputStyle
                         "",
                         out strQueryXml,
+                        out _,
                         out strError);
                     if (lRet == -1)
                     {
@@ -2335,6 +2336,7 @@ namespace dp2Catalog
                             "", // strOutputStyle
                             "",
                             out strQueryXml,
+                            out _,
                             out strError);
                         if (lRet == -1)
                         {

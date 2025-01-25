@@ -9,10 +9,10 @@ using System.Data.Sql;
 using System.Data.SqlClient;
 using System.Diagnostics;
 
+using Npgsql;
 using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Install;
-using Npgsql;
 using DigitalPlatform.Text;
 
 namespace DigitalPlatform.rms

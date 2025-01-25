@@ -831,6 +831,7 @@ namespace DigitalPlatform.OPAC.Server
                     // TODO: 超时发生后输出耗费的时间?
                     DateTime start_time = DateTime.Now;
 
+                    // TODO: 确保 strXml 中的超时参数足以获得所需的全部记录
                     lRet = channel.Search(
                         null,
                         strXml,

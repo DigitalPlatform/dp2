@@ -788,6 +788,7 @@ strParameters,  // "内部"
 "exact",
 "zh",
 "", // strSearchStyle,
+"",
 out List<string> dbTypes,
 out strQueryXml,
     out strError);

@@ -9602,6 +9602,7 @@ out strError);
         "exact",
         "zh",
         "", // strSearchStyle,
+        "",
         out List<string> dbTypes,
         out string strQueryXml,
                 out strError);

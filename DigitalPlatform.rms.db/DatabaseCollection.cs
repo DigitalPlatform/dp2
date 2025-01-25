@@ -9,19 +9,9 @@ using System.Xml;
 using System.Data;
 using System.IO;
 using System.Diagnostics;
-using System.Web;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using System.Security.Cryptography;
-
-using System.Data.SqlClient;
-using System.Data.SQLite;
-
-//using MySql.Data;
-//using MySql.Data.MySqlClient;
-
-using Oracle.ManagedDataAccess.Client;
-using Oracle.ManagedDataAccess.Types;
 
 using Ghostscript.NET;
 
@@ -349,8 +339,11 @@ namespace DigitalPlatform.rms
                 // 根据<database>节点创建Database对象
                 int nRet = 0;
                 XmlNodeList listDb = this.NodeDbs.SelectNodes("database");
-                foreach (XmlNode nodeDb in listDb)
+                foreach (XmlElement nodeDb in listDb)
                 {
+                    if (nodeDb == null)
+                        continue;
+
                     // return:
                     //      -1  出错
                     //      0   成功
@@ -415,7 +408,7 @@ namespace DigitalPlatform.rms
         //      -1  出错
         //      0   成功
         // 线：不安全
-        public int AddDatabase(XmlNode node,
+        public int AddDatabase(XmlElement node,
             out string strError)
         {
             Debug.Assert(node != null, "AddDatabase()调用错误，node参数值为能为null。");
@@ -1040,7 +1033,7 @@ namespace DigitalPlatform.rms
                 }
 
                 // 最后一个库为新建的数据库，加到集合里
-                XmlNode nodeDb = nodeListDb[nodeListDb.Count - 1];
+                var nodeDb = nodeListDb[nodeListDb.Count - 1] as XmlElement;
                 // return:
                 //      -1  出错
                 //      0   成功
@@ -2359,9 +2352,16 @@ namespace DigitalPlatform.rms
             // Delegate_isConnected isConnected,
             ChannelHandle handle,
             string strOutputStyle,
+            StringBuilder explainInfo,
             out string strError)
         {
             strError = "";
+
+            if (handle != null && handle.CancelToken.IsCancellationRequested)
+            {
+                strError = "前端中断";
+                return -1;
+            }
 
             DateTime start = DateTime.UtcNow;
 
@@ -2413,6 +2413,7 @@ namespace DigitalPlatform.rms
                     ref resultSet,
                     handle,
                     // isConnected,
+                    explainInfo,
                     out strError);
                 if (resultSet != null)
                     resultSet.m_strQuery = strQuery;
@@ -2422,13 +2423,26 @@ namespace DigitalPlatform.rms
                 if (StringUtil.IsInList("desc", strOutputStyle)
                     && !(resultSet.Sorted && resultSet.Asc == -1))
                 {
+                    Stopwatch sw = Stopwatch.StartNew();
+                    var sortby_key = Query.GetSortBy(strOutputStyle) == "key";
                     resultSet.Asc = -1;
-                    if (Query.DoSort(resultSet, handle) == true)
+                    if (Query.DoSort(resultSet,
+                        handle,
+                        (a, b) =>
+                        {
+                            if (sortby_key)
+                                return a.CompareToKey(b);
+                            return a.CompareTo(b);
+                        }) == true)
                     {
                         strError = "前端中断";
                         return -1;
                     }
-                    resultSet.Sort();
+
+                    sw.Stop();
+                    explainInfo?.AppendLine($"终末排序耗时 {sw.Elapsed}");
+                    
+                    // resultSet.Sort();
                 }
 
                 // testing
@@ -7072,6 +7086,7 @@ namespace DigitalPlatform.rms
 
                 string strWarning = "";
                 SearchItem searchItem = new SearchItem();
+                searchItem.Description = $"{strUserName}";
                 searchItem.TargetTables = "";
                 searchItem.Word = strUserName;
                 searchItem.Match = "exact";
@@ -7091,6 +7106,7 @@ namespace DigitalPlatform.rms
                     null,       //用于中断 , deleget
                     resultSet,
                     0,
+                    null,
                     out strError,
                     out strWarning);
                 if (nRet == -1)
@@ -7512,7 +7528,7 @@ dp2LibraryXE 版本: dp2LibraryXE, Version=1.1.5939.41661, Culture=neutral, Publ
         }
     }
 #endif
-#endregion
+    #endregion
 
     // 资源项信息
     // 当时放在DigitalPlatform.rms.Service里，后来要在Database.xml里使用，所以移动到这儿

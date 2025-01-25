@@ -238,6 +238,7 @@ namespace DigitalPlatform.LibraryServer
     string strMatchStyle,
     string strLang,
     string strSearchStyle,
+    string strOutputStyle,
     out List<string> dbTypes,
     out string strQueryXml,
             out string strError)
@@ -354,7 +355,20 @@ namespace DigitalPlatform.LibraryServer
                     dbTypes.Add("authority");
             }
 
-            bool bDesc = StringUtil.IsInList("desc", strSearchStyle);
+            // 2025/1/21
+            // strSearchStyle 和 strOutputStyle 中包含 desc 都管用。建议用 strOutputStyle
+            bool bDesc = StringUtil.IsInList("desc", strSearchStyle) || StringUtil.IsInList("desc", strOutputStyle);
+            bool bAsc = StringUtil.IsInList("asc", strSearchStyle) || StringUtil.IsInList("asc", strOutputStyle);
+            if (bDesc && bAsc)
+            {
+                strError = "检索参数中 asc 和 desc 值不允许同时存在";
+                return -1;
+            }
+
+            // 兼容以前的效果：没有 asc 时当作 asc 处理
+            // 注意，dp2kernel 的 XML 检索式中，缺乏 order 元素，是当作不排序处理，而不是正序排序
+            if (bDesc == false && bAsc == false)
+                bAsc = true;
 
             // 构造检索式
             string strFromList = "";
@@ -460,6 +474,7 @@ namespace DigitalPlatform.LibraryServer
             strQueryXml = "<target list='"
                 + StringUtil.GetXmlStringSimple(strFromList)
                 + "'><option warning='0'/><item>"
+                + (bAsc == true ? "<order>ASC</order>" : "")
                 + (bDesc == true ? "<order>DESC</order>" : "")
                 + "<word>"
                 + StringUtil.GetXmlStringSimple(strQueryWord)

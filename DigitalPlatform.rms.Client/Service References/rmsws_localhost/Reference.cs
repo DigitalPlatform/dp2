@@ -1143,20 +1143,20 @@ namespace DigitalPlatform.rms.Client.rmsws_localhost {
         DigitalPlatform.rms.Client.rmsws_localhost.Result EndLogout(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2kernel/KernelService/Search", ReplyAction="http://dp2003.com/dp2kernel/KernelService/SearchResponse")]
-        DigitalPlatform.rms.Client.rmsws_localhost.Result Search(string strQuery, string strResultSetName, string strOutputStyle);
+        DigitalPlatform.rms.Client.rmsws_localhost.Result Search(out string explain, string strQuery, string strResultSetName, string strOutputStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2kernel/KernelService/Search", ReplyAction="http://dp2003.com/dp2kernel/KernelService/SearchResponse")]
         System.IAsyncResult BeginSearch(string strQuery, string strResultSetName, string strOutputStyle, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.rms.Client.rmsws_localhost.Result EndSearch(System.IAsyncResult result);
+        DigitalPlatform.rms.Client.rmsws_localhost.Result EndSearch(out string explain, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2kernel/KernelService/SearchEx", ReplyAction="http://dp2003.com/dp2kernel/KernelService/SearchExResponse")]
-        DigitalPlatform.rms.Client.rmsws_localhost.Result SearchEx(out DigitalPlatform.rms.Client.rmsws_localhost.Record[] records, string strQuery, string strResultSetName, string strSearchStyle, long lRecordCount, string strLang, string strRecordStyle);
+        DigitalPlatform.rms.Client.rmsws_localhost.Result SearchEx(out DigitalPlatform.rms.Client.rmsws_localhost.Record[] records, out string explain, string strQuery, string strResultSetName, string strSearchStyle, long lRecordCount, string strLang, string strRecordStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2kernel/KernelService/SearchEx", ReplyAction="http://dp2003.com/dp2kernel/KernelService/SearchExResponse")]
         System.IAsyncResult BeginSearchEx(string strQuery, string strResultSetName, string strSearchStyle, long lRecordCount, string strLang, string strRecordStyle, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.rms.Client.rmsws_localhost.Result EndSearchEx(out DigitalPlatform.rms.Client.rmsws_localhost.Record[] records, System.IAsyncResult result);
+        DigitalPlatform.rms.Client.rmsws_localhost.Result EndSearchEx(out DigitalPlatform.rms.Client.rmsws_localhost.Record[] records, out string explain, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(IsOneWay=true, IsInitiating=false, Action="http://dp2003.com/dp2kernel/KernelService/Stop")]
         void Stop();
@@ -1426,10 +1426,17 @@ namespace DigitalPlatform.rms.Client.rmsws_localhost {
             this.results = results;
         }
         
+        public string explain {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[0]));
+            }
+        }
+        
         public DigitalPlatform.rms.Client.rmsws_localhost.Result Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.rms.Client.rmsws_localhost.Result)(this.results[0]));
+                return ((DigitalPlatform.rms.Client.rmsws_localhost.Result)(this.results[1]));
             }
         }
     }
@@ -1452,10 +1459,17 @@ namespace DigitalPlatform.rms.Client.rmsws_localhost {
             }
         }
         
+        public string explain {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[1]));
+            }
+        }
+        
         public DigitalPlatform.rms.Client.rmsws_localhost.Result Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.rms.Client.rmsws_localhost.Result)(this.results[1]));
+                return ((DigitalPlatform.rms.Client.rmsws_localhost.Result)(this.results[2]));
             }
         }
     }
@@ -2472,8 +2486,8 @@ namespace DigitalPlatform.rms.Client.rmsws_localhost {
             base.InvokeAsync(this.onBeginLogoutDelegate, null, this.onEndLogoutDelegate, this.onLogoutCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.rms.Client.rmsws_localhost.Result Search(string strQuery, string strResultSetName, string strOutputStyle) {
-            return base.Channel.Search(strQuery, strResultSetName, strOutputStyle);
+        public DigitalPlatform.rms.Client.rmsws_localhost.Result Search(out string explain, string strQuery, string strResultSetName, string strOutputStyle) {
+            return base.Channel.Search(out explain, strQuery, strResultSetName, strOutputStyle);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
@@ -2482,8 +2496,8 @@ namespace DigitalPlatform.rms.Client.rmsws_localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.rms.Client.rmsws_localhost.Result EndSearch(System.IAsyncResult result) {
-            return base.Channel.EndSearch(result);
+        public DigitalPlatform.rms.Client.rmsws_localhost.Result EndSearch(out string explain, System.IAsyncResult result) {
+            return base.Channel.EndSearch(out explain, result);
         }
         
         private System.IAsyncResult OnBeginSearch(object[] inValues, System.AsyncCallback callback, object asyncState) {
@@ -2494,8 +2508,10 @@ namespace DigitalPlatform.rms.Client.rmsws_localhost {
         }
         
         private object[] OnEndSearch(System.IAsyncResult result) {
-            DigitalPlatform.rms.Client.rmsws_localhost.Result retVal = this.EndSearch(result);
+            string explain = this.GetDefaultValueForInitialization<string>();
+            DigitalPlatform.rms.Client.rmsws_localhost.Result retVal = this.EndSearch(out explain, result);
             return new object[] {
+                    explain,
                     retVal};
         }
         
@@ -2526,8 +2542,8 @@ namespace DigitalPlatform.rms.Client.rmsws_localhost {
                         strOutputStyle}, this.onEndSearchDelegate, this.onSearchCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.rms.Client.rmsws_localhost.Result SearchEx(out DigitalPlatform.rms.Client.rmsws_localhost.Record[] records, string strQuery, string strResultSetName, string strSearchStyle, long lRecordCount, string strLang, string strRecordStyle) {
-            return base.Channel.SearchEx(out records, strQuery, strResultSetName, strSearchStyle, lRecordCount, strLang, strRecordStyle);
+        public DigitalPlatform.rms.Client.rmsws_localhost.Result SearchEx(out DigitalPlatform.rms.Client.rmsws_localhost.Record[] records, out string explain, string strQuery, string strResultSetName, string strSearchStyle, long lRecordCount, string strLang, string strRecordStyle) {
+            return base.Channel.SearchEx(out records, out explain, strQuery, strResultSetName, strSearchStyle, lRecordCount, strLang, strRecordStyle);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
@@ -2536,8 +2552,8 @@ namespace DigitalPlatform.rms.Client.rmsws_localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.rms.Client.rmsws_localhost.Result EndSearchEx(out DigitalPlatform.rms.Client.rmsws_localhost.Record[] records, System.IAsyncResult result) {
-            return base.Channel.EndSearchEx(out records, result);
+        public DigitalPlatform.rms.Client.rmsws_localhost.Result EndSearchEx(out DigitalPlatform.rms.Client.rmsws_localhost.Record[] records, out string explain, System.IAsyncResult result) {
+            return base.Channel.EndSearchEx(out records, out explain, result);
         }
         
         private System.IAsyncResult OnBeginSearchEx(object[] inValues, System.AsyncCallback callback, object asyncState) {
@@ -2552,9 +2568,11 @@ namespace DigitalPlatform.rms.Client.rmsws_localhost {
         
         private object[] OnEndSearchEx(System.IAsyncResult result) {
             DigitalPlatform.rms.Client.rmsws_localhost.Record[] records = this.GetDefaultValueForInitialization<DigitalPlatform.rms.Client.rmsws_localhost.Record[]>();
-            DigitalPlatform.rms.Client.rmsws_localhost.Result retVal = this.EndSearchEx(out records, result);
+            string explain = this.GetDefaultValueForInitialization<string>();
+            DigitalPlatform.rms.Client.rmsws_localhost.Result retVal = this.EndSearchEx(out records, out explain, result);
             return new object[] {
                     records,
+                    explain,
                     retVal};
         }
         

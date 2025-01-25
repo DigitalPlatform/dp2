@@ -165,26 +165,30 @@ string style = "")
             AppendString("\r\n");
         }
 
+        // TODO: 锁定，(并发情况下) 确保多行显示挨在一起
         // 线程安全
         // parameters:
         //      style 为 begin end warning error green 之一
         public void AppendString(string strText, string style = "")
         {
-            /*
-            if (this.webBrowser1.InvokeRequired)
+            lock (this)
             {
-                this.webBrowser1.Invoke(new Action<string>(AppendString), strText);
-                return;
-            }
-            this.WriteTextToConsole(strText);
-            ScrollToEnd();
-            */
-            strText = strText.Replace("\r", "\n");
-            strText = strText.TrimEnd(new char[] { '\n' });
-            string[] lines = strText.Split(new char[] { '\n' });
-            foreach (string line in lines)
-            {
-                AppendHtml($"<div class='debug {style}'>" + HttpUtility.HtmlEncode(line).Replace(" ", "&nbsp;") + "</div>");
+                /*
+                if (this.webBrowser1.InvokeRequired)
+                {
+                    this.webBrowser1.Invoke(new Action<string>(AppendString), strText);
+                    return;
+                }
+                this.WriteTextToConsole(strText);
+                ScrollToEnd();
+                */
+                strText = strText.Replace("\r", "\n");
+                strText = strText.TrimEnd(new char[] { '\n' });
+                string[] lines = strText.Split(new char[] { '\n' });
+                foreach (string line in lines)
+                {
+                    AppendHtml($"<div class='debug {style}'>" + HttpUtility.HtmlEncode(line).Replace(" ", "&nbsp;") + "</div>");
+                }
             }
         }
 
@@ -596,6 +600,33 @@ string style = "")
                     try
                     {
                         var result = TestMultiChannel.TestAll(cancel.Token,
+                            "");
+                        if (result.Value == -1)
+                            DataModel.SetMessage(result.ErrorInfo, "error");
+                    }
+                    catch (Exception ex)
+                    {
+                        AppendString($"exception: {ex.Message}");
+                    }
+                    finally
+                    {
+                        EnableControls(true);
+                    }
+                });
+            }
+        }
+
+        private async void MenuItem_test_queryXml_Click(object sender, EventArgs e)
+        {
+            using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(this._cancelApp.Token))
+            {
+                _cancelCurrent = cancel;
+                await Task.Run(() =>
+                {
+                    EnableControls(false);
+                    try
+                    {
+                        var result = TestQueryXml.TestAll(cancel.Token,
                             "");
                         if (result.Value == -1)
                             DataModel.SetMessage(result.ErrorInfo, "error");

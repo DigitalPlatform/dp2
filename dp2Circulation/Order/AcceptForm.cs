@@ -804,6 +804,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                     "", // strOutputStyle
                     "",
                     out string strQueryXml,
+                    out _,
                     out strError);
                 if (lRet == -1)
                     return -1;

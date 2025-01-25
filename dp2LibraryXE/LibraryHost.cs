@@ -42,7 +42,13 @@ namespace dp2LibraryXE
 
             while (_running)
             {
-                Thread.Sleep(100);
+                try
+                {
+                    Thread.Sleep(100);
+                }
+                catch
+                {
+                }
             }
 
             this.CloseHosts();

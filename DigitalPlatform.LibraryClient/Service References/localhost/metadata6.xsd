@@ -1336,6 +1336,7 @@
       <xs:sequence>
         <xs:element xmlns:q81="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SearchBiblioResult" nillable="true" type="q81:LibraryServerResult" />
         <xs:element minOccurs="0" name="strQueryXml" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="explain" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>

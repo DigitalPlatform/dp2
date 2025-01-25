@@ -47,6 +47,7 @@ namespace dp2KernelApiTester
             this.MenuItem_test_pdf = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_test_special = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_test_multiChannel = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_test_queryXml = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -54,10 +55,10 @@ namespace dp2KernelApiTester
             // webBrowser1
             // 
             this.webBrowser1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.webBrowser1.Location = new System.Drawing.Point(0, 86);
+            this.webBrowser1.Location = new System.Drawing.Point(0, 78);
             this.webBrowser1.MinimumSize = new System.Drawing.Size(20, 20);
             this.webBrowser1.Name = "webBrowser1";
-            this.webBrowser1.Size = new System.Drawing.Size(800, 342);
+            this.webBrowser1.Size = new System.Drawing.Size(800, 350);
             this.webBrowser1.TabIndex = 7;
             // 
             // toolStrip1
@@ -65,10 +66,10 @@ namespace dp2KernelApiTester
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton_stop});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 42);
+            this.toolStrip1.Location = new System.Drawing.Point(0, 38);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Padding = new System.Windows.Forms.Padding(0, 0, 3, 0);
-            this.toolStrip1.Size = new System.Drawing.Size(800, 44);
+            this.toolStrip1.Size = new System.Drawing.Size(800, 40);
             this.toolStrip1.TabIndex = 6;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -79,7 +80,7 @@ namespace dp2KernelApiTester
             this.toolStripButton_stop.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_stop.Image")));
             this.toolStripButton_stop.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_stop.Name = "toolStripButton_stop";
-            this.toolStripButton_stop.Size = new System.Drawing.Size(58, 38);
+            this.toolStripButton_stop.Size = new System.Drawing.Size(61, 34);
             this.toolStripButton_stop.Text = "停止";
             this.toolStripButton_stop.Click += new System.EventHandler(this.toolStripButton_stop_Click);
             // 
@@ -101,7 +102,7 @@ namespace dp2KernelApiTester
             this.MenuItem_test});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(800, 42);
+            this.menuStrip1.Size = new System.Drawing.Size(800, 38);
             this.menuStrip1.TabIndex = 4;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -110,13 +111,13 @@ namespace dp2KernelApiTester
             this.MenuItem_file.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MenuItem_settings});
             this.MenuItem_file.Name = "MenuItem_file";
-            this.MenuItem_file.Size = new System.Drawing.Size(72, 34);
+            this.MenuItem_file.Size = new System.Drawing.Size(75, 34);
             this.MenuItem_file.Text = "文件";
             // 
             // MenuItem_settings
             // 
             this.MenuItem_settings.Name = "MenuItem_settings";
-            this.MenuItem_settings.Size = new System.Drawing.Size(192, 40);
+            this.MenuItem_settings.Size = new System.Drawing.Size(197, 40);
             this.MenuItem_settings.Text = "设置 ...";
             this.MenuItem_settings.Click += new System.EventHandler(this.MenuItem_settings_Click);
             // 
@@ -131,73 +132,81 @@ namespace dp2KernelApiTester
             this.MenuItem_fragmentWrite,
             this.MenuItem_test_pdf,
             this.MenuItem_test_special,
-            this.MenuItem_test_multiChannel});
+            this.MenuItem_test_multiChannel,
+            this.MenuItem_test_queryXml});
             this.MenuItem_test.Name = "MenuItem_test";
-            this.MenuItem_test.Size = new System.Drawing.Size(72, 34);
+            this.MenuItem_test.Size = new System.Drawing.Size(75, 34);
             this.MenuItem_test.Text = "测试";
             // 
             // MenuItem_test_initializeDatabase
             // 
             this.MenuItem_test_initializeDatabase.Name = "MenuItem_test_initializeDatabase";
-            this.MenuItem_test_initializeDatabase.Size = new System.Drawing.Size(297, 40);
+            this.MenuItem_test_initializeDatabase.Size = new System.Drawing.Size(315, 40);
             this.MenuItem_test_initializeDatabase.Text = "创建和删除数据库";
             this.MenuItem_test_initializeDatabase.Click += new System.EventHandler(this.MenuItem_test_initializeDatabase_Click);
             // 
             // MenuItem_test_records
             // 
             this.MenuItem_test_records.Name = "MenuItem_test_records";
-            this.MenuItem_test_records.Size = new System.Drawing.Size(297, 40);
+            this.MenuItem_test_records.Size = new System.Drawing.Size(315, 40);
             this.MenuItem_test_records.Text = "记录相关";
             this.MenuItem_test_records.Click += new System.EventHandler(this.MenuItem_test_records_Click);
             // 
             // MenuItem_test_search
             // 
             this.MenuItem_test_search.Name = "MenuItem_test_search";
-            this.MenuItem_test_search.Size = new System.Drawing.Size(297, 40);
+            this.MenuItem_test_search.Size = new System.Drawing.Size(315, 40);
             this.MenuItem_test_search.Text = "检索相关";
             this.MenuItem_test_search.Click += new System.EventHandler(this.MenuItem_test_search_Click);
             // 
             // MenuItem_test_refreshKeys
             // 
             this.MenuItem_test_refreshKeys.Name = "MenuItem_test_refreshKeys";
-            this.MenuItem_test_refreshKeys.Size = new System.Drawing.Size(297, 40);
+            this.MenuItem_test_refreshKeys.Size = new System.Drawing.Size(315, 40);
             this.MenuItem_test_refreshKeys.Text = "刷新检索点";
             this.MenuItem_test_refreshKeys.Click += new System.EventHandler(this.MenuItem_test_refreshKeys_Click);
             // 
             // MenuItem_test_largeObject
             // 
             this.MenuItem_test_largeObject.Name = "MenuItem_test_largeObject";
-            this.MenuItem_test_largeObject.Size = new System.Drawing.Size(297, 40);
+            this.MenuItem_test_largeObject.Size = new System.Drawing.Size(315, 40);
             this.MenuItem_test_largeObject.Text = "大对象";
             this.MenuItem_test_largeObject.Click += new System.EventHandler(this.MenuItem_test_largeObject_Click);
             // 
             // MenuItem_fragmentWrite
             // 
             this.MenuItem_fragmentWrite.Name = "MenuItem_fragmentWrite";
-            this.MenuItem_fragmentWrite.Size = new System.Drawing.Size(297, 40);
+            this.MenuItem_fragmentWrite.Size = new System.Drawing.Size(315, 40);
             this.MenuItem_fragmentWrite.Text = "碎片式写入";
             this.MenuItem_fragmentWrite.Click += new System.EventHandler(this.MenuItem_fragmentWrite_Click);
             // 
             // MenuItem_test_pdf
             // 
             this.MenuItem_test_pdf.Name = "MenuItem_test_pdf";
-            this.MenuItem_test_pdf.Size = new System.Drawing.Size(297, 40);
+            this.MenuItem_test_pdf.Size = new System.Drawing.Size(315, 40);
             this.MenuItem_test_pdf.Text = "PDF 相关";
             this.MenuItem_test_pdf.Click += new System.EventHandler(this.MenuItem_test_pdf_Click);
             // 
             // MenuItem_test_special
             // 
             this.MenuItem_test_special.Name = "MenuItem_test_special";
-            this.MenuItem_test_special.Size = new System.Drawing.Size(297, 40);
+            this.MenuItem_test_special.Size = new System.Drawing.Size(315, 40);
             this.MenuItem_test_special.Text = "特殊测试";
             this.MenuItem_test_special.Click += new System.EventHandler(this.MenuItem_test_special_Click);
             // 
             // MenuItem_test_multiChannel
             // 
             this.MenuItem_test_multiChannel.Name = "MenuItem_test_multiChannel";
-            this.MenuItem_test_multiChannel.Size = new System.Drawing.Size(297, 40);
+            this.MenuItem_test_multiChannel.Size = new System.Drawing.Size(315, 40);
             this.MenuItem_test_multiChannel.Text = "多通道测试";
             this.MenuItem_test_multiChannel.Click += new System.EventHandler(this.MenuItem_test_multiChannel_Click);
+            // 
+            // MenuItem_test_queryXml
+            // 
+            this.MenuItem_test_queryXml.Name = "MenuItem_test_queryXml";
+            this.MenuItem_test_queryXml.Size = new System.Drawing.Size(315, 40);
+            this.MenuItem_test_queryXml.Text = "XML检索式测试";
+            this.MenuItem_test_queryXml.Click += new System.EventHandler(this.MenuItem_test_queryXml_Click);
             // 
             // MainForm
             // 
@@ -241,6 +250,7 @@ namespace dp2KernelApiTester
         private System.Windows.Forms.ToolStripButton toolStripButton_stop;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_test_special;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_test_multiChannel;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_test_queryXml;
     }
 }
 

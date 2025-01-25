@@ -123,3 +123,5 @@ SQL>
 
 	~~~
 	https://geek-docs.com/postgresql/postgresql-questions/487_postgresql_idle_postgres_processes_taking_up_lots_of_memory.html
+
+	https://blog.sqlauthority.com/2012/10/30/sql-server-union-all-and-order-by-how-to-order-table-separately-while-using-union-all/

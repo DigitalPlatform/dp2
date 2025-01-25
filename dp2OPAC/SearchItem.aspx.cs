@@ -175,6 +175,7 @@ ref sessioninfo) == false)
             channel.Idle += new IdleEventHandler(channel_Idle);
             try
             {
+                // TODO: 根据发起检索者的账户权限，适当限制(strXml 中的)检索超时时间，避免数据库资源被过度耗用
                 long lRet = //sessioninfo.Channel.
                     channel.Search(
                     null,
@@ -273,6 +274,7 @@ ref sessioninfo) == false)
         channel.Idle += new IdleEventHandler(channel_Idle);
         try
         {
+            // TODO: 根据发起检索者的账户权限，适当限制(strXml 中的)检索超时时间，避免数据库资源被过度耗用
             long lRet = // sessioninfo.Channel.
                 channel.Search(
                 null,

@@ -14,6 +14,9 @@ using System.Threading;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Globalization;
 
 using System.Data.Common;
 using System.Data.SqlClient;
@@ -37,12 +40,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Core;
 using static DigitalPlatform.rms.KeysCfg;
-using System.Windows.Forms;
-using System.Linq;
-using System.Threading.Tasks;
-using Google.Protobuf.WellKnownTypes;
-using System.Globalization;
-using System.Linq.Expressions;
+
 
 namespace DigitalPlatform.rms
 {
@@ -135,7 +133,7 @@ namespace DigitalPlatform.rms
         // return:
         //      -1  出错
         //      0   成功
-        internal override int Initial(XmlNode node,
+        internal override int Initial(XmlElement node,
             out string strError)
         {
             strError = "";
@@ -709,10 +707,9 @@ VerifyFull - Always use SSL. Fail if the host name is not correct.
                 /*
 <root>
   <version>2.0</version>
-  <datasource userid="postgres" password="HIP8ih0vfHU9me5emzGs3g==" servername="localhost" servertype="PostgreSQL" />
+  <datasource userid="postgres" password="HIP8ih0vfHU9me5emzGs3g==" servername="localhost:5432" servertype="PostgreSQL" />
   <keysize>255</keysize>
   <dbs instancename="dp2kernel_pgsql">
-                * 
                  * */
                 // 2022/4/7
                 var dbs = this.container.CfgDom.DocumentElement.SelectSingleNode("dbs") as XmlElement;
@@ -731,10 +728,21 @@ VerifyFull - Always use SSL. Fail if the host name is not correct.
 
                 strConnection = "Username=" + strUserID + ";"    //帐户和密码
                             + "Password=" + strPassword + ";"
-                            //+ "Integrated Security=SSPI; "      //信任连接
-                            + "Host=" + this.container.SqlServerName + ";"
+                            + PgsqlBuildHostAndPort(this.container.SqlServerName) + ";"
                             + "Database=" + instanceName;
                 return 0;
+
+                // 2025/1/20
+                string PgsqlBuildHostAndPort(string server_name)
+                {
+                    if (server_name.Contains(":"))
+                    {
+                        var parts = StringUtil.ParseTwoPart(server_name, ":");
+                        return $"Host={parts[0]};Port={parts[1]}";
+                    }
+
+                    return $"Host={server_name}";
+                }
             }
 
             if (String.IsNullOrEmpty(strMode) == true)
@@ -1055,6 +1063,9 @@ VerifyFull - Always use SSL. Fail if the host name is not correct.
                                     trans.Commit();
                                     trans = null;
                                 }
+
+                                this.SetDatabaseVersion("0.02");
+                                this.container.Changed = true;
                             }
                             finally
                             {
@@ -2413,7 +2424,7 @@ ex);
                         $"DROP TABLE IF EXISTS {db_prefix}records ;\n"
                         + $"CREATE TABLE {db_prefix}records " + "\n"
                         + "(" + "\n"
-                        + "id varchar (255) collate \"C\" NULL UNIQUE," + "\n" 
+                        + "id varchar (255) collate \"C\" NULL UNIQUE," + "\n"
                         + "data bytea NULL ," + "\n"
                         + "newdata bytea NULL ," + "\n"
                         + "range varchar (2000) collate \"C\" NULL," + "\n"
@@ -2459,7 +2470,7 @@ ex);
                                 $"DROP TABLE IF EXISTS {db_prefix}{tableInfo.SqlTableName} ;\n"
                                 + $" CREATE TABLE {db_prefix}{tableInfo.SqlTableName} " + "\n" +
                                 "(" + "\n" +
-                                $"keystring varchar ({ this.KeySize }) collate \"C\" NULL," + "\n" +
+                                $"keystring varchar ({this.KeySize}) collate \"C\" NULL," + "\n" +
                                 $"fromstring varchar (255) collate \"C\" NULL ," + "\n" +
                                 $"idstring varchar (255) collate \"C\" NULL ," + "\n" +
                                 "keystringnum bigint NULL " + "\n" +
@@ -3671,6 +3682,7 @@ ex);
             // Delegate_isConnected isConnected,
             DpResultSet resultSet,
             string strOutputStyle,
+            StringBuilder explainInfo,
             out string strError)
         {
             strError = "";
@@ -4047,6 +4059,7 @@ ex);
         + "\n";
             }
 
+            explainInfo?.AppendLine($"处理 {searchItem.Description}");
             var result = ExecuteQueryFillResultSet(
         handle,
         strCommand,
@@ -4055,7 +4068,8 @@ ex);
         searchItem.MaxCount,
         searchItem.Timeout,
         GetOutputStyle(strOutputStyle),
-        true);
+        true,
+        explainInfo);
             if (result.Value == -1 || result.Value == 0)
             {
                 strError = result.ErrorString;
@@ -4170,8 +4184,8 @@ handle.CancelTokenSource.Token).Result;
         int nMaxCount,
         string strTimeout,
         OutputStyle style,
-        bool bRecordTable/*,
-        out string strError*/)
+        bool bRecordTable,
+        StringBuilder explainInfo)
         {
             string strError = "";
 
@@ -4194,6 +4208,16 @@ handle.CancelTokenSource.Token).Result;
                     };
             }
 
+            if (handle != null && handle.CancelToken.IsCancellationRequested)
+            {
+                return new Result
+                {
+                    Value = -1,
+                    ErrorString = "前端中断",
+                    ErrorCode = ErrorCodeValue.Canceled,
+                };
+            }
+
             Connection connection = null;
 
             {
@@ -4210,7 +4234,37 @@ handle.CancelTokenSource.Token).Result;
                 var command = connection.NewCommand(strCommand) as DbCommand;
                 command.CommandTimeout = 20 * 60;  // 把检索时间变大
 
+                Task<DbDataReader> task = null;
+                void CloseReader()
+                {
+                    if (task != null
+                        /*&& this.SqlServerType == SqlServerType.MySql*/)
+                    {
+                        try
+                        {
+                            var reader = task.Result;
+                            if (reader != null)
+                            {
+                                /*
+                                // 把残余的信息读完
+                                while (reader.Read())
+                                {
+
+                                }
+                                */
+                                reader.Close();
+                            }
+                        }
+                        catch
+                        {
+                        }
+                    }
+                }
+
+                DateTime start = DateTime.UtcNow;
+
                 // ****
+                bool finished = false;
                 using (command)
                 {
                     // 确保抛出异常的时候 command.Cancel()
@@ -4231,33 +4285,23 @@ handle.CancelTokenSource.Token).Result;
                         reader = command.ExecuteReaderAsync(CommandBehavior.CloseConnection
 ).Result;
 #endif
+                        Stopwatch sw = Stopwatch.StartNew();
 
                         // command.ExecuteReader(CommandBehavior.Default/*.CloseConnection*/);
 
-                        var task = command.ExecuteReaderAsync(CommandBehavior.CloseConnection,
-                            handle.CancelToken);
+                        task = command.ExecuteReaderAsync(CommandBehavior.CloseConnection,
+                            handle == null ? default : handle.CancelToken);
                         // 2024/11/30
                         var ret = task.Wait((int)timeout.TotalMilliseconds,
-                            handle.CancelToken);
+                            handle == null ? default : handle.CancelToken);
                         if (ret == false
-                            || handle.CancelToken.IsCancellationRequested)
+                            || (handle != null && handle.CancelToken.IsCancellationRequested))
                         {
+                            /*
                             // 2024/11/30
                             command.Cancel();
-                            {
-                                var reader = task.Result;
-                                if (reader != null)
-                                {
-                                    /*
-                                    // 把残余的信息读完
-                                    while (reader.Read())
-                                    {
-
-                                    }
-                                    */
-                                    reader.Close();
-                                }
-                            }
+                            CloseReader();
+                            */
 
                             if (ret == false)
                             {
@@ -4288,39 +4332,76 @@ handle.CancelTokenSource.Token).Result;
                         // 2019/9/8 加上的 using
                         using (DbDataReader reader = task.Result)
                         {
-                            // 从 DbDataReader 中获取和填入记录到一个结果集对象中
-                            // return:
-                            //      -1  出错
-                            //      0   没有填入任何记录
-                            //      >0  实际填入的记录条数
-                            int nRet = FillResultSet(
-                                    handle,
-                                    reader,
-                                    resultSet,
-                                    nMaxCount,
-                                    style,  // GetOutputStyle(strOutputStyle),
-                                    bRecordTable,
-                                    () =>
-                                    {
-                                        command.Cancel();
-                                    },
-                                    out strError);
-                            if (nRet == -1 || nRet == 0)
+                            task = null;
+
+                            sw.Stop();
+                            explainInfo?.AppendLine($"第一阶段耗费时间 {sw.Elapsed}。SQL 语句: {strCommand}");
+                            sw.Restart();
+
+                            // 此时剩余的超时时间
+                            var current_timeout = timeout - (DateTime.UtcNow - start);
+                            var handle_token = handle?.CancelToken ?? default;
+                            //using (var timeout_cts = new CancellationTokenSource(current_timeout))
+                            //using (var cts = CancellationTokenSource.CreateLinkedTokenSource(handle_token, timeout_cts.Token))
                             {
-                                if (nRet == -1)
-                                    command.Cancel();
-                                return new Result
+                                // 从 DbDataReader 中获取和填入记录到一个结果集对象中
+                                // return:
+                                //      -1  出错
+                                //      0   没有填入任何记录
+                                //      >0  实际填入的记录条数
+                                int nRet = FillResultSet(
+                                        // cts.Token,
+                                        reader,
+                                        resultSet,
+                                        nMaxCount,
+                                        style,  // GetOutputStyle(strOutputStyle),
+                                        bRecordTable,
+                                        () =>
+                                        {
+                                            CancelCommand(command);
+                                            reader?.Close();
+                                            finished = true;
+                                        },
+                                        () =>
+                                        {
+                                            handle_token.ThrowIfCancellationRequested();
+                                            if (DateTime.UtcNow - start > current_timeout)
+                                                throw new TimeoutException($"服务器检索发生超时({timeout})");
+                                            return null;
+                                        },
+                                        out strError);
+
+                                sw.Stop();
+                                explainInfo?.AppendLine($"第二阶段耗费时间 {sw.Elapsed}。填入的记录数 {nRet}");
+
+                                if (nRet == -1 /*|| nRet == 0*/)
                                 {
-                                    Value = nRet,
-                                    ErrorString = strError
-                                };
+                                    /*
+                                    if (nRet == -1)
+                                    {
+                                        command?.Cancel();
+                                        reader?.Close();
+                                    }
+                                    */
+                                    return new Result
+                                    {
+                                        Value = nRet,
+                                        ErrorString = strError
+                                    };
+                                }
                             }
                         }
+
+                        // TODO: 测试一下 nMaxCount 为零或者为较小值的情况。另外测试多库(多表) Union 并且 nMaxCount 较小的情况
+                        finished = true;
                     }
-                    catch
+                    finally
                     {
-                        command?.Cancel();
-                        throw;
+                        if (finished == false)
+                        {
+                            CancelCommand(command);
+                            CloseReader();
+                        }
                     }
 
                 } // end of using command
@@ -4336,9 +4417,62 @@ handle.CancelTokenSource.Token).Result;
                     ErrorString = strError
                 };
             }
+            catch (TimeoutException ex)
+            {
+                return new Result
+                {
+                    Value = -1,
+                    ErrorString = ex.Message,
+                    ErrorCode = ErrorCodeValue.RequestTimeOut,
+                };
+            }
+            catch (TaskCanceledException ex)
+            {
+                return new Result
+                {
+                    Value = -1,
+                    ErrorString = "前端中断",
+                    ErrorCode = ErrorCodeValue.Canceled,
+                };
+            }
+            catch (OperationCanceledException ex)
+            {
+                return new Result
+                {
+                    Value = -1,
+                    ErrorString = "前端中断",
+                    ErrorCode = ErrorCodeValue.Canceled,
+                };
+            }
             catch (Exception ex)
             {
                 // 注意这里可能捕获到 AggregationException，所以要用 ExceptionUtil.GetExceptionText() 来输出异常信息
+                if (ex is AggregateException)
+                {
+                    var aex = ex as AggregateException;
+                    if (aex.InnerExceptions.Count(o => o is TimeoutException) > 0)
+                        return new Result
+                        {
+                            Value = -1,
+                            ErrorString = $"服务器检索过程发生超时({timeout})",
+                            ErrorCode = ErrorCodeValue.RequestTimeOut,  // TODO: 需要一个专门的错误码表示服务器检索超时
+                        };
+                    if (aex.InnerExceptions.Count(o => o is TaskCanceledException) > 0)
+                        return new Result
+                        {
+                            Value = -1,
+                            ErrorString = "前端中断",
+                            ErrorCode = ErrorCodeValue.Canceled,
+                        };
+                    var oracle_exception = aex.InnerExceptions.Where(o => o is OracleException).FirstOrDefault() as OracleException;
+                    if (oracle_exception != null && oracle_exception.Number == 1013)
+                        return new Result
+                        {
+                            Value = -1,
+                            ErrorString = "前端中断",
+                            ErrorCode = ErrorCodeValue.Canceled,
+                        };
+                }
                 strError = "ExecuteQueryFillResultSet() exception:\r\n" + ExceptionUtil.GetExceptionText(ex) + "\r\nSQL command: " + strCommand;
                 return new Result
                 {
@@ -4353,12 +4487,31 @@ handle.CancelTokenSource.Token).Result;
                 //if (lite_connection != null)
                 //    lite_connection.Close();
             }
+
+            void CancelCommand(DbCommand command)
+            {
+                if (this.IsOracle())
+                {
+                    try
+                    {
+                        command?.Cancel();
+                    }
+                    catch
+                    {
+
+                    }
+                }
+                else
+                    command?.Cancel();
+            }
         }
 
         delegate void delegate_cancel();
+        delegate string delegate_hasTimeout();
 
         // 从 DbDataReader 中获取和填入记录到一个结果集对象中
         // parameters:
+        //      nMaxCount       填入的最大数。
         //      bRecordTable    是否为从 record 表中 select 出来的结果？(否则就是 keys 表)
         //      func_cancel     当放弃检索时需要触发的回调函数
         // return:
@@ -4366,13 +4519,14 @@ handle.CancelTokenSource.Token).Result;
         //      0   没有填入任何记录
         //      >0  实际填入的记录条数
         int FillResultSet(
-        ChannelHandle handle,
+        // ChannelHandle handle,
         DbDataReader reader,
         DpResultSet resultSet,
         int nMaxCount,
         OutputStyle style,
         bool bRecordTable,
         delegate_cancel func_cancel,
+        delegate_hasTimeout func_hasTimeout,
         out string strError)
         {
             strError = "";
@@ -4383,13 +4537,11 @@ handle.CancelTokenSource.Token).Result;
                     || reader.HasRows == false)
                     return 0;
 
-                CancellationToken token;
                 /*
-                if (handle != null && handle.CancelTokenSource != null)
-                    token = handle.CancelTokenSource.Token;
-                    */
+                CancellationToken token;
                 if (handle != null)
                     token = handle.CancelToken;
+                */
 
                 int nGetedCount = 0;
                 while (reader.Read())
@@ -4405,14 +4557,25 @@ handle.CancelTokenSource.Token).Result;
                                         }
                                     }
 #endif
-                    if ((nGetedCount % 1000) == 0
-                        && token.IsCancellationRequested)
+                    if ((nGetedCount % 1000) == 0)
                     {
-                        // 2024/11/30
-                        // 如果不用 Command.Cancel()，则 DataReader.Close() 会滞留较长时间
-                        func_cancel?.Invoke();
-                        strError = "用户中断";
-                        return -1;
+                        /*
+                        if (token.IsCancellationRequested)
+                        {
+                            // 2024/11/30
+                            // 如果不用 Command.Cancel()，则 DataReader.Close() 会滞留较长时间
+                            func_cancel?.Invoke();
+                            // 判断是否为超时
+                            strError = "用户中断";
+                            return -1;
+                        }
+                        */
+                        var error = func_hasTimeout();
+                        if (string.IsNullOrEmpty(error) == false)
+                        {
+                            strError = error;
+                            return -1;
+                        }
                     }
 
                     string strFirstColumn = ((string)reader[0]);
@@ -4454,14 +4617,11 @@ handle.CancelTokenSource.Token).Result;
                     if (nMaxCount != -1
                         && nGetedCount >= nMaxCount)
                     {
-                        func_cancel?.Invoke();
+                        // 如果还有剩余的没有读完的，则需要专门 Cancel 一次，避免 SQL Server 还继续繁忙
+                        if (reader.Read() == true)
+                            func_cancel?.Invoke();
                         break;
                     }
-
-                    /*
-                    if (nGetedCount % 100 == 0)
-                        Thread.Sleep(1);
-                    */
                 }
 
                 return nGetedCount;
@@ -5339,6 +5499,7 @@ List<DbParameter> aSqlParameter)
             // Delegate_isConnected isConnected,
             DpResultSet resultSet,
             int nWarningLevel,
+            StringBuilder explainInfo,
             out string strError,
             out string strWarning)
         {
@@ -5363,11 +5524,9 @@ List<DbParameter> aSqlParameter)
 
             try
             {
-                bool bHasID = false;
-                List<TableInfo> aTableInfo = null;
                 int nRet = this.TableNames2aTableInfo(searchItem.TargetTables,
-                    out bHasID,
-                    out aTableInfo,
+                    out bool bHasID,
+                    out List<TableInfo> aTableInfo,
                     out strError);
                 if (nRet == -1)
                     return -1;
@@ -5381,9 +5540,11 @@ List<DbParameter> aSqlParameter)
                         // isConnected,
                         resultSet,
                         strOutputStyle,
+                        explainInfo,
                         out strError);
                     if (nRet == -1)
                         return -1;
+                    // ?? 这里忘了返回?
                 }
 
                 // 对sql库来说,通过ID检索后，记录已排序，去重
@@ -5467,6 +5628,7 @@ List<DbParameter> aSqlParameter)
                         return -1;
                     }
 
+#if REMOVED
                     // 如果限制了一个最大数，则按每个途径都是这个最大数算
                     string strTop = "";
                     string strLimit = "";
@@ -5487,6 +5649,7 @@ List<DbParameter> aSqlParameter)
                                 throw new Exception("未知的 SqlServerType");
                         }
                     }
+#endif
 
                     string strWhere = "";
 
@@ -5517,25 +5680,24 @@ List<DbParameter> aSqlParameter)
                         strOneCommand =
                             " SELECT "
                             + strDistinct
-                            + strTop
-                            // + " idstring" + strSelectKeystring + " "
+                            /*+ strTop*/    // 2025/1/23
                             + strColumnList
                             + " FROM " + strTableName + " "
                             + strWhere
                             + strGroupBy
-                            + (i == aTableInfo.Count - 1 ? strLimit : "");
+                            /*+ (i == aTableInfo.Count - 1 ? strLimit : "")*/;  // 2025/1/23
 
                         if (this.container.SqlServerType == SqlServerType.Oracle)
                         {
                             strOneCommand =
         " SELECT "
         + strDistinct
-        + strTop
-        // + " idstring" + strSelectKeystring + " "
+        /*+ strTop*/ // 2025/1/23
         + strColumnList
         + " FROM " + strTableName + " "
         + strWhere
         + strGroupBy;
+#if REMOVED
                             if (string.IsNullOrEmpty(strLimit) == false)
                             {
                                 // 注：如果要在有限制数的情况下确保命中靠前的条目，需要采用 select * from ( 办法
@@ -5550,29 +5712,29 @@ List<DbParameter> aSqlParameter)
                                         + strLimit;
                                 }
                             }
+#endif
                         }
                     }
                     else
                     {
                         strOneCommand = " SELECT "  // union
                             + strDistinct
-                            + strTop
-                            // + " idstring" + strSelectKeystring + " "  //DISTINCT 去重
+                            /*+ strTop*/ // 2025/1/23
                             + strColumnList
                             + " FROM " + strTableName + " "
                             + strWhere
                             + strGroupBy
-                            + (i == aTableInfo.Count - 1 ? strLimit : "");
+                            /*+ (i == aTableInfo.Count - 1 ? strLimit : "")*/;  // 2025/1/23
                         if (this.container.SqlServerType == SqlServerType.Oracle)
                         {
                             strOneCommand = " SELECT "
         + strDistinct
-        + strTop
-        // + " idstring" + strSelectKeystring + " "  //DISTINCT 去重
+        /*+ strTop */   // 2025/1/23
         + strColumnList
         + " FROM " + strTableName + " "
         + strWhere
         + strGroupBy;
+#if REMOVED
                             if (string.IsNullOrEmpty(strLimit) == false)
                             {
                                 // 注：如果要在有限制数的情况下确保命中靠前的条目，需要采用 select * from ( 办法
@@ -5588,6 +5750,7 @@ List<DbParameter> aSqlParameter)
                                 }
 
                             }
+#endif
 
                             // strOneCommand = " union " + strOneCommand;
                         }
@@ -5642,9 +5805,12 @@ List<DbParameter> aSqlParameter)
 
                 string strOrderBy = "";
                 if (string.IsNullOrEmpty(searchItem.OrderBy) == false
-                    && bSearchNull == false)    // 检索空的时候，列里面只有 id，没有 keystring 列，所以无法进行排序
+                    /*&& bSearchNull == false*/)    // 检索空的时候，列里面只有 id，没有 keystring 列，所以无法进行排序
                 {
                     strOrderBy = " ORDER BY " + searchItem.OrderBy + " ";
+                    // 检索空值的时候，order by 是约束 records 表的 id 字段
+                    if (bSearchNull)
+                        strOrderBy = " ORDER BY " + searchItem.OrderBy.Replace("idstring", "id")/*把 keys 表中的字段名替换为 record 表中的等同字段名*/ + " ";
 
                     // 2010/5/10
                     string strTemp = searchItem.OrderBy.ToLower();
@@ -5654,9 +5820,16 @@ List<DbParameter> aSqlParameter)
                     // TODO: 多个select union, 总的序可能是乱的
                 }
 
+                GetLimit(
+    searchItem,
+    bSearchNull,
+    out string strTop,
+    out string strLimit);
+
                 // 2009/8/5
                 if (bSearchNull == true)
                 {
+#if REMOVED
                     string strTop = "";
                     string strLimit = "";
 
@@ -5673,14 +5846,15 @@ List<DbParameter> aSqlParameter)
                         else
                             throw new Exception("未知的 SqlServerType");
                     }
+#endif
 
                     // Oracle比较特殊
                     if (this.container.SqlServerType == SqlServerType.Oracle)
                     {
                         if (string.IsNullOrEmpty(strLimit) == false)
                             strCommand = "SELECT * FROM (" + strCommand + ") "
-        + strOrderBy    // 2012/3/30
-        + strLimit;
+        + strLimit
+        + strOrderBy;   // 注意 where rownum <= ... 在 order by 之前
                         else
                             strCommand = "select * FROM (" + strCommand + ") "
         + strOrderBy    // 2012/3/30
@@ -5781,11 +5955,44 @@ List<DbParameter> aSqlParameter)
                 }
                 else
                 {
+                    // Oracle比较特殊
+                    if (this.container.SqlServerType == SqlServerType.Oracle)
+                    {
+                        if (string.IsNullOrEmpty(strLimit) == false)
+                            strCommand = "SELECT * FROM (" + strCommand + ") "
+        + strLimit
+        + strOrderBy;   // 注意 where rownum <= ... 在 order by 之前
+                        else
+                            strCommand = "select * FROM (" + strCommand + ") "
+        + strOrderBy    // 2012/3/30
+        ;
+                    }
+                    else
+                    {
+                        // 将 top 子句插入 select 后面 2015/12/23
+                        if (string.IsNullOrEmpty(strTop) == false)
+                            strCommand = InsertTopPart(strCommand, strTop);
+
+                        if (string.IsNullOrEmpty(strLimit) == false
+        || string.IsNullOrEmpty(strOrderBy) == false)
+                            strCommand = strCommand
+        + strOrderBy
+        + strLimit;
+                    }
+
+
+#if REMOVED
                     if (this.container.SqlServerType == SqlServerType.MsSqlServer)
                         strCommand += " " + strOrderBy;
+                    else if (this.container.SqlServerType == SqlServerType.Pgsql)
+                        strCommand += " " + strOrderBy;
                     else
-                        bNeedSort = true;
+                    {
+                        if (string.IsNullOrEmpty(strOrderBy) == false)
+                            bNeedSort = true;
+                    }
                     // TODO: 其他数据库类型，是否在一个select * from () 后面加order by(如果只有一个select语句则不要加外壳)，还是在每个具体的select语句里面加order by?
+#endif
                 }
 
                 if (this.container.SqlServerType == SqlServerType.MsSqlServer)
@@ -5812,12 +6019,22 @@ List<DbParameter> aSqlParameter)
             searchItem.MaxCount,
             searchItem.Timeout,
             GetOutputStyle(strOutputStyle),
-            false);
+            false,
+            explainInfo);
                 if (result.Value == -1 || result.Value == 0)
                 {
                     strError = result.ErrorString;
-                    return (int)result.Value;    // ???
+                    var ret = (int)result.Value;
+                    // 2025/1/21
+                    if (ret == 0 && bNeedSort)
+                        return 1;
+                    return ret;
                 }
+
+                if (bNeedSort == true)
+                    return 1;
+
+                return 0;
             }
             catch (Exception ex)
             {
@@ -5839,11 +6056,52 @@ List<DbParameter> aSqlParameter)
                 Debug.WriteLine("SearchByUnion耗时 " + delta.ToString());
 #endif
             }
+        }
 
-            if (bNeedSort == true)
-                return 1;
+        // 2025/1/23
+        void GetLimit(
+            SearchItem searchItem,
+            bool bSearchNull,
+            out string strTop,
+            out string strLimit)
+        {
+            // 如果限制了一个最大数，则按每个途径都是这个最大数算
+            strTop = "";
+            strLimit = "";
 
-            return 0;
+            if (bSearchNull == false)
+            {
+                if (searchItem.MaxCount != -1)  //限制的最大数
+                {
+                    if (this.IsMsSqlServer())
+                        strTop = " TOP " + Convert.ToString(searchItem.MaxCount) + " ";
+                    else if (this.IsSqlite() || this.IsPgsql())
+                        strLimit = " LIMIT " + Convert.ToString(searchItem.MaxCount) + " ";  // 2025/1/15
+                    else if (this.container.SqlServerType == SqlServerType.MySql)
+                        strLimit = " LIMIT " + Convert.ToString(searchItem.MaxCount) + " ";
+                    else if (this.container.SqlServerType == SqlServerType.Oracle)
+                        strLimit = " WHERE rownum <= " + Convert.ToString(searchItem.MaxCount) + " ";
+                    else
+                        throw new Exception("未知的 SqlServerType");
+                }
+            }
+
+            if (bSearchNull == true)
+            {
+                if (searchItem.MaxCount != -1)  //限制的最大数
+                {
+                    if (this.IsMsSqlServer())
+                        strTop = " TOP " + Convert.ToString(searchItem.MaxCount) + " ";
+                    else if (this.IsSqlite() || this.IsPgsql())
+                        strLimit = " LIMIT " + Convert.ToString(searchItem.MaxCount) + " ";  // 2025/1/15
+                    else if (this.container.SqlServerType == SqlServerType.MySql)
+                        strLimit = " LIMIT " + Convert.ToString(searchItem.MaxCount) + " ";
+                    else if (this.container.SqlServerType == SqlServerType.Oracle)
+                        strLimit = " WHERE rownum <= " + Convert.ToString(searchItem.MaxCount) + " ";
+                    else
+                        throw new Exception("未知的 SqlServerType");
+                }
+            }
         }
 
         static string InsertTopPart(string strCommand, string strTop)
@@ -5957,6 +6215,90 @@ List<DbParameter> aSqlParameter)
                     return -1;
                 }
             }
+
+            if (this.container.SqlServerType == SqlServerType.Pgsql)
+            {
+                var current_version = this.GetDatabaseVersion();
+                if (string.IsNullOrEmpty(current_version))
+                    current_version = "0.01";
+                // 0.01 --> 0.02 pgsql 数据库的 keys 表和 records 表若干字段增加 collate "C" 定义
+                if (StringUtil.CompareVersion(current_version, "0.02") < 0)
+                {
+                    this.container.WriteErrorLog($"数据库 {this.GetCaption("zh")} 算法版本为 {current_version}，开始升级库表结构 ...");
+
+                    string strCommand = "";
+                    {
+                        // TODO: 可以考虑改进为探索实际存在的表，才发出 SQL 指令
+
+                        strCommand += $"ALTER TABLE {db_prefix}records ALTER COLUMN id TYPE varchar (255) collate \"C\",";
+                        strCommand += $"ALTER COLUMN range TYPE varchar (2000) collate \"C\",\n";
+                        strCommand += $"ALTER COLUMN dptimestamp TYPE varchar (100) collate \"C\",\n";
+                        strCommand += $"ALTER COLUMN newdptimestamp TYPE varchar (100) collate \"C\",\n";
+                        strCommand += $"ALTER COLUMN metadata TYPE varchar (2000) collate \"C\",\n";
+                        strCommand += $"ALTER COLUMN filename TYPE varchar (255) collate \"C\",\n";
+                        strCommand += $"ALTER COLUMN newfilename TYPE varchar (255) collate \"C\";\n";
+                        strCommand += $"ANALYZE {db_prefix}records;\n";
+                    }
+
+                    {
+                        int nRet = this.GetKeysCfg(out KeysCfg keysCfg,
+    out strError);
+                        if (nRet == -1)
+                            return -1;
+
+                        if (keysCfg != null)
+                        {
+                            nRet = keysCfg.GetTableInfosRemoveDup(
+                                out List<TableInfo> aTableInfo,
+                                out strError);
+                            if (nRet == -1)
+                                return -1;
+
+                            // TODO: 可以考虑改进为探索实际存在的表，才发出 SQL 指令
+
+                            foreach (var tableInfo in aTableInfo)
+                            {
+                                strCommand += $"ALTER TABLE {db_prefix}{tableInfo.SqlTableName} \n";
+                                strCommand += $"ALTER COLUMN keystring TYPE varchar ({this.KeySize}) collate \"C\",\n";
+                                strCommand += $"ALTER COLUMN fromstring TYPE varchar (255) collate \"C\",\n";
+                                strCommand += $"ALTER COLUMN idstring TYPE varchar (255) collate \"C\";\n";
+                                strCommand += $"ANALYZE {db_prefix}{tableInfo.SqlTableName};\n";
+                            }
+                        }
+                    }
+
+                    Connection connection = new Connection(this, this.m_strConnString);
+                    connection.TryOpen();
+                    try
+                    {
+                        using (var command = connection.NewCommand(""))
+                        {
+                            command.CommandTimeout = 10 * 60;
+
+                            int nRet = RunCommandNonQuery(command,
+    strCommand,
+    "更新 pgsql 中 record 和 keys 表定义",
+    null,
+    out strError);
+                            if (nRet == -1)
+                            {
+                                this.container.WriteErrorLog($"更新数据库 {this.GetCaption("zh")} 表结构时出错: {strError}");
+                                return -1;
+                            }
+
+                        } // end of using command
+                    }
+                    finally
+                    {
+                        connection.Close();
+                    }
+
+                    this.SetDatabaseVersion("0.02");
+                    this.container.Changed = true;
+                    this.container.WriteErrorLog($"数据库 {this.GetCaption("zh")} 算法版本已经升级到 0.02");
+                }
+            }
+
             return 0;
         }
 

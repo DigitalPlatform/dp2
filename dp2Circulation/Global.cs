@@ -2341,6 +2341,7 @@ namespace dp2Circulation
                         "keycount", // strOutputStyle
                         "",
                         out string strQueryXml,
+                        out _,
                         out strError);
                 }
                 else if (strType == "item")

@@ -156,7 +156,8 @@ namespace dp2Library
             string strSearchStyle,
             string strOutputStyle,
             string strLocationFilter,
-            out string strQueryXml);
+            out string strQueryXml,
+            out string explain);
 
         [OperationContract(IsInitiating = true, IsTerminating = false)]
         LibraryServerResult SetBiblioInfo(

@@ -1698,6 +1698,9 @@ out strError);
                 if (dont_use_batch)
                     use_batch = false;
 
+                if (filter_query == false)
+                    strOutputStyle += ",explain";
+
                 // this.ShowMessageBox($"use_batch={use_batch}");
 
                 int word_index = 0;
@@ -2581,9 +2584,12 @@ out strError);
             strOutputStyle,
             filter,
             out strQueryXml,
+            out string explain,
             out strError);
                 if (words.Count > 1)    // .Count == 1 其实是没有有效拆分的情况
                     Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode($"-- '{query_string}' 拆分后的检索词 '{word}' 检索返回 {lRet}").Replace("\r\n", "<br/>") + "</div>");
+                if (string.IsNullOrEmpty(explain) == false)
+                    Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode($"explain: {explain}").Replace("\r\n", "<br/>") + "</div>");
 
                 if (lRet == -1)
                     return -1;
@@ -5687,6 +5693,7 @@ GetCurrentBrowseStyle());
                 "",
                 "",
                 "",
+                out _,
                 out _,
                 out strError);
             if (ret == -1)
@@ -12028,6 +12035,7 @@ message,
                 "",
                 "",
                 "",
+                out _,
                 out _,
                 out strError);
             if (ret == -1)

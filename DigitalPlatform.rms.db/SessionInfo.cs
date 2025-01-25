@@ -48,6 +48,8 @@ namespace DigitalPlatform.rms
 
         public int BeginSearch()
         {
+            this.TryStopPrevious();
+
             return Interlocked.Increment(ref m_nInSearching) - 1;
 
             /*
@@ -447,17 +449,17 @@ namespace DigitalPlatform.rms
             if (nRet == -1)
                 return -1;
 
-            bool bKeyCount = StringUtil.IsInList("keycount", strStyle, true);
-            bool bKeyID = StringUtil.IsInList("keyid", strStyle, true);
+            bool isKeyCountState = StringUtil.IsInList("keycount", strStyle, true);
+            bool isKeyIdState = StringUtil.IsInList("keyid", strStyle, true);
 
             bool bHasID = StringUtil.IsInList("id", strStyle, true);
             bool bHasCols = StringUtil.IsInList("cols", strStyle, true);
             bool bHasKey = StringUtil.IsInList("key", strStyle, true);
 
-            if (bKeyID == true
+            if (isKeyIdState == true
                 && bHasID == false && bHasCols == false && bHasKey == false)
             {
-                strError = "strStyle包含了keyid但是没有包含id/key/cols中任何一个，导致API不返回任何内容，操作无意义";
+                strError = "strStyle 包含了 keyid 但是没有包含 id/key/cols 中任何一个，导致API不返回任何内容，操作无意义";
                 return -1;
             }
 
@@ -497,12 +499,13 @@ namespace DigitalPlatform.rms
 
                 Record record = new Record();
 
-                if (bKeyCount == true)
+                if (isKeyCountState == true)
                 {
                     record.Path = dpRecord.ID;
                     record.Cols = new string[1];
                     record.Cols[0] = dpRecord.Index.ToString();
 
+                    // 注: 返回的 record.Key 里面没有内容。因为 dpRecord.BrowseText 里面没有内容
 #if NO
                     lTotalPackageLength += record.Path.Length;
                     lTotalPackageLength += record.Cols[0].Length;
@@ -603,14 +606,8 @@ out strError);
                     record.RecordBody.Timestamp = baTimestamp;
                 }
 
-                if (bKeyID == true)
+                if (isKeyIdState == true)
                 {
-                    // string strID = "";
-                    string strKey = "";
-
-                    // strID = dpRecord.ID;
-                    strKey = dpRecord.BrowseText;
-
                     /*
                     string strText = dpRecord.ID;
                     nRet = strText.LastIndexOf(",");
@@ -635,7 +632,7 @@ out strError);
 
                     if (bHasKey == true)
                     {
-                        record.Keys = BuildKeyFromArray(strKey);
+                        record.Keys = BuildKeyFromArray(dpRecord?.BrowseText);
                         // lTotalPackageLength += GetLength(record.Keys);
                     }
 
@@ -1210,7 +1207,7 @@ out strError);
                         info.RecordID10,    // path.ID10,
                         client_xml, // "",
                         strStyle,   // TODO: 可以考虑削减 titles:type1|type2 以外的其他子参数
-                        out string [] cols,
+                        out string[] cols,
                         out strError);
 #if NO
                     if (nRet == -1)
@@ -1356,11 +1353,42 @@ out strError);
             return 0;
         }
 
+        public void TryStopPrevious()
+        {
+            try
+            {
+                if (this.InSearching > 0)
+                {
+                    var handle = this.ChannelHandle;
+                    if (handle != null)
+                    {
+                        handle?.DoStop();
+
+                        // 如果是全局结果集，把它改名为一个随机名字。
+                        // 这样后继请求获得结果集内容的时候，就会找不到这个结果集名，
+                        // 这样避免了前端请求在获得结果集的过程中被另外的线程突然 Clear() 造成报错
+                        // TODO: 改名后的这个结果集对象，可以设法让它加速自动被清除，因为再也不会有人用到它。可以考虑给名字带上特征
+                        if (KernelApplication.IsGlobalResultSetName(handle.ResultSetName) == true)
+                            app.ResultSets.RenameResultSet(handle.ResultSetName.Substring(1), "free_" + Guid.NewGuid().ToString());
+                    }
+
+#if DEBUG
+                    app.MyWriteDebugInfo("因后一个search的到来，前一个search不得不中断 ");
+#endif
+                }
+            }
+            catch
+            {
+            }
+        }
+
         // 关闭
         public void Close()
         {
             int nRet = 0;
 
+            // 2025/1/17
+            this.TryStopPrevious();
 #if NO
             if (this.DelayTables != null && this.DelayTables.Count != 0)
             {

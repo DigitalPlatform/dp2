@@ -511,6 +511,7 @@ strErrorCode);
                              "", // strOutputStyle
                              "",
                              out strQueryXml,
+                             out _,
                              out strError);
                     }
                     else if (searchParam.Operation == "searchPatron")

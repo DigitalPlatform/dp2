@@ -1807,6 +1807,7 @@ false);
                     "", // strOutputStyle
                     "",
                     out string strQueryXml,
+                    out _,
                     out strError);
                 if (lRet == -1)
                 {

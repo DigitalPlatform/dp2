@@ -278,6 +278,7 @@ namespace dp2Circulation
                     "", // strOutputStyle
                     "",
                     out strQueryXml,
+                    out _,
                     out strError);
                 if (lRet == -1)
                     goto ERROR1;

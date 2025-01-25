@@ -5891,6 +5891,7 @@ out QueryResult[] results)
         search_style,
         output_style,
         location_filter,
+        out _,
         out _);
                         if (current_result.Value == -1
                             || current_result.Value > 0)
@@ -6106,7 +6107,12 @@ out QueryResult[] results)
         //      strResultSetName    结果集名。
         //      strQueryXml 返回数据库内核层所使用的XML检索式，便于进行调试
         //      strSearchStyle  可以包含 desc，表示命中结果按照降序排列
-        //      strOutputStyle  如果为"keycount"，表示输出key+count形式
+        //      strOutputStyle  如果包含"keycount"，表示输出 key + count形式
+        //                      如果包含"keyid"，表示输出 key + id 形式
+        //                      如果 keycount 和 keyid 都不具备，则表示为一般输出 id 形式
+        //                      当处于 keycount 或 keyid 状态时，可以包含 sortby:key 或 sortby:id 分别代表按照命中 key 排序和按照命中 id 排序。(缺省为 sortby:id)
+        //                      可以包含 desc，表示对命中结果排序采用降序。(为兼容以前版本，strSearchStyle 和 strOutputStyle 参数都可以用这个值，不过建议用在 strOutputStyle 中)
+        //                      如果包含 explain，表示希望在 explain 参数中返回检索过程的解释信息
         //      strLocationFilter   馆藏地点过滤条件
         // rights:
         //      需要 searchbiblio 权限
@@ -6123,9 +6129,11 @@ out QueryResult[] results)
             string strSearchStyle,
             string strOutputStyle,
             string strLocationFilter,
-            out string strQueryXml)
+            out string strQueryXml,
+            out string explain)
         {
             strQueryXml = "";
+            explain = null;
             string strError = "";
 
             LibraryServerResult result = this.PrepareEnvironment("SearchBiblio", true, true);
@@ -6346,6 +6354,7 @@ out QueryResult[] results)
         strMatchStyle,
         strLang,
         strSearchStyle,
+        strOutputStyle,
         out List<string> dbTypes,
         out strQueryXml,
                 out strError);
@@ -6438,6 +6447,7 @@ out QueryResult[] results)
                     long lRet = channel.DoSearch(strQueryXml,
                         strResultSetName,   // "default",
                         strOutputStyle,
+                        out explain,
                         out strError);
                     WriteDebugInfo("end search lRet=" + lRet.ToString() + " " + strQueryXml);
                     if (lRet == -1)

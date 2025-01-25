@@ -26,7 +26,7 @@ namespace dp2rms
 
         public string Lang = "zh";
 
-        RmsChannel channel = null;	// 临时使用的channel对象
+        RmsChannel _channel = null;	// 临时使用的channel对象
 
         public AutoResetEvent eventClose = new AutoResetEvent(false);
 
@@ -344,8 +344,8 @@ namespace dp2rms
             // 
             // textBox_simpleQuery_comment
             // 
-            this.textBox_simpleQuery_comment.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_simpleQuery_comment.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_simpleQuery_comment.Location = new System.Drawing.Point(15, 151);
             this.textBox_simpleQuery_comment.Multiline = true;
@@ -364,7 +364,7 @@ namespace dp2rms
             // 
             // textBox_simpleQueryWord
             // 
-            this.textBox_simpleQueryWord.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_simpleQueryWord.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_simpleQueryWord.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.textBox_simpleQueryWord.Location = new System.Drawing.Point(11, 43);
@@ -416,8 +416,8 @@ namespace dp2rms
             // 
             // textBox_complexQuery_comment
             // 
-            this.textBox_complexQuery_comment.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_complexQuery_comment.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_complexQuery_comment.Location = new System.Drawing.Point(24, 238);
             this.textBox_complexQuery_comment.Multiline = true;
@@ -515,7 +515,7 @@ namespace dp2rms
             // 
             // textBox_complex_word4
             // 
-            this.textBox_complex_word4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_complex_word4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_complex_word4.Location = new System.Drawing.Point(182, 142);
             this.textBox_complex_word4.Name = "textBox_complex_word4";
@@ -548,7 +548,7 @@ namespace dp2rms
             // 
             // textBox_complex_word3
             // 
-            this.textBox_complex_word3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_complex_word3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_complex_word3.Location = new System.Drawing.Point(182, 101);
             this.textBox_complex_word3.Name = "textBox_complex_word3";
@@ -581,7 +581,7 @@ namespace dp2rms
             // 
             // textBox_complex_word2
             // 
-            this.textBox_complex_word2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_complex_word2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_complex_word2.Location = new System.Drawing.Point(182, 60);
             this.textBox_complex_word2.Name = "textBox_complex_word2";
@@ -607,7 +607,7 @@ namespace dp2rms
             // 
             // textBox_complex_word1
             // 
-            this.textBox_complex_word1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_complex_word1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_complex_word1.Location = new System.Drawing.Point(182, 19);
             this.textBox_complex_word1.Name = "textBox_complex_word1";
@@ -878,9 +878,9 @@ namespace dp2rms
             {
                 if (stop.State == 0 || stop.State == 1)
                 {
-                    if (this.channel != null)
+                    if (this._channel != null)
                     {
-                        this.channel.Abort();
+                        this._channel.Abort();
                         e.Cancel = true;
                     }
                 }
@@ -1106,10 +1106,10 @@ namespace dp2rms
 
                     TargetItem item = (TargetItem)targets[i];
 
-                    channel = Channels.GetChannel(item.Url);
-                    Debug.Assert(channel != null, "Channels.GetChannel 异常");
+                    _channel = Channels.GetChannel(item.Url);
+                    Debug.Assert(_channel != null, "Channels.GetChannel 异常");
 
-                    channel.Idle += Channel_Idle;
+                    _channel.Idle += Channel_Idle;
                     try
                     {
 
@@ -1125,7 +1125,7 @@ namespace dp2rms
                         }
 
                         // MessageBox.Show(this, item.Xml);
-                        long nRet = channel.DoSearch(item.Xml,
+                        long nRet = _channel.DoSearch(item.Xml,
                             "default",
                             strOutputStyle,
                             out strError);
@@ -1142,7 +1142,7 @@ namespace dp2rms
                             continue;
 
                         // 获取结果集
-                        nRet = channel.DoBrowse(listView_browse,
+                        nRet = _channel.DoBrowse(listView_browse,
                             listView_browse.Lang,
                             stop,
                             "default",
@@ -1157,7 +1157,7 @@ namespace dp2rms
                     }
                     finally
                     {
-                        channel.Idle -= Channel_Idle;
+                        _channel.Idle -= Channel_Idle;
                     }
                 }
 
@@ -1171,7 +1171,7 @@ namespace dp2rms
                     MessageBox.Show(this, "未命中");
                 }
 
-                channel = null;
+                _channel = null;
             }
             finally
             {
@@ -1190,8 +1190,8 @@ namespace dp2rms
 
         void DoStop(object sender, StopEventArgs e)
         {
-            if (this.channel != null)
-                this.channel.Abort();
+            if (this._channel != null)
+                this._channel.Abort();
         }
 
         private void SearchForm_Activated(object sender, System.EventArgs e)
@@ -1549,14 +1549,14 @@ namespace dp2rms
 
                 TargetItem item = (TargetItem)targets[i];
 
-                channel = Channels.GetChannel(item.Url);
-                Debug.Assert(channel != null, "Channels.GetChannel 异常");
+                _channel = Channels.GetChannel(item.Url);
+                Debug.Assert(_channel != null, "Channels.GetChannel 异常");
 
-                channel.Idle += Channel_Idle;
+                _channel.Idle += Channel_Idle;
                 try
                 {
                     // MessageBox.Show(this, item.Xml);
-                    long nRet = channel.DoSearch(textBox_xmlQueryString.Text,
+                    long nRet = _channel.DoSearch(textBox_xmlQueryString.Text,
                         "default",
                         strOutputStyle,
                         out strError);
@@ -1574,7 +1574,7 @@ namespace dp2rms
 
                     // 获取结果集
 
-                    nRet = channel.DoBrowse(listView_browse,
+                    nRet = _channel.DoBrowse(listView_browse,
                         listView_browse.Lang,
                         stop,
                         "default",
@@ -1589,7 +1589,8 @@ namespace dp2rms
                 }
                 finally
                 {
-                    channel.Idle -= Channel_Idle;
+                    if (_channel != null)
+                        _channel.Idle -= Channel_Idle;
                 }
             }
 
@@ -1609,7 +1610,7 @@ namespace dp2rms
 
             EnableControlsInSearching(false);
 
-            channel = null;
+            _channel = null;
 
         }
 
@@ -2222,10 +2223,10 @@ namespace dp2rms
                 string strServer = (string)aServer[i];
                 string strQueryXml = (string)aQueryXml[i];
 
-                channel = Channels.GetChannel(strServer);
-                Debug.Assert(channel != null, "Channels.GetChannel 异常");
+                _channel = Channels.GetChannel(strServer);
+                Debug.Assert(_channel != null, "Channels.GetChannel 异常");
 
-                channel.Idle += Channel_Idle;
+                _channel.Idle += Channel_Idle;
                 try
                 {
 
@@ -2234,7 +2235,7 @@ namespace dp2rms
                     textBox_complexQuery_comment.Text += "检索式XML:\r\n" + DomUtil.GetIndentXml(strQueryXml) + "\r\n";
 
                     // MessageBox.Show(this, item.Xml);
-                    nRet = channel.DoSearch(strQueryXml,
+                    nRet = _channel.DoSearch(strQueryXml,
                         "default",
                         strOutputStyle,
                         out strError);
@@ -2252,7 +2253,7 @@ namespace dp2rms
 
                     // 获取结果集
 
-                    nRet = channel.DoBrowse(listView_browse,
+                    nRet = _channel.DoBrowse(listView_browse,
                         listView_browse.Lang,
                         stop,
                         "default",
@@ -2267,7 +2268,7 @@ namespace dp2rms
                 }
                 finally
                 {
-                    channel.Idle -= Channel_Idle;
+                    _channel.Idle -= Channel_Idle;
                 }
             }
 
@@ -2287,7 +2288,7 @@ namespace dp2rms
 
             EnableControlsInSearching(false);
 
-            channel = null;
+            _channel = null;
         }
 
         void EnableComplexSearchLine1(bool bEnable)

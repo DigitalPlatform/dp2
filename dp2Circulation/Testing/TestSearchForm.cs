@@ -385,6 +385,7 @@ namespace dp2Circulation
                             "", // strOutputStyle,
                             "",
                             out strQueryXml,
+                            out _,
                             out strError);
 
                         TimeSpan delta = DateTime.Now - timeStart;

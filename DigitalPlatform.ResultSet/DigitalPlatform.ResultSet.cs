@@ -918,6 +918,8 @@ namespace DigitalPlatform.ResultSet
         public int Asc = 1; // 1 升序 -1 降序
         public bool Sorted = false; // 是否已经排过序
 
+        public delegate_compare FuncCompare = null;
+
         //表示结果集的名称
         protected string m_strName;
 
@@ -1137,6 +1139,7 @@ namespace DigitalPlatform.ResultSet
             this.m_bufferBig = null;
 
             this.Sorted = false;
+            this.Asc = 1;   // 2025/1/21
         }
 
         //记录数
@@ -2594,8 +2597,10 @@ namespace DigitalPlatform.ResultSet
             return 0;
         }
 
+        public delegate int delegate_compare(DpRecord r1, DpRecord r2);
+
         // 排序
-        public void Sort()
+        public void Sort(delegate_compare func_compare = null)
         {
             if (this.ReadOnly)
                 throw new Exception("只读的结果集不允许发生修改");
@@ -2624,6 +2629,9 @@ namespace DigitalPlatform.ResultSet
 
             ReadToMemory();
 
+            var old_func = this.FuncCompare;
+            if (func_compare != null)
+                this.FuncCompare = func_compare;
             try
             {
 
@@ -2635,6 +2643,9 @@ namespace DigitalPlatform.ResultSet
             }
             finally
             {
+                if (func_compare != null)
+                    this.FuncCompare = old_func;
+
                 this.m_bufferSmall = null;
                 this.m_bufferBig = null;
             }
@@ -3554,6 +3565,9 @@ namespace DigitalPlatform.ResultSet
             DpRecord record1 = GetRecordByOffset(lPtr1);
             DpRecord record2 = GetRecordByOffset(lPtr2);
 
+            if (this.FuncCompare != null)
+                return this.FuncCompare(record1, record2);
+
             return record1.CompareTo(record2);
         }
 
@@ -3663,6 +3677,19 @@ namespace DigitalPlatform.ResultSet
 
             //通过String类的静态方法Compare比较两个字符串的大小，返回值为小于0，等于0，大于0
             return String.Compare(this.ID, myRecord.ID);
+        }
+
+        // 2025/1/21
+        public int CompareToKey(object obj)
+        {
+            DpRecord myRecord = (DpRecord)obj;
+            var ret = String.Compare(this.BrowseText, myRecord.BrowseText);
+            if (ret == 0)   // 如果 Key 相等，继续比较 ID 部分
+            {
+                return String.Compare(this.ID, myRecord.ID);
+            }
+
+            return ret;
         }
 
     }//end of class DpRecord

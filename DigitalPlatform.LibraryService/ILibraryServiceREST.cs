@@ -178,7 +178,8 @@ SessionMode = SessionMode.NotAllowed)]
             string strSearchStyle,
             string strOutputStyle,
             string strLocationFilter,
-            out string strQueryXml);
+            out string strQueryXml,
+            out string explain);
 
         [OperationContract]
         LibraryServerResult SetBiblioInfo(

@@ -266,6 +266,7 @@ namespace DigitalPlatform.OPAC.Server
             {
                 DateTime time = DateTime.Now;
 
+                // TODO: 确保 strQueryXml 中的超时参数足以获得所需的全部记录
                 long nRet = // sessioninfo.Channel.
                     channel.Search(
                     null,

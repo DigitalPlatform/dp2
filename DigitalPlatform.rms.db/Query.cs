@@ -11,6 +11,8 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.ResultSet;
 using DigitalPlatform.Text;
+using static DigitalPlatform.ResultSet.DpResultSet;
+using System.Data.SqlClient;
 
 namespace DigitalPlatform.rms
 {
@@ -29,6 +31,10 @@ namespace DigitalPlatform.rms
         public string OrderBy = "";     // 排序风格
         public int MaxCount = -1;       // 限制的最大条数 -1:不限
         public string Timeout = "";     // 超时时间长度。例如 00:02:00 表示两分钟
+
+        // 2025/1/23
+        // 描述信息
+        public string Description = "";
     }
 
     // 专门的逻辑检索类,并不用考虑加锁的问题，
@@ -187,7 +193,13 @@ namespace DigitalPlatform.rms
                     continue;
 
                 //用于其它用途的扩展节点，需要跳过
+                /*
                 if (nodeChild.Name == "lang" || nodeChild.Name == "option")
+                    continue;
+                */
+                // 2025/1/12
+                if (nodeChild.Name != "operator" && nodeChild.Name != "item"
+                    && nodeChild.Name != "target")
                     continue;
 
                 // 2010/9/26 add
@@ -334,7 +346,7 @@ namespace DigitalPlatform.rms
             //最后，将栈里剩下的操作符，从栈里pop，加到output里
             while (stackOperator.Count != 0)
             {
-                var  nodeTemp = stackOperator.Pop() as XmlElement;
+                var nodeTemp = stackOperator.Pop() as XmlElement;
 
                 //操作符为左括号，括号不匹配，出错，返回-1
                 string strOperator = "";
@@ -461,6 +473,35 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
+        public static string GetSortBy(string strOutputStyle,
+            bool throw_exception = true)
+        {
+            // 2025/1/21
+            // 排序依据的列 sortby:id 或者 sortby:key
+            var sortby = StringUtil.GetParameterByPrefix(strOutputStyle, "sortby");
+            if (string.IsNullOrEmpty(sortby))
+                sortby = "id";
+            else
+            {
+                // 检查 sortby 值
+                if (sortby != "id" && sortby != "key")
+                {
+                    var error = $"strOutputStyle 参数值 '{strOutputStyle}' 不合法: sortby: 子参数值应为 'id' 或 'key'";
+                    if (throw_exception)
+                        throw new ArgumentException(error);
+                    return "id";
+                }
+            }
+
+            // 检查 keyid keycount 的缺乏，和 sortby:key 之间的矛盾
+            if (sortby == "key"
+                && StringUtil.IsInList("keyid", strOutputStyle) == false
+                && StringUtil.IsInList("keycount", strOutputStyle) == false)
+                throw new ArgumentException($"当 strOutput 参数值 '{strOutputStyle}' 中不具备 keyid 或 keycount 时，不应使用 sortby:key 子参数");
+
+            return sortby;
+        }
+
         // 检索单元item的信息，对库进行检索
         // parameter:
         //		nodeItem	    item节点
@@ -478,21 +519,46 @@ namespace DigitalPlatform.rms
             XmlElement nodeItem,
             ref DpResultSet resultSet,
             ChannelHandle handle,
-            // Delegate_isConnected isConnected,
+            StringBuilder explainInfo,
             out string strError)
         {
             strError = "";
             if (nodeItem == null)
             {
-                strError = "doItem() nodeItem参数为null.";
+                strError = "doItem() nodeItem 参数值不应为 null";
                 return -1;
             }
 
             if (resultSet == null)
             {
-                strError = "doItem() oResult参数为null.";
+                strError = "doItem() resultSet 参数值不应为 null";
                 return -1;
             }
+
+            // 2025/1/17
+            if (handle != null && handle.CancelToken.IsCancellationRequested)
+            {
+                strError = "前端中断";
+                return -1;
+            }
+
+#if REMOVED
+            // 2025/1/21
+            // 排序依据的列 sortby:id 或者 sortby:key
+            var sortby = StringUtil.GetParameterByPrefix(strOutputStyle, "sortby");
+            if (string.IsNullOrEmpty(sortby))
+                sortby = "id";
+            else
+            {
+                // 检查 sortby 值
+                if (sortby != "id" && sortby != "key")
+                {
+                    strError = $"strOutputStyle 参数值 '{strOutputStyle}' 不合法: sortby: 子参数值应为 'id' 或 'key'";
+                    return -1;
+                }
+            }
+#endif
+            var sortby_key = Query.GetSortBy(strOutputStyle) == "key";
 
             string strResultSetName = nodeItem.GetAttribute("resultset");
             if (string.IsNullOrEmpty(strResultSetName) == false)
@@ -519,7 +585,10 @@ namespace DigitalPlatform.rms
 
                 // 2022/1/16
                 // 对即将 ReadOnly 的结果集先排序。因为一旦变成 ReadOnly 以后就不允许排序了
-                if (EnsureSorted(resultSet, handle, out strError) == -1)
+                if (EnsureSorted(resultSet, handle, sortby_key,
+                    "克隆后",
+                    explainInfo,
+                    out strError) == -1)
                 {
                     strError = $"在对克隆后的结果集排序时出现错误: {strError}";
                     return -1;
@@ -581,6 +650,7 @@ namespace DigitalPlatform.rms
 
             int hit_database_count = 0; // 检索真正发生命中的数据库数量
             // 将 target 以 ; 号分成多个库
+            // TODO: 其实多个库之间也可以考虑实现为 select union
             string[] aDatabase = strTarget.Split(new Char[] { ';' });
             foreach (string strOneDatabase in aDatabase)
             {
@@ -628,6 +698,7 @@ namespace DigitalPlatform.rms
                 }
 
                 SearchItem searchItem = new SearchItem();
+                searchItem.Description = $"{strOneDatabase} {nodeItem.OuterXml}";
                 searchItem.TargetTables = strTableList;
                 searchItem.Word = strWord;
                 searchItem.Match = strMatch;
@@ -653,6 +724,7 @@ namespace DigitalPlatform.rms
                     // isConnected,
                     resultSet,
                     this.m_nWarningLevel,
+                    explainInfo,
                     out strError,
                     out strWarningInfo);
                 if (nRet == -1)
@@ -683,11 +755,24 @@ namespace DigitalPlatform.rms
                 if (StringUtil.IsInList("keycount", strOutputStyle)
                     && hit_database_count > 1)
                 {
-                    if (DoSort(resultSet, handle/*isConnected*/) == true)
+                    Stopwatch sw = Stopwatch.StartNew();
+
+                    if (DoSort(resultSet,
+                        handle/*isConnected*/,
+                        (a, b) =>
+                        {
+                            if (sortby_key)
+                                return a.CompareToKey(b);
+                            return a.CompareTo(b);
+                        }) == true)
                     {
                         strError = "前端中断";
                         return -1;
                     }
+
+                    sw.Stop();
+                    explainInfo?.AppendLine($"key+count 合并阶段排序耗费时间 {sw.Elapsed}");
+                    sw.Restart();
 
                     DpResultSet oTargetMiddle = sessioninfo.NewResultSet();   // new DpResultSet();
                     StringBuilder debugInfo = null;
@@ -705,17 +790,32 @@ namespace DigitalPlatform.rms
                     resultSet = oTargetMiddle;
 
                     bNeedSort = false;  // 已经排序了
+
+                    sw.Stop();
+                    explainInfo?.AppendLine($"key+count 合并阶段归并耗费时间 {sw.Elapsed}");
                 }
 
                 // 排序
                 // TODO: 其实可以使用EnsureSorted()函数
                 if (bNeedSort == true)
                 {
-                    if (DoSort(resultSet, handle/*isConnected*/) == true)
+                    Stopwatch sw = Stopwatch.StartNew();
+
+                    if (DoSort(resultSet,
+                        handle/*isConnected*/,
+                        (a, b) =>
+                        {
+                            if (sortby_key)
+                                return a.CompareToKey(b);
+                            return a.CompareTo(b);
+                        }) == true)
                     {
                         strError = "前端中断";
                         return -1;
                     }
+
+                    sw.Stop();
+                    explainInfo?.AppendLine($"doItem 排序耗费时间 {sw.Elapsed}");
                 }
                 // TODO: 也可以延迟排序，本函数返回一个值表希望排序。等到最后不得不排序时候再排序最好了
 
@@ -725,19 +825,20 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
+
         // return:
         //      fasle   正常完成
         //      true    中断
         public static bool DoSort(DpResultSet resultset,
-            ChannelHandle handle
+            ChannelHandle handle,
             // Delegate_isConnected isConnected
-            )
+            delegate_compare func_compare = null)
         {
             resultset.Idle += new IdleEventHandler(sort_Idle);
             resultset.Param = handle;   //  isConnected;
             try
             {
-                resultset.Sort();
+                resultset.Sort(func_compare);
             }
             catch (InterruptException /*ex*/)
             {
@@ -786,7 +887,7 @@ namespace DigitalPlatform.rms
             XmlElement nodeRoot,
             ref DpResultSet resultSet,
             ChannelHandle handle,
-            // Delegate_isConnected isConnected,
+            StringBuilder explainInfo,
             out string strError)
         {
 #if DEBUG
@@ -833,7 +934,7 @@ namespace DigitalPlatform.rms
                         nodeRoot,
                         ref resultSet,
                         handle,
-                        // isConnected,
+                        explainInfo,
                         out strError);
                 }
 
@@ -874,7 +975,7 @@ namespace DigitalPlatform.rms
                     rpn,
                     ref resultSet,
                     handle,
-                    // isConnected,
+                    explainInfo,
                     out strError);
                 if (nRet <= -1)
                     return nRet;
@@ -892,6 +993,9 @@ namespace DigitalPlatform.rms
 
         static int EnsureSorted(DpResultSet resultset,
             ChannelHandle handle,
+            bool sortby_key,
+            string comment,
+            StringBuilder explainInfo,
             out string strError)
         {
             strError = "";
@@ -900,13 +1004,25 @@ namespace DigitalPlatform.rms
 
             if (resultset.Sorted == false)
             {
-                if (DoSort(resultset, handle/*isConnected*/) == true)
+                Stopwatch sw = Stopwatch.StartNew();
+
+                if (DoSort(resultset,
+                    handle/*isConnected*/,
+                    (a, b) =>
+                    {
+                        if (sortby_key)
+                            return a.CompareToKey(b);
+                        return a.CompareTo(b);
+                    }) == true)
                 {
                     strError = "前端中断";
                     return -1;
                 }
 
                 Debug.Assert(resultset.Sorted == true, "");
+
+                sw.Stop();
+                explainInfo?.AppendLine($"{comment} 排序耗费时间 {sw?.Elapsed}");
             }
             return 0;
         }
@@ -935,6 +1051,7 @@ namespace DigitalPlatform.rms
             ref DpResultSet resultSet,
             ChannelHandle handle,
             // Delegate_isConnected isConnected,
+            StringBuilder explainInfo,
             out string strError)
         {
 #if DEBUG
@@ -969,6 +1086,8 @@ namespace DigitalPlatform.rms
                 if (rpn.Count == 0)
                     return 0;
 
+                var sortby_key = Query.GetSortBy(strOutputStyle) == "key";
+
                 int ret;
 
                 // 声明栈,ReversePolishStack栈是自定义的类
@@ -986,7 +1105,7 @@ namespace DigitalPlatform.rms
                     new ReversePolishStack();
 
                 // for (int i = 0; i < rpn.Count; i++)
-                foreach(XmlElement node in rpn)
+                foreach (XmlElement node in rpn)
                 {
                     // XmlElement node = (XmlElement)rpn[i];
 
@@ -1044,7 +1163,7 @@ namespace DigitalPlatform.rms
                                         nodePop,
                                         ref temp,
                                         handle,
-                                        // isConnected,
+                                        explainInfo,
                                         out strError);
                                     if (ret <= -1)
                                         return ret;
@@ -1132,9 +1251,15 @@ namespace DigitalPlatform.rms
                                 }
                                 else
                                 {
-                                    if (EnsureSorted(left, handle, out strError) == -1)
+                                    if (EnsureSorted(left, handle, sortby_key,
+                                        "OR (1)运算前对左侧",
+                                        explainInfo,
+                                        out strError) == -1)
                                         return -1;
-                                    if (EnsureSorted(right, handle, out strError) == -1)
+                                    if (EnsureSorted(right, handle, sortby_key,
+                                        "OR (1)运算前对右侧",
+                                        explainInfo,
+                                        out strError) == -1)
                                         return -1;
                                     // return:
                                     //      -1  出错
@@ -1178,9 +1303,15 @@ namespace DigitalPlatform.rms
                                             right.Sorted = false;
                                         }
 
-                                        if (EnsureSorted(left, handle, out strError) == -1)
+                                        if (EnsureSorted(left, handle, sortby_key,
+                                            "OR (2)运算前对左侧",
+                                            explainInfo,
+                                            out strError) == -1)
                                             return -1;
-                                        if (EnsureSorted(right, handle, out strError) == -1)
+                                        if (EnsureSorted(right, handle, sortby_key,
+                                            "OR (2)运算前对右侧",
+                                            explainInfo,
+                                            out strError) == -1)
                                             return -1;
 
                                         {
@@ -1230,9 +1361,15 @@ namespace DigitalPlatform.rms
                                 right.Sorted = false;
                             }
 
-                            if (EnsureSorted(left, handle, out strError) == -1)
+                            if (EnsureSorted(left, handle, sortby_key,
+                                "AND 运算前对左侧",
+                                explainInfo,
+                                out strError) == -1)
                                 return -1;
-                            if (EnsureSorted(right, handle, out strError) == -1)
+                            if (EnsureSorted(right, handle, sortby_key,
+                                "AND 运算前对右侧",
+                                explainInfo,
+                                out strError) == -1)
                                 return -1;
 
                             // 优化
@@ -1302,9 +1439,19 @@ namespace DigitalPlatform.rms
                                 right.Sorted = false;
                             }
 
-                            if (EnsureSorted(left, handle, out strError) == -1)
+                            if (EnsureSorted(left,
+                                handle,
+                                sortby_key,
+                                "SUB 运算前对左侧",
+                                explainInfo,
+                                out strError) == -1)
                                 return -1;
-                            if (EnsureSorted(right, handle, out strError) == -1)
+                            if (EnsureSorted(right,
+                                handle,
+                                sortby_key,
+                                "SUB 运算前对右侧",
+                                explainInfo,
+                                out strError) == -1)
                                 return -1;
 
                             // 优化
@@ -1368,9 +1515,9 @@ namespace DigitalPlatform.rms
                 }
                 try
                 {
-                    int nTemp = oReversePolandStack.PeekType();
+                    int nType = oReversePolandStack.PeekType();
                     //如果类型为0,表示存放的是节点
-                    if (nTemp == 0)
+                    if (nType == 0)
                     {
                         XmlElement node = oReversePolandStack.PopNode();
 
@@ -1384,7 +1531,7 @@ namespace DigitalPlatform.rms
                             node,
                             ref resultSet,
                             handle,
-                            // isConnected,
+                            explainInfo,
                             out strError);
                         if (ret <= -1)
                             return ret;
@@ -1395,7 +1542,7 @@ namespace DigitalPlatform.rms
 
                         }
                     }
-                    else if (nTemp == 1)
+                    else if (nType == 1)
                     {
                         // 调DpResultSet的copy函数
 
@@ -1405,7 +1552,7 @@ namespace DigitalPlatform.rms
                     }
                     else
                     {
-                        strError = "oReversePolandStack的类型不可能为" + Convert.ToString(nTemp);
+                        strError = "oReversePolandStack的类型不可能为" + Convert.ToString(nType);
                         return -1;
                     }
                 }

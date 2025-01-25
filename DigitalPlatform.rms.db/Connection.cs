@@ -589,7 +589,7 @@ namespace DigitalPlatform.rms
         public void Close()
         {
             if (this._bGlobal == false)
-                _connection.Close();
+                _connection?.Close();
             else
             {
                 // 输出调试信息：全局 Connection 不会关闭

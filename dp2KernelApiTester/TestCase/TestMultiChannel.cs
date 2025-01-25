@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using DigitalPlatform;
+using DigitalPlatform.CirculationClient;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.Text;
 
@@ -82,7 +83,7 @@ namespace dp2KernelApiTester.TestCase
 
         public static NormalResult MultiChannelSearch(CancellationToken token)
         {
-            int COUNT = 100;
+            int COUNT = 100; // 100
             List<RmsChannel> channels = new List<RmsChannel>();
             for (int i = 0; i < COUNT; i++)
             {
@@ -92,9 +93,28 @@ namespace dp2KernelApiTester.TestCase
 
             token.ThrowIfCancellationRequested();
 
+            List<RmsChannel> removed_channles = new List<RmsChannel>();
+
+            var ctr = token.Register(() =>
+            {
+                foreach(var channel in channels)
+                {
+                    if (removed_channles.IndexOf(channel) != -1)
+                        continue;
+
+                    try
+                    {
+                        channel.BeginStop();
+                    }
+                    catch
+                    {
+
+                    }
+                }
+            });
+
             try
             {
-
                 List<Task> tasks = new List<Task>();
                 int j = 0;
                 foreach (var channel in channels)
@@ -102,21 +122,32 @@ namespace dp2KernelApiTester.TestCase
                     string word = "ttttt";
                     string strQueryXml = $"<target list='{_strDatabaseName}:题名'><item><word>{word}</word><match>middle</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
 
-                    var task = Task.Factory.StartNew((index) =>
+                    var context = new ChannelContext
                     {
+                        Channel = channel,
+                        Index = j
+                    };
+                    var task = Task.Factory.StartNew((c) =>
+                    {
+                        var current = c as ChannelContext; 
+                        DataModel.SetMessage($"线程 {current.Index} 启动 ...", "");
+
                         var start = DateTime.UtcNow;
-                        var ret = channel.DoSearch(strQueryXml, "default", out string strError);
+                        var ret = current.Channel.DoSearch(strQueryXml, "default", out string strError);
                         if (ret == -1)
                         {
-                            DataModel.SetMessage($"{index} DoSearch() 出错: {strError}", "error");
+                            DataModel.SetMessage($"{current.Index} DoSearch() 出错: {strError}", "error");
                         }
                         else
-                            DataModel.SetMessage($"线程 {index} 已经结束，耗时 {DateTime.UtcNow - start}", "green");
+                            DataModel.SetMessage($"线程 {current.Index} 已经结束，耗时 {DateTime.UtcNow - start}", "green");
+
+                        removed_channles.Add(current.Channel);
                     },
-                    j,
+                    context,
                     token,
                     TaskCreationOptions.LongRunning,
                     TaskScheduler.Default);
+
                     tasks.Add(task);
                     j++;
                 }
@@ -130,11 +161,18 @@ namespace dp2KernelApiTester.TestCase
                 {
                     channel.Dispose();
                 }
+
+                ctr.Dispose();
             }
 
             return new NormalResult();
         }
 
+        class ChannelContext
+        {
+            public RmsChannel Channel { get; set; }
+            public int Index { get; set; }
+        }
     }
 
 }

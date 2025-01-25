@@ -701,6 +701,7 @@ namespace DigitalPlatform.LibraryServer
                 "",
                 strOutputStyle,
                 out strQueryXml,
+                out _,
                 out strError);
             if (lRet == -1)
                 return -1;

@@ -26,7 +26,6 @@ using System.Net.Security;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Core;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace DigitalPlatform.LibraryClient
 {
@@ -3531,10 +3530,12 @@ location_filter,
             string strOutputStyle,
             string strLocationFilter,
             out string strQueryXml,
+            out string explain,
             out string strError)
         {
             strError = "";
             strQueryXml = "";
+            explain = null;
 
         REDO:
             this.BeginSearch();
@@ -3565,6 +3566,7 @@ location_filter,
 
                 LibraryServerResult result = this.ws.EndSearchBiblio(
                     out strQueryXml,
+                    out explain,
                     soapresult);
                 if (result.Value == -1 && result.ErrorCode == ErrorCode.NotLogin)
                 {
