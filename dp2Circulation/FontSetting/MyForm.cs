@@ -35,7 +35,6 @@ using DigitalPlatform.Core;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Typography;
 using static dp2Circulation.AccountBookForm;
-using Microsoft.SqlServer.Server;
 using DigitalPlatform.IO;
 
 // 2013/3/16 添加 XML 注释

@@ -344,13 +344,14 @@ namespace dp2rms
             // 
             // textBox_simpleQuery_comment
             // 
-            this.textBox_simpleQuery_comment.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.textBox_simpleQuery_comment.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_simpleQuery_comment.Location = new System.Drawing.Point(15, 151);
             this.textBox_simpleQuery_comment.Multiline = true;
             this.textBox_simpleQuery_comment.Name = "textBox_simpleQuery_comment";
             this.textBox_simpleQuery_comment.ReadOnly = true;
+            this.textBox_simpleQuery_comment.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.textBox_simpleQuery_comment.Size = new System.Drawing.Size(368, 72);
             this.textBox_simpleQuery_comment.TabIndex = 4;
             // 
@@ -364,7 +365,7 @@ namespace dp2rms
             // 
             // textBox_simpleQueryWord
             // 
-            this.textBox_simpleQueryWord.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.textBox_simpleQueryWord.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_simpleQueryWord.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.textBox_simpleQueryWord.Location = new System.Drawing.Point(11, 43);
@@ -416,14 +417,15 @@ namespace dp2rms
             // 
             // textBox_complexQuery_comment
             // 
-            this.textBox_complexQuery_comment.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.textBox_complexQuery_comment.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_complexQuery_comment.Location = new System.Drawing.Point(24, 238);
             this.textBox_complexQuery_comment.Multiline = true;
             this.textBox_complexQuery_comment.Name = "textBox_complexQuery_comment";
             this.textBox_complexQuery_comment.ReadOnly = true;
-            this.textBox_complexQuery_comment.Size = new System.Drawing.Size(612, 0);
+            this.textBox_complexQuery_comment.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox_complexQuery_comment.Size = new System.Drawing.Size(612, 35);
             this.textBox_complexQuery_comment.TabIndex = 20;
             // 
             // button_complexQuerySearch
@@ -515,7 +517,7 @@ namespace dp2rms
             // 
             // textBox_complex_word4
             // 
-            this.textBox_complex_word4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.textBox_complex_word4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_complex_word4.Location = new System.Drawing.Point(182, 142);
             this.textBox_complex_word4.Name = "textBox_complex_word4";
@@ -548,7 +550,7 @@ namespace dp2rms
             // 
             // textBox_complex_word3
             // 
-            this.textBox_complex_word3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.textBox_complex_word3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_complex_word3.Location = new System.Drawing.Point(182, 101);
             this.textBox_complex_word3.Name = "textBox_complex_word3";
@@ -581,7 +583,7 @@ namespace dp2rms
             // 
             // textBox_complex_word2
             // 
-            this.textBox_complex_word2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.textBox_complex_word2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_complex_word2.Location = new System.Drawing.Point(182, 60);
             this.textBox_complex_word2.Name = "textBox_complex_word2";
@@ -607,7 +609,7 @@ namespace dp2rms
             // 
             // textBox_complex_word1
             // 
-            this.textBox_complex_word1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.textBox_complex_word1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_complex_word1.Location = new System.Drawing.Point(182, 19);
             this.textBox_complex_word1.Name = "textBox_complex_word1";
@@ -664,6 +666,7 @@ namespace dp2rms
             this.textBox_xmlQuery_comment.Multiline = true;
             this.textBox_xmlQuery_comment.Name = "textBox_xmlQuery_comment";
             this.textBox_xmlQuery_comment.ReadOnly = true;
+            this.textBox_xmlQuery_comment.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.textBox_xmlQuery_comment.Size = new System.Drawing.Size(651, 106);
             this.textBox_xmlQuery_comment.TabIndex = 21;
             // 
@@ -1127,7 +1130,8 @@ namespace dp2rms
                         // MessageBox.Show(this, item.Xml);
                         long nRet = _channel.DoSearch(item.Xml,
                             "default",
-                            strOutputStyle,
+                            strOutputStyle + ",explain",
+                            out string explain,
                             out strError);
                         if (nRet == -1)
                         {
@@ -1136,7 +1140,7 @@ namespace dp2rms
                             continue;
                         }
                         lTotalCount += nRet;
-                        textBox_simpleQuery_comment.Text += "命中记录数: " + Convert.ToString(nRet) + "\r\n";
+                        textBox_simpleQuery_comment.Text += $"命中记录数: {nRet}\r\nExplain:\r\n{explain}";
 
                         if (nRet == 0)
                             continue;
@@ -1558,7 +1562,8 @@ namespace dp2rms
                     // MessageBox.Show(this, item.Xml);
                     long nRet = _channel.DoSearch(textBox_xmlQueryString.Text,
                         "default",
-                        strOutputStyle,
+                        strOutputStyle + ",explain",
+                        out string explain,
                         out strError);
                     if (nRet == -1)
                     {
@@ -1567,7 +1572,7 @@ namespace dp2rms
                         continue;
                     }
                     lTotalCount += nRet;
-                    textBox_xmlQuery_comment.Text += "命中记录数: " + Convert.ToString(nRet) + "\r\n";
+                    textBox_xmlQuery_comment.Text += $"命中记录数: {nRet}\r\nExplain:\r\n{explain}";
 
                     if (nRet == 0)
                         continue;
@@ -2237,7 +2242,8 @@ namespace dp2rms
                     // MessageBox.Show(this, item.Xml);
                     nRet = _channel.DoSearch(strQueryXml,
                         "default",
-                        strOutputStyle,
+                        strOutputStyle + ",explain",
+                        out string explain,
                         out strError);
                     if (nRet == -1)
                     {
@@ -2246,7 +2252,7 @@ namespace dp2rms
                         continue;
                     }
                     lTotalCount += nRet;
-                    textBox_complexQuery_comment.Text += "命中记录数: " + Convert.ToString(nRet) + "\r\n";
+                    textBox_complexQuery_comment.Text += $"命中记录数: {nRet}\r\nExplain:\r\n{explain}";
 
                     if (nRet == 0)
                         continue;

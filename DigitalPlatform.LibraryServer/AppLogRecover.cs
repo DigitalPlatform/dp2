@@ -10286,6 +10286,7 @@ out strError);
 
                 string strNewBarcode = DomUtil.GetAttr(record_node, "newBarcode");
                 string strNewRefID = DomUtil.GetAttr(record_node, "newRefID");
+                string strOldRefID = record_node.GetAttribute("oldRefID");  // 2025/2/13
 
                 string strMetaData = "";
                 string strXml = "";
@@ -10325,6 +10326,9 @@ out strError);
                 newbarcodes.Add(strNewBarcode);
                 List<string> newrefids = new List<string>();
                 newrefids.Add(strNewRefID);
+                // 2025/2/13
+                List<string> oldrefids = new List<string>();
+                oldrefids.Add(strOldRefID);
 
 
                 // 复制属于同一书目记录的全部实体记录
@@ -10340,6 +10344,7 @@ out strError);
                     strTargetBiblioRecPath,
                     newbarcodes,
                     newrefids,
+                    oldrefids,
                     out strError);
                 if (nRet == -1)
                     return -1;

@@ -1439,10 +1439,18 @@ out strTargetLibraryCode);
                 RemoveReaderPassword(ref dom, "readerRecord");
                 return;
             }
+            // 2025/2/12
+            if (strOperation == "changeUserPassword")
+            {
+                DomUtil.DeleteElement(dom.DocumentElement, "newPassword");
+                DomUtil.DeleteElement(dom.DocumentElement, "type");
+                return;
+            }
             if (strOperation == "changeReaderPassword")
             {
                 RemoveReaderPassword(ref dom, "readerRecord");
                 DomUtil.DeleteElement(dom.DocumentElement, "newPassword");
+                DomUtil.DeleteElement(dom.DocumentElement, "type"); // 2025/2/12
                 return;
             }
             if (strOperation == "changeReaderTempPassword")
@@ -1472,6 +1480,7 @@ out strTargetLibraryCode);
             if (strOperation == "setUser")
             {
                 DomUtil.DeleteElement(dom.DocumentElement, "newPassword");
+                DomUtil.DeleteElement(dom.DocumentElement, "type"); // 2025/2/12
                 XmlNodeList nodes = dom.DocumentElement.SelectNodes("account | oldAccount");
                 foreach (XmlElement account in nodes)
                 {

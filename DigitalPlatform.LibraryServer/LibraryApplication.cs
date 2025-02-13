@@ -13209,6 +13209,7 @@ out strError);
             node.SetAttribute("tempPasswordCreateTime", strCreateTime); // 2017/10/27
             DomUtil.SetAttr(node,
                 "tempPasswordExpire", strExpireTime);
+            // 2025/2/1 注: 暂时没有 tempPasswordType 属性。缺省表示 SHA1 类型。
 
             // 在日志中保存的是SHA1形态的密码。这样可以防止密码泄露。
             // 在日志恢复阶段, 把这个密码直接写入读者记录即可, 不需要再加工
@@ -13216,6 +13217,7 @@ out strError);
                 "tempPassword", strTempPassword);
             DomUtil.SetElementText(domOperLog.DocumentElement,
                 "tempPasswordExpire", strExpireTime);
+            // 2025/2/1 注: 暂时没有 tempPasswordType 属性。缺省表示 SHA1 类型。
 
             return 0;
         }

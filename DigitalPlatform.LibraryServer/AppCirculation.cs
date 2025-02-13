@@ -10079,6 +10079,18 @@ out string _);
                         root.AppendChild(calendar_node);
                         calendar_node.SetAttribute("name", info.Name);
                     }
+                    else
+                    {
+                        // 2025/2/12
+
+                        // 增强健壮性
+                        for (int i = 1; i < nodes.Count; i++)
+                        {
+                            nodes[i].ParentNode.RemoveChild(nodes[i]);
+                        }
+
+                        calendar_node = nodes[0] as XmlElement;
+                    }
                 }
 
                 old_info = GetElementValues(calendar_node);

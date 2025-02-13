@@ -458,6 +458,13 @@ namespace DigitalPlatform.LibraryServer
             strError = "";
             // int nRet = 0;
 
+            // 2025/2/12
+            if (strPassword == null)
+            {
+                strError = "strPassword 不允许为 null";
+                return -1;
+            }
+
             // 允许明文空密码
             if (allowEmptyHashed && String.IsNullOrEmpty(strHashed) == true)
             {

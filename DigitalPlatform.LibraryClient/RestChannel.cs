@@ -261,9 +261,56 @@ string parameters)
             WebRequest request = base.GetWebRequest(address);
             if (request is HttpWebRequest)
             {
-                (request as HttpWebRequest).CookieContainer = this.CookieContainer;
+                var r = request as HttpWebRequest;
+                r.CookieContainer = this.CookieContainer;
+                r.Timeout = this._timeout;
+                r.ReadWriteTimeout = this._readWriteTimeout;
+                r.ContinueTimeout = this._continueTimeout;
             }
             return request;
+        }
+
+        // 2025/1/25 增加
+        int _timeout = 100000;
+
+        public int Timeout
+        {
+            get
+            {
+                return _timeout;
+            }
+            set
+            {
+                _timeout = value;
+            }
+        }
+
+        int _readWriteTimeout = 300000;
+
+        public int ReadWriteTimeout
+        {
+            get
+            {
+                return _readWriteTimeout;
+            }
+            set
+            {
+                _readWriteTimeout = value;
+            }
+        }
+
+        int _continueTimeout = 350;
+
+        public int ContinueTimeout
+        {
+            get
+            {
+                return _continueTimeout;
+            }
+            set
+            {
+                _continueTimeout = value;
+            }
         }
     }
 

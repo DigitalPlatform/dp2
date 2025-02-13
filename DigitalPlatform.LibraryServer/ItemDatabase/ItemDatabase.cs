@@ -3896,7 +3896,7 @@ strError);
 
                 // string strNewBarcode = "";  // 复制中修改后的册条码号
                 string strNewRefID = "";    // 复制中修改后的参考 ID(2024/4/30)
-
+                string strOldRefID = "";    // 原先的参考 ID(2025/2/13)
                 // this.EntityLocks.LockForWrite(info.ItemBarcode);
                 try
                 {
@@ -3951,7 +3951,7 @@ strError);
                         if (strAction == "copy")
                         {
                             // 2024/5/1
-                            string strOldRefID = DomUtil.GetElementText(dom.DocumentElement,
+                            strOldRefID = DomUtil.GetElementText(dom.DocumentElement,
                                 "refID");
                             // 把原有的参考 ID 保留在下级记录的 oldRefID 元素文本中
                             DomUtil.SetElementText(dom.DocumentElement,
@@ -4024,7 +4024,7 @@ strError);
                 {
                     Debug.Assert(root != null, "");
 
-                    XmlNode node = domOperLog.CreateElement("record");
+                    var node = domOperLog.CreateElement("record");
                     root.AppendChild(node);
 
                     DomUtil.SetAttr(node, "recPath", info.RecPath);
@@ -4036,6 +4036,10 @@ strError);
                     // 2024/4/30
                     if (string.IsNullOrEmpty(strNewRefID) == false)
                         DomUtil.SetAttr(node, "newRefID", strNewRefID);
+
+                    // 2025/2/13
+                    if (string.IsNullOrEmpty(strOldRefID) == false)
+                        node.SetAttribute("oldRefID", strOldRefID);
                 }
 
                 nOperCount++;

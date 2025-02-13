@@ -672,7 +672,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "CreateAssemblyFile() 出错 " + ExceptionUtil.GetDebugText(ex);
+                strError = "CreateAssemblyFile() 1出错 " + ExceptionUtil.GetDebugText(ex);
                 return -1;
             }
         }

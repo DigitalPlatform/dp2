@@ -1973,7 +1973,7 @@ namespace DigitalPlatform.LibraryServer
                             // 2024/5/13
                             {
                                 nRet = app.InitialVdbs(app.GetRmsChannel(sessioninfo),  // sessioninfo.Channels,
-    out strError);
+    out string initial_error/*2025/2/11 从 strError 改为 initial_error*/);
                                 if (nRet != -1 && app.vdbs != null)
                                 {
                                     // Undo 以后 vdbs 重新初始化成功，系统处于正常状态
@@ -1989,6 +1989,8 @@ namespace DigitalPlatform.LibraryServer
                         //app.ActivateManagerThread();
                         goto END1;
                     }
+
+
 
                     // 设置<browseformats>元素
                     // strValue中是下级片断定义，没有<browseformats>元素作为根。
@@ -2040,6 +2042,28 @@ namespace DigitalPlatform.LibraryServer
 
                     strError = "(strCategory为 '" + strCategory + "' 时)未知的strName值 '" + strName + "' ";
                     goto ERROR1;
+                }
+
+                // 测试用途
+                if (strCategory == "testing")
+                {
+                    // 分馆用户不能修改定义
+                    if (sessioninfo.GlobalUser == false)
+                    {
+                        strError = "分馆用户不允许使用 strCategory 为 'test' 的功能";
+                        goto ERROR1;
+                    }
+
+                    if (StringUtil.IsInList("testing", sessioninfo.Rights) == false)
+                    {
+                        strError = "当前用户缺乏 testing 权限";
+                        goto ERROR1;
+                    }
+
+                    if (strName == "setVdbsNull")
+                    {
+                        this.vdbs = null;
+                    }
                 }
 
             END1:

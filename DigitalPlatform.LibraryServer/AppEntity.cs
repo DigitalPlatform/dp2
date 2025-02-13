@@ -298,6 +298,8 @@ namespace DigitalPlatform.LibraryServer
                     return -1;
             }
 
+            bool changed = false;
+
             // 算法的要点是, 把"新记录"中的要害字段, 覆盖到"已存在记录"中
             foreach (string name in element_names)
             {
@@ -319,16 +321,24 @@ namespace DigitalPlatform.LibraryServer
                     }
                 }
 
+                string strTextOld = DomUtil.GetElementOuterXml(domExist.DocumentElement,
+                    name);
                 string strTextNew = DomUtil.GetElementOuterXml(domNew.DocumentElement,
                     name);
-
-                DomUtil.SetElementOuterXml(domExist.DocumentElement,
-                    name, strTextNew);
+                if (strTextOld != strTextNew)
+                {
+                    DomUtil.SetElementOuterXml(domExist.DocumentElement,
+                        name, strTextNew);
+                    changed = true;
+                }
             }
 
             // 日志恢复的时候会使用旧代码，效果是直接使用新记录中的 dprms:file 元素
             if (sessioninfo == null)
             {
+                List<string> old_xmls = new List<string>();
+                List<string> new_xmls = new List<string>();
+
                 // 清除以前的<dprms:file>元素
                 XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
                 nsmgr.AddNamespace("dprms", DpNs.dprms);
@@ -336,16 +346,21 @@ namespace DigitalPlatform.LibraryServer
                 XmlNodeList nodes = domExist.DocumentElement.SelectNodes("//dprms:file", nsmgr);
                 foreach (XmlNode node in nodes)
                 {
+                    old_xmls.Add(node.OuterXml);
                     node.ParentNode.RemoveChild(node);
                 }
                 // 兑现新记录中的 dprms:file 元素
                 nodes = domNew.DocumentElement.SelectNodes("//dprms:file", nsmgr);
                 foreach (XmlElement node in nodes)
                 {
+                    new_xmls.Add(node.OuterXml);
                     XmlDocumentFragment frag = domExist.CreateDocumentFragment();
                     frag.InnerXml = node.OuterXml;
                     domExist.DocumentElement.AppendChild(frag);
                 }
+
+                if (AreEqual(old_xmls, new_xmls) == false)
+                    changed = true;
             }
 
             strMergedXml = domExist.OuterXml;
@@ -356,7 +371,24 @@ namespace DigitalPlatform.LibraryServer
                 return 1;
             }
 
+            // 2025/2/12
+            if (changed == false)
+                return 2;
+
             return 0;
+        }
+
+        static bool AreEqual(List<string> xmls1, List<string> xmls2)
+        {
+            if (xmls1.Count != xmls2.Count)
+                return false;
+            for (int i = 0; i < xmls1.Count; i++)
+            {
+                if (xmls1[i] != xmls2[i])
+                    return false;
+            }
+
+            return true;
         }
 
         // <DoEntityOperChange()的下级函数>
@@ -937,6 +969,7 @@ namespace DigitalPlatform.LibraryServer
 
                 string strNewBarcode = "";  // 复制中修改后的册条码号
                 string strNewRefID = "";    // 复制中修改后的参考 ID(2024/4/30)
+                string strOldRefID = "";    // 原有的参考 ID(2025/2/13)
 
                 this.EntityLocks.LockForWrite(info.ItemBarcode);
                 try
@@ -1021,7 +1054,7 @@ namespace DigitalPlatform.LibraryServer
                             // 修改参考 ID，避免其在复制后发生重复
                             // 注: 无论旧记录内容中有没有 refID 元素，都要覆盖(新增)一个 refID 元素内容
                             // *** 后面这几个清除动作要作为规则出现
-                            string strOldRefID = DomUtil.GetElementText(dom.DocumentElement,
+                            strOldRefID = DomUtil.GetElementText(dom.DocumentElement,
                                 "refID");
                             // 把原有的参考 ID 保留在册记录的 oldRefID 元素文本中
                             DomUtil.SetElementText(dom.DocumentElement,
@@ -1072,19 +1105,28 @@ namespace DigitalPlatform.LibraryServer
                             }
                         }
 
+                        // 2025/2/11
+                        if (output_timestamp == null
+                            && strAction == "move")
+                            output_timestamp = info.OldTimestamp;
+
                         // 修改xml记录。<parent>元素发生了变化
                         // byte[] baOutputTimestamp = null;
                         // string strOutputRecPath1 = "";
                         lRet = channel.DoSaveTextRes(strOutputRecPath,
                             dom.OuterXml,
                             false,
-                            "content", // ,ignorechecktimestamp
+                            "content",
+                            // output_timestamp != null ? "content" : "content,ignorechecktimestamp",
                             output_timestamp,
                             out _,
                             out _,
                             out strError);
                         if (lRet == -1)
+                        {
+                            strError = $"修改书目记录的下级记录 '{strOutputRecPath}' 时出错: {strError}";
                             goto ERROR1;
+                        }
 
                         oldrecordpaths.Add(info.RecPath);
                         newrecordpaths.Add(strOutputRecPath);
@@ -1104,7 +1146,7 @@ namespace DigitalPlatform.LibraryServer
                 {
                     Debug.Assert(root != null, "");
 
-                    XmlNode node = domOperLog.CreateElement("record");
+                    var node = domOperLog.CreateElement("record");
                     root.AppendChild(node);
 
                     DomUtil.SetAttr(node, "recPath", info.RecPath);
@@ -1119,6 +1161,9 @@ namespace DigitalPlatform.LibraryServer
                     // 2024/4/30
                     if (string.IsNullOrEmpty(strNewRefID) == false)
                         DomUtil.SetAttr(node, "newRefID", strNewRefID);
+                    // 2025/2/13
+                    if (string.IsNullOrEmpty(strOldRefID) == false)
+                        node.SetAttribute("oldRefID", strOldRefID);
                 }
 
                 nOperCount++;
@@ -1229,6 +1274,7 @@ namespace DigitalPlatform.LibraryServer
             string strTargetBiblioRecPath,
             List<string> newbarcodes,
             List<string> newrefids,
+            List<string> oldrefids, // 2025/2/13
             out string strError)
         {
             strError = "";
@@ -1236,6 +1282,12 @@ namespace DigitalPlatform.LibraryServer
             if (newbarcodes.Count != newrefids.Count)
             {
                 strError = $"newbarcodes.Count({newbarcodes.Count}) != newrefids.Count({newrefids.Count})";
+                return -1;
+            }
+
+            if (newbarcodes.Count != oldrefids.Count)
+            {
+                strError = $"newbarcodes.Count({newbarcodes.Count}) != oldrefids.Count({oldrefids.Count})";
                 return -1;
             }
 
@@ -1275,6 +1327,7 @@ namespace DigitalPlatform.LibraryServer
 
                 string strNewBarcode = newbarcodes[i];
                 string strNewRefID = newrefids[i];
+                string strOldRefID = oldrefids[i];
 
                 byte[] output_timestamp = null;
                 string strOutputRecPath = "";
@@ -1320,6 +1373,12 @@ namespace DigitalPlatform.LibraryServer
     "refID",
     strNewRefID);
                         }
+
+                        // 2025/2/13
+                        if (string.IsNullOrEmpty(strOldRefID) == false)
+                            DomUtil.SetElementText(dom.DocumentElement,
+"oldRefID",
+strOldRefID);
 
                         /*
                         // 2014/1/5
@@ -6967,7 +7026,8 @@ out strError);
                 error.NewRecord = /*strNewXml*/domNew.DocumentElement.OuterXml;
 
                 error.ErrorInfo = "保存操作成功。NewTimeStamp中返回了新的时间戳，NewRecord中返回了实际保存的新记录(可能和提交的新记录稍有差异)。";
-                if (string.IsNullOrEmpty(strWarning) == false)
+                if (string.IsNullOrEmpty(strWarning) == false
+                    || string.IsNullOrEmpty(part_type) == false/*2025/2/12*/)
                 {
                     error.ErrorInfo = "保存操作" + part_type + "兑现。" + strWarning;
                     error.ErrorCode = ErrorCodeValue.PartialDenied;

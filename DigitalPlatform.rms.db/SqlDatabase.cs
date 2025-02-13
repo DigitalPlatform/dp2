@@ -4218,12 +4218,20 @@ handle.CancelTokenSource.Token).Result;
                 };
             }
 
+            var handle_token = handle?.CancelToken ?? default;
+
             Connection connection = null;
 
             {
                 // 注意: SQLite 这里的连接字符串是和具体数据库关联的
                 connection = new Connection(this, this.m_strConnString);
                 connection.TryOpen();
+            }
+            var timeout_cts = new CancellationTokenSource(timeout);
+            var cts = CancellationTokenSource.CreateLinkedTokenSource(handle_token, timeout_cts.Token);
+            bool HasTimeout()
+            {
+                return timeout_cts.Token.IsCancellationRequested;
             }
             try
             {
@@ -4232,7 +4240,7 @@ handle.CancelTokenSource.Token).Result;
 
                 // 通用
                 var command = connection.NewCommand(strCommand) as DbCommand;
-                command.CommandTimeout = 20 * 60;  // 把检索时间变大
+                command.CommandTimeout = (int)timeout.TotalSeconds;    //  20 * 60;  // 把检索时间变大
 
                 Task<DbDataReader> task = null;
                 void CloseReader()
@@ -4290,12 +4298,13 @@ handle.CancelTokenSource.Token).Result;
                         // command.ExecuteReader(CommandBehavior.Default/*.CloseConnection*/);
 
                         task = command.ExecuteReaderAsync(CommandBehavior.CloseConnection,
-                            handle == null ? default : handle.CancelToken);
+                            cts.Token);
                         // 2024/11/30
                         var ret = task.Wait((int)timeout.TotalMilliseconds,
-                            handle == null ? default : handle.CancelToken);
+                            cts.Token);
                         if (ret == false
-                            || (handle != null && handle.CancelToken.IsCancellationRequested))
+                            || (handle_token.IsCancellationRequested)
+                            || timeout_cts.Token.IsCancellationRequested)
                         {
                             /*
                             // 2024/11/30
@@ -4303,7 +4312,7 @@ handle.CancelTokenSource.Token).Result;
                             CloseReader();
                             */
 
-                            if (ret == false)
+                            if (ret == false || timeout_cts.Token.IsCancellationRequested)
                             {
                                 return new Result
                                 {
@@ -4339,8 +4348,8 @@ handle.CancelTokenSource.Token).Result;
                             sw.Restart();
 
                             // 此时剩余的超时时间
-                            var current_timeout = timeout - (DateTime.UtcNow - start);
-                            var handle_token = handle?.CancelToken ?? default;
+                            // var current_timeout = timeout - (DateTime.UtcNow - start);
+                            // var handle_token = handle?.CancelToken ?? default;
                             //using (var timeout_cts = new CancellationTokenSource(current_timeout))
                             //using (var cts = CancellationTokenSource.CreateLinkedTokenSource(handle_token, timeout_cts.Token))
                             {
@@ -4350,7 +4359,7 @@ handle.CancelTokenSource.Token).Result;
                                 //      0   没有填入任何记录
                                 //      >0  实际填入的记录条数
                                 int nRet = FillResultSet(
-                                        // cts.Token,
+                                        cts.Token,
                                         reader,
                                         resultSet,
                                         nMaxCount,
@@ -4362,13 +4371,17 @@ handle.CancelTokenSource.Token).Result;
                                             reader?.Close();
                                             finished = true;
                                         },
+#if REMOVED
                                         () =>
                                         {
                                             handle_token.ThrowIfCancellationRequested();
+                                            /*
                                             if (DateTime.UtcNow - start > current_timeout)
                                                 throw new TimeoutException($"服务器检索发生超时({timeout})");
+                                            */
                                             return null;
                                         },
+#endif
                                         out strError);
 
                                 sw.Stop();
@@ -4422,30 +4435,23 @@ handle.CancelTokenSource.Token).Result;
                 return new Result
                 {
                     Value = -1,
-                    ErrorString = ex.Message,
+                    ErrorString = $"TimeoutException:{ex.Message}",
                     ErrorCode = ErrorCodeValue.RequestTimeOut,
                 };
             }
             catch (TaskCanceledException ex)
             {
-                return new Result
-                {
-                    Value = -1,
-                    ErrorString = "前端中断",
-                    ErrorCode = ErrorCodeValue.Canceled,
-                };
+                return BuildResult();
             }
             catch (OperationCanceledException ex)
             {
-                return new Result
-                {
-                    Value = -1,
-                    ErrorString = "前端中断",
-                    ErrorCode = ErrorCodeValue.Canceled,
-                };
+                return BuildResult();
             }
             catch (Exception ex)
             {
+                if (cts.IsCancellationRequested)
+                    return BuildResult();
+
                 // 注意这里可能捕获到 AggregationException，所以要用 ExceptionUtil.GetExceptionText() 来输出异常信息
                 if (ex is AggregateException)
                 {
@@ -4461,7 +4467,7 @@ handle.CancelTokenSource.Token).Result;
                         return new Result
                         {
                             Value = -1,
-                            ErrorString = "前端中断",
+                            ErrorString = HasTimeout() ? "检索过程超时" : "前端中断",
                             ErrorCode = ErrorCodeValue.Canceled,
                         };
                     var oracle_exception = aex.InnerExceptions.Where(o => o is OracleException).FirstOrDefault() as OracleException;
@@ -4486,6 +4492,9 @@ handle.CancelTokenSource.Token).Result;
                     connection.Close();
                 //if (lite_connection != null)
                 //    lite_connection.Close();
+
+                timeout_cts.Dispose();
+                cts.Dispose();
             }
 
             void CancelCommand(DbCommand command)
@@ -4504,6 +4513,16 @@ handle.CancelTokenSource.Token).Result;
                 else
                     command?.Cancel();
             }
+
+            Result BuildResult()
+            {
+                return new Result
+                {
+                    Value = -1,
+                    ErrorString = timeout_cts.Token.IsCancellationRequested ? $"检索数据库时发生超时({strTimeout})" : "前端中断",
+                    ErrorCode = timeout_cts.Token.IsCancellationRequested ? ErrorCodeValue.RequestTimeOut : ErrorCodeValue.Canceled,
+                };
+            }
         }
 
         delegate void delegate_cancel();
@@ -4520,13 +4539,16 @@ handle.CancelTokenSource.Token).Result;
         //      >0  实际填入的记录条数
         int FillResultSet(
         // ChannelHandle handle,
+        CancellationToken token,
         DbDataReader reader,
         DpResultSet resultSet,
         int nMaxCount,
         OutputStyle style,
         bool bRecordTable,
         delegate_cancel func_cancel,
+#if REMOVED
         delegate_hasTimeout func_hasTimeout,
+#endif
         out string strError)
         {
             strError = "";
@@ -4542,6 +4564,7 @@ handle.CancelTokenSource.Token).Result;
                 if (handle != null)
                     token = handle.CancelToken;
                 */
+                token.ThrowIfCancellationRequested();
 
                 int nGetedCount = 0;
                 while (reader.Read())
@@ -4559,6 +4582,7 @@ handle.CancelTokenSource.Token).Result;
 #endif
                     if ((nGetedCount % 1000) == 0)
                     {
+                        token.ThrowIfCancellationRequested();
                         /*
                         if (token.IsCancellationRequested)
                         {
@@ -4570,12 +4594,14 @@ handle.CancelTokenSource.Token).Result;
                             return -1;
                         }
                         */
+#if REMOVED
                         var error = func_hasTimeout();
                         if (string.IsNullOrEmpty(error) == false)
                         {
                             strError = error;
                             return -1;
                         }
+#endif
                     }
 
                     string strFirstColumn = ((string)reader[0]);
@@ -6202,7 +6228,7 @@ List<DbParameter> aSqlParameter)
                      * */
                     if (ContainsErrorCode(ex, 2) == true)
                     {
-                        strError = ex.Message;
+                        strError = $"UpdateStructure() exception: {ex.Message}";
                         return -2;
                     }
 

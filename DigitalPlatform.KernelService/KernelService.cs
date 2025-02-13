@@ -729,7 +729,7 @@ namespace dp2Kernel
 #endif
                 result.Value = -1;
                 result.ErrorCode = ErrorCodeValue.CommonError;
-                result.ErrorString = ex.Message
+                result.ErrorString = "SearchEx() exception: " + ex.Message
                     + ex.Source.ToString()
                     + ex.StackTrace.ToString();
                 return result;
@@ -943,7 +943,7 @@ namespace dp2Kernel
 #endif
                 result.Value = -1;
                 result.ErrorCode = ErrorCodeValue.CommonError;
-                result.ErrorString = ex.Message
+                result.ErrorString = "Search() exception: " + ex.Message
                     + ex.Source.ToString()
                     + ex.StackTrace.ToString();
                 return result;

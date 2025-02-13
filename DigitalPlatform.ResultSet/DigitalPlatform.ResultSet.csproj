@@ -105,6 +105,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="System">
       <Name>System</Name>
     </Reference>
@@ -122,6 +123,7 @@
     <Compile Include="DigitalPlatform.ResultSet.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="UnitTest.cs" />
     <Content Include="内容概要.txt" />
   </ItemGroup>
   <ItemGroup>
@@ -157,6 +159,10 @@
     <ProjectReference Include="..\dp-library\DigitalPlatform.Core\DigitalPlatform.Core.csproj">
       <Project>{c5b517c1-7344-45a5-89dc-06a9b130ae36}</Project>
       <Name>DigitalPlatform.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DuckDbResultSet\DuckDbResultSet.csproj">
+      <Project>{E04EF3B7-521D-4419-8463-2633524390A3}</Project>
+      <Name>DuckDbResultSet</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

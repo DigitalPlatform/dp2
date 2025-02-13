@@ -392,7 +392,6 @@ namespace DigitalPlatform.rms.Client
 
                 // this.m_ws.InnerChannel.OperationTimeout = TimeSpan.FromMinutes(20);
                 this.m_ws.InnerChannel.OperationTimeout = this.OperationTimeout;
-
                 return m_ws;
             }
         }

@@ -93,7 +93,7 @@ namespace DigitalPlatform
             }
             catch (Exception ex)
             {
-                strError = "CreateAssemblyFile() 出错 " + GetDebugText(ex);
+                strError = "CreateAssemblyFile() 2出错 " + GetDebugText(ex);
                 return -1;
             }
         }
@@ -227,7 +227,7 @@ warnings);
             }
             catch (Exception ex)
             {
-                strError = "CreateAssemblyFile() 出错 " + GetDebugText(ex);
+                strError = "CreateAssemblyFile() 3出错 " + GetDebugText(ex);
                 return -1;
             }
         }
@@ -309,7 +309,7 @@ warnings);
             }
             catch (Exception ex)
             {
-                strError = "CreateAssemblyFile() 出错 " + GetDebugText(ex);
+                strError = "CreateAssemblyFile() 4出错 " + GetDebugText(ex);
                 return -1;
             }
         }

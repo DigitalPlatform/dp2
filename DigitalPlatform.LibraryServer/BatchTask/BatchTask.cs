@@ -1089,6 +1089,10 @@ namespace DigitalPlatform.LibraryServer
             {
                 // 暂未实现
             }
+            else if (strOperation == "changeUserPassword")
+            {
+                // 暂未实现
+            }
             else if (strOperation == "passgate")
             {
                 // 只读

@@ -1827,6 +1827,8 @@ out strError);
                 return -1;
             }
 
+            string type = "bcrypt";
+
             XmlElement nodeAccount = null;
             string strHashedPassword = "";
 
@@ -1871,7 +1873,6 @@ out strError);
                     return -1;
 
                 // 强制修改密码。无需验证旧密码
-                string type = "bcrypt";
                 nRet = LibraryServerUtil.SetUserPassword(
                     type,
                     strNewPassword,
@@ -1909,6 +1910,10 @@ out strError);
                 DomUtil.SetElementText(domOperLog.DocumentElement,
                     "newPassword",
                     strHashedPassword);
+                // 2025/2/12
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+    "type",
+    type);
 
                 // 写入日志
                 nRet = this.OperLog.WriteOperLog(domOperLog,

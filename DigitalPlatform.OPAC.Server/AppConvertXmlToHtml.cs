@@ -421,7 +421,7 @@ namespace DigitalPlatform.OPAC.Server
                         if (nRet == -1)
                         {
                             // if (string.IsNullOrEmpty(strWarning) == true)
-                                throw new Exception(strError1);
+                            throw new Exception(strError1);
                         }
 
                         return assembly1;
