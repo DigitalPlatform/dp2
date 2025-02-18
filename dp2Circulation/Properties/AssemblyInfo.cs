@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.96.*")]
-[assembly: AssemblyFileVersion("3.96.0.0")]
+[assembly: AssemblyVersion("3.97.*")]
+[assembly: AssemblyFileVersion("3.97.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -245,3 +245,6 @@ using System.Runtime.InteropServices;
 // 3.95 2024/12/26  导出新书通报功能，html 格式的图像文件改为写入一个专门的子目录。功能执行完成后，用户如果拷走 .html 文件，要记得一并拷走这个图像文件子目录，以免封面图片显示不出来
 //                  docx 格式处理时，对于 dp2library 自己管理的封面图片对象，改为直接利用 dp2library 协议获得(此前的版本是利用 dp2OPAC 的 getobject.aspx 获取)
 // 3.96 2025/1/10   MarcEditor 增加 shift+回车 键，功能为从插入符当前位置切割为两个字段
+// 3.97 2025/2/14   系统管理窗的“内核”属性页，在允许复选的情况下，check 选中一个节点不再会引起上级节点自动 check。
+//                  新的效果是，check 选中一个节点，会自动引起这个节点的上级所有祖先节点自动清除 check。如果用户需要选中上级祖先节点，请在 check 当前节点以后再补充 check 选中一次上级祖先节点
+//                  这个改进主要是避免 check 选中节点的时候被强迫选中上级祖先节点，从而避免在后继的删除命令执行时无意中所有上级祖先节点

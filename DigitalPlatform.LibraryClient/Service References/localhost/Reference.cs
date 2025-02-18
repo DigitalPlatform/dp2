@@ -15,640 +15,6 @@ namespace DigitalPlatform.LibraryClient.localhost {
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
-    [System.Runtime.Serialization.DataContractAttribute(Name="LibraryServerResult", Namespace="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer")]
-    [System.SerializableAttribute()]
-    public partial class LibraryServerResult : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
-        
-        [System.NonSerializedAttribute()]
-        private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private DigitalPlatform.LibraryClient.localhost.ErrorCode ErrorCodeField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private string ErrorInfoField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private long ValueField;
-        
-        [global::System.ComponentModel.BrowsableAttribute(false)]
-        public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
-            get {
-                return this.extensionDataField;
-            }
-            set {
-                this.extensionDataField = value;
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute()]
-        public DigitalPlatform.LibraryClient.localhost.ErrorCode ErrorCode {
-            get {
-                return this.ErrorCodeField;
-            }
-            set {
-                if ((this.ErrorCodeField.Equals(value) != true)) {
-                    this.ErrorCodeField = value;
-                    this.RaisePropertyChanged("ErrorCode");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute()]
-        public string ErrorInfo {
-            get {
-                return this.ErrorInfoField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.ErrorInfoField, value) != true)) {
-                    this.ErrorInfoField = value;
-                    this.RaisePropertyChanged("ErrorInfo");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute()]
-        public long Value {
-            get {
-                return this.ValueField;
-            }
-            set {
-                if ((this.ValueField.Equals(value) != true)) {
-                    this.ValueField = value;
-                    this.RaisePropertyChanged("Value");
-                }
-            }
-        }
-        
-        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
-        
-        protected void RaisePropertyChanged(string propertyName) {
-            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
-            if ((propertyChanged != null)) {
-                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
-            }
-        }
-    }
-    
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
-    [System.Runtime.Serialization.DataContractAttribute(Name="ErrorCode", Namespace="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer")]
-    public enum ErrorCode : int {
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        NoError = 0,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        SystemError = 1,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        NotFound = 2,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        ReaderBarcodeNotFound = 3,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        ItemBarcodeNotFound = 4,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        Overdue = 5,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        NotLogin = 6,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        DupItemBarcode = 7,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        InvalidParameter = 8,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        ReturnReservation = 9,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        BorrowReservationDenied = 10,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        RenewReservationDenied = 11,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        AccessDenied = 12,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        ItemBarcodeDup = 14,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        Hangup = 15,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        ReaderBarcodeDup = 16,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        HasCirculationInfo = 17,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        SourceReaderBarcodeNotFound = 18,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        TargetReaderBarcodeNotFound = 19,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        FromNotFound = 20,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        ItemDbNotDef = 21,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        IdcardNumberDup = 22,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        IdcardNumberNotFound = 23,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        PartialDenied = 24,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        ChannelReleased = 25,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        OutofSession = 26,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        InvalidReaderBarcode = 27,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        InvalidItemBarcode = 28,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        NeedSmsLogin = 29,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        RetryLogin = 30,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        TempCodeMismatch = 31,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        BiblioDup = 32,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        Borrowing = 33,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        ClientVersionTooOld = 34,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        NotBorrowed = 35,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        NotChanged = 36,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        ServerTimeout = 37,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        AlreadyBorrowed = 38,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        AlreadyBorrowedByOther = 39,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        SyncDenied = 40,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        PasswordExpired = 41,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        BarcodeDup = 42,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        DisplayNameDup = 43,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        RefIdDup = 44,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        Canceled = 45,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        AlreadyExist = 100,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        AlreadyExistOtherType = 101,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        ApplicationStartError = 102,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        EmptyRecord = 103,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        NotFoundSubRes = 105,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        NotHasEnoughRights = 106,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        OtherError = 107,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        PartNotFound = 108,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        RequestCanceled = 109,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        RequestCanceledByEventClose = 110,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        RequestError = 111,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        RequestTimeOut = 112,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        TimestampMismatch = 113,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        Compressed = 114,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        NotFoundObjectFile = 115,
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
-    [System.Runtime.Serialization.DataContractAttribute(Name="CallNumberSearchResult", Namespace="http://dp2003.com/dp2library/")]
-    [System.SerializableAttribute()]
-    public partial class CallNumberSearchResult : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
-        
-        [System.NonSerializedAttribute()]
-        private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private string BarcodeField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private string CallNumberField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private string ErrorInfoField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private string ItemRecPathField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private string LocationField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private string ParentIDField;
-        
-        [global::System.ComponentModel.BrowsableAttribute(false)]
-        public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
-            get {
-                return this.extensionDataField;
-            }
-            set {
-                this.extensionDataField = value;
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute()]
-        public string Barcode {
-            get {
-                return this.BarcodeField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.BarcodeField, value) != true)) {
-                    this.BarcodeField = value;
-                    this.RaisePropertyChanged("Barcode");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute()]
-        public string CallNumber {
-            get {
-                return this.CallNumberField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.CallNumberField, value) != true)) {
-                    this.CallNumberField = value;
-                    this.RaisePropertyChanged("CallNumber");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute()]
-        public string ErrorInfo {
-            get {
-                return this.ErrorInfoField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.ErrorInfoField, value) != true)) {
-                    this.ErrorInfoField = value;
-                    this.RaisePropertyChanged("ErrorInfo");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute()]
-        public string ItemRecPath {
-            get {
-                return this.ItemRecPathField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.ItemRecPathField, value) != true)) {
-                    this.ItemRecPathField = value;
-                    this.RaisePropertyChanged("ItemRecPath");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute()]
-        public string Location {
-            get {
-                return this.LocationField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.LocationField, value) != true)) {
-                    this.LocationField = value;
-                    this.RaisePropertyChanged("Location");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute()]
-        public string ParentID {
-            get {
-                return this.ParentIDField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.ParentIDField, value) != true)) {
-                    this.ParentIDField = value;
-                    this.RaisePropertyChanged("ParentID");
-                }
-            }
-        }
-        
-        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
-        
-        protected void RaisePropertyChanged(string propertyName) {
-            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
-            if ((propertyChanged != null)) {
-                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
-    [System.Runtime.Serialization.DataContractAttribute(Name="ZhongcihaoSearchResult", Namespace="http://dp2003.com/dp2library/")]
-    [System.SerializableAttribute()]
-    public partial class ZhongcihaoSearchResult : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
-        
-        [System.NonSerializedAttribute()]
-        private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private string[] ColsField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private string PathField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private string ZhongcihaoField;
-        
-        [global::System.ComponentModel.BrowsableAttribute(false)]
-        public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
-            get {
-                return this.extensionDataField;
-            }
-            set {
-                this.extensionDataField = value;
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute()]
-        public string[] Cols {
-            get {
-                return this.ColsField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.ColsField, value) != true)) {
-                    this.ColsField = value;
-                    this.RaisePropertyChanged("Cols");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute()]
-        public string Path {
-            get {
-                return this.PathField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.PathField, value) != true)) {
-                    this.PathField = value;
-                    this.RaisePropertyChanged("Path");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute()]
-        public string Zhongcihao {
-            get {
-                return this.ZhongcihaoField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.ZhongcihaoField, value) != true)) {
-                    this.ZhongcihaoField = value;
-                    this.RaisePropertyChanged("Zhongcihao");
-                }
-            }
-        }
-        
-        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
-        
-        protected void RaisePropertyChanged(string propertyName) {
-            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
-            if ((propertyChanged != null)) {
-                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
-    [System.Runtime.Serialization.DataContractAttribute(Name="DupSearchResult", Namespace="http://dp2003.com/dp2library/")]
-    [System.SerializableAttribute()]
-    public partial class DupSearchResult : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
-        
-        [System.NonSerializedAttribute()]
-        private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private string[] ColsField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private string DetailField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private string PathField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private int ThresholdField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private int WeightField;
-        
-        [global::System.ComponentModel.BrowsableAttribute(false)]
-        public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
-            get {
-                return this.extensionDataField;
-            }
-            set {
-                this.extensionDataField = value;
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute()]
-        public string[] Cols {
-            get {
-                return this.ColsField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.ColsField, value) != true)) {
-                    this.ColsField = value;
-                    this.RaisePropertyChanged("Cols");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute()]
-        public string Detail {
-            get {
-                return this.DetailField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.DetailField, value) != true)) {
-                    this.DetailField = value;
-                    this.RaisePropertyChanged("Detail");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute()]
-        public string Path {
-            get {
-                return this.PathField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.PathField, value) != true)) {
-                    this.PathField = value;
-                    this.RaisePropertyChanged("Path");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute()]
-        public int Threshold {
-            get {
-                return this.ThresholdField;
-            }
-            set {
-                if ((this.ThresholdField.Equals(value) != true)) {
-                    this.ThresholdField = value;
-                    this.RaisePropertyChanged("Threshold");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute()]
-        public int Weight {
-            get {
-                return this.WeightField;
-            }
-            set {
-                if ((this.WeightField.Equals(value) != true)) {
-                    this.WeightField = value;
-                    this.RaisePropertyChanged("Weight");
-                }
-            }
-        }
-        
-        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
-        
-        protected void RaisePropertyChanged(string propertyName) {
-            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
-            if ((propertyChanged != null)) {
-                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
-    [System.Runtime.Serialization.DataContractAttribute(Name="DupProjectInfo", Namespace="http://dp2003.com/dp2library/")]
-    [System.SerializableAttribute()]
-    public partial class DupProjectInfo : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
-        
-        [System.NonSerializedAttribute()]
-        private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private string CommentField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private string NameField;
-        
-        [global::System.ComponentModel.BrowsableAttribute(false)]
-        public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
-            get {
-                return this.extensionDataField;
-            }
-            set {
-                this.extensionDataField = value;
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute()]
-        public string Comment {
-            get {
-                return this.CommentField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.CommentField, value) != true)) {
-                    this.CommentField = value;
-                    this.RaisePropertyChanged("Comment");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute()]
-        public string Name {
-            get {
-                return this.NameField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.NameField, value) != true)) {
-                    this.NameField = value;
-                    this.RaisePropertyChanged("Name");
-                }
-            }
-        }
-        
-        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
-        
-        protected void RaisePropertyChanged(string propertyName) {
-            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
-            if ((propertyChanged != null)) {
-                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
     [System.Runtime.Serialization.DataContractAttribute(Name="EntityInfo", Namespace="http://dp2003.com/dp2library/")]
     [System.SerializableAttribute()]
     public partial class EntityInfo : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
@@ -930,6 +296,271 @@ namespace DigitalPlatform.LibraryClient.localhost {
         
         [System.Runtime.Serialization.EnumMemberAttribute()]
         RequestTimeOut = 112,
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
+    [System.Runtime.Serialization.DataContractAttribute(Name="LibraryServerResult", Namespace="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer")]
+    [System.SerializableAttribute()]
+    public partial class LibraryServerResult : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
+        
+        [System.NonSerializedAttribute()]
+        private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private DigitalPlatform.LibraryClient.localhost.ErrorCode ErrorCodeField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string ErrorInfoField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private long ValueField;
+        
+        [global::System.ComponentModel.BrowsableAttribute(false)]
+        public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
+            get {
+                return this.extensionDataField;
+            }
+            set {
+                this.extensionDataField = value;
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public DigitalPlatform.LibraryClient.localhost.ErrorCode ErrorCode {
+            get {
+                return this.ErrorCodeField;
+            }
+            set {
+                if ((this.ErrorCodeField.Equals(value) != true)) {
+                    this.ErrorCodeField = value;
+                    this.RaisePropertyChanged("ErrorCode");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string ErrorInfo {
+            get {
+                return this.ErrorInfoField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.ErrorInfoField, value) != true)) {
+                    this.ErrorInfoField = value;
+                    this.RaisePropertyChanged("ErrorInfo");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public long Value {
+            get {
+                return this.ValueField;
+            }
+            set {
+                if ((this.ValueField.Equals(value) != true)) {
+                    this.ValueField = value;
+                    this.RaisePropertyChanged("Value");
+                }
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        protected void RaisePropertyChanged(string propertyName) {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null)) {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            }
+        }
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
+    [System.Runtime.Serialization.DataContractAttribute(Name="ErrorCode", Namespace="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer")]
+    public enum ErrorCode : int {
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        NoError = 0,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        SystemError = 1,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        NotFound = 2,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        ReaderBarcodeNotFound = 3,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        ItemBarcodeNotFound = 4,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        Overdue = 5,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        NotLogin = 6,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        DupItemBarcode = 7,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        InvalidParameter = 8,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        ReturnReservation = 9,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        BorrowReservationDenied = 10,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        RenewReservationDenied = 11,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        AccessDenied = 12,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        ItemBarcodeDup = 14,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        Hangup = 15,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        ReaderBarcodeDup = 16,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        HasCirculationInfo = 17,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        SourceReaderBarcodeNotFound = 18,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        TargetReaderBarcodeNotFound = 19,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        FromNotFound = 20,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        ItemDbNotDef = 21,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        IdcardNumberDup = 22,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        IdcardNumberNotFound = 23,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        PartialDenied = 24,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        ChannelReleased = 25,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        OutofSession = 26,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        InvalidReaderBarcode = 27,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        InvalidItemBarcode = 28,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        NeedSmsLogin = 29,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        RetryLogin = 30,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        TempCodeMismatch = 31,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        BiblioDup = 32,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        Borrowing = 33,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        ClientVersionTooOld = 34,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        NotBorrowed = 35,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        NotChanged = 36,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        ServerTimeout = 37,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        AlreadyBorrowed = 38,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        AlreadyBorrowedByOther = 39,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        SyncDenied = 40,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        PasswordExpired = 41,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        BarcodeDup = 42,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        DisplayNameDup = 43,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        RefIdDup = 44,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        Canceled = 45,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        ErrorParameter = 46,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        AlreadyExist = 100,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        AlreadyExistOtherType = 101,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        ApplicationStartError = 102,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        EmptyRecord = 103,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        NotFoundSubRes = 105,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        NotHasEnoughRights = 106,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        OtherError = 107,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        PartNotFound = 108,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        RequestCanceled = 109,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        RequestCanceledByEventClose = 110,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        RequestError = 111,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        RequestTimeOut = 112,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        TimestampMismatch = 113,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        Compressed = 114,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        NotFoundObjectFile = 115,
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
@@ -3946,177 +3577,381 @@ namespace DigitalPlatform.LibraryClient.localhost {
         }
     }
     
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
+    [System.Runtime.Serialization.DataContractAttribute(Name="CallNumberSearchResult", Namespace="http://dp2003.com/dp2library/")]
+    [System.SerializableAttribute()]
+    public partial class CallNumberSearchResult : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
+        
+        [System.NonSerializedAttribute()]
+        private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string BarcodeField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string CallNumberField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string ErrorInfoField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string ItemRecPathField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string LocationField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string ParentIDField;
+        
+        [global::System.ComponentModel.BrowsableAttribute(false)]
+        public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
+            get {
+                return this.extensionDataField;
+            }
+            set {
+                this.extensionDataField = value;
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string Barcode {
+            get {
+                return this.BarcodeField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.BarcodeField, value) != true)) {
+                    this.BarcodeField = value;
+                    this.RaisePropertyChanged("Barcode");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string CallNumber {
+            get {
+                return this.CallNumberField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.CallNumberField, value) != true)) {
+                    this.CallNumberField = value;
+                    this.RaisePropertyChanged("CallNumber");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string ErrorInfo {
+            get {
+                return this.ErrorInfoField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.ErrorInfoField, value) != true)) {
+                    this.ErrorInfoField = value;
+                    this.RaisePropertyChanged("ErrorInfo");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string ItemRecPath {
+            get {
+                return this.ItemRecPathField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.ItemRecPathField, value) != true)) {
+                    this.ItemRecPathField = value;
+                    this.RaisePropertyChanged("ItemRecPath");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string Location {
+            get {
+                return this.LocationField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.LocationField, value) != true)) {
+                    this.LocationField = value;
+                    this.RaisePropertyChanged("Location");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string ParentID {
+            get {
+                return this.ParentIDField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.ParentIDField, value) != true)) {
+                    this.ParentIDField = value;
+                    this.RaisePropertyChanged("ParentID");
+                }
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        protected void RaisePropertyChanged(string propertyName) {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null)) {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
+    [System.Runtime.Serialization.DataContractAttribute(Name="ZhongcihaoSearchResult", Namespace="http://dp2003.com/dp2library/")]
+    [System.SerializableAttribute()]
+    public partial class ZhongcihaoSearchResult : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
+        
+        [System.NonSerializedAttribute()]
+        private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string[] ColsField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string PathField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string ZhongcihaoField;
+        
+        [global::System.ComponentModel.BrowsableAttribute(false)]
+        public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
+            get {
+                return this.extensionDataField;
+            }
+            set {
+                this.extensionDataField = value;
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string[] Cols {
+            get {
+                return this.ColsField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.ColsField, value) != true)) {
+                    this.ColsField = value;
+                    this.RaisePropertyChanged("Cols");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string Path {
+            get {
+                return this.PathField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.PathField, value) != true)) {
+                    this.PathField = value;
+                    this.RaisePropertyChanged("Path");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string Zhongcihao {
+            get {
+                return this.ZhongcihaoField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.ZhongcihaoField, value) != true)) {
+                    this.ZhongcihaoField = value;
+                    this.RaisePropertyChanged("Zhongcihao");
+                }
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        protected void RaisePropertyChanged(string propertyName) {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null)) {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
+    [System.Runtime.Serialization.DataContractAttribute(Name="DupSearchResult", Namespace="http://dp2003.com/dp2library/")]
+    [System.SerializableAttribute()]
+    public partial class DupSearchResult : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
+        
+        [System.NonSerializedAttribute()]
+        private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string[] ColsField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string DetailField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string PathField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private int ThresholdField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private int WeightField;
+        
+        [global::System.ComponentModel.BrowsableAttribute(false)]
+        public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
+            get {
+                return this.extensionDataField;
+            }
+            set {
+                this.extensionDataField = value;
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string[] Cols {
+            get {
+                return this.ColsField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.ColsField, value) != true)) {
+                    this.ColsField = value;
+                    this.RaisePropertyChanged("Cols");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string Detail {
+            get {
+                return this.DetailField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.DetailField, value) != true)) {
+                    this.DetailField = value;
+                    this.RaisePropertyChanged("Detail");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string Path {
+            get {
+                return this.PathField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.PathField, value) != true)) {
+                    this.PathField = value;
+                    this.RaisePropertyChanged("Path");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public int Threshold {
+            get {
+                return this.ThresholdField;
+            }
+            set {
+                if ((this.ThresholdField.Equals(value) != true)) {
+                    this.ThresholdField = value;
+                    this.RaisePropertyChanged("Threshold");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public int Weight {
+            get {
+                return this.WeightField;
+            }
+            set {
+                if ((this.WeightField.Equals(value) != true)) {
+                    this.WeightField = value;
+                    this.RaisePropertyChanged("Weight");
+                }
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        protected void RaisePropertyChanged(string propertyName) {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null)) {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
+    [System.Runtime.Serialization.DataContractAttribute(Name="DupProjectInfo", Namespace="http://dp2003.com/dp2library/")]
+    [System.SerializableAttribute()]
+    public partial class DupProjectInfo : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
+        
+        [System.NonSerializedAttribute()]
+        private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string CommentField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string NameField;
+        
+        [global::System.ComponentModel.BrowsableAttribute(false)]
+        public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
+            get {
+                return this.extensionDataField;
+            }
+            set {
+                this.extensionDataField = value;
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string Comment {
+            get {
+                return this.CommentField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.CommentField, value) != true)) {
+                    this.CommentField = value;
+                    this.RaisePropertyChanged("Comment");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string Name {
+            get {
+                return this.NameField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.NameField, value) != true)) {
+                    this.NameField = value;
+                    this.RaisePropertyChanged("Name");
+                }
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        protected void RaisePropertyChanged(string propertyName) {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null)) {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            }
+        }
+    }
+    
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
     [System.ServiceModel.ServiceContractAttribute(Namespace="http://dp2003.com/dp2library/", ConfigurationName="localhost.dp2library", SessionMode=System.ServiceModel.SessionMode.Required)]
     public interface dp2library {
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/RepairBorrowInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/RepairBorrowInfoResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult RepairBorrowInfo(out int nProcessedBorrowItems, out int nTotalBorrowItems, out string strOutputReaderBarcode, out string[] aDupPath, string strAction, string strReaderBarcode, string strItemBarcode, string strConfirmItemRecPath, int nStart, int nCount);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/RepairBorrowInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/RepairBorrowInfoResponse")]
-        System.IAsyncResult BeginRepairBorrowInfo(string strAction, string strReaderBarcode, string strItemBarcode, string strConfirmItemRecPath, int nStart, int nCount, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndRepairBorrowInfo(out int nProcessedBorrowItems, out int nTotalBorrowItems, out string strOutputReaderBarcode, out string[] aDupPath, System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/PassGate", ReplyAction="http://dp2003.com/dp2library/dp2library/PassGateResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult PassGate(out string[] results, string strReaderBarcode, string strGateName, string strResultTypeList);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/PassGate", ReplyAction="http://dp2003.com/dp2library/dp2library/PassGateResponse")]
-        System.IAsyncResult BeginPassGate(string strReaderBarcode, string strGateName, string strResultTypeList, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndPassGate(out string[] results, System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/Foregift", ReplyAction="http://dp2003.com/dp2library/dp2library/ForegiftResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult Foregift(out string strOutputReaderXml, out string strOutputID, string strAction, string strReaderBarcode);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/Foregift", ReplyAction="http://dp2003.com/dp2library/dp2library/ForegiftResponse")]
-        System.IAsyncResult BeginForegift(string strAction, string strReaderBarcode, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndForegift(out string strOutputReaderXml, out string strOutputID, System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/Hire", ReplyAction="http://dp2003.com/dp2library/dp2library/HireResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult Hire(out string strOutputReaderXml, out string strOutputID, string strAction, string strReaderBarcode);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/Hire", ReplyAction="http://dp2003.com/dp2library/dp2library/HireResponse")]
-        System.IAsyncResult BeginHire(string strAction, string strReaderBarcode, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndHire(out string strOutputReaderXml, out string strOutputID, System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/Settlement", ReplyAction="http://dp2003.com/dp2library/dp2library/SettlementResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult Settlement(string strAction, string[] ids);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/Settlement", ReplyAction="http://dp2003.com/dp2library/dp2library/SettlementResponse")]
-        System.IAsyncResult BeginSettlement(string strAction, string[] ids, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSettlement(System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SearchOneClassCallNumber", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchOneClassCallNumberResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchOneClassCallNumber(out string strQueryXml, string strArrangeGroupName, string strClass, string strResultSetName);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SearchOneClassCallNumber", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchOneClassCallNumberResponse")]
-        System.IAsyncResult BeginSearchOneClassCallNumber(string strArrangeGroupName, string strClass, string strResultSetName, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchOneClassCallNumber(out string strQueryXml, System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetCallNumberSearchResult", ReplyAction="http://dp2003.com/dp2library/dp2library/GetCallNumberSearchResultResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetCallNumberSearchResult(out DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[] searchresults, string strArrangeGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetCallNumberSearchResult", ReplyAction="http://dp2003.com/dp2library/dp2library/GetCallNumberSearchResultResponse")]
-        System.IAsyncResult BeginGetCallNumberSearchResult(string strArrangeGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetCallNumberSearchResult(out DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[] searchresults, System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetOneClassTailNumber", ReplyAction="http://dp2003.com/dp2library/dp2library/GetOneClassTailNumberResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetOneClassTailNumber(out string strTailNumber, string strArrangeGroupName, string strClass);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetOneClassTailNumber", ReplyAction="http://dp2003.com/dp2library/dp2library/GetOneClassTailNumberResponse")]
-        System.IAsyncResult BeginGetOneClassTailNumber(string strArrangeGroupName, string strClass, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetOneClassTailNumber(out string strTailNumber, System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SetOneClassTailNumber", ReplyAction="http://dp2003.com/dp2library/dp2library/SetOneClassTailNumberResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetOneClassTailNumber(out string strOutputNumber, string strAction, string strArrangeGroupName, string strClass, string strTestNumber);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SetOneClassTailNumber", ReplyAction="http://dp2003.com/dp2library/dp2library/SetOneClassTailNumberResponse")]
-        System.IAsyncResult BeginSetOneClassTailNumber(string strAction, string strArrangeGroupName, string strClass, string strTestNumber, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetOneClassTailNumber(out string strOutputNumber, System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SearchUsedZhongcihao", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchUsedZhongcihaoResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchUsedZhongcihao(out string strQueryXml, string strZhongcihaoGroupName, string strClass, string strResultSetName);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SearchUsedZhongcihao", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchUsedZhongcihaoResponse")]
-        System.IAsyncResult BeginSearchUsedZhongcihao(string strZhongcihaoGroupName, string strClass, string strResultSetName, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchUsedZhongcihao(out string strQueryXml, System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetZhongcihaoSearchResult", ReplyAction="http://dp2003.com/dp2library/dp2library/GetZhongcihaoSearchResultResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetZhongcihaoSearchResult(out DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[] searchresults, string strZhongcihaoGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetZhongcihaoSearchResult", ReplyAction="http://dp2003.com/dp2library/dp2library/GetZhongcihaoSearchResultResponse")]
-        System.IAsyncResult BeginGetZhongcihaoSearchResult(string strZhongcihaoGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetZhongcihaoSearchResult(out DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[] searchresults, System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetZhongcihaoTailNumber", ReplyAction="http://dp2003.com/dp2library/dp2library/GetZhongcihaoTailNumberResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetZhongcihaoTailNumber(out string strTailNumber, string strZhongcihaoGroupName, string strClass);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetZhongcihaoTailNumber", ReplyAction="http://dp2003.com/dp2library/dp2library/GetZhongcihaoTailNumberResponse")]
-        System.IAsyncResult BeginGetZhongcihaoTailNumber(string strZhongcihaoGroupName, string strClass, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetZhongcihaoTailNumber(out string strTailNumber, System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SetZhongcihaoTailNumber", ReplyAction="http://dp2003.com/dp2library/dp2library/SetZhongcihaoTailNumberResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetZhongcihaoTailNumber(out string strOutputNumber, string strAction, string strZhongcihaoGroupName, string strClass, string strTestNumber);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SetZhongcihaoTailNumber", ReplyAction="http://dp2003.com/dp2library/dp2library/SetZhongcihaoTailNumberResponse")]
-        System.IAsyncResult BeginSetZhongcihaoTailNumber(string strAction, string strZhongcihaoGroupName, string strClass, string strTestNumber, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetZhongcihaoTailNumber(out string strOutputNumber, System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SearchDup", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchDupResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchDup(out string strUsedProjectName, string strOriginBiblioRecPath, string strOriginBiblioRecXml, string strProjectName, string strStyle);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SearchDup", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchDupResponse")]
-        System.IAsyncResult BeginSearchDup(string strOriginBiblioRecPath, string strOriginBiblioRecXml, string strProjectName, string strStyle, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchDup(out string strUsedProjectName, System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetDupSearchResult", ReplyAction="http://dp2003.com/dp2library/dp2library/GetDupSearchResultResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetDupSearchResult(out DigitalPlatform.LibraryClient.localhost.DupSearchResult[] searchresults, long lStart, long lCount, string strBrowseInfoStyle);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetDupSearchResult", ReplyAction="http://dp2003.com/dp2library/dp2library/GetDupSearchResultResponse")]
-        System.IAsyncResult BeginGetDupSearchResult(long lStart, long lCount, string strBrowseInfoStyle, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetDupSearchResult(out DigitalPlatform.LibraryClient.localhost.DupSearchResult[] searchresults, System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/ListDupProjectInfos", ReplyAction="http://dp2003.com/dp2library/dp2library/ListDupProjectInfosResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult ListDupProjectInfos(out DigitalPlatform.LibraryClient.localhost.DupProjectInfo[] results, string strOriginBiblioDbName);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/ListDupProjectInfos", ReplyAction="http://dp2003.com/dp2library/dp2library/ListDupProjectInfosResponse")]
-        System.IAsyncResult BeginListDupProjectInfos(string strOriginBiblioDbName, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndListDupProjectInfos(out DigitalPlatform.LibraryClient.localhost.DupProjectInfo[] results, System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetUtilInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/GetUtilInfoResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetUtilInfo(out string strValue, string strAction, string strDbName, string strFrom, string strKey, string strValueAttrName);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetUtilInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/GetUtilInfoResponse")]
-        System.IAsyncResult BeginGetUtilInfo(string strAction, string strDbName, string strFrom, string strKey, string strValueAttrName, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetUtilInfo(out string strValue, System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SetUtilInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/SetUtilInfoResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetUtilInfo(string strAction, string strDbName, string strFrom, string strRootElementName, string strKeyAttrName, string strValueAttrName, string strKey, string strValue);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SetUtilInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/SetUtilInfoResponse")]
-        System.IAsyncResult BeginSetUtilInfo(string strAction, string strDbName, string strFrom, string strRootElementName, string strKeyAttrName, string strValueAttrName, string strKey, string strValue, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetUtilInfo(System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetRes", ReplyAction="http://dp2003.com/dp2library/dp2library/GetResResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetRes(out byte[] baContent, out string strMetadata, out string strOutputResPath, out byte[] baOutputTimestamp, string strResPath, long nStart, int nLength, string strStyle);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetRes", ReplyAction="http://dp2003.com/dp2library/dp2library/GetResResponse")]
-        System.IAsyncResult BeginGetRes(string strResPath, long nStart, int nLength, string strStyle, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetRes(out byte[] baContent, out string strMetadata, out string strOutputResPath, out byte[] baOutputTimestamp, System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/WriteRes", ReplyAction="http://dp2003.com/dp2library/dp2library/WriteResResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult WriteRes(out string strOutputResPath, out byte[] baOutputTimestamp, string strResPath, string strRanges, long lTotalLength, byte[] baContent, string strMetadata, string strStyle, byte[] baInputTimestamp);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/WriteRes", ReplyAction="http://dp2003.com/dp2library/dp2library/WriteResResponse")]
-        System.IAsyncResult BeginWriteRes(string strResPath, string strRanges, long lTotalLength, byte[] baContent, string strMetadata, string strStyle, byte[] baInputTimestamp, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndWriteRes(out string strOutputResPath, out byte[] baOutputTimestamp, System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetComments", ReplyAction="http://dp2003.com/dp2library/dp2library/GetCommentsResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetComments", ReplyAction="http://dp2003.com/dp2library/dp2library/GetCommentsResponse")]
-        System.IAsyncResult BeginGetComments(string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SetComments", ReplyAction="http://dp2003.com/dp2library/dp2library/SetCommentsResponse")]
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos, string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos);
@@ -4805,605 +4640,178 @@ namespace DigitalPlatform.LibraryClient.localhost {
         System.IAsyncResult BeginUrgentRecover(string strXML, System.AsyncCallback callback, object asyncState);
         
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndUrgentRecover(System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/RepairBorrowInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/RepairBorrowInfoResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult RepairBorrowInfo(out int nProcessedBorrowItems, out int nTotalBorrowItems, out string strOutputReaderBarcode, out string[] aDupPath, string strAction, string strReaderBarcode, string strItemBarcode, string strConfirmItemRecPath, int nStart, int nCount);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/RepairBorrowInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/RepairBorrowInfoResponse")]
+        System.IAsyncResult BeginRepairBorrowInfo(string strAction, string strReaderBarcode, string strItemBarcode, string strConfirmItemRecPath, int nStart, int nCount, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndRepairBorrowInfo(out int nProcessedBorrowItems, out int nTotalBorrowItems, out string strOutputReaderBarcode, out string[] aDupPath, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/PassGate", ReplyAction="http://dp2003.com/dp2library/dp2library/PassGateResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult PassGate(out string[] results, string strReaderBarcode, string strGateName, string strResultTypeList);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/PassGate", ReplyAction="http://dp2003.com/dp2library/dp2library/PassGateResponse")]
+        System.IAsyncResult BeginPassGate(string strReaderBarcode, string strGateName, string strResultTypeList, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndPassGate(out string[] results, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/Foregift", ReplyAction="http://dp2003.com/dp2library/dp2library/ForegiftResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult Foregift(out string strOutputReaderXml, out string strOutputID, string strAction, string strReaderBarcode);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/Foregift", ReplyAction="http://dp2003.com/dp2library/dp2library/ForegiftResponse")]
+        System.IAsyncResult BeginForegift(string strAction, string strReaderBarcode, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndForegift(out string strOutputReaderXml, out string strOutputID, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/Hire", ReplyAction="http://dp2003.com/dp2library/dp2library/HireResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult Hire(out string strOutputReaderXml, out string strOutputID, string strAction, string strReaderBarcode);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/Hire", ReplyAction="http://dp2003.com/dp2library/dp2library/HireResponse")]
+        System.IAsyncResult BeginHire(string strAction, string strReaderBarcode, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndHire(out string strOutputReaderXml, out string strOutputID, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/Settlement", ReplyAction="http://dp2003.com/dp2library/dp2library/SettlementResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult Settlement(string strAction, string[] ids);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/Settlement", ReplyAction="http://dp2003.com/dp2library/dp2library/SettlementResponse")]
+        System.IAsyncResult BeginSettlement(string strAction, string[] ids, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSettlement(System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SearchOneClassCallNumber", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchOneClassCallNumberResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchOneClassCallNumber(out string strQueryXml, string strArrangeGroupName, string strClass, string strResultSetName);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SearchOneClassCallNumber", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchOneClassCallNumberResponse")]
+        System.IAsyncResult BeginSearchOneClassCallNumber(string strArrangeGroupName, string strClass, string strResultSetName, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchOneClassCallNumber(out string strQueryXml, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetCallNumberSearchResult", ReplyAction="http://dp2003.com/dp2library/dp2library/GetCallNumberSearchResultResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetCallNumberSearchResult(out DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[] searchresults, string strArrangeGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetCallNumberSearchResult", ReplyAction="http://dp2003.com/dp2library/dp2library/GetCallNumberSearchResultResponse")]
+        System.IAsyncResult BeginGetCallNumberSearchResult(string strArrangeGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetCallNumberSearchResult(out DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[] searchresults, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetOneClassTailNumber", ReplyAction="http://dp2003.com/dp2library/dp2library/GetOneClassTailNumberResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetOneClassTailNumber(out string strTailNumber, string strArrangeGroupName, string strClass);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetOneClassTailNumber", ReplyAction="http://dp2003.com/dp2library/dp2library/GetOneClassTailNumberResponse")]
+        System.IAsyncResult BeginGetOneClassTailNumber(string strArrangeGroupName, string strClass, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetOneClassTailNumber(out string strTailNumber, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SetOneClassTailNumber", ReplyAction="http://dp2003.com/dp2library/dp2library/SetOneClassTailNumberResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetOneClassTailNumber(out string strOutputNumber, string strAction, string strArrangeGroupName, string strClass, string strTestNumber);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SetOneClassTailNumber", ReplyAction="http://dp2003.com/dp2library/dp2library/SetOneClassTailNumberResponse")]
+        System.IAsyncResult BeginSetOneClassTailNumber(string strAction, string strArrangeGroupName, string strClass, string strTestNumber, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetOneClassTailNumber(out string strOutputNumber, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SearchUsedZhongcihao", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchUsedZhongcihaoResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchUsedZhongcihao(out string strQueryXml, string strZhongcihaoGroupName, string strClass, string strResultSetName);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SearchUsedZhongcihao", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchUsedZhongcihaoResponse")]
+        System.IAsyncResult BeginSearchUsedZhongcihao(string strZhongcihaoGroupName, string strClass, string strResultSetName, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchUsedZhongcihao(out string strQueryXml, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetZhongcihaoSearchResult", ReplyAction="http://dp2003.com/dp2library/dp2library/GetZhongcihaoSearchResultResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetZhongcihaoSearchResult(out DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[] searchresults, string strZhongcihaoGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetZhongcihaoSearchResult", ReplyAction="http://dp2003.com/dp2library/dp2library/GetZhongcihaoSearchResultResponse")]
+        System.IAsyncResult BeginGetZhongcihaoSearchResult(string strZhongcihaoGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetZhongcihaoSearchResult(out DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[] searchresults, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetZhongcihaoTailNumber", ReplyAction="http://dp2003.com/dp2library/dp2library/GetZhongcihaoTailNumberResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetZhongcihaoTailNumber(out string strTailNumber, string strZhongcihaoGroupName, string strClass);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetZhongcihaoTailNumber", ReplyAction="http://dp2003.com/dp2library/dp2library/GetZhongcihaoTailNumberResponse")]
+        System.IAsyncResult BeginGetZhongcihaoTailNumber(string strZhongcihaoGroupName, string strClass, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetZhongcihaoTailNumber(out string strTailNumber, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SetZhongcihaoTailNumber", ReplyAction="http://dp2003.com/dp2library/dp2library/SetZhongcihaoTailNumberResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetZhongcihaoTailNumber(out string strOutputNumber, string strAction, string strZhongcihaoGroupName, string strClass, string strTestNumber);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SetZhongcihaoTailNumber", ReplyAction="http://dp2003.com/dp2library/dp2library/SetZhongcihaoTailNumberResponse")]
+        System.IAsyncResult BeginSetZhongcihaoTailNumber(string strAction, string strZhongcihaoGroupName, string strClass, string strTestNumber, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetZhongcihaoTailNumber(out string strOutputNumber, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SearchDup", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchDupResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchDup(out string strUsedProjectName, string strOriginBiblioRecPath, string strOriginBiblioRecXml, string strProjectName, string strStyle);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SearchDup", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchDupResponse")]
+        System.IAsyncResult BeginSearchDup(string strOriginBiblioRecPath, string strOriginBiblioRecXml, string strProjectName, string strStyle, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchDup(out string strUsedProjectName, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetDupSearchResult", ReplyAction="http://dp2003.com/dp2library/dp2library/GetDupSearchResultResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetDupSearchResult(out DigitalPlatform.LibraryClient.localhost.DupSearchResult[] searchresults, long lStart, long lCount, string strBrowseInfoStyle);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetDupSearchResult", ReplyAction="http://dp2003.com/dp2library/dp2library/GetDupSearchResultResponse")]
+        System.IAsyncResult BeginGetDupSearchResult(long lStart, long lCount, string strBrowseInfoStyle, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetDupSearchResult(out DigitalPlatform.LibraryClient.localhost.DupSearchResult[] searchresults, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/ListDupProjectInfos", ReplyAction="http://dp2003.com/dp2library/dp2library/ListDupProjectInfosResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult ListDupProjectInfos(out DigitalPlatform.LibraryClient.localhost.DupProjectInfo[] results, string strOriginBiblioDbName);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/ListDupProjectInfos", ReplyAction="http://dp2003.com/dp2library/dp2library/ListDupProjectInfosResponse")]
+        System.IAsyncResult BeginListDupProjectInfos(string strOriginBiblioDbName, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndListDupProjectInfos(out DigitalPlatform.LibraryClient.localhost.DupProjectInfo[] results, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetUtilInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/GetUtilInfoResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetUtilInfo(out string strValue, string strAction, string strDbName, string strFrom, string strKey, string strValueAttrName);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetUtilInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/GetUtilInfoResponse")]
+        System.IAsyncResult BeginGetUtilInfo(string strAction, string strDbName, string strFrom, string strKey, string strValueAttrName, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetUtilInfo(out string strValue, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SetUtilInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/SetUtilInfoResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetUtilInfo(string strAction, string strDbName, string strFrom, string strRootElementName, string strKeyAttrName, string strValueAttrName, string strKey, string strValue);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SetUtilInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/SetUtilInfoResponse")]
+        System.IAsyncResult BeginSetUtilInfo(string strAction, string strDbName, string strFrom, string strRootElementName, string strKeyAttrName, string strValueAttrName, string strKey, string strValue, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetUtilInfo(System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetRes", ReplyAction="http://dp2003.com/dp2library/dp2library/GetResResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetRes(out byte[] baContent, out string strMetadata, out string strOutputResPath, out byte[] baOutputTimestamp, string strResPath, long nStart, int nLength, string strStyle);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetRes", ReplyAction="http://dp2003.com/dp2library/dp2library/GetResResponse")]
+        System.IAsyncResult BeginGetRes(string strResPath, long nStart, int nLength, string strStyle, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetRes(out byte[] baContent, out string strMetadata, out string strOutputResPath, out byte[] baOutputTimestamp, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/WriteRes", ReplyAction="http://dp2003.com/dp2library/dp2library/WriteResResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult WriteRes(out string strOutputResPath, out byte[] baOutputTimestamp, string strResPath, string strRanges, long lTotalLength, byte[] baContent, string strMetadata, string strStyle, byte[] baInputTimestamp);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/WriteRes", ReplyAction="http://dp2003.com/dp2library/dp2library/WriteResResponse")]
+        System.IAsyncResult BeginWriteRes(string strResPath, string strRanges, long lTotalLength, byte[] baContent, string strMetadata, string strStyle, byte[] baInputTimestamp, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndWriteRes(out string strOutputResPath, out byte[] baOutputTimestamp, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetComments", ReplyAction="http://dp2003.com/dp2library/dp2library/GetCommentsResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetComments", ReplyAction="http://dp2003.com/dp2library/dp2library/GetCommentsResponse")]
+        System.IAsyncResult BeginGetComments(string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, System.IAsyncResult result);
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
     public interface dp2libraryChannel : DigitalPlatform.LibraryClient.localhost.dp2library, System.ServiceModel.IClientChannel {
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class RepairBorrowInfoCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        public RepairBorrowInfoCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        public int nProcessedBorrowItems {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((int)(this.results[0]));
-            }
-        }
-        
-        public int nTotalBorrowItems {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((int)(this.results[1]));
-            }
-        }
-        
-        public string strOutputReaderBarcode {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((string)(this.results[2]));
-            }
-        }
-        
-        public string[] aDupPath {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((string[])(this.results[3]));
-            }
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[4]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class PassGateCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results1;
-        
-        public PassGateCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results1 = results;
-        }
-        
-        public string[] results {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((string[])(this.results1[0]));
-            }
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results1[1]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class ForegiftCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        public ForegiftCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        public string strOutputReaderXml {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((string)(this.results[0]));
-            }
-        }
-        
-        public string strOutputID {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((string)(this.results[1]));
-            }
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[2]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class HireCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        public HireCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        public string strOutputReaderXml {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((string)(this.results[0]));
-            }
-        }
-        
-        public string strOutputID {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((string)(this.results[1]));
-            }
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[2]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class SettlementCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        public SettlementCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class SearchOneClassCallNumberCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        public SearchOneClassCallNumberCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        public string strQueryXml {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((string)(this.results[0]));
-            }
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class GetCallNumberSearchResultCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        public GetCallNumberSearchResultCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[] searchresults {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[])(this.results[0]));
-            }
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class GetOneClassTailNumberCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        public GetOneClassTailNumberCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        public string strTailNumber {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((string)(this.results[0]));
-            }
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class SetOneClassTailNumberCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        public SetOneClassTailNumberCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        public string strOutputNumber {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((string)(this.results[0]));
-            }
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class SearchUsedZhongcihaoCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        public SearchUsedZhongcihaoCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        public string strQueryXml {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((string)(this.results[0]));
-            }
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class GetZhongcihaoSearchResultCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        public GetZhongcihaoSearchResultCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[] searchresults {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[])(this.results[0]));
-            }
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class GetZhongcihaoTailNumberCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        public GetZhongcihaoTailNumberCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        public string strTailNumber {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((string)(this.results[0]));
-            }
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class SetZhongcihaoTailNumberCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        public SetZhongcihaoTailNumberCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        public string strOutputNumber {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((string)(this.results[0]));
-            }
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class SearchDupCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        public SearchDupCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        public string strUsedProjectName {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((string)(this.results[0]));
-            }
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class GetDupSearchResultCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        public GetDupSearchResultCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.DupSearchResult[] searchresults {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.DupSearchResult[])(this.results[0]));
-            }
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class ListDupProjectInfosCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results1;
-        
-        public ListDupProjectInfosCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results1 = results;
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.DupProjectInfo[] results {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.DupProjectInfo[])(this.results1[0]));
-            }
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results1[1]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class GetUtilInfoCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        public GetUtilInfoCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        public string strValue {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((string)(this.results[0]));
-            }
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class SetUtilInfoCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        public SetUtilInfoCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class GetResCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        public GetResCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        public byte[] baContent {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((byte[])(this.results[0]));
-            }
-        }
-        
-        public string strMetadata {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((string)(this.results[1]));
-            }
-        }
-        
-        public string strOutputResPath {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((string)(this.results[2]));
-            }
-        }
-        
-        public byte[] baOutputTimestamp {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((byte[])(this.results[3]));
-            }
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[4]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class WriteResCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        public WriteResCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        public string strOutputResPath {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((string)(this.results[0]));
-            }
-        }
-        
-        public byte[] baOutputTimestamp {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((byte[])(this.results[1]));
-            }
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[2]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class GetCommentsCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        public GetCommentsCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.EntityInfo[])(this.results[0]));
-            }
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
-            }
-        }
     }
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
@@ -7783,133 +7191,602 @@ namespace DigitalPlatform.LibraryClient.localhost {
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class RepairBorrowInfoCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public RepairBorrowInfoCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public int nProcessedBorrowItems {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((int)(this.results[0]));
+            }
+        }
+        
+        public int nTotalBorrowItems {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((int)(this.results[1]));
+            }
+        }
+        
+        public string strOutputReaderBarcode {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[2]));
+            }
+        }
+        
+        public string[] aDupPath {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string[])(this.results[3]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[4]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class PassGateCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results1;
+        
+        public PassGateCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results1 = results;
+        }
+        
+        public string[] results {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string[])(this.results1[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results1[1]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class ForegiftCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public ForegiftCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public string strOutputReaderXml {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[0]));
+            }
+        }
+        
+        public string strOutputID {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[1]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[2]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class HireCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public HireCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public string strOutputReaderXml {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[0]));
+            }
+        }
+        
+        public string strOutputID {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[1]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[2]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class SettlementCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public SettlementCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class SearchOneClassCallNumberCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public SearchOneClassCallNumberCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public string strQueryXml {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class GetCallNumberSearchResultCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public GetCallNumberSearchResultCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[] searchresults {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[])(this.results[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class GetOneClassTailNumberCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public GetOneClassTailNumberCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public string strTailNumber {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class SetOneClassTailNumberCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public SetOneClassTailNumberCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public string strOutputNumber {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class SearchUsedZhongcihaoCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public SearchUsedZhongcihaoCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public string strQueryXml {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class GetZhongcihaoSearchResultCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public GetZhongcihaoSearchResultCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[] searchresults {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[])(this.results[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class GetZhongcihaoTailNumberCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public GetZhongcihaoTailNumberCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public string strTailNumber {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class SetZhongcihaoTailNumberCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public SetZhongcihaoTailNumberCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public string strOutputNumber {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class SearchDupCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public SearchDupCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public string strUsedProjectName {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class GetDupSearchResultCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public GetDupSearchResultCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.DupSearchResult[] searchresults {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.DupSearchResult[])(this.results[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class ListDupProjectInfosCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results1;
+        
+        public ListDupProjectInfosCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results1 = results;
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.DupProjectInfo[] results {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.DupProjectInfo[])(this.results1[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results1[1]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class GetUtilInfoCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public GetUtilInfoCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public string strValue {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class SetUtilInfoCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public SetUtilInfoCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class GetResCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public GetResCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public byte[] baContent {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((byte[])(this.results[0]));
+            }
+        }
+        
+        public string strMetadata {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[1]));
+            }
+        }
+        
+        public string strOutputResPath {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[2]));
+            }
+        }
+        
+        public byte[] baOutputTimestamp {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((byte[])(this.results[3]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[4]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class WriteResCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public WriteResCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public string strOutputResPath {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[0]));
+            }
+        }
+        
+        public byte[] baOutputTimestamp {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((byte[])(this.results[1]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[2]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class GetCommentsCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public GetCommentsCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.EntityInfo[])(this.results[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
     public partial class dp2libraryClient : System.ServiceModel.ClientBase<DigitalPlatform.LibraryClient.localhost.dp2library>, DigitalPlatform.LibraryClient.localhost.dp2library {
-        
-        private BeginOperationDelegate onBeginRepairBorrowInfoDelegate;
-        
-        private EndOperationDelegate onEndRepairBorrowInfoDelegate;
-        
-        private System.Threading.SendOrPostCallback onRepairBorrowInfoCompletedDelegate;
-        
-        private BeginOperationDelegate onBeginPassGateDelegate;
-        
-        private EndOperationDelegate onEndPassGateDelegate;
-        
-        private System.Threading.SendOrPostCallback onPassGateCompletedDelegate;
-        
-        private BeginOperationDelegate onBeginForegiftDelegate;
-        
-        private EndOperationDelegate onEndForegiftDelegate;
-        
-        private System.Threading.SendOrPostCallback onForegiftCompletedDelegate;
-        
-        private BeginOperationDelegate onBeginHireDelegate;
-        
-        private EndOperationDelegate onEndHireDelegate;
-        
-        private System.Threading.SendOrPostCallback onHireCompletedDelegate;
-        
-        private BeginOperationDelegate onBeginSettlementDelegate;
-        
-        private EndOperationDelegate onEndSettlementDelegate;
-        
-        private System.Threading.SendOrPostCallback onSettlementCompletedDelegate;
-        
-        private BeginOperationDelegate onBeginSearchOneClassCallNumberDelegate;
-        
-        private EndOperationDelegate onEndSearchOneClassCallNumberDelegate;
-        
-        private System.Threading.SendOrPostCallback onSearchOneClassCallNumberCompletedDelegate;
-        
-        private BeginOperationDelegate onBeginGetCallNumberSearchResultDelegate;
-        
-        private EndOperationDelegate onEndGetCallNumberSearchResultDelegate;
-        
-        private System.Threading.SendOrPostCallback onGetCallNumberSearchResultCompletedDelegate;
-        
-        private BeginOperationDelegate onBeginGetOneClassTailNumberDelegate;
-        
-        private EndOperationDelegate onEndGetOneClassTailNumberDelegate;
-        
-        private System.Threading.SendOrPostCallback onGetOneClassTailNumberCompletedDelegate;
-        
-        private BeginOperationDelegate onBeginSetOneClassTailNumberDelegate;
-        
-        private EndOperationDelegate onEndSetOneClassTailNumberDelegate;
-        
-        private System.Threading.SendOrPostCallback onSetOneClassTailNumberCompletedDelegate;
-        
-        private BeginOperationDelegate onBeginSearchUsedZhongcihaoDelegate;
-        
-        private EndOperationDelegate onEndSearchUsedZhongcihaoDelegate;
-        
-        private System.Threading.SendOrPostCallback onSearchUsedZhongcihaoCompletedDelegate;
-        
-        private BeginOperationDelegate onBeginGetZhongcihaoSearchResultDelegate;
-        
-        private EndOperationDelegate onEndGetZhongcihaoSearchResultDelegate;
-        
-        private System.Threading.SendOrPostCallback onGetZhongcihaoSearchResultCompletedDelegate;
-        
-        private BeginOperationDelegate onBeginGetZhongcihaoTailNumberDelegate;
-        
-        private EndOperationDelegate onEndGetZhongcihaoTailNumberDelegate;
-        
-        private System.Threading.SendOrPostCallback onGetZhongcihaoTailNumberCompletedDelegate;
-        
-        private BeginOperationDelegate onBeginSetZhongcihaoTailNumberDelegate;
-        
-        private EndOperationDelegate onEndSetZhongcihaoTailNumberDelegate;
-        
-        private System.Threading.SendOrPostCallback onSetZhongcihaoTailNumberCompletedDelegate;
-        
-        private BeginOperationDelegate onBeginSearchDupDelegate;
-        
-        private EndOperationDelegate onEndSearchDupDelegate;
-        
-        private System.Threading.SendOrPostCallback onSearchDupCompletedDelegate;
-        
-        private BeginOperationDelegate onBeginGetDupSearchResultDelegate;
-        
-        private EndOperationDelegate onEndGetDupSearchResultDelegate;
-        
-        private System.Threading.SendOrPostCallback onGetDupSearchResultCompletedDelegate;
-        
-        private BeginOperationDelegate onBeginListDupProjectInfosDelegate;
-        
-        private EndOperationDelegate onEndListDupProjectInfosDelegate;
-        
-        private System.Threading.SendOrPostCallback onListDupProjectInfosCompletedDelegate;
-        
-        private BeginOperationDelegate onBeginGetUtilInfoDelegate;
-        
-        private EndOperationDelegate onEndGetUtilInfoDelegate;
-        
-        private System.Threading.SendOrPostCallback onGetUtilInfoCompletedDelegate;
-        
-        private BeginOperationDelegate onBeginSetUtilInfoDelegate;
-        
-        private EndOperationDelegate onEndSetUtilInfoDelegate;
-        
-        private System.Threading.SendOrPostCallback onSetUtilInfoCompletedDelegate;
-        
-        private BeginOperationDelegate onBeginGetResDelegate;
-        
-        private EndOperationDelegate onEndGetResDelegate;
-        
-        private System.Threading.SendOrPostCallback onGetResCompletedDelegate;
-        
-        private BeginOperationDelegate onBeginWriteResDelegate;
-        
-        private EndOperationDelegate onEndWriteResDelegate;
-        
-        private System.Threading.SendOrPostCallback onWriteResCompletedDelegate;
-        
-        private BeginOperationDelegate onBeginGetCommentsDelegate;
-        
-        private EndOperationDelegate onEndGetCommentsDelegate;
-        
-        private System.Threading.SendOrPostCallback onGetCommentsCompletedDelegate;
         
         private BeginOperationDelegate onBeginSetCommentsDelegate;
         
@@ -8415,6 +8292,132 @@ namespace DigitalPlatform.LibraryClient.localhost {
         
         private System.Threading.SendOrPostCallback onUrgentRecoverCompletedDelegate;
         
+        private BeginOperationDelegate onBeginRepairBorrowInfoDelegate;
+        
+        private EndOperationDelegate onEndRepairBorrowInfoDelegate;
+        
+        private System.Threading.SendOrPostCallback onRepairBorrowInfoCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginPassGateDelegate;
+        
+        private EndOperationDelegate onEndPassGateDelegate;
+        
+        private System.Threading.SendOrPostCallback onPassGateCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginForegiftDelegate;
+        
+        private EndOperationDelegate onEndForegiftDelegate;
+        
+        private System.Threading.SendOrPostCallback onForegiftCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginHireDelegate;
+        
+        private EndOperationDelegate onEndHireDelegate;
+        
+        private System.Threading.SendOrPostCallback onHireCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginSettlementDelegate;
+        
+        private EndOperationDelegate onEndSettlementDelegate;
+        
+        private System.Threading.SendOrPostCallback onSettlementCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginSearchOneClassCallNumberDelegate;
+        
+        private EndOperationDelegate onEndSearchOneClassCallNumberDelegate;
+        
+        private System.Threading.SendOrPostCallback onSearchOneClassCallNumberCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginGetCallNumberSearchResultDelegate;
+        
+        private EndOperationDelegate onEndGetCallNumberSearchResultDelegate;
+        
+        private System.Threading.SendOrPostCallback onGetCallNumberSearchResultCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginGetOneClassTailNumberDelegate;
+        
+        private EndOperationDelegate onEndGetOneClassTailNumberDelegate;
+        
+        private System.Threading.SendOrPostCallback onGetOneClassTailNumberCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginSetOneClassTailNumberDelegate;
+        
+        private EndOperationDelegate onEndSetOneClassTailNumberDelegate;
+        
+        private System.Threading.SendOrPostCallback onSetOneClassTailNumberCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginSearchUsedZhongcihaoDelegate;
+        
+        private EndOperationDelegate onEndSearchUsedZhongcihaoDelegate;
+        
+        private System.Threading.SendOrPostCallback onSearchUsedZhongcihaoCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginGetZhongcihaoSearchResultDelegate;
+        
+        private EndOperationDelegate onEndGetZhongcihaoSearchResultDelegate;
+        
+        private System.Threading.SendOrPostCallback onGetZhongcihaoSearchResultCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginGetZhongcihaoTailNumberDelegate;
+        
+        private EndOperationDelegate onEndGetZhongcihaoTailNumberDelegate;
+        
+        private System.Threading.SendOrPostCallback onGetZhongcihaoTailNumberCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginSetZhongcihaoTailNumberDelegate;
+        
+        private EndOperationDelegate onEndSetZhongcihaoTailNumberDelegate;
+        
+        private System.Threading.SendOrPostCallback onSetZhongcihaoTailNumberCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginSearchDupDelegate;
+        
+        private EndOperationDelegate onEndSearchDupDelegate;
+        
+        private System.Threading.SendOrPostCallback onSearchDupCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginGetDupSearchResultDelegate;
+        
+        private EndOperationDelegate onEndGetDupSearchResultDelegate;
+        
+        private System.Threading.SendOrPostCallback onGetDupSearchResultCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginListDupProjectInfosDelegate;
+        
+        private EndOperationDelegate onEndListDupProjectInfosDelegate;
+        
+        private System.Threading.SendOrPostCallback onListDupProjectInfosCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginGetUtilInfoDelegate;
+        
+        private EndOperationDelegate onEndGetUtilInfoDelegate;
+        
+        private System.Threading.SendOrPostCallback onGetUtilInfoCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginSetUtilInfoDelegate;
+        
+        private EndOperationDelegate onEndSetUtilInfoDelegate;
+        
+        private System.Threading.SendOrPostCallback onSetUtilInfoCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginGetResDelegate;
+        
+        private EndOperationDelegate onEndGetResDelegate;
+        
+        private System.Threading.SendOrPostCallback onGetResCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginWriteResDelegate;
+        
+        private EndOperationDelegate onEndWriteResDelegate;
+        
+        private System.Threading.SendOrPostCallback onWriteResCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginGetCommentsDelegate;
+        
+        private EndOperationDelegate onEndGetCommentsDelegate;
+        
+        private System.Threading.SendOrPostCallback onGetCommentsCompletedDelegate;
+        
         public dp2libraryClient() {
         }
         
@@ -8433,48 +8436,6 @@ namespace DigitalPlatform.LibraryClient.localhost {
         public dp2libraryClient(System.ServiceModel.Channels.Binding binding, System.ServiceModel.EndpointAddress remoteAddress) : 
                 base(binding, remoteAddress) {
         }
-        
-        public event System.EventHandler<RepairBorrowInfoCompletedEventArgs> RepairBorrowInfoCompleted;
-        
-        public event System.EventHandler<PassGateCompletedEventArgs> PassGateCompleted;
-        
-        public event System.EventHandler<ForegiftCompletedEventArgs> ForegiftCompleted;
-        
-        public event System.EventHandler<HireCompletedEventArgs> HireCompleted;
-        
-        public event System.EventHandler<SettlementCompletedEventArgs> SettlementCompleted;
-        
-        public event System.EventHandler<SearchOneClassCallNumberCompletedEventArgs> SearchOneClassCallNumberCompleted;
-        
-        public event System.EventHandler<GetCallNumberSearchResultCompletedEventArgs> GetCallNumberSearchResultCompleted;
-        
-        public event System.EventHandler<GetOneClassTailNumberCompletedEventArgs> GetOneClassTailNumberCompleted;
-        
-        public event System.EventHandler<SetOneClassTailNumberCompletedEventArgs> SetOneClassTailNumberCompleted;
-        
-        public event System.EventHandler<SearchUsedZhongcihaoCompletedEventArgs> SearchUsedZhongcihaoCompleted;
-        
-        public event System.EventHandler<GetZhongcihaoSearchResultCompletedEventArgs> GetZhongcihaoSearchResultCompleted;
-        
-        public event System.EventHandler<GetZhongcihaoTailNumberCompletedEventArgs> GetZhongcihaoTailNumberCompleted;
-        
-        public event System.EventHandler<SetZhongcihaoTailNumberCompletedEventArgs> SetZhongcihaoTailNumberCompleted;
-        
-        public event System.EventHandler<SearchDupCompletedEventArgs> SearchDupCompleted;
-        
-        public event System.EventHandler<GetDupSearchResultCompletedEventArgs> GetDupSearchResultCompleted;
-        
-        public event System.EventHandler<ListDupProjectInfosCompletedEventArgs> ListDupProjectInfosCompleted;
-        
-        public event System.EventHandler<GetUtilInfoCompletedEventArgs> GetUtilInfoCompleted;
-        
-        public event System.EventHandler<SetUtilInfoCompletedEventArgs> SetUtilInfoCompleted;
-        
-        public event System.EventHandler<GetResCompletedEventArgs> GetResCompleted;
-        
-        public event System.EventHandler<WriteResCompletedEventArgs> WriteResCompleted;
-        
-        public event System.EventHandler<GetCommentsCompletedEventArgs> GetCommentsCompleted;
         
         public event System.EventHandler<SetCommentsCompletedEventArgs> SetCommentsCompleted;
         
@@ -8644,1233 +8605,47 @@ namespace DigitalPlatform.LibraryClient.localhost {
         
         public event System.EventHandler<UrgentRecoverCompletedEventArgs> UrgentRecoverCompleted;
         
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult RepairBorrowInfo(out int nProcessedBorrowItems, out int nTotalBorrowItems, out string strOutputReaderBarcode, out string[] aDupPath, string strAction, string strReaderBarcode, string strItemBarcode, string strConfirmItemRecPath, int nStart, int nCount) {
-            return base.Channel.RepairBorrowInfo(out nProcessedBorrowItems, out nTotalBorrowItems, out strOutputReaderBarcode, out aDupPath, strAction, strReaderBarcode, strItemBarcode, strConfirmItemRecPath, nStart, nCount);
-        }
+        public event System.EventHandler<RepairBorrowInfoCompletedEventArgs> RepairBorrowInfoCompleted;
         
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginRepairBorrowInfo(string strAction, string strReaderBarcode, string strItemBarcode, string strConfirmItemRecPath, int nStart, int nCount, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginRepairBorrowInfo(strAction, strReaderBarcode, strItemBarcode, strConfirmItemRecPath, nStart, nCount, callback, asyncState);
-        }
+        public event System.EventHandler<PassGateCompletedEventArgs> PassGateCompleted;
         
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndRepairBorrowInfo(out int nProcessedBorrowItems, out int nTotalBorrowItems, out string strOutputReaderBarcode, out string[] aDupPath, System.IAsyncResult result) {
-            return base.Channel.EndRepairBorrowInfo(out nProcessedBorrowItems, out nTotalBorrowItems, out strOutputReaderBarcode, out aDupPath, result);
-        }
+        public event System.EventHandler<ForegiftCompletedEventArgs> ForegiftCompleted;
         
-        private System.IAsyncResult OnBeginRepairBorrowInfo(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strAction = ((string)(inValues[0]));
-            string strReaderBarcode = ((string)(inValues[1]));
-            string strItemBarcode = ((string)(inValues[2]));
-            string strConfirmItemRecPath = ((string)(inValues[3]));
-            int nStart = ((int)(inValues[4]));
-            int nCount = ((int)(inValues[5]));
-            return this.BeginRepairBorrowInfo(strAction, strReaderBarcode, strItemBarcode, strConfirmItemRecPath, nStart, nCount, callback, asyncState);
-        }
+        public event System.EventHandler<HireCompletedEventArgs> HireCompleted;
         
-        private object[] OnEndRepairBorrowInfo(System.IAsyncResult result) {
-            int nProcessedBorrowItems = this.GetDefaultValueForInitialization<int>();
-            int nTotalBorrowItems = this.GetDefaultValueForInitialization<int>();
-            string strOutputReaderBarcode = this.GetDefaultValueForInitialization<string>();
-            string[] aDupPath = this.GetDefaultValueForInitialization<string[]>();
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndRepairBorrowInfo(out nProcessedBorrowItems, out nTotalBorrowItems, out strOutputReaderBarcode, out aDupPath, result);
-            return new object[] {
-                    nProcessedBorrowItems,
-                    nTotalBorrowItems,
-                    strOutputReaderBarcode,
-                    aDupPath,
-                    retVal};
-        }
+        public event System.EventHandler<SettlementCompletedEventArgs> SettlementCompleted;
         
-        private void OnRepairBorrowInfoCompleted(object state) {
-            if ((this.RepairBorrowInfoCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.RepairBorrowInfoCompleted(this, new RepairBorrowInfoCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
+        public event System.EventHandler<SearchOneClassCallNumberCompletedEventArgs> SearchOneClassCallNumberCompleted;
         
-        public void RepairBorrowInfoAsync(string strAction, string strReaderBarcode, string strItemBarcode, string strConfirmItemRecPath, int nStart, int nCount) {
-            this.RepairBorrowInfoAsync(strAction, strReaderBarcode, strItemBarcode, strConfirmItemRecPath, nStart, nCount, null);
-        }
+        public event System.EventHandler<GetCallNumberSearchResultCompletedEventArgs> GetCallNumberSearchResultCompleted;
         
-        public void RepairBorrowInfoAsync(string strAction, string strReaderBarcode, string strItemBarcode, string strConfirmItemRecPath, int nStart, int nCount, object userState) {
-            if ((this.onBeginRepairBorrowInfoDelegate == null)) {
-                this.onBeginRepairBorrowInfoDelegate = new BeginOperationDelegate(this.OnBeginRepairBorrowInfo);
-            }
-            if ((this.onEndRepairBorrowInfoDelegate == null)) {
-                this.onEndRepairBorrowInfoDelegate = new EndOperationDelegate(this.OnEndRepairBorrowInfo);
-            }
-            if ((this.onRepairBorrowInfoCompletedDelegate == null)) {
-                this.onRepairBorrowInfoCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnRepairBorrowInfoCompleted);
-            }
-            base.InvokeAsync(this.onBeginRepairBorrowInfoDelegate, new object[] {
-                        strAction,
-                        strReaderBarcode,
-                        strItemBarcode,
-                        strConfirmItemRecPath,
-                        nStart,
-                        nCount}, this.onEndRepairBorrowInfoDelegate, this.onRepairBorrowInfoCompletedDelegate, userState);
-        }
+        public event System.EventHandler<GetOneClassTailNumberCompletedEventArgs> GetOneClassTailNumberCompleted;
         
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult PassGate(out string[] results, string strReaderBarcode, string strGateName, string strResultTypeList) {
-            return base.Channel.PassGate(out results, strReaderBarcode, strGateName, strResultTypeList);
-        }
+        public event System.EventHandler<SetOneClassTailNumberCompletedEventArgs> SetOneClassTailNumberCompleted;
         
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginPassGate(string strReaderBarcode, string strGateName, string strResultTypeList, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginPassGate(strReaderBarcode, strGateName, strResultTypeList, callback, asyncState);
-        }
+        public event System.EventHandler<SearchUsedZhongcihaoCompletedEventArgs> SearchUsedZhongcihaoCompleted;
         
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndPassGate(out string[] results, System.IAsyncResult result) {
-            return base.Channel.EndPassGate(out results, result);
-        }
+        public event System.EventHandler<GetZhongcihaoSearchResultCompletedEventArgs> GetZhongcihaoSearchResultCompleted;
         
-        private System.IAsyncResult OnBeginPassGate(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strReaderBarcode = ((string)(inValues[0]));
-            string strGateName = ((string)(inValues[1]));
-            string strResultTypeList = ((string)(inValues[2]));
-            return this.BeginPassGate(strReaderBarcode, strGateName, strResultTypeList, callback, asyncState);
-        }
+        public event System.EventHandler<GetZhongcihaoTailNumberCompletedEventArgs> GetZhongcihaoTailNumberCompleted;
         
-        private object[] OnEndPassGate(System.IAsyncResult result) {
-            string[] results = this.GetDefaultValueForInitialization<string[]>();
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndPassGate(out results, result);
-            return new object[] {
-                    results,
-                    retVal};
-        }
+        public event System.EventHandler<SetZhongcihaoTailNumberCompletedEventArgs> SetZhongcihaoTailNumberCompleted;
         
-        private void OnPassGateCompleted(object state) {
-            if ((this.PassGateCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.PassGateCompleted(this, new PassGateCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
+        public event System.EventHandler<SearchDupCompletedEventArgs> SearchDupCompleted;
         
-        public void PassGateAsync(string strReaderBarcode, string strGateName, string strResultTypeList) {
-            this.PassGateAsync(strReaderBarcode, strGateName, strResultTypeList, null);
-        }
+        public event System.EventHandler<GetDupSearchResultCompletedEventArgs> GetDupSearchResultCompleted;
         
-        public void PassGateAsync(string strReaderBarcode, string strGateName, string strResultTypeList, object userState) {
-            if ((this.onBeginPassGateDelegate == null)) {
-                this.onBeginPassGateDelegate = new BeginOperationDelegate(this.OnBeginPassGate);
-            }
-            if ((this.onEndPassGateDelegate == null)) {
-                this.onEndPassGateDelegate = new EndOperationDelegate(this.OnEndPassGate);
-            }
-            if ((this.onPassGateCompletedDelegate == null)) {
-                this.onPassGateCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnPassGateCompleted);
-            }
-            base.InvokeAsync(this.onBeginPassGateDelegate, new object[] {
-                        strReaderBarcode,
-                        strGateName,
-                        strResultTypeList}, this.onEndPassGateDelegate, this.onPassGateCompletedDelegate, userState);
-        }
+        public event System.EventHandler<ListDupProjectInfosCompletedEventArgs> ListDupProjectInfosCompleted;
         
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Foregift(out string strOutputReaderXml, out string strOutputID, string strAction, string strReaderBarcode) {
-            return base.Channel.Foregift(out strOutputReaderXml, out strOutputID, strAction, strReaderBarcode);
-        }
+        public event System.EventHandler<GetUtilInfoCompletedEventArgs> GetUtilInfoCompleted;
         
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginForegift(string strAction, string strReaderBarcode, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginForegift(strAction, strReaderBarcode, callback, asyncState);
-        }
+        public event System.EventHandler<SetUtilInfoCompletedEventArgs> SetUtilInfoCompleted;
         
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndForegift(out string strOutputReaderXml, out string strOutputID, System.IAsyncResult result) {
-            return base.Channel.EndForegift(out strOutputReaderXml, out strOutputID, result);
-        }
+        public event System.EventHandler<GetResCompletedEventArgs> GetResCompleted;
         
-        private System.IAsyncResult OnBeginForegift(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strAction = ((string)(inValues[0]));
-            string strReaderBarcode = ((string)(inValues[1]));
-            return this.BeginForegift(strAction, strReaderBarcode, callback, asyncState);
-        }
+        public event System.EventHandler<WriteResCompletedEventArgs> WriteResCompleted;
         
-        private object[] OnEndForegift(System.IAsyncResult result) {
-            string strOutputReaderXml = this.GetDefaultValueForInitialization<string>();
-            string strOutputID = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndForegift(out strOutputReaderXml, out strOutputID, result);
-            return new object[] {
-                    strOutputReaderXml,
-                    strOutputID,
-                    retVal};
-        }
-        
-        private void OnForegiftCompleted(object state) {
-            if ((this.ForegiftCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.ForegiftCompleted(this, new ForegiftCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
-        
-        public void ForegiftAsync(string strAction, string strReaderBarcode) {
-            this.ForegiftAsync(strAction, strReaderBarcode, null);
-        }
-        
-        public void ForegiftAsync(string strAction, string strReaderBarcode, object userState) {
-            if ((this.onBeginForegiftDelegate == null)) {
-                this.onBeginForegiftDelegate = new BeginOperationDelegate(this.OnBeginForegift);
-            }
-            if ((this.onEndForegiftDelegate == null)) {
-                this.onEndForegiftDelegate = new EndOperationDelegate(this.OnEndForegift);
-            }
-            if ((this.onForegiftCompletedDelegate == null)) {
-                this.onForegiftCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnForegiftCompleted);
-            }
-            base.InvokeAsync(this.onBeginForegiftDelegate, new object[] {
-                        strAction,
-                        strReaderBarcode}, this.onEndForegiftDelegate, this.onForegiftCompletedDelegate, userState);
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Hire(out string strOutputReaderXml, out string strOutputID, string strAction, string strReaderBarcode) {
-            return base.Channel.Hire(out strOutputReaderXml, out strOutputID, strAction, strReaderBarcode);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginHire(string strAction, string strReaderBarcode, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginHire(strAction, strReaderBarcode, callback, asyncState);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndHire(out string strOutputReaderXml, out string strOutputID, System.IAsyncResult result) {
-            return base.Channel.EndHire(out strOutputReaderXml, out strOutputID, result);
-        }
-        
-        private System.IAsyncResult OnBeginHire(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strAction = ((string)(inValues[0]));
-            string strReaderBarcode = ((string)(inValues[1]));
-            return this.BeginHire(strAction, strReaderBarcode, callback, asyncState);
-        }
-        
-        private object[] OnEndHire(System.IAsyncResult result) {
-            string strOutputReaderXml = this.GetDefaultValueForInitialization<string>();
-            string strOutputID = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndHire(out strOutputReaderXml, out strOutputID, result);
-            return new object[] {
-                    strOutputReaderXml,
-                    strOutputID,
-                    retVal};
-        }
-        
-        private void OnHireCompleted(object state) {
-            if ((this.HireCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.HireCompleted(this, new HireCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
-        
-        public void HireAsync(string strAction, string strReaderBarcode) {
-            this.HireAsync(strAction, strReaderBarcode, null);
-        }
-        
-        public void HireAsync(string strAction, string strReaderBarcode, object userState) {
-            if ((this.onBeginHireDelegate == null)) {
-                this.onBeginHireDelegate = new BeginOperationDelegate(this.OnBeginHire);
-            }
-            if ((this.onEndHireDelegate == null)) {
-                this.onEndHireDelegate = new EndOperationDelegate(this.OnEndHire);
-            }
-            if ((this.onHireCompletedDelegate == null)) {
-                this.onHireCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnHireCompleted);
-            }
-            base.InvokeAsync(this.onBeginHireDelegate, new object[] {
-                        strAction,
-                        strReaderBarcode}, this.onEndHireDelegate, this.onHireCompletedDelegate, userState);
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Settlement(string strAction, string[] ids) {
-            return base.Channel.Settlement(strAction, ids);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginSettlement(string strAction, string[] ids, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginSettlement(strAction, ids, callback, asyncState);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSettlement(System.IAsyncResult result) {
-            return base.Channel.EndSettlement(result);
-        }
-        
-        private System.IAsyncResult OnBeginSettlement(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strAction = ((string)(inValues[0]));
-            string[] ids = ((string[])(inValues[1]));
-            return this.BeginSettlement(strAction, ids, callback, asyncState);
-        }
-        
-        private object[] OnEndSettlement(System.IAsyncResult result) {
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSettlement(result);
-            return new object[] {
-                    retVal};
-        }
-        
-        private void OnSettlementCompleted(object state) {
-            if ((this.SettlementCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.SettlementCompleted(this, new SettlementCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
-        
-        public void SettlementAsync(string strAction, string[] ids) {
-            this.SettlementAsync(strAction, ids, null);
-        }
-        
-        public void SettlementAsync(string strAction, string[] ids, object userState) {
-            if ((this.onBeginSettlementDelegate == null)) {
-                this.onBeginSettlementDelegate = new BeginOperationDelegate(this.OnBeginSettlement);
-            }
-            if ((this.onEndSettlementDelegate == null)) {
-                this.onEndSettlementDelegate = new EndOperationDelegate(this.OnEndSettlement);
-            }
-            if ((this.onSettlementCompletedDelegate == null)) {
-                this.onSettlementCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnSettlementCompleted);
-            }
-            base.InvokeAsync(this.onBeginSettlementDelegate, new object[] {
-                        strAction,
-                        ids}, this.onEndSettlementDelegate, this.onSettlementCompletedDelegate, userState);
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchOneClassCallNumber(out string strQueryXml, string strArrangeGroupName, string strClass, string strResultSetName) {
-            return base.Channel.SearchOneClassCallNumber(out strQueryXml, strArrangeGroupName, strClass, strResultSetName);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginSearchOneClassCallNumber(string strArrangeGroupName, string strClass, string strResultSetName, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginSearchOneClassCallNumber(strArrangeGroupName, strClass, strResultSetName, callback, asyncState);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchOneClassCallNumber(out string strQueryXml, System.IAsyncResult result) {
-            return base.Channel.EndSearchOneClassCallNumber(out strQueryXml, result);
-        }
-        
-        private System.IAsyncResult OnBeginSearchOneClassCallNumber(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strArrangeGroupName = ((string)(inValues[0]));
-            string strClass = ((string)(inValues[1]));
-            string strResultSetName = ((string)(inValues[2]));
-            return this.BeginSearchOneClassCallNumber(strArrangeGroupName, strClass, strResultSetName, callback, asyncState);
-        }
-        
-        private object[] OnEndSearchOneClassCallNumber(System.IAsyncResult result) {
-            string strQueryXml = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchOneClassCallNumber(out strQueryXml, result);
-            return new object[] {
-                    strQueryXml,
-                    retVal};
-        }
-        
-        private void OnSearchOneClassCallNumberCompleted(object state) {
-            if ((this.SearchOneClassCallNumberCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.SearchOneClassCallNumberCompleted(this, new SearchOneClassCallNumberCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
-        
-        public void SearchOneClassCallNumberAsync(string strArrangeGroupName, string strClass, string strResultSetName) {
-            this.SearchOneClassCallNumberAsync(strArrangeGroupName, strClass, strResultSetName, null);
-        }
-        
-        public void SearchOneClassCallNumberAsync(string strArrangeGroupName, string strClass, string strResultSetName, object userState) {
-            if ((this.onBeginSearchOneClassCallNumberDelegate == null)) {
-                this.onBeginSearchOneClassCallNumberDelegate = new BeginOperationDelegate(this.OnBeginSearchOneClassCallNumber);
-            }
-            if ((this.onEndSearchOneClassCallNumberDelegate == null)) {
-                this.onEndSearchOneClassCallNumberDelegate = new EndOperationDelegate(this.OnEndSearchOneClassCallNumber);
-            }
-            if ((this.onSearchOneClassCallNumberCompletedDelegate == null)) {
-                this.onSearchOneClassCallNumberCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnSearchOneClassCallNumberCompleted);
-            }
-            base.InvokeAsync(this.onBeginSearchOneClassCallNumberDelegate, new object[] {
-                        strArrangeGroupName,
-                        strClass,
-                        strResultSetName}, this.onEndSearchOneClassCallNumberDelegate, this.onSearchOneClassCallNumberCompletedDelegate, userState);
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetCallNumberSearchResult(out DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[] searchresults, string strArrangeGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang) {
-            return base.Channel.GetCallNumberSearchResult(out searchresults, strArrangeGroupName, strResultSetName, lStart, lCount, strBrowseInfoStyle, strLang);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginGetCallNumberSearchResult(string strArrangeGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginGetCallNumberSearchResult(strArrangeGroupName, strResultSetName, lStart, lCount, strBrowseInfoStyle, strLang, callback, asyncState);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetCallNumberSearchResult(out DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[] searchresults, System.IAsyncResult result) {
-            return base.Channel.EndGetCallNumberSearchResult(out searchresults, result);
-        }
-        
-        private System.IAsyncResult OnBeginGetCallNumberSearchResult(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strArrangeGroupName = ((string)(inValues[0]));
-            string strResultSetName = ((string)(inValues[1]));
-            long lStart = ((long)(inValues[2]));
-            long lCount = ((long)(inValues[3]));
-            string strBrowseInfoStyle = ((string)(inValues[4]));
-            string strLang = ((string)(inValues[5]));
-            return this.BeginGetCallNumberSearchResult(strArrangeGroupName, strResultSetName, lStart, lCount, strBrowseInfoStyle, strLang, callback, asyncState);
-        }
-        
-        private object[] OnEndGetCallNumberSearchResult(System.IAsyncResult result) {
-            DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[] searchresults = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[]>();
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetCallNumberSearchResult(out searchresults, result);
-            return new object[] {
-                    searchresults,
-                    retVal};
-        }
-        
-        private void OnGetCallNumberSearchResultCompleted(object state) {
-            if ((this.GetCallNumberSearchResultCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.GetCallNumberSearchResultCompleted(this, new GetCallNumberSearchResultCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
-        
-        public void GetCallNumberSearchResultAsync(string strArrangeGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang) {
-            this.GetCallNumberSearchResultAsync(strArrangeGroupName, strResultSetName, lStart, lCount, strBrowseInfoStyle, strLang, null);
-        }
-        
-        public void GetCallNumberSearchResultAsync(string strArrangeGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang, object userState) {
-            if ((this.onBeginGetCallNumberSearchResultDelegate == null)) {
-                this.onBeginGetCallNumberSearchResultDelegate = new BeginOperationDelegate(this.OnBeginGetCallNumberSearchResult);
-            }
-            if ((this.onEndGetCallNumberSearchResultDelegate == null)) {
-                this.onEndGetCallNumberSearchResultDelegate = new EndOperationDelegate(this.OnEndGetCallNumberSearchResult);
-            }
-            if ((this.onGetCallNumberSearchResultCompletedDelegate == null)) {
-                this.onGetCallNumberSearchResultCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetCallNumberSearchResultCompleted);
-            }
-            base.InvokeAsync(this.onBeginGetCallNumberSearchResultDelegate, new object[] {
-                        strArrangeGroupName,
-                        strResultSetName,
-                        lStart,
-                        lCount,
-                        strBrowseInfoStyle,
-                        strLang}, this.onEndGetCallNumberSearchResultDelegate, this.onGetCallNumberSearchResultCompletedDelegate, userState);
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetOneClassTailNumber(out string strTailNumber, string strArrangeGroupName, string strClass) {
-            return base.Channel.GetOneClassTailNumber(out strTailNumber, strArrangeGroupName, strClass);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginGetOneClassTailNumber(string strArrangeGroupName, string strClass, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginGetOneClassTailNumber(strArrangeGroupName, strClass, callback, asyncState);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetOneClassTailNumber(out string strTailNumber, System.IAsyncResult result) {
-            return base.Channel.EndGetOneClassTailNumber(out strTailNumber, result);
-        }
-        
-        private System.IAsyncResult OnBeginGetOneClassTailNumber(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strArrangeGroupName = ((string)(inValues[0]));
-            string strClass = ((string)(inValues[1]));
-            return this.BeginGetOneClassTailNumber(strArrangeGroupName, strClass, callback, asyncState);
-        }
-        
-        private object[] OnEndGetOneClassTailNumber(System.IAsyncResult result) {
-            string strTailNumber = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetOneClassTailNumber(out strTailNumber, result);
-            return new object[] {
-                    strTailNumber,
-                    retVal};
-        }
-        
-        private void OnGetOneClassTailNumberCompleted(object state) {
-            if ((this.GetOneClassTailNumberCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.GetOneClassTailNumberCompleted(this, new GetOneClassTailNumberCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
-        
-        public void GetOneClassTailNumberAsync(string strArrangeGroupName, string strClass) {
-            this.GetOneClassTailNumberAsync(strArrangeGroupName, strClass, null);
-        }
-        
-        public void GetOneClassTailNumberAsync(string strArrangeGroupName, string strClass, object userState) {
-            if ((this.onBeginGetOneClassTailNumberDelegate == null)) {
-                this.onBeginGetOneClassTailNumberDelegate = new BeginOperationDelegate(this.OnBeginGetOneClassTailNumber);
-            }
-            if ((this.onEndGetOneClassTailNumberDelegate == null)) {
-                this.onEndGetOneClassTailNumberDelegate = new EndOperationDelegate(this.OnEndGetOneClassTailNumber);
-            }
-            if ((this.onGetOneClassTailNumberCompletedDelegate == null)) {
-                this.onGetOneClassTailNumberCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetOneClassTailNumberCompleted);
-            }
-            base.InvokeAsync(this.onBeginGetOneClassTailNumberDelegate, new object[] {
-                        strArrangeGroupName,
-                        strClass}, this.onEndGetOneClassTailNumberDelegate, this.onGetOneClassTailNumberCompletedDelegate, userState);
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetOneClassTailNumber(out string strOutputNumber, string strAction, string strArrangeGroupName, string strClass, string strTestNumber) {
-            return base.Channel.SetOneClassTailNumber(out strOutputNumber, strAction, strArrangeGroupName, strClass, strTestNumber);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginSetOneClassTailNumber(string strAction, string strArrangeGroupName, string strClass, string strTestNumber, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginSetOneClassTailNumber(strAction, strArrangeGroupName, strClass, strTestNumber, callback, asyncState);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetOneClassTailNumber(out string strOutputNumber, System.IAsyncResult result) {
-            return base.Channel.EndSetOneClassTailNumber(out strOutputNumber, result);
-        }
-        
-        private System.IAsyncResult OnBeginSetOneClassTailNumber(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strAction = ((string)(inValues[0]));
-            string strArrangeGroupName = ((string)(inValues[1]));
-            string strClass = ((string)(inValues[2]));
-            string strTestNumber = ((string)(inValues[3]));
-            return this.BeginSetOneClassTailNumber(strAction, strArrangeGroupName, strClass, strTestNumber, callback, asyncState);
-        }
-        
-        private object[] OnEndSetOneClassTailNumber(System.IAsyncResult result) {
-            string strOutputNumber = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetOneClassTailNumber(out strOutputNumber, result);
-            return new object[] {
-                    strOutputNumber,
-                    retVal};
-        }
-        
-        private void OnSetOneClassTailNumberCompleted(object state) {
-            if ((this.SetOneClassTailNumberCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.SetOneClassTailNumberCompleted(this, new SetOneClassTailNumberCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
-        
-        public void SetOneClassTailNumberAsync(string strAction, string strArrangeGroupName, string strClass, string strTestNumber) {
-            this.SetOneClassTailNumberAsync(strAction, strArrangeGroupName, strClass, strTestNumber, null);
-        }
-        
-        public void SetOneClassTailNumberAsync(string strAction, string strArrangeGroupName, string strClass, string strTestNumber, object userState) {
-            if ((this.onBeginSetOneClassTailNumberDelegate == null)) {
-                this.onBeginSetOneClassTailNumberDelegate = new BeginOperationDelegate(this.OnBeginSetOneClassTailNumber);
-            }
-            if ((this.onEndSetOneClassTailNumberDelegate == null)) {
-                this.onEndSetOneClassTailNumberDelegate = new EndOperationDelegate(this.OnEndSetOneClassTailNumber);
-            }
-            if ((this.onSetOneClassTailNumberCompletedDelegate == null)) {
-                this.onSetOneClassTailNumberCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnSetOneClassTailNumberCompleted);
-            }
-            base.InvokeAsync(this.onBeginSetOneClassTailNumberDelegate, new object[] {
-                        strAction,
-                        strArrangeGroupName,
-                        strClass,
-                        strTestNumber}, this.onEndSetOneClassTailNumberDelegate, this.onSetOneClassTailNumberCompletedDelegate, userState);
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchUsedZhongcihao(out string strQueryXml, string strZhongcihaoGroupName, string strClass, string strResultSetName) {
-            return base.Channel.SearchUsedZhongcihao(out strQueryXml, strZhongcihaoGroupName, strClass, strResultSetName);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginSearchUsedZhongcihao(string strZhongcihaoGroupName, string strClass, string strResultSetName, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginSearchUsedZhongcihao(strZhongcihaoGroupName, strClass, strResultSetName, callback, asyncState);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchUsedZhongcihao(out string strQueryXml, System.IAsyncResult result) {
-            return base.Channel.EndSearchUsedZhongcihao(out strQueryXml, result);
-        }
-        
-        private System.IAsyncResult OnBeginSearchUsedZhongcihao(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strZhongcihaoGroupName = ((string)(inValues[0]));
-            string strClass = ((string)(inValues[1]));
-            string strResultSetName = ((string)(inValues[2]));
-            return this.BeginSearchUsedZhongcihao(strZhongcihaoGroupName, strClass, strResultSetName, callback, asyncState);
-        }
-        
-        private object[] OnEndSearchUsedZhongcihao(System.IAsyncResult result) {
-            string strQueryXml = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchUsedZhongcihao(out strQueryXml, result);
-            return new object[] {
-                    strQueryXml,
-                    retVal};
-        }
-        
-        private void OnSearchUsedZhongcihaoCompleted(object state) {
-            if ((this.SearchUsedZhongcihaoCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.SearchUsedZhongcihaoCompleted(this, new SearchUsedZhongcihaoCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
-        
-        public void SearchUsedZhongcihaoAsync(string strZhongcihaoGroupName, string strClass, string strResultSetName) {
-            this.SearchUsedZhongcihaoAsync(strZhongcihaoGroupName, strClass, strResultSetName, null);
-        }
-        
-        public void SearchUsedZhongcihaoAsync(string strZhongcihaoGroupName, string strClass, string strResultSetName, object userState) {
-            if ((this.onBeginSearchUsedZhongcihaoDelegate == null)) {
-                this.onBeginSearchUsedZhongcihaoDelegate = new BeginOperationDelegate(this.OnBeginSearchUsedZhongcihao);
-            }
-            if ((this.onEndSearchUsedZhongcihaoDelegate == null)) {
-                this.onEndSearchUsedZhongcihaoDelegate = new EndOperationDelegate(this.OnEndSearchUsedZhongcihao);
-            }
-            if ((this.onSearchUsedZhongcihaoCompletedDelegate == null)) {
-                this.onSearchUsedZhongcihaoCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnSearchUsedZhongcihaoCompleted);
-            }
-            base.InvokeAsync(this.onBeginSearchUsedZhongcihaoDelegate, new object[] {
-                        strZhongcihaoGroupName,
-                        strClass,
-                        strResultSetName}, this.onEndSearchUsedZhongcihaoDelegate, this.onSearchUsedZhongcihaoCompletedDelegate, userState);
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetZhongcihaoSearchResult(out DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[] searchresults, string strZhongcihaoGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang) {
-            return base.Channel.GetZhongcihaoSearchResult(out searchresults, strZhongcihaoGroupName, strResultSetName, lStart, lCount, strBrowseInfoStyle, strLang);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginGetZhongcihaoSearchResult(string strZhongcihaoGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginGetZhongcihaoSearchResult(strZhongcihaoGroupName, strResultSetName, lStart, lCount, strBrowseInfoStyle, strLang, callback, asyncState);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetZhongcihaoSearchResult(out DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[] searchresults, System.IAsyncResult result) {
-            return base.Channel.EndGetZhongcihaoSearchResult(out searchresults, result);
-        }
-        
-        private System.IAsyncResult OnBeginGetZhongcihaoSearchResult(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strZhongcihaoGroupName = ((string)(inValues[0]));
-            string strResultSetName = ((string)(inValues[1]));
-            long lStart = ((long)(inValues[2]));
-            long lCount = ((long)(inValues[3]));
-            string strBrowseInfoStyle = ((string)(inValues[4]));
-            string strLang = ((string)(inValues[5]));
-            return this.BeginGetZhongcihaoSearchResult(strZhongcihaoGroupName, strResultSetName, lStart, lCount, strBrowseInfoStyle, strLang, callback, asyncState);
-        }
-        
-        private object[] OnEndGetZhongcihaoSearchResult(System.IAsyncResult result) {
-            DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[] searchresults = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[]>();
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetZhongcihaoSearchResult(out searchresults, result);
-            return new object[] {
-                    searchresults,
-                    retVal};
-        }
-        
-        private void OnGetZhongcihaoSearchResultCompleted(object state) {
-            if ((this.GetZhongcihaoSearchResultCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.GetZhongcihaoSearchResultCompleted(this, new GetZhongcihaoSearchResultCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
-        
-        public void GetZhongcihaoSearchResultAsync(string strZhongcihaoGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang) {
-            this.GetZhongcihaoSearchResultAsync(strZhongcihaoGroupName, strResultSetName, lStart, lCount, strBrowseInfoStyle, strLang, null);
-        }
-        
-        public void GetZhongcihaoSearchResultAsync(string strZhongcihaoGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang, object userState) {
-            if ((this.onBeginGetZhongcihaoSearchResultDelegate == null)) {
-                this.onBeginGetZhongcihaoSearchResultDelegate = new BeginOperationDelegate(this.OnBeginGetZhongcihaoSearchResult);
-            }
-            if ((this.onEndGetZhongcihaoSearchResultDelegate == null)) {
-                this.onEndGetZhongcihaoSearchResultDelegate = new EndOperationDelegate(this.OnEndGetZhongcihaoSearchResult);
-            }
-            if ((this.onGetZhongcihaoSearchResultCompletedDelegate == null)) {
-                this.onGetZhongcihaoSearchResultCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetZhongcihaoSearchResultCompleted);
-            }
-            base.InvokeAsync(this.onBeginGetZhongcihaoSearchResultDelegate, new object[] {
-                        strZhongcihaoGroupName,
-                        strResultSetName,
-                        lStart,
-                        lCount,
-                        strBrowseInfoStyle,
-                        strLang}, this.onEndGetZhongcihaoSearchResultDelegate, this.onGetZhongcihaoSearchResultCompletedDelegate, userState);
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetZhongcihaoTailNumber(out string strTailNumber, string strZhongcihaoGroupName, string strClass) {
-            return base.Channel.GetZhongcihaoTailNumber(out strTailNumber, strZhongcihaoGroupName, strClass);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginGetZhongcihaoTailNumber(string strZhongcihaoGroupName, string strClass, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginGetZhongcihaoTailNumber(strZhongcihaoGroupName, strClass, callback, asyncState);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetZhongcihaoTailNumber(out string strTailNumber, System.IAsyncResult result) {
-            return base.Channel.EndGetZhongcihaoTailNumber(out strTailNumber, result);
-        }
-        
-        private System.IAsyncResult OnBeginGetZhongcihaoTailNumber(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strZhongcihaoGroupName = ((string)(inValues[0]));
-            string strClass = ((string)(inValues[1]));
-            return this.BeginGetZhongcihaoTailNumber(strZhongcihaoGroupName, strClass, callback, asyncState);
-        }
-        
-        private object[] OnEndGetZhongcihaoTailNumber(System.IAsyncResult result) {
-            string strTailNumber = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetZhongcihaoTailNumber(out strTailNumber, result);
-            return new object[] {
-                    strTailNumber,
-                    retVal};
-        }
-        
-        private void OnGetZhongcihaoTailNumberCompleted(object state) {
-            if ((this.GetZhongcihaoTailNumberCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.GetZhongcihaoTailNumberCompleted(this, new GetZhongcihaoTailNumberCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
-        
-        public void GetZhongcihaoTailNumberAsync(string strZhongcihaoGroupName, string strClass) {
-            this.GetZhongcihaoTailNumberAsync(strZhongcihaoGroupName, strClass, null);
-        }
-        
-        public void GetZhongcihaoTailNumberAsync(string strZhongcihaoGroupName, string strClass, object userState) {
-            if ((this.onBeginGetZhongcihaoTailNumberDelegate == null)) {
-                this.onBeginGetZhongcihaoTailNumberDelegate = new BeginOperationDelegate(this.OnBeginGetZhongcihaoTailNumber);
-            }
-            if ((this.onEndGetZhongcihaoTailNumberDelegate == null)) {
-                this.onEndGetZhongcihaoTailNumberDelegate = new EndOperationDelegate(this.OnEndGetZhongcihaoTailNumber);
-            }
-            if ((this.onGetZhongcihaoTailNumberCompletedDelegate == null)) {
-                this.onGetZhongcihaoTailNumberCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetZhongcihaoTailNumberCompleted);
-            }
-            base.InvokeAsync(this.onBeginGetZhongcihaoTailNumberDelegate, new object[] {
-                        strZhongcihaoGroupName,
-                        strClass}, this.onEndGetZhongcihaoTailNumberDelegate, this.onGetZhongcihaoTailNumberCompletedDelegate, userState);
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetZhongcihaoTailNumber(out string strOutputNumber, string strAction, string strZhongcihaoGroupName, string strClass, string strTestNumber) {
-            return base.Channel.SetZhongcihaoTailNumber(out strOutputNumber, strAction, strZhongcihaoGroupName, strClass, strTestNumber);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginSetZhongcihaoTailNumber(string strAction, string strZhongcihaoGroupName, string strClass, string strTestNumber, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginSetZhongcihaoTailNumber(strAction, strZhongcihaoGroupName, strClass, strTestNumber, callback, asyncState);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetZhongcihaoTailNumber(out string strOutputNumber, System.IAsyncResult result) {
-            return base.Channel.EndSetZhongcihaoTailNumber(out strOutputNumber, result);
-        }
-        
-        private System.IAsyncResult OnBeginSetZhongcihaoTailNumber(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strAction = ((string)(inValues[0]));
-            string strZhongcihaoGroupName = ((string)(inValues[1]));
-            string strClass = ((string)(inValues[2]));
-            string strTestNumber = ((string)(inValues[3]));
-            return this.BeginSetZhongcihaoTailNumber(strAction, strZhongcihaoGroupName, strClass, strTestNumber, callback, asyncState);
-        }
-        
-        private object[] OnEndSetZhongcihaoTailNumber(System.IAsyncResult result) {
-            string strOutputNumber = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetZhongcihaoTailNumber(out strOutputNumber, result);
-            return new object[] {
-                    strOutputNumber,
-                    retVal};
-        }
-        
-        private void OnSetZhongcihaoTailNumberCompleted(object state) {
-            if ((this.SetZhongcihaoTailNumberCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.SetZhongcihaoTailNumberCompleted(this, new SetZhongcihaoTailNumberCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
-        
-        public void SetZhongcihaoTailNumberAsync(string strAction, string strZhongcihaoGroupName, string strClass, string strTestNumber) {
-            this.SetZhongcihaoTailNumberAsync(strAction, strZhongcihaoGroupName, strClass, strTestNumber, null);
-        }
-        
-        public void SetZhongcihaoTailNumberAsync(string strAction, string strZhongcihaoGroupName, string strClass, string strTestNumber, object userState) {
-            if ((this.onBeginSetZhongcihaoTailNumberDelegate == null)) {
-                this.onBeginSetZhongcihaoTailNumberDelegate = new BeginOperationDelegate(this.OnBeginSetZhongcihaoTailNumber);
-            }
-            if ((this.onEndSetZhongcihaoTailNumberDelegate == null)) {
-                this.onEndSetZhongcihaoTailNumberDelegate = new EndOperationDelegate(this.OnEndSetZhongcihaoTailNumber);
-            }
-            if ((this.onSetZhongcihaoTailNumberCompletedDelegate == null)) {
-                this.onSetZhongcihaoTailNumberCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnSetZhongcihaoTailNumberCompleted);
-            }
-            base.InvokeAsync(this.onBeginSetZhongcihaoTailNumberDelegate, new object[] {
-                        strAction,
-                        strZhongcihaoGroupName,
-                        strClass,
-                        strTestNumber}, this.onEndSetZhongcihaoTailNumberDelegate, this.onSetZhongcihaoTailNumberCompletedDelegate, userState);
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchDup(out string strUsedProjectName, string strOriginBiblioRecPath, string strOriginBiblioRecXml, string strProjectName, string strStyle) {
-            return base.Channel.SearchDup(out strUsedProjectName, strOriginBiblioRecPath, strOriginBiblioRecXml, strProjectName, strStyle);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginSearchDup(string strOriginBiblioRecPath, string strOriginBiblioRecXml, string strProjectName, string strStyle, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginSearchDup(strOriginBiblioRecPath, strOriginBiblioRecXml, strProjectName, strStyle, callback, asyncState);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchDup(out string strUsedProjectName, System.IAsyncResult result) {
-            return base.Channel.EndSearchDup(out strUsedProjectName, result);
-        }
-        
-        private System.IAsyncResult OnBeginSearchDup(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strOriginBiblioRecPath = ((string)(inValues[0]));
-            string strOriginBiblioRecXml = ((string)(inValues[1]));
-            string strProjectName = ((string)(inValues[2]));
-            string strStyle = ((string)(inValues[3]));
-            return this.BeginSearchDup(strOriginBiblioRecPath, strOriginBiblioRecXml, strProjectName, strStyle, callback, asyncState);
-        }
-        
-        private object[] OnEndSearchDup(System.IAsyncResult result) {
-            string strUsedProjectName = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchDup(out strUsedProjectName, result);
-            return new object[] {
-                    strUsedProjectName,
-                    retVal};
-        }
-        
-        private void OnSearchDupCompleted(object state) {
-            if ((this.SearchDupCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.SearchDupCompleted(this, new SearchDupCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
-        
-        public void SearchDupAsync(string strOriginBiblioRecPath, string strOriginBiblioRecXml, string strProjectName, string strStyle) {
-            this.SearchDupAsync(strOriginBiblioRecPath, strOriginBiblioRecXml, strProjectName, strStyle, null);
-        }
-        
-        public void SearchDupAsync(string strOriginBiblioRecPath, string strOriginBiblioRecXml, string strProjectName, string strStyle, object userState) {
-            if ((this.onBeginSearchDupDelegate == null)) {
-                this.onBeginSearchDupDelegate = new BeginOperationDelegate(this.OnBeginSearchDup);
-            }
-            if ((this.onEndSearchDupDelegate == null)) {
-                this.onEndSearchDupDelegate = new EndOperationDelegate(this.OnEndSearchDup);
-            }
-            if ((this.onSearchDupCompletedDelegate == null)) {
-                this.onSearchDupCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnSearchDupCompleted);
-            }
-            base.InvokeAsync(this.onBeginSearchDupDelegate, new object[] {
-                        strOriginBiblioRecPath,
-                        strOriginBiblioRecXml,
-                        strProjectName,
-                        strStyle}, this.onEndSearchDupDelegate, this.onSearchDupCompletedDelegate, userState);
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetDupSearchResult(out DigitalPlatform.LibraryClient.localhost.DupSearchResult[] searchresults, long lStart, long lCount, string strBrowseInfoStyle) {
-            return base.Channel.GetDupSearchResult(out searchresults, lStart, lCount, strBrowseInfoStyle);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginGetDupSearchResult(long lStart, long lCount, string strBrowseInfoStyle, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginGetDupSearchResult(lStart, lCount, strBrowseInfoStyle, callback, asyncState);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetDupSearchResult(out DigitalPlatform.LibraryClient.localhost.DupSearchResult[] searchresults, System.IAsyncResult result) {
-            return base.Channel.EndGetDupSearchResult(out searchresults, result);
-        }
-        
-        private System.IAsyncResult OnBeginGetDupSearchResult(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            long lStart = ((long)(inValues[0]));
-            long lCount = ((long)(inValues[1]));
-            string strBrowseInfoStyle = ((string)(inValues[2]));
-            return this.BeginGetDupSearchResult(lStart, lCount, strBrowseInfoStyle, callback, asyncState);
-        }
-        
-        private object[] OnEndGetDupSearchResult(System.IAsyncResult result) {
-            DigitalPlatform.LibraryClient.localhost.DupSearchResult[] searchresults = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.DupSearchResult[]>();
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetDupSearchResult(out searchresults, result);
-            return new object[] {
-                    searchresults,
-                    retVal};
-        }
-        
-        private void OnGetDupSearchResultCompleted(object state) {
-            if ((this.GetDupSearchResultCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.GetDupSearchResultCompleted(this, new GetDupSearchResultCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
-        
-        public void GetDupSearchResultAsync(long lStart, long lCount, string strBrowseInfoStyle) {
-            this.GetDupSearchResultAsync(lStart, lCount, strBrowseInfoStyle, null);
-        }
-        
-        public void GetDupSearchResultAsync(long lStart, long lCount, string strBrowseInfoStyle, object userState) {
-            if ((this.onBeginGetDupSearchResultDelegate == null)) {
-                this.onBeginGetDupSearchResultDelegate = new BeginOperationDelegate(this.OnBeginGetDupSearchResult);
-            }
-            if ((this.onEndGetDupSearchResultDelegate == null)) {
-                this.onEndGetDupSearchResultDelegate = new EndOperationDelegate(this.OnEndGetDupSearchResult);
-            }
-            if ((this.onGetDupSearchResultCompletedDelegate == null)) {
-                this.onGetDupSearchResultCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetDupSearchResultCompleted);
-            }
-            base.InvokeAsync(this.onBeginGetDupSearchResultDelegate, new object[] {
-                        lStart,
-                        lCount,
-                        strBrowseInfoStyle}, this.onEndGetDupSearchResultDelegate, this.onGetDupSearchResultCompletedDelegate, userState);
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult ListDupProjectInfos(out DigitalPlatform.LibraryClient.localhost.DupProjectInfo[] results, string strOriginBiblioDbName) {
-            return base.Channel.ListDupProjectInfos(out results, strOriginBiblioDbName);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginListDupProjectInfos(string strOriginBiblioDbName, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginListDupProjectInfos(strOriginBiblioDbName, callback, asyncState);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndListDupProjectInfos(out DigitalPlatform.LibraryClient.localhost.DupProjectInfo[] results, System.IAsyncResult result) {
-            return base.Channel.EndListDupProjectInfos(out results, result);
-        }
-        
-        private System.IAsyncResult OnBeginListDupProjectInfos(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strOriginBiblioDbName = ((string)(inValues[0]));
-            return this.BeginListDupProjectInfos(strOriginBiblioDbName, callback, asyncState);
-        }
-        
-        private object[] OnEndListDupProjectInfos(System.IAsyncResult result) {
-            DigitalPlatform.LibraryClient.localhost.DupProjectInfo[] results = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.DupProjectInfo[]>();
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndListDupProjectInfos(out results, result);
-            return new object[] {
-                    results,
-                    retVal};
-        }
-        
-        private void OnListDupProjectInfosCompleted(object state) {
-            if ((this.ListDupProjectInfosCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.ListDupProjectInfosCompleted(this, new ListDupProjectInfosCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
-        
-        public void ListDupProjectInfosAsync(string strOriginBiblioDbName) {
-            this.ListDupProjectInfosAsync(strOriginBiblioDbName, null);
-        }
-        
-        public void ListDupProjectInfosAsync(string strOriginBiblioDbName, object userState) {
-            if ((this.onBeginListDupProjectInfosDelegate == null)) {
-                this.onBeginListDupProjectInfosDelegate = new BeginOperationDelegate(this.OnBeginListDupProjectInfos);
-            }
-            if ((this.onEndListDupProjectInfosDelegate == null)) {
-                this.onEndListDupProjectInfosDelegate = new EndOperationDelegate(this.OnEndListDupProjectInfos);
-            }
-            if ((this.onListDupProjectInfosCompletedDelegate == null)) {
-                this.onListDupProjectInfosCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnListDupProjectInfosCompleted);
-            }
-            base.InvokeAsync(this.onBeginListDupProjectInfosDelegate, new object[] {
-                        strOriginBiblioDbName}, this.onEndListDupProjectInfosDelegate, this.onListDupProjectInfosCompletedDelegate, userState);
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetUtilInfo(out string strValue, string strAction, string strDbName, string strFrom, string strKey, string strValueAttrName) {
-            return base.Channel.GetUtilInfo(out strValue, strAction, strDbName, strFrom, strKey, strValueAttrName);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginGetUtilInfo(string strAction, string strDbName, string strFrom, string strKey, string strValueAttrName, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginGetUtilInfo(strAction, strDbName, strFrom, strKey, strValueAttrName, callback, asyncState);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetUtilInfo(out string strValue, System.IAsyncResult result) {
-            return base.Channel.EndGetUtilInfo(out strValue, result);
-        }
-        
-        private System.IAsyncResult OnBeginGetUtilInfo(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strAction = ((string)(inValues[0]));
-            string strDbName = ((string)(inValues[1]));
-            string strFrom = ((string)(inValues[2]));
-            string strKey = ((string)(inValues[3]));
-            string strValueAttrName = ((string)(inValues[4]));
-            return this.BeginGetUtilInfo(strAction, strDbName, strFrom, strKey, strValueAttrName, callback, asyncState);
-        }
-        
-        private object[] OnEndGetUtilInfo(System.IAsyncResult result) {
-            string strValue = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetUtilInfo(out strValue, result);
-            return new object[] {
-                    strValue,
-                    retVal};
-        }
-        
-        private void OnGetUtilInfoCompleted(object state) {
-            if ((this.GetUtilInfoCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.GetUtilInfoCompleted(this, new GetUtilInfoCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
-        
-        public void GetUtilInfoAsync(string strAction, string strDbName, string strFrom, string strKey, string strValueAttrName) {
-            this.GetUtilInfoAsync(strAction, strDbName, strFrom, strKey, strValueAttrName, null);
-        }
-        
-        public void GetUtilInfoAsync(string strAction, string strDbName, string strFrom, string strKey, string strValueAttrName, object userState) {
-            if ((this.onBeginGetUtilInfoDelegate == null)) {
-                this.onBeginGetUtilInfoDelegate = new BeginOperationDelegate(this.OnBeginGetUtilInfo);
-            }
-            if ((this.onEndGetUtilInfoDelegate == null)) {
-                this.onEndGetUtilInfoDelegate = new EndOperationDelegate(this.OnEndGetUtilInfo);
-            }
-            if ((this.onGetUtilInfoCompletedDelegate == null)) {
-                this.onGetUtilInfoCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetUtilInfoCompleted);
-            }
-            base.InvokeAsync(this.onBeginGetUtilInfoDelegate, new object[] {
-                        strAction,
-                        strDbName,
-                        strFrom,
-                        strKey,
-                        strValueAttrName}, this.onEndGetUtilInfoDelegate, this.onGetUtilInfoCompletedDelegate, userState);
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetUtilInfo(string strAction, string strDbName, string strFrom, string strRootElementName, string strKeyAttrName, string strValueAttrName, string strKey, string strValue) {
-            return base.Channel.SetUtilInfo(strAction, strDbName, strFrom, strRootElementName, strKeyAttrName, strValueAttrName, strKey, strValue);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginSetUtilInfo(string strAction, string strDbName, string strFrom, string strRootElementName, string strKeyAttrName, string strValueAttrName, string strKey, string strValue, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginSetUtilInfo(strAction, strDbName, strFrom, strRootElementName, strKeyAttrName, strValueAttrName, strKey, strValue, callback, asyncState);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetUtilInfo(System.IAsyncResult result) {
-            return base.Channel.EndSetUtilInfo(result);
-        }
-        
-        private System.IAsyncResult OnBeginSetUtilInfo(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strAction = ((string)(inValues[0]));
-            string strDbName = ((string)(inValues[1]));
-            string strFrom = ((string)(inValues[2]));
-            string strRootElementName = ((string)(inValues[3]));
-            string strKeyAttrName = ((string)(inValues[4]));
-            string strValueAttrName = ((string)(inValues[5]));
-            string strKey = ((string)(inValues[6]));
-            string strValue = ((string)(inValues[7]));
-            return this.BeginSetUtilInfo(strAction, strDbName, strFrom, strRootElementName, strKeyAttrName, strValueAttrName, strKey, strValue, callback, asyncState);
-        }
-        
-        private object[] OnEndSetUtilInfo(System.IAsyncResult result) {
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetUtilInfo(result);
-            return new object[] {
-                    retVal};
-        }
-        
-        private void OnSetUtilInfoCompleted(object state) {
-            if ((this.SetUtilInfoCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.SetUtilInfoCompleted(this, new SetUtilInfoCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
-        
-        public void SetUtilInfoAsync(string strAction, string strDbName, string strFrom, string strRootElementName, string strKeyAttrName, string strValueAttrName, string strKey, string strValue) {
-            this.SetUtilInfoAsync(strAction, strDbName, strFrom, strRootElementName, strKeyAttrName, strValueAttrName, strKey, strValue, null);
-        }
-        
-        public void SetUtilInfoAsync(string strAction, string strDbName, string strFrom, string strRootElementName, string strKeyAttrName, string strValueAttrName, string strKey, string strValue, object userState) {
-            if ((this.onBeginSetUtilInfoDelegate == null)) {
-                this.onBeginSetUtilInfoDelegate = new BeginOperationDelegate(this.OnBeginSetUtilInfo);
-            }
-            if ((this.onEndSetUtilInfoDelegate == null)) {
-                this.onEndSetUtilInfoDelegate = new EndOperationDelegate(this.OnEndSetUtilInfo);
-            }
-            if ((this.onSetUtilInfoCompletedDelegate == null)) {
-                this.onSetUtilInfoCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnSetUtilInfoCompleted);
-            }
-            base.InvokeAsync(this.onBeginSetUtilInfoDelegate, new object[] {
-                        strAction,
-                        strDbName,
-                        strFrom,
-                        strRootElementName,
-                        strKeyAttrName,
-                        strValueAttrName,
-                        strKey,
-                        strValue}, this.onEndSetUtilInfoDelegate, this.onSetUtilInfoCompletedDelegate, userState);
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetRes(out byte[] baContent, out string strMetadata, out string strOutputResPath, out byte[] baOutputTimestamp, string strResPath, long nStart, int nLength, string strStyle) {
-            return base.Channel.GetRes(out baContent, out strMetadata, out strOutputResPath, out baOutputTimestamp, strResPath, nStart, nLength, strStyle);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginGetRes(string strResPath, long nStart, int nLength, string strStyle, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginGetRes(strResPath, nStart, nLength, strStyle, callback, asyncState);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetRes(out byte[] baContent, out string strMetadata, out string strOutputResPath, out byte[] baOutputTimestamp, System.IAsyncResult result) {
-            return base.Channel.EndGetRes(out baContent, out strMetadata, out strOutputResPath, out baOutputTimestamp, result);
-        }
-        
-        private System.IAsyncResult OnBeginGetRes(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strResPath = ((string)(inValues[0]));
-            long nStart = ((long)(inValues[1]));
-            int nLength = ((int)(inValues[2]));
-            string strStyle = ((string)(inValues[3]));
-            return this.BeginGetRes(strResPath, nStart, nLength, strStyle, callback, asyncState);
-        }
-        
-        private object[] OnEndGetRes(System.IAsyncResult result) {
-            byte[] baContent = this.GetDefaultValueForInitialization<byte[]>();
-            string strMetadata = this.GetDefaultValueForInitialization<string>();
-            string strOutputResPath = this.GetDefaultValueForInitialization<string>();
-            byte[] baOutputTimestamp = this.GetDefaultValueForInitialization<byte[]>();
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetRes(out baContent, out strMetadata, out strOutputResPath, out baOutputTimestamp, result);
-            return new object[] {
-                    baContent,
-                    strMetadata,
-                    strOutputResPath,
-                    baOutputTimestamp,
-                    retVal};
-        }
-        
-        private void OnGetResCompleted(object state) {
-            if ((this.GetResCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.GetResCompleted(this, new GetResCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
-        
-        public void GetResAsync(string strResPath, long nStart, int nLength, string strStyle) {
-            this.GetResAsync(strResPath, nStart, nLength, strStyle, null);
-        }
-        
-        public void GetResAsync(string strResPath, long nStart, int nLength, string strStyle, object userState) {
-            if ((this.onBeginGetResDelegate == null)) {
-                this.onBeginGetResDelegate = new BeginOperationDelegate(this.OnBeginGetRes);
-            }
-            if ((this.onEndGetResDelegate == null)) {
-                this.onEndGetResDelegate = new EndOperationDelegate(this.OnEndGetRes);
-            }
-            if ((this.onGetResCompletedDelegate == null)) {
-                this.onGetResCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetResCompleted);
-            }
-            base.InvokeAsync(this.onBeginGetResDelegate, new object[] {
-                        strResPath,
-                        nStart,
-                        nLength,
-                        strStyle}, this.onEndGetResDelegate, this.onGetResCompletedDelegate, userState);
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult WriteRes(out string strOutputResPath, out byte[] baOutputTimestamp, string strResPath, string strRanges, long lTotalLength, byte[] baContent, string strMetadata, string strStyle, byte[] baInputTimestamp) {
-            return base.Channel.WriteRes(out strOutputResPath, out baOutputTimestamp, strResPath, strRanges, lTotalLength, baContent, strMetadata, strStyle, baInputTimestamp);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginWriteRes(string strResPath, string strRanges, long lTotalLength, byte[] baContent, string strMetadata, string strStyle, byte[] baInputTimestamp, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginWriteRes(strResPath, strRanges, lTotalLength, baContent, strMetadata, strStyle, baInputTimestamp, callback, asyncState);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndWriteRes(out string strOutputResPath, out byte[] baOutputTimestamp, System.IAsyncResult result) {
-            return base.Channel.EndWriteRes(out strOutputResPath, out baOutputTimestamp, result);
-        }
-        
-        private System.IAsyncResult OnBeginWriteRes(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strResPath = ((string)(inValues[0]));
-            string strRanges = ((string)(inValues[1]));
-            long lTotalLength = ((long)(inValues[2]));
-            byte[] baContent = ((byte[])(inValues[3]));
-            string strMetadata = ((string)(inValues[4]));
-            string strStyle = ((string)(inValues[5]));
-            byte[] baInputTimestamp = ((byte[])(inValues[6]));
-            return this.BeginWriteRes(strResPath, strRanges, lTotalLength, baContent, strMetadata, strStyle, baInputTimestamp, callback, asyncState);
-        }
-        
-        private object[] OnEndWriteRes(System.IAsyncResult result) {
-            string strOutputResPath = this.GetDefaultValueForInitialization<string>();
-            byte[] baOutputTimestamp = this.GetDefaultValueForInitialization<byte[]>();
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndWriteRes(out strOutputResPath, out baOutputTimestamp, result);
-            return new object[] {
-                    strOutputResPath,
-                    baOutputTimestamp,
-                    retVal};
-        }
-        
-        private void OnWriteResCompleted(object state) {
-            if ((this.WriteResCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.WriteResCompleted(this, new WriteResCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
-        
-        public void WriteResAsync(string strResPath, string strRanges, long lTotalLength, byte[] baContent, string strMetadata, string strStyle, byte[] baInputTimestamp) {
-            this.WriteResAsync(strResPath, strRanges, lTotalLength, baContent, strMetadata, strStyle, baInputTimestamp, null);
-        }
-        
-        public void WriteResAsync(string strResPath, string strRanges, long lTotalLength, byte[] baContent, string strMetadata, string strStyle, byte[] baInputTimestamp, object userState) {
-            if ((this.onBeginWriteResDelegate == null)) {
-                this.onBeginWriteResDelegate = new BeginOperationDelegate(this.OnBeginWriteRes);
-            }
-            if ((this.onEndWriteResDelegate == null)) {
-                this.onEndWriteResDelegate = new EndOperationDelegate(this.OnEndWriteRes);
-            }
-            if ((this.onWriteResCompletedDelegate == null)) {
-                this.onWriteResCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnWriteResCompleted);
-            }
-            base.InvokeAsync(this.onBeginWriteResDelegate, new object[] {
-                        strResPath,
-                        strRanges,
-                        lTotalLength,
-                        baContent,
-                        strMetadata,
-                        strStyle,
-                        baInputTimestamp}, this.onEndWriteResDelegate, this.onWriteResCompletedDelegate, userState);
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang) {
-            return base.Channel.GetComments(out commentinfos, strBiblioRecPath, lStart, lCount, strStyle, strLang);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginGetComments(string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginGetComments(strBiblioRecPath, lStart, lCount, strStyle, strLang, callback, asyncState);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, System.IAsyncResult result) {
-            return base.Channel.EndGetComments(out commentinfos, result);
-        }
-        
-        private System.IAsyncResult OnBeginGetComments(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strBiblioRecPath = ((string)(inValues[0]));
-            long lStart = ((long)(inValues[1]));
-            long lCount = ((long)(inValues[2]));
-            string strStyle = ((string)(inValues[3]));
-            string strLang = ((string)(inValues[4]));
-            return this.BeginGetComments(strBiblioRecPath, lStart, lCount, strStyle, strLang, callback, asyncState);
-        }
-        
-        private object[] OnEndGetComments(System.IAsyncResult result) {
-            DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.EntityInfo[]>();
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetComments(out commentinfos, result);
-            return new object[] {
-                    commentinfos,
-                    retVal};
-        }
-        
-        private void OnGetCommentsCompleted(object state) {
-            if ((this.GetCommentsCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.GetCommentsCompleted(this, new GetCommentsCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
-        
-        public void GetCommentsAsync(string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang) {
-            this.GetCommentsAsync(strBiblioRecPath, lStart, lCount, strStyle, strLang, null);
-        }
-        
-        public void GetCommentsAsync(string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang, object userState) {
-            if ((this.onBeginGetCommentsDelegate == null)) {
-                this.onBeginGetCommentsDelegate = new BeginOperationDelegate(this.OnBeginGetComments);
-            }
-            if ((this.onEndGetCommentsDelegate == null)) {
-                this.onEndGetCommentsDelegate = new EndOperationDelegate(this.OnEndGetComments);
-            }
-            if ((this.onGetCommentsCompletedDelegate == null)) {
-                this.onGetCommentsCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetCommentsCompleted);
-            }
-            base.InvokeAsync(this.onBeginGetCommentsDelegate, new object[] {
-                        strBiblioRecPath,
-                        lStart,
-                        lCount,
-                        strStyle,
-                        strLang}, this.onEndGetCommentsDelegate, this.onGetCommentsCompletedDelegate, userState);
-        }
+        public event System.EventHandler<GetCommentsCompletedEventArgs> GetCommentsCompleted;
         
         public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos, string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos) {
             return base.Channel.SetComments(out errorinfos, strBiblioRecPath, commentinfos);
@@ -14794,185 +13569,1239 @@ namespace DigitalPlatform.LibraryClient.localhost {
             base.InvokeAsync(this.onBeginUrgentRecoverDelegate, new object[] {
                         strXML}, this.onEndUrgentRecoverDelegate, this.onUrgentRecoverCompletedDelegate, userState);
         }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult RepairBorrowInfo(out int nProcessedBorrowItems, out int nTotalBorrowItems, out string strOutputReaderBarcode, out string[] aDupPath, string strAction, string strReaderBarcode, string strItemBarcode, string strConfirmItemRecPath, int nStart, int nCount) {
+            return base.Channel.RepairBorrowInfo(out nProcessedBorrowItems, out nTotalBorrowItems, out strOutputReaderBarcode, out aDupPath, strAction, strReaderBarcode, strItemBarcode, strConfirmItemRecPath, nStart, nCount);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginRepairBorrowInfo(string strAction, string strReaderBarcode, string strItemBarcode, string strConfirmItemRecPath, int nStart, int nCount, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginRepairBorrowInfo(strAction, strReaderBarcode, strItemBarcode, strConfirmItemRecPath, nStart, nCount, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndRepairBorrowInfo(out int nProcessedBorrowItems, out int nTotalBorrowItems, out string strOutputReaderBarcode, out string[] aDupPath, System.IAsyncResult result) {
+            return base.Channel.EndRepairBorrowInfo(out nProcessedBorrowItems, out nTotalBorrowItems, out strOutputReaderBarcode, out aDupPath, result);
+        }
+        
+        private System.IAsyncResult OnBeginRepairBorrowInfo(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strAction = ((string)(inValues[0]));
+            string strReaderBarcode = ((string)(inValues[1]));
+            string strItemBarcode = ((string)(inValues[2]));
+            string strConfirmItemRecPath = ((string)(inValues[3]));
+            int nStart = ((int)(inValues[4]));
+            int nCount = ((int)(inValues[5]));
+            return this.BeginRepairBorrowInfo(strAction, strReaderBarcode, strItemBarcode, strConfirmItemRecPath, nStart, nCount, callback, asyncState);
+        }
+        
+        private object[] OnEndRepairBorrowInfo(System.IAsyncResult result) {
+            int nProcessedBorrowItems = this.GetDefaultValueForInitialization<int>();
+            int nTotalBorrowItems = this.GetDefaultValueForInitialization<int>();
+            string strOutputReaderBarcode = this.GetDefaultValueForInitialization<string>();
+            string[] aDupPath = this.GetDefaultValueForInitialization<string[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndRepairBorrowInfo(out nProcessedBorrowItems, out nTotalBorrowItems, out strOutputReaderBarcode, out aDupPath, result);
+            return new object[] {
+                    nProcessedBorrowItems,
+                    nTotalBorrowItems,
+                    strOutputReaderBarcode,
+                    aDupPath,
+                    retVal};
+        }
+        
+        private void OnRepairBorrowInfoCompleted(object state) {
+            if ((this.RepairBorrowInfoCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.RepairBorrowInfoCompleted(this, new RepairBorrowInfoCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void RepairBorrowInfoAsync(string strAction, string strReaderBarcode, string strItemBarcode, string strConfirmItemRecPath, int nStart, int nCount) {
+            this.RepairBorrowInfoAsync(strAction, strReaderBarcode, strItemBarcode, strConfirmItemRecPath, nStart, nCount, null);
+        }
+        
+        public void RepairBorrowInfoAsync(string strAction, string strReaderBarcode, string strItemBarcode, string strConfirmItemRecPath, int nStart, int nCount, object userState) {
+            if ((this.onBeginRepairBorrowInfoDelegate == null)) {
+                this.onBeginRepairBorrowInfoDelegate = new BeginOperationDelegate(this.OnBeginRepairBorrowInfo);
+            }
+            if ((this.onEndRepairBorrowInfoDelegate == null)) {
+                this.onEndRepairBorrowInfoDelegate = new EndOperationDelegate(this.OnEndRepairBorrowInfo);
+            }
+            if ((this.onRepairBorrowInfoCompletedDelegate == null)) {
+                this.onRepairBorrowInfoCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnRepairBorrowInfoCompleted);
+            }
+            base.InvokeAsync(this.onBeginRepairBorrowInfoDelegate, new object[] {
+                        strAction,
+                        strReaderBarcode,
+                        strItemBarcode,
+                        strConfirmItemRecPath,
+                        nStart,
+                        nCount}, this.onEndRepairBorrowInfoDelegate, this.onRepairBorrowInfoCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult PassGate(out string[] results, string strReaderBarcode, string strGateName, string strResultTypeList) {
+            return base.Channel.PassGate(out results, strReaderBarcode, strGateName, strResultTypeList);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginPassGate(string strReaderBarcode, string strGateName, string strResultTypeList, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginPassGate(strReaderBarcode, strGateName, strResultTypeList, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndPassGate(out string[] results, System.IAsyncResult result) {
+            return base.Channel.EndPassGate(out results, result);
+        }
+        
+        private System.IAsyncResult OnBeginPassGate(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strReaderBarcode = ((string)(inValues[0]));
+            string strGateName = ((string)(inValues[1]));
+            string strResultTypeList = ((string)(inValues[2]));
+            return this.BeginPassGate(strReaderBarcode, strGateName, strResultTypeList, callback, asyncState);
+        }
+        
+        private object[] OnEndPassGate(System.IAsyncResult result) {
+            string[] results = this.GetDefaultValueForInitialization<string[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndPassGate(out results, result);
+            return new object[] {
+                    results,
+                    retVal};
+        }
+        
+        private void OnPassGateCompleted(object state) {
+            if ((this.PassGateCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.PassGateCompleted(this, new PassGateCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void PassGateAsync(string strReaderBarcode, string strGateName, string strResultTypeList) {
+            this.PassGateAsync(strReaderBarcode, strGateName, strResultTypeList, null);
+        }
+        
+        public void PassGateAsync(string strReaderBarcode, string strGateName, string strResultTypeList, object userState) {
+            if ((this.onBeginPassGateDelegate == null)) {
+                this.onBeginPassGateDelegate = new BeginOperationDelegate(this.OnBeginPassGate);
+            }
+            if ((this.onEndPassGateDelegate == null)) {
+                this.onEndPassGateDelegate = new EndOperationDelegate(this.OnEndPassGate);
+            }
+            if ((this.onPassGateCompletedDelegate == null)) {
+                this.onPassGateCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnPassGateCompleted);
+            }
+            base.InvokeAsync(this.onBeginPassGateDelegate, new object[] {
+                        strReaderBarcode,
+                        strGateName,
+                        strResultTypeList}, this.onEndPassGateDelegate, this.onPassGateCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Foregift(out string strOutputReaderXml, out string strOutputID, string strAction, string strReaderBarcode) {
+            return base.Channel.Foregift(out strOutputReaderXml, out strOutputID, strAction, strReaderBarcode);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginForegift(string strAction, string strReaderBarcode, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginForegift(strAction, strReaderBarcode, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndForegift(out string strOutputReaderXml, out string strOutputID, System.IAsyncResult result) {
+            return base.Channel.EndForegift(out strOutputReaderXml, out strOutputID, result);
+        }
+        
+        private System.IAsyncResult OnBeginForegift(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strAction = ((string)(inValues[0]));
+            string strReaderBarcode = ((string)(inValues[1]));
+            return this.BeginForegift(strAction, strReaderBarcode, callback, asyncState);
+        }
+        
+        private object[] OnEndForegift(System.IAsyncResult result) {
+            string strOutputReaderXml = this.GetDefaultValueForInitialization<string>();
+            string strOutputID = this.GetDefaultValueForInitialization<string>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndForegift(out strOutputReaderXml, out strOutputID, result);
+            return new object[] {
+                    strOutputReaderXml,
+                    strOutputID,
+                    retVal};
+        }
+        
+        private void OnForegiftCompleted(object state) {
+            if ((this.ForegiftCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.ForegiftCompleted(this, new ForegiftCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void ForegiftAsync(string strAction, string strReaderBarcode) {
+            this.ForegiftAsync(strAction, strReaderBarcode, null);
+        }
+        
+        public void ForegiftAsync(string strAction, string strReaderBarcode, object userState) {
+            if ((this.onBeginForegiftDelegate == null)) {
+                this.onBeginForegiftDelegate = new BeginOperationDelegate(this.OnBeginForegift);
+            }
+            if ((this.onEndForegiftDelegate == null)) {
+                this.onEndForegiftDelegate = new EndOperationDelegate(this.OnEndForegift);
+            }
+            if ((this.onForegiftCompletedDelegate == null)) {
+                this.onForegiftCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnForegiftCompleted);
+            }
+            base.InvokeAsync(this.onBeginForegiftDelegate, new object[] {
+                        strAction,
+                        strReaderBarcode}, this.onEndForegiftDelegate, this.onForegiftCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Hire(out string strOutputReaderXml, out string strOutputID, string strAction, string strReaderBarcode) {
+            return base.Channel.Hire(out strOutputReaderXml, out strOutputID, strAction, strReaderBarcode);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginHire(string strAction, string strReaderBarcode, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginHire(strAction, strReaderBarcode, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndHire(out string strOutputReaderXml, out string strOutputID, System.IAsyncResult result) {
+            return base.Channel.EndHire(out strOutputReaderXml, out strOutputID, result);
+        }
+        
+        private System.IAsyncResult OnBeginHire(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strAction = ((string)(inValues[0]));
+            string strReaderBarcode = ((string)(inValues[1]));
+            return this.BeginHire(strAction, strReaderBarcode, callback, asyncState);
+        }
+        
+        private object[] OnEndHire(System.IAsyncResult result) {
+            string strOutputReaderXml = this.GetDefaultValueForInitialization<string>();
+            string strOutputID = this.GetDefaultValueForInitialization<string>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndHire(out strOutputReaderXml, out strOutputID, result);
+            return new object[] {
+                    strOutputReaderXml,
+                    strOutputID,
+                    retVal};
+        }
+        
+        private void OnHireCompleted(object state) {
+            if ((this.HireCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.HireCompleted(this, new HireCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void HireAsync(string strAction, string strReaderBarcode) {
+            this.HireAsync(strAction, strReaderBarcode, null);
+        }
+        
+        public void HireAsync(string strAction, string strReaderBarcode, object userState) {
+            if ((this.onBeginHireDelegate == null)) {
+                this.onBeginHireDelegate = new BeginOperationDelegate(this.OnBeginHire);
+            }
+            if ((this.onEndHireDelegate == null)) {
+                this.onEndHireDelegate = new EndOperationDelegate(this.OnEndHire);
+            }
+            if ((this.onHireCompletedDelegate == null)) {
+                this.onHireCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnHireCompleted);
+            }
+            base.InvokeAsync(this.onBeginHireDelegate, new object[] {
+                        strAction,
+                        strReaderBarcode}, this.onEndHireDelegate, this.onHireCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Settlement(string strAction, string[] ids) {
+            return base.Channel.Settlement(strAction, ids);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginSettlement(string strAction, string[] ids, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginSettlement(strAction, ids, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSettlement(System.IAsyncResult result) {
+            return base.Channel.EndSettlement(result);
+        }
+        
+        private System.IAsyncResult OnBeginSettlement(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strAction = ((string)(inValues[0]));
+            string[] ids = ((string[])(inValues[1]));
+            return this.BeginSettlement(strAction, ids, callback, asyncState);
+        }
+        
+        private object[] OnEndSettlement(System.IAsyncResult result) {
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSettlement(result);
+            return new object[] {
+                    retVal};
+        }
+        
+        private void OnSettlementCompleted(object state) {
+            if ((this.SettlementCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.SettlementCompleted(this, new SettlementCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void SettlementAsync(string strAction, string[] ids) {
+            this.SettlementAsync(strAction, ids, null);
+        }
+        
+        public void SettlementAsync(string strAction, string[] ids, object userState) {
+            if ((this.onBeginSettlementDelegate == null)) {
+                this.onBeginSettlementDelegate = new BeginOperationDelegate(this.OnBeginSettlement);
+            }
+            if ((this.onEndSettlementDelegate == null)) {
+                this.onEndSettlementDelegate = new EndOperationDelegate(this.OnEndSettlement);
+            }
+            if ((this.onSettlementCompletedDelegate == null)) {
+                this.onSettlementCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnSettlementCompleted);
+            }
+            base.InvokeAsync(this.onBeginSettlementDelegate, new object[] {
+                        strAction,
+                        ids}, this.onEndSettlementDelegate, this.onSettlementCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchOneClassCallNumber(out string strQueryXml, string strArrangeGroupName, string strClass, string strResultSetName) {
+            return base.Channel.SearchOneClassCallNumber(out strQueryXml, strArrangeGroupName, strClass, strResultSetName);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginSearchOneClassCallNumber(string strArrangeGroupName, string strClass, string strResultSetName, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginSearchOneClassCallNumber(strArrangeGroupName, strClass, strResultSetName, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchOneClassCallNumber(out string strQueryXml, System.IAsyncResult result) {
+            return base.Channel.EndSearchOneClassCallNumber(out strQueryXml, result);
+        }
+        
+        private System.IAsyncResult OnBeginSearchOneClassCallNumber(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strArrangeGroupName = ((string)(inValues[0]));
+            string strClass = ((string)(inValues[1]));
+            string strResultSetName = ((string)(inValues[2]));
+            return this.BeginSearchOneClassCallNumber(strArrangeGroupName, strClass, strResultSetName, callback, asyncState);
+        }
+        
+        private object[] OnEndSearchOneClassCallNumber(System.IAsyncResult result) {
+            string strQueryXml = this.GetDefaultValueForInitialization<string>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchOneClassCallNumber(out strQueryXml, result);
+            return new object[] {
+                    strQueryXml,
+                    retVal};
+        }
+        
+        private void OnSearchOneClassCallNumberCompleted(object state) {
+            if ((this.SearchOneClassCallNumberCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.SearchOneClassCallNumberCompleted(this, new SearchOneClassCallNumberCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void SearchOneClassCallNumberAsync(string strArrangeGroupName, string strClass, string strResultSetName) {
+            this.SearchOneClassCallNumberAsync(strArrangeGroupName, strClass, strResultSetName, null);
+        }
+        
+        public void SearchOneClassCallNumberAsync(string strArrangeGroupName, string strClass, string strResultSetName, object userState) {
+            if ((this.onBeginSearchOneClassCallNumberDelegate == null)) {
+                this.onBeginSearchOneClassCallNumberDelegate = new BeginOperationDelegate(this.OnBeginSearchOneClassCallNumber);
+            }
+            if ((this.onEndSearchOneClassCallNumberDelegate == null)) {
+                this.onEndSearchOneClassCallNumberDelegate = new EndOperationDelegate(this.OnEndSearchOneClassCallNumber);
+            }
+            if ((this.onSearchOneClassCallNumberCompletedDelegate == null)) {
+                this.onSearchOneClassCallNumberCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnSearchOneClassCallNumberCompleted);
+            }
+            base.InvokeAsync(this.onBeginSearchOneClassCallNumberDelegate, new object[] {
+                        strArrangeGroupName,
+                        strClass,
+                        strResultSetName}, this.onEndSearchOneClassCallNumberDelegate, this.onSearchOneClassCallNumberCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetCallNumberSearchResult(out DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[] searchresults, string strArrangeGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang) {
+            return base.Channel.GetCallNumberSearchResult(out searchresults, strArrangeGroupName, strResultSetName, lStart, lCount, strBrowseInfoStyle, strLang);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginGetCallNumberSearchResult(string strArrangeGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginGetCallNumberSearchResult(strArrangeGroupName, strResultSetName, lStart, lCount, strBrowseInfoStyle, strLang, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetCallNumberSearchResult(out DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[] searchresults, System.IAsyncResult result) {
+            return base.Channel.EndGetCallNumberSearchResult(out searchresults, result);
+        }
+        
+        private System.IAsyncResult OnBeginGetCallNumberSearchResult(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strArrangeGroupName = ((string)(inValues[0]));
+            string strResultSetName = ((string)(inValues[1]));
+            long lStart = ((long)(inValues[2]));
+            long lCount = ((long)(inValues[3]));
+            string strBrowseInfoStyle = ((string)(inValues[4]));
+            string strLang = ((string)(inValues[5]));
+            return this.BeginGetCallNumberSearchResult(strArrangeGroupName, strResultSetName, lStart, lCount, strBrowseInfoStyle, strLang, callback, asyncState);
+        }
+        
+        private object[] OnEndGetCallNumberSearchResult(System.IAsyncResult result) {
+            DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[] searchresults = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetCallNumberSearchResult(out searchresults, result);
+            return new object[] {
+                    searchresults,
+                    retVal};
+        }
+        
+        private void OnGetCallNumberSearchResultCompleted(object state) {
+            if ((this.GetCallNumberSearchResultCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.GetCallNumberSearchResultCompleted(this, new GetCallNumberSearchResultCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void GetCallNumberSearchResultAsync(string strArrangeGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang) {
+            this.GetCallNumberSearchResultAsync(strArrangeGroupName, strResultSetName, lStart, lCount, strBrowseInfoStyle, strLang, null);
+        }
+        
+        public void GetCallNumberSearchResultAsync(string strArrangeGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang, object userState) {
+            if ((this.onBeginGetCallNumberSearchResultDelegate == null)) {
+                this.onBeginGetCallNumberSearchResultDelegate = new BeginOperationDelegate(this.OnBeginGetCallNumberSearchResult);
+            }
+            if ((this.onEndGetCallNumberSearchResultDelegate == null)) {
+                this.onEndGetCallNumberSearchResultDelegate = new EndOperationDelegate(this.OnEndGetCallNumberSearchResult);
+            }
+            if ((this.onGetCallNumberSearchResultCompletedDelegate == null)) {
+                this.onGetCallNumberSearchResultCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetCallNumberSearchResultCompleted);
+            }
+            base.InvokeAsync(this.onBeginGetCallNumberSearchResultDelegate, new object[] {
+                        strArrangeGroupName,
+                        strResultSetName,
+                        lStart,
+                        lCount,
+                        strBrowseInfoStyle,
+                        strLang}, this.onEndGetCallNumberSearchResultDelegate, this.onGetCallNumberSearchResultCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetOneClassTailNumber(out string strTailNumber, string strArrangeGroupName, string strClass) {
+            return base.Channel.GetOneClassTailNumber(out strTailNumber, strArrangeGroupName, strClass);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginGetOneClassTailNumber(string strArrangeGroupName, string strClass, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginGetOneClassTailNumber(strArrangeGroupName, strClass, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetOneClassTailNumber(out string strTailNumber, System.IAsyncResult result) {
+            return base.Channel.EndGetOneClassTailNumber(out strTailNumber, result);
+        }
+        
+        private System.IAsyncResult OnBeginGetOneClassTailNumber(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strArrangeGroupName = ((string)(inValues[0]));
+            string strClass = ((string)(inValues[1]));
+            return this.BeginGetOneClassTailNumber(strArrangeGroupName, strClass, callback, asyncState);
+        }
+        
+        private object[] OnEndGetOneClassTailNumber(System.IAsyncResult result) {
+            string strTailNumber = this.GetDefaultValueForInitialization<string>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetOneClassTailNumber(out strTailNumber, result);
+            return new object[] {
+                    strTailNumber,
+                    retVal};
+        }
+        
+        private void OnGetOneClassTailNumberCompleted(object state) {
+            if ((this.GetOneClassTailNumberCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.GetOneClassTailNumberCompleted(this, new GetOneClassTailNumberCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void GetOneClassTailNumberAsync(string strArrangeGroupName, string strClass) {
+            this.GetOneClassTailNumberAsync(strArrangeGroupName, strClass, null);
+        }
+        
+        public void GetOneClassTailNumberAsync(string strArrangeGroupName, string strClass, object userState) {
+            if ((this.onBeginGetOneClassTailNumberDelegate == null)) {
+                this.onBeginGetOneClassTailNumberDelegate = new BeginOperationDelegate(this.OnBeginGetOneClassTailNumber);
+            }
+            if ((this.onEndGetOneClassTailNumberDelegate == null)) {
+                this.onEndGetOneClassTailNumberDelegate = new EndOperationDelegate(this.OnEndGetOneClassTailNumber);
+            }
+            if ((this.onGetOneClassTailNumberCompletedDelegate == null)) {
+                this.onGetOneClassTailNumberCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetOneClassTailNumberCompleted);
+            }
+            base.InvokeAsync(this.onBeginGetOneClassTailNumberDelegate, new object[] {
+                        strArrangeGroupName,
+                        strClass}, this.onEndGetOneClassTailNumberDelegate, this.onGetOneClassTailNumberCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetOneClassTailNumber(out string strOutputNumber, string strAction, string strArrangeGroupName, string strClass, string strTestNumber) {
+            return base.Channel.SetOneClassTailNumber(out strOutputNumber, strAction, strArrangeGroupName, strClass, strTestNumber);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginSetOneClassTailNumber(string strAction, string strArrangeGroupName, string strClass, string strTestNumber, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginSetOneClassTailNumber(strAction, strArrangeGroupName, strClass, strTestNumber, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetOneClassTailNumber(out string strOutputNumber, System.IAsyncResult result) {
+            return base.Channel.EndSetOneClassTailNumber(out strOutputNumber, result);
+        }
+        
+        private System.IAsyncResult OnBeginSetOneClassTailNumber(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strAction = ((string)(inValues[0]));
+            string strArrangeGroupName = ((string)(inValues[1]));
+            string strClass = ((string)(inValues[2]));
+            string strTestNumber = ((string)(inValues[3]));
+            return this.BeginSetOneClassTailNumber(strAction, strArrangeGroupName, strClass, strTestNumber, callback, asyncState);
+        }
+        
+        private object[] OnEndSetOneClassTailNumber(System.IAsyncResult result) {
+            string strOutputNumber = this.GetDefaultValueForInitialization<string>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetOneClassTailNumber(out strOutputNumber, result);
+            return new object[] {
+                    strOutputNumber,
+                    retVal};
+        }
+        
+        private void OnSetOneClassTailNumberCompleted(object state) {
+            if ((this.SetOneClassTailNumberCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.SetOneClassTailNumberCompleted(this, new SetOneClassTailNumberCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void SetOneClassTailNumberAsync(string strAction, string strArrangeGroupName, string strClass, string strTestNumber) {
+            this.SetOneClassTailNumberAsync(strAction, strArrangeGroupName, strClass, strTestNumber, null);
+        }
+        
+        public void SetOneClassTailNumberAsync(string strAction, string strArrangeGroupName, string strClass, string strTestNumber, object userState) {
+            if ((this.onBeginSetOneClassTailNumberDelegate == null)) {
+                this.onBeginSetOneClassTailNumberDelegate = new BeginOperationDelegate(this.OnBeginSetOneClassTailNumber);
+            }
+            if ((this.onEndSetOneClassTailNumberDelegate == null)) {
+                this.onEndSetOneClassTailNumberDelegate = new EndOperationDelegate(this.OnEndSetOneClassTailNumber);
+            }
+            if ((this.onSetOneClassTailNumberCompletedDelegate == null)) {
+                this.onSetOneClassTailNumberCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnSetOneClassTailNumberCompleted);
+            }
+            base.InvokeAsync(this.onBeginSetOneClassTailNumberDelegate, new object[] {
+                        strAction,
+                        strArrangeGroupName,
+                        strClass,
+                        strTestNumber}, this.onEndSetOneClassTailNumberDelegate, this.onSetOneClassTailNumberCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchUsedZhongcihao(out string strQueryXml, string strZhongcihaoGroupName, string strClass, string strResultSetName) {
+            return base.Channel.SearchUsedZhongcihao(out strQueryXml, strZhongcihaoGroupName, strClass, strResultSetName);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginSearchUsedZhongcihao(string strZhongcihaoGroupName, string strClass, string strResultSetName, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginSearchUsedZhongcihao(strZhongcihaoGroupName, strClass, strResultSetName, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchUsedZhongcihao(out string strQueryXml, System.IAsyncResult result) {
+            return base.Channel.EndSearchUsedZhongcihao(out strQueryXml, result);
+        }
+        
+        private System.IAsyncResult OnBeginSearchUsedZhongcihao(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strZhongcihaoGroupName = ((string)(inValues[0]));
+            string strClass = ((string)(inValues[1]));
+            string strResultSetName = ((string)(inValues[2]));
+            return this.BeginSearchUsedZhongcihao(strZhongcihaoGroupName, strClass, strResultSetName, callback, asyncState);
+        }
+        
+        private object[] OnEndSearchUsedZhongcihao(System.IAsyncResult result) {
+            string strQueryXml = this.GetDefaultValueForInitialization<string>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchUsedZhongcihao(out strQueryXml, result);
+            return new object[] {
+                    strQueryXml,
+                    retVal};
+        }
+        
+        private void OnSearchUsedZhongcihaoCompleted(object state) {
+            if ((this.SearchUsedZhongcihaoCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.SearchUsedZhongcihaoCompleted(this, new SearchUsedZhongcihaoCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void SearchUsedZhongcihaoAsync(string strZhongcihaoGroupName, string strClass, string strResultSetName) {
+            this.SearchUsedZhongcihaoAsync(strZhongcihaoGroupName, strClass, strResultSetName, null);
+        }
+        
+        public void SearchUsedZhongcihaoAsync(string strZhongcihaoGroupName, string strClass, string strResultSetName, object userState) {
+            if ((this.onBeginSearchUsedZhongcihaoDelegate == null)) {
+                this.onBeginSearchUsedZhongcihaoDelegate = new BeginOperationDelegate(this.OnBeginSearchUsedZhongcihao);
+            }
+            if ((this.onEndSearchUsedZhongcihaoDelegate == null)) {
+                this.onEndSearchUsedZhongcihaoDelegate = new EndOperationDelegate(this.OnEndSearchUsedZhongcihao);
+            }
+            if ((this.onSearchUsedZhongcihaoCompletedDelegate == null)) {
+                this.onSearchUsedZhongcihaoCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnSearchUsedZhongcihaoCompleted);
+            }
+            base.InvokeAsync(this.onBeginSearchUsedZhongcihaoDelegate, new object[] {
+                        strZhongcihaoGroupName,
+                        strClass,
+                        strResultSetName}, this.onEndSearchUsedZhongcihaoDelegate, this.onSearchUsedZhongcihaoCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetZhongcihaoSearchResult(out DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[] searchresults, string strZhongcihaoGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang) {
+            return base.Channel.GetZhongcihaoSearchResult(out searchresults, strZhongcihaoGroupName, strResultSetName, lStart, lCount, strBrowseInfoStyle, strLang);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginGetZhongcihaoSearchResult(string strZhongcihaoGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginGetZhongcihaoSearchResult(strZhongcihaoGroupName, strResultSetName, lStart, lCount, strBrowseInfoStyle, strLang, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetZhongcihaoSearchResult(out DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[] searchresults, System.IAsyncResult result) {
+            return base.Channel.EndGetZhongcihaoSearchResult(out searchresults, result);
+        }
+        
+        private System.IAsyncResult OnBeginGetZhongcihaoSearchResult(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strZhongcihaoGroupName = ((string)(inValues[0]));
+            string strResultSetName = ((string)(inValues[1]));
+            long lStart = ((long)(inValues[2]));
+            long lCount = ((long)(inValues[3]));
+            string strBrowseInfoStyle = ((string)(inValues[4]));
+            string strLang = ((string)(inValues[5]));
+            return this.BeginGetZhongcihaoSearchResult(strZhongcihaoGroupName, strResultSetName, lStart, lCount, strBrowseInfoStyle, strLang, callback, asyncState);
+        }
+        
+        private object[] OnEndGetZhongcihaoSearchResult(System.IAsyncResult result) {
+            DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[] searchresults = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetZhongcihaoSearchResult(out searchresults, result);
+            return new object[] {
+                    searchresults,
+                    retVal};
+        }
+        
+        private void OnGetZhongcihaoSearchResultCompleted(object state) {
+            if ((this.GetZhongcihaoSearchResultCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.GetZhongcihaoSearchResultCompleted(this, new GetZhongcihaoSearchResultCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void GetZhongcihaoSearchResultAsync(string strZhongcihaoGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang) {
+            this.GetZhongcihaoSearchResultAsync(strZhongcihaoGroupName, strResultSetName, lStart, lCount, strBrowseInfoStyle, strLang, null);
+        }
+        
+        public void GetZhongcihaoSearchResultAsync(string strZhongcihaoGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang, object userState) {
+            if ((this.onBeginGetZhongcihaoSearchResultDelegate == null)) {
+                this.onBeginGetZhongcihaoSearchResultDelegate = new BeginOperationDelegate(this.OnBeginGetZhongcihaoSearchResult);
+            }
+            if ((this.onEndGetZhongcihaoSearchResultDelegate == null)) {
+                this.onEndGetZhongcihaoSearchResultDelegate = new EndOperationDelegate(this.OnEndGetZhongcihaoSearchResult);
+            }
+            if ((this.onGetZhongcihaoSearchResultCompletedDelegate == null)) {
+                this.onGetZhongcihaoSearchResultCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetZhongcihaoSearchResultCompleted);
+            }
+            base.InvokeAsync(this.onBeginGetZhongcihaoSearchResultDelegate, new object[] {
+                        strZhongcihaoGroupName,
+                        strResultSetName,
+                        lStart,
+                        lCount,
+                        strBrowseInfoStyle,
+                        strLang}, this.onEndGetZhongcihaoSearchResultDelegate, this.onGetZhongcihaoSearchResultCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetZhongcihaoTailNumber(out string strTailNumber, string strZhongcihaoGroupName, string strClass) {
+            return base.Channel.GetZhongcihaoTailNumber(out strTailNumber, strZhongcihaoGroupName, strClass);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginGetZhongcihaoTailNumber(string strZhongcihaoGroupName, string strClass, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginGetZhongcihaoTailNumber(strZhongcihaoGroupName, strClass, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetZhongcihaoTailNumber(out string strTailNumber, System.IAsyncResult result) {
+            return base.Channel.EndGetZhongcihaoTailNumber(out strTailNumber, result);
+        }
+        
+        private System.IAsyncResult OnBeginGetZhongcihaoTailNumber(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strZhongcihaoGroupName = ((string)(inValues[0]));
+            string strClass = ((string)(inValues[1]));
+            return this.BeginGetZhongcihaoTailNumber(strZhongcihaoGroupName, strClass, callback, asyncState);
+        }
+        
+        private object[] OnEndGetZhongcihaoTailNumber(System.IAsyncResult result) {
+            string strTailNumber = this.GetDefaultValueForInitialization<string>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetZhongcihaoTailNumber(out strTailNumber, result);
+            return new object[] {
+                    strTailNumber,
+                    retVal};
+        }
+        
+        private void OnGetZhongcihaoTailNumberCompleted(object state) {
+            if ((this.GetZhongcihaoTailNumberCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.GetZhongcihaoTailNumberCompleted(this, new GetZhongcihaoTailNumberCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void GetZhongcihaoTailNumberAsync(string strZhongcihaoGroupName, string strClass) {
+            this.GetZhongcihaoTailNumberAsync(strZhongcihaoGroupName, strClass, null);
+        }
+        
+        public void GetZhongcihaoTailNumberAsync(string strZhongcihaoGroupName, string strClass, object userState) {
+            if ((this.onBeginGetZhongcihaoTailNumberDelegate == null)) {
+                this.onBeginGetZhongcihaoTailNumberDelegate = new BeginOperationDelegate(this.OnBeginGetZhongcihaoTailNumber);
+            }
+            if ((this.onEndGetZhongcihaoTailNumberDelegate == null)) {
+                this.onEndGetZhongcihaoTailNumberDelegate = new EndOperationDelegate(this.OnEndGetZhongcihaoTailNumber);
+            }
+            if ((this.onGetZhongcihaoTailNumberCompletedDelegate == null)) {
+                this.onGetZhongcihaoTailNumberCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetZhongcihaoTailNumberCompleted);
+            }
+            base.InvokeAsync(this.onBeginGetZhongcihaoTailNumberDelegate, new object[] {
+                        strZhongcihaoGroupName,
+                        strClass}, this.onEndGetZhongcihaoTailNumberDelegate, this.onGetZhongcihaoTailNumberCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetZhongcihaoTailNumber(out string strOutputNumber, string strAction, string strZhongcihaoGroupName, string strClass, string strTestNumber) {
+            return base.Channel.SetZhongcihaoTailNumber(out strOutputNumber, strAction, strZhongcihaoGroupName, strClass, strTestNumber);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginSetZhongcihaoTailNumber(string strAction, string strZhongcihaoGroupName, string strClass, string strTestNumber, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginSetZhongcihaoTailNumber(strAction, strZhongcihaoGroupName, strClass, strTestNumber, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetZhongcihaoTailNumber(out string strOutputNumber, System.IAsyncResult result) {
+            return base.Channel.EndSetZhongcihaoTailNumber(out strOutputNumber, result);
+        }
+        
+        private System.IAsyncResult OnBeginSetZhongcihaoTailNumber(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strAction = ((string)(inValues[0]));
+            string strZhongcihaoGroupName = ((string)(inValues[1]));
+            string strClass = ((string)(inValues[2]));
+            string strTestNumber = ((string)(inValues[3]));
+            return this.BeginSetZhongcihaoTailNumber(strAction, strZhongcihaoGroupName, strClass, strTestNumber, callback, asyncState);
+        }
+        
+        private object[] OnEndSetZhongcihaoTailNumber(System.IAsyncResult result) {
+            string strOutputNumber = this.GetDefaultValueForInitialization<string>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetZhongcihaoTailNumber(out strOutputNumber, result);
+            return new object[] {
+                    strOutputNumber,
+                    retVal};
+        }
+        
+        private void OnSetZhongcihaoTailNumberCompleted(object state) {
+            if ((this.SetZhongcihaoTailNumberCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.SetZhongcihaoTailNumberCompleted(this, new SetZhongcihaoTailNumberCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void SetZhongcihaoTailNumberAsync(string strAction, string strZhongcihaoGroupName, string strClass, string strTestNumber) {
+            this.SetZhongcihaoTailNumberAsync(strAction, strZhongcihaoGroupName, strClass, strTestNumber, null);
+        }
+        
+        public void SetZhongcihaoTailNumberAsync(string strAction, string strZhongcihaoGroupName, string strClass, string strTestNumber, object userState) {
+            if ((this.onBeginSetZhongcihaoTailNumberDelegate == null)) {
+                this.onBeginSetZhongcihaoTailNumberDelegate = new BeginOperationDelegate(this.OnBeginSetZhongcihaoTailNumber);
+            }
+            if ((this.onEndSetZhongcihaoTailNumberDelegate == null)) {
+                this.onEndSetZhongcihaoTailNumberDelegate = new EndOperationDelegate(this.OnEndSetZhongcihaoTailNumber);
+            }
+            if ((this.onSetZhongcihaoTailNumberCompletedDelegate == null)) {
+                this.onSetZhongcihaoTailNumberCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnSetZhongcihaoTailNumberCompleted);
+            }
+            base.InvokeAsync(this.onBeginSetZhongcihaoTailNumberDelegate, new object[] {
+                        strAction,
+                        strZhongcihaoGroupName,
+                        strClass,
+                        strTestNumber}, this.onEndSetZhongcihaoTailNumberDelegate, this.onSetZhongcihaoTailNumberCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchDup(out string strUsedProjectName, string strOriginBiblioRecPath, string strOriginBiblioRecXml, string strProjectName, string strStyle) {
+            return base.Channel.SearchDup(out strUsedProjectName, strOriginBiblioRecPath, strOriginBiblioRecXml, strProjectName, strStyle);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginSearchDup(string strOriginBiblioRecPath, string strOriginBiblioRecXml, string strProjectName, string strStyle, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginSearchDup(strOriginBiblioRecPath, strOriginBiblioRecXml, strProjectName, strStyle, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchDup(out string strUsedProjectName, System.IAsyncResult result) {
+            return base.Channel.EndSearchDup(out strUsedProjectName, result);
+        }
+        
+        private System.IAsyncResult OnBeginSearchDup(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strOriginBiblioRecPath = ((string)(inValues[0]));
+            string strOriginBiblioRecXml = ((string)(inValues[1]));
+            string strProjectName = ((string)(inValues[2]));
+            string strStyle = ((string)(inValues[3]));
+            return this.BeginSearchDup(strOriginBiblioRecPath, strOriginBiblioRecXml, strProjectName, strStyle, callback, asyncState);
+        }
+        
+        private object[] OnEndSearchDup(System.IAsyncResult result) {
+            string strUsedProjectName = this.GetDefaultValueForInitialization<string>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchDup(out strUsedProjectName, result);
+            return new object[] {
+                    strUsedProjectName,
+                    retVal};
+        }
+        
+        private void OnSearchDupCompleted(object state) {
+            if ((this.SearchDupCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.SearchDupCompleted(this, new SearchDupCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void SearchDupAsync(string strOriginBiblioRecPath, string strOriginBiblioRecXml, string strProjectName, string strStyle) {
+            this.SearchDupAsync(strOriginBiblioRecPath, strOriginBiblioRecXml, strProjectName, strStyle, null);
+        }
+        
+        public void SearchDupAsync(string strOriginBiblioRecPath, string strOriginBiblioRecXml, string strProjectName, string strStyle, object userState) {
+            if ((this.onBeginSearchDupDelegate == null)) {
+                this.onBeginSearchDupDelegate = new BeginOperationDelegate(this.OnBeginSearchDup);
+            }
+            if ((this.onEndSearchDupDelegate == null)) {
+                this.onEndSearchDupDelegate = new EndOperationDelegate(this.OnEndSearchDup);
+            }
+            if ((this.onSearchDupCompletedDelegate == null)) {
+                this.onSearchDupCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnSearchDupCompleted);
+            }
+            base.InvokeAsync(this.onBeginSearchDupDelegate, new object[] {
+                        strOriginBiblioRecPath,
+                        strOriginBiblioRecXml,
+                        strProjectName,
+                        strStyle}, this.onEndSearchDupDelegate, this.onSearchDupCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetDupSearchResult(out DigitalPlatform.LibraryClient.localhost.DupSearchResult[] searchresults, long lStart, long lCount, string strBrowseInfoStyle) {
+            return base.Channel.GetDupSearchResult(out searchresults, lStart, lCount, strBrowseInfoStyle);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginGetDupSearchResult(long lStart, long lCount, string strBrowseInfoStyle, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginGetDupSearchResult(lStart, lCount, strBrowseInfoStyle, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetDupSearchResult(out DigitalPlatform.LibraryClient.localhost.DupSearchResult[] searchresults, System.IAsyncResult result) {
+            return base.Channel.EndGetDupSearchResult(out searchresults, result);
+        }
+        
+        private System.IAsyncResult OnBeginGetDupSearchResult(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            long lStart = ((long)(inValues[0]));
+            long lCount = ((long)(inValues[1]));
+            string strBrowseInfoStyle = ((string)(inValues[2]));
+            return this.BeginGetDupSearchResult(lStart, lCount, strBrowseInfoStyle, callback, asyncState);
+        }
+        
+        private object[] OnEndGetDupSearchResult(System.IAsyncResult result) {
+            DigitalPlatform.LibraryClient.localhost.DupSearchResult[] searchresults = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.DupSearchResult[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetDupSearchResult(out searchresults, result);
+            return new object[] {
+                    searchresults,
+                    retVal};
+        }
+        
+        private void OnGetDupSearchResultCompleted(object state) {
+            if ((this.GetDupSearchResultCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.GetDupSearchResultCompleted(this, new GetDupSearchResultCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void GetDupSearchResultAsync(long lStart, long lCount, string strBrowseInfoStyle) {
+            this.GetDupSearchResultAsync(lStart, lCount, strBrowseInfoStyle, null);
+        }
+        
+        public void GetDupSearchResultAsync(long lStart, long lCount, string strBrowseInfoStyle, object userState) {
+            if ((this.onBeginGetDupSearchResultDelegate == null)) {
+                this.onBeginGetDupSearchResultDelegate = new BeginOperationDelegate(this.OnBeginGetDupSearchResult);
+            }
+            if ((this.onEndGetDupSearchResultDelegate == null)) {
+                this.onEndGetDupSearchResultDelegate = new EndOperationDelegate(this.OnEndGetDupSearchResult);
+            }
+            if ((this.onGetDupSearchResultCompletedDelegate == null)) {
+                this.onGetDupSearchResultCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetDupSearchResultCompleted);
+            }
+            base.InvokeAsync(this.onBeginGetDupSearchResultDelegate, new object[] {
+                        lStart,
+                        lCount,
+                        strBrowseInfoStyle}, this.onEndGetDupSearchResultDelegate, this.onGetDupSearchResultCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult ListDupProjectInfos(out DigitalPlatform.LibraryClient.localhost.DupProjectInfo[] results, string strOriginBiblioDbName) {
+            return base.Channel.ListDupProjectInfos(out results, strOriginBiblioDbName);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginListDupProjectInfos(string strOriginBiblioDbName, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginListDupProjectInfos(strOriginBiblioDbName, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndListDupProjectInfos(out DigitalPlatform.LibraryClient.localhost.DupProjectInfo[] results, System.IAsyncResult result) {
+            return base.Channel.EndListDupProjectInfos(out results, result);
+        }
+        
+        private System.IAsyncResult OnBeginListDupProjectInfos(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strOriginBiblioDbName = ((string)(inValues[0]));
+            return this.BeginListDupProjectInfos(strOriginBiblioDbName, callback, asyncState);
+        }
+        
+        private object[] OnEndListDupProjectInfos(System.IAsyncResult result) {
+            DigitalPlatform.LibraryClient.localhost.DupProjectInfo[] results = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.DupProjectInfo[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndListDupProjectInfos(out results, result);
+            return new object[] {
+                    results,
+                    retVal};
+        }
+        
+        private void OnListDupProjectInfosCompleted(object state) {
+            if ((this.ListDupProjectInfosCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.ListDupProjectInfosCompleted(this, new ListDupProjectInfosCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void ListDupProjectInfosAsync(string strOriginBiblioDbName) {
+            this.ListDupProjectInfosAsync(strOriginBiblioDbName, null);
+        }
+        
+        public void ListDupProjectInfosAsync(string strOriginBiblioDbName, object userState) {
+            if ((this.onBeginListDupProjectInfosDelegate == null)) {
+                this.onBeginListDupProjectInfosDelegate = new BeginOperationDelegate(this.OnBeginListDupProjectInfos);
+            }
+            if ((this.onEndListDupProjectInfosDelegate == null)) {
+                this.onEndListDupProjectInfosDelegate = new EndOperationDelegate(this.OnEndListDupProjectInfos);
+            }
+            if ((this.onListDupProjectInfosCompletedDelegate == null)) {
+                this.onListDupProjectInfosCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnListDupProjectInfosCompleted);
+            }
+            base.InvokeAsync(this.onBeginListDupProjectInfosDelegate, new object[] {
+                        strOriginBiblioDbName}, this.onEndListDupProjectInfosDelegate, this.onListDupProjectInfosCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetUtilInfo(out string strValue, string strAction, string strDbName, string strFrom, string strKey, string strValueAttrName) {
+            return base.Channel.GetUtilInfo(out strValue, strAction, strDbName, strFrom, strKey, strValueAttrName);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginGetUtilInfo(string strAction, string strDbName, string strFrom, string strKey, string strValueAttrName, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginGetUtilInfo(strAction, strDbName, strFrom, strKey, strValueAttrName, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetUtilInfo(out string strValue, System.IAsyncResult result) {
+            return base.Channel.EndGetUtilInfo(out strValue, result);
+        }
+        
+        private System.IAsyncResult OnBeginGetUtilInfo(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strAction = ((string)(inValues[0]));
+            string strDbName = ((string)(inValues[1]));
+            string strFrom = ((string)(inValues[2]));
+            string strKey = ((string)(inValues[3]));
+            string strValueAttrName = ((string)(inValues[4]));
+            return this.BeginGetUtilInfo(strAction, strDbName, strFrom, strKey, strValueAttrName, callback, asyncState);
+        }
+        
+        private object[] OnEndGetUtilInfo(System.IAsyncResult result) {
+            string strValue = this.GetDefaultValueForInitialization<string>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetUtilInfo(out strValue, result);
+            return new object[] {
+                    strValue,
+                    retVal};
+        }
+        
+        private void OnGetUtilInfoCompleted(object state) {
+            if ((this.GetUtilInfoCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.GetUtilInfoCompleted(this, new GetUtilInfoCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void GetUtilInfoAsync(string strAction, string strDbName, string strFrom, string strKey, string strValueAttrName) {
+            this.GetUtilInfoAsync(strAction, strDbName, strFrom, strKey, strValueAttrName, null);
+        }
+        
+        public void GetUtilInfoAsync(string strAction, string strDbName, string strFrom, string strKey, string strValueAttrName, object userState) {
+            if ((this.onBeginGetUtilInfoDelegate == null)) {
+                this.onBeginGetUtilInfoDelegate = new BeginOperationDelegate(this.OnBeginGetUtilInfo);
+            }
+            if ((this.onEndGetUtilInfoDelegate == null)) {
+                this.onEndGetUtilInfoDelegate = new EndOperationDelegate(this.OnEndGetUtilInfo);
+            }
+            if ((this.onGetUtilInfoCompletedDelegate == null)) {
+                this.onGetUtilInfoCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetUtilInfoCompleted);
+            }
+            base.InvokeAsync(this.onBeginGetUtilInfoDelegate, new object[] {
+                        strAction,
+                        strDbName,
+                        strFrom,
+                        strKey,
+                        strValueAttrName}, this.onEndGetUtilInfoDelegate, this.onGetUtilInfoCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetUtilInfo(string strAction, string strDbName, string strFrom, string strRootElementName, string strKeyAttrName, string strValueAttrName, string strKey, string strValue) {
+            return base.Channel.SetUtilInfo(strAction, strDbName, strFrom, strRootElementName, strKeyAttrName, strValueAttrName, strKey, strValue);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginSetUtilInfo(string strAction, string strDbName, string strFrom, string strRootElementName, string strKeyAttrName, string strValueAttrName, string strKey, string strValue, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginSetUtilInfo(strAction, strDbName, strFrom, strRootElementName, strKeyAttrName, strValueAttrName, strKey, strValue, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetUtilInfo(System.IAsyncResult result) {
+            return base.Channel.EndSetUtilInfo(result);
+        }
+        
+        private System.IAsyncResult OnBeginSetUtilInfo(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strAction = ((string)(inValues[0]));
+            string strDbName = ((string)(inValues[1]));
+            string strFrom = ((string)(inValues[2]));
+            string strRootElementName = ((string)(inValues[3]));
+            string strKeyAttrName = ((string)(inValues[4]));
+            string strValueAttrName = ((string)(inValues[5]));
+            string strKey = ((string)(inValues[6]));
+            string strValue = ((string)(inValues[7]));
+            return this.BeginSetUtilInfo(strAction, strDbName, strFrom, strRootElementName, strKeyAttrName, strValueAttrName, strKey, strValue, callback, asyncState);
+        }
+        
+        private object[] OnEndSetUtilInfo(System.IAsyncResult result) {
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetUtilInfo(result);
+            return new object[] {
+                    retVal};
+        }
+        
+        private void OnSetUtilInfoCompleted(object state) {
+            if ((this.SetUtilInfoCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.SetUtilInfoCompleted(this, new SetUtilInfoCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void SetUtilInfoAsync(string strAction, string strDbName, string strFrom, string strRootElementName, string strKeyAttrName, string strValueAttrName, string strKey, string strValue) {
+            this.SetUtilInfoAsync(strAction, strDbName, strFrom, strRootElementName, strKeyAttrName, strValueAttrName, strKey, strValue, null);
+        }
+        
+        public void SetUtilInfoAsync(string strAction, string strDbName, string strFrom, string strRootElementName, string strKeyAttrName, string strValueAttrName, string strKey, string strValue, object userState) {
+            if ((this.onBeginSetUtilInfoDelegate == null)) {
+                this.onBeginSetUtilInfoDelegate = new BeginOperationDelegate(this.OnBeginSetUtilInfo);
+            }
+            if ((this.onEndSetUtilInfoDelegate == null)) {
+                this.onEndSetUtilInfoDelegate = new EndOperationDelegate(this.OnEndSetUtilInfo);
+            }
+            if ((this.onSetUtilInfoCompletedDelegate == null)) {
+                this.onSetUtilInfoCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnSetUtilInfoCompleted);
+            }
+            base.InvokeAsync(this.onBeginSetUtilInfoDelegate, new object[] {
+                        strAction,
+                        strDbName,
+                        strFrom,
+                        strRootElementName,
+                        strKeyAttrName,
+                        strValueAttrName,
+                        strKey,
+                        strValue}, this.onEndSetUtilInfoDelegate, this.onSetUtilInfoCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetRes(out byte[] baContent, out string strMetadata, out string strOutputResPath, out byte[] baOutputTimestamp, string strResPath, long nStart, int nLength, string strStyle) {
+            return base.Channel.GetRes(out baContent, out strMetadata, out strOutputResPath, out baOutputTimestamp, strResPath, nStart, nLength, strStyle);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginGetRes(string strResPath, long nStart, int nLength, string strStyle, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginGetRes(strResPath, nStart, nLength, strStyle, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetRes(out byte[] baContent, out string strMetadata, out string strOutputResPath, out byte[] baOutputTimestamp, System.IAsyncResult result) {
+            return base.Channel.EndGetRes(out baContent, out strMetadata, out strOutputResPath, out baOutputTimestamp, result);
+        }
+        
+        private System.IAsyncResult OnBeginGetRes(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strResPath = ((string)(inValues[0]));
+            long nStart = ((long)(inValues[1]));
+            int nLength = ((int)(inValues[2]));
+            string strStyle = ((string)(inValues[3]));
+            return this.BeginGetRes(strResPath, nStart, nLength, strStyle, callback, asyncState);
+        }
+        
+        private object[] OnEndGetRes(System.IAsyncResult result) {
+            byte[] baContent = this.GetDefaultValueForInitialization<byte[]>();
+            string strMetadata = this.GetDefaultValueForInitialization<string>();
+            string strOutputResPath = this.GetDefaultValueForInitialization<string>();
+            byte[] baOutputTimestamp = this.GetDefaultValueForInitialization<byte[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetRes(out baContent, out strMetadata, out strOutputResPath, out baOutputTimestamp, result);
+            return new object[] {
+                    baContent,
+                    strMetadata,
+                    strOutputResPath,
+                    baOutputTimestamp,
+                    retVal};
+        }
+        
+        private void OnGetResCompleted(object state) {
+            if ((this.GetResCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.GetResCompleted(this, new GetResCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void GetResAsync(string strResPath, long nStart, int nLength, string strStyle) {
+            this.GetResAsync(strResPath, nStart, nLength, strStyle, null);
+        }
+        
+        public void GetResAsync(string strResPath, long nStart, int nLength, string strStyle, object userState) {
+            if ((this.onBeginGetResDelegate == null)) {
+                this.onBeginGetResDelegate = new BeginOperationDelegate(this.OnBeginGetRes);
+            }
+            if ((this.onEndGetResDelegate == null)) {
+                this.onEndGetResDelegate = new EndOperationDelegate(this.OnEndGetRes);
+            }
+            if ((this.onGetResCompletedDelegate == null)) {
+                this.onGetResCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetResCompleted);
+            }
+            base.InvokeAsync(this.onBeginGetResDelegate, new object[] {
+                        strResPath,
+                        nStart,
+                        nLength,
+                        strStyle}, this.onEndGetResDelegate, this.onGetResCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult WriteRes(out string strOutputResPath, out byte[] baOutputTimestamp, string strResPath, string strRanges, long lTotalLength, byte[] baContent, string strMetadata, string strStyle, byte[] baInputTimestamp) {
+            return base.Channel.WriteRes(out strOutputResPath, out baOutputTimestamp, strResPath, strRanges, lTotalLength, baContent, strMetadata, strStyle, baInputTimestamp);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginWriteRes(string strResPath, string strRanges, long lTotalLength, byte[] baContent, string strMetadata, string strStyle, byte[] baInputTimestamp, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginWriteRes(strResPath, strRanges, lTotalLength, baContent, strMetadata, strStyle, baInputTimestamp, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndWriteRes(out string strOutputResPath, out byte[] baOutputTimestamp, System.IAsyncResult result) {
+            return base.Channel.EndWriteRes(out strOutputResPath, out baOutputTimestamp, result);
+        }
+        
+        private System.IAsyncResult OnBeginWriteRes(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strResPath = ((string)(inValues[0]));
+            string strRanges = ((string)(inValues[1]));
+            long lTotalLength = ((long)(inValues[2]));
+            byte[] baContent = ((byte[])(inValues[3]));
+            string strMetadata = ((string)(inValues[4]));
+            string strStyle = ((string)(inValues[5]));
+            byte[] baInputTimestamp = ((byte[])(inValues[6]));
+            return this.BeginWriteRes(strResPath, strRanges, lTotalLength, baContent, strMetadata, strStyle, baInputTimestamp, callback, asyncState);
+        }
+        
+        private object[] OnEndWriteRes(System.IAsyncResult result) {
+            string strOutputResPath = this.GetDefaultValueForInitialization<string>();
+            byte[] baOutputTimestamp = this.GetDefaultValueForInitialization<byte[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndWriteRes(out strOutputResPath, out baOutputTimestamp, result);
+            return new object[] {
+                    strOutputResPath,
+                    baOutputTimestamp,
+                    retVal};
+        }
+        
+        private void OnWriteResCompleted(object state) {
+            if ((this.WriteResCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.WriteResCompleted(this, new WriteResCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void WriteResAsync(string strResPath, string strRanges, long lTotalLength, byte[] baContent, string strMetadata, string strStyle, byte[] baInputTimestamp) {
+            this.WriteResAsync(strResPath, strRanges, lTotalLength, baContent, strMetadata, strStyle, baInputTimestamp, null);
+        }
+        
+        public void WriteResAsync(string strResPath, string strRanges, long lTotalLength, byte[] baContent, string strMetadata, string strStyle, byte[] baInputTimestamp, object userState) {
+            if ((this.onBeginWriteResDelegate == null)) {
+                this.onBeginWriteResDelegate = new BeginOperationDelegate(this.OnBeginWriteRes);
+            }
+            if ((this.onEndWriteResDelegate == null)) {
+                this.onEndWriteResDelegate = new EndOperationDelegate(this.OnEndWriteRes);
+            }
+            if ((this.onWriteResCompletedDelegate == null)) {
+                this.onWriteResCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnWriteResCompleted);
+            }
+            base.InvokeAsync(this.onBeginWriteResDelegate, new object[] {
+                        strResPath,
+                        strRanges,
+                        lTotalLength,
+                        baContent,
+                        strMetadata,
+                        strStyle,
+                        baInputTimestamp}, this.onEndWriteResDelegate, this.onWriteResCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang) {
+            return base.Channel.GetComments(out commentinfos, strBiblioRecPath, lStart, lCount, strStyle, strLang);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginGetComments(string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginGetComments(strBiblioRecPath, lStart, lCount, strStyle, strLang, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, System.IAsyncResult result) {
+            return base.Channel.EndGetComments(out commentinfos, result);
+        }
+        
+        private System.IAsyncResult OnBeginGetComments(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strBiblioRecPath = ((string)(inValues[0]));
+            long lStart = ((long)(inValues[1]));
+            long lCount = ((long)(inValues[2]));
+            string strStyle = ((string)(inValues[3]));
+            string strLang = ((string)(inValues[4]));
+            return this.BeginGetComments(strBiblioRecPath, lStart, lCount, strStyle, strLang, callback, asyncState);
+        }
+        
+        private object[] OnEndGetComments(System.IAsyncResult result) {
+            DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.EntityInfo[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetComments(out commentinfos, result);
+            return new object[] {
+                    commentinfos,
+                    retVal};
+        }
+        
+        private void OnGetCommentsCompleted(object state) {
+            if ((this.GetCommentsCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.GetCommentsCompleted(this, new GetCommentsCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void GetCommentsAsync(string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang) {
+            this.GetCommentsAsync(strBiblioRecPath, lStart, lCount, strStyle, strLang, null);
+        }
+        
+        public void GetCommentsAsync(string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang, object userState) {
+            if ((this.onBeginGetCommentsDelegate == null)) {
+                this.onBeginGetCommentsDelegate = new BeginOperationDelegate(this.OnBeginGetComments);
+            }
+            if ((this.onEndGetCommentsDelegate == null)) {
+                this.onEndGetCommentsDelegate = new EndOperationDelegate(this.OnEndGetComments);
+            }
+            if ((this.onGetCommentsCompletedDelegate == null)) {
+                this.onGetCommentsCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetCommentsCompleted);
+            }
+            base.InvokeAsync(this.onBeginGetCommentsDelegate, new object[] {
+                        strBiblioRecPath,
+                        lStart,
+                        lCount,
+                        strStyle,
+                        strLang}, this.onEndGetCommentsDelegate, this.onGetCommentsCompletedDelegate, userState);
+        }
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
     [System.ServiceModel.ServiceContractAttribute(Namespace="http://dp2003.com/dp2library/rest", ConfigurationName="localhost.dp2libraryREST", SessionMode=System.ServiceModel.SessionMode.NotAllowed)]
     public interface dp2libraryREST {
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/RepairBorrowInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/RepairBorrowInfoResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult RepairBorrowInfo(out int nProcessedBorrowItems, out int nTotalBorrowItems, out string strOutputReaderBarcode, out string[] aDupPath, string strAction, string strReaderBarcode, string strItemBarcode, string strConfirmItemRecPath, int nStart, int nCount);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/RepairBorrowInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/RepairBorrowInfoResponse")]
-        System.IAsyncResult BeginRepairBorrowInfo(string strAction, string strReaderBarcode, string strItemBarcode, string strConfirmItemRecPath, int nStart, int nCount, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndRepairBorrowInfo(out int nProcessedBorrowItems, out int nTotalBorrowItems, out string strOutputReaderBarcode, out string[] aDupPath, System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/PassGate", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/PassGateResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult PassGate(out string[] results, string strReaderBarcode, string strGateName, string strResultTypeList);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/PassGate", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/PassGateResponse")]
-        System.IAsyncResult BeginPassGate(string strReaderBarcode, string strGateName, string strResultTypeList, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndPassGate(out string[] results, System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Foregift", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ForegiftResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult Foregift(out string strOutputReaderXml, out string strOutputID, string strAction, string strReaderBarcode);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Foregift", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ForegiftResponse")]
-        System.IAsyncResult BeginForegift(string strAction, string strReaderBarcode, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndForegift(out string strOutputReaderXml, out string strOutputID, System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Hire", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/HireResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult Hire(out string strOutputReaderXml, out string strOutputID, string strAction, string strReaderBarcode);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Hire", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/HireResponse")]
-        System.IAsyncResult BeginHire(string strAction, string strReaderBarcode, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndHire(out string strOutputReaderXml, out string strOutputID, System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Settlement", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SettlementResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult Settlement(string strAction, string[] ids);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Settlement", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SettlementResponse")]
-        System.IAsyncResult BeginSettlement(string strAction, string[] ids, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSettlement(System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchOneClassCallNumber", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchOneClassCallNumberResponse" +
-            "")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchOneClassCallNumber(out string strQueryXml, string strArrangeGroupName, string strClass, string strResultSetName);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchOneClassCallNumber", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchOneClassCallNumberResponse" +
-            "")]
-        System.IAsyncResult BeginSearchOneClassCallNumber(string strArrangeGroupName, string strClass, string strResultSetName, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchOneClassCallNumber(out string strQueryXml, System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCallNumberSearchResult", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCallNumberSearchResultRespons" +
-            "e")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetCallNumberSearchResult(out DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[] searchresults, string strArrangeGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCallNumberSearchResult", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCallNumberSearchResultRespons" +
-            "e")]
-        System.IAsyncResult BeginGetCallNumberSearchResult(string strArrangeGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetCallNumberSearchResult(out DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[] searchresults, System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetOneClassTailNumber", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetOneClassTailNumberResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetOneClassTailNumber(out string strTailNumber, string strArrangeGroupName, string strClass);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetOneClassTailNumber", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetOneClassTailNumberResponse")]
-        System.IAsyncResult BeginGetOneClassTailNumber(string strArrangeGroupName, string strClass, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetOneClassTailNumber(out string strTailNumber, System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetOneClassTailNumber", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetOneClassTailNumberResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetOneClassTailNumber(out string strOutputNumber, string strAction, string strArrangeGroupName, string strClass, string strTestNumber);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetOneClassTailNumber", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetOneClassTailNumberResponse")]
-        System.IAsyncResult BeginSetOneClassTailNumber(string strAction, string strArrangeGroupName, string strClass, string strTestNumber, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetOneClassTailNumber(out string strOutputNumber, System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchUsedZhongcihao", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchUsedZhongcihaoResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchUsedZhongcihao(out string strQueryXml, string strZhongcihaoGroupName, string strClass, string strResultSetName);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchUsedZhongcihao", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchUsedZhongcihaoResponse")]
-        System.IAsyncResult BeginSearchUsedZhongcihao(string strZhongcihaoGroupName, string strClass, string strResultSetName, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchUsedZhongcihao(out string strQueryXml, System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetZhongcihaoSearchResult", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetZhongcihaoSearchResultRespons" +
-            "e")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetZhongcihaoSearchResult(out DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[] searchresults, string strZhongcihaoGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetZhongcihaoSearchResult", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetZhongcihaoSearchResultRespons" +
-            "e")]
-        System.IAsyncResult BeginGetZhongcihaoSearchResult(string strZhongcihaoGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetZhongcihaoSearchResult(out DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[] searchresults, System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetZhongcihaoTailNumber", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetZhongcihaoTailNumberResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetZhongcihaoTailNumber(out string strTailNumber, string strZhongcihaoGroupName, string strClass);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetZhongcihaoTailNumber", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetZhongcihaoTailNumberResponse")]
-        System.IAsyncResult BeginGetZhongcihaoTailNumber(string strZhongcihaoGroupName, string strClass, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetZhongcihaoTailNumber(out string strTailNumber, System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetZhongcihaoTailNumber", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetZhongcihaoTailNumberResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetZhongcihaoTailNumber(out string strOutputNumber, string strAction, string strZhongcihaoGroupName, string strClass, string strTestNumber);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetZhongcihaoTailNumber", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetZhongcihaoTailNumberResponse")]
-        System.IAsyncResult BeginSetZhongcihaoTailNumber(string strAction, string strZhongcihaoGroupName, string strClass, string strTestNumber, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetZhongcihaoTailNumber(out string strOutputNumber, System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchDup", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchDupResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchDup(out string strUsedProjectName, string strOriginBiblioRecPath, string strOriginBiblioRecXml, string strProjectName, string strStyle);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchDup", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchDupResponse")]
-        System.IAsyncResult BeginSearchDup(string strOriginBiblioRecPath, string strOriginBiblioRecXml, string strProjectName, string strStyle, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchDup(out string strUsedProjectName, System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetDupSearchResult", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetDupSearchResultResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetDupSearchResult(out DigitalPlatform.LibraryClient.localhost.DupSearchResult[] searchresults, long lStart, long lCount, string strBrowseInfoStyle);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetDupSearchResult", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetDupSearchResultResponse")]
-        System.IAsyncResult BeginGetDupSearchResult(long lStart, long lCount, string strBrowseInfoStyle, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetDupSearchResult(out DigitalPlatform.LibraryClient.localhost.DupSearchResult[] searchresults, System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/ListDupProjectInfos", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ListDupProjectInfosResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult ListDupProjectInfos(out DigitalPlatform.LibraryClient.localhost.DupProjectInfo[] results, string strOriginBiblioDbName);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/ListDupProjectInfos", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ListDupProjectInfosResponse")]
-        System.IAsyncResult BeginListDupProjectInfos(string strOriginBiblioDbName, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndListDupProjectInfos(out DigitalPlatform.LibraryClient.localhost.DupProjectInfo[] results, System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetUtilInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetUtilInfoResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetUtilInfo(out string strValue, string strAction, string strDbName, string strFrom, string strKey, string strValueAttrName);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetUtilInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetUtilInfoResponse")]
-        System.IAsyncResult BeginGetUtilInfo(string strAction, string strDbName, string strFrom, string strKey, string strValueAttrName, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetUtilInfo(out string strValue, System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetUtilInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetUtilInfoResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetUtilInfo(string strAction, string strDbName, string strFrom, string strRootElementName, string strKeyAttrName, string strValueAttrName, string strKey, string strValue);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetUtilInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetUtilInfoResponse")]
-        System.IAsyncResult BeginSetUtilInfo(string strAction, string strDbName, string strFrom, string strRootElementName, string strKeyAttrName, string strValueAttrName, string strKey, string strValue, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetUtilInfo(System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetRes", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetResResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetRes(out byte[] baContent, out string strMetadata, out string strOutputResPath, out byte[] baOutputTimestamp, string strResPath, long nStart, int nLength, string strStyle);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetRes", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetResResponse")]
-        System.IAsyncResult BeginGetRes(string strResPath, long nStart, int nLength, string strStyle, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetRes(out byte[] baContent, out string strMetadata, out string strOutputResPath, out byte[] baOutputTimestamp, System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/WriteRes", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/WriteResResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult WriteRes(out string strOutputResPath, out byte[] baOutputTimestamp, string strResPath, string strRanges, long lTotalLength, byte[] baContent, string strMetadata, string strStyle, byte[] baInputTimestamp);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/WriteRes", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/WriteResResponse")]
-        System.IAsyncResult BeginWriteRes(string strResPath, string strRanges, long lTotalLength, byte[] baContent, string strMetadata, string strStyle, byte[] baInputTimestamp, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndWriteRes(out string strOutputResPath, out byte[] baOutputTimestamp, System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetComments", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCommentsResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetComments", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCommentsResponse")]
-        System.IAsyncResult BeginGetComments(string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetComments", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetCommentsResponse")]
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos, string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos);
@@ -15661,605 +15490,184 @@ namespace DigitalPlatform.LibraryClient.localhost {
         System.IAsyncResult BeginUrgentRecover(string strXML, System.AsyncCallback callback, object asyncState);
         
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndUrgentRecover(System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/RepairBorrowInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/RepairBorrowInfoResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult RepairBorrowInfo(out int nProcessedBorrowItems, out int nTotalBorrowItems, out string strOutputReaderBarcode, out string[] aDupPath, string strAction, string strReaderBarcode, string strItemBarcode, string strConfirmItemRecPath, int nStart, int nCount);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/RepairBorrowInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/RepairBorrowInfoResponse")]
+        System.IAsyncResult BeginRepairBorrowInfo(string strAction, string strReaderBarcode, string strItemBarcode, string strConfirmItemRecPath, int nStart, int nCount, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndRepairBorrowInfo(out int nProcessedBorrowItems, out int nTotalBorrowItems, out string strOutputReaderBarcode, out string[] aDupPath, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/PassGate", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/PassGateResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult PassGate(out string[] results, string strReaderBarcode, string strGateName, string strResultTypeList);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/PassGate", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/PassGateResponse")]
+        System.IAsyncResult BeginPassGate(string strReaderBarcode, string strGateName, string strResultTypeList, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndPassGate(out string[] results, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Foregift", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ForegiftResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult Foregift(out string strOutputReaderXml, out string strOutputID, string strAction, string strReaderBarcode);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Foregift", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ForegiftResponse")]
+        System.IAsyncResult BeginForegift(string strAction, string strReaderBarcode, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndForegift(out string strOutputReaderXml, out string strOutputID, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Hire", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/HireResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult Hire(out string strOutputReaderXml, out string strOutputID, string strAction, string strReaderBarcode);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Hire", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/HireResponse")]
+        System.IAsyncResult BeginHire(string strAction, string strReaderBarcode, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndHire(out string strOutputReaderXml, out string strOutputID, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Settlement", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SettlementResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult Settlement(string strAction, string[] ids);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Settlement", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SettlementResponse")]
+        System.IAsyncResult BeginSettlement(string strAction, string[] ids, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSettlement(System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchOneClassCallNumber", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchOneClassCallNumberResponse" +
+            "")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchOneClassCallNumber(out string strQueryXml, string strArrangeGroupName, string strClass, string strResultSetName);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchOneClassCallNumber", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchOneClassCallNumberResponse" +
+            "")]
+        System.IAsyncResult BeginSearchOneClassCallNumber(string strArrangeGroupName, string strClass, string strResultSetName, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchOneClassCallNumber(out string strQueryXml, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCallNumberSearchResult", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCallNumberSearchResultRespons" +
+            "e")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetCallNumberSearchResult(out DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[] searchresults, string strArrangeGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCallNumberSearchResult", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCallNumberSearchResultRespons" +
+            "e")]
+        System.IAsyncResult BeginGetCallNumberSearchResult(string strArrangeGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetCallNumberSearchResult(out DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[] searchresults, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetOneClassTailNumber", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetOneClassTailNumberResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetOneClassTailNumber(out string strTailNumber, string strArrangeGroupName, string strClass);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetOneClassTailNumber", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetOneClassTailNumberResponse")]
+        System.IAsyncResult BeginGetOneClassTailNumber(string strArrangeGroupName, string strClass, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetOneClassTailNumber(out string strTailNumber, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetOneClassTailNumber", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetOneClassTailNumberResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetOneClassTailNumber(out string strOutputNumber, string strAction, string strArrangeGroupName, string strClass, string strTestNumber);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetOneClassTailNumber", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetOneClassTailNumberResponse")]
+        System.IAsyncResult BeginSetOneClassTailNumber(string strAction, string strArrangeGroupName, string strClass, string strTestNumber, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetOneClassTailNumber(out string strOutputNumber, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchUsedZhongcihao", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchUsedZhongcihaoResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchUsedZhongcihao(out string strQueryXml, string strZhongcihaoGroupName, string strClass, string strResultSetName);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchUsedZhongcihao", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchUsedZhongcihaoResponse")]
+        System.IAsyncResult BeginSearchUsedZhongcihao(string strZhongcihaoGroupName, string strClass, string strResultSetName, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchUsedZhongcihao(out string strQueryXml, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetZhongcihaoSearchResult", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetZhongcihaoSearchResultRespons" +
+            "e")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetZhongcihaoSearchResult(out DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[] searchresults, string strZhongcihaoGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetZhongcihaoSearchResult", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetZhongcihaoSearchResultRespons" +
+            "e")]
+        System.IAsyncResult BeginGetZhongcihaoSearchResult(string strZhongcihaoGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetZhongcihaoSearchResult(out DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[] searchresults, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetZhongcihaoTailNumber", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetZhongcihaoTailNumberResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetZhongcihaoTailNumber(out string strTailNumber, string strZhongcihaoGroupName, string strClass);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetZhongcihaoTailNumber", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetZhongcihaoTailNumberResponse")]
+        System.IAsyncResult BeginGetZhongcihaoTailNumber(string strZhongcihaoGroupName, string strClass, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetZhongcihaoTailNumber(out string strTailNumber, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetZhongcihaoTailNumber", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetZhongcihaoTailNumberResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetZhongcihaoTailNumber(out string strOutputNumber, string strAction, string strZhongcihaoGroupName, string strClass, string strTestNumber);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetZhongcihaoTailNumber", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetZhongcihaoTailNumberResponse")]
+        System.IAsyncResult BeginSetZhongcihaoTailNumber(string strAction, string strZhongcihaoGroupName, string strClass, string strTestNumber, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetZhongcihaoTailNumber(out string strOutputNumber, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchDup", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchDupResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchDup(out string strUsedProjectName, string strOriginBiblioRecPath, string strOriginBiblioRecXml, string strProjectName, string strStyle);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchDup", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchDupResponse")]
+        System.IAsyncResult BeginSearchDup(string strOriginBiblioRecPath, string strOriginBiblioRecXml, string strProjectName, string strStyle, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchDup(out string strUsedProjectName, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetDupSearchResult", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetDupSearchResultResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetDupSearchResult(out DigitalPlatform.LibraryClient.localhost.DupSearchResult[] searchresults, long lStart, long lCount, string strBrowseInfoStyle);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetDupSearchResult", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetDupSearchResultResponse")]
+        System.IAsyncResult BeginGetDupSearchResult(long lStart, long lCount, string strBrowseInfoStyle, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetDupSearchResult(out DigitalPlatform.LibraryClient.localhost.DupSearchResult[] searchresults, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/ListDupProjectInfos", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ListDupProjectInfosResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult ListDupProjectInfos(out DigitalPlatform.LibraryClient.localhost.DupProjectInfo[] results, string strOriginBiblioDbName);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/ListDupProjectInfos", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ListDupProjectInfosResponse")]
+        System.IAsyncResult BeginListDupProjectInfos(string strOriginBiblioDbName, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndListDupProjectInfos(out DigitalPlatform.LibraryClient.localhost.DupProjectInfo[] results, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetUtilInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetUtilInfoResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetUtilInfo(out string strValue, string strAction, string strDbName, string strFrom, string strKey, string strValueAttrName);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetUtilInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetUtilInfoResponse")]
+        System.IAsyncResult BeginGetUtilInfo(string strAction, string strDbName, string strFrom, string strKey, string strValueAttrName, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetUtilInfo(out string strValue, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetUtilInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetUtilInfoResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetUtilInfo(string strAction, string strDbName, string strFrom, string strRootElementName, string strKeyAttrName, string strValueAttrName, string strKey, string strValue);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetUtilInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetUtilInfoResponse")]
+        System.IAsyncResult BeginSetUtilInfo(string strAction, string strDbName, string strFrom, string strRootElementName, string strKeyAttrName, string strValueAttrName, string strKey, string strValue, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetUtilInfo(System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetRes", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetResResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetRes(out byte[] baContent, out string strMetadata, out string strOutputResPath, out byte[] baOutputTimestamp, string strResPath, long nStart, int nLength, string strStyle);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetRes", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetResResponse")]
+        System.IAsyncResult BeginGetRes(string strResPath, long nStart, int nLength, string strStyle, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetRes(out byte[] baContent, out string strMetadata, out string strOutputResPath, out byte[] baOutputTimestamp, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/WriteRes", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/WriteResResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult WriteRes(out string strOutputResPath, out byte[] baOutputTimestamp, string strResPath, string strRanges, long lTotalLength, byte[] baContent, string strMetadata, string strStyle, byte[] baInputTimestamp);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/WriteRes", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/WriteResResponse")]
+        System.IAsyncResult BeginWriteRes(string strResPath, string strRanges, long lTotalLength, byte[] baContent, string strMetadata, string strStyle, byte[] baInputTimestamp, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndWriteRes(out string strOutputResPath, out byte[] baOutputTimestamp, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetComments", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCommentsResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetComments", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCommentsResponse")]
+        System.IAsyncResult BeginGetComments(string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, System.IAsyncResult result);
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
     public interface dp2libraryRESTChannel : DigitalPlatform.LibraryClient.localhost.dp2libraryREST, System.ServiceModel.IClientChannel {
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class RepairBorrowInfoCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        public RepairBorrowInfoCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        public int nProcessedBorrowItems {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((int)(this.results[0]));
-            }
-        }
-        
-        public int nTotalBorrowItems {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((int)(this.results[1]));
-            }
-        }
-        
-        public string strOutputReaderBarcode {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((string)(this.results[2]));
-            }
-        }
-        
-        public string[] aDupPath {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((string[])(this.results[3]));
-            }
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[4]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class PassGateCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results1;
-        
-        public PassGateCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results1 = results;
-        }
-        
-        public string[] results {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((string[])(this.results1[0]));
-            }
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results1[1]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class ForegiftCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        public ForegiftCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        public string strOutputReaderXml {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((string)(this.results[0]));
-            }
-        }
-        
-        public string strOutputID {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((string)(this.results[1]));
-            }
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[2]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class HireCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        public HireCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        public string strOutputReaderXml {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((string)(this.results[0]));
-            }
-        }
-        
-        public string strOutputID {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((string)(this.results[1]));
-            }
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[2]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class SettlementCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        public SettlementCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class SearchOneClassCallNumberCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        public SearchOneClassCallNumberCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        public string strQueryXml {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((string)(this.results[0]));
-            }
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class GetCallNumberSearchResultCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        public GetCallNumberSearchResultCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[] searchresults {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[])(this.results[0]));
-            }
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class GetOneClassTailNumberCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        public GetOneClassTailNumberCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        public string strTailNumber {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((string)(this.results[0]));
-            }
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class SetOneClassTailNumberCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        public SetOneClassTailNumberCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        public string strOutputNumber {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((string)(this.results[0]));
-            }
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class SearchUsedZhongcihaoCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        public SearchUsedZhongcihaoCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        public string strQueryXml {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((string)(this.results[0]));
-            }
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class GetZhongcihaoSearchResultCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        public GetZhongcihaoSearchResultCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[] searchresults {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[])(this.results[0]));
-            }
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class GetZhongcihaoTailNumberCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        public GetZhongcihaoTailNumberCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        public string strTailNumber {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((string)(this.results[0]));
-            }
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class SetZhongcihaoTailNumberCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        public SetZhongcihaoTailNumberCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        public string strOutputNumber {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((string)(this.results[0]));
-            }
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class SearchDupCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        public SearchDupCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        public string strUsedProjectName {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((string)(this.results[0]));
-            }
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class GetDupSearchResultCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        public GetDupSearchResultCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.DupSearchResult[] searchresults {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.DupSearchResult[])(this.results[0]));
-            }
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class ListDupProjectInfosCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results1;
-        
-        public ListDupProjectInfosCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results1 = results;
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.DupProjectInfo[] results {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.DupProjectInfo[])(this.results1[0]));
-            }
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results1[1]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class GetUtilInfoCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        public GetUtilInfoCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        public string strValue {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((string)(this.results[0]));
-            }
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class SetUtilInfoCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        public SetUtilInfoCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class GetResCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        public GetResCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        public byte[] baContent {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((byte[])(this.results[0]));
-            }
-        }
-        
-        public string strMetadata {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((string)(this.results[1]));
-            }
-        }
-        
-        public string strOutputResPath {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((string)(this.results[2]));
-            }
-        }
-        
-        public byte[] baOutputTimestamp {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((byte[])(this.results[3]));
-            }
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[4]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class WriteResCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        public WriteResCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        public string strOutputResPath {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((string)(this.results[0]));
-            }
-        }
-        
-        public byte[] baOutputTimestamp {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((byte[])(this.results[1]));
-            }
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[2]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class GetCommentsCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        public GetCommentsCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.EntityInfo[])(this.results[0]));
-            }
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
-            }
-        }
     }
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
@@ -18639,133 +18047,602 @@ namespace DigitalPlatform.LibraryClient.localhost {
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class RepairBorrowInfoCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public RepairBorrowInfoCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public int nProcessedBorrowItems {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((int)(this.results[0]));
+            }
+        }
+        
+        public int nTotalBorrowItems {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((int)(this.results[1]));
+            }
+        }
+        
+        public string strOutputReaderBarcode {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[2]));
+            }
+        }
+        
+        public string[] aDupPath {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string[])(this.results[3]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[4]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class PassGateCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results1;
+        
+        public PassGateCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results1 = results;
+        }
+        
+        public string[] results {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string[])(this.results1[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results1[1]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class ForegiftCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public ForegiftCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public string strOutputReaderXml {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[0]));
+            }
+        }
+        
+        public string strOutputID {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[1]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[2]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class HireCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public HireCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public string strOutputReaderXml {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[0]));
+            }
+        }
+        
+        public string strOutputID {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[1]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[2]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class SettlementCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public SettlementCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class SearchOneClassCallNumberCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public SearchOneClassCallNumberCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public string strQueryXml {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class GetCallNumberSearchResultCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public GetCallNumberSearchResultCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[] searchresults {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[])(this.results[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class GetOneClassTailNumberCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public GetOneClassTailNumberCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public string strTailNumber {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class SetOneClassTailNumberCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public SetOneClassTailNumberCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public string strOutputNumber {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class SearchUsedZhongcihaoCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public SearchUsedZhongcihaoCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public string strQueryXml {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class GetZhongcihaoSearchResultCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public GetZhongcihaoSearchResultCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[] searchresults {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[])(this.results[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class GetZhongcihaoTailNumberCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public GetZhongcihaoTailNumberCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public string strTailNumber {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class SetZhongcihaoTailNumberCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public SetZhongcihaoTailNumberCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public string strOutputNumber {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class SearchDupCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public SearchDupCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public string strUsedProjectName {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class GetDupSearchResultCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public GetDupSearchResultCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.DupSearchResult[] searchresults {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.DupSearchResult[])(this.results[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class ListDupProjectInfosCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results1;
+        
+        public ListDupProjectInfosCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results1 = results;
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.DupProjectInfo[] results {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.DupProjectInfo[])(this.results1[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results1[1]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class GetUtilInfoCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public GetUtilInfoCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public string strValue {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class SetUtilInfoCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public SetUtilInfoCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class GetResCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public GetResCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public byte[] baContent {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((byte[])(this.results[0]));
+            }
+        }
+        
+        public string strMetadata {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[1]));
+            }
+        }
+        
+        public string strOutputResPath {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[2]));
+            }
+        }
+        
+        public byte[] baOutputTimestamp {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((byte[])(this.results[3]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[4]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class WriteResCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public WriteResCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public string strOutputResPath {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[0]));
+            }
+        }
+        
+        public byte[] baOutputTimestamp {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((byte[])(this.results[1]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[2]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class GetCommentsCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public GetCommentsCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.EntityInfo[])(this.results[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
     public partial class dp2libraryRESTClient : System.ServiceModel.ClientBase<DigitalPlatform.LibraryClient.localhost.dp2libraryREST>, DigitalPlatform.LibraryClient.localhost.dp2libraryREST {
-        
-        private BeginOperationDelegate onBeginRepairBorrowInfoDelegate;
-        
-        private EndOperationDelegate onEndRepairBorrowInfoDelegate;
-        
-        private System.Threading.SendOrPostCallback onRepairBorrowInfoCompletedDelegate;
-        
-        private BeginOperationDelegate onBeginPassGateDelegate;
-        
-        private EndOperationDelegate onEndPassGateDelegate;
-        
-        private System.Threading.SendOrPostCallback onPassGateCompletedDelegate;
-        
-        private BeginOperationDelegate onBeginForegiftDelegate;
-        
-        private EndOperationDelegate onEndForegiftDelegate;
-        
-        private System.Threading.SendOrPostCallback onForegiftCompletedDelegate;
-        
-        private BeginOperationDelegate onBeginHireDelegate;
-        
-        private EndOperationDelegate onEndHireDelegate;
-        
-        private System.Threading.SendOrPostCallback onHireCompletedDelegate;
-        
-        private BeginOperationDelegate onBeginSettlementDelegate;
-        
-        private EndOperationDelegate onEndSettlementDelegate;
-        
-        private System.Threading.SendOrPostCallback onSettlementCompletedDelegate;
-        
-        private BeginOperationDelegate onBeginSearchOneClassCallNumberDelegate;
-        
-        private EndOperationDelegate onEndSearchOneClassCallNumberDelegate;
-        
-        private System.Threading.SendOrPostCallback onSearchOneClassCallNumberCompletedDelegate;
-        
-        private BeginOperationDelegate onBeginGetCallNumberSearchResultDelegate;
-        
-        private EndOperationDelegate onEndGetCallNumberSearchResultDelegate;
-        
-        private System.Threading.SendOrPostCallback onGetCallNumberSearchResultCompletedDelegate;
-        
-        private BeginOperationDelegate onBeginGetOneClassTailNumberDelegate;
-        
-        private EndOperationDelegate onEndGetOneClassTailNumberDelegate;
-        
-        private System.Threading.SendOrPostCallback onGetOneClassTailNumberCompletedDelegate;
-        
-        private BeginOperationDelegate onBeginSetOneClassTailNumberDelegate;
-        
-        private EndOperationDelegate onEndSetOneClassTailNumberDelegate;
-        
-        private System.Threading.SendOrPostCallback onSetOneClassTailNumberCompletedDelegate;
-        
-        private BeginOperationDelegate onBeginSearchUsedZhongcihaoDelegate;
-        
-        private EndOperationDelegate onEndSearchUsedZhongcihaoDelegate;
-        
-        private System.Threading.SendOrPostCallback onSearchUsedZhongcihaoCompletedDelegate;
-        
-        private BeginOperationDelegate onBeginGetZhongcihaoSearchResultDelegate;
-        
-        private EndOperationDelegate onEndGetZhongcihaoSearchResultDelegate;
-        
-        private System.Threading.SendOrPostCallback onGetZhongcihaoSearchResultCompletedDelegate;
-        
-        private BeginOperationDelegate onBeginGetZhongcihaoTailNumberDelegate;
-        
-        private EndOperationDelegate onEndGetZhongcihaoTailNumberDelegate;
-        
-        private System.Threading.SendOrPostCallback onGetZhongcihaoTailNumberCompletedDelegate;
-        
-        private BeginOperationDelegate onBeginSetZhongcihaoTailNumberDelegate;
-        
-        private EndOperationDelegate onEndSetZhongcihaoTailNumberDelegate;
-        
-        private System.Threading.SendOrPostCallback onSetZhongcihaoTailNumberCompletedDelegate;
-        
-        private BeginOperationDelegate onBeginSearchDupDelegate;
-        
-        private EndOperationDelegate onEndSearchDupDelegate;
-        
-        private System.Threading.SendOrPostCallback onSearchDupCompletedDelegate;
-        
-        private BeginOperationDelegate onBeginGetDupSearchResultDelegate;
-        
-        private EndOperationDelegate onEndGetDupSearchResultDelegate;
-        
-        private System.Threading.SendOrPostCallback onGetDupSearchResultCompletedDelegate;
-        
-        private BeginOperationDelegate onBeginListDupProjectInfosDelegate;
-        
-        private EndOperationDelegate onEndListDupProjectInfosDelegate;
-        
-        private System.Threading.SendOrPostCallback onListDupProjectInfosCompletedDelegate;
-        
-        private BeginOperationDelegate onBeginGetUtilInfoDelegate;
-        
-        private EndOperationDelegate onEndGetUtilInfoDelegate;
-        
-        private System.Threading.SendOrPostCallback onGetUtilInfoCompletedDelegate;
-        
-        private BeginOperationDelegate onBeginSetUtilInfoDelegate;
-        
-        private EndOperationDelegate onEndSetUtilInfoDelegate;
-        
-        private System.Threading.SendOrPostCallback onSetUtilInfoCompletedDelegate;
-        
-        private BeginOperationDelegate onBeginGetResDelegate;
-        
-        private EndOperationDelegate onEndGetResDelegate;
-        
-        private System.Threading.SendOrPostCallback onGetResCompletedDelegate;
-        
-        private BeginOperationDelegate onBeginWriteResDelegate;
-        
-        private EndOperationDelegate onEndWriteResDelegate;
-        
-        private System.Threading.SendOrPostCallback onWriteResCompletedDelegate;
-        
-        private BeginOperationDelegate onBeginGetCommentsDelegate;
-        
-        private EndOperationDelegate onEndGetCommentsDelegate;
-        
-        private System.Threading.SendOrPostCallback onGetCommentsCompletedDelegate;
         
         private BeginOperationDelegate onBeginSetCommentsDelegate;
         
@@ -19271,6 +19148,132 @@ namespace DigitalPlatform.LibraryClient.localhost {
         
         private System.Threading.SendOrPostCallback onUrgentRecoverCompletedDelegate;
         
+        private BeginOperationDelegate onBeginRepairBorrowInfoDelegate;
+        
+        private EndOperationDelegate onEndRepairBorrowInfoDelegate;
+        
+        private System.Threading.SendOrPostCallback onRepairBorrowInfoCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginPassGateDelegate;
+        
+        private EndOperationDelegate onEndPassGateDelegate;
+        
+        private System.Threading.SendOrPostCallback onPassGateCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginForegiftDelegate;
+        
+        private EndOperationDelegate onEndForegiftDelegate;
+        
+        private System.Threading.SendOrPostCallback onForegiftCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginHireDelegate;
+        
+        private EndOperationDelegate onEndHireDelegate;
+        
+        private System.Threading.SendOrPostCallback onHireCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginSettlementDelegate;
+        
+        private EndOperationDelegate onEndSettlementDelegate;
+        
+        private System.Threading.SendOrPostCallback onSettlementCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginSearchOneClassCallNumberDelegate;
+        
+        private EndOperationDelegate onEndSearchOneClassCallNumberDelegate;
+        
+        private System.Threading.SendOrPostCallback onSearchOneClassCallNumberCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginGetCallNumberSearchResultDelegate;
+        
+        private EndOperationDelegate onEndGetCallNumberSearchResultDelegate;
+        
+        private System.Threading.SendOrPostCallback onGetCallNumberSearchResultCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginGetOneClassTailNumberDelegate;
+        
+        private EndOperationDelegate onEndGetOneClassTailNumberDelegate;
+        
+        private System.Threading.SendOrPostCallback onGetOneClassTailNumberCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginSetOneClassTailNumberDelegate;
+        
+        private EndOperationDelegate onEndSetOneClassTailNumberDelegate;
+        
+        private System.Threading.SendOrPostCallback onSetOneClassTailNumberCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginSearchUsedZhongcihaoDelegate;
+        
+        private EndOperationDelegate onEndSearchUsedZhongcihaoDelegate;
+        
+        private System.Threading.SendOrPostCallback onSearchUsedZhongcihaoCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginGetZhongcihaoSearchResultDelegate;
+        
+        private EndOperationDelegate onEndGetZhongcihaoSearchResultDelegate;
+        
+        private System.Threading.SendOrPostCallback onGetZhongcihaoSearchResultCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginGetZhongcihaoTailNumberDelegate;
+        
+        private EndOperationDelegate onEndGetZhongcihaoTailNumberDelegate;
+        
+        private System.Threading.SendOrPostCallback onGetZhongcihaoTailNumberCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginSetZhongcihaoTailNumberDelegate;
+        
+        private EndOperationDelegate onEndSetZhongcihaoTailNumberDelegate;
+        
+        private System.Threading.SendOrPostCallback onSetZhongcihaoTailNumberCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginSearchDupDelegate;
+        
+        private EndOperationDelegate onEndSearchDupDelegate;
+        
+        private System.Threading.SendOrPostCallback onSearchDupCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginGetDupSearchResultDelegate;
+        
+        private EndOperationDelegate onEndGetDupSearchResultDelegate;
+        
+        private System.Threading.SendOrPostCallback onGetDupSearchResultCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginListDupProjectInfosDelegate;
+        
+        private EndOperationDelegate onEndListDupProjectInfosDelegate;
+        
+        private System.Threading.SendOrPostCallback onListDupProjectInfosCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginGetUtilInfoDelegate;
+        
+        private EndOperationDelegate onEndGetUtilInfoDelegate;
+        
+        private System.Threading.SendOrPostCallback onGetUtilInfoCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginSetUtilInfoDelegate;
+        
+        private EndOperationDelegate onEndSetUtilInfoDelegate;
+        
+        private System.Threading.SendOrPostCallback onSetUtilInfoCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginGetResDelegate;
+        
+        private EndOperationDelegate onEndGetResDelegate;
+        
+        private System.Threading.SendOrPostCallback onGetResCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginWriteResDelegate;
+        
+        private EndOperationDelegate onEndWriteResDelegate;
+        
+        private System.Threading.SendOrPostCallback onWriteResCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginGetCommentsDelegate;
+        
+        private EndOperationDelegate onEndGetCommentsDelegate;
+        
+        private System.Threading.SendOrPostCallback onGetCommentsCompletedDelegate;
+        
         public dp2libraryRESTClient() {
         }
         
@@ -19289,48 +19292,6 @@ namespace DigitalPlatform.LibraryClient.localhost {
         public dp2libraryRESTClient(System.ServiceModel.Channels.Binding binding, System.ServiceModel.EndpointAddress remoteAddress) : 
                 base(binding, remoteAddress) {
         }
-        
-        public event System.EventHandler<RepairBorrowInfoCompletedEventArgs1> RepairBorrowInfoCompleted;
-        
-        public event System.EventHandler<PassGateCompletedEventArgs1> PassGateCompleted;
-        
-        public event System.EventHandler<ForegiftCompletedEventArgs1> ForegiftCompleted;
-        
-        public event System.EventHandler<HireCompletedEventArgs1> HireCompleted;
-        
-        public event System.EventHandler<SettlementCompletedEventArgs1> SettlementCompleted;
-        
-        public event System.EventHandler<SearchOneClassCallNumberCompletedEventArgs1> SearchOneClassCallNumberCompleted;
-        
-        public event System.EventHandler<GetCallNumberSearchResultCompletedEventArgs1> GetCallNumberSearchResultCompleted;
-        
-        public event System.EventHandler<GetOneClassTailNumberCompletedEventArgs1> GetOneClassTailNumberCompleted;
-        
-        public event System.EventHandler<SetOneClassTailNumberCompletedEventArgs1> SetOneClassTailNumberCompleted;
-        
-        public event System.EventHandler<SearchUsedZhongcihaoCompletedEventArgs1> SearchUsedZhongcihaoCompleted;
-        
-        public event System.EventHandler<GetZhongcihaoSearchResultCompletedEventArgs1> GetZhongcihaoSearchResultCompleted;
-        
-        public event System.EventHandler<GetZhongcihaoTailNumberCompletedEventArgs1> GetZhongcihaoTailNumberCompleted;
-        
-        public event System.EventHandler<SetZhongcihaoTailNumberCompletedEventArgs1> SetZhongcihaoTailNumberCompleted;
-        
-        public event System.EventHandler<SearchDupCompletedEventArgs1> SearchDupCompleted;
-        
-        public event System.EventHandler<GetDupSearchResultCompletedEventArgs1> GetDupSearchResultCompleted;
-        
-        public event System.EventHandler<ListDupProjectInfosCompletedEventArgs1> ListDupProjectInfosCompleted;
-        
-        public event System.EventHandler<GetUtilInfoCompletedEventArgs1> GetUtilInfoCompleted;
-        
-        public event System.EventHandler<SetUtilInfoCompletedEventArgs1> SetUtilInfoCompleted;
-        
-        public event System.EventHandler<GetResCompletedEventArgs1> GetResCompleted;
-        
-        public event System.EventHandler<WriteResCompletedEventArgs1> WriteResCompleted;
-        
-        public event System.EventHandler<GetCommentsCompletedEventArgs1> GetCommentsCompleted;
         
         public event System.EventHandler<SetCommentsCompletedEventArgs1> SetCommentsCompleted;
         
@@ -19500,1233 +19461,47 @@ namespace DigitalPlatform.LibraryClient.localhost {
         
         public event System.EventHandler<UrgentRecoverCompletedEventArgs1> UrgentRecoverCompleted;
         
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult RepairBorrowInfo(out int nProcessedBorrowItems, out int nTotalBorrowItems, out string strOutputReaderBarcode, out string[] aDupPath, string strAction, string strReaderBarcode, string strItemBarcode, string strConfirmItemRecPath, int nStart, int nCount) {
-            return base.Channel.RepairBorrowInfo(out nProcessedBorrowItems, out nTotalBorrowItems, out strOutputReaderBarcode, out aDupPath, strAction, strReaderBarcode, strItemBarcode, strConfirmItemRecPath, nStart, nCount);
-        }
+        public event System.EventHandler<RepairBorrowInfoCompletedEventArgs1> RepairBorrowInfoCompleted;
         
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginRepairBorrowInfo(string strAction, string strReaderBarcode, string strItemBarcode, string strConfirmItemRecPath, int nStart, int nCount, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginRepairBorrowInfo(strAction, strReaderBarcode, strItemBarcode, strConfirmItemRecPath, nStart, nCount, callback, asyncState);
-        }
+        public event System.EventHandler<PassGateCompletedEventArgs1> PassGateCompleted;
         
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndRepairBorrowInfo(out int nProcessedBorrowItems, out int nTotalBorrowItems, out string strOutputReaderBarcode, out string[] aDupPath, System.IAsyncResult result) {
-            return base.Channel.EndRepairBorrowInfo(out nProcessedBorrowItems, out nTotalBorrowItems, out strOutputReaderBarcode, out aDupPath, result);
-        }
+        public event System.EventHandler<ForegiftCompletedEventArgs1> ForegiftCompleted;
         
-        private System.IAsyncResult OnBeginRepairBorrowInfo(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strAction = ((string)(inValues[0]));
-            string strReaderBarcode = ((string)(inValues[1]));
-            string strItemBarcode = ((string)(inValues[2]));
-            string strConfirmItemRecPath = ((string)(inValues[3]));
-            int nStart = ((int)(inValues[4]));
-            int nCount = ((int)(inValues[5]));
-            return this.BeginRepairBorrowInfo(strAction, strReaderBarcode, strItemBarcode, strConfirmItemRecPath, nStart, nCount, callback, asyncState);
-        }
+        public event System.EventHandler<HireCompletedEventArgs1> HireCompleted;
         
-        private object[] OnEndRepairBorrowInfo(System.IAsyncResult result) {
-            int nProcessedBorrowItems = this.GetDefaultValueForInitialization<int>();
-            int nTotalBorrowItems = this.GetDefaultValueForInitialization<int>();
-            string strOutputReaderBarcode = this.GetDefaultValueForInitialization<string>();
-            string[] aDupPath = this.GetDefaultValueForInitialization<string[]>();
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndRepairBorrowInfo(out nProcessedBorrowItems, out nTotalBorrowItems, out strOutputReaderBarcode, out aDupPath, result);
-            return new object[] {
-                    nProcessedBorrowItems,
-                    nTotalBorrowItems,
-                    strOutputReaderBarcode,
-                    aDupPath,
-                    retVal};
-        }
+        public event System.EventHandler<SettlementCompletedEventArgs1> SettlementCompleted;
         
-        private void OnRepairBorrowInfoCompleted(object state) {
-            if ((this.RepairBorrowInfoCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.RepairBorrowInfoCompleted(this, new RepairBorrowInfoCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
+        public event System.EventHandler<SearchOneClassCallNumberCompletedEventArgs1> SearchOneClassCallNumberCompleted;
         
-        public void RepairBorrowInfoAsync(string strAction, string strReaderBarcode, string strItemBarcode, string strConfirmItemRecPath, int nStart, int nCount) {
-            this.RepairBorrowInfoAsync(strAction, strReaderBarcode, strItemBarcode, strConfirmItemRecPath, nStart, nCount, null);
-        }
+        public event System.EventHandler<GetCallNumberSearchResultCompletedEventArgs1> GetCallNumberSearchResultCompleted;
         
-        public void RepairBorrowInfoAsync(string strAction, string strReaderBarcode, string strItemBarcode, string strConfirmItemRecPath, int nStart, int nCount, object userState) {
-            if ((this.onBeginRepairBorrowInfoDelegate == null)) {
-                this.onBeginRepairBorrowInfoDelegate = new BeginOperationDelegate(this.OnBeginRepairBorrowInfo);
-            }
-            if ((this.onEndRepairBorrowInfoDelegate == null)) {
-                this.onEndRepairBorrowInfoDelegate = new EndOperationDelegate(this.OnEndRepairBorrowInfo);
-            }
-            if ((this.onRepairBorrowInfoCompletedDelegate == null)) {
-                this.onRepairBorrowInfoCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnRepairBorrowInfoCompleted);
-            }
-            base.InvokeAsync(this.onBeginRepairBorrowInfoDelegate, new object[] {
-                        strAction,
-                        strReaderBarcode,
-                        strItemBarcode,
-                        strConfirmItemRecPath,
-                        nStart,
-                        nCount}, this.onEndRepairBorrowInfoDelegate, this.onRepairBorrowInfoCompletedDelegate, userState);
-        }
+        public event System.EventHandler<GetOneClassTailNumberCompletedEventArgs1> GetOneClassTailNumberCompleted;
         
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult PassGate(out string[] results, string strReaderBarcode, string strGateName, string strResultTypeList) {
-            return base.Channel.PassGate(out results, strReaderBarcode, strGateName, strResultTypeList);
-        }
+        public event System.EventHandler<SetOneClassTailNumberCompletedEventArgs1> SetOneClassTailNumberCompleted;
         
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginPassGate(string strReaderBarcode, string strGateName, string strResultTypeList, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginPassGate(strReaderBarcode, strGateName, strResultTypeList, callback, asyncState);
-        }
+        public event System.EventHandler<SearchUsedZhongcihaoCompletedEventArgs1> SearchUsedZhongcihaoCompleted;
         
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndPassGate(out string[] results, System.IAsyncResult result) {
-            return base.Channel.EndPassGate(out results, result);
-        }
+        public event System.EventHandler<GetZhongcihaoSearchResultCompletedEventArgs1> GetZhongcihaoSearchResultCompleted;
         
-        private System.IAsyncResult OnBeginPassGate(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strReaderBarcode = ((string)(inValues[0]));
-            string strGateName = ((string)(inValues[1]));
-            string strResultTypeList = ((string)(inValues[2]));
-            return this.BeginPassGate(strReaderBarcode, strGateName, strResultTypeList, callback, asyncState);
-        }
+        public event System.EventHandler<GetZhongcihaoTailNumberCompletedEventArgs1> GetZhongcihaoTailNumberCompleted;
         
-        private object[] OnEndPassGate(System.IAsyncResult result) {
-            string[] results = this.GetDefaultValueForInitialization<string[]>();
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndPassGate(out results, result);
-            return new object[] {
-                    results,
-                    retVal};
-        }
+        public event System.EventHandler<SetZhongcihaoTailNumberCompletedEventArgs1> SetZhongcihaoTailNumberCompleted;
         
-        private void OnPassGateCompleted(object state) {
-            if ((this.PassGateCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.PassGateCompleted(this, new PassGateCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
+        public event System.EventHandler<SearchDupCompletedEventArgs1> SearchDupCompleted;
         
-        public void PassGateAsync(string strReaderBarcode, string strGateName, string strResultTypeList) {
-            this.PassGateAsync(strReaderBarcode, strGateName, strResultTypeList, null);
-        }
+        public event System.EventHandler<GetDupSearchResultCompletedEventArgs1> GetDupSearchResultCompleted;
         
-        public void PassGateAsync(string strReaderBarcode, string strGateName, string strResultTypeList, object userState) {
-            if ((this.onBeginPassGateDelegate == null)) {
-                this.onBeginPassGateDelegate = new BeginOperationDelegate(this.OnBeginPassGate);
-            }
-            if ((this.onEndPassGateDelegate == null)) {
-                this.onEndPassGateDelegate = new EndOperationDelegate(this.OnEndPassGate);
-            }
-            if ((this.onPassGateCompletedDelegate == null)) {
-                this.onPassGateCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnPassGateCompleted);
-            }
-            base.InvokeAsync(this.onBeginPassGateDelegate, new object[] {
-                        strReaderBarcode,
-                        strGateName,
-                        strResultTypeList}, this.onEndPassGateDelegate, this.onPassGateCompletedDelegate, userState);
-        }
+        public event System.EventHandler<ListDupProjectInfosCompletedEventArgs1> ListDupProjectInfosCompleted;
         
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Foregift(out string strOutputReaderXml, out string strOutputID, string strAction, string strReaderBarcode) {
-            return base.Channel.Foregift(out strOutputReaderXml, out strOutputID, strAction, strReaderBarcode);
-        }
+        public event System.EventHandler<GetUtilInfoCompletedEventArgs1> GetUtilInfoCompleted;
         
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginForegift(string strAction, string strReaderBarcode, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginForegift(strAction, strReaderBarcode, callback, asyncState);
-        }
+        public event System.EventHandler<SetUtilInfoCompletedEventArgs1> SetUtilInfoCompleted;
         
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndForegift(out string strOutputReaderXml, out string strOutputID, System.IAsyncResult result) {
-            return base.Channel.EndForegift(out strOutputReaderXml, out strOutputID, result);
-        }
+        public event System.EventHandler<GetResCompletedEventArgs1> GetResCompleted;
         
-        private System.IAsyncResult OnBeginForegift(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strAction = ((string)(inValues[0]));
-            string strReaderBarcode = ((string)(inValues[1]));
-            return this.BeginForegift(strAction, strReaderBarcode, callback, asyncState);
-        }
+        public event System.EventHandler<WriteResCompletedEventArgs1> WriteResCompleted;
         
-        private object[] OnEndForegift(System.IAsyncResult result) {
-            string strOutputReaderXml = this.GetDefaultValueForInitialization<string>();
-            string strOutputID = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndForegift(out strOutputReaderXml, out strOutputID, result);
-            return new object[] {
-                    strOutputReaderXml,
-                    strOutputID,
-                    retVal};
-        }
-        
-        private void OnForegiftCompleted(object state) {
-            if ((this.ForegiftCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.ForegiftCompleted(this, new ForegiftCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
-        
-        public void ForegiftAsync(string strAction, string strReaderBarcode) {
-            this.ForegiftAsync(strAction, strReaderBarcode, null);
-        }
-        
-        public void ForegiftAsync(string strAction, string strReaderBarcode, object userState) {
-            if ((this.onBeginForegiftDelegate == null)) {
-                this.onBeginForegiftDelegate = new BeginOperationDelegate(this.OnBeginForegift);
-            }
-            if ((this.onEndForegiftDelegate == null)) {
-                this.onEndForegiftDelegate = new EndOperationDelegate(this.OnEndForegift);
-            }
-            if ((this.onForegiftCompletedDelegate == null)) {
-                this.onForegiftCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnForegiftCompleted);
-            }
-            base.InvokeAsync(this.onBeginForegiftDelegate, new object[] {
-                        strAction,
-                        strReaderBarcode}, this.onEndForegiftDelegate, this.onForegiftCompletedDelegate, userState);
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Hire(out string strOutputReaderXml, out string strOutputID, string strAction, string strReaderBarcode) {
-            return base.Channel.Hire(out strOutputReaderXml, out strOutputID, strAction, strReaderBarcode);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginHire(string strAction, string strReaderBarcode, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginHire(strAction, strReaderBarcode, callback, asyncState);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndHire(out string strOutputReaderXml, out string strOutputID, System.IAsyncResult result) {
-            return base.Channel.EndHire(out strOutputReaderXml, out strOutputID, result);
-        }
-        
-        private System.IAsyncResult OnBeginHire(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strAction = ((string)(inValues[0]));
-            string strReaderBarcode = ((string)(inValues[1]));
-            return this.BeginHire(strAction, strReaderBarcode, callback, asyncState);
-        }
-        
-        private object[] OnEndHire(System.IAsyncResult result) {
-            string strOutputReaderXml = this.GetDefaultValueForInitialization<string>();
-            string strOutputID = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndHire(out strOutputReaderXml, out strOutputID, result);
-            return new object[] {
-                    strOutputReaderXml,
-                    strOutputID,
-                    retVal};
-        }
-        
-        private void OnHireCompleted(object state) {
-            if ((this.HireCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.HireCompleted(this, new HireCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
-        
-        public void HireAsync(string strAction, string strReaderBarcode) {
-            this.HireAsync(strAction, strReaderBarcode, null);
-        }
-        
-        public void HireAsync(string strAction, string strReaderBarcode, object userState) {
-            if ((this.onBeginHireDelegate == null)) {
-                this.onBeginHireDelegate = new BeginOperationDelegate(this.OnBeginHire);
-            }
-            if ((this.onEndHireDelegate == null)) {
-                this.onEndHireDelegate = new EndOperationDelegate(this.OnEndHire);
-            }
-            if ((this.onHireCompletedDelegate == null)) {
-                this.onHireCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnHireCompleted);
-            }
-            base.InvokeAsync(this.onBeginHireDelegate, new object[] {
-                        strAction,
-                        strReaderBarcode}, this.onEndHireDelegate, this.onHireCompletedDelegate, userState);
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Settlement(string strAction, string[] ids) {
-            return base.Channel.Settlement(strAction, ids);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginSettlement(string strAction, string[] ids, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginSettlement(strAction, ids, callback, asyncState);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSettlement(System.IAsyncResult result) {
-            return base.Channel.EndSettlement(result);
-        }
-        
-        private System.IAsyncResult OnBeginSettlement(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strAction = ((string)(inValues[0]));
-            string[] ids = ((string[])(inValues[1]));
-            return this.BeginSettlement(strAction, ids, callback, asyncState);
-        }
-        
-        private object[] OnEndSettlement(System.IAsyncResult result) {
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSettlement(result);
-            return new object[] {
-                    retVal};
-        }
-        
-        private void OnSettlementCompleted(object state) {
-            if ((this.SettlementCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.SettlementCompleted(this, new SettlementCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
-        
-        public void SettlementAsync(string strAction, string[] ids) {
-            this.SettlementAsync(strAction, ids, null);
-        }
-        
-        public void SettlementAsync(string strAction, string[] ids, object userState) {
-            if ((this.onBeginSettlementDelegate == null)) {
-                this.onBeginSettlementDelegate = new BeginOperationDelegate(this.OnBeginSettlement);
-            }
-            if ((this.onEndSettlementDelegate == null)) {
-                this.onEndSettlementDelegate = new EndOperationDelegate(this.OnEndSettlement);
-            }
-            if ((this.onSettlementCompletedDelegate == null)) {
-                this.onSettlementCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnSettlementCompleted);
-            }
-            base.InvokeAsync(this.onBeginSettlementDelegate, new object[] {
-                        strAction,
-                        ids}, this.onEndSettlementDelegate, this.onSettlementCompletedDelegate, userState);
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchOneClassCallNumber(out string strQueryXml, string strArrangeGroupName, string strClass, string strResultSetName) {
-            return base.Channel.SearchOneClassCallNumber(out strQueryXml, strArrangeGroupName, strClass, strResultSetName);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginSearchOneClassCallNumber(string strArrangeGroupName, string strClass, string strResultSetName, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginSearchOneClassCallNumber(strArrangeGroupName, strClass, strResultSetName, callback, asyncState);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchOneClassCallNumber(out string strQueryXml, System.IAsyncResult result) {
-            return base.Channel.EndSearchOneClassCallNumber(out strQueryXml, result);
-        }
-        
-        private System.IAsyncResult OnBeginSearchOneClassCallNumber(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strArrangeGroupName = ((string)(inValues[0]));
-            string strClass = ((string)(inValues[1]));
-            string strResultSetName = ((string)(inValues[2]));
-            return this.BeginSearchOneClassCallNumber(strArrangeGroupName, strClass, strResultSetName, callback, asyncState);
-        }
-        
-        private object[] OnEndSearchOneClassCallNumber(System.IAsyncResult result) {
-            string strQueryXml = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchOneClassCallNumber(out strQueryXml, result);
-            return new object[] {
-                    strQueryXml,
-                    retVal};
-        }
-        
-        private void OnSearchOneClassCallNumberCompleted(object state) {
-            if ((this.SearchOneClassCallNumberCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.SearchOneClassCallNumberCompleted(this, new SearchOneClassCallNumberCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
-        
-        public void SearchOneClassCallNumberAsync(string strArrangeGroupName, string strClass, string strResultSetName) {
-            this.SearchOneClassCallNumberAsync(strArrangeGroupName, strClass, strResultSetName, null);
-        }
-        
-        public void SearchOneClassCallNumberAsync(string strArrangeGroupName, string strClass, string strResultSetName, object userState) {
-            if ((this.onBeginSearchOneClassCallNumberDelegate == null)) {
-                this.onBeginSearchOneClassCallNumberDelegate = new BeginOperationDelegate(this.OnBeginSearchOneClassCallNumber);
-            }
-            if ((this.onEndSearchOneClassCallNumberDelegate == null)) {
-                this.onEndSearchOneClassCallNumberDelegate = new EndOperationDelegate(this.OnEndSearchOneClassCallNumber);
-            }
-            if ((this.onSearchOneClassCallNumberCompletedDelegate == null)) {
-                this.onSearchOneClassCallNumberCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnSearchOneClassCallNumberCompleted);
-            }
-            base.InvokeAsync(this.onBeginSearchOneClassCallNumberDelegate, new object[] {
-                        strArrangeGroupName,
-                        strClass,
-                        strResultSetName}, this.onEndSearchOneClassCallNumberDelegate, this.onSearchOneClassCallNumberCompletedDelegate, userState);
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetCallNumberSearchResult(out DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[] searchresults, string strArrangeGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang) {
-            return base.Channel.GetCallNumberSearchResult(out searchresults, strArrangeGroupName, strResultSetName, lStart, lCount, strBrowseInfoStyle, strLang);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginGetCallNumberSearchResult(string strArrangeGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginGetCallNumberSearchResult(strArrangeGroupName, strResultSetName, lStart, lCount, strBrowseInfoStyle, strLang, callback, asyncState);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetCallNumberSearchResult(out DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[] searchresults, System.IAsyncResult result) {
-            return base.Channel.EndGetCallNumberSearchResult(out searchresults, result);
-        }
-        
-        private System.IAsyncResult OnBeginGetCallNumberSearchResult(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strArrangeGroupName = ((string)(inValues[0]));
-            string strResultSetName = ((string)(inValues[1]));
-            long lStart = ((long)(inValues[2]));
-            long lCount = ((long)(inValues[3]));
-            string strBrowseInfoStyle = ((string)(inValues[4]));
-            string strLang = ((string)(inValues[5]));
-            return this.BeginGetCallNumberSearchResult(strArrangeGroupName, strResultSetName, lStart, lCount, strBrowseInfoStyle, strLang, callback, asyncState);
-        }
-        
-        private object[] OnEndGetCallNumberSearchResult(System.IAsyncResult result) {
-            DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[] searchresults = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[]>();
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetCallNumberSearchResult(out searchresults, result);
-            return new object[] {
-                    searchresults,
-                    retVal};
-        }
-        
-        private void OnGetCallNumberSearchResultCompleted(object state) {
-            if ((this.GetCallNumberSearchResultCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.GetCallNumberSearchResultCompleted(this, new GetCallNumberSearchResultCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
-        
-        public void GetCallNumberSearchResultAsync(string strArrangeGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang) {
-            this.GetCallNumberSearchResultAsync(strArrangeGroupName, strResultSetName, lStart, lCount, strBrowseInfoStyle, strLang, null);
-        }
-        
-        public void GetCallNumberSearchResultAsync(string strArrangeGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang, object userState) {
-            if ((this.onBeginGetCallNumberSearchResultDelegate == null)) {
-                this.onBeginGetCallNumberSearchResultDelegate = new BeginOperationDelegate(this.OnBeginGetCallNumberSearchResult);
-            }
-            if ((this.onEndGetCallNumberSearchResultDelegate == null)) {
-                this.onEndGetCallNumberSearchResultDelegate = new EndOperationDelegate(this.OnEndGetCallNumberSearchResult);
-            }
-            if ((this.onGetCallNumberSearchResultCompletedDelegate == null)) {
-                this.onGetCallNumberSearchResultCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetCallNumberSearchResultCompleted);
-            }
-            base.InvokeAsync(this.onBeginGetCallNumberSearchResultDelegate, new object[] {
-                        strArrangeGroupName,
-                        strResultSetName,
-                        lStart,
-                        lCount,
-                        strBrowseInfoStyle,
-                        strLang}, this.onEndGetCallNumberSearchResultDelegate, this.onGetCallNumberSearchResultCompletedDelegate, userState);
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetOneClassTailNumber(out string strTailNumber, string strArrangeGroupName, string strClass) {
-            return base.Channel.GetOneClassTailNumber(out strTailNumber, strArrangeGroupName, strClass);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginGetOneClassTailNumber(string strArrangeGroupName, string strClass, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginGetOneClassTailNumber(strArrangeGroupName, strClass, callback, asyncState);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetOneClassTailNumber(out string strTailNumber, System.IAsyncResult result) {
-            return base.Channel.EndGetOneClassTailNumber(out strTailNumber, result);
-        }
-        
-        private System.IAsyncResult OnBeginGetOneClassTailNumber(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strArrangeGroupName = ((string)(inValues[0]));
-            string strClass = ((string)(inValues[1]));
-            return this.BeginGetOneClassTailNumber(strArrangeGroupName, strClass, callback, asyncState);
-        }
-        
-        private object[] OnEndGetOneClassTailNumber(System.IAsyncResult result) {
-            string strTailNumber = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetOneClassTailNumber(out strTailNumber, result);
-            return new object[] {
-                    strTailNumber,
-                    retVal};
-        }
-        
-        private void OnGetOneClassTailNumberCompleted(object state) {
-            if ((this.GetOneClassTailNumberCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.GetOneClassTailNumberCompleted(this, new GetOneClassTailNumberCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
-        
-        public void GetOneClassTailNumberAsync(string strArrangeGroupName, string strClass) {
-            this.GetOneClassTailNumberAsync(strArrangeGroupName, strClass, null);
-        }
-        
-        public void GetOneClassTailNumberAsync(string strArrangeGroupName, string strClass, object userState) {
-            if ((this.onBeginGetOneClassTailNumberDelegate == null)) {
-                this.onBeginGetOneClassTailNumberDelegate = new BeginOperationDelegate(this.OnBeginGetOneClassTailNumber);
-            }
-            if ((this.onEndGetOneClassTailNumberDelegate == null)) {
-                this.onEndGetOneClassTailNumberDelegate = new EndOperationDelegate(this.OnEndGetOneClassTailNumber);
-            }
-            if ((this.onGetOneClassTailNumberCompletedDelegate == null)) {
-                this.onGetOneClassTailNumberCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetOneClassTailNumberCompleted);
-            }
-            base.InvokeAsync(this.onBeginGetOneClassTailNumberDelegate, new object[] {
-                        strArrangeGroupName,
-                        strClass}, this.onEndGetOneClassTailNumberDelegate, this.onGetOneClassTailNumberCompletedDelegate, userState);
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetOneClassTailNumber(out string strOutputNumber, string strAction, string strArrangeGroupName, string strClass, string strTestNumber) {
-            return base.Channel.SetOneClassTailNumber(out strOutputNumber, strAction, strArrangeGroupName, strClass, strTestNumber);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginSetOneClassTailNumber(string strAction, string strArrangeGroupName, string strClass, string strTestNumber, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginSetOneClassTailNumber(strAction, strArrangeGroupName, strClass, strTestNumber, callback, asyncState);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetOneClassTailNumber(out string strOutputNumber, System.IAsyncResult result) {
-            return base.Channel.EndSetOneClassTailNumber(out strOutputNumber, result);
-        }
-        
-        private System.IAsyncResult OnBeginSetOneClassTailNumber(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strAction = ((string)(inValues[0]));
-            string strArrangeGroupName = ((string)(inValues[1]));
-            string strClass = ((string)(inValues[2]));
-            string strTestNumber = ((string)(inValues[3]));
-            return this.BeginSetOneClassTailNumber(strAction, strArrangeGroupName, strClass, strTestNumber, callback, asyncState);
-        }
-        
-        private object[] OnEndSetOneClassTailNumber(System.IAsyncResult result) {
-            string strOutputNumber = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetOneClassTailNumber(out strOutputNumber, result);
-            return new object[] {
-                    strOutputNumber,
-                    retVal};
-        }
-        
-        private void OnSetOneClassTailNumberCompleted(object state) {
-            if ((this.SetOneClassTailNumberCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.SetOneClassTailNumberCompleted(this, new SetOneClassTailNumberCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
-        
-        public void SetOneClassTailNumberAsync(string strAction, string strArrangeGroupName, string strClass, string strTestNumber) {
-            this.SetOneClassTailNumberAsync(strAction, strArrangeGroupName, strClass, strTestNumber, null);
-        }
-        
-        public void SetOneClassTailNumberAsync(string strAction, string strArrangeGroupName, string strClass, string strTestNumber, object userState) {
-            if ((this.onBeginSetOneClassTailNumberDelegate == null)) {
-                this.onBeginSetOneClassTailNumberDelegate = new BeginOperationDelegate(this.OnBeginSetOneClassTailNumber);
-            }
-            if ((this.onEndSetOneClassTailNumberDelegate == null)) {
-                this.onEndSetOneClassTailNumberDelegate = new EndOperationDelegate(this.OnEndSetOneClassTailNumber);
-            }
-            if ((this.onSetOneClassTailNumberCompletedDelegate == null)) {
-                this.onSetOneClassTailNumberCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnSetOneClassTailNumberCompleted);
-            }
-            base.InvokeAsync(this.onBeginSetOneClassTailNumberDelegate, new object[] {
-                        strAction,
-                        strArrangeGroupName,
-                        strClass,
-                        strTestNumber}, this.onEndSetOneClassTailNumberDelegate, this.onSetOneClassTailNumberCompletedDelegate, userState);
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchUsedZhongcihao(out string strQueryXml, string strZhongcihaoGroupName, string strClass, string strResultSetName) {
-            return base.Channel.SearchUsedZhongcihao(out strQueryXml, strZhongcihaoGroupName, strClass, strResultSetName);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginSearchUsedZhongcihao(string strZhongcihaoGroupName, string strClass, string strResultSetName, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginSearchUsedZhongcihao(strZhongcihaoGroupName, strClass, strResultSetName, callback, asyncState);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchUsedZhongcihao(out string strQueryXml, System.IAsyncResult result) {
-            return base.Channel.EndSearchUsedZhongcihao(out strQueryXml, result);
-        }
-        
-        private System.IAsyncResult OnBeginSearchUsedZhongcihao(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strZhongcihaoGroupName = ((string)(inValues[0]));
-            string strClass = ((string)(inValues[1]));
-            string strResultSetName = ((string)(inValues[2]));
-            return this.BeginSearchUsedZhongcihao(strZhongcihaoGroupName, strClass, strResultSetName, callback, asyncState);
-        }
-        
-        private object[] OnEndSearchUsedZhongcihao(System.IAsyncResult result) {
-            string strQueryXml = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchUsedZhongcihao(out strQueryXml, result);
-            return new object[] {
-                    strQueryXml,
-                    retVal};
-        }
-        
-        private void OnSearchUsedZhongcihaoCompleted(object state) {
-            if ((this.SearchUsedZhongcihaoCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.SearchUsedZhongcihaoCompleted(this, new SearchUsedZhongcihaoCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
-        
-        public void SearchUsedZhongcihaoAsync(string strZhongcihaoGroupName, string strClass, string strResultSetName) {
-            this.SearchUsedZhongcihaoAsync(strZhongcihaoGroupName, strClass, strResultSetName, null);
-        }
-        
-        public void SearchUsedZhongcihaoAsync(string strZhongcihaoGroupName, string strClass, string strResultSetName, object userState) {
-            if ((this.onBeginSearchUsedZhongcihaoDelegate == null)) {
-                this.onBeginSearchUsedZhongcihaoDelegate = new BeginOperationDelegate(this.OnBeginSearchUsedZhongcihao);
-            }
-            if ((this.onEndSearchUsedZhongcihaoDelegate == null)) {
-                this.onEndSearchUsedZhongcihaoDelegate = new EndOperationDelegate(this.OnEndSearchUsedZhongcihao);
-            }
-            if ((this.onSearchUsedZhongcihaoCompletedDelegate == null)) {
-                this.onSearchUsedZhongcihaoCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnSearchUsedZhongcihaoCompleted);
-            }
-            base.InvokeAsync(this.onBeginSearchUsedZhongcihaoDelegate, new object[] {
-                        strZhongcihaoGroupName,
-                        strClass,
-                        strResultSetName}, this.onEndSearchUsedZhongcihaoDelegate, this.onSearchUsedZhongcihaoCompletedDelegate, userState);
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetZhongcihaoSearchResult(out DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[] searchresults, string strZhongcihaoGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang) {
-            return base.Channel.GetZhongcihaoSearchResult(out searchresults, strZhongcihaoGroupName, strResultSetName, lStart, lCount, strBrowseInfoStyle, strLang);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginGetZhongcihaoSearchResult(string strZhongcihaoGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginGetZhongcihaoSearchResult(strZhongcihaoGroupName, strResultSetName, lStart, lCount, strBrowseInfoStyle, strLang, callback, asyncState);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetZhongcihaoSearchResult(out DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[] searchresults, System.IAsyncResult result) {
-            return base.Channel.EndGetZhongcihaoSearchResult(out searchresults, result);
-        }
-        
-        private System.IAsyncResult OnBeginGetZhongcihaoSearchResult(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strZhongcihaoGroupName = ((string)(inValues[0]));
-            string strResultSetName = ((string)(inValues[1]));
-            long lStart = ((long)(inValues[2]));
-            long lCount = ((long)(inValues[3]));
-            string strBrowseInfoStyle = ((string)(inValues[4]));
-            string strLang = ((string)(inValues[5]));
-            return this.BeginGetZhongcihaoSearchResult(strZhongcihaoGroupName, strResultSetName, lStart, lCount, strBrowseInfoStyle, strLang, callback, asyncState);
-        }
-        
-        private object[] OnEndGetZhongcihaoSearchResult(System.IAsyncResult result) {
-            DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[] searchresults = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[]>();
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetZhongcihaoSearchResult(out searchresults, result);
-            return new object[] {
-                    searchresults,
-                    retVal};
-        }
-        
-        private void OnGetZhongcihaoSearchResultCompleted(object state) {
-            if ((this.GetZhongcihaoSearchResultCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.GetZhongcihaoSearchResultCompleted(this, new GetZhongcihaoSearchResultCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
-        
-        public void GetZhongcihaoSearchResultAsync(string strZhongcihaoGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang) {
-            this.GetZhongcihaoSearchResultAsync(strZhongcihaoGroupName, strResultSetName, lStart, lCount, strBrowseInfoStyle, strLang, null);
-        }
-        
-        public void GetZhongcihaoSearchResultAsync(string strZhongcihaoGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang, object userState) {
-            if ((this.onBeginGetZhongcihaoSearchResultDelegate == null)) {
-                this.onBeginGetZhongcihaoSearchResultDelegate = new BeginOperationDelegate(this.OnBeginGetZhongcihaoSearchResult);
-            }
-            if ((this.onEndGetZhongcihaoSearchResultDelegate == null)) {
-                this.onEndGetZhongcihaoSearchResultDelegate = new EndOperationDelegate(this.OnEndGetZhongcihaoSearchResult);
-            }
-            if ((this.onGetZhongcihaoSearchResultCompletedDelegate == null)) {
-                this.onGetZhongcihaoSearchResultCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetZhongcihaoSearchResultCompleted);
-            }
-            base.InvokeAsync(this.onBeginGetZhongcihaoSearchResultDelegate, new object[] {
-                        strZhongcihaoGroupName,
-                        strResultSetName,
-                        lStart,
-                        lCount,
-                        strBrowseInfoStyle,
-                        strLang}, this.onEndGetZhongcihaoSearchResultDelegate, this.onGetZhongcihaoSearchResultCompletedDelegate, userState);
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetZhongcihaoTailNumber(out string strTailNumber, string strZhongcihaoGroupName, string strClass) {
-            return base.Channel.GetZhongcihaoTailNumber(out strTailNumber, strZhongcihaoGroupName, strClass);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginGetZhongcihaoTailNumber(string strZhongcihaoGroupName, string strClass, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginGetZhongcihaoTailNumber(strZhongcihaoGroupName, strClass, callback, asyncState);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetZhongcihaoTailNumber(out string strTailNumber, System.IAsyncResult result) {
-            return base.Channel.EndGetZhongcihaoTailNumber(out strTailNumber, result);
-        }
-        
-        private System.IAsyncResult OnBeginGetZhongcihaoTailNumber(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strZhongcihaoGroupName = ((string)(inValues[0]));
-            string strClass = ((string)(inValues[1]));
-            return this.BeginGetZhongcihaoTailNumber(strZhongcihaoGroupName, strClass, callback, asyncState);
-        }
-        
-        private object[] OnEndGetZhongcihaoTailNumber(System.IAsyncResult result) {
-            string strTailNumber = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetZhongcihaoTailNumber(out strTailNumber, result);
-            return new object[] {
-                    strTailNumber,
-                    retVal};
-        }
-        
-        private void OnGetZhongcihaoTailNumberCompleted(object state) {
-            if ((this.GetZhongcihaoTailNumberCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.GetZhongcihaoTailNumberCompleted(this, new GetZhongcihaoTailNumberCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
-        
-        public void GetZhongcihaoTailNumberAsync(string strZhongcihaoGroupName, string strClass) {
-            this.GetZhongcihaoTailNumberAsync(strZhongcihaoGroupName, strClass, null);
-        }
-        
-        public void GetZhongcihaoTailNumberAsync(string strZhongcihaoGroupName, string strClass, object userState) {
-            if ((this.onBeginGetZhongcihaoTailNumberDelegate == null)) {
-                this.onBeginGetZhongcihaoTailNumberDelegate = new BeginOperationDelegate(this.OnBeginGetZhongcihaoTailNumber);
-            }
-            if ((this.onEndGetZhongcihaoTailNumberDelegate == null)) {
-                this.onEndGetZhongcihaoTailNumberDelegate = new EndOperationDelegate(this.OnEndGetZhongcihaoTailNumber);
-            }
-            if ((this.onGetZhongcihaoTailNumberCompletedDelegate == null)) {
-                this.onGetZhongcihaoTailNumberCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetZhongcihaoTailNumberCompleted);
-            }
-            base.InvokeAsync(this.onBeginGetZhongcihaoTailNumberDelegate, new object[] {
-                        strZhongcihaoGroupName,
-                        strClass}, this.onEndGetZhongcihaoTailNumberDelegate, this.onGetZhongcihaoTailNumberCompletedDelegate, userState);
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetZhongcihaoTailNumber(out string strOutputNumber, string strAction, string strZhongcihaoGroupName, string strClass, string strTestNumber) {
-            return base.Channel.SetZhongcihaoTailNumber(out strOutputNumber, strAction, strZhongcihaoGroupName, strClass, strTestNumber);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginSetZhongcihaoTailNumber(string strAction, string strZhongcihaoGroupName, string strClass, string strTestNumber, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginSetZhongcihaoTailNumber(strAction, strZhongcihaoGroupName, strClass, strTestNumber, callback, asyncState);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetZhongcihaoTailNumber(out string strOutputNumber, System.IAsyncResult result) {
-            return base.Channel.EndSetZhongcihaoTailNumber(out strOutputNumber, result);
-        }
-        
-        private System.IAsyncResult OnBeginSetZhongcihaoTailNumber(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strAction = ((string)(inValues[0]));
-            string strZhongcihaoGroupName = ((string)(inValues[1]));
-            string strClass = ((string)(inValues[2]));
-            string strTestNumber = ((string)(inValues[3]));
-            return this.BeginSetZhongcihaoTailNumber(strAction, strZhongcihaoGroupName, strClass, strTestNumber, callback, asyncState);
-        }
-        
-        private object[] OnEndSetZhongcihaoTailNumber(System.IAsyncResult result) {
-            string strOutputNumber = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetZhongcihaoTailNumber(out strOutputNumber, result);
-            return new object[] {
-                    strOutputNumber,
-                    retVal};
-        }
-        
-        private void OnSetZhongcihaoTailNumberCompleted(object state) {
-            if ((this.SetZhongcihaoTailNumberCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.SetZhongcihaoTailNumberCompleted(this, new SetZhongcihaoTailNumberCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
-        
-        public void SetZhongcihaoTailNumberAsync(string strAction, string strZhongcihaoGroupName, string strClass, string strTestNumber) {
-            this.SetZhongcihaoTailNumberAsync(strAction, strZhongcihaoGroupName, strClass, strTestNumber, null);
-        }
-        
-        public void SetZhongcihaoTailNumberAsync(string strAction, string strZhongcihaoGroupName, string strClass, string strTestNumber, object userState) {
-            if ((this.onBeginSetZhongcihaoTailNumberDelegate == null)) {
-                this.onBeginSetZhongcihaoTailNumberDelegate = new BeginOperationDelegate(this.OnBeginSetZhongcihaoTailNumber);
-            }
-            if ((this.onEndSetZhongcihaoTailNumberDelegate == null)) {
-                this.onEndSetZhongcihaoTailNumberDelegate = new EndOperationDelegate(this.OnEndSetZhongcihaoTailNumber);
-            }
-            if ((this.onSetZhongcihaoTailNumberCompletedDelegate == null)) {
-                this.onSetZhongcihaoTailNumberCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnSetZhongcihaoTailNumberCompleted);
-            }
-            base.InvokeAsync(this.onBeginSetZhongcihaoTailNumberDelegate, new object[] {
-                        strAction,
-                        strZhongcihaoGroupName,
-                        strClass,
-                        strTestNumber}, this.onEndSetZhongcihaoTailNumberDelegate, this.onSetZhongcihaoTailNumberCompletedDelegate, userState);
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchDup(out string strUsedProjectName, string strOriginBiblioRecPath, string strOriginBiblioRecXml, string strProjectName, string strStyle) {
-            return base.Channel.SearchDup(out strUsedProjectName, strOriginBiblioRecPath, strOriginBiblioRecXml, strProjectName, strStyle);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginSearchDup(string strOriginBiblioRecPath, string strOriginBiblioRecXml, string strProjectName, string strStyle, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginSearchDup(strOriginBiblioRecPath, strOriginBiblioRecXml, strProjectName, strStyle, callback, asyncState);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchDup(out string strUsedProjectName, System.IAsyncResult result) {
-            return base.Channel.EndSearchDup(out strUsedProjectName, result);
-        }
-        
-        private System.IAsyncResult OnBeginSearchDup(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strOriginBiblioRecPath = ((string)(inValues[0]));
-            string strOriginBiblioRecXml = ((string)(inValues[1]));
-            string strProjectName = ((string)(inValues[2]));
-            string strStyle = ((string)(inValues[3]));
-            return this.BeginSearchDup(strOriginBiblioRecPath, strOriginBiblioRecXml, strProjectName, strStyle, callback, asyncState);
-        }
-        
-        private object[] OnEndSearchDup(System.IAsyncResult result) {
-            string strUsedProjectName = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchDup(out strUsedProjectName, result);
-            return new object[] {
-                    strUsedProjectName,
-                    retVal};
-        }
-        
-        private void OnSearchDupCompleted(object state) {
-            if ((this.SearchDupCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.SearchDupCompleted(this, new SearchDupCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
-        
-        public void SearchDupAsync(string strOriginBiblioRecPath, string strOriginBiblioRecXml, string strProjectName, string strStyle) {
-            this.SearchDupAsync(strOriginBiblioRecPath, strOriginBiblioRecXml, strProjectName, strStyle, null);
-        }
-        
-        public void SearchDupAsync(string strOriginBiblioRecPath, string strOriginBiblioRecXml, string strProjectName, string strStyle, object userState) {
-            if ((this.onBeginSearchDupDelegate == null)) {
-                this.onBeginSearchDupDelegate = new BeginOperationDelegate(this.OnBeginSearchDup);
-            }
-            if ((this.onEndSearchDupDelegate == null)) {
-                this.onEndSearchDupDelegate = new EndOperationDelegate(this.OnEndSearchDup);
-            }
-            if ((this.onSearchDupCompletedDelegate == null)) {
-                this.onSearchDupCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnSearchDupCompleted);
-            }
-            base.InvokeAsync(this.onBeginSearchDupDelegate, new object[] {
-                        strOriginBiblioRecPath,
-                        strOriginBiblioRecXml,
-                        strProjectName,
-                        strStyle}, this.onEndSearchDupDelegate, this.onSearchDupCompletedDelegate, userState);
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetDupSearchResult(out DigitalPlatform.LibraryClient.localhost.DupSearchResult[] searchresults, long lStart, long lCount, string strBrowseInfoStyle) {
-            return base.Channel.GetDupSearchResult(out searchresults, lStart, lCount, strBrowseInfoStyle);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginGetDupSearchResult(long lStart, long lCount, string strBrowseInfoStyle, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginGetDupSearchResult(lStart, lCount, strBrowseInfoStyle, callback, asyncState);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetDupSearchResult(out DigitalPlatform.LibraryClient.localhost.DupSearchResult[] searchresults, System.IAsyncResult result) {
-            return base.Channel.EndGetDupSearchResult(out searchresults, result);
-        }
-        
-        private System.IAsyncResult OnBeginGetDupSearchResult(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            long lStart = ((long)(inValues[0]));
-            long lCount = ((long)(inValues[1]));
-            string strBrowseInfoStyle = ((string)(inValues[2]));
-            return this.BeginGetDupSearchResult(lStart, lCount, strBrowseInfoStyle, callback, asyncState);
-        }
-        
-        private object[] OnEndGetDupSearchResult(System.IAsyncResult result) {
-            DigitalPlatform.LibraryClient.localhost.DupSearchResult[] searchresults = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.DupSearchResult[]>();
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetDupSearchResult(out searchresults, result);
-            return new object[] {
-                    searchresults,
-                    retVal};
-        }
-        
-        private void OnGetDupSearchResultCompleted(object state) {
-            if ((this.GetDupSearchResultCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.GetDupSearchResultCompleted(this, new GetDupSearchResultCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
-        
-        public void GetDupSearchResultAsync(long lStart, long lCount, string strBrowseInfoStyle) {
-            this.GetDupSearchResultAsync(lStart, lCount, strBrowseInfoStyle, null);
-        }
-        
-        public void GetDupSearchResultAsync(long lStart, long lCount, string strBrowseInfoStyle, object userState) {
-            if ((this.onBeginGetDupSearchResultDelegate == null)) {
-                this.onBeginGetDupSearchResultDelegate = new BeginOperationDelegate(this.OnBeginGetDupSearchResult);
-            }
-            if ((this.onEndGetDupSearchResultDelegate == null)) {
-                this.onEndGetDupSearchResultDelegate = new EndOperationDelegate(this.OnEndGetDupSearchResult);
-            }
-            if ((this.onGetDupSearchResultCompletedDelegate == null)) {
-                this.onGetDupSearchResultCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetDupSearchResultCompleted);
-            }
-            base.InvokeAsync(this.onBeginGetDupSearchResultDelegate, new object[] {
-                        lStart,
-                        lCount,
-                        strBrowseInfoStyle}, this.onEndGetDupSearchResultDelegate, this.onGetDupSearchResultCompletedDelegate, userState);
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult ListDupProjectInfos(out DigitalPlatform.LibraryClient.localhost.DupProjectInfo[] results, string strOriginBiblioDbName) {
-            return base.Channel.ListDupProjectInfos(out results, strOriginBiblioDbName);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginListDupProjectInfos(string strOriginBiblioDbName, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginListDupProjectInfos(strOriginBiblioDbName, callback, asyncState);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndListDupProjectInfos(out DigitalPlatform.LibraryClient.localhost.DupProjectInfo[] results, System.IAsyncResult result) {
-            return base.Channel.EndListDupProjectInfos(out results, result);
-        }
-        
-        private System.IAsyncResult OnBeginListDupProjectInfos(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strOriginBiblioDbName = ((string)(inValues[0]));
-            return this.BeginListDupProjectInfos(strOriginBiblioDbName, callback, asyncState);
-        }
-        
-        private object[] OnEndListDupProjectInfos(System.IAsyncResult result) {
-            DigitalPlatform.LibraryClient.localhost.DupProjectInfo[] results = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.DupProjectInfo[]>();
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndListDupProjectInfos(out results, result);
-            return new object[] {
-                    results,
-                    retVal};
-        }
-        
-        private void OnListDupProjectInfosCompleted(object state) {
-            if ((this.ListDupProjectInfosCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.ListDupProjectInfosCompleted(this, new ListDupProjectInfosCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
-        
-        public void ListDupProjectInfosAsync(string strOriginBiblioDbName) {
-            this.ListDupProjectInfosAsync(strOriginBiblioDbName, null);
-        }
-        
-        public void ListDupProjectInfosAsync(string strOriginBiblioDbName, object userState) {
-            if ((this.onBeginListDupProjectInfosDelegate == null)) {
-                this.onBeginListDupProjectInfosDelegate = new BeginOperationDelegate(this.OnBeginListDupProjectInfos);
-            }
-            if ((this.onEndListDupProjectInfosDelegate == null)) {
-                this.onEndListDupProjectInfosDelegate = new EndOperationDelegate(this.OnEndListDupProjectInfos);
-            }
-            if ((this.onListDupProjectInfosCompletedDelegate == null)) {
-                this.onListDupProjectInfosCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnListDupProjectInfosCompleted);
-            }
-            base.InvokeAsync(this.onBeginListDupProjectInfosDelegate, new object[] {
-                        strOriginBiblioDbName}, this.onEndListDupProjectInfosDelegate, this.onListDupProjectInfosCompletedDelegate, userState);
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetUtilInfo(out string strValue, string strAction, string strDbName, string strFrom, string strKey, string strValueAttrName) {
-            return base.Channel.GetUtilInfo(out strValue, strAction, strDbName, strFrom, strKey, strValueAttrName);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginGetUtilInfo(string strAction, string strDbName, string strFrom, string strKey, string strValueAttrName, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginGetUtilInfo(strAction, strDbName, strFrom, strKey, strValueAttrName, callback, asyncState);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetUtilInfo(out string strValue, System.IAsyncResult result) {
-            return base.Channel.EndGetUtilInfo(out strValue, result);
-        }
-        
-        private System.IAsyncResult OnBeginGetUtilInfo(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strAction = ((string)(inValues[0]));
-            string strDbName = ((string)(inValues[1]));
-            string strFrom = ((string)(inValues[2]));
-            string strKey = ((string)(inValues[3]));
-            string strValueAttrName = ((string)(inValues[4]));
-            return this.BeginGetUtilInfo(strAction, strDbName, strFrom, strKey, strValueAttrName, callback, asyncState);
-        }
-        
-        private object[] OnEndGetUtilInfo(System.IAsyncResult result) {
-            string strValue = this.GetDefaultValueForInitialization<string>();
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetUtilInfo(out strValue, result);
-            return new object[] {
-                    strValue,
-                    retVal};
-        }
-        
-        private void OnGetUtilInfoCompleted(object state) {
-            if ((this.GetUtilInfoCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.GetUtilInfoCompleted(this, new GetUtilInfoCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
-        
-        public void GetUtilInfoAsync(string strAction, string strDbName, string strFrom, string strKey, string strValueAttrName) {
-            this.GetUtilInfoAsync(strAction, strDbName, strFrom, strKey, strValueAttrName, null);
-        }
-        
-        public void GetUtilInfoAsync(string strAction, string strDbName, string strFrom, string strKey, string strValueAttrName, object userState) {
-            if ((this.onBeginGetUtilInfoDelegate == null)) {
-                this.onBeginGetUtilInfoDelegate = new BeginOperationDelegate(this.OnBeginGetUtilInfo);
-            }
-            if ((this.onEndGetUtilInfoDelegate == null)) {
-                this.onEndGetUtilInfoDelegate = new EndOperationDelegate(this.OnEndGetUtilInfo);
-            }
-            if ((this.onGetUtilInfoCompletedDelegate == null)) {
-                this.onGetUtilInfoCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetUtilInfoCompleted);
-            }
-            base.InvokeAsync(this.onBeginGetUtilInfoDelegate, new object[] {
-                        strAction,
-                        strDbName,
-                        strFrom,
-                        strKey,
-                        strValueAttrName}, this.onEndGetUtilInfoDelegate, this.onGetUtilInfoCompletedDelegate, userState);
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetUtilInfo(string strAction, string strDbName, string strFrom, string strRootElementName, string strKeyAttrName, string strValueAttrName, string strKey, string strValue) {
-            return base.Channel.SetUtilInfo(strAction, strDbName, strFrom, strRootElementName, strKeyAttrName, strValueAttrName, strKey, strValue);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginSetUtilInfo(string strAction, string strDbName, string strFrom, string strRootElementName, string strKeyAttrName, string strValueAttrName, string strKey, string strValue, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginSetUtilInfo(strAction, strDbName, strFrom, strRootElementName, strKeyAttrName, strValueAttrName, strKey, strValue, callback, asyncState);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetUtilInfo(System.IAsyncResult result) {
-            return base.Channel.EndSetUtilInfo(result);
-        }
-        
-        private System.IAsyncResult OnBeginSetUtilInfo(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strAction = ((string)(inValues[0]));
-            string strDbName = ((string)(inValues[1]));
-            string strFrom = ((string)(inValues[2]));
-            string strRootElementName = ((string)(inValues[3]));
-            string strKeyAttrName = ((string)(inValues[4]));
-            string strValueAttrName = ((string)(inValues[5]));
-            string strKey = ((string)(inValues[6]));
-            string strValue = ((string)(inValues[7]));
-            return this.BeginSetUtilInfo(strAction, strDbName, strFrom, strRootElementName, strKeyAttrName, strValueAttrName, strKey, strValue, callback, asyncState);
-        }
-        
-        private object[] OnEndSetUtilInfo(System.IAsyncResult result) {
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetUtilInfo(result);
-            return new object[] {
-                    retVal};
-        }
-        
-        private void OnSetUtilInfoCompleted(object state) {
-            if ((this.SetUtilInfoCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.SetUtilInfoCompleted(this, new SetUtilInfoCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
-        
-        public void SetUtilInfoAsync(string strAction, string strDbName, string strFrom, string strRootElementName, string strKeyAttrName, string strValueAttrName, string strKey, string strValue) {
-            this.SetUtilInfoAsync(strAction, strDbName, strFrom, strRootElementName, strKeyAttrName, strValueAttrName, strKey, strValue, null);
-        }
-        
-        public void SetUtilInfoAsync(string strAction, string strDbName, string strFrom, string strRootElementName, string strKeyAttrName, string strValueAttrName, string strKey, string strValue, object userState) {
-            if ((this.onBeginSetUtilInfoDelegate == null)) {
-                this.onBeginSetUtilInfoDelegate = new BeginOperationDelegate(this.OnBeginSetUtilInfo);
-            }
-            if ((this.onEndSetUtilInfoDelegate == null)) {
-                this.onEndSetUtilInfoDelegate = new EndOperationDelegate(this.OnEndSetUtilInfo);
-            }
-            if ((this.onSetUtilInfoCompletedDelegate == null)) {
-                this.onSetUtilInfoCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnSetUtilInfoCompleted);
-            }
-            base.InvokeAsync(this.onBeginSetUtilInfoDelegate, new object[] {
-                        strAction,
-                        strDbName,
-                        strFrom,
-                        strRootElementName,
-                        strKeyAttrName,
-                        strValueAttrName,
-                        strKey,
-                        strValue}, this.onEndSetUtilInfoDelegate, this.onSetUtilInfoCompletedDelegate, userState);
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetRes(out byte[] baContent, out string strMetadata, out string strOutputResPath, out byte[] baOutputTimestamp, string strResPath, long nStart, int nLength, string strStyle) {
-            return base.Channel.GetRes(out baContent, out strMetadata, out strOutputResPath, out baOutputTimestamp, strResPath, nStart, nLength, strStyle);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginGetRes(string strResPath, long nStart, int nLength, string strStyle, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginGetRes(strResPath, nStart, nLength, strStyle, callback, asyncState);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetRes(out byte[] baContent, out string strMetadata, out string strOutputResPath, out byte[] baOutputTimestamp, System.IAsyncResult result) {
-            return base.Channel.EndGetRes(out baContent, out strMetadata, out strOutputResPath, out baOutputTimestamp, result);
-        }
-        
-        private System.IAsyncResult OnBeginGetRes(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strResPath = ((string)(inValues[0]));
-            long nStart = ((long)(inValues[1]));
-            int nLength = ((int)(inValues[2]));
-            string strStyle = ((string)(inValues[3]));
-            return this.BeginGetRes(strResPath, nStart, nLength, strStyle, callback, asyncState);
-        }
-        
-        private object[] OnEndGetRes(System.IAsyncResult result) {
-            byte[] baContent = this.GetDefaultValueForInitialization<byte[]>();
-            string strMetadata = this.GetDefaultValueForInitialization<string>();
-            string strOutputResPath = this.GetDefaultValueForInitialization<string>();
-            byte[] baOutputTimestamp = this.GetDefaultValueForInitialization<byte[]>();
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetRes(out baContent, out strMetadata, out strOutputResPath, out baOutputTimestamp, result);
-            return new object[] {
-                    baContent,
-                    strMetadata,
-                    strOutputResPath,
-                    baOutputTimestamp,
-                    retVal};
-        }
-        
-        private void OnGetResCompleted(object state) {
-            if ((this.GetResCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.GetResCompleted(this, new GetResCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
-        
-        public void GetResAsync(string strResPath, long nStart, int nLength, string strStyle) {
-            this.GetResAsync(strResPath, nStart, nLength, strStyle, null);
-        }
-        
-        public void GetResAsync(string strResPath, long nStart, int nLength, string strStyle, object userState) {
-            if ((this.onBeginGetResDelegate == null)) {
-                this.onBeginGetResDelegate = new BeginOperationDelegate(this.OnBeginGetRes);
-            }
-            if ((this.onEndGetResDelegate == null)) {
-                this.onEndGetResDelegate = new EndOperationDelegate(this.OnEndGetRes);
-            }
-            if ((this.onGetResCompletedDelegate == null)) {
-                this.onGetResCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetResCompleted);
-            }
-            base.InvokeAsync(this.onBeginGetResDelegate, new object[] {
-                        strResPath,
-                        nStart,
-                        nLength,
-                        strStyle}, this.onEndGetResDelegate, this.onGetResCompletedDelegate, userState);
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult WriteRes(out string strOutputResPath, out byte[] baOutputTimestamp, string strResPath, string strRanges, long lTotalLength, byte[] baContent, string strMetadata, string strStyle, byte[] baInputTimestamp) {
-            return base.Channel.WriteRes(out strOutputResPath, out baOutputTimestamp, strResPath, strRanges, lTotalLength, baContent, strMetadata, strStyle, baInputTimestamp);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginWriteRes(string strResPath, string strRanges, long lTotalLength, byte[] baContent, string strMetadata, string strStyle, byte[] baInputTimestamp, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginWriteRes(strResPath, strRanges, lTotalLength, baContent, strMetadata, strStyle, baInputTimestamp, callback, asyncState);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndWriteRes(out string strOutputResPath, out byte[] baOutputTimestamp, System.IAsyncResult result) {
-            return base.Channel.EndWriteRes(out strOutputResPath, out baOutputTimestamp, result);
-        }
-        
-        private System.IAsyncResult OnBeginWriteRes(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strResPath = ((string)(inValues[0]));
-            string strRanges = ((string)(inValues[1]));
-            long lTotalLength = ((long)(inValues[2]));
-            byte[] baContent = ((byte[])(inValues[3]));
-            string strMetadata = ((string)(inValues[4]));
-            string strStyle = ((string)(inValues[5]));
-            byte[] baInputTimestamp = ((byte[])(inValues[6]));
-            return this.BeginWriteRes(strResPath, strRanges, lTotalLength, baContent, strMetadata, strStyle, baInputTimestamp, callback, asyncState);
-        }
-        
-        private object[] OnEndWriteRes(System.IAsyncResult result) {
-            string strOutputResPath = this.GetDefaultValueForInitialization<string>();
-            byte[] baOutputTimestamp = this.GetDefaultValueForInitialization<byte[]>();
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndWriteRes(out strOutputResPath, out baOutputTimestamp, result);
-            return new object[] {
-                    strOutputResPath,
-                    baOutputTimestamp,
-                    retVal};
-        }
-        
-        private void OnWriteResCompleted(object state) {
-            if ((this.WriteResCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.WriteResCompleted(this, new WriteResCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
-        
-        public void WriteResAsync(string strResPath, string strRanges, long lTotalLength, byte[] baContent, string strMetadata, string strStyle, byte[] baInputTimestamp) {
-            this.WriteResAsync(strResPath, strRanges, lTotalLength, baContent, strMetadata, strStyle, baInputTimestamp, null);
-        }
-        
-        public void WriteResAsync(string strResPath, string strRanges, long lTotalLength, byte[] baContent, string strMetadata, string strStyle, byte[] baInputTimestamp, object userState) {
-            if ((this.onBeginWriteResDelegate == null)) {
-                this.onBeginWriteResDelegate = new BeginOperationDelegate(this.OnBeginWriteRes);
-            }
-            if ((this.onEndWriteResDelegate == null)) {
-                this.onEndWriteResDelegate = new EndOperationDelegate(this.OnEndWriteRes);
-            }
-            if ((this.onWriteResCompletedDelegate == null)) {
-                this.onWriteResCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnWriteResCompleted);
-            }
-            base.InvokeAsync(this.onBeginWriteResDelegate, new object[] {
-                        strResPath,
-                        strRanges,
-                        lTotalLength,
-                        baContent,
-                        strMetadata,
-                        strStyle,
-                        baInputTimestamp}, this.onEndWriteResDelegate, this.onWriteResCompletedDelegate, userState);
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang) {
-            return base.Channel.GetComments(out commentinfos, strBiblioRecPath, lStart, lCount, strStyle, strLang);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginGetComments(string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginGetComments(strBiblioRecPath, lStart, lCount, strStyle, strLang, callback, asyncState);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, System.IAsyncResult result) {
-            return base.Channel.EndGetComments(out commentinfos, result);
-        }
-        
-        private System.IAsyncResult OnBeginGetComments(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strBiblioRecPath = ((string)(inValues[0]));
-            long lStart = ((long)(inValues[1]));
-            long lCount = ((long)(inValues[2]));
-            string strStyle = ((string)(inValues[3]));
-            string strLang = ((string)(inValues[4]));
-            return this.BeginGetComments(strBiblioRecPath, lStart, lCount, strStyle, strLang, callback, asyncState);
-        }
-        
-        private object[] OnEndGetComments(System.IAsyncResult result) {
-            DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.EntityInfo[]>();
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetComments(out commentinfos, result);
-            return new object[] {
-                    commentinfos,
-                    retVal};
-        }
-        
-        private void OnGetCommentsCompleted(object state) {
-            if ((this.GetCommentsCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.GetCommentsCompleted(this, new GetCommentsCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
-        
-        public void GetCommentsAsync(string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang) {
-            this.GetCommentsAsync(strBiblioRecPath, lStart, lCount, strStyle, strLang, null);
-        }
-        
-        public void GetCommentsAsync(string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang, object userState) {
-            if ((this.onBeginGetCommentsDelegate == null)) {
-                this.onBeginGetCommentsDelegate = new BeginOperationDelegate(this.OnBeginGetComments);
-            }
-            if ((this.onEndGetCommentsDelegate == null)) {
-                this.onEndGetCommentsDelegate = new EndOperationDelegate(this.OnEndGetComments);
-            }
-            if ((this.onGetCommentsCompletedDelegate == null)) {
-                this.onGetCommentsCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetCommentsCompleted);
-            }
-            base.InvokeAsync(this.onBeginGetCommentsDelegate, new object[] {
-                        strBiblioRecPath,
-                        lStart,
-                        lCount,
-                        strStyle,
-                        strLang}, this.onEndGetCommentsDelegate, this.onGetCommentsCompletedDelegate, userState);
-        }
+        public event System.EventHandler<GetCommentsCompletedEventArgs1> GetCommentsCompleted;
         
         public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos, string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos) {
             return base.Channel.SetComments(out errorinfos, strBiblioRecPath, commentinfos);
@@ -25649,6 +24424,1234 @@ namespace DigitalPlatform.LibraryClient.localhost {
             }
             base.InvokeAsync(this.onBeginUrgentRecoverDelegate, new object[] {
                         strXML}, this.onEndUrgentRecoverDelegate, this.onUrgentRecoverCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult RepairBorrowInfo(out int nProcessedBorrowItems, out int nTotalBorrowItems, out string strOutputReaderBarcode, out string[] aDupPath, string strAction, string strReaderBarcode, string strItemBarcode, string strConfirmItemRecPath, int nStart, int nCount) {
+            return base.Channel.RepairBorrowInfo(out nProcessedBorrowItems, out nTotalBorrowItems, out strOutputReaderBarcode, out aDupPath, strAction, strReaderBarcode, strItemBarcode, strConfirmItemRecPath, nStart, nCount);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginRepairBorrowInfo(string strAction, string strReaderBarcode, string strItemBarcode, string strConfirmItemRecPath, int nStart, int nCount, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginRepairBorrowInfo(strAction, strReaderBarcode, strItemBarcode, strConfirmItemRecPath, nStart, nCount, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndRepairBorrowInfo(out int nProcessedBorrowItems, out int nTotalBorrowItems, out string strOutputReaderBarcode, out string[] aDupPath, System.IAsyncResult result) {
+            return base.Channel.EndRepairBorrowInfo(out nProcessedBorrowItems, out nTotalBorrowItems, out strOutputReaderBarcode, out aDupPath, result);
+        }
+        
+        private System.IAsyncResult OnBeginRepairBorrowInfo(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strAction = ((string)(inValues[0]));
+            string strReaderBarcode = ((string)(inValues[1]));
+            string strItemBarcode = ((string)(inValues[2]));
+            string strConfirmItemRecPath = ((string)(inValues[3]));
+            int nStart = ((int)(inValues[4]));
+            int nCount = ((int)(inValues[5]));
+            return this.BeginRepairBorrowInfo(strAction, strReaderBarcode, strItemBarcode, strConfirmItemRecPath, nStart, nCount, callback, asyncState);
+        }
+        
+        private object[] OnEndRepairBorrowInfo(System.IAsyncResult result) {
+            int nProcessedBorrowItems = this.GetDefaultValueForInitialization<int>();
+            int nTotalBorrowItems = this.GetDefaultValueForInitialization<int>();
+            string strOutputReaderBarcode = this.GetDefaultValueForInitialization<string>();
+            string[] aDupPath = this.GetDefaultValueForInitialization<string[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndRepairBorrowInfo(out nProcessedBorrowItems, out nTotalBorrowItems, out strOutputReaderBarcode, out aDupPath, result);
+            return new object[] {
+                    nProcessedBorrowItems,
+                    nTotalBorrowItems,
+                    strOutputReaderBarcode,
+                    aDupPath,
+                    retVal};
+        }
+        
+        private void OnRepairBorrowInfoCompleted(object state) {
+            if ((this.RepairBorrowInfoCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.RepairBorrowInfoCompleted(this, new RepairBorrowInfoCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void RepairBorrowInfoAsync(string strAction, string strReaderBarcode, string strItemBarcode, string strConfirmItemRecPath, int nStart, int nCount) {
+            this.RepairBorrowInfoAsync(strAction, strReaderBarcode, strItemBarcode, strConfirmItemRecPath, nStart, nCount, null);
+        }
+        
+        public void RepairBorrowInfoAsync(string strAction, string strReaderBarcode, string strItemBarcode, string strConfirmItemRecPath, int nStart, int nCount, object userState) {
+            if ((this.onBeginRepairBorrowInfoDelegate == null)) {
+                this.onBeginRepairBorrowInfoDelegate = new BeginOperationDelegate(this.OnBeginRepairBorrowInfo);
+            }
+            if ((this.onEndRepairBorrowInfoDelegate == null)) {
+                this.onEndRepairBorrowInfoDelegate = new EndOperationDelegate(this.OnEndRepairBorrowInfo);
+            }
+            if ((this.onRepairBorrowInfoCompletedDelegate == null)) {
+                this.onRepairBorrowInfoCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnRepairBorrowInfoCompleted);
+            }
+            base.InvokeAsync(this.onBeginRepairBorrowInfoDelegate, new object[] {
+                        strAction,
+                        strReaderBarcode,
+                        strItemBarcode,
+                        strConfirmItemRecPath,
+                        nStart,
+                        nCount}, this.onEndRepairBorrowInfoDelegate, this.onRepairBorrowInfoCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult PassGate(out string[] results, string strReaderBarcode, string strGateName, string strResultTypeList) {
+            return base.Channel.PassGate(out results, strReaderBarcode, strGateName, strResultTypeList);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginPassGate(string strReaderBarcode, string strGateName, string strResultTypeList, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginPassGate(strReaderBarcode, strGateName, strResultTypeList, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndPassGate(out string[] results, System.IAsyncResult result) {
+            return base.Channel.EndPassGate(out results, result);
+        }
+        
+        private System.IAsyncResult OnBeginPassGate(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strReaderBarcode = ((string)(inValues[0]));
+            string strGateName = ((string)(inValues[1]));
+            string strResultTypeList = ((string)(inValues[2]));
+            return this.BeginPassGate(strReaderBarcode, strGateName, strResultTypeList, callback, asyncState);
+        }
+        
+        private object[] OnEndPassGate(System.IAsyncResult result) {
+            string[] results = this.GetDefaultValueForInitialization<string[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndPassGate(out results, result);
+            return new object[] {
+                    results,
+                    retVal};
+        }
+        
+        private void OnPassGateCompleted(object state) {
+            if ((this.PassGateCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.PassGateCompleted(this, new PassGateCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void PassGateAsync(string strReaderBarcode, string strGateName, string strResultTypeList) {
+            this.PassGateAsync(strReaderBarcode, strGateName, strResultTypeList, null);
+        }
+        
+        public void PassGateAsync(string strReaderBarcode, string strGateName, string strResultTypeList, object userState) {
+            if ((this.onBeginPassGateDelegate == null)) {
+                this.onBeginPassGateDelegate = new BeginOperationDelegate(this.OnBeginPassGate);
+            }
+            if ((this.onEndPassGateDelegate == null)) {
+                this.onEndPassGateDelegate = new EndOperationDelegate(this.OnEndPassGate);
+            }
+            if ((this.onPassGateCompletedDelegate == null)) {
+                this.onPassGateCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnPassGateCompleted);
+            }
+            base.InvokeAsync(this.onBeginPassGateDelegate, new object[] {
+                        strReaderBarcode,
+                        strGateName,
+                        strResultTypeList}, this.onEndPassGateDelegate, this.onPassGateCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Foregift(out string strOutputReaderXml, out string strOutputID, string strAction, string strReaderBarcode) {
+            return base.Channel.Foregift(out strOutputReaderXml, out strOutputID, strAction, strReaderBarcode);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginForegift(string strAction, string strReaderBarcode, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginForegift(strAction, strReaderBarcode, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndForegift(out string strOutputReaderXml, out string strOutputID, System.IAsyncResult result) {
+            return base.Channel.EndForegift(out strOutputReaderXml, out strOutputID, result);
+        }
+        
+        private System.IAsyncResult OnBeginForegift(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strAction = ((string)(inValues[0]));
+            string strReaderBarcode = ((string)(inValues[1]));
+            return this.BeginForegift(strAction, strReaderBarcode, callback, asyncState);
+        }
+        
+        private object[] OnEndForegift(System.IAsyncResult result) {
+            string strOutputReaderXml = this.GetDefaultValueForInitialization<string>();
+            string strOutputID = this.GetDefaultValueForInitialization<string>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndForegift(out strOutputReaderXml, out strOutputID, result);
+            return new object[] {
+                    strOutputReaderXml,
+                    strOutputID,
+                    retVal};
+        }
+        
+        private void OnForegiftCompleted(object state) {
+            if ((this.ForegiftCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.ForegiftCompleted(this, new ForegiftCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void ForegiftAsync(string strAction, string strReaderBarcode) {
+            this.ForegiftAsync(strAction, strReaderBarcode, null);
+        }
+        
+        public void ForegiftAsync(string strAction, string strReaderBarcode, object userState) {
+            if ((this.onBeginForegiftDelegate == null)) {
+                this.onBeginForegiftDelegate = new BeginOperationDelegate(this.OnBeginForegift);
+            }
+            if ((this.onEndForegiftDelegate == null)) {
+                this.onEndForegiftDelegate = new EndOperationDelegate(this.OnEndForegift);
+            }
+            if ((this.onForegiftCompletedDelegate == null)) {
+                this.onForegiftCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnForegiftCompleted);
+            }
+            base.InvokeAsync(this.onBeginForegiftDelegate, new object[] {
+                        strAction,
+                        strReaderBarcode}, this.onEndForegiftDelegate, this.onForegiftCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Hire(out string strOutputReaderXml, out string strOutputID, string strAction, string strReaderBarcode) {
+            return base.Channel.Hire(out strOutputReaderXml, out strOutputID, strAction, strReaderBarcode);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginHire(string strAction, string strReaderBarcode, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginHire(strAction, strReaderBarcode, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndHire(out string strOutputReaderXml, out string strOutputID, System.IAsyncResult result) {
+            return base.Channel.EndHire(out strOutputReaderXml, out strOutputID, result);
+        }
+        
+        private System.IAsyncResult OnBeginHire(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strAction = ((string)(inValues[0]));
+            string strReaderBarcode = ((string)(inValues[1]));
+            return this.BeginHire(strAction, strReaderBarcode, callback, asyncState);
+        }
+        
+        private object[] OnEndHire(System.IAsyncResult result) {
+            string strOutputReaderXml = this.GetDefaultValueForInitialization<string>();
+            string strOutputID = this.GetDefaultValueForInitialization<string>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndHire(out strOutputReaderXml, out strOutputID, result);
+            return new object[] {
+                    strOutputReaderXml,
+                    strOutputID,
+                    retVal};
+        }
+        
+        private void OnHireCompleted(object state) {
+            if ((this.HireCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.HireCompleted(this, new HireCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void HireAsync(string strAction, string strReaderBarcode) {
+            this.HireAsync(strAction, strReaderBarcode, null);
+        }
+        
+        public void HireAsync(string strAction, string strReaderBarcode, object userState) {
+            if ((this.onBeginHireDelegate == null)) {
+                this.onBeginHireDelegate = new BeginOperationDelegate(this.OnBeginHire);
+            }
+            if ((this.onEndHireDelegate == null)) {
+                this.onEndHireDelegate = new EndOperationDelegate(this.OnEndHire);
+            }
+            if ((this.onHireCompletedDelegate == null)) {
+                this.onHireCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnHireCompleted);
+            }
+            base.InvokeAsync(this.onBeginHireDelegate, new object[] {
+                        strAction,
+                        strReaderBarcode}, this.onEndHireDelegate, this.onHireCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Settlement(string strAction, string[] ids) {
+            return base.Channel.Settlement(strAction, ids);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginSettlement(string strAction, string[] ids, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginSettlement(strAction, ids, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSettlement(System.IAsyncResult result) {
+            return base.Channel.EndSettlement(result);
+        }
+        
+        private System.IAsyncResult OnBeginSettlement(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strAction = ((string)(inValues[0]));
+            string[] ids = ((string[])(inValues[1]));
+            return this.BeginSettlement(strAction, ids, callback, asyncState);
+        }
+        
+        private object[] OnEndSettlement(System.IAsyncResult result) {
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSettlement(result);
+            return new object[] {
+                    retVal};
+        }
+        
+        private void OnSettlementCompleted(object state) {
+            if ((this.SettlementCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.SettlementCompleted(this, new SettlementCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void SettlementAsync(string strAction, string[] ids) {
+            this.SettlementAsync(strAction, ids, null);
+        }
+        
+        public void SettlementAsync(string strAction, string[] ids, object userState) {
+            if ((this.onBeginSettlementDelegate == null)) {
+                this.onBeginSettlementDelegate = new BeginOperationDelegate(this.OnBeginSettlement);
+            }
+            if ((this.onEndSettlementDelegate == null)) {
+                this.onEndSettlementDelegate = new EndOperationDelegate(this.OnEndSettlement);
+            }
+            if ((this.onSettlementCompletedDelegate == null)) {
+                this.onSettlementCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnSettlementCompleted);
+            }
+            base.InvokeAsync(this.onBeginSettlementDelegate, new object[] {
+                        strAction,
+                        ids}, this.onEndSettlementDelegate, this.onSettlementCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchOneClassCallNumber(out string strQueryXml, string strArrangeGroupName, string strClass, string strResultSetName) {
+            return base.Channel.SearchOneClassCallNumber(out strQueryXml, strArrangeGroupName, strClass, strResultSetName);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginSearchOneClassCallNumber(string strArrangeGroupName, string strClass, string strResultSetName, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginSearchOneClassCallNumber(strArrangeGroupName, strClass, strResultSetName, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchOneClassCallNumber(out string strQueryXml, System.IAsyncResult result) {
+            return base.Channel.EndSearchOneClassCallNumber(out strQueryXml, result);
+        }
+        
+        private System.IAsyncResult OnBeginSearchOneClassCallNumber(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strArrangeGroupName = ((string)(inValues[0]));
+            string strClass = ((string)(inValues[1]));
+            string strResultSetName = ((string)(inValues[2]));
+            return this.BeginSearchOneClassCallNumber(strArrangeGroupName, strClass, strResultSetName, callback, asyncState);
+        }
+        
+        private object[] OnEndSearchOneClassCallNumber(System.IAsyncResult result) {
+            string strQueryXml = this.GetDefaultValueForInitialization<string>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchOneClassCallNumber(out strQueryXml, result);
+            return new object[] {
+                    strQueryXml,
+                    retVal};
+        }
+        
+        private void OnSearchOneClassCallNumberCompleted(object state) {
+            if ((this.SearchOneClassCallNumberCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.SearchOneClassCallNumberCompleted(this, new SearchOneClassCallNumberCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void SearchOneClassCallNumberAsync(string strArrangeGroupName, string strClass, string strResultSetName) {
+            this.SearchOneClassCallNumberAsync(strArrangeGroupName, strClass, strResultSetName, null);
+        }
+        
+        public void SearchOneClassCallNumberAsync(string strArrangeGroupName, string strClass, string strResultSetName, object userState) {
+            if ((this.onBeginSearchOneClassCallNumberDelegate == null)) {
+                this.onBeginSearchOneClassCallNumberDelegate = new BeginOperationDelegate(this.OnBeginSearchOneClassCallNumber);
+            }
+            if ((this.onEndSearchOneClassCallNumberDelegate == null)) {
+                this.onEndSearchOneClassCallNumberDelegate = new EndOperationDelegate(this.OnEndSearchOneClassCallNumber);
+            }
+            if ((this.onSearchOneClassCallNumberCompletedDelegate == null)) {
+                this.onSearchOneClassCallNumberCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnSearchOneClassCallNumberCompleted);
+            }
+            base.InvokeAsync(this.onBeginSearchOneClassCallNumberDelegate, new object[] {
+                        strArrangeGroupName,
+                        strClass,
+                        strResultSetName}, this.onEndSearchOneClassCallNumberDelegate, this.onSearchOneClassCallNumberCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetCallNumberSearchResult(out DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[] searchresults, string strArrangeGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang) {
+            return base.Channel.GetCallNumberSearchResult(out searchresults, strArrangeGroupName, strResultSetName, lStart, lCount, strBrowseInfoStyle, strLang);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginGetCallNumberSearchResult(string strArrangeGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginGetCallNumberSearchResult(strArrangeGroupName, strResultSetName, lStart, lCount, strBrowseInfoStyle, strLang, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetCallNumberSearchResult(out DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[] searchresults, System.IAsyncResult result) {
+            return base.Channel.EndGetCallNumberSearchResult(out searchresults, result);
+        }
+        
+        private System.IAsyncResult OnBeginGetCallNumberSearchResult(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strArrangeGroupName = ((string)(inValues[0]));
+            string strResultSetName = ((string)(inValues[1]));
+            long lStart = ((long)(inValues[2]));
+            long lCount = ((long)(inValues[3]));
+            string strBrowseInfoStyle = ((string)(inValues[4]));
+            string strLang = ((string)(inValues[5]));
+            return this.BeginGetCallNumberSearchResult(strArrangeGroupName, strResultSetName, lStart, lCount, strBrowseInfoStyle, strLang, callback, asyncState);
+        }
+        
+        private object[] OnEndGetCallNumberSearchResult(System.IAsyncResult result) {
+            DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[] searchresults = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.CallNumberSearchResult[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetCallNumberSearchResult(out searchresults, result);
+            return new object[] {
+                    searchresults,
+                    retVal};
+        }
+        
+        private void OnGetCallNumberSearchResultCompleted(object state) {
+            if ((this.GetCallNumberSearchResultCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.GetCallNumberSearchResultCompleted(this, new GetCallNumberSearchResultCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void GetCallNumberSearchResultAsync(string strArrangeGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang) {
+            this.GetCallNumberSearchResultAsync(strArrangeGroupName, strResultSetName, lStart, lCount, strBrowseInfoStyle, strLang, null);
+        }
+        
+        public void GetCallNumberSearchResultAsync(string strArrangeGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang, object userState) {
+            if ((this.onBeginGetCallNumberSearchResultDelegate == null)) {
+                this.onBeginGetCallNumberSearchResultDelegate = new BeginOperationDelegate(this.OnBeginGetCallNumberSearchResult);
+            }
+            if ((this.onEndGetCallNumberSearchResultDelegate == null)) {
+                this.onEndGetCallNumberSearchResultDelegate = new EndOperationDelegate(this.OnEndGetCallNumberSearchResult);
+            }
+            if ((this.onGetCallNumberSearchResultCompletedDelegate == null)) {
+                this.onGetCallNumberSearchResultCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetCallNumberSearchResultCompleted);
+            }
+            base.InvokeAsync(this.onBeginGetCallNumberSearchResultDelegate, new object[] {
+                        strArrangeGroupName,
+                        strResultSetName,
+                        lStart,
+                        lCount,
+                        strBrowseInfoStyle,
+                        strLang}, this.onEndGetCallNumberSearchResultDelegate, this.onGetCallNumberSearchResultCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetOneClassTailNumber(out string strTailNumber, string strArrangeGroupName, string strClass) {
+            return base.Channel.GetOneClassTailNumber(out strTailNumber, strArrangeGroupName, strClass);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginGetOneClassTailNumber(string strArrangeGroupName, string strClass, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginGetOneClassTailNumber(strArrangeGroupName, strClass, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetOneClassTailNumber(out string strTailNumber, System.IAsyncResult result) {
+            return base.Channel.EndGetOneClassTailNumber(out strTailNumber, result);
+        }
+        
+        private System.IAsyncResult OnBeginGetOneClassTailNumber(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strArrangeGroupName = ((string)(inValues[0]));
+            string strClass = ((string)(inValues[1]));
+            return this.BeginGetOneClassTailNumber(strArrangeGroupName, strClass, callback, asyncState);
+        }
+        
+        private object[] OnEndGetOneClassTailNumber(System.IAsyncResult result) {
+            string strTailNumber = this.GetDefaultValueForInitialization<string>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetOneClassTailNumber(out strTailNumber, result);
+            return new object[] {
+                    strTailNumber,
+                    retVal};
+        }
+        
+        private void OnGetOneClassTailNumberCompleted(object state) {
+            if ((this.GetOneClassTailNumberCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.GetOneClassTailNumberCompleted(this, new GetOneClassTailNumberCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void GetOneClassTailNumberAsync(string strArrangeGroupName, string strClass) {
+            this.GetOneClassTailNumberAsync(strArrangeGroupName, strClass, null);
+        }
+        
+        public void GetOneClassTailNumberAsync(string strArrangeGroupName, string strClass, object userState) {
+            if ((this.onBeginGetOneClassTailNumberDelegate == null)) {
+                this.onBeginGetOneClassTailNumberDelegate = new BeginOperationDelegate(this.OnBeginGetOneClassTailNumber);
+            }
+            if ((this.onEndGetOneClassTailNumberDelegate == null)) {
+                this.onEndGetOneClassTailNumberDelegate = new EndOperationDelegate(this.OnEndGetOneClassTailNumber);
+            }
+            if ((this.onGetOneClassTailNumberCompletedDelegate == null)) {
+                this.onGetOneClassTailNumberCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetOneClassTailNumberCompleted);
+            }
+            base.InvokeAsync(this.onBeginGetOneClassTailNumberDelegate, new object[] {
+                        strArrangeGroupName,
+                        strClass}, this.onEndGetOneClassTailNumberDelegate, this.onGetOneClassTailNumberCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetOneClassTailNumber(out string strOutputNumber, string strAction, string strArrangeGroupName, string strClass, string strTestNumber) {
+            return base.Channel.SetOneClassTailNumber(out strOutputNumber, strAction, strArrangeGroupName, strClass, strTestNumber);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginSetOneClassTailNumber(string strAction, string strArrangeGroupName, string strClass, string strTestNumber, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginSetOneClassTailNumber(strAction, strArrangeGroupName, strClass, strTestNumber, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetOneClassTailNumber(out string strOutputNumber, System.IAsyncResult result) {
+            return base.Channel.EndSetOneClassTailNumber(out strOutputNumber, result);
+        }
+        
+        private System.IAsyncResult OnBeginSetOneClassTailNumber(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strAction = ((string)(inValues[0]));
+            string strArrangeGroupName = ((string)(inValues[1]));
+            string strClass = ((string)(inValues[2]));
+            string strTestNumber = ((string)(inValues[3]));
+            return this.BeginSetOneClassTailNumber(strAction, strArrangeGroupName, strClass, strTestNumber, callback, asyncState);
+        }
+        
+        private object[] OnEndSetOneClassTailNumber(System.IAsyncResult result) {
+            string strOutputNumber = this.GetDefaultValueForInitialization<string>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetOneClassTailNumber(out strOutputNumber, result);
+            return new object[] {
+                    strOutputNumber,
+                    retVal};
+        }
+        
+        private void OnSetOneClassTailNumberCompleted(object state) {
+            if ((this.SetOneClassTailNumberCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.SetOneClassTailNumberCompleted(this, new SetOneClassTailNumberCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void SetOneClassTailNumberAsync(string strAction, string strArrangeGroupName, string strClass, string strTestNumber) {
+            this.SetOneClassTailNumberAsync(strAction, strArrangeGroupName, strClass, strTestNumber, null);
+        }
+        
+        public void SetOneClassTailNumberAsync(string strAction, string strArrangeGroupName, string strClass, string strTestNumber, object userState) {
+            if ((this.onBeginSetOneClassTailNumberDelegate == null)) {
+                this.onBeginSetOneClassTailNumberDelegate = new BeginOperationDelegate(this.OnBeginSetOneClassTailNumber);
+            }
+            if ((this.onEndSetOneClassTailNumberDelegate == null)) {
+                this.onEndSetOneClassTailNumberDelegate = new EndOperationDelegate(this.OnEndSetOneClassTailNumber);
+            }
+            if ((this.onSetOneClassTailNumberCompletedDelegate == null)) {
+                this.onSetOneClassTailNumberCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnSetOneClassTailNumberCompleted);
+            }
+            base.InvokeAsync(this.onBeginSetOneClassTailNumberDelegate, new object[] {
+                        strAction,
+                        strArrangeGroupName,
+                        strClass,
+                        strTestNumber}, this.onEndSetOneClassTailNumberDelegate, this.onSetOneClassTailNumberCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchUsedZhongcihao(out string strQueryXml, string strZhongcihaoGroupName, string strClass, string strResultSetName) {
+            return base.Channel.SearchUsedZhongcihao(out strQueryXml, strZhongcihaoGroupName, strClass, strResultSetName);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginSearchUsedZhongcihao(string strZhongcihaoGroupName, string strClass, string strResultSetName, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginSearchUsedZhongcihao(strZhongcihaoGroupName, strClass, strResultSetName, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchUsedZhongcihao(out string strQueryXml, System.IAsyncResult result) {
+            return base.Channel.EndSearchUsedZhongcihao(out strQueryXml, result);
+        }
+        
+        private System.IAsyncResult OnBeginSearchUsedZhongcihao(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strZhongcihaoGroupName = ((string)(inValues[0]));
+            string strClass = ((string)(inValues[1]));
+            string strResultSetName = ((string)(inValues[2]));
+            return this.BeginSearchUsedZhongcihao(strZhongcihaoGroupName, strClass, strResultSetName, callback, asyncState);
+        }
+        
+        private object[] OnEndSearchUsedZhongcihao(System.IAsyncResult result) {
+            string strQueryXml = this.GetDefaultValueForInitialization<string>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchUsedZhongcihao(out strQueryXml, result);
+            return new object[] {
+                    strQueryXml,
+                    retVal};
+        }
+        
+        private void OnSearchUsedZhongcihaoCompleted(object state) {
+            if ((this.SearchUsedZhongcihaoCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.SearchUsedZhongcihaoCompleted(this, new SearchUsedZhongcihaoCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void SearchUsedZhongcihaoAsync(string strZhongcihaoGroupName, string strClass, string strResultSetName) {
+            this.SearchUsedZhongcihaoAsync(strZhongcihaoGroupName, strClass, strResultSetName, null);
+        }
+        
+        public void SearchUsedZhongcihaoAsync(string strZhongcihaoGroupName, string strClass, string strResultSetName, object userState) {
+            if ((this.onBeginSearchUsedZhongcihaoDelegate == null)) {
+                this.onBeginSearchUsedZhongcihaoDelegate = new BeginOperationDelegate(this.OnBeginSearchUsedZhongcihao);
+            }
+            if ((this.onEndSearchUsedZhongcihaoDelegate == null)) {
+                this.onEndSearchUsedZhongcihaoDelegate = new EndOperationDelegate(this.OnEndSearchUsedZhongcihao);
+            }
+            if ((this.onSearchUsedZhongcihaoCompletedDelegate == null)) {
+                this.onSearchUsedZhongcihaoCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnSearchUsedZhongcihaoCompleted);
+            }
+            base.InvokeAsync(this.onBeginSearchUsedZhongcihaoDelegate, new object[] {
+                        strZhongcihaoGroupName,
+                        strClass,
+                        strResultSetName}, this.onEndSearchUsedZhongcihaoDelegate, this.onSearchUsedZhongcihaoCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetZhongcihaoSearchResult(out DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[] searchresults, string strZhongcihaoGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang) {
+            return base.Channel.GetZhongcihaoSearchResult(out searchresults, strZhongcihaoGroupName, strResultSetName, lStart, lCount, strBrowseInfoStyle, strLang);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginGetZhongcihaoSearchResult(string strZhongcihaoGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginGetZhongcihaoSearchResult(strZhongcihaoGroupName, strResultSetName, lStart, lCount, strBrowseInfoStyle, strLang, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetZhongcihaoSearchResult(out DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[] searchresults, System.IAsyncResult result) {
+            return base.Channel.EndGetZhongcihaoSearchResult(out searchresults, result);
+        }
+        
+        private System.IAsyncResult OnBeginGetZhongcihaoSearchResult(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strZhongcihaoGroupName = ((string)(inValues[0]));
+            string strResultSetName = ((string)(inValues[1]));
+            long lStart = ((long)(inValues[2]));
+            long lCount = ((long)(inValues[3]));
+            string strBrowseInfoStyle = ((string)(inValues[4]));
+            string strLang = ((string)(inValues[5]));
+            return this.BeginGetZhongcihaoSearchResult(strZhongcihaoGroupName, strResultSetName, lStart, lCount, strBrowseInfoStyle, strLang, callback, asyncState);
+        }
+        
+        private object[] OnEndGetZhongcihaoSearchResult(System.IAsyncResult result) {
+            DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[] searchresults = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetZhongcihaoSearchResult(out searchresults, result);
+            return new object[] {
+                    searchresults,
+                    retVal};
+        }
+        
+        private void OnGetZhongcihaoSearchResultCompleted(object state) {
+            if ((this.GetZhongcihaoSearchResultCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.GetZhongcihaoSearchResultCompleted(this, new GetZhongcihaoSearchResultCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void GetZhongcihaoSearchResultAsync(string strZhongcihaoGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang) {
+            this.GetZhongcihaoSearchResultAsync(strZhongcihaoGroupName, strResultSetName, lStart, lCount, strBrowseInfoStyle, strLang, null);
+        }
+        
+        public void GetZhongcihaoSearchResultAsync(string strZhongcihaoGroupName, string strResultSetName, long lStart, long lCount, string strBrowseInfoStyle, string strLang, object userState) {
+            if ((this.onBeginGetZhongcihaoSearchResultDelegate == null)) {
+                this.onBeginGetZhongcihaoSearchResultDelegate = new BeginOperationDelegate(this.OnBeginGetZhongcihaoSearchResult);
+            }
+            if ((this.onEndGetZhongcihaoSearchResultDelegate == null)) {
+                this.onEndGetZhongcihaoSearchResultDelegate = new EndOperationDelegate(this.OnEndGetZhongcihaoSearchResult);
+            }
+            if ((this.onGetZhongcihaoSearchResultCompletedDelegate == null)) {
+                this.onGetZhongcihaoSearchResultCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetZhongcihaoSearchResultCompleted);
+            }
+            base.InvokeAsync(this.onBeginGetZhongcihaoSearchResultDelegate, new object[] {
+                        strZhongcihaoGroupName,
+                        strResultSetName,
+                        lStart,
+                        lCount,
+                        strBrowseInfoStyle,
+                        strLang}, this.onEndGetZhongcihaoSearchResultDelegate, this.onGetZhongcihaoSearchResultCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetZhongcihaoTailNumber(out string strTailNumber, string strZhongcihaoGroupName, string strClass) {
+            return base.Channel.GetZhongcihaoTailNumber(out strTailNumber, strZhongcihaoGroupName, strClass);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginGetZhongcihaoTailNumber(string strZhongcihaoGroupName, string strClass, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginGetZhongcihaoTailNumber(strZhongcihaoGroupName, strClass, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetZhongcihaoTailNumber(out string strTailNumber, System.IAsyncResult result) {
+            return base.Channel.EndGetZhongcihaoTailNumber(out strTailNumber, result);
+        }
+        
+        private System.IAsyncResult OnBeginGetZhongcihaoTailNumber(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strZhongcihaoGroupName = ((string)(inValues[0]));
+            string strClass = ((string)(inValues[1]));
+            return this.BeginGetZhongcihaoTailNumber(strZhongcihaoGroupName, strClass, callback, asyncState);
+        }
+        
+        private object[] OnEndGetZhongcihaoTailNumber(System.IAsyncResult result) {
+            string strTailNumber = this.GetDefaultValueForInitialization<string>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetZhongcihaoTailNumber(out strTailNumber, result);
+            return new object[] {
+                    strTailNumber,
+                    retVal};
+        }
+        
+        private void OnGetZhongcihaoTailNumberCompleted(object state) {
+            if ((this.GetZhongcihaoTailNumberCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.GetZhongcihaoTailNumberCompleted(this, new GetZhongcihaoTailNumberCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void GetZhongcihaoTailNumberAsync(string strZhongcihaoGroupName, string strClass) {
+            this.GetZhongcihaoTailNumberAsync(strZhongcihaoGroupName, strClass, null);
+        }
+        
+        public void GetZhongcihaoTailNumberAsync(string strZhongcihaoGroupName, string strClass, object userState) {
+            if ((this.onBeginGetZhongcihaoTailNumberDelegate == null)) {
+                this.onBeginGetZhongcihaoTailNumberDelegate = new BeginOperationDelegate(this.OnBeginGetZhongcihaoTailNumber);
+            }
+            if ((this.onEndGetZhongcihaoTailNumberDelegate == null)) {
+                this.onEndGetZhongcihaoTailNumberDelegate = new EndOperationDelegate(this.OnEndGetZhongcihaoTailNumber);
+            }
+            if ((this.onGetZhongcihaoTailNumberCompletedDelegate == null)) {
+                this.onGetZhongcihaoTailNumberCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetZhongcihaoTailNumberCompleted);
+            }
+            base.InvokeAsync(this.onBeginGetZhongcihaoTailNumberDelegate, new object[] {
+                        strZhongcihaoGroupName,
+                        strClass}, this.onEndGetZhongcihaoTailNumberDelegate, this.onGetZhongcihaoTailNumberCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetZhongcihaoTailNumber(out string strOutputNumber, string strAction, string strZhongcihaoGroupName, string strClass, string strTestNumber) {
+            return base.Channel.SetZhongcihaoTailNumber(out strOutputNumber, strAction, strZhongcihaoGroupName, strClass, strTestNumber);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginSetZhongcihaoTailNumber(string strAction, string strZhongcihaoGroupName, string strClass, string strTestNumber, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginSetZhongcihaoTailNumber(strAction, strZhongcihaoGroupName, strClass, strTestNumber, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetZhongcihaoTailNumber(out string strOutputNumber, System.IAsyncResult result) {
+            return base.Channel.EndSetZhongcihaoTailNumber(out strOutputNumber, result);
+        }
+        
+        private System.IAsyncResult OnBeginSetZhongcihaoTailNumber(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strAction = ((string)(inValues[0]));
+            string strZhongcihaoGroupName = ((string)(inValues[1]));
+            string strClass = ((string)(inValues[2]));
+            string strTestNumber = ((string)(inValues[3]));
+            return this.BeginSetZhongcihaoTailNumber(strAction, strZhongcihaoGroupName, strClass, strTestNumber, callback, asyncState);
+        }
+        
+        private object[] OnEndSetZhongcihaoTailNumber(System.IAsyncResult result) {
+            string strOutputNumber = this.GetDefaultValueForInitialization<string>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetZhongcihaoTailNumber(out strOutputNumber, result);
+            return new object[] {
+                    strOutputNumber,
+                    retVal};
+        }
+        
+        private void OnSetZhongcihaoTailNumberCompleted(object state) {
+            if ((this.SetZhongcihaoTailNumberCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.SetZhongcihaoTailNumberCompleted(this, new SetZhongcihaoTailNumberCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void SetZhongcihaoTailNumberAsync(string strAction, string strZhongcihaoGroupName, string strClass, string strTestNumber) {
+            this.SetZhongcihaoTailNumberAsync(strAction, strZhongcihaoGroupName, strClass, strTestNumber, null);
+        }
+        
+        public void SetZhongcihaoTailNumberAsync(string strAction, string strZhongcihaoGroupName, string strClass, string strTestNumber, object userState) {
+            if ((this.onBeginSetZhongcihaoTailNumberDelegate == null)) {
+                this.onBeginSetZhongcihaoTailNumberDelegate = new BeginOperationDelegate(this.OnBeginSetZhongcihaoTailNumber);
+            }
+            if ((this.onEndSetZhongcihaoTailNumberDelegate == null)) {
+                this.onEndSetZhongcihaoTailNumberDelegate = new EndOperationDelegate(this.OnEndSetZhongcihaoTailNumber);
+            }
+            if ((this.onSetZhongcihaoTailNumberCompletedDelegate == null)) {
+                this.onSetZhongcihaoTailNumberCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnSetZhongcihaoTailNumberCompleted);
+            }
+            base.InvokeAsync(this.onBeginSetZhongcihaoTailNumberDelegate, new object[] {
+                        strAction,
+                        strZhongcihaoGroupName,
+                        strClass,
+                        strTestNumber}, this.onEndSetZhongcihaoTailNumberDelegate, this.onSetZhongcihaoTailNumberCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchDup(out string strUsedProjectName, string strOriginBiblioRecPath, string strOriginBiblioRecXml, string strProjectName, string strStyle) {
+            return base.Channel.SearchDup(out strUsedProjectName, strOriginBiblioRecPath, strOriginBiblioRecXml, strProjectName, strStyle);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginSearchDup(string strOriginBiblioRecPath, string strOriginBiblioRecXml, string strProjectName, string strStyle, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginSearchDup(strOriginBiblioRecPath, strOriginBiblioRecXml, strProjectName, strStyle, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchDup(out string strUsedProjectName, System.IAsyncResult result) {
+            return base.Channel.EndSearchDup(out strUsedProjectName, result);
+        }
+        
+        private System.IAsyncResult OnBeginSearchDup(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strOriginBiblioRecPath = ((string)(inValues[0]));
+            string strOriginBiblioRecXml = ((string)(inValues[1]));
+            string strProjectName = ((string)(inValues[2]));
+            string strStyle = ((string)(inValues[3]));
+            return this.BeginSearchDup(strOriginBiblioRecPath, strOriginBiblioRecXml, strProjectName, strStyle, callback, asyncState);
+        }
+        
+        private object[] OnEndSearchDup(System.IAsyncResult result) {
+            string strUsedProjectName = this.GetDefaultValueForInitialization<string>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSearchDup(out strUsedProjectName, result);
+            return new object[] {
+                    strUsedProjectName,
+                    retVal};
+        }
+        
+        private void OnSearchDupCompleted(object state) {
+            if ((this.SearchDupCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.SearchDupCompleted(this, new SearchDupCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void SearchDupAsync(string strOriginBiblioRecPath, string strOriginBiblioRecXml, string strProjectName, string strStyle) {
+            this.SearchDupAsync(strOriginBiblioRecPath, strOriginBiblioRecXml, strProjectName, strStyle, null);
+        }
+        
+        public void SearchDupAsync(string strOriginBiblioRecPath, string strOriginBiblioRecXml, string strProjectName, string strStyle, object userState) {
+            if ((this.onBeginSearchDupDelegate == null)) {
+                this.onBeginSearchDupDelegate = new BeginOperationDelegate(this.OnBeginSearchDup);
+            }
+            if ((this.onEndSearchDupDelegate == null)) {
+                this.onEndSearchDupDelegate = new EndOperationDelegate(this.OnEndSearchDup);
+            }
+            if ((this.onSearchDupCompletedDelegate == null)) {
+                this.onSearchDupCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnSearchDupCompleted);
+            }
+            base.InvokeAsync(this.onBeginSearchDupDelegate, new object[] {
+                        strOriginBiblioRecPath,
+                        strOriginBiblioRecXml,
+                        strProjectName,
+                        strStyle}, this.onEndSearchDupDelegate, this.onSearchDupCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetDupSearchResult(out DigitalPlatform.LibraryClient.localhost.DupSearchResult[] searchresults, long lStart, long lCount, string strBrowseInfoStyle) {
+            return base.Channel.GetDupSearchResult(out searchresults, lStart, lCount, strBrowseInfoStyle);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginGetDupSearchResult(long lStart, long lCount, string strBrowseInfoStyle, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginGetDupSearchResult(lStart, lCount, strBrowseInfoStyle, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetDupSearchResult(out DigitalPlatform.LibraryClient.localhost.DupSearchResult[] searchresults, System.IAsyncResult result) {
+            return base.Channel.EndGetDupSearchResult(out searchresults, result);
+        }
+        
+        private System.IAsyncResult OnBeginGetDupSearchResult(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            long lStart = ((long)(inValues[0]));
+            long lCount = ((long)(inValues[1]));
+            string strBrowseInfoStyle = ((string)(inValues[2]));
+            return this.BeginGetDupSearchResult(lStart, lCount, strBrowseInfoStyle, callback, asyncState);
+        }
+        
+        private object[] OnEndGetDupSearchResult(System.IAsyncResult result) {
+            DigitalPlatform.LibraryClient.localhost.DupSearchResult[] searchresults = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.DupSearchResult[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetDupSearchResult(out searchresults, result);
+            return new object[] {
+                    searchresults,
+                    retVal};
+        }
+        
+        private void OnGetDupSearchResultCompleted(object state) {
+            if ((this.GetDupSearchResultCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.GetDupSearchResultCompleted(this, new GetDupSearchResultCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void GetDupSearchResultAsync(long lStart, long lCount, string strBrowseInfoStyle) {
+            this.GetDupSearchResultAsync(lStart, lCount, strBrowseInfoStyle, null);
+        }
+        
+        public void GetDupSearchResultAsync(long lStart, long lCount, string strBrowseInfoStyle, object userState) {
+            if ((this.onBeginGetDupSearchResultDelegate == null)) {
+                this.onBeginGetDupSearchResultDelegate = new BeginOperationDelegate(this.OnBeginGetDupSearchResult);
+            }
+            if ((this.onEndGetDupSearchResultDelegate == null)) {
+                this.onEndGetDupSearchResultDelegate = new EndOperationDelegate(this.OnEndGetDupSearchResult);
+            }
+            if ((this.onGetDupSearchResultCompletedDelegate == null)) {
+                this.onGetDupSearchResultCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetDupSearchResultCompleted);
+            }
+            base.InvokeAsync(this.onBeginGetDupSearchResultDelegate, new object[] {
+                        lStart,
+                        lCount,
+                        strBrowseInfoStyle}, this.onEndGetDupSearchResultDelegate, this.onGetDupSearchResultCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult ListDupProjectInfos(out DigitalPlatform.LibraryClient.localhost.DupProjectInfo[] results, string strOriginBiblioDbName) {
+            return base.Channel.ListDupProjectInfos(out results, strOriginBiblioDbName);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginListDupProjectInfos(string strOriginBiblioDbName, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginListDupProjectInfos(strOriginBiblioDbName, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndListDupProjectInfos(out DigitalPlatform.LibraryClient.localhost.DupProjectInfo[] results, System.IAsyncResult result) {
+            return base.Channel.EndListDupProjectInfos(out results, result);
+        }
+        
+        private System.IAsyncResult OnBeginListDupProjectInfos(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strOriginBiblioDbName = ((string)(inValues[0]));
+            return this.BeginListDupProjectInfos(strOriginBiblioDbName, callback, asyncState);
+        }
+        
+        private object[] OnEndListDupProjectInfos(System.IAsyncResult result) {
+            DigitalPlatform.LibraryClient.localhost.DupProjectInfo[] results = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.DupProjectInfo[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndListDupProjectInfos(out results, result);
+            return new object[] {
+                    results,
+                    retVal};
+        }
+        
+        private void OnListDupProjectInfosCompleted(object state) {
+            if ((this.ListDupProjectInfosCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.ListDupProjectInfosCompleted(this, new ListDupProjectInfosCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void ListDupProjectInfosAsync(string strOriginBiblioDbName) {
+            this.ListDupProjectInfosAsync(strOriginBiblioDbName, null);
+        }
+        
+        public void ListDupProjectInfosAsync(string strOriginBiblioDbName, object userState) {
+            if ((this.onBeginListDupProjectInfosDelegate == null)) {
+                this.onBeginListDupProjectInfosDelegate = new BeginOperationDelegate(this.OnBeginListDupProjectInfos);
+            }
+            if ((this.onEndListDupProjectInfosDelegate == null)) {
+                this.onEndListDupProjectInfosDelegate = new EndOperationDelegate(this.OnEndListDupProjectInfos);
+            }
+            if ((this.onListDupProjectInfosCompletedDelegate == null)) {
+                this.onListDupProjectInfosCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnListDupProjectInfosCompleted);
+            }
+            base.InvokeAsync(this.onBeginListDupProjectInfosDelegate, new object[] {
+                        strOriginBiblioDbName}, this.onEndListDupProjectInfosDelegate, this.onListDupProjectInfosCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetUtilInfo(out string strValue, string strAction, string strDbName, string strFrom, string strKey, string strValueAttrName) {
+            return base.Channel.GetUtilInfo(out strValue, strAction, strDbName, strFrom, strKey, strValueAttrName);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginGetUtilInfo(string strAction, string strDbName, string strFrom, string strKey, string strValueAttrName, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginGetUtilInfo(strAction, strDbName, strFrom, strKey, strValueAttrName, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetUtilInfo(out string strValue, System.IAsyncResult result) {
+            return base.Channel.EndGetUtilInfo(out strValue, result);
+        }
+        
+        private System.IAsyncResult OnBeginGetUtilInfo(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strAction = ((string)(inValues[0]));
+            string strDbName = ((string)(inValues[1]));
+            string strFrom = ((string)(inValues[2]));
+            string strKey = ((string)(inValues[3]));
+            string strValueAttrName = ((string)(inValues[4]));
+            return this.BeginGetUtilInfo(strAction, strDbName, strFrom, strKey, strValueAttrName, callback, asyncState);
+        }
+        
+        private object[] OnEndGetUtilInfo(System.IAsyncResult result) {
+            string strValue = this.GetDefaultValueForInitialization<string>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetUtilInfo(out strValue, result);
+            return new object[] {
+                    strValue,
+                    retVal};
+        }
+        
+        private void OnGetUtilInfoCompleted(object state) {
+            if ((this.GetUtilInfoCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.GetUtilInfoCompleted(this, new GetUtilInfoCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void GetUtilInfoAsync(string strAction, string strDbName, string strFrom, string strKey, string strValueAttrName) {
+            this.GetUtilInfoAsync(strAction, strDbName, strFrom, strKey, strValueAttrName, null);
+        }
+        
+        public void GetUtilInfoAsync(string strAction, string strDbName, string strFrom, string strKey, string strValueAttrName, object userState) {
+            if ((this.onBeginGetUtilInfoDelegate == null)) {
+                this.onBeginGetUtilInfoDelegate = new BeginOperationDelegate(this.OnBeginGetUtilInfo);
+            }
+            if ((this.onEndGetUtilInfoDelegate == null)) {
+                this.onEndGetUtilInfoDelegate = new EndOperationDelegate(this.OnEndGetUtilInfo);
+            }
+            if ((this.onGetUtilInfoCompletedDelegate == null)) {
+                this.onGetUtilInfoCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetUtilInfoCompleted);
+            }
+            base.InvokeAsync(this.onBeginGetUtilInfoDelegate, new object[] {
+                        strAction,
+                        strDbName,
+                        strFrom,
+                        strKey,
+                        strValueAttrName}, this.onEndGetUtilInfoDelegate, this.onGetUtilInfoCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetUtilInfo(string strAction, string strDbName, string strFrom, string strRootElementName, string strKeyAttrName, string strValueAttrName, string strKey, string strValue) {
+            return base.Channel.SetUtilInfo(strAction, strDbName, strFrom, strRootElementName, strKeyAttrName, strValueAttrName, strKey, strValue);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginSetUtilInfo(string strAction, string strDbName, string strFrom, string strRootElementName, string strKeyAttrName, string strValueAttrName, string strKey, string strValue, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginSetUtilInfo(strAction, strDbName, strFrom, strRootElementName, strKeyAttrName, strValueAttrName, strKey, strValue, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetUtilInfo(System.IAsyncResult result) {
+            return base.Channel.EndSetUtilInfo(result);
+        }
+        
+        private System.IAsyncResult OnBeginSetUtilInfo(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strAction = ((string)(inValues[0]));
+            string strDbName = ((string)(inValues[1]));
+            string strFrom = ((string)(inValues[2]));
+            string strRootElementName = ((string)(inValues[3]));
+            string strKeyAttrName = ((string)(inValues[4]));
+            string strValueAttrName = ((string)(inValues[5]));
+            string strKey = ((string)(inValues[6]));
+            string strValue = ((string)(inValues[7]));
+            return this.BeginSetUtilInfo(strAction, strDbName, strFrom, strRootElementName, strKeyAttrName, strValueAttrName, strKey, strValue, callback, asyncState);
+        }
+        
+        private object[] OnEndSetUtilInfo(System.IAsyncResult result) {
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetUtilInfo(result);
+            return new object[] {
+                    retVal};
+        }
+        
+        private void OnSetUtilInfoCompleted(object state) {
+            if ((this.SetUtilInfoCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.SetUtilInfoCompleted(this, new SetUtilInfoCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void SetUtilInfoAsync(string strAction, string strDbName, string strFrom, string strRootElementName, string strKeyAttrName, string strValueAttrName, string strKey, string strValue) {
+            this.SetUtilInfoAsync(strAction, strDbName, strFrom, strRootElementName, strKeyAttrName, strValueAttrName, strKey, strValue, null);
+        }
+        
+        public void SetUtilInfoAsync(string strAction, string strDbName, string strFrom, string strRootElementName, string strKeyAttrName, string strValueAttrName, string strKey, string strValue, object userState) {
+            if ((this.onBeginSetUtilInfoDelegate == null)) {
+                this.onBeginSetUtilInfoDelegate = new BeginOperationDelegate(this.OnBeginSetUtilInfo);
+            }
+            if ((this.onEndSetUtilInfoDelegate == null)) {
+                this.onEndSetUtilInfoDelegate = new EndOperationDelegate(this.OnEndSetUtilInfo);
+            }
+            if ((this.onSetUtilInfoCompletedDelegate == null)) {
+                this.onSetUtilInfoCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnSetUtilInfoCompleted);
+            }
+            base.InvokeAsync(this.onBeginSetUtilInfoDelegate, new object[] {
+                        strAction,
+                        strDbName,
+                        strFrom,
+                        strRootElementName,
+                        strKeyAttrName,
+                        strValueAttrName,
+                        strKey,
+                        strValue}, this.onEndSetUtilInfoDelegate, this.onSetUtilInfoCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetRes(out byte[] baContent, out string strMetadata, out string strOutputResPath, out byte[] baOutputTimestamp, string strResPath, long nStart, int nLength, string strStyle) {
+            return base.Channel.GetRes(out baContent, out strMetadata, out strOutputResPath, out baOutputTimestamp, strResPath, nStart, nLength, strStyle);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginGetRes(string strResPath, long nStart, int nLength, string strStyle, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginGetRes(strResPath, nStart, nLength, strStyle, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetRes(out byte[] baContent, out string strMetadata, out string strOutputResPath, out byte[] baOutputTimestamp, System.IAsyncResult result) {
+            return base.Channel.EndGetRes(out baContent, out strMetadata, out strOutputResPath, out baOutputTimestamp, result);
+        }
+        
+        private System.IAsyncResult OnBeginGetRes(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strResPath = ((string)(inValues[0]));
+            long nStart = ((long)(inValues[1]));
+            int nLength = ((int)(inValues[2]));
+            string strStyle = ((string)(inValues[3]));
+            return this.BeginGetRes(strResPath, nStart, nLength, strStyle, callback, asyncState);
+        }
+        
+        private object[] OnEndGetRes(System.IAsyncResult result) {
+            byte[] baContent = this.GetDefaultValueForInitialization<byte[]>();
+            string strMetadata = this.GetDefaultValueForInitialization<string>();
+            string strOutputResPath = this.GetDefaultValueForInitialization<string>();
+            byte[] baOutputTimestamp = this.GetDefaultValueForInitialization<byte[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetRes(out baContent, out strMetadata, out strOutputResPath, out baOutputTimestamp, result);
+            return new object[] {
+                    baContent,
+                    strMetadata,
+                    strOutputResPath,
+                    baOutputTimestamp,
+                    retVal};
+        }
+        
+        private void OnGetResCompleted(object state) {
+            if ((this.GetResCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.GetResCompleted(this, new GetResCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void GetResAsync(string strResPath, long nStart, int nLength, string strStyle) {
+            this.GetResAsync(strResPath, nStart, nLength, strStyle, null);
+        }
+        
+        public void GetResAsync(string strResPath, long nStart, int nLength, string strStyle, object userState) {
+            if ((this.onBeginGetResDelegate == null)) {
+                this.onBeginGetResDelegate = new BeginOperationDelegate(this.OnBeginGetRes);
+            }
+            if ((this.onEndGetResDelegate == null)) {
+                this.onEndGetResDelegate = new EndOperationDelegate(this.OnEndGetRes);
+            }
+            if ((this.onGetResCompletedDelegate == null)) {
+                this.onGetResCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetResCompleted);
+            }
+            base.InvokeAsync(this.onBeginGetResDelegate, new object[] {
+                        strResPath,
+                        nStart,
+                        nLength,
+                        strStyle}, this.onEndGetResDelegate, this.onGetResCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult WriteRes(out string strOutputResPath, out byte[] baOutputTimestamp, string strResPath, string strRanges, long lTotalLength, byte[] baContent, string strMetadata, string strStyle, byte[] baInputTimestamp) {
+            return base.Channel.WriteRes(out strOutputResPath, out baOutputTimestamp, strResPath, strRanges, lTotalLength, baContent, strMetadata, strStyle, baInputTimestamp);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginWriteRes(string strResPath, string strRanges, long lTotalLength, byte[] baContent, string strMetadata, string strStyle, byte[] baInputTimestamp, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginWriteRes(strResPath, strRanges, lTotalLength, baContent, strMetadata, strStyle, baInputTimestamp, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndWriteRes(out string strOutputResPath, out byte[] baOutputTimestamp, System.IAsyncResult result) {
+            return base.Channel.EndWriteRes(out strOutputResPath, out baOutputTimestamp, result);
+        }
+        
+        private System.IAsyncResult OnBeginWriteRes(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strResPath = ((string)(inValues[0]));
+            string strRanges = ((string)(inValues[1]));
+            long lTotalLength = ((long)(inValues[2]));
+            byte[] baContent = ((byte[])(inValues[3]));
+            string strMetadata = ((string)(inValues[4]));
+            string strStyle = ((string)(inValues[5]));
+            byte[] baInputTimestamp = ((byte[])(inValues[6]));
+            return this.BeginWriteRes(strResPath, strRanges, lTotalLength, baContent, strMetadata, strStyle, baInputTimestamp, callback, asyncState);
+        }
+        
+        private object[] OnEndWriteRes(System.IAsyncResult result) {
+            string strOutputResPath = this.GetDefaultValueForInitialization<string>();
+            byte[] baOutputTimestamp = this.GetDefaultValueForInitialization<byte[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndWriteRes(out strOutputResPath, out baOutputTimestamp, result);
+            return new object[] {
+                    strOutputResPath,
+                    baOutputTimestamp,
+                    retVal};
+        }
+        
+        private void OnWriteResCompleted(object state) {
+            if ((this.WriteResCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.WriteResCompleted(this, new WriteResCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void WriteResAsync(string strResPath, string strRanges, long lTotalLength, byte[] baContent, string strMetadata, string strStyle, byte[] baInputTimestamp) {
+            this.WriteResAsync(strResPath, strRanges, lTotalLength, baContent, strMetadata, strStyle, baInputTimestamp, null);
+        }
+        
+        public void WriteResAsync(string strResPath, string strRanges, long lTotalLength, byte[] baContent, string strMetadata, string strStyle, byte[] baInputTimestamp, object userState) {
+            if ((this.onBeginWriteResDelegate == null)) {
+                this.onBeginWriteResDelegate = new BeginOperationDelegate(this.OnBeginWriteRes);
+            }
+            if ((this.onEndWriteResDelegate == null)) {
+                this.onEndWriteResDelegate = new EndOperationDelegate(this.OnEndWriteRes);
+            }
+            if ((this.onWriteResCompletedDelegate == null)) {
+                this.onWriteResCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnWriteResCompleted);
+            }
+            base.InvokeAsync(this.onBeginWriteResDelegate, new object[] {
+                        strResPath,
+                        strRanges,
+                        lTotalLength,
+                        baContent,
+                        strMetadata,
+                        strStyle,
+                        baInputTimestamp}, this.onEndWriteResDelegate, this.onWriteResCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang) {
+            return base.Channel.GetComments(out commentinfos, strBiblioRecPath, lStart, lCount, strStyle, strLang);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginGetComments(string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginGetComments(strBiblioRecPath, lStart, lCount, strStyle, strLang, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, System.IAsyncResult result) {
+            return base.Channel.EndGetComments(out commentinfos, result);
+        }
+        
+        private System.IAsyncResult OnBeginGetComments(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strBiblioRecPath = ((string)(inValues[0]));
+            long lStart = ((long)(inValues[1]));
+            long lCount = ((long)(inValues[2]));
+            string strStyle = ((string)(inValues[3]));
+            string strLang = ((string)(inValues[4]));
+            return this.BeginGetComments(strBiblioRecPath, lStart, lCount, strStyle, strLang, callback, asyncState);
+        }
+        
+        private object[] OnEndGetComments(System.IAsyncResult result) {
+            DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.EntityInfo[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetComments(out commentinfos, result);
+            return new object[] {
+                    commentinfos,
+                    retVal};
+        }
+        
+        private void OnGetCommentsCompleted(object state) {
+            if ((this.GetCommentsCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.GetCommentsCompleted(this, new GetCommentsCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void GetCommentsAsync(string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang) {
+            this.GetCommentsAsync(strBiblioRecPath, lStart, lCount, strStyle, strLang, null);
+        }
+        
+        public void GetCommentsAsync(string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang, object userState) {
+            if ((this.onBeginGetCommentsDelegate == null)) {
+                this.onBeginGetCommentsDelegate = new BeginOperationDelegate(this.OnBeginGetComments);
+            }
+            if ((this.onEndGetCommentsDelegate == null)) {
+                this.onEndGetCommentsDelegate = new EndOperationDelegate(this.OnEndGetComments);
+            }
+            if ((this.onGetCommentsCompletedDelegate == null)) {
+                this.onGetCommentsCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetCommentsCompleted);
+            }
+            base.InvokeAsync(this.onBeginGetCommentsDelegate, new object[] {
+                        strBiblioRecPath,
+                        lStart,
+                        lCount,
+                        strStyle,
+                        strLang}, this.onEndGetCommentsDelegate, this.onGetCommentsCompletedDelegate, userState);
         }
     }
 }

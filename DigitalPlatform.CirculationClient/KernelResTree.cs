@@ -1497,6 +1497,8 @@ MessageBoxDefaultButton.Button2);
             if (result != DialogResult.Yes)
                 return;
 
+            bool prompt = true;
+            DialogResult dialog_result = DialogResult.Yes;
 
             LibraryChannel channel = null;
             TimeSpan old_timeout = new TimeSpan(0);
@@ -1579,7 +1581,31 @@ MessageBoxDefaultButton.Button2);
 
 
                     if (nRet == -1)
-                        goto ERROR1;
+                    {
+                        if (paths.Count > 0)
+                        {
+                            if (prompt)
+                            {
+                                dialog_result = (DialogResult)Application.OpenForms[0].Invoke(new Func<DialogResult>(() =>
+                                {
+                                    return MessageDlg.Show(this,
+                                    strError + "\r\n---\r\n\r\n是否继续后面的删除操作?\r\n\r\n注：\r\n[是] 继续后面的删除\r\n[中断] 中断处理",
+                                    "导入数据",
+                                    MessageBoxButtons.YesNo,
+                                    MessageBoxDefaultButton.Button1,
+                                    ref prompt,
+                                    new string[] { "是", "中断" },
+                                    "下次不再询问");
+                                }));
+                            }
+
+                            if (dialog_result == DialogResult.No)
+                                goto ERROR1;
+                            goto CONTINUE;
+                        }
+                        else
+                            goto ERROR1;
+                    }
 
                     this.ConfigFileChanged?.Invoke(this, new ConfigFileChangedEventArgs
                     {
@@ -1597,6 +1623,7 @@ MessageBoxDefaultButton.Button2);
                     else
                         goto ERROR1;
 #endif
+                CONTINUE:
                     i++;
                 }
             }
@@ -2149,16 +2176,41 @@ out strError);
 
             if (node.Checked == false)
             {
+                // 2025/2/14 注释掉
+                /*
                 ClearOneLevelChildrenCheck(node);
+                */
             }
             else
             {
+                // 2025/2/14 暂时不启用 递归 check 父节点
+                /*
                 if (node.Parent != null)
                     node.Parent.Checked = true;
+                */
+
             }
 
-            // 注：事件自己会递归
+            // 2025/2/14
+            // 把上级的所有已经 checked 的节点去掉 checked
+            ClearUpperCheck(node);
 
+            /*
+            // 注：事件自己会递归
+            */
+        }
+
+        // 2025/2/14
+        // 把上级的所有已经 checked 的节点去掉 checked
+        void ClearUpperCheck(TreeNode node)
+        {
+            var current = node.Parent;
+            while (current != null)
+            {
+                if (current.Checked)
+                    current.Checked = false;
+                current = current.Parent;
+            }
         }
 
         // 清除下级所有的选中的项(不包括自己)

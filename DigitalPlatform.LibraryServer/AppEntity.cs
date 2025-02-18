@@ -1028,6 +1028,12 @@ namespace DigitalPlatform.LibraryServer
                             strError = "记录 '" + info.RecPath + "' 装入XMLDOM发生错误: " + ex.Message;
                             goto ERROR1;
                         }
+
+                        // 2025/2/14
+                        // 不管是 move 还是 copy，都要记载 record/@oldRefID 属性
+                        strOldRefID = DomUtil.GetElementText(dom.DocumentElement,
+    "refID");
+
                         DomUtil.SetElementText(dom.DocumentElement,
                             "parent",
                             strParentID);
@@ -1054,8 +1060,7 @@ namespace DigitalPlatform.LibraryServer
                             // 修改参考 ID，避免其在复制后发生重复
                             // 注: 无论旧记录内容中有没有 refID 元素，都要覆盖(新增)一个 refID 元素内容
                             // *** 后面这几个清除动作要作为规则出现
-                            strOldRefID = DomUtil.GetElementText(dom.DocumentElement,
-                                "refID");
+
                             // 把原有的参考 ID 保留在册记录的 oldRefID 元素文本中
                             DomUtil.SetElementText(dom.DocumentElement,
         "oldRefID",
@@ -1162,7 +1167,8 @@ namespace DigitalPlatform.LibraryServer
                     if (string.IsNullOrEmpty(strNewRefID) == false)
                         DomUtil.SetAttr(node, "newRefID", strNewRefID);
                     // 2025/2/13
-                    if (string.IsNullOrEmpty(strOldRefID) == false)
+                    if (string.IsNullOrEmpty(strOldRefID) == false/*
+                        && strAction.ToLower().Contains("copy")*/)
                         node.SetAttribute("oldRefID", strOldRefID);
                 }
 
@@ -1274,7 +1280,9 @@ namespace DigitalPlatform.LibraryServer
             string strTargetBiblioRecPath,
             List<string> newbarcodes,
             List<string> newrefids,
+            /*
             List<string> oldrefids, // 2025/2/13
+            */
             out string strError)
         {
             strError = "";
@@ -1285,11 +1293,13 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
+            /*
             if (newbarcodes.Count != oldrefids.Count)
             {
                 strError = $"newbarcodes.Count({newbarcodes.Count}) != oldrefids.Count({oldrefids.Count})";
                 return -1;
             }
+            */
 
             if (entityinfos.Count != target_recpaths.Count)
             {
@@ -1327,7 +1337,10 @@ namespace DigitalPlatform.LibraryServer
 
                 string strNewBarcode = newbarcodes[i];
                 string strNewRefID = newrefids[i];
+                /*
                 string strOldRefID = oldrefids[i];
+                */
+                string strOldRefID = "";
 
                 byte[] output_timestamp = null;
                 string strOutputRecPath = "";
@@ -1345,6 +1358,10 @@ namespace DigitalPlatform.LibraryServer
                         strError = "记录 '" + info.RecPath + "' 装入XMLDOM发生错误: " + ex.Message;
                         goto ERROR1;
                     }
+
+                    // 2025/2/14
+                    strOldRefID = DomUtil.GetElementText(dom.DocumentElement, "refID");
+
                     DomUtil.SetElementText(dom.DocumentElement,
                         "parent",
                         strParentID);
@@ -1375,7 +1392,8 @@ namespace DigitalPlatform.LibraryServer
                         }
 
                         // 2025/2/13
-                        if (string.IsNullOrEmpty(strOldRefID) == false)
+                        if (string.IsNullOrEmpty(strOldRefID) == false
+                            && strAction.ToLower().Contains("copy"))
                             DomUtil.SetElementText(dom.DocumentElement,
 "oldRefID",
 strOldRefID);

@@ -16458,6 +16458,13 @@ strLibraryCode);    // 读者所在的馆代码
                     strError = "路径 '" + strResPath + "' 越过了限定的范围，无法访问";
                     return 0;
                 }
+                // 2025/2/14
+                if (PathUtil.IsEqual(strFilePath, strTargetDir)
+                    && strAction == "delete")
+                {
+                    strError = "不允许删除路径 '" + strResPath + "'。因为这是数据目录的根目录";
+                    return 0;
+                }
                 return 1;
             }
 
@@ -18483,6 +18490,7 @@ out string db_type);
         DisplayNameDup = 43,  // 显示名重复了 2021/8/9
         RefIdDup = 44,    // 参考 ID 重复了 2021/8/9
         Canceled = 45,  // 2021/11/6
+        ErrorParameter = 46,    // 2025/2/17 错误的参数值。和 InvalidParameter 的区别，是 invalid 指参数内容形态不合法，error 指参数内容值不符合要求(不包括明显的形态不合法情形)
 
         // 以下为兼容内核错误码而设立的同名错误码
         AlreadyExist = 100, // 兼容

@@ -32,8 +32,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.169.*")]
-[assembly: AssemblyFileVersion("3.169.0.0")]
+[assembly: AssemblyVersion("3.170.*")]
+[assembly: AssemblyFileVersion("3.170.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -407,5 +407,6 @@ ItemCanReturn()
 //      3.168 (2025/1/21) SearchBiblio() API 中 strOutputStyle 参数可以使用 sortby:key 或者 sortby:id。缺省表示 sortby:id。需和 keyid 或者 keycount 配置使用。
 //						另外早先版本用法 strSearchStyle 中的 desc，可以改放到 strOutputStyle 参数中
 //		3.169 (2025/2/11) 修正 CopyBiblioInfo() API 中移动一条带有册记录的书目记录到统一库末尾时出现(册记录修改时)时间戳报错的 bug
+//		3.170 (2025/2/11) ListFile 和 WriteRes() API 检查可写权限的时候，允许删除数据目录根目录的 bug 已经修正
 
 

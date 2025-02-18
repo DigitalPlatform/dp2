@@ -5,137 +5,11 @@
       <xsd:import schemaLocation="http://localhost:8001/dp2library/xe/metadata?xsd=xsd5" namespace="http://dp2003.com/dp2library/rest" />
       <xsd:import schemaLocation="http://localhost:8001/dp2library/xe/metadata?xsd=xsd0" namespace="http://dp2003.com/dp2library/" />
       <xsd:import schemaLocation="http://localhost:8001/dp2library/xe/metadata?xsd=xsd1" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
-      <xsd:import schemaLocation="http://localhost:8001/dp2library/xe/metadata?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" />
-      <xsd:import schemaLocation="http://localhost:8001/dp2library/xe/metadata?xsd=xsd3" namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
-      <xsd:import schemaLocation="http://localhost:8001/dp2library/xe/metadata?xsd=xsd4" namespace="http://dp2003.com/dp2kernel/" />
+      <xsd:import schemaLocation="http://localhost:8001/dp2library/xe/metadata?xsd=xsd2" namespace="http://dp2003.com/dp2kernel/" />
+      <xsd:import schemaLocation="http://localhost:8001/dp2library/xe/metadata?xsd=xsd3" namespace="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" />
+      <xsd:import schemaLocation="http://localhost:8001/dp2library/xe/metadata?xsd=xsd4" namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
     </xsd:schema>
   </wsdl:types>
-  <wsdl:message name="dp2libraryREST_RepairBorrowInfo_InputMessage">
-    <wsdl:part name="parameters" element="tns:RepairBorrowInfo" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_RepairBorrowInfo_OutputMessage">
-    <wsdl:part name="parameters" element="tns:RepairBorrowInfoResponse" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_PassGate_InputMessage">
-    <wsdl:part name="parameters" element="tns:PassGate" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_PassGate_OutputMessage">
-    <wsdl:part name="parameters" element="tns:PassGateResponse" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_Foregift_InputMessage">
-    <wsdl:part name="parameters" element="tns:Foregift" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_Foregift_OutputMessage">
-    <wsdl:part name="parameters" element="tns:ForegiftResponse" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_Hire_InputMessage">
-    <wsdl:part name="parameters" element="tns:Hire" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_Hire_OutputMessage">
-    <wsdl:part name="parameters" element="tns:HireResponse" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_Settlement_InputMessage">
-    <wsdl:part name="parameters" element="tns:Settlement" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_Settlement_OutputMessage">
-    <wsdl:part name="parameters" element="tns:SettlementResponse" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_SearchOneClassCallNumber_InputMessage">
-    <wsdl:part name="parameters" element="tns:SearchOneClassCallNumber" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_SearchOneClassCallNumber_OutputMessage">
-    <wsdl:part name="parameters" element="tns:SearchOneClassCallNumberResponse" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_GetCallNumberSearchResult_InputMessage">
-    <wsdl:part name="parameters" element="tns:GetCallNumberSearchResult" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_GetCallNumberSearchResult_OutputMessage">
-    <wsdl:part name="parameters" element="tns:GetCallNumberSearchResultResponse" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_GetOneClassTailNumber_InputMessage">
-    <wsdl:part name="parameters" element="tns:GetOneClassTailNumber" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_GetOneClassTailNumber_OutputMessage">
-    <wsdl:part name="parameters" element="tns:GetOneClassTailNumberResponse" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_SetOneClassTailNumber_InputMessage">
-    <wsdl:part name="parameters" element="tns:SetOneClassTailNumber" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_SetOneClassTailNumber_OutputMessage">
-    <wsdl:part name="parameters" element="tns:SetOneClassTailNumberResponse" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_SearchUsedZhongcihao_InputMessage">
-    <wsdl:part name="parameters" element="tns:SearchUsedZhongcihao" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_SearchUsedZhongcihao_OutputMessage">
-    <wsdl:part name="parameters" element="tns:SearchUsedZhongcihaoResponse" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_GetZhongcihaoSearchResult_InputMessage">
-    <wsdl:part name="parameters" element="tns:GetZhongcihaoSearchResult" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_GetZhongcihaoSearchResult_OutputMessage">
-    <wsdl:part name="parameters" element="tns:GetZhongcihaoSearchResultResponse" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_GetZhongcihaoTailNumber_InputMessage">
-    <wsdl:part name="parameters" element="tns:GetZhongcihaoTailNumber" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_GetZhongcihaoTailNumber_OutputMessage">
-    <wsdl:part name="parameters" element="tns:GetZhongcihaoTailNumberResponse" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_SetZhongcihaoTailNumber_InputMessage">
-    <wsdl:part name="parameters" element="tns:SetZhongcihaoTailNumber" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_SetZhongcihaoTailNumber_OutputMessage">
-    <wsdl:part name="parameters" element="tns:SetZhongcihaoTailNumberResponse" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_SearchDup_InputMessage">
-    <wsdl:part name="parameters" element="tns:SearchDup" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_SearchDup_OutputMessage">
-    <wsdl:part name="parameters" element="tns:SearchDupResponse" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_GetDupSearchResult_InputMessage">
-    <wsdl:part name="parameters" element="tns:GetDupSearchResult" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_GetDupSearchResult_OutputMessage">
-    <wsdl:part name="parameters" element="tns:GetDupSearchResultResponse" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_ListDupProjectInfos_InputMessage">
-    <wsdl:part name="parameters" element="tns:ListDupProjectInfos" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_ListDupProjectInfos_OutputMessage">
-    <wsdl:part name="parameters" element="tns:ListDupProjectInfosResponse" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_GetUtilInfo_InputMessage">
-    <wsdl:part name="parameters" element="tns:GetUtilInfo" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_GetUtilInfo_OutputMessage">
-    <wsdl:part name="parameters" element="tns:GetUtilInfoResponse" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_SetUtilInfo_InputMessage">
-    <wsdl:part name="parameters" element="tns:SetUtilInfo" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_SetUtilInfo_OutputMessage">
-    <wsdl:part name="parameters" element="tns:SetUtilInfoResponse" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_GetRes_InputMessage">
-    <wsdl:part name="parameters" element="tns:GetRes" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_GetRes_OutputMessage">
-    <wsdl:part name="parameters" element="tns:GetResResponse" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_WriteRes_InputMessage">
-    <wsdl:part name="parameters" element="tns:WriteRes" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_WriteRes_OutputMessage">
-    <wsdl:part name="parameters" element="tns:WriteResResponse" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_GetComments_InputMessage">
-    <wsdl:part name="parameters" element="tns:GetComments" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_GetComments_OutputMessage">
-    <wsdl:part name="parameters" element="tns:GetCommentsResponse" />
-  </wsdl:message>
   <wsdl:message name="dp2libraryREST_SetComments_InputMessage">
     <wsdl:part name="parameters" element="tns:SetComments" />
   </wsdl:message>
@@ -637,91 +511,133 @@
   <wsdl:message name="dp2libraryREST_UrgentRecover_OutputMessage">
     <wsdl:part name="parameters" element="tns:UrgentRecoverResponse" />
   </wsdl:message>
+  <wsdl:message name="dp2libraryREST_RepairBorrowInfo_InputMessage">
+    <wsdl:part name="parameters" element="tns:RepairBorrowInfo" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_RepairBorrowInfo_OutputMessage">
+    <wsdl:part name="parameters" element="tns:RepairBorrowInfoResponse" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_PassGate_InputMessage">
+    <wsdl:part name="parameters" element="tns:PassGate" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_PassGate_OutputMessage">
+    <wsdl:part name="parameters" element="tns:PassGateResponse" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_Foregift_InputMessage">
+    <wsdl:part name="parameters" element="tns:Foregift" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_Foregift_OutputMessage">
+    <wsdl:part name="parameters" element="tns:ForegiftResponse" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_Hire_InputMessage">
+    <wsdl:part name="parameters" element="tns:Hire" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_Hire_OutputMessage">
+    <wsdl:part name="parameters" element="tns:HireResponse" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_Settlement_InputMessage">
+    <wsdl:part name="parameters" element="tns:Settlement" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_Settlement_OutputMessage">
+    <wsdl:part name="parameters" element="tns:SettlementResponse" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_SearchOneClassCallNumber_InputMessage">
+    <wsdl:part name="parameters" element="tns:SearchOneClassCallNumber" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_SearchOneClassCallNumber_OutputMessage">
+    <wsdl:part name="parameters" element="tns:SearchOneClassCallNumberResponse" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_GetCallNumberSearchResult_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetCallNumberSearchResult" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_GetCallNumberSearchResult_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetCallNumberSearchResultResponse" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_GetOneClassTailNumber_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetOneClassTailNumber" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_GetOneClassTailNumber_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetOneClassTailNumberResponse" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_SetOneClassTailNumber_InputMessage">
+    <wsdl:part name="parameters" element="tns:SetOneClassTailNumber" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_SetOneClassTailNumber_OutputMessage">
+    <wsdl:part name="parameters" element="tns:SetOneClassTailNumberResponse" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_SearchUsedZhongcihao_InputMessage">
+    <wsdl:part name="parameters" element="tns:SearchUsedZhongcihao" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_SearchUsedZhongcihao_OutputMessage">
+    <wsdl:part name="parameters" element="tns:SearchUsedZhongcihaoResponse" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_GetZhongcihaoSearchResult_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetZhongcihaoSearchResult" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_GetZhongcihaoSearchResult_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetZhongcihaoSearchResultResponse" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_GetZhongcihaoTailNumber_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetZhongcihaoTailNumber" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_GetZhongcihaoTailNumber_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetZhongcihaoTailNumberResponse" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_SetZhongcihaoTailNumber_InputMessage">
+    <wsdl:part name="parameters" element="tns:SetZhongcihaoTailNumber" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_SetZhongcihaoTailNumber_OutputMessage">
+    <wsdl:part name="parameters" element="tns:SetZhongcihaoTailNumberResponse" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_SearchDup_InputMessage">
+    <wsdl:part name="parameters" element="tns:SearchDup" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_SearchDup_OutputMessage">
+    <wsdl:part name="parameters" element="tns:SearchDupResponse" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_GetDupSearchResult_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetDupSearchResult" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_GetDupSearchResult_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetDupSearchResultResponse" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_ListDupProjectInfos_InputMessage">
+    <wsdl:part name="parameters" element="tns:ListDupProjectInfos" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_ListDupProjectInfos_OutputMessage">
+    <wsdl:part name="parameters" element="tns:ListDupProjectInfosResponse" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_GetUtilInfo_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetUtilInfo" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_GetUtilInfo_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetUtilInfoResponse" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_SetUtilInfo_InputMessage">
+    <wsdl:part name="parameters" element="tns:SetUtilInfo" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_SetUtilInfo_OutputMessage">
+    <wsdl:part name="parameters" element="tns:SetUtilInfoResponse" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_GetRes_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetRes" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_GetRes_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetResResponse" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_WriteRes_InputMessage">
+    <wsdl:part name="parameters" element="tns:WriteRes" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_WriteRes_OutputMessage">
+    <wsdl:part name="parameters" element="tns:WriteResResponse" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_GetComments_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetComments" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_GetComments_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetCommentsResponse" />
+  </wsdl:message>
   <wsdl:portType msc:usingSession="false" name="dp2libraryREST">
-    <wsdl:operation name="RepairBorrowInfo">
-      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/RepairBorrowInfo" message="tns:dp2libraryREST_RepairBorrowInfo_InputMessage" />
-      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/RepairBorrowInfoResponse" message="tns:dp2libraryREST_RepairBorrowInfo_OutputMessage" />
-    </wsdl:operation>
-    <wsdl:operation name="PassGate">
-      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/PassGate" message="tns:dp2libraryREST_PassGate_InputMessage" />
-      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/PassGateResponse" message="tns:dp2libraryREST_PassGate_OutputMessage" />
-    </wsdl:operation>
-    <wsdl:operation name="Foregift">
-      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Foregift" message="tns:dp2libraryREST_Foregift_InputMessage" />
-      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/ForegiftResponse" message="tns:dp2libraryREST_Foregift_OutputMessage" />
-    </wsdl:operation>
-    <wsdl:operation name="Hire">
-      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Hire" message="tns:dp2libraryREST_Hire_InputMessage" />
-      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/HireResponse" message="tns:dp2libraryREST_Hire_OutputMessage" />
-    </wsdl:operation>
-    <wsdl:operation name="Settlement">
-      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Settlement" message="tns:dp2libraryREST_Settlement_InputMessage" />
-      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SettlementResponse" message="tns:dp2libraryREST_Settlement_OutputMessage" />
-    </wsdl:operation>
-    <wsdl:operation name="SearchOneClassCallNumber">
-      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchOneClassCallNumber" message="tns:dp2libraryREST_SearchOneClassCallNumber_InputMessage" />
-      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchOneClassCallNumberResponse" message="tns:dp2libraryREST_SearchOneClassCallNumber_OutputMessage" />
-    </wsdl:operation>
-    <wsdl:operation name="GetCallNumberSearchResult">
-      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCallNumberSearchResult" message="tns:dp2libraryREST_GetCallNumberSearchResult_InputMessage" />
-      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCallNumberSearchResultResponse" message="tns:dp2libraryREST_GetCallNumberSearchResult_OutputMessage" />
-    </wsdl:operation>
-    <wsdl:operation name="GetOneClassTailNumber">
-      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetOneClassTailNumber" message="tns:dp2libraryREST_GetOneClassTailNumber_InputMessage" />
-      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetOneClassTailNumberResponse" message="tns:dp2libraryREST_GetOneClassTailNumber_OutputMessage" />
-    </wsdl:operation>
-    <wsdl:operation name="SetOneClassTailNumber">
-      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetOneClassTailNumber" message="tns:dp2libraryREST_SetOneClassTailNumber_InputMessage" />
-      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetOneClassTailNumberResponse" message="tns:dp2libraryREST_SetOneClassTailNumber_OutputMessage" />
-    </wsdl:operation>
-    <wsdl:operation name="SearchUsedZhongcihao">
-      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchUsedZhongcihao" message="tns:dp2libraryREST_SearchUsedZhongcihao_InputMessage" />
-      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchUsedZhongcihaoResponse" message="tns:dp2libraryREST_SearchUsedZhongcihao_OutputMessage" />
-    </wsdl:operation>
-    <wsdl:operation name="GetZhongcihaoSearchResult">
-      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetZhongcihaoSearchResult" message="tns:dp2libraryREST_GetZhongcihaoSearchResult_InputMessage" />
-      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetZhongcihaoSearchResultResponse" message="tns:dp2libraryREST_GetZhongcihaoSearchResult_OutputMessage" />
-    </wsdl:operation>
-    <wsdl:operation name="GetZhongcihaoTailNumber">
-      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetZhongcihaoTailNumber" message="tns:dp2libraryREST_GetZhongcihaoTailNumber_InputMessage" />
-      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetZhongcihaoTailNumberResponse" message="tns:dp2libraryREST_GetZhongcihaoTailNumber_OutputMessage" />
-    </wsdl:operation>
-    <wsdl:operation name="SetZhongcihaoTailNumber">
-      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetZhongcihaoTailNumber" message="tns:dp2libraryREST_SetZhongcihaoTailNumber_InputMessage" />
-      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetZhongcihaoTailNumberResponse" message="tns:dp2libraryREST_SetZhongcihaoTailNumber_OutputMessage" />
-    </wsdl:operation>
-    <wsdl:operation name="SearchDup">
-      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchDup" message="tns:dp2libraryREST_SearchDup_InputMessage" />
-      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchDupResponse" message="tns:dp2libraryREST_SearchDup_OutputMessage" />
-    </wsdl:operation>
-    <wsdl:operation name="GetDupSearchResult">
-      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetDupSearchResult" message="tns:dp2libraryREST_GetDupSearchResult_InputMessage" />
-      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetDupSearchResultResponse" message="tns:dp2libraryREST_GetDupSearchResult_OutputMessage" />
-    </wsdl:operation>
-    <wsdl:operation name="ListDupProjectInfos">
-      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/ListDupProjectInfos" message="tns:dp2libraryREST_ListDupProjectInfos_InputMessage" />
-      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/ListDupProjectInfosResponse" message="tns:dp2libraryREST_ListDupProjectInfos_OutputMessage" />
-    </wsdl:operation>
-    <wsdl:operation name="GetUtilInfo">
-      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetUtilInfo" message="tns:dp2libraryREST_GetUtilInfo_InputMessage" />
-      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetUtilInfoResponse" message="tns:dp2libraryREST_GetUtilInfo_OutputMessage" />
-    </wsdl:operation>
-    <wsdl:operation name="SetUtilInfo">
-      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetUtilInfo" message="tns:dp2libraryREST_SetUtilInfo_InputMessage" />
-      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetUtilInfoResponse" message="tns:dp2libraryREST_SetUtilInfo_OutputMessage" />
-    </wsdl:operation>
-    <wsdl:operation name="GetRes">
-      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetRes" message="tns:dp2libraryREST_GetRes_InputMessage" />
-      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetResResponse" message="tns:dp2libraryREST_GetRes_OutputMessage" />
-    </wsdl:operation>
-    <wsdl:operation name="WriteRes">
-      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/WriteRes" message="tns:dp2libraryREST_WriteRes_InputMessage" />
-      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/WriteResResponse" message="tns:dp2libraryREST_WriteRes_OutputMessage" />
-    </wsdl:operation>
-    <wsdl:operation name="GetComments">
-      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetComments" message="tns:dp2libraryREST_GetComments_InputMessage" />
-      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCommentsResponse" message="tns:dp2libraryREST_GetComments_OutputMessage" />
-    </wsdl:operation>
     <wsdl:operation name="SetComments">
       <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetComments" message="tns:dp2libraryREST_SetComments_InputMessage" />
       <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetCommentsResponse" message="tns:dp2libraryREST_SetComments_OutputMessage" />
@@ -1056,6 +972,90 @@
     <wsdl:operation name="UrgentRecover">
       <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/UrgentRecover" message="tns:dp2libraryREST_UrgentRecover_InputMessage" />
       <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/UrgentRecoverResponse" message="tns:dp2libraryREST_UrgentRecover_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="RepairBorrowInfo">
+      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/RepairBorrowInfo" message="tns:dp2libraryREST_RepairBorrowInfo_InputMessage" />
+      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/RepairBorrowInfoResponse" message="tns:dp2libraryREST_RepairBorrowInfo_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="PassGate">
+      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/PassGate" message="tns:dp2libraryREST_PassGate_InputMessage" />
+      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/PassGateResponse" message="tns:dp2libraryREST_PassGate_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="Foregift">
+      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Foregift" message="tns:dp2libraryREST_Foregift_InputMessage" />
+      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/ForegiftResponse" message="tns:dp2libraryREST_Foregift_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="Hire">
+      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Hire" message="tns:dp2libraryREST_Hire_InputMessage" />
+      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/HireResponse" message="tns:dp2libraryREST_Hire_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="Settlement">
+      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Settlement" message="tns:dp2libraryREST_Settlement_InputMessage" />
+      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SettlementResponse" message="tns:dp2libraryREST_Settlement_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="SearchOneClassCallNumber">
+      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchOneClassCallNumber" message="tns:dp2libraryREST_SearchOneClassCallNumber_InputMessage" />
+      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchOneClassCallNumberResponse" message="tns:dp2libraryREST_SearchOneClassCallNumber_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="GetCallNumberSearchResult">
+      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCallNumberSearchResult" message="tns:dp2libraryREST_GetCallNumberSearchResult_InputMessage" />
+      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCallNumberSearchResultResponse" message="tns:dp2libraryREST_GetCallNumberSearchResult_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="GetOneClassTailNumber">
+      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetOneClassTailNumber" message="tns:dp2libraryREST_GetOneClassTailNumber_InputMessage" />
+      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetOneClassTailNumberResponse" message="tns:dp2libraryREST_GetOneClassTailNumber_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="SetOneClassTailNumber">
+      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetOneClassTailNumber" message="tns:dp2libraryREST_SetOneClassTailNumber_InputMessage" />
+      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetOneClassTailNumberResponse" message="tns:dp2libraryREST_SetOneClassTailNumber_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="SearchUsedZhongcihao">
+      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchUsedZhongcihao" message="tns:dp2libraryREST_SearchUsedZhongcihao_InputMessage" />
+      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchUsedZhongcihaoResponse" message="tns:dp2libraryREST_SearchUsedZhongcihao_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="GetZhongcihaoSearchResult">
+      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetZhongcihaoSearchResult" message="tns:dp2libraryREST_GetZhongcihaoSearchResult_InputMessage" />
+      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetZhongcihaoSearchResultResponse" message="tns:dp2libraryREST_GetZhongcihaoSearchResult_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="GetZhongcihaoTailNumber">
+      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetZhongcihaoTailNumber" message="tns:dp2libraryREST_GetZhongcihaoTailNumber_InputMessage" />
+      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetZhongcihaoTailNumberResponse" message="tns:dp2libraryREST_GetZhongcihaoTailNumber_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="SetZhongcihaoTailNumber">
+      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetZhongcihaoTailNumber" message="tns:dp2libraryREST_SetZhongcihaoTailNumber_InputMessage" />
+      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetZhongcihaoTailNumberResponse" message="tns:dp2libraryREST_SetZhongcihaoTailNumber_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="SearchDup">
+      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchDup" message="tns:dp2libraryREST_SearchDup_InputMessage" />
+      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchDupResponse" message="tns:dp2libraryREST_SearchDup_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="GetDupSearchResult">
+      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetDupSearchResult" message="tns:dp2libraryREST_GetDupSearchResult_InputMessage" />
+      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetDupSearchResultResponse" message="tns:dp2libraryREST_GetDupSearchResult_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="ListDupProjectInfos">
+      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/ListDupProjectInfos" message="tns:dp2libraryREST_ListDupProjectInfos_InputMessage" />
+      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/ListDupProjectInfosResponse" message="tns:dp2libraryREST_ListDupProjectInfos_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="GetUtilInfo">
+      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetUtilInfo" message="tns:dp2libraryREST_GetUtilInfo_InputMessage" />
+      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetUtilInfoResponse" message="tns:dp2libraryREST_GetUtilInfo_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="SetUtilInfo">
+      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetUtilInfo" message="tns:dp2libraryREST_SetUtilInfo_InputMessage" />
+      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetUtilInfoResponse" message="tns:dp2libraryREST_SetUtilInfo_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="GetRes">
+      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetRes" message="tns:dp2libraryREST_GetRes_InputMessage" />
+      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetResResponse" message="tns:dp2libraryREST_GetRes_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="WriteRes">
+      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/WriteRes" message="tns:dp2libraryREST_WriteRes_InputMessage" />
+      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/WriteResResponse" message="tns:dp2libraryREST_WriteRes_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="GetComments">
+      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetComments" message="tns:dp2libraryREST_GetComments_InputMessage" />
+      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCommentsResponse" message="tns:dp2libraryREST_GetComments_OutputMessage" />
     </wsdl:operation>
   </wsdl:portType>
 </wsdl:definitions>

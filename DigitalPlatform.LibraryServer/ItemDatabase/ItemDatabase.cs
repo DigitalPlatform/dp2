@@ -3943,6 +3943,12 @@ strError);
                             strError = "记录 '" + info.RecPath + "' 装入XMLDOM发生错误: " + ex.Message;
                             goto ERROR1;
                         }
+
+                        // 2025/2/14
+                        // 对 move 和 copy 都要记载 oldRefID 属性
+                        strOldRefID = DomUtil.GetElementText(dom.DocumentElement,
+                            "refID");
+
                         DomUtil.SetElementText(dom.DocumentElement,
                             "parent",
                             strParentID);
@@ -3950,9 +3956,6 @@ strError);
                         // 复制的情况
                         if (strAction == "copy")
                         {
-                            // 2024/5/1
-                            strOldRefID = DomUtil.GetElementText(dom.DocumentElement,
-                                "refID");
                             // 把原有的参考 ID 保留在下级记录的 oldRefID 元素文本中
                             DomUtil.SetElementText(dom.DocumentElement,
                                 "oldRefID",
@@ -4038,7 +4041,8 @@ strError);
                         DomUtil.SetAttr(node, "newRefID", strNewRefID);
 
                     // 2025/2/13
-                    if (string.IsNullOrEmpty(strOldRefID) == false)
+                    if (string.IsNullOrEmpty(strOldRefID) == false/*
+                        && strAction.ToLower().Contains("copy")*/)
                         node.SetAttribute("oldRefID", strOldRefID);
                 }
 

@@ -134,15 +134,24 @@ namespace DigitalPlatform.LibraryServer
                 // 修改数据库
                 if (strAction == "change")
                 {
-                    return ChangeDatabase(
+                    var ret = ChangeDatabase(
                         sessioninfo,
                         channel,    // Channels,
                         strLibraryCodeList,
                         strDatabaseNames,
                         strDatabaseInfo,
                         strStyle,
+                        out List<string> skip_rename_warnings,
                         out strOutputInfo,
                         out strError);
+                    if (ret == -1)
+                        return -1;
+                    if (skip_rename_warnings != null && skip_rename_warnings.Count > 0)
+                    {
+                        strError = StringUtil.MakePathList(skip_rename_warnings, "; ");
+                        return -1;
+                    }
+                    return ret;
                 }
 
                 if (strAction == "compressTailNo")
@@ -329,7 +338,7 @@ out strError);
                             strStyle,
                             null,   // byte [] input_timestamp,
                             out _,
-                            out byte [] timestamp,
+                            out byte[] timestamp,
                             out string strOutputPath,
                             out strError);
                         if (lRet == -1)
@@ -509,6 +518,7 @@ out strError);
         //      strStyle    attach/detach/空。
         //                  attach 表示将 dp2kernel 中数据库附加上来。
         //                  detach 表示将 dp2library 用到的某个数据库从 library.xml 中摘除(但数据库已经在 dp2kernel 中存在)
+        //                  如果包含 logRecover，表示当前正在进行日志恢复。
         // return:
         //      -1  出错
         //      0   没有找到
@@ -521,6 +531,7 @@ out strError);
             string strDatabaseNames,
             string strDatabaseInfo,
             string strStyle,
+            out List<string> skip_rename_warnings,
             out string strOutputInfo,
             out string strError)
         {
@@ -529,9 +540,13 @@ out strError);
 
             int nRet = 0;
 
+            var logRecover = StringUtil.IsInList("logRecover", strStyle);
+
+            List<ChangeInfo> change_infos = new List<ChangeInfo>();
+
             // 遇到报错是否尽量维持循环，以继续完成后面的处理
             var continueLoop = StringUtil.IsInList("continueLoop", strStyle);
-            List<string> skip_warnings = new List<string>();    // 跳过处理的警告
+            skip_rename_warnings = new List<string>();    // 跳过处理的警告
 
             bool bDbNameChanged = false;
 
@@ -579,10 +594,10 @@ out strError);
                     XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("itemdbgroup/database[@biblioDbName='" + strName + "']");
                     if (nodeDatabase == null)
                     {
-                        strError = "配置DOM中名字为 '" + strName + "' 的书目库(biblioDbName属性)相关<database>元素没有找到";
+                        strError = "library.xml 中名字为 '" + strName + "' 的书目库(biblioDbName属性)相关<database>元素没有找到";
                         if (continueLoop)
                         {
-                            skip_warnings.Add(strError);
+                            skip_rename_warnings.Add(strError);
                             continue;
                         }
                         return 0;
@@ -617,35 +632,48 @@ out strError);
                             if (String.IsNullOrEmpty(strOldBiblioDbName) == true
                                 && String.IsNullOrEmpty(strNewBiblioDbName) == false)
                             {
-                                strError = "要创建书目库 '" + strNewBiblioDbName + "'，请使用create功能，而不能使用change功能";
-                                goto ERROR1;
-                            }
-
-                            nRet = ChangeDbName(
-                                channel,
-                                strOldBiblioDbName,
-                                strNewBiblioDbName,
-                                () =>
+                                // 如果是日志恢复模式，则不报错，跳过这个数据库改名
+                                if (logRecover == true)
                                 {
-                                    DomUtil.SetAttr(nodeDatabase, "biblioDbName", strNewBiblioDbName);
-                                    bDbNameChanged = true;
-                                    this.Changed = true;
-                                },
-                                out strError);
-                            if (nRet == -1)
-                            {
-                                if (continueLoop)
-                                {
-                                    skip_warnings.Add(strError);
-                                    continue;
+                                    // 注: 这个错误不可能出现
+                                    skip_rename_warnings.Add($"书目库(小书目库)尝试改名为 '{strNewBiblioDbName}'，但参数 strDatabaseNames('{strDatabaseNames}')中没有找到原有的名字");
                                 }
-                                goto ERROR1;
+                                else
+                                {
+                                    strError = "要创建书目库 '" + strNewBiblioDbName + "'，请使用create功能，而不能使用change功能";
+                                    goto ERROR1;
+                                }
                             }
-#if NO
-                            bDbNameChanged = true;
-                            DomUtil.SetAttr(nodeDatabase, "biblioDbName", strNewBiblioDbName);
-                            this.Changed = true;
-#endif
+                            else
+                            {
+                                nRet = ChangeDbName(
+                                    channel,
+                                    strOldBiblioDbName,
+                                    strNewBiblioDbName,
+                                    () =>
+                                    {
+                                        DomUtil.SetAttr(nodeDatabase, "biblioDbName", strNewBiblioDbName);
+                                        bDbNameChanged = true;
+                                        this.Changed = true;
+
+                                        change_infos.Add(new ChangeInfo
+                                        {
+                                            OldDbName = strOldBiblioDbName,
+                                            NewDbName = strNewBiblioDbName,
+                                            DbType = "biblio"
+                                        });
+                                    },
+                                    out strError);
+                                if (nRet == -1)
+                                {
+                                    if (continueLoop)
+                                    {
+                                        skip_rename_warnings.Add(strError);
+                                        continue;
+                                    }
+                                    goto ERROR1;
+                                }
+                            }
                         }
                     }
 
@@ -664,36 +692,47 @@ out strError);
                             if (String.IsNullOrEmpty(strOldEntityDbName) == true
                                 && String.IsNullOrEmpty(strNewEntityDbName) == false)
                             {
-                                strError = "要创建实体库 '" + strNewEntityDbName + "'，请使用create功能，而不能使用change功能";
-                                goto ERROR1;
-                            }
-
-                            nRet = ChangeDbName(
-                                channel,
-                                strOldEntityDbName,
-                                strNewEntityDbName,
-                                () =>
+                                // 如果是日志恢复模式，则不报错，跳过这个数据库改名
+                                if (logRecover == true)
                                 {
-                                    DomUtil.SetAttr(nodeDatabase, "name", strNewEntityDbName);
-                                    bDbNameChanged = true;
-                                    this.Changed = true;
-                                },
-                                out strError);
-                            if (nRet == -1)
-                            {
-                                if (continueLoop)
-                                {
-                                    skip_warnings.Add(strError);
-                                    continue;
+                                    skip_rename_warnings.Add($"实体库尝试改名为 '{strNewEntityDbName}'，但 library.xml 中没有找到原有的名字");
                                 }
-                                goto ERROR1;
+                                else
+                                {
+                                    strError = "要创建实体库 '" + strNewEntityDbName + "'，请使用create功能，而不能使用change功能";
+                                    goto ERROR1;
+                                }
                             }
-#if NO
-                            bDbNameChanged = true;
+                            else
+                            {
+                                nRet = ChangeDbName(
+                                    channel,
+                                    strOldEntityDbName,
+                                    strNewEntityDbName,
+                                    () =>
+                                    {
+                                        DomUtil.SetAttr(nodeDatabase, "name", strNewEntityDbName);
+                                        bDbNameChanged = true;
+                                        this.Changed = true;
 
-                            DomUtil.SetAttr(nodeDatabase, "name", strNewEntityDbName);
-                            this.Changed = true;
-#endif
+                                        change_infos.Add(new ChangeInfo
+                                        {
+                                            OldDbName = strOldEntityDbName,
+                                            NewDbName = strNewEntityDbName,
+                                            DbType = "entity"
+                                        });
+                                    },
+                                    out strError);
+                                if (nRet == -1)
+                                {
+                                    if (continueLoop)
+                                    {
+                                        skip_rename_warnings.Add(strError);
+                                        continue;
+                                    }
+                                    goto ERROR1;
+                                }
+                            }
                         }
                     }
 
@@ -712,36 +751,47 @@ out strError);
                             if (String.IsNullOrEmpty(strOldOrderDbName) == true
                                 && String.IsNullOrEmpty(strNewOrderDbName) == false)
                             {
-                                strError = "要创建订购库 '" + strNewOrderDbName + "'，请使用create功能，而不能使用change功能";
-                                goto ERROR1;
-                            }
-
-                            nRet = ChangeDbName(
-                                channel,
-                                strOldOrderDbName,
-                                strNewOrderDbName,
-                                () =>
+                                // 如果是日志恢复模式，则不报错，跳过这个数据库改名
+                                if (logRecover == true)
                                 {
-                                    DomUtil.SetAttr(nodeDatabase, "orderDbName", strNewOrderDbName);
-                                    bDbNameChanged = true;
-                                    this.Changed = true;
-                                },
-                                out strError);
-                            if (nRet == -1)
-                            {
-                                if (continueLoop)
-                                {
-                                    skip_warnings.Add(strError);
-                                    continue;
+                                    skip_rename_warnings.Add($"订购库尝试改名为 '{strNewOrderDbName}'，但 library.xml 中没有找到原有的名字");
                                 }
-                                goto ERROR1;
+                                else
+                                {
+                                    strError = "要创建订购库 '" + strNewOrderDbName + "'，请使用create功能，而不能使用change功能";
+                                    goto ERROR1;
+                                }
                             }
-#if NO
-                            bDbNameChanged = true;
+                            else
+                            {
+                                nRet = ChangeDbName(
+                                    channel,
+                                    strOldOrderDbName,
+                                    strNewOrderDbName,
+                                    () =>
+                                    {
+                                        DomUtil.SetAttr(nodeDatabase, "orderDbName", strNewOrderDbName);
+                                        bDbNameChanged = true;
+                                        this.Changed = true;
 
-                            DomUtil.SetAttr(nodeDatabase, "orderDbName", strNewOrderDbName);
-                            this.Changed = true;
-#endif
+                                        change_infos.Add(new ChangeInfo
+                                        {
+                                            OldDbName = strOldOrderDbName,
+                                            NewDbName = strNewOrderDbName,
+                                            DbType = "order"
+                                        });
+                                    },
+                                    out strError);
+                                if (nRet == -1)
+                                {
+                                    if (continueLoop)
+                                    {
+                                        skip_rename_warnings.Add(strError);
+                                        continue;
+                                    }
+                                    goto ERROR1;
+                                }
+                            }
                         }
                     }
 
@@ -759,36 +809,47 @@ out strError);
                             if (String.IsNullOrEmpty(strOldIssueDbName) == true
                                 && String.IsNullOrEmpty(strNewIssueDbName) == false)
                             {
-                                strError = "要创建期库 '" + strNewIssueDbName + "'，请使用create功能，而不能使用change功能";
-                                goto ERROR1;
-                            }
-
-                            nRet = ChangeDbName(
-                                channel,
-                                strOldIssueDbName,
-                                strNewIssueDbName,
-                                () =>
+                                // 如果是日志恢复模式，则不报错，跳过这个数据库改名
+                                if (logRecover == true)
                                 {
-                                    DomUtil.SetAttr(nodeDatabase, "issueDbName", strNewIssueDbName);
-                                    bDbNameChanged = true;
-                                    this.Changed = true;
-                                },
-                                out strError);
-                            if (nRet == -1)
-                            {
-                                if (continueLoop)
-                                {
-                                    skip_warnings.Add(strError);
-                                    continue;
+                                    skip_rename_warnings.Add($"期库尝试改名为 '{strNewIssueDbName}'，但 library.xml 中没有找到原有的名字");
                                 }
-                                goto ERROR1;
+                                else
+                                {
+                                    strError = "要创建期库 '" + strNewIssueDbName + "'，请使用create功能，而不能使用change功能";
+                                    goto ERROR1;
+                                }
                             }
-#if NO
-                            bDbNameChanged = true;
+                            else
+                            {
+                                nRet = ChangeDbName(
+                                    channel,
+                                    strOldIssueDbName,
+                                    strNewIssueDbName,
+                                    () =>
+                                    {
+                                        DomUtil.SetAttr(nodeDatabase, "issueDbName", strNewIssueDbName);
+                                        bDbNameChanged = true;
+                                        this.Changed = true;
 
-                            DomUtil.SetAttr(nodeDatabase, "issueDbName", strNewIssueDbName);
-                            this.Changed = true;
-#endif
+                                        change_infos.Add(new ChangeInfo
+                                        {
+                                            OldDbName = strOldIssueDbName,
+                                            NewDbName = strNewIssueDbName,
+                                            DbType = "issue"
+                                        });
+                                    },
+                                    out strError);
+                                if (nRet == -1)
+                                {
+                                    if (continueLoop)
+                                    {
+                                        skip_rename_warnings.Add(strError);
+                                        continue;
+                                    }
+                                    goto ERROR1;
+                                }
+                            }
                         }
                     }
 
@@ -807,36 +868,47 @@ out strError);
                             if (String.IsNullOrEmpty(strOldCommentDbName) == true
                                 && String.IsNullOrEmpty(strNewCommentDbName) == false)
                             {
-                                strError = "要创建评注库 '" + strNewCommentDbName + "'，请使用create功能，而不能使用change功能";
-                                goto ERROR1;
-                            }
-
-                            nRet = ChangeDbName(
-                                channel,
-                                strOldCommentDbName,
-                                strNewCommentDbName,
-                                () =>
+                                // 如果是日志恢复模式，则不报错，跳过这个数据库改名
+                                if (logRecover == true)
                                 {
-                                    DomUtil.SetAttr(nodeDatabase, "commentDbName", strNewCommentDbName);
-                                    bDbNameChanged = true;
-                                    this.Changed = true;
-                                },
-                                out strError);
-                            if (nRet == -1)
-                            {
-                                if (continueLoop)
-                                {
-                                    skip_warnings.Add(strError);
-                                    continue;
+                                    skip_rename_warnings.Add($"评注库尝试改名为 '{strNewCommentDbName}'，但 library.xml 中没有找到原有的名字");
                                 }
-                                goto ERROR1;
+                                else
+                                {
+                                    strError = "要创建评注库 '" + strNewCommentDbName + "'，请使用create功能，而不能使用change功能";
+                                    goto ERROR1;
+                                }
                             }
-#if NO
-                            bDbNameChanged = true;
+                            else
+                            {
+                                nRet = ChangeDbName(
+                                    channel,
+                                    strOldCommentDbName,
+                                    strNewCommentDbName,
+                                    () =>
+                                    {
+                                        DomUtil.SetAttr(nodeDatabase, "commentDbName", strNewCommentDbName);
+                                        bDbNameChanged = true;
+                                        this.Changed = true;
 
-                            DomUtil.SetAttr(nodeDatabase, "commentDbName", strNewCommentDbName);
-                            this.Changed = true;
-#endif
+                                        change_infos.Add(new ChangeInfo
+                                        {
+                                            OldDbName = strOldCommentDbName,
+                                            NewDbName = strNewCommentDbName,
+                                            DbType = "comment"
+                                        });
+                                    },
+                                    out strError);
+                                if (nRet == -1)
+                                {
+                                    if (continueLoop)
+                                    {
+                                        skip_rename_warnings.Add(strError);
+                                        continue;
+                                    }
+                                    goto ERROR1;
+                                }
+                            }
                         }
                     }
 
@@ -958,7 +1030,7 @@ out strError);
                     {
                         if (continueLoop)
                         {
-                            skip_warnings.Add(strError);
+                            skip_rename_warnings.Add(strError);
                             continue;
                         }
                         goto ERROR1;
@@ -1299,7 +1371,7 @@ out strError);
                     XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("readerdbgroup/database[@name='" + strName + "']");
                     if (nodeDatabase == null)
                     {
-                        strError = "配置DOM中名字为 '" + strName + "' 的读者库(name属性)相关<database>元素没有找到";
+                        strError = "library.xml 中名字为 '" + strName + "' 的读者库(name属性)相关<database>元素没有找到";
                         return 0;
                     }
 
@@ -1349,13 +1421,20 @@ out strError);
                                     DomUtil.SetAttr(nodeDatabase, "name", strNewReaderDbName);
                                     bDbNameChanged = true;
                                     this.Changed = true;
+
+                                    change_infos.Add(new ChangeInfo
+                                    {
+                                        OldDbName = strOldReaderDbName,
+                                        NewDbName = strNewReaderDbName,
+                                        DbType = "reader"
+                                    });
                                 },
                             out strError);
                         if (nRet == -1)
                         {
                             if (continueLoop)
                             {
-                                skip_warnings.Add(strError);
+                                skip_rename_warnings.Add(strError);
                                 continue;
                             }
                             goto ERROR1;
@@ -1458,7 +1537,7 @@ out strError);
                     XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("authdbgroup/database[@name='" + strName + "']");
                     if (nodeDatabase == null)
                     {
-                        strError = "配置 DOM 中名字为 '" + strName + "' 的规范库(name属性)相关 authdbgroup/database 元素没有找到";
+                        strError = "library.xml 中名字为 '" + strName + "' 的规范库(name属性)相关 authdbgroup/database 元素没有找到";
                         return 0;
                     }
 
@@ -1501,13 +1580,20 @@ out strError);
                                     DomUtil.SetAttr(nodeDatabase, "name", strNewReaderDbName);
                                     bDbNameChanged = true;
                                     this.Changed = true;
+
+                                    change_infos.Add(new ChangeInfo
+                                    {
+                                        OldDbName = strOldReaderDbName,
+                                        NewDbName = strNewReaderDbName,
+                                        DbType = "authority"
+                                    });
                                 },
                             out strError);
                         if (nRet == -1)
                         {
                             if (continueLoop)
                             {
-                                skip_warnings.Add(strError);
+                                skip_rename_warnings.Add(strError);
                                 continue;
                             }
                             goto ERROR1;
@@ -1541,7 +1627,7 @@ out strError);
                         strError = $"数据库名 '{strName}' 在 library.xml 中没有定义";  // $"数据库名 '{strName}' 在 library.xml 中没有找到对应的类型信息";
                         if (continueLoop)
                         {
-                            skip_warnings.Add(strError);
+                            skip_rename_warnings.Add(strError);
                             continue;
                         }
                         return -1;
@@ -1578,7 +1664,7 @@ out strError);
                     {
                         if (continueLoop)
                         {
-                            skip_warnings.Add(strError);
+                            skip_rename_warnings.Add(strError);
                             continue;
                         }
                         return nRet;
@@ -1902,7 +1988,7 @@ out strError);
                     {
                         if (continueLoop)
                         {
-                            skip_warnings.Add(strError);
+                            skip_rename_warnings.Add(strError);
                             continue;
                         }
                         return nRet;
@@ -2075,12 +2161,14 @@ out strError);
                 }
             }
 
+            /*
             // 2024/2/24
-            if (skip_warnings.Count > 0)
+            if (skip_rename_warnings.Count > 0)
             {
-                strError = StringUtil.MakePathList(skip_warnings, "; ");
+                strError = StringUtil.MakePathList(skip_rename_warnings, "; ");
                 return -1;
             }
+            */
             return 1;
         ERROR1:
             // 2024/2/23 注释掉
@@ -2089,6 +2177,12 @@ out strError);
             if (this.Changed == true)
                 this.ActivateManagerThread();
             */
+
+            if (change_infos.Count > 0)
+            {
+                // TODO: 将已经改名的数据库改回原来的名字
+                // TODO: 将所有被改变过的 database 元素改回原来的状态
+            }
 
             // 2015/1/29
             if (bDbNameChanged == true)
@@ -7678,7 +7772,7 @@ out strError);
                 }
                 #endregion
 #endif
-#region reader
+                #region reader
                 else if (strDbType == "reader")
                 {
                     // 创建读者库
@@ -9573,7 +9667,7 @@ out strError);
 
                 long ret = channel.DoRefreshDB(
                     "compressTailNo",
-                    strName, 
+                    strName,
                     false,
                     out strError);
                 if (ret == -1)
@@ -9600,7 +9694,7 @@ out strError);
                 DomUtil.SetElementText(domOperLog.DocumentElement,
     "action",
     "compressTailNo");  // 2024/6/20 verion 1.10 开始才有的这个 action 值
-                
+
                 DomUtil.SetElementText(domOperLog.DocumentElement,
                     "libraryCode", strLibraryCodeList);
 

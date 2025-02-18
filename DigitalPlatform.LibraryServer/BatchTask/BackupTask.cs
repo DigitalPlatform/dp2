@@ -453,7 +453,9 @@ out strError);
         // 根据备份文件名，构造数据库定义文件名
         static string GetDatabaseDefFileName(string strBackupFileName)
         {
-            return Path.GetDirectoryName(strBackupFileName) + "\\" + Path.GetFileNameWithoutExtension(strBackupFileName) + ".dbdef.zip";
+            var directory = Path.GetDirectoryName(strBackupFileName);
+            PathUtil.CreateDirIfNeed(directory);    // 2024/2/14
+            return directory + "\\" + Path.GetFileNameWithoutExtension(strBackupFileName) + ".dbdef.zip";
         }
 
         // 如果没有扩展名部分，要自动加上 .dp2bak
@@ -471,6 +473,8 @@ out strError);
             bool bContinue)
         {
             List<string> filenames = new List<string>();
+
+            PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strBackupFileName)); // 2025/2/14
 
             {
                 string strDefFileName = GetDatabaseDefFileName(strBackupFileName);

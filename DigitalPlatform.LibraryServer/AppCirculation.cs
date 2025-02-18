@@ -17969,9 +17969,10 @@ out strError);
         // parameters:
         //      nStart      从第几个借阅的册事项开始处理
         //      nCount      共处理几个借阅的册事项
+        //      strFilterItemKey    用于过滤读者记录中 borrow 元素的册 Key(也就是说只处理一个 borrow 元素)。
+        //                  如果为空，表示会处理读者记录中全部 borrow 元素
         //      nProcessedBorrowItems   [out]本次处理了多少个借阅册事项
         //      nTotalBorrowItems   [out]当前读者一共包含有多少个借阅册事项
-        //      strFilterItemKey    用于过滤读者记录中 borrow 元素的册 Key(也就是说只处理一个 borrow 元素)。如果为空，表示会处理读者记录中全部 borrow 元素
         // result.Value
         //      -1  错误。
         //      0   检查无错。
@@ -18121,7 +18122,7 @@ out strError);
                     if (nodesBorrow.Count == 0)
                     {
                         strError = $"读者记录中没有找到匹配 '{strFilterItemKey}' 的借阅信息";
-                        goto ERROR1;
+                        return BuildError(strError, ErrorCode.ErrorParameter);
                     }
                     if (nodesBorrow.Count > 1)
                     {
@@ -18289,6 +18290,17 @@ out strError);
             return result;
         }
 
+        LibraryServerResult BuildError(string error, 
+            ErrorCode code = ErrorCode.SystemError)
+        {
+            LibraryServerResult result = new LibraryServerResult();
+            result.Value = -1;
+            result.ErrorInfo = error;
+            result.ErrorCode = code;
+            return result;
+
+        }
+
         // 比较两个读者键是否指向同一条读者记录
         bool IsReaderKeySame(RmsChannel channel,
             string key1,
@@ -18338,6 +18350,7 @@ out strError);
         // parameters:
         //      strItemKey  册键
         //      strLockedReaderBarcode  外层已经加锁过的条码号。本函数根据这个信息，可以避免重复加锁。
+        //                      strLockedReaderBarcode 可以为空。表示自动使用从册记录 XML 中获得的 borrower 元素值进行判断和检查
         //      exist_readerdom 已经装载入DOM的读者记录。其读者证条码号是strLockedReaderBarcode。如果提供了这个值，本函数会优化性能。
         //      strOutputReaderBarcode  [out] 输出读者 Key。是从册记录 borrower 元素中取得的文本内容，为证条码号或 "@refID:xxx" 形态
         //      aDupPath        [out] 返回涉及到的册记录路径，可能是多个
@@ -18604,6 +18617,25 @@ out strError);
                         strError = "装载读者记录进入XML DOM时发生错误: " + strError;
                         goto ERROR1;
                     }
+
+                    // 2025/2/17
+                    // 核实一下根据 strLockedReaderBarcode 获得的记录，是否和 strOutputReaderBarcode 是同一条读者记录
+                    if (string.IsNullOrEmpty(strLockedReaderBarcode) == false)
+                    {
+                        var type = GetKeyType(strOutputReaderBarcode);
+                        var tempRefID = DomUtil.GetElementText(readerdom.DocumentElement, "refID");
+                        var tempBarcode = DomUtil.GetElementText(readerdom.DocumentElement, "barcode");
+                        if (type == "barcode" && tempBarcode != strOutputReaderBarcode)
+                        {
+                            strError = $"前端请求的读者 Key '{strLockedReaderBarcode}' 取出的证条码号 '{tempBarcode}' 和册记录中 borrower 元素内容 '{strOutputReaderBarcode}' 不一致";
+                            return BuildError(strError, ErrorCode.ErrorParameter);
+                        }
+                        else if (type == "refID" && tempRefID != GetRefID(strOutputReaderBarcode))
+                        {
+                            strError = $"前端请求的读者 Key '{strLockedReaderBarcode}' 取出的参考 ID '{tempRefID}' 和册记录中 borrower 元素内容 '{GetRefID(strOutputReaderBarcode)}' 不一致";
+                            return BuildError(strError, ErrorCode.ErrorParameter);
+                        }
+                    }
                 }
                 else
                 {
@@ -18677,6 +18709,9 @@ out strError);
         // 而如果是册记录里面存在 borrower 元素，但读者记录这边不存在对应的 borrow 元素，这种情况从读者记录一侧是无法发现和修复的，只能从册的一侧发现和修复
         // 操作日志动作: 最新版增加了 readerRecord 和 itemRecord 元素，记载发生了修改的读者记录和册记录，修改后的内容。
         // 如果修复过程中册记录没有发生修改，日志动作中就有 itemRecord 元素会有一个属性 changed='false'
+        // 注1: 函数用 strReaderKey 给出的信息装载读者记录，然后检查读者记录中的 borrow 元素内容是否存在符合 strItemrKey 的。(注意 borrow 元素可能会有多个)
+        //      如果不符合，则表明本函数的输入参数错误(注意这并不是说这个读者记录是一个正确的读者记录，只是说本函数此时因为输入参数错误还无法进入修复阶段)
+        //      那使用本 API 的前端应该怎么做呢？应该在调用本 API 之前，先设法获得读者记录，检查里面是否有 borrow 元素(一个或者多个)，有了，才需要调用本 API(针对每个 borrow 需要单独调用一次)。如果没有 borrow 元素内容，则不要调用本 API
         // parameters:
         //      strReaderKey    读者键。不允许为空
         //      strItemKey      册键。不允许为空
@@ -19028,7 +19063,15 @@ out strError);
                         //    goto WRITE_READER_RECORD;
 
                         strError = "修复操作被拒绝。读者记录 '" + PatronBarcodeLink(strReaderKey) + "' 中并不存在有关册 " + ItemBarcodeLink(strItemKey) + " 的借阅信息。";
-                        goto ERROR1;
+                        // goto ERROR1;
+                        // 2025/2/16 注: 这里返回 -1 的原因是，不能简单断定这就是一条往返都正确的链。有可能 item 那一侧还有不正确
+
+                        // 2025/2/16
+                        result.Value = 0;
+                        result.ErrorInfo = strError;
+                        result.ErrorCode = ErrorCode.NoError;
+                        return result;
+
                     }
 #if NO
                     // TODO: 要实现 strItemBarcode 为 @refID:xxxxx 的情况。因为现在允许册记录没有册条码号了
@@ -19606,6 +19649,9 @@ string itemBarcode)
         // 其中没有指回的链。这两种情况。对于这两种情况的修复处理，都是删除册记录的 borrower 元素和相关元素。
         // 注意，本函数不会修改读者记录。
         // 操作日志: 最新版增加了 itemRecord 元素，存储修改后的册记录内容
+        // 注1: 函数用 strItemKey 给出的信息装载册记录，然后检查册记录中的 borrower 元素内容是否符合 strReaderKey
+        //      如果不符合，则表明本函数的输入参数错误(注意这并不是说这个册记录是一个正确的册记录，只是说本函数此时因为输入参数错误还无法进入修复阶段)
+        //      那使用本 API 的前端应该怎么做呢？应该在调用本 API 之前，先设法获得册记录，检查里面是否有 borrower 元素内容，有了，才需要调用本 API。如果没有 borrower 元素内容，则不要调用本 API
         // parameters:
         //      strReaderKey    读者键
         //      strItemKey      册键
@@ -19999,7 +20045,12 @@ string itemBarcode)
                         if (nodeBorrow != null)
                         {
                             strError = "修复操作被拒绝。您所请求要修复的链，本是一条完整正确的链。可直接进行普通还书操作。";
-                            goto ERROR1;
+                            // goto ERROR1;
+                            // 2025/2/15
+                            result.Value = 0;
+                            result.ErrorInfo = strError;
+                            result.ErrorCode = ErrorCode.NoError;
+                            return result;
                         }
                     }
 

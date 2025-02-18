@@ -10286,7 +10286,10 @@ out strError);
 
                 string strNewBarcode = DomUtil.GetAttr(record_node, "newBarcode");
                 string strNewRefID = DomUtil.GetAttr(record_node, "newRefID");
+                
+                /*
                 string strOldRefID = record_node.GetAttribute("oldRefID");  // 2025/2/13
+                */
 
                 string strMetaData = "";
                 string strXml = "";
@@ -10326,10 +10329,11 @@ out strError);
                 newbarcodes.Add(strNewBarcode);
                 List<string> newrefids = new List<string>();
                 newrefids.Add(strNewRefID);
+                /*
                 // 2025/2/13
                 List<string> oldrefids = new List<string>();
                 oldrefids.Add(strOldRefID);
-
+                */
 
                 // 复制属于同一书目记录的全部实体记录
                 // parameters:
@@ -10344,7 +10348,9 @@ out strError);
                     strTargetBiblioRecPath,
                     newbarcodes,
                     newrefids,
+                    /*
                     oldrefids,
+                    */
                     out strError);
                 if (nRet == -1)
                     return -1;
@@ -12237,7 +12243,18 @@ out error);
                     nodes,
                     out strError);
                                 if (nRet == -1)
+                                {
+                                    // 把 succeed_dbNames 中的数据库名执行删除
+                                    {
+                                        // 2025/2/13
+                                        nRet = deleteKernelDatabases(
+    succeed_dbNames,
+    out string error);
+                                        if (nRet == -1)
+                                            strError += $"。(在尝试删除刚创建的数据库 {StringUtil.MakePathList(succeed_dbNames)} 过程中又遇到出错: {error})";
+                                    }
                                     return -1;
+                                }
                                 this.Changed = true;
                             }
                             if (skip_warnings.Count > 0)
@@ -12289,11 +12306,22 @@ out error);
                                 strLibraryCode,
                                 strDatabaseNames,
                                 strDatabaseInfo,
-                                MergeStyle(strStyle, style, "skipOperLog,continueLoop"),
+                                MergeStyle(strStyle, style, "skipOperLog,continueLoop,logRecover"),
+                                out List<string> skip_rename_warnings,
                                 out string strOutputInfo,
                                 out strError);
+
+                            if (skip_rename_warnings != null && skip_rename_warnings.Count > 0)
+                                func_warning?.Invoke($"{StringUtil.MakePathList(skip_rename_warnings, "; ")}");
+
                             if (nRet == -1)
+                            {
+                                // 2025/2/14
+                                // 虽然出错了，但 library.xml 可能已经被修改了部分，也要保存回物理文件
+                                if (this.Changed == true)
+                                    this.Flush();
                                 return -1;
+                            }
                             // 注: ChangeDatabase() 中已经使 this.Changed = true 了
 
                         }
@@ -12376,6 +12404,17 @@ out error);
                                     if (nRet == -1)
                                     {
                                         strError = $"初始化数据库时发现下列数据库的定义不存在({StringUtil.MakePathList(notexist_dbnames, ",")})，然后尝试重新创建这些数据库时遇到报错: {strError}";
+
+                                        // 把 succeed_dbNames 中的数据库名执行删除
+                                        {
+                                            // 2025/2/13
+                                            nRet = deleteKernelDatabases(
+        succeed_dbNames,
+        out string error);
+                                            if (nRet == -1)
+                                                strError += $"。(在尝试删除刚创建的数据库 {StringUtil.MakePathList(succeed_dbNames)} 过程中又遇到出错: {error})";
+                                        }
+
                                         return -1;
                                     }
                                     this.Changed = true;
@@ -12549,6 +12588,32 @@ out error);
             }
 #endif
             return -1;
+
+            int deleteKernelDatabases(List<string> names,
+                out string error)
+            {
+                error = "";
+
+                List<string> errors = new List<string>();
+                foreach(var name in names)
+                {
+                    long lRet = channel.DoDeleteDB(name, out string error1);
+                    if (lRet == -1)
+                    {
+                        if (channel.IsNotFound() == true)
+                            continue;
+                        errors.Add($"删除内核数据库 '{name}' 时出错: {error1}");
+                    }
+                }
+
+                if (errors.Count > 0)
+                {
+                    error = StringUtil.MakePathList(errors, "; ");
+                    return -1;
+                }
+
+                return 0;
+            }
         }
 
         // 合并 style
