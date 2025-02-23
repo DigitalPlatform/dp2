@@ -873,6 +873,9 @@ namespace DigitalPlatform.CirculationClient
                 this.CallReturnChannel(channel, looping);
             }
 
+            // 2025/2/18
+            // 把已经新增下级的节点展开，便于用户看到新增的下级节点
+            this.SelectedNode?.Expand();
             /*
             // 刷新显示
             this.Fill(this.SelectedNode);
@@ -914,7 +917,13 @@ namespace DigitalPlatform.CirculationClient
             channel.Timeout = new TimeSpan(0, 5, 0);
             try
             {
-                string strPath = GetNodePath(this.SelectedNode) + "/" + dir_name;
+                string strPath = "";
+                string strStart = GetNodePath(this.SelectedNode);
+                // "!"+"a"
+                if (strStart == "!")
+                    strPath = strStart + dir_name;
+                else
+                    strPath = strStart + "/" + dir_name;    // "!backup"+"/"+"a"
 
                 /*
                 // 节点类型
@@ -961,6 +970,9 @@ out strFileName);
 
             // 刷新显示
             this.Fill(this.SelectedNode);
+
+            // 把已经新增下级的节点展开，便于用户看到新增的下级节点
+            this.SelectedNode?.Expand();
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -1484,16 +1496,26 @@ out string _);
                 path_types.Add(node.ImageIndex);
             }
 
-            string strNameList = StringUtil.MakePathList(paths);
+            string strNameList = StringUtil.MakePathList(paths, "\r\n");
             if (strNameList.Length > 1000)
-                strNameList = strNameList.Substring(0, 1000) + " ... 等 " + selected_nodes.Count + " 个文件";
+                strNameList = strNameList.Substring(0, 1000) + "\r\n ... 等 " + selected_nodes.Count + " 个文件";
 
+            bool temp = false;
+            var result = MessageDlg.Show(this,
+                "确实要删除下列目录或文件?\r\n" + strNameList,
+                "KernelResTree",
+                MessageBoxButtons.YesNo,
+                MessageBoxDefaultButton.Button2,
+                ref temp,
+                new string[] { "是", "否" });
+            /*
             DialogResult result = MessageBox.Show(this,
-"确实要删除目录或文件 " + strNameList + " ?",
+"确实要删除下列目录或文件?\r\n" + strNameList,
 "KernelResTree",
 MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,
 MessageBoxDefaultButton.Button2);
+            */
             if (result != DialogResult.Yes)
                 return;
 
@@ -1582,7 +1604,7 @@ MessageBoxDefaultButton.Button2);
 
                     if (nRet == -1)
                     {
-                        if (paths.Count > 0)
+                        if (paths.Count > 1)
                         {
                             if (prompt)
                             {
@@ -1613,6 +1635,10 @@ MessageBoxDefaultButton.Button2);
                         Condition = "deleted"
                     });
 
+                    // 2025/2/20
+                    var node = selected_nodes[i];
+                    node.Remove();
+
 #if NO
                     if (nRet == 1)
                         this.SelectedNode.Remove(); // TODO: 删除任何文件后都要注意刷新去除相伴的 .~state 文件
@@ -1624,6 +1650,7 @@ MessageBoxDefaultButton.Button2);
                         goto ERROR1;
 #endif
                 CONTINUE:
+
                     i++;
                 }
             }
@@ -1634,12 +1661,14 @@ MessageBoxDefaultButton.Button2);
                 this.CallReturnChannel(channel, looping);
             }
 
+            /*
             // 刷新显示
             List<TreeNode> parents = FindParentNodes(selected_nodes);
             foreach (TreeNode node in parents)
             {
                 this.Fill(node);
             }
+            */
             return;
         ERROR1:
             MessageBox.Show(this, strError);

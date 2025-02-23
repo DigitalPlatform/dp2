@@ -1062,7 +1062,7 @@ out string error);
             return true;
         }
 
-        static string GetXmlRefID(string xml)
+        public static string GetXmlRefID(string xml)
         {
             var dom = new XmlDocument();
             try

@@ -238,6 +238,7 @@ namespace DigitalPlatform.LibraryServer
         //      0   正确
         //      1   有部分修改没有兑现。说明在strError中
         //      2   全部修改都没有兑现。说明在strError中 (2018/10/9)
+        //      3   没有发生任何修改。说明在 strError 中 (2025/2/21)
         int MergeTwoEntityXml(
             SessionInfo sessioninfo,
             XmlDocument domExist,
@@ -369,6 +370,13 @@ namespace DigitalPlatform.LibraryServer
             {
                 strError = strWarning;
                 return 1;
+            }
+
+            // 2025/2/21
+            if (check_outof_elements == true && changed == false)
+            {
+                strError = "没有发生任何修改";
+                return 3;   // 没有发生任何修改
             }
 
             // 2025/2/12
@@ -906,10 +914,12 @@ namespace DigitalPlatform.LibraryServer
         //      -2  目标实体库不存在，无法进行复制或者删除
         //      -1  error
         //      >=0  实际复制或者移动的实体记录数
-        public int CopyBiblioChildEntities(RmsChannel channel,
+        public int CopyBiblioChildEntities(
+            RmsChannel channel,
             string strAction,
             List<DeleteEntityInfo> entityinfos,
             string strTargetBiblioRecPath,
+            string strOperator,
             XmlDocument domOperLog,
             out string strError)
         {
@@ -1109,6 +1119,29 @@ namespace DigitalPlatform.LibraryServer
                                 goto ERROR1;
                             }
                         }
+
+                        // 2025/2/21
+                        // 处理 operation 元素
+                        var ret = this.AppendOperation(ref dom,
+                            strAction,
+                            strOperator,
+                            "",
+                            10,
+                            (e) =>
+                            {
+                                // 创建 path 属性
+                                e.SetAttribute("path", $"{info.RecPath}-->{strOutputRecPath}");
+
+                                // 创建 refID 属性
+                                if (strAction.ToLower().Contains("copy")
+                                || strOldRefID != strNewRefID)
+                                {
+                                    e.SetAttribute("refID", $"{strOldRefID}-->{strNewRefID}");
+                                }
+                            },
+                            out strError);
+                        if (ret == -1)
+                            goto ERROR1;
 
                         // 2025/2/11
                         if (output_timestamp == null
@@ -4960,6 +4993,9 @@ out strError);
 
                         {
                             // 执行SetEntities API中的"change"操作
+                            // return:
+                            //      -1  出错
+                            //      0   成功
                             nRet = DoEntityOperChange(
                                 info.Action,
                                 strStyle,
@@ -6850,6 +6886,7 @@ out strError);
                 //      0   正确
                 //      1   有部分修改没有兑现。说明在strError中
                 //      2   全部修改都没有兑现。说明在strError中 (2018/10/9)
+                //      3   没有发生任何修改。说明在 strError 中 (2025/2/21)
                 nRet = MergeTwoEntityXml(
                     sessioninfo,
                     domExist,
@@ -6860,13 +6897,26 @@ out strError);
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
-                if (nRet == 1 || nRet == 2)
+                if (nRet == 1 /*|| nRet == 2*/)
                 {
                     if (nRet == 1)
                         part_type = "部分";
                     else
                         part_type = "全部都没有";
                     strWarning = strError;
+                }
+                else if (nRet == 2 || nRet == 3)
+                {
+                    // 2025/2/21
+                    // 没有发生修改，拒绝保存
+                    error = new EntityInfo(info);
+                    error.ErrorInfo = strError + "。拒绝保存。";
+                    if (nRet == 2)
+                        error.ErrorCode = ErrorCodeValue.FullDenied;
+                    else
+                        error.ErrorCode = ErrorCodeValue.NotChanged;
+                    ErrorInfos.Add(error);
+                    return -1;
                 }
 
                 domNew = new XmlDocument();
@@ -6875,6 +6925,10 @@ out strError);
                 if (bNoOperations == false
                     && bForce == false)
                 {
+                    // 改变归属 可能会走到这里。改变归属是把册记录 XML 中 parent 元素修改了
+                    // TODO: 需要为 parent 修改这种特殊动作在 operations/operation 元素中留下某种痕迹么？
+                    // 可以考虑在 operation/@comment 里面记载这种细节
+
                     // 2010/4/8
                     nRet = ReplaceOperation(
                         ref domNew,
@@ -6882,6 +6936,7 @@ out strError);
                         sessioninfo.UserID,
                         "",
                         10,
+
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -7015,9 +7070,21 @@ out strError);
             {
                 if (domOperLog != null)
                 {
-                    DomUtil.SetElementText(domOperLog.DocumentElement,
-        "libraryCode",
-        strSourceLibraryCode + "," + strTargetLibraryCode);    // 册所在的馆代码
+                    if (strAction == "transfer"
+                        || strSourceLibraryCode != strTargetLibraryCode/*保险起见*/)
+                        DomUtil.SetElementText(domOperLog.DocumentElement,
+            "libraryCode",
+            strSourceLibraryCode + "," + strTargetLibraryCode);    // 册所在的馆代码
+                    else
+                    {
+                        // 2025/2/20
+                        if (strSourceLibraryCode != strTargetLibraryCode)
+                            throw new ArgumentException($"strSourceLibraryCode '{strSourceLibraryCode}' 和 strTargetLibraryCode '{strTargetLibraryCode}' 不相等");
+                        DomUtil.SetElementText(domOperLog.DocumentElement,
+"libraryCode",
+strSourceLibraryCode);
+                    }
+
 
                     DomUtil.SetElementText(domOperLog.DocumentElement,
                         "action", strAction == "transfer" || strAction == "setuid" ? strAction : "change");
@@ -7165,12 +7232,13 @@ out strError);
             return 0;
         }
         public int ReplaceOperation(
-    ref string strXml,
-    string strOperName,
-    string strOperator,
-    string strComment,
-    int nMaxCount,
-    out string strError)
+            ref string strXml,
+            string strOperName,
+            string strOperator,
+            string strComment,
+            int nMaxCount,
+            delegate_elmentCreated func_elementCreated,
+            out string strError)
         {
             return SetOperation(
     ref strXml,
@@ -7179,16 +7247,18 @@ out strError);
     strComment,
     false,
     nMaxCount,
+    func_elementCreated,
     out strError);
         }
 
         public int AppendOperation(
-    ref string strXml,
-    string strOperName,
-    string strOperator,
-    string strComment,
-    int nMaxCount,
-    out string strError)
+            ref string strXml,
+            string strOperName,
+            string strOperator,
+            string strComment,
+            int nMaxCount,
+            delegate_elmentCreated func_elementCreated,
+            out string strError)
         {
             return SetOperation(
     ref strXml,
@@ -7197,6 +7267,27 @@ out strError);
     strComment,
     true,
     nMaxCount,
+    func_elementCreated,
+    out strError);
+        }
+
+        public int AppendOperation(
+    ref XmlDocument dom,
+    string strOperName,
+    string strOperator,
+    string strComment,
+    int nMaxCount,
+    delegate_elmentCreated func_elementCreated,
+    out string strError)
+        {
+            return SetOperation(
+    ref dom,
+    strOperName,
+    strOperator,
+    strComment,
+    true,
+    nMaxCount,
+    func_elementCreated,
     out strError);
         }
 
@@ -7211,6 +7302,7 @@ out strError);
             string strComment,
             bool bAppend,
             int nMaxCount,
+            delegate_elmentCreated func_elementCreated,
             out string strError)
         {
             strError = "";
@@ -7233,6 +7325,7 @@ out strError);
                 strComment,
                 bAppend,
                 nMaxCount,
+                func_elementCreated,
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -7281,6 +7374,28 @@ out strError);
     out strError);
         }
 
+        public int SetOperation(
+    ref XmlDocument dom,
+    string strOperName,
+    string strOperator,
+    string strComment,
+    bool bAppend,
+    int nMaxCount,
+    out string strError)
+        {
+            return SetOperation(
+            ref dom,
+            strOperName,
+            strOperator,
+            strComment,
+            bAppend,
+            nMaxCount,
+            null,
+            out strError);
+        }
+
+        public delegate void delegate_elmentCreated(XmlElement element);
+
         // 设置或者刷新一个操作记载
         // parameters:
         //      bAppend 是否以追加的方式加入新的操作信息.如果==false，表示替代一个同strOperName的原有节点
@@ -7292,6 +7407,7 @@ out strError);
             string strComment,
             bool bAppend,
             int nMaxCount,
+            delegate_elmentCreated func_elementCreated,
             out string strError)
         {
             strError = "";
@@ -7357,6 +7473,9 @@ out strError);
                 node.SetAttribute("comment", strComment);
             else
                 node.RemoveAttribute("comment");
+
+            // 2025/2/20
+            func_elementCreated?.Invoke(node);
 
             // (从第二个 operation 元素开始)删除超出nMaxCount个数的<operation>元素
             {
@@ -7604,21 +7723,6 @@ out strError);
                 bNoOperations = true;
             }
 
-            if (bNoOperations == false)
-            {
-                // 2010/4/8
-                // 
-                nRet = ReplaceOperation(
-    ref domNew,
-    "moved",
-    sessioninfo.UserID,
-    "",
-    10,
-    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-            }
-
             string part_type = "";
             string strWarning = "";
             // 合并新旧记录
@@ -7627,6 +7731,7 @@ out strError);
             //      0   正确
             //      1   有部分修改没有兑现。说明在strError中
             //      2   全部修改都没有兑现。说明在strError中 (2018/10/9)
+            //      3   没有发生任何修改。说明在 strError 中 (2025/2/21)
             nRet = MergeTwoEntityXml(
                 sessioninfo,
                 domSourceExist,
@@ -7775,6 +7880,37 @@ out strError);
                 strError = "DoCopyRecord() error :" + strError;
                 goto ERROR1;
             }
+
+            if (bNoOperations == false)
+            {
+                // 2025/2/21
+                var strOldRefID = LibraryApplication.GetXmlRefID(strExistSourceXml);
+                var strNewRefID = LibraryApplication.GetXmlRefID(strNewXml);
+
+                // 2010/4/8
+                // 
+                nRet = AppendOperation(
+                    ref strNewXml,
+                    "move", //"moved",
+                    sessioninfo.UserID,
+                    "",
+                    10,
+                    (e) =>
+                    {
+                        // 创建 path 属性
+                        e.SetAttribute("path", $"{info.OldRecPath}-->{strOutputPath}");
+
+                        // 创建 refID 属性
+                        if (strOldRefID != strNewRefID)
+                        {
+                            e.SetAttribute("refID", $"{strOldRefID}-->{strNewRefID}");
+                        }
+                    },
+    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+            }
+
 
             // Debug.Assert(strOutputPath == info.NewRecPath);
             string strTargetPath = strOutputPath;

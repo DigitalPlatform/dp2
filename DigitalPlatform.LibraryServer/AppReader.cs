@@ -7802,6 +7802,39 @@ out strError);
                     goto ERROR1;
                 }
 
+                {
+                    // 因为要修改或添加 operation 元素，所以必须再 DoSaveTextRes() 写入一次
+                    if (string.IsNullOrEmpty(strNewReader))
+                        strNewReader = strExistingSourceXml;
+
+                    var strOldRefID = GetXmlRefID(strExistingSourceXml);
+                    // 确保 strNewReader 中有 refID 元素内容
+                    EnsureRefID(ref strNewReader);
+                    var strNewRefID = GetXmlRefID(strNewReader);
+
+                    // 2025/2/22
+                    // 处理 operation 元素
+                    var ret = this.AppendOperation(ref strNewReader,
+                        "move",
+                        sessioninfo.UserID,
+                        "",
+                        10,
+                        (e) =>
+                        {
+                            // 创建 path 属性
+                            e.SetAttribute("path", $"{strSourceRecPath}-->{strOutputRecPath}");
+
+                            // 创建 refID 属性
+                            if (strOldRefID != strNewRefID)
+                            {
+                                e.SetAttribute("refID", $"{strOldRefID}-->{strNewRefID}");
+                            }
+                        },
+                        out strError);
+                    if (ret == -1)
+                        goto ERROR1;
+                }
+
                 strTargetRecPath = strOutputRecPath;
 
                 // TODO: 如果新位置的 libraryCode 变了，还要专门改写一次新位置的 XML 记录
@@ -7868,9 +7901,11 @@ out strError);
             DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
                 strOperTimeString);
 
+            // 2025/2/22 注: strNewReader 后来被(添加 operation 元素前一刻)改变了，不代表函数参数时的状态。它在此刻总是有值
             XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
                 "record",
                 strNewReader);    // 2024/5/21 前 record 元素都没有文本内容
+            
             DomUtil.SetAttr(node, "recPath", strTargetRecPath);
 
             node = DomUtil.SetElementText(domOperLog.DocumentElement,

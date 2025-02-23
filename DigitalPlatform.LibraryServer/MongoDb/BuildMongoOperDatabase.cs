@@ -311,6 +311,7 @@ namespace DigitalPlatform.LibraryServer
             string strStyle = "getcount";
             long lAttachmentLength = 0;
             long lRet = this.App.OperLog.GetOperLog(
+                null,
                 "*",
                 strDate + ".log",
                 -1,    // lIndex,

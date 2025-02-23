@@ -164,6 +164,12 @@ namespace DigitalPlatform.rms.Client.rmsws_localhost {
         NotFoundTargetDb = 26,
         
         [System.Runtime.Serialization.EnumMemberAttribute()]
+        FullDenied = 27,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        NotChanged = 28,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
         RequestError = 100,
         
         [System.Runtime.Serialization.EnumMemberAttribute()]

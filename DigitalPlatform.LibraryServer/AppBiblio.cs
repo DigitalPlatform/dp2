@@ -3056,6 +3056,7 @@ return result;
                     return -1;
                 }
 
+#if REMOVED
                 // 确保<operations>元素被服务器彻底控制
                 {
                     // 删除new中的全部<operations>元素，然后将old记录中的全部<operations>元素插入到new记录中
@@ -3081,6 +3082,8 @@ return result;
                         domNew.DocumentElement.AppendChild(fragment);
                     }
                 }
+
+#endif
 
                 // 如果不具备 setbiblioobject 和 setobject 权限，则要屏蔽前端发来的 XML 记录中的 dprms:file 元素
                 if (StringUtil.IsInList("setbiblioobject,setobject", strRights) == false)
@@ -3277,6 +3280,9 @@ return result;
                     }
                 }
 
+                // 确保 refID 元素
+                EnsureRefID(ref domNew);
+
                 strNewBiblioXml = domNew.OuterXml;
 
                 if (strNewSave == strNewBiblioXml)
@@ -3291,6 +3297,45 @@ return result;
 
                 if (bChangePartDenied == true)
                     bChangePartDeniedParam = true;
+            }
+        }
+
+        // 2025/2/22
+        public static string EnsureRefID(ref string xml)
+        {
+            if (string.IsNullOrEmpty(xml))
+                return null;
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(string.IsNullOrEmpty(xml) ? "<root />" : xml);
+            var ret = EnsureRefID(ref dom);
+            xml = dom.DocumentElement.OuterXml;
+            return ret;
+        }
+
+        // 2025/2/21
+        // 确保 XML中有 refID 元素。如果没有就自动添加一个 refID 元素在根元素之下
+        public static string EnsureRefID(ref XmlDocument dom)
+        {
+            if (dom == null || dom.DocumentElement == null)
+                return null;
+            var nodes = dom.DocumentElement.SelectNodes("//refID");
+            if (nodes.Count > 0)
+            {
+                foreach (XmlElement node in nodes)
+                {
+                    var existing_refID = node.InnerText.Trim();
+                    if (string.IsNullOrEmpty(existing_refID) == false)
+                        return existing_refID;
+                    var refID = Guid.NewGuid().ToString();
+                    node.InnerText = refID;
+                    return refID;
+                }
+            }
+
+            {
+                var refID = Guid.NewGuid().ToString();
+                DomUtil.SetElementText(dom.DocumentElement, "refID", refID);
+                return refID;
             }
         }
 
@@ -6056,6 +6101,7 @@ out strError);
             "",
             // true,
             10,
+            null,
             out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -6227,6 +6273,7 @@ out strError);
             "",
             // true,
             10,
+            null,
             out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -8281,7 +8328,7 @@ out strError);
                             sessioninfo,
                             channel,
                             strBiblioRecPath,
-                            // strExistingSourceXml,
+                            strExistingSourceXml,
                             strNewBiblioRecPath,
                             strNewBiblio,    // 已经经过Merge预处理的新记录XML
                             strMergeStyle,
@@ -8536,8 +8583,8 @@ out strError);
 
             // 1)
             // 探测书目记录有没有下属的实体记录(也顺便看看实体记录里面是否有流通信息)?
-            List<DeleteEntityInfo> entityinfos = null;
-            long lHitCount = 0;
+            //List<DeleteEntityInfo> entityinfos = null;
+            //long lHitCount = 0;
 
             // TODO: 只要获得记录路径即可，因为后面利用了CopyRecord复制
             // return:
@@ -8552,8 +8599,8 @@ out strError);
                 // sessioninfo.GlobalUser == false ? CheckItemRecord : (Delegate_checkRecord)null,
                 CheckItemRecord,
                 sessioninfo.GlobalUser == false ? sessioninfo.LibraryCodeList : null,
-                out lHitCount,
-                out entityinfos,
+                out long lHitCount,
+                out List<DeleteEntityInfo> entityinfos,
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -8604,7 +8651,8 @@ out strError);
 
             // 2)
             // 探测书目记录有没有下属的订购记录
-            List<DeleteEntityInfo> orderinfos = null;
+            // List<DeleteEntityInfo> orderinfos = null;
+
             // return:
             //      -1  error
             //      0   not exist entity dbname
@@ -8617,7 +8665,7 @@ out strError);
                 (DigitalPlatform.LibraryServer.LibraryApplication.Delegate_checkRecord)null,
                 null,
                 out lHitCount,
-                out orderinfos,
+                out List<DeleteEntityInfo> orderinfos,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -8657,7 +8705,7 @@ out strError);
 
             // 3)
             // 探测书目记录有没有下属的期记录
-            List<DeleteEntityInfo> issueinfos = null;
+            // List<DeleteEntityInfo> issueinfos = null;
 
             // return:
             //      -1  error
@@ -8671,7 +8719,7 @@ out strError);
                 (DigitalPlatform.LibraryServer.LibraryApplication.Delegate_checkRecord)null,
                 null,
                 out lHitCount,
-                out issueinfos,
+                out List<DeleteEntityInfo> issueinfos,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -8712,7 +8760,8 @@ out strError);
 
             // 4)
             // 探测书目记录有没有下属的评注记录
-            List<DeleteEntityInfo> commentinfos = null;
+            // List<DeleteEntityInfo> commentinfos = null;
+
             // return:
             //      -1  error
             //      0   not exist entity dbname
@@ -8725,7 +8774,7 @@ out strError);
                 (DigitalPlatform.LibraryServer.LibraryApplication.Delegate_checkRecord)null,
                 null,
                 out lHitCount,
-                out commentinfos,
+                out List<DeleteEntityInfo> commentinfos,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -8781,6 +8830,7 @@ out strError);
                     strAction,
                     entityinfos,
                     missing_source_subrecord ? "" : strNewBiblioRecPath,
+                    sessioninfo.UserID,
                     domOperLog,
                     out strError);
                 if (nRet == -1)
@@ -8829,11 +8879,12 @@ out strError);
                 //      -1  error
                 //      >=0  实际复制或者移动的实体记录数
                 nRet = this.OrderItemDatabase.CopyBiblioChildItems(channel,
-            strAction,
-            orderinfos,
+                    strAction,
+                    orderinfos,
                     missing_source_subrecord ? "" : strNewBiblioRecPath,
-            domOperLog,
-            out strError);
+                    sessioninfo.UserID,
+                    domOperLog,
+                    out strError);
                 if (nRet == -1)
                 {
                     if (entityinfos.Count > 0)
@@ -8872,11 +8923,12 @@ out strError);
                 //      -1  error
                 //      >=0  实际复制或者移动的实体记录数
                 nRet = this.IssueItemDatabase.CopyBiblioChildItems(channel,
-        strAction,
-        issueinfos,
-                missing_source_subrecord ? "" : strNewBiblioRecPath,
-        domOperLog,
-        out strError);
+                    strAction,
+                    issueinfos,
+                    missing_source_subrecord ? "" : strNewBiblioRecPath,
+                    sessioninfo.UserID,
+                    domOperLog,
+                    out strError);
                 if (nRet == -1)
                 {
                     if (entityinfos.Count > 0)
@@ -8917,11 +8969,12 @@ out strError);
                 //      -1  error
                 //      >=0  实际复制或者移动的实体记录数
                 nRet = this.CommentItemDatabase.CopyBiblioChildItems(channel,
-        strAction,
-        commentinfos,
+                strAction,
+                commentinfos,
                 missing_source_subrecord ? "" : strNewBiblioRecPath,
-        domOperLog,
-        out strError);
+                sessioninfo.UserID,
+                domOperLog,
+                out strError);
                 if (nRet == -1)
                 {
                     if (entityinfos.Count > 0)
@@ -8974,7 +9027,7 @@ out strError);
             SessionInfo sessioninfo,
             RmsChannel channel,
             string strOldRecPath,
-            // string strExistingSourceXml,
+            string strExistingSourceXml,
             string strNewRecPath,
             string strNewBiblio,    // 已经经过Merge预处理的新记录XML
             string strMergeStyle,
@@ -9018,10 +9071,10 @@ out strError);
                 bAppendStyle = true;
             }
 
-            string strOutputPath = "";
+            // string strOutputPath = "";
             string strMetaData = "";
-            bool target_exist = false;  // 目标位置记录是否已经存在 2023/2/17
-            byte[] exist_target_timestamp = null;
+            //bool target_exist = false;  // 目标位置记录是否已经存在 2023/2/17
+            //byte[] exist_target_timestamp = null;
 
 #if REMOVED
             if (bAppendStyle == false)
@@ -9190,13 +9243,41 @@ out strError);
             }
 
             // TODO: 兑现对 856 字段的合并，和来自源的 856 字段的 $u 修改
-
             if (String.IsNullOrEmpty(strNewBiblio) == false)
             {
+                var strOldRefID = GetXmlRefID(strExistingSourceXml);
+                // TODO: 确保 strNewBiblio 中有 refID 元素内容
+                var strNewRefID = GetXmlRefID(strNewBiblio);
+
                 this.BiblioLocks.LockForWrite(strOutputRecPath);
 
                 try
                 {
+                    string target_path = strOutputRecPath;
+                    // 2025/2/20
+                    // 处理 operation 元素
+                    var ret = this.AppendOperation(ref strNewBiblio,
+                        strAction,
+                        sessioninfo.UserID,
+                        "",
+                        10,
+                        (e) =>
+                        {
+                            // 创建 path 属性
+                            e.SetAttribute("path", $"{strOldRecPath}-->{target_path}");
+
+                            // 创建 refID 属性
+                            if (strAction.ToLower().Contains("copy")
+                            || strOldRefID != strNewRefID)
+                            {
+                                e.SetAttribute("refID", $"{strOldRefID}-->{strNewRefID}");
+                            }
+                        },
+                        out strError);
+                    if (ret == -1)
+                        goto ERROR1;
+
+
                     // TODO: 如果新的、已存在的xml没有不同，或者新的xml为空，则这步保存可以省略
                     byte[] output_timestamp = baOutputTimestamp;
 
@@ -9226,7 +9307,7 @@ out strError);
                     out strOutputTargetXml,
                     out strMetaData,
                     out baOutputTimestamp,
-                    out strOutputPath,
+                    out string strOutputPath,
                     out strError);
 
                 // 注意: strOutputTargetXml 此时尚未按照目标位置的 getbiblioinfo 存取定义来过滤，依然是 dp2kernel 中读出的原始记录内容

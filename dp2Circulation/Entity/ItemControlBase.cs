@@ -1293,81 +1293,62 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
             if (errorinfos == null)
                 return false;
 
-            for (int i = 0; i < errorinfos.Length; i++)
+            // for (int i = 0; i < errorinfos.Length; i++)
+            foreach (EntityInfo info in errorinfos)
             {
                 T bookitem = null;
 
                 string strError = "";
 
-                if (String.IsNullOrEmpty(errorinfos[i].RefID) == true)
+                if (String.IsNullOrEmpty(info.RefID) == true)
                 {
                     strWarning += " 服务器返回的EntityInfo结构中RefID为空";
                     return true;
                 }
 
-                /*
-                string strBarcode = "";
-                string strRegisterNo = "";
-                // 在listview中定位和dom关联的事项
-                // 顺次根据 记录路径 -- 条码 -- 登录号 来定位
-                nRet = LocateBookItem(
-                    errorinfos[i].OldRecPath,   // 原来是NewRecPath
-                    _dom,
-                    out bookitem,
-                    out strBarcode,
-                    out strRegisterNo,
-                    out strError);
-                 * */
                 nRet = LocateItem(
-                    errorinfos[i].RefID,
-                    GetOneRecPath(errorinfos[i].NewRecPath, errorinfos[i].OldRecPath),
+                    info.RefID,
+                    GetOneRecPath(info.NewRecPath, info.OldRecPath),
                     out bookitem,
                     out strError);
                 if (nRet == -1 || nRet == 0)
                 {
-                    strWarning += " 定位错误信息 '" + errorinfos[i].ErrorInfo + "' 所在行的过程中发生错误:" + strError;
+                    strWarning += " 定位错误信息 '" + info.ErrorInfo + "' 所在行的过程中发生错误:" + strError;
                     continue;
                 }
 
-                // string strLocationSummary = GetLocationSummary(strBarcode, strRegisterNo, errorinfos[i].NewRecPath);
-#if NO
-                string strLocationSummary = GetLocationSummary(bookitem.Barcode,
-                    bookitem.RegisterNo,
-                    errorinfos[i].NewRecPath,
-                    errorinfos[i].RefID);
-#endif
                 string strLocationSummary = GetLocationSummary(bookitem);
 
                 // 正常信息处理
-                if (errorinfos[i].ErrorCode == ErrorCodeValue.NoError)
+                if (info.ErrorCode == ErrorCodeValue.NoError)
                 {
-                    if (errorinfos[i].Action == "new")
+                    if (info.Action == "new")
                     {
-                        bookitem.OldRecord = errorinfos[i].NewRecord;
+                        bookitem.OldRecord = info.NewRecord;
                         /*
                         bookitem.Timestamp = errorinfos[i].NewTimestamp;
                         bookitem.RecPath = errorinfos[i].RecPath;   // 检查一下这里是否还是问号? 如果还是问号，就不对了
                         bookitem.ItemDisplayState = ItemDisplayState.Normal;
                          */
                         nRet = bookitem.ResetData(
-                            errorinfos[i].NewRecPath,
-                            errorinfos[i].NewRecord,
-                            errorinfos[i].NewTimestamp,
+                            info.NewRecPath,
+                            info.NewRecord,
+                            info.NewTimestamp,
                             out strError);
                         if (nRet == -1)
                         {
                             strWarning += " " + strError;
                         }
                     }
-                    else if (errorinfos[i].Action == "change"
-                        || errorinfos[i].Action == "move")
+                    else if (info.Action == "change"
+                        || info.Action == "move")
                     {
-                        bookitem.OldRecord = errorinfos[i].NewRecord;
+                        bookitem.OldRecord = info.NewRecord;
 
                         nRet = bookitem.ResetData(
-                            errorinfos[i].NewRecPath,
-                            errorinfos[i].NewRecord,
-                            errorinfos[i].NewTimestamp,
+                            info.NewRecPath,
+                            info.NewRecord,
+                            info.NewTimestamp,
                             out strError);
                         if (nRet == -1)
                         {
@@ -1404,15 +1385,22 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
 
                     bookitem.Changed = false;   // bookitem的changed变化，间接会引起booitems的changed变化或发送消息？
                     bookitem.RefreshListView();
-
                     continue;
                 }
 
                 // 报错处理
-                bookitem.Error = errorinfos[i];
+                bookitem.Error = info;
+                // 2025/2/21
+                if (bookitem.Error.ErrorCode == ErrorCodeValue.NotChanged)
+                {
+                    bookitem.Error.ErrorInfo = "提醒:" + bookitem.Error.ErrorInfo;
+                    bookitem.Changed = false;
+                    bookitem.RefreshListView();
+                    continue;
+                }
                 bookitem.RefreshListView();
 
-                strWarning += strLocationSummary + "在提交保存过程中发生错误 -- " + errorinfos[i].ErrorInfo + "\r\n";
+                strWarning += strLocationSummary + "在提交保存过程中发生错误 -- " + info.ErrorInfo + "\r\n";
             }
 
 

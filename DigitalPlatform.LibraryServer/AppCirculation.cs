@@ -4630,7 +4630,7 @@ out strError);
 
         #region Borrow()下级函数
 
-        void SetValue(Engine engine, string name, object o)
+        static void SetValue(Engine engine, string name, object o)
         {
             if (o == null)
                 engine.SetValue(name, JsValue.Null);

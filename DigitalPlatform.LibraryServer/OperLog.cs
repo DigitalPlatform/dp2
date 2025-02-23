@@ -15,6 +15,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using System.Threading.Tasks;
 using DigitalPlatform.LibraryServer.Common;
+using Jint.Parser.Ast;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -832,7 +833,8 @@ namespace DigitalPlatform.LibraryServer
         // 1.08 (2019/4/25) changeReaderPassword 日志此前版本中少了 readerBarcode 和 newPassword 元素。现在补上
         // 1.09 (2022/3/16) 此前版本的 setSystemParameter 类型的日志记录中 value 元素内容会把 \t 字符替换为 *，导致 XML 内容或者 C# 脚本出现错误。建议 recover 的时候忽略此前版本的 setSystemParameter 动作
         // 1.10 (2024/2/7) 借阅信息链中两类册条码号变为参考 ID。borrow return reservation 等日志动作记录格式均有变化。见文档 https://github.com/DigitalPlatform/dp2/issues/1183
-        static string operlog_version = "1.10";
+        // 1.11 (2025/2/19) SetUser() API 的日志记录中增加了 libraryCode 元素。此前的版本没有 libraryCode 元素，在执行 GetOperLogs() API 的时候，应该只允许全局账户身份的请求获得 setUser 日志。而新版本的日志记录，则根据 libraryCode 元素内容中的馆代码，决定分馆身份的请求者可以看到它所在分馆的日志记录
+        static string operlog_version = "1.11";
 
         // 写入一条操作日志
         // parameters:
@@ -1092,12 +1094,15 @@ namespace DigitalPlatform.LibraryServer
 
         // 检查和过滤日志XML记录
         // parameters:
+        //      sessioninfo 可能为 null
+        //      strLibraryCodeList  当前账户的馆代码列表
         //      strStyle    如果不包含 supervisor，则需要过滤日志记录中读者记录的 password 元素
         // return:
         //      -1  出错
         //      0   不允许返回当前日志记录
         //      1   允许返回当前日志记录
         public static int FilterXml(
+            SessionInfo sessionInfo,
             string strLibraryCodeList,
             string strStyle,
             string strFilter,
@@ -1124,15 +1129,41 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
+            var supervisor = StringUtil.IsInList("supervisor", strStyle);
+
             // 分馆用户不允许看到 setUser 操作信息
             string strOperation = DomUtil.GetElementText(dom.DocumentElement, "operation");
             if (strOperation == "setUser")
             {
-                if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
-                    return 0;
+                var version = DomUtil.GetElementInnerText(dom.DocumentElement, "version");
+                if (StringUtil.CompareVersion(version, "1.11") < 0)
+                {
+                    if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
+                        return 0;
+                }
+                else
+                {
+                    // 2025/2/19
+                    // 根据 libraryCode 判断
+                    string codes = DomUtil.GetElementText(dom.DocumentElement, "libraryCode",
+                        out XmlNode libraryCode_node);
+                    if (libraryCode_node == null && SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
+                        return 0;
+                    if (StringUtil.IsInList(codes, strLibraryCodeList) == false)
+                        return 0;
+                }
             }
 
-            if (StringUtil.IsInList("supervisor", strStyle) == false)
+            /*
+            // 2025/2/19
+            if (strOperation == "configChanged")
+            {
+                if (StringUtil.IsInList("managedatabase", sessionInfo?.Rights) == false)
+                    return 0;
+            }
+            */
+
+            if (supervisor == false)
             {
                 // 过滤日志记录中，读者记录或者其它内容的 password 元素
                 RemoveReaderPassword(ref dom);
@@ -1430,6 +1461,7 @@ out strTargetLibraryCode);
             // operation:foregift -- readerRecord
             // !TODO: operation:writeRes 要留意它是不是写入了读者库。如果是，则要防范泄露 password 元素内容
             // operation:setUser -- account 和 oldAccount 元素里面的 password 元素; 根元素的 newPassword 元素
+            // operation:configChanged -- value 和 oldValue 元素的 InnerText 中，rmsserver | mongodb | serverReplication | reportStorage | reportReplication | messageServer 这几个元素的 password 属性，和 script 元素
             string strOperation = DomUtil.GetElementText(dom.DocumentElement, "operation");
             if (strOperation == "borrow"
     || strOperation == "return"
@@ -1457,6 +1489,7 @@ out strTargetLibraryCode);
             {
                 RemoveReaderPassword(ref dom, "readerRecord");
                 DomUtil.DeleteElement(dom.DocumentElement, "tempPassword");
+                // 注: tempPasswordExpire 元素里面的信息不算敏感，没有过滤
                 return;
             }
             if (strOperation == "setReaderInfo")
@@ -1495,10 +1528,43 @@ out strTargetLibraryCode);
             }
             if (strOperation == "configChanged")
             {
-                var nodes = dom.DocumentElement.SelectNodes("rmsserver | mongodb | serverReplication | reportStorage | reportReplication | messageServer");
-                foreach (XmlElement node in nodes)
+                // 清除 value 和 oldValue 元素内 InnerText 中 XML 的敏感内容
+                var value_nodes = dom.DocumentElement.SelectNodes("value | oldValue");
+                foreach (XmlNode value_node in value_nodes)
                 {
-                    node.RemoveAttribute("password");
+                    if (string.IsNullOrWhiteSpace(value_node.InnerText))
+                        continue;
+
+                    XmlDocument value_dom = new XmlDocument();
+                    try
+                    {
+                        value_dom.LoadXml(value_node.InnerText);
+                    }
+                    catch
+                    {
+                        // TODO: 写入错误日志文件。value 元素内的 XML 格式不合法。
+                        XmlDocument error_dom = new XmlDocument();
+                        error_dom.LoadXml("<error></error>");
+                        error_dom.DocumentElement.InnerText = $"过滤敏感信息时发现日志记录的 value 元素 InnerText 内容不合法：不是合法的 XML 字符串";
+                        value_node.InnerText = error_dom.DocumentElement.OuterXml;
+                        continue;
+                    }
+
+                    var nodes = value_dom.DocumentElement.SelectNodes("rmsserver | mongodb | serverReplication | reportStorage | reportReplication | messageServer");
+                    foreach (XmlElement node in nodes)
+                    {
+                        node.RemoveAttribute("password");
+                    }
+
+                    // 2025/2/20
+                    // script 元素滤除
+                    nodes = value_dom.DocumentElement.SelectNodes("script");
+                    foreach (XmlElement node in nodes)
+                    {
+                        node.ParentNode?.RemoveChild(node);
+                    }
+
+                    value_node.InnerText = value_dom.DocumentElement.OuterXml;
                 }
                 return;
             }
@@ -1688,7 +1754,7 @@ out strTargetLibraryCode);
             RemoveReaderRecord(nLevel, "readerRecord", ref dom);
         }
 
-#endregion
+        #endregion
 
         // 2012/9/23
         // 获得一个日志记录的附件片断
@@ -1858,6 +1924,7 @@ out strTargetLibraryCode);
         //      1   succeed
         //      2   超过范围，本次调用无效
         public int GetOperLogs(
+            SessionInfo sessioninfo,
             string strLibraryCodeList,
             string strFileName,
             long lIndex,
@@ -1931,6 +1998,7 @@ out strTargetLibraryCode);
                 //      1   succeed
                 //      2   超过范围
                 int nRet = GetOperLog(
+                    sessioninfo,
                     strLibraryCodeList,
                     strFileName,
                     lIndex,
@@ -1994,6 +2062,7 @@ out strTargetLibraryCode);
 
         // 获得一个日志记录
         // parameters:
+        //      sessioninfo 可能为 null
         //      strLibraryCodeList  当前用户管辖的馆代码列表
         //      strFileName 纯文件名,不含路径部分。但要包括".log"部分。
         //      lIndex  记录序号。从0开始计数。lIndex为-1时调用本函数，表示希望获得整个文件尺寸值，将返回在lHintNext中。
@@ -2007,6 +2076,7 @@ out strTargetLibraryCode);
         //      1   succeed
         //      2   超过范围。本次调用无效
         public int GetOperLog(
+            SessionInfo sessionInfo,
             string strLibraryCodeList,
             string strFileName,
             long lIndex,
@@ -2207,6 +2277,7 @@ out strTargetLibraryCode);
                     //      0   不允许返回当前日志记录
                     //      1   允许返回当前日志记录
                     nRet = FilterXml(
+                        sessionInfo,
                         strLibraryCodeList,
                         strStyle,
                         strFilter,

@@ -901,6 +901,13 @@ namespace DigitalPlatform.rms
         [EnumMember]
         NotFoundTargetDb = 26,  // 没找到数据库 -12
 
+        // 2025/2/21
+        [EnumMember]
+        FullDenied = 27,  // 全部被拒绝
+
+        [EnumMember]
+        NotChanged = 28,    // 没有发生修改
+
         //
 
         [EnumMember]

@@ -71,6 +71,8 @@ namespace DigitalPlatform.LibraryServer
         //      -1  出错
         //      0   正确
         //      1   有部分修改没有兑现。说明在strError中
+        //      2   全部修改都没有兑现。说明在strError中 (2018/10/9)
+        //      3   没有发生任何修改。说明在 strError 中 (2025/2/21)
         public override int MergeTwoItemXml(
             SessionInfo sessioninfo,
             string strAction,
@@ -90,6 +92,14 @@ namespace DigitalPlatform.LibraryServer
                 strError = "期库记录不允许读者进行修改";
                 return -1;
             }
+
+            /*
+            // 2025/2/21
+            bool not_changed = false;
+            if (AreEqual(domExist, domNew))
+                not_changed = true;
+            */
+            string origin_xml = domExist.OuterXml;
 
             string strWarning = "";
 
@@ -345,6 +355,12 @@ namespace DigitalPlatform.LibraryServer
             {
                 strError = strWarning;
                 return 1;
+            }
+
+            if (AreEqualXml(origin_xml, strMergedXml))
+            {
+                strError = "没有发生任何修改";
+                return 3;   // 没有发生任何修改
             }
 
             return 0;

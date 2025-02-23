@@ -292,6 +292,7 @@
     </Compile>
     <Compile Include="UserCollection.cs" />
     <Content Include="deletedCode.txt" />
+    <Content Include="design.txt" />
     <Content Include="NoUse.txt" />
     <Content Include="内容概要.txt" />
   </ItemGroup>

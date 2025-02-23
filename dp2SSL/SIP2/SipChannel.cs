@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -694,6 +695,8 @@ namespace dp2SSL
             }
         }
 
+        ScriptContext _scriptContext = new ScriptContext();
+
         // 发送消息，接收消息
         public async Task<SendAndRecvResult> SendAndRecvAsync(string requestText)
         {
@@ -701,6 +704,19 @@ namespace dp2SSL
             int nRet = 0;
 
             int redo_count = 0;
+
+            // 将 SIP2 消息记入日志
+            ChargingData.LoggingMessage("", "request", requestText);
+
+            // 对即将发出的消息进行脚本过滤处理
+            error = ChargingData.TriggerScript("request", ref requestText, _scriptContext);
+            if (string.IsNullOrEmpty(error) == false)
+                return new SendAndRecvResult
+                {
+                    Value = -1,
+                    ErrorCode = "scriptFail",
+                    ErrorInfo = $"SIP 请求触发脚本时出错: {error}"
+                };
 
             // 校验消息
             BaseMessage request = null;
@@ -756,6 +772,24 @@ namespace dp2SSL
 
                 SipChannelUtil.TryDetectSipNetwork();
                 return new SendAndRecvResult(recv_result);
+            }
+
+
+            // 将 SIP2 消息记入日志
+            ChargingData.LoggingMessage("", "response", recv_result.RecvMsg);
+
+            // 对收到的消息调用脚本进行过滤处理
+            {
+                string responseText = recv_result.RecvMsg;
+                error = ChargingData.TriggerScript("response", ref responseText, _scriptContext);
+                if (string.IsNullOrEmpty(error) == false)
+                    return new SendAndRecvResult
+                    {
+                        Value = -1,
+                        ErrorCode = "scriptFail",
+                        ErrorInfo = $"SIP 响应触发脚本时出错: {error}"
+                    };
+                recv_result.RecvMsg = responseText;
             }
 
             //解析返回的消息

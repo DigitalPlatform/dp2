@@ -1,0 +1,16 @@
+
+2025/2/20
+
+如果检索式 XML 中 item 元素下没有 order 和 originOrder 元素，则依照 strOutputStyle 中的排序规则对 keystring 和 id 进行排序。
+排序很重要，当使用 limit 子句的时候，哪一端会被留下。
+如果 item 元素下有 order 和 originOrder 元素，则处理该 item 的时候依照这两个元素的定义形成 order by 子句
+
+~~~
+正则表达式的用法需要梳理一下，尽量改为不用正则表达式，以保证速度
+
+~~~
+文件型数据库在登录过程中的效率问题需要梳理一下。如果可能改进为具有更快速度的方式
+
+
+~~~
+DigitalPlatform.rms.db 目录下有个 开发文档 子目录，需要梳理一下这些文件，没有必要存在的要删除

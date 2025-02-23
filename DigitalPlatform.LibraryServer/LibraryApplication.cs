@@ -3555,7 +3555,7 @@ TaskScheduler.Default);
     strLibraryCodeList);
 
                 DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
-        sessioninfo.UserID);
+        temp_sessioninfo.UserID);
                 */
 
                 string strOperTime = this.Clock.GetClock();
@@ -3582,6 +3582,9 @@ TaskScheduler.Default);
         }
 
         // 过滤掉 library.xml 内容中的一些不必要的元素
+        // return:
+        //      -1  出错
+        //      其它  过滤时发生改变的区域个数
         int FilterLibraryXml(ref string xml,
             out string strError)
         {
@@ -9332,7 +9335,7 @@ out strError);
             List<string> dbnames = null;
             if (strDbType == "reader")
             {
-                dbnames = this.GetCurrentReaderDbNameList(strLibraryCodeList);    // sessioninfo.LibraryCodeList
+                dbnames = this.GetCurrentReaderDbNameList(strLibraryCodeList);    // temp_sessioninfo.LibraryCodeList
             }
             else
             {
@@ -10943,6 +10946,7 @@ out strError);
          * */
         // 重设密码
         // parameters:
+        //      request_session 代表发起请求的前端的账户身份。注意可能为 null，表示前端未登录情况下使用本函数
         //      strParameters   参数字符串。name tel 和 queryword 子参数是必备子参数。(name 在立即返回消息的情况下可以缺乏)
         //                      tel 子参数内容必须为 11 位字符。
         //                      queryword 的作用是确保 API 高效运行。用于检索得到用于初筛的结果集
@@ -10961,6 +10965,7 @@ out strError);
         //      1   功能成功执行
         public int ResetPassword(
             // string strLibraryCodeList,
+            SessionInfo request_session,
             string strParameters,
             string strMessageTemplate,
             out string strMessage,
@@ -11020,10 +11025,10 @@ out strError);
             }
 
             // 临时的SessionInfo对象
-            SessionInfo sessioninfo = new SessionInfo(this);
+            SessionInfo temp_sessioninfo = new SessionInfo(this);
             try
             {
-                RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+                RmsChannel channel = temp_sessioninfo.Channels.GetChannel(this.WsUrl);
                 if (channel == null)
                 {
                     strError = "get channel error";
@@ -11220,7 +11225,7 @@ out strError);
                             // parameters:
                             //      strUserName 账户名，或者读者证件条码号，或者 "@refID:xxxx"
                             nRet = SendSmsByMq(
-                            sessioninfo.Account == null ? "[none]" : sessioninfo.Account.UserID,
+                            temp_sessioninfo.Account == null ? "[none]" : temp_sessioninfo.Account.UserID,
                             strTelParam,
                             strBody,
                             out strError);
@@ -11312,8 +11317,11 @@ out strError);
                         }
                     }
 
+
                     nRet = ChangeReaderTempPassword(
-            sessioninfo,
+                        request_session,
+                        channel,
+            // temp_sessioninfo,
             record.RecPath,
             readerdom,
             strReaderTempPassword,
@@ -11330,8 +11338,8 @@ out strError);
             }
             finally
             {
-                sessioninfo.CloseSession();
-                sessioninfo = null;
+                temp_sessioninfo.CloseSession();
+                temp_sessioninfo = null;
             }
 
             if (bReturnMessage == false)
@@ -11832,7 +11840,7 @@ out strError);
             //      1   命中1条
             //      >1  命中多于1条
             int nRet = this.GetReaderRecXmlForLogin(
-                // sessioninfo.Channels,
+                // temp_sessioninfo.Channels,
                 channel,
                 strLibraryCodeList,
                 strLoginName,
@@ -12205,17 +12213,17 @@ out strError);
         {
             if (sessioninfo == null)
             {
-                throw new Exception("sessioninfo = null");
+                throw new Exception("temp_sessioninfo = null");
             }
 
             if (sessioninfo.Account == null)
             {
-                throw new Exception("sessioninfo.Account = null");
+                throw new Exception("temp_sessioninfo.Account = null");
             }
 
             if (sessioninfo.Account.Type != "reader")
             {
-                throw new Exception("sessioninfo.Account.Type != \"reader\"");
+                throw new Exception("temp_sessioninfo.Account.Type != \"reader\"");
             }
 
             sessioninfo.Account.ReaderDomChanged = true;
@@ -12233,19 +12241,19 @@ out strError);
             strError = "";
             if (sessioninfo == null)
             {
-                strError = "sessioninfo = null";
+                strError = "temp_sessioninfo = null";
                 return -1;
             }
 
             if (sessioninfo.Account == null)
             {
-                strError = "sessioninfo.Account = null";
+                strError = "temp_sessioninfo.Account = null";
                 return -1;
             }
 
             if (sessioninfo.Account.Type != "reader")
             {
-                strError = "sessioninfo.Account.Type != \"reader\"";
+                strError = "temp_sessioninfo.Account.Type != \"reader\"";
                 return -1;
             }
 
@@ -12273,11 +12281,11 @@ out strError);
 
             /*
             // 保存读者记录
-            lRet = channel.DoSaveTextRes(sessioninfo.Account.ReaderDomPath,
+            lRet = channel.DoSaveTextRes(temp_sessioninfo.Account.ReaderDomPath,
                 readerdom.OuterXml,
                 false,
                 "content",
-                sessioninfo.Account.ReaderDomTimestamp,   // timestamp,
+                temp_sessioninfo.Account.ReaderDomTimestamp,   // timestamp,
                 out output_timestamp,
                 out strOutputPath,
                 out strError);
@@ -12288,7 +12296,7 @@ out strError);
                 "change",
                 sessioninfo.Account.ReaderDomPath,
                 readerdom.OuterXml,
-                "", // sessioninfo.Account.ReaderDomOldXml,    // strOldXml
+                "", // temp_sessioninfo.Account.ReaderDomOldXml,    // strOldXml
                 sessioninfo.Account.ReaderDomTimestamp,
                 "",
                 out strExistingXml,
@@ -12389,19 +12397,19 @@ out strError);
             strError = "";
             if (sessioninfo == null)
             {
-                strError = "sessioninfo = null";
+                strError = "temp_sessioninfo = null";
                 return -1;
             }
 
             if (sessioninfo.Account == null)
             {
-                strError = "sessioninfo.Account = null";
+                strError = "temp_sessioninfo.Account = null";
                 return -1;
             }
 
             if (sessioninfo.Account.Type == "reader")
             {
-                strError = "sessioninfo.Account.Type == \"reader\"，而不是工作人员身份";
+                strError = "temp_sessioninfo.Account.Type == \"reader\"，而不是工作人员身份";
                 return -1;
             }
 
@@ -12430,11 +12438,11 @@ out strError);
 
             /*
             // 保存读者记录
-            lRet = channel.DoSaveTextRes(sessioninfo.Account.ReaderDomPath,
+            lRet = channel.DoSaveTextRes(temp_sessioninfo.Account.ReaderDomPath,
                 readerdom.OuterXml,
                 false,
                 "content",
-                sessioninfo.Account.ReaderDomTimestamp,   // timestamp,
+                temp_sessioninfo.Account.ReaderDomTimestamp,   // timestamp,
                 out output_timestamp,
                 out strOutputPath,
                 out strError);
@@ -12445,7 +12453,7 @@ out strError);
                 "change",
                 sessioninfo.Account.ReaderDomPath,
                 readerdom.OuterXml,
-                "", // sessioninfo.Account.ReaderDomOldXml,    // strOldXml
+                "", // temp_sessioninfo.Account.ReaderDomOldXml,    // strOldXml
                 sessioninfo.Account.ReaderDomTimestamp,
                 "",
                 out strExistingXml,
@@ -12548,7 +12556,7 @@ out strError);
 
             if (sessioninfo == null)
             {
-                strError = "sessioninfo == null";
+                strError = "temp_sessioninfo == null";
                 goto ERROR1;
             }
 
@@ -12577,7 +12585,7 @@ out strError);
                 /*
                 string strBarcode = "";
 
-                strBarcode = sessioninfo.Account.Barcode;
+                strBarcode = temp_sessioninfo.Account.Barcode;
                 if (strBarcode == "")
                 {
                     strError = "帐户信息中读者证条码号为空，无法定位读者记录。";
@@ -12654,7 +12662,7 @@ out strError);
 
             if (sessioninfo == null)
             {
-                strError = "sessioninfo == null";
+                strError = "temp_sessioninfo == null";
                 goto ERROR1;
             }
 
@@ -12702,7 +12710,7 @@ out strError);
                 byte[] timestamp = null;
                 // 获得读者记录
                 int nRet = this.GetReaderRecXml(
-                    // sessioninfo.Channels,
+                    // temp_sessioninfo.Channels,
                     channel,
                     strBarcode,
                     out strXml,
@@ -13314,7 +13322,7 @@ out strError);
                 //      1   命中1条
                 //      >1  命中多于1条
                 nRet = this.GetItemRecXml(
-                    // sessioninfo.Channels,
+                    // temp_sessioninfo.Channels,
                     channel,
                     strItemBarcode,
                     out strItemXml,
@@ -13437,7 +13445,7 @@ out strError);
 
             /*
             // 准备工作: 映射数据库名
-            nRet = this.GetGlobalCfg(sessioninfo.Channels,
+            nRet = this.GetGlobalCfg(temp_sessioninfo.Channels,
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -13946,7 +13954,7 @@ out strError);
                 //      1   命中1条
                 //      >1  命中多于1条
                 int nRet = this.GetReaderRecXml(
-                    // sessioninfo.Channels,
+                    // temp_sessioninfo.Channels,
                     channel,
                     strReaderKey,
                     out strXml,
@@ -14467,10 +14475,13 @@ strLibraryCode);    // 读者所在的馆代码
 
         // 修改读者临时密码
         // parameters:
+        //      temp_sessioninfo 注意可能是临时 Session
         //      timeExpire  临时密码失效时间
         //      readerdom [in,out] 读者记录 XMLDOM，可能会因为时间戳不匹配而被重新装载
         int ChangeReaderTempPassword(
-            SessionInfo sessioninfo,
+            // SessionInfo temp_sessioninfo,
+            SessionInfo request_session,
+            RmsChannel channel,
             string strReaderRecPath,
             XmlDocument readerdom,
             string strReaderTempPassword,
@@ -14483,7 +14494,6 @@ strLibraryCode);    // 读者所在的馆代码
             output_timestamp = null;
 
             int nRet = 0;
-
 
             // 获得读者库的馆代码
             // return:
@@ -14506,12 +14516,14 @@ strLibraryCode);    // 读者所在的馆代码
             DomUtil.SetElementText(domOperLog.DocumentElement, "operation",
                 "changeReaderTempPassword");
 
+            /*
             RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
             if (channel == null)
             {
                 strError = "get channel error";
                 goto ERROR1;
             }
+            */
 
             int nRedoCount = 0;
         REDO:
@@ -14581,7 +14593,8 @@ strLibraryCode);    // 读者所在的馆代码
             }
 
             // 写入日志
-            string strReaderBarcode = DomUtil.GetElementText(domOperLog.DocumentElement, "barcode");
+            string strReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement, // 2025/2/18 从 domOperLog 改为 readerdom
+                "barcode");
 
             // 读者证条码号
             DomUtil.SetElementText(domOperLog.DocumentElement,
@@ -14597,12 +14610,13 @@ strLibraryCode);    // 读者所在的馆代码
 
             string strOperTime = this.Clock.GetClock();
             DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
-                sessioninfo.UserID);   // 操作者
+                request_session == null ? "[empty]" : request_session.UserID);   // 操作者
             DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
                 strOperTime);   // 操作时间
 
+            // TODO: 当 request_session 为 null 的时候，也要设法记载下来前端的 IP 地址
             nRet = this.OperLog.WriteOperLog(domOperLog,
-                sessioninfo.ClientAddress,
+                request_session == null ? "[empty]" : request_session.ClientAddress,
                 out strError);
             if (nRet == -1)
             {
@@ -15645,7 +15659,7 @@ strLibraryCode);    // 读者所在的馆代码
             // TODO: 还可以考虑支持http://这样的配置文件。
 
             nRet = this.CfgsMap.MapFileToLocal(
-                // sessioninfo.Channels,
+                // temp_sessioninfo.Channels,
                 channel,
                 strRemotePath,
                 out strLocalPath,
@@ -15665,7 +15679,7 @@ strLibraryCode);    // 读者所在的馆代码
             {
                 string strTempPath = "";
                 nRet = this.CfgsMap.MapFileToLocal(
-                    // sessioninfo.Channels,
+                    // temp_sessioninfo.Channels,
                     channel,
                     strRemotePath + ".ref",
                     out strTempPath,
@@ -16343,6 +16357,27 @@ strLibraryCode);    // 读者所在的馆代码
 
                 string strFirstLevel = StringUtil.GetFirstPartPath(ref strPath);
 
+                // 2025/2/20
+                if (strAction == "delete"
+                    && SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
+                {
+                    strError = $"删除文件或目录 {strResPath} 被拒绝。分馆账户身份不允许删除任何文件和目录";
+                    return 0;
+                }
+
+                {
+                    string[] special_names = new string[] {
+                "log", "operlog", "cfgs", "templates", "statis",
+                };
+
+                    // 2025/2/20
+                    if (strAction == "delete" && IndexOfIgnoreCase(special_names, strFirstLevel) != -1)
+                    {
+                        strError = $"删除目录 {strResPath} 被拒绝。特殊目录不允许任何用户删除";
+                        return 0;
+                    }
+                }
+
                 if (strFirstLevel == "")
                 {
                     if (strAction == "delete" && string.Compare(strPath, "library.xml", true) == 0)
@@ -16364,6 +16399,7 @@ strLibraryCode);    // 读者所在的馆代码
                         return 0;
                     }
                 }
+#if REMOVED
                 else if (string.Compare(strFirstLevel, "cfgs", true) == 0)
                 {
                     if (StringUtil.IsInList("managedatabase", strRights) == false)
@@ -16372,6 +16408,9 @@ strLibraryCode);    // 读者所在的馆代码
                         return 0;
                     }
                 }
+#endif
+
+#if REMOVED
                 else if (string.Compare(strFirstLevel, "log", true) == 0)
                 {
                     strError = $"{strActionName}文件 {strResPath} 被拒绝。特殊目录不允许进行{strActionName}";
@@ -16382,6 +16421,7 @@ strLibraryCode);    // 读者所在的馆代码
                     strError = $"{strActionName}文件 {strResPath} 被拒绝。特殊目录不允许进行{strActionName}";
                     return 0;
                 }
+#endif
                 else if (string.Compare(strFirstLevel, "upload", true) == 0)
                 {
                     if (StringUtil.IsInList("upload,managedatabase", strRights) == false)
@@ -17052,7 +17092,7 @@ out string db_type);
             /*
             // 书目库 读者库 等
             // 2022/12/9
-            var error = CheckDbGetRights(sessioninfo,
+            var error = CheckDbGetRights(temp_sessioninfo,
                 strDbName,
                 out string db_type);
             if (error != null)
@@ -17313,7 +17353,7 @@ out string db_type);
                 // 检查当前操作者是否管辖这个读者库
                 // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
                 if (IsCurrentChangeableReaderPath(strDbName + "/?",
-                    sessioninfo.ExpandLibraryCodeList/*sessioninfo.LibraryCodeList*/) == false)
+                    sessioninfo.ExpandLibraryCodeList/*temp_sessioninfo.LibraryCodeList*/) == false)
                 {
                     strError = $"读者库 '{strDbName}' 不在{GetCurrentUserName(sessioninfo)}管辖范围内，不允许读取";
                     return 0;
@@ -17329,9 +17369,9 @@ out string db_type);
                     // 只要已经具备 getxxxinfo 权限，则可以获得 cfgs 下的所有配置文件
                     /*
                     // 2022/12/9
-                    if (StringUtil.IsInList("getcfgfile", sessioninfo.RightsOrigin) == false)
+                    if (StringUtil.IsInList("getcfgfile", temp_sessioninfo.RightsOrigin) == false)
                     {
-                        strError = "用户 " + sessioninfo.UserID + " 获取配置文件被拒绝。不具备 getcfgfile 权限。";
+                        strError = "用户 " + temp_sessioninfo.UserID + " 获取配置文件被拒绝。不具备 getcfgfile 权限。";
                         return 0;
                     }
                     */
@@ -18092,6 +18132,18 @@ out string db_type);
             foreach (string o in strings)
             {
                 if (s == o)
+                    return i;
+                i++;
+            }
+            return -1;
+        }
+
+        static int IndexOfIgnoreCase(string[] strings, string s)
+        {
+            int i = 0;
+            foreach (string o in strings)
+            {
+                if (string.Compare(s, o, true) == 0)
                     return i;
                 i++;
             }

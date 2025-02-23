@@ -3049,8 +3049,8 @@ strOldMarc);
         int GetBiblioInfoString(
             string strBiblioRecPath,
             string strBiblioXml,
-    out string strHtml,
-    out string strError)
+            out string strHtml,
+            out string strError)
         {
             strHtml = "";
             strError = "";

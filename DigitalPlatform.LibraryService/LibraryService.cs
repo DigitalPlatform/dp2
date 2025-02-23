@@ -2461,6 +2461,16 @@ namespace dp2Library
                     goto ERROR1;
                 }
 
+                string strOrder = "";
+                if (StringUtil.IsInList("desc", strOutputStyle))
+                {
+                    var sort_by = GetSortBy(strOutputStyle);
+                    if (sort_by == "key")
+                        strOrder = "<originOrder>DESC</originOrder>";
+                    else
+                        strOrder = "<order>DESC</order>";
+                }
+
                 // 构造检索式
                 string strQueryXml = "";
                 for (int i = 0; i < dbnames.Count; i++)
@@ -2523,7 +2533,7 @@ namespace dp2Library
                         + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)   // 2007/9/14 
                         + "'><option warning='0'/><item><word>"
                         + StringUtil.GetXmlStringSimple(strQueryWord)
-                        + "</word><match>" + strMatchStyle + "</match><relation>" + strRelation + "</relation><dataType>" + strDataType + "</dataType><maxCount>" + nPerMax.ToString() + "</maxCount></item><lang>" + strLang + "</lang></target>";
+                        + "</word><match>" + strMatchStyle + "</match><relation>" + strRelation + "</relation><dataType>" + strDataType + "</dataType><maxCount>" + nPerMax.ToString() + "</maxCount>" + strOrder + "</item><lang>" + strLang + "</lang></target>";
 
                     if (i > 0)
                     {
@@ -2608,6 +2618,35 @@ namespace dp2Library
                 result.ErrorInfo = strErrorText;
                 return result;
             }
+        }
+
+        public static string GetSortBy(string strOutputStyle,
+    bool throw_exception = true)
+        {
+            // 2025/1/21
+            // 排序依据的列 sortby:id 或者 sortby:key
+            var sortby = StringUtil.GetParameterByPrefix(strOutputStyle, "sortby");
+            if (string.IsNullOrEmpty(sortby))
+                sortby = "id";
+            else
+            {
+                // 检查 sortby 值
+                if (sortby != "id" && sortby != "key")
+                {
+                    var error = $"strOutputStyle 参数值 '{strOutputStyle}' 不合法: sortby: 子参数值应为 'id' 或 'key'";
+                    if (throw_exception)
+                        throw new ArgumentException(error);
+                    return "id";
+                }
+            }
+
+            // 检查 keyid keycount 的缺乏，和 sortby:key 之间的矛盾
+            if (sortby == "key"
+                && StringUtil.IsInList("keyid", strOutputStyle) == false
+                && StringUtil.IsInList("keycount", strOutputStyle) == false)
+                throw new ArgumentException($"当 strOutput 参数值 '{strOutputStyle}' 中不具备 keyid 或 keycount 时，不应使用 sortby:key 子参数");
+
+            return sortby;
         }
 
         // parameters:
@@ -6058,7 +6097,7 @@ out QueryResult[] results)
         {
             browse_formats = null;
             List<string> biblio_list = new List<string>();
-            foreach(var format in formats)
+            foreach (var format in formats)
             {
                 if (format.StartsWith("browse:"))
                     browse_formats = format.Substring("browse:".Length);
@@ -6094,7 +6133,7 @@ out QueryResult[] results)
         }
 #endif
 
-#endregion
+        #endregion
 
         // 检索书目信息
         // parameters:
@@ -11206,7 +11245,10 @@ PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin)
             string strStyle = (string)parameters["style"];
             bool bReturnMessage = StringUtil.IsInList("returnMessage", strStyle);
 
-            LibraryServerResult result = this.PrepareEnvironment("ResetPassword", bReturnMessage, bReturnMessage, true);
+            LibraryServerResult result = this.PrepareEnvironment("ResetPassword",
+                true/*始终准备 SessionInfo */,   // bReturnMessage,
+                bReturnMessage,
+                true);
             if (result.Value == -1)
                 return result;
 
@@ -11231,6 +11273,7 @@ PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin)
             //      1   功能成功执行
             int nRet = app.ResetPassword(
                 // sessioninfo.LibraryCodeList,
+                sessioninfo,    // 始终会有 sessioninfo。但 sessioninfo 是否登录过受到 bReturnMessage 控制
                 strParameters,
                 strMessageTemplate,
                 out strMessage,
@@ -11477,6 +11520,7 @@ PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin)
                     //      1   succeed
                     //      2   超过范围
                     nRet = app.OperLog.GetOperLogs(
+                        sessioninfo,
                         sessioninfo.LibraryCodeList,
                         strFileName,
                         lIndex,
@@ -11620,16 +11664,6 @@ PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin)
                         return result;
                     }
 
-                    // 从 strStyle 里移走 supervisor，避免前端通过本 API 看到日志记录中读者记录的 password 元素
-                    // StringUtil.RemoveFromInList("supervisor", true, ref strStyle);
-                    if (StringUtil.IsInList("supervisor", strStyle) && sessioninfo.RightsOriginList.IsInList("replication") == false)
-                    {
-                        result.Value = -1;
-                        result.ErrorInfo = $"以敏感信息方式获得日志记录被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 replication 权限。";
-                        result.ErrorCode = ErrorCode.AccessDenied;
-                        return result;
-                    }
-
                     OperLogInfo[] records = null;
                     nRet = app.AccessLogDatabase.GetOperLogs(
                         sessioninfo.LibraryCodeList,
@@ -11657,12 +11691,25 @@ PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin)
                     return result;
                 }
 
+
+                // 从 strStyle 里移走 supervisor，避免前端通过本 API 看到日志记录中读者记录的 password 元素
+                // StringUtil.RemoveFromInList("supervisor", true, ref strStyle);
+                if (StringUtil.IsInList("supervisor", strStyle) && sessioninfo.RightsOriginList.IsInList("replication") == false)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = $"以敏感信息方式获得日志记录被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 replication 权限。";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+
+
                 // return:
                 //      -1  error
                 //      0   file not found
                 //      1   succeed
                 //      2   超过范围
                 nRet = app.OperLog.GetOperLog(
+                    sessioninfo,
                     sessioninfo.LibraryCodeList,
                     strFileName,
                     lIndex,

@@ -199,7 +199,7 @@ namespace DigitalPlatform.rms
 
             //key的序  //ASC:升序  //DESC:降序
             XmlNode nodeOriginOrder = nodeItem.SelectSingleNode("originOrder");
-            // 当定义了order元素时，才会id进行排序
+            // 当定义了 originOrder 元素时，才会 keystring 进行排序
             if (nodeOriginOrder != null)
             {
                 string strOriginOrderText = nodeOriginOrder.InnerText;   // 2012/2/16

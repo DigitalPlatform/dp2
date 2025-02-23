@@ -430,9 +430,21 @@ namespace dp2Circulation
 
                 if (String.IsNullOrEmpty(this.ErrorInfo) == false)
                 {
-                    // 出错的事项
-                    item.BackColor = Color.FromArgb(255, 0, 0); // 纯红色
-                    item.ForeColor = Color.White;
+                    // 2025/2/21
+                    if (this.ErrorInfo.StartsWith("提醒:")
+                    || this.ErrorInfo.StartsWith("提示:")
+                    || this.ErrorInfo.StartsWith("警告:"))
+                    {
+                        // 警告和提示的事项
+                        item.BackColor = Color.FromArgb(190, 190, 255); // 浅蓝色
+                        item.ForeColor = SystemColors.WindowText;
+                    }
+                    else
+                    {
+                        // 出错的事项
+                        item.BackColor = Color.FromArgb(150, 0, 0); // 深红色
+                        item.ForeColor = Color.White;
+                    }
                 }
                 else if (this.ItemDisplayState == ItemDisplayState.Normal)
                 {

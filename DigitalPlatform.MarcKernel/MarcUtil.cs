@@ -49,7 +49,8 @@ namespace DigitalPlatform.Marc
                 return "";
 
             strFragmentXml = MarcDiff.GetIndentInnerXml(strFragmentXml);    // 不包含根节点
-            return GetPlanTextHtml(strFragmentXml);
+            // 注: strFragmentXml 中的一些实体字符，例如 &gt; 这样的，需要先用 HtmlDecode 变换为适合阅读的形态，再进行下一步处理
+            return GetPlanTextHtml(HttpUtility.HtmlDecode(strFragmentXml));
         }
 
         static string GetPlanTextHtml(string strOldFragmentXml)

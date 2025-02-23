@@ -1724,6 +1724,7 @@ namespace DigitalPlatform.LibraryServer
                     strAction,
                     entityinfos,
                     strNewBiblioRecPath,
+                    null,
                     null,   // domOperLog,
                     out strError);
                 if (nRet == -1)
@@ -1753,6 +1754,7 @@ namespace DigitalPlatform.LibraryServer
                 strAction,
                 orderinfos,
                 strNewBiblioRecPath,
+                null,
                 null,   // domOperLog,
                 out strError);
                 if (nRet == -1)
@@ -1778,6 +1780,7 @@ namespace DigitalPlatform.LibraryServer
             strAction,
             issueinfos,
             strNewBiblioRecPath,
+            null,
             null,   // domOperLog,
             out strError);
                 if (nRet == -1)
@@ -1805,6 +1808,7 @@ namespace DigitalPlatform.LibraryServer
             strAction,
             commentinfos,
             strNewBiblioRecPath,
+            null,
             null,   // domOperLog,
             out strError);
                 if (nRet == -1)

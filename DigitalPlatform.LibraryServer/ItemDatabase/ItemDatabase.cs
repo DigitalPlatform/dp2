@@ -12,15 +12,10 @@ using System.Diagnostics;
 using DigitalPlatform;	// Stop类
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.Xml;
-using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.Script;
-using DigitalPlatform.MarcDom;
-using DigitalPlatform.Marc;
 
-using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
-using System.Numerics;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -355,6 +350,8 @@ namespace DigitalPlatform.LibraryServer
         //      -1  出错
         //      0   正确
         //      1   有部分修改没有兑现。说明在strError中
+        //      2   全部修改都没有兑现。说明在strError中 (2018/10/9)
+        //      3   没有发生任何修改。说明在 strError 中 (2025/2/21)
         public virtual int MergeTwoItemXml(
             SessionInfo sessioninfo,
             string strAction,
@@ -1503,21 +1500,6 @@ out strError);
                 bNoOperations = true;
             }
 
-            if (bNoOperations == false)
-            {
-                // 2010/4/8
-                // 
-                nRet = this.App.ReplaceOperation(
-                ref domNew,
-                "moved",
-                sessioninfo.UserID, // strUserID,
-                "",
-                10,
-                out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-            }
-
             string part_type = "";
             string strWarning = "";
             // 合并新旧记录
@@ -1563,6 +1545,36 @@ out strError);
 
             // Debug.Assert(strOutputPath == info.NewRecPath);
             string strTargetPath = strOutputPath;
+
+            if (bNoOperations == false)
+            {
+                // 2025/2/21
+                var strOldRefID = LibraryApplication.GetXmlRefID(strExistSourceXml);
+                var strNewRefID = LibraryApplication.GetXmlRefID(strNewXml);
+
+                // 2010/4/8
+                // 
+                nRet = this.App.AppendOperation(    // 原来是 ReplaceOperation
+                    ref strNewXml,
+                    "move", // "moved",
+                    sessioninfo.UserID, // strUserID,
+                    "",
+                    10,
+                    (e) =>
+                    {
+                        // 创建 path 属性
+                        e.SetAttribute("path", $"{info.OldRecPath}-->{strOutputPath}");
+
+                        // 创建 refID 属性
+                        if (strOldRefID != strNewRefID)
+                        {
+                            e.SetAttribute("refID", $"{strOldRefID}-->{strNewRefID}");
+                        }
+                    },
+                out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+            }
 
             lRet = channel.DoSaveTextRes(strTargetPath,
                 strNewXml,
@@ -1862,6 +1874,7 @@ out strError);
                     //      0   正确
                     //      1   有部分修改没有兑现。说明在strError中
                     //      2   全部修改都没有兑现。说明在strError中 (2018/10/9)
+                    //      3   没有发生任何修改。说明在 strError 中 (2025/2/21)
                     nRet = MergeTwoItemXml(
                         sessioninfo,
                         "change",
@@ -1871,13 +1884,26 @@ out strError);
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
-                    if (nRet == 1 || nRet == 2)
+                    if (nRet == 1 /*|| nRet == 2*/)
                     {
                         if (nRet == 1)
                             part_type = "部分";
                         else
                             part_type = "全部都没有";
                         strWarning = strError;
+                    }
+                    else if (nRet == 2 || nRet == 3)
+                    {
+                        // 2025/2/21
+                        // 没有发生修改，拒绝保存
+                        error = new EntityInfo(info);
+                        error.ErrorInfo = strError + "。拒绝保存。";
+                        if (nRet == 2)
+                            error.ErrorCode = ErrorCodeValue.FullDenied;
+                        else
+                            error.ErrorCode = ErrorCodeValue.NotChanged;
+                        ErrorInfos.Add(error);
+                        return -1;
                     }
 
                     // 为了后面的 CheckParent
@@ -1971,7 +1997,7 @@ out strError);
                     node = DomUtil.SetElementText(domOperLog.DocumentElement,
                         "oldRecord",
                         strExistXml);
-                    DomUtil.SetAttr(node, 
+                    DomUtil.SetAttr(node,
                         "recPath",
                         info.NewRecPath/*info.OldRecPath*/);
                 }
@@ -2906,9 +2932,9 @@ out strError);
                             // 创建<record>元素
                             {
                                 var node = DomUtil.SetElementText(domOperLog.DocumentElement,
-                                    "record", 
+                                    "record",
                                     strNewXml);
-                                DomUtil.SetAttr(node, 
+                                DomUtil.SetAttr(node,
                                     "recPath",
                                     strOutputPath);
                             }
@@ -2920,7 +2946,7 @@ out strError);
 
                             // 所真正保存的记录，可能稍有变化, 因此需要返回给前端
                             // TODO: strNewXml 中可能包含一些当前账户的权限不应看到的字段，需要过滤后再赋给 .NewRecord
-                            error.NewRecord = strNewXml;    
+                            error.NewRecord = strNewXml;
                             error.NewTimestamp = output_timestamp;
 
                             // 2023/2/2
@@ -3837,6 +3863,7 @@ strError);
             string strAction,
             List<DeleteEntityInfo> entityinfos,
             string strTargetBiblioRecPath,
+            string strOperator,
             XmlDocument domOperLog,
             out string strError)
         {
@@ -3994,6 +4021,29 @@ strError);
                             strError = "复制" + this.ItemName + "记录 '" + info.RecPath + "' 时发生错误: " + strError;
                             goto ERROR1;
                         }
+
+                        // 2025/2/21
+                        // 处理 operation 元素
+                        var ret = this.App.AppendOperation(ref dom,
+                            strAction,
+                            strOperator,
+                            "",
+                            10,
+                            (e) =>
+                            {
+                                // 创建 path 属性
+                                e.SetAttribute("path", $"{info.RecPath}-->{strOutputRecPath}");
+
+                                // 创建 refID 属性
+                                if (strAction.ToLower().Contains("copy")
+                                || strOldRefID != strNewRefID)
+                                {
+                                    e.SetAttribute("refID", $"{strOldRefID}-->{strNewRefID}");
+                                }
+                            },
+                            out strError);
+                        if (ret == -1)
+                            goto ERROR1;
 
                         // 2011/5/24
                         // 修改xml记录。<parent>元素发生了变化
@@ -4861,6 +4911,44 @@ out string strError)
             return 0;
         }
 
+        public static bool AreEqualXml(string xml1, string xml2)
+        {
+            XmlDocument dom1 = new XmlDocument();
+            dom1.LoadXml(xml1);
+
+            XmlDocument dom2 = new XmlDocument();
+            dom2.LoadXml(xml2);
+
+            return AreEqual(dom1, dom2);
+        }
+
+        // 判断两个 DOM 内容是否为等同的
+        public static bool AreEqual(XmlDocument dom1, XmlDocument dom2)
+        {
+            if (dom1.DocumentElement == null && dom2.DocumentElement == null)
+            {
+
+            }
+            else
+            {
+                if ((dom1.DocumentElement == null) != (dom2.DocumentElement == null))
+                    return false;
+            }
+
+            if (dom1.DocumentElement.ChildNodes.Count != dom2.DocumentElement.ChildNodes.Count)
+                return false;
+
+            for (int i = 0; i < dom1.DocumentElement.ChildNodes.Count; i++)
+            {
+                var node1 = dom1.DocumentElement.ChildNodes[i];
+                var node2 = dom2.DocumentElement.ChildNodes[i];
+
+                if (node1.OuterXml.Trim() != node2.OuterXml.Trim())
+                    return false;
+            }
+
+            return true;
+        }
     }
 
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,6 +8,8 @@ using System.Threading.Tasks;
 using System.Xml;
 
 using DigitalPlatform.WPF;
+using Jint;
+using Jint.Native;
 
 namespace dp2SSL
 {
@@ -86,5 +89,111 @@ namespace dp2SSL
 
             return value == "true";
         }
+
+        /*
+<charging>
+	<messageIO>
+		<script lang="javascript">
+
+		</script>
+	</messageIO>
+</charging>
+        * */
+        // 2025/2/22
+        // 从 charging.xml 配置文件中获得 消息 IO 的脚本代码
+        public static string GetMessageIoScript(string lang = "javascript")
+        {
+            if (ChargingCfgDom == null)
+                return null;
+            var script_node = ChargingCfgDom.DocumentElement.SelectSingleNode($"messageIO/script[@lang='{lang}']") as XmlElement;
+            if (script_node == null)
+                return null;
+            return script_node.InnerText;
+        }
+
+        public static string GetMessageIoLogging()
+        {
+            if (ChargingCfgDom == null)
+                return null;
+            return ChargingCfgDom.DocumentElement.SelectSingleNode($"messageIO/@logging")?.Value;
+        }
+
+        #region 消息 IO 脚本执行
+
+        // parameters:
+        //      type    消息的类型。"request" "response" 之一
+        public static void LoggingMessage(string prefix, string type, string message)
+        {
+            var logging = GetMessageIoLogging();
+            if (logging == "on" || logging == "yes")
+            {
+                WpfClientInfo.WriteDebugLog($"{prefix} {type} message: '{message}'");
+            }
+        }
+
+        // parameters:
+        //      type    消息的类型。"request" "response" 之一
+        public static string TriggerScript(string type,
+            ref string message,
+            ScriptContext context)
+        {
+            var lang = "javascript";
+            string script_code = GetMessageIoScript(lang);
+            if (string.IsNullOrEmpty(script_code))
+                return null;
+
+            try
+            {
+                Engine engine = new Engine(cfg => cfg.AllowClr(typeof(App).Assembly));
+
+                SetValue(engine,
+                    "type",
+                    type);
+                SetValue(engine,
+                    "message",
+                    message);
+                SetValue(engine,
+                    "context",
+                    context);
+
+                engine.Execute("var DigitalPlatform = importNamespace('dp2SSL');\r\n"
+                    + script_code) // execute a statement
+                    ?.GetCompletionValue() // get the latest statement completion value
+                    ?.ToObject()?.ToString() // converts the value to .NET
+                    ;
+                message = GetString(engine, "message", "");
+                var error = GetString(engine, "error", null);
+
+                // 将变换后的 SIP2 消息记入日志
+                ChargingData.LoggingMessage($"经 {lang} 脚本变换{(string.IsNullOrEmpty(error) ? "" : " (error="+error)}",
+                    "response",
+                    message);
+                return error;
+            }
+            catch (Exception ex)
+            {
+                // TODO: 截取脚本代码的前面若干行出现在报错信息中
+                return $"执行消息 {type} 脚本时出现异常: {ex.Message}";
+            }
+        }
+
+        static void SetValue(Engine engine, string name, object o)
+        {
+            if (o == null)
+                engine.SetValue(name, JsValue.Null);
+            else
+                engine.SetValue(name, o);
+        }
+
+        static string GetString(Engine engine, string name, string default_value)
+        {
+            var result_obj = engine.GetValue(name);
+            string value = result_obj.IsUndefined() ? default_value : result_obj.ToObject().ToString();
+            if (value == null)
+                value = "";
+            return value;
+        }
+
+        #endregion
     }
 }
