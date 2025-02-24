@@ -7,9 +7,15 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 
-using DigitalPlatform.WPF;
 using Jint;
 using Jint.Native;
+
+using DigitalPlatform.Interfaces;
+using DigitalPlatform.WPF;
+using System.Reflection;
+using DigitalPlatform;
+using DigitalPlatform.RFID;
+using DigitalPlatform.Script;
 
 namespace dp2SSL
 {
@@ -90,6 +96,7 @@ namespace dp2SSL
             return value == "true";
         }
 
+#if REMOVED
         /*
 <charging>
 	<messageIO>
@@ -109,6 +116,47 @@ namespace dp2SSL
             if (script_node == null)
                 return null;
             return script_node.InnerText;
+        }
+#endif
+        /*
+<charging>
+<messageIO>
+<script lang="javascript">
+
+</script>
+</messageIO>
+</charging>
+* */
+        // 2025/2/22
+        // 从 charging.xml 配置文件中获得 消息 IO 的脚本代码
+        public static List<ScriptItem> GetMessageIoScripts()
+        {
+            if (ChargingCfgDom == null)
+                return null;
+            List<ScriptItem> results = new List<ScriptItem>();
+            var script_nodes = ChargingCfgDom.DocumentElement.SelectNodes($"messageIO/script");
+            foreach(XmlElement script_node in script_nodes)
+            {
+                var item = new ScriptItem();
+                item.Lang = script_node.GetAttribute("lang");
+                item.Code = script_node.InnerText;
+                item.FileName = script_node.GetAttribute("fileName");
+                results.Add(item);
+            }
+
+            return results;
+        }
+
+        public class ScriptItem
+        {
+            // 语言名称
+            public string Lang { get; set; }
+
+            // 源代码。目前仅支持 javascript 语言的源代码
+            public string Code { get; set; }
+
+            // 物理文件名。目前仅支持 DLL 文件名
+            public string FileName { get; set; }
         }
 
         public static string GetMessageIoLogging()
@@ -137,11 +185,144 @@ namespace dp2SSL
             ref string message,
             ScriptContext context)
         {
-            var lang = "javascript";
-            string script_code = GetMessageIoScript(lang);
-            if (string.IsNullOrEmpty(script_code))
-                return null;
+            var items = GetMessageIoScripts();
+            // 顺次触发调用 script
+            foreach(var item in items)
+            {
+                string ext = Path.GetExtension(item.FileName)?.ToLower();
+                string error = null;
+                if (item.Lang == "javascript")
+                {
+                    if (string.IsNullOrEmpty(item.Code) == false)
+                    {
+                        error = CallJavascript(
+        item.Code,
+        type,
+        ref message,
+        context);
+                    }
+                }
+                else if (string.IsNullOrEmpty(item.FileName) == false
+                    &&  ext == ".dll")
+                {
+                    if (_filters.Count == 0)
+                    {
+                        var ret = LoadSipFilters();
+                        if (ret.Value == -1)
+                            throw new Exception($"加载 SIP 消息过 DLL 失败: {ret.ErrorInfo}");
+                    }
 
+                    error = CallDll(
+item.FileName,
+type,
+ref message,
+context);
+                }
+                else
+                    throw new ArgumentException($"charging.xml 中 messageIO/script/@lang 中出现了无法识别的语言名称 '{item.Lang}'");
+                
+                if (string.IsNullOrEmpty(error) == false)
+                    return error;
+            }
+
+            return null;
+        }
+
+        static List<FilterItem> _filters = new List<FilterItem>();
+
+        class FilterItem
+        {
+            public string FileName { get; set; }
+            public ISipMessageFilter Filter { get; set; }
+        }
+
+        public static NormalResult LoadSipFilters()
+        {
+            _filters.Clear();
+
+            var items = GetMessageIoScripts();
+            // 顺次触发调用 script
+            foreach (var item in items)
+            {
+                string ext = Path.GetExtension(item.FileName)?.ToLower();
+                if (string.IsNullOrEmpty(item.FileName) == false
+                    && ext == ".dll")
+                {
+                    var assembly = Assembly.LoadFile(item.FileName);
+                    if (assembly == null)
+                    {
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"SIP 消息过滤 DLL '{item.FileName}' 加载失败"
+                        };
+                    }
+
+                    Type type = ScriptManager.GetDerivedClassType(
+    assembly,
+    "DigitalPlatform.Interfaces.ISipMessageFilter");
+                    if (type == null)
+                    {
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"SIP 消息过滤 DLL '{item.FileName}' 中没有找到从 DigitalPlatform.Interfaces.ISipMessageFilter 派生的类。加载失败"
+                        };
+                    }
+
+                    var filter = (ISipMessageFilter)type.InvokeMember(null,
+    BindingFlags.DeclaredOnly |
+    BindingFlags.Public | BindingFlags.NonPublic |
+    BindingFlags.Instance | BindingFlags.CreateInstance,
+    null,
+    null,
+    null);
+                    if (filter == null)
+                    {
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"创建类 {type.Name} 的实例失败({item.FileName})"
+                        };
+                    }
+
+                    _filters.Add(new FilterItem
+                    {
+                        FileName = item.FileName,
+                        Filter = filter
+                    });
+                }
+            }
+
+
+            return new NormalResult();
+        }
+
+        static string CallDll(
+    string fileName,
+    string type,
+    ref string message,
+    ScriptContext context)
+        {
+            var obj_item = _filters.Where(o => o.FileName == fileName).FirstOrDefault();
+            if (obj_item == null)
+                throw new Exception($"在 _filter 集合中没有找到 FileName 为 '{fileName}' 的事项");
+            var error = obj_item.Filter.TriggerScript(type,
+                ref message,
+                context);
+            // 将变换后的 SIP2 消息记入日志
+            ChargingData.LoggingMessage($"经 DLL {fileName} 变换{(string.IsNullOrEmpty(error) ? "" : " (error=" + error)}",
+                type,
+                message);
+            return error;
+        }
+
+        static string CallJavascript(
+            string script_code,
+            string type,
+            ref string message,
+            ScriptContext context)
+        {
             try
             {
                 Engine engine = new Engine(cfg => cfg.AllowClr(typeof(App).Assembly));
@@ -165,8 +346,8 @@ namespace dp2SSL
                 var error = GetString(engine, "error", null);
 
                 // 将变换后的 SIP2 消息记入日志
-                ChargingData.LoggingMessage($"经 {lang} 脚本变换{(string.IsNullOrEmpty(error) ? "" : " (error="+error)}",
-                    "response",
+                ChargingData.LoggingMessage($"经 javascript 脚本变换{(string.IsNullOrEmpty(error) ? "" : " (error=" + error)}",
+                    type,
                     message);
                 return error;
             }
@@ -175,6 +356,7 @@ namespace dp2SSL
                 // TODO: 截取脚本代码的前面若干行出现在报错信息中
                 return $"执行消息 {type} 脚本时出现异常: {ex.Message}";
             }
+
         }
 
         static void SetValue(Engine engine, string name, object o)

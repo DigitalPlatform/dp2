@@ -5,8 +5,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace dp2SSL
+namespace DigitalPlatform.Interfaces
 {
+    public interface ISipMessageFilter
+    {
+        // parameters:
+        //      type    消息的类型。"request" "response" 之一
+        string TriggerScript(string type,
+    ref string message,
+    ScriptContext context);
+
+    }
+
+
     public class ScriptContext : Hashtable
     {
         public ScriptContext() : base()
@@ -31,4 +42,5 @@ namespace dp2SSL
             this[key] = value;
         }
     }
+
 }

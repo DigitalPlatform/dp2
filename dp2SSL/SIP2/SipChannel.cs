@@ -9,6 +9,8 @@ using System.Text;
 using System.Threading.Tasks;
 
 using DigitalPlatform;
+using DigitalPlatform.Interfaces;
+
 /*
 using DigitalPlatform.SIP2;
 using DigitalPlatform.SIP2.Request;

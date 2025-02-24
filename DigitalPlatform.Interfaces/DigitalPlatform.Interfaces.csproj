@@ -56,6 +56,7 @@
     <Compile Include="IFingerprint.cs" />
     <Compile Include="IIdcard.cs" />
     <Compile Include="IServiceControl.cs" />
+    <Compile Include="ISipMessageFilter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

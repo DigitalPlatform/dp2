@@ -22,6 +22,7 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
 using System.Linq;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -1622,6 +1623,8 @@ out strError);
             XmlElement nodeAccount = null;
             string strOldOuterXml = "";
 
+            string strExistLibraryCodeList = "";
+
             // this.m_lock.AcquireWriterLock(m_nLockTimeout);
             this.LockForWrite();    // 2016/10/16
             try
@@ -1638,7 +1641,7 @@ out strError);
                 strOldOuterXml = nodeAccount.OuterXml;
 
                 // 旧的馆代码
-                string strExistLibraryCodeList = DomUtil.GetAttr(nodeAccount, "libraryCode");
+                strExistLibraryCodeList = DomUtil.GetAttr(nodeAccount, "libraryCode");
 
                 // 2012/9/9
                 // 分馆用户只允许修改馆代码属于管辖分馆的帐户
@@ -1764,11 +1767,15 @@ out strError);
 
                 DomUtil.SetElementOuterXml(node, nodeAccount.OuterXml);
 
-                // 2025/2/18
-                // 新账户的馆代码
-                DomUtil.SetElementText(domOperLog.DocumentElement,
-                    "libraryCode",
-                    userinfo?.LibraryCode);
+                // 2025/2/24
+                // 旧的，新的账户的馆代码
+                {
+                    var codes = MergeLibraryCodeLists(strExistLibraryCodeList,
+                        userinfo?.LibraryCode);
+                    DomUtil.SetElementText(domOperLog.DocumentElement,
+                        "libraryCode",
+                        codes);
+                }
 
                 // 写入日志
                 nRet = this.OperLog.WriteOperLog(domOperLog,
@@ -1781,6 +1788,38 @@ out strError);
                 }
             }
             return 0;
+        }
+
+        public static string MergeLibraryCodeLists(string list1, string list2)
+        {
+            List<string> codes = new List<string>();
+            codes.AddRange(Split(list1));
+            codes.AddRange(Split(list2));
+            StringUtil.RemoveDupNoSort(ref codes);
+            if (codes.Count == 0)
+                return null;
+            return string.Join(",", codes.Select(o => o == "[总馆]" ? "" : o));
+
+            // l 为 null 返回空集合。
+            // l 为 "" 返回 .Count 为 1 的集合
+            List<string> Split(string l)
+            {
+                if (l == null)
+                    return new List<string>();
+                if (string.IsNullOrEmpty(l))
+                    return new List<string>(new string[] { "[总馆]" });
+                var segments = l.Split(',');
+                List<string> results = new List<string>();
+                foreach(var segment in segments)
+                {
+                    if (string.IsNullOrEmpty(segment))
+                        results.Add("[总馆]");
+                    else
+                    results.Add(segment);
+                }
+
+                return results;
+            }
         }
 
         // list1中的值是否全包含在list2中？

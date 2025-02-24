@@ -470,6 +470,9 @@ namespace dp2Circulation
 
         private void button_webCamera_start_Click(object sender, EventArgs e)
         {
+            MessageBox.Show(this, "暂未实现");
+            return;
+            // 2024/2/24 发现 System.AccessViolationException
             if (m_webCamera == null)
             {
                 m_webCamera = new WebCamera(this.panel_camera_preview.Handle,

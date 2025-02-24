@@ -216,6 +216,21 @@ namespace DigitalPlatform.GUI
             return showVideo.SendMessage(hCapWnd, showVideo.WM_CAP_SET_VIDEOFORMAT, CapFormatSize, ref BmpFormat);
         }
 
+        /* 2025/2/24
+应用程序: dp2Circulation.exe
+Framework 版本: v4.0.30319
+说明: 由于未经处理的异常，进程终止。
+异常信息: System.AccessViolationException
+   在 System.Runtime.InteropServices.Marshal.CopyToManaged(IntPtr, System.Object, Int32, Int32)
+   在 DigitalPlatform.GUI.showVideo.Copy(IntPtr, Byte[])
+   在 DigitalPlatform.GUI.showVideo.Copy(Int32, Byte[])
+   在 DigitalPlatform.GUI.WebCamera.FrameCallBack(IntPtr, IntPtr)
+   在 System.Windows.Forms.UnsafeNativeMethods.DispatchMessageW(MSG ByRef)
+   在 System.Windows.Forms.Application+ComponentManager.System.Windows.Forms.UnsafeNativeMethods.IMsoComponentManager.FPushMessageLoop(IntPtr, Int32, Int32)
+   在 System.Windows.Forms.Application+ThreadContext.RunMessageLoopInner(Int32, System.Windows.Forms.ApplicationContext)
+   在 System.Windows.Forms.Application+ThreadContext.RunMessageLoop(Int32, System.Windows.Forms.ApplicationContext)
+   在 dp2Circulation.Program.Main()
+        * */
         private void FrameCallBack(IntPtr lwnd, IntPtr lpVHdr)
         {
             showVideo.VIDEOHDR videoHeader = new showVideo.VIDEOHDR();

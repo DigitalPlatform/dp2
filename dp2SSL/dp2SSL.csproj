@@ -663,7 +663,6 @@
     <Compile Include="Models\NewTagList2.cs" />
     <Compile Include="Models\PasswordCache.cs" />
     <Compile Include="Models\PatronReplication.cs" />
-    <Compile Include="Models\ScriptContext.cs" />
     <Compile Include="NetworkUsage.cs" />
     <Compile Include="Resources\SkinResourceDictionary.cs" />
     <Compile Include="SIP2\BaseMessage.cs" />

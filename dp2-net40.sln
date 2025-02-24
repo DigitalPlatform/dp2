@@ -345,6 +345,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RfidDrivers.SikeHF", "RfidD
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DuckDbResultSet", "DuckDbResultSet\DuckDbResultSet.csproj", "{E04EF3B7-521D-4419-8463-2633524390A3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dp2SSL.SampleSipMessageFilter", "dp2SSL.SampleSipMessageFilter\dp2SSL.SampleSipMessageFilter.csproj", "{2FA8B1B4-2E82-41AA-B51B-8B700A039B1D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -2986,6 +2988,24 @@ Global
 		{E04EF3B7-521D-4419-8463-2633524390A3}.Test|Mixed Platforms.Build.0 = Debug|Any CPU
 		{E04EF3B7-521D-4419-8463-2633524390A3}.Test|x86.ActiveCfg = Debug|Any CPU
 		{E04EF3B7-521D-4419-8463-2633524390A3}.Test|x86.Build.0 = Debug|Any CPU
+		{2FA8B1B4-2E82-41AA-B51B-8B700A039B1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2FA8B1B4-2E82-41AA-B51B-8B700A039B1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2FA8B1B4-2E82-41AA-B51B-8B700A039B1D}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{2FA8B1B4-2E82-41AA-B51B-8B700A039B1D}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{2FA8B1B4-2E82-41AA-B51B-8B700A039B1D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2FA8B1B4-2E82-41AA-B51B-8B700A039B1D}.Debug|x86.Build.0 = Debug|Any CPU
+		{2FA8B1B4-2E82-41AA-B51B-8B700A039B1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2FA8B1B4-2E82-41AA-B51B-8B700A039B1D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2FA8B1B4-2E82-41AA-B51B-8B700A039B1D}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{2FA8B1B4-2E82-41AA-B51B-8B700A039B1D}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{2FA8B1B4-2E82-41AA-B51B-8B700A039B1D}.Release|x86.ActiveCfg = Release|Any CPU
+		{2FA8B1B4-2E82-41AA-B51B-8B700A039B1D}.Release|x86.Build.0 = Release|Any CPU
+		{2FA8B1B4-2E82-41AA-B51B-8B700A039B1D}.Test|Any CPU.ActiveCfg = Debug|Any CPU
+		{2FA8B1B4-2E82-41AA-B51B-8B700A039B1D}.Test|Any CPU.Build.0 = Debug|Any CPU
+		{2FA8B1B4-2E82-41AA-B51B-8B700A039B1D}.Test|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{2FA8B1B4-2E82-41AA-B51B-8B700A039B1D}.Test|Mixed Platforms.Build.0 = Debug|Any CPU
+		{2FA8B1B4-2E82-41AA-B51B-8B700A039B1D}.Test|x86.ActiveCfg = Debug|Any CPU
+		{2FA8B1B4-2E82-41AA-B51B-8B700A039B1D}.Test|x86.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
