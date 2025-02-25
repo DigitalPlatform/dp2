@@ -1,11 +1,10 @@
-﻿using System;
+﻿using Jint;
+using Jint.Native;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-
-using Jint;
 
 namespace DigitalPlatform.SIP
 {
@@ -38,6 +37,8 @@ namespace DigitalPlatform.SIP
         private MessageTransformer() { }
         public void Initial(string rule)
         {
+            IgnoreMessage.Clear();
+            FilteMessage.Clear();
             StringReader stringReader = new StringReader(rule);
 
             string currMapperFld = "";
@@ -113,9 +114,12 @@ namespace DigitalPlatform.SIP
                                         stringBuilder.Append(scriptLine);
                                     }
                                 }
-                                // TODO: 这里需要运行脚本，或者是将脚本存到引擎对象，处理消息时，将消息字符串传入，对数据进行加工后返回
+
                                 Engine en = new Engine();
-                                // 有没有可能这里将 Engine 进行定义，包括定义一些函数，或者一些变量值，相当于将脚本预编译。到处理数据那一步，才真正的传入消息数据，返回处理结果
+                                // 这里需要运行脚本，包括定义一些函数，或者一些变量值，相当于将脚本预编译。到处理数据那一步，才真正的传入消息数据，对数据进行加工后返回处理结果
+                                // 预先定义好函数名，将代码作用域限定，在处理数据时使用Invoke方法调用函数名，并将消息当成参数传入。
+                                stringBuilder.Insert(0, "function callTransformerResult(msg){");
+                                stringBuilder.Append("}");
                                 en.Execute(stringBuilder.ToString());
                                 ruler.AddScriptFields.Add(ret[1], en);
                             }
@@ -234,8 +238,18 @@ namespace DigitalPlatform.SIP
                     List<string> addFlds = new List<string>();
                     foreach (string key in ruler.AddScriptFields.Keys)
                     {
-                        // TODO: 这里需要从脚本里获取到执行结果
-                        addFlds.Add(key + ruler.AddScriptFields[key].Eval);
+                        // 从脚本里获取到执行结果，callTransformerResult 是初始化Engine时设置的函数名，定义的所有代码都是基于这个作用域里。
+                        JsValue val = null;
+                        try
+                        {
+                            val = ruler.AddScriptFields[key].Invoke("callTransformerResult", message);
+                            addFlds.Add(key + val.AsString());
+                        }
+                        catch (Jint.Runtime.JavaScriptException e)
+                        {
+                            // 脚本运行异常报错的话，将空值赋值给字段，
+                            addFlds.Add(key + "");
+                        }
                     }
                     // 追加 add 关键字的字段到消息末尾
                     append[1] = string.Join("|", addFlds.ToArray().Where(item => !string.IsNullOrEmpty(item)));
