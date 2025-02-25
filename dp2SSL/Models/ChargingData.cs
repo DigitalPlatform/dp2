@@ -186,18 +186,25 @@ namespace dp2SSL
             ref string message,
             ScriptContext context)
         {
-            var items = GetMessageIoScripts();
+            if (_filters == null)
+            {
+                var ret = LoadSipFilters();
+                if (ret.Value == -1)
+                    throw new Exception($"初始化 charging.xml 中 SIP 消息过滤规则时失败: {ret.ErrorInfo}");
+            }
+
+            // var items = GetMessageIoScripts();
             // 顺次触发调用 script
-            foreach(var item in items)
+            foreach(var item in _filters)
             {
                 string ext = Path.GetExtension(item.FileName)?.ToLower();
                 string error = null;
-                if (item.Lang == "javascript")
+                if (item.Lang?.ToLower() == "javascript")
                 {
                     if (string.IsNullOrEmpty(item.Code) == false)
                     {
-                        error = CallJavascript(
-        item.Code,
+                        error = RunJavascript(
+        item,
         type,
         ref message,
         context);
@@ -206,30 +213,16 @@ namespace dp2SSL
                 else if (string.IsNullOrEmpty(item.FileName) == false
                     &&  ext == ".dll")
                 {
-                    if (_filters.Count == 0)
-                    {
-                        var ret = LoadSipFilters();
-                        if (ret.Value == -1)
-                            throw new Exception($"加载 SIP 消息过滤规则或 DLL 失败: {ret.ErrorInfo}");
-                    }
-
-                    error = CallDll(
-item.FileName,
+                    error = RunDll(
+item,
 type,
 ref message,
 context);
                 }
                 else if (IsZhao(item.Lang))
                 {
-                    if (_filters.Count == 0)
-                    {
-                        var ret = LoadSipFilters();
-                        if (ret.Value == -1)
-                            throw new Exception($"加载 SIP 消息过滤规则或 DLL 失败: {ret.ErrorInfo}");
-                    }
-
-                    error = CallTransformer(
-item.Code,
+                    error = RunTransformer(
+item,
 type,
 ref message,
 context);
@@ -244,7 +237,7 @@ context);
             return null;
         }
 
-        static List<FilterItem> _filters = new List<FilterItem>();
+        static List<FilterItem> _filters = null;
 
         class FilterItem
         {
@@ -268,6 +261,8 @@ context);
         // 目前不加入 javascript 语言的事项。只是加入 DLL 或 Transformer 事项
         public static NormalResult LoadSipFilters()
         {
+            if (_filters == null)
+                _filters = new List<FilterItem>();
             _filters.Clear();
 
             var items = GetMessageIoScripts();
@@ -275,9 +270,30 @@ context);
             foreach (var item in items)
             {
                 string ext = Path.GetExtension(item.FileName)?.ToLower();
-                if (string.IsNullOrEmpty(item.FileName) == false
+                if (item.Lang == "javascript")
+                {
+                    if (string.IsNullOrEmpty(item.FileName) == false)
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = "script/@lang 属性值为 'javascript' 时，暂不支持 script/@fileName 属性"
+                        };
+                    _filters.Add(new FilterItem
+                    {
+                        Lang = item.Lang,
+                        Code = item.Code,
+                        FileName = item.FileName,
+                    });
+                }
+                else if (string.IsNullOrEmpty(item.FileName) == false
                     && ext == ".dll")
                 {
+                    if (string.IsNullOrEmpty(item.FileName) == false)
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = "script/@fileName 属性值为 'xxx.dll' 时，暂不支持 script/@lang 属性"
+                        };
                     var assembly = Assembly.LoadFile(item.FileName);
                     if (assembly == null)
                     {
@@ -326,6 +342,13 @@ context);
                 }
                 else if (IsZhao(item.Lang))
                 {
+                    if (string.IsNullOrEmpty(item.FileName) == false)
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = "script/@lang 属性值为 'ZHAO' 时，暂不支持 script/@fileName 属性"
+                        };
+
                     var transformer = MessageTransformer.Instance();
                     try
                     {
@@ -336,7 +359,7 @@ context);
                         return new NormalResult
                         {
                             Value = -1,
-                            ErrorInfo = $"Initialize Transformer 出错: {ex.Message}\r\n(code='{item.Code}')"
+                            ErrorInfo = $"Initialize MessageTransformer 出错: {ex.Message}\r\n(code='{item.Code}')"
                         };
                     }
                     _filters.Add(new FilterItem
@@ -352,42 +375,47 @@ context);
             return new NormalResult();
         }
 
-        static string CallDll(
-    string fileName,
+        static string RunDll(
+    // string fileName,
+    FilterItem filter_item,
     string type,
     ref string message,
     ScriptContext context)
         {
+            /*
             var obj_item = _filters.Where(o => o.FileName == fileName).FirstOrDefault();
             if (obj_item == null)
                 throw new Exception($"在 _filter 集合中没有找到 FileName 为 '{fileName}' 的事项");
-            var error = obj_item.Filter.TriggerScript(type,
+            */
+            var error = filter_item.Filter.TriggerScript(type,
                 ref message,
                 context);
             // 将变换后的 SIP2 消息记入日志
-            ChargingData.LoggingMessage($"经 DLL {fileName} 变换{(string.IsNullOrEmpty(error) ? "" : " (error=" + error)}",
+            ChargingData.LoggingMessage($"经 DLL {filter_item.FileName} 变换{(string.IsNullOrEmpty(error) ? "" : " (error=" + error)}",
                 type,
                 message);
             return error;
         }
 
-        static string CallTransformer(
-string script_code,
+        static string RunTransformer(
+// string script_code,
+FilterItem filter_item,
 string type,
 ref string message,
 ScriptContext context)
         {
+            /*
             var obj_item = _filters.Where(o => IsZhao(o.Lang) && o.Code == script_code).FirstOrDefault();
             if (obj_item == null)
             {
                 // TODO: 取规则文本的前面若干行报错
                 throw new Exception($"在 _filter 集合中没有找到 代码 为 '{script_code}' 的事项");
             }
-
+            */
             string error = null;
             try
             {
-                obj_item.Transformer.Process(message,
+                filter_item.Transformer.Process(message,
                     out string result);
                 message = result;
             }
@@ -396,6 +424,7 @@ ScriptContext context)
                 error = ex.Message;
             }
             // 将变换后的 SIP2 消息记入日志
+            // TODO: 取规则文本的前面几行，作为名字出现在 LoogingMessage() 中
             ChargingData.LoggingMessage($"经 ZHAO 规则变换{(string.IsNullOrEmpty(error) ? "" : " (error=" + error)}",
                 type,
                 message);
@@ -403,8 +432,9 @@ ScriptContext context)
         }
 
 
-        static string CallJavascript(
-            string script_code,
+        static string RunJavascript(
+            // string script_code,
+            FilterItem filter_item,
             string type,
             ref string message,
             ScriptContext context)
@@ -424,7 +454,7 @@ ScriptContext context)
                     context);
 
                 engine.Execute("var DigitalPlatform = importNamespace('dp2SSL');\r\n"
-                    + script_code) // execute a statement
+                    + filter_item.Code) // execute a statement
                     ?.GetCompletionValue() // get the latest statement completion value
                     ?.ToObject()?.ToString() // converts the value to .NET
                     ;
@@ -432,6 +462,7 @@ ScriptContext context)
                 var error = GetString(engine, "error", null);
 
                 // 将变换后的 SIP2 消息记入日志
+                // TODO: 取 javascript 代码的前若干行作为名字
                 ChargingData.LoggingMessage($"经 javascript 脚本变换{(string.IsNullOrEmpty(error) ? "" : " (error=" + error)}",
                     type,
                     message);
@@ -442,7 +473,6 @@ ScriptContext context)
                 // TODO: 截取脚本代码的前面若干行出现在报错信息中
                 return $"执行消息 {type} 脚本时出现异常: {ex.Message}";
             }
-
         }
 
         static void SetValue(Engine engine, string name, object o)
