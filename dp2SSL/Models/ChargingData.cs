@@ -6,16 +6,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using System.Reflection;
 
 using Jint;
 using Jint.Native;
 
 using DigitalPlatform.Interfaces;
 using DigitalPlatform.WPF;
-using System.Reflection;
 using DigitalPlatform;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Script;
+using DigitalPlatform.SIP;
 
 namespace dp2SSL
 {
@@ -209,11 +210,26 @@ namespace dp2SSL
                     {
                         var ret = LoadSipFilters();
                         if (ret.Value == -1)
-                            throw new Exception($"加载 SIP 消息过 DLL 失败: {ret.ErrorInfo}");
+                            throw new Exception($"加载 SIP 消息过滤规则或 DLL 失败: {ret.ErrorInfo}");
                     }
 
                     error = CallDll(
 item.FileName,
+type,
+ref message,
+context);
+                }
+                else if (IsZhao(item.Lang))
+                {
+                    if (_filters.Count == 0)
+                    {
+                        var ret = LoadSipFilters();
+                        if (ret.Value == -1)
+                            throw new Exception($"加载 SIP 消息过滤规则或 DLL 失败: {ret.ErrorInfo}");
+                    }
+
+                    error = CallTransformer(
+item.Code,
 type,
 ref message,
 context);
@@ -234,14 +250,28 @@ context);
         {
             public string FileName { get; set; }
             public ISipMessageFilter Filter { get; set; }
+
+            public string Lang { get; set; }
+
+            public string Code { get; set; }
+
+            public MessageTransformer Transformer { get; set; }
         }
 
+        static bool IsZhao(string name)
+        {
+            if (name == "ZHAO" || name == "zhao" || name == "SMTS" || name == "smts")
+                return true;
+            return false;
+        }
+
+        // 目前不加入 javascript 语言的事项。只是加入 DLL 或 Transformer 事项
         public static NormalResult LoadSipFilters()
         {
             _filters.Clear();
 
             var items = GetMessageIoScripts();
-            // 顺次触发调用 script
+
             foreach (var item in items)
             {
                 string ext = Path.GetExtension(item.FileName)?.ToLower();
@@ -288,8 +318,32 @@ context);
 
                     _filters.Add(new FilterItem
                     {
+                        Lang = item.Lang,
+                        Code = item.Code,
                         FileName = item.FileName,
                         Filter = filter
+                    });
+                }
+                else if (IsZhao(item.Lang))
+                {
+                    var transformer = MessageTransformer.Instance();
+                    try
+                    {
+                        transformer.Initial(item.Code);
+                    }
+                    catch(Exception ex)
+                    {
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"Initialize Transformer 出错: {ex.Message}\r\n(code='{item.Code}')"
+                        };
+                    }
+                    _filters.Add(new FilterItem
+                    {
+                        Lang = item.Lang,
+                        Code = item.Code,
+                        Transformer = transformer,
                     });
                 }
             }
@@ -316,6 +370,38 @@ context);
                 message);
             return error;
         }
+
+        static string CallTransformer(
+string script_code,
+string type,
+ref string message,
+ScriptContext context)
+        {
+            var obj_item = _filters.Where(o => IsZhao(o.Lang) && o.Code == script_code).FirstOrDefault();
+            if (obj_item == null)
+            {
+                // TODO: 取规则文本的前面若干行报错
+                throw new Exception($"在 _filter 集合中没有找到 代码 为 '{script_code}' 的事项");
+            }
+
+            string error = null;
+            try
+            {
+                obj_item.Transformer.Process(message,
+                    out string result);
+                message = result;
+            }
+            catch(Exception ex)
+            {
+                error = ex.Message;
+            }
+            // 将变换后的 SIP2 消息记入日志
+            ChargingData.LoggingMessage($"经 ZHAO 规则变换{(string.IsNullOrEmpty(error) ? "" : " (error=" + error)}",
+                type,
+                message);
+            return error;
+        }
+
 
         static string CallJavascript(
             string script_code,

@@ -1022,6 +1022,10 @@
       <Project>{f2161fb9-eafb-4667-8830-dc1448c52f32}</Project>
       <Name>DigitalPlatform.SimpleMessageQueue</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.SIP.MessageTransformer\DigitalPlatform.SIP.MessageTransformer.csproj">
+      <Project>{d33cdcae-b59a-4d07-bb74-ae17b088a304}</Project>
+      <Name>DigitalPlatform.SIP.MessageTransformer</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.Text\DigitalPlatform.Text.csproj">
       <Project>{26F96CC3-A4A9-4BC4-A10A-BC7E25581FF6}</Project>
       <Name>DigitalPlatform.Text</Name>
