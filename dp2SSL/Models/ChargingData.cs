@@ -97,6 +97,24 @@ namespace dp2SSL
             return value == "true";
         }
 
+        // 从 charging.xml 配置文件中获得是否校验 SIP 消息的参数
+        // 值应为空，或者 fix,var,requir 的任意组合
+        // return:
+        //      null    不校验
+        //      ""      全功能校验
+        //      其它      自定义的组合校验
+        public static string GetSipMessageVerifyStyle()
+        {
+            if (ChargingCfgDom == null)
+                return "";
+            var value = ChargingCfgDom.DocumentElement.SelectSingleNode("settings/key[@name='SIP消息校验']/@value")?.Value;
+            if (value == null)
+                return "";
+            if (value == "[none]" || value == "[不校验]")
+                return null;
+            return value;
+        }
+
 #if REMOVED
         /*
 <charging>

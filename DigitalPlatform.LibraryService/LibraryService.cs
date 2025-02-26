@@ -11263,8 +11263,6 @@ PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin)
                 }
             }
 
-            string strError = "";
-
             // 不需要登录
             // return:
             //      -2  读者的图书馆账户尚未注册手机号
@@ -11277,7 +11275,7 @@ PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin)
                 strParameters,
                 strMessageTemplate,
                 out strMessage,
-                out strError);
+                out string strError);
             result.ErrorInfo = strError;
             if (nRet == -2)
             {

@@ -28,7 +28,9 @@ namespace dp2SSL.SIP2
         /// true 成功
         /// false 出错
         /// </returns>
-        public static int ParseMessage(string cmdText, out BaseMessage message, out string error)
+        public static int ParseMessage(string cmdText,
+            string style,
+            out BaseMessage message, out string error)
         {
             message = new BaseMessage();
             error = "";
@@ -213,7 +215,7 @@ namespace dp2SSL.SIP2
                     return -1;
             }
 
-            return message.Parse(cmdText, out error);
+            return message.Parse(cmdText, style, out error); // "verify:fix|var"
         }
 
 

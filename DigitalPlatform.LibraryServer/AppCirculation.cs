@@ -17112,16 +17112,13 @@ out strError);
                     {
 
                         // 读入源读者记录
-                        string strSourceReaderXml = "";
-                        string strSourceOutputReaderRecPath = "";
-                        byte[] source_reader_timestamp = null;
                         nRet = this.GetReaderRecXml(
                             // sessioninfo.Channels,
                             channel,
                             strSourceReaderKey,
-                            out strSourceReaderXml,
-                            out strSourceOutputReaderRecPath,
-                            out source_reader_timestamp,
+                            out string strSourceReaderXml,
+                            out string strSourceOutputReaderRecPath,
+                            out byte[] source_reader_timestamp,
                             out strError);
                         if (nRet == 0)
                         {
@@ -17177,16 +17174,13 @@ out strError);
 
 
                         // 读入目标读者记录
-                        string strTargetReaderXml = "";
-                        string strTargetOutputReaderRecPath = "";
-                        byte[] target_reader_timestamp = null;
                         nRet = this.GetReaderRecXml(
                             // sessioninfo.Channels,
                             channel,
                             strTargetReaderKey,
-                            out strTargetReaderXml,
-                            out strTargetOutputReaderRecPath,
-                            out target_reader_timestamp,
+                            out string strTargetReaderXml,
+                            out string strTargetOutputReaderRecPath,
+                            out byte[] target_reader_timestamp,
                             out strError);
                         if (nRet == 0)
                         {
@@ -17220,6 +17214,16 @@ out strError);
                     out strTargetLibraryCode) == false)
                             {
                                 strError = $"源读者记录路径 '{strTargetOutputReaderRecPath}' 从属的读者库不在{GetCurrentUserName(sessioninfo)}管辖范围内";
+                                goto ERROR1;
+                            }
+                        }
+
+                        // 2025/2/26
+                        // 检查源和目标读者记录馆代码是否一致。不一致则不允许转移
+                        {
+                            if (strSourceLibraryCode != strTargetLibraryCode)
+                            {
+                                strError = $"转移操作被拒绝。因源读者记录 '{strTargetOutputReaderRecPath}' 的馆代码 '{strSourceLibraryCode}' 和目标读者记录 '{strTargetOutputReaderRecPath}' 的馆代码 '{strTargetLibraryCode}' 不相等";
                                 goto ERROR1;
                             }
                         }

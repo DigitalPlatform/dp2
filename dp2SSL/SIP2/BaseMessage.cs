@@ -1115,7 +1115,13 @@ AC_TerminalPassword var:r1";
         #endregion
 
         // 解析字符串命令为对象
-        public virtual int Parse(string text, out string error)
+        // parameters:
+        //      style   解析风格。
+        //              目前可以包含 verify:xxx 子参数。
+        //              verify:xxx 可以为"verify" 或者 "verify:fix|var|requir"。fix|var|requir 分别表示要校验固定长字段、变长字段、字段必备性
+        public virtual int Parse(string text,
+            string style,
+            out string error)
         {
             error = "";
 
@@ -1202,10 +1208,14 @@ AC_TerminalPassword var:r1";
                 }
             }
 
-            // 校验;
-            int ret = this.Verify(out error);
-            if (ret == -1)
-                return -1;
+            var verify_rules = StringUtil.GetParameterByPrefix(style, "verify");
+            if (verify_rules != null)
+            {
+                // 校验;
+                int ret = this.Verify(verify_rules, out error);
+                if (ret == -1)
+                    return -1;
+            }
 
             return 0;
         }
@@ -1255,41 +1265,61 @@ AC_TerminalPassword var:r1";
         }
 
         // 校验对象的各参数是否合法
-        public virtual int Verify(out string error)
+        // parameters:
+        //      verify_rules    内容为 fix|var|requir 之一。分别表示要校验固定长字段、变长字段、字段必备性
+        //                      如果为空，默认当作 fix|var|requir
+        public virtual int Verify(
+            string verify_rules,
+            out string error)
         {
             error = "";
             List<string> errors = new List<string>();
 
-            // 校验定长字段
-            foreach (FixedLengthField field in this.FixedLengthFields)
-            {
-                if (field.Value == null || field.Value.Length != field.Length)
-                {
-                    errors.Add($"消息 {_id} 中字段 {field.Name} 的值为 null 或者长度不符合要求的长度 {field.Length}");
-                }
-            }
+            if (verify_rules == null)
+                verify_rules = "";
+            verify_rules = verify_rules.Replace("|", ",");
+            if (string.IsNullOrEmpty(verify_rules))
+                verify_rules = "fix,var,requir";
 
-            foreach (VariableLengthField field in this.VariableLengthFields)
+            if (StringUtil.IsInList("fix", verify_rules))
             {
-                /*
-                if (field.IsRequired == true && field.Value == null)
+                // 校验定长字段
+                foreach (FixedLengthField field in this.FixedLengthFields)
                 {
-                    error = $"消息 {_id} 中 字段 {field.ID} 是必备字段，消息中需包含该字段";
-                    return -1;
-                }
-                */
-            }
-
-            if (this._rule != null && this._rule.FieldRules != null)
-            {
-                foreach (var item in this._rule.FieldRules)
-                {
-                    // 检查必备字段是否具备
-                    if (item.IsRequired && item.ID != "##")
+                    if (field.Value == null || field.Value.Length != field.Length)
                     {
-                        var fields = this.GetVariableFieldList(item.ID);
-                        if (fields.Count == 0)
-                            errors.Add($"消息 {_id} 中缺乏必备字段 {item.ID}");
+                        errors.Add($"消息 {_id} 中字段 {field.Name} 的值为 null 或者长度不符合要求的长度 {field.Length}");
+                    }
+                }
+            }
+
+            if (StringUtil.IsInList("var", verify_rules))
+            {
+                foreach (VariableLengthField field in this.VariableLengthFields)
+                {
+                    /*
+                    if (field.IsRequired == true && field.Value == null)
+                    {
+                        error = $"消息 {_id} 中 字段 {field.ID} 是必备字段，消息中需包含该字段";
+                        return -1;
+                    }
+                    */
+                }
+            }
+
+            if (StringUtil.IsInList("requir", verify_rules))
+            {
+                if (this._rule != null && this._rule.FieldRules != null)
+                {
+                    foreach (var item in this._rule.FieldRules)
+                    {
+                        // 检查必备字段是否具备
+                        if (item.IsRequired && item.ID != "##")
+                        {
+                            var fields = this.GetVariableFieldList(item.ID);
+                            if (fields.Count == 0)
+                                errors.Add($"消息 {_id} 中缺乏必备字段 {item.ID}");
+                        }
                     }
                 }
             }

@@ -1067,7 +1067,7 @@ out error);
             }
         }
 
-        static bool IsLibraryCodeInControl(string strLibraryCode,
+        public static bool IsLibraryCodeInControl(string strLibraryCode,
             string strLibraryCodeList)
         {
             if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)

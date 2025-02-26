@@ -34,6 +34,7 @@ using DigitalPlatform.Core;
 using DigitalPlatform.Marc;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.Threading;
+using System.Data.SqlClient;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -10961,7 +10962,7 @@ out strError);
         // return:
         //      -2  读者的图书馆账户尚未注册手机号
         //      -1  出错
-        //      0   因为条件不具备功能没有成功执行
+        //      0   因为条件不具备，功能没有成功执行
         //      1   功能成功执行
         public int ResetPassword(
             // string strLibraryCodeList,
@@ -10982,6 +10983,19 @@ out strError);
             string strNameParam = (string)parameters["name"];
             string strTelParam = (string)parameters["tel"];
             string strLibraryCodeList = (string)parameters["librarycode"];  // 控制检索读者记录的范围
+
+            // TODO: 检查 strLibraryCodeList 中是否多于一个馆代码。
+
+            // 2025/2/26
+            // 检查 request_session.LibraryCodeList 是否可以管辖 strLibraryCodeList
+            if (request_session != null)
+            {
+                if (IsLibraryCodeInControl(strLibraryCodeList, request_session.LibraryCodeList) == false)
+                {
+                    strError = $"请求被拒绝。因 librarycode 子参数的分馆 '{strLibraryCodeList}' 越过当前账户的管辖范围 '{request_session.LibraryCodeList}'";
+                    return -1;
+                }
+            }
 
             int nMaxHitCount = 500; // 2021/10/21 从 10 改为 500
 

@@ -699,6 +699,29 @@ namespace dp2SSL
 
         ScriptContext _scriptContext = new ScriptContext();
 
+        string GetParseStyle()
+        {
+            // return:
+            //      null    不校验
+            //      ""      全功能校验
+            //      其它      自定义的组合校验
+            var verify_style = "";
+
+            if (_scriptContext.ContainsKey("verifyMessage"))
+                verify_style = _scriptContext.Get("verifyMessage") as string;
+            else
+                verify_style = ChargingData.GetSipMessageVerifyStyle();
+
+            // 2025/2/26
+            string style = "";
+            if (string.IsNullOrEmpty(verify_style) == false)
+                style = $"verify:{verify_style.Replace(",", "|")}";
+            else if (verify_style == "")
+                style = "verify";
+
+            return style;
+        }
+
         // 发送消息，接收消息
         public async Task<SendAndRecvResult> SendAndRecvAsync(string requestText)
         {
@@ -722,7 +745,10 @@ namespace dp2SSL
 
             // 校验消息
             BaseMessage request = null;
-            nRet = SIPUtility.ParseMessage(requestText, out request, out error);
+            nRet = SIPUtility.ParseMessage(requestText,
+                GetParseStyle(),
+                out request,
+                out error);
             if (nRet == -1)
             {
                 SipChannelUtil.TryDetectSipNetwork();
@@ -795,7 +821,10 @@ namespace dp2SSL
             }
 
             //解析返回的消息
-            nRet = SIPUtility.ParseMessage(recv_result.RecvMsg, out BaseMessage response, out error);
+            nRet = SIPUtility.ParseMessage(recv_result.RecvMsg,
+                GetParseStyle(),
+                out BaseMessage response, 
+                out error);
             if (nRet == -1)
             {
                 try

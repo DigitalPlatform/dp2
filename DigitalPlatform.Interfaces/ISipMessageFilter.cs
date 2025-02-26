@@ -41,6 +41,8 @@ namespace DigitalPlatform.Interfaces
         {
             this[key] = value;
         }
+
+        // 注: Hashtable 本来有 Remove(key) 函数
     }
 
 }
