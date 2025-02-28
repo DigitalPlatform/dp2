@@ -291,8 +291,8 @@ namespace DigitalPlatform.SIP
                         JsValue val = null;
                         try
                         {
-                            val = ruler.ScriptFields[fieldName].Invoke("callTransformerResult", fieldTempParts[i].Substring(2), message);
-                            fieldTempParts[i] = fieldTempParts[i].Substring(0, 2) + val.AsString();
+                            val = ruler.ScriptFields[fieldName].Invoke("callTransformerResult", fieldTempParts[i], message);
+                            fieldTempParts[i] = val.AsString();
                         }
                         catch (Jint.Runtime.JavaScriptException e)
                         {
