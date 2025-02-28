@@ -4068,7 +4068,7 @@ new_tag_info);
             }
             catch (Exception ex)
             {
-                strError = "SaveUhfTagContent() 出现异常: " + ex.Message;
+                strError = "SaveUhfTagContentAsync() 出现异常: " + ex.Message;
                 goto ERROR1;
             }
         ERROR1:

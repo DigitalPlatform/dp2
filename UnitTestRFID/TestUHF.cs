@@ -151,7 +151,7 @@ namespace UnitTestRFID
 
         // 9 字符才会形成 digit 类型
         [TestMethod]
-        public void Test_splitSegment_1()
+        public void Test_splitSegment_01()
         {
             var segments = UhfUtility.SplitSegment("123456789");
 
@@ -162,7 +162,7 @@ namespace UnitTestRFID
 
         // 8 字符只能形成 table 类型
         [TestMethod]
-        public void Test_splitSegment_2()
+        public void Test_splitSegment_02()
         {
             var segments = UhfUtility.SplitSegment("12345678");
 
@@ -172,7 +172,7 @@ namespace UnitTestRFID
         }
 
         [TestMethod]
-        public void Test_splitSegment_3()
+        public void Test_splitSegment_03()
         {
             var segments = UhfUtility.SplitSegment("AB.123456789");
 
@@ -186,7 +186,7 @@ namespace UnitTestRFID
         }
 
         [TestMethod]
-        public void Test_splitSegment_4()
+        public void Test_splitSegment_04()
         {
             var segments = UhfUtility.SplitSegment("123456789AB.");
 
@@ -200,7 +200,7 @@ namespace UnitTestRFID
         }
 
         [TestMethod]
-        public void Test_splitSegment_5()
+        public void Test_splitSegment_05()
         {
             var segments = UhfUtility.SplitSegment("1234/56789");
 
@@ -218,7 +218,7 @@ namespace UnitTestRFID
 
         // 含有 UTF-8 汉字字符
         [TestMethod]
-        public void Test_splitSegment_6()
+        public void Test_splitSegment_06()
         {
             var segments = UhfUtility.SplitSegment("1234中国56789");
 
@@ -235,7 +235,7 @@ namespace UnitTestRFID
         }
 
         [TestMethod]
-        public void Test_splitSegment_7()
+        public void Test_splitSegment_07()
         {
             var segments = UhfUtility.SplitSegment("78.");
 
@@ -243,6 +243,43 @@ namespace UnitTestRFID
             Assert.AreEqual("table", segments[0].Type);
             Assert.AreEqual("78.", segments[0].Text);
         }
+
+        // 2025/2/28
+        [TestMethod]
+        public void Test_splitSegment_08()
+        {
+            var segments = UhfUtility.SplitSegment("000387624");
+
+            Assert.AreEqual(1, segments.Count);
+            Assert.AreEqual("table", segments[0].Type);
+            Assert.AreEqual("000387624", segments[0].Text);
+        }
+
+        // 2025/2/28
+        [TestMethod]
+        public void Test_splitSegment_09()
+        {
+            var segments = UhfUtility.SplitSegment("CN-0000001-ZG.000387624");
+
+            Assert.AreEqual(1, segments.Count);
+            Assert.AreEqual("table", segments[0].Type);
+            Assert.AreEqual("CN-0000001-ZG.000387624", segments[0].Text);
+        }
+
+        // 2025/2/28
+        [TestMethod]
+        public void Test_splitSegment_10()
+        {
+            var segments = UhfUtility.SplitSegment("CN-0000001-ZG.387624000");
+
+            Assert.AreEqual(2, segments.Count);
+            Assert.AreEqual("table", segments[0].Type);
+            Assert.AreEqual("CN-0000001-ZG.", segments[0].Text);
+            Assert.AreEqual("digit", segments[1].Type);
+            Assert.AreEqual("387624000", segments[1].Text);
+        }
+
+        // 
 
         // 编码 MB11 (User Bank)
         // ISO/TS 28560-4:2014(E) page 52

@@ -379,10 +379,22 @@ namespace DigitalPlatform.RFID
 
                             buffer.Clear();
                         }
-                        buffer.Add(c);
-                        buffer_type = "digit";
+
+                        if (c == '0' && buffer.Count == 0)
+                        {
+                            // 2025/2/28
+                            // digit 段落的开头不允许是 '0'
+                            // 后面还要继续判断和处理
+                        }
+                        else
+                        {
+                            buffer.Add(c);
+                            buffer_type = "digit";
+                            continue;
+                        }
                     }
-                    else if (char.IsDigit(c) == false)
+
+                    if (char.IsDigit(c) == false)
                     {
                         if (buffer_type != "table"
                             && buffer.Count > 0)
@@ -399,7 +411,12 @@ namespace DigitalPlatform.RFID
                         buffer_type = "table";
                     }
                     else
-                        throw new Exception("不可能到达这里");
+                    {
+                        // throw new Exception("不可能到达这里");
+                        // 2025/2/28
+                        buffer.Add(c);
+                        buffer_type = "table";
+                    }
                 }
                 else
                 {
@@ -472,6 +489,8 @@ namespace DigitalPlatform.RFID
 
             if (results.Count <= 1 && results[0].Type != "digit")
                 return results;
+
+            // 把前面有连续 '0' 的 digit 段落拆分为多个段落
 
             // 把不足 9 字符的 digit 段落和前后的 table 段落合并
             List<Segment> merged = new List<Segment>();

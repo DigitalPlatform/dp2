@@ -955,6 +955,7 @@ get_result.Result.AE_PersonalName_r);
 
         #region 监控
 
+        // 2025/2/28
         public static TimeSpan DetectPeriod
         {
             get
@@ -962,7 +963,15 @@ get_result.Result.AE_PersonalName_r);
                 var value = ChargingData.GetSipDetectPeriod();
                 if (string.IsNullOrEmpty(value))
                     return TimeSpan.FromMinutes(5);
-                if (TimeSpan.TryParse(value, out TimeSpan result) == false)
+                // 参数值格式为 时:分:秒 分:秒 或 秒
+                if (TimeSpan.TryParseExact(value,
+                    new string[] {
+                    "%h\\:%m\\:%s",
+                    "%m\\:%s",
+                    "%s",
+                    },
+                    CultureInfo.InvariantCulture,
+                    out TimeSpan result) == false)
                     throw new ArgumentException($"charging.xml 中 'settings/key[@name='SIP探测间隔']/@value' 参数值 '{value}' 不合法。应为 00:00:10 形态");
                 return result;
             }

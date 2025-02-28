@@ -3757,6 +3757,10 @@ out string strErrorCode)
                 if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.91") < 0)
                     bLoadSubrecords = false;
 
+                // return:
+                //      -1  error
+                //      0   not found
+                //      1   found
                 int nRet = this.LoadBiblioRecord(
                     looping.Progress,
                     channel,
@@ -3843,11 +3847,29 @@ out string strErrorCode)
                     bBiblioRecordExist = true;
                 }
 #endif
+                bool bError = false;
+
+#if REMOVED
+                // 注: 因为 LoadBiblioRecord() 已经包含了，所以这里被注释掉
+                // 装载书目和<dprms:file>以外的其它XML片断
+                if (String.IsNullOrEmpty(strOutputBiblioRecPath) == false
+                    && string.IsNullOrEmpty(strXml) == false)
+                {
+                    nRet = LoadXmlFragment(strXml,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        if (String.IsNullOrEmpty(strTotalError) == false)
+                            strTotalError += "\r\n";
+                        strTotalError += strError;
+
+                        bError = true;
+                    }
+                } // end of if (String.IsNullOrEmpty(strOutputBiblioRecPath) == false)
+#endif
 
                 if (string.IsNullOrEmpty(strXml) == false)
                     bBiblioRecordExist = true;
-
-                bool bError = false;
 
                 // 注：当bBiblioRecordExist==true时，LoadBiblioRecord()函数中已经设好了书目记录路径
 
@@ -3903,23 +3925,6 @@ out string strErrorCode)
                     }
                 }
 
-                if (String.IsNullOrEmpty(strOutputBiblioRecPath) == false)
-                {
-                    // 装载书目和<dprms:file>以外的其它XML片断
-                    if (string.IsNullOrEmpty(strXml) == false)
-                    {
-                        nRet = LoadXmlFragment(strXml,
-                            out strError);
-                        if (nRet == -1)
-                        {
-                            if (String.IsNullOrEmpty(strTotalError) == false)
-                                strTotalError += "\r\n";
-                            strTotalError += strError;
-
-                            bError = true;
-                        }
-                    }
-                } // end of if (String.IsNullOrEmpty(strOutputBiblioRecPath) == false)
 
                 if (string.IsNullOrEmpty(this.m_strUsedActiveItemPage) == false)
                 {
@@ -4679,6 +4684,14 @@ out string strErrorCode)
                         // 2008/11/13 
                         if (nRet == 0)
                             this.MessageBoxShow("警告：当前书目记录 '" + strOutputBiblioRecPath + "' 是一条空记录");
+
+                        // 2025/2/28
+                        nRet = LoadXmlFragment(strXml, out strError);
+                        if (nRet == -1)
+                        {
+                            var error = $"书目记录 XML 装入 XmlFragment 时出错: {strError}";
+                            this.MessageBoxShow(error);
+                        }
 
                         this.BiblioChanged = false;
 
@@ -9043,7 +9056,7 @@ out strError);
             string strXmlBody)
         {
             string path = Path.Combine(Program.MainForm.DataDir, "memory_biblio.txt");
-            File.WriteAllText(path, biblio_recpath + "\r\n" 
+            File.WriteAllText(path, biblio_recpath + "\r\n"
                 + ByteArray.GetHexTimeStampString(timestamp) + "\r\n"
                 + strXmlBody);
         }
@@ -9236,7 +9249,7 @@ out strError);
 
             // 把 MARC 编辑器中的一个 MARC 记录保存到一个固定名字的临时文件
             // 便于在 dp2circulation.exe 意外崩溃的情况下，重启后可以找回这条 MARC 记录
-            MemoryBiblio(strTargetPath, 
+            MemoryBiblio(strTargetPath,
                 this.BiblioTimestamp,
                 strXmlBody);
             try
@@ -9545,6 +9558,10 @@ out strError);
                                     strError = "重新装载书目记录时出错: " + strError;
                                     goto ERROR1;
                                 }
+
+                                // 2025/2/28
+                                // 重新显示固定面板区的属性 XML
+                                DoViewComment(false);
                             }
                         }
                     }
