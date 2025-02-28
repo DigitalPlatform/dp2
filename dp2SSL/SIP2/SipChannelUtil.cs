@@ -957,7 +957,7 @@ get_result.Result.AE_PersonalName_r);
 
         // 可以适当降低探测的频率。比如每五分钟探测一次
         // 两次检测网络之间的间隔
-        static TimeSpan _detectPeriod = TimeSpan.FromMinutes(5);
+        static TimeSpan _detectPeriod = TimeSpan.FromSeconds(100);
         // 最近一次检测网络的时间
         static DateTime _lastDetectTime;
 
