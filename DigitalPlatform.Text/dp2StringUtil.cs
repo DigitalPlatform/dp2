@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Xml;
 
@@ -926,6 +927,75 @@ out string strPureName);
 
 
         #endregion
+
+        #region operations/operation 元素操作
+
+        const string DIRECTION_SEPARATOR = "-->";
+
+        public static void SetOperationRecPath(XmlElement e,
+            string source_recpath,
+            string target_recpath)
+        {
+            e.SetAttribute("path", $"{source_recpath}{DIRECTION_SEPARATOR}{target_recpath}");
+        }
+
+        public static bool SetOperationRefID(XmlElement e,
+            string strOldRefID,
+            string strNewRefID)
+        {
+            if (strOldRefID != strNewRefID)
+            {
+                e.SetAttribute("refID", $"{strOldRefID}{DIRECTION_SEPARATOR}{strNewRefID}");
+                return true;
+            }
+
+            return false;
+        }
+
+        public static List<XmlElement> MatchTargetRecPath(
+    XmlNodeList nodes,
+    string target_recpath)
+        {
+            return MatchTargetRecPath(
+            nodes.Cast<XmlNode>(),
+            target_recpath);
+        }
+
+        // 匹配 目标记录路径
+        public static List<XmlElement> MatchTargetRecPath(
+            IEnumerable<XmlNode> nodes,
+            string target_recpath)
+        {
+            List<XmlElement> results = new List<XmlElement>();
+            foreach (XmlElement node in nodes)
+            {
+                var path = node.GetAttribute("path");
+                var parts = StringUtil.ParseTwoPart(path, DIRECTION_SEPARATOR);
+                if (parts[1] == target_recpath)
+                    results.Add(node);
+            }
+
+            return results;
+        }
+
+        public static List<string> GetOperators(XmlNodeList nodes)
+        {
+            return GetOperators(nodes.Cast<XmlNode>());
+        }
+
+        public static List<string> GetOperators(IEnumerable<XmlNode> nodes)
+        {
+            List<string> operator_list = new List<string>();
+            foreach (XmlElement node in nodes)
+            {
+                operator_list.Add(node.GetAttribute("operator"));
+            }
+
+            return operator_list;
+        }
+
+        #endregion
+
     }
 
 

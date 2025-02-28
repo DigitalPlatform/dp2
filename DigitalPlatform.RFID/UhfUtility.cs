@@ -660,6 +660,27 @@ namespace DigitalPlatform.RFID
                     return UII;
                 }
             }
+
+            // 2025/2/27
+            // 获得解释文字
+            public string GetDescription(byte[] epc_bank, byte[] user_bank)
+            {
+                StringBuilder text = new StringBuilder();
+                text.AppendLine("=== EPC Bank ===");
+                text.AppendLine($"Hex(十六进制内容):\t{ByteArray.GetHexTimeStampString(epc_bank)?.ToUpper()}");
+                text.AppendLine($"PC(协议控制字):\t{this.PC.ToString()}");
+                text.AppendLine("=== User Bank ===");
+                text.AppendLine($"Hex(十六进制内容):\t{ByteArray.GetHexTimeStampString(user_bank)?.ToUpper()}");
+                if (this.LogicChip != null)
+                {
+                    foreach (var element in this.LogicChip.Elements)
+                    {
+                        text.AppendLine($"{(int)element.OID} {element.OID.ToString()}:\t'{element.Text}' (hex:{ByteArray.GetHexTimeStampString(element.Content)?.ToUpper()})");
+                    }
+                }
+                return text.ToString();
+            }
+
         }
 
         // 解析一个 UHF 国标标签全部内容

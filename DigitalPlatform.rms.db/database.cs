@@ -445,6 +445,12 @@ namespace DigitalPlatform.rms
             return logicNames;
         }
 
+        // 2025/2/27
+        public string GetDefaultName()
+        {
+            return GetCaption("zh-CN");
+        }
+
         // 有缓存的版本
         public string GetCaption(string strLang)
         {
@@ -2445,6 +2451,7 @@ namespace DigitalPlatform.rms
                     //创建检索点
                     keys = new KeyCollection();
                     nRet = keysCfg.BuildKeys(domData,
+                        this.GetDefaultName(),
                         strRecordID,
                         strLang,
                         // strStyle,
@@ -2525,6 +2532,7 @@ namespace DigitalPlatform.rms
                 if (keysCfg != null)
                 {
                     nRet = keysCfg.BuildKeys(newDom,
+                        this.GetDefaultName(),
                         strID,
                         "zh",//strLang,
                              // "",//strStyle,
@@ -2565,6 +2573,7 @@ namespace DigitalPlatform.rms
                 if (keysCfg != null)
                 {
                     nRet = keysCfg.BuildKeys(oldDom,
+                        this.GetDefaultName(),
                         strID,
                         "zh",//strLang,
                              // "",//strStyle,

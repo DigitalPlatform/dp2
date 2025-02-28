@@ -7822,12 +7822,14 @@ out strError);
                         (e) =>
                         {
                             // 创建 path 属性
-                            e.SetAttribute("path", $"{strSourceRecPath}-->{strOutputRecPath}");
+                            // e.SetAttribute("path", $"{strSourceRecPath}-->{strOutputRecPath}");
+                            dp2StringUtil.SetOperationRecPath(e, strSourceRecPath, strOutputRecPath);
 
                             // 创建 refID 属性
                             if (strOldRefID != strNewRefID)
                             {
-                                e.SetAttribute("refID", $"{strOldRefID}-->{strNewRefID}");
+                                // e.SetAttribute("refID", $"{strOldRefID}-->{strNewRefID}");
+                                dp2StringUtil.SetOperationRefID(e, strOldRefID, strNewRefID);
                             }
                         },
                         out strError);

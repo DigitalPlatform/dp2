@@ -26,6 +26,7 @@ using DigitalPlatform.Xml;
 using static DigitalPlatform.RFID.RfidTagList;
 using DigitalPlatform.CirculationClient;
 using Accord.IO;
+using static DigitalPlatform.RFID.UhfUtility;
 
 namespace dp2Circulation
 {
@@ -2733,13 +2734,37 @@ TaskScheduler.Default);
             var user_bank = taginfo.Bytes;
             var epc_bank = ByteArray.GetTimeStampByteArray(tag.UID);
 
-            var parse_result = GaoxiaoUtility.ParseTag(epc_bank,
-    user_bank,
-    "");
-            if (parse_result.Value == -1)
-                text.AppendLine($"解析过程出错: {parse_result.ErrorInfo}");
-            else
-                text.Append(parse_result.GetDescription(epc_bank, user_bank));
+            {
+                text.AppendLine("=== PC ===");
+                text.AppendLine($"Hex(十六进制内容):\t{ByteArray.GetHexTimeStampString(epc_bank.ToList().GetRange(2,2).ToArray())?.ToUpper()}");
+
+                var pc = UhfUtility.ParsePC(epc_bank, 2);
+                text.AppendLine(pc.ToString());
+            }
+
+            {
+                text.AppendLine("=== 尝试按照高校联盟格式解析 ===");
+
+                var parse_result = GaoxiaoUtility.ParseTag(epc_bank,
+        user_bank,
+        "");
+                if (parse_result.Value == -1)
+                    text.AppendLine($"解析过程出错: {parse_result.ErrorInfo}");
+                else
+                    text.Append(parse_result.GetDescription(epc_bank, user_bank));
+            }
+
+            {
+                text.AppendLine("=== 尝试按照国标格式解析 ===");
+
+                var parse_result = UhfUtility.ParseTag(epc_bank,
+        user_bank,
+        4);
+                if (parse_result.Value == -1)
+                    text.AppendLine($"解析过程出错: {parse_result.ErrorInfo}");
+                else
+                    text.Append(parse_result.GetDescription(epc_bank, user_bank));
+            }
 
             // 尝试获得 TID Bank
             {

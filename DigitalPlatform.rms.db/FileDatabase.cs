@@ -2124,6 +2124,7 @@ namespace DigitalPlatform.rms
                             //生成检索点集合
                             KeyCollection oldKeys = null;
                             nRet = keysCfg.BuildKeys(oldDataDom,
+                                this.GetDefaultName(),
                                 strID,
                                 "zh",
                                 // "",//strStyle
@@ -2390,6 +2391,7 @@ namespace DigitalPlatform.rms
                     && keysCfg != null)
                 {
                     nRet = keysCfg.ConvertKeyWithStringNode(
+                        null,   // 2025/2/27
                         null, //dataDom
                         strKeyValue,
                         new List<XmlElement> { nodeConvertQueryString },
@@ -2411,8 +2413,9 @@ namespace DigitalPlatform.rms
                 if (nodeConvertQueryNumber != null
                     && keysCfg != null)
                 {
-                    string strMyKey;
+                    // string strMyKey;
                     nRet = keysCfg.ConvertKeyWithNumberNode(
+                                    null, // 2025/2/27
                         null,
                         strKeyValue,
                         new List<XmlElement>{ nodeConvertQueryNumber},
@@ -2485,7 +2488,9 @@ namespace DigitalPlatform.rms
                                 && keysCfg != null)
                             {
                                 // 加工首
-                                nRet = keysCfg.ConvertKeyWithStringNode(null,//dataDom
+                                nRet = keysCfg.ConvertKeyWithStringNode(
+                                    null, // 2025/2/27
+                                    null,//dataDom
                                     strStartText,
                                     new List<XmlElement> { nodeConvertQueryString },
                                     out List<KeyAndFrom> keys,
@@ -2501,7 +2506,9 @@ namespace DigitalPlatform.rms
 
 
                                 // 加工尾
-                                nRet = keysCfg.ConvertKeyWithStringNode(null,//dataDom
+                                nRet = keysCfg.ConvertKeyWithStringNode(
+                                    null, // 2025/2/27
+                                    null,//dataDom
                                     strEndText,
                                     new List<XmlElement> { nodeConvertQueryString },
                                     out keys,
@@ -2528,6 +2535,7 @@ namespace DigitalPlatform.rms
                                 // 首
                                 string strMyKey;
                                 nRet = keysCfg.ConvertKeyWithNumberNode(
+                                    null, // 2025/2/27
                                     null,
                                     strStartText,
                                     new List<XmlElement> { nodeConvertQueryNumber },
@@ -2540,6 +2548,7 @@ namespace DigitalPlatform.rms
 
                                 // 尾
                                 nRet = keysCfg.ConvertKeyWithNumberNode(
+                                    null, // 2025/2/27
                                     null,
                                     strEndText,
                                     new List<XmlElement> { nodeConvertQueryNumber },
@@ -2573,7 +2582,9 @@ namespace DigitalPlatform.rms
                             if (nodeConvertQueryString != null
                                 && keysCfg != null)
                             {
-                                nRet = keysCfg.ConvertKeyWithStringNode(null,//dataDom
+                                nRet = keysCfg.ConvertKeyWithStringNode(
+                                    null, // 2025/2/27
+                                    null,//dataDom
                                     strRealText,
                                     new List<XmlElement> { nodeConvertQueryString },
                                     out List<KeyAndFrom> keys,
@@ -2599,6 +2610,7 @@ namespace DigitalPlatform.rms
                             {
                                 // string strMyKey;
                                 nRet = keysCfg.ConvertKeyWithNumberNode(
+                                    null, // 2025/2/27
                                     null,
                                     strRealText,
                                     new List<XmlElement> { nodeConvertQueryNumber },

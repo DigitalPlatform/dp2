@@ -732,6 +732,7 @@
       <xs:sequence>
         <xs:element xmlns:q69="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="SetBiblioInfoResult" nillable="true" type="q69:LibraryServerResult" />
         <xs:element minOccurs="0" name="strOutputBiblioRecPath" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strOutputBiblio" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="baOutputTimestamp" nillable="true" type="xs:base64Binary" />
       </xs:sequence>
     </xs:complexType>

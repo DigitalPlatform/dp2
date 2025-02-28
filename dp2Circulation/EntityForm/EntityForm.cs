@@ -35,6 +35,7 @@ using DigitalPlatform.Z3950;
 
 using UcsUpload;
 using dp2Circulation.Script;
+using System.Data.SqlTypes;
 // using DocumentFormat.OpenXml.Wordprocessing;
 
 namespace dp2Circulation
@@ -9255,6 +9256,7 @@ out strError);
                 {
                     bool bPartialDenied = false;
                     string strOutputPath = "";
+                    string strOutputBiblio = "";
                     byte[] baNewTimestamp = null;
                     string strWarning = "";
                     if (StringUtil.IsInList("checkUnique", strStyle) == true)
@@ -9290,6 +9292,7 @@ out strError);
                             strXmlBody,
                             this.BiblioTimestamp,
                             out strOutputPath,
+                            out strOutputBiblio,
                             out baNewTimestamp,
                             out strWarning,
                             out strError);
@@ -9356,6 +9359,32 @@ out strError);
                     this.BiblioTimestamp = baNewTimestamp;
                     this.BiblioRecPath = strOutputPath;
                     this.BiblioOriginPath = strOutputPath;
+
+                    // 2025/2/28
+                    // 把 strOutputBilbio 装入 MARC 编辑器
+                    if (bPartialDenied == false
+                        && string.IsNullOrEmpty(strOutputBiblio) == false)
+                    {
+                        // return:
+                        //      -1  error
+                        //      0   空的记录
+                        //      1   成功
+                        nRet = SetBiblioRecordToMarcEditor(strOutputBiblio,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            var error = $"保存后的书目记录装入 MARC 编辑器时出错: {strError}";
+                            this.MessageBoxShow(error);
+                        }
+                        nRet = LoadXmlFragment(strOutputBiblio,
+    out strError);
+                        if (nRet == -1)
+                        {
+                            var error = $"保存后的书目记录装入 XmlFragment 时出错: {strError}";
+                            this.MessageBoxShow(error);
+                        }
+                        SwitchFocus(MARC_EDITOR);
+                    }
 
                     this.BiblioChanged = false;
 
@@ -10044,6 +10073,7 @@ out strError);
             string strXml,
             byte[] baTimestamp,
             out string strOutputPath,
+            out string strOutputBiblio, // 2025/2/28
             out byte[] baNewTimestamp,
             out string strWarning,
             out string strError)
@@ -10052,6 +10082,7 @@ out strError);
             strWarning = "";
             baNewTimestamp = null;
             strOutputPath = "";
+            strOutputBiblio = "";
 
             // 2024/11/9
             MainForm.WriteInfoLog($"开始保存书目记录 {strPath}。\r\nXML='{strXml}'\r\ntimestamp={ByteArray.GetHexTimeStampString(baTimestamp)}");
@@ -10080,8 +10111,10 @@ out strError);
                     "xml",
                     strXml,
                     baTimestamp,
-                    "",
+                    "", // strComment
+                    "", // strStyle
                     out strOutputPath,
+                    out strOutputBiblio,
                     out baNewTimestamp,
                     out strError);
                 if (lRet == -1)

@@ -1369,6 +1369,64 @@ AC_TerminalPassword var:r1";
             }
 
         }
+
+        public static string ComputeChecksum(byte[] message)
+        {
+            int checksum = 0;
+            foreach (byte b in message)
+            {
+                checksum += b;
+            }
+            checksum = (checksum ^ 0xFFFF) + 1;
+            return string.Format("{0:X4}", checksum);
+        }
+
+        // 给一条消息设置 |AYxAZxxxx 消息校验部分
+        // parameters:
+        //      message 待处理的消息正文。注意末尾应当包含 '|AZn' 部分。n 代表一个数字。
+        //              注: '990 402.00' 这样的消息正文不适合用本函数，因为它没有变长字段部分，无法用 |AY 搜索末尾位置。应调用另一版本的 GetChecksum(int tail_index) 函数
+        public static string SetChecksum(Encoding encoding,
+            string message)
+        {
+            var index = message.IndexOf("|AY");
+            if (index != -1)
+            {
+                if (message.Length <= index + 3)
+                    throw new ArgumentException($"待处理的消息正文 '{message}' 的长度不够，'|AY' 后至少应包含一字符的序号部分");
+                char number = message[index + 3];
+                return SetChecksum(encoding, message, number, index);
+            }
+            throw new ArgumentException($"待处理的消息正文 '{message}' 中没有找到 |AY");
+        }
+
+        // parameters:
+        //      tail_index  message 内容中从头到 |AY 片段中 包括 | 在内的局部字符数
+        //              如果大于等于 message 的总字符数，则说明这是一个只有固定长字段、没有变长字段的特殊消息，需要把 AYxxxx 加到消息末尾。注意，此时 AY 左边没有 |
+        public static string SetChecksum(Encoding encoding,
+            string message,
+            char number,
+            int tail_index)
+        {
+            string pure_text = "";
+            if (tail_index < message.Length && message[tail_index] != '|')
+                throw new ArgumentException($"tail_index {tail_index} 位置不是 '|' 字符");
+
+            string seperator = "";
+            // 获得需要计算的局部
+            if (tail_index < message.Length)
+            {
+                seperator = "|";
+                pure_text = message.Substring(0, tail_index);
+            }
+            else
+                pure_text = message;
+
+            pure_text += seperator + "AY" + number + "AZ";
+            var checksum = ComputeChecksum(encoding.GetBytes(pure_text));
+            Debug.Assert(checksum.Length == 4);
+            return pure_text + checksum;
+        }
+
     }
 
 }

@@ -6599,6 +6599,7 @@ out QueryResult[] results)
         //      baTimestamp 时间戳。如果为新创建记录，可以为null 
         //      strOutputBiblioRecPath 输出的书目记录路径。当strBiblioRecPath中末级为问号，表示追加保存书目记录的时候，本参数返回实际保存的书目记录路径
         //                      此参数也用于，当保存前查重时发现了重复的书目记录，这里返回这些书目记录的路径
+        //      strOutputBiblio     实际保存的 XML 记录内容。可能多了 operation 元素。当前用户权限不够的字段，可能修改没有兑现。
         //      baOutputTimestamp   操作完成后，新的时间戳
         // Result.Value -1出错 0成功 >0 表示查重发现了重复的书目记录，保存被拒绝
         public LibraryServerResult SetBiblioInfo(
@@ -6610,9 +6611,11 @@ out QueryResult[] results)
             string strComment,
             string strStyle,    // 2016/12/22
             out string strOutputBiblioRecPath,
+            out string strOutputBiblio, // 2025/2/28
             out byte[] baOutputTimestamp)
         {
             strOutputBiblioRecPath = "";
+            strOutputBiblio = "";
             baOutputTimestamp = null;
 
             LibraryServerResult result = this.PrepareEnvironment("SetBiblioInfo", true, true, true);
@@ -6651,6 +6654,7 @@ out QueryResult[] results)
                     strComment,
                     strStyle,
                     out strOutputBiblioRecPath,
+                    out strOutputBiblio,
                     out baOutputTimestamp);
             }
             catch (Exception ex)
@@ -16870,6 +16874,7 @@ out strError);
                                     "",
                                     strStyle,
                                     out strOutputResPath,
+                                    out _,
                                     out baOutputTimestamp);
                                 if (ret.Value == -1)
                                     return ret;
@@ -17075,6 +17080,7 @@ out strError);
                                     null,
                                     style,
                                     out strOutputResPath,
+                                    out _,
                                     out baOutputTimestamp);
                                 if (ret.Value == -1)
                                     return ret;

@@ -320,12 +320,19 @@ namespace dp2SSL
                                 // 借书时间
                                 {
                                     string borrowDateString = get_result.Result.CM_HoldPickupDate_18;
+                                    // 2025//28
+                                    // 去掉右边的多余空白字符
+                                    if (borrowDateString != null)
+                                        borrowDateString = borrowDateString.TrimEnd(' ');
                                     if (string.IsNullOrEmpty(borrowDateString) == false)
                                     {
                                         if (DateTime.TryParseExact(borrowDateString,
-                                        "yyyyMMdd    HHmmss",
-                                        CultureInfo.InvariantCulture,
-                                        DateTimeStyles.None,
+                                            new string[] { 
+                                                "yyyyMMdd    HHmmss",
+                                                "yyyyMMdd", // 2025/2/28 兼容不太正规的用法
+                                            },
+                                            CultureInfo.InvariantCulture,
+                                            DateTimeStyles.None,
                                         out DateTime borrowDate))
                                         {
                                             DomUtil.SetElementText(itemdom.DocumentElement,
@@ -339,6 +346,13 @@ namespace dp2SSL
                                         else
                                         {
                                             // 报错，时间字符串格式错误，无法解析
+                                            // 2025/2/28
+                                            errors.Add(new NormalResult
+                                            {
+                                                Value = -1,
+                                                ErrorInfo = $"SIP 消息 18 的 SM(HoldPickupDate) 字段内容 '{get_result.Result.CM_HoldPickupDate_18}' 不合法。应为 'yyyyMMdd    HHmmss' 格式",
+                                                ErrorCode = "invalidSipFieldValue"
+                                            });
                                         }
                                     }
                                 }
@@ -361,6 +375,13 @@ namespace dp2SSL
                                         else
                                         {
                                             // 报错，时间字符串格式错误，无法解析
+                                            // 2025/2/28
+                                            errors.Add(new NormalResult
+                                            {
+                                                Value = -1,
+                                                ErrorInfo = $"SIP 消息 18 的 AH(DueDate) 字段内容 '{get_result.Result.AH_DueDate_o}' 不合法。应为 '{DateFormat}' 格式",
+                                                ErrorCode = "invalidSipFieldValue"
+                                            });
                                         }
                                     }
                                 }
@@ -633,8 +654,9 @@ get_result.Result.AE_PersonalName_r);
                             {
                                 foreach (var item in items)
                                 {
-                                    if (item.Value == null)
+                                    if (string.IsNullOrEmpty(item.Value))
                                         continue;
+
                                     var borrow = root.AppendChild(readerdom.CreateElement("borrow")) as XmlElement;
                                     InventoryData.ParseOiPii(item.Value, out string current_pii, out string current_oi);
 
@@ -982,7 +1004,7 @@ get_result.Result.AE_PersonalName_r);
                     ActivateMonitor();
                     _delayTry = null;
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     WpfClientInfo.WriteErrorLog($"TryDetectSipNetwork() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }

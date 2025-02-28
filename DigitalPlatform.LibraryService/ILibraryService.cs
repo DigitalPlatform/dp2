@@ -169,6 +169,7 @@ namespace dp2Library
             string strComment,
             string strStyle,
             out string strOutputBiblioRecPath,
+            out string strOutputBiblio, // 2025/2/28
             out byte[] baOutputTimestamp);
 
         [OperationContract(IsInitiating = true, IsTerminating = false)]

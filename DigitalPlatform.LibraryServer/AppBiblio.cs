@@ -5024,6 +5024,7 @@ ref string strMARC)
             string strComment,
             string strStyle,
             out string strOutputBiblioRecPath,
+            out string strOutputBiblio, // 2025/2/28
             out byte[] baOutputTimestamp)
         {
             string strError = "";
@@ -5031,6 +5032,7 @@ ref string strMARC)
             int nRet = 0;
 
             strOutputBiblioRecPath = "";
+            strOutputBiblio = "";
             baOutputTimestamp = null;
 
             LibraryServerResult result = new LibraryServerResult();
@@ -6136,6 +6138,8 @@ out strError);
                         goto ERROR1;
                     }
 
+                    strOutputBiblio = strBiblio;
+
                     if (this.TestMode == true || sessioninfo.TestMode)
                     {
                         string strID = ResPath.GetRecordId(strOutputBiblioRecPath);
@@ -6340,6 +6344,8 @@ out strError);
                             result.ErrorCode = LibraryServerResult.FromErrorValue(channel.OriginErrorCode);
                             goto ERROR1;
                         }
+
+                        strOutputBiblio = strBiblio;
                     }
                     finally
                     {
@@ -9264,13 +9270,15 @@ out strError);
                         (e) =>
                         {
                             // 创建 path 属性
-                            e.SetAttribute("path", $"{strOldRecPath}-->{target_path}");
+                            // e.SetAttribute("path", $"{strOldRecPath}-->{target_path}");
+                            dp2StringUtil.SetOperationRecPath(e, strOldRecPath, target_path);
 
                             // 创建 refID 属性
                             if (strAction.ToLower().Contains("copy")
                             || strOldRefID != strNewRefID)
                             {
-                                e.SetAttribute("refID", $"{strOldRefID}-->{strNewRefID}");
+                                // e.SetAttribute("refID", $"{strOldRefID}-->{strNewRefID}");
+                                dp2StringUtil.SetOperationRefID(e, strOldRefID, strNewRefID);
                             }
                         },
                         out strError);

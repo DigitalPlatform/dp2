@@ -5879,8 +5879,6 @@ location_filter,
                     return -1;
                 goto REDO;
             }
-
-
         }
 
         // 获得书目记录信息(一次可以获得多种)
@@ -5975,8 +5973,37 @@ location_filter,
             strComment,
             "",
             out strOutputBiblioRecPath,
+            out _,
             out baOutputTimestamp,
             out strError);
+        }
+
+        public long SetBiblioInfo(
+    DigitalPlatform.Stop stop,
+    string strAction,
+    string strBiblioRecPath,
+    string strBiblioType,
+    string strBiblio,
+    byte[] baTimestamp,
+    string strComment,
+    string strStyle,
+    out string strOutputBiblioRecPath,
+    out byte[] baOutputTimestamp,
+    out string strError)
+        {
+            return SetBiblioInfo(
+                stop,
+                strAction,
+                strBiblioRecPath,
+                strBiblioType,
+                strBiblio,
+                baTimestamp,
+                strComment,
+                strStyle,
+                out strOutputBiblioRecPath,
+                out _,
+                out baOutputTimestamp,
+                out strError);
         }
 
         // 设置书目信息
@@ -5990,11 +6017,13 @@ location_filter,
             string strComment,
             string strStyle,
             out string strOutputBiblioRecPath,
+            out string strOutputBiblio,
             out byte[] baOutputTimestamp,
             out string strError)
         {
             strError = "";
             strOutputBiblioRecPath = "";
+            strOutputBiblio = "";
             baOutputTimestamp = null;
 
         REDO:
@@ -6022,6 +6051,7 @@ location_filter,
 
                 LibraryServerResult result = this.ws.EndSetBiblioInfo(
                     out strOutputBiblioRecPath,
+                    out strOutputBiblio,
                     out baOutputTimestamp,
                     soapresult);
                 if (result.Value == -1 && result.ErrorCode == ErrorCode.NotLogin)

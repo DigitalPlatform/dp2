@@ -76,6 +76,9 @@ namespace dp2SSL
             ItemCollection items = new ItemCollection();
             items.Add("utf-8");
             items.Add("gb2312");
+            // 以下是 2025/2/26 增加
+            items.Add("gbk");
+            items.Add("gb18030");
             return items;
         }
     }

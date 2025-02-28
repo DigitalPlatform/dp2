@@ -1563,12 +1563,14 @@ out strError);
                     (e) =>
                     {
                         // 创建 path 属性
-                        e.SetAttribute("path", $"{info.OldRecPath}-->{strOutputPath}");
+                        // e.SetAttribute("path", $"{info.OldRecPath}-->{strOutputPath}");
+                        dp2StringUtil.SetOperationRecPath(e, info.OldRecPath, strOutputPath);
 
                         // 创建 refID 属性
                         if (strOldRefID != strNewRefID)
                         {
-                            e.SetAttribute("refID", $"{strOldRefID}-->{strNewRefID}");
+                            // e.SetAttribute("refID", $"{strOldRefID}-->{strNewRefID}");
+                            dp2StringUtil.SetOperationRefID(e, strOldRefID, strNewRefID);
                         }
                     },
                 out strError);
@@ -4032,13 +4034,15 @@ strError);
                             (e) =>
                             {
                                 // 创建 path 属性
-                                e.SetAttribute("path", $"{info.RecPath}-->{strOutputRecPath}");
+                                // e.SetAttribute("path", $"{info.RecPath}-->{strOutputRecPath}");
+                                dp2StringUtil.SetOperationRecPath(e, info.RecPath, strOutputRecPath);
 
                                 // 创建 refID 属性
                                 if (strAction.ToLower().Contains("copy")
                                 || strOldRefID != strNewRefID)
                                 {
-                                    e.SetAttribute("refID", $"{strOldRefID}-->{strNewRefID}");
+                                    // e.SetAttribute("refID", $"{strOldRefID}-->{strNewRefID}");
+                                    dp2StringUtil.SetOperationRefID(e, strOldRefID, strNewRefID);
                                 }
                             },
                             out strError);

@@ -596,6 +596,7 @@ namespace DigitalPlatform.rms
         //		-1	出错
         //		0	成功
         public int BuildKeys(XmlDocument domData,
+            string strDatabaseName, // 2025/2/27 数据库的默认名字
             string strRecordID,
             string strLang,
             //             string strStyle,
@@ -642,6 +643,8 @@ namespace DigitalPlatform.rms
             }
 
             int nRet = 0;
+
+            string recpath = strDatabaseName + "/" + strRecordID?.TrimStart('0');   // 2025/2/27
 
             // 找到所有<key>节点
             // TODO: <key> 是否有明确的位置？ 那样就可以避免 // 查找。或者预先缓存起来
@@ -754,13 +757,14 @@ namespace DigitalPlatform.rms
                     //aKey.Add("abc");
 
                     //string strOutputString = "";
-                    List<String> OutputStrings = null;
                     string strFunctionName = nodeXpath.InnerText.Trim();     // 2012/2/16
-                    nRet = this.DoScriptFunction(domData,
+                    nRet = this.DoScriptFunction(
+                        recpath,
+                        domData,
                         strFunctionName,
                         "", //strInputString
                             // out strOutputString,
-                        out OutputStrings,
+                        out List<String> OutputStrings,
                         out strError);
                     if (nRet == -1)
                         return -1;
@@ -880,7 +884,9 @@ namespace DigitalPlatform.rms
                     List<KeyAndFrom> outputKeys = new List<KeyAndFrom>();
                     if (tableInfo.nodesConvertKeyString?.Count > 0)
                     {
-                        nRet = ConvertKeyWithStringNode(domData,
+                        nRet = ConvertKeyWithStringNode(
+                            recpath,
+                            domData,
                             strKey,
                             tableInfo.nodesConvertKeyString,
                             out outputKeys,
@@ -914,6 +920,7 @@ namespace DigitalPlatform.rms
                             && tableInfo.nodesConvertKeyNumber.Count > 0)
                         {
                             nRet = ConvertKeyWithNumberNode(
+                                recpath,
                                 domData,
                                 strOneKey,
                                 tableInfo.nodesConvertKeyNumber,
@@ -974,7 +981,9 @@ namespace DigitalPlatform.rms
         // return:
         //      -1  出错
         //      0   成功
-        public int DoScriptFunction(XmlDocument dataDom,
+        public int DoScriptFunction(
+            string recpath,
+            XmlDocument dataDom,
             string strFunctionName,
             List<KeyAndFrom> keys,
             out string strError)
@@ -997,7 +1006,9 @@ namespace DigitalPlatform.rms
 
                 // string strOutputString = "";
                 List<string> OutputStrings = null;
-                nRet = this.DoScriptFunction(dataDom,
+                nRet = this.DoScriptFunction(
+                    recpath,
+                    dataDom,
                     strFunctionName,
                     strInputString,
                     // out strOutputString,
@@ -1100,7 +1111,9 @@ namespace DigitalPlatform.rms
         // return:
         //      -1  出错
         //      0   成功
-        public int DoScriptFunction(XmlDocument dataDom,
+        public int DoScriptFunction(
+            string recpath,
+            XmlDocument dataDom,
             string strFunctionName,
             string strInputString,
             // out string strOutputString,
@@ -1144,6 +1157,7 @@ namespace DigitalPlatform.rms
                 strError = "从Type对象获取KeysHost实例为null。";
                 return -1;
             }
+            host.RecPath = recpath;
             host.DataDom = dataDom;
             host.CfgDom = this._dom;
             host.InputString = strInputString;
@@ -1450,6 +1464,7 @@ namespace DigitalPlatform.rms
         //		0	成功
         //      1   转换为数字的过程失败 strError中有报错信息 2010/9/27
         public int ConvertKeyWithNumberNode(
+            string recpath,
             XmlDocument dataDom,
             string strText,
             List<XmlElement> nodes,
@@ -1467,6 +1482,7 @@ namespace DigitalPlatform.rms
                 //		0	成功
                 //      1   转换为数字的过程失败 strError中有报错信息 2010/9/27
                 var ret = ConvertKeyWithNumberNode(
+                    recpath,
                     dataDom,
                     strText,
                     node,
@@ -1510,6 +1526,7 @@ namespace DigitalPlatform.rms
         //		0	成功
         //      1   转换为数字的过程失败 strError中有报错信息 2010/9/27
         private int ConvertKeyWithNumberNode(
+            string recpath,
             XmlDocument dataDom,
             string strText,
             XmlElement numberNode,
@@ -1683,7 +1700,9 @@ namespace DigitalPlatform.rms
                         }
                         List<KeyAndFrom> keys = new List<KeyAndFrom>();
                         keys.Add(new KeyAndFrom { Key = strKey });
-                        int nRet = this.DoScriptFunction(dataDom,
+                        int nRet = this.DoScriptFunction(
+                            recpath,
+                            dataDom,
                             strFunctionName,
                             keys,
                             out strError);
@@ -1811,6 +1830,7 @@ namespace DigitalPlatform.rms
         }
 
         public int ConvertKeyWithStringNode(
+            string recpath,
     XmlDocument dataDom,
     string strText,
     List<XmlElement> string_nodes,
@@ -1829,6 +1849,7 @@ namespace DigitalPlatform.rms
             foreach (var node in string_nodes)
             {
                 var ret = ConvertKeyWithStringNode(
+                    recpath,
             dataDom,
             strText,
             node,
@@ -1852,6 +1873,7 @@ namespace DigitalPlatform.rms
         //		-1	出错
         //		0	成功
         private int ConvertKeyWithStringNode(
+            string recpath,
             XmlDocument dataDom,
             string strText,
             XmlElement stringNode,
@@ -2087,7 +2109,9 @@ namespace DigitalPlatform.rms
 
                         }
 
-                        nRet = this.DoScriptFunction(dataDom,
+                        nRet = this.DoScriptFunction(
+                            recpath,
+                            dataDom,
                             strFunctionName,
                             keys,
                             out strError);
@@ -2414,6 +2438,8 @@ namespace DigitalPlatform.rms
 
     public class KeysHost
     {
+        public string RecPath { get; set; }
+
         public XmlDocument DataDom = null;
         public XmlDocument CfgDom = null;
 
@@ -2421,7 +2447,32 @@ namespace DigitalPlatform.rms
 
         public string ResultString = "";
 
-        public List<string> ResultStrings = new List<string>();
+        // public List<string> ResultStrings = new List<string>();
+        List<string> _resultStrings = new List<string>();
+
+        // TODO: 改造为更安全的方式，但要检查现有的脚本的用法是否符合安全的用法
+        public List<string> ResultStrings
+        {
+            get
+            {
+                /*
+                return new List<string>(_resultStrings);
+                */
+                return _resultStrings;
+            }
+            set
+            {
+                /*
+                if (value == null)
+                {
+                    _resultStrings = new List<string>();
+                    return;
+                }
+                _resultStrings = new List<string>(value);
+                */
+                _resultStrings = value;
+            }
+        }
 
         public KeysHost()
         {
