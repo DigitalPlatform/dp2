@@ -115,6 +115,14 @@ namespace dp2SSL
             return value;
         }
 
+        // 格式为 00:01:40
+        public static string GetSipDetectPeriod()
+        {
+            if (ChargingCfgDom == null)
+                return null;
+            return ChargingCfgDom.DocumentElement.SelectSingleNode("settings/key[@name='SIP探测间隔']/@value")?.Value;
+        }
+
 #if REMOVED
         /*
 <charging>

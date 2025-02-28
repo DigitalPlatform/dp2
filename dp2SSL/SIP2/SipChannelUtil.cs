@@ -327,7 +327,7 @@ namespace dp2SSL
                                     if (string.IsNullOrEmpty(borrowDateString) == false)
                                     {
                                         if (DateTime.TryParseExact(borrowDateString,
-                                            new string[] { 
+                                            new string[] {
                                                 "yyyyMMdd    HHmmss",
                                                 "yyyyMMdd", // 2025/2/28 兼容不太正规的用法
                                             },
@@ -955,9 +955,25 @@ get_result.Result.AE_PersonalName_r);
 
         #region 监控
 
+        public static TimeSpan DetectPeriod
+        {
+            get
+            {
+                var value = ChargingData.GetSipDetectPeriod();
+                if (string.IsNullOrEmpty(value))
+                    return TimeSpan.FromMinutes(5);
+                if (TimeSpan.TryParse(value, out TimeSpan result) == false)
+                    throw new ArgumentException($"charging.xml 中 'settings/key[@name='SIP探测间隔']/@value' 参数值 '{value}' 不合法。应为 00:00:10 形态");
+                return result;
+            }
+        }
+
+        /*
         // 可以适当降低探测的频率。比如每五分钟探测一次
         // 两次检测网络之间的间隔
-        static TimeSpan _detectPeriod = TimeSpan.FromSeconds(100);
+        static TimeSpan _detectPeriod = TimeSpan.FromMinutes(5);
+        */
+
         // 最近一次检测网络的时间
         static DateTime _lastDetectTime;
 
@@ -1042,7 +1058,7 @@ get_result.Result.AE_PersonalName_r);
 
                         token.ThrowIfCancellationRequested();
 
-                        if (DateTime.Now - _lastDetectTime > _detectPeriod)
+                        if (DateTime.Now - _lastDetectTime > DetectPeriod)
                         {
                             var detect_result = await DetectSipNetworkAsync();
                             _lastDetectTime = DateTime.Now;
