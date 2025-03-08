@@ -91,6 +91,64 @@ namespace dp2Circulation
             }
         }
 
+        // 2025/3/6
+        public bool NoOperation
+        {
+            get
+            {
+                return this.TryGet(() =>
+                {
+                    return this.checkBox_noOperation.Checked;
+                });
+            }
+            set
+            {
+                this.TryInvoke(() =>
+                {
+                    this.checkBox_noOperation.Checked = value;
+                });
+            }
+        }
+
+        // 2025/3/7
+        public bool DontLogging
+        {
+            get
+            {
+                return this.TryGet(() =>
+                {
+                    return this.checkBox_dontLogging.Checked;
+                });
+            }
+            set
+            {
+                this.TryInvoke(() =>
+                {
+                    this.checkBox_dontLogging.Checked = value;
+                });
+            }
+        }
+
+        // 2025/3/6
+        public bool DontTriggerAutoGen
+        {
+            get
+            {
+                return this.TryGet(() =>
+                {
+                    return this.checkBox_dontTriggerAutoGen.Checked;
+                });
+            }
+            set
+            {
+                this.TryInvoke(() =>
+                {
+                    this.checkBox_dontTriggerAutoGen.Checked = value;
+                });
+            }
+        }
+
+
         public string UiState
         {
             get
@@ -99,6 +157,9 @@ namespace dp2Circulation
                 controls.Add(this.textBox_scriptFileName);
                 controls.Add(this.checkBox_autoSaveChanges);
                 controls.Add(this.checkBox_forceSave);
+                controls.Add(this.checkBox_noOperation);
+                controls.Add(this.checkBox_dontLogging);
+                controls.Add(this.checkBox_dontTriggerAutoGen);
                 return GuiState.GetUiState(controls);
             }
             set
@@ -107,13 +168,29 @@ namespace dp2Circulation
                 controls.Add(this.textBox_scriptFileName);
                 controls.Add(this.checkBox_autoSaveChanges);
                 controls.Add(this.checkBox_forceSave);
+                controls.Add(this.checkBox_noOperation);
+                controls.Add(this.checkBox_dontLogging);
+                controls.Add(this.checkBox_dontTriggerAutoGen);
                 GuiState.SetUiState(controls, value);
             }
         }
 
         private void checkBox_autoSaveChanges_CheckedChanged(object sender, EventArgs e)
         {
+            this.groupBox1.Visible = this.checkBox_autoSaveChanges.Checked;
+            /*
             this.checkBox_forceSave.Visible = this.checkBox_autoSaveChanges.Checked;
+            this.checkBox_noOperation.Visible = this.checkBox_autoSaveChanges.Checked;
+            this.checkBox_dontTriggerAutoGen.Visible = this.checkBox_autoSaveChanges.Checked;
+            */
+            // 当 gourpbox 隐藏时，这些参数都应该是 false
+            if (this.checkBox_autoSaveChanges.Checked == false)
+            {
+                this.checkBox_forceSave.Checked = false;
+                this.checkBox_noOperation.Checked = false;
+                this.checkBox_dontLogging.Checked = false;
+                this.checkBox_dontTriggerAutoGen.Checked = false;
+            }
         }
 
         private void button_getScriptFileName_Click(object sender, EventArgs e)

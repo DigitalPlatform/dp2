@@ -97,6 +97,9 @@
     <None Include="Service References\localhost\DigitalPlatform.LibraryClient.localhost.BiblioDbFromInfo.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
     </None>
+    <None Include="Service References\localhost\DigitalPlatform.LibraryClient.localhost.BiblioInfoItem.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
     <None Include="Service References\localhost\DigitalPlatform.LibraryClient.localhost.BorrowInfo.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
     </None>

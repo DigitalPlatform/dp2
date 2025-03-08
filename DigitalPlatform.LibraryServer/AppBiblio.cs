@@ -29,6 +29,7 @@ using MongoDB.Driver.Core.Clusters.ServerSelectors;
 using System.Data;
 using System.Web;
 using System.Web.UI.WebControls;
+using System.Runtime.Serialization;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -5086,6 +5087,10 @@ ref string strMARC)
             if (StringUtil.IsInList("nooperations", strStyle) == true)
             {
                 bNoOperations = true;
+
+                // 2025/3/6
+                if (bForce == false)
+                    return BuildError("nooperations 风格只能和 force 风格一起使用", ErrorCode.InvalidParameter);
             }
 
             if (bNoCheckDup == true)
@@ -9895,5 +9900,54 @@ out strError);
         MARC = 0x01,
         OTHER = 0x02,
     }*/
+
+
+    [DataContract(Namespace = "http://dp2003.com/dp2library/")]
+    public class BiblioInfoItem
+    {
+        [DataMember]
+        public string Action { get; set; }
+
+        [DataMember]
+        public string Record { get; set; }
+
+        [DataMember]
+        public string RecordType { get; set; }
+
+        [DataMember]
+        public byte[] Timestamp { get; set; }
+
+        [DataMember]
+        public string RecPath { get; set; }
+
+        [DataMember]
+        public string Comment { get; set; }
+
+        [DataMember]
+        public string Style { get; set; }
+
+        [DataMember]
+        public LibraryServerResult Result { get; set; }
+
+        public BiblioInfoItem Clone()
+        {
+            return new BiblioInfoItem
+            {
+                Action = this.Action,
+                Record = this.Record,
+                RecordType = this.RecordType,
+                Timestamp = this.Timestamp,
+                RecPath = this.RecPath,
+                Comment = this.Comment,
+                Style = this.Style,
+                Result = new LibraryServerResult
+                {
+                    ErrorCode = this.Result.ErrorCode,
+                    ErrorInfo = this.Result.ErrorInfo,
+                    Value = this.Result.Value
+                }
+            };
+        }
+    }
 
 }

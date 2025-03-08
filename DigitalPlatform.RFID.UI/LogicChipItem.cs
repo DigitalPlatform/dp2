@@ -129,11 +129,23 @@ namespace DigitalPlatform.RFID.UI
         {
         }
 
+        /*
         // 获得当前方法的名称
         static string FieldName()
         {
             // https://weblogs.asp.net/palermo4/how-to-obtain-method-name-programmatically-for-tracing
             string text = new System.Diagnostics.StackFrame(1).GetMethod().Name;
+            if (text.StartsWith("get_") || text.StartsWith("set_"))
+                text = text.Substring(4);   //  去掉 get_ 或者 set_ 部分
+            return text;
+        }
+        */
+
+        // 获得当前方法的名称
+        // [CallerMemberName] string caller = ""
+        static string FieldName([CallerMemberName] string caller = "")
+        {
+            string text = caller;
             if (text.StartsWith("get_") || text.StartsWith("set_"))
                 text = text.Substring(4);   //  去掉 get_ 或者 set_ 部分
             return text;

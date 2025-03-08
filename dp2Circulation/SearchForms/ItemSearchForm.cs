@@ -12809,7 +12809,7 @@ TaskScheduler.Default);
         // 保存一条记录
         // 保存成功后， info.Timestamp 会被更新
         // parameters:
-        //      strStyle force/auto_retry/空。可能组合使用
+        //      strStyle    force/auto_retry/nooperations/空。可能组合使用
         // return:
         //      -2  时间戳不匹配
         //      -1  出错
@@ -12839,6 +12839,10 @@ TaskScheduler.Default);
                     item_info.Action = "forcechange";
                 else
                     item_info.Action = "change";
+
+                // 2025/3/6
+                if (StringUtil.IsInList("nooperations", strStyle))
+                    item_info.Style= "nooperations";
 
                 item_info.NewRecPath = strRecPath;
 
@@ -13091,6 +13095,12 @@ TaskScheduler.Default);
             string save_style = "dont_enablecontrol,dont_refresh,auto_retry";
             if (dlg.ForceSave)
                 save_style += ",force";
+            // 2025/3/6
+            if (dlg.NoOperation)
+                save_style += ",nooperations";
+            // 2025/3/7
+            if (dlg.DontLogging)
+                save_style += ",noeventlog";
 
             this.m_strUsedMarcQueryFilename = dlg.ScriptFileName;
 

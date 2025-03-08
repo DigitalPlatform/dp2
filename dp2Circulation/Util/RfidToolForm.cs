@@ -1722,6 +1722,19 @@ TaskScheduler.Default);
                     if (tag_info == null)
                         goto CONTINUE;
 
+                    // 2025/2/28
+                    // 如果是读者卡，不处理
+                    {
+                        if (tag_info.Protocol == InventoryInfo.ISO14443A)
+                            goto CONTINUE;
+                        var typeOfUsage = item_info.LogicChipItem?.TypeOfUsage;
+                        // var typeOfUsage = item_info.LogicChipItem?.FindElement(ElementOID.TypeOfUsage)?.Text;
+                        if (string.IsNullOrEmpty(typeOfUsage) == false
+                            && typeOfUsage.StartsWith("8"))
+                            goto CONTINUE;
+                    }
+
+
                     // 比较两个 UID
                     Debug.Assert(tag_info.UID == item_info.OneTag.UID, $"DoAutoFixEas() tag_info.UID({tag_info.UID}) != item_info.OneTag.UID({item_info.OneTag.UID})");
 

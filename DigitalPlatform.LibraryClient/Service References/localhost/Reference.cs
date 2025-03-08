@@ -15,6 +15,271 @@ namespace DigitalPlatform.LibraryClient.localhost {
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
+    [System.Runtime.Serialization.DataContractAttribute(Name="LibraryServerResult", Namespace="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer")]
+    [System.SerializableAttribute()]
+    public partial class LibraryServerResult : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
+        
+        [System.NonSerializedAttribute()]
+        private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private DigitalPlatform.LibraryClient.localhost.ErrorCode ErrorCodeField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string ErrorInfoField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private long ValueField;
+        
+        [global::System.ComponentModel.BrowsableAttribute(false)]
+        public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
+            get {
+                return this.extensionDataField;
+            }
+            set {
+                this.extensionDataField = value;
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public DigitalPlatform.LibraryClient.localhost.ErrorCode ErrorCode {
+            get {
+                return this.ErrorCodeField;
+            }
+            set {
+                if ((this.ErrorCodeField.Equals(value) != true)) {
+                    this.ErrorCodeField = value;
+                    this.RaisePropertyChanged("ErrorCode");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string ErrorInfo {
+            get {
+                return this.ErrorInfoField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.ErrorInfoField, value) != true)) {
+                    this.ErrorInfoField = value;
+                    this.RaisePropertyChanged("ErrorInfo");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public long Value {
+            get {
+                return this.ValueField;
+            }
+            set {
+                if ((this.ValueField.Equals(value) != true)) {
+                    this.ValueField = value;
+                    this.RaisePropertyChanged("Value");
+                }
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        protected void RaisePropertyChanged(string propertyName) {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null)) {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            }
+        }
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
+    [System.Runtime.Serialization.DataContractAttribute(Name="ErrorCode", Namespace="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer")]
+    public enum ErrorCode : int {
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        NoError = 0,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        SystemError = 1,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        NotFound = 2,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        ReaderBarcodeNotFound = 3,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        ItemBarcodeNotFound = 4,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        Overdue = 5,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        NotLogin = 6,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        DupItemBarcode = 7,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        InvalidParameter = 8,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        ReturnReservation = 9,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        BorrowReservationDenied = 10,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        RenewReservationDenied = 11,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        AccessDenied = 12,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        ItemBarcodeDup = 14,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        Hangup = 15,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        ReaderBarcodeDup = 16,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        HasCirculationInfo = 17,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        SourceReaderBarcodeNotFound = 18,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        TargetReaderBarcodeNotFound = 19,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        FromNotFound = 20,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        ItemDbNotDef = 21,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        IdcardNumberDup = 22,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        IdcardNumberNotFound = 23,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        PartialDenied = 24,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        ChannelReleased = 25,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        OutofSession = 26,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        InvalidReaderBarcode = 27,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        InvalidItemBarcode = 28,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        NeedSmsLogin = 29,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        RetryLogin = 30,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        TempCodeMismatch = 31,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        BiblioDup = 32,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        Borrowing = 33,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        ClientVersionTooOld = 34,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        NotBorrowed = 35,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        NotChanged = 36,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        ServerTimeout = 37,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        AlreadyBorrowed = 38,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        AlreadyBorrowedByOther = 39,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        SyncDenied = 40,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        PasswordExpired = 41,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        BarcodeDup = 42,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        DisplayNameDup = 43,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        RefIdDup = 44,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        Canceled = 45,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        ErrorParameter = 46,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        AlreadyExist = 100,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        AlreadyExistOtherType = 101,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        ApplicationStartError = 102,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        EmptyRecord = 103,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        NotFoundSubRes = 105,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        NotHasEnoughRights = 106,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        OtherError = 107,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        PartNotFound = 108,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        RequestCanceled = 109,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        RequestCanceledByEventClose = 110,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        RequestError = 111,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        RequestTimeOut = 112,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        TimestampMismatch = 113,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        Compressed = 114,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        NotFoundObjectFile = 115,
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
     [System.Runtime.Serialization.DataContractAttribute(Name="EntityInfo", Namespace="http://dp2003.com/dp2library/")]
     [System.SerializableAttribute()]
     public partial class EntityInfo : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
@@ -302,271 +567,6 @@ namespace DigitalPlatform.LibraryClient.localhost {
         
         [System.Runtime.Serialization.EnumMemberAttribute()]
         RequestTimeOut = 112,
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
-    [System.Runtime.Serialization.DataContractAttribute(Name="LibraryServerResult", Namespace="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer")]
-    [System.SerializableAttribute()]
-    public partial class LibraryServerResult : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
-        
-        [System.NonSerializedAttribute()]
-        private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private DigitalPlatform.LibraryClient.localhost.ErrorCode ErrorCodeField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private string ErrorInfoField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private long ValueField;
-        
-        [global::System.ComponentModel.BrowsableAttribute(false)]
-        public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
-            get {
-                return this.extensionDataField;
-            }
-            set {
-                this.extensionDataField = value;
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute()]
-        public DigitalPlatform.LibraryClient.localhost.ErrorCode ErrorCode {
-            get {
-                return this.ErrorCodeField;
-            }
-            set {
-                if ((this.ErrorCodeField.Equals(value) != true)) {
-                    this.ErrorCodeField = value;
-                    this.RaisePropertyChanged("ErrorCode");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute()]
-        public string ErrorInfo {
-            get {
-                return this.ErrorInfoField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.ErrorInfoField, value) != true)) {
-                    this.ErrorInfoField = value;
-                    this.RaisePropertyChanged("ErrorInfo");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute()]
-        public long Value {
-            get {
-                return this.ValueField;
-            }
-            set {
-                if ((this.ValueField.Equals(value) != true)) {
-                    this.ValueField = value;
-                    this.RaisePropertyChanged("Value");
-                }
-            }
-        }
-        
-        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
-        
-        protected void RaisePropertyChanged(string propertyName) {
-            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
-            if ((propertyChanged != null)) {
-                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
-            }
-        }
-    }
-    
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
-    [System.Runtime.Serialization.DataContractAttribute(Name="ErrorCode", Namespace="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer")]
-    public enum ErrorCode : int {
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        NoError = 0,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        SystemError = 1,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        NotFound = 2,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        ReaderBarcodeNotFound = 3,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        ItemBarcodeNotFound = 4,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        Overdue = 5,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        NotLogin = 6,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        DupItemBarcode = 7,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        InvalidParameter = 8,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        ReturnReservation = 9,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        BorrowReservationDenied = 10,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        RenewReservationDenied = 11,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        AccessDenied = 12,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        ItemBarcodeDup = 14,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        Hangup = 15,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        ReaderBarcodeDup = 16,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        HasCirculationInfo = 17,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        SourceReaderBarcodeNotFound = 18,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        TargetReaderBarcodeNotFound = 19,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        FromNotFound = 20,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        ItemDbNotDef = 21,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        IdcardNumberDup = 22,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        IdcardNumberNotFound = 23,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        PartialDenied = 24,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        ChannelReleased = 25,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        OutofSession = 26,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        InvalidReaderBarcode = 27,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        InvalidItemBarcode = 28,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        NeedSmsLogin = 29,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        RetryLogin = 30,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        TempCodeMismatch = 31,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        BiblioDup = 32,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        Borrowing = 33,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        ClientVersionTooOld = 34,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        NotBorrowed = 35,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        NotChanged = 36,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        ServerTimeout = 37,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        AlreadyBorrowed = 38,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        AlreadyBorrowedByOther = 39,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        SyncDenied = 40,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        PasswordExpired = 41,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        BarcodeDup = 42,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        DisplayNameDup = 43,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        RefIdDup = 44,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        Canceled = 45,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        ErrorParameter = 46,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        AlreadyExist = 100,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        AlreadyExistOtherType = 101,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        ApplicationStartError = 102,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        EmptyRecord = 103,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        NotFoundSubRes = 105,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        NotHasEnoughRights = 106,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        OtherError = 107,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        PartNotFound = 108,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        RequestCanceled = 109,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        RequestCanceledByEventClose = 110,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        RequestError = 111,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        RequestTimeOut = 112,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        TimestampMismatch = 113,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        Compressed = 114,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        NotFoundObjectFile = 115,
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
@@ -2236,6 +2236,163 @@ namespace DigitalPlatform.LibraryClient.localhost {
                 if ((object.ReferenceEquals(this.StyleField, value) != true)) {
                     this.StyleField = value;
                     this.RaisePropertyChanged("Style");
+                }
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        protected void RaisePropertyChanged(string propertyName) {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null)) {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
+    [System.Runtime.Serialization.DataContractAttribute(Name="BiblioInfoItem", Namespace="http://dp2003.com/dp2library/")]
+    [System.SerializableAttribute()]
+    public partial class BiblioInfoItem : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
+        
+        [System.NonSerializedAttribute()]
+        private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string ActionField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string CommentField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string RecPathField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string RecordField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string RecordTypeField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private DigitalPlatform.LibraryClient.localhost.LibraryServerResult ResultField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string StyleField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private byte[] TimestampField;
+        
+        [global::System.ComponentModel.BrowsableAttribute(false)]
+        public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
+            get {
+                return this.extensionDataField;
+            }
+            set {
+                this.extensionDataField = value;
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string Action {
+            get {
+                return this.ActionField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.ActionField, value) != true)) {
+                    this.ActionField = value;
+                    this.RaisePropertyChanged("Action");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string Comment {
+            get {
+                return this.CommentField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.CommentField, value) != true)) {
+                    this.CommentField = value;
+                    this.RaisePropertyChanged("Comment");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string RecPath {
+            get {
+                return this.RecPathField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.RecPathField, value) != true)) {
+                    this.RecPathField = value;
+                    this.RaisePropertyChanged("RecPath");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string Record {
+            get {
+                return this.RecordField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.RecordField, value) != true)) {
+                    this.RecordField = value;
+                    this.RaisePropertyChanged("Record");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string RecordType {
+            get {
+                return this.RecordTypeField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.RecordTypeField, value) != true)) {
+                    this.RecordTypeField = value;
+                    this.RaisePropertyChanged("RecordType");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                return this.ResultField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.ResultField, value) != true)) {
+                    this.ResultField = value;
+                    this.RaisePropertyChanged("Result");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string Style {
+            get {
+                return this.StyleField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.StyleField, value) != true)) {
+                    this.StyleField = value;
+                    this.RaisePropertyChanged("Style");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public byte[] Timestamp {
+            get {
+                return this.TimestampField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.TimestampField, value) != true)) {
+                    this.TimestampField = value;
+                    this.RaisePropertyChanged("Timestamp");
                 }
             }
         }
@@ -3959,6 +4116,14 @@ namespace DigitalPlatform.LibraryClient.localhost {
     [System.ServiceModel.ServiceContractAttribute(Namespace="http://dp2003.com/dp2library/", ConfigurationName="localhost.dp2library", SessionMode=System.ServiceModel.SessionMode.Required)]
     public interface dp2library {
         
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetComments", ReplyAction="http://dp2003.com/dp2library/dp2library/GetCommentsResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetComments", ReplyAction="http://dp2003.com/dp2library/dp2library/GetCommentsResponse")]
+        System.IAsyncResult BeginGetComments(string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, System.IAsyncResult result);
+        
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SetComments", ReplyAction="http://dp2003.com/dp2library/dp2library/SetCommentsResponse")]
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos, string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos);
         
@@ -4278,6 +4443,14 @@ namespace DigitalPlatform.LibraryClient.localhost {
         System.IAsyncResult BeginSearchBiblio(string strBiblioDbNames, string strQueryWord, int nPerMax, string strFromStyle, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle, string strLocationFilter, System.AsyncCallback callback, object asyncState);
         
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchBiblio(out string strQueryXml, out string explain, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SetBiblioInfos", ReplyAction="http://dp2003.com/dp2library/dp2library/SetBiblioInfosResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetBiblioInfos(out DigitalPlatform.LibraryClient.localhost.BiblioInfoItem[] results, DigitalPlatform.LibraryClient.localhost.BiblioInfoItem[] infos, string style);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SetBiblioInfos", ReplyAction="http://dp2003.com/dp2library/dp2library/SetBiblioInfosResponse")]
+        System.IAsyncResult BeginSetBiblioInfos(DigitalPlatform.LibraryClient.localhost.BiblioInfoItem[] infos, string style, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetBiblioInfos(out DigitalPlatform.LibraryClient.localhost.BiblioInfoItem[] results, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SetBiblioInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/SetBiblioInfoResponse")]
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetBiblioInfo(out string strOutputBiblioRecPath, out string strOutputBiblio, out byte[] baOutputTimestamp, string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strComment, string strStyle);
@@ -4806,18 +4979,36 @@ namespace DigitalPlatform.LibraryClient.localhost {
         System.IAsyncResult BeginWriteRes(string strResPath, string strRanges, long lTotalLength, byte[] baContent, string strMetadata, string strStyle, byte[] baInputTimestamp, System.AsyncCallback callback, object asyncState);
         
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndWriteRes(out string strOutputResPath, out byte[] baOutputTimestamp, System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetComments", ReplyAction="http://dp2003.com/dp2library/dp2library/GetCommentsResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetComments", ReplyAction="http://dp2003.com/dp2library/dp2library/GetCommentsResponse")]
-        System.IAsyncResult BeginGetComments(string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, System.IAsyncResult result);
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
     public interface dp2libraryChannel : DigitalPlatform.LibraryClient.localhost.dp2library, System.ServiceModel.IClientChannel {
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class GetCommentsCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public GetCommentsCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.EntityInfo[])(this.results[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
+            }
+        }
     }
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
@@ -5907,6 +6098,32 @@ namespace DigitalPlatform.LibraryClient.localhost {
             get {
                 base.RaiseExceptionIfNecessary();
                 return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[2]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class SetBiblioInfosCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results1;
+        
+        public SetBiblioInfosCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results1 = results;
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.BiblioInfoItem[] results {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.BiblioInfoItem[])(this.results1[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results1[1]));
             }
         }
     }
@@ -7773,33 +7990,13 @@ namespace DigitalPlatform.LibraryClient.localhost {
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class GetCommentsCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        public GetCommentsCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.EntityInfo[])(this.results[0]));
-            }
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
     public partial class dp2libraryClient : System.ServiceModel.ClientBase<DigitalPlatform.LibraryClient.localhost.dp2library>, DigitalPlatform.LibraryClient.localhost.dp2library {
+        
+        private BeginOperationDelegate onBeginGetCommentsDelegate;
+        
+        private EndOperationDelegate onEndGetCommentsDelegate;
+        
+        private System.Threading.SendOrPostCallback onGetCommentsCompletedDelegate;
         
         private BeginOperationDelegate onBeginSetCommentsDelegate;
         
@@ -8040,6 +8237,12 @@ namespace DigitalPlatform.LibraryClient.localhost {
         private EndOperationDelegate onEndSearchBiblioDelegate;
         
         private System.Threading.SendOrPostCallback onSearchBiblioCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginSetBiblioInfosDelegate;
+        
+        private EndOperationDelegate onEndSetBiblioInfosDelegate;
+        
+        private System.Threading.SendOrPostCallback onSetBiblioInfosCompletedDelegate;
         
         private BeginOperationDelegate onBeginSetBiblioInfoDelegate;
         
@@ -8425,12 +8628,6 @@ namespace DigitalPlatform.LibraryClient.localhost {
         
         private System.Threading.SendOrPostCallback onWriteResCompletedDelegate;
         
-        private BeginOperationDelegate onBeginGetCommentsDelegate;
-        
-        private EndOperationDelegate onEndGetCommentsDelegate;
-        
-        private System.Threading.SendOrPostCallback onGetCommentsCompletedDelegate;
-        
         public dp2libraryClient() {
         }
         
@@ -8449,6 +8646,8 @@ namespace DigitalPlatform.LibraryClient.localhost {
         public dp2libraryClient(System.ServiceModel.Channels.Binding binding, System.ServiceModel.EndpointAddress remoteAddress) : 
                 base(binding, remoteAddress) {
         }
+        
+        public event System.EventHandler<GetCommentsCompletedEventArgs> GetCommentsCompleted;
         
         public event System.EventHandler<SetCommentsCompletedEventArgs> SetCommentsCompleted;
         
@@ -8529,6 +8728,8 @@ namespace DigitalPlatform.LibraryClient.localhost {
         public event System.EventHandler<ListBiblioDbFromsCompletedEventArgs> ListBiblioDbFromsCompleted;
         
         public event System.EventHandler<SearchBiblioCompletedEventArgs> SearchBiblioCompleted;
+        
+        public event System.EventHandler<SetBiblioInfosCompletedEventArgs> SetBiblioInfosCompleted;
         
         public event System.EventHandler<SetBiblioInfoCompletedEventArgs> SetBiblioInfoCompleted;
         
@@ -8658,7 +8859,65 @@ namespace DigitalPlatform.LibraryClient.localhost {
         
         public event System.EventHandler<WriteResCompletedEventArgs> WriteResCompleted;
         
-        public event System.EventHandler<GetCommentsCompletedEventArgs> GetCommentsCompleted;
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang) {
+            return base.Channel.GetComments(out commentinfos, strBiblioRecPath, lStart, lCount, strStyle, strLang);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginGetComments(string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginGetComments(strBiblioRecPath, lStart, lCount, strStyle, strLang, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, System.IAsyncResult result) {
+            return base.Channel.EndGetComments(out commentinfos, result);
+        }
+        
+        private System.IAsyncResult OnBeginGetComments(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strBiblioRecPath = ((string)(inValues[0]));
+            long lStart = ((long)(inValues[1]));
+            long lCount = ((long)(inValues[2]));
+            string strStyle = ((string)(inValues[3]));
+            string strLang = ((string)(inValues[4]));
+            return this.BeginGetComments(strBiblioRecPath, lStart, lCount, strStyle, strLang, callback, asyncState);
+        }
+        
+        private object[] OnEndGetComments(System.IAsyncResult result) {
+            DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.EntityInfo[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetComments(out commentinfos, result);
+            return new object[] {
+                    commentinfos,
+                    retVal};
+        }
+        
+        private void OnGetCommentsCompleted(object state) {
+            if ((this.GetCommentsCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.GetCommentsCompleted(this, new GetCommentsCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void GetCommentsAsync(string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang) {
+            this.GetCommentsAsync(strBiblioRecPath, lStart, lCount, strStyle, strLang, null);
+        }
+        
+        public void GetCommentsAsync(string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang, object userState) {
+            if ((this.onBeginGetCommentsDelegate == null)) {
+                this.onBeginGetCommentsDelegate = new BeginOperationDelegate(this.OnBeginGetComments);
+            }
+            if ((this.onEndGetCommentsDelegate == null)) {
+                this.onEndGetCommentsDelegate = new EndOperationDelegate(this.OnEndGetComments);
+            }
+            if ((this.onGetCommentsCompletedDelegate == null)) {
+                this.onGetCommentsCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetCommentsCompleted);
+            }
+            base.InvokeAsync(this.onBeginGetCommentsDelegate, new object[] {
+                        strBiblioRecPath,
+                        lStart,
+                        lCount,
+                        strStyle,
+                        strLang}, this.onEndGetCommentsDelegate, this.onGetCommentsCompletedDelegate, userState);
+        }
         
         public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos, string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos) {
             return base.Channel.SetComments(out errorinfos, strBiblioRecPath, commentinfos);
@@ -10977,6 +11236,60 @@ namespace DigitalPlatform.LibraryClient.localhost {
                         strSearchStyle,
                         strOutputStyle,
                         strLocationFilter}, this.onEndSearchBiblioDelegate, this.onSearchBiblioCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetBiblioInfos(out DigitalPlatform.LibraryClient.localhost.BiblioInfoItem[] results, DigitalPlatform.LibraryClient.localhost.BiblioInfoItem[] infos, string style) {
+            return base.Channel.SetBiblioInfos(out results, infos, style);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginSetBiblioInfos(DigitalPlatform.LibraryClient.localhost.BiblioInfoItem[] infos, string style, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginSetBiblioInfos(infos, style, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetBiblioInfos(out DigitalPlatform.LibraryClient.localhost.BiblioInfoItem[] results, System.IAsyncResult result) {
+            return base.Channel.EndSetBiblioInfos(out results, result);
+        }
+        
+        private System.IAsyncResult OnBeginSetBiblioInfos(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            DigitalPlatform.LibraryClient.localhost.BiblioInfoItem[] infos = ((DigitalPlatform.LibraryClient.localhost.BiblioInfoItem[])(inValues[0]));
+            string style = ((string)(inValues[1]));
+            return this.BeginSetBiblioInfos(infos, style, callback, asyncState);
+        }
+        
+        private object[] OnEndSetBiblioInfos(System.IAsyncResult result) {
+            DigitalPlatform.LibraryClient.localhost.BiblioInfoItem[] results = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.BiblioInfoItem[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetBiblioInfos(out results, result);
+            return new object[] {
+                    results,
+                    retVal};
+        }
+        
+        private void OnSetBiblioInfosCompleted(object state) {
+            if ((this.SetBiblioInfosCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.SetBiblioInfosCompleted(this, new SetBiblioInfosCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void SetBiblioInfosAsync(DigitalPlatform.LibraryClient.localhost.BiblioInfoItem[] infos, string style) {
+            this.SetBiblioInfosAsync(infos, style, null);
+        }
+        
+        public void SetBiblioInfosAsync(DigitalPlatform.LibraryClient.localhost.BiblioInfoItem[] infos, string style, object userState) {
+            if ((this.onBeginSetBiblioInfosDelegate == null)) {
+                this.onBeginSetBiblioInfosDelegate = new BeginOperationDelegate(this.OnBeginSetBiblioInfos);
+            }
+            if ((this.onEndSetBiblioInfosDelegate == null)) {
+                this.onEndSetBiblioInfosDelegate = new EndOperationDelegate(this.OnEndSetBiblioInfos);
+            }
+            if ((this.onSetBiblioInfosCompletedDelegate == null)) {
+                this.onSetBiblioInfosCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnSetBiblioInfosCompleted);
+            }
+            base.InvokeAsync(this.onBeginSetBiblioInfosDelegate, new object[] {
+                        infos,
+                        style}, this.onEndSetBiblioInfosDelegate, this.onSetBiblioInfosCompletedDelegate, userState);
         }
         
         public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetBiblioInfo(out string strOutputBiblioRecPath, out string strOutputBiblio, out byte[] baOutputTimestamp, string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strComment, string strStyle) {
@@ -14752,71 +15065,19 @@ namespace DigitalPlatform.LibraryClient.localhost {
                         strStyle,
                         baInputTimestamp}, this.onEndWriteResDelegate, this.onWriteResCompletedDelegate, userState);
         }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang) {
-            return base.Channel.GetComments(out commentinfos, strBiblioRecPath, lStart, lCount, strStyle, strLang);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginGetComments(string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginGetComments(strBiblioRecPath, lStart, lCount, strStyle, strLang, callback, asyncState);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, System.IAsyncResult result) {
-            return base.Channel.EndGetComments(out commentinfos, result);
-        }
-        
-        private System.IAsyncResult OnBeginGetComments(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strBiblioRecPath = ((string)(inValues[0]));
-            long lStart = ((long)(inValues[1]));
-            long lCount = ((long)(inValues[2]));
-            string strStyle = ((string)(inValues[3]));
-            string strLang = ((string)(inValues[4]));
-            return this.BeginGetComments(strBiblioRecPath, lStart, lCount, strStyle, strLang, callback, asyncState);
-        }
-        
-        private object[] OnEndGetComments(System.IAsyncResult result) {
-            DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.EntityInfo[]>();
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetComments(out commentinfos, result);
-            return new object[] {
-                    commentinfos,
-                    retVal};
-        }
-        
-        private void OnGetCommentsCompleted(object state) {
-            if ((this.GetCommentsCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.GetCommentsCompleted(this, new GetCommentsCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
-        
-        public void GetCommentsAsync(string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang) {
-            this.GetCommentsAsync(strBiblioRecPath, lStart, lCount, strStyle, strLang, null);
-        }
-        
-        public void GetCommentsAsync(string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang, object userState) {
-            if ((this.onBeginGetCommentsDelegate == null)) {
-                this.onBeginGetCommentsDelegate = new BeginOperationDelegate(this.OnBeginGetComments);
-            }
-            if ((this.onEndGetCommentsDelegate == null)) {
-                this.onEndGetCommentsDelegate = new EndOperationDelegate(this.OnEndGetComments);
-            }
-            if ((this.onGetCommentsCompletedDelegate == null)) {
-                this.onGetCommentsCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetCommentsCompleted);
-            }
-            base.InvokeAsync(this.onBeginGetCommentsDelegate, new object[] {
-                        strBiblioRecPath,
-                        lStart,
-                        lCount,
-                        strStyle,
-                        strLang}, this.onEndGetCommentsDelegate, this.onGetCommentsCompletedDelegate, userState);
-        }
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
     [System.ServiceModel.ServiceContractAttribute(Namespace="http://dp2003.com/dp2library/rest", ConfigurationName="localhost.dp2libraryREST", SessionMode=System.ServiceModel.SessionMode.NotAllowed)]
     public interface dp2libraryREST {
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetComments", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCommentsResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetComments", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCommentsResponse")]
+        System.IAsyncResult BeginGetComments(string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetComments", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetCommentsResponse")]
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos, string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos);
@@ -15137,6 +15398,14 @@ namespace DigitalPlatform.LibraryClient.localhost {
         System.IAsyncResult BeginSearchBiblio(string strBiblioDbNames, string strQueryWord, int nPerMax, string strFromStyle, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle, string strLocationFilter, System.AsyncCallback callback, object asyncState);
         
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchBiblio(out string strQueryXml, out string explain, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetBiblioInfos", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetBiblioInfosResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetBiblioInfos(out DigitalPlatform.LibraryClient.localhost.BiblioInfoItem[] results, DigitalPlatform.LibraryClient.localhost.BiblioInfoItem[] infos, string style);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetBiblioInfos", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetBiblioInfosResponse")]
+        System.IAsyncResult BeginSetBiblioInfos(DigitalPlatform.LibraryClient.localhost.BiblioInfoItem[] infos, string style, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetBiblioInfos(out DigitalPlatform.LibraryClient.localhost.BiblioInfoItem[] results, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetBiblioInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetBiblioInfoResponse")]
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetBiblioInfo(out string strOutputBiblioRecPath, out string strOutputBiblio, out byte[] baOutputTimestamp, string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strComment, string strStyle);
@@ -15671,18 +15940,36 @@ namespace DigitalPlatform.LibraryClient.localhost {
         System.IAsyncResult BeginWriteRes(string strResPath, string strRanges, long lTotalLength, byte[] baContent, string strMetadata, string strStyle, byte[] baInputTimestamp, System.AsyncCallback callback, object asyncState);
         
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndWriteRes(out string strOutputResPath, out byte[] baOutputTimestamp, System.IAsyncResult result);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetComments", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCommentsResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang);
-        
-        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetComments", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCommentsResponse")]
-        System.IAsyncResult BeginGetComments(string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang, System.AsyncCallback callback, object asyncState);
-        
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, System.IAsyncResult result);
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
     public interface dp2libraryRESTChannel : DigitalPlatform.LibraryClient.localhost.dp2libraryREST, System.ServiceModel.IClientChannel {
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class GetCommentsCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public GetCommentsCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.EntityInfo[])(this.results[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
+            }
+        }
     }
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
@@ -16772,6 +17059,32 @@ namespace DigitalPlatform.LibraryClient.localhost {
             get {
                 base.RaiseExceptionIfNecessary();
                 return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[2]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class SetBiblioInfosCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results1;
+        
+        public SetBiblioInfosCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results1 = results;
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.BiblioInfoItem[] results {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.BiblioInfoItem[])(this.results1[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results1[1]));
             }
         }
     }
@@ -18638,33 +18951,13 @@ namespace DigitalPlatform.LibraryClient.localhost {
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class GetCommentsCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        public GetCommentsCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.EntityInfo[])(this.results[0]));
-            }
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
-            get {
-                base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
     public partial class dp2libraryRESTClient : System.ServiceModel.ClientBase<DigitalPlatform.LibraryClient.localhost.dp2libraryREST>, DigitalPlatform.LibraryClient.localhost.dp2libraryREST {
+        
+        private BeginOperationDelegate onBeginGetCommentsDelegate;
+        
+        private EndOperationDelegate onEndGetCommentsDelegate;
+        
+        private System.Threading.SendOrPostCallback onGetCommentsCompletedDelegate;
         
         private BeginOperationDelegate onBeginSetCommentsDelegate;
         
@@ -18905,6 +19198,12 @@ namespace DigitalPlatform.LibraryClient.localhost {
         private EndOperationDelegate onEndSearchBiblioDelegate;
         
         private System.Threading.SendOrPostCallback onSearchBiblioCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginSetBiblioInfosDelegate;
+        
+        private EndOperationDelegate onEndSetBiblioInfosDelegate;
+        
+        private System.Threading.SendOrPostCallback onSetBiblioInfosCompletedDelegate;
         
         private BeginOperationDelegate onBeginSetBiblioInfoDelegate;
         
@@ -19290,12 +19589,6 @@ namespace DigitalPlatform.LibraryClient.localhost {
         
         private System.Threading.SendOrPostCallback onWriteResCompletedDelegate;
         
-        private BeginOperationDelegate onBeginGetCommentsDelegate;
-        
-        private EndOperationDelegate onEndGetCommentsDelegate;
-        
-        private System.Threading.SendOrPostCallback onGetCommentsCompletedDelegate;
-        
         public dp2libraryRESTClient() {
         }
         
@@ -19314,6 +19607,8 @@ namespace DigitalPlatform.LibraryClient.localhost {
         public dp2libraryRESTClient(System.ServiceModel.Channels.Binding binding, System.ServiceModel.EndpointAddress remoteAddress) : 
                 base(binding, remoteAddress) {
         }
+        
+        public event System.EventHandler<GetCommentsCompletedEventArgs1> GetCommentsCompleted;
         
         public event System.EventHandler<SetCommentsCompletedEventArgs1> SetCommentsCompleted;
         
@@ -19394,6 +19689,8 @@ namespace DigitalPlatform.LibraryClient.localhost {
         public event System.EventHandler<ListBiblioDbFromsCompletedEventArgs1> ListBiblioDbFromsCompleted;
         
         public event System.EventHandler<SearchBiblioCompletedEventArgs1> SearchBiblioCompleted;
+        
+        public event System.EventHandler<SetBiblioInfosCompletedEventArgs1> SetBiblioInfosCompleted;
         
         public event System.EventHandler<SetBiblioInfoCompletedEventArgs1> SetBiblioInfoCompleted;
         
@@ -19523,7 +19820,65 @@ namespace DigitalPlatform.LibraryClient.localhost {
         
         public event System.EventHandler<WriteResCompletedEventArgs1> WriteResCompleted;
         
-        public event System.EventHandler<GetCommentsCompletedEventArgs1> GetCommentsCompleted;
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang) {
+            return base.Channel.GetComments(out commentinfos, strBiblioRecPath, lStart, lCount, strStyle, strLang);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginGetComments(string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginGetComments(strBiblioRecPath, lStart, lCount, strStyle, strLang, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, System.IAsyncResult result) {
+            return base.Channel.EndGetComments(out commentinfos, result);
+        }
+        
+        private System.IAsyncResult OnBeginGetComments(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strBiblioRecPath = ((string)(inValues[0]));
+            long lStart = ((long)(inValues[1]));
+            long lCount = ((long)(inValues[2]));
+            string strStyle = ((string)(inValues[3]));
+            string strLang = ((string)(inValues[4]));
+            return this.BeginGetComments(strBiblioRecPath, lStart, lCount, strStyle, strLang, callback, asyncState);
+        }
+        
+        private object[] OnEndGetComments(System.IAsyncResult result) {
+            DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.EntityInfo[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetComments(out commentinfos, result);
+            return new object[] {
+                    commentinfos,
+                    retVal};
+        }
+        
+        private void OnGetCommentsCompleted(object state) {
+            if ((this.GetCommentsCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.GetCommentsCompleted(this, new GetCommentsCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void GetCommentsAsync(string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang) {
+            this.GetCommentsAsync(strBiblioRecPath, lStart, lCount, strStyle, strLang, null);
+        }
+        
+        public void GetCommentsAsync(string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang, object userState) {
+            if ((this.onBeginGetCommentsDelegate == null)) {
+                this.onBeginGetCommentsDelegate = new BeginOperationDelegate(this.OnBeginGetComments);
+            }
+            if ((this.onEndGetCommentsDelegate == null)) {
+                this.onEndGetCommentsDelegate = new EndOperationDelegate(this.OnEndGetComments);
+            }
+            if ((this.onGetCommentsCompletedDelegate == null)) {
+                this.onGetCommentsCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetCommentsCompleted);
+            }
+            base.InvokeAsync(this.onBeginGetCommentsDelegate, new object[] {
+                        strBiblioRecPath,
+                        lStart,
+                        lCount,
+                        strStyle,
+                        strLang}, this.onEndGetCommentsDelegate, this.onGetCommentsCompletedDelegate, userState);
+        }
         
         public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] errorinfos, string strBiblioRecPath, DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos) {
             return base.Channel.SetComments(out errorinfos, strBiblioRecPath, commentinfos);
@@ -21842,6 +22197,60 @@ namespace DigitalPlatform.LibraryClient.localhost {
                         strSearchStyle,
                         strOutputStyle,
                         strLocationFilter}, this.onEndSearchBiblioDelegate, this.onSearchBiblioCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetBiblioInfos(out DigitalPlatform.LibraryClient.localhost.BiblioInfoItem[] results, DigitalPlatform.LibraryClient.localhost.BiblioInfoItem[] infos, string style) {
+            return base.Channel.SetBiblioInfos(out results, infos, style);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginSetBiblioInfos(DigitalPlatform.LibraryClient.localhost.BiblioInfoItem[] infos, string style, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginSetBiblioInfos(infos, style, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetBiblioInfos(out DigitalPlatform.LibraryClient.localhost.BiblioInfoItem[] results, System.IAsyncResult result) {
+            return base.Channel.EndSetBiblioInfos(out results, result);
+        }
+        
+        private System.IAsyncResult OnBeginSetBiblioInfos(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            DigitalPlatform.LibraryClient.localhost.BiblioInfoItem[] infos = ((DigitalPlatform.LibraryClient.localhost.BiblioInfoItem[])(inValues[0]));
+            string style = ((string)(inValues[1]));
+            return this.BeginSetBiblioInfos(infos, style, callback, asyncState);
+        }
+        
+        private object[] OnEndSetBiblioInfos(System.IAsyncResult result) {
+            DigitalPlatform.LibraryClient.localhost.BiblioInfoItem[] results = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.BiblioInfoItem[]>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetBiblioInfos(out results, result);
+            return new object[] {
+                    results,
+                    retVal};
+        }
+        
+        private void OnSetBiblioInfosCompleted(object state) {
+            if ((this.SetBiblioInfosCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.SetBiblioInfosCompleted(this, new SetBiblioInfosCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void SetBiblioInfosAsync(DigitalPlatform.LibraryClient.localhost.BiblioInfoItem[] infos, string style) {
+            this.SetBiblioInfosAsync(infos, style, null);
+        }
+        
+        public void SetBiblioInfosAsync(DigitalPlatform.LibraryClient.localhost.BiblioInfoItem[] infos, string style, object userState) {
+            if ((this.onBeginSetBiblioInfosDelegate == null)) {
+                this.onBeginSetBiblioInfosDelegate = new BeginOperationDelegate(this.OnBeginSetBiblioInfos);
+            }
+            if ((this.onEndSetBiblioInfosDelegate == null)) {
+                this.onEndSetBiblioInfosDelegate = new EndOperationDelegate(this.OnEndSetBiblioInfos);
+            }
+            if ((this.onSetBiblioInfosCompletedDelegate == null)) {
+                this.onSetBiblioInfosCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnSetBiblioInfosCompleted);
+            }
+            base.InvokeAsync(this.onBeginSetBiblioInfosDelegate, new object[] {
+                        infos,
+                        style}, this.onEndSetBiblioInfosDelegate, this.onSetBiblioInfosCompletedDelegate, userState);
         }
         
         public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetBiblioInfo(out string strOutputBiblioRecPath, out string strOutputBiblio, out byte[] baOutputTimestamp, string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strComment, string strStyle) {
@@ -25616,66 +26025,6 @@ namespace DigitalPlatform.LibraryClient.localhost {
                         strMetadata,
                         strStyle,
                         baInputTimestamp}, this.onEndWriteResDelegate, this.onWriteResCompletedDelegate, userState);
-        }
-        
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang) {
-            return base.Channel.GetComments(out commentinfos, strBiblioRecPath, lStart, lCount, strStyle, strLang);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginGetComments(string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginGetComments(strBiblioRecPath, lStart, lCount, strStyle, strLang, callback, asyncState);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetComments(out DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos, System.IAsyncResult result) {
-            return base.Channel.EndGetComments(out commentinfos, result);
-        }
-        
-        private System.IAsyncResult OnBeginGetComments(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strBiblioRecPath = ((string)(inValues[0]));
-            long lStart = ((long)(inValues[1]));
-            long lCount = ((long)(inValues[2]));
-            string strStyle = ((string)(inValues[3]));
-            string strLang = ((string)(inValues[4]));
-            return this.BeginGetComments(strBiblioRecPath, lStart, lCount, strStyle, strLang, callback, asyncState);
-        }
-        
-        private object[] OnEndGetComments(System.IAsyncResult result) {
-            DigitalPlatform.LibraryClient.localhost.EntityInfo[] commentinfos = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.EntityInfo[]>();
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetComments(out commentinfos, result);
-            return new object[] {
-                    commentinfos,
-                    retVal};
-        }
-        
-        private void OnGetCommentsCompleted(object state) {
-            if ((this.GetCommentsCompleted != null)) {
-                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
-                this.GetCommentsCompleted(this, new GetCommentsCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
-            }
-        }
-        
-        public void GetCommentsAsync(string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang) {
-            this.GetCommentsAsync(strBiblioRecPath, lStart, lCount, strStyle, strLang, null);
-        }
-        
-        public void GetCommentsAsync(string strBiblioRecPath, long lStart, long lCount, string strStyle, string strLang, object userState) {
-            if ((this.onBeginGetCommentsDelegate == null)) {
-                this.onBeginGetCommentsDelegate = new BeginOperationDelegate(this.OnBeginGetComments);
-            }
-            if ((this.onEndGetCommentsDelegate == null)) {
-                this.onEndGetCommentsDelegate = new EndOperationDelegate(this.OnEndGetComments);
-            }
-            if ((this.onGetCommentsCompletedDelegate == null)) {
-                this.onGetCommentsCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetCommentsCompleted);
-            }
-            base.InvokeAsync(this.onBeginGetCommentsDelegate, new object[] {
-                        strBiblioRecPath,
-                        lStart,
-                        lCount,
-                        strStyle,
-                        strLang}, this.onEndGetCommentsDelegate, this.onGetCommentsCompletedDelegate, userState);
         }
     }
 }

@@ -182,6 +182,11 @@ SessionMode = SessionMode.NotAllowed)]
             out string explain);
 
         [OperationContract]
+        LibraryServerResult SetBiblioInfos(BiblioInfoItem[] infos,
+            string style,
+            out BiblioInfoItem[] results);
+
+        [OperationContract]
         LibraryServerResult SetBiblioInfo(
             string strAction,
             string strBiblioRecPath,

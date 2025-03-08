@@ -6590,6 +6590,56 @@ out QueryResult[] results)
             }
         }
 
+        // 2025/3/7
+
+        public LibraryServerResult SetBiblioInfos(BiblioInfoItem[] infos,
+            string style,
+            out BiblioInfoItem[] results)
+        {
+            results = null;
+
+            LibraryServerResult result = this.PrepareEnvironment("SetBiblioInfos", true, true, true);
+            if (result.Value == -1)
+                return result;
+
+            try
+            {
+                var errors = new List<BiblioInfoItem>();
+                foreach (var info in infos)
+                {
+                    var ret = SetBiblioInfo(
+            info.Action,
+            info.RecPath,
+            info.RecordType,
+            info.Record,
+            info.Timestamp,
+            info.Comment,
+            info.Style,
+            out string strOutputBiblioRecPath,
+            out string strOutputBiblio,
+            out byte[] baOutputTimestamp);
+                    var error = info.Clone();
+                    error.Action = info.Action;
+                    info.Record = strOutputBiblio;
+                    info.Timestamp = baOutputTimestamp;
+                    info.Result = ret;
+                    errors.Add(error);
+                }
+
+                return new LibraryServerResult { Value = 0 };
+            }
+            catch (Exception ex)
+            {
+                string strErrorText = "dp2Library SetBiblioInfos() API出现异常: " + ExceptionUtil.GetDebugText(ex);
+                app.WriteErrorLog(strErrorText);
+
+                result.Value = -1;
+                result.ErrorCode = ErrorCode.SystemError;
+                result.ErrorInfo = strErrorText;
+                return result;
+            }
+        }
+
         // TODO: 需要增加返回保存后记录 XML 的参数。因为保存过程中，可能会略微修改前端提交的记录，比如增加一些字段
         // 设置书目信息或者规范信息(目前只能xml一种格式)
         // 权限:   需要具有setbiblioinfo权限
@@ -13031,8 +13081,8 @@ true);
                             sessioninfo,
                             //sessioninfo.LibraryCodeList,
                             //sessioninfo.RightsOrigin,
-                            // string.IsNullOrEmpty(strFileName) ? strCategory : strCategory + "/" + strFileName,
-                            strCategory,
+                            string.IsNullOrEmpty(strFileName) ? strCategory : strCategory + "/" + strFileName,
+                            // strCategory,
                             "delete",
                             out strLibraryCode,
                             out strError);

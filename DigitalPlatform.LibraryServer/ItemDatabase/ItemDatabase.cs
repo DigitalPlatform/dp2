@@ -2361,11 +2361,32 @@ out strError);
                     continue;
                 }
 
-
                 bool bNoOperations = false; // 是否为不要覆盖<operations>内容
                 if (StringUtil.IsInList("nooperations", strStyle) == true)
                 {
                     bNoOperations = true;
+
+                    // 2025/3/6
+                    if (bForce == false)
+                        return LibraryApplication.BuildError("nooperations 风格只能和 force 风格一起使用", ErrorCode.InvalidParameter);
+
+                    // 2025/3/6
+                    if (StringUtil.IsInList("restore", sessioninfo.RightsOrigin) == false)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = $"带有风格 'nooperations' 的修改{this.ItemName}信息的{strAction}操作被拒绝。不具备 restore 权限。";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
+                    }
+
+                    // 2025/3/6
+                    if (sessioninfo.GlobalUser == false)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = $"带有风格 'nooperations' 的修改{this.ItemName}信息的" + strAction + "操作被拒绝。只有全局用户并具备 restore 权限才能进行这样的操作。";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
+                    }
                 }
 
                 // 把(前端发过来的)旧记录装载到DOM

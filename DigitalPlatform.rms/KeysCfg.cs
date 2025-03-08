@@ -1666,7 +1666,7 @@ namespace DigitalPlatform.rms
                         long nTicks = -1; //缺省值-1
                         try
                         {
-                            DateTime time = ParseFreeTimeString(strKey);
+                            DateTime time = ParseFreeTimeString(strKey).ToUniversalTime();  // 2025/3/8 增加的 .ToUniversalTime()
                             nTicks = time.Ticks;
                         }
                         catch
@@ -1729,6 +1729,8 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
+        // return:
+        //		返回的是本地时间值
         public static DateTime ParseFreeTimeString(string strTime)
         {
             string[] formats = {
@@ -1772,15 +1774,48 @@ namespace DigitalPlatform.rms
 
 
         // 注: utime 格式实际上对应 u 和 s 两种
-        static bool TryParseUTimeString(string time,
+        // parameters:
+        //          value   [out] 解析得到的 DateTime 时间值。注意，这个值的 Kind 属性是 Local
+        public static bool TryParseUTimeString(string time,
             out DateTime value)
         {
+            /*
             IFormatProvider culture = new CultureInfo("zh-CN", true);
             return DateTime.TryParseExact(time,
                 new string[] { "u", "s" },
                 culture,    // DateTimeFormatInfo.InvariantInfo,
                 DateTimeStyles.None,
                 out value);
+            */
+            IFormatProvider culture = new CultureInfo("zh-CN", true);
+            {
+                var ret = DateTime.TryParseExact(time,
+        new string[] { "s" },
+        culture,    // DateTimeFormatInfo.InvariantInfo,
+        DateTimeStyles.None,
+        out value);
+                if (ret == true)
+                {
+                    value = value.ToUniversalTime();
+                    Debug.Assert(value.Kind == DateTimeKind.Utc);
+                    return true;
+                }
+            }
+            {
+                var ret = DateTime.TryParseExact(time,
+        new string[] { "u" },
+        culture,    // DateTimeFormatInfo.InvariantInfo,
+        DateTimeStyles.None,
+        out value);
+                if (ret == true)
+                {
+                    value = new DateTime(value.Ticks, DateTimeKind.Utc);
+                    Debug.Assert(value.Kind == DateTimeKind.Utc);
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         // https://blogs.infosupport.com/normalizing-unicode-strings-in-c/

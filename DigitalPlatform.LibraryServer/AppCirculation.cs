@@ -18294,7 +18294,7 @@ out strError);
             return result;
         }
 
-        LibraryServerResult BuildError(string error, 
+        public static LibraryServerResult BuildError(string error, 
             ErrorCode code = ErrorCode.SystemError)
         {
             LibraryServerResult result = new LibraryServerResult();
@@ -18302,7 +18302,6 @@ out strError);
             result.ErrorInfo = error;
             result.ErrorCode = code;
             return result;
-
         }
 
         // 比较两个读者键是否指向同一条读者记录
@@ -18555,10 +18554,17 @@ out strError);
     "borrower");
             if (String.IsNullOrEmpty(strOutputReaderBarcode) == true)
             {
+                /*
                 strError = "册记录中 borrower 元素值表明该册当前并未被任何读者借阅";
                 result.Value = 0;   // 2008/1/25 comment 此时无法断定是否为错误。还需要strOutputReaderBarcode返回后进行比较才能确定
                 result.ErrorInfo = strError;
                 return result;
+                */
+                // 2025/3/3
+                strError = "册记录中 borrower 元素值表明该册当前并未被任何读者借阅";
+                // 2008/1/25 comment 此时无法断定是否为错误。还需要strOutputReaderBarcode返回后进行比较才能确定
+                result.ErrorInfo = strError;
+                return BuildError(strError, ErrorCode.InvalidParameter);
             }
 
             // 读出读者记录，看看是否有borrows/borrow元素表明有这个册条码号
@@ -18783,7 +18789,8 @@ out strError);
                 if (nRet == 0)
                 {
                     strError = "读者证条码号 '" + PatronBarcodeLink(strReaderKey) + "' 不存在";
-                    goto ERROR1;
+                    // goto ERROR1;
+                    return BuildError(strError, ErrorCode.ReaderBarcodeNotFound);
                 }
                 if (nRet == -1)
                 {
@@ -19068,14 +19075,16 @@ out strError);
 
                         strError = "修复操作被拒绝。读者记录 '" + PatronBarcodeLink(strReaderKey) + "' 中并不存在有关册 " + ItemBarcodeLink(strItemKey) + " 的借阅信息。";
                         // goto ERROR1;
-                        // 2025/2/16 注: 这里返回 -1 的原因是，不能简单断定这就是一条往返都正确的链。有可能 item 那一侧还有不正确
-
+                        // 2025/3/5 注: 这里返回 -1 的原因是，不能简单断定这就是一条往返都正确的链。有可能 item 那一侧还有不正确
+                        return BuildError(strError, ErrorCode.ErrorParameter);
+                        
+                        /*
                         // 2025/2/16
                         result.Value = 0;
                         result.ErrorInfo = strError;
                         result.ErrorCode = ErrorCode.NoError;
                         return result;
-
+                        */
                     }
 #if NO
                     // TODO: 要实现 strItemBarcode 为 @refID:xxxxx 的情况。因为现在允许册记录没有册条码号了
@@ -19994,12 +20003,16 @@ string itemBarcode)
                         "borrower");
                     if (String.IsNullOrEmpty(strBorrower) == true)
                     {
-                        strError = "修复操作被拒绝。您所请求要修复的册记录中，本来就没有借阅信息，因此无需修复。";
+                        strError = $"修复操作被拒绝。您所请求要修复的册记录 {ItemRecPathLink(strOutputItemRecPath)} 中，本来就没有借阅信息，因此无需修复。";
+
+                        /*
                         // goto CORRECT;
                         result.Value = 0;
                         result.ErrorInfo = strError;
                         result.ErrorCode = ErrorCode.NoError;
                         return result;
+                        */
+                        return BuildError(strError, ErrorCode.ErrorParameter);
                     }
 
                     if (readerdom != null)
@@ -20010,7 +20023,8 @@ string itemBarcode)
                             // 注: 本 API 调用对前端的要求是，前端要设法通过册记录的 borrower 元素获得 strReaderKey。
                             // 这多少有点考验前端的意思。其实换一种做法，可以只给出 strItemKey，让服务器通过获得册记录以后推断出 strReaderKey，不要求前端在请求中作为参数提供 strReaderKey
                             strError = $"修复操作被拒绝。您所请求要修复的册记录中，并没有指明借阅者是读者 '{PatronBarcodeLink(strReaderKey)}'。(实际上借阅者(borrower值)是 '{PatronBarcodeLink(strBorrower)}')";
-                            goto ERROR1;
+                            // goto ERROR1;
+                            return BuildError(strError, ErrorCode.ErrorParameter);
                         }
                     }
                     else

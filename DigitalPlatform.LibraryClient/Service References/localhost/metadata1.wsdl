@@ -5,11 +5,17 @@
       <xsd:import schemaLocation="http://localhost:8001/dp2library/xe/metadata?xsd=xsd5" namespace="http://dp2003.com/dp2library/rest" />
       <xsd:import schemaLocation="http://localhost:8001/dp2library/xe/metadata?xsd=xsd0" namespace="http://dp2003.com/dp2library/" />
       <xsd:import schemaLocation="http://localhost:8001/dp2library/xe/metadata?xsd=xsd1" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
-      <xsd:import schemaLocation="http://localhost:8001/dp2library/xe/metadata?xsd=xsd2" namespace="http://dp2003.com/dp2kernel/" />
-      <xsd:import schemaLocation="http://localhost:8001/dp2library/xe/metadata?xsd=xsd3" namespace="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" />
+      <xsd:import schemaLocation="http://localhost:8001/dp2library/xe/metadata?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" />
+      <xsd:import schemaLocation="http://localhost:8001/dp2library/xe/metadata?xsd=xsd3" namespace="http://dp2003.com/dp2kernel/" />
       <xsd:import schemaLocation="http://localhost:8001/dp2library/xe/metadata?xsd=xsd4" namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
     </xsd:schema>
   </wsdl:types>
+  <wsdl:message name="dp2libraryREST_GetComments_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetComments" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_GetComments_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetCommentsResponse" />
+  </wsdl:message>
   <wsdl:message name="dp2libraryREST_SetComments_InputMessage">
     <wsdl:part name="parameters" element="tns:SetComments" />
   </wsdl:message>
@@ -246,6 +252,12 @@
   </wsdl:message>
   <wsdl:message name="dp2libraryREST_SearchBiblio_OutputMessage">
     <wsdl:part name="parameters" element="tns:SearchBiblioResponse" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_SetBiblioInfos_InputMessage">
+    <wsdl:part name="parameters" element="tns:SetBiblioInfos" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_SetBiblioInfos_OutputMessage">
+    <wsdl:part name="parameters" element="tns:SetBiblioInfosResponse" />
   </wsdl:message>
   <wsdl:message name="dp2libraryREST_SetBiblioInfo_InputMessage">
     <wsdl:part name="parameters" element="tns:SetBiblioInfo" />
@@ -631,13 +643,11 @@
   <wsdl:message name="dp2libraryREST_WriteRes_OutputMessage">
     <wsdl:part name="parameters" element="tns:WriteResResponse" />
   </wsdl:message>
-  <wsdl:message name="dp2libraryREST_GetComments_InputMessage">
-    <wsdl:part name="parameters" element="tns:GetComments" />
-  </wsdl:message>
-  <wsdl:message name="dp2libraryREST_GetComments_OutputMessage">
-    <wsdl:part name="parameters" element="tns:GetCommentsResponse" />
-  </wsdl:message>
   <wsdl:portType msc:usingSession="false" name="dp2libraryREST">
+    <wsdl:operation name="GetComments">
+      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetComments" message="tns:dp2libraryREST_GetComments_InputMessage" />
+      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCommentsResponse" message="tns:dp2libraryREST_GetComments_OutputMessage" />
+    </wsdl:operation>
     <wsdl:operation name="SetComments">
       <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetComments" message="tns:dp2libraryREST_SetComments_InputMessage" />
       <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetCommentsResponse" message="tns:dp2libraryREST_SetComments_OutputMessage" />
@@ -796,6 +806,10 @@
     <wsdl:operation name="SearchBiblio">
       <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchBiblio" message="tns:dp2libraryREST_SearchBiblio_InputMessage" />
       <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchBiblioResponse" message="tns:dp2libraryREST_SearchBiblio_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="SetBiblioInfos">
+      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetBiblioInfos" message="tns:dp2libraryREST_SetBiblioInfos_InputMessage" />
+      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetBiblioInfosResponse" message="tns:dp2libraryREST_SetBiblioInfos_OutputMessage" />
     </wsdl:operation>
     <wsdl:operation name="SetBiblioInfo">
       <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetBiblioInfo" message="tns:dp2libraryREST_SetBiblioInfo_InputMessage" />
@@ -1052,10 +1066,6 @@
     <wsdl:operation name="WriteRes">
       <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/WriteRes" message="tns:dp2libraryREST_WriteRes_InputMessage" />
       <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/WriteResResponse" message="tns:dp2libraryREST_WriteRes_OutputMessage" />
-    </wsdl:operation>
-    <wsdl:operation name="GetComments">
-      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetComments" message="tns:dp2libraryREST_GetComments_InputMessage" />
-      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCommentsResponse" message="tns:dp2libraryREST_GetComments_OutputMessage" />
     </wsdl:operation>
   </wsdl:portType>
 </wsdl:definitions>

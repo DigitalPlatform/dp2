@@ -34,6 +34,8 @@ using DigitalPlatform.Z3950;
 using static DigitalPlatform.Marc.MarcUtil;
 using dp2Circulation.SearchForms;
 using dp2Circulation.Script;
+using DocumentFormat.OpenXml.EMMA;
+using Microsoft.CodeAnalysis.Operations;
 
 namespace dp2Circulation
 {
@@ -7678,12 +7680,32 @@ MessageBoxDefaultButton.Button2);
         }
 
 
-        NormalResult _saveChangedRecords(List<ListViewItem> items)
+        NormalResult _saveChangedRecords(List<ListViewItem> items,
+            string style = "enable_controls,refresh,progress_value,progress_text")
         {
             string strError = "";
 
+            // 是否要 EnableControls()
+            var enable_controls = StringUtil.IsInList(style, "enable_controls");
+            // 是否在保存完成后自动刷新 ListView 内容
+            var refresh = StringUtil.IsInList(style, "refresh");
+            // 是否显示进度条
+            var progress_value = StringUtil.IsInList(style, "progress_value");
+            // 是否显示进度文字
+            var progress_text = StringUtil.IsInList(style, "progress_text");
+            // 是否强制保存
+            var force = StringUtil.IsInList(style, "force");
+            // 是否不改变 operation 元素
+            var nooperations = StringUtil.IsInList(style, "nooperations");
+            // 不产生操作日志
+            var dont_logging = StringUtil.IsInList(style, "dont_logging");
+            // 不触发 dp2circulation_marc_autogen.cs 脚本
+            var dont_trigger_autogen = StringUtil.IsInList(style, "dont_trigger_autogen");
+            // 保存成功后自动清除 BiblioInfo，释放内存
+            var release_info = StringUtil.IsInList(style, "release_info");
+
+
             int nReloadCount = 0;
-            // int nSavedCount = 0;
 
             bool bDontPrompt = false;
             DialogResult dialog_result = DialogResult.Yes;  // yes no cancel
@@ -7702,16 +7724,23 @@ MessageBoxDefaultButton.Button2);
             _stop.Initial("正在保存书目记录 ...");
             _stop.BeginLoop();
             */
-            var looping = BeginLoop(this.DoStop, "正在保存书目记录 ...", "halfstop");
+            var looping = BeginLoop(this.DoStop,
+                progress_text ? "正在保存书目记录 ..." : null,
+                "halfstop");
 
-            this.EnableControlsInSearching(false);
-            this.TryInvoke(() =>
+            if (enable_controls)
             {
-                this.listView_records.Enabled = false;
-            });
+                this.EnableControlsInSearching(false);
+                this.TryInvoke(() =>
+                {
+                    this.listView_records.Enabled = false;
+                });
+            }
+
             try
             {
-                looping.Progress.SetProgressRange(0, items.Count);
+                if (progress_value)
+                    looping.Progress.SetProgressRange(0, items.Count);
                 for (int i = 0; i < items.Count; i++)
                 {
                     if (looping.Stopped)
@@ -7728,7 +7757,8 @@ MessageBoxDefaultButton.Button2);
                     string strRecPath = ListViewUtil.GetItemText(item, 0);  //  item.Text;
                     if (string.IsNullOrEmpty(strRecPath) == true)
                     {
-                        looping.Progress.SetProgressValue(i);
+                        if (progress_value)
+                            looping.Progress.SetProgressValue(i);
                         goto CONTINUE;
                     }
 
@@ -7744,12 +7774,14 @@ MessageBoxDefaultButton.Button2);
                     if (info.RecPath.IndexOf("@") != -1)
                         goto CONTINUE;
 
+                    if (progress_text)
                     looping.Progress.SetMessage("正在保存书目记录 " + strRecPath);
 
                     bool append = (info.RecPath != null && info.RecPath.Contains("?"));
 
                     string biblio_rec_path = BiblioInfo.GetPath(strRecPath);
 
+                    if (dont_trigger_autogen == false)
                     {
                         // 2024/7/23
                         int nRet = genData.InitialAutogenAssembly(biblio_rec_path,
@@ -7799,6 +7831,13 @@ MessageBoxDefaultButton.Button2);
 
                     int nRedoCount = 0;
                 REDO_SAVE:
+                    string save_style = "";
+                    if (force)
+                        save_style += ",force";
+                    if (nooperations)
+                        save_style += ",nooperations";
+                    if (dont_logging)
+                        save_style += ",noeventlog";
                     long lRet = channel.SetBiblioInfo(
                         looping.Progress,
                         append ? "new" : "change",
@@ -7807,7 +7846,9 @@ MessageBoxDefaultButton.Button2);
                         info.NewXml,
                         info.Timestamp,
                         "",
+                        save_style,
                         out string strOutputPath,
+                        out string strOutputBiblio, // 2025/3/7
                         out byte[] baNewTimestamp,
                         out strError);
                     if (lRet == -1)
@@ -7959,13 +8000,20 @@ MessageBoxDefaultButton.Button2);
                     }
 
                     info.Timestamp = baNewTimestamp;
-                    info.OldXml = info.NewXml;
+                    info.OldXml = string.IsNullOrEmpty(strOutputBiblio) ?info.NewXml : strOutputBiblio;
                     info.NewXml = "";
                     // 2024/5/20
                     if (append)
                     {
                         ChangeRecPath(info, strOutputPath);
                         ListViewUtil.ChangeItemText(item, 0, info.RecPath);
+                    }
+
+                    // 2025/3/7
+                    if (release_info)
+                    {
+                        // ClearBiblioInfo();
+                        this.m_biblioTable.Remove(info.RecPath);
                     }
 
                     item.BackColor = SystemColors.Window;
@@ -7978,7 +8026,8 @@ MessageBoxDefaultButton.Button2);
                     Debug.Assert(this.m_nChangedCount >= 0, "");
 
                 CONTINUE:
-                    looping.Progress.SetProgressValue(i);
+                    if (progress_value)
+                        looping.Progress.SetProgressValue(i);
                 }
             }
             finally
@@ -7997,25 +8046,31 @@ MessageBoxDefaultButton.Button2);
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
 
-                this.EnableControlsInSearching(true);
-                this.TryInvoke(() =>
+                if (enable_controls)
                 {
-                    this.listView_records.Enabled = true;
-                });
+                    this.EnableControlsInSearching(true);
+                    this.TryInvoke(() =>
+                    {
+                        this.listView_records.Enabled = true;
+                    });
+                }
             }
 
-            /*
-            // 2013/10/22
-            int nRet = RefreshListViewLines(saved_items,
-        out strError);
-            if (nRet == -1)
-                return -1;
-            */
-            var ret = _refreshListViewLines(saved_items);
-            if (ret.Value == -1)
-                return ret;
+            if (refresh)
+            {
+                /*
+                // 2013/10/22
+                int nRet = RefreshListViewLines(saved_items,
+            out strError);
+                if (nRet == -1)
+                    return -1;
+                */
+                var ret = _refreshListViewLines(saved_items);
+                if (ret.Value == -1)
+                    return ret;
 
-            RefreshPropertyView(false);
+                RefreshPropertyView(false);
+            }
 
             strError = "";
             if (saved_items.Count > 0)
@@ -8585,6 +8640,7 @@ TaskScheduler.Default);
 
             // this.m_biblioTable.Clear();
 
+#if REMOVED
             OpenFileDialog dlg = this.TryGet(() =>
             {
                 return new OpenFileDialog
@@ -8604,6 +8660,45 @@ TaskScheduler.Default);
                 return;
 
             this.m_strUsedMarcQueryFilename = dlg.FileName;
+
+#endif
+            RunScriptDialog dlg = null;
+            {
+
+                var dialog_result = this.TryGet(() =>
+                {
+                    dlg = new RunScriptDialog();
+                    MainForm.SetControlFont(dlg, this.Font);
+                    dlg.ScriptFileName = this.m_strUsedMarcQueryFilename;
+
+                    dlg.UiState = Program.MainForm.AppInfo.GetString(
+            "BiblioSearchForm",
+            "RunScriptDialog_uiState",
+            "");
+                    Program.MainForm.AppInfo.LinkFormState(dlg,
+                        "BiblioSearchForm_RunScriptDialog_state");
+
+                    dlg.ShowDialog(this);
+
+                    Program.MainForm.AppInfo.SetString(
+            "BiblioSearchForm",
+            "RunScriptDialog_uiState",
+            dlg.UiState);
+
+                    return dlg.DialogResult;
+                });
+
+                if (dialog_result == DialogResult.Cancel)
+                    return;
+            }
+
+            const int AUTO_SAVE_BATCH = 100;
+            this.m_strUsedMarcQueryFilename = dlg.ScriptFileName;
+            var auto_save = dlg.AutoSaveChanges;
+            var force = dlg.ForceSave;
+            var nooperations = dlg.NoOperation;
+            var dont_logging = dlg.DontLogging;
+            var dont_trigger_autogen = dlg.DontTriggerAutoGen;
 
             nRet = PrepareMarcQuery(this.m_strUsedMarcQueryFilename,
                 out Assembly assembly,
@@ -8658,7 +8753,7 @@ TaskScheduler.Default);
                 }
             }
 
-            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始执行脚本 " + dlg.FileName + "</div>");
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始执行脚本 " + dlg.ScriptFileName + "</div>");
 
             LibraryChannel channel = this.GetChannel();
 
@@ -8723,6 +8818,8 @@ TaskScheduler.Default);
                     items.Add(item);
                 }
                 */
+
+                List<ListViewItem> changed_items = new List<ListViewItem>();
 
                 bool bOldSource = true; // 是否要从 OldXml 开始做起
 
@@ -8850,10 +8947,60 @@ TaskScheduler.Default);
                             item.ListViewItem.BackColor = GlobalParameters.ChangedBackColor;    // SystemColors.Info;
                             item.ListViewItem.ForeColor = GlobalParameters.ChangedForeColor;     // SystemColors.InfoText;
                         });
+
+                        if (auto_save)
+                        {
+                            changed_items.Add(item.ListViewItem);
+                        }
+                    }
+
+                    // 对于没有发生修改的事项，并且是自动保存状态，则从缓存中删除，以尽可能腾出内存
+                    if (host.Changed == false && auto_save)
+                    {
+                        this.m_biblioTable.Remove(info.RecPath);
                     }
 
                     // 显示为工作单形式
                     i++;
+
+                    if (changed_items.Count >= AUTO_SAVE_BATCH)
+                    {
+                        // 注: style 中包含 release_info 会清理 biblioTable 中已经用完的事项
+                        var ret = _saveChangedRecords(changed_items, GetSaveStyle());
+                        if (ret.Value == -1)
+                        {
+                            strError = $"自动保存阶段出错: {ret.ErrorInfo}";
+                            goto ERROR1;
+                        }
+                        changed_items.Clear();
+                    }
+                }
+
+                // 2025/3/6
+                // 最后一轮保存
+                if (auto_save && changed_items.Count > 0)
+                {
+                    var ret = _saveChangedRecords(changed_items, GetSaveStyle());
+                    if (ret.Value == -1)
+                    {
+                        strError = $"自动保存阶段出错: {ret.ErrorInfo}";
+                        goto ERROR1;
+                    }
+                    changed_items.Clear();
+                }
+
+                string GetSaveStyle()
+                {
+                    string style = "progress_text,release_info";
+                    if (force)
+                        style += ",force";
+                    if (nooperations)
+                        style += ",nooperations";
+                    if (dont_trigger_autogen)
+                        style += ",dont_trigger_autogen";
+                    if (dont_logging)
+                        style += ",dont_logging";
+                    return style;
                 }
 
                 {
@@ -8904,7 +9051,7 @@ TaskScheduler.Default);
                 listView_records_SelectedIndexChanged(null, null);
                 this.EnableControls(true);
 
-                Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束执行脚本 " + dlg.FileName + "</div>");
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束执行脚本 " + dlg.ScriptFileName + "</div>");
 
 #if REMOVED
                 DestoryAppDomain(domain);

@@ -6144,6 +6144,56 @@ location_filter,
             }
         }
 
+        // 2025/3/7
+        public long SetBiblioInfos(BiblioInfoItem[] infos,
+            string style,
+            out BiblioInfoItem[] results,
+            out string strError)
+        {
+            strError = "";
+            results = null;
+        REDO:
+            try
+            {
+                IAsyncResult soapresult = this.ws.BeginSetBiblioInfos(
+                    infos,
+                    style,
+                    null,
+                    null);
+
+                WaitComplete(soapresult);
+
+                if (this.m_ws == null)
+                {
+                    strError = "用户中断";
+                    this.ErrorCode = localhost.ErrorCode.RequestCanceled;
+                    return -1;
+                }
+
+                LibraryServerResult result = this.ws.EndSetBiblioInfos(
+                    out results,
+                    soapresult);
+                if (result.Value == -1 && result.ErrorCode == ErrorCode.NotLogin)
+                {
+                    if (DoNotLogin(ref strError) == 1)
+                        goto REDO;
+                    return -1;
+                }
+                strError = result.ErrorInfo;
+                this.ErrorCode = result.ErrorCode;
+                this.ClearRedoCount();
+                return result.Value;
+            }
+            catch (Exception ex)
+            {
+                int nRet = ConvertWebError(ex, out strError);
+                if (nRet == 0)
+                    return -1;
+                goto REDO;
+            }
+        }
+
+
         // 入馆登记
         public long PassGate(
             DigitalPlatform.Stop stop,

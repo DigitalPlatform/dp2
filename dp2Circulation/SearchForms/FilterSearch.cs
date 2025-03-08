@@ -499,7 +499,7 @@ recid	记录ID
                 menuItem.MenuItems.Add(submenu);
             }
 
-            menuItem = new MenuItem($"开始检索 [{this.dataGridView1.Rows.Count}](&S)");
+            menuItem = new MenuItem($"开始检索 [{this.dataGridView1.Rows.Count - 1}](&S)");
             menuItem.Click += MenuItem_beginSearch_Click;
             contextMenu.MenuItems.Add(menuItem);
 
@@ -1643,7 +1643,7 @@ MessageBoxDefaultButton.Button2);
             {
                 var dlg = new FilterSearchDialog();
                 MainForm.SetControlFont(dlg, this.Font);
-                dlg.QueryWord = $"{this.Rows.Count()} 个";
+                dlg.QueryWord = $"{(this.Rows.Count() - 1)} 个";
                 dlg.From = FindCaption(GetMergeKeyName());
                 dlg.Combinations = GetCombinationList();
                 dlg.MatchStyle = GetMatchStyleCaption(_selectedMatchStyle);

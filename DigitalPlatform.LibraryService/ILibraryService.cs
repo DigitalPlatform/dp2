@@ -160,6 +160,11 @@ namespace dp2Library
             out string explain);
 
         [OperationContract(IsInitiating = true, IsTerminating = false)]
+        LibraryServerResult SetBiblioInfos(BiblioInfoItem[] infos,
+            string style,
+            out BiblioInfoItem[] results);
+
+        [OperationContract(IsInitiating = true, IsTerminating = false)]
         LibraryServerResult SetBiblioInfo(
             string strAction,
             string strBiblioRecPath,

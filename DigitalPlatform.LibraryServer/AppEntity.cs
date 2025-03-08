@@ -19,6 +19,8 @@ using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.LibraryClient;
 using Jint.Parser.Ast;
 using System.Web.UI.WebControls;
+using MongoDB.Driver.Core.Misc;
+using System.Linq;
 // using System.Data.SqlClient;
 
 
@@ -57,6 +59,7 @@ namespace DigitalPlatform.LibraryServer
                 "currentLocation",  // 2019/7/27 新增
                 "uid",  // 2020/8/23 RFID 标签的 UID
                 "invoiceNo",    // 2022/8/7 新增
+                "devolveComment",   // 2025/3/2 因为以前的经过转移处理的册记录中有这个元素，所以保留下来。但以后建议尽量沿用 comment 元素，在里面追加新的文字即可
             };
 
         static string[] transfer_entity_element_names = new string[] {
@@ -114,18 +117,38 @@ namespace DigitalPlatform.LibraryServer
                 "operations",   // 2023/2/27
         };
 
-        // 2020/9/17
-        // 检查新记录中是否有超出定义范围的元素
-        int CheckOutofRangeElements(XmlDocument domNew,
-            out string strError)
+        List<string> GetAllElements()
         {
-            strError = "";
             List<string> range = new List<string>(core_entity_element_names);
             range.AddRange(other_names);
             if (this.ItemAdditionalFields != null && this.ItemAdditionalFields.Count > 0)
                 range.AddRange(this.ItemAdditionalFields);
             range.AddRange(checkinout_element_names);
-            var out_of = HasOutOfRangeElements(domNew, range);
+
+            return range;
+        }
+
+        // 2020/9/17
+        // 检查新记录中是否有超出定义范围的元素
+        // return:
+        //      -1  有超出范围的元素
+        //      0   没有超出范围的元素
+        int CheckOutofRangeElements(XmlDocument domNew,
+            out List<string> out_of,
+            out string strError)
+        {
+            strError = "";
+            out_of = new List<string>();
+
+            /*
+            List<string> range = new List<string>(core_entity_element_names);
+            range.AddRange(other_names);
+            if (this.ItemAdditionalFields != null && this.ItemAdditionalFields.Count > 0)
+                range.AddRange(this.ItemAdditionalFields);
+            range.AddRange(checkinout_element_names);
+            */
+            var range = GetAllElements();
+            out_of = HasOutOfRangeElements(domNew, range);
             if (out_of.Count > 0)
             {
                 strError = $"册记录中出现了元素 {StringUtil.MakePathList(out_of)}, 超过定义范围，无法保存 ";
@@ -232,7 +255,7 @@ namespace DigitalPlatform.LibraryServer
         // 合并新旧记录
         // parameters:
         //      element_names   要害元素名列表。如果为 null，表示会用到 core_entity_element_names
-        //      check_outof_elements    是否检查并报错超范围的 XML 元素。
+        //      outofrangeAsError    是否检查并报错超范围的 XML 元素。
         // return:
         //      -1  出错
         //      0   正确
@@ -244,7 +267,7 @@ namespace DigitalPlatform.LibraryServer
             XmlDocument domExist,
             XmlDocument domNew,
             string[] element_names,
-            bool check_outof_elements,
+            bool outofrangeAsError,
             out string strMergedXml,
             out string strError)
         {
@@ -292,11 +315,24 @@ namespace DigitalPlatform.LibraryServer
 
             // 2020/9/17
             // 检查提交保存的新记录中是否有超出定义范围的元素，如果有则报错返回
-            if (check_outof_elements)
+            bool outof_range = false;   // 是否出现了超出定义范围的元素
             {
-                nRet = CheckOutofRangeElements(domNew, out strError);
-                if (nRet == -1)
-                    return -1;
+                // 注: 如果提交的内容中出现 borrower 等元素，虽然会拒绝保存这部分元素，但不会特意警告
+                List<string> outof_range_elements = HasOutOfRangeElements(domNew,
+                    GetAllElements());
+                if (outof_range_elements.Count > 0)
+                {
+                    if (outofrangeAsError)
+                    {
+                        strError = $"册记录中出现了元素 {StringUtil.MakePathList(outof_range_elements)}, 超过定义范围，无法保存 ";
+                        return -1;
+                    }
+                    outof_range = true;
+                    // 2025/3/6
+                    if (string.IsNullOrEmpty(strWarning) == false)
+                        strWarning += "; ";
+                    strWarning += $"超出定义范围的元素 {StringUtil.MakePathList(outof_range_elements)} 在保存时已被忽略";
+                }
             }
 
             bool changed = false;
@@ -372,17 +408,35 @@ namespace DigitalPlatform.LibraryServer
                 return 1;
             }
 
+            if (changed == false)
+            {
+                if (outof_range)
+                {
+                    strError = "全部修改都没有兑现";
+                    return 2;
+                }
+
+                {
+                    strError = "前端提交的记录内容和数据库中的记录内容没有变化，没有发生任何修改";
+                    return 3;   // 没有发生任何修改
+                }
+            }
+
+#if REMOVED
             // 2025/2/21
             if (check_outof_elements == true && changed == false)
             {
-                strError = "没有发生任何修改";
+                strError = "前端的记录内容和数据库中的记录内容没有变化，没有发生任何修改";
                 return 3;   // 没有发生任何修改
             }
 
             // 2025/2/12
             if (changed == false)
+            {
+                strError = "全部修改都没有兑现";
                 return 2;
-
+            }
+#endif
             return 0;
         }
 
@@ -4010,6 +4064,28 @@ out strError);
                 if (StringUtil.IsInList("nooperations", info.Style) == true)
                 {
                     bNoOperations = true;
+
+                    // 2025/3/6
+                    if (bForce == false)
+                        return BuildError("nooperations 风格只能和 force 风格一起使用", ErrorCode.InvalidParameter);
+
+                    // 2025/3/6
+                    if (StringUtil.IsInList("restore", sessioninfo.RightsOrigin) == false)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = $"带有风格 'nooperations' 的修改册信息的{strAction}操作被拒绝。不具备 restore 权限。";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
+                    }
+
+                    // 2025/3/6
+                    if (sessioninfo.GlobalUser == false)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = "带有风格 'nooperations' 的修改册信息的" + strAction + "操作被拒绝。只有全局用户并具备 restore 权限才能进行这样的操作。";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
+                    }
                 }
 
                 if (bNoCheckDup == true)
@@ -5802,7 +5878,9 @@ out strError);
 
             // 2020/9/17
             // 检查新记录中是否有超出定义范围的元素
-            int nRet = CheckOutofRangeElements(dom, out strError);
+            int nRet = CheckOutofRangeElements(dom,
+                out _,
+                out strError);
             if (nRet == -1)
                 return -1;
 
@@ -6888,7 +6966,7 @@ out strError);
                 //      0   正确
                 //      1   有部分修改没有兑现。说明在strError中
                 //      2   全部修改都没有兑现。说明在strError中 (2018/10/9)
-                //      3   没有发生任何修改。说明在 strError 中 (2025/2/21)
+                //      3   前端的记录内容和数据库中的记录内容没有变化，没有发生任何修改。说明在 strError 中 (2025/2/21)
                 nRet = MergeTwoEntityXml(
                     sessioninfo,
                     domExist,
@@ -9153,6 +9231,5 @@ strSourceLibraryCode);
 
         }
     }
-
 
 }

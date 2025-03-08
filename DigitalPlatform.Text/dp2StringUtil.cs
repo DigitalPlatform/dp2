@@ -930,8 +930,9 @@ out string strPureName);
 
         #region operations/operation 元素操作
 
-        const string DIRECTION_SEPARATOR = "-->";
+        const string DIRECTION_SEPARATOR = "--";  // "-->";
 
+        // TODO: 对内容中的 "--" 预先转义
         public static void SetOperationRecPath(XmlElement e,
             string source_recpath,
             string target_recpath)
@@ -989,6 +990,22 @@ out string strPureName);
             foreach (XmlElement node in nodes)
             {
                 operator_list.Add(node.GetAttribute("operator"));
+            }
+
+            return operator_list;
+        }
+
+        public static List<string> GetAttrs(XmlNodeList nodes, string attr_name)
+        {
+            return GetAttrs(nodes.Cast<XmlNode>(), attr_name);
+        }
+
+        public static List<string> GetAttrs(IEnumerable<XmlNode> nodes, string attr_name)
+        {
+            List<string> operator_list = new List<string>();
+            foreach (XmlElement node in nodes)
+            {
+                operator_list.Add(node.GetAttribute(attr_name));
             }
 
             return operator_list;

@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.97.*")]
-[assembly: AssemblyFileVersion("3.97.0.0")]
+[assembly: AssemblyVersion("3.98.*")]
+[assembly: AssemblyFileVersion("3.98.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -248,3 +248,6 @@ using System.Runtime.InteropServices;
 // 3.97 2025/2/14   系统管理窗的“内核”属性页，在允许复选的情况下，check 选中一个节点不再会引起上级节点自动 check。
 //                  新的效果是，check 选中一个节点，会自动引起这个节点的上级所有祖先节点自动清除 check。如果用户需要选中上级祖先节点，请在 check 当前节点以后再补充 check 选中一次上级祖先节点
 //                  这个改进主要是避免 check 选中节点的时候被强迫选中上级祖先节点，从而避免在后继的删除命令执行时无意中所有上级祖先节点
+// 3.98 2025/3/7    书目查询窗的执行 MarcQuery 脚本功能增加了自动保存所修改的记录的功能
+//                  书目查询窗的保存修改的功能中，增加了对于修改后的记录的立即兑现显示能力
+//                  种册窗增加了对于修改后的记录的立即兑现显示能力(注: 前端提交保存的记录，dp2library 服务器有可能决定部分接受，并且可能增加和修改 operation 元素)

@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Xml;
 
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
+using Ionic.Zlib;
 
 // === 为脚本提供的各种接口 ===
 
@@ -48,10 +50,12 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 获得当前方法的名称
-        public static string FieldName()
+        // 2025/3/1 改为用 [CallerMemberName] 实现
+        public static string FieldName([CallerMemberName] string caller = "")
         {
             // https://weblogs.asp.net/palermo4/how-to-obtain-method-name-programmatically-for-tracing
-            string text = new System.Diagnostics.StackFrame(1).GetMethod().Name;
+            // string text = new System.Diagnostics.StackFrame(1).GetMethod().Name;
+            string text = caller;
             if (text.StartsWith("get_"))
                 text = text.Substring(4);   //  去掉 get_ 部分
             return new string(char.ToLower(text[0]), 1) // 第一个字母变小写
@@ -503,10 +507,12 @@ namespace DigitalPlatform.LibraryServer
         private Account _account = null;
 
         // 获得当前方法的名称
-        static string FieldName()
+        // 2025/3/1 改为用 [CallerMemberName] 实现
+        static string FieldName([CallerMemberName] string caller = "")
         {
             // https://weblogs.asp.net/palermo4/how-to-obtain-method-name-programmatically-for-tracing
-            string text = new System.Diagnostics.StackFrame(1).GetMethod().Name;
+            // string text = new System.Diagnostics.StackFrame(1).GetMethod().Name;
+            string text = caller;
             if (text.StartsWith("get_"))
                 text = text.Substring(4);   //  去掉 get_ 部分
             return text;
