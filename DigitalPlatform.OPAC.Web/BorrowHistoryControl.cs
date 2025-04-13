@@ -171,6 +171,9 @@ namespace DigitalPlatform.OPAC.Web
                 if (nItemsPerPage == -1)
                     style += ",noResult";
 
+                // 2025/4/1
+                style += ",transferIdTo:itemBarcode|readerBarcode";
+
                 // 获得借阅历史
                 // parameters:
                 //      nPageNo 页号

@@ -2797,7 +2797,7 @@ namespace DigitalPlatform.rms
             if (strEx != "XML")
                 return false;
 
-            // 检查是不是10中的记录号
+            // 检查是不是10位的记录号
             string strRecordID = Path.GetFileNameWithoutExtension(strFileName);
             if (strRecordID.Length != 10)
                 return false;

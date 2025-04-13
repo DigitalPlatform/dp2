@@ -245,7 +245,7 @@ namespace dp2Catalog
                         if (this.comboBox_server_serverType.Text == "单机版 (dp2Library XE)")
                             strError += "\r\n\r\n请检查 dp2libraryXE 模块确实安装和启动了？";
                         else if (this.comboBox_server_serverType.Text == "红泥巴 · 数字平台服务器")
-                            strError += "\r\n\r\n请检查 网络确实通畅？可以用浏览器试着访问一下 http://58.87.101.80/hnb/ 看看";
+                            strError += "\r\n\r\n请检查 网络确实通畅？可以用浏览器试着访问一下 http://pear.ilovelibrary.cn/hnb/ 看看";
                         else if (this.comboBox_server_serverType.Text == "其它服务器")
                             strError += "\r\n\r\n请检查 网络确实通畅？dp2Library 服务器 URL 地址输入是否正确？";
                     }
@@ -318,7 +318,7 @@ namespace dp2Catalog
             }
             else if (this.comboBox_server_serverType.Text == "红泥巴 · 数字平台服务器")
             {
-                this.textBox_server_dp2LibraryServerUrl.Text = "rest.http://58.87.101.80/hnb/rest";
+                this.textBox_server_dp2LibraryServerUrl.Text = "rest.http://pear.ilovelibrary.cn/hnb/rest/";
                 this.textBox_server_dp2LibraryServerUrl.ReadOnly = true;
 
                 this.textBox_server_userName.Text = "";

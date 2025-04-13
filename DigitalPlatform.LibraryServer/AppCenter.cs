@@ -20,6 +20,7 @@ using DigitalPlatform.Marc;
 
 using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
+using System.Linq;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -31,15 +32,30 @@ namespace DigitalPlatform.LibraryServer
 
 
         // 修改 <center> 内的定义
+        // parameters:
+        //      strAction   "create" "modify" "delete"
+        //      strXml      传入的 XML 内容。注意可能在调用过程中被修改，其中 password 属性值从 plain 变为 hashed 状态
+        //      strOldXml   返回被修改前的 server 元素 OuterXml。顶层包含元素 center 作为容器元素。
+        //      strSnapshoet    返回被修改前的 center 元素 OuterXml。此内容便于日志恢复阶段进行快照恢复
         // return:
         //      -1  error
         //      0   not change
         //      1   changed
         public int SetCenterDef(string strAction,
-            string strXml,
+            ref string strXml,
+            out string strOldXml,
+            out string strSnapshot,
             out string strError)
         {
             strError = "";
+            strOldXml = "";
+            strSnapshot = "";
+
+            // 记载修改前的 center 元素 OuterXml
+            {
+                var center_nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("center");
+                strSnapshot = GetXmls(center_nodes.Cast<XmlNode>());
+            }
 
             bool bChanged = false;
 
@@ -54,8 +70,18 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
+            // 把 strXml 中的 password 属性值 hashed
+            {
+                var password_attrs = dom.DocumentElement.SelectNodes("//center/server/@password");
+                foreach (XmlAttribute attr in password_attrs)
+                {
+                    attr.Value = Cryptography.Encrypt(attr.Value, EncryptKey);
+                }
+                strXml = dom.DocumentElement.OuterXml;
+            }
+
             XmlNodeList nodes = dom.DocumentElement.SelectNodes("//server");
-            foreach (XmlNode node in nodes)
+            foreach (XmlElement node in nodes)
             {
                 string strRefID = DomUtil.GetAttr(node, "refid");
 
@@ -73,6 +99,11 @@ namespace DigitalPlatform.LibraryServer
                         return -1;
                     }
 
+                    // 2025/4/4
+                    // 记忆下 library.xml 相关 server 节点的原始 XML
+                    // 注意 center 是返回内容中必要的容器元素名。不意味着 library.xml 中 center 元素下只有这些内容
+                    strOldXml += GetXmls(target_nodes.Cast<XmlNode>(), "center");
+
                     foreach (XmlNode target in target_nodes)
                     {
                         target.ParentNode.RemoveChild(target);
@@ -88,18 +119,23 @@ namespace DigitalPlatform.LibraryServer
                         strError = "无法修改，因为请求中没有使用 refid 属性 : " + node.OuterXml;
                         return -1;
                     }
-                    XmlNode target = this.LibraryCfgDom.DocumentElement.SelectSingleNode("center/server[@refid='" + strRefID + "']");
+                    var target = this.LibraryCfgDom.DocumentElement.SelectSingleNode("center/server[@refid='" + strRefID + "']") as XmlElement;
                     if (target == null)
                     {
                         strError = "参考 ID 为 '" + strRefID + "' 的 server 元素在 center 元素下没有找到";
                         return -1;
                     }
 
+                    // 2025/4/4
+                    // 记忆下 library.xml 相关 server 节点的原始 XML
+                    // 注意 center 是返回内容中必要的容器元素名。不意味着 library.xml 中 center 元素下只有这些内容
+                    strOldXml += GetXmls(new List<XmlNode>() { target }, "center");
+
                     string strName = DomUtil.GetAttr(node, "name");
 
-                    XmlElement t = target as XmlElement;
-                    XmlElement n = node as XmlElement;
-                    if (n.HasAttribute("name") == true
+                    //XmlElement t = target as XmlElement;
+                    //XmlElement n = node as XmlElement;
+                    if (node.HasAttribute("name") == true
                         && DomUtil.GetAttr(target, "name") != strName)
                     {
                         // name 查重
@@ -114,22 +150,23 @@ namespace DigitalPlatform.LibraryServer
                         bChanged = true;
                     }
 
-                    if (n.HasAttribute("url") == true)
+                    if (node.HasAttribute("url") == true)
                     {
                         DomUtil.SetAttr(target, "url", DomUtil.GetAttr(node, "url"));
                         bChanged = true;
                     }
 
-                    if (n.HasAttribute("username") == true)
+                    if (node.HasAttribute("username") == true)
                     {
                         DomUtil.SetAttr(target, "username", DomUtil.GetAttr(node, "username"));
                         bChanged = true;
                     }
 
-                    if (n.HasAttribute("password") == true)
+                    if (node.HasAttribute("password") == true)
                     {
-                        string strText = Cryptography.Encrypt(DomUtil.GetAttr(node, "password"), EncryptKey);
-                        DomUtil.SetAttr(target, "password", strText);
+                        //string strText = Cryptography.Encrypt(DomUtil.GetAttr(node, "password"), EncryptKey);
+                        //DomUtil.SetAttr(target, "password", strText);
+                        target.SetAttribute("password", node.GetAttribute("password"));
                         bChanged = true;
                     }
 
@@ -187,16 +224,16 @@ namespace DigitalPlatform.LibraryServer
                         root = this.LibraryCfgDom.CreateElement("center");
                         this.LibraryCfgDom.DocumentElement.AppendChild(root);
                     }
-                    XmlNode target = this.LibraryCfgDom.CreateElement("server");
+                    var target = this.LibraryCfgDom.CreateElement("server");
                     root.AppendChild(target);
 
                     DomUtil.SetAttr(target, "name", strName);
                     DomUtil.SetAttr(target, "url", strUrl);
 
-                    string strPassword = DomUtil.GetAttr(node, "password");
-
                     DomUtil.SetAttr(target, "username", strUserName);
-                    DomUtil.SetAttr(target, "password", Cryptography.Encrypt(strPassword, EncryptKey));
+                    // string strPassword = DomUtil.GetAttr(node, "password");
+                    // DomUtil.SetAttr(target, "password", Cryptography.Encrypt(strPassword, EncryptKey));
+                    target.SetAttribute("password", node.GetAttribute("password"));
                     DomUtil.SetAttr(target, "refid", strRefID);
 
                     bChanged = true;
@@ -216,7 +253,6 @@ namespace DigitalPlatform.LibraryServer
                     return -1;
                 }
 #endif
-
                 this.Changed = true;
                 return 1;
             }

@@ -1055,7 +1055,7 @@ out string error);
             {
                 if (e2.HasAttribute("clipping"))
                     continue;
-                DomUtil.SetElementOuterXml(dom1.DocumentElement, e2.Name, e2.OuterXml);
+                DomUtil.SetElementOuterXml(dom1.DocumentElement, e2.NamespaceURI, e2.Name, e2.OuterXml);
             }
 
             xml1 = dom1.OuterXml;
@@ -12974,7 +12974,9 @@ out error);
         temp_sessioninfo,
         category,
         name,
-        value,
+        ref value,
+        out _,
+        out _,
         out bool succeed,
         out strError);
                     if (nRet == -1)

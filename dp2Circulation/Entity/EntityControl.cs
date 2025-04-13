@@ -1332,7 +1332,8 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                         "uiState",
                         "");
                 };
-                edit.FormClosed += (o, e) => {
+                edit.FormClosed += (o, e) =>
+                {
                     Program.MainForm.AppInfo.SetString(
 "EntityEditForm",
 "uiState",
@@ -1906,13 +1907,15 @@ edit.UiState);
                 //REDO:
                 Program.MainForm.AppInfo.LinkFormState(edit, "EntityEditForm_state");
 
-                edit.Load += (o, e) => {
+                edit.Load += (o, e) =>
+                {
                     edit.UiState = Program.MainForm.AppInfo.GetString(
         "EntityEditForm",
         "uiState",
         "");
                 };
-                edit.FormClosed += (o, e) => {
+                edit.FormClosed += (o, e) =>
+                {
                     Program.MainForm.AppInfo.SetString(
 "EntityEditForm",
 "uiState",
@@ -2272,6 +2275,7 @@ edit.UiState);
                             nodes[i].Name, strText);
                     }*/
 
+                    // TODO: 注意验证一下元素名为 dprms:file 时此后的 SetElementOuterXml() 调用是否会抛出异常
                     string name = nodes[i].Name;
 
                     // 2009/12/17 changed
@@ -2371,6 +2375,36 @@ edit.UiState);
             }
 
             return 0;
+        }
+
+        public int DoQuickNewEntity(string strBarcode, int count = 1)
+        {
+            string error = "";
+            int succeed_count = 0;
+            for (int i = 0; i < count; i++)
+            {
+                var ret = DoQuickNewEntity(strBarcode);
+                if (ret == -1)
+                    return -1;
+                if (ret == 1)
+                    succeed_count++;
+                ret = StringUtil.IncreaseLeadNumber(strBarcode, 
+                    1,
+                    out string next_barcode,
+                    out error);
+                if (ret == -1)
+                {
+                    goto ERROR1;
+                }
+                strBarcode = next_barcode;
+            }
+
+            if (succeed_count > 0)
+                return 1;
+            return 0;
+        ERROR1:
+            MessageBox.Show(ForegroundWindow.Instance, error);
+            return -1;
         }
 
         // 

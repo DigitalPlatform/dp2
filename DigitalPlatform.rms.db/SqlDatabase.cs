@@ -13983,11 +13983,10 @@ List<DbParameter> aSqlParameter)
                 string strTempRecordPath = this.GetCaption("zh-CN") + "/" + strID;
                 if (bPushTailNo == true)
                 {
-                    string strExistRights = "";
                     bool bHasRight = oUser.HasRights(strTempRecordPath,
                         ResType.Record,
                         "create",//"append",
-                        out strExistRights);
+                        out string strExistRights);
                     if (bHasRight == false)
                     {
                         strError = "您的帐户名为'" + oUser.Name + "'，对'" + strTempRecordPath + "'记录没有'创建(create)'权限，目前的权限值为'" + strExistRights + "'。";
@@ -13996,11 +13995,10 @@ List<DbParameter> aSqlParameter)
                 }
                 else
                 {
-                    string strExistRights = "";
                     bool bHasRight = oUser.HasRights(strTempRecordPath,
                         ResType.Record,
                         "overwrite",
-                        out strExistRights);
+                        out string strExistRights);
                     if (bHasRight == false)
                     {
                         strError = "您的帐户名为'" + oUser.Name + "'，对'" + strTempRecordPath + "'记录没有'覆盖(overwrite)'权限，目前的权限值为'" + strExistRights + "'。";

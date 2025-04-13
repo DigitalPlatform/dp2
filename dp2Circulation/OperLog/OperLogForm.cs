@@ -2272,7 +2272,8 @@ DomUtil.GetElementInnerXml(dom.DocumentElement, "deletedCommentRecords"));
             string strCategory = DomUtil.GetElementText(dom.DocumentElement, "category");
             string strName = DomUtil.GetElementText(dom.DocumentElement, "name");
             string strValue = DomUtil.GetElementText(dom.DocumentElement, "value");
-
+            string strOldValue = DomUtil.GetElementText(dom.DocumentElement, "oldValue");
+            string strSnapshot = DomUtil.GetElementText(dom.DocumentElement, "snapshot");
             string strLibraryCodeList = DomUtil.GetElementText(dom.DocumentElement, "libraryCodeList");
 
             strHtml =
@@ -2281,6 +2282,8 @@ DomUtil.GetElementInnerXml(dom.DocumentElement, "deletedCommentRecords"));
                 BuildHtmlLine("参数目录", strCategory) +
                 BuildHtmlLine("参数名字", strName) +
                 BuildHtmlLine("参数值", strValue) +
+                BuildHtmlLine("修改前内容", strOldValue) +
+                BuildHtmlLine("修改前快照", strSnapshot) +
                 BuildHtmlLine("操作者管辖的分馆代码", strLibraryCodeList) +
                 BuildHtmlLine("操作者", strOperator) +
                 BuildHtmlLine("操作时间", strOperTime) +

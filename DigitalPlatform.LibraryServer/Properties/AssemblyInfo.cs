@@ -32,8 +32,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.173.*")]
-[assembly: AssemblyFileVersion("3.173.0.0")]
+[assembly: AssemblyVersion("3.175.*")]
+[assembly: AssemblyFileVersion("3.175.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -416,5 +416,7 @@ ItemCanReturn()
 //							freetime 格式此前版本返回的 DateTime 值为 Local 时间，这是错误的，本次改为返回 UTC 时间
 //							因为这些改动，keys 配置文件中用到 utime 和 freetime 的检索点都受到影响，dp2library 升级后应当尽快重新创建检索点
 //							(另外，早期 dp2circulation 的 dp2circulation_marc_autogen.cs 自动为 998 字段创建 $u 子字段内容的时候，使用的是 "u" 格式，后来改为使用 "s" 格式。这就留下一个问题，原先的书目记录中 998$u 中的 "u" 格式内容需要一个实用工具全部修改为使用 "s" 格式。只要格式改变，但时间值字面量不要改变。而如果这些内容不做修改，原有 "u" 格式字面量用法是不对的，正确的用法应该是 UTC 字面量)
+//		3.174 (2025/4/1) SearchCharging() API 的 actions 参数中增加了 "transferIdTo:xxx|xxx" 子参数用法。
+//		3.175 (2025/4/11) SetSystemParameter() API 所产生的操作日志动作中，增加了 oldValue 和 snapshot 元素。此版操作日志记录的 version 为 1.12。
 
 

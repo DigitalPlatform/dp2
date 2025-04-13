@@ -26,6 +26,7 @@ using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.rms;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.rms.Client.rmsws_localhost;
+using System.Data.SqlClient;
 
 namespace dp2Library
 {
@@ -2654,7 +2655,9 @@ namespace dp2Library
         //                      如果 以 "@itemBarcode:" 前缀引导，表示这是册条码号
         //                      如果 以 "@itemRefID:" 前缀引导，表示这是册参考 ID
         //                      如果 以 "@readerRefID:" 或 "@refID:" 前缀引导，表示这是读者参考 ID
-        //      actions noResult 表示不返回 results，只返回 result.Value(totalCount)
+        //      actions         noResult 表示不返回 results，只返回 result.Value(totalCount)
+        //                      transferIdTo:xxx|xxx  对 ID 字段内容的变换要求。例如 "transferIdTo:itemBarcode|readerBarcode"
+
         public LibraryServerResult SearchCharging(
             string patronBarcode,
             string timeRange,
@@ -2767,6 +2770,11 @@ namespace dp2Library
                 // 2021/6/8
                 bool no_result = StringUtil.IsInList("noResult", actions);
 
+                // 2025/4/1
+                var transfer = StringUtil.GetParameterByPrefix(actions, "transferIdTo");
+                if (transfer != null)
+                    transfer = transfer.Replace("|", ",");
+
                 if (no_result == false)
                 {
                     int MAXITEMS = 100;    // 每次最多返回的事项数
@@ -2778,14 +2786,26 @@ namespace dp2Library
                             break;
                         if (count != -1 && i >= count)
                             break;
+
                         ChargingItemWrapper wrapper = new ChargingItemWrapper();
                         wrapper.Item = new ChargingItem(item);
+
+                        // 2025/4/1
+                        if (transfer != null)
+                            TransferIds(wrapper.Item, transfer);
+
                         if (item.Operation == "return"
                             && item.Action != "read")
                         {
                             ChargingOperItem rel = app.ChargingOperDatabase.FindRelativeBorrowItem(item);
                             if (rel != null)
+                            {
                                 wrapper.RelatedItem = new ChargingItem(rel);
+
+                                // 2025/4/1
+                                if (transfer != null)
+                                    TransferIds(wrapper.RelatedItem, transfer);
+                            }
                         }
                         infos.Add(wrapper);
                         i++;
@@ -2812,6 +2832,60 @@ namespace dp2Library
                 return result;
             }
         }
+
+        #region 对返回的事项内容进行变换
+
+        // parameters:
+        //      transfer    变换要求。例如 "itemBarcode,readerBarcode"
+        int TransferIds(ChargingItem item, string transfer)
+        {
+            if (item == null)
+                return 0;
+
+            int count = 0;
+
+            RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
+
+            // 尽量变换为册条码号
+            if (string.IsNullOrEmpty(item.ItemBarcode) == false
+                && StringUtil.IsInList("itemBarcode", transfer))
+            {
+                int nRet = app.ConvertRefIdListToItemBarcodeList(channel,
+item.ItemBarcode,
+out string barcode,
+out string error);
+                if (nRet == -1)
+                {
+                }
+                else
+                {
+                    item.ItemBarcode = barcode;
+                    count++;
+                }
+            }
+
+            // 尽量变换为读者证条码号
+            if (string.IsNullOrEmpty(item.PatronBarcode) == false
+                && StringUtil.IsInList("readerBarcode", transfer))
+            {
+                int nRet = app.ConvertRefIdListToReaderBarcodeList(channel,
+item.PatronBarcode,
+out string barcode,
+out string error);
+                if (nRet == -1)
+                {
+                }
+                else
+                {
+                    item.PatronBarcode = barcode;
+                    count++;
+                }
+            }
+
+            return count;
+        }
+
+        #endregion
 
         // 设置好友关系
         // parameters:
@@ -14457,7 +14531,9 @@ public int Type;	// 类型：0 库 / 1 途径 / 4 cfgs / 5 file
                     sessioninfo,
                     strCategory,
                     strName,
-                    strValue,
+                    ref strValue,
+                    out string strOldValue,
+                    out string strSnapshot,
                     out bool succeed,
                     out strError);
                 if (nRet == -1)
@@ -14471,6 +14547,8 @@ public int Type;	// 类型：0 库 / 1 途径 / 4 cfgs / 5 file
                     if (WriteSetSystemParameterOperLog(strCategory,
                         strName,
                         strValue,
+                        strOldValue,
+                        strSnapshot,
                         sessioninfo.LibraryCodeList,
                         out strError) == -1)
                         goto ERROR1;
@@ -14503,6 +14581,8 @@ public int Type;	// 类型：0 库 / 1 途径 / 4 cfgs / 5 file
         int WriteSetSystemParameterOperLog(string strCategory,
             string strName,
             string strValue,
+            string strOldValue,
+            string strSnapshot,
             string strLibraryCodeList,
             out string strError)
         {
@@ -14524,6 +14604,22 @@ strName);
             DomUtil.SetElementTextEx(domOperLog.DocumentElement,
 "value",
 strValue);
+
+            // 2025/4/3 增加此元素
+            //if (string.IsNullOrEmpty(strOldValue) == false)
+            {
+                DomUtil.SetElementTextEx(domOperLog.DocumentElement,
+    "oldValue",
+    strOldValue);
+            }
+
+            // 2025/4/10 增加此元素
+            //if (string.IsNullOrEmpty(strSnapshot) == false)
+            {
+                DomUtil.SetElementTextEx(domOperLog.DocumentElement,
+    "snapshot",
+    strSnapshot);
+            }
 
             // 请求者所管辖的分馆代码列表
             DomUtil.SetElementText(domOperLog.DocumentElement,

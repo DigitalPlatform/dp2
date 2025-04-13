@@ -14859,11 +14859,30 @@ strLibraryCode);    // 读者所在的馆代码
             return results;
         }
 
+        public static string GetXmls(IEnumerable<XmlNode> nodes,
+            string container_element_name = "")
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach(XmlNode node in nodes)
+            {
+                if (sb.Length > 0)
+                    sb.AppendLine();
+                sb.Append(node.OuterXml);
+            }
+
+            var value = sb.ToString();
+            if (string.IsNullOrEmpty(container_element_name) == false)
+                return $"<{container_element_name}>{value}</{container_element_name}>";
+            return value;
+        }
+
         // TODO: 需要进行针对分馆用户的改造
         // 修改值列表
         // 2008/8/21 
         // parameters:
         //      strAction   "new" "change" "overwirte" "delete"
+        //                  change 和 overwrite 的区别，是 change 要求 strDbName 指定的 table 元素预先存在。
+        //      strOldXml   [out] 返回修改或删除前的 XML。valueTables 元素下的 table 元素(一个或者多个 OuterXml)，其 name 属性值匹配 strDbName
         // return:
         //      -1  error
         //      0   not change
@@ -14872,9 +14891,13 @@ strLibraryCode);    // 读者所在的馆代码
             string strName,
             string strDbName,
             string strValue,
+            out string strOldXml,
+            out string strSnapshot,
             out string strError)
         {
             strError = "";
+            strOldXml = "";
+            strSnapshot = "";
 
             if (String.IsNullOrEmpty(strName) == true)
             {
@@ -14888,6 +14911,8 @@ strLibraryCode);    // 读者所在的馆代码
                 this.LibraryCfgDom.DocumentElement.AppendChild(root);
                 this.Changed = true;
             }
+            else
+                strSnapshot = root.OuterXml;
 
             if (strAction == "new")
             {
@@ -14921,6 +14946,9 @@ strLibraryCode);    // 读者所在的馆代码
                     return 0;
                 }
 
+                // 2025/4/2
+                strOldXml = GetXmls(nodes);
+
                 for (int i = 0; i < nodes.Count; i++)
                 {
                     nodes[i].ParentNode.RemoveChild(nodes[i]);
@@ -14937,8 +14965,11 @@ strLibraryCode);    // 读者所在的馆代码
                 if (nodes.Count == 0)
                 {
                     strError = "name为 '" + strName + "' dbname为 '" + strDbName + "' 的值列表事项不存在";
-                    return 0;
+                    return -1;  // 2025/4/5 从 0 改为 -1
                 }
+
+                // 2025/4/2
+                strOldXml = GetXmls(nodes);
 
                 XmlNode exist_node = nodes[0];
                 for (int i = 1; i < nodes.Count; i++)
@@ -14967,6 +14998,9 @@ strLibraryCode);    // 读者所在的馆代码
                 }
                 else
                 {
+                    // 2025/4/2
+                    strOldXml = GetXmls(nodes);
+
                     XmlNode exist_node = nodes[0];
                     for (int i = 1; i < nodes.Count; i++)
                     {

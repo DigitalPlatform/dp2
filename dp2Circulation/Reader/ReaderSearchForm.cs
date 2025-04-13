@@ -2844,9 +2844,12 @@ TaskScheduler.Default);
                             return ret;
                     }
                     else
+                    {
+                        // TODO: 注意验证 strElementName 为 "dprms:file" 这样的元素名会抛出异常，要改用另一版本的 SetElementOuterXml() 函数
                         DomUtil.SetElementOuterXml(target_dom.DocumentElement,
                         strElementName,
                         strTextNew);
+                    }
                 }
                 else
                 {
@@ -7435,7 +7438,7 @@ dlg.UiState);
                             history_loader.Stop = stop;
                             history_loader.PatronBarcode = strBarcode;
                             history_loader.TimeRange = strTimeRange;
-                            history_loader.Actions = "return,lost";
+                            history_loader.Actions = "return,lost,transferIdTo:itemBarcode|readerBarcode";
                             history_loader.Order = "descending";
 
                             CacheableBiblioLoader summary_loader = new CacheableBiblioLoader();
@@ -7687,7 +7690,7 @@ dlg.UiState);
                         history_loader.Stop = looping.Progress;
                         history_loader.PatronBarcode = readerBarcode;
                         history_loader.TimeRange = "~"; // strTimeRange;
-                        history_loader.Actions = "return,lost";
+                        history_loader.Actions = "return,lost,transferIdTo:itemBarcode|readerBarcode";
                         history_loader.Order = "descending";
 
                         ItemBarcodeLoader barcode_loader = new ItemBarcodeLoader();
@@ -8730,7 +8733,7 @@ dlg.UiState);
                                 history_loader.Stop = looping.Progress;
                                 history_loader.PatronBarcode = strBarcode;
                                 history_loader.TimeRange = strTimeRange;
-                                history_loader.Actions = "return,lost";
+                                history_loader.Actions = "return,lost,transferIdTo:itemBarcode|readerBarcode";
                                 history_loader.Order = "descending";
 
                                 CacheableBiblioLoader summary_loader = new CacheableBiblioLoader();

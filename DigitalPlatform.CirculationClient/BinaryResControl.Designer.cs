@@ -39,6 +39,7 @@ namespace DigitalPlatform.CirculationClient
             this.columnHeader_timestamp = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_usage = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_rights = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_lastModified = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.SuspendLayout();
             // 
             // ListView
@@ -52,14 +53,15 @@ namespace DigitalPlatform.CirculationClient
             this.columnHeader_mime,
             this.columnHeader_timestamp,
             this.columnHeader_usage,
-            this.columnHeader_rights});
+            this.columnHeader_rights,
+            this.columnHeader_lastModified});
             this.ListView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.ListView.FullRowSelect = true;
             this.ListView.HideSelection = false;
             this.ListView.Location = new System.Drawing.Point(0, 0);
             this.ListView.Margin = new System.Windows.Forms.Padding(0);
             this.ListView.Name = "ListView";
-            this.ListView.Size = new System.Drawing.Size(334, 284);
+            this.ListView.Size = new System.Drawing.Size(612, 497);
             this.ListView.TabIndex = 1;
             this.ListView.UseCompatibleStateImageBehavior = false;
             this.ListView.View = System.Windows.Forms.View.Details;
@@ -108,14 +110,19 @@ namespace DigitalPlatform.CirculationClient
             this.columnHeader_rights.Text = "权限";
             this.columnHeader_rights.Width = 200;
             // 
+            // columnHeader_lastModified
+            // 
+            this.columnHeader_lastModified.Text = "最后修改时间";
+            this.columnHeader_lastModified.Width = 240;
+            // 
             // BinaryResControl
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.ListView);
-            this.Margin = new System.Windows.Forms.Padding(2);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "BinaryResControl";
-            this.Size = new System.Drawing.Size(334, 284);
+            this.Size = new System.Drawing.Size(612, 497);
             this.ResumeLayout(false);
 
         }
@@ -131,5 +138,6 @@ namespace DigitalPlatform.CirculationClient
         private System.Windows.Forms.ColumnHeader columnHeader_timestamp;
         private System.Windows.Forms.ColumnHeader columnHeader_usage;
         private System.Windows.Forms.ColumnHeader columnHeader_rights;
+        private System.Windows.Forms.ColumnHeader columnHeader_lastModified;
     }
 }

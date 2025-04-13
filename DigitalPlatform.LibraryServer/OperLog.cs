@@ -16,6 +16,7 @@ using DigitalPlatform.Text;
 using System.Threading.Tasks;
 using DigitalPlatform.LibraryServer.Common;
 using Jint.Parser.Ast;
+using Amazon.Runtime;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -834,7 +835,8 @@ namespace DigitalPlatform.LibraryServer
         // 1.09 (2022/3/16) 此前版本的 setSystemParameter 类型的日志记录中 value 元素内容会把 \t 字符替换为 *，导致 XML 内容或者 C# 脚本出现错误。建议 recover 的时候忽略此前版本的 setSystemParameter 动作
         // 1.10 (2024/2/7) 借阅信息链中两类册条码号变为参考 ID。borrow return reservation 等日志动作记录格式均有变化。见文档 https://github.com/DigitalPlatform/dp2/issues/1183
         // 1.11 (2025/2/19) SetUser() API 的日志记录中增加了 libraryCode 元素。此前的版本没有 libraryCode 元素，在执行 GetOperLogs() API 的时候，应该只允许全局账户身份的请求获得 setUser 日志。而新版本的日志记录，则根据 libraryCode 元素内容中的馆代码，决定分馆身份的请求者可以看到它所在分馆的日志记录
-        static string operlog_version = "1.11";
+        // 1.12 (2025/4/10) SetSystemParameter() API 的日志记录中增加了 oldValue 元素和 snapshot 元素。此前版本中没有这两个元素
+        static string operlog_version = "1.12";
 
         // 写入一条操作日志
         // parameters:
@@ -1462,6 +1464,7 @@ out strTargetLibraryCode);
             // !TODO: operation:writeRes 要留意它是不是写入了读者库。如果是，则要防范泄露 password 元素内容
             // operation:setUser -- account 和 oldAccount 元素里面的 password 元素; 根元素的 newPassword 元素
             // operation:configChanged -- value 和 oldValue 元素的 InnerText 中，rmsserver | mongodb | serverReplication | reportStorage | reportReplication | messageServer 这几个元素的 password 属性，和 script 元素
+            // operation:setSystemParameter -- script 和 password 元素，password 属性
             string strOperation = DomUtil.GetElementText(dom.DocumentElement, "operation");
             if (strOperation == "borrow"
     || strOperation == "return"
@@ -1567,6 +1570,79 @@ out strTargetLibraryCode);
                     value_node.InnerText = value_dom.DocumentElement.OuterXml;
                 }
                 return;
+            }
+
+            // 2025/4/10
+            if (strOperation == "setSystemParameter")
+            {
+                // 清除 value 和 oldValue 元素内 InnerText 中 XML 的敏感内容
+                var value_nodes = dom.DocumentElement.SelectNodes("value | oldValue | snapshot");
+                foreach (XmlNode value_node in value_nodes)
+                {
+                    if (string.IsNullOrWhiteSpace(value_node.InnerText))
+                        continue;
+
+                    if (isXml(value_node.InnerText) == false)
+                        continue;
+                    bool outerXml = true;   // 是否把 InnerText 作为 XML 处理
+                    XmlDocument value_dom = new XmlDocument();
+                    value_dom.PreserveWhitespace = true;
+                    try
+                    {
+                        value_dom.LoadXml(value_node.InnerText);
+                        goto CORRECT;
+                    }
+                    catch
+                    {
+                    }
+
+                    try
+                    {
+                        value_dom.LoadXml($"<collection>{value_node.InnerText}</collection>");
+                        outerXml = false;
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+
+                CORRECT:
+                    bool changed = false;
+                    // password 属性滤除
+                    var nodes = value_dom.DocumentElement.SelectNodes("//*/@password");
+                    foreach (XmlAttribute node in nodes)
+                    {
+                        node.OwnerElement.RemoveAttributeNode(node);
+                        changed = true;
+                    }
+
+                    // password 元素滤除
+                    // 注意可能导致 value_dom.DocumentElement 为 null
+                    // TODO: script 元素需要删除么？
+                    nodes = value_dom.DocumentElement.SelectNodes("//password");
+                    foreach (XmlElement node in nodes)
+                    {
+                        node.ParentNode?.RemoveChild(node);
+                        changed = true;
+                    }
+
+                    if (changed)
+                    {
+                        if (outerXml)
+                            value_node.InnerText = value_dom.DocumentElement?.OuterXml;
+                        else
+                            value_node.InnerText = value_dom.DocumentElement?.InnerXml;
+                    }
+                }
+                return;
+            }
+
+            bool isXml(string text)
+            {
+                var value = text.TrimStart('\r', '\n', '\t', ' ');
+                if (value.StartsWith("<") == false)
+                    return false;
+                return true;
             }
         }
 

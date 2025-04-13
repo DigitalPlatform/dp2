@@ -10380,12 +10380,14 @@ out string _);
         public int SetValueTablesXml(
     string strLibraryCodeList,
     string strFragment,
+    out string strOldXml,
     out string strError)
         {
             return SetLibraryFragmentXml(
                 "valueTables",
                 strLibraryCodeList,
                 strFragment,
+                out strOldXml,
                 out strError);
         }
 
@@ -10393,23 +10395,29 @@ out string _);
         public int SetRightsTableXml(
     string strLibraryCodeList,
     string strFragment,
+    out string strOldXml,
     out string strError)
         {
             return SetLibraryFragmentXml(
                 "rightsTable",
                 strLibraryCodeList,
                 strFragment,
+                out strOldXml,
                 out strError);
         }
 
         // 将前端发来的片断XML代码更新到library.xml中
+        // parameters:
+        //      strOldXml   返回 strRootElementName 指向的元素的修改前的内容
         public int SetLibraryFragmentXml(
             string strRootElementName,
             string strLibraryCodeList,
             string strFragment,
+            out string strOldXml,
             out string strError)
         {
             strError = "";
+            strOldXml = "";
 
             XmlNode root = this.LibraryCfgDom.DocumentElement.SelectSingleNode(strRootElementName);   // 0.02前为rightstable
             if (root == null)
@@ -10417,6 +10425,8 @@ out string _);
                 root = this.LibraryCfgDom.CreateElement(strRootElementName);
                 this.LibraryCfgDom.DocumentElement.AppendChild(root);
             }
+            else
+                strOldXml = root.OuterXml;
 
             XmlDocument source_dom = new XmlDocument();
             source_dom.LoadXml("<" + strRootElementName + " />");
@@ -11098,7 +11108,6 @@ out string _);
                             strError = $"name属性值为 '{strGroupName}' 的<group>元素，若其属性发生了修改，这要求其下的所有<location>元素应在当前用户的管辖范围内。但发现这个<group>元素其下的<location>元素name属性值中的馆藏地点 '{strLocationName}' 不在{GetCurrentUserName(null)}管辖范围 '{strLibraryCodeList}' 内，修改<callNumber>定义操作被拒绝";
                             return -1;
                         }
-
                     }
                 }
             }
@@ -11109,12 +11118,16 @@ out string _);
             return 0;
         }
 
+        // parameters:
+        //      strOldXml   返回 locationTypes 元素修改前的 outerxml
         public int SetLocationTypesXml(
     string strLibraryCodeList,
     string strFragment,
+    out string strOldXml,
     out string strError)
         {
             strError = "";
+            strOldXml = "";
 
             XmlDocument source_dom = new XmlDocument();
             source_dom.LoadXml("<root />");
@@ -11147,7 +11160,6 @@ out string _);
                 }
             }
 
-
             // 检查所有<library>元素的code属性值
             // parameters:
             // return:
@@ -11167,6 +11179,9 @@ out string _);
                 this.LibraryCfgDom.DocumentElement.AppendChild(root);
                 this.Changed = true;
             }
+            else
+                strOldXml = root.OuterXml;
+
             // 把当前用户能管辖的全部已有片断删除，然后一个一个插入
             // 注意，list为空或者"*"，管辖全部内容
             if (SessionInfo.IsGlobalUser(strLibraryCodeList) == true)
@@ -18125,7 +18140,7 @@ out strError);
                         strItemBarcode);
                     if (nodesBorrow.Count == 0)
                     {
-                        strError = $"读者记录中没有找到匹配 '{strFilterItemKey}' 的借阅信息";
+                        strError = $"读者记录 {PatronRecPathLink(strOutputReaderRecPath)} 中没有找到匹配 '{strFilterItemKey}' 的借阅信息";
                         return BuildError(strError, ErrorCode.ErrorParameter);
                     }
                     if (nodesBorrow.Count > 1)
@@ -18294,7 +18309,7 @@ out strError);
             return result;
         }
 
-        public static LibraryServerResult BuildError(string error, 
+        public static LibraryServerResult BuildError(string error,
             ErrorCode code = ErrorCode.SystemError)
         {
             LibraryServerResult result = new LibraryServerResult();
@@ -18561,7 +18576,7 @@ out strError);
                 return result;
                 */
                 // 2025/3/3
-                strError = "册记录中 borrower 元素值表明该册当前并未被任何读者借阅";
+                strError = $"册记录 {ItemRecPathLink(strOutputItemRecPath)} 中 borrower 元素值表明该册当前并未被任何读者借阅";
                 // 2008/1/25 comment 此时无法断定是否为错误。还需要strOutputReaderBarcode返回后进行比较才能确定
                 result.ErrorInfo = strError;
                 return BuildError(strError, ErrorCode.InvalidParameter);
@@ -19077,7 +19092,7 @@ out strError);
                         // goto ERROR1;
                         // 2025/3/5 注: 这里返回 -1 的原因是，不能简单断定这就是一条往返都正确的链。有可能 item 那一侧还有不正确
                         return BuildError(strError, ErrorCode.ErrorParameter);
-                        
+
                         /*
                         // 2025/2/16
                         result.Value = 0;

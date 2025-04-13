@@ -1562,15 +1562,23 @@ namespace DigitalPlatform.rms
                 {
                     if (strPrecision == "")
                         strPrecision = "0";
-                    strKey = StringUtil.ExtendByPrecision(
-                        strKey,
-                        strPrecision);
+                    {
+                        if (string.IsNullOrEmpty(strKey))
+                            strKey = "-1";
+                        else
+                            strKey = StringUtil.ExtendByPrecision(
+                            strKey,
+                            strPrecision);
+                    }
                 }
                 else if (strOneStyleLower == "integer")
                 {
-                    strKey = StringUtil.ExtendByPrecision(
-                        strKey,
-                        "0");
+                    if (string.IsNullOrEmpty(strKey))
+                        strKey = "-1";
+                    else
+                        strKey = StringUtil.ExtendByPrecision(
+                            strKey,
+                            "0");
                 }
                 else if (strOneStyleLower == "rfc1123time")
                 {

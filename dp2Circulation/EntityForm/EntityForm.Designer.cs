@@ -40,6 +40,7 @@
             this.contextMenuStrip_selectRegisterType = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.toolStripMenuItem_SearchOnly = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_quickRegister = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem_quickRegisterMultiple = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_register = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip_option = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.ToolStripMenuItem_enableSaveAllButtonAfterRecordDeleted = new System.Windows.Forms.ToolStripMenuItem();
@@ -174,6 +175,7 @@
             this.contextMenuStrip_selectRegisterType.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripMenuItem_SearchOnly,
             this.toolStripMenuItem_quickRegister,
+            this.toolStripMenuItem_quickRegisterMultiple,
             this.toolStripMenuItem_register});
             this.contextMenuStrip_selectRegisterType.Name = "contextMenuStrip_selectRegisterType";
             this.contextMenuStrip_selectRegisterType.Size = new System.Drawing.Size(169, 106);
@@ -191,6 +193,13 @@
             this.toolStripMenuItem_quickRegister.Size = new System.Drawing.Size(168, 34);
             this.toolStripMenuItem_quickRegister.Text = "快速登记";
             this.toolStripMenuItem_quickRegister.Click += new System.EventHandler(this.toolStripMenuItem_quickRegister_Click);
+            // 
+            // toolStripMenuItem_quickRegisterMultiple
+            // 
+            this.toolStripMenuItem_quickRegisterMultiple.Name = "toolStripMenuItem_quickRegisterMultiple";
+            this.toolStripMenuItem_quickRegisterMultiple.Size = new System.Drawing.Size(168, 34);
+            this.toolStripMenuItem_quickRegisterMultiple.Text = "快速登记多个";
+            this.toolStripMenuItem_quickRegisterMultiple.Click += new System.EventHandler(this.toolStripMenuItem_quickRegisterMultiple_Click);
             // 
             // toolStripMenuItem_register
             // 
@@ -1417,6 +1426,7 @@
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip_selectRegisterType;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_SearchOnly;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_quickRegister;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_quickRegisterMultiple;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_register;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip_option;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_enableSaveAllButtonAfterRecordDeleted;

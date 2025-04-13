@@ -332,7 +332,7 @@ this.textBox_palm_identityQualityThreshold.Text);
                 _config.Save();
         }
 
-        public static string HnbUrl = "rest.http://58.87.101.80/hnb/rest";   // "http://hnbclub.cn/dp2library";
+        public static string HnbUrl = "rest.http://pear.ilovelibrary.cn/hnb/rest/";   // "http://hnbclub.cn/dp2library";
 
         private void toolStripButton_cfg_setHongnibaServer_Click(object sender, EventArgs e)
         {

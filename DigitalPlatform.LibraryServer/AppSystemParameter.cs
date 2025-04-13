@@ -150,7 +150,7 @@ namespace DigitalPlatform.LibraryServer
 
         // return:
         //      -1  出错
-        //      0   没有找到指定的参数
+        //      0   没有找到指定 strCategory 和 strName 的参数(注: 指特定 strCategory 和 strName 代表的参数没有定义。注意，不是指参数值为空)
         //      1   找到指定的参数
         public int GetSystemParameter(
             SessionInfo sessioninfo,
@@ -165,7 +165,7 @@ namespace DigitalPlatform.LibraryServer
             this.LockForRead();
             try
             {
-                int nRet = 1;
+                // int nRet = 1;
 
                 // 实用功能
                 if (strCategory == "utility")
@@ -375,7 +375,7 @@ namespace DigitalPlatform.LibraryServer
                         if (root == null)
                         {
                             strValue = "";
-                            nRet = 0;
+                            // nRet = 0;
                         }
                         else
                         {
@@ -412,7 +412,7 @@ namespace DigitalPlatform.LibraryServer
                     if (rfid == null)
                     {
                         strError = $"library.xml 中没有配置 rfid 元素";
-                        nRet = 0;
+                        // nRet = 0;
                         goto END1;
                     }
 
@@ -432,12 +432,12 @@ namespace DigitalPlatform.LibraryServer
                         if (ret == false)
                         {
                             strValue = "";
-                            nRet = 0;
+                            // nRet = 0;
                         }
                         else
                         {
                             strValue = isil + "|" + alternative;
-                            nRet = 1;
+                            // nRet = 1;
                         }
 
                         strError = "category '" + strCategory + "' 中未知的 name '" + strName + "'";
@@ -496,7 +496,7 @@ namespace DigitalPlatform.LibraryServer
                         if (root == null)
                         {
                             strValue = "";
-                            nRet = 0;
+                            // nRet = 0;
                         }
                         else
                             strValue = root.OuterXml;
@@ -578,7 +578,7 @@ namespace DigitalPlatform.LibraryServer
                         if (root == null)
                         {
                             strValue = "";
-                            nRet = 0;
+                            // nRet = 0;
                         }
                         else
                             strValue = root.OuterXml;
@@ -594,8 +594,8 @@ namespace DigitalPlatform.LibraryServer
                         if (root == null)
                         {
                             strValue = "";
-                            nRet = 0;
-                            // 注: 返回值为0，字符串为空，错误码不是NotFound，表示想关节点找到了，但值为空
+                            // nRet = 0;
+                            // 注: 返回值为0，字符串为空，错误码不是NotFound，表示相关节点找到了，但值为空
                         }
                         else
                         {
@@ -628,7 +628,7 @@ namespace DigitalPlatform.LibraryServer
                                 //      -1  出错
                                 //      0   不可读
                                 //      1   可读
-                                nRet = IsBiblioDbReadeable(
+                                int nRet = IsBiblioDbReadeable(
                                     sessioninfo,
                                     nodeDatabase,
                                     out strError);
@@ -677,7 +677,7 @@ namespace DigitalPlatform.LibraryServer
                         if (root == null)
                         {
                             strValue = "";
-                            nRet = 0;
+                            // nRet = 0;
                             // 注: 返回值为0，字符串为空，错误码不是NotFound，表示相关节点找到了，但值为空
                             goto END1;
                         }
@@ -731,7 +731,7 @@ namespace DigitalPlatform.LibraryServer
                         if (root == null)
                         {
                             strValue = "";
-                            nRet = 0;
+                            // nRet = 0;
                         }
                         else
                             strValue = root.InnerXml;
@@ -746,7 +746,7 @@ namespace DigitalPlatform.LibraryServer
                         if (root == null)
                         {
                             strValue = "";
-                            nRet = 0;
+                            // nRet = 0;
                         }
                         else
                             strValue = root.InnerXml;
@@ -784,7 +784,7 @@ namespace DigitalPlatform.LibraryServer
                             strValue = "true";
                         else
                             strValue = "false";
-                        nRet = 1;
+                        // nRet = 1;
                         goto END1;
                     }
 
@@ -795,7 +795,7 @@ namespace DigitalPlatform.LibraryServer
                             strValue = "enabled";
                         else
                             strValue = "";
-                        nRet = 1;
+                        // nRet = 1;
                         goto END1;
                     }
 
@@ -806,12 +806,12 @@ namespace DigitalPlatform.LibraryServer
                         XmlNode root = this.LibraryCfgDom.DocumentElement.SelectSingleNode("clientFineInterface");
                         if (root == null)
                         {
-                            nRet = 0;
+                            // nRet = 0;
                             goto END1;
                         }
 
                         strValue = root.OuterXml;
-                        nRet = 1;
+                        // nRet = 1;
                         goto END1;
                     }
 
@@ -820,13 +820,13 @@ namespace DigitalPlatform.LibraryServer
                     if (strName == "valueTables")
                     {
                         // 按照馆代码列表，返回<valueTables>内的适当片断
-                        nRet = this.GetValueTablesXml(
+                        int nRet = this.GetValueTablesXml(
                                 sessioninfo.LibraryCodeList,
                                 out strValue,
                                 out strError);
                         if (nRet == -1)
                             goto ERROR1;
-                        nRet = 1;
+                        // nRet = 1;
                         goto END1;
                     }
 
@@ -847,27 +847,27 @@ namespace DigitalPlatform.LibraryServer
                         goto END1;
 #endif
                         // 按照馆代码列表，返回<rightsTable>内的适当片断
-                        nRet = this.GetRightsTableXml(
+                        int nRet = this.GetRightsTableXml(
                                 sessioninfo.LibraryCodeList,
                                 out strValue,
                                 out strError);
                         if (nRet == -1)
                             goto ERROR1;
-                        nRet = 1;
+                        // nRet = 1;
                         goto END1;
                     }
 
                     // (当前<rightsTable>)权限表的HTML形态
                     if (strName == "rightsTableHtml")
                     {
-                        nRet = this.GetRightTableHtml(
+                        int nRet = this.GetRightTableHtml(
                             "",
                             sessioninfo.LibraryCodeList,
                             out strValue,
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
-                        nRet = 1;
+                        // nRet = 1;
                         goto END1;
                     }
 
@@ -924,13 +924,13 @@ namespace DigitalPlatform.LibraryServer
                         goto END1;
 #endif
                         // 按照馆代码列表，返回<locationTypes>内的适当片断
-                        nRet = this.GetLocationTypesXml(
+                        int nRet = this.GetLocationTypesXml(
                                 sessioninfo.LibraryCodeList,
                                 out strValue,
                                 out strError);
                         if (nRet == -1)
                             goto ERROR1;
-                        nRet = 1;
+                        //nRet = 1;
                         goto END1;
                     }
 
@@ -943,12 +943,12 @@ namespace DigitalPlatform.LibraryServer
                         XmlNode root = this.LibraryCfgDom.DocumentElement.SelectSingleNode("zhongcihao");
                         if (root == null)
                         {
-                            nRet = 0;
+                            //nRet = 0;
                             goto END1;
                         }
 
                         strValue = root.InnerXml;
-                        nRet = 1;
+                        //nRet = 1;
                         goto END1;
                     }
 
@@ -961,12 +961,12 @@ namespace DigitalPlatform.LibraryServer
                         XmlNode root = this.LibraryCfgDom.DocumentElement.SelectSingleNode("callNumber");
                         if (root == null)
                         {
-                            nRet = 0;
+                            //nRet = 0;
                             goto END1;
                         }
 
                         strValue = root.InnerXml;
-                        nRet = 1;
+                        //nRet = 1;
                         goto END1;
                     }
 
@@ -979,12 +979,12 @@ namespace DigitalPlatform.LibraryServer
                         XmlNode root = this.LibraryCfgDom.DocumentElement.SelectSingleNode("dup");
                         if (root == null)
                         {
-                            nRet = 0;
+                            //nRet = 0;
                             goto END1;
                         }
 
                         strValue = root.InnerXml;
-                        nRet = 1;
+                        //nRet = 1;
                         goto END1;
                     }
 
@@ -997,13 +997,56 @@ namespace DigitalPlatform.LibraryServer
                         XmlNode root = this.LibraryCfgDom.DocumentElement.SelectSingleNode(strName);
                         if (root == null)
                         {
-                            nRet = 0;
+                            //nRet = 0;
                             goto END1;
                         }
 
                         strValue = root.InnerXml;
-                        nRet = 1;
+                        //nRet = 1;
                         goto END1;
+                    }
+
+                    // 2025/4/6
+                    switch(strName)
+                    {
+                        case "?AcceptBlankReaderBarcode":
+                            strValue = this.AcceptBlankReaderBarcode.ToString();
+                            goto END1;
+                        case "?AcceptBlankItemBarcode":
+                            strValue = this.AcceptBlankItemBarcode.ToString();
+                            goto END1;
+                        case "?UpperCaseItemBarcode":
+                            strValue = this.UpperCaseItemBarcode.ToString();
+                            goto END1;
+                        case "?UpperCaseReaderBarcode":
+                            strValue = this.UpperCaseReaderBarcode.ToString();
+                            goto END1;
+                        case "?VerifyBookType":
+                            strValue = this.VerifyBookType.ToString();
+                            goto END1;
+                        case "?VerifyReaderType":
+                            strValue = this.VerifyReaderType.ToString();
+                            goto END1;
+                        case "?BorrowCheckOverdue":
+                            strValue = this.BorrowCheckOverdue.ToString();
+                            goto END1;
+                        case "?CirculationNotifyTypes":
+                            strValue = this.CirculationNotifyTypes;
+                            goto END1;
+                        case "?AcceptBlankRoomName":
+                            strValue = this.AcceptBlankRoomName.ToString();
+                            goto END1;
+                        case "?VerifyRegisterNoDup":
+                            strValue = this.VerifyRegisterNoDup.ToString();
+                            goto END1;
+                        case "?PatronAdditionalFroms":
+                            strValue = StringUtil.MakePathList(this.PatronAdditionalFroms);
+                            goto END1;
+                        case "?PatronAdditionalFields":
+                            strValue = StringUtil.MakePathList(this.PatronAdditionalFields);
+                            goto END1;
+                        default:
+                            break;
                     }
 
                     strError = "category '" + strCategory + "' 中未知的 name '" + strName + "'";
@@ -1013,7 +1056,7 @@ namespace DigitalPlatform.LibraryServer
                 // 根据前端在strName参数中提供的rightstable xml字符串，立即创建rightsTableHtml字符串
                 if (strCategory == "instance_rightstable_html")
                 {
-                    nRet = this.GetRightTableHtml(
+                    int nRet = this.GetRightTableHtml(
                         strName,
                         sessioninfo.LibraryCodeList,
                         out strValue,
@@ -1031,7 +1074,7 @@ namespace DigitalPlatform.LibraryServer
                     this.CheckVdbsThrow();
 
                     // strName参数不能为空。本功能只能得到一个数据库的定义，如果要得到全部数据库的定义，请使用ManageDatabase API的getinfo子功能
-                    nRet = this.vdbs.GetDatabaseDef(
+                    int nRet = this.vdbs.GetDatabaseDef(
                         strName,
                         out strValue,
                         out strError);
@@ -1381,7 +1424,8 @@ namespace DigitalPlatform.LibraryServer
                     strError = "未知的 category '" + strCategory + "' 和 name '" + strName + "'";
                 return 0;
             END1:
-                return nRet;
+                // return nRet;
+                return 1;
             ERROR1:
                 return -1;
             }
@@ -1393,16 +1437,23 @@ namespace DigitalPlatform.LibraryServer
 
         // 异常:
         //      可能会抛出异常
+        // parameters:
+        //      strOldValue 修改前的内容。有可能是修改涉及到的局部内容之前的状态，或者修改之前的完整内容(范围大于实际修改的部分)
+        //      strSnapshot  修改前的快照内容。所谓快照内容就是包括修改的和未修改到的，属于一个完整单元的内容，便于日志恢复阶段利用完整内容进行快照恢复
         public int SetSystemParameter(
             SessionInfo sessioninfo,
             string strCategory,
             string strName,
-            string strValue,
+            ref string strValue,
+            out string strOldValue, // 2025/4/3 增加此参数
+            out string strSnapshot, // 2025/4/10 增加此参数
             out bool succeed,
             out string strError)
         {
             strError = "";
             succeed = false;
+            strOldValue = "";
+            strSnapshot = "";
 
             var app = this;
 
@@ -1426,7 +1477,9 @@ namespace DigitalPlatform.LibraryServer
                     //      0   not change
                     //      1   changed
                     nRet = app.SetCenterDef(strName,
-                        strValue,
+                        ref strValue,
+                        out strOldValue,
+                        out strSnapshot,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -1435,6 +1488,8 @@ namespace DigitalPlatform.LibraryServer
                         app.Changed = true;
                         // app.ActivateManagerThread();
                     }
+
+                    // strValue 中的 password 属性值变换为 hashed 形态以后再写入操作日志记录
                     goto END1;
                 }
 
@@ -1477,6 +1532,8 @@ namespace DigitalPlatform.LibraryServer
                         strNameParam,
                         strDbNameParam,
                         strValueParam,
+                        out strOldValue,
+                        out strSnapshot,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -1495,6 +1552,8 @@ namespace DigitalPlatform.LibraryServer
                     // 临时修改内存中的 app.AcceptBlankReaderBarcode 值
                     if (strName == "?AcceptBlankReaderBarcode")
                     {
+                        strOldValue = app.AcceptBlankReaderBarcode.ToString();
+                        strSnapshot = strOldValue;
                         app.AcceptBlankReaderBarcode = DomUtil.IsBooleanTrue(strValue);
                         goto END1;
                     }
@@ -1502,6 +1561,8 @@ namespace DigitalPlatform.LibraryServer
                     // 临时修改内存中的 app.AcceptBlankItemBarcode 值
                     if (strName == "?AcceptBlankItemBarcode")
                     {
+                        strOldValue = app.AcceptBlankItemBarcode.ToString();
+                        strSnapshot = strOldValue;
                         app.AcceptBlankItemBarcode = DomUtil.IsBooleanTrue(strValue);
                         goto END1;
                     }
@@ -1509,6 +1570,8 @@ namespace DigitalPlatform.LibraryServer
                     // 临时修改内存中的 app.VerifyBarcode 值
                     if (strName == "?VerifyBarcode")
                     {
+                        strOldValue = app.VerifyBarcode.ToString();
+                        strSnapshot = strOldValue;
                         app.VerifyBarcode = DomUtil.IsBooleanTrue(strValue);
                         goto END1;
                     }
@@ -1516,6 +1579,8 @@ namespace DigitalPlatform.LibraryServer
                     // 临时修改内存中的 app.UpperCaseItemBarcode 值
                     if (strName == "?UpperCaseItemBarcode")
                     {
+                        strOldValue = app.UpperCaseItemBarcode.ToString();
+                        strSnapshot = strOldValue;
                         app.UpperCaseItemBarcode = DomUtil.IsBooleanTrue(strValue);
                         goto END1;
                     }
@@ -1523,6 +1588,8 @@ namespace DigitalPlatform.LibraryServer
                     // 临时修改内存中的 app.UpperCaseReaderBarcode 值
                     if (strName == "?UpperCaseReaderBarcode")
                     {
+                        strOldValue = app.UpperCaseReaderBarcode.ToString();
+                        strSnapshot = strOldValue;
                         app.UpperCaseReaderBarcode = DomUtil.IsBooleanTrue(strValue);
                         goto END1;
                     }
@@ -1530,6 +1597,8 @@ namespace DigitalPlatform.LibraryServer
                     // 临时修改内存中的 app.VerifyBookType 值
                     if (strName == "?VerifyBookType")
                     {
+                        strOldValue = app.VerifyBookType.ToString();
+                        strSnapshot = strOldValue;
                         app.VerifyBookType = DomUtil.IsBooleanTrue(strValue);
                         goto END1;
                     }
@@ -1537,6 +1606,8 @@ namespace DigitalPlatform.LibraryServer
                     // 临时修改内存中的 app.VerifyReaderType 值
                     if (strName == "?VerifyReaderType")
                     {
+                        strOldValue = app.VerifyReaderType.ToString();
+                        strSnapshot = strOldValue;
                         app.VerifyReaderType = DomUtil.IsBooleanTrue(strValue);
                         goto END1;
                     }
@@ -1544,6 +1615,8 @@ namespace DigitalPlatform.LibraryServer
                     // 临时修改内存中的 app.BorrowCheckOverdue 值
                     if (strName == "?BorrowCheckOverdue")
                     {
+                        strOldValue = app.BorrowCheckOverdue.ToString();
+                        strSnapshot = strOldValue;
                         app.BorrowCheckOverdue = DomUtil.IsBooleanTrue(strValue);
                         goto END1;
                     }
@@ -1551,6 +1624,8 @@ namespace DigitalPlatform.LibraryServer
                     // 临时修改内存中的 app.CirculationNotifyTypes 值
                     if (strName == "?CirculationNotifyTypes")
                     {
+                        strOldValue = app.CirculationNotifyTypes;
+                        strSnapshot = strOldValue;
                         app.CirculationNotifyTypes = strValue;
                         goto END1;
                     }
@@ -1558,6 +1633,8 @@ namespace DigitalPlatform.LibraryServer
                     // 临时修改内存中的 app.AcceptBlankRoomName 值
                     if (strName == "?AcceptBlankRoomName")
                     {
+                        strOldValue = app.AcceptBlankRoomName.ToString();
+                        strSnapshot = strOldValue;
                         app.AcceptBlankRoomName = DomUtil.IsBooleanTrue(strValue);
                         goto END1;
                     }
@@ -1565,13 +1642,17 @@ namespace DigitalPlatform.LibraryServer
                     // 临时修改内存中的 app.VerifyRegisterNoDup 值
                     if (strName == "?VerifyRegisterNoDup")
                     {
-                        app.AcceptBlankRoomName = DomUtil.IsBooleanTrue(strValue);
+                        strOldValue = app.VerifyRegisterNoDup.ToString();
+                        strSnapshot = strOldValue;
+                        app.VerifyRegisterNoDup = DomUtil.IsBooleanTrue(strValue);
                         goto END1;
                     }
 
                     // 临时修改内存中的 app.PatronAdditionalFroms 值
                     if (strName == "?PatronAdditionalFroms")
                     {
+                        strOldValue = StringUtil.MakePathList(app.PatronAdditionalFroms);
+                        strSnapshot = strOldValue;
                         app.PatronAdditionalFroms = StringUtil.SplitList(strValue);
                         goto END1;
                     }
@@ -1579,6 +1660,8 @@ namespace DigitalPlatform.LibraryServer
                     // 临时修改内存中的 app.PatronAdditionalFields 值
                     if (strName == "?PatronAdditionalFields")
                     {
+                        strOldValue = StringUtil.MakePathList(app.PatronAdditionalFields);
+                        strSnapshot = strOldValue;
                         app.PatronAdditionalFields = StringUtil.SplitList(strValue);
                         goto END1;
                     }
@@ -1590,10 +1673,12 @@ namespace DigitalPlatform.LibraryServer
                         nRet = app.SetValueTablesXml(
                             sessioninfo.LibraryCodeList,
                             strValue,
+                            out strOldValue,
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
 
+                        strSnapshot = strOldValue;
                         app.Changed = true;
                         // app.ActivateManagerThread();
                         goto END1;
@@ -1606,9 +1691,12 @@ namespace DigitalPlatform.LibraryServer
                         nRet = app.SetRightsTableXml(
     sessioninfo.LibraryCodeList,
     strValue,
+    out strOldValue,
     out strError);
                         if (nRet == -1)
                             goto ERROR1;
+
+                        strSnapshot = strOldValue;
 
                         // 2022/3/8
                         app.SessionTable.RefreshExpandLibraryCodeList();
@@ -1651,10 +1739,12 @@ namespace DigitalPlatform.LibraryServer
                         nRet = app.SetLocationTypesXml(
                             sessioninfo.LibraryCodeList,
                             strValue,
+                            out strOldValue,
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
 
+                        strSnapshot = strOldValue;
                         app.Changed = true;
                         // app.ActivateManagerThread();
                         goto END1;
@@ -1688,6 +1778,10 @@ namespace DigitalPlatform.LibraryServer
                             root = app.LibraryCfgDom.CreateElement("zhongcihao");
                             app.LibraryCfgDom.DocumentElement.AppendChild(root);
                         }
+                        else
+                            strOldValue = root.OuterXml;
+
+                        strSnapshot = strOldValue;
 
                         try
                         {
@@ -1740,6 +1834,10 @@ namespace DigitalPlatform.LibraryServer
                             root = app.LibraryCfgDom.CreateElement("callNumber");
                             app.LibraryCfgDom.DocumentElement.AppendChild(root);
                         }
+                        else
+                            strOldValue = root.OuterXml;
+
+                        strSnapshot = strOldValue;
 
                         try
                         {
@@ -1803,6 +1901,10 @@ namespace DigitalPlatform.LibraryServer
                             root = app.LibraryCfgDom.CreateElement("dup");
                             app.LibraryCfgDom.DocumentElement.AppendChild(root);
                         }
+                        else
+                            strOldValue = root.OuterXml;
+
+                        strSnapshot = strOldValue;
 
                         try
                         {
@@ -1868,6 +1970,11 @@ namespace DigitalPlatform.LibraryServer
 
                         bool changed = false;
                         XmlNode root = app.LibraryCfgDom.DocumentElement.SelectSingleNode(strName);
+                        if (root != null)
+                            strOldValue = root.OuterXml;
+
+                        strSnapshot = strOldValue;
+
                         if (string.IsNullOrEmpty(strValue) == false)
                         {
                             if (root == null)
@@ -1949,6 +2056,10 @@ namespace DigitalPlatform.LibraryServer
                             root = app.LibraryCfgDom.CreateElement("virtualDatabases");
                             app.LibraryCfgDom.DocumentElement.AppendChild(root);
                         }
+                        else
+                            strOldValue = root.OuterXml;
+
+                        strSnapshot = strOldValue;
 
                         string strOldInnerXml = root.InnerXml;
                         try
@@ -2002,6 +2113,10 @@ namespace DigitalPlatform.LibraryServer
                             root = app.LibraryCfgDom.CreateElement("browseformats");
                             app.LibraryCfgDom.DocumentElement.AppendChild(root);
                         }
+                        else
+                            strOldValue = root.OuterXml;
+
+                        strSnapshot = strOldValue;
 
                         try
                         {
@@ -2034,6 +2149,9 @@ namespace DigitalPlatform.LibraryServer
 
                         DomUtil.SetAttr(node, "url", strValue);
                          * */
+                        strOldValue = app.OpacServerUrl;
+                        strSnapshot = strOldValue;
+
                         app.OpacServerUrl = strValue;
                         app.Changed = true;
                         //app.ActivateManagerThread();
@@ -2085,7 +2203,5 @@ namespace DigitalPlatform.LibraryServer
                 app.UnlockForWrite();
             }
         }
-
-
     }
 }

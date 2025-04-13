@@ -428,6 +428,7 @@ namespace DigitalPlatform.LibraryServer
             domExist.LoadXml(domExistParam.OuterXml);
 
             // 2021/7/19
+            // 对名为 "http://dp2003.com/dprms:file" 的元素，进行特殊处理，这样就不要求 SetElementOuterXml() 函数具备处理这种特殊(指包含 Namespace URI)名字的元素的能力了
             bool has_file_element = Array.IndexOf(element_names, "http://dp2003.com/dprms:file") != -1;
             if (has_file_element)
             {

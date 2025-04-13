@@ -2223,7 +2223,7 @@ out strError);
                 {
                     lRet = channel.LoadChargingHistory(looping.Progress,
                         strBarcode,
-                        "return,lost,read",
+                        "return,lost,read,transferIdTo:itemBarcode|readerBarcode",
                         nPageNo,
                         nLength,
                         out total_results,

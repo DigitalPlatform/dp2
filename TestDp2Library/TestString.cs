@@ -9,6 +9,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.Text;
 using static DigitalPlatform.Text.dp2StringUtil;
+using DigitalPlatform.Xml;
+using System.Xml;
 
 namespace TestDp2Library
 {
@@ -579,6 +581,100 @@ namespace TestDp2Library
         return $"{macro}_value";
     });
             Assert.AreEqual(correct, result);
+        }
+
+        // 测试 DomUtil.SetElementOuterXml() 函数
+        // 原先 DOM 中没有名字为 "dprms:file" 的元素，新设置进去
+        [TestMethod]
+        public void test_setElementOuterXml_01()
+        {
+            string origin = "<root><a>123</a></root>";
+            string name = "dprms:file";
+            string outerxml = "<dprms:file id=\"0\" usage=\"photo\" xmlns:dprms=\"http://dp2003.com/dprms\" />";
+            string correct = "<root><a>123</a><dprms:file id=\"0\" usage=\"photo\" xmlns:dprms=\"http://dp2003.com/dprms\" /></root>";
+
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(origin);
+
+            DomUtil.SetElementOuterXml(dom.DocumentElement,
+                "http://dp2003.com/dprms",
+                name,
+                outerxml);
+            Assert.AreEqual(correct, dom.DocumentElement.OuterXml);
+        }
+
+        // 原先 DOM 中就有名字为 "dprms:file" 的元素，覆盖式设置进去
+        [TestMethod]
+        public void test_setElementOuterXml_02()
+        {
+            string origin = "<root><a>123</a><dprms:file id=\"0\" usage=\"photo\" xmlns:dprms=\"http://dp2003.com/dprms\" /></root>";
+            string name = "dprms:file";
+            string outerxml = "<dprms:file id=\"1\" usage=\"photo\" xmlns:dprms=\"http://dp2003.com/dprms\" />";
+            string correct = "<root><a>123</a><dprms:file id=\"1\" usage=\"photo\" xmlns:dprms=\"http://dp2003.com/dprms\" /></root>";
+
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(origin);
+
+            DomUtil.SetElementOuterXml(dom.DocumentElement,
+                "http://dp2003.com/dprms",
+                name,
+                outerxml);
+            Assert.AreEqual(correct, dom.DocumentElement.OuterXml);
+        }
+
+        // 原先 DOM 中就有名字为 "dprms:file" 的元素，覆盖式设置进去另外一个元素(名字没有前缀)的 OuterXml 内容
+        [TestMethod]
+        public void test_setElementOuterXml_03()
+        {
+            string origin = "<root><a>123</a><dprms:file id=\"0\" usage=\"photo\" xmlns:dprms=\"http://dp2003.com/dprms\" /></root>";
+            string name = "dprms:file";
+            string outerxml = "<file id=\"1\" usage=\"photo\" />";
+            string correct = "<root><a>123</a><file id=\"1\" usage=\"photo\" /></root>";
+
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(origin);
+
+            DomUtil.SetElementOuterXml(dom.DocumentElement,
+                "http://dp2003.com/dprms",
+                name,
+                outerxml);
+            Assert.AreEqual(correct, dom.DocumentElement.OuterXml);
+        }
+
+        // 原先 DOM 中就有名字为 "dprms:file" 的元素，覆盖式设置进去另外一个元素(名字有前缀)的 OuterXml 内容
+        [TestMethod]
+        public void test_setElementOuterXml_04()
+        {
+            string origin = "<root><a>123</a><dprms:file id=\"0\" usage=\"photo\" xmlns:dprms=\"http://dp2003.com/dprms\" /></root>";
+            string name = "dprms:file";
+            string outerxml = "<test:file id=\"1\" usage=\"photo\" xmlns:test=\"http://dp2003.com/test\" />";
+            string correct = "<root><a>123</a><test:file id=\"1\" usage=\"photo\" xmlns:test=\"http://dp2003.com/test\" /></root>";
+
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(origin);
+
+            DomUtil.SetElementOuterXml(dom.DocumentElement,
+                "http://dp2003.com/dprms",
+                name,
+                outerxml);
+            Assert.AreEqual(correct, dom.DocumentElement.OuterXml);
+        }
+
+        // SetElementOuterXml() 用到了 CreateNode() 函数
+        [TestMethod]
+        public void test_createNode_01()
+        {
+            string origin = "<root><a>123</a></root>";
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(origin);
+            XmlNamespaceManager nsmgr = new XmlNamespaceManager(dom.NameTable);
+            nsmgr.AddNamespace("dprms", "http://dp2003.com/dprms");
+
+            var file_element = DomUtil.CreateNode(dom.DocumentElement,
+                new string[] { "dprms:file" },
+                nsmgr) as XmlElement;
+            Assert.IsTrue(file_element != null);
+            Assert.AreEqual("dprms:file", file_element.Name);
         }
     }
 }

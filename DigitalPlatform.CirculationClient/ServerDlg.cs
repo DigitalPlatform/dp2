@@ -186,7 +186,7 @@ a => a.AddressFamily == AddressFamily.InterNetwork);
             return false;
         }
 
-        public static string HnbUrl = "rest.http://58.87.101.80/hnb/rest";   // "http://hnbclub.cn/dp2library";
+        public static string HnbUrl = "rest.http://pear.ilovelibrary.cn/hnb/rest/";   // "rest.http://58.87.101.80/hnb/rest";   // "http://hnbclub.cn/dp2library";
 
         private void toolStripButton_server_setHongnibaServer_Click(object sender, EventArgs e)
         {

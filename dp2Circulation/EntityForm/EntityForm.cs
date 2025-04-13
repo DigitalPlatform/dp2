@@ -8057,6 +8057,11 @@ out strError);
             this.RegisterType = RegisterType.QuickRegister;
         }
 
+        private void toolStripMenuItem_quickRegisterMultiple_Click(object sender, EventArgs e)
+        {
+            this.RegisterType = RegisterType.QuickRegisterMultiple;
+        }
+
         private void toolStripMenuItem_register_Click(object sender, EventArgs e)
         {
             this.RegisterType = RegisterType.Register;
@@ -8089,6 +8094,11 @@ out strError);
                 {
                     this.button_register.Text = "快速登记";
                     this.toolStripMenuItem_quickRegister.Checked = true;
+                }
+                if (m_registerType == RegisterType.QuickRegisterMultiple)
+                {
+                    this.button_register.Text = "快速登记多个";
+                    this.toolStripMenuItem_quickRegisterMultiple.Checked = true;
                 }
                 if (m_registerType == RegisterType.Register)
                 {
@@ -13185,7 +13195,29 @@ out strError);
                          * */
                         this.SwitchFocus(ITEM_BARCODE);
                     }
-
+                }
+                else if (this.RegisterType == RegisterType.QuickRegisterMultiple)
+                {
+                REDO_INPUT:
+                    var count_string = InputDlg.GetInput(this, "要创建的册记录个数", "个数", "1", this.Font);
+                    if (count_string == null)
+                        return;
+                    if (Int16.TryParse(count_string, out short count) == false)
+                    {
+                        MessageBox.Show(this, $"输入内容 '{count_string}' 不合法。应该是一个纯数字。请重新输入");
+                        goto REDO_INPUT;
+                    }
+                    if (count > 100)
+                    {
+                        strError = "输入的数字太大。请重新输入一个小于等于 100 的数字";
+                        goto REDO_INPUT;
+                    }
+                    // 快速登记
+                    nRet = this.entityControl1.DoQuickNewEntity(this.QuickItemBarcode, count);
+                    if (nRet != -1)
+                    {
+                        this.SwitchFocus(ITEM_BARCODE);
+                    }
                 }
                 else if (this.RegisterType == RegisterType.SearchOnly)
                 {
@@ -18348,10 +18380,16 @@ out strError);
         /// 快速登记
         /// </summary>
         QuickRegister = 1, // 快速登记
+
+        /// <summary>
+        /// 快速登记多个
+        /// </summary>
+        QuickRegisterMultiple = 2,
+
         /// <summary>
         /// 登记
         /// </summary>
-        Register = 2, // 登记
+        Register = 3, // 登记
     }
 
 #if NO

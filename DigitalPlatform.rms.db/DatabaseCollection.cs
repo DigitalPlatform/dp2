@@ -4000,7 +4000,7 @@ namespace DigitalPlatform.rms
 
                     // ************************************
                     // 处理记录和记录里的对象
-                    if (bObject == true)  //对像
+                    if (bObject == true)  // 对象
                     {
                         if (strOutputRecordID == "-1")
                         {

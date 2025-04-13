@@ -15,8 +15,6 @@ using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
-using DigitalPlatform.Core;
-using DigitalPlatform.CommonControl;
 
 namespace DigitalPlatform.CirculationClient
 {
@@ -107,6 +105,7 @@ namespace DigitalPlatform.CirculationClient
         public const int COLUMN_TIMESTAMP = 5;
         public const int COLUMN_USAGE = 6;
         public const int COLUMN_RIGHTS = 7;
+        public const int COLUMN_LASTMODIFIED = 8;   // 2024/4/13
 
         /*
         public const int TYPE_UPLOADED = 0;
@@ -389,6 +388,7 @@ namespace DigitalPlatform.CirculationClient
                             string strTimestamp = ByteArray.GetHexTimeStampString(baMetadataTimestamp);
                             ListViewUtil.ChangeItemText(item, COLUMN_TIMESTAMP, strTimestamp);
 
+                            ListViewUtil.ChangeItemText(item, COLUMN_LASTMODIFIED, (string)values["lastmodified"]);   // 2024/4/13
                             i++;
                         }
                     }
@@ -471,6 +471,8 @@ namespace DigitalPlatform.CirculationClient
                         // tiemstamp
                         string strTimestamp = ByteArray.GetHexTimeStampString(baMetadataTimestamp);
                         ListViewUtil.ChangeItemText(item, COLUMN_TIMESTAMP, strTimestamp);
+
+                        ListViewUtil.ChangeItemText(item, COLUMN_LASTMODIFIED, (string)values["lastmodified"]);   // 2024/4/13
                     }
                 }
 

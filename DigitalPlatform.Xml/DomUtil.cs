@@ -1313,6 +1313,66 @@ namespace DigitalPlatform.Xml
             return DomUtil.CreateNode(nodeRoot, aNodeName);
         }
 
+        // 2025/4/12
+        // 名字空间版本
+        public static XmlNode CreateNode(XmlNode nodeRoot,
+            string[] aNodeName,
+            XmlNamespaceManager nsmgr)
+        {
+            XmlDocument dom = nodeRoot.OwnerDocument;
+            if (dom == null)
+            {
+                if (nodeRoot is XmlDocument)
+                    dom = (XmlDocument)nodeRoot;
+                else
+                    throw (new Exception("CreateNode()发生异常，nodeRoot的OwnerDocument属性值为null，且nodeRoot不是XmlDocument类型。"));
+            }
+
+            if (aNodeName.Length == 0)
+                return null;
+
+            int i = 0;
+            if (aNodeName[0] == "")
+                i = 1;
+
+            XmlNode nodeCurrent = nodeRoot;
+            XmlNode temp = null;
+            for (; i < aNodeName.Length; i++)
+            {
+                string strOneName = aNodeName[i];
+                if (strOneName == "")
+                    throw new Exception("通过CreateNode()创建元素时，第'" + Convert.ToInt32(i) + "'级的名称为空。");
+
+                temp = nodeCurrent.SelectSingleNode(strOneName, nsmgr);
+                if (temp == null)
+                {
+                    Char firstChar = strOneName[0];
+                    if (firstChar == '@' && i == aNodeName.Length - 1)
+                    {
+                        string strAttrName = strOneName.Substring(1);
+                        if (strAttrName == "")
+                            throw new Exception("通过CreateNode()创建元素时，第'" + Convert.ToInt32(i) + "'级的属性名称为空。");
+                        DomUtil.SetAttr(nodeCurrent, strAttrName, "");
+                        temp = nodeCurrent.SelectSingleNode("@" + strAttrName, nsmgr);
+                        if (temp == null)
+                            throw new Exception("已经创建了'" + strAttrName + "'属性，不可能找不到。");
+                    }
+                    else
+                    {
+                        var prefix = GetPrefix(strOneName);
+                        if (nsmgr.GetNamespacesInScope(XmlNamespaceScope.All).TryGetValue(prefix, out string uri) == false)
+                                throw new XmlException($"创建元素时没有找到前缀 '{prefix}' 的 NamespaceURI 定义");
+                        temp = dom.CreateElement(strOneName, uri);
+                        nodeCurrent.AppendChild(temp);
+                    }
+                }
+                nodeCurrent = temp;
+            }
+
+            return nodeCurrent;
+        }
+
+
         // 根据名称数组逐级创建节点
         // parameters:
         //      nodeRoot    根节点
@@ -1617,6 +1677,79 @@ namespace DigitalPlatform.Xml
             return false;
         }
 
+        // 2025/4/12 带有 namespace uri 的版本
+        // 写入一个元素文本
+        // return:
+        //      返回该元素的XmlNode
+        public static XmlElement SetElementOuterXml(XmlNode nodeRoot,
+            string namespace_uri,
+            string strXpath,
+            string strOuterXml)
+        {
+            if (nodeRoot == null)
+                throw new ArgumentException("nodeRoot 参数值不应为空", "nodeRoot");
+
+            // 2025/4/12
+            var prefix = GetPrefix(strXpath);
+            XmlElement nodeFound = null;
+            XmlNamespaceManager nsmgr = null;
+            if (string.IsNullOrEmpty(prefix) == false)
+            {
+                nsmgr = new XmlNamespaceManager(nodeRoot.OwnerDocument.NameTable);
+                nsmgr.AddNamespace(prefix, namespace_uri);
+                nodeFound = nodeRoot.SelectSingleNode(strXpath, nsmgr) as XmlElement;
+            }
+            else
+                nodeFound = nodeRoot.SelectSingleNode(strXpath) as XmlElement;
+
+            if (nodeFound == null)
+            {
+                string[] aNodeName = strXpath.Split(new Char[] { '/' });
+                nodeFound = CreateNode(nodeRoot, aNodeName, nsmgr) as XmlElement;
+            }
+
+            if (nodeFound == null)
+            {
+                throw (new Exception("SetElementOuterXml() CreateNode error"));
+            }
+
+            if (string.IsNullOrEmpty(strOuterXml) == false)
+            {
+                XmlDocumentFragment fragment = nodeFound.OwnerDocument.CreateDocumentFragment();
+                fragment.InnerXml = strOuterXml;
+
+                nodeFound.ParentNode.InsertAfter(fragment, nodeFound);
+
+                nodeFound.ParentNode.RemoveChild(nodeFound);
+
+                if (nsmgr != null)
+                    nodeFound = nodeRoot.SelectSingleNode(strXpath, nsmgr) as XmlElement;
+                else
+                    nodeFound = nodeRoot.SelectSingleNode(strXpath) as XmlElement;
+                return nodeFound;
+            }
+            else
+            {
+                // 2016/11/5
+                nodeFound.ParentNode.RemoveChild(nodeFound);
+                return null;
+            }
+        }
+
+
+        static string GetPrefix(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return "";
+            // 目前 GetPrefix() 只支持一个前缀，一级元素名称
+            if (text.Contains("/"))
+                throw new ArgumentException("text 参数值不能包含 '/' 字符", "text");
+            var index = text.IndexOf(':');
+            if (index == -1)
+                return "";
+            return text.Substring(0, index);
+        }
+
         // 写入一个元素文本
         // return:
         //      返回该元素的XmlNode
@@ -1627,7 +1760,7 @@ namespace DigitalPlatform.Xml
             if (nodeRoot == null)
                 throw new ArgumentException("nodeRoot 参数值不应为空", "nodeRoot");
 
-            XmlNode nodeFound = nodeRoot.SelectSingleNode(strXpath);
+            var nodeFound = nodeRoot.SelectSingleNode(strXpath);
             if (nodeFound == null)
             {
                 string[] aNodeName = strXpath.Split(new Char[] { '/' });

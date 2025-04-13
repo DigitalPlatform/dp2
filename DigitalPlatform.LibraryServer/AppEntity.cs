@@ -402,7 +402,8 @@ namespace DigitalPlatform.LibraryServer
 
             strMergedXml = domExist.OuterXml;
 
-            if (string.IsNullOrEmpty(strWarning) == false)
+            if (string.IsNullOrEmpty(strWarning) == false
+                && bChangePartDeniedParam == true)
             {
                 strError = strWarning;
                 return 1;

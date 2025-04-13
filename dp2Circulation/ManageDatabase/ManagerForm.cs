@@ -6620,7 +6620,6 @@ namespace dp2Circulation
             return;
         ERROR1:
             MessageBox.Show(this, strError);
-
         }
 
         private void toolStripButton_valueTable_refresh_Click(object sender, EventArgs e)

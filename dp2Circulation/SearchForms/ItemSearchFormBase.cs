@@ -933,6 +933,7 @@ item_recpath);
 
                     DomUtil.SetElementText(old_dom.DocumentElement, "comment", new_comment);
                 }
+                // TODO: 注意验证 name 为 "dprms:file" 这样的元素名时抛出异常。要改用另一个版本的 SetElementOuterXml() 函数
                 DomUtil.SetElementOuterXml(old_dom.DocumentElement,
                     name, strTextNew);
             }
