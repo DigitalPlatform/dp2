@@ -4788,15 +4788,21 @@ handle.CancelTokenSource.Token).Result;
                 if (nodesConvertQueryString?.Count > 0
                     && keysCfg != null)
                 {
+                    // return:
+                    //      -1  出错
+                    //      0   成功
                     nRet = keysCfg.ConvertKeyWithStringNode(
-                                    null, // 2025/2/27
-                        null,//dataDom
+                        null,   // 2025/2/27
+                        null,   //dataDom
                         strKeyValue,
                         nodesConvertQueryString,
                         out keys,
                         out strError);
                     if (nRet == -1)
+                    {
+                        strError = $"预处理检索词 '{strKeyValue}' 过程出错: {strError}";
                         return -1;
+                    }
 #if REMOVED
                     if (keys.Count != 1)
                     {
@@ -4818,16 +4824,22 @@ handle.CancelTokenSource.Token).Result;
                 if (nodesConvertQueryNumber?.Count > 0
                     && keysCfg != null)
                 {
-                    // string strMyKey;
+                    // return:
+                    //		-1	出错
+                    //		0	成功
+                    //      1   转换为数字的过程失败 strError中有报错信息
                     nRet = keysCfg.ConvertKeyWithNumberNode(
-                                    null, // 2025/2/27
+                        null, // 2025/2/27
                         null,
                         strKeyValue,
                         nodesConvertQueryNumber,
                         out List<string> keys1,   // strMyKey,
                         out strError);
                     if (nRet == -1 || nRet == 1)
+                    {
+                        strError = $"预处理检索词 '{strKeyValue}' 过程出错: {strError}";
                         return -1;
+                    }
                     // strKeyValue = strMyKey;
 #if REMOVED
                     strKeyValue = keys[0];
@@ -5046,6 +5058,9 @@ handle.CancelTokenSource.Token).Result;
                                 && keysCfg != null)
                             {
                                 // 加工首
+                                // return:
+                                //      -1  出错
+                                //      0   成功
                                 nRet = keysCfg.ConvertKeyWithStringNode(
                                     null, // 2025/2/27
                                     null,//dataDom
@@ -5054,7 +5069,10 @@ handle.CancelTokenSource.Token).Result;
                                     out List<KeyAndFrom> keys1,
                                     out strError);
                                 if (nRet == -1)
+                                {
+                                    strError = $"预处理检索词 '{strStartText}' 过程出错: {strError}";
                                     return -1;
+                                }
                                 if (keys1.Count != 1)
                                 {
                                     strError = $"不支持把检索词通过'split'样式加工成多个({KeyAndFrom.ToString(keys1)})";
@@ -5064,6 +5082,9 @@ handle.CancelTokenSource.Token).Result;
 
 
                                 // 加工尾
+                                // return:
+                                //      -1  出错
+                                //      0   成功
                                 nRet = keysCfg.ConvertKeyWithStringNode(
                                     null, // 2025/2/27
                                     null,//dataDom
@@ -5072,7 +5093,10 @@ handle.CancelTokenSource.Token).Result;
                                     out List<KeyAndFrom> keys2,
                                     out strError);
                                 if (nRet == -1)
+                                {
+                                    strError = $"预处理检索词 '{strEndText}' 过程出错: {strError}";
                                     return -1;
+                                }
                                 if (keys2.Count != 1)
                                 {
                                     strError = $"不支持把检索词通过'split'样式加工成多个({KeyAndFrom.ToString(keys2)})";
@@ -5144,7 +5168,10 @@ handle.CancelTokenSource.Token).Result;
                                 && keysCfg != null)
                             {
                                 // 首
-                                string strMyKey;
+                                // return:
+                                //		-1	出错
+                                //		0	成功
+                                //      1   转换为数字的过程失败 strError中有报错信息
                                 nRet = keysCfg.ConvertKeyWithNumberNode(
                                     null, // 2025/2/27
                                     null,
@@ -5153,11 +5180,18 @@ handle.CancelTokenSource.Token).Result;
                                     out List<string> keys1,  // strMyKey,
                                     out strError);
                                 if (nRet == -1 || nRet == 1)
+                                {
+                                    strError = $"预处理检索词 '{strStartText}' 过程出错: {strError}";
                                     return -1;
+                                }
                                 // strStartText = strMyKey;
                                 strStartText = keys1[0];
 
                                 // 尾
+                                // return:
+                                //		-1	出错
+                                //		0	成功
+                                //      1   转换为数字的过程失败 strError中有报错信息
                                 nRet = keysCfg.ConvertKeyWithNumberNode(
                                     null, // 2025/2/27
                                     null,
@@ -5166,7 +5200,10 @@ handle.CancelTokenSource.Token).Result;
                                     out List<string> keys2,   // strMyKey,
                                     out strError);
                                 if (nRet == -1 || nRet == 1)
+                                {
+                                    strError = $"预处理检索词 '{strEndText}' 过程出错: {strError}";
                                     return -1;
+                                }
                                 // strEndText = strMyKey;
                                 strEndText = keys2[0];
                             }
@@ -5195,6 +5232,9 @@ handle.CancelTokenSource.Token).Result;
                             if (nodesConvertQueryString?.Count > 0
                                 && keysCfg != null)
                             {
+                                // return:
+                                //      -1  出错
+                                //      0   成功
                                 nRet = keysCfg.ConvertKeyWithStringNode(
                                     null, // 2025/2/27
                                     null,//dataDom
@@ -5203,7 +5243,11 @@ handle.CancelTokenSource.Token).Result;
                                     out keys1,
                                     out strError);
                                 if (nRet == -1)
+                                {
+                                    strError = $"预处理检索词 '{strRealText}' 过程出错: {strError}";
                                     return -1;
+                                }
+
                                 if (keys1.Count != 1)
                                 {
                                     strError = $"不支持把检索词通过'split'样式加工成多个({KeyAndFrom.ToString(keys1)})";
@@ -5265,7 +5309,10 @@ handle.CancelTokenSource.Token).Result;
                             if (nodesConvertQueryNumber?.Count > 0
                                 && keysCfg != null)
                             {
-                                // string strMyKey;
+                                // return:
+                                //		-1	出错
+                                //		0	成功
+                                //      1   转换为数字的过程失败 strError中有报错信息
                                 nRet = keysCfg.ConvertKeyWithNumberNode(
                                     null, // 2025/2/27
                                     null,
@@ -5274,7 +5321,10 @@ handle.CancelTokenSource.Token).Result;
                                     out keys1,  // strMyKey,
                                     out strError);
                                 if (nRet == -1 || nRet == 1)
+                                {
+                                    strError = $"预处理检索词 '{strRealText}' 过程出错: {strError}";
                                     return -1;
+                                }
                                 // strRealText = strMyKey;
 
 
@@ -7133,7 +7183,7 @@ List<DbParameter> aSqlParameter)
                                 XmlNamespaceManager nsmgr = new XmlNamespaceManager(dom.NameTable);
                                 nsmgr.AddNamespace("dprms", DpNs.dprms);
                                 XmlNodeList fileList = dom.DocumentElement.SelectNodes("//dprms:file", nsmgr);
-                                foreach (XmlNode fileNode in fileList)
+                                foreach (XmlElement fileNode in fileList)
                                 {
                                     string strObjectID = DomUtil.GetAttr(fileNode, "id");
                                     if (strObjectID == "")

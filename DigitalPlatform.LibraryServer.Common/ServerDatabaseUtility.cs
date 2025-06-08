@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
@@ -213,6 +214,8 @@ namespace DigitalPlatform.LibraryServer.Common
                     return "书目";
                 case "entity":
                     return "实体";
+                case "item":
+                    return "册";
                 case "order":
                     return "订购";
                 case "issue":
@@ -386,6 +389,19 @@ namespace DigitalPlatform.LibraryServer.Common
                 return null;
 
             return node.Value;
+        }
+
+        // 根据类型，获得实用库的名字
+        public static List<string> GetUtilDbNamesByType(XmlDocument LibraryCfgDom,
+            string type)
+        {
+            List<string> names = new List<string>();
+            XmlNodeList nodes = LibraryCfgDom.DocumentElement.SelectNodes($"utilDb/database[@type='{type}']");
+            foreach (XmlElement database in nodes)
+            {
+                names.Add(database.GetAttribute("name"));
+            }
+            return names;
         }
 
         // 确保在 library.xml 中创建一个 utilDb/database 元素

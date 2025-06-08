@@ -336,7 +336,7 @@ namespace DigitalPlatform
             return results;
         }
 
-        private void button_copyNicInfomation_Click(object sender, EventArgs e)
+        private void button_copyNicInformation_Click(object sender, EventArgs e)
         {
             string strContent = GetNicInformation();
             // Clipboard.SetDataObject(strContent, true);
@@ -379,7 +379,7 @@ namespace DigitalPlatform
         }
 #endif
 
-        private void toolStripButton_copyNicInfomation_Click(object sender, EventArgs e)
+        private void toolStripButton_copyNicInformation_Click(object sender, EventArgs e)
         {
             string strContent = GetNicInformation();
             CopyToClipboard(strContent);

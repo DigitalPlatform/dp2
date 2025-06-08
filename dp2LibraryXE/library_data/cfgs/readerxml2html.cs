@@ -29,6 +29,8 @@
 // 2021/8/23	“在借册”行左侧增加 checkbox
 // 2021/10/9    “在借册”行左边增加一列序号
 // 2021/10/25   显示掌纹图标和人脸(识别)图标
+// 2025/4/23    改进 MakeBarcodeListHyperLink() 等，尽可能显示册条码号
+// 2025/4/26    借阅历史的操作者内容如果为 "@refID:" 开头，尽量转换显示为读者证条码号
 
 using System;
 using System.Collections.Generic;
@@ -360,16 +362,12 @@ public class MyConverter : ReaderConverter
         try
         {
             nMax = System.Convert.ToInt32(strMaxItemCount);
+            strResult.Append("当前可借:" + System.Convert.ToString(Math.Max(0, nMax - nodes.Count)) + "");
         }
         catch
         {
             strResult.Append("当前读者 可借总册数 参数 '" + strMaxItemCount + "' 格式错误");
-            goto CONTINUE1;
         }
-
-        strResult.Append("当前可借:" + System.Convert.ToString(Math.Max(0, nMax - nodes.Count)) + "");
-
-    CONTINUE1:
 
         int nOverdueCount = 0;
         strResult.Append("</td></tr>");
@@ -382,6 +380,12 @@ public class MyConverter : ReaderConverter
             {
                 XmlNode node = nodes[i];
                 string strBarcode = DomUtil.GetAttr(node, "barcode");
+
+                // 2025/4/24
+                string strRefID = DomUtil.GetAttr(node, "refID");
+                if (string.IsNullOrEmpty(strBarcode) && string.IsNullOrEmpty(strRefID) == false)
+                    strBarcode = $"@refID:{strRefID}";
+
                 string strNo = DomUtil.GetAttr(node, "no");
                 string strBorrowDate = DomUtil.GetAttr(node, "borrowDate");
                 string strPeriod = DomUtil.GetAttr(node, "borrowPeriod");
@@ -476,7 +480,7 @@ public class MyConverter : ReaderConverter
                     strResult.Append("<tr class='content overdue'>");
                 else
                     strResult.Append("<tr class='content'>");
-                strResult.Append("<td class='checkbox' nowrap><span style='index'>"+(i+1).ToString()+"</span><input class='sel' type='checkbox' data-barcode='" + strBarcode + "'></input></td>");
+                strResult.Append("<td class='checkbox' nowrap><span style='index'>" + (i + 1).ToString() + "</span><input class='sel' type='checkbox' data-barcode='" + strBarcode + "'></input></td>");
                 strResult.Append("<td class='barcode' nowrap>" + strBarcodeLink + "</td>");
                 strResult.Append("<td class='summary pending'><br/>BC:" + strBarcode + "|" + strConfirmItemRecPath
                     + (string.IsNullOrEmpty(strBiblioRecPath) == true ? "" : "|" + strBiblioRecPath) + "</td>");
@@ -525,12 +529,43 @@ public class MyConverter : ReaderConverter
                 string strRequestDate = LocalTime(DomUtil.GetAttr(node, "requestDate"));
 
                 string strOperator = DomUtil.GetAttr(node, "operator");
-                string strArrivedItemBarcode = DomUtil.GetAttr(node, "arrivedItemBarcode");
+
+                // 2025/4/23
+                // 尽可能将读者参考 ID 转换为读者证条码号
+                string strDisplayOperator = strOperator;
+                if (strDisplayOperator != null && strDisplayOperator.StartsWith("@refID:"))
+                {
+                    var ret = ConvertRefIdListToReaderBarcodeList(
+    strOperator,
+    out string temp,
+    out string _);
+                    if (ret != -1 && string.IsNullOrEmpty(temp) == false)
+                        strDisplayOperator = temp;
+                }
+
+                string strArrivedItemKey = DomUtil.GetAttr(node, "arrivedItemRefID");
+                if (string.IsNullOrEmpty(strArrivedItemKey))
+                    strArrivedItemKey = DomUtil.GetAttr(node, "arrivedItemBarcode");
+
+                // 用于显示的册条码号
+                string strDisplayArrivedBarcode = DomUtil.GetAttr(node, "arrivedItemBarcode");
+                if (string.IsNullOrEmpty(strDisplayArrivedBarcode))
+                    strDisplayArrivedBarcode = strArrivedItemKey;
+                // 尽量转成册条码号形态
+                if (strDisplayArrivedBarcode.StartsWith("@refID:"))
+                {
+                    var ret = ConvertRefIdListToItemBarcodeList(
+strDisplayArrivedBarcode,
+out string temp,
+out string _);
+                    if (ret != -1 && string.IsNullOrEmpty(temp) == false)
+                        strDisplayArrivedBarcode = temp;
+                }
 
                 string strSummary = this.App.GetBarcodesSummary(
                     this.SessionInfo,
                     strBarcodes,
-                    strArrivedItemBarcode,
+                    strArrivedItemKey,
                     "html", // "html,forcelogin",
                     ""/*"target='_blank'"*/);
 
@@ -543,7 +578,7 @@ public class MyConverter : ReaderConverter
                 if (strState == "arrived")
                 {
                     strArrivedDate = ItemConverter.LocalTime(strArrivedDate);
-                    strState = "册 " + strArrivedItemBarcode + " 已于 " + strArrivedDate + " 到书";
+                    strState = "册 " + strDisplayArrivedBarcode + " 已于 " + strArrivedDate + " 到书";
 
                     if (nBarcodesCount > 1)
                     {
@@ -561,13 +596,13 @@ public class MyConverter : ReaderConverter
 
                 strResult.Append("<tr class='" + strClass + "'>");
                 strResult.Append("<td class='barcode'>"
-                    + MakeBarcodeListHyperLink(strBarcodes, strArrivedItemBarcode, ", ")
+                    + MakeBarcodeListHyperLink(strBarcodes, strArrivedItemKey, ", ")
                     + (nBarcodesCount > 1 ? " 之一" : "")
                     + "</td>");
                 strResult.Append("<td class='state'>" + strState + "</td>");
                 strResult.Append("<td class='summary'>" + strSummary + "</td>");
                 strResult.Append("<td class='requestdate'>" + strRequestDate + "</td>");
-                strResult.Append("<td class='operator'>" + strOperator + "</td>");
+                strResult.Append("<td class='operator'>" + strDisplayOperator + "</td>");
                 strResult.Append("<td class='boxing'>" + strBox + "</td>");
                 strResult.Append("</tr>");
             }
@@ -607,13 +642,40 @@ public class MyConverter : ReaderConverter
 
                 for (int i = 0; i < nodes.Count; i++)
                 {
-                    XmlNode node = nodes[i];
+                    XmlElement node = nodes[i] as XmlElement;
                     string strBarcode = DomUtil.GetAttr(node, "barcode");
+
+                    // 2025/4/25
+                    string strRefID = node.GetAttribute("refID");
+                    if (string.IsNullOrEmpty(strBarcode) && string.IsNullOrEmpty(strRefID) == false)
+                        strBarcode = $"@refID:{strRefID}";
+
                     string strNo = DomUtil.GetAttr(node, "no");
                     string strBorrowDate = DomUtil.GetAttr(node, "borrowDate");
                     string strPeriod = DomUtil.GetAttr(node, "borrowPeriod");
                     string strBorrowOperator = DomUtil.GetAttr(node, "borrowOperator");	// 借书操作者
-                    string strOperator = DomUtil.GetAttr(node, "operator");	// 还书操作者
+                    // 2025/4/26
+                    if (strBorrowOperator != null && strBorrowOperator.StartsWith("@refID:"))
+                    {
+                        var ret = this.ConvertRefIdListToReaderBarcodeList(
+strBorrowOperator,
+out string temp,
+out string _);
+                        if (ret != -1 && string.IsNullOrEmpty(temp) == false)
+                            strBorrowOperator = temp;
+                    }
+                    // 还书操作者
+                    string strOperator = DomUtil.GetAttr(node, "operator"); 
+                    // 2025/4/26
+                    if (strOperator != null && strOperator.StartsWith("@refID:"))
+                    {
+                        var ret = this.ConvertRefIdListToReaderBarcodeList(
+strOperator,
+out string temp,
+out string _);
+                        if (ret != -1 && string.IsNullOrEmpty(temp) == false)
+                            strOperator = temp;
+                    }
                     string strRenewComment = DomUtil.GetAttr(node, "renewComment");
                     // string strSummary = "";
                     string strConfirmItemRecPath = DomUtil.GetAttr(node, "recPath");
@@ -666,17 +728,29 @@ public class MyConverter : ReaderConverter
         if (string.IsNullOrEmpty(strArrivedItemBarcode) == false)
             strDisableClass = "deleted";
         string[] barcodes = strBarcodes.Split(new char[] { ',' });
-        for (int i = 0; i < barcodes.Length; i++)
+        foreach (string strBarcode in barcodes)
         {
-            string strBarcode = barcodes[i];
+            // string strBarcode = barcodes[i];
             if (String.IsNullOrEmpty(strBarcode) == true)
                 continue;
+
+            // 2025/4/23
+            // 将 "@refID:xxx" 尽可能替换为册条码号
+            string strDisplayBarcode = strBarcode;
+            {
+                var ret = ConvertRefIdListToItemBarcodeList(
+strBarcode,
+out string temp,
+out string strError);
+                if (ret != -1 && string.IsNullOrEmpty(temp) == false)
+                    strDisplayBarcode = temp;
+            }
 
             if (strResult != "")
                 strResult += strSep;
             strResult += "<a "
                 + (string.IsNullOrEmpty(strDisableClass) == false && strBarcode != strArrivedItemBarcode ? "class='" + strDisableClass + "'" : "")
-                + " href='javascript:void(0);' onclick=\"window.external.OpenForm('ItemInfoForm', this.innerText, true);\"  onmouseover=\"window.external.HoverItemProperty(this.innerText);\">" + strBarcode + "</a>";
+                + " href='javascript:void(0);' onclick=\"window.external.OpenForm('ItemInfoForm', this.innerText, true);\"  onmouseover=\"window.external.HoverItemProperty(this.innerText);\">" + strDisplayBarcode + "</a>";
         }
 
         return strResult;

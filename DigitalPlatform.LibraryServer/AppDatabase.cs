@@ -14,6 +14,8 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.rms.Client.rmsws_localhost;
+using System.Web.UI;
+using System.Data.SqlClient;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -1507,13 +1509,23 @@ out strError);
                 out strError);
                             if (nRet != 0)
                             {
-                                strError = "图书馆代码 '" + strNewLibraryCode + "' 格式错误: " + strError;
+                                strError = "(打算修改成的)图书馆代码 '" + strNewLibraryCode + "' 格式错误: " + strError;
                                 goto ERROR1;
                             }
 
                             DomUtil.SetAttr(nodeDatabase,
                                 "libraryCode",
                                 strNewLibraryCode);
+
+                            {
+                                // 2025/4/19
+                                // 确保在 library.xml 中创建所需的 libraries/library 元素
+                                EnsureCreateLibraryNode(strNewLibraryCode);
+                                // strOldLibraryCode 如果变成再也没有读者库使用了(并且不是 "")，那么需要考虑从 libraries/library 元素中删除它
+                                if (string.IsNullOrEmpty(strOldLibraryCode) == false)
+                                    RemoveUnusedLibraryNode(strOldLibraryCode);
+                            }
+
                             this.Changed = true;
                         }
                     }
@@ -2145,6 +2157,7 @@ out strError);
 
             if (bDbNameChanged == true)
             {
+#if REMOVED
                 nRet = InitialKdbs(
                     channel,    // Channels,
                     out strError);
@@ -2154,6 +2167,15 @@ out strError);
                 this.vdbs = null;
                 nRet = this.InitialVdbs(channel,    // Channels,
                     out strError);
+                if (nRet == -1)
+                {
+                    this.WriteErrorLog($"*** ChangeDatabase() (2) 过程中出现致命错误，请在日志恢复完成后，手动修正故障: {strError}");
+                    return -1;
+                }
+#endif
+                nRet = ReloadKdbs(channel,
+"vdbs",
+out strError);
                 if (nRet == -1)
                 {
                     this.WriteErrorLog($"*** ChangeDatabase() (2) 过程中出现致命错误，请在日志恢复完成后，手动修正故障: {strError}");
@@ -2187,6 +2209,7 @@ out strError);
             // 2015/1/29
             if (bDbNameChanged == true)
             {
+#if REMOVED
                 {
                     nRet = InitialKdbs(
                         channel,    // Channels,
@@ -2206,6 +2229,16 @@ out strError);
                         this.WriteErrorLog($"*** ChangeDatabase() 过程中出现致命错误，请在日志恢复完成后，手动修正故障: {strError}");
                     }
                 }
+#endif
+                nRet = ReloadKdbs(channel,
+"vdbs,continueOnError",
+out string error);
+                if (nRet == -1)
+                {
+                    this.WriteErrorLog($"*** ChangeDatabase() 过程中出现致命错误，请在日志恢复完成后，手动修正故障: {strError + "; " + error}");
+                    return -1;
+                }
+
             }
             return -1;
         }
@@ -2992,7 +3025,7 @@ out strError);
         }
 
         // 删除读者库。
-        // 也会自动修改 library.xml 的 readerdbgroup 中相关元素
+        // 也会自动修改 library.xml 的 readerdbgroup 中相关元素；并且会删除掉再也没有读者库用到的 libraries/library 元素
         // parameters:
         //      bDbNameChanged  如果数据库发生了删除或者修改名字的情况，此参数会被设置为 true。否则其值不会发生改变
         // return:
@@ -3010,7 +3043,7 @@ out strError);
             int nRet = 0;
 
             // 获得相关配置小节
-            XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("readerdbgroup/database[@name='" + strName + "']");
+            var nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("readerdbgroup/database[@name='" + strName + "']") as XmlElement;
             if (nodeDatabase == null)
             {
                 strError = "配置 DOM 中名字为 '" + strName + "' 的读者库(name属性)相关<database>元素没有找到";
@@ -3043,6 +3076,12 @@ out strError);
             bDbNameChanged = true;
 
             nodeDatabase.ParentNode.RemoveChild(nodeDatabase);
+
+            {
+                var code = nodeDatabase.GetAttribute("libraryCode");
+                if (string.IsNullOrEmpty(code) == false)
+                    RemoveUnusedLibraryNode(code);
+            }
 
             // <readerdbgroup>内容更新，刷新配套的内存结构
             this.LoadReaderDbGroupParam(this.LibraryCfgDom);
@@ -3858,6 +3897,7 @@ strCommentDbName,
 
             if (bDbNameChanged == true)
             {
+#if REMOVED
                 nRet = InitialKdbs(
                     channel,    // Channels,
                     out strError);
@@ -3867,6 +3907,15 @@ strCommentDbName,
                 this.vdbs = null;
                 nRet = this.InitialVdbs(channel,    // Channels,
                     out strError);
+                if (nRet == -1)
+                {
+                    this.WriteErrorLog($"*** DeleteDatabase() 过程中出现致命错误，请在日志恢复完成后，手动修正故障: {strError}");
+                    return -1;
+                }
+#endif
+                nRet = ReloadKdbs(channel,
+"vdbs",
+out strError);
                 if (nRet == -1)
                 {
                     this.WriteErrorLog($"*** DeleteDatabase() 过程中出现致命错误，请在日志恢复完成后，手动修正故障: {strError}");
@@ -4906,6 +4955,7 @@ strCommentDbName,
             // 2015/6/13
             if (keyschanged_dbnames.Count > 0)
             {
+#if REMOVED
                 nRet = InitialKdbs(
                     channel,    // Channels,
                     out strError);
@@ -4915,6 +4965,15 @@ strCommentDbName,
                 this.vdbs = null;
                 nRet = this.InitialVdbs(channel,    // Channels,
                     out strError);
+                if (nRet == -1)
+                {
+                    this.WriteErrorLog($"*** RefreshDatabaseDefs() 过程中出现致命错误，请在日志恢复完成后，手动修正故障: {strError}");
+                    return -1;
+                }
+#endif
+                nRet = ReloadKdbs(channel,
+"vdbs",
+out strError);
                 if (nRet == -1)
                 {
                     this.WriteErrorLog($"*** RefreshDatabaseDefs() 过程中出现致命错误，请在日志恢复完成后，手动修正故障: {strError}");
@@ -4968,7 +5027,7 @@ strCommentDbName,
             return -1;
         }
 
-        // TODO: 如果当前任务正在运行, 需要把新的任务追加到末尾继续运行
+        // 如果当前任务正在运行, 会把新的任务追加到末尾继续运行
         int StartRebuildKeysTask(string strDbNameList,
             out string strError)
         {
@@ -5931,6 +5990,7 @@ strCommentDbName,
 
             if (bDbNameChanged == true)
             {
+#if REMOVED
                 nRet = InitialKdbs(
                     channel,    // Channels,
                     out strError);
@@ -5944,6 +6004,14 @@ strCommentDbName,
                 if (nRet == -1)
                     return -1;
                  * */
+#endif
+                nRet = ReloadKdbs(channel,
+"",
+out strError);
+                if (nRet == -1)
+                {
+                    return -1;
+                }
             }
 
             // 2024/2/24
@@ -7837,6 +7905,21 @@ out strError);
                         }
                     }
 
+                    // 2025/4/19
+                    // 检查一个单独的图书馆代码是否格式正确
+                    // 要求不能为 '*'，不能包含逗号
+                    // return:
+                    //      -1  校验函数本身出错了
+                    //      0   校验正确
+                    //      1   校验发现问题。strError中有描述
+                    nRet = VerifySingleLibraryCode(info.LibraryCode,
+        out strError);
+                    if (nRet != 0)
+                    {
+                        strError = "图书馆代码 '" + info.LibraryCode + "' 格式错误: " + strError;
+                        goto ERROR1;
+                    }
+
                     // 检查dp2kernel中是否有和读者库同名的数据库存在
                     {
                         // 数据库是否已经存在？
@@ -7876,6 +7959,7 @@ out strError);
                         strInCirculation = "true";  // 缺省为true
 #endif
 
+                    /*
                     // 检查一个单独的图书馆代码是否格式正确
                     // 要求不能为 '*'，不能包含逗号
                     // return:
@@ -7889,6 +7973,7 @@ out strError);
                         strError = "图书馆代码 '" + info.LibraryCode + "' 格式错误: " + strError;
                         goto ERROR1;
                     }
+                    */
 
                     // 在CfgDom中增加相关的配置信息
                     XmlNode root = this.LibraryCfgDom.DocumentElement.SelectSingleNode("readerdbgroup");
@@ -7909,6 +7994,9 @@ out strError);
                         nodeNewDatabase = exist_database_node;
                     }
 
+                    // 2025/4/19
+                    // 确保在 library.xml 中创建所需的 libraries/library 元素
+                    EnsureCreateLibraryNode(info.LibraryCode);
 #if NO
                     DomUtil.SetAttr(nodeNewDatabase, "name", strName);
                     DomUtil.SetAttr(nodeNewDatabase, "inCirculation", strInCirculation);
@@ -8547,6 +8635,7 @@ out strError);
 
             if (bDbChanged == true)
             {
+#if REMOVED
                 nRet = InitialKdbs(
                     channel,    // Channels,
                     out strError);
@@ -8556,6 +8645,15 @@ out strError);
                 this.vdbs = null;
                 nRet = this.InitialVdbs(channel,    // Channels,
                     out strError);
+                if (nRet == -1)
+                {
+                    this.WriteErrorLog($"*** CreateDatabase() 过程中出现致命错误，请在日志恢复完成后，手动修正故障: {strError}");
+                    return -1;
+                }
+#endif
+                nRet = ReloadKdbs(channel,
+"vdbs",
+out strError);
                 if (nRet == -1)
                 {
                     this.WriteErrorLog($"*** CreateDatabase() 过程中出现致命错误，请在日志恢复完成后，手动修正故障: {strError}");
@@ -8586,6 +8684,46 @@ out strError);
                 return -1;
             }
 
+            return -1;
+        }
+
+        // 21025/5/13
+        // 重新加载 kdbs vdbs 内存结构
+        // parameters:
+        //      style   "vdbs" "continueOnError" 之一或者两者的组合
+        //              vdbs 表示不但要 InitialKdbs() 还要继续 InitialVdbs()
+        //              continueOnError 表示如果 InitialKdbs() 出错了也继续执行
+        public int ReloadKdbs(RmsChannel channel,
+            string style,
+            out string strError)
+        {
+            List<string> errors = new List<string>();
+            int nRet = InitialKdbs(
+                channel,
+                out strError);
+            if (nRet == -1)
+            {
+                errors.Add($"InitialKdbs() 出错: {strError}");
+                if (StringUtil.IsInList("continueOnError", style) == false)
+                    goto ERROR1;
+            }
+
+            if (StringUtil.IsInList("vdbs", style))
+            {
+                // 重新初始化虚拟库定义
+                this.vdbs = null;
+                nRet = this.InitialVdbs(channel,    // Channels,
+                    out strError);
+                if (nRet == -1)
+                    errors.Add($"InitialVdbs() 出错: {strError}");
+            }
+
+            if (errors.Count > 0)
+                goto ERROR1;
+
+            return 0;
+        ERROR1:
+            strError = StringUtil.MakePathList(errors, "; ");
             return -1;
         }
 
@@ -8666,7 +8804,7 @@ out strError);
 
         // 为 library.xml itemdbgroup 下追加 database 元素
         // parameters:
-        //      elements    日志记录中的 database 元素节点数组
+        //      elements    日志记录中的 databases/database 元素节点数组
         // return:
         //      -1  出错
         //      0   没有发生修改
@@ -8761,6 +8899,29 @@ out strError);
                     info.WriteReaderCfgNode(database);
 #endif
                     info.RefreshReaderCfgNode(cfg_dom);
+
+                    {
+                        // 2025/4/19
+                        // TODO: 早期版本的日志记录中 databases/database 元素可能没有 libraryCode 属性，可以转为把 databaseInfo 元素的 InnerText 装入 XmlDocument，在里面寻找 */database/@libraryCode 属性(不过需要注意 */database 元素可能有多个，需要用 name 属性值来定位)
+                        /*
+<root>
+  <operation>manageDatabase</operation>
+  <action>createDatabase</action>
+  <libraryCode>
+  </libraryCode>
+  <databaseInfo>&lt;root&gt;&lt;database type="reader" inCirculation="true" name="_海淀读者" libraryCode="海淀分馆" /&gt;&lt;/root&gt;</databaseInfo>
+  <databases>
+    <database type="reader" inCirculation="true" name="_海淀读者" libraryCode="海淀分馆" />
+  </databases>
+  <operator>supervisor</operator>
+  <operTime>Sat, 19 Apr 2025 17:30:06 +0800</operTime>
+  <clientAddress via="net.pipe://localhost/dp2library/xe">localhost</clientAddress>
+  <version>1.12</version>
+</root>
+                        * */
+                        if (source.HasAttribute("libraryCode"))
+                            EnsureCreateLibraryNode(source.GetAttribute("libraryCode"));
+                    }
 
                     nRet = this.LoadReaderDbGroupParam(this.LibraryCfgDom);
                     if (nRet == -1)

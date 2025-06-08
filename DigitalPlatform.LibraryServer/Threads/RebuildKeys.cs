@@ -378,7 +378,7 @@ out strError);
                 return;
 
             ERROR1:
-                this.AppendResultText(strError + "\r\n");
+                this.AppendResultText("*** 出错: " + strError + "\r\n");
                 return;
             }
             finally
@@ -773,13 +773,10 @@ out strError);
                 }
 
                 // 允许重试
-                if (bNeedRetry == true)
+                if (bNeedRetry == true && nRedoCount < 10)
                 {
-                    if (nRedoCount < 10)
-                    {
-                        nRedoCount++;
-                        goto REDO_REBUILD;
-                    }
+                    nRedoCount++;
+                    goto REDO_REBUILD;
                 }
                 else
                 {
@@ -896,7 +893,7 @@ out strError);
             return 0;
         }
 
-#endregion
+        #endregion
 
         #region 重建查重键
 
@@ -991,13 +988,10 @@ out strError);
                 }
 
                 // 允许重试
-                if (bNeedRetry == true)
+                if (bNeedRetry == true && nRedoCount < 10)
                 {
-                    if (nRedoCount < 10)
-                    {
-                        nRedoCount++;
-                        goto REDO_REBUILD;
-                    }
+                    nRedoCount++;
+                    goto REDO_REBUILD;
                 }
                 else
                 {
@@ -1270,14 +1264,11 @@ out string strError)
                         }
 
                         // 允许重试
-                        if (bNeedRetry == true)
-                        {
-                            if (nRedoCount < 10)
+                        if (bNeedRetry == true && nRedoCount < 10)
                             {
                                 nRedoCount++;
                                 goto REDO_REBUILD;
                             }
-                        }
                         else
                             return -1;
 
@@ -1344,10 +1335,15 @@ out string strError)
                 {
                     if (procStopLoop != null)
                     {
-                        this.AppendResultText($"中断处理 {info.DbName}。已经处理到记录 ID '{info.RecID}'\r\n");
-                        nRet = procStopLoop(channel, info, out strError);
-                        //if (nRet == -1)
-                        //    return -1;
+                        if (nRet == -1)
+                            this.AppendResultText($"批处理 {info.DbName} 过程中遇到出错: {strError}\r\n已经停止处理。已经处理到记录 ID '{info.RecID}'\r\n");
+                        else
+                            this.AppendResultText($"中断处理 {info.DbName}。已经处理到记录 ID '{info.RecID}'\r\n");
+                        var ret = procStopLoop(channel, info, out string temp_error);
+                        if (ret == -1)
+                        {
+                            this.AppendResultText($"批处理收尾 {info.DbName} 时遇到出错: {temp_error}\r\n");
+                        }
                     }
                 }
 
@@ -1513,14 +1509,11 @@ out string strError)
                         }
 
                         // 允许重试
-                        if (bNeedRetry == true)
-                        {
-                            if (nRedoCount < 10)
+                        if (bNeedRetry == true && nRedoCount < 10)
                             {
                                 nRedoCount++;
                                 goto REDO_REBUILD;
                             }
-                        }
                         else
                             return -1;
 
@@ -1648,7 +1641,7 @@ out string strError)
             Int64 nStart = 0;
             Int64 nEnd = 9999999999;
 
-            if (Int64.TryParse(strInputStartNo, out nStart)== false)
+            if (Int64.TryParse(strInputStartNo, out nStart) == false)
             {
                 strError = $"起始号码 '{strInputStartNo}' 不合法。应为一个纯数字";
             }

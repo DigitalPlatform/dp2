@@ -11,10 +11,7 @@ using System.Runtime.InteropServices;
 using System.Linq;
 using System.Xml;
 
-
 using DigitalPlatform.Text;
-using DigitalPlatform.CommonControl;
-
 
 namespace DigitalPlatform.Marc
 {
@@ -308,7 +305,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.94.9035.22741, Culture=neutral,
 
             string strText = this.Text.Substring(nContentStart, nContentLength);
             int nInsertPos = nContentStart + nContentLength;
-            this.Text = this.Text.Substring(0, nInsertPos) + strText + this.Text.Substring(nInsertPos);
+            this.TextWithHeight = this.Text.Substring(0, nInsertPos) + strText + this.Text.Substring(nInsertPos);
             this.SelectionStart = nContentStart;
             this.SelectionLength = nContentLength;
         }
@@ -325,7 +322,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.94.9035.22741, Culture=neutral,
 #else
             string name = new string((char)Record.KERNEL_SUBFLD, 1);
 #endif
-            this.Text = text.Substring(0, pos) + name + text.Substring(pos + length);
+            this.TextWithHeight = text.Substring(0, pos) + name + text.Substring(pos + length);
 
             this.SelectionStart = pos + name.Length;
             this.SelectionLength = 0;
@@ -353,7 +350,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.94.9035.22741, Culture=neutral,
 #else
             string name = new string((char)Record.KERNEL_SUBFLD, 1) + ch;
 #endif
-            this.Text = text.Substring(0, pos) + name + text.Substring(pos + length);
+            this.TextWithHeight = text.Substring(0, pos) + name + text.Substring(pos + length);
 
             this.SelectionStart = pos + name.Length;
             this.SelectionLength = 0;
@@ -394,7 +391,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.94.9035.22741, Culture=neutral,
                 length++;
             }
             var text = this.Text;
-            this.Text = text.Substring(0, nStart) + text.Substring(nStart + length);
+            this.TextWithHeight = text.Substring(0, nStart) + text.Substring(nStart + length);
             this.SelectionStart = nStart;
             this.SelectionLength = 0;
             return true;
@@ -445,7 +442,20 @@ dp2Circulation 版本: dp2Circulation, Version=3.94.9035.22741, Culture=neutral,
                 out int nContentLength,
                 out bool forbidden);
             if (nRet == 0)
-                return false;
+            {
+                // return false;
+
+                // 2025/5/15
+                // 全选小 edit 内容
+                this.SelectionStart = 0;
+                this.SelectionLength = this.Text.Length;
+
+                // 记忆
+                this._double_info._double_string = this.Text;
+                this._double_info._double_count = 0;
+                this._double_info._double_pos = 0;
+                return true;
+            }
 
             if (this.Text == this._double_info._double_string
                 && nStart == this._double_info._double_pos
@@ -556,9 +566,35 @@ dp2Circulation 版本: dp2Circulation, Version=3.94.9035.22741, Culture=neutral,
                         if (DoDoubleClick() == true)
                             return;
                     }
+
                     break;
+                    /*
+                case API.WM_LBUTTONUP:
+                    if (_ensureFocus)
+                    {
+                        _ensureFocus = false;
+                        Task.Run(async () =>
+                        {
+                            await Task.Delay(100);
+                            this.TryInvoke(() =>
+                            {
+                                this.m_marcEditor.SetFocusEx();
+                            });
+                        });
+                    }
+                    break;
+                    */
             }
             base.DefWndProc(ref m);
+        }
+
+        // 是否需要确认一次 Focused
+        bool _ensureFocus = false;
+
+        // 确保 WM_MOUSELBUTTONUP 时确认一次 Focused
+        public void EnsureMarcEditFocued()
+        {
+            _ensureFocus = true;
         }
 
         #region 处理快捷键
@@ -1286,13 +1322,13 @@ dp2Circulation 版本: dp2Circulation, Version=3.94.9035.22741, Culture=neutral,
                 if (this.MarcEditor.m_nFocusCol == 1)
                 {
                     if (this.Text.Length < 3)
-                        this.Text = this.Text.PadRight(3, ' ');
+                        this.TextWithHeight = this.Text.PadRight(3, ' ');
                 }
                 // 字段指示符，确保2字符
                 else if (this.MarcEditor.m_nFocusCol == 2)
                 {
                     if (this.Text.Length < 2)
-                        this.Text = this.Text.PadRight(2, ' ');
+                        this.TextWithHeight = this.Text.PadRight(2, ' ');
                 }
 
                 this.MarcEditor.Flush();
@@ -1305,8 +1341,8 @@ dp2Circulation 版本: dp2Circulation, Version=3.94.9035.22741, Culture=neutral,
             {
                 int nPos = this.SelectionStart;
                 if (this.SelectionLength != 0)
-                    this.Text = this.Text.Remove(nPos, this.SelectionLength);
-                this.Text = this.Text.Insert(nPos, strText);
+                    this.TextWithHeight = this.Text.Remove(nPos, this.SelectionLength);
+                this.TextWithHeight = this.Text.Insert(nPos, strText);
                 this.SelectionStart = nPos;
                 this.SelectionLength = strText.Length;
             }
@@ -1428,7 +1464,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.94.9035.22741, Culture=neutral,
                     int nOldSelectionStart = this.SelectionStart;
                     if (this.SelectedText == "")
                     {
-                        this.Text = this.Text.Insert(this.SelectionStart, strThisText);
+                        this.TextWithHeight = this.Text.Insert(this.SelectionStart, strThisText);
                     }
                     else
                     {
@@ -1436,7 +1472,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.94.9035.22741, Culture=neutral,
                         strTempText = strTempText.Remove(nOldSelectionStart, this.SelectedText.Length);
                         strTempText = strTempText.Insert(nOldSelectionStart, strThisText);
 
-                        this.Text = strTempText;
+                        this.TextWithHeight = strTempText;
                     }
 
                     this.SelectionStart = nOldSelectionStart + strThisText.Length;
@@ -1445,13 +1481,13 @@ dp2Circulation 版本: dp2Circulation, Version=3.94.9035.22741, Culture=neutral,
                     if (this.MarcEditor.m_nFocusCol == 1)
                     {
                         if (this.Text.Length > 3)
-                            this.Text = this.Text.Substring(0, 3);
+                            this.TextWithHeight = this.Text.Substring(0, 3);
                     }
                     // 字段指示符，确保2字符
                     else if (this.MarcEditor.m_nFocusCol == 2)
                     {
                         if (this.Text.Length > 2)
-                            this.Text = this.Text.Substring(0, 2);
+                            this.TextWithHeight = this.Text.Substring(0, 2);
                     }
 
                     // TODO: 确保小 edit 的高度调整
@@ -1518,7 +1554,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.94.9035.22741, Culture=neutral,
                     int nOldSelectionStart = this.SelectionStart;
                     if (this.SelectedText == "")
                     {
-                        this.Text = this.Text.Insert(this.SelectionStart, strThisText);
+                        this.TextWithHeight = this.Text.Insert(this.SelectionStart, strThisText);
                     }
                     else
                     {
@@ -1526,7 +1562,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.94.9035.22741, Culture=neutral,
                         strTempText = strTempText.Remove(nOldSelectionStart, this.SelectedText.Length);
                         strTempText = strTempText.Insert(nOldSelectionStart, strThisText);
 
-                        this.Text = strTempText;
+                        this.TextWithHeight = strTempText;
                     }
 
                     // this.SelectionStart = nOldSelectionStart + strThisText.Length;
@@ -1538,13 +1574,13 @@ dp2Circulation 版本: dp2Circulation, Version=3.94.9035.22741, Culture=neutral,
                     if (this.MarcEditor.m_nFocusCol == 1)
                     {
                         if (this.Text.Length > 3)
-                            this.Text = this.Text.Substring(0, 3);
+                            this.TextWithHeight = this.Text.Substring(0, 3);
                     }
                     // 字段指示符，确保2字符
                     else if (this.MarcEditor.m_nFocusCol == 2)
                     {
                         if (this.Text.Length > 2)
-                            this.Text = this.Text.Substring(0, 2);
+                            this.TextWithHeight = this.Text.Substring(0, 2);
                     }
 
                     this.MarcEditor.Flush();    // 促使通知外界
@@ -1604,20 +1640,20 @@ dp2Circulation 版本: dp2Circulation, Version=3.94.9035.22741, Culture=neutral,
             if (this.SelectedText != "")
             {
                 int nStart = this.SelectionStart;
-                this.Text = this.Text.Remove(this.SelectionStart, this.SelectionLength);
+                this.TextWithHeight = this.Text.Remove(this.SelectionStart, this.SelectionLength);
                 this.SelectionStart = nStart;
 
                 // 字段名，确保3字符
                 if (this.MarcEditor.m_nFocusCol == 1)
                 {
                     if (this.Text.Length < 3)
-                        this.Text = this.Text.PadRight(3, ' ');
+                        this.TextWithHeight = this.Text.PadRight(3, ' ');
                 }
                 // 字段指示符，确保2字符
                 else if (this.MarcEditor.m_nFocusCol == 2)
                 {
                     if (this.Text.Length < 2)
-                        this.Text = this.Text.PadRight(2, ' ');
+                        this.TextWithHeight = this.Text.PadRight(2, ' ');
                 }
             }
         }
@@ -1795,7 +1831,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.30.6506.29202, Culture=neutral,
                         strTemp = strTemp.Insert(nOldStart, new string((char)Record.KERNEL_SUBFLD, 1));
 #endif
 
-                        this.Text = strTemp;
+                        this.TextWithHeight = strTemp;
                         this.SelectionStart = nOldStart;
                         e.Handled = true;
 
@@ -1877,7 +1913,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.30.6506.29202, Culture=neutral,
                                 if (this.Text[nStart] == 0x200e)    // && this.Text.Length >= nStart + 1 + 1
                                 {
                                     // 一同删除
-                                    this.Text = this.Text.Remove(
+                                    this.TextWithHeight = this.Text.Remove(
                                         nStart - 1,
                                         2);
                                     this.SelectionStart = nStart - 1;
@@ -1889,7 +1925,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.30.6506.29202, Culture=neutral,
                                     && this.Text[nStart - 1] == 0x200e)
                                 {
                                     // 一同删除
-                                    this.Text = this.Text.Remove(nStart - 1, 2);
+                                    this.TextWithHeight = this.Text.Remove(nStart - 1, 2);
                                     this.SelectionStart = nStart - 1;
                                     e.Handled = true;
                                 }
@@ -1932,7 +1968,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.30.6506.29202, Culture=neutral,
 
                                     try
                                     {
-                                        this.Text = this.Text.Remove(this.SelectionStart, 1 + (this.Text.Length - this.MaxLength));
+                                        this.TextWithHeight = this.Text.Remove(this.SelectionStart, 1 + (this.Text.Length - this.MaxLength));
                                         this.SelectionStart = nOldSelectionStart;
                                     }
                                     catch (ArgumentOutOfRangeException ex)
@@ -2725,13 +2761,13 @@ API.MakeLParam(x, y));
                                 }
 
 
-                                this.Text = this.Text.Insert(nStart, " ");
+                                this.TextWithHeight = this.Text.Insert(nStart, " ");
 #if BIDI_SUPPORT
                                 if (this.Text[nStart + 1] == 0x200e
                                     && this.Text.Length >= nStart + 2 + 1)
-                                    this.Text = this.Text.Remove(nStart + 1, 2);
+                                    this.TextWithHeight = this.Text.Remove(nStart + 1, 2);
                                 else
-                                    this.Text = this.Text.Remove(nStart + 1, 1);
+                                    this.TextWithHeight = this.Text.Remove(nStart + 1, 1);
 #else
 
                                 this.Text = this.Text.Remove(nStart + 1, 1);
@@ -2752,7 +2788,7 @@ API.MakeLParam(x, y));
                                 {
                                     // 一同删除
                                     int nStart = this.SelectionStart;
-                                    this.Text = this.Text.Remove(this.SelectionStart, 2);
+                                    this.TextWithHeight = this.Text.Remove(this.SelectionStart, 2);
                                     this.SelectionStart = nStart;
                                     e.Handled = true;
                                 }
@@ -2762,7 +2798,7 @@ API.MakeLParam(x, y));
                                 {
                                     // 一同删除
                                     int nStart = this.SelectionStart;
-                                    this.Text = this.Text.Remove(this.SelectionStart - 1, 2);
+                                    this.TextWithHeight = this.Text.Remove(this.SelectionStart - 1, 2);
                                     this.SelectionStart = nStart - 1;
                                     e.Handled = true;
                                 }
@@ -3408,6 +3444,7 @@ MarcEditor.WM_LEFTRIGHT_MOVED,
             _lineCount = 0;
         }
 
+        // 根据文本内容的折行 自动调整 TextBox 高度
         public void SetHeight()
         {
             var numberOfLines = API.SendMessage(this.Handle, API.EM_GETLINECOUNT, 0, 0).ToInt32();
@@ -3439,6 +3476,43 @@ pixels.
                 }
 
                 _lineCount = numberOfLines;
+            }
+        }
+
+        // 修改 Text 属性的同时自动修正 TextBox 的 Height
+        public string TextWithHeight
+        {
+            set
+            {
+                // TextChanged 事件被触发
+                base.Text = value;
+            }
+        }
+
+        public new string Text
+        {
+            get
+            {
+                return base.Text;
+            }
+            set
+            {
+                // 禁止 TextChanged 事件被触发
+                bool changed = false;
+                if (this.m_marcEditor != null)
+                {
+                    this.m_marcEditor._disableTextChanged++;
+                    changed = true;
+                }
+                try
+                {
+                    base.Text = value;
+                }
+                finally
+                {
+                    if (changed)
+                        this.m_marcEditor._disableTextChanged--;
+                }
             }
         }
 

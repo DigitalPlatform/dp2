@@ -181,10 +181,28 @@ namespace dp2Circulation
         /// </summary>
         public QuickPinyin QuickPinyin = null;
 
+        // 注意使用 Program.MainForm.LoadIsbnSplitter() 先初始化 !
+        public IsbnSplitter _isbnSplitter = null;
+
         /// <summary>
         /// ISBN 切割对象
         /// </summary>
-        public IsbnSplitter IsbnSplitter = null;
+        public IsbnSplitter IsbnSplitter
+        {
+            get
+            {
+                // return:
+                // -1: 出错;
+                // 0: 调用前已经装载;
+                // 1：从文件装载
+                var ret = LoadIsbnSplitter(true,
+            out string strError);
+                if (ret == -1)
+                    throw new Exception($"初始化 IsbnSplitter 时出现异常: {strError}");
+
+                return this._isbnSplitter;
+            }
+        }
 
         /// <summary>
         /// 四角号码对象
@@ -2789,6 +2807,20 @@ false);
             }
 
             return results;
+        }
+
+        // 当有书目库的 keys 配置文件发生修改后，清除 BiblioSearchForm 的检索途径列表
+        public void OnKeysConfigChanged()
+        {
+            foreach (Form child in this.MdiChildren)
+            {
+                if (child is BiblioSearchForm)
+                {
+                    var form = (BiblioSearchForm)child;
+                    // 重新填充检索途径列表
+                    form.BeginFillBiblioFromList(true);
+                }
+            }
         }
 
         /// <summary>
@@ -6613,7 +6645,7 @@ out strError);
             strError = "";
 
             // 优化
-            if (this.IsbnSplitter != null)
+            if (this._isbnSplitter != null)
                 return 0;
 
             string strFileName = Path.Combine(this.DataDir, "rangemessage.xml");
@@ -6622,7 +6654,7 @@ out strError);
 
             try
             {
-                this.IsbnSplitter = new IsbnSplitter(strFileName);  // "\\isbn.xml"
+                this._isbnSplitter = new IsbnSplitter(strFileName);  // "\\isbn.xml"
             }
             catch (FileNotFoundException ex)
             {
@@ -9622,6 +9654,84 @@ Keys keyData)
             finally
             {
                 looping.Dispose();
+            }
+        }
+
+        /*
+<root version="0.02">
+  <server name="当前服务器" type="dp2library" url="." userName=".">
+    <database name="中文图书" isTarget="yes" access="append,overwrite,delete" entityAccess="append,overwrite,delete" />
+  </server>
+  <server name="红泥巴.数字平台中心" type="dp2library" url="rest.http://58.87.101.80/hnb/rest" userName="public" />
+  <server name="亚马逊中国" type="amazon" url="webservices.amazon.cn" />
+</root>
+        * */
+        public static int UpgradeServersCfgFile(string strCfgFileName,
+            out string strError)
+        {
+            strError = "";
+
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.Load(strCfgFileName);
+            }
+            catch (FileNotFoundException)
+            {
+                return 0;
+            }
+            catch (DirectoryNotFoundException)
+            {
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                strError = $"UpgradeServersCfgFile() load file '{strCfgFileName}' exception: {ExceptionUtil.GetDebugText(ex)}";
+                return -1;
+            }
+
+            try
+            {
+                bool changed = false;
+                //   <server name="红泥巴.数字平台中心" type="dp2library" url="rest.http://58.87.101.80/hnb/rest" userName="public" />
+                dom.DocumentElement.SelectNodes("server[@name='红泥巴.数字平台中心' and @type='dp2library']")
+                    .OfType<XmlElement>()
+                    .ToList()
+                    .ForEach((server) =>
+                    {
+                        var old_url = server.GetAttribute("url");
+                        if (old_url != ServerDlg.HnbUrl)
+                        {
+                            server.SetAttribute("url",
+                                ServerDlg.HnbUrl
+                                // "rest.http://pear.ilovelibrary.cn/hnb/rest/"
+                                );
+                            changed = true;
+                            MainForm.WriteErrorLog($"已自动将配置文件 {strCfgFileName} 内容中的红泥巴服务器地址更新为 '{ServerDlg.HnbUrl}'");
+                        }
+                    });
+                //   <server name="亚马逊中国" type="amazon" url="webservices.amazon.cn" />
+                dom.DocumentElement.SelectNodes("server[@name='亚马逊中国' and @type='amazon']")
+    .OfType<XmlElement>()
+    .ToList()
+    .ForEach((server) =>
+    {
+        var outer_xml = server.OuterXml;
+        server.ParentNode.RemoveChild(server);
+        changed = true;
+        MainForm.WriteErrorLog($"已自动将配置文件 {strCfgFileName} 内容中失效的亚马逊中国服务器节点删除: \r\n{outer_xml}");
+    });
+                if (changed)
+                {
+                    dom.Save(strCfgFileName);
+                    return 1;
+                }
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                strError = $"UpgradeServersCfgFile() save file '{strCfgFileName}' exception: {ExceptionUtil.GetDebugText(ex)}";
+                return -1;
             }
         }
 

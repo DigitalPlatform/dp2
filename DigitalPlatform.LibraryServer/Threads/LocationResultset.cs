@@ -1,13 +1,15 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Xml;
-
-using DigitalPlatform.ResultSet;
+﻿using DigitalPlatform.ResultSet;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.Text;
+using Microsoft.VisualStudio.Threading;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Data.Sql;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Xml;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -72,10 +74,33 @@ namespace DigitalPlatform.LibraryServer
                 if (list != null)
                 {
                     _requests.Clear();
-                    _taskCreateLocationResultset = Task.Factory.StartNew(() => CreateLocationResultset(list));
+                    _taskCreateLocationResultset = // Task.Factory.StartNew(() => CreateLocationResultset(list));
+                        Task.Factory.StartNew(async (l) =>
+                        {
+                            // TODO: timeout
+                            using (var releaser = await _semaphoreResultset.EnterAsync(this.AppDownToken))
+                            {
+                                Interlocked.Increment(ref _concurrentCount);
+                                try
+                                {
+                                    CreateLocationResultset((string)l);
+                                }
+                                finally
+                                {
+                                    Interlocked.Decrement(ref _concurrentCount);
+                                }
+                            }
+                        },
+                        list,
+                        this.AppDownToken,
+                        TaskCreationOptions.LongRunning,    // 独立线程运行
+                        TaskScheduler.Default).Unwrap();
                 }
             }
         }
+
+        static AsyncSemaphore _semaphoreResultset = new AsyncSemaphore(1);
+        static volatile int _concurrentCount = 0;
 
         // 创建馆藏地结果集
         // 馆藏地结果集的特点是，针对实体库进行检索，然后变换为书目记录路径。所以需要在 dp2library 一端运算和构造检索结果，然后写回 dp2kernel 形成永久结果集，供以后使用
@@ -100,15 +125,26 @@ namespace DigitalPlatform.LibraryServer
                 else
                     librarycodes = StringUtil.SplitList(location_list);
 
-                this.WriteErrorLog("馆藏地结果集创建开始 " + location_list);
-                foreach (string code in librarycodes)
+                if (librarycodes.Count > 0)
                 {
-                    this._app_down.Token.ThrowIfCancellationRequested();
+                    this.WriteErrorLog("馆藏地结果集创建开始 " + location_list);
+                    foreach (string code in librarycodes)
+                    {
+                        this._app_down.Token.ThrowIfCancellationRequested();
 
-                    this.WriteErrorLog("--- 馆藏地结果集创建 " + code);
-                    CreateOneLocationResultset(code);
+                        this.WriteErrorLog("--- 馆藏地结果集创建 " + code);
+                        CreateOneLocationResultset(code);
+                    }
+                    this.WriteErrorLog("馆藏地结果集创建结束 " + location_list);
                 }
-                this.WriteErrorLog("馆藏地结果集创建结束 " + location_list);
+                else
+                {
+                    this.WriteErrorLog("馆藏地结果集无需创建(因为当前不存在任何分馆)");
+                }
+            }
+            catch(Exception ex)
+            {
+                this.WriteErrorLog($"馆藏地 {location_list} 结果集创建过程中出现异常: {ExceptionUtil.GetDebugText(ex)}");
             }
             finally
             {
@@ -293,7 +329,7 @@ namespace DigitalPlatform.LibraryServer
                 session = null;
             }
 
-            ERROR1:
+        ERROR1:
             this.WriteErrorLog("馆藏地 '" + strLocation + "' 结果集创建出错: " + strError);
             return;
         }
@@ -654,7 +690,27 @@ out strError);
                 if (list != null)
                 {
                     _biblio_requests.Clear();
-                    _taskCreateBiblioResultset = Task.Factory.StartNew(() => CreateBiblioFilterResultsets(list));
+                    _taskCreateBiblioResultset = // Task.Factory.StartNew(() => CreateBiblioFilterResultsets(list));
+                        Task.Factory.StartNew(async (l) =>
+                        {
+                            // TODO: timeout
+                            using (var releaser = await _semaphoreResultset.EnterAsync(this.AppDownToken))
+                            {
+                                Interlocked.Increment(ref _concurrentCount);
+                                try
+                                {
+                                    CreateBiblioFilterResultsets((string)l);
+                                }
+                                finally
+                                {
+                                    Interlocked.Decrement(ref _concurrentCount);
+                                }
+                            }
+                        },
+                        list,
+                        this.AppDownToken,
+                        TaskCreationOptions.LongRunning,    // 独立线程运行
+                        TaskScheduler.Default).Unwrap();
                 }
             }
         }
@@ -686,6 +742,7 @@ out strError);
             return StringUtil.MakePathList(locations);
         }
 
+        // 创建永久书目结果集。代表那些不需要显示的书目记录。相关模块会利用逻辑检索的减法运算，从命中结果集中减去这部分记录然后返回给前端
         void CreateBiblioFilterResultsets(string name_list)
         {
             try
@@ -704,24 +761,35 @@ out strError);
                     names = StringUtil.SplitList(name_list);
                 }
 
-                foreach (string name in names)
+                if (names.Count > 0)
                 {
-                    XmlElement item = this.LibraryCfgDom.DocumentElement.SelectSingleNode($"globalResults/item[@name='{name}']") as XmlElement;
-                    if (item == null)
+                    this.WriteErrorLog("书目结果集创建开始 " + name_list);
+
+                    foreach (string name in names)
                     {
-                        this.WriteErrorLog($"名为 '{name}' 的 globalResults/item 元素没有找到");
-                        continue;
+                        XmlElement item = this.LibraryCfgDom.DocumentElement.SelectSingleNode($"globalResults/item[@name='{name}']") as XmlElement;
+                        if (item == null)
+                        {
+                            this.WriteErrorLog($"名为 '{name}' 的 globalResults/item 元素没有找到");
+                            continue;
+                        }
+                        string strType = item.GetAttribute("type");
+                        string strParameters = item.GetAttribute("parameters");
+                        string strResultsetName = item.GetAttribute("resultsetName");
+
+                        this.WriteErrorLog("--- 书目结果集创建 " + name);
+
+                        CreateBiblioFilterResultset(strType, strParameters, strResultsetName);
                     }
-                    string strType = item.GetAttribute("type");
-                    string strParameters = item.GetAttribute("parameters");
-                    string strResultsetName = item.GetAttribute("resultsetName");
 
-                    this.WriteErrorLog("--- 书目结果集创建 " + name);
-
-                    CreateBiblioFilterResultset(strType, strParameters, strResultsetName);
+                    this.WriteErrorLog("书目结果集创建结束 " + name_list);
                 }
-
-                this.WriteErrorLog("书目结果集创建结束 " + name_list);
+                else
+                    this.WriteErrorLog("书目结果集无需创建");
+            }
+            catch (Exception ex)
+            {
+                this.WriteErrorLog($"书目结果集 {name_list} 创建过程中出现异常: {ExceptionUtil.GetDebugText(ex)}");
             }
             finally
             {
@@ -803,7 +871,7 @@ out strQueryXml,
 
             CreateBiblioFilterResultset(strQueryXml, strResultsetName);
             return;
-            ERROR1:
+        ERROR1:
             this.WriteErrorLog($"类型为 '{strType}' 参数为 '{strParameters}' 的书目结果集创建出错: {strError}");
         }
 
@@ -882,7 +950,7 @@ out strQueryXml,
                 session = null;
             }
 
-            ERROR1:
+        ERROR1:
             this.WriteErrorLog("书目 '" + strResultsetName + "' 结果集创建出错: " + strError);
         }
 

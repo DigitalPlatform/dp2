@@ -484,7 +484,7 @@ namespace DigitalPlatform.OPAC.Server
                 if (nRet == -1)
                 {
                     // 将此情况写入错误日志
-                    this.WriteErrorLog("在UpdateLine()函数中，调用line.ProcessXml()发生错误, 记录路径=" + line.m_strRecPath + ")。这将导致栏目主页面中，该记录从显示中丢失。详细原因：" + strError);
+                    OpacApplication.WriteErrorLog("在UpdateLine()函数中，调用line.ProcessXml()发生错误, 记录路径=" + line.m_strRecPath + ")。这将导致栏目主页面中，该记录从显示中丢失。详细原因：" + strError);
                     return -1;
                 }
 

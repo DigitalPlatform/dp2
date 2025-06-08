@@ -733,7 +733,7 @@ namespace dp2LibraryApiTester
             }
 
         ERROR1:
-            DataModel.SetMessage($"Finish() error: {strError}");
+            DataModel.SetMessage($"Finish() error: {strError}", "error");
             return new NormalResult
             {
                 Value = -1,

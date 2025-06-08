@@ -419,7 +419,7 @@ namespace DigitalPlatform.OPAC.Web
                 "readerType");
 
             // 获得日历
-            string strError = "";
+            // string strError = "";
             /*
             Calendar calendar = null;
             int nRet = app.GetReaderCalendar(strReaderType, out calendar, out strError);
@@ -444,6 +444,11 @@ namespace DigitalPlatform.OPAC.Web
 
             string strReaderBarcode = DomUtil.GetElementText(dom.DocumentElement,
                 "barcode");
+            // 2025/4/25
+            string strReaderRefID = DomUtil.GetElementText(dom.DocumentElement,
+                "refID");
+            if (string.IsNullOrEmpty(strReaderBarcode) && string.IsNullOrEmpty(strReaderRefID) == false)
+                strReaderBarcode = $"@refID:{strReaderRefID}";
 
             XmlNodeList nodes = dom.DocumentElement.SelectNodes("borrows/borrow");
             this.BorrowLineCount = nodes.Count;
@@ -464,9 +469,12 @@ namespace DigitalPlatform.OPAC.Web
                 LiteralControl right = (LiteralControl)line.FindControl("borrowinfo_line" + Convert.ToString(i) + "right");
 
 
-                XmlNode node = nodes[i];
+                XmlElement node = nodes[i] as XmlElement;
 
                 string strBarcode = DomUtil.GetAttr(node, "barcode");
+                string strRefID = node.GetAttribute("refID");
+                if (string.IsNullOrEmpty(strBarcode) && string.IsNullOrEmpty(strRefID) == false)
+                    strBarcode = $"@refID:{strRefID}";
 
                 // 添加到集合
                 this.BorrowBarcodes.Add(strBarcode);

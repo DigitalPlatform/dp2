@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using DigitalPlatform.Text;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
@@ -248,12 +248,25 @@ namespace DigitalPlatform.LibraryServer
         //                      如果 以 "@itemBarcode:" 前缀引导，表示这是册条码号
         //                      如果 以 "@itemRefID:" 前缀引导，表示这是册参考 ID
         //                      如果 以 "@readerRefID:" 或 "@refID:" 前缀引导，表示这是读者参考 ID
+        //      orderTypes      希望获取信息的操作类型列表。逗号间隔的内容
+        //                      由以下内容组合而成
+        //                      "borrow"
+        //                      "return"
+        //                      "renew"
+        //                      "lost"
+        //                      "read"
+        //                      如果没有指定，表示所有操作类型都满足条件
         public FilterDefinition<ChargingOperItem> BuildQuery(
             string patronBarcode,
             DateTime startTime,
             DateTime endTime,
             string operTypes)
         {
+            /*
+            if (string.IsNullOrEmpty(operTypes) || string.IsNullOrWhiteSpace(operTypes))
+                operTypes = "borrow,return,renew,lost,read";
+            */
+
             var time_query = Builders<ChargingOperItem>.Filter.And(
                 Builders<ChargingOperItem>.Filter.Gte("OperTime", startTime),
                 Builders<ChargingOperItem>.Filter.Lt("OperTime", endTime));
@@ -306,15 +319,23 @@ namespace DigitalPlatform.LibraryServer
                     action_items.Add(Builders<ChargingOperItem>.Filter.Eq("Action", "read"));
             }
 
-            var type_query = Builders<ChargingOperItem>.Filter.And(
-                Builders<ChargingOperItem>.Filter.Or(
+            FilterDefinition<ChargingOperItem> type_query = null;
+            // 2025/4/27
+            if (action_items.Count == 0)
+                type_query = Builders<ChargingOperItem>.Filter.Or(
                     Builders<ChargingOperItem>.Filter.Eq("Operation", "borrow"),
-                    Builders<ChargingOperItem>.Filter.Eq("Operation", "return")),
-                Builders<ChargingOperItem>.Filter.Or(action_items));
+                    Builders<ChargingOperItem>.Filter.Eq("Operation", "return"));
+            else
+                type_query = Builders<ChargingOperItem>.Filter.And(
+                    Builders<ChargingOperItem>.Filter.Or(
+                        Builders<ChargingOperItem>.Filter.Eq("Operation", "borrow"),
+                        Builders<ChargingOperItem>.Filter.Eq("Operation", "return")),
+                    Builders<ChargingOperItem>.Filter.Or(action_items));
 
             return Builders<ChargingOperItem>.Filter.And(
                 patron_query,
-                time_query, type_query);
+                time_query, 
+                type_query);
         }
 
 #if OLD
@@ -474,8 +495,11 @@ namespace DigitalPlatform.LibraryServer
             */
 
 
-            var results0 = collection.Find(query)
-                .SortBy(o => o.OperTime);
+            var results0 = collection.Find(query);
+            if (order == "descending")
+                results0 = results0.SortByDescending(o => o.OperTime);
+            else
+                results0 = results0.SortBy(o => o.OperTime);
             totalCount = results0.CountDocuments();
             var results = results0.Skip(start)
                 .ToEnumerable();

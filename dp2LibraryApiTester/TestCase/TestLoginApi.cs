@@ -69,7 +69,7 @@ namespace dp2LibraryApiTester
             }
 
         ERROR1:
-            DataModel.SetMessage($"TestLogin() error: {strError}");
+            DataModel.SetMessage($"TestLogin() error: {strError}", "error");
             return new NormalResult
             {
                 Value = -1,
@@ -121,7 +121,7 @@ namespace dp2LibraryApiTester
             }
 
         ERROR1:
-            DataModel.SetMessage($"TestChannelLeakLogin() error: {strError}");
+            DataModel.SetMessage($"TestChannelLeakLogin() error: {strError}", "error");
             return new NormalResult
             {
                 Value = -1,

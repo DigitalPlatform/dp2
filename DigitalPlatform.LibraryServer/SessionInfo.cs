@@ -332,6 +332,7 @@ namespace DigitalPlatform.LibraryServer
             return false;
         }
 
+        // 账户的存取定义
         public string Access
         {
             get

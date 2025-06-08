@@ -26,7 +26,7 @@ namespace DigitalPlatform.RFID
         OI = 3,
         OwnerInstitution = 3,
 
-        // Set infomation
+        // Set information
         SI = 4,
         SetInformation = 4,
 

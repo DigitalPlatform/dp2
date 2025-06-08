@@ -113,6 +113,7 @@ namespace dp2Circulation
             }
         }
 
+
         private void BeginUpdateClickOnceApplication()
         {
             if (ApplicationDeployment.IsNetworkDeployed)
@@ -120,6 +121,9 @@ namespace dp2Circulation
                 OpenBackgroundForm();
 
                 this.DisplayBackgroundTextLn("开始自动更新(ClickOnce安装)");
+                // 2025/5/23
+                this.DisplayBackgroundTextLn(ClientInfo.GetClickOnceInstallLocation());
+                
                 ApplicationDeployment deployment = ApplicationDeployment.CurrentDeployment;
                 deployment.CheckForUpdateCompleted -= new CheckForUpdateCompletedEventHandler(ad_CheckForUpdateCompleted);
                 deployment.CheckForUpdateCompleted += new CheckForUpdateCompletedEventHandler(ad_CheckForUpdateCompleted);

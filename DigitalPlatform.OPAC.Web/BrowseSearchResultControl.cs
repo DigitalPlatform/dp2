@@ -1968,6 +1968,11 @@ namespace DigitalPlatform.OPAC.Web
                                 for (int k = 0; k < searchresults.Length; k++)
                                 {
                                     Record record = searchresults[k];
+
+                                    // 2025/5/17
+                                    if (record.Cols == null)
+                                        record.Cols = new string[0];
+
                                     string[] cols = new string[record.Cols.Length + 1];
                                     cols[0] = record.Path;
                                     Array.Copy(record.Cols,
@@ -2412,14 +2417,13 @@ namespace DigitalPlatform.OPAC.Web
                                     }
 
                                     // 将种记录数据从XML格式转换为HTML格式
-                                    string strBiblioXml = "";
                                     lRet = // sessioninfo.Channel.
                                         channel.GetBiblioInfo(
                                        null,
                                        cols[0],
                                        "",
                                        "xml",
-                                       out strBiblioXml,
+                                       out string strBiblioXml,
                                        out strError);
                                     if (lRet == -1)
                                     {
@@ -2430,14 +2434,13 @@ namespace DigitalPlatform.OPAC.Web
 
                                     if (bFltx == true)
                                     {
-                                        KeyValueCollection result_params = null;
                                         // string strFilterFileName = app.CfgDir + "\\opacdetail.fltx";
                                         nRet = app.ConvertBiblioXmlToHtml(
                                                 strLocalPath,
                                                 strBiblioXml,
                                                 cols[0],
                                                 out strContent,
-                                                out result_params,
+                                                out KeyValueCollection result_params,
                                                 out strError);
                                     }
                                     else

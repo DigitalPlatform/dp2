@@ -33,7 +33,7 @@ namespace dp2LibraryApiTester
 
         private void MenuItem_initialEnvironment_Click(object sender, EventArgs e)
         {
-
+            MessageBox.Show(this, "暂未实现");
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -148,7 +148,7 @@ string style = "")
                 }
                 catch (Exception ex)
                 {
-                    AppendString($"exception: {ex.Message}");
+                    AppendString($"exception: {ex.Message}", "error");
                 }
             });
         }
@@ -348,7 +348,7 @@ string style = "")
                 }
                 catch (Exception ex)
                 {
-                    AppendString($"exception: {ex.Message}");
+                    AppendString($"exception: {ex.Message}", "error");
                 }
             });
         }
@@ -366,7 +366,7 @@ string style = "")
                 }
                 catch (Exception ex)
                 {
-                    AppendString($"exception: {ex.Message}");
+                    AppendString($"exception: {ex.Message}", "error");
                 }
             });
 
@@ -382,7 +382,7 @@ string style = "")
                 }
                 catch (Exception ex)
                 {
-                    AppendString($"exception: {ex.Message}");
+                    AppendString($"exception: {ex.Message}", "error");
                 }
             });
         }
@@ -398,7 +398,7 @@ string style = "")
                 }
                 catch (Exception ex)
                 {
-                    AppendString($"exception: {ex.Message}");
+                    AppendString($"exception: {ex.Message}", "error");
                 }
             });
         }
@@ -413,7 +413,7 @@ string style = "")
                 }
                 catch (Exception ex)
                 {
-                    AppendString($"exception: {ex.Message}");
+                    AppendString($"exception: {ex.Message}", "error");
                 }
             });
         }
@@ -429,7 +429,7 @@ string style = "")
                 }
                 catch (Exception ex)
                 {
-                    AppendString($"exception: {ex.Message}");
+                    AppendString($"exception: {ex.Message}", "error");
                 }
             });
         }
@@ -445,7 +445,7 @@ string style = "")
                 }
                 catch (Exception ex)
                 {
-                    AppendString($"exception: {ex.Message}");
+                    AppendString($"exception: {ex.Message}", "error");
                 }
             });
         }
@@ -461,7 +461,7 @@ string style = "")
                 }
                 catch (Exception ex)
                 {
-                    AppendString($"exception: {ex.Message}");
+                    AppendString($"exception: {ex.Message}", "error");
                 }
             });
         }
@@ -477,7 +477,7 @@ string style = "")
                 }
                 catch (Exception ex)
                 {
-                    AppendString($"exception: {ex.Message}");
+                    AppendString($"exception: {ex.Message}", "error");
                 }
             });
         }
@@ -493,7 +493,7 @@ string style = "")
                 }
                 catch (Exception ex)
                 {
-                    AppendString($"exception: {ex.Message}");
+                    AppendString($"exception: {ex.Message}", "error");
                 }
             });
         }
@@ -506,11 +506,11 @@ string style = "")
                 {
                     var result = TestLoginApi.TestAll(_cancel.Token);
                     if (result.Value == -1)
-                        DataModel.SetMessage(result.ErrorInfo);
+                        DataModel.SetMessage(result.ErrorInfo, "error");
                 }
                 catch (Exception ex)
                 {
-                    AppendString($"exception: {ex.Message}");
+                    AppendString($"exception: {ex.Message}", "error");
                 }
             });
         }
@@ -524,6 +524,44 @@ string style = "")
                     var result = TestReservation.TestAll("");
                     if (result.Value == -1)
                         AppendString(result.ErrorInfo, "error");
+                }
+                catch (Exception ex)
+                {
+                    AppendString($"exception: {ex.Message}", "error");
+                }
+            });
+        }
+
+        private void MenuItem_test_setEntitiesFieldRights_Click(object sender, EventArgs e)
+        {
+            Task.Run(() =>
+            {
+                try
+                {
+                    var result = TestSetEntities.TestAll("item");
+                    if (result.Value == -1)
+                    {
+                        AppendString(result.ErrorInfo, "error");
+                        return;
+                    }
+                    result = TestSetEntities.TestAll("issue");
+                    if (result.Value == -1)
+                    {
+                        AppendString(result.ErrorInfo, "error");
+                        return;
+                    }
+                    result = TestSetEntities.TestAll("order");
+                    if (result.Value == -1)
+                    {
+                        AppendString(result.ErrorInfo, "error");
+                        return;
+                    }
+                    result = TestSetEntities.TestAll("comment");
+                    if (result.Value == -1)
+                    {
+                        AppendString(result.ErrorInfo, "error");
+                        return;
+                    }
                 }
                 catch (Exception ex)
                 {

@@ -26,7 +26,6 @@ using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.rms;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.rms.Client.rmsws_localhost;
-using System.Data.SqlClient;
 
 namespace dp2Library
 {
@@ -2462,6 +2461,22 @@ namespace dp2Library
                     goto ERROR1;
                 }
 
+                // 2025/5/17
+                if (string.IsNullOrEmpty(app.DenyEmptyQueryWord) == false)
+                {
+                    var word = strQueryWord;
+                    if (string.IsNullOrEmpty(word))
+                    {
+                        if (app.AllowEmptyQueryWord(sessioninfo) == false)
+                        {
+                            result.Value = -1;
+                            result.ErrorInfo = $"当前访问者身份不允许使用空检索词";
+                            result.ErrorCode = ErrorCode.EmptyQueryWord;
+                            return result;
+                        }
+                    }
+                }
+
                 string strOrder = "";
                 if (StringUtil.IsInList("desc", strOutputStyle))
                 {
@@ -2837,6 +2852,8 @@ namespace dp2Library
 
         // parameters:
         //      transfer    变换要求。例如 "itemBarcode,readerBarcode"
+        // return:
+        //      发生变换的事项个数
         int TransferIds(ChargingItem item, string transfer)
         {
             if (item == null)
@@ -2854,7 +2871,7 @@ namespace dp2Library
 item.ItemBarcode,
 out string barcode,
 out string error);
-                if (nRet == -1)
+                if (nRet == -1 || string.IsNullOrEmpty(barcode)/*2025/4/24*/)
                 {
                 }
                 else
@@ -2872,12 +2889,26 @@ out string error);
 item.PatronBarcode,
 out string barcode,
 out string error);
-                if (nRet == -1)
+                if (nRet == -1 || string.IsNullOrEmpty(barcode)/*2025/4/24*/)
                 {
                 }
                 else
                 {
                     item.PatronBarcode = barcode;
+                    count++;
+                }
+
+                // 2025/4/27
+                nRet = app.ConvertRefIdListToReaderBarcodeList(channel,
+item.Operator,
+out string temp,
+out error);
+                if (nRet == -1 || string.IsNullOrEmpty(temp))
+                {
+                }
+                else
+                {
+                    item.Operator = temp;
                     count++;
                 }
             }
@@ -3170,6 +3201,22 @@ out string error);
                     }
                 }
 
+                // 2025/5/17
+                if (string.IsNullOrEmpty(app.DenyEmptyQueryWord) == false)
+                {
+                    var word = strQueryWord;
+                    if (string.IsNullOrEmpty(word))
+                    {
+                        if (app.AllowEmptyQueryWord(sessioninfo) == false)
+                        {
+                            result.Value = -1;
+                            result.ErrorInfo = $"当前访问者身份不允许使用空检索词";
+                            result.ErrorCode = ErrorCode.EmptyQueryWord;
+                            return result;
+                        }
+                    }
+                }
+
                 // 构造检索式
                 string strQueryXml = "";
 
@@ -3371,6 +3418,7 @@ out string error);
                 //      -1  检查过程出错
                 //      0   没有超出权限的情况
                 //      1   有超出权限的情况，报错信息在 strError 中
+                //      2   出现了不被允许的空检索词，报错信息在 strError 中
                 nRet = app.CheckSearchRights(
                     sessioninfo,
                     strTargetQueryXml,
@@ -3382,6 +3430,13 @@ out string error);
                     result.Value = -1;
                     result.ErrorInfo = "检索被拒绝。" + strError;
                     result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+                if (nRet == 2)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "检索被拒绝。" + strError;
+                    result.ErrorCode = ErrorCode.EmptyQueryWord;
                     return result;
                 }
 
@@ -4737,6 +4792,7 @@ strDbName);
             sessioninfo,
             db_type,
             item_dom,
+            record?.Path,
             out string strError);
                 if (nRet == -1 || nRet == -2)
                 {
@@ -4777,6 +4833,17 @@ strDbName);
                         // 0,
                         out string[] cols,
                         out string strError);
+
+                    // 2025/4/21
+                    // 刚用 XML 请求 dp2kernel 创建的 cols，里面可能含有 ~b 等指令，需要兑现一次
+                    if (nRet > 0)
+                    {
+                        app.FilterBorrower(sessioninfo,
+                            cols,
+                            "error_in_field",
+                            out strError);
+                    }
+
                     // TODO: 检查 nRet == -1 时候 cols 是否为报错信息
                     record.Cols = cols;
                 }
@@ -6506,6 +6573,22 @@ out QueryResult[] results)
                     }
                 }
 
+                // 2025/5/17
+                if (string.IsNullOrEmpty(app.DenyEmptyQueryWord) == false)
+                {
+                    var word = strQueryWord;
+                    if (string.IsNullOrEmpty(word))
+                    {
+                        if (app.AllowEmptyQueryWord(sessioninfo) == false)
+                        {
+                            result.Value = -1;
+                            result.ErrorInfo = $"当前访问者身份不允许使用空检索词";
+                            result.ErrorCode = ErrorCode.EmptyQueryWord;
+                            return result;
+                        }
+                    }
+                }
+
                 // strLocationFilter = "海淀分馆"; // testing
                 if (string.IsNullOrEmpty(strLocationFilter) == false)
                 {
@@ -7337,6 +7420,22 @@ out QueryResult[] results)
                     return result;
                 }
 
+                // 2025/5/17
+                if (string.IsNullOrEmpty(app.DenyEmptyQueryWord) == false)
+                {
+                    var word = strQueryWord;
+                    if (string.IsNullOrEmpty(word))
+                    {
+                        if (app.AllowEmptyQueryWord(sessioninfo) == false)
+                        {
+                            result.Value = -1;
+                            result.ErrorInfo = $"当前访问者身份不允许使用空检索词";
+                            result.ErrorCode = ErrorCode.EmptyQueryWord;
+                            return result;
+                        }
+                    }
+                }
+
                 string strQueryXml = "";
                 // 构造检索实体库的 XML 检索式
                 // parameters:
@@ -7481,6 +7580,40 @@ out QueryResult[] results)
                 if (string.IsNullOrEmpty(strItemDbType) == true)
                     strItemDbType = "item";
 
+                string typeCaption = ServerDatabaseUtility.GetTypeCaption(strItemDbType);
+
+#if ITEM_ACCESS_RIGHTS
+                {
+                    // 检查 strItemDbType 的合法性
+                    if (strItemDbType == "item")
+                    {
+                    }
+                    else if (strItemDbType == "order")
+                    {
+                    }
+                    else if (strItemDbType == "issue")
+                    {
+                    }
+                    else if (strItemDbType == "comment")
+                    {
+                    }
+                    else
+                    {
+                        strError = $"未能识别的 strItemDbType 值 '{strItemDbType}'";
+                        goto ERROR1;
+                    }
+
+                    // 初步判断一下任意数据库名的 getiteminfo 存取定义是否具备。如果不具备则直接 AccessDenied 返回了
+                    // 注意后期在知道记录的路径以后，还要补充判断一次这个数据库的 getiteminfo 存取定义是否具备
+                    var ret = LibraryApplication.CheckRights(
+            sessioninfo,
+            $"{InfoRight($"get{strItemDbType}info")},order",
+            "",
+            $"获取{typeCaption}信息");
+                    if (ret != null)
+                        return ret;
+                }
+#else
                 if (strItemDbType == "item")
                 {
                     // 权限字符串
@@ -7530,6 +7663,7 @@ out QueryResult[] results)
                     strError = $"未能识别的 strItemDbType 值 '{strItemDbType}'";
                     goto ERROR1;
                 }
+#endif
 
                 // test
                 // Thread.Sleep(new TimeSpan(0, 0, 30));
@@ -7912,6 +8046,21 @@ out QueryResult[] results)
 
 #endif
 
+#if ITEM_ACCESS_RIGHTS
+                // 2025/5/15
+                // 精确判断一下具体数据库名的 getiteminfo 存取定义是否具备。
+                if (string.IsNullOrEmpty(sessioninfo.Access) == false)
+                {
+                    var ret = LibraryApplication.CheckRights(
+            sessioninfo,
+            $"{InfoRight($"get{strItemDbType}info")},order",
+            ResPath.GetDbName(strItemRecPath),
+            $"获取{typeCaption}信息");
+                    if (ret != null)
+                        return ret;
+                }
+#endif
+
                 // 2023/2/3
                 // 按照当前账户的权限，来过滤掉原始册记录中的一些敏感字段
                 // return:
@@ -7923,6 +8072,7 @@ out QueryResult[] results)
             sessioninfo,
             strItemDbType,
             item_dom,
+            strItemRecPath,
             out strError);
                 if (nRet == -1 || nRet == -2)
                     goto ERROR1;
@@ -8320,6 +8470,22 @@ out QueryResult[] results)
                     result.ErrorInfo = $"册条码号查重被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 searchitem 或 order 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
+                }
+
+                // 2025/5/17
+                if (string.IsNullOrEmpty(app.DenyEmptyQueryWord) == false)
+                {
+                    var word = strBarcode;
+                    if (string.IsNullOrEmpty(word))
+                    {
+                        if (app.AllowEmptyQueryWord(sessioninfo) == false)
+                        {
+                            result.Value = -1;
+                            result.ErrorInfo = $"当前访问者身份不允许使用空检索词";
+                            result.ErrorCode = ErrorCode.EmptyQueryWord;
+                            return result;
+                        }
+                    }
                 }
 
                 int nRet = 0;
@@ -10065,7 +10231,22 @@ PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin)
 
                         dbnames.Add(strDbName);
                     }
+                }
 
+                // 2025/5/17
+                if (string.IsNullOrEmpty(app.DenyEmptyQueryWord) == false)
+                {
+                    var word = strQueryWord;
+                    if (string.IsNullOrEmpty(word))
+                    {
+                        if (app.AllowEmptyQueryWord(sessioninfo) == false)
+                        {
+                            result.Value = -1;
+                            result.ErrorInfo = $"当前访问者身份不允许使用空检索词";
+                            result.ErrorCode = ErrorCode.EmptyQueryWord;
+                            return result;
+                        }
+                    }
                 }
 
                 bool bDesc = StringUtil.IsInList("desc", strSearchStyle);
@@ -11124,6 +11305,22 @@ PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin)
                         dbnames.Add(strDbName);
                     }
 
+                }
+
+                // 2025/5/17
+                if (string.IsNullOrEmpty(app.DenyEmptyQueryWord) == false)
+                {
+                    var word = strQueryWord;
+                    if (string.IsNullOrEmpty(word))
+                    {
+                        if (app.AllowEmptyQueryWord(sessioninfo) == false)
+                        {
+                            result.Value = -1;
+                            result.ErrorInfo = $"当前访问者身份不允许使用空检索词";
+                            result.ErrorCode = ErrorCode.EmptyQueryWord;
+                            return result;
+                        }
+                    }
                 }
 
                 bool bDesc = StringUtil.IsInList("desc", strSearchStyle);
@@ -15651,6 +15848,10 @@ strLibraryCodeList);
         // 设置实用库信息
         // parameters:
         //      strRootElementName  根元素名。如果为空，系统自会用<r>作为根元素
+        // result.Value:
+        //      -1  出错
+        //      0   记录未发生改变(ErrorCode 返回 NotChanged)
+        //      1   记录发生了改变
         public LibraryServerResult SetUtilInfo(
             string strAction,
             string strDbName,
@@ -15680,12 +15881,11 @@ strLibraryCodeList);
                 if (StringUtil.IsInList("setpublisherinfo,setutilinfo", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = $"设置实用库记录信息的操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 setpublisherinfo 或 setutilinfo 权限。";
+                    result.ErrorInfo = $"设置实用库 {strDbName} 记录信息的操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 setpublisherinfo 或 setutilinfo 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
 
-                // TODO: 是否要检查数据库名确实属于当前已经定义的实用库
                 return app.SetUtilInfo(
                     sessioninfo,
                     strAction,
@@ -16428,6 +16628,7 @@ out byte[] temp_timestamp);
                                         sessioninfo,
                                         db_type,
                                         dom,
+                                        strResPath,
                                         out strError);
                                     if (nRet == -1 || nRet == -2)
                                     {
@@ -18536,6 +18737,22 @@ out strError);
                         dbnames.Add(strDbName);
                     }
 
+                }
+
+                // 2025/5/17
+                if (string.IsNullOrEmpty(app.DenyEmptyQueryWord) == false)
+                {
+                    var word = strQueryWord;
+                    if (string.IsNullOrEmpty(word))
+                    {
+                        if (app.AllowEmptyQueryWord(sessioninfo) == false)
+                        {
+                            result.Value = -1;
+                            result.ErrorInfo = $"当前访问者身份不允许使用空检索词";
+                            result.ErrorCode = ErrorCode.EmptyQueryWord;
+                            return result;
+                        }
+                    }
                 }
 
                 bool bDesc = StringUtil.IsInList("desc", strSearchStyle);

@@ -548,7 +548,7 @@ namespace DigitalPlatform.LibraryServer
                     {
                         // 虚拟的路径名
                         string strVirtualFromName = db.Froms[k];
-                        
+
                         // 2024/5/10
                         this.CheckVdbsThrow();
 
@@ -597,6 +597,7 @@ namespace DigitalPlatform.LibraryServer
         //      -1  检查过程出错
         //      0   没有超出权限的情况
         //      1   有超出权限的情况，报错信息在 strError 中
+        //      2   出现了不被允许的空检索词，报错信息在 strError 中
         public int CheckSearchRights(
             SessionInfo sessioninfo,
             string strQueryXml,
@@ -634,6 +635,20 @@ namespace DigitalPlatform.LibraryServer
                     if (error != null)
                         outof_list.Add(dbname + ":" + error);
                 }
+
+                if (string.IsNullOrEmpty(this.DenyEmptyQueryWord) == false)
+                {
+                    var word = item.SelectSingleNode("word")?.InnerText;
+                    if (string.IsNullOrEmpty(word))
+                    {
+                        if (AllowEmptyQueryWord(sessioninfo) == false)
+                        {
+
+                            strError = $"当前访问者身份不允许使用空检索词";
+                            return 2;
+                        }
+                    }
+                }
             }
 
             if (outof_list.Count > 0)
@@ -643,6 +658,19 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return 0;
+        }
+
+        public bool AllowEmptyQueryWord(SessionInfo sessioninfo)
+        {
+            if ((sessioninfo.UserID == "public" && StringUtil.IsInList("public", this._denyEmptyQueryWord))
+|| (sessioninfo.UserType == "reader" && StringUtil.IsInList("reader", this._denyEmptyQueryWord))
+|| (sessioninfo.UserType != "reader" && StringUtil.IsInList("worker", this._denyEmptyQueryWord))
+)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         // 判断一个数据库名是否允许当前用户检索

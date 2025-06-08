@@ -23,6 +23,7 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Core;
+using DocumentFormat.OpenXml.Bibliography;
 
 namespace dp2Circulation
 {
@@ -2141,6 +2142,193 @@ MessageBoxDefaultButton.Button2);
             {
                 this.button_addCrLf_countRecords.Enabled = true;
             }
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        // 检索 publisher 库中的出版地条目
+        private void button_publisher_searchCityCode_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            string strDbName = Program.MainForm.GetUtilDbName("publisher");
+
+            if (String.IsNullOrEmpty(strDbName) == true)
+            {
+                strError = "当前连接的 dp2library 服务器尚未定义 publisher 类型的实用库名";
+                goto ERROR1;
+            }
+
+            var cityName = this.textBox_publisher_city.Text;
+            if (string.IsNullOrEmpty(cityName))
+            {
+                strError = "尚未输入出版地";
+                goto ERROR1;
+            }
+
+            this.textBox_publisher_cityCode.Text = "";
+
+            var looping = Looping(out LibraryChannel channel,
+                $"正在获得出版地 '{cityName}' 的地区代码 ...",
+                "disableControl");
+            try
+            {
+                long ret = channel.GetUtilInfo(
+                looping.Progress,
+                "", // action
+                strDbName,
+                VerifyBase.CITY_FROM, // 检索途径
+                $"{VerifyBase.CITY_KEY_PREFIX}{cityName}", // key 值
+                VerifyBase.CITY_CODE_VALUE_ATTR_NAME, // value 属性名 这个属性名可以自由定义，因为 keys 里面没有定义为检索点
+                out string code,
+                out strError);
+                if (ret == -1)
+                    goto ERROR1;
+                if (ret == 0)
+                {
+                    strError = $"出版地 '{cityName}' 的地区代码没有找到";
+                    goto ERROR1;
+                }
+                this.textBox_publisher_cityCode.Text = code;
+            }
+            finally
+            {
+                looping.Dispose();
+            }
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        // 修改 publisher 库中的出版地条目
+        private void button_publisher_setCityCode_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            // 3.180
+
+            string strDbName = Program.MainForm.GetUtilDbName("publisher");
+
+            if (String.IsNullOrEmpty(strDbName) == true)
+            {
+                strError = "当前连接的 dp2library 服务器尚未定义 publisher 类型的实用库名";
+                goto ERROR1;
+            }
+
+            var cityName = this.textBox_publisher_city.Text;
+            if (string.IsNullOrEmpty(cityName))
+            {
+                strError = "尚未输入出版地";
+                goto ERROR1;
+            }
+
+            var code = this.textBox_publisher_cityCode.Text;
+            if (string.IsNullOrEmpty(cityName))
+            {
+                strError = "尚未输入要设置的地区代码";
+                goto ERROR1;
+            }
+
+            List<string> errors = VerifyBase.VerifyCityCode(code,
+    out string long_code);
+
+            if (errors.Count > 0)
+            {
+                strError = StringUtil.MakePathList(errors, "\r\n");
+                goto ERROR1;
+            }
+
+            var looping = Looping(out LibraryChannel channel,
+                $"正在设置出版地 '{cityName}' 的地区代码 ...",
+                "disableControl");
+            try
+            {
+                var ret = channel.SetUtilInfo(
+                looping.Progress,
+                "", // action
+                strDbName,
+                VerifyBase.CITY_FROM, // 检索途径
+                "r",    // 根元素名
+                VerifyBase.CITY_KEY_ATTR_NAME,    // key 属性名 (ISBN 的首字母) 这个属性名不能改，被 keys 定义为“ISBN”检索点了
+                VerifyBase.CITY_CODE_VALUE_ATTR_NAME, // value 属性名 这个属性名可以自由定义，因为 keys 里面没有定义为检索点
+                $"{VerifyBase.CITY_KEY_PREFIX}{cityName}", // key 值
+                long_code, // value 值
+                out strError);
+                if (ret == -1)
+                    goto ERROR1;
+
+                MessageBox.Show(this, $"出版地 '{cityName}' 的地区代码 '{long_code}' 设置成功");
+            }
+            finally
+            {
+                looping.Dispose();
+            }
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        // 删除 publisher 库中的出版地条目
+        private void button_publisher_deleteCity_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.180") < 0)
+            {
+                strError = "当前连接的 dp2library 版本必须在 3.180 以上才能使用删除功能 (但它是 " + Program.MainForm.ServerVersion + ")";
+                goto ERROR1;
+            }
+
+            string strDbName = Program.MainForm.GetUtilDbName("publisher");
+
+            if (String.IsNullOrEmpty(strDbName) == true)
+            {
+                strError = "当前连接的 dp2library 服务器尚未定义 publisher 类型的实用库名";
+                goto ERROR1;
+            }
+
+            var cityName = this.textBox_publisher_city.Text;
+            if (string.IsNullOrEmpty(cityName))
+            {
+                strError = "尚未输入要删除的出版地";
+                goto ERROR1;
+            }
+
+            DialogResult result = MessageBox.Show(this,
+    $"确实要删除出版地 '{cityName}'?",
+    "UtilityForm",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+            if (result != DialogResult.Yes)
+                return;
+
+            var looping = Looping(out LibraryChannel channel,
+                $"正在删除出版地 '{cityName}' 的地区代码 ...",
+                "disableControl");
+            try
+            {
+                var ret = channel.SetUtilInfo(
+                looping.Progress,
+                "delete", // action
+                strDbName,
+                VerifyBase.CITY_FROM, // 检索途径
+                "r",    // 根元素名
+                VerifyBase.CITY_KEY_ATTR_NAME,    // key 属性名 (ISBN 的首字母) 这个属性名不能改，被 keys 定义为“ISBN”检索点了
+                VerifyBase.CITY_CODE_VALUE_ATTR_NAME, // value 属性名 这个属性名可以自由定义，因为 keys 里面没有定义为检索点
+                $"{VerifyBase.CITY_KEY_PREFIX}{cityName}", // key 值
+                null, // value 值
+                out strError);
+                if (ret == -1)
+                    goto ERROR1;
+
+                MessageBox.Show(this, $"出版地 '{cityName}' 删除成功");
+            }
+            finally
+            {
+                looping.Dispose();
+            }
+            return;
         ERROR1:
             MessageBox.Show(this, strError);
         }

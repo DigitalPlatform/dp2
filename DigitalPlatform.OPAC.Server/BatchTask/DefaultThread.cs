@@ -53,7 +53,7 @@ namespace DigitalPlatform.OPAC.Server
                 catch (Exception ex)
                 {
                     string strErrorText = "DefaultTread中 ChatRooms.Flush() 出现异常: " + ExceptionUtil.GetDebugText(ex);
-                    this.App.WriteErrorLog(strErrorText);
+                    OpacApplication.WriteErrorLog(strErrorText);
                 }
             }
 
@@ -81,7 +81,7 @@ namespace DigitalPlatform.OPAC.Server
             catch (Exception ex)
             {
                 string strErrorText = "DefaultTread中 CleanFilterTask() 出现异常: " + ExceptionUtil.GetDebugText(ex);
-                this.App.WriteErrorLog(strErrorText);
+                OpacApplication.WriteErrorLog(strErrorText);
             }
 
             if (this.App.XmlLoaded == false
@@ -100,7 +100,7 @@ namespace DigitalPlatform.OPAC.Server
                         out strError);
                     if (nRet != 0)
                     {
-                        this.App.WriteErrorLog("ERR003 初始化XmlDefs失败: " + strError);
+                        OpacApplication.WriteErrorLog("ERR003 初始化XmlDefs失败: " + strError);
                         m_nRetryAfterMinutes++;
                         return; // 如果必要可修改为继续后面的任务
                     }
@@ -108,7 +108,7 @@ namespace DigitalPlatform.OPAC.Server
                 catch (Exception ex)
                 {
                     string strErrorText = "DefaultTread中 GetXmlDefs() 出现异常: " + ExceptionUtil.GetDebugText(ex);
-                    this.App.WriteErrorLog(strErrorText);
+                    OpacApplication.WriteErrorLog(strErrorText);
                     m_nRetryAfterMinutes++;
                     return; // 如果必要可修改为继续后面的任务
                 }
@@ -120,13 +120,13 @@ namespace DigitalPlatform.OPAC.Server
                     nRet = this.App.InitialVdbs(out strError);
                     if (nRet == -1)
                     {
-                        this.App.WriteErrorLog("ERR004 初始化vdbs失败: " + strError);
+                        OpacApplication.WriteErrorLog("ERR004 初始化vdbs失败: " + strError);
                     }
                 }
                 catch (Exception ex)
                 {
                     string strErrorText = "DefaultTread中 InitialVdbs() 出现异常: " + ExceptionUtil.GetDebugText(ex);
-                    this.App.WriteErrorLog(strErrorText);
+                    OpacApplication.WriteErrorLog(strErrorText);
                 }
 
                 try
@@ -136,13 +136,13 @@ namespace DigitalPlatform.OPAC.Server
                         out strError);
                     if (nRet == -1)
                     {
-                        this.App.WriteErrorLog("ERR006 初始化BiblioDbGroup失败: " + strError);
+                        OpacApplication.WriteErrorLog("ERR006 初始化BiblioDbGroup失败: " + strError);
                     }
                 }
                 catch (Exception ex)
                 {
                     string strErrorText = "DefaultTread中 LoadBiblioDbGroupParam() 出现异常: " + ExceptionUtil.GetDebugText(ex);
-                    this.App.WriteErrorLog(strErrorText);
+                    OpacApplication.WriteErrorLog(strErrorText);
                 }
             }
         }

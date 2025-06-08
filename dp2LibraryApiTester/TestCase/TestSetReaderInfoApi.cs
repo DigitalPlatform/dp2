@@ -2536,9 +2536,11 @@ namespace dp2LibraryApiTester
                     out string _,
                     out saved_xml,
                     out string _,
-                    out new_timestamp,
+                    out byte[] temp,
                     out ErrorCodeValue _,
                     out strError);
+                if (lRet != -1)
+                    new_timestamp = temp;
                 if (lRet == -1)
                     goto ERROR1;
 
@@ -2584,9 +2586,11 @@ namespace dp2LibraryApiTester
                         out string _,
                         out string _,
                         out string _,
-                        out byte[] _,
+                        out byte[] temp1,
                         out ErrorCodeValue _,
                         out strError);
+                    if (lRet != -1)
+                        new_timestamp = temp1;
                     if (lRet == -1)
                     {
                         if (channel.ErrorCode == ErrorCode.InvalidReaderBarcode)
@@ -3033,9 +3037,11 @@ out strError);
                         out string _,
                         out saved_xml,
                         out string _,
-                        out new_timestamp,
+                        out byte[] temp,
                         out ErrorCodeValue _,
                         out strError);
+                    if (lRet != -1)
+                        new_timestamp = temp;
                     if (string.IsNullOrEmpty(test_case))
                     {
                         if (lRet == -1)
@@ -3668,9 +3674,11 @@ out strError);
                         out string _,
                         out saved_xml1,
                         out string _,
-                        out new_timestamp1,
+                        out byte[] temp,
                         out ErrorCodeValue _,
                         out strError);
+                    if (lRet != -1)
+                        new_timestamp1 = temp;
                     if (test_case == "refID")
                     {
                         if (lRet == -1)
@@ -3909,7 +3917,7 @@ out strError);
                 }
                 catch (Exception ex)
                 {
-                    strError = "TestCreateReaderRecord_dup() Exception: " + ExceptionUtil.GetExceptionText(ex);
+                    strError = "TestChangeReaderRecord_dup() Exception: " + ExceptionUtil.GetExceptionText(ex);
                     goto ERROR1;
                 }
                 finally
@@ -3954,7 +3962,7 @@ out strError);
                 if (string.IsNullOrEmpty(test_case))
                 {
                     // 完整的 setreaderinfo 权限
-                    rights = "setreaderinfo";
+                    rights = "setreaderinfo,getreaderinfo"; // 2025/4/19 增加的 ,getreaderinfo。目的是为了成功删除读者记录
                 }
                 else if (test_case == "limitFields1")
                 {
@@ -3964,7 +3972,7 @@ out strError);
                 else if (test_case == "limitFields2")
                 {
                     // 注: 包含数据中的全部元素，和 r_delete
-                    rights = "setreaderinfo:barcode|name|readerType|department|r_delete";
+                    rights = "setreaderinfo:barcode|name|readerType|department|r_delete,getreaderinfo"; // 2025/4/19 增加的 ,getreaderinfo。目的是为了成功删除读者记录
                 }
                 else if (test_case == "limitFields3")
                 {
@@ -4237,7 +4245,7 @@ out strError);
                         out string _,
                         out saved_xml,
                         out string _,
-                        out new_timestamp,
+                        out _,  // new_timestamp,
                         out ErrorCodeValue _,
                         out strError);
                     if (string.IsNullOrEmpty(test_case))
@@ -4422,7 +4430,7 @@ out strError);
             }
 
         ERROR1:
-            DataModel.SetMessage($"TestDeleteReaderRecord() error: {strError}", "error");
+            DataModel.SetMessage($"TestDeleteReaderRecord(\"{test_case}\") error: {strError}", "error");
             return new NormalResult
             {
                 Value = -1,

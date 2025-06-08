@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.98.*")]
-[assembly: AssemblyFileVersion("3.98.0.0")]
+[assembly: AssemblyVersion("3.101.*")]
+[assembly: AssemblyFileVersion("3.101.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -251,3 +251,8 @@ using System.Runtime.InteropServices;
 // 3.98 2025/3/7    书目查询窗的执行 MarcQuery 脚本功能增加了自动保存所修改的记录的功能
 //                  书目查询窗的保存修改的功能中，增加了对于修改后的记录的立即兑现显示能力
 //                  种册窗增加了对于修改后的记录的立即兑现显示能力(注: 前端提交保存的记录，dp2library 服务器有可能决定部分接受，并且可能增加和修改 operation 元素)
+// 3.99 2025/4/30   做了一系列关于读者记录和册记录的参考 ID 显示条码号的优化改进
+//                  发布为正式版
+// 3.100 2025/5/8   DetailHost 类和 MainForm 类中的 AddPinyin() 函数改变了默认效果，默认会覆盖已有的拼音子字段。
+//                  在 strParameters 参数中包含 "append" 子参数可以改变这一行为，变为已有拼音子字段保持原样
+// 3.101 2025/5/12  在“实用工具”窗口中增加“出版者工具”属性页

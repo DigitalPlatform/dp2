@@ -465,7 +465,12 @@ TaskScheduler.Default);
                     goto ERROR1;
                 }
 
-                this.m_webExternalHost_item.SetHtmlString(strItemText,
+                // 2025/4/21
+                if (strItemText != null && strItemText.StartsWith("<result "))
+                    this.m_webExternalHost_item.SetHtmlString(HttpUtility.HtmlEncode(strItemText),
+"iteminfoform_item");
+                else
+                    this.m_webExternalHost_item.SetHtmlString(strItemText,
                     "iteminfoform_item");
 
                 if (String.IsNullOrEmpty(strBiblioText) == true)
@@ -485,11 +490,15 @@ TaskScheduler.Default);
                     this.comboBox_from.Text = "册条码号";
                 });
 
+                string style = "xml";
+                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.179") >= 0)
+                    style = "xml:borrowerBarcode";  // XML 格式，并且 borrower 元素做了自动变换，增加了 barcode 属性
+
                 // 最后获得item xml
                 lRet = channel.GetItemInfo(
                     looping.Progress,
                     strItemBarcode,
-                    "xml",
+                    style,
                     out strItemText,
                     out strItemRecPath,
                     out item_timestamp,
@@ -763,8 +772,13 @@ TaskScheduler.Default);
                     this.ItemRecPath = strOutputItemRecPath;    // 2009/10/18
                     this.BiblioRecPath = strBiblioRecPath;  // 2013/3/4
 
-                    this.m_webExternalHost_item.SetHtmlString(strItemText,
-                        "iteminfoform_item");
+                    // 2025/4/21
+                    if (strItemText != null && strItemText.StartsWith("<result "))
+                        this.m_webExternalHost_item.SetHtmlString(HttpUtility.HtmlEncode(strItemText),
+    "iteminfoform_item");
+                    else
+                        this.m_webExternalHost_item.SetHtmlString(strItemText,
+                            "iteminfoform_item");
                 }
 
                 if (String.IsNullOrEmpty(strBiblioText) == true)
@@ -786,10 +800,15 @@ TaskScheduler.Default);
 
                 // 最后获得item xml
                 if (this.m_strDbType == "item")
+                {
+                    string style = "xml";
+                    if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.179") >= 0)
+                        style = "xml:borrowerBarcode";  // XML 格式，并且 borrower 元素做了自动变换，增加了 barcode 属性
+
                     lRet = channel.GetItemInfo(
                         looping.Progress,
                         "@path:" + strOutputItemRecPath, // strBarcode,
-                        "xml",
+                        style,
                         out strItemText,
                         out strItemRecPath,
                         out item_timestamp,
@@ -797,6 +816,7 @@ TaskScheduler.Default);
                         out strBiblioText,
                         out strBiblioRecPath,
                         out strError);
+                }
                 else if (this.m_strDbType == "comment")
                     lRet = channel.GetCommentInfo(
                          looping.Progress,

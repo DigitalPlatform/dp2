@@ -1823,7 +1823,8 @@ namespace DigitalPlatform.LibraryServer
             string strRefID = DomUtil.GetElementText(readerdom.DocumentElement, "refID");
             if (string.IsNullOrEmpty(strRefID) == true)
             {
-                DomUtil.SetElementText(readerdom.DocumentElement, "refID", Guid.NewGuid().ToString());
+                // DomUtil.SetElementText(readerdom.DocumentElement, "refID", Guid.NewGuid().ToString());
+                LibraryApplication.EnsureRefID(ref readerdom);
                 return 1;
             }
 

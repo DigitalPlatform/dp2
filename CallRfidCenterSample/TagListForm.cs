@@ -398,6 +398,7 @@ bool eas)
                 else if (data_format == "gb")
                 {
                     var result = UhfUtility.BuildTag(chip,
+                        true,   // PC.UMI
                         true,
                         eas ? "afi_eas_on" : "");
                     TagInfo new_tag_info = existing.Clone();

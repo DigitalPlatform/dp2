@@ -523,6 +523,40 @@ namespace dp2Circulation
             }
         }
 
+        // 2025/4/13
+        // borrower 元素的 barcode 属性
+        public string BorrowerBarcode
+        {
+            get
+            {
+                return this.RecordDom.DocumentElement?.SelectSingleNode("borrower/@barcode")?.Value;
+            }
+            set
+            {
+                var borrower = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+                    "borrower",
+                    out XmlNode node);
+                if (node != null)
+                {
+                    if (string.IsNullOrEmpty(value))
+                        (node as XmlElement).RemoveAttribute("barcode");
+                    else
+                        (node as XmlElement).SetAttribute(Barcode, value);
+                    this.Changed = true;
+                }
+                else
+                {
+                    if (string.IsNullOrEmpty(value) == false)
+                    {
+                        DomUtil.SetElementText(this.RecordDom.DocumentElement,
+                            "borrower", "")
+                            .SetAttribute("barcode", value);
+                        this.Changed = true;
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// 借书的日期
         /// </summary>
@@ -773,12 +807,29 @@ namespace dp2Circulation
             throw new Exception($"未知的类型 '{type}'");
         }
 
+        string GetBorrowerText()
+        {
+            if (string.IsNullOrEmpty(this.BorrowerBarcode) == false
+                && string.IsNullOrEmpty(this.Borrower) == false
+                && this.Borrower != this.BorrowerBarcode)
+                return $"{this.BorrowerBarcode} {this.Borrower}";
+
+            return this.Borrower;
+        }
+
         // 可能会抛出异常
         public string GetData(string dataElement)
         {
             // 一般 XML 元素 content
             if (dataElement.IndexOf(":") == -1)
+            {
+                // 2024/1/13
+                // 打个小补丁，borrower 列实际上是显示 refid (barcode)
+                if (dataElement == "borrower")
+                    return this.GetBorrowerText();
+
                 return DomUtil.GetElementText(this.RecordDom.DocumentElement, dataElement);
+            }
 
             var parts = StringUtil.ParseTwoPart(dataElement, ":");
             string name = parts[0];
@@ -906,9 +957,13 @@ namespace dp2Circulation
                 COLUMN_BATCHNO,
                 this.BatchNo);
 
-            ListViewUtil.ChangeItemText(item,
-                COLUMN_BORROWER,
-                this.Borrower);
+            {
+
+                ListViewUtil.ChangeItemText(item,
+                    COLUMN_BORROWER,
+                    this.GetBorrowerText()/*this.Borrower*/);
+            }
+
             ListViewUtil.ChangeItemText(item,
                 COLUMN_BORROWDATE,
                 this.BorrowDate);

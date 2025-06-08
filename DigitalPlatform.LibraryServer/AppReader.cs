@@ -95,13 +95,19 @@ namespace DigitalPlatform.LibraryServer
                 "password",
         };
 
+        public delegate bool delegate_exclude(XmlElement file_element);
+
         // 更换 domTarget 中所有 dprms:file 元素
         // 算法是：删除target中的全部<dprms:file>元素，然后将source记录中的全部<dprms:file>元素插入到target记录中
+        // parameters:
+        //      exclude_func   用于排除某些元素的回调函数，返回值为 true 的元素将被排除
         // return:
         //      false   没有发生实质性改变
         //      true    发生了实质性改变
         public static bool MergeDprmsFile(ref XmlDocument domTarget,
-                XmlDocument domSource)
+                XmlDocument domSource,
+                delegate_exclude exclude_func = null,   // 2025/5/19
+                bool throwException = true)
         {
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
             nsmgr.AddNamespace("dprms", DpNs.dprms);
@@ -116,23 +122,69 @@ namespace DigitalPlatform.LibraryServer
                 XmlNode node = nodes[i];
                 if (node.ParentNode != null)
                 {
+                    if (exclude_func != null 
+                        && exclude_func(node as XmlElement) == true)
+                        continue;
+
                     oldOuterXmls.Add(node.OuterXml);
                     node.ParentNode.RemoveChild(node);
                 }
             }
 
+            // 2025/4/22
+            Hashtable id_table = new Hashtable();   // 用于 id 属性值查重
+
             // 然后将source记录中的全部<dprms:file>元素插入到target记录中
             nodes = domSource.DocumentElement.SelectNodes("//dprms:file", nsmgr);
-            for (int i = 0; i < nodes.Count; i++)
+            foreach(XmlElement file_element in nodes)
             {
-                XmlNode node = nodes[i];
+                if (exclude_func != null
+    && exclude_func(file_element as XmlElement) == true)
+                    continue;
 
-                newOuterXmls.Add(node.OuterXml);
+                var id = file_element.GetAttribute("id");
+                // 2025/4/22
+                if (string.IsNullOrEmpty(id) )
+                {
+                    if (throwException == false)
+                        continue;
+                    throw new ArgumentException($"dprms:file 元素的 id 属性值不允许为空");
+                }
+                if (string.IsNullOrEmpty(id) == false)
+                {
+                    if (id_table.ContainsKey(id) == true)
+                    {
+                        if (throwException == false)
+                            continue;
+                        throw new ArgumentException($"dprms:file 元素的 id 属性值不允许发生重复(发现重复 id 属性值 '{id}')");   // 重复的 id 属性值
+                    }
+                    id_table.Add(id, id);
+                }
 
                 XmlDocumentFragment fragment = domTarget.CreateDocumentFragment();
-                fragment.InnerXml = node.OuterXml;
+                fragment.InnerXml = file_element.OuterXml;
 
-                domTarget.DocumentElement.AppendChild(fragment);
+                var new_element = domTarget.DocumentElement.AppendChild(fragment) as XmlElement;
+
+                {
+                    // 2025/4/23
+                    // 删除名字以 “__” 开头的属性
+                    List<XmlAttribute> delete_attrs = new List<XmlAttribute>();
+                    foreach (XmlAttribute attr_node in new_element.Attributes)
+                    {
+                        if (attr_node.Name.StartsWith("__"))
+                        {
+                            delete_attrs.Add(attr_node);
+                        }
+                    }
+
+                    foreach (var attr_node in delete_attrs)
+                    {
+                        new_element.RemoveAttribute(attr_node.Name);
+                    }
+                }
+
+                newOuterXmls.Add(new_element.OuterXml);
             }
 
             // 比较 oldOuterXmls 和 newOuterXmls 之间是否有差异
@@ -670,9 +722,12 @@ namespace DigitalPlatform.LibraryServer
 
             // 2015/9/12
             // 如果记录中没有 refID 字段，则主动填充
+            /*
             string strRefID = DomUtil.GetElementText(domExist.DocumentElement, "refID");
             if (string.IsNullOrEmpty(strRefID) == true)
                 DomUtil.SetElementText(domExist.DocumentElement, "refID", Guid.NewGuid().ToString());
+            */
+            EnsureRefID(ref domExist);
 
             // 2020/5/19 
             // 删除以前误为根元素添加的 expireDate 属性
@@ -999,7 +1054,8 @@ unprocessed_element_names.Except(_auto_maintain_element_names)));
             string strRefID = DomUtil.GetElementText(dom.DocumentElement, "refID");
             if (string.IsNullOrEmpty(strRefID) == true)
             {
-                DomUtil.SetElementText(dom.DocumentElement, "refID", Guid.NewGuid().ToString());
+                // DomUtil.SetElementText(dom.DocumentElement, "refID", Guid.NewGuid().ToString());
+                EnsureRefID(ref dom);
                 bChanged = true;
             }
             else
@@ -1686,11 +1742,24 @@ out List<string> send_skips);
                 || strAction == "changereaderrefid"
                 || strAction == "delete")
             {
+                // return:
+                //      -1  出错
+                //      0   没有权限
+                //      1   成功
                 nRet = VerifyReadWriteSet(sessioninfo,
                     element_names,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
+                // 2025/4/19
+                if (nRet == 0)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = strError;
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+
             }
 
             // 把旧记录装载到DOM
@@ -2915,6 +2984,10 @@ strLibraryCode);    // 读者所在的馆代码
         // 2021/8/12
         // 检查用户权限中的 getreaderinfo:xxx 和 setreaderinfo:xxx 之间的元素集包含关系
         // TODO: 可以考虑在 xxx 中增加一个 s_bypassverifyset 来故意越过这种检查
+        // return:
+        //      -1  出错(比如用户权限定义不合法等)
+        //      0   没有权限
+        //      1   成功
         static int VerifyReadWriteSet(SessionInfo sessioninfo,
             string[] full_element_names,
             out string strError)
@@ -2933,7 +3006,7 @@ strLibraryCode);    // 读者所在的馆代码
             if (read_level == null)
             {
                 strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 getreaderinfo 或 getreaderobject 权限，因而无法进行修改读者记录的操作(注：仅有写入权限还不够，还要具有大于写入字段范围的读权限)";
-                return -1;
+                return 0;
             }
 
             if (string.IsNullOrEmpty(write_level) == false
@@ -2963,7 +3036,7 @@ strLibraryCode);    // 读者所在的馆代码
                 }
             }
 
-            return 0;
+            return 1;
         }
 
         #region SetReaderInfo() 下级函数
@@ -3475,6 +3548,8 @@ root, strLibraryCode);
             // 清除 LoginCache
             // this.LoginCache.Remove(strExistingBarcode);
             this.ClearLoginCache(strExistingBarcode);
+            ClearLoginCacheByReaderRefID(domExist);
+
 
             // 观察已经存在的记录是否有流通信息
             string strDetailInfo = "";
@@ -3559,7 +3634,8 @@ root, strLibraryCode);
                         "overdues",
                         "reservations",
                         "outofReservations",
-                        "borrowHistory"}); // 注: 把系统自己管理的一些元素从检测范围排除
+                        "borrowHistory",
+                        "operations"/*2025/4/19*/}); // 注: 把系统自己管理的一些元素从检测范围排除
                 if (outof_names.Count > 0)
                 {
                     strError = $"删除读者记录被拒绝。记录中下列元素越过{GetCurrentUserName(sessioninfo)}可修改权限范围: {StringUtil.MakePathList(outof_names)}";
@@ -4019,6 +4095,11 @@ root, strLibraryCode);
                 this.ClearLoginCache(strOldBarcode);
                 if (strNewBarcode != strOldBarcode)
                     this.ClearLoginCache(strNewBarcode);
+                {
+                    // 2025/4/19
+                    ClearLoginCacheByReaderRefID(domExist);
+                    ClearLoginCacheByReaderRefID(domNewRec);
+                }
 
                 // 2009/1/23 
 
@@ -4722,6 +4803,16 @@ root, strLibraryCode);
             return -1;
         }
 
+        // 2025/4/19
+        public void ClearLoginCacheByReaderRefID(XmlDocument readerdom)
+        {
+            if (readerdom == null || readerdom.DocumentElement == null)
+                return;
+            string strReaderRefID = DomUtil.GetElementText(readerdom.DocumentElement, "refID");
+            if (string.IsNullOrEmpty(strReaderRefID) == false)
+                this.ClearLoginCache($"@refID:{strReaderRefID}");
+        }
+
         // parameters:
         //      domNewRec   拟保存的新读者记录
         //      strOldReaderBarcode 旧的证条码号。注意这是证条码号，不能用 "@refID:xxx" 形态
@@ -5229,9 +5320,9 @@ root, strLibraryCode);
                 XmlNode node = borrow_nodes[i];
 
                 /*
-                string strNo = DomUtil.GetAttr(node, "no");
-                string strOperator = DomUtil.GetAttr(node, "operator");
-                string strRenewComment = DomUtil.GetAttr(node, "renewComment");
+                string strNo = DomUtil.GetAttr(file_element, "no");
+                string strOperator = DomUtil.GetAttr(file_element, "operator");
+                string strRenewComment = DomUtil.GetAttr(file_element, "renewComment");
                 string strSummary = "";
                  * */
                 string strBarcode = DomUtil.GetAttr(node, "barcode");
@@ -5407,7 +5498,7 @@ root, strLibraryCode);
             XmlNodeList overdue_nodes = readerdom.DocumentElement.SelectNodes("overdues/overdue");
             foreach (XmlElement node in overdue_nodes)
             {
-                // XmlNode node = overdue_nodes[i];
+                // XmlNode file_element = overdue_nodes[i];
                 string strBarcode = DomUtil.GetAttr(node, "barcode");
 
                 // TODO: 获得册记录馆代码
@@ -7243,6 +7334,21 @@ out strError);
                     // 2011/1/27
                     continue;
                 }
+                else if (IsResultType(strResultType, "refid")
+                    || IsResultType(strResultType, "refID"))
+                {
+                    // 2025/4/22
+                    // 获得读者记录的参考 ID
+                    var refID = DomUtil.GetElementText(filtered_readerdom.DocumentElement, "refID");
+                    SetResult(results_list, i, refID);
+                }
+                else if (IsResultType(strResultType, "barcode"))
+                {
+                    // 2025/4/22
+                    // 获得读者记录的证条码号
+                    var barcode = DomUtil.GetElementText(filtered_readerdom.DocumentElement, "barcode");
+                    SetResult(results_list, i, barcode);
+                }
                 // else if (String.Compare(strResultType, "summary", true) == 0)
                 else if (IsResultType(strResultType, "summary") == true)
                 {
@@ -7908,7 +8014,7 @@ out strError);
             XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
                 "record",
                 strNewReader);    // 2024/5/21 前 record 元素都没有文本内容
-            
+
             DomUtil.SetAttr(node, "recPath", strTargetRecPath);
 
             node = DomUtil.SetElementText(domOperLog.DocumentElement,
@@ -8489,7 +8595,8 @@ out strError);
                 string strRefID = DomUtil.GetElementText(readerdom.DocumentElement, "refID");
                 if (string.IsNullOrEmpty(strRefID) == true)
                 {
-                    DomUtil.SetElementText(readerdom.DocumentElement, "refID", Guid.NewGuid().ToString());
+                    // DomUtil.SetElementText(readerdom.DocumentElement, "refID", Guid.NewGuid().ToString());
+                    EnsureRefID(ref readerdom);
                     bChanged = true;
                 }
 
@@ -8551,6 +8658,10 @@ out strError);
                     // 让缓存失效
                     string strReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement, "barcode");
                     this.ClearLoginCache(strReaderBarcode);   // 及时失效登录缓存
+                    {
+                        // 2025/4/19
+                        ClearLoginCacheByReaderRefID(readerdom);
+                    }
                 }
 
                 List<string> recpaths = new List<string>();

@@ -363,7 +363,7 @@ ref sessioninfo) == false)
 
         // this.HeadBarControl1.CurrentColumn = HeaderColumn.Search;
         return;
-        ERROR1:
+    ERROR1:
         Response.Write(HttpUtility.HtmlEncode(strError));
         Response.End();
     }
@@ -588,7 +588,10 @@ ref sessioninfo) == false)
             sessioninfo.ReturnChannel(channel);
         }
         return;
-        ERROR1:
+    ERROR1:
+        // 2025/5/17
+        if (channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.EmptyQueryWord)
+            strError = "检索词不允许为空。请输入检索词";
         e.ErrorInfo = strError;
         this.BrowseSearchResultControl1.ResultSetName = "";
         this.BrowseSearchResultControl1.ResultCount = 0;
@@ -657,7 +660,7 @@ ref sessioninfo) == false)
         // 确保上一级被选定。但此时和右边的 browselist 内容就不对应了
         this.filter.SelectedNodePath = GetParentResultsetName(this.filter.SelectedNodePath) + "/nav";
         return;
-        ERROR1:
+    ERROR1:
         Response.Write(HttpUtility.HtmlEncode(strError));
         Response.End();
     }

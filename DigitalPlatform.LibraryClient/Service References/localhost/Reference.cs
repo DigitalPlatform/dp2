@@ -233,6 +233,9 @@ namespace DigitalPlatform.LibraryClient.localhost {
         ErrorParameter = 46,
         
         [System.Runtime.Serialization.EnumMemberAttribute()]
+        EmptyQueryWord = 47,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
         AlreadyExist = 100,
         
         [System.Runtime.Serialization.EnumMemberAttribute()]

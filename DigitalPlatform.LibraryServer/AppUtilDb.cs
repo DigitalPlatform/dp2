@@ -1563,7 +1563,10 @@ out error);
         //      strRootElementName  根元素名。如果为空，系统自会用<r>作为根元素
         //      strKeyAttrName  key属性名。如果为空，系统自动会用k
         //      strValueAttrName    value属性名。如果为空，系统自动会用v
-
+        // result.Value:
+        //      -1  出错
+        //      0   记录未发生改变(ErrorCode 返回 NotChanged)
+        //      1   记录发生了改变
         public LibraryServerResult SetUtilInfo(
             SessionInfo sessioninfo,
             string strAction,
@@ -1591,9 +1594,8 @@ out error);
                 goto ERROR1;
             }
 
-            string strPath = "";
-            string strXml = "";
-            byte[] timestamp = null;
+            // string strPath = "";
+            // byte[] timestamp = null;
 
             bool bRedo = false;
 
@@ -1624,13 +1626,38 @@ out error);
                 strDbName,
                 strKey,
                 strFrom,
-                out strPath,
-                out strXml,
-                out timestamp,
+                out string strPath,
+                out string strExistingXml,
+                out byte [] timestamp,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
 
+            // 2025/5/11
+            // 新增删除功能
+            if (strAction == "delete")
+            {
+                if (nRet == 0)
+                {
+                    result.Value = -1;
+                    result.ErrorCode = ErrorCode.NotFound;
+                    result.ErrorInfo = "库名为 '" + strDbName + "' 途径为 '" + strFrom + "' 键值为 '" + strKey + "' 的记录没有找到";
+                    return result;
+                }
+
+                var ret = channel.DoDeleteRes(strPath,
+                    timestamp,
+                    "",
+                    out _,
+                    out strError);
+                if (ret == -1)
+                    goto ERROR1;
+
+                result.Value = 1;
+                return result;
+            }
+
+            string strNewXml = "";
             // 如果动作为直接设置整个记录
             if (strAction == "setrecord")
             {
@@ -1639,7 +1666,7 @@ out error);
                     strPath = strDbName + "/?";
                 }
 
-                strXml = strValue;
+                strNewXml = strValue;
             }
             else
             {
@@ -1655,14 +1682,24 @@ out error);
                     dom.LoadXml("<" + strRootElementName + "/>");
                     DomUtil.SetAttr(dom.DocumentElement, strKeyAttrName, strKey);
                     DomUtil.SetAttr(dom.DocumentElement, strValueAttrName, strValue);
-                    strXml = dom.DocumentElement.OuterXml;
+                    strNewXml = dom.DocumentElement.OuterXml;
                 }
                 else
                 {
                     string strPartXml = "/xpath/<locate>@" + strValueAttrName + "</locate><create>@" + strValueAttrName + "</create>";
                     strPath += strPartXml;
-                    strXml = strValue;
+                    strNewXml = strValue;
                 }
+            }
+
+            // 2025/5/11
+            if (string.IsNullOrEmpty(strExistingXml) == false
+                && strExistingXml == strNewXml)
+            {
+                result.Value = 0;
+                result.ErrorCode = ErrorCode.NotChanged;
+                result.ErrorInfo = "记录未发生改变";
+                return result;
             }
 
 #if NO
@@ -1674,17 +1711,17 @@ out error);
             }
 #endif
 
-            byte[] baOutputTimeStamp = null;
-            string strOutputPath = "";
+            //byte[] baOutputTimeStamp = null;
+            //string strOutputPath = "";
             int nRedoCount = 0;
         REDO:
             long lRet = channel.DoSaveTextRes(strPath,
-                strXml,
+                strNewXml,
                 false,  // bInlucdePreamble
                 "ignorechecktimestamp", // style
                 timestamp,
-                out baOutputTimeStamp,
-                out strOutputPath,
+                out byte [] baOutputTimeStamp,
+                out string strOutputPath,
                 out strError);
             if (lRet == -1)
             {

@@ -16,13 +16,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.rms.Client.rmsws_localhost;
-using DigitalPlatform.LibraryClient;
-using Jint.Parser.Ast;
-using System.Web.UI.WebControls;
-using MongoDB.Driver.Core.Misc;
-using System.Linq;
-// using System.Data.SqlClient;
-
+using System.Web;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -148,7 +142,7 @@ namespace DigitalPlatform.LibraryServer
             range.AddRange(checkinout_element_names);
             */
             var range = GetAllElements();
-            out_of = HasOutOfRangeElements(domNew, range);
+            out_of = HasOutOfRangeElements(domNew, range.ToArray());
             if (out_of.Count > 0)
             {
                 strError = $"册记录中出现了元素 {StringUtil.MakePathList(out_of)}, 超过定义范围，无法保存 ";
@@ -158,8 +152,8 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
-        static List<string> HasOutOfRangeElements(XmlDocument dom,
-                    List<string> element_names)
+        public static List<string> HasOutOfRangeElements(XmlDocument dom,
+            string[] element_names)
         {
             List<string> out_of = new List<string>();
 
@@ -170,7 +164,7 @@ namespace DigitalPlatform.LibraryServer
             foreach (XmlElement element in nodes)
             {
                 var name = GetNamespaceName(element);
-                int index = element_names.IndexOf(name);
+                int index = Array.IndexOf(element_names, name); // element_names.IndexOf(name);
                 if (index == -1)
                     out_of.Add(name);
             }
@@ -278,10 +272,11 @@ namespace DigitalPlatform.LibraryServer
             string strWarning = "";
 
             bool bChangePartDeniedParam = false;
-
+            bool changed = false;
             if (sessioninfo != null)
             {
                 // 合并记录
+                // 目前主要是用于合并 dprms:file 元素。其它元素的合并暂时不考虑
                 // parameters:
                 //      bChangePartDenied   如果本次被设定为 true，则 strError 中返回了关于部分修改的注释信息
                 //      domNew  新记录。
@@ -302,6 +297,9 @@ namespace DigitalPlatform.LibraryServer
 
                 if (bChangePartDeniedParam)
                     strWarning = strError;
+
+                if (nRet == 1)
+                    changed = true;
             }
 
             if (element_names == null)
@@ -319,7 +317,7 @@ namespace DigitalPlatform.LibraryServer
             {
                 // 注: 如果提交的内容中出现 borrower 等元素，虽然会拒绝保存这部分元素，但不会特意警告
                 List<string> outof_range_elements = HasOutOfRangeElements(domNew,
-                    GetAllElements());
+                    GetAllElements().ToArray());
                 if (outof_range_elements.Count > 0)
                 {
                     if (outofrangeAsError)
@@ -335,8 +333,9 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
 
-            bool changed = false;
-
+            // domNew 中的要害字段覆盖到 domExist 中
+            changed = Overwrite(domNew, domExist, element_names) ? true : changed;
+#if REMOVED
             // 算法的要点是, 把"新记录"中的要害字段, 覆盖到"已存在记录"中
             foreach (string name in element_names)
             {
@@ -369,6 +368,7 @@ namespace DigitalPlatform.LibraryServer
                     changed = true;
                 }
             }
+#endif
 
             // 日志恢复的时候会使用旧代码，效果是直接使用新记录中的 dprms:file 元素
             if (sessioninfo == null)
@@ -402,8 +402,18 @@ namespace DigitalPlatform.LibraryServer
 
             strMergedXml = domExist.OuterXml;
 
+            /*
             if (string.IsNullOrEmpty(strWarning) == false
                 && bChangePartDeniedParam == true)
+            {
+                strError = strWarning;
+                return 1;
+            }
+            */
+
+            // 2025/4/20
+            // 合法范围元素有改变；超出合法范围的元素也有改变
+            if (changed == true && outof_range == true)
             {
                 strError = strWarning;
                 return 1;
@@ -414,6 +424,8 @@ namespace DigitalPlatform.LibraryServer
                 if (outof_range)
                 {
                     strError = "全部修改都没有兑现";
+                    if (string.IsNullOrEmpty(strWarning) == false)
+                        strError = $"{strError}({strWarning})";
                     return 2;
                 }
 
@@ -439,6 +451,51 @@ namespace DigitalPlatform.LibraryServer
             }
 #endif
             return 0;
+        }
+
+        // 把 domNew 中的要害字段，覆盖到 domExist 中
+        public static bool Overwrite(
+            XmlDocument domNew,
+            XmlDocument domExist,
+            string[] element_names)
+        {
+            bool changed = false;
+            // 算法的要点是, 把"新记录"中的要害字段, 覆盖到"已存在记录"中
+            foreach (string name in element_names)
+            {
+                if (name == "http://dp2003.com/dprms:file")
+                    throw new ArgumentException("不允许使用 Overwrite() 函数来覆盖 dprms:file 元素");
+                /*
+                string strTextNew = DomUtil.GetElementText(domNew.DocumentElement,
+                    core_entity_element_names[i]);
+
+                DomUtil.SetElementText(domExist.DocumentElement,
+                    core_entity_element_names[i], strTextNew);
+                 * */
+                // 2016/12/8
+                {
+                    XmlElement node_new = domNew.DocumentElement.SelectSingleNode(name) as XmlElement;
+                    if (node_new != null)
+                    {
+                        // 看看 dprms:missing 属性是否存在
+                        if (node_new.GetAttributeNode("missing", DpNs.dprms) != null)
+                            continue;
+                    }
+                }
+
+                string strTextOld = DomUtil.GetElementOuterXml(domExist.DocumentElement,
+                    name);
+                string strTextNew = DomUtil.GetElementOuterXml(domNew.DocumentElement,
+                    name);
+                if (strTextOld != strTextNew)
+                {
+                    DomUtil.SetElementOuterXml(domExist.DocumentElement,
+                        name, strTextNew);
+                    changed = true;
+                }
+            }
+
+            return changed;
         }
 
         static bool AreEqual(List<string> xmls1, List<string> xmls2)
@@ -2052,6 +2109,7 @@ strOldRefID);
         //      strStyle    "opac" 把实体记录按照OPAC要求进行加工，增补一些元素
         //                  "onlygetpath"   仅返回每个路径
         //                  "getfirstxml"   是对onlygetpath的补充，仅获得第一个元素的XML记录，其余的依然只返回路径
+        //                  "borrowerBarcode"   返回的册记录 XML 中，自动给 <borrower> 元素增加一个 barcode 属性，其值为借阅者的证条码号
         // strStyle 中筛选分馆的册，有以下几种情况
         // 全局用户，不过滤
         //      什么都不用特意指定
@@ -2400,6 +2458,7 @@ strOldRefID);
                         nRet = FilterItemRecord(sessioninfo,
                             "item",
                             itemdom,
+                            strOutputPath,
                             out strError);
                         entityinfo.ErrorInfo = strError;
                         if (nRet == -1)
@@ -2509,6 +2568,41 @@ strOldRefID);
                             goto ERROR1;
                         strXml = itemdom.DocumentElement.OuterXml;
                     }
+
+                    // 2024/4/13
+                    if (StringUtil.IsInList("borrowerBarcode", strStyle) == true
+        && string.IsNullOrEmpty(strXml) == false)
+                    {
+                        if (itemdom == null)
+                        {
+                            nRet = LibraryApplication.LoadToDom(strXml,
+                                out itemdom,
+                                out strError);
+                            if (nRet == -1)
+                            {
+                                SetError(entityinfo,
+    record.Path,
+    strError);
+                                goto CONTINUE;
+                            }
+                        }
+
+                        // return:
+                        //      -1  出错
+                        //      0   item_dom 没有发生改变
+                        //      1   item_dom 发生了改变
+                        nRet = AddBorrowerBarcode(
+                            sessioninfo,
+                            //strLang,
+                            //record.Path,
+                            ref itemdom,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (nRet == 1)
+                            strXml = itemdom.DocumentElement.OuterXml;
+                    }
+
 
                 END1:
                     entityinfo.OldRecPath = strOutputPath;
@@ -2810,7 +2904,8 @@ out strError);
             string strBorrower = cols[index].Substring("~b:".Length);
             cols[index] = strBorrower;
             changed = true;
-            if (string.IsNullOrEmpty(strBorrower))
+            // 2024/4/18 注意当 strBorrower 为空白字符时要和 "" 等同
+            if (string.IsNullOrEmpty(strBorrower) || string.IsNullOrWhiteSpace(strBorrower))
                 goto REMOVE_RETURN;
 
             // 找到 ~l: 前缀
@@ -2850,12 +2945,16 @@ out strError);
 
             if (true/*nRet == 1*/)
             {
+                var value = TryGetRefIdPart(strBorrower);
+                if (string.IsNullOrEmpty(value) == true || string.IsNullOrWhiteSpace(value))
+                    goto REMOVE_RETURN;
+
                 // 还需要检查 strBorrower 这个读者是否在当前账户的管辖范围内？如果是，那么可能是这个读者借了其他图书馆的图书，当前账户也要了解这一点，那么不应该脱敏这个证条码号
                 // return:
                 //      -1  出错
                 //      0   不在控制下
                 //      1   在控制下
-                int nRet = IsPatronInControl(null, sessioninfo, strBorrower, out strError);
+                int nRet = IsPatronInControl(null, sessioninfo, value, out strError);
                 if (nRet == -1 && error_in_field)
                 {
                     cols[index] = $"error:{strError}";
@@ -2873,6 +2972,30 @@ out strError);
             return (changed ? 1 : 0);
         REMOVE_RETURN:
             return RemovePrefix() ? 1 : (changed ? 1 : 0);
+
+            // 优先取空格两侧的内容为 @refID: 打头的
+            string TryGetRefIdPart(string text)
+            {
+                if (string.IsNullOrEmpty(text) == true || string.IsNullOrWhiteSpace(text))
+                    return "";
+
+                List<string> others = new List<string>();
+
+                // 2025/4/18
+                // 如果 strBorrower 内容中间存在空格，则优先取空格两侧的内容为 @refID: 打头的
+                var parts = StringUtil.ParseTwoPart(text, " ");
+                foreach (var part in parts)
+                {
+                    if (string.IsNullOrEmpty(part) || string.IsNullOrWhiteSpace(part))
+                        continue;
+                    if (part.StartsWith("@refID:") == true)
+                        return part;
+                    others.Add(part);
+                }
+                if (others.Count == 0)
+                    return "";
+                return others[0];
+            }
         }
 
         // 根据当前账户的权限，过滤册记录中的 borrower 元素内容
@@ -2890,7 +3013,7 @@ out strError);
 
             string strBorrower = DomUtil.GetElementText(itemdom.DocumentElement,
 "borrower");
-            if (string.IsNullOrEmpty(strBorrower))
+            if (string.IsNullOrEmpty(strBorrower) || string.IsNullOrWhiteSpace(strBorrower))
                 return 0;
 
             var error_in_field = StringUtil.IsInList("error_in_field", style);
@@ -2937,12 +3060,35 @@ out strError);
                     if (string.IsNullOrEmpty(strBorrower) == false)
                         DomUtil.SetElementText(itemdom.DocumentElement,
                             "borrower", new string('*', strBorrower.Length));
+                    // 2025/4/21
+                    // 把 borrower 元素的 barcode 属性内容覆盖，或者去掉这个属性
+                    var borrowerElement = itemdom.DocumentElement.SelectSingleNode("borrower") as XmlElement;
+                    if (borrowerElement != null && borrowerElement.HasAttribute("barcode"))
+                    {
+                        // borrowerElement.RemoveAttribute("barcode");
+                        var value = borrowerElement.GetAttribute("barcode");
+                        borrowerElement.SetAttribute("barcode", new string('*', value == null ? 0 : value.Length));
+                    }
                     // strXml = itemdom.DocumentElement.OuterXml;
                     return 1;
                 }
             }
 
             return 0;
+        }
+
+        static bool HasMasked(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return true;
+
+            foreach (char ch in text)
+            {
+                if (ch != '*' && ch != ' ')
+                    return false;
+            }
+
+            return true;
         }
 
         // 检查一个读者记录是否在当前账户的控制范围内
@@ -2960,11 +3106,16 @@ out strError);
         {
             strError = "";
 
-            if (string.IsNullOrEmpty(strReaderKey))
+            if (string.IsNullOrEmpty(strReaderKey) || string.IsNullOrWhiteSpace(strReaderKey))
             {
-                strError = "IsPatronInControl() 调用参数错误，strReaderBarcode 值不应为空";
+                strError = "IsPatronInControl() 调用参数错误，strReaderBarcode 值不应为空或空白字符内容";
                 return -1;
             }
+
+            // 2025/4/21
+            // 如果是被替换为 "***** ****" 形态的内容
+            if (HasMasked(strReaderKey))
+                return 0;
 
             if (channel == null)
             {
@@ -3008,6 +3159,45 @@ out strError);
 sessioninfo.LibraryCodeList) == false)
                 return 0;
             return 1;
+        }
+
+        // 给册记录中 borrower 元素增加 barcode 属性
+        // return:
+        //      -1  出错
+        //      0   item_dom 没有发生改变
+        //      1   item_dom 发生了改变
+        int AddBorrowerBarcode(
+    SessionInfo sessioninfo,
+    //string strLang,
+    //string item_recpath,
+    ref XmlDocument item_dom,
+    out string strError)
+        {
+            strError = "";
+            if (item_dom == null || item_dom.DocumentElement == null)
+                return 0;
+
+            var borrower = DomUtil.GetElementText(item_dom.DocumentElement,
+                "borrower",
+                out XmlNode node);
+            if (node != null
+                && (node as XmlElement).HasAttribute("barcode") == false  // 如果以前就存在 barcode 属性则不必加了
+                && string.IsNullOrEmpty(borrower) == false
+                && borrower.StartsWith("@refID:"))
+            {
+                var channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+                var ret = this.ConvertRefIdListToReaderBarcodeList(
+                    channel,
+                    borrower,
+                    out string strBarcode,
+                    out strError);
+                if (ret == -1)
+                    return 0;
+                (node as XmlElement).SetAttribute("barcode", strBarcode);
+                return 1;
+            }
+
+            return 0;
         }
 
         // 给册记录内增加OPAC信息
@@ -3918,15 +4108,15 @@ out strError);
                 //if (bAutoPostfix)
                 //    StringUtil.SetInList(ref strStyle, "autopostfix", true);
 
+                string strAccessParameters = "";
+
                 // 2023/11/10
                 // 对 transfer 动作检查存取定义
                 if (info.Action == "transfer")
                 {
                     // 检查存取权限
-                    string strAccessParameters = "";
                     string strActionName = "转移";
                     {
-
                         // 检查存取权限
                         if (String.IsNullOrEmpty(sessioninfo.Access) == false)
                         {
@@ -3984,6 +4174,31 @@ out strError);
                         }
                     }
                 }
+#if ITEM_ACCESS_RIGHTS
+                // 2025/4/27
+                // 检查存取定义
+                else if (String.IsNullOrEmpty(sessioninfo.Access) == false)
+                {
+                    var error = this.CheckSetItemAccess(sessioninfo,
+    "item",
+    strBiblioDbName + "," + strItemDbName,  // 两个数据库名命中任意一个就行
+    strAction,
+    out strAccessParameters);
+                    if (error == "normal")
+                    {
+                        // 检查普通权限
+                        if (result.Value == -1)
+                            return result;
+                    }
+                    if (error != null)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = error;
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
+                    }
+                }
+#endif
                 else
                 {
                     // 对于非 transfer 操作，延迟返回 result
@@ -5889,6 +6104,10 @@ out strError);
             DomUtil.RemoveEmptyElements(dom.DocumentElement);
             // strXml = dom.OuterXml;
 
+            // 2025/5/2
+            // 如果没有 refID 元素，则增添一个
+            EnsureRefID(ref dom);
+
             {
                 // 2023/2/2
                 XmlDocument domExist = new XmlDocument();
@@ -6377,7 +6596,16 @@ out strError);
                     DomUtil.SetAttr(node, "recPath", info.NewRecPath);
                 }
 
-                // 如果删除成功，则不必要在数组中返回表示成功的信息元素了
+                // 2025/5/3
+                // 如果删除成功，也要在数组中返回表示成功的信息元素
+                error = new EntityInfo(info);
+                error.OldRecPath = info.NewRecPath;
+                error.OldTimestamp = output_timestamp;
+                error.OldRecord = strExistingXml;
+
+                error.ErrorInfo = "删除操作成功。OldRecord中返回了实际删除的记录(可能因为权限限制对内容有所过滤)。";
+                error.ErrorCode = ErrorCodeValue.NoError;
+                ErrorInfos.Add(error);  // 成功，继续向后执行
             }
 
             return 0;
@@ -8783,6 +9011,7 @@ strSourceLibraryCode);
     SessionInfo sessioninfo,
     string db_type,
     XmlDocument item_dom,
+    string item_recpath,    // 2025/5/5
     out string strError)
         {
             strError = "";
@@ -8791,16 +9020,19 @@ strSourceLibraryCode);
                 return this.OrderItemDatabase.FilterItemRecord(
                     sessioninfo,
                     item_dom,
+                    item_recpath,
                     out strError);
             if (db_type == "issue")
                 return this.IssueItemDatabase.FilterItemRecord(
                     sessioninfo,
                     item_dom,
+                    item_recpath,
                     out strError);
             if (db_type == "comment")
                 return this.CommentItemDatabase.FilterItemRecord(
                     sessioninfo,
                     item_dom,
+                    item_recpath,
                     out strError);
 
             if (db_type != "item")
@@ -8811,6 +9043,26 @@ strSourceLibraryCode);
 
             Debug.Assert(db_type == "item");
             string alias_right = "";    //  "getentities";
+
+#if ITEM_ACCESS_RIGHTS
+            string dbname = ResPath.GetDbName(item_recpath);
+            {
+                var ret = LibraryApplication.CheckRights(
+        sessioninfo,
+        $"{GetInfoRight($"get{db_type}info")}",
+        dbname,
+        $"获取{db_type}信息");
+                if (ret != null && ret.ErrorCode == ErrorCode.AccessDenied)
+                {
+                    strError = $"{GetCurrentUserName(sessioninfo)}不具备 get{db_type}info 权限";
+                    return -2;
+                }
+            }
+#else
+            if (string.IsNullOrEmpty(sessioninfo.Access) == false)
+            {
+
+            }
 
             // 检查 getiteminfo 基本权限
             if (StringUtil.IsInList($"{GetInfoRight($"get{db_type}info")}", sessioninfo.RightsOrigin) == true
@@ -8826,6 +9078,7 @@ strSourceLibraryCode);
                     strError = $"{GetCurrentUserName(sessioninfo)}不具备 get{db_type}info 或 {alias_right} 权限";
                 return -2;
             }
+#endif
 
 #if REMOVED
             // 检查 getiteminfo 基本权限
@@ -8863,12 +9116,27 @@ strSourceLibraryCode);
                     changed = true;
             }
 
+#if ITEM_ACCESS_RIGHTS
+            {
+                var ret = LibraryApplication.CheckRights(
+        sessioninfo,
+        "getitemobject,getobject",
+        dbname,
+        "");
+                if (ret != null && ret.ErrorCode == ErrorCode.AccessDenied)
+                {
+                    if (RemoveDprmsFile(item_dom))
+                        changed = true;
+                }
+            }
+#else
             // 如果不具备 getxxxobject 权限过滤掉 dprms:file
             if (StringUtil.IsInList("getitemobject,getobject", sessioninfo.RightsOrigin) == false)
             {
                 if (RemoveDprmsFile(item_dom))
                     changed = true;
             }
+#endif
 
             // 2023/2/3 注: 原先 LibraryService::GetItemInfo() 返回 "xml" 格式的内容的时候，加 oi 元素如果出现异常，会写入错误日志，然后依然返回加 oi 元素以前的 xml 内容
             // 加上 oi 元素
@@ -8931,19 +9199,49 @@ strSourceLibraryCode);
                 if (IsResultType(format, "xml", out string parameters))
                 {
                     var item_xml = item_dom?.DocumentElement?.OuterXml;
-                    // TODO: 需要支持 xml:noborrowhistory
+                    // 支持 xml:noborrowhistory
                     string strParam = parameters?.Replace("|", ",");
-                    if (StringUtil.IsInList("noborrowhistory", strParam)
+                    if (string.IsNullOrEmpty(strParam) == false
                         && string.IsNullOrEmpty(item_xml) == false)
                     {
                         XmlDocument temp = new XmlDocument();
                         temp.LoadXml(item_xml);
-                        // 2025/1/8
-                        // 只去掉 borrowHistory 的下级元素，但保留 borrowHitstory 元素，是为了保留 borrowHistory 里面可能出现的某些属性值返回给前端
-                        XmlNodeList nodes = temp.DocumentElement.SelectNodes("borrowHistory/*");
-                        foreach (XmlNode node in nodes)
+
+                        if (StringUtil.IsInList("noborrowhistory", strParam))
                         {
-                            node.ParentNode.RemoveChild(node);
+
+                            // 2025/1/8
+                            // 只去掉 borrowHistory 的下级元素，但保留 borrowHitstory 元素，是为了保留 borrowHistory 里面可能出现的某些属性值返回给前端
+                            XmlNodeList nodes = temp.DocumentElement.SelectNodes("borrowHistory/*");
+                            foreach (XmlNode node in nodes)
+                            {
+                                node.ParentNode.RemoveChild(node);
+                            }
+
+                        }
+
+                        // 2025/4/15
+                        //                  "borrowerBarcode"   返回的册记录 XML 中，自动给 <borrower> 元素增加一个 barcode 属性，其值为借阅者的证条码号
+                        if (StringUtil.IsInList("borrowerBarcode", strParam))
+                        {
+                            // return:
+                            //      -1  出错
+                            //      0   item_dom 没有发生改变
+                            //      1   item_dom 发生了改变
+                            var ret = AddBorrowerBarcode(
+    sessioninfo,
+    ref temp,
+    out strError);
+                            if (ret == -1)
+                            {
+                                FormatItem.SetFormat(items,
+                                    i,
+                                    format,
+                                    null,
+                                    ErrorCode.SystemError,
+                                    strError);
+                                goto CONTINUE;
+                            }
                         }
 
                         item_xml = temp.DocumentElement?.OuterXml;
@@ -8985,10 +9283,41 @@ strSourceLibraryCode);
                             strError);
                     }
                 }
+                else if (String.Compare(format, "refid", true) == 0
+                    || String.Compare(format, "barcode", true) == 0)
+                {
+                    // 2025/4/22
+                    try
+                    {
+                        if (item_dom != null)
+                        {
+                            var itemdom = item_dom;
+
+                            if (String.Compare(format, "refid", true) == 0)
+                                FormatItem.SetFormat(items, i, format, DomUtil.GetElementText(itemdom.DocumentElement, "refID"));
+                            else if (String.Compare(format, "barcode", true) == 0)
+                                FormatItem.SetFormat(items, i, format, DomUtil.GetElementText(itemdom.DocumentElement, "barcode"));
+                        }
+                        else
+                            FormatItem.SetFormat(items, i, format, "");
+                    }
+                    catch (Exception ex)
+                    {
+                        this.WriteErrorLog($"(GetItemInfo()) 获得 '{format}' 格式信息时出现异常: \r\n{ExceptionUtil.GetDebugText(ex)}\r\n\r\n册记录 XML:'{item_dom?.OuterXml}'");
+                        strError = $"(GetItemInfo()) 获得 '{format}' 格式信息时出现异常: {ex.Message}";
+                        FormatItem.SetFormat(items,
+                            i,
+                            format,
+                            null,
+                            ErrorCode.SystemError,
+                            strError);
+                    }
+                }
                 else if (String.Compare(format, "html", true) == 0)
                 {
                     // 将册记录数据从XML格式转换为HTML格式
                     int nRet = this.ConvertItemXmlToHtml(
+                        sessioninfo,
                         this.CfgDir + "\\" + strItemDbType + "xml2html.cs",
                         this.CfgDir + "\\" + strItemDbType + "xml2html.cs.ref",
                         item_dom?.OuterXml,  // strXml,
@@ -8999,7 +9328,7 @@ strSourceLibraryCode);
                         FormatItem.SetFormat(items,
                             i,
                             format,
-                            null,
+                            BuildHtmlErrorPage("册记录 XML 转换为 HTML 时出错: " + strError),
                             ErrorCode.SystemError,
                             strError);
                     else
@@ -9010,6 +9339,7 @@ strSourceLibraryCode);
                 {
                     // 将册记录数据从XML格式转换为text格式
                     int nRet = this.ConvertItemXmlToHtml(
+                        sessioninfo,
                         this.CfgDir + "\\" + strItemDbType + "xml2text.cs",
                         this.CfgDir + "\\" + strItemDbType + "xml2text.cs.ref",
                         item_dom?.OuterXml,   // strXml,
@@ -9020,7 +9350,7 @@ strSourceLibraryCode);
                         FormatItem.SetFormat(items,
                             i,
                             format,
-                            null,
+                            "册记录 XML 转换为 TEXT 时出错: " + strError,
                             ErrorCode.SystemError,
                             strError);
                     else
@@ -9038,7 +9368,7 @@ strSourceLibraryCode);
                         FormatItem.SetFormat(items,
                             i,
                             format,
-                            null,
+                            "error:" + strError,
                             ErrorCode.SystemError,
                             strError);
                     else
@@ -9050,16 +9380,22 @@ strSourceLibraryCode);
                     FormatItem.SetFormat(items,
                         i,
                         format,
-                        null,
+                        "error:" + strError,
                         ErrorCode.SystemError,
                         strError);
                 }
 
+            CONTINUE:
                 i++;
             }
 
             // strResult = FormatItem.GetXml(items);
             return 0;
+
+            string BuildHtmlErrorPage(string text)
+            {
+                return $"<html><body><p>{HttpUtility.HtmlEncode(text)}</p></body></html>";
+            }
         }
     }
 
@@ -9160,8 +9496,14 @@ strSourceLibraryCode);
                     if (item.Format != null
                         && item.Format.Contains("xml"))
                         return result.OuterXml;
-                    else
+                    return result.InnerText;
+
+                    /*
+                    else if (string.IsNullOrWhiteSpace(result.InnerText) == false)
                         return result.InnerText;
+                    else
+                        return result.OuterXml; // 2025/4/21
+                    */
                 }
             }
 

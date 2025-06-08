@@ -15,12 +15,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using Ionic.Zip;
+using Serilog.Events;
+
 using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.License;
 using DigitalPlatform.Text;
-using Ionic.Zip;
-using Serilog.Events;
+
 using static DigitalPlatform.CirculationClient.ClientInfo;
 
 namespace DigitalPlatform.CirculationClient

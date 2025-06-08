@@ -105,7 +105,7 @@ ref sessioninfo) == false)
             if (PathUtil.IsPureFileName(strDataFileName) == false)
             {
                 string strError = "datafile 参数值 '" + strDataFileName + "' 不合法";
-                this.app.WriteErrorLog(strError);
+                OpacApplication.WriteErrorLog(strError);
                 this.Response.ContentType = "text/plain";
                 this.Response.StatusCode = 500;
                 this.Response.Write(strError);
@@ -128,7 +128,7 @@ ref sessioninfo) == false)
                 out string strError);
             if (nRet == -1)
             {
-                this.app.WriteErrorLog(strError);
+                OpacApplication.WriteErrorLog(strError);
                 this.Response.ContentType = "text/plain";
                 this.Response.StatusCode = 500;
                 this.Response.Write(strError);

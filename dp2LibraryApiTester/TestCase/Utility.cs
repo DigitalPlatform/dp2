@@ -14,16 +14,16 @@ namespace dp2LibraryApiTester
 
         public static void DisplayErrors(List<string> errors)
         {
-            DataModel.SetMessage("**********************************");
+            DataModel.SetMessage("**********************************", "error");
             foreach (string error in errors)
             {
                 DataModel.SetMessage($"!!! {error} !!!");
             }
-            DataModel.SetMessage("**********************************");
+            DataModel.SetMessage("**********************************", "error");
         }
 
         public static int DeleteUsers(LibraryChannel channel,
-    List<string> user_names,
+    IEnumerable<string> user_names,
     out string strError)
         {
             strError = "";

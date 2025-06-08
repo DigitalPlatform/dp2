@@ -830,6 +830,21 @@ namespace DigitalPlatform.LibraryServer
                         goto END1;
                     }
 
+                    // 2025/4/25
+                    // 获得一个具体名字的值列表。返回逗号间隔的内容
+                    // strName: "valueTable,name=xxx,dbname=xxxx"
+                    var head = StringUtil.GetParameterByPrefix(strName, "valueTable");
+                    if (head == "")
+                    {
+                        var name = StringUtil.GetParameterByPrefix(strName, "name");
+                        var dbname = StringUtil.GetParameterByPrefix(strName, "dbname");
+                        var list = this.GetValueTable(sessioninfo.LibraryCodeList,
+                            name,
+                            dbname);
+                        strValue = StringUtil.MakePathList(list);
+                        goto END1;
+                    }
+
                     // <rightsTable>元素内容
                     // strValue中是下级片断定义，没有<rightsTable>元素作为根。
                     if (strName == "rightsTable")
@@ -1007,7 +1022,7 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     // 2025/4/6
-                    switch(strName)
+                    switch (strName)
                     {
                         case "?AcceptBlankReaderBarcode":
                             strValue = this.AcceptBlankReaderBarcode.ToString();
@@ -1512,13 +1527,43 @@ namespace DigitalPlatform.LibraryServer
                     }
                     catch (Exception ex)
                     {
-                        strError = "strValue装入XMLDOM时发生错误: " + ex.Message;
+                        strError = "strValue 装入 XMLDOM 时发生错误: " + ex.Message;
                         goto ERROR1;
                     }
 
+                    XmlElement table_node = dom.DocumentElement;
+                    // 2025/4/25
+                    // 注: 限定分馆，有两种方法：1) 在 strValue 中直接指定 table/@libraryCode 属性值
+                    // 2) 要求 strValue 内容中用(带有 code 属性的) library 元素包裹 table 元素
+                    string strLibraryCodeParam = "";
+                    if (dom.DocumentElement.Name == "table")
+                        strLibraryCodeParam = dom.DocumentElement.GetAttribute("libraryCode");
+                    else if (dom.DocumentElement.Name == "library")
+                    {
+                        strLibraryCodeParam = dom.DocumentElement.GetAttribute("code");
+
+                        table_node = dom.DocumentElement.SelectSingleNode("table") as XmlElement;
+                        if (table_node == null)
+                        {
+                            strError = $"strValue 参数值不合法: library 元素下级缺乏必要的 table 元素";
+                            return -1;
+                        }
+                    }
+                    else
+                    {
+                        strError = $"strValue 参数值不合法: 根元素名只允许使用 table 或 library";
+                        return -1;
+                    }
+
+                    /*
                     string strNameParam = DomUtil.GetAttr(dom.DocumentElement, "name");
                     string strDbNameParam = DomUtil.GetAttr(dom.DocumentElement, "dbname");
                     string strValueParam = dom.DocumentElement.InnerText;
+                     * */
+
+                    var strNameParam = DomUtil.GetAttr(table_node, "name");
+                    var strDbNameParam = DomUtil.GetAttr(table_node, "dbname");
+                    var strValueParam = table_node.InnerText;
 
                     // 修改值列表
                     // 2008/8/21 
@@ -1528,13 +1573,15 @@ namespace DigitalPlatform.LibraryServer
                     //      -1  error
                     //      0   not change
                     //      1   changed
-                    nRet = app.SetValueTable(strName,
-                        strNameParam,
-                        strDbNameParam,
-                        strValueParam,
-                        out strOldValue,
-                        out strSnapshot,
-                        out strError);
+                    nRet = app.SetValueTable(
+                            strLibraryCodeParam,
+                            strName,
+                            strNameParam,
+                            strDbNameParam,
+                            strValueParam,
+                            out strOldValue,
+                            out strSnapshot,
+                            out strError);
                     if (nRet == -1)
                         goto ERROR1;
                     if (nRet == 1)
@@ -1548,6 +1595,8 @@ namespace DigitalPlatform.LibraryServer
                 // 读者权限
                 if (strCategory == "circulation")
                 {
+                    #region 问号开头的 strName 参数值
+
                     // 2021/8/6
                     // 临时修改内存中的 app.AcceptBlankReaderBarcode 值
                     if (strName == "?AcceptBlankReaderBarcode")
@@ -1665,6 +1714,8 @@ namespace DigitalPlatform.LibraryServer
                         app.PatronAdditionalFields = StringUtil.SplitList(strValue);
                         goto END1;
                     }
+
+                    #endregion
 
                     // 设置<valueTables>元素
                     // strValue中是下级片断定义，没有<valueTables>元素作为根。
@@ -1993,15 +2044,18 @@ namespace DigitalPlatform.LibraryServer
                             }
                         }
 
-                        try
+                        if (root != null)
                         {
-                            root.InnerXml = ConvertCrLf(strValue);
-                            changed = true;
-                        }
-                        catch (Exception ex)
-                        {
-                            strError = $"设置 <{strName}> 元素的 InnerXml 时发生错误: " + ex.Message;
-                            goto ERROR1;
+                            try
+                            {
+                                root.InnerXml = ConvertCrLf(strValue);
+                                changed = true;
+                            }
+                            catch (Exception ex)
+                            {
+                                strError = $"设置 <{strName}> 元素的 InnerXml 时发生错误: " + ex.Message;
+                                goto ERROR1;
+                            }
                         }
 
                         app.Changed = changed;

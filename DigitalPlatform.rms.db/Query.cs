@@ -199,7 +199,7 @@ namespace DigitalPlatform.rms
                 */
                 // 2025/1/12
                 if (nodeChild.Name != "operator" && nodeChild.Name != "item"
-                    && nodeChild.Name != "target")
+                    && nodeChild.Name != "target" && nodeChild.Name != "group")
                     continue;
 
                 // 2010/9/26 add

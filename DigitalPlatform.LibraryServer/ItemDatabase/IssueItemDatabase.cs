@@ -13,13 +13,7 @@ using DigitalPlatform.rms.Client;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
-using DigitalPlatform.Script;
-using DigitalPlatform.MarcDom;
-using DigitalPlatform.Marc;
 
-using DigitalPlatform.Message;
-using DigitalPlatform.rms.Client.rmsws_localhost;
-using DigitalPlatform.Core;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -78,6 +72,7 @@ namespace DigitalPlatform.LibraryServer
             string strAction,
             XmlDocument domExist,
             XmlDocument domNew,
+            bool outofrangeAsError,
             out string strMergedXml,
             out string strError)
         {
@@ -104,7 +99,10 @@ namespace DigitalPlatform.LibraryServer
             string strWarning = "";
 
             bool bChangePartDeniedParam = false;
+            bool changed = false;
+
             // 合并记录
+            // 目前主要是用于合并 dprms:file 元素。其它元素的合并暂时不考虑
             // parameters:
             //      bChangePartDenied   如果本次被设定为 true，则 strError 中返回了关于部分修改的注释信息
             //      domNew  新记录。
@@ -125,6 +123,9 @@ namespace DigitalPlatform.LibraryServer
 
             if (bChangePartDeniedParam)
                 strWarning = strError;
+
+            if (nRet == 1)
+                changed = true;
 
             // 算法的要点是, 把"新记录"中的要害字段, 覆盖到"已存在记录"中
 
@@ -184,25 +185,55 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
 
+
+            // 2025/4/21
+            // 检查提交保存的新记录中是否有超出定义范围的元素，如果有则报错返回
+            bool outof_range = false;   // 是否出现了超出定义范围的元素
+            {
+                // 注: 如果提交的内容中出现 operations 等元素，虽然会拒绝保存这部分元素，但不会特意警告
+                List<string> outof_range_elements = LibraryApplication.HasOutOfRangeElements(domNew,
+                    GetAllElements().ToArray());
+                if (outof_range_elements.Count > 0)
+                {
+                    if (outofrangeAsError)
+                    {
+                        strError = $"期记录中出现了元素 {StringUtil.MakePathList(outof_range_elements)}, 超过定义范围，无法保存 ";
+                        return -1;
+                    }
+                    outof_range = true;
+                    // 2025/3/6
+                    if (string.IsNullOrEmpty(strWarning) == false)
+                        strWarning += "; ";
+                    strWarning += $"超出定义范围的元素 {StringUtil.MakePathList(outof_range_elements)} 在保存时已被忽略";
+                }
+            }
+
+
             if (bControlled == true // 控制了全部用到的馆藏地点的情形，也可以修改基本字段。并且具有删除 <orderInfo> 中某些片断的能力，只要新记录中不包含这些片断，就等于删除了
                 || sessioninfo.GlobalUser == true) // 只有全局用户才能修改基本字段
             {
-                for (int i = 0; i < core_issue_element_names.Length; i++)
-                {
-                    /*
-                    string strTextNew = DomUtil.GetElementText(domNew.DocumentElement,
-                        element_names[i]);
+                // 算法的要点是, 把"新记录"中的要害字段, 覆盖到"已存在记录"中
+                changed = 
+                LibraryApplication.Overwrite(domNew, domExist, core_issue_element_names) ? true : changed;
 
-                    DomUtil.SetElementText(domExist.DocumentElement,
-                        element_names[i], strTextNew);
-                     * */
+#if REMOVED
+                foreach (string name in core_issue_element_names)
+                {
+                    string strTextOld = DomUtil.GetElementOuterXml(domExist.DocumentElement,
+    name);
+
                     // 2009/10/24 changed inner-->outer
                     string strTextNew = DomUtil.GetElementOuterXml(domNew.DocumentElement,
-                        core_issue_element_names[i]);
+                        name);
 
-                    DomUtil.SetElementOuterXml(domExist.DocumentElement,
-                        core_issue_element_names[i], strTextNew);
+                    if (strTextOld != strTextNew)
+                    {
+                        DomUtil.SetElementOuterXml(domExist.DocumentElement,
+                            name, strTextNew);
+                        changed = true;
+                    }
                 }
+#endif
             }
 
             // 分馆用户要特意单独处理<orderInfo>元素
@@ -351,19 +382,61 @@ namespace DigitalPlatform.LibraryServer
 
             strMergedXml = domExist.OuterXml;
 
-            if (string.IsNullOrEmpty(strWarning) == false)
+            /*
+            if (string.IsNullOrEmpty(strWarning) == false
+                && bChangePartDeniedParam == true)
+            {
+                strError = strWarning;
+                return 1;
+            }
+            */
+
+            changed = !AreEqualXml(origin_xml, strMergedXml);
+
+            // 2025/4/20
+            // 合法范围元素有改变；超出合法范围的元素也有改变
+            if (changed == true && outof_range == true)
             {
                 strError = strWarning;
                 return 1;
             }
 
+            if (changed == false)
+            {
+                if (outof_range)
+                {
+                    strError = "全部修改都没有兑现";
+                    if (string.IsNullOrEmpty(strWarning) == false)
+                        strError = $"{strError}({strWarning})";
+                    return 2;
+                }
+
+                {
+                    strError = "前端提交的记录内容和数据库中的记录内容没有变化，没有发生任何修改";
+                    return 3;   // 没有发生任何修改
+                }
+            }
+
+            /*
             if (AreEqualXml(origin_xml, strMergedXml))
             {
                 strError = "没有发生任何修改";
                 return 3;   // 没有发生任何修改
             }
+            */
 
             return 0;
+
+            List<string> GetAllElements()
+            {
+                string[] other_names = {
+                "operations",
+        };
+
+                List<string> range = new List<string>(core_issue_element_names);
+                range.AddRange(other_names);
+                return range;
+            }
         }
 
         // 是否全部订购信息片断中的馆藏地点都在当前用户管辖之下?
@@ -1111,7 +1184,7 @@ out string strError)
                         return -1;
                     if (nRet == 0)
                     {
-                        strError = $"因出现了超越{SessionInfo.GetCurrentUserName(sessioninfo)}管辖范围的分馆馆藏信息，创建期记录的操作被拒绝：{ strError}";
+                        strError = $"因出现了超越{SessionInfo.GetCurrentUserName(sessioninfo)}管辖范围的分馆馆藏信息，创建期记录的操作被拒绝：{strError}";
                         return 0;
                     }
                 }

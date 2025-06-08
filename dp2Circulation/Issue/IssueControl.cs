@@ -2090,6 +2090,7 @@ namespace dp2Circulation
         }
 
         // 给期记录 XML 中增加 recPath 元素
+        // 这是期记录 XML 在记到控件中临时需要的元素，在提交保存到 dp2library 之前注意删除这个元素
         static void AddRecPath(ref string strIssueXml, string strRecPath)
         {
             XmlDocument dom = new XmlDocument();
@@ -2101,10 +2102,12 @@ namespace dp2Circulation
             {
                 return;
             }
-            DomUtil.SetElementText(dom.DocumentElement, "recPath", strRecPath);
+            DomUtil.SetElementText(dom.DocumentElement, _tempRecPathElementName, strRecPath);
             strIssueXml = dom.DocumentElement.OuterXml;
         }
 
+        // 这是期记录 XML 在记到控件中临时需要的元素，在提交保存到 dp2library 之前注意删除这个元素
+        internal const string _tempRecPathElementName = "recPath";
 
         void dlg_GenerateData(object sender, GenerateDataEventArgs e)
         {

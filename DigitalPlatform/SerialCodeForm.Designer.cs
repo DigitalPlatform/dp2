@@ -38,7 +38,7 @@ namespace DigitalPlatform
             this.button_cancel = new System.Windows.Forms.Button();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripSplitButton_useCommunityVersion = new System.Windows.Forms.ToolStripSplitButton();
-            this.toolStripButton_copyNicInfomation = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton_copyNicInformation = new System.Windows.Forms.ToolStripButton();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -127,7 +127,7 @@ namespace DigitalPlatform
             this.toolStrip1.Dock = System.Windows.Forms.DockStyle.None;
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripSplitButton_useCommunityVersion,
-            this.toolStripButton_copyNicInfomation});
+            this.toolStripButton_copyNicInformation});
             this.toolStrip1.Location = new System.Drawing.Point(9, 308);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(214, 25);
@@ -145,16 +145,16 @@ namespace DigitalPlatform
             this.toolStripSplitButton_useCommunityVersion.ToolTipText = "切换为...版";
             this.toolStripSplitButton_useCommunityVersion.Visible = false;
             // 
-            // toolStripButton_copyNicInfomation
+            // toolStripButton_copyNicInformation
             // 
-            this.toolStripButton_copyNicInfomation.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripButton_copyNicInfomation.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_copyNicInfomation.Image")));
-            this.toolStripButton_copyNicInfomation.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton_copyNicInfomation.Name = "toolStripButton_copyNicInfomation";
-            this.toolStripButton_copyNicInfomation.Size = new System.Drawing.Size(90, 22);
-            this.toolStripButton_copyNicInfomation.Text = "复制 NIC 信息";
-            this.toolStripButton_copyNicInfomation.ToolTipText = "复制 NIC 信息到 Windows 剪贴板";
-            this.toolStripButton_copyNicInfomation.Click += new System.EventHandler(this.toolStripButton_copyNicInfomation_Click);
+            this.toolStripButton_copyNicInformation.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_copyNicInformation.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_copyNicInformation.Image")));
+            this.toolStripButton_copyNicInformation.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_copyNicInformation.Name = "toolStripButton_copyNicInformation";
+            this.toolStripButton_copyNicInformation.Size = new System.Drawing.Size(90, 22);
+            this.toolStripButton_copyNicInformation.Text = "复制 NIC 信息";
+            this.toolStripButton_copyNicInformation.ToolTipText = "复制 NIC 信息到 Windows 剪贴板";
+            this.toolStripButton_copyNicInformation.Click += new System.EventHandler(this.toolStripButton_copyNicInformation_Click);
             // 
             // SerialCodeForm
             // 
@@ -193,6 +193,6 @@ namespace DigitalPlatform
         private System.Windows.Forms.Button button_cancel;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripSplitButton toolStripSplitButton_useCommunityVersion;
-        private System.Windows.Forms.ToolStripButton toolStripButton_copyNicInfomation;
+        private System.Windows.Forms.ToolStripButton toolStripButton_copyNicInformation;
     }
 }

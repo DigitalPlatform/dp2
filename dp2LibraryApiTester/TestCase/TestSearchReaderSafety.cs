@@ -482,7 +482,7 @@ namespace dp2LibraryApiTester
             }
 
         ERROR1:
-            DataModel.SetMessage($"PrepareEnvironment() error: {strError}");
+            DataModel.SetMessage($"PrepareEnvironment() error: {strError}", "error");
             return new NormalResult
             {
                 Value = -1,
@@ -580,7 +580,7 @@ $"id,cols,xml",
             }
 
         ERROR1:
-            DataModel.SetMessage($"TestSearchReader() error: {strError}");
+            DataModel.SetMessage($"TestSearchReader() error: {strError}", "error");
             return new NormalResult
             {
                 Value = -1,
@@ -778,7 +778,7 @@ $"id,cols,xml",
             }
 
         ERROR1:
-            DataModel.SetMessage($"TestGetBrowseRecords() error: {strError}");
+            DataModel.SetMessage($"TestGetBrowseRecords() error: {strError}", "error");
             return new NormalResult
             {
                 Value = -1,
@@ -899,7 +899,7 @@ $"id,cols,xml",
             }
 
         ERROR1:
-            DataModel.SetMessage($"TestSearchReader() error: {strError}");
+            DataModel.SetMessage($"TestSearchReader() error: {strError}", "error");
             return new NormalResult
             {
                 Value = -1,
@@ -1362,7 +1362,7 @@ $"id,cols,xml",
             }
 
         ERROR1:
-            DataModel.SetMessage($"Finish() error: {strError}");
+            DataModel.SetMessage($"Finish() error: {strError}", "error");
             return new NormalResult
             {
                 Value = -1,

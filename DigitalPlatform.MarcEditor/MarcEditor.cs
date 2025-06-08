@@ -2,22 +2,24 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
-using System.Windows.Forms;
 using System.ComponentModel.Design;
-using System.Runtime.InteropServices;
 using System.Diagnostics;
-using System.Xml;
-using System.Text;
+using System.Drawing;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Xml;
 
 using Newtonsoft.Json;
 
-using DigitalPlatform.GUI;
-using DigitalPlatform.Xml;
-using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
+using DigitalPlatform.GUI;
 using DigitalPlatform.MarcEditor;
+using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
 
 namespace DigitalPlatform.Marc
 {
@@ -643,7 +645,11 @@ namespace DigitalPlatform.Marc
 
         #endregion
 
-        #region 构造函数
+#region 构造函数
+
+#if BREATH
+        CancellationTokenSource _cancel = new CancellationTokenSource();
+#endif
 
         /// <summary>
         /// 构造函数
@@ -656,6 +662,34 @@ namespace DigitalPlatform.Marc
 
             // 该调用是 Windows.Forms 窗体设计器所必需的。
             InitializeComponent();
+
+#if BREATH
+            _ = Task.Factory.StartNew(async () =>
+            {
+                int step = 10;
+                int delta = step;
+                while (_cancel.Token.IsCancellationRequested == false)
+                {
+                    await Task.Delay(1000, _cancel.Token);
+                    if (this.curEdit != null)
+                    {
+                        this.Invoke((Action)(() =>
+                        {
+                            var color = this.curEdit.BackColor;
+                            var b = color.B + delta;
+                            if (b >= 255)
+                                delta = -step;
+                            else if (b <= 0)
+                                delta = step;
+                            this.curEdit.BackColor = Color.FromArgb(color.R, color.G, (color.B + delta) % 255);
+                        }));
+                    }
+                }
+            },
+_cancel.Token,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+#endif
         }
 
         //
@@ -671,6 +705,9 @@ namespace DigitalPlatform.Marc
         /// <param name="disposing">为 true 则释放托管资源和非托管资源；为 false 则仅释放非托管资源。</param>
         protected override void Dispose(bool disposing)
         {
+#if BREATH
+            _cancel.Cancel();
+#endif
             if (disposing)
             {
                 if (components != null)
@@ -680,7 +717,7 @@ namespace DigitalPlatform.Marc
                 FreeFonts();
             base.Dispose(disposing);
         }
-        #endregion
+#endregion
 
         #region 组件设计器生成的代码
         /// <summary>
@@ -1200,6 +1237,9 @@ namespace DigitalPlatform.Marc
 
         #region 关于小 edit 控件的一些函数
 
+        volatile internal int _disableTextChanged = 0;
+
+
         void InitialEditControl()
         {
             // 2009/11/20
@@ -1218,9 +1258,10 @@ namespace DigitalPlatform.Marc
             curEdit.MaxLength = 0;
             curEdit.Multiline = true;
             curEdit.WordWrap = true;
+            // 如果不抑制“主动改变 edit 尺寸引起的 TextChanged 事件” 可能会引起 Windows 7 下点击鼠标不同字段之间切换，Caret 显示不出来的问题
             curEdit.TextChanged += (s1, o1) =>
             {
-                if (this._focusCol == 3)
+                if (this._focusCol == 3 && _disableTextChanged == 0)
                     curEdit.SetHeight();
             };
 
@@ -1229,6 +1270,8 @@ namespace DigitalPlatform.Marc
                 curEdit.ReadOnly = this.ReadOnly;
 
             this.Controls.Add(curEdit);
+
+
         }
 
         // 为SetEditPos()编写的私有函数
@@ -1243,7 +1286,6 @@ namespace DigitalPlatform.Marc
             Debug.Assert(nCol == 1 || nCol == 2 || nCol == 3, "nCol 只能为 1,2,3");
 
             Field field = this.record.Fields[nFieldIndex];
-
 
             // 如果是没有指示符的字段，需要调整
             // 2008/3/19
@@ -1417,7 +1459,6 @@ namespace DigitalPlatform.Marc
 
             //  curEdit.AutoSize = false;
 
-
             Size oldsize = curEdit.Size;
             Size newsize = new System.Drawing.Size(
                 nWidth,
@@ -1428,19 +1469,30 @@ namespace DigitalPlatform.Marc
             // 从小变大，先move然后改变size
             if (oldsize.Height < newsize.Height)
             {
-                curEdit.Location = loc;
-                curEdit.Size = newsize;
+                if (curEdit.Location.Equals(loc) == false)
+                    curEdit.Location = loc;
+                if (curEdit.Size.Equals(newsize) == false)
+                    curEdit.Size = newsize;
             }
             else
             {
                 // 从大变小，先size然后改变move
-                curEdit.Size = newsize;
-
-                curEdit.Location = loc;
+                if (curEdit.Size.Equals(newsize) == false)
+                    curEdit.Size = newsize;
+                if (curEdit.Location.Equals(loc) == false)
+                    curEdit.Location = loc;
             }
 
-            curEdit.Padding = new System.Windows.Forms.Padding(0);
-            curEdit.AutoSize = false;
+            {
+                var padding = curEdit.Padding;
+                if (padding.Left != 0 || padding.Right != 0 || padding.Top != 0 || padding.Bottom != 0)
+                {
+                    curEdit.Padding = new System.Windows.Forms.Padding(0);
+                }
+
+                if (curEdit.AutoSize != false)
+                    curEdit.AutoSize = false;
+            }
 
             // 2009/10/24
             if (curEdit.ReadOnly != this.ReadOnly)
@@ -1465,7 +1517,7 @@ namespace DigitalPlatform.Marc
         }
 
         // 兑现edit控件位置大小到当前字段行上。
-        void SetEditPos(bool bFocus)
+        void SetEditPos(bool focus_to_edit)
         {
             if (this.SelectedFieldIndices.Count != 1)
                 return;
@@ -1480,7 +1532,7 @@ namespace DigitalPlatform.Marc
             if (nField == -1
                 || this.FocusedField == null)   // 2008/11/29
             {
-                this.curEdit.Text = "";
+                this.curEdit.TextWithHeight = "";
                 this.curEdit.Hide();
                 this.curEdit.SelectionStart = 0;
                 return;
@@ -1488,7 +1540,7 @@ namespace DigitalPlatform.Marc
             else
             {
                 this.curEdit.Show();
-                if (bFocus == true)
+                if (focus_to_edit == true)
                     this.curEdit.Focus();
             }
 
@@ -2405,21 +2457,27 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                     {
                         this.SetActiveField(nField, nCol);
 
+                        // 把插入符定位到单击的地方
+                        HitEdit(e.X, e.Y, true);
+#if REMOVED
                         // 下面这段代码是把插入符定位到单击的地方
                         int x = e.X - curEdit.Location.X;
                         int y = e.Y - curEdit.Location.Y;
 
-                        API.SendMessage(curEdit.Handle,
+                        API.PostMessage(curEdit.Handle,
                             API.WM_LBUTTONDOWN,
                             new UIntPtr(API.MK_LBUTTON),	//	UIntPtr wParam,
                             API.MakeLParam(x, y));
+                        // 记忆，等后面 OnMouseUp() 时发送给 edit 一个 WM_LBUTTONUP 消息
+                        _delayUp = true;
                         /*
                         // **
-                        API.SendMessage(curEdit.Handle,
+                        API.PostMessage(curEdit.Handle,
     API.WM_LBUTTONUP,
     new UIntPtr(API.MK_LBUTTON),	//	UIntPtr wParam,
     API.MakeLParam(x, y));
-                         * */
+                        */
+#endif
                         if (e.Button == MouseButtons.Right)
                         {
                             PopupMenu(new Point(e.X, e.Y));
@@ -2494,21 +2552,27 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                      */
                     this.SetActiveField(nField, nCol);
 
+                    // 把插入符定位到单击的地方
+                    HitEdit(e.X, e.Y, true);
+#if REMOVED
                     // 下面这段代码是把插入符定位到单击的地方
                     int x = e.X - curEdit.Location.X;
                     int y = e.Y - curEdit.Location.Y;
 
-                    API.SendMessage(curEdit.Handle,
+                    API.PostMessage(curEdit.Handle,
                         API.WM_LBUTTONDOWN,
                         new UIntPtr(API.MK_LBUTTON),	//	UIntPtr wParam,
                         API.MakeLParam(x, y));
+                    // 记忆，等后面 OnMouseUp() 时发送给 edit 一个 WM_LBUTTONUP 消息
+                    _delayUp = true;
                     /*
                     // **
-                    API.SendMessage(curEdit.Handle,
+                    API.PostMessage(curEdit.Handle,
     API.WM_LBUTTONUP,
     new UIntPtr(API.MK_LBUTTON),	//	UIntPtr wParam,
     API.MakeLParam(x, y));
-                     * */
+                    */
+#endif
                     if (e.Button == MouseButtons.Right)
                     {
                         PopupMenu(new Point(e.X, e.Y));
@@ -2535,6 +2599,66 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
 
         END1:
             base.OnMouseDown(e);
+        }
+
+        protected override void OnMouseWheel(MouseEventArgs e)
+        {
+            DocumentOrgY += e.Delta;    // * this.Font.Height;
+
+            base.OnMouseWheel(e);
+        }
+
+        // parameters:
+        //      screen_x   鼠标点击的 x 坐标 (全屏幕坐标)
+        //      screen_y   鼠标点击的 y 坐标 (全屏幕坐标)
+        void HitEdit(int screen_x, int screen_y, bool focus)
+        {
+            int x = screen_x - curEdit.Location.X;
+            int y = screen_y - curEdit.Location.Y;
+
+            // 修正 y 值，确保在 edit 的客户区内
+            if (y <= curEdit.ClientRectangle.Top)
+                y = curEdit.ClientRectangle.Top + 1;
+            else if (y >= curEdit.ClientRectangle.Bottom)
+                y = curEdit.ClientRectangle.Bottom - 1;
+
+            var point = new Point(x, y);
+
+            //var point = new Point(screen_x, screen_y);
+            //curEdit.PointToClient(point);
+
+            curEdit.SelectionStart = 0;
+            curEdit.SelectionLength = 0;
+
+            API.SendMessage(curEdit.Handle,
+                API.WM_LBUTTONDOWN,
+                new UIntPtr(API.MK_LBUTTON),    //	UIntPtr wParam,
+                API.MakeLParam(point.X, point.Y));
+
+            // 记忆，等后面 OnMouseUp() 时发送给 edit 一个 WM_LBUTTONUP 消息
+            // _delayUp = true;
+            /*
+            // **
+            API.SendMessage(curEdit.Handle,
+API.WM_LBUTTONUP,
+new UIntPtr(API.MK_LBUTTON),	//	UIntPtr wParam,
+API.MakeLParam(x, y));
+            */
+
+            /*
+            if (focus)
+                this.curEdit.EnsureMarcEditFocued();
+            */
+        }
+
+        public void SetFocusEx()
+        {
+            if (this.Focused == false)
+            {
+                // 希望执行 WM_SETFOCUS 时不要自动调用 SetEditPos();
+                this.AddFocusParameter("dont_seteditpos", true);
+                this.Focus();
+            }
         }
 
         // 是否处在定义块的状态
@@ -2821,6 +2945,9 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             base.OnMouseMove(e);
         }
 
+        // 2025/5/12 重新增加以下代码。怀疑 Windows 7 下的 TextBox 如果缺乏 WM_LBUTTONUP 会出现 Caret 不显示的情况(键盘输入一个字符就又显示 Caret 了)
+        bool _delayUp = false;
+
         //
         // 摘要:
         //     引发 System.Windows.Forms.Control.MouseUp 事件。
@@ -2839,6 +2966,24 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                 base.OnMouseUp(e);
                 return;
             }
+
+#if REMOVED
+            // 2025/5/12
+            if (_delayUp)
+            {
+                if (curEdit.Focused == false)
+                    curEdit.Focus();
+
+                int x = e.X - curEdit.Location.X;
+                int y = e.Y - curEdit.Location.Y;
+
+                API.PostMessage(curEdit.Handle,
+API.WM_LBUTTONUP,
+new UIntPtr(API.MK_LBUTTON),
+API.MakeLParam(x, y));
+                _delayUp = false;
+            }
+#endif
 
             this.Capture = false;
 
@@ -4534,7 +4679,7 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
         // 把一个字段设为当前活动的字段
         // parameters:
         //      caret_pos   小 edit 要设置的插入符的字符位置。从本区域单独计数
-        //      bFocus  是否将焦点放到上面
+        //      focus_to_edit  是否将焦点放到上面
         internal void SetActiveField(int nFieldIndex,
             int nCol,
             int caret_pos,
@@ -4589,13 +4734,21 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                 InitialEditControl();
 
             if (nFieldIndex == 0)
-                this.curEdit.MaxLength = 24;
+            {
+                if (this.curEdit.MaxLength != 24)
+                    this.curEdit.MaxLength = 24;
+            }
             else
-                this.curEdit.MaxLength = 32767;
+            {
+                if (this.curEdit.MaxLength != 32767)
+                    this.curEdit.MaxLength = 32767;
+            }
 
             // 设小edit控件的大小和位置
             this.SetEditPos(bFocus);
 
+            // 2025/5/22
+            // TODO: 注意设置文本内容和移动位置之间的操作顺序
             // 把新内容赋到小edit控件里
             this.ItemTextToEditControl(caret_pos);
 
@@ -6614,7 +6767,7 @@ SYS	011528318
             if (string.IsNullOrEmpty(right_prev_text) == false)
                 right = right_prev_text + right;
 
-            this.curEdit.Text = left;
+            this.curEdit.TextWithHeight = left;
             this.Flush();    // 促使通知外界
 
             var new_field = this.InsertFieldAfter(nFieldIndex,

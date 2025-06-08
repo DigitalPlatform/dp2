@@ -3282,7 +3282,7 @@ return result;
                 }
 
                 // 确保 refID 元素
-                EnsureRefID(ref domNew);
+                EnsureRefID(ref domNew, true);
 
                 strNewBiblioXml = domNew.OuterXml;
 
@@ -3302,24 +3302,28 @@ return result;
         }
 
         // 2025/2/22
-        public static string EnsureRefID(ref string xml)
+        public static string EnsureRefID(ref string xml, 
+            bool global = false)
         {
             if (string.IsNullOrEmpty(xml))
                 return null;
             XmlDocument dom = new XmlDocument();
             dom.LoadXml(string.IsNullOrEmpty(xml) ? "<root />" : xml);
-            var ret = EnsureRefID(ref dom);
+            var ret = EnsureRefID(ref dom, global);
             xml = dom.DocumentElement.OuterXml;
             return ret;
         }
 
         // 2025/2/21
         // 确保 XML中有 refID 元素。如果没有就自动添加一个 refID 元素在根元素之下
-        public static string EnsureRefID(ref XmlDocument dom)
+        // parameters:
+        //      global  是否在 XML 结构中全局搜索 refID 元素。== false 表示仅在跟元素下搜索
+        public static string EnsureRefID(ref XmlDocument dom,
+            bool wildcard = false)
         {
             if (dom == null || dom.DocumentElement == null)
                 return null;
-            var nodes = dom.DocumentElement.SelectNodes("//refID");
+            var nodes = dom.DocumentElement.SelectNodes( wildcard ? "//refID" : "refID");
             if (nodes.Count > 0)
             {
                 foreach (XmlElement node in nodes)

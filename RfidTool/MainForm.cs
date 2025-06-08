@@ -21,6 +21,7 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.IO;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
+using System.Runtime.Remoting.Messaging;
 
 namespace RfidTool
 {
@@ -356,7 +357,12 @@ bool bClickClose = false)
         {
             FormClientInfo.SerialNumberMode = "must";
             var ret = FormClientInfo.Initial("rfidtool",
-                () => StringUtil.IsDevelopMode());
+#if SN
+                () => StringUtil.IsDevelopMode()
+#else
+                () => true
+#endif
+                );
             if (ret == false)
             {
                 Application.Exit();

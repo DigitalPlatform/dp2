@@ -18,6 +18,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Text;
+using System.Web.UI.HtmlControls;
 
 namespace DigitalPlatform.OPAC.Web
 {
@@ -533,13 +534,64 @@ namespace DigitalPlatform.OPAC.Web
             {
                 this.strAction = DomUtil.GetAttr(node, "action");
                 this.strBarcode = DomUtil.GetAttr(node, "barcode");
+                // 2025/4/25
+                if (string.IsNullOrEmpty(this.strBarcode))
+                {
+                    string refid = node.GetAttribute("refID");
+                    if (string.IsNullOrEmpty(refid) == false)
+                        this.strBarcode = $"@refID:{refid}";
+                }
                 this.strRecPath = DomUtil.GetAttr(node, "recPath");
                 this.strBorrowDate = DateTimeUtil.LocalTime(DomUtil.GetAttr(node, "borrowDate"));
                 this.strBorrowPeriod = DomUtil.GetAttr(node, "borrowPeriod");
+                this.strBorrowOperator = DomUtil.GetAttr(node, "borrowOperator");   // 2025/4/25
                 this.strReturnDate = DateTimeUtil.LocalTime(DomUtil.GetAttr(node, "returnDate"));
                 this.strNo = DomUtil.GetAttr(node, "no");
                 this.strRenewComment = DomUtil.GetAttr(node, "renewComment");
                 this.strOperator = DomUtil.GetAttr(node, "operator");
+#if REMOVED
+                // 2025/4/25
+                // 如果操作者为 "@refID:xxx" 形态，需要转换为证条码号
+                if (this.strOperator != null
+                    && this.strOperator.StartsWith("@refID:")
+                    && sessioninfo != null)
+                {
+                    LibraryChannel channel = sessioninfo.GetChannel(true);
+                    try
+                    {
+                        var ret = channel.ConvertRefIdListToReaderBarcodeList(
+    this.strOperator,
+    out string temp,
+    out string strError);
+                        if (ret != -1 && string.IsNullOrEmpty(temp) == false)
+                            this.strOperator = temp;
+                    }
+                    finally
+                    {
+                        sessioninfo.ReturnChannel(channel);
+                    }
+                }
+
+                if (this.strBorrowOperator != null
+        && this.strBorrowOperator.StartsWith("@refID:")
+        && sessioninfo != null)
+                {
+                    LibraryChannel channel = sessioninfo.GetChannel(true);
+                    try
+                    {
+                        var ret = channel.ConvertRefIdListToReaderBarcodeList(
+    this.strBorrowOperator,
+    out string temp,
+    out string strError);
+                        if (ret != -1 && string.IsNullOrEmpty(temp) == false)
+                            this.strBorrowOperator = temp;
+                    }
+                    finally
+                    {
+                        sessioninfo.ReturnChannel(channel);
+                    }
+                }
+#endif
             }
 
             public LineInfo(ChargingItemWrapper wrapper)
@@ -560,6 +612,54 @@ namespace DigitalPlatform.OPAC.Web
                 this.strOperator = wrapper.Item.Operator;
             }
 
+            // 2025/4/26
+            // 补充获得一些信息
+            public void Update(SessionInfo sessioninfo)
+            {
+                // 2025/4/25
+                // 如果操作者为 "@refID:xxx" 形态，需要转换为证条码号
+                if (this.strOperator != null
+                    && this.strOperator.StartsWith("@refID:")
+                    && sessioninfo != null)
+                {
+                    LibraryChannel channel = sessioninfo.GetChannel(true);
+                    try
+                    {
+                        var ret = channel.ConvertRefIdListToReaderBarcodeList(
+    this.strOperator,
+    out string temp,
+    out string strError);
+                        if (ret != -1 && string.IsNullOrEmpty(temp) == false)
+                            this.strOperator = temp;
+                    }
+                    finally
+                    {
+                        sessioninfo.ReturnChannel(channel);
+                    }
+                }
+
+                if (this.strBorrowOperator != null
+        && this.strBorrowOperator.StartsWith("@refID:")
+        && sessioninfo != null)
+                {
+                    LibraryChannel channel = sessioninfo.GetChannel(true);
+                    try
+                    {
+                        var ret = channel.ConvertRefIdListToReaderBarcodeList(
+    this.strBorrowOperator,
+    out string temp,
+    out string strError);
+                        if (ret != -1 && string.IsNullOrEmpty(temp) == false)
+                            this.strBorrowOperator = temp;
+                    }
+                    finally
+                    {
+                        sessioninfo.ReturnChannel(channel);
+                    }
+                }
+            }
+
+
             public bool IsEmpty()
             {
                 return (string.IsNullOrEmpty(this.strBarcode) == true);
@@ -569,6 +669,8 @@ namespace DigitalPlatform.OPAC.Web
         protected override void Render(HtmlTextWriter writer)
         {
             int nRet = 0;
+
+            SessionInfo temp_session = (SessionInfo)this.Page.Session["sessioninfo"];
 
             string strError = "";
             List<LineInfo> infos = new List<LineInfo>();
@@ -590,8 +692,12 @@ namespace DigitalPlatform.OPAC.Web
 
                 if (nRet == 1)
                 {
-                    sessioninfo.LoginCallStack.Push(this.Page.Request.RawUrl);
-                    this.Page.Response.Redirect("login.aspx", true);
+                    // TODO: sessioninfo 不为 null 么?
+                    if (sessioninfo != null)
+                    {
+                        sessioninfo.LoginCallStack.Push(this.Page.Request.RawUrl);
+                        this.Page.Response.Redirect("login.aspx", true);
+                    }
                     return;
                 }
 
@@ -666,6 +772,10 @@ namespace DigitalPlatform.OPAC.Web
                     int i = 0;
                     foreach (LineInfo info in infos)
                     {
+                        // 2025/4/26
+                        // 补充一些信息
+                        info.Update(temp_session);
+
                         StringBuilder text = new StringBuilder();
 
                         string strBarcodeLink = "<a href='book.aspx?barcode=" + info.strBarcode + "&forcelogin=userid' target='_blank'>" + info.strBarcode + "</a>";
@@ -720,8 +830,10 @@ namespace DigitalPlatform.OPAC.Web
 
                         text.Append("<td class='renewcomment'>" + HttpUtility.HtmlEncode(info.strRenewComment) + "</td>");
 
-                        if (this.DatabaseMode == false || info.IsEmpty())
+                        if (/*this.DatabaseMode == false ||*/ info.IsEmpty())
+                        {
                             text.Append("<td class='operator'>" + info.strOperator + "</td>");
+                        }
                         else
                         {
                             if (info.strAction == "read")

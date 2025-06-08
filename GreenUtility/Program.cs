@@ -14,7 +14,6 @@ using System.Collections;
 
 using Ionic.Zip;
 using DigitalPlatform.Text;
-using System.Runtime.Remoting.Activation;
 
 /*
  * 制作和解压绿色更新安装包的实用工具程序
@@ -730,7 +729,11 @@ out strError);
             result = "";
             strError = "";
 
+#if DEBUG
             string dir = Path.Combine(strSourceDir, "bin\\debug\\app.publish\\Application Files");
+#else
+            string dir = Path.Combine(strSourceDir, "bin\\release\\app.publish\\Application Files");
+#endif
             DirectoryInfo di = new DirectoryInfo(dir);
             var fis = di.GetDirectories();
             List<string> names = new List<string>();

@@ -1,18 +1,36 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-    <key>
-        <xpath>/r/@i</xpath>
-        <from>isbn</from>
-        <table ref="isbn" />
-    </key>
-    <table name="isbn" id="5">
-        <convert>
-            <string style="" />
-        </convert>
-        <convertquery>
-            <string style="" />
-        </convertquery>
-        <caption lang="zh">ISBN</caption>
-        <caption lang="en">ISBN</caption>
-    </table>
+	<!-- ISBN -->
+	<key>
+		<xpath>/r/@i</xpath>
+		<from>isbn</from>
+		<table ref="isbn" />
+	</key>
+	<table name="isbn" id="5">
+		<convert>
+			<string style="" />
+		</convert>
+		<convertquery>
+			<string style="" />
+		</convertquery>
+		<caption lang="zh">ISBN</caption>
+		<caption lang="en">ISBN</caption>
+	</table>
+
+	<!-- 出版地 (2025/5/11) -->
+	<key>
+		<xpath>/r/@city</xpath>
+		<from>city</from>
+		<table ref="city" />
+	</key>
+	<table name="city" id="5">
+		<convert>
+			<string style="upper" />
+		</convert>
+		<convertquery>
+			<string style="upper" />
+		</convertquery>
+		<caption lang="zh">出版地</caption>
+		<caption lang="en">City</caption>
+	</table>
 </root>

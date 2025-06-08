@@ -32,8 +32,11 @@ using System.Runtime.InteropServices;
 // 可以指定所有这些值，也可以使用“内部版本号”和“修订号”的默认值，
 // 方法是按如下所示使用“*”:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("3.0.*")]
-[assembly: AssemblyFileVersion("3.0.0.0")]
+[assembly: AssemblyVersion("3.1.*")]
+[assembly: AssemblyFileVersion("3.1.0.0")]
 
 // 2.4 (2015/12/10) 首次为 Global.asax.cs 加入 Unhandled Exception 处理机制，发送报告给 dp2003.com
 // 3.0 (2018/6/23) 改为用 .NET Framework 4.6.1 编译
+// 3.1 (2025/5/18) 错误日志改用 Serilog
+//                  opac.xml 中根节点增加 logWebRequest 属性。值为 "true" 表示 Web 请求要记入错误日志
+//                  根节点增加 logLevel 属性。值为 Verbose,Debug,Information,Warning,Error,Fatal 之一

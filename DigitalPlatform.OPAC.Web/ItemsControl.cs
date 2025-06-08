@@ -1812,8 +1812,15 @@ namespace DigitalPlatform.OPAC.Web
                 strResult += "<td class='comment'>" + (strComment == "" ? "&nbsp;" : strComment) + "</td>";
 
 
-            // 借者条码
-            string strBorrower = DomUtil.GetElementText(dom.DocumentElement, "borrower");
+            // 借者条码或参考 ID(带有 @refID: 前缀)
+            string strBorrower = DomUtil.GetElementText(dom.DocumentElement,
+                "borrower",
+                out XmlNode borrower_node);
+
+            string strBorrowerBarcode = (borrower_node != null ? (borrower_node as XmlElement).GetAttribute("barcode") : "");
+            if (strBorrowerBarcode == null)
+                strBorrowerBarcode = "";
+
             bool bMyselfBorrower = false;
             /*
             bool bLibrarian = false;
@@ -1862,9 +1869,14 @@ namespace DigitalPlatform.OPAC.Web
                 || (loginstate == LoginState.Reader
                 && bMyselfBorrower == false))
             {
+                /*
                 int nLength = strBorrower.Length;
                 strBorrower = "";
-                strBorrower = strBorrower.PadLeft(nLength, '*');
+                strBorrower.PadLeft(nLength, '*');
+                */
+                strBorrower = new string('*', strBorrower.Length);
+
+                strBorrowerBarcode = new string('*', strBorrowerBarcode.Length);
             }
 
 
@@ -1872,6 +1884,9 @@ namespace DigitalPlatform.OPAC.Web
             // strResult += "<td class='borrower'>";
 
             string strBorrowString = "";
+            // 2025/4/22
+            // 在证条码号和参考 ID 之间选择一个较短的作为显示内容
+            string displayBorrower = string.IsNullOrEmpty(strBorrowerBarcode) == false ? strBorrowerBarcode : strBorrower;
 
             if (loginstate == LoginState.Librarian
                 && strBorrower != "")
@@ -1879,7 +1894,7 @@ namespace DigitalPlatform.OPAC.Web
                 // TODO: 要改造readerinfo.aspx
                 string strBorrowerUrl = "./readerinfo.aspx?barcode=" + strBorrower;
                 // strResult += "<a href='"+strBorrowerUrl+"'>" + strBorrower + "</a>";
-                strBorrowString = "<a href='" + strBorrowerUrl + "'>" + strBorrower + "</a>";
+                strBorrowString = "<a href='" + strBorrowerUrl + "'>" + displayBorrower + "</a>";
             }
             else
             {
@@ -1888,10 +1903,9 @@ namespace DigitalPlatform.OPAC.Web
                 if (bMyself == true)
                     strResult += "(我自己)";
                  * */
-                strBorrowString = strBorrower;
+                strBorrowString = displayBorrower;
                 if (bMyselfBorrower == true)
                     strBorrowString += this.GetString("我自己");  // "(我自己)"
-
             }
 
 
@@ -2062,10 +2076,12 @@ namespace DigitalPlatform.OPAC.Web
             {
                 string strReservations = "";
                 XmlNodeList nodes = dom.DocumentElement.SelectNodes("reservations/request");
-                for (int i = 0; i < nodes.Count; i++)
+                foreach (XmlElement node in nodes)
                 {
-                    XmlNode node = nodes[i];
+                    // XmlNode node = nodes[i];
                     string strReader = DomUtil.GetAttr(node, "reader");
+                    // 2025/4/22
+                    string strReaderBarcode = node.GetAttribute("readerBarcode");
                     string strRequestDate = DateTimeUtil.LocalDate(DomUtil.GetAttr(node, "requestDate"));
 
                     bool bMyselfReserver = false;
@@ -2080,6 +2096,10 @@ namespace DigitalPlatform.OPAC.Web
                         bMyselfReserver = true;
                     }
 
+                    string strDisplayReader = strReaderBarcode;
+                    if (string.IsNullOrEmpty(strDisplayReader))
+                        strDisplayReader = strReader;
+
                     // 对于读者，隐去除自己以外的其他人的证条码号
                     if (loginstate == LoginState.NotLogin
                         || loginstate == LoginState.Public  // 2009/4/10
@@ -2089,29 +2109,33 @@ namespace DigitalPlatform.OPAC.Web
                             && sessioninfo.Account.Type == "reader"*/
                             && bMyselfReserver == false))
                     {
+                        /*
                         int nLength = strReader.Length;
                         strReader = "";
                         strReader = strReader.PadLeft(nLength, '*');
+                        */
+                        strDisplayReader = new string('*', strDisplayReader.Length);
                     }
 
                     // TODO: 要改造readerinfo.aspx
                     string strReaderUrl = "./readerinfo.aspx?barcode=" + strReader;
                     if (loginstate == LoginState.Librarian)
                     {
-                        strReservations += this.GetString("读者证条码号") + ": " + "<a href='" + strReaderUrl + "'>" + strReader + "</a>"
+                        strReservations += this.GetString("读者证条码号") + ": " + "<a href='" + strReaderUrl + "'>" + strDisplayReader + "</a>"
                              + "; "
                              + this.GetString("请求日期") + ": " + strRequestDate + "<br/>";
                     }
                     else
                     {
-                        string strReaderString = strReader;
+                        // string strReaderString = strReader;
 
-                        if (bMyselfReserver == true)
-                            strBorrowString += this.GetString("我自己");  // "(我自己)"
-
+                        //if (bMyselfReserver == true)
+                        //    strReservations += this.GetString("我自己");  // "(我自己)"
 
                         strReservations += this.GetString("读者证条码号")
-                            + ": " + strReaderString + "; "
+                            + ": " + strDisplayReader 
+                            + (bMyselfReserver? this.GetString("我自己"): "") 
+                            + "; "
                             + this.GetString("请求日期")
                             + ": " + strRequestDate + "<br/>";
                     }

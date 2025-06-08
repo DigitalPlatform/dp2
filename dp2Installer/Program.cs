@@ -92,12 +92,12 @@ Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                 {
                     Process.Start(processInfo);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     // The user did not allow the application to run as administrator
                     //MessageBox.Show("Sorry, but I don't seem to be able to start " +
                     //   "this program with administrator rights!");
-                    MessageBox.Show("dp2installer 无法运行。\r\n\r\n因为安装和配置 Windows Service 程序的需要，必须在 Administrator 权限下才能运行");
+                    MessageBox.Show($"dp2installer 无法运行。\r\n\r\n因为安装和配置 Windows Service 程序的需要，必须在 Administrator 权限下才能运行\r\n\r\n{ex.Message}");
                 }
 
                 // Shut down the current process

@@ -9,20 +9,13 @@ using System.Reflection;
 using System.Threading;
 using System.Diagnostics;
 using System.Runtime.Serialization;
+using System.Linq;
 
 using DigitalPlatform;	// Stop类
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
-using DigitalPlatform.Script;
-using DigitalPlatform.MarcDom;
-using DigitalPlatform.Marc;
-
-using DigitalPlatform.Message;
-using DigitalPlatform.rms.Client.rmsws_localhost;
-using System.Linq;
-using DigitalPlatform.LibraryClient.localhost;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -31,6 +24,57 @@ namespace DigitalPlatform.LibraryServer
     /// </summary>
     public partial class LibraryApplication
     {
+        // 检查基本权限和存取定义是否允许指定的操作
+        public static LibraryServerResult CheckRights(
+            SessionInfo sessioninfo,
+            string list,
+            string dbname = "",
+            string action_name = "")
+        {
+            LibraryServerResult result = null;
+#if ITEM_ACCESS_RIGHTS
+            if (string.IsNullOrEmpty(sessioninfo.Access) == false)
+            {
+                foreach (var right in StringUtil.SplitList(list))
+                {
+                    var s = GetDbOperRights(sessioninfo.Access,
+        "",
+        right);
+                    if (string.IsNullOrEmpty(s) == false)
+                        return null;
+                }
+
+                {
+                    result = new LibraryServerResult();
+                    result.Value = -1;
+                    result.ErrorInfo = $"{SessionInfo.GetCurrentUserName(sessioninfo)} {action_name}被拒绝。不具备和 {GetListString(list)} 相关的存取定义。";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+            }
+            else
+#endif
+            {
+                // 权限字符串
+                if (StringUtil.IsInList(list, sessioninfo.RightsOrigin) == false)
+                {
+                    result = new LibraryServerResult();
+                    result.Value = -1;
+                    result.ErrorInfo = $"{SessionInfo.GetCurrentUserName(sessioninfo)} {action_name}被拒绝。不具备 {GetListString(list)} 权限。";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+            }
+
+            return null;
+
+            // ... 或 ...
+            string GetListString(string value)
+            {
+                return StringUtil.MakePathList(StringUtil.SplitList(value), " 或 ");
+            }
+        }
+
         // 翻译 getxxxinfo 权限
         public static string GetInfoRight(string right)
         {
@@ -524,6 +568,11 @@ namespace DigitalPlatform.LibraryServer
                 // 2014/9/16
                 if (userinfo.UserName == "reader")
                     this.ClearLoginCache("");
+                else
+                {
+                    this.ClearLoginCache(strUserName);
+                    this.ClearLoginCache(userinfo.UserName);
+                }
             }
             finally
             {
@@ -1741,6 +1790,11 @@ out strError);
                 // 2014/9/16
                 if (userinfo.UserName == "reader")
                     this.ClearLoginCache("");
+                else
+                {
+                    this.ClearLoginCache(strUserName);
+                    this.ClearLoginCache(userinfo.UserName);
+                }
             }
             finally
             {
@@ -1810,12 +1864,12 @@ out strError);
                     return new List<string>(new string[] { "[总馆]" });
                 var segments = l.Split(',');
                 List<string> results = new List<string>();
-                foreach(var segment in segments)
+                foreach (var segment in segments)
                 {
                     if (string.IsNullOrEmpty(segment))
                         results.Add("[总馆]");
                     else
-                    results.Add(segment);
+                        results.Add(segment);
                 }
 
                 return results;
@@ -2050,6 +2104,8 @@ out strError);
                 // 2014/9/16
                 if (strUserName == "reader")
                     this.ClearLoginCache("");
+                else
+                    this.ClearLoginCache(strUserName);
             }
             finally
             {
@@ -2206,6 +2262,60 @@ out strError);
 
                 return text;
             }
+        }
+
+
+        static string[] _normal_rights = new string[] {
+        "setiteminfo",
+        "getiteminfo",
+        };
+
+        // 将旧版本的普通权限字符串升级到新版本的 存取定义 中
+        // 检查每个账户的权限字符串和存取定义字符串，当存取定义字符串不为空时，检查存取定义中是否已经存在了某个 API 名字，如果不存在，
+        // 在其尾部追加部分定义，这部分定义是从普通权限定义字符串中变换移动过来
+        // 例如: setiteminfo --> 在既有的存取定义字符串后面追加 *:setiteminfo(*)
+        // 如果既有的存取定义字符串中已经包含了 *: 部分，可以考虑在其冒号后面追加 |setiteminfo(*)。注意 setiteminfo 部分不应该重复添加
+        // 需要处理的普通权限为如下:
+        // setiteminfo setorderinfo setissueinfo setcommentinfo
+        // getiteminfo getorderinfo getissueinfo getcommentinfo
+        public static void MoveUserRightsToAccess(ref string rights, ref string access)
+        {
+            List<string> results = new List<string>();
+            var source_rights = rights.Split(',');
+            foreach (var source_right in source_rights)
+            {
+                if (_normal_rights.Contains(source_right))
+                {
+                    access = AddToAccessString(access, source_right);
+                }
+                else
+                    results.Add(source_right);
+            }
+
+            StringUtil.RemoveDupNoSort(ref results);
+            rights = string.Join(",", results);
+        }
+
+        // 根据普通权限，给存取定义字符串末尾添加一个等同效果的局部
+        // parameters:
+        //      access          存取权限字符串
+        //      normal_right    普通权限值。例如 setiteminfo
+        //      access_fragment 要变成的存取权限片段。例如 setiteminfo(*)。注：用于在末尾补齐 *:setiteminfo(*)
+        static string AddToAccessString(string access,
+            string normal_right)
+        {
+            // return:
+            //      null    指定的操作类型的权限没有定义
+            //      ""      定义了指定类型的操作权限，但是否定的定义
+            //      其它      权限列表。* 表示通配的权限列表
+            var strAccessActionList = GetDbOperRights(access,
+                "",
+                normal_right);
+            if (strAccessActionList != null)
+                return access;
+            if (string.IsNullOrEmpty(access) == false)
+                access += ";";
+            return access + "*:" + normal_right + "(*)";
         }
 
         static string[] _db_type_table = new string[] {

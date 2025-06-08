@@ -19,10 +19,8 @@ namespace DigitalPlatform.LibraryServer
     /// <summary>
     /// dp2library中调用C#脚本时, 用于转换读者信息xml->html的脚本类的基类
     /// </summary>
-    public class ReaderConverter
+    public class ReaderConverter : ReaderItemConvertorBase
     {
-        public LibraryApplication App = null;
-        public SessionInfo SessionInfo = null;
 
         public string[] BorrowedItemBarcodes = null;
         public string CurrentItemBarcode = "";  // 当前正在操作的条码号
@@ -32,6 +30,8 @@ namespace DigitalPlatform.LibraryServer
         public string LibraryCode = ""; // 读者记录所从属的读者库的图书馆代码 2012/9/8
 
         public string Formats = ""; // 子格式。为逗号间隔的字符串列表 2013/12/4
+
+#if REMOVED
 
         public static string LocalTime(string strRfc1123Time)
         {
@@ -61,6 +61,7 @@ namespace DigitalPlatform.LibraryServer
                 return "日期字符串 '" + strRfc1123Time + "' 格式错误，不是合法的RFC1123格式";
             }
         }
+#endif
 
         // 获得流通参数
         public string GetParam(string strReaderType,
@@ -73,7 +74,7 @@ namespace DigitalPlatform.LibraryServer
             int nRet = this.App.GetLoanParam(
                 //null,
                 this.LibraryCode,
-                strReaderType, 
+                strReaderType,
                 strBookType,
                 strParamName,
                 out strParamValue,
@@ -118,5 +119,75 @@ namespace DigitalPlatform.LibraryServer
             return strXml;
         }
     }
+
+
+    public class ReaderItemConvertorBase
+    {
+        public LibraryApplication App = null;
+        public SessionInfo SessionInfo = null;
+
+        public static string LocalTime(string strRfc1123Time)
+        {
+            try
+            {
+                if (String.IsNullOrEmpty(strRfc1123Time) == true)
+                    return "";
+                return DateTimeUtil.Rfc1123DateTimeStringToLocal(strRfc1123Time, "G");
+            }
+            catch (Exception /*ex*/)    // 2008/10/28
+            {
+                return "时间字符串 '" + strRfc1123Time + "' 格式错误，不是合法的RFC1123格式";
+            }
+
+        }
+
+        // 将RFC1123时间字符串转换为本地一般日期字符串
+        public static string LocalDate(string strRfc1123Time)
+        {
+            try
+            {
+                if (String.IsNullOrEmpty(strRfc1123Time) == true)
+                    return "";
+
+                return DateTimeUtil.Rfc1123DateTimeStringToLocal(strRfc1123Time, "d"); // "yyyy-MM-dd"
+            }
+            catch (Exception /*ex*/)    // 2008/10/28
+            {
+                return "日期字符串 '" + strRfc1123Time + "' 格式错误，不是合法的RFC1123格式";
+            }
+        }
+
+
+
+        // 2025/4/23
+        public int ConvertRefIdListToItemBarcodeList(
+            string strRefIdList,
+            out string strBarcodeList,
+            out string strError)
+        {
+            var channel = this.SessionInfo.Channels.GetChannel(this.App.WsUrl);
+            return this.App.ConvertRefIdListToItemBarcodeList(
+                channel,
+                strRefIdList,
+                out strBarcodeList,
+                out strError);
+        }
+
+        // 2025/4/23
+        public int ConvertRefIdListToReaderBarcodeList(
+    string strRefIdList,
+    out string strBarcodeList,
+    out string strError)
+        {
+            var channel = this.SessionInfo.Channels.GetChannel(this.App.WsUrl);
+            return this.App.ConvertRefIdListToReaderBarcodeList(
+                channel,
+                strRefIdList,
+                out strBarcodeList,
+                out strError);
+        }
+
+    }
+
 }
 

@@ -109,7 +109,7 @@ namespace DigitalPlatform.OPAC.Web
 
                 if (app.XmlLoaded == false)
                 {
-                    strErrorInfo = 
+                    strErrorInfo =
                         "<html><body><pre>" +
                         HttpUtility.HtmlEncode("OPAC 初始化时装载 XmlDefs 失败，可能的原因是：OPAC 所依赖的 dp2Library 服务模块尚未启动，或 OPAC 代理帐户不存在、权限不够或密码被修改...。\r\n具体出错原因请察看 dp2OPAC 数据目录 log 子目录下的当日日志文件(log_????????.txt)，并及时排除故障。OPAC 系统将在稍后自动重试装载 XmlDefs。");
                     page.Response.Write(strErrorInfo);
@@ -352,7 +352,7 @@ namespace DigitalPlatform.OPAC.Web
                     string strToken = (string)table["token"];
 
                     string strPassword = "";
-                    
+
 #if NO
                     if (string.IsNullOrEmpty(strToken) == false)
                         strPassword = "token:" + (string)table["token"];
@@ -371,7 +371,7 @@ namespace DigitalPlatform.OPAC.Web
         //      不包含 token: 头部
         static string FindTokenString(string strRights)
         {
-            string[] parts = strRights.Split(new char[] {','});
+            string[] parts = strRights.Split(new char[] { ',' });
             foreach (string text in parts)
             {
                 if (StringUtil.HasHead(text, "token:") == true)
@@ -425,7 +425,7 @@ namespace DigitalPlatform.OPAC.Web
                         table.Remove("keeplogin");
                         expire_time = GetInstantExpireTime();
                     }
-                    if (StringUtil.IsInList("password", strLevel) == true 
+                    if (StringUtil.IsInList("password", strLevel) == true
                         || StringUtil.IsInList("token", strLevel) == true)
                         table.Remove("token");
                     if (StringUtil.IsInList("online", strLevel) == true)
@@ -479,7 +479,7 @@ namespace DigitalPlatform.OPAC.Web
                     else
                         table["id"] = sessioninfo.UserID;
                 }
-                else 
+                else
                     table["id"] = strUserID;
 
                 table["token"] = strToken;
@@ -516,7 +516,7 @@ namespace DigitalPlatform.OPAC.Web
 
                 // 和现有的内容合并
                 cookie.Value = strValue;
-                cookie.Expires = expire_time; 
+                cookie.Expires = expire_time;
             }
 
 #if NO
@@ -546,15 +546,58 @@ namespace DigitalPlatform.OPAC.Web
             if (sessioninfo != null && sessioninfo.Channel != null)
                 sessioninfo.Channel.Close();
 #endif
+            // 写入日志
+            if (OpacApplication.LogWebRequest)
+            {
+                var id = this.Page.Session.SessionID;
+                var length = DateTime.UtcNow - _startTime;
+                OpacApplication.WriteInfoLog($"  {id} process time: {length}");
+            }
         }
+
+        DateTime _startTime;
+
+        /*
+        protected void Page_PreLoad(object sender, EventArgs e)
+        {
+
+        }
+        */
 
         protected void Page_PreInit(object sender, EventArgs e)
         {
+            _startTime = DateTime.UtcNow;
+            // 写入日志
+            if (OpacApplication.LogWebRequest)
+            {
+                var id = this.Page.Session.SessionID;
+                string data = "";
+                if (Request.ContentType == "application/x-www-form-urlencoded")
+                    data = GetFormData(Request);
+                OpacApplication.WriteInfoLog($"Request {id} {Request.HttpMethod} {Request.Url} {data}");
+            }
+
             // 为了让ipad上运行的chrome表现正常
             if (Request.UserAgent != null && Request.UserAgent.IndexOf("crios", StringComparison.OrdinalIgnoreCase) > -1)
             {
                 this.ClientTarget = "uplevel";
             }
+        }
+
+        static string GetFormData(HttpRequest request)
+        {
+            if (request.Form == null)
+                return "";
+            StringBuilder text = new StringBuilder();
+            foreach (var key in request.Form.AllKeys)
+            {
+                if (key.StartsWith("_"))
+                    continue;
+                var value = request.Form[key];
+                text.Append($"{key}={value}; ");
+            }
+
+            return "form data:" + text.ToString();
         }
 
         /*

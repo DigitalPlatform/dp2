@@ -2459,8 +2459,10 @@ namespace DigitalPlatform.rms
                         out keys,
                         out strError);
                     if (nRet == -1)
+                    {
+                        strError = $"构造检索点时出错: {strError}";
                         return -1;
-
+                    }
                     //排序去重
                     //keys.Sort();
                     keys.RemoveDup();
@@ -2540,7 +2542,10 @@ namespace DigitalPlatform.rms
                         out newKeys,
                         out strError);
                     if (nRet == -1)
+                    {
+                        strError = $"构造检索点(new)时出错: {strError}";
                         return -1;
+                    }
                     //newKeys.Sort();
                     newKeys.RemoveDup();
                 }
@@ -2581,7 +2586,10 @@ namespace DigitalPlatform.rms
                         out oldKeys,
                         out strError);
                     if (nRet == -1)
+                    {
+                        strError = $"构造检索点(old)时出错: {strError}";
                         return -1;
+                    }
                     //oldKeys.Sort();
                     oldKeys.RemoveDup();
                 }

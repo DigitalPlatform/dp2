@@ -1133,6 +1133,7 @@ namespace RfidTool
         {
             string oi = DataModel.DefaultOiString;
             string aoi = DataModel.DefaultAoiString;
+            // TODO: 可以考虑警告后放行这种特殊用法
             if (string.IsNullOrEmpty(oi) && string.IsNullOrEmpty(aoi))
                 return "O I (所属机构代码) 和 A O I (非标准所属机构代码) 尚未配置";
             return null;
@@ -1283,6 +1284,7 @@ MessageBoxDefaultButton.Button2);
                     SetTypeOfUsage(chip/*, "gb"*/);
 
                     var result = UhfUtility.BuildTag(chip,
+                        build_user_bank,
                         true,
                         eas ? "afi_eas_on" : "");
                     if (result.Value == -1)
@@ -1907,6 +1909,7 @@ new_tag_info);
         public static bool HasLicense(string function_type,
             bool reinput = true)
         {
+#if SN
             string style = reinput ? "reinput" : "";
             if (StringUtil.IsDevelopMode())
                 style += ",skipVerify";
@@ -1922,6 +1925,9 @@ new_tag_info);
             if (nRet == 1)
                 return true;
             return false;
+#else
+            return true;
+#endif
         }
 
         static void SetItemColor(ListViewItem item, string state)

@@ -25,6 +25,10 @@ using DigitalPlatform.Drawing;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Core;
+using Serilog.Core;
+using Serilog;
+using Serilog.Events;
+using Microsoft.SqlServer.Server;
 
 namespace DigitalPlatform.OPAC.Server
 {
@@ -136,7 +140,10 @@ namespace DigitalPlatform.OPAC.Server
         public string MongoDbConnStr = "";
         public string MongoDbInstancePrefix = ""; // MongoDB 的实例字符串。用于区分不同的 dp2OPAC 实例在同一 MongoDB 实例中创建的数据库名，这个实例名被用作数据库名的前缀字符串
 
+#if REMOVED
         public bool DebugMode = false;
+#endif
+
         public HangupReason HangupReason = HangupReason.None;
 
         // Application通用锁。可以用来管理GlobalCfgDom等
@@ -197,6 +204,24 @@ namespace DigitalPlatform.OPAC.Server
 #if OPAC_SEARCH_LOG
         public SearchLog SearchLog = null;
 #endif
+
+        private static bool _logWebRequest = false;
+        public static bool LogWebRequest
+        {
+            get
+            {
+                return _logWebRequest;
+            }
+        }
+
+        private string _logLevel = "";
+        public string LogLevel
+        {
+            get
+            {
+                return _logLevel;
+            }
+        }
 
         // 构造函数
         public OpacApplication()
@@ -365,6 +390,17 @@ namespace DigitalPlatform.OPAC.Server
             }
         }
 
+        public static void InitialLogger(
+            string logDir,
+            LogEventLevel level = LogEventLevel.Information)
+        {
+            var loggingLevel = new LoggingLevelSwitch(level);
+            Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.ControlledBy(loggingLevel)
+    .WriteTo.File(Path.Combine(logDir, "log_.txt"), rollingInterval: RollingInterval.Day)
+    .CreateLogger();
+        }
+
         /// <summary>
         /// 前端，也就是 dp2OPAC 的版本号
         /// </summary>
@@ -402,19 +438,27 @@ namespace DigitalPlatform.OPAC.Server
                 app.LogDir = Path.Combine(strDataDir, "log");
                 PathUtil.TryCreateDir(app.LogDir);
 
+                // 2025/5/18
+                if (bReload == false)
+                {
+                    InitialLogger(app.LogDir, LogEventLevel.Information);
+                    _logLevel = "information";
+                    WriteInfoLog($"LogEventLevel 初始为 'information'");
+                }
+
                 // session 临时文件目录
                 app.SessionDir = Path.Combine(strDataDir, "session");
                 PathUtil.TryCreateDir(app.SessionDir);
 
                 if (PathUtil.TryClearDir(app.SessionDir) == false)
-                    this.WriteErrorLog("清除 Session 文件目录 " + app.SessionDir + " 时出错");
+                    OpacApplication.WriteErrorLog("清除 Session 文件目录 " + app.SessionDir + " 时出错");
 
                 // 临时文件目录
                 app.TempDir = Path.Combine(strDataDir, "temp");
                 PathUtil.TryCreateDir(app.TempDir);
 
                 if (PathUtil.TryClearDir(app.TempDir) == false)
-                    this.WriteErrorLog("清除临时文件目录 " + app.TempDir + " 时出错");
+                    OpacApplication.WriteErrorLog("清除临时文件目录 " + app.TempDir + " 时出错");
 
                 // 2018/10/23
                 // 清除一些特殊的临时文件
@@ -429,14 +473,14 @@ namespace DigitalPlatform.OPAC.Server
                 {
                     if (app.HasAppBeenKilled() == true)
                     {
-                        app.WriteErrorLog("*** 发现opac service先前曾被意外终止 ***");
+                        OpacApplication.WriteErrorLog("*** 发现opac service先前曾被意外终止 ***");
                     }
                 }
 
                 if (bReload == true)
-                    app.WriteErrorLog("opac service 开始重新装载 " + this.m_strFileName);
+                    OpacApplication.WriteInfoLog("opac service 开始重新装载 " + this.m_strFileName);
                 else
-                    app.WriteErrorLog("opac service 开始启动。");
+                    OpacApplication.WriteInfoLog("opac service 开始启动。");
 
                 //
 
@@ -448,7 +492,7 @@ namespace DigitalPlatform.OPAC.Server
                     if (nRet == -1)
                     {
                         // strError = "装载配置文件-- '" + strWebUiFileName + "'时发生错误，原因：" + ex.Message;
-                        app.WriteErrorLog(strError);
+                        OpacApplication.WriteErrorLog(strError);
                         goto ERROR1;
                     }
                 }
@@ -468,7 +512,7 @@ namespace DigitalPlatform.OPAC.Server
                 catch (Exception ex)
                 {
                     strError = "装载配置文件-- '" + this.m_strFileName + "' 时发生错误，错误类型：" + ex.GetType().ToString() + "，原因：" + ex.Message;
-                    app.WriteErrorLog(strError);
+                    OpacApplication.WriteErrorLog(strError);
                     // throw ex;
                     goto ERROR1;
                 }
@@ -478,7 +522,9 @@ namespace DigitalPlatform.OPAC.Server
                 // *** 进入内存的参数开始
                 // 注意修改了这些参数的结构后，必须相应修改Save()函数的相关片断
 
+#if REMOVED
                 // 2011/1/7
+                // 根元素的 debogMode 属性
                 bool bValue = false;
                 DomUtil.GetBooleanParam(app.OpacCfgDom.DocumentElement,
                     "debugMode",
@@ -486,6 +532,56 @@ namespace DigitalPlatform.OPAC.Server
                     out bValue,
                     out strError);
                 this.DebugMode = bValue;
+#endif
+
+                // 2025/5/18
+                // 根元素的 logLevel 属性
+                {
+                    /*
+    //     Anything and everything you might want to know about a running block of code.
+    Verbose,
+    //     Internal system events that aren't necessarily observable from the outside.
+    Debug,
+    //     The lifeblood of operational intelligence - things happen.
+    Information,
+    //     Service is degraded or endangered.
+    Warning,
+    //     Functionality is unavailable, invariants are broken or data is lost.
+    Error,
+    //     If you have a pager, it goes off when one of these occurs.
+    Fatal
+                    * */
+                    DomUtil.GetStringParam(app.OpacCfgDom.DocumentElement,
+    "logLevel",
+    "information",
+    out string level,
+    out strError);
+                    if (string.IsNullOrEmpty(level))
+                        level = "information";
+
+                    if (_logLevel != level)
+                    {
+                        if (Enum.TryParse<LogEventLevel>(level, out LogEventLevel new_level) == true)
+                        {
+                            InitialLogger(app.LogDir, new_level);
+                            _logLevel = level.ToLower();
+                            WriteInfoLog($"LogEventLevel 已切换为 '{level}'");
+                        }
+                        else
+                            WriteErrorLog($"opac.xml 中出现无法解析的 LogEventLevel 值 '{level}'");
+                    }
+                }
+
+                // 2025/5/18
+                // 根元素的 logWebRequest 属性
+                {
+                    DomUtil.GetBooleanParam(app.OpacCfgDom.DocumentElement,
+    "logWebRequest",
+    false,
+    out bool value,
+    out strError);
+                    OpacApplication._logWebRequest = value;
+                }
 
                 // 应用服务器参数
                 // 元素<libraryServer>
@@ -575,7 +671,7 @@ namespace DigitalPlatform.OPAC.Server
                     out strError);
                 if (nRet != 0)
                 {
-                    app.WriteErrorLog("ERR001 首次初始化XmlDefs失败: " + strError);
+                    OpacApplication.WriteErrorLog("ERR001 首次初始化XmlDefs失败: " + strError);
                     // goto ERROR1;
                 }
                 else
@@ -585,7 +681,7 @@ namespace DigitalPlatform.OPAC.Server
                         out strError);
                     if (nRet == -1)
                     {
-                        app.WriteErrorLog("ERR002 初始化vdbs失败: " + strError);
+                        OpacApplication.WriteErrorLog("ERR002 初始化vdbs失败: " + strError);
                         goto ERROR1;    // 这样的初始化失败不是因为通讯问题，而是数据本身的问题，所以不再继续load()函数后面的部分。应当在解决问题后重新启动opac
                     }
 
@@ -594,7 +690,7 @@ namespace DigitalPlatform.OPAC.Server
                         out strError);
                     if (nRet == -1)
                     {
-                        app.WriteErrorLog("ERR005 初始化BiblioDbGroup失败: " + strError);
+                        OpacApplication.WriteErrorLog("ERR005 初始化BiblioDbGroup失败: " + strError);
                         goto ERROR1;
                     }
                 }
@@ -607,7 +703,7 @@ namespace DigitalPlatform.OPAC.Server
                 if (nRet == -1)
                 {
                     strError = "初始化扩展的SSO接口时出错: " + strError;
-                    app.WriteErrorLog(strError);
+                    WriteErrorLog(strError);
                     // goto ERROR1;
                 }
 
@@ -631,7 +727,7 @@ namespace DigitalPlatform.OPAC.Server
                     }
                     catch (Exception ex)
                     {
-                        app.WriteErrorLog("启动管理任务DefaultThread时出错：" + ex.Message);
+                        OpacApplication.WriteErrorLog("启动管理任务DefaultThread时出错：" + ex.Message);
                         goto ERROR1;
                     }
 
@@ -648,7 +744,7 @@ namespace DigitalPlatform.OPAC.Server
                     }
                     catch (Exception ex)
                     {
-                        app.WriteErrorLog("启动批处理任务CacheBuilder时出错：" + ex.Message);
+                        OpacApplication.WriteErrorLog("启动批处理任务CacheBuilder时出错：" + ex.Message);
                         goto ERROR1;
                     }
 
@@ -691,7 +787,7 @@ namespace DigitalPlatform.OPAC.Server
                         out strError);
                     if (nRet == -1)
                     {
-                        app.WriteErrorLog("初始化 ChatRooms 时出错：" + strError);
+                        OpacApplication.WriteErrorLog("初始化 ChatRooms 时出错：" + strError);
                         goto ERROR1;
                     }
                 }
@@ -728,20 +824,20 @@ namespace DigitalPlatform.OPAC.Server
                                 out strError);
                     if (nRet == -1)
                     {
-                        app.WriteErrorLog("装载栏目存储时出错: " + strError);
+                        OpacApplication.WriteErrorLog("装载栏目存储时出错: " + strError);
                     }
                     else if (nRet == 0)
-                        app.WriteErrorLog("栏目存储尚未创建。请及时创建");
+                        OpacApplication.WriteInfoLog("栏目存储尚未创建。请及时创建");
 
                 }
 
                 if (bReload == true)
-                    app.WriteErrorLog("opac service结束重新装载 " + this.m_strFileName);
+                    OpacApplication.WriteInfoLog("opac service结束重新装载 " + this.m_strFileName);
                 else
                 {
                     // var version = System.Reflection.Assembly.GetAssembly(typeof(OpacApplication)).GetName().Version;
 
-                    app.WriteErrorLog("opac service 成功启动。版本: "
+                    OpacApplication.WriteInfoLog("opac service 成功启动。版本: "
                         // + System.Reflection.Assembly.GetAssembly(typeof(OpacApplication)).GetName().ToString()
                         + ClientVersion
                         );
@@ -881,7 +977,7 @@ namespace DigitalPlatform.OPAC.Server
             if (nRet != 0)
             {
                 this.XmlLoaded = false; // 促使后面可以自动重试
-                this.WriteErrorLog("ERR00? 刷新配置信息时，初始化XmlDefs失败: " + strError);
+                OpacApplication.WriteErrorLog("ERR00? 刷新配置信息时，初始化XmlDefs失败: " + strError);
                 return -1;
             }
             else
@@ -892,7 +988,7 @@ namespace DigitalPlatform.OPAC.Server
                     out strError);
                 if (nRet == -1)
                 {
-                    this.WriteErrorLog("ERR00? 刷新配置信息时，初始化vdbs失败: " + strError);
+                    OpacApplication.WriteErrorLog("ERR00? 刷新配置信息时，初始化vdbs失败: " + strError);
                     return -1;
                 }
 
@@ -901,7 +997,7 @@ namespace DigitalPlatform.OPAC.Server
                     out strError);
                 if (nRet == -1)
                 {
-                    this.WriteErrorLog("ERR00? 刷新配置信息时，初始化BiblioDbGroup失败: " + strError);
+                    OpacApplication.WriteErrorLog("ERR00? 刷新配置信息时，初始化BiblioDbGroup失败: " + strError);
                     return -1;
                 }
             }
@@ -1405,7 +1501,7 @@ namespace DigitalPlatform.OPAC.Server
                         "chargingOperDatabase",
                         out string strValue,
                         out strError);
-                    this.WriteErrorLog("GetSystemParameter() circulation chargingOperDatabase return " + lRet + " , strValue '" + strValue + "', strError '" + strError + "'。(这是一条提示信息，不一定等于出错)");
+                    OpacApplication.WriteInfoLog("GetSystemParameter() circulation chargingOperDatabase return " + lRet + " , strValue '" + strValue + "', strError '" + strError + "'。(这是一条提示信息，不一定等于出错)");
                     if (strValue == "enabled")
                         this.ChargingHistoryType = strValue;
                     else
@@ -1704,11 +1800,11 @@ namespace DigitalPlatform.OPAC.Server
                     FileMode.Create))
                 {
                 }
-                this.WriteErrorLog("opac service 被重新启动。");
+                OpacApplication.WriteInfoLog("opac service 被重新启动。");
             }
             catch (Exception ex)
             {
-                this.WriteErrorLog("opac service 重新启动时发生错误：" + ExceptionUtil.GetDebugText(ex));
+                OpacApplication.WriteErrorLog("opac service 重新启动时发生错误：" + ExceptionUtil.GetDebugText(ex));
             }
         }
 
@@ -1739,6 +1835,8 @@ namespace DigitalPlatform.OPAC.Server
             }
         }
 #endif
+
+#if REMOVED
         static object logSyncRoot = new object();
 
         public void WriteErrorLog(string strText)
@@ -1754,6 +1852,7 @@ namespace DigitalPlatform.OPAC.Server
                     StreamUtil.WriteText(strFilename,
                         strTime + " " + strText + "\r\n");
                 }
+                Log.Write(LogEventLevel.Error, strText);
             }
             catch (Exception ex)
             {
@@ -1761,6 +1860,49 @@ namespace DigitalPlatform.OPAC.Server
                 Log.Source = "dp2opac";
                 Log.WriteEntry("因为原本要写入日志文件的操作发生异常， 所以不得不改为写入Windows系统日志(见后一条)。异常信息如下：'" + ExceptionUtil.GetDebugText(ex) + "'", EventLogEntryType.Error);
                 Log.WriteEntry(strText, EventLogEntryType.Error);
+            }
+        }
+#endif
+
+
+        // 写入错误日志文件
+        public static void WriteErrorLog(string strText)
+        {
+            WriteLog("error", strText);
+        }
+
+        public static void WriteInfoLog(string strText)
+        {
+            WriteLog("info", strText);
+        }
+
+        public static void WriteDebugLog(string strText)
+        {
+            WriteLog("debug", strText);
+        }
+
+        // 写入错误日志文件
+        // parameters:
+        //      level   info/error
+        // Exception:
+        //      可能会抛出异常
+        public static void WriteLog(string level, string strText)
+        {
+            if (Log.Logger == null) // 先前写入实例的日志文件发生过错误，所以改为写入 Windows 日志。会加上实例名前缀字符串
+            {
+                EventLog Log = new EventLog();
+                Log.Source = "dp2opac";
+                Log.WriteEntry(level + ":" + strText, EventLogEntryType.Error);
+            }
+            else
+            {
+                // 注意，这里不捕获异常
+                if (level == "info")
+                    Log.Information(strText);
+                else if (level == "debug")
+                    Log.Debug(strText);
+                else
+                    Log.Error(strText);
             }
         }
 
@@ -1816,12 +1958,15 @@ System.Text.Encoding.UTF8))
             }
         }
 
+#if REMOVED
         public void WriteDebugInfo(string strTitle)
         {
             if (this.DebugMode == false)
                 return;
             StreamUtil.WriteText(this.LogDir + "\\debug.txt", "-- " + DateTime.Now.ToString("u") + " " + strTitle + "\r\n");
         }
+#endif
+
 
         public void WriteAppDownDetectFile(string strText)
         {
@@ -1866,7 +2011,7 @@ System.Text.Encoding.UTF8))
             }
             catch (Exception ex)
             {
-                this.WriteErrorLog("Flush()中俘获异常 " + ex.Message);
+                OpacApplication.WriteErrorLog("Flush()中俘获异常 " + ex.Message);
             }
         }
 
@@ -1914,13 +2059,13 @@ System.Text.Encoding.UTF8))
 
                 if (FileUtil.IsFileExsitAndNotNull(strFileName) == true)
                 {
-                    this.WriteErrorLog("备份 " + strFileName + " 到 " + strBackupFilename);
+                    OpacApplication.WriteInfoLog("备份 " + strFileName + " 到 " + strBackupFilename);
                     File.Copy(strFileName, strBackupFilename, true);
                 }
 
                 if (bFlush == false)
                 {
-                    this.WriteErrorLog("开始 从内存写入 " + strFileName);
+                    OpacApplication.WriteInfoLog("开始 从内存写入 " + strFileName);
                 }
 
                 using (XmlTextWriter writer = new XmlTextWriter(strFileName,
@@ -1932,9 +2077,24 @@ System.Text.Encoding.UTF8))
 
                     writer.WriteStartDocument();
 
-                    writer.WriteStartElement("root");
+                    // 根元素
+                    var root_element_name = "root";
+                    if (this.OpacCfgDom != null && this.OpacCfgDom.DocumentElement != null)
+                        root_element_name = this.OpacCfgDom.DocumentElement.Name;
+                    writer.WriteStartElement(root_element_name);
+
+                    // 还原根元素的属性
+                    if (this.OpacCfgDom != null && this.OpacCfgDom.DocumentElement != null)
+                    {
+                        foreach (XmlAttribute attr in this.OpacCfgDom.DocumentElement.Attributes)
+                        {
+                            writer.WriteAttributeString(attr.Prefix, attr.Name, attr.NamespaceURI, attr.Value);
+                        }
+                    }
+#if REMOVED
                     if (this.DebugMode == true)
                         writer.WriteAttributeString("debugMode", "true");
+#endif
 
                     // <version>
                     {
@@ -2122,7 +2282,7 @@ System.Text.Encoding.UTF8))
                 }
 
                 if (bFlush == false)
-                    this.WriteErrorLog("完成 从内存写入 " + strFileName);
+                    OpacApplication.WriteInfoLog("完成 从内存写入 " + strFileName);
 
                 this.m_bChanged = false;
 
@@ -2336,7 +2496,7 @@ System.Text.Encoding.UTF8))
                 if (nRet == -1)
                 {
                     strError = "reload " + this.m_strFileName + " error: " + strError;
-                    this.WriteErrorLog(strError);
+                    OpacApplication.WriteErrorLog(strError);
                     this.GlobalErrorInfo = strError;
                 }
                 else
@@ -2357,7 +2517,7 @@ System.Text.Encoding.UTF8))
                 if (nRet == -1)
                 {
                     strError = "reload " + this.m_strWebuiFileName + " error: " + strError;
-                    this.WriteErrorLog(strError);
+                    OpacApplication.WriteErrorLog(strError);
                     this.GlobalErrorInfo = strError;
                 }
                 else
@@ -2446,10 +2606,10 @@ System.Text.Encoding.UTF8))
             }
             catch (Exception ex)
             {
-                this.WriteErrorLog("OpacApplication Close()俘获异常: " + ExceptionUtil.GetDebugText(ex));
+                OpacApplication.WriteErrorLog("OpacApplication Close()俘获异常: " + ExceptionUtil.GetDebugText(ex));
             }
 
-            this.WriteErrorLog("opac service被停止。");
+            OpacApplication.WriteInfoLog("opac service被停止。");
 
             this.RemoveAppDownDetectFile();	// 删除检测文件
         }
@@ -2597,12 +2757,15 @@ System.Text.Encoding.UTF8))
                     string strFrom = vdb.GetRealFromName(
                         strDbName,
                         strVirtualFromName,
-                        this.DebugMode,
+                        false, // this.DebugMode,
                         out strDebugInfo);
+#if REMOVED
                     if (this.DebugMode == true)
                     {
-                        this.WriteDebugInfo(strDebugInfo);
+                        // this.WriteDebugInfo(strDebugInfo);
+                        WriteDebugLog(strDebugInfo);
                     }
+#endif
                     if (strFrom == null)
                     {
                         strWarning += "虚拟库 '" + vdb.GetName(null) + "' 中针对物理库 '" + strDbName + "'(length=" + strDbName.Length + ") 中对虚拟From '" + strVirtualFromName + "'(length=" + strVirtualFromName.Length + ") 未找到对应的物理From名; ";
@@ -3336,7 +3499,7 @@ System.Text.Encoding.UTF8))
             }
             catch (Exception ex)
             {
-                this.WriteErrorLog("启动批处理任务CacheBuilder时出错：" + ex.Message);
+                OpacApplication.WriteErrorLog("启动批处理任务CacheBuilder时出错：" + ex.Message);
             }
 
             this.CacheBuilder.Activate();

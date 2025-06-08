@@ -140,7 +140,7 @@ namespace dp2LibraryApiTester
                     goto ERROR1;
 
                 // 创建册记录
-                DataModel.SetMessage("正在创建册记录");
+                DataModel.SetMessage($"正在创建书目的下级({_dbType})记录");
                 EntityInfo[] errorinfos = null;
                 var entities = BuildEntityRecords();
                 if (_dbType == "item")
@@ -250,7 +250,7 @@ namespace dp2LibraryApiTester
                 DataModel.ReturnChannel(channel);
             }
         ERROR1:
-            DataModel.SetMessage($"PrepareEnvironment() error: {strError}");
+            DataModel.SetMessage($"PrepareEnvironment() error: {strError}", "error");
             return new NormalResult
             {
                 Value = -1,
@@ -384,7 +384,7 @@ $"id,cols,xml",
             }
             catch (Exception ex)
             {
-                strError = "TestSearchItem() Exception: " + ExceptionUtil.GetExceptionText(ex);
+                strError = "TestSetSubrecords() Exception: " + ExceptionUtil.GetExceptionText(ex);
                 goto ERROR1;
             }
             finally
@@ -394,7 +394,7 @@ $"id,cols,xml",
             }
 
         ERROR1:
-            DataModel.SetMessage($"TestSearchItem() error: {strError}");
+            DataModel.SetMessage($"TestSetSubrecords() error: {strError}", "error");
             return new NormalResult
             {
                 Value = -1,
@@ -504,7 +504,7 @@ $"id,cols,xml",
             }
 
         ERROR1:
-            DataModel.SetMessage($"TestGetBrowseRecords() error: {strError}");
+            DataModel.SetMessage($"TestGetBrowseRecords() error: {strError}", "error");
             return new NormalResult
             {
                 Value = -1,
@@ -561,7 +561,7 @@ $"id,cols,xml",
             }
 
         ERROR1:
-            DataModel.SetMessage($"Finish() error: {strError}");
+            DataModel.SetMessage($"Finish() error: {strError}", "error");
             return new NormalResult
             {
                 Value = -1,
@@ -632,11 +632,11 @@ $"id,cols,xml",
 
                 string bookType = DomUtil.GetElementText(dom.DocumentElement, "bookType");
                 if (Array.IndexOf(cols, bookType) == -1)
-                    errors.Add($"浏览列中未包含册条码号 '{bookType}'");
+                    errors.Add($"浏览列中未包含图书类型 '{bookType}'");
 
                 string price = DomUtil.GetElementText(dom.DocumentElement, "price");
                 if (Array.IndexOf(cols, price) == -1)
-                    errors.Add($"浏览列中未包含册条码号 '{price}'");
+                    errors.Add($"浏览列中未包含价格 '{price}'");
             }
             else if (_dbType == "order")
             {
@@ -652,7 +652,7 @@ $"id,cols,xml",
             }
             else if (_dbType == "comment")
             {
-                dom.LoadXml(_commentXml);
+                dom.LoadXml(ModifyCreator(_commentXml));
 
                 errors.AddRange(VerifyCols(dom, cols, "type,title,creator,content"));
             }
@@ -709,7 +709,11 @@ $"id,cols,xml",
             else if (_dbType == "issue")
                 origin_xml = _issueXml;
             else if (_dbType == "comment")
-                origin_xml = _commentXml;
+            {
+                // 2024/4/19
+                // creator 元素需要改为当前通道 dp2libary 用户名
+                origin_xml = ModifyCreator(_commentXml);
+            }
             else
                 throw new ArgumentException("_dbType error");
 
@@ -737,6 +741,20 @@ $"id,cols,xml",
                     return $"{element_name} 元素值 '{new_value}' 和参考值 '{origin_value}' 不符";
                 return null;
             }
+        }
+
+        // 修改册 XML 中的 creator 元素文本值
+        static string ModifyCreator(string source_xml)
+        {
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(source_xml);
+            var creators = dom.DocumentElement.SelectNodes("creator");
+            foreach (XmlElement creator in creators)
+            {
+                creator.InnerText = DataModel.dp2libraryUserName;
+            }
+
+            return dom.DocumentElement.OuterXml;
         }
 
 

@@ -1,6 +1,6 @@
 ﻿// 册 XML 记录转换为 HTML 显示格式
 // 编写者：谢涛
-// 最后修改日期: 2022/2/26
+// 最后修改日期: 2024/4/15
 
 // 修改历史：
 // 2010/5/14	将借阅操作者栏的strOperator修改为strBorrowOperator
@@ -14,6 +14,8 @@
 // 2016/11/5    册二维码或者一维码改用 barcode: 协议显示
 // 2020/8/23    增加 uid 字段
 // 2022/2/26    增加 currentLocation 和 shelfNo 字段
+// 2024/4/15    borrower 元素增加借者条码号属性
+// 2025/4/26    借阅历史的操作者内容如果为 "@refID:" 开头，尽量转换显示为读者证条码号
 
 using System;
 using System.Xml;
@@ -122,7 +124,10 @@ public class MyConverter : ItemConverter
             // 批次号
             strResult.Append(GetOneTR(dom.DocumentElement, "batchNo", "批次号"));
 
-            string strBorrower = DomUtil.GetElementText(dom.DocumentElement, "borrower");	// 借者条码
+            string strBorrower = DomUtil.GetElementText(dom.DocumentElement, "borrower", out XmlNode borrower_node);   // 借者条码
+
+            // 2024/4/15
+            string strBorrowerBarcode = (borrower_node as XmlElement)?.GetAttribute("barcode"); // 借者条码号
 
             // 借者姓名
             strResult.Append("<tr class='content patronname'>");
@@ -151,10 +156,14 @@ public class MyConverter : ItemConverter
                     + strBorrower
                     + "</a>";
                  * */
-                strBorrowerLink = "<a href='javascript:void(0);' onclick=\"window.external.OpenForm('ReaderInfoForm', this.innerText, true);\">" + strBorrower + "</a>";
+                // 2025/4/15
+                if (string.IsNullOrEmpty(strBorrowerBarcode) == false)
+                    strBorrowerLink = "(<a href='javascript:void(0);' onclick=\"window.external.OpenForm('ReaderInfoForm', this.innerText, true);\">" + strBorrowerBarcode + "</a>)<br/>";
+
+                strBorrowerLink += "<a href='javascript:void(0);' onclick=\"window.external.OpenForm('ReaderInfoForm', this.innerText, true);\">" + strBorrower + "</a>";
             }
             else
-                strBorrowerLink = "&nbsp";
+                strBorrowerLink = "&nbsp;";
 
             strResult.Append(GetOneTR("borrower", "借者证条码号", strBorrowerLink));
 
@@ -217,20 +226,53 @@ public class MyConverter : ItemConverter
 
             for (int i = 0; i < nodes.Count; i++)
             {
-                XmlNode node = nodes[i];
+                XmlElement node = nodes[i] as XmlElement;
+
                 string strBarcode = DomUtil.GetAttr(node, "barcode");
+                string strBorrowerRefID = DomUtil.GetAttr(node, "refID");
                 string strNo = DomUtil.GetAttr(node, "no");
                 string strBorrowDate = DomUtil.GetAttr(node, "borrowDate");
                 string strPeriod = DomUtil.GetAttr(node, "borrowPeriod");
-                string strBorrowOperator = DomUtil.GetAttr(node, "borrowOperator");	// 借书操作者
-                string strOperator = DomUtil.GetAttr(node, "operator");	// 还书操作者
+                string strBorrowOperator = DomUtil.GetAttr(node, "borrowOperator"); // 借书操作者
+
+                // 2025/4/26
+                if (strBorrowOperator != null && strBorrowOperator.StartsWith("@refID:"))
+                {
+                    var ret = this.ConvertRefIdListToReaderBarcodeList(
+strBorrowOperator,
+out string temp,
+out string _);
+                    if (ret != -1 && string.IsNullOrEmpty(temp) == false)
+                        strBorrowOperator = temp;
+                }
+
+                string strOperator = DomUtil.GetAttr(node, "operator"); // 还书操作者
+
+                // 2025/4/26
+                if (strOperator != null && strOperator.StartsWith("@refID:"))
+                {
+                    var ret = this.ConvertRefIdListToReaderBarcodeList(
+strOperator,
+out string temp,
+out string _);
+                    if (ret != -1 && string.IsNullOrEmpty(temp) == false)
+                        strOperator = temp;
+                }
+
                 string strRenewComment = DomUtil.GetAttr(node, "renewComment");
                 // string strSummary = "";
                 // string strConfirmItemRecPath = DomUtil.GetAttr(node, "recPath");
                 string strReturnDate = DomUtil.GetAttr(node, "returnDate");
 
-                // string strBarcodeLink = "<a href='" + App.OpacServerUrl + "/readerinfo.aspx?barcode=" + strBarcode + "&forcelogin=userid' target='_blank'>" + strBarcode + "</a>";
-                string strBarcodeLink = "<a href='javascript:void(0);' onclick=\"window.external.OpenForm('ReaderInfoForm', this.innerText, true);\">" + strBarcode + "</a>";
+                string strBarcodeLink = "";
+                if (string.IsNullOrEmpty(strBarcode) == false)
+                    strBarcodeLink = "<a href='javascript:void(0);' onclick=\"window.external.OpenForm('ReaderInfoForm', this.innerText, true);\">" + strBarcode + "</a>";
+                if (string.IsNullOrEmpty(strBorrowerRefID) == false)
+                {
+                    if (string.IsNullOrEmpty(strBarcodeLink) == false)
+                        strBarcodeLink += "<br/>";
+                    strBarcodeLink += "<a href='javascript:void(0);' onclick=\"window.external.OpenForm('ReaderInfoForm', this.innerText, true);\">@refID:" + strBorrowerRefID + "</a>";
+                }
 
                 // 表格内容奇数行的类名
                 string strOdd = "";
@@ -239,8 +281,12 @@ public class MyConverter : ItemConverter
 
                 strResult.Append("<tr class='content" + strOdd + "'>");
                 strResult.Append("<td class='index' nowrap>" + (i + 1).ToString() + "</td>");
-                strResult.Append("<td class='barcode' nowrap>" + strBarcodeLink + "</td>");
-                strResult.Append("<td class='summary pending' nowrap>P:" + strBarcode + "</td>");
+                strResult.Append("<td class='barcode' nowrap><div>" + strBarcodeLink + "</div></td>");
+                // 优先使用参考 ID
+                if (string.IsNullOrEmpty(strBorrowerRefID) == false)
+                    strResult.Append("<td class='summary pending' nowrap>P:@refID:" + strBorrowerRefID + "</td>");
+                else
+                    strResult.Append("<td class='summary pending' nowrap>P:" + strBarcode + "</td>");
 
                 strResult.Append("<td class='no' nowrap align='right'>" + strNo + "</td>");
                 strResult.Append("<td class='borrowdate' nowrap>" + LocalDate(strBorrowDate) + "</td>");

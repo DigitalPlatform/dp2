@@ -198,10 +198,12 @@ namespace DigitalPlatform.RFID
 
         // 根据 LogicChip 对象构造标签内容
         // parameters:
+        //      umi     PC(协议控制字)中 UMI 是否为 on?
         //      uii_include_oi  是否要把 OI 装配到 UII 字符串中？
         //      style   如果包含 "afi_eas_on" 表示 AFI 用 0x07(否则用 0xc2)
         //              如果包含 "oi_in_userbank" 表示把 OI 写入 User Bank, 并且 EPC 中的 UII 里面不包含 OI 部分。否则会在 EPC 中 UII 中包含 OI 部分，而 UserBank 中不会有 OI 元素
         public static BuildTagResult BuildTag(LogicChip chip_param,
+            bool umi,   // 2025/6/7
             bool uii_include_oi = true,
             string style = "")
         {
@@ -245,12 +247,12 @@ namespace DigitalPlatform.RFID
                 true,
                 out string block_map);
 
-            int afi = 0xc2;
+            byte afi = 0xc2;
             if (StringUtil.IsInList("afi_eas_on", style) == true)
                 afi = 0x07;
 
             // 注意返回的 bytes 不包含校验码 1 word 部分(这部分一般是由读写器驱动自动计算和补充写入)
-            var epc_payload = EncodeEpcBank(uii, afi);
+            var epc_payload = EncodeEpcBank(uii, umi, afi);
 
             return new BuildTagResult
             {
@@ -263,12 +265,14 @@ namespace DigitalPlatform.RFID
         // 2020/12/15
         // 编码 MB01 也就是 EPC Bank
         // 注意返回的 bytes 不包含校验码 1 word 部分(这部分一般是由读写器驱动自动计算和补充写入)
-        public static byte[] EncodeEpcBank(string uii, int afi = 0xc2)
+        public static byte[] EncodeEpcBank(string uii, 
+            bool umi = true,    // 2025/6/7
+            byte afi = 0xc2)
         {
             var uii_bytes = EncodeUII(uii, true);
 
             ProtocolControlWord pc_info = new ProtocolControlWord();
-            pc_info.UMI = true;
+            pc_info.UMI = umi;
             pc_info.XPC = false;
             pc_info.ISO = true;
             pc_info.AFI = afi;
@@ -1088,7 +1092,7 @@ namespace DigitalPlatform.RFID
         // 是 ISO AFI 还是 GS1/EPC ?
         public bool ISO { get; set; }
         // 图书馆应用的 AFI 应该为 0xc2
-        public int AFI { get; set; }
+        public byte AFI { get; set; }
 
         public override string ToString()
         {

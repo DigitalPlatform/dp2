@@ -676,5 +676,173 @@ namespace TestDp2Library
             Assert.IsTrue(file_element != null);
             Assert.AreEqual("dprms:file", file_element.Name);
         }
+
+        [TestMethod]
+        public void test_moveUserRightsToAccess_01()
+        {
+            string rights = "setiteminfo";
+            string access = "";
+
+            string target_rights = "";
+            string target_access = "*:setiteminfo(*)";
+
+            LibraryApplication.MoveUserRightsToAccess(ref rights, ref access);
+            Assert.AreEqual(target_rights, rights);
+            Assert.AreEqual(target_access, access);
+        }
+
+        [TestMethod]
+        public void test_moveUserRightsToAccess_02()
+        {
+            string rights = "setiteminfo";
+            string access = "中文图书:getbiblioinfo";
+
+            string target_rights = "";
+            string target_access = "中文图书:getbiblioinfo;*:setiteminfo(*)";
+
+            LibraryApplication.MoveUserRightsToAccess(ref rights, ref access);
+            Assert.AreEqual(target_rights, rights);
+            Assert.AreEqual(target_access, access);
+        }
+
+        // 存取定义中已经有了一个同类的 API，就不再追加了
+        [TestMethod]
+        public void test_moveUserRightsToAccess_03()
+        {
+            string rights = "setiteminfo";
+            string access = "中文图书:setiteminfo";
+
+            string target_rights = "";
+            string target_access = "中文图书:setiteminfo";
+
+            LibraryApplication.MoveUserRightsToAccess(ref rights, ref access);
+            Assert.AreEqual(target_rights, rights);
+            Assert.AreEqual(target_access, access);
+        }
+
+        // 普通权限字符串中不止一个权限值
+        [TestMethod]
+        public void test_moveUserRightsToAccess_04()
+        {
+            string rights = "getbiblioinfo,setiteminfo";
+            string access = "";
+
+            string target_rights = "getbiblioinfo";
+            string target_access = "*:setiteminfo(*)";
+
+            LibraryApplication.MoveUserRightsToAccess(ref rights, ref access);
+            Assert.AreEqual(target_rights, rights);
+            Assert.AreEqual(target_access, access);
+        }
+
+        // 普通权限字符串中不止一个权限值
+        [TestMethod]
+        public void test_moveUserRightsToAccess_05()
+        {
+            string rights = "setiteminfo,getbiblioinfo";
+            string access = "";
+
+            string target_rights = "getbiblioinfo";
+            string target_access = "*:setiteminfo(*)";
+
+            LibraryApplication.MoveUserRightsToAccess(ref rights, ref access);
+            Assert.AreEqual(target_rights, rights);
+            Assert.AreEqual(target_access, access);
+        }
+
+        [TestMethod]
+        public void test_getDbOperRights_01()
+        {
+            string access = "中文图书:setorderinfo=new(newparam),change(changeparam)|getbiblioinfo=*";
+            string dbname = "中文图书";
+            string operation = "setorderinfo";
+            string correct = "new(newparam),change(changeparam)";
+            var result = LibraryApplication.GetDbOperRights(access,
+            dbname,
+            operation);
+            Assert.AreEqual(correct, result);
+        }
+
+        [TestMethod]
+        public void test_getDbOperRights_02()
+        {
+            string access = "中文图书:setorderinfo=*|getbiblioinfo=*";
+            string dbname = "中文图书";
+            string operation = "setorderinfo";
+            string correct = "*";
+            var result = LibraryApplication.GetDbOperRights(access,
+            dbname,
+            operation);
+            Assert.AreEqual(correct, result);
+        }
+
+        // 否定形态
+        [TestMethod]
+        public void test_getDbOperRights_03()
+        {
+            string access = "中文图书:setorderinfo=|getbiblioinfo=*";
+            string dbname = "中文图书";
+            string operation = "setorderinfo";
+            string correct = "";
+            var result = LibraryApplication.GetDbOperRights(access,
+            dbname,
+            operation);
+            Assert.AreEqual(correct, result);
+        }
+
+        // 没有找到
+        [TestMethod]
+        public void test_getDbOperRights_04()
+        {
+            string access = "中文图书:getbiblioinfo=*";
+            string dbname = "中文图书";
+            string operation = "setorderinfo";
+            string correct = null;
+            var result = LibraryApplication.GetDbOperRights(access,
+            dbname,
+            operation);
+            Assert.AreEqual(correct, result);
+        }
+
+        // "中文图书:getbiblioinfo" 等同于 "中文图书:getbiblioinfo=*"
+        // 注意 "中文图书:getbiblioinfo=" 表示否定的意思，即 getbiblioinfo 操作不被允许
+        [TestMethod]
+        public void test_getDbOperRights_05()
+        {
+            string access = "中文图书:getbiblioinfo";
+            string dbname = "中文图书";
+            string operation = "getbiblioinfo";
+            string correct = "*";
+            var result = LibraryApplication.GetDbOperRights(access,
+            dbname,
+            operation);
+            Assert.AreEqual(correct, result);
+        }
+
+        [TestMethod]
+        public void test_getDbOperRights_10()
+        {
+            string access = "中文图书:getbiblioinfo=1;*:getbiblioinfo=2";
+            string dbname = "中文图书";
+            string operation = "getbiblioinfo";
+            string correct = "1";
+            var result = LibraryApplication.GetDbOperRights(access,
+            dbname,
+            operation);
+            Assert.AreEqual(correct, result);
+        }
+
+        [TestMethod]
+        public void test_getDbOperRights_11()
+        {
+            string access = "中文图书:getbiblioinfo=1;*:getbiblioinfo=2";
+            string dbname = "英文图书";
+            string operation = "getbiblioinfo";
+            string correct = "2";
+            var result = LibraryApplication.GetDbOperRights(access,
+            dbname,
+            operation);
+            Assert.AreEqual(correct, result);
+        }
     }
 }

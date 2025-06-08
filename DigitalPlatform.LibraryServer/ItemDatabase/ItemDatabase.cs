@@ -16,6 +16,8 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Script;
 
 using DigitalPlatform.rms.Client.rmsws_localhost;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Xml.Linq;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -357,6 +359,7 @@ namespace DigitalPlatform.LibraryServer
             string strAction,
             XmlDocument domExist,
             XmlDocument domNew,
+            bool outofrangeAsError,
             out string strMergedXml,
             out string strError)
         {
@@ -454,7 +457,15 @@ namespace DigitalPlatform.LibraryServer
                 {
                     string strRequstFragments = LibraryApplication.GetAllFileElements(domNew);
 
-                    LibraryApplication.MergeDprmsFile(ref domNew, domOld);
+                    // 根元素下 biblio 元素内的 dprms:file 元素不参与合并
+                    LibraryApplication.MergeDprmsFile(ref domNew,
+                        domOld,
+                        (e) =>
+                        {
+                            if (IsChildOfBiblio(e))
+                                return true;
+                            return false;
+                        });
 
                     string strAcceptedFragments = LibraryApplication.GetAllFileElements(domNew);
                     if (strRequstFragments != strAcceptedFragments)
@@ -501,7 +512,22 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
+        static bool IsChildOfBiblio(XmlElement current)
+        {
+            current = current.ParentNode as XmlElement;
+            while (current != null && current.ParentNode != null)
+            {
+                if (current == current.OwnerDocument.DocumentElement)
+                    return false;
+                if (current.Name == "biblio")
+                    return true;
+                current = current.ParentNode as XmlElement;
+            }
+            return false;
+        }
+
         // 合并记录
+        // 目前主要是用于合并 dprms:file 元素。其它元素的合并暂时不考虑
         // parameters:
         //      bChangePartDenied   如果本次被设定为 true，则 strError 中返回了关于部分修改的注释信息
         //      domNew  新记录。
@@ -553,7 +579,15 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     // 把 domNew 中的 dprms:file 元素兑现到 domOld 中
-                    LibraryApplication.MergeDprmsFile(ref domOld, domNew);
+                    // 根元素下 biblio 元素内的 dprms:file 元素不参与合并
+                    LibraryApplication.MergeDprmsFile(ref domOld,
+                        domNew,
+                        (e) =>
+                        {
+                            if (IsChildOfBiblio(e))
+                                return true;
+                            return false;
+                        });
                 }
 
                 var strOldBiblioXml = domOld.OuterXml;
@@ -686,6 +720,7 @@ namespace DigitalPlatform.LibraryServer
                     "new",
                     domExist,
                     dom,
+                    false,  //??
                     out strXml,
                     out strError);
                 if (nRet == -1)
@@ -1154,6 +1189,7 @@ namespace DigitalPlatform.LibraryServer
                     "delete",
                     domExist,
                     domNew,
+                                        false,  //??
                     out string _,
                     out strError);
                 if (nRet == -1)
@@ -1185,7 +1221,7 @@ namespace DigitalPlatform.LibraryServer
                         error = new EntityInfo(info);
                         // error.NewTimestamp = exist_timestamp;   // 让前端知道库中记录实际上发生过变化
                         error.OldTimestamp = exist_timestamp;   // 2023/2/24 让前端知道库中记录实际上发生过变化
-                        error.ErrorInfo = "数据库中即将删除的册记录已经发生了变化，请重新装载、仔细核对后再行删除。";
+                        error.ErrorInfo = "数据库中即将删除的" + this.ItemName + "记录已经发生了变化，请重新装载、仔细核对后再行删除。";
                         error.ErrorCode = ErrorCodeValue.TimestampMismatch;
                         ErrorInfos.Add(error);
                         return -1;
@@ -1266,8 +1302,16 @@ namespace DigitalPlatform.LibraryServer
                     "oldRecord", strExistingXml);
                 DomUtil.SetAttr(node, "recPath", info.NewRecPath);
 
+                // 2025/5/3
+                // 如果删除成功，也要在数组中返回表示成功的信息元素
+                error = new EntityInfo(info);
+                error.OldRecPath = info.NewRecPath;
+                error.OldTimestamp = output_timestamp;
+                error.OldRecord = strExistingXml;
 
-                // 如果删除成功，则不必要在数组中返回表示成功的信息元素了
+                error.ErrorInfo = "删除操作成功。OldRecord中返回了实际删除的记录(可能因为权限限制对内容有所过滤)。";
+                error.ErrorCode = ErrorCodeValue.NoError;
+                ErrorInfos.Add(error);  // 成功，继续向后执行
             }
 
             return 0;
@@ -1513,6 +1557,7 @@ out strError);
                 "move",
                 domSourceExist,
                 domNew,
+                StringUtil.IsInList("outofrangeAsError", info.Style),
                 out string strNewXml,
                 out strError);
             if (nRet == -1)
@@ -1867,7 +1912,10 @@ out strError);
                 {
                     string strOldRefID = DomUtil.GetElementText(domNew.DocumentElement, "refID");
                     if (string.IsNullOrEmpty(strOldRefID))
-                        DomUtil.SetElementText(domNew.DocumentElement, "refID", Guid.NewGuid().ToString());
+                    {
+                        // DomUtil.SetElementText(domNew.DocumentElement, "refID", Guid.NewGuid().ToString());
+                        LibraryApplication.EnsureRefID(ref domNew);
+                    }
                 }
 
                 {
@@ -1882,6 +1930,7 @@ out strError);
                         "change",
                         domExist,
                         domNew,
+                        StringUtil.IsInList("outofrangeAsError", info.Style),
                         out string strNewXml,
                         out strError);
                     if (nRet == -1)
@@ -2045,6 +2094,9 @@ out strError);
             errorinfos = null;
 
             LibraryServerResult result = new LibraryServerResult();
+#if ITEM_ACCESS_RIGHTS
+            LibraryServerResult normal_check_result = null; // 检查普通权限的结果
+#endif
 
             int nRet = 0;
             long lRet = 0;
@@ -2074,7 +2126,11 @@ out strError);
                     result.Value = -1;
                     result.ErrorInfo = $"修改{type_name}信息 操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 {list} 权限之一";
                     result.ErrorCode = ErrorCode.AccessDenied;
+#if !ITEM_ACCESS_RIGHTS
                     return result;
+#else
+                    normal_check_result = result;
+#endif
                 }
 
                 if (StringUtil.IsInList($"{LibraryApplication.GetInfoRight($"get{db_type}info")}", sessioninfo.RightsOrigin) == false)
@@ -2082,7 +2138,11 @@ out strError);
                     result.Value = -1;
                     result.ErrorInfo = $"修改{type_name}信息 操作被拒绝。虽然{SessionInfo.GetCurrentUserName(sessioninfo)}具备写入{type_name}的权限，但不具备 get{db_type}info 权限。请修改账户权限";
                     result.ErrorCode = ErrorCode.AccessDenied;
+#if !ITEM_ACCESS_RIGHTS
                     return result;
+#else
+                    normal_check_result = result;
+#endif
                 }
             }
 
@@ -2163,6 +2223,39 @@ out strError);
                 }
 
                 string strAction = info.Action;
+
+#if ITEM_ACCESS_RIGHTS
+                // 2025/4/27
+                // 检查存取定义
+                string strAccessParameters = "";
+                if (String.IsNullOrEmpty(sessioninfo.Access) == false)
+                {
+                    var error = this.App.CheckSetItemAccess(sessioninfo,
+    ItemNameInternal.ToLower(),
+    strBiblioDbName + "," + strItemDbName,  // 两个数据库名命中任意一个就行
+    strAction,
+    out strAccessParameters);
+                    if (error == "normal")
+                    {
+                        // 检查普通权限
+                        if (normal_check_result != null)
+                            return normal_check_result;
+                    }
+                    if (error != null)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = error;
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
+                    }
+                }
+                else
+                {
+                    // 检查普通权限
+                    if (normal_check_result != null)
+                        return normal_check_result;
+                }
+#endif
 
                 bool bForce = false;    // 是否为强制操作(强制操作不去除源记录中的流通信息字段内容)
                 bool bNoCheckDup = false;   // 是否为不查重?
@@ -3506,6 +3599,7 @@ strError);
                         //      1   过滤后记录发生了改变
                         nRet = FilterItemRecord(sessioninfo,
                             item_dom,
+                            strOutputPath,
                             out strError);
                         iteminfo.ErrorInfo = strError;
                         if (nRet == -1)
@@ -4884,6 +4978,7 @@ out string strError)
         public virtual int FilterItemRecord(
             SessionInfo sessioninfo,
             XmlDocument item_dom,
+            string item_recpath,    // 2025/5/5
             out string strError)
         {
             strError = "";
@@ -4914,22 +5009,54 @@ out string strError)
             }
             */
 
+            var dbname = ResPath.GetDbName(item_recpath);
+
+#if ITEM_ACCESS_RIGHTS
+            {
+                var list = LibraryApplication.GetInfoRight($"get{db_type}info");
+                var ret = LibraryApplication.CheckRights(sessioninfo,
+                    list,
+                    dbname,
+                    $"获取{this.ItemNameInternal}记录");
+                if (ret != null && ret.Value == -1 && ret.ErrorCode == ErrorCode.AccessDenied)
+                {
+                    strError = ret.ErrorInfo;
+                    return -2;
+                }
+            }
+#else
             // 检查 getxxxinfo 基本权限
             if (StringUtil.IsInList($"{LibraryApplication.GetInfoRight($"get{db_type}info")}", sessioninfo.RightsOrigin) == false)
             {
                 strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 get{db_type}info 权限";
                 return -2;
             }
+#endif
 
             if (item_dom == null || item_dom.DocumentElement == null)
                 return 0;
 
+#if ITEM_ACCESS_RIGHTS
+            {
+                var ret = LibraryApplication.CheckRights(
+        sessioninfo,
+        $"get{db_type}object,getobject",
+        dbname,
+        "");
+                if (ret != null && ret.ErrorCode == ErrorCode.AccessDenied)
+                {
+                    if (LibraryApplication.RemoveDprmsFile(item_dom))
+                        changed = true;
+                }
+            }
+#else
             // 如果不具备 getxxxobject 权限过滤掉 dprms:file
             if (StringUtil.IsInList($"get{db_type}object,getobject", sessioninfo.RightsOrigin) == false)
             {
                 if (LibraryApplication.RemoveDprmsFile(item_dom))
                     changed = true;
             }
+#endif
 
             if (changed == true)
                 return 1;

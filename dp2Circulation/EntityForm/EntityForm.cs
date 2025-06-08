@@ -4058,6 +4058,11 @@ out string strErrorCode)
                     if (bRefresh)
                         strStyle += ",_refresh";
 
+                    // 2024/4/13
+                    // 获取册记录时确保 borrower 元素具有 barcode 属性
+                    if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.179") >= 0)
+                        strStyle += ",borrowerBarcode";
+
                     nRet = this.entityControl1.LoadItemRecords(
                         stop,
                         channel,
@@ -10978,6 +10983,9 @@ out strError);
 
             VerifyMarcResultDialog modeless_dialog = null;
 
+            // 2025/5/11
+            EntityForm.ClearVerifyContext();
+
             if (this != null)
                 this._processing++;
             try
@@ -11571,6 +11579,14 @@ out strError);
             return 0;
         }
 
+        // MARC 校验每次触发之间维持上下文的 Hashtable
+        static Hashtable _verifyTable = new Hashtable();
+
+        public static void ClearVerifyContext()
+        {
+            _verifyTable.Clear();
+        }
+
         public static int _verifyData(
             //object sender,
             //GenerateDataEventArgs e,
@@ -11692,6 +11708,7 @@ out strError);
                     // 为Host派生类设置参数
                     hostObj.DetailForm = entity_form;
                     hostObj.Assembly = assembly;
+                    hostObj.Table = _verifyTable;
 
                     // HostEventArgs e1 = new HostEventArgs();
                     // e1.e = e;   // 2009/2/24 
@@ -11704,6 +11721,9 @@ out strError);
                 {
                     if (hostObj == null)
                         hostObj = new VerifyHost { DetailForm = entity_form };
+
+                    hostObj.Table = _verifyTable;
+
                     var filter = new VerifyFilterDocument();
                     filter.FilterHost = hostObj;
                     filter.Assembly = assembly;
@@ -14809,6 +14829,43 @@ out strError);
                 return true;
             }
 
+            // 2025/5/7
+            if (keyData == (Keys.Alt | Keys.M))
+            {
+                toolStripButton_marcEditor_moveTo_Click(this, new EventArgs());
+                return true;
+            }
+
+            // 2025/5/7
+            if (keyData == (Keys.Alt | Keys.S))
+            {
+                toolStripButton_marcEditor_save_Click(this, new EventArgs());
+                return true;
+            }
+
+
+            // 2025/5/7
+            if (keyData == (Keys.Control | Keys.T))
+            {
+                toolStripButton_marcEditor_loadTemplate_Click(this, new EventArgs());
+                return true;
+            }
+
+            // 2025/5/7
+            // ?
+            if (keyData == (Keys.Control | Keys.D))
+            {
+                toolStripSplitButton_searchDup_ButtonClick(this, new EventArgs());
+                return true;
+            }
+
+            // 2025/5/7
+            if (keyData == (Keys.Control | Keys.U))
+            {
+                toolStripButton_verifyData_Click(this, new EventArgs());
+                return true;
+            }
+
             return base.ProcessCmdKey(ref m, keyData);
         }
 
@@ -14934,6 +14991,7 @@ out strError);
                 this.toolStripButton_marcEditor_moveTo_Click(this, null);
                 return true;
             }
+
 
             // return false;
             return base.ProcessDialogKey(keyData);

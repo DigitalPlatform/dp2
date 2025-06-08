@@ -415,6 +415,7 @@ namespace DigitalPlatform.LibraryServer
         // parameters:
         //      strRecPath  册记录路径。用途是为了给宿主对象的RecPath成员赋值  // 2009/10/18
         public int ConvertItemXmlToHtml(
+            SessionInfo sessioninfo,
             string strCsFileName,
             string strRefFileName,
             string strXml,
@@ -432,6 +433,7 @@ namespace DigitalPlatform.LibraryServer
             if (obj == null)
                 return -1;
             obj.App = this;
+            obj.SessionInfo = sessioninfo;
 
             // 调用关键函数Item
             try

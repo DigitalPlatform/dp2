@@ -727,6 +727,7 @@ namespace DigitalPlatform.RFID
 
                     // pc.AFI = enable ? 0x07 : 0xc2;
                     taginfo.EAS = parse_result.PC.AFI == 0x07;
+                    taginfo.AFI = (byte)parse_result.PC.AFI;    // 2025/6/7
                     result.UhfProtocol = "gb";
                     result.UII = parse_result.SafetyUII;
                     result.PII = GetPiiPart(parse_result.SafetyUII);
@@ -769,6 +770,7 @@ namespace DigitalPlatform.RFID
                     // TODO: 如果 Chip 为 null，需要 new 一个，并且把 PII 等内容放到其 Elements 中，以便上层可以正常使用
 
                     taginfo.EAS = parse_result.EpcInfo == null ? false : !parse_result.EpcInfo.Lending;
+                    taginfo.AFI = (byte)parse_result.PC.AFI;    // 2025/6/7
                     result.UhfProtocol = "gxlm";
 
                     result.PII = GetPiiPart(parse_result.EpcInfo?.PII);

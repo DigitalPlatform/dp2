@@ -18,6 +18,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.Core;
+using DigitalPlatform.Marc;
 
 
 namespace DigitalPlatform.rms
@@ -884,6 +885,9 @@ namespace DigitalPlatform.rms
                     List<KeyAndFrom> outputKeys = new List<KeyAndFrom>();
                     if (tableInfo.nodesConvertKeyString?.Count > 0)
                     {
+                        // return:
+                        //      -1  出错
+                        //      0   成功
                         nRet = ConvertKeyWithStringNode(
                             recpath,
                             domData,
@@ -892,7 +896,10 @@ namespace DigitalPlatform.rms
                             out outputKeys,
                             out strError);
                         if (nRet == -1)
+                        {
+                            strError = $"变换键值 '{strKey}' 时出错: {strError}";
                             return -1;
+                        }
                     }
                     else
                     {
@@ -919,6 +926,10 @@ namespace DigitalPlatform.rms
                         if (tableInfo.nodesConvertKeyNumber != null
                             && tableInfo.nodesConvertKeyNumber.Count > 0)
                         {
+                            // return:
+                            //		-1	出错
+                            //		0	成功
+                            //      1   转换为数字的过程失败 strError中有报错信息
                             nRet = ConvertKeyWithNumberNode(
                                 recpath,
                                 domData,
@@ -927,7 +938,10 @@ namespace DigitalPlatform.rms
                                 out numbers,
                                 out strError);
                             if (nRet == -1)
+                            {
+                                strError = $"变换键值 '{strOneKey}' 过程出错: {strError}";
                                 return -1;
+                            }
                             if (nRet == 1)
                             {
                                 // 2010/9/27
@@ -1686,6 +1700,12 @@ namespace DigitalPlatform.rms
                         strKey = Convert.ToString(nTicks);
                     }
                 }
+                else if (strOneStyleLower == "usmarctrim" || strOneStyleLower == "trimusmarc")
+                {
+                    // 2025/5/16
+                    // 去掉 USMARC 中常见的标点符号
+                    strKey = MarcQuery.TrimStartEndChar(strKey);
+                }
                 else
                 {
                     // 2010/11/20
@@ -1702,7 +1722,7 @@ namespace DigitalPlatform.rms
                         string strFunctionName = strOneStyle.Substring(1);
                         if (strFunctionName == "")
                         {
-                            strError = "加工检索点时出错，发现数字风格'" + strOneStyle + "'未写脚本函数名。";
+                            strError = $"加工检索点时出错，发现数字类型的变换方法 '{strOneStyle}' 未写脚本函数名";
                             return -1;
 
                         }
@@ -1724,7 +1744,7 @@ namespace DigitalPlatform.rms
                     }
                     else
                     {
-                        strError = "加工检索点时,当是数值类型时，不支持'" + strOneStyle + "'风格，必须是'money','integer','rfc1123time','utime'或者'#...'";
+                        strError = $"加工检索点时，当是数值类型时，无法识别名为 '{strOneStyle}' 的变换方法。必须是 'money','integer','rfc1123time','utime' 或者 '#...'";
                         return -1;
                     }
 
@@ -1872,13 +1892,16 @@ namespace DigitalPlatform.rms
             }
         }
 
+        // return:
+        //      -1  出错
+        //      0   成功
         public int ConvertKeyWithStringNode(
             string recpath,
-    XmlDocument dataDom,
-    string strText,
-    List<XmlElement> string_nodes,
-    out List<KeyAndFrom> keys,
-    out string strError)
+            XmlDocument dataDom,
+            string strText,
+            List<XmlElement> string_nodes,
+            out List<KeyAndFrom> keys,
+            out string strError)
         {
             strError = "";
             keys = new List<KeyAndFrom>();
@@ -2061,7 +2084,7 @@ namespace DigitalPlatform.rms
                             return -1;
                         if (bInStopword == true)
                         {
-                            strError = "加工检索点,先使用了'stopword'去非用字功能,且非用字中包含','，那么再使用'split'风格则无意义。";
+                            strError = "加工检索点，先使用了 'stopword' 去非用字方法，且非用字中包含','，那么再使用 'split' 方法则无意义";
                             return -1;
                         }
                     }
@@ -2134,6 +2157,28 @@ namespace DigitalPlatform.rms
 
                     keys = results;
                 }
+                else if (strOneStyleLower == "usmarctrim" || strOneStyleLower == "trimusmarc")
+                {
+                    // 2025/5/16
+                    // 去掉 USMARC 中常见的标点符号
+
+                    List<KeyAndFrom> result = new List<KeyAndFrom>();
+                    foreach (var key in keys)
+                    {
+                        if (string.IsNullOrEmpty(key.Key))
+                            continue;
+                        var strKey = MarcQuery.TrimStartEndChar(key.Key);
+                        if (string.IsNullOrEmpty(strKey))
+                            continue;
+                        result.Add(new KeyAndFrom
+                        {
+                            Key = strKey,
+                            From = key.From
+                        });
+                    }
+
+                    keys = result;
+                }
                 else
                 {
                     // 处理C#脚本函数调用
@@ -2147,7 +2192,7 @@ namespace DigitalPlatform.rms
                         string strFunctionName = strOneStyle.Substring(1);
                         if (strFunctionName == "")
                         {
-                            strError = "加工检索点时出错，发现字符串风格'" + strOneStyle + "'未写脚本函数名。";
+                            strError = $"加工检索点时出错，发现字符串变换方法 '{strOneStyle}' 未写脚本函数名";
                             return -1;
 
                         }
@@ -2163,7 +2208,7 @@ namespace DigitalPlatform.rms
                     }
                     else
                     {
-                        strError = "加工检索点时,当是字符串类型时，不支持'" + strOneStyle + "'风格";
+                        strError = $"加工检索点时，当是字符串类型时，无法识别名为 '{strOneStyle}' 的变换方法";
                         return -1;
                     }
                 }

@@ -15,10 +15,13 @@ using System.Security.Principal;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Linq;
+using System.Threading.Tasks;
 
 using MongoDB.Driver;
 using MongoDB.Bson;
 using MongoDB.Bson.IO;
+
+using Microsoft.VisualStudio.Threading;
 
 using Newtonsoft.Json.Linq;
 
@@ -32,9 +35,7 @@ using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.Core;
 using DigitalPlatform.Marc;
-using System.Threading.Tasks;
-using Microsoft.VisualStudio.Threading;
-using System.Data.SqlClient;
+
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -115,21 +116,52 @@ namespace DigitalPlatform.LibraryServer
         /// <summary>
         /// 在登录阶段是否强制检查前端的版本号？(对几个特殊的代理账户不做此项检查)
         /// </summary>
-        public bool CheckClientVersion = false;
+        private bool _checkClientVersion = false;
+        public bool CheckClientVersion
+        {
+            get
+            {
+                return _checkClientVersion;
+            }
+        }
+
+        // 不允许使用空检索词的 身份列表
+        private string _denyEmptyQueryWord = "";
+        public string DenyEmptyQueryWord
+        {
+            get
+            {
+                return _denyEmptyQueryWord;
+            }
+        }
 
         // 负责存储统计日志的 UID 的 Hashtable。用途是防止重复写入 UID 相同的日志记录
         // uid --> true
         public UidTable StatisLogUidTable = new UidTable();
 
+        private string _globalAddRights = null;
         /// <summary>
         /// 在登录阶段要给所有账户都添加的权限列表。用逗号分隔的字符串
         /// </summary>
-        public string GlobalAddRights { get; set; }
+        public string GlobalAddRights
+        {
+            get
+            {
+                return _globalAddRights;
+            }
+        }
 
+        private bool _publicError = false;
         /// <summary>
         /// 登录时，如果报错，是否采用模糊报错方式
         /// </summary>
-        public bool PublicError { get; set; }
+        public bool PublicError
+        {
+            get
+            {
+                return _publicError;
+            }
+        }
 
         string _outgoingQueue = "";
 
@@ -987,11 +1019,11 @@ namespace DigitalPlatform.LibraryServer
                     node = dom.DocumentElement.SelectSingleNode("login") as XmlElement;
                     if (node != null)
                     {
-                        this.CheckClientVersion = DomUtil.GetBooleanParam(node,
+                        this._checkClientVersion = DomUtil.GetBooleanParam(node,
                             "checkClientVersion",
                             false);
                         // 2017/10/13
-                        this.GlobalAddRights = node.GetAttribute("globalAddRights");
+                        this._globalAddRights = node.GetAttribute("globalAddRights");
 
                         // 2021/7/4
                         string patronPasswordExpireLength = node.GetAttribute("patronPasswordExpireLength");
@@ -1023,16 +1055,31 @@ namespace DigitalPlatform.LibraryServer
                         }
 
                         // 2023/4/3
-                        this.PublicError = DomUtil.GetBooleanParam(node,
+                        this._publicError = DomUtil.GetBooleanParam(node,
     "publicError",
     false);
                     }
                     else
                     {
-                        this.CheckClientVersion = false;
-                        this.GlobalAddRights = "";
-                        this.PublicError = false;
+                        this._checkClientVersion = false;
+                        this._globalAddRights = "";
+                        this._publicError = false;
                     }
+
+                    // 2025/5/17
+                    // <searching>
+                    node = dom.DocumentElement.SelectSingleNode("searching") as XmlElement;
+                    if (node != null)
+                    {
+                        this._denyEmptyQueryWord = DomUtil.GetStringParam(node,
+                            "denyEmptyQueryWord",
+                            "");
+                    }
+                    else
+                    {
+                        this._denyEmptyQueryWord = "";
+                    }
+
 
                     // <circulation>
                     node = dom.DocumentElement.SelectSingleNode("circulation") as XmlElement;
@@ -2017,10 +2064,10 @@ out strError);
 #if LOG_INFO
                         app.WriteErrorLog("INFO: UpgradeLibraryXml");
 #endif
-                        nRet = this.UpgradeLibraryXml(out strError);
+                        nRet = this.UpgradeLibraryXml(out string error);
                         if (nRet == -1)
                         {
-                            app.WriteErrorLog("升级library.xml时出错：" + strError);
+                            app.WriteErrorLog("自动升级 library.xml 时出错：" + error);
                         }
                     }
 
@@ -2246,7 +2293,7 @@ out strError);
             this.CacheBuilder.Activate();
         }
 #endif
-
+        /*
         // 修改 library.xml 中的 version 元素值
         bool ModifyLibraryXmlVersion(string old_version,
             string new_version)
@@ -2264,7 +2311,7 @@ out strError);
             this.ActivateManagerThread();
             return true;
         }
-
+        */
         int UpgradeLibraryXml(out string strError)
         {
             strError = "";
@@ -2366,10 +2413,13 @@ out strError);
                 }
 
                 // 升级完成后，修改版本号
+                /*
                 nodeVersion.InnerText = "0.02";
                 bChanged = true;
                 WriteErrorLog("自动升级library.xml v0.01到v0.02");
                 version = 0.02;
+                */
+                modify_version("0.02");
             }
 
             // 2009/3/10
@@ -2432,10 +2482,13 @@ out strError);
                 }
 
                 // 升级完成后，修改版本号
+                /*
                 nodeVersion.InnerText = "0.03";
                 bChanged = true;
                 WriteErrorLog("自动升级library.xml v0.02到v0.03");
                 version = 0.03;
+                */
+                modify_version("0.03");
             }
 
 
@@ -2478,15 +2531,18 @@ out strError);
                     ref temp,
                     out strError);
                 if (nRet == -1)
-                    WriteErrorLog("自动升级 library.xml v2.00(或以下)到v2.01 时出错: " + strError + "。为了修复这个问题，请系统管理员重设所有工作人员账户的密码");
+                    WriteErrorLog("=== 自动升级 library.xml v2.00(或以下)到v2.01 时出错: " + strError + "。为了修复这个问题，请系统管理员重设所有工作人员账户的密码");
 
                 this.LibraryCfgDom = temp;
 
                 // 升级完成后，修改版本号
+                /*
                 nodeVersion.InnerText = "2.01";
                 bChanged = true;
                 WriteErrorLog("自动升级 library.xml v2.00(或以下)到v2.01");
                 version = 2.01;
+                */
+                modify_version("2.01");
             }
 
             // 2021/6/29
@@ -2526,10 +2582,13 @@ out strError);
                 }
 
                 // 升级完成后，修改版本号
+                /*
                 nodeVersion.InnerText = "3.00";
                 bChanged = true;
                 WriteErrorLog($"自动升级 library.xml v{version.ToString()}到v3.00");
                 version = 3.00;
+                */
+                modify_version("3.00");
             }
 
             // 2023/3/4
@@ -2558,6 +2617,7 @@ out strError);
 
                 StringUtil.RemoveDupNoSort(ref library_codes);
 
+#if REMOVED
                 var libraries = this.LibraryCfgDom.DocumentElement.SelectSingleNode("libraries") as XmlElement;
                 if (libraries == null)
                 {
@@ -2573,6 +2633,11 @@ out strError);
                     library_node = this.LibraryCfgDom.CreateElement("library");
                     libraries.AppendChild(library_node);
                     library_node.SetAttribute("code", code);
+                }
+#endif
+                foreach (var code in library_codes)
+                {
+                    EnsureCreateLibraryNode(code);
                 }
 
                 // 自动修改 accounts/account@rights 中的权限字符串
@@ -2628,117 +2693,432 @@ out strError);
                 }
 
                 // 升级完成后，修改版本号
+                /*
                 nodeVersion.InnerText = "3.01";
                 bChanged = true;
                 WriteErrorLog($"自动升级 library.xml v{version.ToString()}到v3.01");
                 version = 3.01;
-            }
-
-            // 2024/2/5
-            // 从 3.01 版升级
-            if (version <= 3.01)
-            {
-                // *** 升级任务是将 mongodb 日志动作库中的记录内的两类条码号变更为 @refID:xxx 形态
-                // 另外可能会对涉及到的部分读者记录和册记录添加 refID 元素
-                _ = Task.Factory.StartNew(async () =>
-                {
-                    using (var releaser = await _semaphoreUpgrade.EnterAsync(this.AppDownToken))
-                    {
-                        SessionInfo session = new SessionInfo(this);
-                        session.Account = new Account { UserID = "!upgrade" };
-                        try
-                        {
-                            int nRet = 0;
-                            string error = "";
-                            this.WriteErrorLog("开始升级 mongodb 出纳动作库(读者轮) ...");
-                            nRet = UpgradePatronBarcodes(
-                                session,
-                                (text, is_error) =>
-                                {
-                                    if (is_error)
-                                        this.WriteErrorLog($"升级 mongodb 出纳动作库(读者轮) 中途出错(继续向后处理): {text}");
-                                },
-                                null,
-                                this.AppDownToken,
-                                out error);
-                            if (nRet == -1)
-                            {
-                                this.WriteErrorLog($"升级 mongodb 出纳动作库(读者轮)出错: {error}");
-                                return;
-                            }
-                            else
-                                this.WriteErrorLog($"升级 mongodb 出纳动作库(读者轮)成功(共处理 {nRet} 条读者记录)");
-
-                            this.WriteErrorLog("开始升级 mongodb 出纳动作库(册轮) ...");
-                            nRet = UpgradeItemBarcodes(
-                                session,
-                                (text, is_error) =>
-                                {
-                                    if (is_error)
-                                        this.WriteErrorLog($"升级 mongodb 出纳动作库(册轮) 中途出错(继续向后处理): {text}");
-                                },
-                                null,
-                                this.AppDownToken,
-                                out error);
-                            if (nRet == -1)
-                            {
-                                this.WriteErrorLog($"升级 mongodb 出纳动作库(册轮)出错: {error}");
-                                return;
-                            }
-                            else
-                                this.WriteErrorLog($"升级 mongodb 出纳动作库(册轮)成功(共处理 {nRet} 条册记录)");
-
-                            this.WriteErrorLog("开始升级违约金库 ...");
-                            nRet = UpgradeAmerceRecords(
-                                session,
-                                (text, is_error) =>
-                                {
-                                    if (is_error)
-                                        this.WriteErrorLog($"升级违约金库中途出错(继续向后处理): {text}");
-                                },
-                                null,
-                                this.AppDownToken,
-                                out error);
-                            if (nRet == -1)
-                            {
-                                this.WriteErrorLog($"升级违约金库出错: {error}");
-                                return;
-                            }
-                            else
-                                this.WriteErrorLog($"升级违约金库成功(共处理 {nRet} 条违约金记录)");
-
-
-                            ModifyLibraryXmlVersion("3.01", "3.02");
-                            this.WriteErrorLog($"自动升级 library.xml v3.01到v3.02。数据升级刚才已经完成");
-                        }
-                        finally
-                        {
-                            session.CloseSession();
-                            session = null;
-                        }
-                    }
-                },
-this.AppDownToken,
-TaskCreationOptions.LongRunning,
-TaskScheduler.Default);
-
-                /*
-                // 升级完成后，修改版本号
-                nodeVersion.InnerText = "3.02";
-                bChanged = true;
-                WriteErrorLog($"自动升级 library.xml v{version.ToString()}到v3.02");
-                version = 3.02;
                 */
+                modify_version("3.01");
             }
 
-
+            // 变化及时保存到 library.xml 物理文件
             if (bChanged == true)
             {
                 this.Changed = true;
                 this.ActivateManagerThread();   // 2009/3/10 
+                bChanged = false;
             }
 
+            void modify_version(string new_version, string comment = "")
+            {
+                nodeVersion.InnerText = new_version;
+                WriteErrorLog($"=== 自动升级 library.xml v{version.ToString()}到v{new_version}。{comment}");
+                version = Convert.ToDouble(new_version);
+                bChanged = true;
+            }
+
+            bool sleeped = false;
+            // 确保停留 5 秒
+            void EnsureDelay()
+            {
+                if (sleeped == false)
+                {
+                    Thread.Sleep(5 * 1000);
+                    sleeped = true;
+                }
+            }
+
+            // --> 3.01 -->3.02 这部分升级任务时间很长，放入一个单独的线程来执行
+            _ = Task.Factory.StartNew(async () =>
+            {
+                try
+                {
+                    // 2024/2/5
+                    // 从 3.01 版升级
+                    if (version <= 3.01)
+                    {
+                        EnsureDelay();
+
+                        // *** 升级任务是将 mongodb 日志动作库中的记录内的两类条码号变更为 @refID:xxx 形态
+                        // 另外可能会对涉及到的部分读者记录和册记录添加 refID 元素
+                        using (var releaser = await _semaphoreUpgrade.EnterAsync(this.AppDownToken))
+                        {
+                            SessionInfo session = new SessionInfo(this);
+                            session.Account = new Account { UserID = "!upgrade" };
+                            try
+                            {
+                                int nRet = 0;
+                                string error = "";
+                                this.WriteErrorLog("=== 开始升级 mongodb 出纳动作库(读者轮) ...");
+                                nRet = UpgradePatronBarcodes(
+                                    session,
+                                    (text, is_error) =>
+                                    {
+                                        if (is_error)
+                                            this.WriteErrorLog($"=== 升级 mongodb 出纳动作库(读者轮) 中途出错(继续向后处理): {text}");
+                                    },
+                                    null,
+                                    this.AppDownToken,
+                                    out error);
+                                if (nRet == -1)
+                                {
+                                    this.WriteErrorLog($"=== 升级 mongodb 出纳动作库(读者轮)出错: {error}");
+                                    return;
+                                }
+                                else
+                                    this.WriteErrorLog($"=== 升级 mongodb 出纳动作库(读者轮)成功(共处理 {nRet} 条读者记录)");
+
+                                this.WriteErrorLog("=== 开始升级 mongodb 出纳动作库(册轮) ...");
+                                nRet = UpgradeItemBarcodes(
+                                    session,
+                                    (text, is_error) =>
+                                    {
+                                        if (is_error)
+                                            this.WriteErrorLog($"=== 升级 mongodb 出纳动作库(册轮) 中途出错(继续向后处理): {text}");
+                                    },
+                                    null,
+                                    this.AppDownToken,
+                                    out error);
+                                if (nRet == -1)
+                                {
+                                    this.WriteErrorLog($"=== 升级 mongodb 出纳动作库(册轮)出错: {error}");
+                                    return;
+                                }
+                                else
+                                    this.WriteErrorLog($"=== 升级 mongodb 出纳动作库(册轮)成功(共处理 {nRet} 条册记录)");
+
+                                this.WriteErrorLog("=== 开始升级违约金库 ...");
+                                nRet = UpgradeAmerceRecords(
+                                    session,
+                                    (text, is_error) =>
+                                    {
+                                        if (is_error)
+                                            this.WriteErrorLog($"=== 升级违约金库中途出错(继续向后处理): {text}");
+                                    },
+                                    null,
+                                    this.AppDownToken,
+                                    out error);
+                                if (nRet == -1)
+                                {
+                                    this.WriteErrorLog($"=== 升级违约金库出错: {error}");
+                                    return;
+                                }
+                                else
+                                    this.WriteErrorLog($"=== 升级违约金库成功(共处理 {nRet} 条违约金记录)");
+
+#if REMOVED
+                                // 2025/4/23
+                                // 更新违约金库的检索点
+                                if (string.IsNullOrEmpty(this.AmerceDbName) == false)
+                                {
+                                    this.WriteErrorLog("=== 开始刷新违约金库定义和检索点 ...");
+
+                                    // 刷新违约金库
+                                    var channel = session.Channels.GetChannel(this.WsUrl);
+                                    string strTemplateDir = this.DataDir + "\\templates\\" + "amerce";
+                                    // return:
+                                    //      -1
+                                    //      0   keys定义没有更新
+                                    //      1   keys定义更新了
+                                    nRet = RefreshDatabase(channel,
+                                        strTemplateDir,
+                                        this.AmerceDbName,
+                                        "*",    // 根据 templates 刷新数据库 cfgs 下的所有配置文件
+                                        "",
+                                        false,
+                                        null,
+                                        out error);
+                                    if (nRet == -1)
+                                        this.WriteErrorLog($"=== 刷新违约金库 '{this.AmerceDbName}' 定义时发生错误: {error}");
+                                    else if (nRet == 1)
+                                    {
+                                        this.WriteErrorLog($"=== 刷新违约金库 '{this.AmerceDbName}' 定义成功");
+
+                                        nRet = StartRebuildKeysTask(this.AmerceDbName,
+                                    out error);
+                                        if (nRet == -1)
+                                            this.WriteErrorLog($"=== 启动重建违约金库 '{this.AmerceDbName}' 检索点的后台批处理任务时发生错误: {error}");
+                                        else
+                                            this.WriteErrorLog($"=== 已成功启动重建违约金库 '{this.AmerceDbName}' 检索点的后台批处理任务。可利用内务的批处理任务窗观察此后台任务的执行情况");
+                                    }
+                                    else
+                                        this.WriteErrorLog($"=== 刷新违约金库 '{this.AmerceDbName}' 定义完成，keys 定义没有发生变化");
+                                }
+
+                                /*
+                                ModifyLibraryXmlVersion("3.01", "3.02");
+                                this.WriteErrorLog($"自动升级 library.xml v3.01到v3.02。数据升级刚才已经完成");
+                                version = 3.02;
+                                */
+                                modify_version("3.02", "数据升级刚才已经完成");
+#endif
+                                RefreshDatabase(this.AmerceDbName,
+"违约金库",
+"amerce");
+                                modify_version("3.02", "数据升级刚才已经完成");
+                            }
+                            finally
+                            {
+                                session.CloseSession();
+                                session = null;
+                            }
+                        }
+                    }
+
+                    // 2024/4/18
+                    // 从 3.02 版升级
+                    if (version <= 3.02)
+                    {
+                        EnsureDelay();
+
+                        // *** 升级任务是将 mongodb 日志动作库中的记录内的两类条码号变更为 @refID:xxx 形态
+                        // 另外可能会对涉及到的部分读者记录和册记录添加 refID 元素
+                        using (var releaser = await _semaphoreUpgrade.EnterAsync(this.AppDownToken))
+                        {
+#if REMOVED
+                            SessionInfo session = new SessionInfo(this);
+                            session.Account = new Account { UserID = "!upgrade" };
+                            try
+                            {
+                                int nRet = 0;
+                                string error = "";
+                                // 2024/4/17
+                                // 刷新预约到书库
+                                if (string.IsNullOrEmpty(this.ArrivedDbName) == false)
+                                {
+                                    this.WriteErrorLog("=== 开始刷新预约到书库定义和检索点 ...");
+
+                                    // 刷新预约到书库
+                                    var channel = session.Channels.GetChannel(this.WsUrl);
+                                    string strTemplateDir = this.DataDir + "\\templates\\" + "arrived";
+                                    // return:
+                                    //      -1
+                                    //      0   keys定义没有更新
+                                    //      1   keys定义更新了
+                                    nRet = RefreshDatabase(channel,
+                                        strTemplateDir,
+                                        this.ArrivedDbName,
+                                        "*",    // 根据 templates 刷新数据库 cfgs 下的所有配置文件
+                                        "",
+                                        false,
+                                        null,
+                                        out error);
+                                    if (nRet == -1)
+                                        this.WriteErrorLog($"=== 刷新预约到书库 '{this.ArrivedDbName}' 定义时发生错误: {error}");
+                                    else if (nRet == 1)
+                                    {
+                                        this.WriteErrorLog($"=== 刷新预约到书库 '{this.ArrivedDbName}' 定义成功");
+
+                                        nRet = StartRebuildKeysTask(this.ArrivedDbName,
+                                    out error);
+                                        if (nRet == -1)
+                                            this.WriteErrorLog($"=== 启动重建预约到书库 '{this.ArrivedDbName}' 检索点的后台批处理任务时发生错误: {error}");
+                                        else
+                                            this.WriteErrorLog($"=== 已成功启动重建预约到书库 '{this.ArrivedDbName}' 检索点的后台批处理任务。可利用内务的批处理任务窗观察此后台任务的执行情况");
+                                    }
+                                    else
+                                        this.WriteErrorLog($"=== 刷新预约到书库 '{this.ArrivedDbName}' 定义完成，keys 定义没有发生变化");
+                                }
+
+                                /*
+                                ModifyLibraryXmlVersion("3.02", "3.03");
+                                this.WriteErrorLog($"自动升级 library.xml v3.02到v3.03。刷新预约到书库检索点刚才已经完成");
+                                version = 3.03;
+                                */
+                                modify_version("3.03", "刷新预约到书库检索点刚才已经完成");
+                            }
+                            finally
+                            {
+                                session.CloseSession();
+                                session = null;
+                            }
+#endif
+
+                            var ret = RefreshDatabase(this.ArrivedDbName,
+"预约到书库",
+"arrived");
+                            if (ret.Value == 1)
+                                modify_version("3.03", "刷新预约到书库检索点刚才已经完成");
+                            else
+                                modify_version("3.03");
+                        }
+
+                    }
+
+                    // 从 3.03 版升级
+                    if (version <= 3.03)
+                    {
+                        EnsureDelay();
+
+                        using (var releaser = await _semaphoreUpgrade.EnterAsync(this.AppDownToken))
+                        {
+                            List<string> succeed_dbnames = new List<string>();
+                            foreach (var dbname in ServerDatabaseUtility.GetUtilDbNamesByType(this.LibraryCfgDom, "publisher"))
+                            {
+                                // 刷新 出版者库 的检索点
+                                var ret = RefreshDatabase(dbname,
+    "出版者库",
+    "publisher");
+                                if (ret.Value == 1)
+                                    succeed_dbnames.Add(dbname);
+                            }
+
+                            if (succeed_dbnames.Count > 0)
+                                modify_version("3.04", $"刷新预约到书库 {StringUtil.MakePathList(succeed_dbnames, ",")} 检索点刚才已经完成");
+                            else
+                                modify_version("3.04");
+                        }
+
+                    }
+                    if (bChanged == true)
+                    {
+                        this.Changed = true;
+                        this.ActivateManagerThread();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    this.WriteErrorLog($"UpgradeLibraryXml() 中单独任务部分出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                }
+            },
+this.AppDownToken,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+
             return 0;
+        }
+
+        NormalResult RefreshDatabase(string strDbName,
+            string strDbNameCaption,
+            string strTemplateName)
+        {
+            if (string.IsNullOrEmpty(strDbName))
+                return new NormalResult();
+
+            SessionInfo session = new SessionInfo(this);
+            session.Account = new Account { UserID = "!upgrade" };
+            try
+            {
+                int nRet = 0;
+                string error = "";
+                // 刷新数据库
+                {
+                    this.WriteErrorLog($"=== 开始刷新{strDbNameCaption}定义和检索点 ...");
+
+                    // 刷新预约到书库
+                    var channel = session.Channels.GetChannel(this.WsUrl);
+                    string strTemplateDir = this.DataDir + "\\templates\\" + strTemplateName;
+                    // return:
+                    //      -1
+                    //      0   keys定义没有更新
+                    //      1   keys定义更新了
+                    nRet = RefreshDatabase(channel,
+                        strTemplateDir,
+                        strDbName,
+                        "*",    // 根据 templates 刷新数据库 cfgs 下的所有配置文件
+                        "",
+                        false,
+                        null,
+                        out error);
+                    if (nRet == -1)
+                    {
+                        this.WriteErrorLog($"=== 刷新{strDbNameCaption} '{strDbName}' 定义时发生错误: {error}");
+                        return new NormalResult { Value = -1, ErrorInfo = error };
+                    }
+                    else if (nRet == 1)
+                    {
+                        this.WriteErrorLog($"=== 刷新{strDbNameCaption}库 '{strDbName}' 定义成功");
+
+                        nRet = StartRebuildKeysTask(strDbName,
+                    out error);
+                        if (nRet == -1)
+                            this.WriteErrorLog($"=== 启动重建{strDbNameCaption} '{strDbName}' 检索点的后台批处理任务时发生错误: {error}");
+                        else
+                            this.WriteErrorLog($"=== 已成功启动重建{strDbNameCaption} '{strDbName}' 检索点的后台批处理任务。可利用内务的批处理任务窗观察此后台任务的执行情况");
+
+                        // 2025/5/13
+                        nRet = ReloadKdbs(channel,
+"vdbs",
+out error);
+                        if (nRet == -1)
+                            this.WriteErrorLog($"=== 重载内存中的内核数据库和虚拟数据库定义信息 ReloadKdbs() 过程中出现致命错误，请在自动更新完成后，手动修正故障: {error}");
+                    }
+                    else
+                        this.WriteErrorLog($"=== 刷新{strDbNameCaption} '{strDbName}' 定义完成，keys 定义没有发生变化");
+                }
+
+                return new NormalResult { Value = 1 };
+            }
+            finally
+            {
+                session.CloseSession();
+                session = null;
+            }
+        }
+
+        // 2025/4/19
+        // 确保在 library.xml 中创建所需的 libraries/library 元素
+        // return:
+        //      false   没有发生修改
+        //      true    发生了修改
+        public bool EnsureCreateLibraryNode(string code)
+        {
+            if (code == null)
+                throw new ArgumentException("code 参数值不能为 null");
+
+            bool changed = false;
+            var libraries = this.LibraryCfgDom.DocumentElement.SelectSingleNode("libraries") as XmlElement;
+            if (libraries == null)
+            {
+                libraries = this.LibraryCfgDom.CreateElement("libraries");
+                this.LibraryCfgDom.DocumentElement.AppendChild(libraries);
+                changed = true;
+            }
+
+            {
+                var library_node = this.LibraryCfgDom.DocumentElement.SelectSingleNode($"libraries/library[@code='{code}']") as XmlElement;
+                if (library_node != null)
+                    return changed;
+                library_node = this.LibraryCfgDom.CreateElement("library");
+                libraries.AppendChild(library_node);
+                library_node.SetAttribute("code", code);
+                changed = true;
+            }
+
+            return changed;
+        }
+
+        // 2025/4/19
+        // 从 library.xml 中删除不再使用的 libraries/library 元素
+        // “不再使用”是指 readerdbgroup/database/@libraryCode 属性中不再使用
+        // parameters:
+        //      code    要删除的 libraryCode
+        // return:
+        //      false   没有发生修改
+        //      true    发生了修改
+        public bool RemoveUnusedLibraryNode(string code)
+        {
+            if (code == null)
+                throw new ArgumentException("code 参数值不能为 null");
+
+            List<string> library_codes = new List<string>();
+            var database_nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("readerdbgroup/database");
+            foreach (XmlElement database in database_nodes)
+            {
+                if (database.HasAttribute("libraryCode") == false)
+                    continue;
+                library_codes.Add(database.GetAttribute("libraryCode"));
+            }
+
+            if (library_codes.Contains(code) == false)
+            {
+                var library_node = this.LibraryCfgDom.DocumentElement.SelectSingleNode($"libraries/library[@code='{code}']") as XmlElement;
+                if (library_node != null)
+                    library_node.ParentNode?.RemoveChild(library_node);
+                return true;
+            }
+            return false;
         }
 
         // 限制多个实例的升级按照顺序进行，避免给 CPU 太大压力
@@ -3920,6 +4300,7 @@ TaskScheduler.Default);
                             "reportStorage",
                             "reportReplication",
                             "messageServer",
+                            "searching",   // 2025/5/17
                         };
 
             foreach (string element_name in unique_containers)
@@ -4445,6 +4826,7 @@ TaskScheduler.Default);
                             "commands", // 2021/12/23
                             "fileShare",    // 2022/5/19
                             "libraries",    // 2023/3/4
+                            "searching",   // 2025/5/17
                         };
 
                             RestoreElements(cfg_dom, writer, elements);
@@ -14147,7 +14529,10 @@ out strError);
 
                 // 清除 LoginCache
                 this.ClearLoginCache(strExistingBarcode);
-
+                {
+                    // 2025/4/19
+                    ClearLoginCacheByReaderRefID(readerdom);
+                }
                 result.Value = 1;   // 成功
             }
             finally
@@ -14640,6 +15025,10 @@ strLibraryCode);    // 读者所在的馆代码
 
             // this.LoginCache.Remove(strReaderKey);   // 及时失效登录缓存
             this.ClearLoginCache(strReaderBarcode);   // 及时失效登录缓存
+            {
+                // 2025/4/19
+                ClearLoginCacheByReaderRefID(readerdom);
+            }
             return 0;
         ERROR1:
             return -1;
@@ -14709,15 +15098,28 @@ strLibraryCode);    // 读者所在的馆代码
                     return "get channel error";
                 }
 
+                // 2025/4/23
+                // 用于显示的册条码号。尽可能将 "@refID:xxx" 转换为册条码号形态
+                string strDisplayBarcode = strBarcode;
+                {
+                    var ret = this.ConvertRefIdListToItemBarcodeList(
+    channel,
+    strBarcode,
+    out string temp,
+    out string error);
+                    if (ret != -1 && string.IsNullOrEmpty(temp) == false)
+                        strDisplayBarcode = temp;
+                }
+
                 // parameters:
                 //      strItemBarcodeParam         册条码号。也可以为 @refID:xxx 形态
                 LibraryServerResult result = this.GetBiblioSummary(sessioninfo,
                     channel,
-    strBarcode,
-    null,
-    strPrevBiblioRecPath,   // 前一个path
-    out strBiblioRecPath,
-    out strOneSummary);
+                    strBarcode,
+                    null,
+                    strPrevBiblioRecPath,   // 前一个path
+                    out strBiblioRecPath,
+                    out strOneSummary);
                 if (result.Value == -1 || result.Value == 0)
                     strOneSummary = result.ErrorInfo;
 
@@ -14735,14 +15137,14 @@ strLibraryCode);    // 读者所在的馆代码
 
                     string strBarcodeLink = "<a "
     + (string.IsNullOrEmpty(strDisableClass) == false && strBarcode != strArrivedItemBarcode ? "class='" + strDisableClass + "'" : "")
-    + " href='javascript:void(0);' onclick=\"window.external.OpenForm('ItemInfoForm', this.innerText, true);\"  onmouseover=\"window.external.HoverItemProperty(this.innerText);\">" + strBarcode + "</a>";
+    + " href='javascript:void(0);' onclick=\"window.external.OpenForm('ItemInfoForm', this.innerText, true);\"  onmouseover=\"window.external.HoverItemProperty(this.innerText);\">" + strDisplayBarcode + "</a>";
 
 
                     strSummary += strBarcodeLink + " : " + strOneSummary + "<br/>";
                 }
                 else
                 {
-                    strSummary += strBarcode + " : " + strOneSummary + "<br/>";
+                    strSummary += strDisplayBarcode + " : " + strOneSummary + "<br/>";
                 }
 
                 strPrevBiblioRecPath = strBiblioRecPath;
@@ -14832,28 +15234,33 @@ strLibraryCode);    // 读者所在的馆代码
 
 #endif
 
-        static List<XmlNode> MatchTableNodes(XmlNode root,
+        static List<XmlElement> MatchTableNodes(XmlNode root,
+            string strLibraryCode,  // 2025/4/25
             string strName,
             string strDbName)
         {
-            List<XmlNode> results = new List<XmlNode>();
+            var results = new List<XmlElement>();
 
-            XmlNodeList nodes = root.SelectNodes("table[@name='" + strName + "']");
+            XmlNodeList nodes = null;
+            if (string.IsNullOrEmpty(strLibraryCode))
+                nodes = root.SelectNodes($"table[@name='{strName}']");
+            else
+                nodes = root.SelectNodes($"library[@code='{strLibraryCode}']/table[@name='{strName}']");
             if (nodes.Count == 0)
                 return results;
 
-            for (int i = 0; i < nodes.Count; i++)
+            foreach (XmlElement node in nodes)
             {
-                string strCurDbName = DomUtil.GetAttr(nodes[i], "dbname");
+                string strCurDbName = DomUtil.GetAttr(node, "dbname");
                 if (String.IsNullOrEmpty(strCurDbName) == true
                     && String.IsNullOrEmpty(strDbName) == true)
                 {
-                    results.Add(nodes[i]);
+                    results.Add(node);
                     continue;
                 }
 
                 if (strCurDbName == strDbName)
-                    results.Add(nodes[i]);
+                    results.Add(node);
             }
 
             return results;
@@ -14863,7 +15270,7 @@ strLibraryCode);    // 读者所在的馆代码
             string container_element_name = "")
         {
             StringBuilder sb = new StringBuilder();
-            foreach(XmlNode node in nodes)
+            foreach (XmlNode node in nodes)
             {
                 if (sb.Length > 0)
                     sb.AppendLine();
@@ -14882,12 +15289,17 @@ strLibraryCode);    // 读者所在的馆代码
         // parameters:
         //      strAction   "new" "change" "overwirte" "delete"
         //                  change 和 overwrite 的区别，是 change 要求 strDbName 指定的 table 元素预先存在。
+        //      strName     name 参数值
+        //      strDbName   dbname 参数值
+        //      strValue    value 参数值
         //      strOldXml   [out] 返回修改或删除前的 XML。valueTables 元素下的 table 元素(一个或者多个 OuterXml)，其 name 属性值匹配 strDbName
         // return:
         //      -1  error
         //      0   not change
         //      1   changed
-        public int SetValueTable(string strAction,
+        public int SetValueTable(
+            string strLibraryCode,  // 2025/4/25
+            string strAction,
             string strName,
             string strDbName,
             string strValue,
@@ -14904,7 +15316,7 @@ strLibraryCode);    // 读者所在的馆代码
                 strError = "strName参数值不能为空";
                 return -1;
             }
-            XmlNode root = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//valueTables");
+            var root = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//valueTables") as XmlElement;
             if (root == null)
             {
                 root = this.LibraryCfgDom.CreateElement("valueTables");
@@ -14916,7 +15328,9 @@ strLibraryCode);    // 读者所在的馆代码
 
             if (strAction == "new")
             {
-                List<XmlNode> nodes = MatchTableNodes(root,
+                var nodes = MatchTableNodes(
+                    root,
+                    strLibraryCode,
                     strName,
                     strDbName);
                 if (nodes.Count > 0)
@@ -14925,8 +15339,11 @@ strLibraryCode);    // 读者所在的馆代码
                     return -1;
                 }
 
+                /*
                 XmlNode new_node = root.OwnerDocument.CreateElement("table");
                 root.AppendChild(new_node);
+                */
+                var new_node = CreateTableElement();
 
                 DomUtil.SetAttr(new_node, "name", strName);
                 DomUtil.SetAttr(new_node, "dbname", strDbName);
@@ -14937,13 +15354,15 @@ strLibraryCode);    // 读者所在的馆代码
             }
             else if (strAction == "delete")
             {
-                List<XmlNode> nodes = MatchTableNodes(root,
+                var nodes = MatchTableNodes(
+                    root,
+                    strLibraryCode,
                     strName,
                     strDbName);
                 if (nodes.Count == 0)
                 {
                     strError = "name为 '" + strName + "' dbname为 '" + strDbName + "' 的值列表事项不存在";
-                    return 0;
+                    return -1;  // 2025/4/18 从 0 改为 -1
                 }
 
                 // 2025/4/2
@@ -14959,7 +15378,9 @@ strLibraryCode);    // 读者所在的馆代码
             }
             else if (strAction == "change")
             {
-                List<XmlNode> nodes = MatchTableNodes(root,
+                var nodes = MatchTableNodes(
+                    root,
+                    strLibraryCode,
                     strName,
                     strDbName);
                 if (nodes.Count == 0)
@@ -14983,13 +15404,18 @@ strLibraryCode);    // 读者所在的馆代码
             }
             else if (strAction == "overwrite")
             {
-                List<XmlNode> nodes = MatchTableNodes(root,
+                var nodes = MatchTableNodes(
+                    root,
+                    strLibraryCode,
                     strName,
                     strDbName);
                 if (nodes.Count == 0)
                 {
+                    /*
                     XmlNode new_node = root.OwnerDocument.CreateElement("table");
                     root.AppendChild(new_node);
+                    */
+                    var new_node = CreateTableElement();
 
                     DomUtil.SetAttr(new_node, "name", strName);
                     DomUtil.SetAttr(new_node, "dbname", strDbName);
@@ -15016,6 +15442,19 @@ strLibraryCode);    // 读者所在的馆代码
             {
                 strError = "未知的strAction值 '" + strAction + "'";
                 return -1;
+            }
+
+            // 2025/4/25
+            XmlElement CreateTableElement()
+            {
+                XmlElement library = null;
+                if (string.IsNullOrEmpty(strLibraryCode))
+                    library = root;
+                else
+                    library = root.SelectSingleNode($"library[@name='{strLibraryCode}']") as XmlElement;
+                var new_node = library.OwnerDocument.CreateElement("table");
+                library.AppendChild(new_node);
+                return new_node;
             }
         }
 
@@ -17365,6 +17804,25 @@ out string db_type);
                 }
             }
 
+            // 内核的数据或者文件
+            if (strPath.StartsWith("<kernel>"))
+            {
+                strPath = strPath.Substring("<kernel>".Length);
+
+                // 注意： strPath 中的斜杠应该是 '/'
+                string strFirstLevel = StringUtil.GetFirstPartPath(ref strPath);
+                if (strFirstLevel == "log")
+                {
+                    if (StringUtil.IsInList("managedatabase,backup", strRights))
+                    {
+                        // 具备 managedatabase 或 backup 权限可以列出任何文件和目录
+                        return 1;
+                    }
+                }
+                strError = $"读取资源 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备读取数据库内核信息的权限";
+                return 0;
+            }
+
             /*
             // 如果具备 setobject 权限，则具备所有对象的读取权限了
             if (StringUtil.IsInList("setobject", strRights) == true
@@ -18524,6 +18982,99 @@ out string db_type);
             return 1;
         }
 
+        // 检查当前用户是否具备 SetOrders() 等 API 的存取定义权限
+        // parameters:
+        //      check_normal_right 是否要连带一起检查普通权限？如果不连带，则本函数可能返回 "normal"，意思是需要追加检查一下普通权限
+        // return:
+        //      "normal"    (存取定义已经满足要求了，但)还需要进一步检查普通权限
+        //      null    具备权限
+        //      其它      不具备权限。文字是报错信息
+        public string CheckSetItemAccess(SessionInfo sessioninfo,
+            string strDbType,
+            string strDbNameList,
+            string strAction,
+            // bool check_normal_right,
+            out string strAccessParameters)
+        {
+            strAccessParameters = "";
+
+            Debug.Assert(strDbType == "item"
+                || strDbType == "order"
+                || strDbType == "issue"
+                || strDbType == "comment");
+
+            bool check_normal_right = false;
+
+            bool bRightVerified = false;
+
+            string right_name = $"set{strDbType}info";
+
+            // 检查存取权限
+            if (String.IsNullOrEmpty(sessioninfo.Access) == false)
+            {
+                string strAccessActionList = "";
+                // return:
+                //      null    指定的操作类型的权限没有定义
+                //      ""      定义了指定类型的操作权限，但是否定的定义
+                //      其它      权限列表。* 表示通配的权限列表
+                strAccessActionList = GetDbOperRights(sessioninfo.Access,
+                    strDbNameList,
+                    right_name);
+                if (strAccessActionList == null)
+                {
+                    // 看看是不是关于 setxxxinfo 的任何权限都没有定义?
+                    strAccessActionList = GetDbOperRights(sessioninfo.Access,
+                        "",
+                        right_name);
+                    if (strAccessActionList == null)
+                    {
+                        if (check_normal_right)
+                        {
+                            // TODO: 可以提示"既没有... 也没有 ..."
+                            goto CHECK_RIGHTS_2;
+                        }
+                        return "normal";    // 还需要继续检查普通权限中的 setxxxinfo
+                    }
+                    else
+                    {
+                        return "用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strDbNameList + "' 执行 " +
+                            right_name +
+                            " " + strAction + " 操作的存取权限";
+                    }
+                }
+                if (strAccessActionList == "*")
+                {
+                    // 通配
+                }
+                else
+                {
+                    if (IsInAccessList(strAction,
+                        strAccessActionList,
+                        true,
+                        out strAccessParameters) == false)
+                    {
+                        return "用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strDbNameList + "' 执行 " +
+                            right_name +
+                            " " + strAction + " 操作的存取权限";
+                    }
+                }
+
+                bRightVerified = true;
+            }
+
+        CHECK_RIGHTS_2:
+            if (bRightVerified == false)
+            {
+                // 权限字符串
+                if (StringUtil.IsInList($"{right_name},writerecord,order", sessioninfo.RightsOrigin) == false)
+                {
+                    return $"设置{strDbType}信息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 {right_name} 或 writerecord 或 order 权限";
+                }
+            }
+
+            return null;
+        }
+
     }
 
 #if NO
@@ -18591,6 +19142,7 @@ out string db_type);
         RefIdDup = 44,    // 参考 ID 重复了 2021/8/9
         Canceled = 45,  // 2021/11/6
         ErrorParameter = 46,    // 2025/2/17 错误的参数值。和 InvalidParameter 的区别，是 invalid 指参数内容形态不合法，error 指参数内容值不符合要求(不包括明显的形态不合法情形)
+        EmptyQueryWord = 47,    // 2025/5/17 出现了空检索词
 
         // 以下为兼容内核错误码而设立的同名错误码
         AlreadyExist = 100, // 兼容

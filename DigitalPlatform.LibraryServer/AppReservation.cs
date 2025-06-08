@@ -1263,9 +1263,9 @@ namespace DigitalPlatform.LibraryServer
                 root = itemdom.DocumentElement.AppendChild(root);
             }
             // 看看是否已经存在元素
-            XmlNode nodeRequest = root.SelectSingleNode("request[@reader='@refID:" + strReaderRefID + "']");
+            var nodeRequest = root.SelectSingleNode("request[@reader='@refID:" + strReaderRefID + "']") as XmlElement;
             if (nodeRequest == null)
-                nodeRequest = root.SelectSingleNode("request[@reader='" + strReaderBarcode + "']");
+                nodeRequest = root.SelectSingleNode("request[@reader='" + strReaderBarcode + "']") as XmlElement;
 
             if (String.Compare(strFunction, "new", true) == 0)
             {
@@ -1311,8 +1311,12 @@ namespace DigitalPlatform.LibraryServer
                 if (nodeRequest == null)
                 {
                     nodeRequest = itemdom.CreateElement("request");
-                    nodeRequest = root.AppendChild(nodeRequest);
+                    nodeRequest = root.AppendChild(nodeRequest) as XmlElement;
                     DomUtil.SetAttr(nodeRequest, "reader", "@refID:" + strReaderRefID/*strReaderBarcode*/);
+                    // 2025/4/22
+                    // readerBarcode 属性值为读者的证条码号
+                    if (string.IsNullOrEmpty(strReaderBarcode) == false)
+                        nodeRequest.SetAttribute("readerBarcode", strReaderBarcode);
                 }
 
                 // 请求时间
@@ -1409,7 +1413,10 @@ namespace DigitalPlatform.LibraryServer
                     } // end of -- if (strState == "arrived")
 
                     // 经过 DoNotifyNext() 以后 itemdom 内容可能会发生变化
-                    nodeRequest = root.SelectSingleNode("request[@reader='" + strReaderBarcode + "']");
+                    // 2025/4/22
+                    nodeRequest = root.SelectSingleNode("request[@reader='@refID:" + strReaderRefID + "']") as XmlElement;
+                    if (nodeRequest == null)
+                        nodeRequest = root.SelectSingleNode("request[@reader='" + strReaderBarcode + "']") as XmlElement;
                     if (nodeRequest != null && nodeRequest.ParentNode != null)
                         nodeRequest.ParentNode.RemoveChild(nodeRequest);
                 } // end of -- if (nodeRequest != null)
@@ -1555,7 +1562,11 @@ out strError);
                         var state = node.GetAttribute("state");
                         string strItems = DomUtil.GetAttr(node, "items");
                         if (state == "arrived")
-                            strItems = node.GetAttribute("arrivedItemBarcode");
+                        {
+                            strItems = node.GetAttribute("arrivedItemRefID");   // 2025/4/23 补充
+                            if (string.IsNullOrEmpty(strItems))
+                                strItems = node.GetAttribute("arrivedItemBarcode");
+                        }
 
                         nRet = ConvertItemBarcodeListToRefIdList(channel,
             strItems,
@@ -2017,7 +2028,11 @@ out strError);
                 // 到达时间
                 DomUtil.SetAttr(readerRequestNode, "arrivedDate", this.Clock.GetClock());
                 // 实际到达的一个册条码号 2007/1/18 
-                DomUtil.SetAttr(readerRequestNode, "arrivedItemBarcode", strItemRefIdString/*strItemBarcodeParam*/);
+                // 也有一定几率是 "@refID:xxx" 形态
+                DomUtil.SetAttr(readerRequestNode, "arrivedItemBarcode", strItemBarcodeParam);  // 借阅信息链重构版本曾经用过 strItemRefIdString
+                // 2025/4/23 补充
+                // 实际到达的一个册参考 ID
+                readerRequestNode.SetAttribute("arrivedItemRefID", strItemRefIdString);
 
                 // 2016/12/4
                 readerRequestNode.SetAttribute("notifyID", strNotifyID);
@@ -2691,7 +2706,7 @@ out strError);
 
             if (this.ArrivedDbKeysContainsRefIdKey() == false)
             {
-                strError = $"预约到书库的检索点定义太旧，没有包含 item_refid 检索点。请系统管理员刷新其检索点定义";
+                strError = $"预约到书库的检索点定义太旧，没有包含 item_refid 检索点。请系统管理员刷新其检索点定义并批处理重建检索点";
                 return -1;
             }
 
@@ -2749,7 +2764,7 @@ out strError);
             DomUtil.SetElementText(new_queue_dom.DocumentElement, "notifyDate", this.Clock.GetClock());
 
             // 2016/12/4
-            // 预约到书记录的参考 ID
+            // 预约到书记录(自身)的参考 ID
             DomUtil.SetElementText(new_queue_dom.DocumentElement, "refID", strNotifyID);
 
             // 2015/6/13

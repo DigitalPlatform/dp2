@@ -32,10 +32,10 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.175.*")]
-[assembly: AssemblyFileVersion("3.175.0.0")]
+[assembly: AssemblyVersion("3.181.*")]
+[assembly: AssemblyFileVersion("3.181.0.0")]
 
-//      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
+//      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCommentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
 //      2.12 (2012/5/15) SearchBiblio() API 对“出版时间”检索途径进行了特殊处理
 //      2.13 (2012/5/16) SearchBiblio() API 通过strFromStyle中包含_time子串来识别时间检索请求
@@ -159,29 +159,29 @@ using System.Runtime.InteropServices;
 /*
 ItemCanBorrow()
 早期版本里，本函数的类型是这样的：
-	public bool ItemCanBorrow(
-		bool bRenew,
-		Account account, 
-		XmlDocument itemdom,
-		out string strMessageText)
+public bool ItemCanBorrow(
+    bool bRenew,
+    Account account, 
+    XmlDocument itemdom,
+    out string strMessageText)
 新版本继续兼容这种类型。但新版本提供了新的类型，能更好地参考读者记录信息：
-	public bool ItemCanBorrow(
-		bool bRenew,
-		Account account, 
-                XmlDocument readerdom,  // 这是新增加的参数
-		XmlDocument itemdom,
-		out string strMessageText)
+public bool ItemCanBorrow(
+    bool bRenew,
+    Account account, 
+            XmlDocument readerdom,  // 这是新增加的参数
+    XmlDocument itemdom,
+    out string strMessageText)
 ItemCanReturn()
 早期版本里，本函数的类型是这样的：
-	public bool ItemCanReturn(Account account, 
-		XmlDocument itemdom,
-		out string strMessageText)
+public bool ItemCanReturn(Account account, 
+    XmlDocument itemdom,
+    out string strMessageText)
 新版本继续兼容这种类型。但新版本提供了新的类型，能更好地参考读者记录信息：
-	public bool ItemCanReturn(Account account, 
-                XmlDocument readerdom,  // 这是新增加的参数
-		XmlDocument itemdom,
-		out string strMessageText)
- * */
+public bool ItemCanReturn(Account account, 
+            XmlDocument readerdom,  // 这是新增加的参数
+    XmlDocument itemdom,
+    out string strMessageText)
+* */
 //      (续上) 3.7 版本还为 locationType//item/@canBorrow 属性扩展了用法，除了继续兼容以前的 'yes' 和 'no' 值以外，还可以
 //      使用 javascript 脚本定义，如 "javascript:xxxxx"。脚本执行前，宿主给准备好了 account readerRecord itemRecord 三个变量。
 //      脚本通过 result 变量返回 'yes' 或 'no' 表示是否允许外借。如果脚本中没有定义这个变量，默认 'no' 的效果。
@@ -418,5 +418,46 @@ ItemCanReturn()
 //							(另外，早期 dp2circulation 的 dp2circulation_marc_autogen.cs 自动为 998 字段创建 $u 子字段内容的时候，使用的是 "u" 格式，后来改为使用 "s" 格式。这就留下一个问题，原先的书目记录中 998$u 中的 "u" 格式内容需要一个实用工具全部修改为使用 "s" 格式。只要格式改变，但时间值字面量不要改变。而如果这些内容不做修改，原有 "u" 格式字面量用法是不对的，正确的用法应该是 UTC 字面量)
 //		3.174 (2025/4/1) SearchCharging() API 的 actions 参数中增加了 "transferIdTo:xxx|xxx" 子参数用法。
 //		3.175 (2025/4/11) SetSystemParameter() API 所产生的操作日志动作中，增加了 oldValue 和 snapshot 元素。此版操作日志记录的 version 为 1.12。
+//		3.176 (2025/4/15) GetItemInfo () API 中的 strResultType 参数增加了 "xml:borrowerBarcode" 子参数用法。作用为给返回的册记录 XML 的 borrower 元素确保增加一个 barcode 属性，表示借阅者的证条码号。(注: borrower 元素中原先就存在 barcode 属性，则不再添加)
+//							GetEntities() API 的 strStyle 参数增加了一个子参数 borrowerBarcode。作用为給返回的册记录 XML 的 borrower 元素确保增加一个 barcode 属性，表示借阅者的证条码号。(注: borrower 元素中原先就存在 barcode 属性，则不再添加)
+//							Return() API 在产生 borrowerHistory/borrower 元素的时候，增加了一个 refID 属性，表示借阅者的参考 ID。此前版本 barcode 属性里面存储借阅者的证条码号或者 @refID: 打头的参考 ID。
+//								最新版优化了一下：当读者记录只有参考 ID 没有证条码号的时候，参考 ID 放入这里的 barcode 属性和 refID 属性；而如果读者记录又有参考 ID 又有证条码号，则 barcode 属性放证条码号，refID 属性放参考 ID
+//							Borrow() API 增加了一个特性，会自动给册记录 XML 中 borrower 元素增加一个 barcode 属性，表示借阅者的证条码号
+//		3.177 (2025/4/17) dp2library 启动时检查 library.xml 版本和自动升级的时候，从 3.02 升级到 3.03 的过程，增加了刷新和重建“预约到书”库检索点的步骤。
+//							3.03 即是确保 “预约到书”库检索点是最新的，这么一个 library.xml 版本号。
+//		3.178 (2025/4/23) dp2library 启动时检查 library.xml 版本和自动升级的时候，从 3.01 升级到 3.02 的过程，增加了刷新和重建“违约金”库检索点的步骤。
+//							Return() API 在发现一个册记录属于已到册的时候，会在读者记录 XML 中写入内容。读者记录 XML 中 reservations/request 元素新增了 arrivedItemRefID 属性，用于存储已到册的参考 ID。原有 arrivedItemBarcode 由稍早版本(即刚开始进行借阅信息链重构时)的存储已到册的参考 ID 改为存储已到册的条码号(最早版本此属性值是册条码号形态)。
+//							Return() API 在发现一个册记录属于已到册的时候，册记录中 reservations/request 元素增加了一个 readerBarcode 属性，用于存储读者的证条码号。原有的 reader 属性值是读者的参考 ID 或者证条码号(几率较低)
+//            (2025/4/25) 为 GetSystemParameter() API 增加了类似 GetValueTable() API 的新功能，调用方法是: 
+//                          strCategory: "circulation"; strName: "valueTable,name=xxx,dbname=xxxx"
+//                          out strValue 参数返回的字符串内容，是一个逗号间隔的内容。注意在分馆情形下，里面会出现 {} 花括号，表示分馆的馆代码。这个效果和 GetValueTable() API 是一致的，没有变化。
+/*
+为 SetSystemParameter() API 增加了以总馆账户身份请求(SetSystemParameter(strCategory: "valueTable", strName: "...各种动作"))修改 library.xml 中 valueTables/library/table 元素，实现对一个分馆的值列表修改的功能。
 
+这个功能也有一些特殊性，因为 SetSystemParameter() API 只有三个输入参数，不方便表达(值列表从属的)馆代码这个信息。
+只能在 strValue 参数值提交的 XML 结构中想办法。实现了两种方法：
 
+1) 在 table 元素中使用 libraryCode 属性，表达希望修改针对的馆代码；
+例子：
+    <table libraryCode="海淀分馆" name="location" dbname="">xxx1,xxx2,xxx3</table>
+
+2) 为 table 元素的父级增加一个 library 元素，并用 code 属性表达希望修改针对的馆代码。
+例子：
+<library code="海淀分馆">
+    <table libraryCode="海淀分馆" name="location" dbname="">xxx1,xxx2,xxx3</table>
+</library>
+
+注意无论是 table 元素的 libraryCode 属性，还是增加的 library 元素，都是用于表达馆代码，是一种表达方法。这两个结构并不会被增加或者覆盖到 valueTables 元素下级结构中。
+
+原来最早的用法也依然兼容：
+例如：
+    <table name="location" dbname="">xxx1,xxx2,xxx3</table>
+注意这种用法中 table 元素没有 libraryCode 属性，也没有上级 library 元素。因此默认是指馆代码为空的分馆，也就是总馆。
+* */
+//		3.179 (2025/4/27) 对于 SearchCharging() API 的 actions 参数中 "transferIdTo:readarBarcode" 子参数用法，稍早版本是只对 .PatronBarcode 成员起作用，最新版对 .Operator 成员也起作用。
+//                          兑现 SearchCharging() API 的 order 参数值 "descending"
+//                          actions 参数值为空时，表示希望命中所有动作类型的记录。稍早版本这样用会抛出异常
+//      3.180 (2025/5/11) 为 SetUtilInfo() API 的 strAction 增加了 "delete" 功能。注意，如果 strAction 为 "delete" 调用稍早版本的 dp2library，则会被当作创建、修改记录处理
+//      3.181 (2025/5/18) library.xml 中增加 searching 元素。可使用 denyEmptyQueryWord 属性。属性值为 public reader worker 之一或者逗号组合。表示禁止使用空检索词的身份。缺省为空，表示对任何身份都不禁止
+//            (2025/5/20) 此前版本重建检索点后台任务在遇到 keys 检索点配置文件中出现无法识别的 convert 方法名时，并不会报错。这个 bug 已经修正。
+//                          SetEntities() API 在修改册记录的时候，XML 中根元素下若出现 biblio 元素(内含一条书目记录)，并且 biblio 的子元素中包含 dprms:file 元素，册记录根元素的子元素也包含 dprms:file 元素，并且两者之间 id 属性值出现重复，则会报错说 “重复的 dprms:file 元素 id 属性值”。这个 bug 已经修正。

@@ -570,6 +570,23 @@ namespace dp2Circulation
             string strPrefix = "",
             bool bAutoSel = false)
         {
+            return AddPinyinExt(strCfgXml,
+    style,
+    strPrefix,
+    bUseCache ? "useCache" : "");
+        }
+
+        // 2025/5/8
+        // parameters:
+        //      strParameters   autoSel append useCache 的组合。分别表示是否自动选择多音字，是否在已有拼音后面追加拼音，是否使用缓存
+        // return
+        //      -1  出错。包括中断的情况;
+        //      0   正常
+        public virtual int AddPinyinExt(string strCfgXml,
+    PinyinStyle style = PinyinStyle.None,
+    string strPrefix = "",
+    string strParameters = "")
+        {
             string strError = "";
             XmlDocument cfg_dom = new XmlDocument();
             try
@@ -581,6 +598,15 @@ namespace dp2Circulation
                 strError = "strCfgXml装载到XMLDOM时出错: " + ex.Message;
                 goto ERROR1;
             }
+
+            bool bUseCache = StringUtil.IsInList("useCache", strParameters);
+
+            // 2025/5/8
+            bool bAutoSel = false;
+            if (string.IsNullOrEmpty(strParameters) == false)
+                bAutoSel = StringUtil.IsInList("autoSel", strParameters);
+
+            var append = StringUtil.IsInList("append", strParameters);
 
             string strRuleParam = "";
             if (string.IsNullOrEmpty(strPrefix) == false)
@@ -709,7 +735,7 @@ namespace dp2Circulation
 
                                 // 2024/7/30
                                 // 如果遇到已经有拼音子字段了，则不会再加和修改
-                                if (strNextSubfieldName == to)
+                                if (append && strNextSubfieldName == to)
                                     continue;
 
                                 string strSubfieldPrefix = "";  // 当前子字段内容本来具有的前缀

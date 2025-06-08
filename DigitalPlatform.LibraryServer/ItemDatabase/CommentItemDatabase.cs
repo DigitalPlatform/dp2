@@ -71,6 +71,7 @@ namespace DigitalPlatform.LibraryServer
             string strAction,
             XmlDocument domExistParam,
             XmlDocument domNewParam,
+            bool outofrangeAsError,
             out string strMergedXml,
             out string strError)
         {
@@ -95,6 +96,7 @@ namespace DigitalPlatform.LibraryServer
 
             bool bChangePartDeniedParam = false;
             // 合并记录
+            // 目前主要是用于合并 dprms:file 元素。其它元素的合并暂时不考虑
             // parameters:
             //      bChangePartDenied   如果本次被设定为 true，则 strError 中返回了关于部分修改的注释信息
             //      domNew  新记录。
@@ -115,6 +117,29 @@ namespace DigitalPlatform.LibraryServer
 
             if (bChangePartDeniedParam)
                 strWarning = strError;
+
+            // 2025/4/21
+            // 检查提交保存的新记录中是否有超出定义范围的元素，如果有则报错返回
+            bool outof_range = false;   // 是否出现了超出定义范围的元素
+            {
+                // 注: 如果提交的内容中出现 operations 等元素，虽然会拒绝保存这部分元素，但不会特意警告
+                List<string> outof_range_elements = LibraryApplication.HasOutOfRangeElements(domNew,
+                    GetAllElements().ToArray());
+                if (outof_range_elements.Count > 0)
+                {
+                    if (outofrangeAsError)
+                    {
+                        strError = $"评注记录中出现了元素 {StringUtil.MakePathList(outof_range_elements)}, 超过定义范围，无法保存 ";
+                        return -1;
+                    }
+                    outof_range = true;
+                    // 2025/3/6
+                    if (string.IsNullOrEmpty(strWarning) == false)
+                        strWarning += "; ";
+                    strWarning += $"超出定义范围的元素 {StringUtil.MakePathList(outof_range_elements)} 在保存时已被忽略";
+                }
+            }
+
 
             var element_table = new List<string>(core_comment_element_names);
 
@@ -238,19 +263,58 @@ unprocessed_element_names.Except(_auto_maintain_comment_element_names)));
             // 修改者不能改变最初的馆代码
             strMergedXml = domExist.OuterXml;
 
-            if (string.IsNullOrEmpty(strWarning) == false)
+            /*
+            if (string.IsNullOrEmpty(strWarning) == false
+                && bChangePartDeniedParam == true)
+            {
+                strError = strWarning;
+                return 1;
+            }
+            */
+
+            bool changed = !AreEqualXml(origin_xml, strMergedXml);
+
+            // 2025/4/20
+            // 合法范围元素有改变；超出合法范围的元素也有改变
+            if (changed == true && outof_range == true)
             {
                 strError = strWarning;
                 return 1;
             }
 
+            if (changed == false)
+            {
+                if (outof_range)
+                {
+                    strError = "全部修改都没有兑现";
+                    if (string.IsNullOrEmpty(strWarning) == false)
+                        strError = $"{strError}({strWarning})";
+                    return 2;
+                }
+
+                {
+                    strError = "前端提交的记录内容和数据库中的记录内容没有变化，没有发生任何修改";
+                    return 3;   // 没有发生任何修改
+                }
+            }
+
+            /*
             if (AreEqualXml(origin_xml, strMergedXml))
             {
                 strError = "没有发生任何修改";
                 return 3;   // 没有发生任何修改
             }
+            */
 
             return 0;
+
+            List<string> GetAllElements()
+            {
+                List<string> range = new List<string>(core_comment_element_names);
+                range.AddRange(_auto_maintain_comment_element_names);
+                range.Add("creator");
+                return range;
+            }
         }
 
         // (派生类必须重载)

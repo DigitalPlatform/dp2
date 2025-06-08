@@ -2132,7 +2132,10 @@ namespace DigitalPlatform.rms
                                 out oldKeys,
                                 out strError);
                             if (nRet == -1)
+                            {
+                                strError = $"构造检索点时出错: {strError}";
                                 return -1;
+                            }
 
                             //oldKeys.Sort();
                             oldKeys.RemoveDup();
@@ -2415,7 +2418,7 @@ namespace DigitalPlatform.rms
                 {
                     // string strMyKey;
                     nRet = keysCfg.ConvertKeyWithNumberNode(
-                                    null, // 2025/2/27
+                        null, // 2025/2/27
                         null,
                         strKeyValue,
                         new List<XmlElement>{ nodeConvertQueryNumber},

@@ -84,28 +84,25 @@ namespace dp2Circulation
         /// </summary>
         public object Tag = null;   // 
 
-        // public string Xml = ""; // 
-        // string m_strXml = "";
-
         /// <summary>
-        /// 获得期记录的 XML 字符串
+        /// 获得(用于 SetIssues() API 保存)期记录的 XML 字符串
         /// </summary>
         public string Xml
         {
             get
             {
-                if (dom != null)
-                    return dom.OuterXml;
-
-                return "";
-                // return m_strXml;
+                if (dom == null || dom.DocumentElement == null)
+                    return "";
+                {
+                    // 2025/4/29
+                    // 删除临时存储记录路径用的 recPath 元素
+                    XmlDocument temp = new XmlDocument();
+                    temp.LoadXml(dom.OuterXml);
+                    DomUtil.DeleteElement(temp.DocumentElement,
+                        IssueControl._tempRecPathElementName);
+                    return temp.OuterXml;
+                }
             }
-            /*
-            set
-            {
-                m_strXml = value;
-            }
-             * */
         }
 
         internal XmlDocument dom = null;
@@ -217,13 +214,14 @@ namespace dp2Circulation
         }
 
         // 期记录路径。依靠 XML 记录中的 recPath 元素
+        // 这是期记录 XML 在记到控件中临时需要的元素，在提交保存到 dp2library 之前注意删除这个元素
         string RecPath
         {
             get
             {
                 if (this.dom == null)
                     return "";
-                return DomUtil.GetElementText(this.dom.DocumentElement, "recPath");
+                return DomUtil.GetElementText(this.dom.DocumentElement, IssueControl._tempRecPathElementName);
             }
         }
 

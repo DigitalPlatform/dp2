@@ -667,7 +667,7 @@
             this.toolStripButton_marcEditor_save.Name = "toolStripButton_marcEditor_save";
             this.toolStripButton_marcEditor_save.Size = new System.Drawing.Size(40, 32);
             this.toolStripButton_marcEditor_save.Text = "保存书目记录(不保存册信息)";
-            this.toolStripButton_marcEditor_save.ToolTipText = "保存书目记录(不保存册信息) Ctrl+S";
+            this.toolStripButton_marcEditor_save.ToolTipText = "保存书目记录(不保存册信息) Alt+S";
             this.toolStripButton_marcEditor_save.Click += new System.EventHandler(this.toolStripButton_marcEditor_save_Click);
             // 
             // toolStripSplitButton_loadBiblioTemplate
@@ -873,7 +873,7 @@
             // 
             this.MenuItem_marcEditor_getSummary.Name = "MenuItem_marcEditor_getSummary";
             this.MenuItem_marcEditor_getSummary.Size = new System.Drawing.Size(446, 40);
-            this.MenuItem_marcEditor_getSummary.Text = "查看书目记录摘要(&S)";
+            this.MenuItem_marcEditor_getSummary.Text = "查看书目记录摘要和 table 格式(&S)";
             this.MenuItem_marcEditor_getSummary.Click += new System.EventHandler(this.MenuItem_marcEditor_getSummary_Click);
             // 
             // MenuItem_marcEditor_editMacroTable

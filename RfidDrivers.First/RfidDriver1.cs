@@ -4338,7 +4338,7 @@ out Reader reader);
                                     continue;
                                 }
 
-                                pc.AFI = enable ? 0x07 : 0xc2;
+                                pc.AFI = enable ? (byte)0x07 : (byte)0xc2;
                                 var new_pc_bytes = UhfUtility.EncodePC(pc);
 
                                 Debug.Assert(new_pc_bytes.Length == 2);

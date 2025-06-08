@@ -361,7 +361,7 @@ namespace dp2Circulation
                 if (x >= 0)
                     strColumnName = this.listView.Columns[x].Text;
             }
-            menuItem = new MenuItem("自动复制列 '" + strColumnName + "' (&V)");
+            menuItem = new MenuItem("自动填充列 '" + strColumnName + "' (&V)");
             menuItem.Click += new System.EventHandler(this.menu_autoCopyColumn_Click);
             if (bHasBillioLoaded == false
                 || hittest_info.Item == null
@@ -679,7 +679,8 @@ namespace dp2Circulation
             MessageBox.Show(this, strError);
         }
 
-        // 自动复制列
+        // 自动填充列
+        // 功能说明: 操作选定行的时候，至少选定两行。第一行的此列内容会作为源内容，填入到其它行的同一列。注意“其它行”具体来说是选定的行范围中，此列内容为空的，才会填充进入。操作前已经不为空的，则不会填入。
         void menu_autoCopyColumn_Click(object sender, EventArgs e)
         {
             // bool bOldChanged = this.Changed;

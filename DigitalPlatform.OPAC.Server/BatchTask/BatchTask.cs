@@ -399,7 +399,7 @@ namespace DigitalPlatform.OPAC.Server
             catch (Exception ex)
             {
                 string strErrorText = "StartWorkerThread() 出现异常: " + ExceptionUtil.GetDebugText(ex);
-                this.App.WriteErrorLog(strErrorText);
+                OpacApplication.WriteErrorLog(strErrorText);
 
                 try
                 {
@@ -682,7 +682,7 @@ StackTrace:    在 System.Runtime.InteropServices.SafeHandle.DangerousAddRef(Boo
                         OpacApplication.WriteWindowsLog("BatchTask俘获了ThreadAbortException异常", EventLogEntryType.Information);
                          * */
                         this.App.Save(null, false);    // 触发保存
-                        this.App.WriteErrorLog("刚才是ThreadAbortException触发了配置文件保存");
+                        OpacApplication.WriteInfoLog("刚才是ThreadAbortException触发了配置文件保存");
                         break;
                     }
 
@@ -715,7 +715,7 @@ StackTrace:    在 System.Runtime.InteropServices.SafeHandle.DangerousAddRef(Boo
                 string strErrorText = "BatchTask工作线程出现异常: " + ExceptionUtil.GetDebugText(ex);
                 try
                 {
-                    this.App.WriteErrorLog(strErrorText);
+                    OpacApplication.WriteErrorLog(strErrorText);
                 }
                 catch
                 {

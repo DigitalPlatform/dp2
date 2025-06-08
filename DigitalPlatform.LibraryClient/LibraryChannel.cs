@@ -2545,6 +2545,136 @@ out strError);
             }
         }
 
+        // 2025/4/22
+        // 将参考 ID 列表转换为证条码号列表
+        //      strBarcodeList    [out] 返回证条码号列表
+        public int ConvertRefIdListToReaderBarcodeList(
+    string strRefIdList,
+    out string strBarcodeList,
+    out string strError)
+        {
+            strError = "";
+            strBarcodeList = strRefIdList;
+
+            List<string> barcode_results = new List<string>();
+
+            // 切割出单个的参考 ID
+            string[] refids = strRefIdList.Split(new char[] { ',' });
+            foreach (var strRefIdString in refids)
+            {
+                if (string.IsNullOrEmpty(strRefIdString))
+                    continue;
+
+                if (strRefIdString.StartsWith("@refID:") == false)
+                {
+                    barcode_results.Add(strRefIdString);
+                    continue;
+                }
+
+                var ret = this.GetReaderInfo(
+                    null,
+                    strRefIdString,
+                    "barcode",
+                    out string[] results,
+                    out string strOutputReaderRecPath,
+                    out byte[] item_timestamp,
+                    out strError);
+                if (ret == 0)
+                {
+                    strError = "读者证条码号 '" + strRefIdString + "' 不存在";
+                    return -1;
+                }
+                if (ret == -1)
+                {
+                    strError = $"读入读者记录 '{strRefIdString}' 时发生错误: {strError}";
+                    return -1;
+                }
+
+                if (results == null || results.Length == 0)
+                {
+                    strError = $"读者证条码号 '{strRefIdString}' 检索读者记录时 results 返回空";
+                    return -1;
+                }
+
+                barcode_results.Add(results[0]);
+            }
+
+            strBarcodeList = StringUtil.MakePathList(barcode_results);
+            return 0;
+        }
+
+        // 2025/4/22
+        // 将参考 ID 列表转换为册条码号列表
+        //      strRefIdList        [in] 逗号间隔的参考 ID 列表。每个号码前方可以有一个感叹号。变换后 strBarcodeList 中的感叹号保持不变
+        //      strBarcodeList    [out] 返回册条码号列表
+        public int ConvertRefIdListToItemBarcodeList(
+    string strRefIdList,
+    out string strBarcodeList,
+    out string strError)
+        {
+            strError = "";
+            strBarcodeList = strRefIdList;
+
+            List<string> barcode_results = new List<string>();
+
+            // 切割出单个的参考 ID
+            string[] refids = strRefIdList.Split(new char[] { ',' });
+            foreach (var strRefIdString in refids)
+            {
+                if (string.IsNullOrEmpty(strRefIdString))
+                    continue;
+
+                string prefix = "";
+                string id = strRefIdString;
+                if (strRefIdString.StartsWith("!"))
+                {
+                    prefix = "!";
+                    id = strRefIdString.Substring(1);
+                }
+
+
+                if (id.StartsWith("@refID:") == false)
+                {
+                    barcode_results.Add(strRefIdString);
+                    continue;
+                }
+
+                var ret = this.GetItemInfo(
+                    null,
+                    id,
+                    "barcode",
+                    out string barcode,
+                    "",
+                    out _,
+                    out strError);
+                if (ret == -1)
+                {
+                    strError = $"册条码号 '{id}' 检索册记录时出错: {strError}";
+                    return -1;
+                }
+                if (ret == 0)
+                {
+                    strError = $"册条码号 '{id}' 检索册记录时没有找到: {strError}";
+                    return -1;
+                }
+                if (ret > 1)
+                {
+                    strError = $"册条码号 '{id}' 检索册记录时命中多于一条 ({ret})";
+                    return -1;
+                }
+
+                // 2025/4/25
+                if (string.IsNullOrEmpty(barcode))
+                    barcode = id;
+
+                barcode_results.Add(prefix + barcode);
+            }
+
+            strBarcodeList = StringUtil.MakePathList(barcode_results);
+            return 0;
+        }
+
+
         // TODO: 可以增加一个时间参数，在特定时间范围内看次数。超过这一段时间后，重新计算次数。也就是说防范短期内密集重复登录
         int _loginCount = 0;
 

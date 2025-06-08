@@ -1,12 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-    <col title="ISBN中出版社部分">
-        <xpath>/r/@i</xpath>
-    </col>
-    <col title="102值">
-        <xpath>/r/@v102</xpath>
-    </col>
-    <col title="210值">
-        <xpath>/r/@v210</xpath>
-    </col>
+	<col title="ISBN中出版社部分">
+		<xpath>/r/@i</xpath>
+	</col>
+	<col title="出版地">
+		<xpath>/r/@city</xpath>
+	</col>
+	<col title="102值">
+		<xpath>/r/@v102</xpath>
+	</col>
+	<col title="210值">
+		<xpath>/r/@v210</xpath>
+	</col>
 </root>

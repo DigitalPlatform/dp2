@@ -66,7 +66,7 @@ namespace DigitalPlatform.OPAC.Server
                 {
                     string strErrorText = "从文件中获取 " + strMonitorName + " 每日启动时间时发生错误: " + strError;
                     this.AppendResultText(strErrorText + "\r\n");
-                    this.App.WriteErrorLog(strErrorText);
+                    OpacApplication.WriteErrorLog(strErrorText);
                     return;
                 }
 
@@ -87,7 +87,7 @@ namespace DigitalPlatform.OPAC.Server
                 {
                     string strErrorText = "获取 " + strMonitorName + " 每日启动时间时发生错误: " + strError;
                     this.AppendResultText(strErrorText + "\r\n");
-                    this.App.WriteErrorLog(strErrorText);
+                    OpacApplication.WriteErrorLog(strErrorText);
                     if (nRet == -2)
                     {
                         WriteLastTime(strMonitorName, "");
@@ -113,7 +113,7 @@ namespace DigitalPlatform.OPAC.Server
                     }
                 }
 
-                this.App.WriteErrorLog((bPerDayStart == true ? "(定时)" : "(不定时)") + strMonitorName + " 启动。");
+                OpacApplication.WriteInfoLog((bPerDayStart == true ? "(定时)" : "(不定时)") + strMonitorName + " 启动。");
             }
 
             this.AppendResultText("开始新一轮循环\r\n");
@@ -222,7 +222,7 @@ namespace DigitalPlatform.OPAC.Server
                     if (bDone == false)
                     {
                         string strErrorText = "队列事项 '" + strLine + "' 因为发生错误 '" + strError + "' 而不得不删除(避免短时间内反复重做)...";
-                        this.App.WriteErrorLog(strErrorText);
+                        OpacApplication.WriteErrorLog(strErrorText);
                     }
                 }
             }
@@ -237,7 +237,7 @@ namespace DigitalPlatform.OPAC.Server
                 WriteLastTime(strMonitorName,
                     strLastTime);
                 string strErrorText = (bPerDayStart == true ? "(定时)" : "(不定时)") + strMonitorName + "结束。共处理记录 " + nTotalRecCount.ToString() + " 个。";
-                this.App.WriteErrorLog(strErrorText);
+                OpacApplication.WriteInfoLog(strErrorText);
 
             }
 
@@ -247,7 +247,7 @@ namespace DigitalPlatform.OPAC.Server
             ERROR1:
             AppendResultText("CacheBuilder thread error : " + strError + "\r\n");
             this.SetProgressText("CacheBuilder thread error : " + strError);
-            this.App.WriteErrorLog("CacheBuilder thread error : " + strError + "\r\n");
+            OpacApplication.WriteErrorLog("CacheBuilder thread error : " + strError + "\r\n");
             return;
         }
 

@@ -1024,7 +1024,7 @@ out string strError)
                     owner,
                     strHanzi,
                     style,
-                    bAutoSel? "auto,first" : "auto",
+                    bAutoSel ? "auto,first" : "auto",
                     out strPinyin,
                     out strError);
             }
@@ -1038,66 +1038,7 @@ out string strError)
 
             return 1;
         }
-#if NO
-        // 包装后的 汉字到拼音 函数
-        // parameters:
-        // return:
-        //      -1  出错
-        //      0   用户中断选择
-        //      1   成功
-        public int HanziTextToPinyin(string strHanzi,
-            bool bAutoSel,
-            PinyinStyle style,  // PinyinStyle.None,
-            out string strPinyin,
-            out string strError)
-        {
-            strError = "";
-            strPinyin = "";
-            int nRet = 0;
 
-            // 把字符串中的汉字和拼音分离
-            // return:
-            //      -1  出错
-            //      0   用户希望中断
-            //      1   正常
-            if (string.IsNullOrEmpty(this.PinyinServerUrl) == true
-               || this.ForceUseLocalPinyinFunc == true)
-            {
-                nRet = this.HanziTextToPinyin(
-                    this,
-                    true,	// 本地，快速
-                    strHanzi,
-                    style,
-                    out strPinyin,
-                    out strError);
-            }
-            else
-            {
-                // 汉字字符串转换为拼音
-                // 如果函数中已经MessageBox报错，则strError第一字符会为空格
-                // return:
-                //      -1  出错
-                //      0   用户希望中断
-                //      1   正常
-                nRet = this.SmartHanziTextToPinyin(
-                    this,
-                    strHanzi,
-                    style,
-                    bAutoSel,
-                    out strPinyin,
-                    out strError);
-            }
-            if (nRet == -1)
-                return -1;
-            if (nRet == 0)
-            {
-                strError = "用户中断。拼音子字段内容可能不完整。";
-                return 0;
-            }
-
-            return 1;
-        }
-#endif
         // 兼容以前接口
         public int AddPinyin(
     MarcRecord record,
@@ -1141,6 +1082,29 @@ out string strError)
             string strPrefix = "",
             bool bAutoSel = false)
         {
+            return AddPinyin(
+            record,
+            strCfgXml,
+            func_process,
+            style,
+            strPrefix = "",
+            bAutoSel ? "autoSel" : "");
+        }
+
+        // 2025/5/8
+        // parameters:
+        //      strParameters   autoSel append 之一或者两者的组合。分别表示是否自动选择多音字，是否在已有拼音后面追加拼音
+        // return
+        //      -1  出错。包括中断的情况;
+        //      0   正常
+        public int AddPinyin(
+            MarcRecord record,
+            string strCfgXml,
+            delegate_processPinyin func_process,
+            PinyinStyle style = PinyinStyle.None,
+            string strPrefix = "",
+            string strParameters = "")
+        {
             string strError = "";
             XmlDocument cfg_dom = new XmlDocument();
             try
@@ -1153,6 +1117,7 @@ out string strError)
                 goto ERROR1;
             }
 
+
             string strRuleParam = "";
             if (string.IsNullOrEmpty(strPrefix) == false)
             {
@@ -1163,6 +1128,13 @@ out string strError)
                     strRuleParam = strCmd.Substring(3);
                 }
             }
+
+            // 2025/5/8
+            bool bAutoSel = false;
+            if (string.IsNullOrEmpty(strParameters) == false)
+                bAutoSel = StringUtil.IsInList("autoSel", strParameters);
+
+            var append = StringUtil.IsInList("append", strParameters);
 
             MarcNodeList fields = record.select("field");
 
@@ -1246,10 +1218,16 @@ out string strError)
                             if (DetailHost.ContainHanzi(strHanzi) == false)
                                 continue;
 
-                            // TODO: 如果当前子字段后面紧挨着一个目标子字段，则表明不需要加拼音了
+                            // 如果当前子字段后面紧挨着一个目标子字段，则表明不需要加拼音了
                             var next_sibling = GetNextSibling(subfield, to);
-                            if (next_sibling != null)
+                            if (append && next_sibling != null)
                                 continue;
+
+                            /*
+                            // 2025/5/9
+                            if (next_sibling != null)
+                                next_sibling.detach();
+                            */
 
                             string strSubfieldPrefix = "";  // 当前子字段内容本来具有的前缀
 
@@ -1336,7 +1314,10 @@ out string strError)
                                     continue;
                             }
 
-                            subfield.after(MarcQuery.SUBFLD + to + strContent);   // strPinyin
+                            if (next_sibling != null)   // 2025/5/9
+                                next_sibling.Content = strContent;
+                            else
+                                subfield.after(MarcQuery.SUBFLD + to + strContent);   // strPinyin
                         }
                     }
                 }

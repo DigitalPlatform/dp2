@@ -768,11 +768,13 @@ TaskScheduler.Default);
         {
             string strError = "";
 
+            /*
             if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.157") < 0)
             {
                 strError = $"交费窗要求所连接的 dp2library 为 3.157 版及以上(但当前为 {Program.MainForm.ServerVersion})";
                 goto ERROR1;
             }
+            */
 
             // this.StopFillSummary();
             StopFillAmercing(false);

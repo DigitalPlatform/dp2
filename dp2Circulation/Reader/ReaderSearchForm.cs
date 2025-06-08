@@ -3525,7 +3525,7 @@ stop,
         /// <summary>
         /// 向浏览框末尾新加入一行
         /// </summary>
-        /// <param name="strBarcode">证条码号</param>
+        /// <param name="strBarcode">证条码号。注意 strBarcode 内容可能为 "R0000001 @refID:xxxx" 形态</param>
         /// <returns>新创建的 ListViewItem 对象</returns>
         public ListViewItem AddBarcodeToBrowseList(string strBarcode)
         {
@@ -3539,6 +3539,8 @@ stop,
             return item;
         }
 
+        // parameters:
+        //      strBarcode  注意 strBarcode 内容可能为 "R0000001 @refID:xxxx" 形态
         bool FillLineByBarcode(string strBarcode,
     ListViewItem item)
         {
@@ -3632,12 +3634,25 @@ stop,
 #endif
 
         // 根据读者证条码号，检索出其册记录路径
+        // parameters:
+        //      strBarcode  注意 strBarcode 内容可能为 "R0000001 @refID:xxxx" 形态
         int SearchRecPathByBarcode(string strBarcode,
             out string strReaderRecPath,
             out string strError)
         {
             strError = "";
             strReaderRecPath = "";
+
+            // 2025/4/21
+            if (string.IsNullOrEmpty(strBarcode)
+                || string.IsNullOrWhiteSpace(strBarcode))
+            {
+                strError = "SearchRecPathByBarcode() 的 strBarcode 参数值证条码号不能为空";
+                return -1;
+            }
+
+            // 2025/4/21
+            strBarcode = TryGetRefIdPart(strBarcode);
 
             LibraryChannel channel = this.GetChannel();
             try
@@ -3663,6 +3678,31 @@ stop,
                 this.ReturnChannel(channel);
             }
         }
+
+        // 优先取空格两侧的内容为 @refID: 打头的
+        static string TryGetRefIdPart(string text)
+        {
+            if (string.IsNullOrEmpty(text) == true || string.IsNullOrWhiteSpace(text))
+                return "";
+
+            List<string> others = new List<string>();
+
+            // 2025/4/18
+            // 如果 strBorrower 内容中间存在空格，则优先取空格两侧的内容为 @refID: 打头的
+            var parts = StringUtil.ParseTwoPart(text, " ");
+            foreach (var part in parts)
+            {
+                if (string.IsNullOrEmpty(part) || string.IsNullOrWhiteSpace(part))
+                    continue;
+                if (part.StartsWith("@refID:") == true)
+                    return part;
+                others.Add(part);
+            }
+            if (others.Count == 0)
+                return "";
+            return others[0];
+        }
+
 
         // 从记录路径文件中导入
         void menu_importFromRecPathFile_Click(object sender, EventArgs e)
@@ -8068,6 +8108,8 @@ dlg.UiState);
 
         // 通用的，遍历和处理读者记录的函数
         // 该函数的弱点是速度慢，优点是能按照特殊风格来获取读者记录
+        // parameters:
+        //      reader_barcodes  读者证条码号列表。注意元素可能是 "R0000001 @refID:xxx" 形态
         // return:
         //      -1  出错。包括用户中断的情况
         //      >=0 实际处理的读者记录数
@@ -8102,7 +8144,7 @@ dlg.UiState);
                     looping.Progress.SetProgressRange(0, reader_barcodes.Count);
 
                 int nReaderIndex = 0;
-                foreach (string strBarcode in reader_barcodes)
+                foreach (string s in reader_barcodes)
                 {
                     Application.DoEvents(); // 出让界面控制权
 
@@ -8112,13 +8154,15 @@ dlg.UiState);
                         return -1;
                     }
 
-                    if (string.IsNullOrEmpty(strBarcode) == true)
+                    string strBarcode = s;
+                    if (string.IsNullOrEmpty(strBarcode)
+                        || string.IsNullOrWhiteSpace(strBarcode))
                         continue;
 
-                    // 获得读者记录
-                    byte[] baTimestamp = null;
-                    string strOutputRecPath = "";
+                    // 2025/4/21
+                    strBarcode = TryGetRefIdPart(strBarcode);
 
+                    // 获得读者记录
                     looping.Progress.SetMessage("正在处理读者记录 " + strBarcode + " ...");
 
                     string[] results = null;
@@ -8129,8 +8173,8 @@ dlg.UiState);
                         "advancexml,advancexml_borrow_bibliosummary,advancexml_overdue_bibliosummary"
                         : strGetReaderInfoStyle, // advancexml_history_bibliosummary
                         out results,
-                        out strOutputRecPath,
-                        out baTimestamp,
+                        out string strOutputRecPath,
+                        out byte[] baTimestamp,
                         out strError);
                     if (lRet == -1)
                     {
@@ -8572,6 +8616,8 @@ dlg.UiState);
             return false;
         }
 
+        // parameters:
+        //      reader_barcodes  读者证条码号列表。注意元素可能是 "R0000001 @refID:xxx" 形态
         // return:
         //      -1  出错
         //      0   用户中断

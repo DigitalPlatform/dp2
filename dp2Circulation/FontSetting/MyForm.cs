@@ -1929,16 +1929,29 @@ out string strError)
             {
                 string strAction = "";
 
+                /*
+        public long SetUtilInfo(
+            DigitalPlatform.Stop stop,
+            string strAction,
+            string strDbName,
+            string strFrom,
+            string strRootElementName,
+            string strKeyAttrName,
+            string strValueAttrName,
+            string strKey,
+            string strValue,
+            out string strError)
+                * */
                 long lRet = channel.SetUtilInfo(
                     looping.Progress,
                     strAction,
                     strDbName,
-                    "ISBN",
-                    "r",
-                    "i",
-                    "v102",
-                    strPublisherNumber,
-                    str102,
+                    "ISBN", // 检索途径
+                    "r",    // 根元素名
+                    "i",    // key 属性名 (ISBN 的首字母) 这个属性名不能改，被 keys 定义为“ISBN”检索点了
+                    "v102", // value 属性名 (v102 表示用于存储 102 信息) 这个属性名可以自由定义，因为 keys 里面没有定义为检索点
+                    strPublisherNumber, // key 值
+                    str102, // value 值
                     out strError);
                 if (lRet == -1)
                     return -1;

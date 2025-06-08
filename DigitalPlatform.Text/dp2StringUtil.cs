@@ -1083,4 +1083,10 @@ out string strNewValue);
         }
     }
 
+
+    public static class KernelServerUtil
+    {
+        // 本地文件目录的虚拟前缀字符串
+        public static string LOCAL_PREFIX = "<kernel>";
+    }
 }

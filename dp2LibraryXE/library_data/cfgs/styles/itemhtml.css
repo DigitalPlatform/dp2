@@ -125,10 +125,12 @@ TABLE.borrowhistory TR.content TD.index
 	border-style: solid;
 }
 
-TABLE.borrowhistory TR.content TD.borrower
-{
-	background-color: whitesmoke;
-}
+	TABLE.borrowhistory TR.content TD.barcode DIV {
+		width: 200px;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
 
 TABLE.borrowhistory TR.content TD.summary
 {

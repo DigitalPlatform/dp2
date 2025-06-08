@@ -333,7 +333,7 @@ namespace dp2LibraryApiTester.TestCase
             // X0000001
             string item_template = @"<root>
 <barcode>{barcode}</barcode>
-<location>阅览室</location>
+<location>流通库</location>
 <bookType>普通</bookType>
 <price>CNY12.00</price>
 <refID>{refID}</refID>
@@ -1429,7 +1429,7 @@ namespace dp2LibraryApiTester.TestCase
             }
 
         ERROR1:
-            DataModel.SetMessage($"Finish() error: {strError}");
+            DataModel.SetMessage($"Finish() error: {strError}", "error");
             return new NormalResult
             {
                 Value = -1,

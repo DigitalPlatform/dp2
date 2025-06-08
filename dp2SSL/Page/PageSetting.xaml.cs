@@ -182,7 +182,7 @@ namespace dp2SSL
                     this.ForgetDialog(dialog);
 
                     if (dialog.Result == "OK")
-                        password = dialog.password.Password;
+                        password = dialog.Password;
                 }
                 finally
                 {
@@ -1385,7 +1385,7 @@ MessageBoxOptions.DefaultDesktopOnly);
         private void detectNetwork_Click(object sender, RoutedEventArgs e)
         {
             // ping dp2003.com
-            var ret = NetUtil.Ping("dp2003.com", out string strInfomation);
+            var ret = NetUtil.Ping("dp2003.com", out string strInformation);
             if (ret == false)
                 App.ErrorBox("检测网络(功能尚未完成)", "网络不通");
             else

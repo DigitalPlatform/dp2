@@ -156,8 +156,8 @@ namespace DigitalPlatform.CirculationClient
                 result = DigitalPlatform.LibraryServer.LibraryServerUtil.LOCAL_PREFIX + result.Substring(DigitalPlatform.LibraryServer.LibraryServerUtil.LOCAL_PREFIX.Length + 1);
 
             // 针对 '~/cfgs' 情况，修正为 '~cfgs'
-            if (result.StartsWith(DigitalPlatform.rms.KernelServerUtil.LOCAL_PREFIX + "/") == true)
-                result = DigitalPlatform.rms.KernelServerUtil.LOCAL_PREFIX + result.Substring(DigitalPlatform.rms.KernelServerUtil.LOCAL_PREFIX.Length + 1);
+            if (result.StartsWith(DigitalPlatform.Text.KernelServerUtil.LOCAL_PREFIX + "/") == true)
+                result = DigitalPlatform.Text.KernelServerUtil.LOCAL_PREFIX + result.Substring(DigitalPlatform.Text.KernelServerUtil.LOCAL_PREFIX.Length + 1);
 
             return result;
         }

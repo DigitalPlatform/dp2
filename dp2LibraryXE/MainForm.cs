@@ -582,19 +582,20 @@ this.Font);
 
         void SetTitle()
         {
+            var test_version = (ClientInfo.IsTestVersion() ? "(测试版)" : "");
             if (this.IsServer == true)
             {
                 if (this.TestMode == true)
-                    this.Text = "dp2Library XE V3 小型服务器 [社区版]";
+                    this.Text = "dp2Library XE V3 小型服务器 [社区版]" + test_version;
                 else
-                    this.Text = "dp2Library XE V3 小型服务器 [专业版]";
+                    this.Text = "dp2Library XE V3 小型服务器 [专业版]" + test_version;
             }
             else
             {
                 if (this.TestMode == true)
-                    this.Text = "dp2Library XE V3 单机 [社区版]";
+                    this.Text = "dp2Library XE V3 单机 [社区版]" + test_version;
                 else
-                    this.Text = "dp2Library XE V3 单机 [专业版]";
+                    this.Text = "dp2Library XE V3 单机 [专业版]" + test_version;
             }
 
             Assembly myAssembly = Assembly.GetAssembly(this.GetType());
@@ -605,6 +606,7 @@ dp2Library XE V3
 dp2 图书馆集成系统 图书馆应用服务器 "
                 + (this.IsServer == false ? "单机" : "小型服务器")
                 + (this.TestMode == false ? " [专业版]" : " [社区版]")
+                + (ClientInfo.IsTestVersion() ? "(测试版)" : "")
                 + "\r\ndp2libraryxe 框架版本: " + Program.ClientVersion
                 +
 @"

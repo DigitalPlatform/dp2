@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -469,6 +471,10 @@ out string error);
     {
         public MarcRecord Record { get; set; }
 
+        // 2025/5/11
+        public Hashtable Table { get; set; }
+
+
         List<VerifyError> _errors = new List<VerifyError>();
 
         public List<VerifyError> Errors
@@ -505,6 +511,53 @@ out string error);
             AddWarning("这是 warning 行");
             AddError("这是 error 行");
             AddSucceed("这是 succeed 行");
+        }
+
+        // 2025/5/7
+        public int IsbnInsertHyphen(string strISBN,
+            string strStyle,
+            out string strTarget,
+            out string strError)
+        {
+            return IsbnSplitter.IsbnInsertHyphen(
+strISBN,
+strStyle,
+out strTarget,
+out strError);
+        }
+
+        // 2025/5/7
+        public static IsbnSplitter IsbnSplitter
+        {
+            get
+            {
+                /*
+                int nRet = Program.MainForm.LoadIsbnSplitter(
+    true,
+    out string strError);
+                if (nRet == -1)
+                    throw new Exception(strError);
+                */
+                return Program.MainForm.IsbnSplitter;
+            }
+        }
+
+        public int CountChar(string text, char ch)
+        {
+            return text.Count(o => o == ch);
+        }
+
+        // 根据指定的符号切割字符串内容为两部分。
+        // 确保返回的 List<string> 集合至少有两个元素。切割时每个部分原有的空格被保留
+        public static List<string> SplitTwoPart(string text,
+            params char[] separator)
+        {
+            var results = text.Split(separator);
+            if (results.Length == 0)
+                return new List<string> { "", "" };
+            if (results.Length == 1)
+                return new List<string> { results[0], "" };
+            return results.ToList();
         }
 
         public void AutoSetIndicator(string field_name,
@@ -683,6 +736,13 @@ out string error);
             return text.Replace(" ", "#");
         }
 
+        public static string DisplayMarc(string marc)
+        {
+            if (marc == null)
+                return marc;
+            return marc.Replace(MarcQuery.SUBFLD, "$");
+        }
+
         // 获得 a?|b?|c? 参数的名字部分。即 a,b,c
         static List<string> GetSubfieldNames(string subfield_properties)
         {
@@ -730,6 +790,7 @@ out string error);
             return null;
         }
 
+        // UNIMARC
         // 校验 423 字段是否和 200$a (第一个以后的)对应
         public void Verify200a423()
         {
@@ -740,7 +801,7 @@ out string error);
                 {
                     var title = subfield.Content;
                     // 423#0$12001#$a...$1701#0$a...
-                    var count = this.Record.select($"field[@name='423' and indicator=' 0']/field[@name='200' and @indicator='1 ']/subfield[@name='a' and @content='{title}']").count;
+                    var count = this.Record.select($"field[@name='423' and @indicator=' 0']/field[@name='200' and @indicator='1 ']/subfield[@name='a' and @content='{title}']").count;
                     if (count == 0)
                         AddError($"200$a{title} 没有找到对应的 423 字段(423#0$12001#$a...)");
                     else if (count > 1)
@@ -749,6 +810,7 @@ out string error);
             }
         }
 
+        // UNIMARC
         /*
 有$d必须要有$z。
 有$d必须有对应的500$a字段或510$a字段。
@@ -809,6 +871,104 @@ out string error);
             }
         }
 
+        bool HideGetCityCodeDialog
+        {
+            get
+            {
+                if (this.Table == null)
+                    return false;
+                var o = this.Table["hideGetCityCodeDialog"];
+                if (o == null)
+                    return false;
+                return (bool)o;
+            }
+            set
+            {
+                if (this.Table == null)
+                    return;
+                this.Table["hideGetCityCodeDialog"] = value;
+            }
+        }
+
+        // UNIMARC
+        // 校验 102$b(地区代码) 和 210$a(出版地) 的对应关系
+        // parameters:
+        //      style   “askInput” 表示如果找不到 city-code 对应关系，需要弹出对话框询问用户
+        public void Verify102b210a(string style)
+        {
+            var sufields_102b = this.Record.select("field[@name='102']/subfield[@name='b']");
+            var sufields_210a = this.Record.select("field[@name='210']/subfield[@name='a']");
+            if (sufields_102b.count != sufields_210a.count)
+            {
+                AddError($"210$a 的个数 {sufields_210a.count} 和 102$b 的个数 {sufields_102b.count} 不一致");
+                return; // 数量不一致时暂不校验对照关系
+            }
+
+            // 校验对照关系
+            for (int i = 0; i < sufields_102b.count; i++)
+            {
+                var subfield_102b = sufields_102b[i] as MarcSubfield;
+                var subfield_210a = sufields_210a[i] as MarcSubfield;
+                var code = subfield_102b.Content;
+                if (string.IsNullOrEmpty(code))
+                {
+                    AddError($"102$b 内容不允许为空");
+                    continue;
+                }
+                if (code.Length != 6)
+                {
+                    AddError($"102$b 内容长度应为 6 字符");
+                    continue;
+                }
+                var city = subfield_210a.Content;
+                if (string.IsNullOrEmpty(city))
+                {
+                    AddError($"210$a 内容不允许为空");
+                    continue;
+                }
+
+                if (HideGetCityCodeDialog)
+                    StringUtil.SetInList(ref style, "askInput", false);
+
+                // result.Value
+                //      -1  出错
+                //      0   没有找到
+                //      1   找到
+                var result = GetCityCode(city,
+            style,
+            code,
+            out string result_string);
+                if (result.Value == -1)
+                {
+                    if (result.ErrorCode == "hide")
+                        HideGetCityCodeDialog = true;
+                    AddError($"获取城市 '{city}' 的地区代码时出错: {result.ErrorInfo}。无法验证城市 '{city}' 和地区代码 '{code}' 对应关系的正确性，请注意核实");
+                    continue;
+                }
+                if (result.Value == 0)
+                {
+                    AddWarning($"城市 '{city}' 的地区代码没有找到。无法验证城市 '{city}' 和地区代码 '{code}' 对应关系的正确性，请注意核实");
+                    continue;
+                }
+                if (result.Value == 1)
+                {
+                    var parts = StringUtil.ParseTwoPart(result_string, ":");
+                    var correct_code = parts[1];
+                    if (string.IsNullOrEmpty(correct_code))
+                        correct_code = parts[0];
+                    // 检查对照条目内容正确性
+                    if (correct_code.Length != 6 || StringUtil.IsPureNumber(correct_code) == false)
+                    {
+                        AddError($"从 city-code 库中查得的 '{city}'-->'{result_string}' 条目内容有误，请联系管理员进行处理");
+                        continue;
+                    }
+                    // 210$a 和 102$b 不一致
+                    if (code != correct_code)
+                        AddError($"210$a '{city}' 和 102$b '{code}' 不一致。根据后台数据库信息，'{city}' 的地区代码应为 '{correct_code}'");
+                }
+            }
+        }
+
         // 找到左边的兄弟。但找的过程要越过大写字母名字的子字段或$9
         public static MarcSubfield GetPrevSibling(MarcSubfield current)
         {
@@ -824,6 +984,312 @@ out string error);
             return result;
         }
 
+        // 2025/5/9
+        public static MarcSubfield GetNextSibling(MarcSubfield current)
+        {
+            MarcSubfield result = current.NextSibling as MarcSubfield;
+            while (result != null)
+            {
+                if (char.IsUpper(result.Name[0]) == true
+                    || result.Name[0] == '9')
+                    result = result.NextSibling as MarcSubfield;
+                else
+                    return result;
+            }
+            return result;
+        }
+
+        // 半角标点符号，除 () 外
+        // public static char[] BANJIAO_1 = new char[] { ',', ':', ';', '?', '\"', '<', '>', };
+
+        // 全角标点符号
+        public static char[] QUANJIAO = new char[] { '，', '：', '；', '（', '）' };
+
+        // 0x21 0x2f
+        public static List<char> FindBanjiao(string text, char[] ignore_chars = null)
+        {
+            List<char> results = new List<char>();
+            foreach (char ch in text)
+            {
+                if (ch >= 0x21 && ch <= 0x7e && char.IsLetterOrDigit(ch) == false)
+                {
+                    if (ignore_chars != null && ignore_chars.Contains(ch))
+                        continue;
+                    results.Add(ch);
+                }
+            }
+
+            return results;
+        }
+
+        public static string DisplayChars(IEnumerable<char> chars, string sep = " ")
+        {
+            var results = new StringBuilder();
+            foreach (var ch in chars)
+            {
+                if (results.Length > 0)
+                    results.Append(sep);
+                results.Append($"'{ch}'");
+            }
+
+            return results.ToString();
+        }
+
+        // 获得用于 102$a$b 的出版地代码。
+        // 代码值 "CN:110000" 是完整状态。
+        // 如果代码值为 "110000"，保存到数据库的时候自动转换为 "CN:110000" (也就是说默认中国)
+        /* UNIMARC 相关字段如下:
+         * 102  ǂaCNǂb110000
+         * 210  ǂa北京ǂc科学出版社ǂd2023
+         * */
+        // parameters:
+        //      style   风格。如果包含 "askInput" 表示如果没有找到对应的城市代码，则询问用户输入
+        // result.Value
+        //      -1  出错
+        //      0   没有找到
+        //      1   找到
+        public static NormalResult GetCityCode(string city,
+            string style,
+            string default_code,
+            out string code)
+        {
+            code = "";
+            string strDbName = Program.MainForm.GetUtilDbName("publisher");
+
+            if (String.IsNullOrEmpty(strDbName) == true)
+            {
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = "当前连接的 dp2library 服务器尚未定义 publisher 类型的实用库名"
+                };
+            }
+
+            var channel = Program.MainForm.GetChannel();
+            var old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromSeconds(10);
+            try
+            {
+                long ret = channel.GetUtilInfo(
+                null,
+                "", // action
+                strDbName,
+                CITY_FROM, // 检索途径
+                $"{CITY_KEY_PREFIX}{city}", // key 值
+                CITY_CODE_VALUE_ATTR_NAME, // value 属性名 (v102 表示用于存储 102 信息) 这个属性名可以自由定义，因为 keys 里面没有定义为检索点
+                out code,
+                out string error);
+                /*
+                        public long GetUtilInfo(
+            DigitalPlatform.Stop stop,
+            string strAction,
+            string strDbName,
+            string strFrom,
+            string strKey,
+            string strValueAttrName,
+            out string strValue,
+            out string strError)
+                */
+                if (ret == -1)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = error,
+                        ErrorCode = channel.ErrorCode.ToString()
+                    };
+                // TODO: 专门实现一个对话框，具有 checkbox “下次不再显示本对话框”
+                if (ret == 0 && StringUtil.IsInList("askInput", style))
+                {
+                REDO_INPUT:
+                    var input_code = InputDlg.GetInput(Program.MainForm,
+                        $"地区代码没有找到，请输入",
+                        $"'{city}' 的地区代码(6字符):",
+                        default_code,
+                        Program.MainForm.Font);
+                    if (input_code == null)
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = error,
+                            ErrorCode = "inputCancelled"
+                        };
+                    // 返回命令，表示希望此后不再询问
+                    if (input_code == "hide" || input_code == "dont ask")
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"出版地 '{city}' 的地区代码在出版者数据库中没有找到。弹出对话框询问后，操作者选择后继不再弹出此对话框",
+                            ErrorCode = "hide"
+                        };
+#if REMOVED
+                    string country = "CN";
+                    if (input_code.Contains(":"))
+                    {
+                        // 如果包含冒号，表示用户输入了完整的代码
+                        var parts = input_code.Split(new char[] { ':' });
+                        if (parts.Length == 2)
+                        {
+                            country = parts[0].Trim();
+                            code = parts[1].Trim();
+                        }
+                        else
+                            code = input_code.Trim();
+                    }
+                    else
+                    {
+                        code = input_code;
+                    }
+
+                    List<string> errors = new List<string>();
+                    if (country.Length != 2 || country.Where(o => char.IsUpper(o) == false).Count() > 0)
+                    {
+                        errors.Add($"国家代码 '{country}' 不正确。应为 2 字符大写字母。");
+                    }
+
+                    if (code.Length != 6 || StringUtil.IsPureNumber(code) == false)
+                    {
+                        errors.Add($"地区代码 '{code}' 不正确。应为 6 字符数字。");
+                    }
+#endif
+                    List<string> errors = VerifyCityCode(input_code,
+            out string long_code);
+
+                    if (errors.Count > 0)
+                    {
+                        MessageBox.Show(Program.MainForm, $"{StringUtil.MakePathList(errors, "\r\n")}\r\n\r\n请重新输入\r\n\r\n(若希望不再显示，可输入 hide)");
+                        goto REDO_INPUT;
+                    }
+
+                    code = input_code;
+                    // 保存到服务器
+                    var save_result = SetCityCode(city, long_code);
+                    if (save_result.Value == -1)
+                        return save_result;
+
+                    return new NormalResult
+                    {
+                        Value = 0,
+                        ErrorCode = "input"
+                    };
+                }
+
+                if (ret == 0)
+                    return new NormalResult
+                    {
+                        Value = 0,
+                        ErrorInfo = $"出版社 '{city}' 的地区代码没有找到"
+                    };
+
+                return new NormalResult { Value = 1 };
+            }
+            finally
+            {
+                channel.Timeout = old_timeout;
+                Program.MainForm.ReturnChannel(channel);
+            }
+        }
+
+        public static List<string> VerifyCityCode(string input_code,
+            out string long_code)
+        {
+            long_code = input_code;
+            string country = "CN";
+            string code = "";
+            if (input_code.Contains(":"))
+            {
+                // 如果包含冒号，表示用户输入了完整的代码
+                var parts = input_code.Split(new char[] { ':' });
+                if (parts.Length == 2)
+                {
+                    country = parts[0].Trim();
+                    code = parts[1].Trim();
+                }
+                else
+                    code = input_code.Trim();
+            }
+            else
+            {
+                code = input_code;
+            }
+
+            List<string> errors = new List<string>();
+            if (country.Length != 2 || country.Where(o => char.IsUpper(o) == false).Count() > 0)
+            {
+                errors.Add($"国家代码 '{country}' 不正确。应为 2 字符大写字母");
+            }
+
+            if (code.Length != 6 || StringUtil.IsPureNumber(code) == false)
+            {
+                errors.Add($"地区代码 '{code}' 不正确。应为 6 字符数字");
+            }
+
+            if (errors.Count == 0)
+            {
+                long_code = country + ":" + code;
+                Debug.Assert(long_code.Length == 2 + 1 + 6);
+            }
+            return errors;
+        }
+
+        public const string CITY_KEY_PREFIX = ""; // key 前缀
+        public const string CITY_CODE_VALUE_ATTR_NAME = "v102"; // value 属性名 (v102 表示用于存储 102 信息) 这个属性名可以自由定义，因为 keys 里面没有定义为检索点
+        public const string CITY_FROM = "出版地"; // 检索途径名
+        public const string CITY_KEY_ATTR_NAME = "city"; // key 属性名
+
+        // 设置(修改或创建)城市代码
+        public static NormalResult SetCityCode(string city, string code)
+        {
+            string strDbName = Program.MainForm.GetUtilDbName("publisher");
+
+            if (String.IsNullOrEmpty(strDbName) == true)
+            {
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = "当前连接的 dp2library 服务器尚未定义 publisher 类型的实用库名"
+                };
+            }
+
+            // “CN:110000”
+            if (code.Length != 2 + 1 + 6)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"地区代码 '{code}' 格式不正确"
+                };
+
+            var channel = Program.MainForm.GetChannel();
+            var old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromSeconds(10);
+            try
+            {
+                var ret = channel.SetUtilInfo(
+                null,
+                "", // action
+                strDbName,
+                CITY_FROM, // 检索途径
+                "r",    // 根元素名
+                CITY_KEY_ATTR_NAME,    // key 属性名 (ISBN 的首字母) 这个属性名不能改，被 keys 定义为“ISBN”检索点了
+                CITY_CODE_VALUE_ATTR_NAME, // value 属性名 这个属性名可以自由定义，因为 keys 里面没有定义为检索点
+                $"{CITY_KEY_PREFIX}{city}", // key 值
+                code, // value 值
+                out string error);
+                if (ret == -1)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = error,
+                        ErrorCode = channel.ErrorCode.ToString()
+                    };
+
+                return new NormalResult();
+            }
+            finally
+            {
+                channel.Timeout = old_timeout;
+                Program.MainForm.ReturnChannel(channel);
+            }
+        }
     }
 
 
@@ -1854,7 +2320,7 @@ ref string locationString)
             if (rule == "CALIS" || string.IsNullOrEmpty(rule))
             {
                 var subfields = record.select("field/subfield");
-                foreach(MarcSubfield subfield in subfields)
+                foreach (MarcSubfield subfield in subfields)
                 {
                     if (char.IsUpper(subfield.Name[0]))
                         subfield.detach();

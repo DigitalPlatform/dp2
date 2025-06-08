@@ -254,10 +254,10 @@ DomUtil.GetAttr(this.XmlNode,
 
             // initial result info
             /*
-            this.textBox_initializeInfomation.Text = DomUtil.GetAttr(this.XmlNode,
+            this.textBox_initializeInformation.Text = DomUtil.GetAttr(this.XmlNode,
                 "extraInfo");
              * */
-            this.textBox_initializeInfomation.Text = InitialResultInfo;
+            this.textBox_initializeInformation.Text = InitialResultInfo;
 
             // set initial button state
             textBox_homepage_TextChanged(this, null);

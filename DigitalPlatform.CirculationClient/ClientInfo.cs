@@ -103,6 +103,23 @@ namespace DigitalPlatform.CirculationClient
     .CreateLogger();
         }
 
+        public static string GetClickOnceInstallLocation()
+        {
+            if (ApplicationDeployment.IsNetworkDeployed &&
+ApplicationDeployment.CurrentDeployment != null)
+                return ApplicationDeployment.CurrentDeployment.UpdateLocation.ToString();
+            return "";
+        }
+
+
+        public static bool IsTestVersion()
+        {
+            if (ApplicationDeployment.IsNetworkDeployed &&
+    ApplicationDeployment.CurrentDeployment != null)
+                return ApplicationDeployment.CurrentDeployment.UpdateLocation.ToString().Contains("_dev");
+            return false;
+        }
+
         // return:
         //      true    不检查序列号
         public delegate bool Delegate_skipSerialNumberCheck();

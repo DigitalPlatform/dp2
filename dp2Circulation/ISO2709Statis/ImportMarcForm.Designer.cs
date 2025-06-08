@@ -317,17 +317,17 @@
             this.tabPage_runImport.Name = "tabPage_runImport";
             this.tabPage_runImport.Size = new System.Drawing.Size(756, 476);
             this.tabPage_runImport.TabIndex = 3;
-            this.tabPage_runImport.Text = " 执行统计 ";
+            this.tabPage_runImport.Text = " 执行导入 ";
             this.tabPage_runImport.UseVisualStyleBackColor = true;
             // 
             // progressBar_records
             // 
             this.progressBar_records.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressBar_records.Location = new System.Drawing.Point(0, 296);
+            this.progressBar_records.Location = new System.Drawing.Point(4, 454);
             this.progressBar_records.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.progressBar_records.Name = "progressBar_records";
-            this.progressBar_records.Size = new System.Drawing.Size(653, 19);
+            this.progressBar_records.Size = new System.Drawing.Size(748, 19);
             this.progressBar_records.TabIndex = 1;
             // 
             // webBrowser1_running
@@ -339,7 +339,7 @@
             this.webBrowser1_running.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.webBrowser1_running.MinimumSize = new System.Drawing.Size(27, 28);
             this.webBrowser1_running.Name = "webBrowser1_running";
-            this.webBrowser1_running.Size = new System.Drawing.Size(653, 264);
+            this.webBrowser1_running.Size = new System.Drawing.Size(748, 425);
             this.webBrowser1_running.TabIndex = 0;
             // 
             // tabPage_print
@@ -372,6 +372,7 @@
             this.Controls.Add(this.tabControl_main);
             this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.Name = "ImportMarcForm";
+            this.ShowIcon = false;
             this.Text = "导入 MARC";
             this.Activated += new System.EventHandler(this.ImportMarcForm_Activated);
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ImportMarcForm_FormClosing);

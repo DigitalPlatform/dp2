@@ -4627,6 +4627,7 @@ LogicChipItem chip)
                     }
 
                     var result = UhfUtility.BuildTag(working_chip,
+                        build_user_bank,
                         true,
                         build_style);
                     if (result.Value == -1)

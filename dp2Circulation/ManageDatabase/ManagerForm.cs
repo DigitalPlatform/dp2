@@ -156,6 +156,12 @@ namespace dp2Circulation
                     {
                         path = path.ToLower().Replace("\\", "/");
                         Program.MainForm.AssemblyCache.Clear(path);
+
+                        // TODO: keys 配置文件修改后，最好自动刷新一次书目查询窗的检索途径列表
+                        if (path.EndsWith("/keys"))
+                        {
+                            Program.MainForm.OnKeysConfigChanged();
+                        }
                     }
                 }
             }

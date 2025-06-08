@@ -4351,6 +4351,7 @@ out strError);
                                     strAction,
                                     domExist,
                                     domNew,
+                                                        false,  //??
                                     out strNewXml,
                                     out strError);
                                 if (nRet == -1)
@@ -12537,6 +12538,7 @@ out error);
 
                     if (bDbNameChanged == true)
                     {
+#if REMOVED
                         nRet = InitialKdbs(
                             channel,    // Channels,
                             out strError);
@@ -12546,6 +12548,15 @@ out error);
                         this.vdbs = null;
                         nRet = this.InitialVdbs(channel,    // Channels,
                             out strError);
+                        if (nRet == -1)
+                        {
+                            this.WriteErrorLog($"*** LogRecover 过程中出现致命错误，请在日志恢复完成后，手动修正故障: {strError}");
+                            return -1;
+                        }
+#endif
+                        nRet = ReloadKdbs(channel,
+            "vdbs",
+            out strError);
                         if (nRet == -1)
                         {
                             this.WriteErrorLog($"*** LogRecover 过程中出现致命错误，请在日志恢复完成后，手动修正故障: {strError}");

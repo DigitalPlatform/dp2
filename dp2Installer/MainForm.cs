@@ -248,7 +248,14 @@ FormWindowState.Normal);
         void DisplayCopyRight()
         {
             AppendString("dp2Installer - dp2 图书馆集成系统 安装实用工具\r\n");
-            AppendString("版本: " + ClientInfo.ClientVersion + "\r\n");
+            AppendString("版本: " + ClientInfo.ClientVersion + " " + (ClientInfo.IsTestVersion() ? "(测试版)" : "") + "\r\n");
+
+            string installUrl = ClientInfo.GetClickOnceInstallLocation();
+            if (string.IsNullOrEmpty(installUrl) == false)
+                installUrl = "\r\n安装地址: " + installUrl;
+            if (string.IsNullOrEmpty(installUrl) == false)
+                AppendString($"{installUrl}\r\n");
+
             AppendString("(C)2015 版权所有 数字平台(北京)软件有限责任公司\r\n"
                 + "2015 年以 Apache License Version 2.0 方式开源\r\n"
                 + "https://github.com/digitalplatform/dp2\r\n");

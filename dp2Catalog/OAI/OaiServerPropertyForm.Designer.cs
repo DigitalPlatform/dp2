@@ -36,7 +36,7 @@ namespace dp2Catalog
             this.button_gotoHomepage = new System.Windows.Forms.Button();
             this.textBox_homepage = new System.Windows.Forms.TextBox();
             this.label16 = new System.Windows.Forms.Label();
-            this.textBox_initializeInfomation = new System.Windows.Forms.TextBox();
+            this.textBox_initializeInformation = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.textBox_baseUrl = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
@@ -91,7 +91,7 @@ namespace dp2Catalog
             this.tabPage_general.Controls.Add(this.button_gotoHomepage);
             this.tabPage_general.Controls.Add(this.textBox_homepage);
             this.tabPage_general.Controls.Add(this.label16);
-            this.tabPage_general.Controls.Add(this.textBox_initializeInfomation);
+            this.tabPage_general.Controls.Add(this.textBox_initializeInformation);
             this.tabPage_general.Controls.Add(this.label4);
             this.tabPage_general.Controls.Add(this.textBox_baseUrl);
             this.tabPage_general.Controls.Add(this.label2);
@@ -134,18 +134,18 @@ namespace dp2Catalog
             this.label16.TabIndex = 6;
             this.label16.Text = "WebÖ÷Ò³(&H):";
             // 
-            // textBox_initializeInfomation
+            // textBox_initializeInformation
             // 
-            this.textBox_initializeInfomation.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            this.textBox_initializeInformation.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_initializeInfomation.Location = new System.Drawing.Point(6, 166);
-            this.textBox_initializeInfomation.Multiline = true;
-            this.textBox_initializeInfomation.Name = "textBox_initializeInfomation";
-            this.textBox_initializeInfomation.ReadOnly = true;
-            this.textBox_initializeInfomation.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_initializeInfomation.Size = new System.Drawing.Size(490, 221);
-            this.textBox_initializeInfomation.TabIndex = 9;
+            this.textBox_initializeInformation.Location = new System.Drawing.Point(6, 166);
+            this.textBox_initializeInformation.Multiline = true;
+            this.textBox_initializeInformation.Name = "textBox_initializeInformation";
+            this.textBox_initializeInformation.ReadOnly = true;
+            this.textBox_initializeInformation.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox_initializeInformation.Size = new System.Drawing.Size(490, 221);
+            this.textBox_initializeInformation.TabIndex = 9;
             // 
             // label4
             // 
@@ -268,7 +268,7 @@ namespace dp2Catalog
         private System.Windows.Forms.Button button_gotoHomepage;
         private System.Windows.Forms.TextBox textBox_homepage;
         private System.Windows.Forms.Label label16;
-        private System.Windows.Forms.TextBox textBox_initializeInfomation;
+        private System.Windows.Forms.TextBox textBox_initializeInformation;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.TextBox textBox_baseUrl;
         private System.Windows.Forms.Label label2;

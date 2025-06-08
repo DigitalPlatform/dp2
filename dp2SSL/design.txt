@@ -254,3 +254,13 @@ SIP 消息处理的类。
 Get 固定长字段的辅助函数，最好用下标来访问。这样即便没有固定长字段定义，也能访问
 
 dp2ssl 端的 SIP 消息日志
+
+~~~
+dp2ssl 在管理员输入密码进入管理界面的时候，应该记入错误日志。管理操作最好都要记入错误日志。
+另外，管理员退出 dp2ssl 也要记入错误日志。
+可以在管理员退出 dp2ssl 的前一瞬间，启动摄像头拍摄一下留下操作者照片。
+
+~~~
+https://www.bilibili.com/opus/794446461839343651
+开启Win11平板模式(视频中任务栏)的教程
+首先：我们打开Windows的搜索(Win+S)，输入“注册表”，使用管理员权限打开注册表编辑器，然后打开如下路径：HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\PriorityControl

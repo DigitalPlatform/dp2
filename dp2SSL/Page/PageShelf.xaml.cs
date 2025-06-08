@@ -2255,7 +2255,7 @@ DateTime.Now);
                     this.ForgetDialog(dialog);
 
                     if (dialog.Result == "OK")
-                        password = dialog.password.Password;
+                        password = dialog.Password;
                 }
                 finally
                 {
@@ -3920,7 +3920,7 @@ DateTime.Now);
                     if (_passwordDialog != null)
                     {
                         RemoveLayer();
-                        password = _passwordDialog.password.Password;
+                        password = _passwordDialog.Password;
                         dialog_result = _passwordDialog.Result;
                         _passwordDialog = null;
                         closed = true;

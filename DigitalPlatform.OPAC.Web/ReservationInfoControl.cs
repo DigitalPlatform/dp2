@@ -362,27 +362,49 @@ Control insertbefore)
                 text.Text = "<div class='" + strSpanClass + "'>" + strText + "</div>";
         }
 
-        static string BuildBarcodeList(string strBarcodes,
+        string BuildBarcodeList(string strBarcodes,
             string strArrivedBarcode)
         {
-            if (string.IsNullOrEmpty(strArrivedBarcode) == true)
-                return strBarcodes;
-
-            string[] barcodes = strBarcodes.Split(new char[] {','});
             string strResult = "";
-            foreach (string barcode in barcodes)
+            if (string.IsNullOrEmpty(strArrivedBarcode) == true)
             {
-                if (string.IsNullOrEmpty(barcode) == true)
-                    continue;
-                if (string.IsNullOrEmpty(strResult) == false)
-                    strResult += ",";
-
-                if (barcode == strArrivedBarcode)
+                strResult = strBarcodes;
+            }
+            else
+            {
+                string[] barcodes = strBarcodes.Split(new char[] { ',' });
+                foreach (string barcode in barcodes)
                 {
-                    strResult += "!" + barcode;
+                    if (string.IsNullOrEmpty(barcode) == true)
+                        continue;
+                    if (string.IsNullOrEmpty(strResult) == false)
+                        strResult += ",";
+
+                    if (barcode == strArrivedBarcode)
+                    {
+                        strResult += "!" + barcode;
+                    }
+                    else
+                        strResult += barcode;
                 }
-                else
-                    strResult += barcode;
+            }
+
+            {
+                SessionInfo sessioninfo = (SessionInfo)this.Page.Session["sessioninfo"];
+                LibraryChannel channel = sessioninfo.GetChannel(true);
+                try
+                {
+                    var ret = channel.ConvertRefIdListToItemBarcodeList(
+strResult,
+out string temp,
+out string strError);
+                    if (ret != -1 && string.IsNullOrEmpty(temp) == false)
+                        return temp;
+                }
+                finally
+                {
+                    sessioninfo.ReturnChannel(channel);
+                }
             }
 
             return strResult;
@@ -414,7 +436,7 @@ Control insertbefore)
                 LiteralControl right = (LiteralControl)line.FindControl("reservation_line" + Convert.ToString(i) + "right");
 
 
-                XmlNode node = nodes[i];
+                XmlElement node = nodes[i] as XmlElement;
                 string strBarcodes = DomUtil.GetAttr(node, "items");
 
                 this.ReservationBarcodes.Add(strBarcodes);
@@ -438,29 +460,76 @@ Control insertbefore)
                 strResult = "&nbsp;";
 
                 // 2007/1/18
-                string strArrivedItemBarcode = DomUtil.GetAttr(node, "arrivedItemBarcode");
+                string strArrivedItemKey = DomUtil.GetAttr(node, "arrivedItemRefID");
+                if (string.IsNullOrEmpty(strArrivedItemKey))
+                    strArrivedItemKey = DomUtil.GetAttr(node, "arrivedItemBarcode");
+
+                string strDisplayArrivedItemBarcode = DomUtil.GetAttr(node, "arrivedItemBarcode"); // 2025/4/23 补充
 
                 //strResult += "" + strBarcodes + "</td>";
                 int nBarcodesCount = GetBarcodesCount(strBarcodes);
 
-                strResult += "" + MakeBarcodeListHyperLink(strBarcodes, strArrivedItemBarcode, ",")
+                strResult += "" + MakeBarcodeListHyperLink(strBarcodes, strArrivedItemKey, ",")
                     + (nBarcodesCount > 1 ? " 之一" : "")  // 2007/7/5
                     + "</td>";
 
                 // 操作者
                 string strOperator = DomUtil.GetAttr(node, "operator");
+                string strDisplayOperator = strOperator;
+                if (strOperator != null && strOperator.StartsWith("@refID:"))
+                {
+                    LibraryChannel channel = sessioninfo.GetChannel(true);
+                    try
+                    {
+                        var ret = channel.ConvertRefIdListToReaderBarcodeList(
+    strOperator,
+    out string temp,
+    out string strError);
+                        if (ret != -1 && string.IsNullOrEmpty(temp) == false)
+                            strDisplayOperator = temp;
+                    }
+                    finally
+                    {
+                        sessioninfo.ReturnChannel(channel);
+                    }
+                }
+
                 // 状态
                 string strArrivedDate = DomUtil.GetAttr(node, "arrivedDate");
                 string strState = DomUtil.GetAttr(node, "state");
                 if (strState == "arrived")
                 {
                     strArrivedDate = DateTimeUtil.LocalTime(strArrivedDate);
+
+                    // 2025/4/23
+                    // 将 strDisplayArrivedItemBarcode 尽量转化为册条码号形态显示
+                    if (string.IsNullOrEmpty(strDisplayArrivedItemBarcode))
+                        strDisplayArrivedItemBarcode = strArrivedItemKey;
+                    if (strDisplayArrivedItemBarcode != null
+                        && strDisplayArrivedItemBarcode.StartsWith("@refID:"))
+                    {
+                        LibraryChannel channel = sessioninfo.GetChannel(true);
+                        try
+                        {
+                            var ret = channel.ConvertRefIdListToItemBarcodeList(
+        strDisplayArrivedItemBarcode,
+        out string temp,
+        out string strError);
+                            if (ret != -1 && string.IsNullOrEmpty(temp) == false)
+                                strDisplayArrivedItemBarcode = temp;
+                        }
+                        finally
+                        {
+                            sessioninfo.ReturnChannel(channel);
+                        }
+                    }
+
                     // text-level: 用户提示
                     strState = string.Format(this.GetString("册s已于s到书"),    // "册 {0} 已于 {1} 到书"
-                        strArrivedItemBarcode,
+                        strDisplayArrivedItemBarcode,
                         strArrivedDate);
 
-                    // "册 " + strArrivedItemBarcode + " 已于 " + strArrivedDate + " 到书";
+                    // "册 " + strArrivedItemKey + " 已于 " + strArrivedDate + " 到书";
                     if (nBarcodesCount > 1)
                     {
                         strState += string.Format(this.GetString("同一预约请求中的其余s册旋即失效"),  // "；同一预约请求中的其余 {0} 册旋即失效"
@@ -481,9 +550,9 @@ Control insertbefore)
                  * */
 
                 strResult += "<td width='50%' class='pending'>formated:" + BuildBarcodeList(strBarcodes,
-            strArrivedItemBarcode) + "</td>";
+            strArrivedItemKey) + "</td>";
                 strResult += "<td nowrap>" + strRequestDate + "</td>";
-                strResult += "<td nowrap>" + strOperator + "</td>";
+                strResult += "<td nowrap>" + strDisplayOperator + "</td>";
                 strResult += "</tr>";
 
                 right.Text = strResult;
@@ -870,9 +939,9 @@ Control insertbefore)
             return barcodes.Length;
         }
 
-        static string MakeBarcodeListHyperLink(string strBarcodes,
+        string MakeBarcodeListHyperLink(string strBarcodes,
             string strArrivedItemBarcode,
-    string strSep)
+            string strSep)
         {
             string strResult = "";
             string strDisableClass = "";
@@ -885,12 +954,30 @@ Control insertbefore)
                 if (String.IsNullOrEmpty(strBarcode) == true)
                     continue;
 
+                string strDisplayBarcode = strBarcode;
+                SessionInfo sessioninfo = (SessionInfo)this.Page.Session["sessioninfo"];
+                LibraryChannel channel = sessioninfo.GetChannel(true);
+                try
+                {
+                    var ret = channel.ConvertRefIdListToItemBarcodeList(
+strBarcode,
+out string temp,
+out string strError);
+                    if (ret != -1 && string.IsNullOrEmpty(temp) == false)
+                        strDisplayBarcode = temp;
+                }
+                finally
+                {
+                    sessioninfo.ReturnChannel(channel);
+                }
+
                 if (strResult != "")
                     strResult += strSep;
                 strResult += "<a "
                     + (string.IsNullOrEmpty(strDisableClass) == false && strBarcode != strArrivedItemBarcode ? "class='" + strDisableClass + "'" : "")
                     + " href='book.aspx?barcode=" + strBarcode + "&forcelogin=on'>"
-                    + strBarcode + "</a>";
+                    + strDisplayBarcode + "</a>";
+                // 锚点文字尽量用较短的册条码号
             }
 
             return strResult;

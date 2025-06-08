@@ -3165,7 +3165,7 @@ out string strError)
                                         else if (string.IsNullOrEmpty(result.ErrorInfo) == false)
                                             AppendString($"ClickOnce 后台自动更新: {result.ErrorInfo}\r\n");
                                     }
-                                    catch(Exception ex)
+                                    catch (Exception ex)
                                     {
                                         AppendString($"后台自动升级出现异常: {ExceptionUtil.GetDebugText(ex)}");
                                     }

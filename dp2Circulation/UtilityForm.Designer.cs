@@ -125,6 +125,7 @@
             this.textBox_biblioRecPath = new System.Windows.Forms.TextBox();
             this.label15 = new System.Windows.Forms.Label();
             this.tabPage_addCrLf = new System.Windows.Forms.TabPage();
+            this.button_addCrLf_countRecords = new System.Windows.Forms.Button();
             this.label19 = new System.Windows.Forms.Label();
             this.button_addCrLf_begin = new System.Windows.Forms.Button();
             this.label18 = new System.Windows.Forms.Label();
@@ -138,7 +139,14 @@
             this.button_accessNo_sort = new System.Windows.Forms.Button();
             this.label20 = new System.Windows.Forms.Label();
             this.textBox_accessNo_lines = new System.Windows.Forms.TextBox();
-            this.button_addCrLf_countRecords = new System.Windows.Forms.Button();
+            this.tabPage_publisher = new System.Windows.Forms.TabPage();
+            this.button_publisher_setCityCode = new System.Windows.Forms.Button();
+            this.button_publisher_searchCityCode = new System.Windows.Forms.Button();
+            this.textBox_publisher_cityCode = new System.Windows.Forms.TextBox();
+            this.label22 = new System.Windows.Forms.Label();
+            this.textBox_publisher_city = new System.Windows.Forms.TextBox();
+            this.label21 = new System.Windows.Forms.Label();
+            this.button_publisher_deleteCity = new System.Windows.Forms.Button();
             this.tabControl_main.SuspendLayout();
             this.tabPage_sjhm.SuspendLayout();
             this.tabPage_xmlEditor.SuspendLayout();
@@ -173,6 +181,7 @@
             this.tabPage_biblioTable.SuspendLayout();
             this.tabPage_addCrLf.SuspendLayout();
             this.tabPage_accessNo.SuspendLayout();
+            this.tabPage_publisher.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl_main
@@ -190,6 +199,7 @@
             this.tabControl_main.Controls.Add(this.tabPage_biblioTable);
             this.tabControl_main.Controls.Add(this.tabPage_addCrLf);
             this.tabControl_main.Controls.Add(this.tabPage_accessNo);
+            this.tabControl_main.Controls.Add(this.tabPage_publisher);
             this.tabControl_main.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl_main.Location = new System.Drawing.Point(0, 0);
             this.tabControl_main.Margin = new System.Windows.Forms.Padding(5);
@@ -1369,6 +1379,17 @@
             this.tabPage_addCrLf.Text = "添加回车换行";
             this.tabPage_addCrLf.UseVisualStyleBackColor = true;
             // 
+            // button_addCrLf_countRecords
+            // 
+            this.button_addCrLf_countRecords.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_addCrLf_countRecords.Location = new System.Drawing.Point(766, 206);
+            this.button_addCrLf_countRecords.Name = "button_addCrLf_countRecords";
+            this.button_addCrLf_countRecords.Size = new System.Drawing.Size(167, 40);
+            this.button_addCrLf_countRecords.TabIndex = 14;
+            this.button_addCrLf_countRecords.Text = "记录条数";
+            this.button_addCrLf_countRecords.UseVisualStyleBackColor = true;
+            this.button_addCrLf_countRecords.Click += new System.EventHandler(this.button_addCrLf_countRecords_Click);
+            // 
             // label19
             // 
             this.label19.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -1515,16 +1536,83 @@
             this.textBox_accessNo_lines.Size = new System.Drawing.Size(928, 483);
             this.textBox_accessNo_lines.TabIndex = 3;
             // 
-            // button_addCrLf_countRecords
+            // tabPage_publisher
             // 
-            this.button_addCrLf_countRecords.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_addCrLf_countRecords.Location = new System.Drawing.Point(766, 206);
-            this.button_addCrLf_countRecords.Name = "button_addCrLf_countRecords";
-            this.button_addCrLf_countRecords.Size = new System.Drawing.Size(167, 40);
-            this.button_addCrLf_countRecords.TabIndex = 14;
-            this.button_addCrLf_countRecords.Text = "记录条数";
-            this.button_addCrLf_countRecords.UseVisualStyleBackColor = true;
-            this.button_addCrLf_countRecords.Click += new System.EventHandler(this.button_addCrLf_countRecords_Click);
+            this.tabPage_publisher.Controls.Add(this.button_publisher_deleteCity);
+            this.tabPage_publisher.Controls.Add(this.button_publisher_setCityCode);
+            this.tabPage_publisher.Controls.Add(this.button_publisher_searchCityCode);
+            this.tabPage_publisher.Controls.Add(this.textBox_publisher_cityCode);
+            this.tabPage_publisher.Controls.Add(this.label22);
+            this.tabPage_publisher.Controls.Add(this.textBox_publisher_city);
+            this.tabPage_publisher.Controls.Add(this.label21);
+            this.tabPage_publisher.Location = new System.Drawing.Point(4, 31);
+            this.tabPage_publisher.Name = "tabPage_publisher";
+            this.tabPage_publisher.Size = new System.Drawing.Size(943, 592);
+            this.tabPage_publisher.TabIndex = 13;
+            this.tabPage_publisher.Text = "出版者工具";
+            this.tabPage_publisher.UseVisualStyleBackColor = true;
+            // 
+            // button_publisher_setCityCode
+            // 
+            this.button_publisher_setCityCode.Location = new System.Drawing.Point(508, 56);
+            this.button_publisher_setCityCode.Name = "button_publisher_setCityCode";
+            this.button_publisher_setCityCode.Size = new System.Drawing.Size(156, 31);
+            this.button_publisher_setCityCode.TabIndex = 5;
+            this.button_publisher_setCityCode.Text = "设置";
+            this.button_publisher_setCityCode.UseVisualStyleBackColor = true;
+            this.button_publisher_setCityCode.Click += new System.EventHandler(this.button_publisher_setCityCode_Click);
+            // 
+            // button_publisher_searchCityCode
+            // 
+            this.button_publisher_searchCityCode.Location = new System.Drawing.Point(508, 18);
+            this.button_publisher_searchCityCode.Name = "button_publisher_searchCityCode";
+            this.button_publisher_searchCityCode.Size = new System.Drawing.Size(156, 31);
+            this.button_publisher_searchCityCode.TabIndex = 2;
+            this.button_publisher_searchCityCode.Text = "获取";
+            this.button_publisher_searchCityCode.UseVisualStyleBackColor = true;
+            this.button_publisher_searchCityCode.Click += new System.EventHandler(this.button_publisher_searchCityCode_Click);
+            // 
+            // textBox_publisher_cityCode
+            // 
+            this.textBox_publisher_cityCode.Location = new System.Drawing.Point(137, 58);
+            this.textBox_publisher_cityCode.Name = "textBox_publisher_cityCode";
+            this.textBox_publisher_cityCode.Size = new System.Drawing.Size(364, 31);
+            this.textBox_publisher_cityCode.TabIndex = 4;
+            // 
+            // label22
+            // 
+            this.label22.AutoSize = true;
+            this.label22.Location = new System.Drawing.Point(17, 61);
+            this.label22.Name = "label22";
+            this.label22.Size = new System.Drawing.Size(105, 21);
+            this.label22.TabIndex = 3;
+            this.label22.Text = "地区代码:";
+            // 
+            // textBox_publisher_city
+            // 
+            this.textBox_publisher_city.Location = new System.Drawing.Point(137, 18);
+            this.textBox_publisher_city.Name = "textBox_publisher_city";
+            this.textBox_publisher_city.Size = new System.Drawing.Size(364, 31);
+            this.textBox_publisher_city.TabIndex = 1;
+            // 
+            // label21
+            // 
+            this.label21.AutoSize = true;
+            this.label21.Location = new System.Drawing.Point(17, 21);
+            this.label21.Name = "label21";
+            this.label21.Size = new System.Drawing.Size(84, 21);
+            this.label21.TabIndex = 0;
+            this.label21.Text = "出版地:";
+            // 
+            // button_publisher_deleteCity
+            // 
+            this.button_publisher_deleteCity.Location = new System.Drawing.Point(670, 56);
+            this.button_publisher_deleteCity.Name = "button_publisher_deleteCity";
+            this.button_publisher_deleteCity.Size = new System.Drawing.Size(156, 31);
+            this.button_publisher_deleteCity.TabIndex = 6;
+            this.button_publisher_deleteCity.Text = "删除";
+            this.button_publisher_deleteCity.UseVisualStyleBackColor = true;
+            this.button_publisher_deleteCity.Click += new System.EventHandler(this.button_publisher_deleteCity_Click);
             // 
             // UtilityForm
             // 
@@ -1591,6 +1679,8 @@
             this.tabPage_addCrLf.PerformLayout();
             this.tabPage_accessNo.ResumeLayout(false);
             this.tabPage_accessNo.PerformLayout();
+            this.tabPage_publisher.ResumeLayout(false);
+            this.tabPage_publisher.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -1707,5 +1797,13 @@
         private System.Windows.Forms.Button button_accessNo_sort;
         private System.Windows.Forms.Button button_accessNo_removeRangeEnd;
         private System.Windows.Forms.Button button_addCrLf_countRecords;
+        private System.Windows.Forms.TabPage tabPage_publisher;
+        private System.Windows.Forms.TextBox textBox_publisher_city;
+        private System.Windows.Forms.Label label21;
+        private System.Windows.Forms.TextBox textBox_publisher_cityCode;
+        private System.Windows.Forms.Label label22;
+        private System.Windows.Forms.Button button_publisher_setCityCode;
+        private System.Windows.Forms.Button button_publisher_searchCityCode;
+        private System.Windows.Forms.Button button_publisher_deleteCity;
     }
 }

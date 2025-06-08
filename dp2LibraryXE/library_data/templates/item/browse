@@ -40,7 +40,7 @@
     <xpath>*/comment</xpath>
   </col>
   <col title="借阅者" type="borrower" prefix="~b:">
-    <xpath>*/borrower</xpath>
+    <xpath>concat(*/borrower/@barcode, '  ', */borrower)</xpath>
   </col>
   <col title="借阅日期" convert="rfc1123tolocaltimeu" type="borrowDate">
     <xpath>*/borrowDate</xpath>

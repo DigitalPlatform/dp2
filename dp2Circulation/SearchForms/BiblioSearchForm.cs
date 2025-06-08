@@ -34,8 +34,7 @@ using DigitalPlatform.Z3950;
 using static DigitalPlatform.Marc.MarcUtil;
 using dp2Circulation.SearchForms;
 using dp2Circulation.Script;
-using DocumentFormat.OpenXml.EMMA;
-using Microsoft.CodeAnalysis.Operations;
+using System.Runtime.InteropServices;
 
 namespace dp2Circulation
 {
@@ -305,6 +304,26 @@ namespace dp2Circulation
                 {
                     this.textBox_queryWord.Focus();
                 });
+            });
+        }
+
+        public void BeginFillBiblioFromList(bool reload_configfile = false)
+        {
+            _ = Task.Run(() =>
+            {
+                try
+                {
+                    if (reload_configfile)
+                        Program.MainForm.GetDbFromInfos();
+                    this.TryInvoke(() =>
+                    {
+                        Program.MainForm.FillBiblioFromList(this.comboBox_from);
+                    });
+                }
+                catch (Exception ex)
+                {
+                    this.MessageBoxShow($"BeginFillBiblioFromList() 异常: {ExceptionUtil.GetDebugText(ex)}");
+                }
             });
         }
 
@@ -751,27 +770,21 @@ this.comboBox_location.Text);
             });
         }
 
-        protected override void OnGotFocus(EventArgs e)
-        {
-            /*
-            base.OnGotFocus(e);
-
-            if (_lastActiveControl == null)
-                FocusToQueryWord();
-            else
-                FocusTo(_lastActiveControl);
-            */
-        }
-
+        // 保存最后拥有输入焦点的控件。以便本窗口重新激活时，正确设置输入焦点到这个控件上
         Control _lastActiveControl = null;
 
-        protected override void OnLostFocus(EventArgs e)
+        // 2025/5/9
+        // 当用鼠标或键盘改变本窗口内控件的 focus 状态时，本函数被触发。意在重新设置缺省按钮。缺省按钮通常和当前的某个控件获得输入焦点有关
+        protected override void UpdateDefaultButton()
         {
-            /*
-            _lastActiveControl = this.ActiveControl;
+            {
+                var temp = GetFocusControl(this);
+                if (temp != this)
+                    _lastActiveControl = temp;
+                // Debug.WriteLine($"save focus {(_lastActiveControl == null ? "(null)" : _lastActiveControl.Name)}");
+            }
 
-            base.OnLostFocus(e);
-            */
+            base.UpdateDefaultButton();
         }
 
         /// <summary>
@@ -4182,9 +4195,15 @@ GetCurrentBrowseStyle());
             Program.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
 
             if (_lastActiveControl == null)
+            {
                 FocusToQueryWord();
+                // Debug.WriteLine("Focus to null");
+            }
             else
+            {
                 FocusTo(_lastActiveControl);
+                // Debug.WriteLine($"Focus to {(_lastActiveControl == null ? "(null)" : _lastActiveControl.Name)}");
+            }
 
             RefreshPropertyView(false);
         }
@@ -5238,11 +5257,35 @@ GetCurrentBrowseStyle());
                     }
                     if (nRet == 0)
                     {
-                        // TODO1: 校验的时候，如果当前 MARC 记录没有明确的编目规则，
+                        // 2025/5/10
+                        // 校验的时候，如果当前 MARC 记录没有明确的编目规则，
                         // 但 rules 中有若干可选的编目规则，这里需要弹出一个列表对话框提供选择。
-                        // 注意校验完成后，自动在 MARC 记录中添加 998$c，这样避免以后再次进行校验的时候再次遇到选择
-
-
+                        // TODO: 校验完成后，自动在 MARC 记录中添加 998$c，这样避免以后再次进行校验的时候再次遇到选择
+                        if (operation == "verify")
+                        {
+                            if (rules.Count == 1)
+                                sourceCatalogingRule = rules[0];
+                            else
+                            {
+                                // 弹出对话框让操作者选择一个原本的编目规则
+                                // return:
+                                //      -1  出错
+                                //      0   放弃选择
+                                //      1   已经选择
+                                nRet = BiblioSearchForm.SelectCatalogingRule(
+                                    $"(请指定记录 '{Global.GetDbName(strBiblioRecPath)}') 原本的编目规则",
+                                    "编目规则:",
+                                    rules,
+                                    true,   // 使用缓存
+                                    out sourceCatalogingRule,
+                                    out strError);
+                                if (nRet == -1 || nRet == 0)
+                                {
+                                    errors.Add($"选择原本编目规则时出错: {strError}");
+                                    goto END1;
+                                }
+                            }
+                        }
 
                         // _errors.Add($"无法获得书目记录的编目规则，因而无法进行 MARC 格式{operation}");
                         // goto END1;
@@ -5332,6 +5375,10 @@ GetCurrentBrowseStyle());
                 // 检查 verify 情况下的 targetCataloginRule
                 if (operation == "verify")
                 {
+                    if (string.IsNullOrEmpty(sourceCatalogingRule))
+                    {
+                        // TODO
+                    }
                     // 2024/7/1
                     if (string.IsNullOrEmpty(targetCatalogingRule))
                         targetCatalogingRule = sourceCatalogingRule;
@@ -5596,6 +5643,7 @@ GetCurrentBrowseStyle());
             if (string.IsNullOrEmpty(catalogingRule) == false)
                 return 1;
 
+            // TODO: 如果 cr:xxx 没有找到，可否临时弹出对话框让操作者指定一个书目库的默认 Cataloging Rule
             return 0;
         }
 
@@ -5978,6 +6026,9 @@ out strError);
 
             int nCount = 0;
             string targetCatalogingRule = "";
+
+            // 2025/5/11
+            EntityForm.ClearVerifyContext();
 
             Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
                 + $" 开始进行书目记录{operation_caption}</div>");
@@ -7775,7 +7826,7 @@ MessageBoxDefaultButton.Button2);
                         goto CONTINUE;
 
                     if (progress_text)
-                    looping.Progress.SetMessage("正在保存书目记录 " + strRecPath);
+                        looping.Progress.SetMessage("正在保存书目记录 " + strRecPath);
 
                     bool append = (info.RecPath != null && info.RecPath.Contains("?"));
 
@@ -8000,7 +8051,7 @@ MessageBoxDefaultButton.Button2);
                     }
 
                     info.Timestamp = baNewTimestamp;
-                    info.OldXml = string.IsNullOrEmpty(strOutputBiblio) ?info.NewXml : strOutputBiblio;
+                    info.OldXml = string.IsNullOrEmpty(strOutputBiblio) ? info.NewXml : strOutputBiblio;
                     info.NewXml = "";
                     // 2024/5/20
                     if (append)
@@ -16617,13 +16668,17 @@ out string error);
 
         private void BiblioSearchForm_Deactivate(object sender, EventArgs e)
         {
+            /*
             _lastActiveControl = GetFocusControl(this);
+            Debug.WriteLine($"save focus {(_lastActiveControl == null ? "(null)" : _lastActiveControl.Name)}");
+            */
         }
 
         public static Control GetFocusControl(Control parent)
         {
             if (parent.Focused)
                 return parent;
+
             foreach (Control control in parent.Controls)
             {
                 var ret = GetFocusControl(control);
@@ -16633,6 +16688,23 @@ out string error);
 
             return null;
         }
+
+#if REMOVED
+        [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.Winapi)]
+        internal static extern IntPtr GetFocus();
+
+        // https://www.syncfusion.com/faq/windowsforms/controls/how-do-i-get-hold-of-the-currently-focused-control#:~:text=%2F%2F%20To%20get%20hold%20of%20the%20focused%20control%3A,will%20return%20null.%20focusedControl%20%3D%20Control.FromHandle%28focusedHandle%29%3B%20return%20focusedControl%3B
+        private Control GetFocusedControl()
+        {
+            Control focusedControl = null;
+            // To get hold of the focused control:
+            IntPtr focusedHandle = GetFocus();
+            if (focusedHandle != IntPtr.Zero)
+                // Note that if the focused Control is not a .Net control, then this will return null.
+                focusedControl = Control.FromHandle(focusedHandle);
+            return focusedControl;
+        }
+#endif
 
         private void BiblioSearchForm_Leave(object sender, EventArgs e)
         {

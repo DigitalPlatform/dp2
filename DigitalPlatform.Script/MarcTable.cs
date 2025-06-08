@@ -1,12 +1,12 @@
-﻿using System;
+﻿// using DigitalPlatform.Marc;
+using DigitalPlatform.Script;
+using DigitalPlatform.Text;
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using System.Web.UI.WebControls;
 using System.Xml;
-
-// using DigitalPlatform.Marc;
-using DigitalPlatform.Script;
-using DigitalPlatform.Text;
 using static DigitalPlatform.Script.ScriptUtil;
 
 namespace DigitalPlatform.Marc
@@ -1710,7 +1710,7 @@ namespace DigitalPlatform.Marc
                 // TODO: 选择除了著者以外的子字段，构成题名字符串
                 if (fields.count > 0)
                 {
-                    results.Add(new NameValueLine("Title", BuildFields(fields, "abhnp"), "title"));
+                    results.Add(new NameValueLine("Title", MarcQuery.TrimEndChar(BuildFields(fields, "abhnp")), "title"));
                 }
             }
 #if NO
@@ -1746,14 +1746,47 @@ namespace DigitalPlatform.Marc
             }
 
             // Published/Created
-            fields = record.select("field[@name='260']");
-            foreach (MarcNode field in fields)
+            if (StringUtil.IsInList("areas,publication_area", strStyle))
             {
-                nodes = field.select("subfield");
-                if (nodes.count > 0)
+                fields = record.select("field[@name='260']");
+                foreach (MarcNode field in fields)
                 {
-                    results.Add(new NameValueLine("Published / Created", ConcatSubfields(nodes), "publication_area"));  // 原"publisher"。附加的空格便于在 HTML 中自然折行
+                    nodes = field.select("subfield");
+                    if (nodes.count > 0)
+                    {
+                        results.Add(new NameValueLine("Published / Created", ConcatSubfields(nodes), "publication_area"));  // 原"publisher"。附加的空格便于在 HTML 中自然折行
+                    }
                 }
+            }
+
+            // 出版者
+            if (StringUtil.IsInList("publisher", strStyle))
+            {
+                StringBuilder text = new StringBuilder();
+                record.select("field[@name='260' or @name='264']/subfield[@name='b']")
+                    .List.ForEach((o) =>
+                    {
+                        if (text.Length > 0)
+                            text.Append(CRLF);
+                        text.Append(MarcQuery.TrimEndChar(o.Content));
+                    });
+                if (text.Length > 0)
+                    results.Add(new NameValueLine("Publisher", text.ToString(), "publisher"));
+            }
+
+            // 出版时间
+            if (StringUtil.IsInList("publishtime", strStyle))
+            {
+                StringBuilder text = new StringBuilder();
+                record.select("field[@name='260' or @name='264']/subfield[@name='c']")
+                    .List.ForEach((o) =>
+                    {
+                        if (text.Length > 0)
+                            text.Append(CRLF);
+                        text.Append(MarcQuery.TrimEndChar(o.Content));
+                    });
+                if (text.Length > 0)
+                    results.Add(new NameValueLine("Publish Time", text.ToString(), "publishtime"));
             }
 
             // 载体形态项

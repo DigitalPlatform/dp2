@@ -681,7 +681,7 @@ https://testbook.com/objective-questions/mcq-on-standards-of-bibliographic-recor
 如果暂时不改进，最好在报错提示中说“虽然 ... 失败，但元数据记录已经创建成功”
 
 keys 配置文件修改后，最好自动刷新一次书目查询窗的检索途径列表
-
+(已经实现)
 ~~~
 提供一种管理命令，可以重新 InitialKdbs()。用于 dp2rms 等工具修改了 keys 配置文件之后
 
@@ -961,7 +961,21 @@ RfidCenter 改进：
 
 
 ~~~
-
+(Rfid 读写器厂家驱动)
 注意 sub_id 属性：
       <sub_id>680601</sub_id>
 提供了多个驱动 ID 映射到同一段 XML 元数据的可能。
+
+
+~~~
+内务的书目查询窗，需要提供观察 SearchBiblio() API 请求时参数，和返回的 Query XML 的功能，
+比方说可以做到“操作历史”属性页里面
+
+~~~
+MARC 编辑器中双击选择单个子字段。要针对 001 头标区也起作用
+(已经做到)
+
+~~~
+当 dp2circulation_marc_autogen.cs 被系统管理窗“内核”属性页修改后，要自动清除掉以前的
+Assembly，以便让种册窗的右侧数据加工菜单重新编译运行。
+(已经做到)
