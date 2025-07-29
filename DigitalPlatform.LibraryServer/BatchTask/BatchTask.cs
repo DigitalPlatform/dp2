@@ -12,6 +12,7 @@ using DigitalPlatform.rms.Client;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
+using Amazon.Runtime.EventStreams;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -716,6 +717,7 @@ namespace DigitalPlatform.LibraryServer
             baResult = null;
             lEndOffset = 0;
 
+            int bytes_count = 0;
 #if NO
             lTotalLength = this.m_stream.Length;
 
@@ -745,7 +747,8 @@ namespace DigitalPlatform.LibraryServer
                     return;
                 }
 
-                baResult = new byte[Math.Min(nMaxBytes, (int)lLength)];
+                bytes_count = Math.Min(nMaxBytes, (int)lLength);
+                baResult = new byte[bytes_count];
 
                 s.FileStream.FastSeek(lStart);
                 int nByteReaded = s.FileStream.Read(baResult, 0, baResult.Length);
@@ -755,7 +758,11 @@ namespace DigitalPlatform.LibraryServer
                     throw new Exception("希望读入 " + baResult.Length + " 字节，但仅仅读入了 " + nByteReaded + " 字节");
                 }
                 Debug.Assert(nByteReaded == baResult.Length);
-                lEndOffset = lStart + nByteReaded;
+                lEndOffset = lStart + (long)nByteReaded;
+            }
+            catch(OverflowException ex)
+            {
+                throw new OverflowException($"从偏移量 {lStart} 希望读入 { bytes_count } 字节时发生整数溢出异常(注整数极限值为 {long.MaxValue})。这意味着显示结果文件尺寸太大了", ex);
             }
             finally
             {

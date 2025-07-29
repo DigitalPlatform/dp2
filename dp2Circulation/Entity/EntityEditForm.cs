@@ -987,119 +987,121 @@ namespace dp2Circulation
         {
             string strError = "";
 
-            BookItem item = this.Item.Clone();
+            try
             {
-                item.RecordDom = this._editing.DataDom;
-                // 确保自动创建索取号
-                EnsureCreateAccessNo(item);
-
-                // 2020/10/27
-                // 检查册记录编辑器里面 PII (册条码号) 是否为空
-                string barcode = DomUtil.GetElementText(item.RecordDom.DocumentElement, "barcode");
-                if (string.IsNullOrEmpty(barcode))
+                BookItem item = this.Item.Clone();
                 {
-                    strError = "在写入 RFID 标签以前，请先为册记录输入正确的册条码号";
-                    goto ERROR1;
-                }
-            }
+                    item.RecordDom = this._editing.DataDom;
+                    // 确保自动创建索取号
+                    EnsureCreateAccessNo(item);
 
-            // 写入以前，装载标签内容到左侧，然后调整右侧(中间可能会警告)。然后再保存
-
-            // string pii = this.chipEditor_editing.LogicChipItem.FindElement(ElementOID.PII).Text;
-            string pii = this.Item.ItemDisplayState == ItemDisplayState.New ?
-                "" : GetPII(this.Item.OldRecord);   // 从修改前的册记录中获得册条码号
-
-            // 注: 如果 this.Item.OldRecord 中旧记录的册条码号和新记录中的不同，
-            // 这种情况下装载读写器上的标签的原有内容，如果：
-            // 1) 标签的 PII 和旧记录中的册条码号相同，意味着操作者把这册图书的标签(本次改写标签之前的状态)放到读写器上了，那么这种情况不应该警告;
-            // 2) 标签的 PII 和新记录中的册条码号相同，意味着操作者在别的什么地方抢先把标签修改到位了(但比较可疑)，那么这种情况似乎也不应该警告;
-            // 3) 标签的 PII 和上述册条码号两种值都不相同，那么应该警告。
-            // 不过需要注意一种情况，就是操作者通过定义册登记的默认值中的“册条码号”为一个具体的号码，这个时候 this.Item.OldRecord 中的册条码号只是这个默认模板内容的号码，而并不是什么实体库中的册记录的册条码号。其实这个时候册记录还是新增编辑状态，根本没有创建保存过
-            // 似乎可以通过判断 EntitEditForm 对话框是否为“新增册”状态来甄别这种情况(通过 this.Item.ItemDisplayState 是否为 New 可以判断)
-
-
-
-            // 看左侧是否装载过。如果没有装载过则自动装载
-            if (_leftLoaded == false)
-            {
-                // return:
-                //      -1  出错
-                //      0   放弃装载
-                //      1   成功装载
-                int nRet = LoadOldChip(pii,
-                    "adjust_right,saving",
-                    // false, true, 
-                    out strError);
-                if (nRet == -1)
-                {
-                    DialogResult result = MessageBox.Show(this,
-$"装载标签原有内容发生错误: {strError}。\r\n\r\n是否继续保存新内容到此标签?",
-"EntityEditForm",
-MessageBoxButtons.YesNo,
-MessageBoxIcon.Question,
-MessageBoxDefaultButton.Button2);
-                    if (result == DialogResult.No)
+                    // 2020/10/27
+                    // 检查册记录编辑器里面 PII (册条码号) 是否为空
+                    string barcode = DomUtil.GetElementText(item.RecordDom.DocumentElement, "barcode");
+                    if (string.IsNullOrEmpty(barcode))
+                    {
+                        strError = "在写入 RFID 标签以前，请先为册记录输入正确的册条码号";
                         goto ERROR1;
+                    }
                 }
-                if (nRet == 0)
+
+                // 写入以前，装载标签内容到左侧，然后调整右侧(中间可能会警告)。然后再保存
+
+                // string pii = this.chipEditor_editing.LogicChipItem.FindElement(ElementOID.PII).Text;
+                string pii = this.Item.ItemDisplayState == ItemDisplayState.New ?
+                    "" : GetPII(this.Item.OldRecord);   // 从修改前的册记录中获得册条码号
+
+                // 注: 如果 this.Item.OldRecord 中旧记录的册条码号和新记录中的不同，
+                // 这种情况下装载读写器上的标签的原有内容，如果：
+                // 1) 标签的 PII 和旧记录中的册条码号相同，意味着操作者把这册图书的标签(本次改写标签之前的状态)放到读写器上了，那么这种情况不应该警告;
+                // 2) 标签的 PII 和新记录中的册条码号相同，意味着操作者在别的什么地方抢先把标签修改到位了(但比较可疑)，那么这种情况似乎也不应该警告;
+                // 3) 标签的 PII 和上述册条码号两种值都不相同，那么应该警告。
+                // 不过需要注意一种情况，就是操作者通过定义册登记的默认值中的“册条码号”为一个具体的号码，这个时候 this.Item.OldRecord 中的册条码号只是这个默认模板内容的号码，而并不是什么实体库中的册记录的册条码号。其实这个时候册记录还是新增编辑状态，根本没有创建保存过
+                // 似乎可以通过判断 EntitEditForm 对话框是否为“新增册”状态来甄别这种情况(通过 this.Item.ItemDisplayState 是否为 New 可以判断)
+
+
+
+                // 看左侧是否装载过。如果没有装载过则自动装载
+                if (_leftLoaded == false)
                 {
-                    strError = "已放弃保存 RFID 标签内容";
-                    goto ERROR1;
+                    // return:
+                    //      -1  出错
+                    //      0   放弃装载
+                    //      1   成功装载
+                    int nRet = LoadOldChip(pii,
+                        "adjust_right,saving",
+                        // false, true, 
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        DialogResult result = MessageBox.Show(this,
+    $"装载标签原有内容发生错误: {strError}。\r\n\r\n是否继续保存新内容到此标签?",
+    "EntityEditForm",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+                        if (result == DialogResult.No)
+                            goto ERROR1;
+                    }
+                    if (nRet == 0)
+                    {
+                        strError = "已放弃保存 RFID 标签内容";
+                        goto ERROR1;
+                    }
                 }
-            }
 
-            // 然后保存
-            {
-                int nRet = SaveNewChip(item,
-                    out string new_tag_uid,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-                // 2023/11/7
-                if (new_tag_uid != null)
+                // 然后保存
                 {
-                    _tagExisting.UID = new_tag_uid;
-                    _tagExisting.TagInfo.UID = new_tag_uid;
+                    int nRet = SaveNewChip(item,
+                        out string new_tag_uid,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    // 2023/11/7
+                    if (new_tag_uid != null)
+                    {
+                        _tagExisting.UID = new_tag_uid;
+                        _tagExisting.TagInfo.UID = new_tag_uid;
+                    }
                 }
-            }
 
 
-            // TODO: 改成类似 ShowMessage() 效果
-            MessageBox.Show(this, "RFID 标签保存成功");
+                // TODO: 改成类似 ShowMessage() 效果
+                MessageBox.Show(this, "RFID 标签保存成功");
 
-            // 刷新左侧显示
-            {
-                Debug.Assert(_tagExisting != null, "");
-
-                Debug.WriteLine("222 " + (_tagExisting.TagInfo != null ? "!=null" : "==null"));
-
-                Debug.Assert(_tagExisting.TagInfo != null, "");
-                // 2019/9/30
-                Debug.Assert(_tagExisting.AntennaID == _tagExisting.TagInfo.AntennaID, $"1 _tagExisting.AntennaID({_tagExisting.AntennaID}) 应该 == _tagExisting.TagInfo.AntennaID({_tagExisting.TagInfo.AntennaID})");
-
-                // TODO: 超高频标签保存后 UID 会发生变化，不能用“根据 UID 读取标签刷新”的方式。要改为盘点方式，寻找 UID 相同的标签
-                // 用保存后的确定了的 UID 重新装载
-                int nRet = LoadChipByUID(
-                    _tagExisting.ReaderName,
-                    _tagExisting.TagInfo.UID,
-                    _tagExisting.AntennaID,
-    out TagInfo tag_info,
-    out strError);
-                if (nRet == -1)
+                // 刷新左侧显示
                 {
-                    _leftLoaded = false;
-                    strError = "保存 RFID 标签内容已经成功。但刷新左侧显示时候出错: " + strError;
-                    goto ERROR1;
-                }
+                    Debug.Assert(_tagExisting != null, "");
 
-                Debug.Assert(tag_info != null, "");
+                    Debug.WriteLine("222 " + (_tagExisting.TagInfo != null ? "!=null" : "==null"));
 
-                _tagExisting.TagInfo = tag_info;
-                _tagExisting.AntennaID = tag_info.AntennaID;    // 2019/9/30
+                    Debug.Assert(_tagExisting.TagInfo != null, "");
+                    // 2019/9/30
+                    Debug.Assert(_tagExisting.AntennaID == _tagExisting.TagInfo.AntennaID, $"1 _tagExisting.AntennaID({_tagExisting.AntennaID}) 应该 == _tagExisting.TagInfo.AntennaID({_tagExisting.TagInfo.AntennaID})");
 
-                Debug.WriteLine("set taginfo");
-                var chip = LogicChipItem.FromTagInfo(tag_info);
-                this.chipEditor_existing.LogicChipItem = chip;
+                    // TODO: 超高频标签保存后 UID 会发生变化，不能用“根据 UID 读取标签刷新”的方式。要改为盘点方式，寻找 UID 相同的标签
+                    // 用保存后的确定了的 UID 重新装载
+                    int nRet = LoadChipByUID(
+                        _tagExisting.ReaderName,
+                        _tagExisting.TagInfo.UID,
+                        _tagExisting.AntennaID,
+        out TagInfo tag_info,
+        out strError);
+                    if (nRet == -1)
+                    {
+                        _leftLoaded = false;
+                        strError = "保存 RFID 标签内容已经成功。但刷新左侧显示时候出错: " + strError;
+                        goto ERROR1;
+                    }
+
+                    Debug.Assert(tag_info != null, "");
+
+                    _tagExisting.TagInfo = tag_info;
+                    _tagExisting.AntennaID = tag_info.AntennaID;    // 2019/9/30
+
+                    Debug.WriteLine("set taginfo");
+                    var chip = LogicChipItem.FromTagInfo(tag_info);
+                    this.chipEditor_existing.LogicChipItem = chip;
 
 #if NO
                 string new_pii = this.chipEditor_editing.LogicChipItem.FindElement(ElementOID.PII)?.Text;
@@ -1120,8 +1122,13 @@ MessageBoxDefaultButton.Button2);
                     goto ERROR1;
                 }
 #endif
+                }
+                return;
             }
-            return;
+            catch (Exception ex)
+            {
+                strError = "保存 RFID 标签内容发生异常: " + ExceptionUtil.GetDebugText(ex);
+            }
         ERROR1:
             MessageBox.Show(this, strError);
         }
@@ -1181,23 +1188,32 @@ MessageBoxDefaultButton.Button2);
         // 从现有标签中装载信息到左侧，供对比使用
         private void toolStripButton_loadRfid_Click(object sender, EventArgs e)
         {
-            // 如果装入的元素里面有锁定状态的元素，要警告以后，覆盖右侧编辑器中的同名元素(右侧这些元素也要显示为只读状态)
-            _leftLoaded = false;
-            // string pii = this.chipEditor_editing.LogicChipItem.FindElement(ElementOID.PII).Text;
-            string pii = this.Item.ItemDisplayState == ItemDisplayState.New ?
-                "" : GetPII(this.Item.OldRecord);   // 从修改前的册记录中获得册条码号
-            // return:
-            //      -1  出错
-            //      0   放弃装载
-            //      1   成功装载
-            int nRet = LoadOldChip(pii,
-                "adjust_right,auto_close_dialog",
-                // false, true, 
-                out string strError);
-            if (nRet != 1)
-                goto ERROR1;
-            _leftLoaded = true;
-            return;
+            string strError = "";
+
+            try
+            {
+                // 如果装入的元素里面有锁定状态的元素，要警告以后，覆盖右侧编辑器中的同名元素(右侧这些元素也要显示为只读状态)
+                _leftLoaded = false;
+                // string pii = this.chipEditor_editing.LogicChipItem.FindElement(ElementOID.PII).Text;
+                string pii = this.Item.ItemDisplayState == ItemDisplayState.New ?
+                    "" : GetPII(this.Item.OldRecord);   // 从修改前的册记录中获得册条码号
+                                                        // return:
+                                                        //      -1  出错
+                                                        //      0   放弃装载
+                                                        //      1   成功装载
+                int nRet = LoadOldChip(pii,
+                    "adjust_right,auto_close_dialog",
+                    // false, true, 
+                    out strError);
+                if (nRet != 1)
+                    goto ERROR1;
+                _leftLoaded = true;
+                return;
+            }
+            catch (Exception ex)
+            {
+                strError = "装载 RFID 标签内容发生异常: " + ExceptionUtil.GetDebugText(ex);
+            }
         ERROR1:
             MessageBox.Show(this, strError);
         }

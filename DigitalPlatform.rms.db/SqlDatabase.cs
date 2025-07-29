@@ -863,6 +863,7 @@ VerifyFull - Always use SSL. Fail if the host name is not correct.
             string strText,
             Exception ex)
         {
+            // TODO: 显示 SQL 错误码
             return strText + "\r\n"
     + ex.Message + "\r\n"
     + "command.CommandTimeout:" + command.CommandTimeout + "\r\n"
@@ -3573,7 +3574,10 @@ ex);
         null,
         out strError);
                             if (nRet == -1)
+                            {
+                                WriteErrorLog($"删除数据库 '{this.GetCaption("zh-CN")}' 过程中出错: {strError}");
                                 return -1;
+                            }
                         }
                     }
                 }
@@ -4344,7 +4348,7 @@ handle.CancelTokenSource.Token).Result;
                             task = null;
 
                             sw.Stop();
-                            explainInfo?.AppendLine($"第一阶段耗费时间 {sw.Elapsed}。SQL 语句: {strCommand}");
+                            explainInfo?.AppendLine($"第一阶段耗费时间 {sw.Elapsed}。SQL 语句: {strCommand}{(aSqlParameter.Count > 0 ? " 参数: "+ToString(aSqlParameter) : "")}");
                             sw.Restart();
 
                             // 此时剩余的超时时间
@@ -4523,6 +4527,11 @@ handle.CancelTokenSource.Token).Result;
                     ErrorCode = timeout_cts.Token.IsCancellationRequested ? ErrorCodeValue.RequestTimeOut : ErrorCodeValue.Canceled,
                 };
             }
+        }
+
+        static string ToString(List<DbParameter> aSqlParameter)
+        {
+            return StringUtil.MakePathList(aSqlParameter.Select(o => $"{o.ParameterName}={o.Value.ToString()}").ToList(), ",");
         }
 
         delegate void delegate_cancel();
@@ -6095,6 +6104,7 @@ List<DbParameter> aSqlParameter)
                     return -1;
                 }
 
+                explainInfo?.AppendLine($"处理 {searchItem.Description}");
                 var result = ExecuteQueryFillResultSet(
             handle,
             strCommand,

@@ -9634,8 +9634,16 @@ out strError);
                 out strError);
             if (lRet == -1)
             {
-                strError = "重新装载书目记录时出错: " + strError;
-                return -1;
+                if (channel.ErrorCode == ErrorCode.NotFoundObjectFile)
+                {
+                    if (results == null || results.Length == 0)
+                        results = new string[] { "" };
+                }
+                else
+                {
+                    strError = "重新装载书目记录时出错: " + strError;
+                    return -1;
+                }
             }
             if (lRet == 0)
             {
@@ -10135,6 +10143,7 @@ out strError);
                     )
                     strAction = "new";
 
+                string strStyle = "";
                 REDO:
                 long lRet = channel.SetBiblioInfo(
                     stop,
@@ -10144,7 +10153,7 @@ out strError);
                     strXml,
                     baTimestamp,
                     "", // strComment
-                    "", // strStyle
+                    strStyle,
                     out strOutputPath,
                     out strOutputBiblio,
                     out baNewTimestamp,
@@ -10168,6 +10177,7 @@ out strError);
                         if (result == System.Windows.Forms.DialogResult.Yes)
                         {
                             strAction = "new";
+                            strStyle = "ifNotExist:continue";   // 2025/6/13
                             // TODO: 此时也需要进一步保存下属的册记录等。而且对象资源不可能恢复了
                             goto REDO;
                         }

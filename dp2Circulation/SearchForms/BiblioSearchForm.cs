@@ -2604,7 +2604,7 @@ out strError);
                 if (words.Count > 1)    // .Count == 1 其实是没有有效拆分的情况
                     Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode($"-- '{query_string}' 拆分后的检索词 '{word}' 检索返回 {lRet}").Replace("\r\n", "<br/>") + "</div>");
                 if (string.IsNullOrEmpty(explain) == false)
-                    Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode($"explain: {explain}").Replace("\r\n", "<br/>") + "</div>");
+                    Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode($"search style: {strSearchStyle}\r\noutput style:{strOutputStyle}\r\nquery xml: {DomUtil.GetIndentXml(strQueryXml)}\r\nexplain: {explain}").Replace("\r\n", "<br/>").Replace("  ", "&nbsp;&nbsp;") + "</div>");
 
                 if (lRet == -1)
                     return -1;
@@ -14247,7 +14247,10 @@ out string error);
                         out baTarget,
                         out strError);
                     if (nRet == -1)
+                    {
+                        strError = $"书目记录 {info.RecPath} 在构造 ISO2709 格式阶段出错: {strError}";
                         goto ERROR1;
+                    }
 
                     s.Write(baTarget, 0,
                         baTarget.Length);

@@ -594,7 +594,8 @@ namespace DigitalPlatform.LibraryServer.Common
                     {
                         if (StringUtil.RegexCompare(pattern, barcode) == true)
                         {
-                            if (IsInRange(barcode, value))
+                            if (range.HasAttribute("value") == false // 2025/7/10
+                                || IsInRange(barcode, value))
                                 return true;
                         }
                     }

@@ -587,7 +587,7 @@ string strTargetPath)
                 {
                     if (items[i].Type == ResTree.RESTYPE_DB)
                     {
-                        strError = "数据库 " + strDatabaseName + " 已经存在。";
+                        strError = "(内核)数据库 " + strDatabaseName + " 已经存在。";
                         return 1;
                     }
                     else

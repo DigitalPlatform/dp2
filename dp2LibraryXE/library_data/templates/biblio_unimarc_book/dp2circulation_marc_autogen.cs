@@ -702,9 +702,9 @@ public class MyHost : DetailHost
             //      1   succeed
             nRet = dlg.GetNumber(
                 ZhongcihaoStyle.Seed,
-                        strClass,
-                        this.DetailForm.BiblioDbName,
-                        out strNumber,
+                strClass,
+                this.DetailForm.BiblioDbName,
+                out strNumber,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -892,7 +892,7 @@ public class MyHost : DetailHost
             "维护210对照表 -- 第2步",
             "请输入ISBN出版社号码 '" + strPublisherNumber + "' 对应的UNIMARC 210$a$c参数(格式 出版地:出版社名):",
             strValue,
-                this.DetailForm.MainForm.DefaultFont);
+            this.DetailForm.MainForm.DefaultFont);
         if (strValue == null)
             return;	// 放弃整个操作
 

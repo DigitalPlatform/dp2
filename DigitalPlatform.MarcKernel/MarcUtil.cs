@@ -775,6 +775,12 @@ namespace DigitalPlatform.Marc
                 baField = new MyByteList();
                 baField.AddRange(s, offs, 3);
 
+                /*
+#if DEBUG
+                string name = Encoding.UTF8.GetString(baField.ToArray());
+#endif
+                */
+
                 results.Add(baField);
                 baField = null;
                 // 得到字段内容开始地址
@@ -4485,7 +4491,7 @@ out strError);
         // return:
         //		-1	error
         //		0	succeed
-        public static int BuildISO2709Record(byte[] baMARC,
+        public static void BuildISO2709Record(byte[] baMARC,
             out byte[] baResult)
         {
             int nLen;
@@ -4505,9 +4511,9 @@ out strError);
             baResult = null;
 
             if (baMARC == null)
-                return -1;
+                throw new ArgumentException("参数 baMARC 不应为 null");
             if (baMARC.Length < 24)
-                return -1;
+                throw new ArgumentException("参数 baMARC 的 Length 不应小于 24");
 
             // 2018/3/8
             if (baMARC[0] == 0
@@ -4551,6 +4557,8 @@ out strError);
                     baFldName, 0,
                     3);
 
+                var fieldName = Encoding.UTF8.GetString(baFldName);
+
                 // advstrFldContent = advstrMARC.MidA(nStartPos + 3, nFldLen - 3);
                 baFldContent = new byte[nFldLen - 3];
                 Array.Copy(baMARC,
@@ -4560,10 +4568,18 @@ out strError);
 
                 //advstrFldLen.Format("%04d", nFldLen - 3);
                 strFldLen = Convert.ToString(nFldLen - 3);
+
+                if (strFldLen.Length > 4)
+                    throw new Exception($"目次区字段 {fieldName} 长度 {(nFldLen - 3)} 表达超过 4 个字符。无法构造合法的 ISO2709 记录");
+
                 strFldLen = strFldLen.PadLeft(4, '0');
 
                 // advstrFldStart.Format("%05d", nFldStart);
                 strFldStart = Convert.ToString(nFldStart);
+
+                if (strFldStart.Length > 5)
+                    throw new Exception($"目次区字段 {fieldName} 起始位置 {nFldStart} 表达超过 5 个字符。无法构造合法的 ISO2709 记录");
+
                 strFldStart = strFldStart.PadLeft(5, '0');
 
                 nFldStart += nFldLen - 3;
@@ -4657,8 +4673,6 @@ out strError);
                 = RECEND;
             */
             baResult = ByteArray.Add(baResult, (byte)RECEND);
-
-            return 0;
         }
 
         // 探测记录的MARC格式 unimarc / usmarc / dt1000reader
@@ -4956,8 +4970,17 @@ out strError);
             // 先转换字符集
             byte[] baMARC = targetEncoding.GetBytes(strMARC);
 
-            BuildISO2709Record(baMARC,
-                out baResult);
+            // 2025/7/9 增加对错误状态的判断
+            try
+            {
+                BuildISO2709Record(baMARC,
+                    out baResult);
+            }
+            catch (Exception ex)
+            {
+                strError = ex.Message;
+                return -1;
+            }
 
             strError = "";
             return 0;

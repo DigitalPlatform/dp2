@@ -9769,7 +9769,9 @@ dlg.UiState);
                         xml,
                         timestamp,
                         "",
+                        "ifNotExist:continue",  // 2025/6/13
                         out strOutputPath,
+                        out _,
                         out baNewTimestamp,
                         out strError);
                     else if (data.DbType == "patron")

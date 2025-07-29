@@ -4,10 +4,7 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using System.Collections;
 using System.Collections.Generic;
-
 using System.Drawing.Drawing2D;
-using System.Runtime.InteropServices;
-using System.Runtime.CompilerServices;
 
 
 namespace DigitalPlatform.Marc

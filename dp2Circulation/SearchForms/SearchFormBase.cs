@@ -1630,6 +1630,51 @@ TaskScheduler.Default);
             return new NormalResult();
         }
 
+        // parameters:
+        //      strElementName 带有前缀的 XPATH 元素名
+        internal static void ChangeFieldNs(ref XmlDocument dom,
+string strElementName,
+string strNewValue,
+ref StringBuilder debug,
+ref bool bChanged)
+        {
+            var nsmgr = new XmlNamespaceManager(dom.NameTable);
+            nsmgr.AddNamespace("dprms", DpNs.dprms);
+
+            var nodes = dom.DocumentElement.SelectNodes(strElementName, nsmgr);
+
+            string strOldValue = nodes.Count > 0 ? nodes[0].Value : null;
+
+            // 解析命令
+            strNewValue = ProcessCommand(strOldValue, strNewValue);
+
+            if (strOldValue != strNewValue)
+            {
+                if (nodes.Count == 0)
+                {
+                    if (string.IsNullOrEmpty(strNewValue))
+                    {
+                        bChanged = false;
+                        return;
+                    }
+                    else
+                        throw new Exception($"在 XML 文档中没有找到元素 '{strElementName}'");
+                }
+                else
+                {
+                    if (string.IsNullOrEmpty(strNewValue))
+                        nodes[0].ParentNode.RemoveChild(nodes[0]);
+                    else
+                        nodes[0].Value = strNewValue;
+                }
+
+                bChanged = true;
+
+                debug.Append("<" + strElementName + "> '" + strOldValue + "' --> '" + strNewValue + "'\r\n");
+            }
+        }
+
+
         internal static void ChangeField(ref XmlDocument dom,
     string strElementName,
     string strNewValue,
@@ -2179,23 +2224,25 @@ TaskScheduler.Default);
             strError = "";
             strDebugInfo = "";
 
-            bool bChanged = false;
-            int nRet = 0;
-
-            StringBuilder debug = new StringBuilder(4096);
-
-            foreach (OneAction action in actions)
+            try
             {
-                // 找到元素名
-                if (string.IsNullOrEmpty(action.FieldName) == true)
-                    continue;
-                string strElementName = "";
-                if (action.FieldName[0] == '{' || action.FieldName[0] == '<')
+                bool bChanged = false;
+                int nRet = 0;
+
+                StringBuilder debug = new StringBuilder(4096);
+
+                foreach (OneAction action in actions)
                 {
-                    strElementName = OneActionDialog.Unquote(action.FieldName);
-                }
-                else
-                {
+                    // 找到元素名
+                    if (string.IsNullOrEmpty(action.FieldName) == true)
+                        continue;
+                    string strElementName = "";
+                    if (action.FieldName[0] == '{' || action.FieldName[0] == '<')
+                    {
+                        strElementName = OneActionDialog.Unquote(action.FieldName);
+                    }
+                    else
+                    {
 #if NO
                     // 从 CfgDom 中查找元素名
                     XmlNode node = cfg_dom.DocumentElement.SelectSingleNode("//caption[@text='"+action.FieldName+"']");
@@ -2206,106 +2253,123 @@ TaskScheduler.Default);
                     }
                     strElementName = DomUtil.GetAttr(node, "element");
 #endif
-                    nRet = OneActionDialog.GetElementName(
-                        cfg_dom,
-                        action.FieldName,
-                        out strElementName,
-                        out strError);
-                    if (nRet == -1)
-                        return -1;
-                }
-
-                // 将值字符串中的宏替换
-                string strFieldValue = action.FieldValue;
-                if (strFieldValue.IndexOf("%") != -1)
-                {
-                    this._macroFileName = Path.Combine(Program.MainForm.UserDir, this.DbType + "_macrotable.xml");
-                    if (File.Exists(this._macroFileName) == false)
-                    {
-                        strError = "宏定义文件 '" + this._macroFileName + "' 不存在，无法进行宏替换";
-                        return -1;
-                    }
-                    // 解析宏
-                    nRet = MacroUtil.Parse(
-                        false,
-                        strFieldValue,
-                        ParseOneMacro,
-                        out string strResult,
-                        out strError);
-                    if (nRet == -1)
-                    {
-                        strError = "替换字符串 '" + strFieldValue + "' 中的宏时出错: " + strError;
-                        return -1;
+                        nRet = OneActionDialog.GetElementName(
+                            cfg_dom,
+                            action.FieldName,
+                            out strElementName,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
                     }
 
-                    strFieldValue = strResult;
-                }
-
-                if (string.IsNullOrEmpty(action.Action) == true)
-                {
-                    // 替换内容
-
-                    if (strElementName.IndexOf("@") == -1)
+                    // 将值字符串中的宏替换
+                    string strFieldValue = action.FieldValue;
+                    if (strFieldValue.IndexOf("%") != -1)
                     {
-                        ChangeField(ref dom,
+                        this._macroFileName = Path.Combine(Program.MainForm.UserDir, this.DbType + "_macrotable.xml");
+                        if (File.Exists(this._macroFileName) == false)
+                        {
+                            strError = "宏定义文件 '" + this._macroFileName + "' 不存在，无法进行宏替换";
+                            return -1;
+                        }
+                        // 解析宏
+                        nRet = MacroUtil.Parse(
+                            false,
+                            strFieldValue,
+                            ParseOneMacro,
+                            out string strResult,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "替换字符串 '" + strFieldValue + "' 中的宏时出错: " + strError;
+                            return -1;
+                        }
+
+                        strFieldValue = strResult;
+                    }
+
+                    if (string.IsNullOrEmpty(action.Action) == true)
+                    {
+                        // 替换内容
+
+                        // 2025/7/14
+                        if (strElementName.Contains("["))
+                        {
+                            // dprms:file[@usage='face'] 形态
+                            ChangeFieldNs(ref dom,
     strElementName,
     strFieldValue,  // action.FieldValue,
     ref debug,
     ref bChanged);
+                        }
+                        else if (strElementName.Contains("@"))
+                        {
+                            // element@attr 形态
+                            ParseElementName(strElementName, out string strElement, out string strAttrName);
+                            ChangeField(ref dom,
+        strElement,
+        strAttrName,
+        strFieldValue,  // action.FieldValue,
+        ref debug,
+        ref bChanged);
+                        }
+                        else
+                        {
+                            // element 形态
+                            ChangeField(ref dom,
+        strElementName,
+        strFieldValue,  // action.FieldValue,
+        ref debug,
+        ref bChanged);
+                        }
                     }
                     else
                     {
+                        // add/remove
+                        string strState = DomUtil.GetElementText(dom.DocumentElement,
+                            strElementName);
 
-                        ParseElementName(strElementName, out string strElement, out string strAttrName);
-                        ChangeField(ref dom,
-    strElement,
-    strAttrName,
-    strFieldValue,  // action.FieldValue,
-    ref debug,
-    ref bChanged);
+                        string strOldState = strState;
+
+                        if (action.Action == "add")
+                        {
+                            if (String.IsNullOrEmpty(action.FieldValue) == false)
+                                StringUtil.SetInList(ref strState,
+                                    strFieldValue,  // action.FieldValue, 
+                                    true);
+                        }
+                        if (action.Action == "remove")
+                        {
+                            if (String.IsNullOrEmpty(action.FieldValue) == false)
+                                StringUtil.SetInList(ref strState,
+                                    strFieldValue,  // action.FieldValue, 
+                                    false);
+                        }
+
+                        if (strOldState != strState)
+                        {
+                            DomUtil.SetElementText(dom.DocumentElement,
+                                strElementName,
+                                strState);
+                            bChanged = true;
+
+                            debug.Append("<" + strElementName + "> '" + strOldState + "' --> '" + strState + "'\r\n");
+                        }
                     }
                 }
-                else
-                {
-                    // add/remove
-                    string strState = DomUtil.GetElementText(dom.DocumentElement,
-                        strElementName);
 
-                    string strOldState = strState;
+                strDebugInfo = debug.ToString();
 
-                    if (action.Action == "add")
-                    {
-                        if (String.IsNullOrEmpty(action.FieldValue) == false)
-                            StringUtil.SetInList(ref strState,
-                                strFieldValue,  // action.FieldValue, 
-                                true);
-                    }
-                    if (action.Action == "remove")
-                    {
-                        if (String.IsNullOrEmpty(action.FieldValue) == false)
-                            StringUtil.SetInList(ref strState,
-                                strFieldValue,  // action.FieldValue, 
-                                false);
-                    }
+                if (bChanged == true)
+                    return 1;
 
-                    if (strOldState != strState)
-                    {
-                        DomUtil.SetElementText(dom.DocumentElement,
-                            strElementName,
-                            strState);
-                        bChanged = true;
-
-                        debug.Append("<" + strElementName + "> '" + strOldState + "' --> '" + strState + "'\r\n");
-                    }
-                }
+                return 0;
             }
-
-            strDebugInfo = debug.ToString();
-
-            if (bChanged == true)
-                return 1;
-
-            return 0;
+            catch(Exception ex)
+            {
+                strError = $"ModifyItemRecord() 出现异常: {ExceptionUtil.GetDebugText(ex)}";
+                return -1;
+            }
         }
 
         string _macroFileName = "";

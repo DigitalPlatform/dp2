@@ -44,7 +44,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;SN1</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -249,10 +249,6 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <None Include="RfidTool_TemporaryKey.pfx" />
-    <None Include="代码签名证书-2020.pfx" />
-    <None Include="数字平台（北京）软件有限责任公司.pfx" />
-    <None Include="数字平台（北京）软件有限责任公司_2022.pfx" />
-    <None Include="数字平台（北京）软件有限责任公司苏州分公司.pfx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

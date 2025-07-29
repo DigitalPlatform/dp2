@@ -644,6 +644,11 @@ MessageBoxDefaultButton.Button2);
                 AddWritingLog(log);
                 return new NormalResult { Value = 1 };
             }
+            catch(Exception ex)
+            {
+                strError = "写入 RFID 标签时发生异常: " + ExceptionUtil.GetAutoText(ex);
+                goto ERROR1;
+            }
             finally
             {
                 this.ClearMessage();

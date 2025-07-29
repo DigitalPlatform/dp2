@@ -3377,6 +3377,7 @@ out strError);
             if (nRet == -1)
             {
                 strError = "删除书目库 '" + strName + "' 时发生错误: " + strError;
+                this.WriteErrorLog(strError);   // 2025/6/11
                 return -1;
             }
             func_procesedDatabase?.Invoke(

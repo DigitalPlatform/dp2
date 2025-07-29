@@ -979,3 +979,38 @@ MARC 编辑器中双击选择单个子字段。要针对 001 头标区也起作�
 当 dp2circulation_marc_autogen.cs 被系统管理窗“内核”属性页修改后，要自动清除掉以前的
 Assembly，以便让种册窗的右侧数据加工菜单重新编译运行。
 (已经做到)
+
+~~~
+在系统管理窗创建(或删除)新的数据库以后，要自动刷新内核属性页
+
+~~~
+https://knowledge.exlibrisgroup.com/Alma/Product_Documentation/010Alma_Online_Help_(English)/Metadata_Management/180Search_Indexes/UNIMARC_Bibliographic_All_Titles_Search
+UNIMARC 格式中检索点和字段的映射关系
+
+~~~
+http://timestamp.comodoca.com/rfc3161
+
+https://www.cnblogs.com/mmykdbc/p/12221833.html
+十大免费时间戳服务器地址
+http://sha256timestamp.ws.symantec.com/sha256/
+
+http://timestamp.comodoca.com/rfc3161
+
+http://tsa.wosign.com/timestamp
+
+http://tsa.starfieldtech.com
+
+http://timestamp.globalsign.com/scripts/timstamp.dll
+
+http://rfc3161timestamp.globalsign.com/advanced
+
+http://timestamp.digicert.com
+
+http://time.certum.pl
+
+http://timestamp.verisign.com/scripts/timestamp.dll
+
+http://timestamp.entrust.net/TSS/AuthenticodeTS
+
+
+new:http://rfc3161timestamp.globalsign.com/standard

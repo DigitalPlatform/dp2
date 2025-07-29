@@ -1,75 +1,78 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <root>
-  <action element="state" type="" list="readerState" additional="combine">
-    <caption lang="zh">状态</caption>
-  </action>
-  <action element="readerType" type="" list="readerType">
-    <caption lang="zh">读者类型</caption>
-  </action>
-  <action element="barcode" type="">
-    <caption lang="zh">证条码号</caption>
-  </action>
-  <action element="cardNumber" type="" additional="combine">
-    <caption lang="zh">证号</caption>
-  </action>
-  <action element="createDate" type="rfc1123">
-    <caption lang="zh">发证日期</caption>
-  </action>
-  <action element="expireDate" type="rfc1123">
-    <caption lang="zh">失效日期</caption>
-  </action>
-  <action element="comment" type="">
-    <caption lang="zh">注释</caption>
-  </action>
-  <action element="hire@period" type="">
-    <caption lang="zh">租金周期</caption>
-  </action>
-  <action element="hire@expireDate" type="rfc1123">
-    <caption lang="zh">租金失效期</caption>
-  </action>
-  <action element="foregift" type="">
-    <caption lang="zh">押金余额</caption>
-  </action>
-  <action element="name" type="">
-    <caption lang="zh">姓名</caption>
-  </action>
-  <action element="gender" type="">
-    <caption lang="zh">性别</caption>
-  </action>
-  <action element="dateOfBirth" type="rfc1123">
-    <caption lang="zh">出生日期</caption>
-  </action>
-  <action element="idCardNumber" type="">
-    <caption lang="zh">身份证号</caption>
-  </action>
-  <action element="department" type="">
-    <caption lang="zh">单位</caption>
-  </action>
-  <action element="post" type="">
-    <caption lang="zh">职务</caption>
-  </action>
-  <action element="address" type="">
-    <caption lang="zh">地址</caption>
-  </action>
-  <action element="tel" type="">
-    <caption lang="zh">电话</caption>
-  </action>
-  <action element="email" type="">
-    <caption lang="zh">Email地址</caption>
-  </action>
-  <action element="rights" type="" list="readerRights" additional="combine">
-    <caption lang="zh">权限</caption>
-  </action>
-  <action element="access" type="">
-    <caption lang="zh">存取定义</caption>
-  </action>
-  <action element="fingerprint" type="">
-    <caption lang="zh">指纹</caption>
-  </action>
-  <action element="face" type="">
-    <caption lang="zh">人脸</caption>
-  </action>
-  <action element="palmprint" type="">
-    <caption lang="zh">掌纹</caption>
-  </action>
+	<action element="state" type="" list="readerState" additional="combine">
+		<caption lang="zh">状态</caption>
+	</action>
+	<action element="readerType" type="" list="readerType">
+		<caption lang="zh">读者类型</caption>
+	</action>
+	<action element="barcode" type="">
+		<caption lang="zh">证条码号</caption>
+	</action>
+	<action element="cardNumber" type="" additional="combine">
+		<caption lang="zh">证号</caption>
+	</action>
+	<action element="createDate" type="rfc1123">
+		<caption lang="zh">发证日期</caption>
+	</action>
+	<action element="expireDate" type="rfc1123">
+		<caption lang="zh">失效日期</caption>
+	</action>
+	<action element="comment" type="">
+		<caption lang="zh">注释</caption>
+	</action>
+	<action element="hire@period" type="">
+		<caption lang="zh">租金周期</caption>
+	</action>
+	<action element="hire@expireDate" type="rfc1123">
+		<caption lang="zh">租金失效期</caption>
+	</action>
+	<action element="foregift" type="">
+		<caption lang="zh">押金余额</caption>
+	</action>
+	<action element="name" type="">
+		<caption lang="zh">姓名</caption>
+	</action>
+	<action element="gender" type="">
+		<caption lang="zh">性别</caption>
+	</action>
+	<action element="dateOfBirth" type="rfc1123">
+		<caption lang="zh">出生日期</caption>
+	</action>
+	<action element="idCardNumber" type="">
+		<caption lang="zh">身份证号</caption>
+	</action>
+	<action element="department" type="">
+		<caption lang="zh">单位</caption>
+	</action>
+	<action element="post" type="">
+		<caption lang="zh">职务</caption>
+	</action>
+	<action element="address" type="">
+		<caption lang="zh">地址</caption>
+	</action>
+	<action element="tel" type="">
+		<caption lang="zh">电话</caption>
+	</action>
+	<action element="email" type="">
+		<caption lang="zh">Email地址</caption>
+	</action>
+	<action element="rights" type="" list="readerRights" additional="combine">
+		<caption lang="zh">权限</caption>
+	</action>
+	<action element="access" type="">
+		<caption lang="zh">存取定义</caption>
+	</action>
+	<action element="fingerprint" type="">
+		<caption lang="zh">指纹</caption>
+	</action>
+	<action element="face" type="">
+		<caption lang="zh">人脸</caption>
+	</action>
+	<action element="dprms:file[@usage='face']" type="">
+		<caption lang="zh">人脸图片</caption>
+	</action>
+	<action element="palmprint" type="">
+		<caption lang="zh">掌纹</caption>
+	</action>
 </root>

@@ -698,7 +698,7 @@ namespace DigitalPlatform.rms
                 }
 
                 SearchItem searchItem = new SearchItem();
-                searchItem.Description = $"{strOneDatabase} {nodeItem.OuterXml}";
+                searchItem.Description = $"{strOneDatabase}\r\n{DomUtil.GetIndentXml(nodeItem.OuterXml)}";
                 searchItem.TargetTables = strTableList;
                 searchItem.Word = strWord;
                 searchItem.Match = strMatch;
