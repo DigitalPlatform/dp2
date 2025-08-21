@@ -35,7 +35,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>512</ApplicationRevision>
+    <ApplicationRevision>515</ApplicationRevision>
     <ApplicationVersion>3.135.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -78,7 +78,7 @@
     <ApplicationIcon>setup-v.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestTimestampUrl>http://timestamp.digicert.com</ManifestTimestampUrl>
+    <ManifestTimestampUrl>http://timestamp.sectigo.com</ManifestTimestampUrl>
   </PropertyGroup>
   <PropertyGroup />
   <PropertyGroup>

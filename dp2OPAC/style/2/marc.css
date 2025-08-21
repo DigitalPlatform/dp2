@@ -48,6 +48,11 @@ TABLE.marc TD.indicator
     border-color: #eeeeee;
 }
 
+    TABLE.marc TD.content {
+        word-break: break-all;
+        overflow-wrap: anywhere;
+    }
+
 TABLE.marc SPAN
 {
     margin: 2px;

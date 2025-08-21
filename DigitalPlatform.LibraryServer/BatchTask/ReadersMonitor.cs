@@ -1943,14 +1943,13 @@ namespace DigitalPlatform.LibraryServer
             if (String.IsNullOrEmpty(strParentID) == true)
                 return null;
 
-            string strBiblioRecPath = "";
             // return:
             //      -1  error
             //      1   找到
             int nRet = this.App.GetBiblioRecPathByItemRecPath(
                 strItemRecPath,
                 strParentID,
-                out strBiblioRecPath,
+                out string strBiblioRecPath,
                 out strError);
             if (nRet == -1)
                 return null;

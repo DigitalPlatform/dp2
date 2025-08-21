@@ -7,15 +7,13 @@ using System.Text;
 using System.Windows.Forms;
 using System.Threading;
 using System.Xml;
+using System.Linq;
 
 using System.Collections;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 
 using System.Deployment.Application;
 
 using System.Diagnostics;
-using System.Net;   // for WebClient class
 using System.IO;
 using System.Web;
 using System.Reflection;
@@ -41,13 +39,9 @@ using DigitalPlatform.MarcDom;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
-using static dp2Circulation.MyForm;
-using DigitalPlatform.Core;
 using DigitalPlatform.Z3950;
 using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.RFID;
-using System.Linq;
-using DocumentFormat.OpenXml.Math;
 
 namespace dp2Circulation
 {
@@ -11184,6 +11178,11 @@ this.UserTempDir,
                         });
                     });
             }
+        }
+
+        private void MenuItem_restoreSize_Click(object sender, EventArgs e)
+        {
+            this.Size = new Size(1024, 768);
         }
     }
 

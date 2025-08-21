@@ -1179,6 +1179,9 @@ namespace DigitalPlatform.LibraryClient.localhost {
         private string BiblioRecPathField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string BiblioSummaryField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
         private string BorrowDateField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
@@ -1246,6 +1249,19 @@ namespace DigitalPlatform.LibraryClient.localhost {
                 if ((object.ReferenceEquals(this.BiblioRecPathField, value) != true)) {
                     this.BiblioRecPathField = value;
                     this.RaisePropertyChanged("BiblioRecPath");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string BiblioSummary {
+            get {
+                return this.BiblioSummaryField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.BiblioSummaryField, value) != true)) {
+                    this.BiblioSummaryField = value;
+                    this.RaisePropertyChanged("BiblioSummary");
                 }
             }
         }

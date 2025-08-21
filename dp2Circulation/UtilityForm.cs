@@ -1261,8 +1261,9 @@ MessageBoxDefaultButton.Button2);
                         //	1	结束(当前返回的记录有效)
                         //	2	结束(当前返回的记录无效)
                         nRet = MarcUtil.ReadWorksheetRecord(reader,
-                out string strMARC,
-                out strError);
+                            null,
+                            out string strMARC,
+                            out strError);
                         if (nRet == -1 || nRet == -2)
                             goto ERROR1;
                         if (nRet == 2)

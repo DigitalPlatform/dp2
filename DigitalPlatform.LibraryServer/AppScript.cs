@@ -1973,13 +1973,16 @@ namespace DigitalPlatform.LibraryServer
 
         // 执行脚本函数 VerifyItem
         // parameters:
+        //      dbType  下级库类型 "item" "order" "issue" "comment"
+        //      info    下级记录信息
         // return:
         //      -2  not found script
         //      -1  出错
         //      0   成功
         public int DoVerifyItemFunction(
             SessionInfo sessioninfo,
-            string strAction,
+            string dbType,
+            EntityInfo info,    // strAction,
             XmlDocument itemdom,
             out string strError)
         {
@@ -2028,7 +2031,9 @@ namespace DigitalPlatform.LibraryServer
             // 执行函数
             try
             {
-                return host.VerifyItem(strAction,
+                return host.VerifyItem(
+                    dbType,
+                    info,    // strAction,
                     itemdom,
                     out strError);
             }
@@ -2518,16 +2523,61 @@ namespace DigitalPlatform.LibraryServer
             return false;
         }
 
+        // parameters:
+        //      dbType  下级库类型 "item" "order" "issue" "comment"
+        //      info    下级记录信息
         // return:
         //      -1  调用出错
         //      0   校验正确
         //      1   校验发现错误
-        public virtual int VerifyItem(string strAction,
+        public virtual int VerifyItem(
+            string dbType,
+            EntityInfo info,  // string strAction,
+            XmlDocument itemdom,
+            out string strError)
+        {
+            if (dbType == "item")
+                return VerifyEntity(
+                    info,
+                    itemdom,
+                    out strError);
+            else if (dbType == "order")
+                return VerifyOrder(
+                    info,
+                    itemdom,
+                    out strError);
+            else if (dbType == "issue")
+                return VerifyIssue(
+                    info,
+                    itemdom,
+                    out strError);
+            else if (dbType == "comment")
+                return VerifyComment(
+                    info,
+                    itemdom,
+                    out strError);
+            else
+            {
+                strError = "未知的下级库类型 '" + dbType + "'";
+                return -1;
+            }
+        }
+
+        // parameters:
+        //      info    下级记录信息
+        // return:
+        //      -1  调用出错
+        //      0   校验正确
+        //      1   校验发现错误
+        public virtual int VerifyEntity(
+            EntityInfo info,  // string strAction,
             XmlDocument itemdom,
             out string strError)
         {
             strError = "";
             int nRet = 0;
+
+            string strAction = info.Action; // 2025/8/20
 
             List<string> errors = new List<string>();
 
@@ -2756,6 +2806,36 @@ strRoom1);
                 strError = StringUtil.MakePathList(errors, "; ");
                 return 1;
             }
+
+            return 0;
+        }
+
+        public virtual int VerifyIssue(
+    EntityInfo info,
+    XmlDocument itemdom,
+    out string strError)
+        {
+            strError = "";
+
+            return 0;
+        }
+
+        public virtual int VerifyOrder(
+EntityInfo info,
+XmlDocument itemdom,
+out string strError)
+        {
+            strError = "";
+
+            return 0;
+        }
+
+        public virtual int VerifyComment(
+EntityInfo info,
+XmlDocument itemdom,
+out string strError)
+        {
+            strError = "";
 
             return 0;
         }

@@ -424,6 +424,7 @@ namespace DigitalPlatform.LibraryServer
             if (collection == null)
                 return null;
 
+            // TODO: 应该改进为利用事务 ID 来查找相关的 ChargingOperItem 事项
             var query = Builders<ChargingOperItem>.Filter.And(
                 Builders<ChargingOperItem>.Filter.And(
                     Builders<ChargingOperItem>.Filter.Eq("Operation", "borrow"),
@@ -464,6 +465,7 @@ namespace DigitalPlatform.LibraryServer
         //                      如果 以 "@itemRefID:" 前缀引导，表示这是册参考 ID
         //                      如果 以 "@readerRefID:" 或 "@refID:" 前缀引导，表示这是读者参考 ID
         //      order   排序方式。ascending/descending 之一。默认 ascending
+        //              注: descending 也可以简写为 desc
         //      start   要跳过这么多个记录
         //      totalCount  [out] 返回命中的记录总数
         public IEnumerable<ChargingOperItem> Find(
@@ -496,7 +498,7 @@ namespace DigitalPlatform.LibraryServer
 
 
             var results0 = collection.Find(query);
-            if (order == "descending")
+            if (order == "descending" || order == "desc")
                 results0 = results0.SortByDescending(o => o.OperTime);
             else
                 results0 = results0.SortBy(o => o.OperTime);

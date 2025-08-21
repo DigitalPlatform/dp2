@@ -286,6 +286,24 @@ namespace dp2Circulation
                 throw new ArgumentException($"GetMarcRecord(object) 无法支持 sender 的类型 '{sender.GetType().ToString()}'");
         }
 
+        // 2025/8/7
+        // 根据 BeforeSaveRecord() 函数的 sender 参数设置 MARC 记录
+        public static void SetMarcRecord(object sender,
+            MarcRecord record)
+        {
+            if (sender is MarcEditor)
+            {
+                var marcEditor = sender as MarcEditor;
+                marcEditor.Marc = record.Text;
+            }
+            else if (sender is MarcRecord)
+            {
+                // 不用设置，record 已经是引用传递了
+            }
+            else
+                throw new ArgumentException($"SetMarcRecord() 无法支持 sender 的类型 '{sender.GetType().ToString()}'");
+        }
+
         // 数据保存前的处理工作
         /// <summary>
         /// 数据保存前的处理工作
@@ -401,7 +419,7 @@ namespace dp2Circulation
             delegate_getFirstSubfield func_getFirstSubfield,
             delegate_setFirstSubfield func_setFirstSubfield)
         {
-            bool bChanged = false;
+            bool bChanged = e.Changed;  // 注意调用前可能 e.Changed 就已经是 true 了
             // 编目批次号
             string strBatchNo = func_getFirstSubfield("998", "a");
             if (string.IsNullOrEmpty(strBatchNo) == true)

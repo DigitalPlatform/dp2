@@ -8662,6 +8662,67 @@ out strError);
                         }
                     }
                 }
+
+                // 2025/8/20
+                // 检查实体记录是否符合格式要求
+                if (missing_source_subrecord == false)
+                {
+                    foreach (var info in entityinfos)
+                    {
+                        if (string.IsNullOrEmpty(info.OldRecord))
+                            continue;
+
+                        string strTargetItemDbName = "";
+
+                        // 获得目标实体库名
+                        {
+                            strTargetBiblioDbName = ResPath.GetDbName(strNewBiblioRecPath);
+                            // return:
+                            //      -1  出错
+                            //      0   没有找到
+                            //      1   找到
+                            nRet = this.GetItemDbName(strTargetBiblioDbName,
+                                out strTargetItemDbName,
+                                out strError);
+                            if (nRet == 0 || string.IsNullOrEmpty(strTargetItemDbName) == true)
+                            {
+                                continue;   // 目标实体库不存在
+                            }
+                        }
+
+
+                        EntityInfo info1 = new EntityInfo
+                        {
+                            Action = strAction,
+                            OldRecPath = info.RecPath,
+                            NewRecPath = strTargetItemDbName + "/?",
+                            OldRecord = info.OldRecord,
+                            OldTimestamp = info.OldTimestamp,
+                        };
+
+                        XmlDocument dom = new XmlDocument();
+                        try
+                        {
+                            dom.LoadXml(info.OldRecord);
+                        }
+                        catch (Exception ex)
+                        {
+                            strError = $"册记录 {info.RecPath} XML 内容不是合法的 XML 格式。{ex.Message}";
+                            goto ERROR1;
+                        }
+                        nRet = this.DoVerifyItemFunction(
+            sessioninfo,
+            "item",
+            info1,
+            dom,
+            out strError);
+                        if (nRet != 0)
+                        {
+                            strError = $"册记录 {info.RecPath} XML 内容校验不合法: {strError}";
+                            goto ERROR1;
+                        }
+                    }
+                }
             }
 
             // 2)

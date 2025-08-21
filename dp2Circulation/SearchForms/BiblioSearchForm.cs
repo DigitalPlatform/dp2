@@ -1,40 +1,38 @@
-﻿using System;
-using System.Linq;
-using System.Collections;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
-using System.Diagnostics;
-using System.IO;
-using System.Reflection;
-using System.Xml;
-using System.Web;
-using System.Threading;
-using System.Threading.Tasks;
-using System.ComponentModel;
-
-using ClosedXML.Excel;
-
+﻿using ClosedXML.Excel;
 using DigitalPlatform;
-using DigitalPlatform.GUI;
-using DigitalPlatform.Xml;
 using DigitalPlatform.CommonControl;
-using DigitalPlatform.Marc;
-
+using DigitalPlatform.dp2.Statis;
+using DigitalPlatform.Drawing;
+using DigitalPlatform.GUI;
 using DigitalPlatform.IO;
-using DigitalPlatform.Script;
-using DigitalPlatform.Text;
-using DigitalPlatform.MessageClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
-using DigitalPlatform.dp2.Statis;
-using DigitalPlatform.Z3950.UI;
+using DigitalPlatform.Marc;
+using DigitalPlatform.MessageClient;
+using DigitalPlatform.Script;
+using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
 using DigitalPlatform.Z3950;
-using static DigitalPlatform.Marc.MarcUtil;
-using dp2Circulation.SearchForms;
+using DigitalPlatform.Z3950.UI;
 using dp2Circulation.Script;
+using dp2Circulation.SearchForms;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Web;
+using System.Windows.Forms;
+using System.Xml;
+using static DigitalPlatform.Marc.MarcUtil;
 
 namespace dp2Circulation
 {
@@ -6453,6 +6451,16 @@ out strError);
                         }
                     }
 
+                    // 2025/8/8
+                    // 把 errors 存储到 BiblioInfo 中
+                    if (info != null)
+                    {
+                        if (errors.Count == 0)
+                            info.VerifyErrors = null;
+                        else
+                            info.VerifyErrors = errors;
+                    }
+
                     nCount++;
                     looping.Progress.SetProgressValue(++i);
                 }
@@ -8752,7 +8760,7 @@ TaskScheduler.Default);
             var dont_trigger_autogen = dlg.DontTriggerAutoGen;
 
             nRet = PrepareMarcQuery(this.m_strUsedMarcQueryFilename,
-                out Assembly assembly,
+                out _,  // Assembly assembly,
                 out MarcQueryHost host,
                 out strError);
             if (nRet == -1)
@@ -13797,6 +13805,9 @@ public class MyVerifyHost : VerifyHost
 
             bool unimarc_modify_100 = dlg.UnimarcModify100;
 
+            string fileType = dlg.FileType;
+            string subfieldDelemeter = dlg.SubfieldDelimeter;
+
             string strCatalogingRule = dlg.Rule;
             if (strCatalogingRule == "<无限制>")
                 strCatalogingRule = null;
@@ -14230,32 +14241,66 @@ out string error);
                         // strMARC = record.Text;
                     }
 
-                    // 将MARC机内格式转换为ISO2709格式
-                    // parameters:
-                    //      strSourceMARC   [in]机内格式MARC记录。
-                    //      strMarcSyntax   [in]为"unimarc"或"usmarc"
-                    //      targetEncoding  [in]输出ISO2709的编码方式。为UTF8、codepage-936等等
-                    //      baResult    [out]输出的ISO2709记录。编码方式受targetEncoding参数控制。注意，缓冲区末尾不包含0字符。
-                    // return:
-                    //      -1  出错
-                    //      0   成功
-                    nRet = MarcUtil.CvtJineiToISO2709(
-                        record.Text,
-                        strMarcSyntax,
-                        targetEncoding,
-                        unimarc_modify_100 ? "unimarc_100" : "",
-                        out baTarget,
-                        out strError);
-                    if (nRet == -1)
+                    string dollar = new string(MarcUtil.SUBFLD, 1);
+                    // 2025/8/23
+                    if (fileType == "wor")
                     {
-                        strError = $"书目记录 {info.RecPath} 在构造 ISO2709 格式阶段出错: {strError}";
-                        goto ERROR1;
+                        // 根据 unimarc_modify_100 先加工 record.Text
+                        ModifyOutputMARC(record.Text,
+                            strMarcSyntax,
+                            targetEncoding,
+                            unimarc_modify_100 ? "unimarc_100" : "",
+                            out string changed_marc);
+
+                        changed_marc = changed_marc.Replace(dollar, subfieldDelemeter);
+
+                        nRet = MarcUtil.CvtJineiToWorksheet(changed_marc,
+                            -1,
+                            out List<string> lines,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strError = $"书目记录 {info.RecPath} 在构造 工作单 格式阶段出错: {strError}";
+                            goto ERROR1;
+                        }
+                        List<byte> bytes = new List<byte>();
+                        foreach (var line in lines)
+                        {
+                            bytes.AddRange(targetEncoding.GetBytes(line));
+                            bytes.AddRange(targetEncoding.GetBytes("\r\n"));
+                        }
+                        // bytes.AddRange(targetEncoding.GetBytes("***\r\n"));
+                        baTarget = bytes.ToArray();
+                    }
+                    else
+                    {
+                        // 将MARC机内格式转换为ISO2709格式
+                        // parameters:
+                        //      strSourceMARC   [in]机内格式MARC记录。
+                        //      strMarcSyntax   [in]为"unimarc"或"usmarc"
+                        //      targetEncoding  [in]输出ISO2709的编码方式。为UTF8、codepage-936等等
+                        //      baResult    [out]输出的ISO2709记录。编码方式受targetEncoding参数控制。注意，缓冲区末尾不包含0字符。
+                        // return:
+                        //      -1  出错
+                        //      0   成功
+                        nRet = MarcUtil.CvtJineiToISO2709(
+                            record.Text,
+                            strMarcSyntax,
+                            targetEncoding,
+                            unimarc_modify_100 ? "unimarc_100" : "",
+                            out baTarget,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strError = $"书目记录 {info.RecPath} 在构造 ISO2709 格式阶段出错: {strError}";
+                            goto ERROR1;
+                        }
                     }
 
                     s.Write(baTarget, 0,
                         baTarget.Length);
 
-                    if (dlg.CrLf == true)
+                    if (dlg.CrLf == true && fileType == "iso")
                     {
                         byte[] baCrLf = targetEncoding.GetBytes("\r\n");
                         s.Write(baCrLf, 0,
@@ -16717,6 +16762,12 @@ out string error);
         {
 
         }
+
+        private void listView_records_ColumnContextMenuClicked(object sender, ColumnHeader columnHeader)
+        {
+            ColumnClickEventArgs e = new ColumnClickEventArgs(this.listView_records.Columns.IndexOf(columnHeader));
+            ListViewUtil.OnColumnContextMenuClick(this.listView_records, e);
+        }
     }
 
     // 为一行存储的书目信息
@@ -16751,6 +16802,10 @@ out string error);
 
         // 2021/2/4
         public string Subrecords = "";
+
+        // 2025/8/8
+        // 校验结果
+        public List<string> VerifyErrors { get; set; }
 
         public BiblioInfo()
         {

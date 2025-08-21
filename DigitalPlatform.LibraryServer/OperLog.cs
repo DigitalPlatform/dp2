@@ -836,7 +836,8 @@ namespace DigitalPlatform.LibraryServer
         // 1.10 (2024/2/7) 借阅信息链中两类册条码号变为参考 ID。borrow return reservation 等日志动作记录格式均有变化。见文档 https://github.com/DigitalPlatform/dp2/issues/1183
         // 1.11 (2025/2/19) SetUser() API 的日志记录中增加了 libraryCode 元素。此前的版本没有 libraryCode 元素，在执行 GetOperLogs() API 的时候，应该只允许全局账户身份的请求获得 setUser 日志。而新版本的日志记录，则根据 libraryCode 元素内容中的馆代码，决定分馆身份的请求者可以看到它所在分馆的日志记录
         // 1.12 (2025/4/10) SetSystemParameter() API 的日志记录中增加了 oldValue 元素和 snapshot 元素。此前版本中没有这两个元素
-        static string operlog_version = "1.12";
+        // 1.13 (2025/8/14) Borrow() 和 Return() API 的日志记录中会写入 biblioRecPath 元素。此前版本只有 action 为 "read" 时才会写入 biblioRecPath 元素
+        static string operlog_version = "1.13";
 
         // 写入一条操作日志
         // parameters:

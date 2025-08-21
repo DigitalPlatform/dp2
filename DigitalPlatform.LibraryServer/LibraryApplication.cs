@@ -1,40 +1,36 @@
 ﻿// #define OPTIMIZE_API
 #define LOG_INFO
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Xml;
-using System.IO;
-using System.Collections;
-using System.Threading;
-using System.Diagnostics;
-using System.Runtime.Serialization;
-using System.Messaging;
-using System.Security.Principal;
-using System.Reflection;
-using System.Text.RegularExpressions;
-using System.Linq;
-using System.Threading.Tasks;
-
-using MongoDB.Driver;
+using DigitalPlatform.Core;
+using DigitalPlatform.IO;
+using DigitalPlatform.LibraryServer.Common;
+using DigitalPlatform.Marc;
+using DigitalPlatform.Message;
+using DigitalPlatform.rms.Client;
+using DigitalPlatform.rms.Client.rmsws_localhost;
+using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
+using Microsoft.VisualStudio.Threading;
 using MongoDB.Bson;
 using MongoDB.Bson.IO;
-
-using Microsoft.VisualStudio.Threading;
-
+using MongoDB.Driver;
 using Newtonsoft.Json.Linq;
-
-using DigitalPlatform.rms.Client;
-using DigitalPlatform.Xml;
-using DigitalPlatform.IO;
-using DigitalPlatform.Text;
-
-using DigitalPlatform.Message;
-using DigitalPlatform.rms.Client.rmsws_localhost;
-using DigitalPlatform.LibraryServer.Common;
-using DigitalPlatform.Core;
-using DigitalPlatform.Marc;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Data.SqlClient;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Messaging;
+using System.Reflection;
+using System.Runtime.Serialization;
+using System.Security.Principal;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Xml;
 
 
 namespace DigitalPlatform.LibraryServer
@@ -14006,6 +14002,12 @@ out strError);
             strBiblioRecPath = "";
             int nRet = 0;
 
+            if (string.IsNullOrEmpty(strParentID) == true)
+            {
+                strError = "strParentID 参数值不能为空";
+                return -1;
+            }
+
             {
                 string strItemDbName0 = ResPath.GetDbName(strItemRecPath);
                 // 需要检查一下数据库名是否在允许的实体库名之列
@@ -14140,6 +14142,43 @@ out strError);
 
             strBiblioRecPath = strBiblioDbName + "/" + strBiblioRecID;
             return 1;
+        }
+
+
+        // 2025/8/14
+        // 根据册记录路径和种记录ID，构造种记录路径
+        public int GetBiblioRecPath(string strItemRecPath,
+            string strBiblioRecID,
+            out string strBiblioRecPath,
+            out string strError)
+        {
+            strBiblioRecPath = "";
+            strError = "";
+            string strItemDbName = "";  // 实体库名
+
+            // 如果需要从册记录中获得种记录路径
+            strItemDbName = ResPath.GetDbName(strItemRecPath);
+            string strBiblioDbName = "";
+
+            // 最好在应用启动时就做了？
+            // 根据实体库名, 找到对应的书目库名
+            // return:
+            //      -1  出错
+            //      0   没有找到
+            //      1   找到
+            int nRet = this.GetBiblioDbNameByItemDbName(strItemDbName,
+                out strBiblioDbName,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            if (nRet == 0)
+            {
+                strError = "实体库名 '" + strItemDbName + "' 没有找到对应的书目库名";
+                return -1;
+            }
+
+            strBiblioRecPath = strBiblioDbName + "/" + strBiblioRecID;
+            return 0;
         }
 
         #endregion

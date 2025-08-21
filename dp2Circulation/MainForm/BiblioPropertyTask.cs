@@ -157,6 +157,7 @@ namespace dp2Circulation
             this.HTML = "<html>" +
     Program.MainForm.GetMarcHtmlHeadString(true) +
     "<body>" +
+    EntityForm.GetVerifyErrorHtml(info.VerifyErrors) + 
     strHtml2 +
     EntityForm.GetTimestampHtml(info.Timestamp) +
     "</body></html>";

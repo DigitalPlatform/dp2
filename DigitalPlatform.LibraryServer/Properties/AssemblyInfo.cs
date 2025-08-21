@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Xml;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
@@ -32,8 +33,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.181.*")]
-[assembly: AssemblyFileVersion("3.181.0.0")]
+[assembly: AssemblyVersion("3.183.*")]
+[assembly: AssemblyFileVersion("3.183.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCommentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -461,3 +462,19 @@ public bool ItemCanReturn(Account account,
 //      3.181 (2025/5/18) library.xml 中增加 searching 元素。可使用 denyEmptyQueryWord 属性。属性值为 public reader worker 之一或者逗号组合。表示禁止使用空检索词的身份。缺省为空，表示对任何身份都不禁止
 //            (2025/5/20) 此前版本重建检索点后台任务在遇到 keys 检索点配置文件中出现无法识别的 convert 方法名时，并不会报错。这个 bug 已经修正。
 //                          SetEntities() API 在修改册记录的时候，XML 中根元素下若出现 biblio 元素(内含一条书目记录)，并且 biblio 的子元素中包含 dprms:file 元素，册记录根元素的子元素也包含 dprms:file 元素，并且两者之间 id 属性值出现重复，则会报错说 “重复的 dprms:file 元素 id 属性值”。这个 bug 已经修正。
+//      3.182 (2025/8/14) SearchCharging() API 的 actions 参数中增加了 "biblioSummary" 子参数用法。表示希望返回书目摘要信息。返回的 ChargingItem 结构中增加了 BiblioSummary 成员。
+//		                    ChargingItem.BiblioRecPath 成员在早先版本中只有动作为 "read" 时才有值，现在改为每种动作都有值
+//                          Borrow() 和 Return() API 创建操作日志 XML 的时候，早先版本中只有当动作为 "read" 时才会写入 biblioRecPath 元素，现在所有动作都会写入 biblioRecPath 元素
+//      3.183 (2025/8/20) LibraryHost.VerifyItem 函数的类型发生变化：
+/*
+        从
+        public virtual int VerifyItem(string strAction,
+            XmlDocument itemdom,
+            out string strError)
+        变为
+        public virtual int VerifyItem(
+            string dbType,
+            EntityInfo info,
+            XmlDocument itemdom,
+            out string strError)
+*/

@@ -2705,11 +2705,13 @@ namespace dp2Library
                 DateTime endTime = string.IsNullOrEmpty(strEnd) ? new DateTime(0) : DateTime.Parse(strEnd);
 
                 string strError = "";
+                RmsChannel channel = null;
 
                 // 2024/2/7
                 if (patronBarcode.StartsWith("@itemBarcode:"))
                 {
-                    RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
+                    if (channel == null)
+                        channel = sessioninfo.Channels.GetChannel(app.WsUrl);
 
                     // 变换为 @itemRefID:xxx
                     // 册参考 ID
@@ -2723,7 +2725,8 @@ namespace dp2Library
                 }
                 else if (patronBarcode.StartsWith("@") == false)
                 {
-                    RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
+                    if (channel == null)
+                        channel = sessioninfo.Channels.GetChannel(app.WsUrl);
 
                     // 变换为 @refID:xxx
                     // 读者参考 ID
@@ -2785,6 +2788,8 @@ namespace dp2Library
                 // 2021/6/8
                 bool no_result = StringUtil.IsInList("noResult", actions);
 
+                bool biblio_summary = StringUtil.IsInList("biblioSummary", actions);
+
                 // 2025/4/1
                 var transfer = StringUtil.GetParameterByPrefix(actions, "transferIdTo");
                 if (transfer != null)
@@ -2810,7 +2815,9 @@ namespace dp2Library
                             TransferIds(wrapper.Item, transfer);
 
                         if (item.Operation == "return"
-                            && item.Action != "read")
+                            // && item.Action != "read"
+                            && (item.Action == "return" || item.Action == "lost") /*TODO: 测试所有 action 类型*/
+                            )
                         {
                             ChargingOperItem rel = app.ChargingOperDatabase.FindRelativeBorrowItem(item);
                             if (rel != null)
@@ -2822,6 +2829,40 @@ namespace dp2Library
                                     TransferIds(wrapper.RelatedItem, transfer);
                             }
                         }
+
+                        // 2025/8/14
+                        // 填充 Summary
+                        if (biblio_summary == true)
+                        {
+                            if (String.IsNullOrEmpty(item.ItemBarcode) == false)
+                            {
+                                if (channel == null)
+                                    channel = sessioninfo.Channels.GetChannel(app.WsUrl);
+
+                                // parameters:
+                                //      strItemBarcodeParam         册条码号。也可以为 @refID:xxx 形态
+                                var get_result = app.GetBiblioSummary(
+                                    sessioninfo,
+                                    channel,
+                                    item.ItemBarcode,
+                                    null,
+                                    null,
+                                    out string _,
+                                    out string strSummary);
+                                if (get_result.Value == -1)
+                                {
+                                    strSummary = "error:" + get_result.ErrorInfo;
+                                }
+
+                                wrapper.Item.BiblioSummary = strSummary;
+                                /*
+                                if (wrapper.RelatedItem != null)
+                                    wrapper.RelatedItem.BiblioSummary = strSummary;
+                                */
+                            }
+                        }
+
+
                         infos.Add(wrapper);
                         i++;
                     }
@@ -19958,6 +19999,10 @@ false);
         [DataMember]
         public string BorrowDate { get; set; } // 借阅时间(仅对还书动作有效)。? 格式
 
+        // 2025/8/14
+        // 书目摘要
+        [DataMember]
+        public string BiblioSummary { get; set; }
 
         public ChargingItem(ChargingOperItem item)
         {

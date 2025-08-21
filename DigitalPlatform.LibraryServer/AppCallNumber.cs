@@ -62,6 +62,12 @@ namespace DigitalPlatform.LibraryServer
             if (String.IsNullOrEmpty(strArrangeGroupName) == true)
                 return null;
 
+            // 2025/8/7
+            // @引导尾号库名
+            if (strArrangeGroupName[0] == '@')
+            {
+                return strArrangeGroupName.Substring(1);
+            }
 #if NO
             if (strArrangeGroupName[0] == '!')
             {
@@ -486,6 +492,9 @@ namespace DigitalPlatform.LibraryServer
 
         // 设置种次号尾号
         // TODO: 增强 strArrangeGroupName 语义，允许直接表达“种次号库名”
+        // parameters:
+        //      strAction   动作。memo, unmemo, skipmemo, protect, conditionalpush, increase, save
+        //      strArrangeGroupName  排架体系名。如果是 '@' 打头，则表示种次号库名
         public LibraryServerResult SetOneClassTailNumber(
             SessionInfo sessioninfo,
             string strAction,

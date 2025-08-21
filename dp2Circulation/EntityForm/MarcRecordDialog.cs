@@ -149,6 +149,10 @@ TABLE.marc TD.indicator
     border-style: dotted;
     border-color: #eeeeee;
 }
+    TABLE.marc TD.content {
+        word-break: break-all;
+        overflow-wrap: anywhere;
+    }
 TABLE.marc SPAN.subfield
 {
     margin: 2px;

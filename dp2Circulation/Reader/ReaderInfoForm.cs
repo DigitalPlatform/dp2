@@ -6479,7 +6479,7 @@ MessageBoxDefaultButton.Button1);
             text.Append("<td class='nowrap'>序号</td>");
             text.Append("<td class='nowrap'>类型</td>");
             text.Append("<td class='nowrap'>册条码号</td>");
-            text.Append("<td class='nowrap'>书目摘要</td>");
+            text.Append("<td class='summary'>书目摘要</td>");   // 2025/8/14 修改为 summary
             text.Append("<td class='nowrap'>卷册</td>");
             text.Append("<td class='nowrap'>期限</td>");
             text.Append("<td class='nowrap'>借阅操作者</td>");

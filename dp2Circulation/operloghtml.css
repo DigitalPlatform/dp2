@@ -207,10 +207,10 @@ TABLE.marc TD.indicator
     border-color: #eeeeee;
 }
 
-TABLE.marc TD.content
-{
-    word-break:break-all;
-}
+    TABLE.marc TD.content {
+        word-break: break-all;
+        overflow-wrap: anywhere;
+    }
 
 TABLE.marc SPAN.subfield
 {
@@ -273,3 +273,52 @@ TABLE.marc SPAN.fieldend
     margin-left: 20px;
     color: #555555;
 }
+
+
+.debug {
+    padding: 2px;
+    padding-left: 8px;
+    border-width: 0px;
+    border-left-width: 4px;
+    border-color: Gray;
+    border-style: solid;
+}
+
+    .debug.recpath {
+        padding-top: 8px;
+        padding-bottom: 4px;
+    }
+
+    .debug.begin {
+        margin-top: 8px;
+        background-color: #bbbbbb;
+        color: White;
+    }
+
+    .debug.end {
+        margin-bottom: 8px;
+        background-color: #bbbbbb;
+        color: White;
+    }
+
+    .debug.warning {
+        background-color: #ffff99;
+        color: Black;
+        padding-left: 16px;
+    }
+
+    .debug.error {
+        background-color: #990000;
+        color: White;
+        padding-left: 16px;
+    }
+
+    .debug.green {
+        background-color: #009900;
+        color: White;
+        padding-left: 16px;
+    }
+
+    .debug.info {
+        padding-left: 16px;
+    }

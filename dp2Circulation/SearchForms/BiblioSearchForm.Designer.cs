@@ -118,7 +118,7 @@
             this.textBox_queryWord.Dock = System.Windows.Forms.DockStyle.Fill;
             this.textBox_queryWord.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             this.textBox_queryWord.Location = new System.Drawing.Point(159, 7);
-            this.textBox_queryWord.Margin = new System.Windows.Forms.Padding(7, 7, 7, 7);
+            this.textBox_queryWord.Margin = new System.Windows.Forms.Padding(7);
             this.textBox_queryWord.MaxLength = 0;
             this.textBox_queryWord.Name = "textBox_queryWord";
             this.textBox_queryWord.Size = new System.Drawing.Size(313, 31);
@@ -223,7 +223,7 @@
             this.comboBox_from.FormattingEnabled = true;
             this.comboBox_from.IntegralHeight = false;
             this.comboBox_from.Location = new System.Drawing.Point(159, 92);
-            this.comboBox_from.Margin = new System.Windows.Forms.Padding(7, 7, 7, 7);
+            this.comboBox_from.Margin = new System.Windows.Forms.Padding(7);
             this.comboBox_from.Name = "comboBox_from";
             this.comboBox_from.Size = new System.Drawing.Size(313, 32);
             this.comboBox_from.TabIndex = 7;
@@ -253,7 +253,7 @@
             "精确一致",
             "空值"});
             this.comboBox_matchStyle.Location = new System.Drawing.Point(159, 138);
-            this.comboBox_matchStyle.Margin = new System.Windows.Forms.Padding(7, 7, 7, 7);
+            this.comboBox_matchStyle.Margin = new System.Windows.Forms.Padding(7);
             this.comboBox_matchStyle.Name = "comboBox_matchStyle";
             this.comboBox_matchStyle.Size = new System.Drawing.Size(313, 29);
             this.comboBox_matchStyle.TabIndex = 9;
@@ -532,7 +532,7 @@
             this.comboBox_location.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.comboBox_location.FormattingEnabled = true;
             this.comboBox_location.Location = new System.Drawing.Point(159, 181);
-            this.comboBox_location.Margin = new System.Windows.Forms.Padding(7, 7, 7, 7);
+            this.comboBox_location.Margin = new System.Windows.Forms.Padding(7);
             this.comboBox_location.Name = "comboBox_location";
             this.comboBox_location.Size = new System.Drawing.Size(313, 29);
             this.comboBox_location.TabIndex = 11;
@@ -568,7 +568,7 @@
             // 
             this.splitContainer_main.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer_main.Location = new System.Drawing.Point(5, 26);
-            this.splitContainer_main.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.splitContainer_main.Margin = new System.Windows.Forms.Padding(5);
             this.splitContainer_main.Name = "splitContainer_main";
             this.splitContainer_main.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -591,7 +591,7 @@
             this.tabControl_query.Controls.Add(this.tabPage_filter);
             this.tabControl_query.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl_query.Location = new System.Drawing.Point(0, 0);
-            this.tabControl_query.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tabControl_query.Margin = new System.Windows.Forms.Padding(5);
             this.tabControl_query.Name = "tabControl_query";
             this.tabControl_query.SelectedIndex = 0;
             this.tabControl_query.Size = new System.Drawing.Size(887, 289);
@@ -602,9 +602,9 @@
             this.tabPage_simple.AutoScroll = true;
             this.tabPage_simple.Controls.Add(this.tableLayoutPanel_query);
             this.tabPage_simple.Location = new System.Drawing.Point(4, 31);
-            this.tabPage_simple.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tabPage_simple.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_simple.Name = "tabPage_simple";
-            this.tabPage_simple.Padding = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tabPage_simple.Padding = new System.Windows.Forms.Padding(5);
             this.tabPage_simple.Size = new System.Drawing.Size(879, 254);
             this.tabPage_simple.TabIndex = 0;
             this.tabPage_simple.Text = "简单";
@@ -615,9 +615,9 @@
             this.tabPage_logic.AutoScroll = true;
             this.tabPage_logic.Controls.Add(this.dp2QueryControl1);
             this.tabPage_logic.Location = new System.Drawing.Point(4, 31);
-            this.tabPage_logic.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tabPage_logic.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_logic.Name = "tabPage_logic";
-            this.tabPage_logic.Padding = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tabPage_logic.Padding = new System.Windows.Forms.Padding(5);
             this.tabPage_logic.Size = new System.Drawing.Size(879, 254);
             this.tabPage_logic.TabIndex = 1;
             this.tabPage_logic.Text = "逻辑";
@@ -681,6 +681,7 @@
             this.listView_records.TabIndex = 0;
             this.listView_records.UseCompatibleStateImageBehavior = false;
             this.listView_records.View = System.Windows.Forms.View.Details;
+            this.listView_records.ColumnContextMenuClicked += new DigitalPlatform.GUI.ListViewNF.ColumnContextMenuHandler(this.listView_records_ColumnContextMenuClicked);
             this.listView_records.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView_records_ColumnClick);
             this.listView_records.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.listView_records_ItemDrag);
             this.listView_records.SelectedIndexChanged += new System.EventHandler(this.listView_records_SelectedIndexChanged);

@@ -664,26 +664,35 @@ ref this.sessioninfo) == false)
         string serverName =
             HttpUtility.UrlEncode(Request.ServerVariables["SERVER_NAME"]);
 
-        string serverPort =
+        string server_port =
             HttpUtility.UrlEncode(Request.ServerVariables["SERVER_PORT"]);
 
         string strPort = "";
 
         if (this.Request.IsSecureConnection == true)
-            strPort = ":80";    // 最好在配置文件中定义http端口号
+        {
+            //// strPort = ":80";    // 最好在配置文件中定义http端口号
+            if (server_port != "443")
+                strPort = ":" + server_port; // 2025/8/5 考虑 https
+        }
         else
         {
-            if (serverPort != "80")
-                strPort = ":" + serverPort;
+            if (server_port != "80")
+                strPort = ":" + server_port;
         }
 
         string strUrl = "";
 
         string strLang = Thread.CurrentThread.CurrentUICulture.Name;
 
+        // 2025/8/5 考虑 https
+        string http_prefix = "http://";
+        if (this.Request.IsSecureConnection == true)
+            http_prefix = "https://";
+
         if (strRedirect[0] == '/')
         {
-            strUrl = "http://" + serverName + strPort + strRedirect;
+            strUrl = http_prefix + serverName + strPort + strRedirect;
 
             /*
             AppendParameter(ref strUrl, 
@@ -697,7 +706,7 @@ ref this.sessioninfo) == false)
         {
             string vdirName = Request.ApplicationPath;
 
-            strUrl = "http://" + serverName + strPort
+            strUrl = http_prefix + serverName + strPort
                 + vdirName + "/" + strRedirect;
 
             /*

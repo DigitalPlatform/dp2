@@ -2546,6 +2546,7 @@ start_time_1,
                     goto ERROR1;
                 }
 
+#if REMOVED
                 string strItemDbName = ResPath.GetDbName(strOutputItemRecPath);
 
                 // 根据实体库名, 找到对应的书目库名
@@ -2569,6 +2570,21 @@ start_time_1,
                 }
 
                 string strBiblioRecPath = strBiblioDbName + "/" + strBiblioRecID;
+#endif
+                // 2025/8/14
+                nRet = GetBiblioRecPathByItemRecPath(
+strOutputItemRecPath,
+strBiblioRecID,
+out string strBiblioRecPath,
+out strError);
+                if (nRet == -1)
+                {
+                    // text-level: 用户提示
+                    if (result.ErrorCode == ErrorCode.NoError)
+                        strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
+                        strError);
+                    goto ERROR1;
+                }
 
                 nRet = BuildBiblio(
     sessioninfo,
@@ -7711,6 +7727,30 @@ out _);
                         // 2024/1/29
                         DomUtil.SetElementText(domOperLog.DocumentElement,
                             "itemRefID", strItemRefID);
+
+                        // 2025/8/14
+                        // biblioRecPath
+                        if (string.IsNullOrEmpty(strOutputItemRecPath) == false)
+                        {
+                            string parent_id = DomUtil.GetElementText(itemdom.DocumentElement, "parent");
+                            if (string.IsNullOrEmpty(parent_id) == false)
+                            {
+                                // 获得书目记录路径
+                                // return:
+                                //      -1  出错
+                                //      0   没有找到
+                                //      1   找到
+                                nRet = GetBiblioRecPathByItemRecPath(
+                        strOutputItemRecPath,
+                        parent_id,
+                        out string strBiblioRecPath,
+                        out strError);
+                                if (nRet == -1)
+                                    goto ERROR1;
+                                DomUtil.SetElementText(domOperLog.DocumentElement, "biblioRecPath",
+        strBiblioRecPath);
+                            }
+                        }
                     }
 
                     bool bOverdue = false;
@@ -8703,6 +8743,7 @@ out _);
                             goto ERROR1;
                         }
 
+#if REMOVED
                         string strItemDbName = ResPath.GetDbName(strOutputItemRecPath);
 
                         // 根据实体库名, 找到对应的书目库名
@@ -8724,6 +8765,19 @@ out _);
                         }
 
                         strBiblioRecPath = strBiblioDbName + "/" + strBiblioRecID;
+#endif
+                        // 2025/8/14
+                        nRet = GetBiblioRecPathByItemRecPath(
+        strOutputItemRecPath,
+        strBiblioRecID,
+        out strBiblioRecPath,
+        out strError);
+                        if (nRet == -1)
+                        {
+                            if (result.ErrorCode == ErrorCode.NoError)
+                                strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
+                            goto ERROR1;
+                        }
                     }
                 }
 
@@ -14293,6 +14347,13 @@ out string _);
                 string strReason = "丢失。";
 
                 string strBiblioRecID = DomUtil.GetElementText(itemdom.DocumentElement, "parent");  //
+                // 2025/8/14
+                if (string.IsNullOrEmpty(strBiblioRecID))
+                {
+                    strError = "册记录 XML 中 parent 元素为空，无法进行丢失计算";
+                    return -1;
+                }
+#if REMOVED
                 string strItemDbName = ResPath.GetDbName(strItemRecPath);
                 string strBiblioDbName = "";
                 // 根据实体库名, 找到对应的书目库名
@@ -14311,7 +14372,15 @@ out string _);
                     return -1;
                 }
                 string strBiblioRecPath = strBiblioDbName + "/" + strBiblioRecID;
-
+#endif
+                // 2025/8/14
+                nRet = GetBiblioRecPathByItemRecPath(
+strItemRecPath,
+strBiblioRecID,
+out string strBiblioRecPath,
+out strError);
+                if (nRet == -1)
+                    return -1;
 
                 int nResultValue = 0;
                 string strTempReason = "";
@@ -16041,6 +16110,25 @@ out string _);
                 return -1;
             }
 
+            string strBiblioRecPath = "";
+
+            if (string.IsNullOrEmpty(strItemRecPath) == false)
+            {
+                string parent_id = DomUtil.GetElementText(itemdom.DocumentElement, "parent");
+
+                // 2025/8/14
+                if (string.IsNullOrEmpty(parent_id) == false)
+                {
+                    nRet = GetBiblioRecPathByItemRecPath(
+                strItemRecPath,
+                parent_id,
+                out strBiblioRecPath,
+                out strError);
+                    if (nRet == -1)
+                        return -1;
+                }
+            }
+
             // 从想要借阅的册信息中，找到图书类型
             string strBookType = DomUtil.GetElementText(itemdom.DocumentElement, "bookType");
 
@@ -16142,6 +16230,7 @@ out string _);
             if (String.IsNullOrEmpty(strItemRecPath) == false)
             {
                 DomUtil.SetAttr(nodeBorrow, "recPath", strItemRecPath); // 2006/12/24
+#if REMOVED
                 string strParentID = DomUtil.GetElementText(itemdom.DocumentElement, "parent");
 
                 // 通过册记录路径和parentid得知从属的种记录路径
@@ -16159,7 +16248,9 @@ out string _);
                     strError = "根据册记录路径 '" + strItemRecPath + "' 和 parent_id '" + strParentID + "' 获得书目库路径时出错: " + strError;
                     return -1;
                 }
-                DomUtil.SetAttr(nodeBorrow, "biblioRecPath", strBiblioRecPath); // 2015/10/2
+#endif
+                if (string.IsNullOrEmpty(strBiblioRecPath) == false)
+                    DomUtil.SetAttr(nodeBorrow, "biblioRecPath", strBiblioRecPath); // 2015/10/2
             }
 
             // 馆藏地点。需要的时候里面可以抽取出 libraryCode
@@ -16672,6 +16763,14 @@ out string _);
             DomUtil.SetElementText(domOperLog.DocumentElement, "itemRefID",
     strItemRefID);    // 册参考 ID
 
+            // 2025/8/14
+            // biblioRecPath
+            {
+
+
+                DomUtil.SetElementText(domOperLog.DocumentElement, "biblioRecPath",
+strBiblioRecPath);
+            }
 
             DomUtil.SetElementText(domOperLog.DocumentElement, "borrowDate",
                 strOperTime);     // 借阅日期

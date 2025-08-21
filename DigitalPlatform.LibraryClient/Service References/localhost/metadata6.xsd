@@ -371,6 +371,7 @@
     <xs:sequence>
       <xs:element minOccurs="0" name="Action" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="BiblioRecPath" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="BiblioSummary" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="BorrowDate" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="ClientAddress" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="Id" nillable="true" type="xs:string" />

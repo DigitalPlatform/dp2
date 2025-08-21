@@ -978,7 +978,7 @@ namespace dp2Catalog
 
             int nRet = 0;
             string strError = "";
-            bool bChanged = false;
+            bool bChanged = e.Changed;  // 注意调用前可能 e.Changed 就已经是 true 了
 
             // 对MARC记录进行处理
             if (sender is MarcEditor)

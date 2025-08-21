@@ -1014,3 +1014,28 @@ http://timestamp.entrust.net/TSS/AuthenticodeTS
 
 
 new:http://rfc3161timestamp.globalsign.com/standard
+
+
+~~~
+https://github.com/michaelmsonne/SignToolGUI
+
+https://kbpdfstudio.qoppa.com/list-of-timestamp-servers-for-signing-pdf/
+
+~~~
+https://www.sectigo.com/resource-library/time-stamping-server
+...
+As part of this process, you will need to know the URL of Sectigo's timestamping server: http://timestamp.sectigo.com
+
+There are two popular timestamping protocols, which are both supported by our time-stamping server:
+
+RFC 3161 timestamping is used by SignTool (using the "/tr" parameter) and other applications (such as jarsigner). Our timestamping server automatically selects the appropriate signature algorithm (RSA/SHA-256, RSA/SHA-384, or RSA/SHA-512) with which to sign each timestamp, based on the hash algorithm you specify (e.g., via SignTool's "/td" parameter).
+Authenticode timestamping is used by older versions of SignTool (using the "/t" parameter) and SignCode. Due to this protocol's design, it is not possible for our timestamping server to automatically select the appropriate signature algorithm. We currently use RSA/SHA-384 by default. However, you may request a different signature algorithm by appending "?td=<hash_algorithm>" to the URL. e.g., http://timestamp.sectigo.com?td=sha256.
+...
+
+~~~
+
+%IncSeed:001尾号,中文图书,5%
+
+
+~~~
+快捷出纳窗显示借阅动作的方块，当内容太多时，看不完全部文字。需要能飞出一个 tips 显示全部文字。

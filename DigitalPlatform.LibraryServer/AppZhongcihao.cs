@@ -221,6 +221,9 @@ namespace DigitalPlatform.LibraryServer
 
         // 设置种次号尾号
         // TODO: 增强 strZhongcihaoGroupName 语义，允许直接表达“种次号库名”
+        // parameters:
+        //      strAction   动作。conditionalpush, increase, +increase, increase+, save
+        //      strZhongcihaoGroupName  种次号组名。如果是 '@' 打头，则表示种次号库名
         public LibraryServerResult SetZhongcihaoTailNumber(
             SessionInfo sessioninfo,
             string strAction,
@@ -427,7 +430,7 @@ namespace DigitalPlatform.LibraryServer
             }
             else
             {
-                strError = "无法识别的strAction参数值 '" + strAction + "'";
+                strError = "无法识别的 strAction 参数值 '" + strAction + "'";
                 goto ERROR1;
             }
 

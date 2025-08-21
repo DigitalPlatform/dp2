@@ -4346,6 +4346,7 @@ out strError);
                 }
                 else
                 {
+                    /* 原先写法
                     if (strPart == "50      ")
                     { // 需要改变
                         strValue = strValue.Remove(26, 8);
@@ -4354,6 +4355,18 @@ out strError);
                     }
                     else
                     {	// 不需要改变
+                    }
+                    */
+                    // 2025/8/1 
+                    if (strPart == "0120    ")
+                    {   // 不需要改变
+                    }
+                    else
+                    {
+                        // 需要改变
+                        strValue = strValue.Remove(26, 8);
+                        strValue = strValue.Insert(26, "0120    ");
+                        bChanged = true;
                     }
                 }
 
@@ -4495,8 +4508,8 @@ out strError);
             out byte[] baResult)
         {
             int nLen;
-            byte[] baMuci = null;	// 目次区
-            byte[] baBody = null;	// 数据区
+            byte[] baMuci = null;   // 目次区
+            byte[] baBody = null;   // 数据区
             byte[] baFldName = null;
             string strFldLen;
             string strFldStart;
@@ -4517,7 +4530,7 @@ out strError);
 
             // 2018/3/8
             if (baMARC[0] == 0
-    || baMARC[1] == 0)
+        || baMARC[1] == 0)
             {
                 throw new Exception("ISO2709 格式无法使用编码方式 UCS-2 (UTF-16)");
             }
@@ -4798,6 +4811,7 @@ out strError);
         }
 
         // 将一个太长的行切割为多行
+        // TODO: 可以增加一种算法，把两个英文字符的宽度视作等于一个汉字的宽度
         static List<string> BreakLine(string strText, int nWrapCol)
         {
             int max = nWrapCol;
@@ -4902,19 +4916,19 @@ out strError);
 
         // 兼容原来的版本
         public static int CvtJineiToISO2709(
-    string strSourceMARC,
-    string strMarcSyntax,
-    Encoding targetEncoding,
-    out byte[] baResult,
-    out string strError)
+        string strSourceMARC,
+        string strMarcSyntax,
+        Encoding targetEncoding,
+        out byte[] baResult,
+        out string strError)
         {
             return CvtJineiToISO2709(
-    strSourceMARC,
-    strMarcSyntax,
-    targetEncoding,
-    "unimarc_100",
-    out baResult,
-    out strError);
+        strSourceMARC,
+        strMarcSyntax,
+        targetEncoding,
+        "unimarc_100",
+        out baResult,
+        out strError);
         }
 
         // 将MARC机内格式转换为ISO2709格式
@@ -5036,6 +5050,9 @@ out strError);
             return Encoding.GetEncoding(strEncodingName);
         }
 
+        // 替换工作单中的临时子字段分隔符
+        public delegate string delegate_replaceDelemeter(string strMARC, string delimeter = "\u0031");
+
         // 2015/8/10
         // 从 MARC 工作单文件中顺次读一条 MARC 记录
         // return:
@@ -5045,6 +5062,7 @@ out strError);
         //	1	结束(当前返回的记录有效)
         //	2	结束(当前返回的记录无效)
         public static int ReadWorksheetRecord(TextReader s,
+            delegate_replaceDelemeter func_replaceDelimeter,
             out string strMARC,
             out string strError)
         {
@@ -5133,8 +5151,18 @@ out strError);
                         i++;
                         continue;
                     }
-                    // 注：符号 'ǂ' 是 MARC 编辑器的“复制工作单到剪贴板”功能所使用的子字段符号
-                    text.Append(strLine.Replace('@', (char)31).Replace('ǂ', (char)31) + new string((char)30, 1));
+
+                    if (func_replaceDelimeter == null)
+                    {
+                        // 注：符号 'ǂ' 是 MARC 编辑器的“复制工作单到剪贴板”功能所使用的子字段符号
+                        text.Append(strLine.Replace('@', (char)31).Replace('ǂ', (char)31) + new string((char)30, 1));
+                    }
+                    else
+                    {
+                        // 替换临时子字段分隔符
+                        var changed = func_replaceDelimeter(strLine, new string((char)31, 1));
+                        text.Append(changed + new string((char)30, 1));
+                    }
                 }
             }
 

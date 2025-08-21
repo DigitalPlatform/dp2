@@ -3667,6 +3667,10 @@ out string strError)
             for (; ; )
             {
                 int nStart = strText.IndexOf("http://", nCur);
+
+                // 2025/8/5 考虑 https
+                if (nStart == -1)
+                    nStart = strText.IndexOf("https://", nCur);
                 if (nStart == -1)
                 {
                     strResult += ReplaceLeadingBlank(HttpUtility.HtmlEncode(strText.Substring(nCur)));

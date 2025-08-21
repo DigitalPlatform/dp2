@@ -2339,7 +2339,7 @@ true);
 
         void m_macroutil_ParseOneMacro(object sender, ParseOneMacroEventArgs e)
         {
-            this.ParseOneMacro(e);
+            ParseOneMacro(e);
         }
 #if NO
         void m_macroutil_ParseOneMacro(object sender, ParseOneMacroEventArgs e)
@@ -4954,7 +4954,7 @@ out string strErrorCode)
                 this.m_marcEditor.Enabled = bValue;
         }
 
-        string GetMacroValue(string strMacroName)
+        public string GetMacroValue(string strMacroName)
         {
             // return strMacroName + "--";
             string strError = "";
@@ -16461,6 +16461,33 @@ out strError);
         {
             return "<p>记录时间戳: " + ByteArray.GetHexTimeStampString(timestamp) + "</p>";
         }
+
+        internal static string GetVerifyErrorHtml(List<string> errors)
+        {
+            if (errors == null || errors.Count == 0)
+                return "";
+
+            var result = new StringBuilder();
+            result.Append($"<div class='debug begin'>" + HttpUtility.HtmlEncode("校验结果:")?.Replace("[CR]", "<br/>") + "</div>");
+            foreach (string error in errors)
+            {
+                var item = VerifyError.FromLine(error);
+                string style = "info";
+                if (item.Level == "error")
+                    style = "error";
+                else if (item.Level == "warning")
+                    style = "warning";
+                else if (item.Level == "info")
+                    style = "info";
+                else if (item.Level == "succeed")
+                    style = "green";
+
+                result.Append($"<div class='debug {style}'>" + HttpUtility.HtmlEncode(item.Text)?.Replace("[CR]", "<br/>") + "</div>");
+            }
+
+            return result.ToString();
+        }
+
 
         List<string> GetExistCatalogingRules()
         {

@@ -17,6 +17,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.rms.Client.rmsws_localhost;
 using System.Web;
+using MongoDB.Bson.Serialization.IdGenerators;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -3590,6 +3591,9 @@ sessioninfo.LibraryCodeList) == false)
         }
 
         // 校验一个册记录
+        // parameters: 
+        //      sessioninfo   会话信息
+        //      info          待校验的册记录信息。注意 info.OldRecPath 是待校验的实体库的路径
         // return:
         //      -1  出错。出错信息在 strError 中返回
         //      0   校验没有发现错误。result 中返回了校验结果
@@ -3642,7 +3646,7 @@ sessioninfo.LibraryCodeList) == false)
 
                 // 从数据库中读出记录
 
-                long lRet = channel.GetRes(info.NewRecPath,
+                long lRet = channel.GetRes(strRecPath,  // info.NewRecPath,
                     out strXml,
                     out string strMetaData,
                     out byte[] exist_timestamp,
@@ -3673,7 +3677,8 @@ sessioninfo.LibraryCodeList) == false)
 
             int nRet = this.DoVerifyItemFunction(
     sessioninfo,
-    "", // strAction,
+    "item",
+    info,   // "",
     domExist,
     out strError);
             if (nRet != 0)
@@ -4671,10 +4676,11 @@ out strError);
                             if (bForce == false)
                             {
                                 nRet = this.DoVerifyItemFunction(
-                                    sessioninfo,
-                                    strAction,
-                                    domNewRec,
-                                    out strError);
+                                        sessioninfo,
+                                        "item",
+                                        info,
+                                        domNewRec,
+                                        out strError);
                                 if (nRet != 0)
                                 {
                                     EntityInfo error = new EntityInfo(info);

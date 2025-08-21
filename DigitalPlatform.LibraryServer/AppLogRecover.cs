@@ -1884,25 +1884,27 @@ out string error);
             {
                 nodeBorrow.SetAttribute("recPath", strItemRecPath); // 2006/12/24
                 string strParentID = DomUtil.GetElementText(itemdom.DocumentElement, "parent");
-
-                // 通过册记录路径和parentid得知从属的种记录路径
-                // parameters:
-                // return:
-                //      -1  error
-                //      1   找到
-                nRet = GetBiblioRecPathByItemRecPath(
-                    strItemRecPath,
-                    strParentID,
-                    out string strBiblioRecPath,
-                    out strError);
-                if (nRet == -1)
+                if (string.IsNullOrEmpty(strParentID) == false)
                 {
-                    //strError = "根据册记录路径 '" + strItemRecPath + "' 和 parent_id '" + strParentID + "' 获得书目库路径时出错: " + strError;
-                    //return -1;
-                }
-                else
-                {
-                    nodeBorrow.SetAttribute("biblioRecPath", strBiblioRecPath);
+                    // 通过册记录路径和parentid得知从属的种记录路径
+                    // parameters:
+                    // return:
+                    //      -1  error
+                    //      1   找到
+                    nRet = GetBiblioRecPathByItemRecPath(
+                        strItemRecPath,
+                        strParentID,
+                        out string strBiblioRecPath,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        //strError = "根据册记录路径 '" + strItemRecPath + "' 和 parent_id '" + strParentID + "' 获得书目库路径时出错: " + strError;
+                        //return -1;
+                    }
+                    else
+                    {
+                        nodeBorrow.SetAttribute("biblioRecPath", strBiblioRecPath);
+                    }
                 }
             }
 

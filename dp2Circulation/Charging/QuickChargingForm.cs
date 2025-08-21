@@ -4160,10 +4160,11 @@ false);
             contextMenu.Items.Add(menuItem);
 
 #endif
-
+                /*
                 menuItem = new ToolStripMenuItem("test change state");
                 menuItem.Click += new EventHandler(menuItem_test_change_state_Click);
                 contextMenu.Items.Add(menuItem);
+                */
             }
 
             contextMenu.Show(this.dpTable_tasks, e.Location);

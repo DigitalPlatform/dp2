@@ -9,6 +9,7 @@ using System.IO;
 
 using DigitalPlatform.Text;
 using DigitalPlatform.GUI;
+using System.Runtime.CompilerServices;
 
 namespace DigitalPlatform.Marc
 {
@@ -78,6 +79,8 @@ namespace DigitalPlatform.Marc
         private CheckBox checkBox_880;
         private Panel panel_main;
         private CheckBox checkBox_unimarc_modify_100;
+        private Label label4;
+        private ComboBox comboBox_subfieldDelimeter;
         private IContainer components;
 
         /// <summary>
@@ -129,6 +132,8 @@ namespace DigitalPlatform.Marc
             this.checkBox_removeField998 = new System.Windows.Forms.CheckBox();
             this.checkBox_880 = new System.Windows.Forms.CheckBox();
             this.panel_main = new System.Windows.Forms.Panel();
+            this.label4 = new System.Windows.Forms.Label();
+            this.comboBox_subfieldDelimeter = new System.Windows.Forms.ComboBox();
             this.checkBox_unimarc_modify_100 = new System.Windows.Forms.CheckBox();
             this.panel_main.SuspendLayout();
             this.SuspendLayout();
@@ -145,10 +150,10 @@ namespace DigitalPlatform.Marc
             // 
             // textBox_filename
             // 
-            this.textBox_filename.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.textBox_filename.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_filename.Location = new System.Drawing.Point(0, 26);
-            this.textBox_filename.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.textBox_filename.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_filename.Name = "textBox_filename";
             this.textBox_filename.Size = new System.Drawing.Size(844, 31);
             this.textBox_filename.TabIndex = 1;
@@ -171,7 +176,7 @@ namespace DigitalPlatform.Marc
             "UTF-8",
             "UTF-16"});
             this.comboBox_encoding.Location = new System.Drawing.Point(172, 126);
-            this.comboBox_encoding.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.comboBox_encoding.Margin = new System.Windows.Forms.Padding(5);
             this.comboBox_encoding.Name = "comboBox_encoding";
             this.comboBox_encoding.Size = new System.Drawing.Size(305, 29);
             this.comboBox_encoding.TabIndex = 6;
@@ -195,7 +200,7 @@ namespace DigitalPlatform.Marc
             "USMARC",
             "<自动>"});
             this.comboBox_marcSyntax.Location = new System.Drawing.Point(172, 86);
-            this.comboBox_marcSyntax.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.comboBox_marcSyntax.Margin = new System.Windows.Forms.Padding(5);
             this.comboBox_marcSyntax.Name = "comboBox_marcSyntax";
             this.comboBox_marcSyntax.Size = new System.Drawing.Size(305, 29);
             this.comboBox_marcSyntax.TabIndex = 4;
@@ -206,7 +211,7 @@ namespace DigitalPlatform.Marc
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_OK.Location = new System.Drawing.Point(640, 536);
-            this.button_OK.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.button_OK.Margin = new System.Windows.Forms.Padding(5);
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(137, 40);
             this.button_OK.TabIndex = 14;
@@ -217,7 +222,7 @@ namespace DigitalPlatform.Marc
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.Location = new System.Drawing.Point(788, 536);
-            this.button_Cancel.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.button_Cancel.Margin = new System.Windows.Forms.Padding(5);
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(137, 40);
             this.button_Cancel.TabIndex = 15;
@@ -228,7 +233,7 @@ namespace DigitalPlatform.Marc
             // 
             this.button_findFileName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_findFileName.Location = new System.Drawing.Point(846, 23);
-            this.button_findFileName.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.button_findFileName.Margin = new System.Windows.Forms.Padding(5);
             this.button_findFileName.Name = "button_findFileName";
             this.button_findFileName.Size = new System.Drawing.Size(61, 38);
             this.button_findFileName.TabIndex = 2;
@@ -239,7 +244,7 @@ namespace DigitalPlatform.Marc
             // 
             this.checkBox_crLf.AutoSize = true;
             this.checkBox_crLf.Location = new System.Drawing.Point(0, 391);
-            this.checkBox_crLf.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.checkBox_crLf.Margin = new System.Windows.Forms.Padding(5);
             this.checkBox_crLf.Name = "checkBox_crLf";
             this.checkBox_crLf.Size = new System.Drawing.Size(363, 25);
             this.checkBox_crLf.TabIndex = 13;
@@ -257,7 +262,7 @@ namespace DigitalPlatform.Marc
             // 
             this.checkBox_addG01Field.AutoSize = true;
             this.checkBox_addG01Field.Location = new System.Drawing.Point(0, 429);
-            this.checkBox_addG01Field.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.checkBox_addG01Field.Margin = new System.Windows.Forms.Padding(5);
             this.checkBox_addG01Field.Name = "checkBox_addG01Field";
             this.checkBox_addG01Field.Size = new System.Drawing.Size(186, 25);
             this.checkBox_addG01Field.TabIndex = 14;
@@ -271,7 +276,7 @@ namespace DigitalPlatform.Marc
             "NLC",
             "CALIS"});
             this.comboBox_catalogingRule.Location = new System.Drawing.Point(172, 205);
-            this.comboBox_catalogingRule.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.comboBox_catalogingRule.Margin = new System.Windows.Forms.Padding(5);
             this.comboBox_catalogingRule.Name = "comboBox_catalogingRule";
             this.comboBox_catalogingRule.Size = new System.Drawing.Size(305, 29);
             this.comboBox_catalogingRule.TabIndex = 9;
@@ -291,11 +296,11 @@ namespace DigitalPlatform.Marc
             // 
             // webBrowser1
             // 
-            this.webBrowser1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.webBrowser1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.webBrowser1.Location = new System.Drawing.Point(517, 86);
-            this.webBrowser1.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.webBrowser1.Margin = new System.Windows.Forms.Padding(5);
             this.webBrowser1.MinimumSize = new System.Drawing.Size(37, 35);
             this.webBrowser1.Name = "webBrowser1";
             this.webBrowser1.Size = new System.Drawing.Size(389, 413);
@@ -305,7 +310,7 @@ namespace DigitalPlatform.Marc
             // 
             this.checkBox_removeField998.AutoSize = true;
             this.checkBox_removeField998.Location = new System.Drawing.Point(0, 314);
-            this.checkBox_removeField998.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.checkBox_removeField998.Margin = new System.Windows.Forms.Padding(5);
             this.checkBox_removeField998.Name = "checkBox_removeField998";
             this.checkBox_removeField998.Size = new System.Drawing.Size(252, 25);
             this.checkBox_removeField998.TabIndex = 11;
@@ -316,7 +321,7 @@ namespace DigitalPlatform.Marc
             // 
             this.checkBox_880.AutoSize = true;
             this.checkBox_880.Location = new System.Drawing.Point(0, 352);
-            this.checkBox_880.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.checkBox_880.Margin = new System.Windows.Forms.Padding(5);
             this.checkBox_880.Name = "checkBox_880";
             this.checkBox_880.Size = new System.Drawing.Size(229, 25);
             this.checkBox_880.TabIndex = 12;
@@ -326,9 +331,11 @@ namespace DigitalPlatform.Marc
             // 
             // panel_main
             // 
-            this.panel_main.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.panel_main.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.panel_main.Controls.Add(this.label4);
+            this.panel_main.Controls.Add(this.comboBox_subfieldDelimeter);
             this.panel_main.Controls.Add(this.checkBox_unimarc_modify_100);
             this.panel_main.Controls.Add(this.textBox_filename);
             this.panel_main.Controls.Add(this.checkBox_880);
@@ -346,11 +353,36 @@ namespace DigitalPlatform.Marc
             this.panel_main.Controls.Add(this.label_encodingComment);
             this.panel_main.Controls.Add(this.comboBox_marcSyntax);
             this.panel_main.Location = new System.Drawing.Point(22, 21);
-            this.panel_main.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.panel_main.Margin = new System.Windows.Forms.Padding(5);
             this.panel_main.Name = "panel_main";
             this.panel_main.Size = new System.Drawing.Size(906, 504);
             this.panel_main.TabIndex = 16;
             this.panel_main.VisibleChanged += new System.EventHandler(this.panel_main_VisibleChanged);
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(0, 249);
+            this.label4.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(159, 21);
+            this.label4.TabIndex = 16;
+            this.label4.Text = "子字段符号(&U):";
+            // 
+            // comboBox_subfieldDelimeter
+            // 
+            this.comboBox_subfieldDelimeter.Items.AddRange(new object[] {
+            "@",
+            "$",
+            "#",
+            "$$"});
+            this.comboBox_subfieldDelimeter.Location = new System.Drawing.Point(172, 244);
+            this.comboBox_subfieldDelimeter.Margin = new System.Windows.Forms.Padding(5);
+            this.comboBox_subfieldDelimeter.Name = "comboBox_subfieldDelimeter";
+            this.comboBox_subfieldDelimeter.Size = new System.Drawing.Size(305, 29);
+            this.comboBox_subfieldDelimeter.TabIndex = 17;
+            this.comboBox_subfieldDelimeter.Text = "@";
+            this.comboBox_subfieldDelimeter.TextChanged += new System.EventHandler(this.comboBox_subfieldDelimeter_TextChanged);
             // 
             // checkBox_unimarc_modify_100
             // 
@@ -358,7 +390,7 @@ namespace DigitalPlatform.Marc
             this.checkBox_unimarc_modify_100.Checked = true;
             this.checkBox_unimarc_modify_100.CheckState = System.Windows.Forms.CheckState.Checked;
             this.checkBox_unimarc_modify_100.Location = new System.Drawing.Point(0, 279);
-            this.checkBox_unimarc_modify_100.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.checkBox_unimarc_modify_100.Margin = new System.Windows.Forms.Padding(5);
             this.checkBox_unimarc_modify_100.Name = "checkBox_unimarc_modify_100";
             this.checkBox_unimarc_modify_100.Size = new System.Drawing.Size(338, 25);
             this.checkBox_unimarc_modify_100.TabIndex = 10;
@@ -375,7 +407,7 @@ namespace DigitalPlatform.Marc
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.Margin = new System.Windows.Forms.Padding(5);
             this.Name = "OpenMarcFileDlg";
             this.ShowInTaskbar = false;
             this.Text = "请指定MARC文件名";
@@ -482,7 +514,7 @@ namespace DigitalPlatform.Marc
                 dlg.OverwritePrompt = false;
                 dlg.FileName = this.textBox_filename.Text;
 
-                dlg.Filter = "MARC (ISO2709) 文件 (*.iso;*.mrc)|*.iso;*.mrc|All files (*.*)|*.*";
+                dlg.Filter = "MARC (ISO2709) 文件 (*.iso;*.mrc)|*.iso;*.mrc|工作单文件 (*.wor)|*.wor|All files (*.*)|*.*";
 
                 dlg.RestoreDirectory = true;
 
@@ -490,7 +522,6 @@ namespace DigitalPlatform.Marc
                     return;
 
                 this.textBox_filename.Text = dlg.FileName;
-
             }
             else
             {
@@ -499,7 +530,8 @@ namespace DigitalPlatform.Marc
                 dlg.Title = "请指定要导入的 MARC(ISO2709格式) 文件名";
                 dlg.FileName = this.textBox_filename.Text;
 
-                dlg.Filter = "ISO2709 文件 (*.iso;*.mrc)|*.iso;*.mrc|All files (*.*)|*.*";
+                // dlg.Filter = "ISO2709 文件 (*.iso;*.mrc)|*.iso;*.mrc|All files (*.*)|*.*";
+                dlg.Filter = "MARC (ISO2709) 文件 (*.iso;*.mrc)|*.iso;*.mrc|工作单文件 (*.wor)|*.wor|All files (*.*)|*.*";
                 dlg.RestoreDirectory = true;
 
                 if (dlg.ShowDialog() != DialogResult.OK)
@@ -532,6 +564,62 @@ namespace DigitalPlatform.Marc
                 });
             }
         }
+
+        // 2025.8.21
+        // 文件类型。"iso" "wor" 之一
+        public string FileType
+        {
+            get
+            {
+                var fileName = this.TryGet(() =>
+                {
+                    return this.textBox_filename.Text;
+                });
+                return GetFileType(fileName);
+            }
+        }
+
+        public static string GetFileType(string fileName)
+        {
+            var ext = Path.GetExtension(fileName).Trim();
+            if (ext.ToLower() == ".wor")
+                return "wor";
+            return "iso";
+        }
+
+        // 设置工作单相关的界面要素 Visible 状态
+        void SetWorksheetVisible()
+        {
+            var fileType = GetFileType(this.FileName);
+            if (fileType == "wor")
+            {
+                this.comboBox_subfieldDelimeter.Visible = true;
+            }
+            else
+            {
+                this.comboBox_subfieldDelimeter.Visible = false;
+            }
+        }
+
+        // 2025/8/21
+        public string SubfieldDelimeter
+        {
+            get
+            {
+                return this.TryGet(() =>
+                {
+                    return this.comboBox_subfieldDelimeter.Text.ToLower();
+                });
+            }
+            set
+            {
+                this.TryInvoke(() =>
+                {
+                    this.comboBox_subfieldDelimeter.Text = value;
+                });
+            }
+        }
+
 
         /// <summary>
         /// 获取或设置 MARC 格式。为 "unimarc" "usmarc" 之一
@@ -887,13 +975,31 @@ namespace DigitalPlatform.Marc
 
             string strMARC = "";
             string strError = "";
-            // return:
-            //      -1  出错
-            //      0   正常
-            int nRet = LoadFirstRecord(strFileName,
-            encoding,
-            out strMARC,
-            out strError);
+            int nRet = 0;
+
+            if (GetFileType(strFileName) == "wor")
+            {
+                nRet = LoadFirstWorksheetRecord(strFileName,
+encoding,
+this.SubfieldDelimeter,
+out strMARC,
+out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                // 将工作单文件中的临时子字段分隔符转换为标准的 31 字符
+                string dollar = new string(MarcUtil.SUBFLD, 1);
+                strMARC = strMARC.Replace(this.SubfieldDelimeter, dollar);
+            }
+            else
+            {
+                // return:
+                //      -1  出错
+                //      0   正常
+                nRet = LoadFirstRecord(strFileName,
+                encoding,
+                out strMARC,
+                out strError);
+            }
             if (nRet == -1)
                 goto ERROR1;
 
@@ -953,6 +1059,10 @@ TABLE.marc TD.indicator
     border-style: dotted;
     border-color: #eeeeee;
 }
+    TABLE.marc TD.content {
+        word-break: break-all;
+        overflow-wrap: anywhere;
+    }
 TABLE.marc SPAN.subfield
 {
     margin: 2px;
@@ -1115,8 +1225,48 @@ TABLE.marc SPAN.fieldend
             }
         }
 
+        static int LoadFirstWorksheetRecord(string strMarcFileName,
+Encoding encoding,
+string subfieldDelemiter,
+out string strMARC,
+out string strError)
+        {
+            strError = "";
+            strMARC = "";
+
+            try
+            {
+                using (var reader = new StreamReader(strMarcFileName, encoding))
+                {
+                    // return:
+                    //	-2	MARC格式错
+                    //	-1	出错
+                    //	0	正确
+                    //	1	结束(当前返回的记录有效)
+                    //	2	结束(当前返回的记录无效)
+                    int nRet = MarcUtil.ReadWorksheetRecord(reader,
+                        (marc, delimeter) => {
+                            return marc.Replace(subfieldDelemiter, delimeter);
+                        },
+            out strMARC,
+            out strError);
+                    if (nRet == 0 || nRet == 1)
+                        return 0;   // 正常
+
+                    strError = "读入工作单记录时出错: " + strError;
+                    return -1;
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = "异常: " + ex.Message;
+                return -1;
+            }
+        }
+
         private void textBox_filename_TextChanged(object sender, EventArgs e)
         {
+            SetWorksheetVisible();
             // 自动显示文件的第一条
             DisplayFirstRecord(this.FileName, this.Encoding);
         }
@@ -1233,6 +1383,12 @@ TABLE.marc SPAN.fieldend
 
                 _visible_change_count++;
             }
+        }
+
+        private void comboBox_subfieldDelimeter_TextChanged(object sender, EventArgs e)
+        {
+            // 自动重新显示文件的第一条。因为工作单的子字段分隔符可能变了
+            DisplayFirstRecord(this.FileName, this.Encoding);
         }
     }
 

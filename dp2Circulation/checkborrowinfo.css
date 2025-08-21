@@ -347,7 +347,9 @@ TABLE.marc {
 
     TABLE.marc TD.content {
         word-break: break-all;
+        overflow-wrap: anywhere;
     }
+
 
     TABLE.marc SPAN.subfield {
         margin: 2px;
