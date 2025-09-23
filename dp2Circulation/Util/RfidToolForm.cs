@@ -2653,7 +2653,7 @@ TaskScheduler.Default);
                 if (strError != null)
                     goto ERROR1;
 
-                text.AppendLine($"{(i+1)})");
+                text.AppendLine($"{(i + 1)})");
 
                 var epc_bank = ByteArray.GetTimeStampByteArray(epc_bank_hex);
 
@@ -2663,7 +2663,7 @@ TaskScheduler.Default);
                 if (parse_result.Value == -1)
                     text.AppendLine($"解析过程出错: {parse_result.ErrorInfo}");
                 else
-                    text.AppendLine(parse_result.GetDescription(epc_bank,user_bank));
+                    text.AppendLine(parse_result.GetDescription(epc_bank, user_bank));
 
                 i++;
             }
@@ -2749,7 +2749,7 @@ TaskScheduler.Default);
 
             {
                 text.AppendLine("=== PC ===");
-                text.AppendLine($"Hex(十六进制内容):\t{ByteArray.GetHexTimeStampString(epc_bank.ToList().GetRange(2,2).ToArray())?.ToUpper()}");
+                text.AppendLine($"Hex(十六进制内容):\t{ByteArray.GetHexTimeStampString(epc_bank.ToList().GetRange(2, 2).ToArray())?.ToUpper()}");
 
                 var pc = UhfUtility.ParsePC(epc_bank, 2);
                 text.AppendLine(pc.ToString());
@@ -2793,12 +2793,12 @@ TaskScheduler.Default);
                 {
                     // TODO: 核对两个 bytes 是否完全一致，不一致则报错
                     // tag.TagInfo = result.TagInfo;   // 使用重新获得的数据
-                }
 
-                if (result.TagInfo.Tag != null)
-                {
-                    var bytes = result.TagInfo.Tag as byte[];
-                    text.AppendLine($"Hex(十六进制内容):\t{ByteArray.GetHexTimeStampString(bytes).ToUpper()} ({bytes?.Length}bytes)");
+                    if (result.TagInfo.Tag != null)
+                    {
+                        var bytes = result.TagInfo.Tag as byte[];
+                        text.AppendLine($"Hex(十六进制内容):\t{ByteArray.GetHexTimeStampString(bytes).ToUpper()} ({bytes?.Length}bytes)");
+                    }
                 }
             }
 
@@ -4613,7 +4613,7 @@ LogicChipItem chip)
 
 
                     // 是否要特意把 OI 写入 User Bank
-                    if (func_oiMoveToUserBank != null 
+                    if (func_oiMoveToUserBank != null
                         && build_user_bank)
                     {
                         // TODO: 可以进一步判断当 working_chip 中包含了非空的 OI 或者 AOI 元素时，才 invoke() func_oiMoveToUserBank

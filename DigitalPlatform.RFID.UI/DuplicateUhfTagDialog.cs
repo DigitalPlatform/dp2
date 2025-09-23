@@ -80,6 +80,18 @@ namespace DigitalPlatform.RFID.UI
             }
         }
 
+        public string OkButtonText
+        {
+            get
+            {
+                return this.button_OK.Text;
+            }
+            set
+            {
+                this.button_OK.Text = value;
+            }
+        }
+
         private void textBox_userBankHex_TextChanged(object sender, EventArgs e)
         {
             this.label_length.Text = $"User Bank 字节数: {this.textBox_userBankHex.Text.Length / 2}";

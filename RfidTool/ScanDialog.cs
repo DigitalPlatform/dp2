@@ -1,4 +1,15 @@
-﻿using System;
+﻿using DigitalPlatform;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.CommonControl;
+using DigitalPlatform.Core;
+using DigitalPlatform.GUI;
+using DigitalPlatform.LibraryServer.Common;
+using DigitalPlatform.RFID;
+using DigitalPlatform.RFID.UI;
+using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
+using DocumentFormat.OpenXml.EMMA;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -10,17 +21,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
-
-using DigitalPlatform;
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.CommonControl;
-using DigitalPlatform.Core;
-using DigitalPlatform.GUI;
-using DigitalPlatform.LibraryServer.Common;
-using DigitalPlatform.RFID;
-using DigitalPlatform.RFID.UI;
-using DigitalPlatform.Text;
-using DigitalPlatform.Xml;
 
 namespace RfidTool
 {
@@ -1294,6 +1294,7 @@ MessageBoxDefaultButton.Button2);
                     var epc_info = new GaoxiaoEpcInfo
                     {
                         Version = 5,
+                        Lending = false,
                         Picking = 1,
                         Reserve = 0
                     };
@@ -1387,6 +1388,20 @@ MessageBoxDefaultButton.Button2);
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
+            menuItem = new MenuItem("解释标签内容 [" + this.listView_tags.SelectedItems.Count.ToString() + "] (&D)");
+            menuItem.Click += new System.EventHandler(this.menu_describe_Click);
+            if (this.listView_tags.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("解释标签十六进制内容 (&S)");
+            menuItem.Click += new System.EventHandler(this.menu_input_describe_Click);
+            contextMenu.MenuItems.Add(menuItem);
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
             menuItem = new MenuItem("清除标签内容 [" + this.listView_tags.SelectedItems.Count.ToString() + "] (&C)");
             menuItem.Click += new System.EventHandler(this.menu_clearSelectedTagContent_Click);
             if (this.listView_tags.SelectedItems.Count == 0)
@@ -1463,6 +1478,229 @@ MessageBoxDefaultButton.Button2);
 
             contextMenu.Show(this.listView_tags, new Point(e.X, e.Y));
         }
+
+        // 根据输入的十六进制内容进行解释
+        void menu_input_describe_Click(object sender, EventArgs e)
+        {
+            DuplicateUhfTagDialog dlg = new DuplicateUhfTagDialog();
+            dlg.Text = "请输入标签内容";
+            dlg.OkButtonText = "解释";
+            if (dlg.ShowDialog(this) != DialogResult.OK)
+                return;
+
+            if (string.IsNullOrEmpty(dlg.EpcBankHex))
+            {
+                MessageBox.Show(this, "请输入 EPC Bank 内容");
+                return;
+            }
+
+            try
+            {
+                var result = GetUhfTagDescription(
+                    ByteArray.GetTimeStampByteArray(dlg.EpcBankHex),
+                    ByteArray.GetTimeStampByteArray(dlg.UserBankHex)
+                    );
+                MessageDlg.Show(this, result, "解释文字");
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+
+        // 针对选定的标签，创建描述文字
+        void menu_describe_Click(object sender, EventArgs e)
+        {
+            StringBuilder text = new StringBuilder();
+            int i = 0;
+            foreach (ListViewItem item in this.listView_tags.SelectedItems)
+            {
+                /*
+                if (text.Length > 0)
+                    text.Append("\r\n***\r\n");
+                */
+                text.AppendLine($"{(i + 1)})");
+
+                ItemInfo item_info = (ItemInfo)item.Tag;
+
+                // 超高频
+                if (item_info.TagData.OneTag.Protocol == InventoryInfo.ISO18000P6C)
+                {
+                    text.Append(GetUhfTagDescription(item_info.TagData.OneTag));    // ???
+                }
+                else
+                {
+                    text.Append(item_info.TagData.OneTag.GetDescription());   // ???
+                }
+
+                i++;
+            }
+
+            MessageDlg.Show(this, text.ToString(), "解释文字");
+            // Clipboard.SetDataObject(text.ToString(), true);
+        }
+
+        static string GetUhfTagDescription(OneTag tag)
+        {
+            StringBuilder text = new StringBuilder();
+
+            var taginfo = tag.TagInfo;
+            var user_bank = taginfo.Bytes;
+            var epc_bank = ByteArray.GetTimeStampByteArray(tag.UID);
+
+            InventoryInfo info = new InventoryInfo
+            {
+                Protocol = tag.Protocol,
+                UID = tag.UID,
+                AntennaID = tag.AntennaID
+            };
+
+            return GetUhfTagDescription(epc_bank,
+    user_bank,
+    info,
+    tag.ReaderName);
+        }
+
+        static string GetUhfTagDescription(byte[] epc_bank,
+            byte[] user_bank,
+            InventoryInfo info = null,
+            string strReaderName = null)
+        {
+            if (epc_bank == null || epc_bank.Length == 0)
+                throw new ArgumentException("epc_bank 参数值不允许为空，集合不允许为空");
+
+            StringBuilder text = new StringBuilder();
+
+            {
+                text.AppendLine("=== PC ===");
+                text.AppendLine($"Hex(十六进制内容):\t{ByteArray.GetHexTimeStampString(epc_bank.ToList().GetRange(2, 2).ToArray())?.ToUpper()}");
+
+                var pc = UhfUtility.ParsePC(epc_bank, 2);
+                text.AppendLine(pc.ToString());
+            }
+
+            {
+                text.AppendLine("=== 尝试按照高校联盟格式解析 ===");
+
+                var parse_result = GaoxiaoUtility.ParseTag(epc_bank,
+        user_bank,
+        "");
+                if (parse_result.Value == -1)
+                    text.AppendLine($"解析过程出错: {parse_result.ErrorInfo}");
+                else
+                    text.Append(parse_result.GetDescription(epc_bank, user_bank));
+            }
+
+            {
+                text.AppendLine("=== 尝试按照国标格式解析 ===");
+
+                var parse_result = UhfUtility.ParseTag(epc_bank,
+        user_bank,
+        4);
+                if (parse_result.Value == -1)
+                    text.AppendLine($"解析过程出错: {parse_result.ErrorInfo}");
+                else
+                    text.Append(parse_result.GetDescription(epc_bank, user_bank));
+            }
+
+            // 尝试获得 TID Bank
+            if (info != null)
+            {
+                text.AppendLine("=== TID Bank ===");
+                GetTagInfoResult result = DataModel.GetTagInfo(strReaderName,
+    info,
+    "tid");
+                if (result.Value == -1)
+                    text.AppendLine($"error: {result.ErrorInfo}");
+                else
+                {
+                    // TODO: 核对两个 bytes 是否完全一致，不一致则报错
+                    // tag.TagInfo = result.TagInfo;   // 使用重新获得的数据
+
+                    if (result.TagInfo.Tag != null)
+                    {
+                        var bytes = result.TagInfo.Tag as byte[];
+                        text.AppendLine($"Hex(十六进制内容):\t{ByteArray.GetHexTimeStampString(bytes).ToUpper()} ({bytes?.Length}bytes)");
+                    }
+                }
+            }
+
+            return text.ToString();
+        }
+
+
+#if REMOVED
+        static string GetUhfTagDescription(OneTag tag)
+        {
+            StringBuilder text = new StringBuilder();
+
+            var taginfo = tag.TagInfo;
+            var user_bank = taginfo.Bytes;
+            var epc_bank = ByteArray.GetTimeStampByteArray(tag.UID);
+
+            {
+                text.AppendLine("=== PC ===");
+                text.AppendLine($"Hex(十六进制内容):\t{ByteArray.GetHexTimeStampString(epc_bank.ToList().GetRange(2, 2).ToArray())?.ToUpper()}");
+
+                var pc = UhfUtility.ParsePC(epc_bank, 2);
+                text.AppendLine(pc.ToString());
+            }
+
+            {
+                text.AppendLine("=== 尝试按照高校联盟格式解析 ===");
+
+                var parse_result = GaoxiaoUtility.ParseTag(epc_bank,
+        user_bank,
+        "");
+                if (parse_result.Value == -1)
+                    text.AppendLine($"解析过程出错: {parse_result.ErrorInfo}");
+                else
+                    text.Append(parse_result.GetDescription(epc_bank, user_bank));
+            }
+
+            {
+                text.AppendLine("=== 尝试按照国标格式解析 ===");
+
+                var parse_result = UhfUtility.ParseTag(epc_bank,
+        user_bank,
+        4);
+                if (parse_result.Value == -1)
+                    text.AppendLine($"解析过程出错: {parse_result.ErrorInfo}");
+                else
+                    text.Append(parse_result.GetDescription(epc_bank, user_bank));
+            }
+
+            // 尝试获得 TID Bank
+            {
+                text.AppendLine("=== TID Bank ===");
+                InventoryInfo info = new InventoryInfo
+                {
+                    Protocol = tag.Protocol,
+                    UID = tag.UID,
+                    AntennaID = tag.AntennaID
+                };
+                GetTagInfoResult result = DataModel.GetTagInfo(tag.ReaderName,
+    info,
+    "tid");
+                if (result.Value == -1)
+                    text.AppendLine($"error: {result.ErrorInfo}");
+                else
+                {
+                    // TODO: 核对两个 bytes 是否完全一致，不一致则报错
+                    // tag.TagInfo = result.TagInfo;   // 使用重新获得的数据
+
+                    if (result.TagInfo.Tag != null)
+                    {
+                        var bytes = result.TagInfo.Tag as byte[];
+                        text.AppendLine($"Hex(十六进制内容):\t{ByteArray.GetHexTimeStampString(bytes).ToUpper()} ({bytes?.Length}bytes)");
+                    }
+                }
+            }
+
+            return text.ToString();
+        }
+#endif
 
         void menu_clearTagsCache_Click(object sender, EventArgs e)
         {
