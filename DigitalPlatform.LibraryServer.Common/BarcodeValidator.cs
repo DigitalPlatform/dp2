@@ -583,6 +583,8 @@ namespace DigitalPlatform.LibraryServer.Common
                 if (range.Name == "range")
                 {
                     string value = range.GetAttribute("value");
+                    // TODO: 如果没有 value 属性，则尝试取元素的 InnerText
+
                     // 2020/7/24
                     string pattern = range.GetAttribute("pattern");
                     if (string.IsNullOrEmpty(pattern))

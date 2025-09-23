@@ -383,7 +383,9 @@ bool eas)
             {
                 if (data_format == "gxlm")
                 {
-                    var result = GaoxiaoUtility.BuildTag(chip, build_user_bank, eas);
+                    var result = GaoxiaoUtility.BuildTag(chip,
+                        build_user_bank, 
+                        eas);   // epc_info ?
 #if DEBUG
                     if (build_user_bank)
                         Debug.Assert(result.UserBank != null);

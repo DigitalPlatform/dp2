@@ -1028,6 +1028,31 @@ unprocessed_element_names.Except(_auto_maintain_element_names)));
             // 条件化的失效期
             TimeSpan expireLength = GetConditionalPatronPasswordExpireLength(dom);
 
+            var client_expire_length = GetClientExpireLength();
+            if (client_expire_length != TimeSpan.MaxValue)
+            {
+                // 根元素建议的密码失效期，不允许长于 expireLength
+                if (client_expire_length > expireLength)
+                {
+                    strError = $"请求的 XML 记录中根元素 passwordExpireLength 属性值指定的失效时间长度长于系统对此读者记录要求的长度 {expireLength}，构建新读者记录的过程失败。请调整此属性值后重新提交保存";
+                    return -1;
+                }
+                expireLength = client_expire_length;
+            }
+
+            // 获得前端指定的密码失效期
+            TimeSpan GetClientExpireLength()
+            {
+                if (dom.DocumentElement == null)
+                    return TimeSpan.MaxValue;
+                var expire_length = dom.DocumentElement.GetAttribute("passwordExpireLength");
+                if (string.IsNullOrEmpty(expire_length))
+                    return TimeSpan.MaxValue;
+                if (TimeSpan.TryParse(expire_length, out var expire) == false)
+                    throw new Exception($"读者 XML 记录中根元素 passwordExpireLength 属性值 '{expire_length}' 格式不合法");
+                return expire;
+            }
+
             // XmlDocument domOperLog = null;
 
             // 修改读者密码
@@ -8338,7 +8363,7 @@ out strError);
                         {
                             if (DateTime.Now > account.PasswordExpire)
                             {
-                                strError = "密码已经失效";
+                                strError = $"账户 '{strUserName}' 密码已经过期";
                                 return -1;
                             }
                         }
@@ -8524,7 +8549,7 @@ out strError);
 
                 if (normalPasswordExpired && bTempPassword == false/*2024/12/12*/)
                 {
-                    strError = "帐户 '" + strQueryWord + "' 密码已经失效";
+                    strError = "帐户 '" + strQueryWord + "' 密码已经过期";
                     return -1;
                 }
 

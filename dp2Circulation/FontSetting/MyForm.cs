@@ -683,6 +683,47 @@ string style = null)
                 this._floatingMessage.OnResizeOrMove();
         }
 
+        public static void Unselect(Control parent)
+        {
+            foreach (Control control in parent.Controls)
+            {
+                if (control is TextBox)
+                    ((TextBox)control).Select(0, 0);
+                else if (control is ComboBox)
+                    ((ComboBox)control).Select(0, 0);
+                else
+                    Unselect(control);
+            }
+        }
+
+        public void UnselectAll(Control focus_control = null)
+        {
+            this.TryInvoke(() =>
+            {
+                Unselect(this);
+            });
+
+            if (focus_control != null)
+            {
+                _ = Task.Run(async () =>
+                {
+                    await Task.Delay(100); // 等待界面刷新
+                    this.TryInvoke(() =>
+                    {
+                        focus_control.Focus();
+                    });
+                });
+            }
+        }
+
+        // 设置 .Text 但不会自动 SelectAll()
+        public static void SetText(TextBoxBase control, string text)
+        {
+            control.Text = text;
+            control.SelectionLength = 0;
+        }
+
+
         public void ShowMessageAutoClear(string strMessage,
 string strColor = "",
 int delay = 2000,

@@ -1162,7 +1162,7 @@ Keys keyData)
             }
         }
 
-        // 密码已经失效，需要在对话框打开时先打开 ChangePasswordDialog 以便进行密码修改操作
+        // 密码已经过期，需要在对话框打开时先打开 ChangePasswordDialog 以便进行密码修改操作
         public bool PasswordExpired { get; set; }
 
         // string _tempCode = "";

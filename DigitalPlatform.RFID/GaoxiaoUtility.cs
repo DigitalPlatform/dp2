@@ -1087,6 +1087,17 @@ namespace DigitalPlatform.RFID
 
         #endregion
 
+#if REMOVED
+        // 校验 OI 元素内容是否符合高校联盟 OI 的格式
+        public static string VerifyOI(LogicChip chip_param)
+        {
+            var oi = chip_param.FindElement(ElementOID.OI)?.Text;
+            if (VerifyOI(oi) == false)
+                return oi;
+            return null;
+        }
+#endif
+
         // 根据 LogicChip 对象构造标签内容
         // 本函数实现注:
         // 1) 本函数构造的 result.UserBank 是 User Bank 内容，因此里面不会包含 PII ContentParameter 元素
@@ -1262,7 +1273,7 @@ namespace DigitalPlatform.RFID
         }
 
         // 验证字符串是否符合高校联盟 OI 的形态要求
-        static bool VerifyOI(string oi)
+        public static bool VerifyOI(string oi)
         {
             if (oi == null)
                 return false;

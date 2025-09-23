@@ -117,7 +117,7 @@ namespace DigitalPlatform
 #endif
 
         // 检测文字中是否包含 wireless 字样
-        static bool ContainWirelass(string strText)
+        static bool ContainWireless(string strText)
         {
             if (string.IsNullOrEmpty(strText) == true)
                 return false;
@@ -146,7 +146,7 @@ namespace DigitalPlatform
                     {
                         if (nic.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
                         {
-                            if (ContainWirelass(nic.Description) == true)
+                            if (ContainWireless(nic.Description) == true)
                                 wireless_ethernet_results.Add(strAddress);
                             else
                                 ethernet_results.Add(strAddress);

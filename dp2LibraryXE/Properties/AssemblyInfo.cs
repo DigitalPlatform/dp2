@@ -32,8 +32,8 @@ using System.Runtime.InteropServices;
 // 可以指定所有这些值，也可以使用“内部版本号”和“修订号”的默认值，
 // 方法是按如下所示使用“*”:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("3.5.*")]
-[assembly: AssemblyFileVersion("3.5.0.0")]
+[assembly: AssemblyVersion("3.6.*")]
+[assembly: AssemblyFileVersion("3.6.0.0")]
 
 // V1.2 (2016/10/11) 在面板上可以为 Windows 启用 MSMQ，可以为 library.xml 配置 MQ 参数
 // V3.0 (2018/6/23) 改为用 .NET Framework 4.6.1 编译
@@ -42,3 +42,6 @@ using System.Runtime.InteropServices;
 // V3.3 (2022/1/27) 升级 dp2OPAC 时，会自动把安装包中的 web.config 和当前 dp2OPAC 的 web.config 内容合并
 // V3.4 (2022/1/29) 升级 dp2OPAC 时，会把虚拟目录 bin 子目录中以前版本残留的 system.*.dll 文件删除
 // V3.5 (2022/2/8) 升级 dp2OPAC 时，会观察虚拟目录中是否存在 __filelist.config 文件，如果存在，则按照它删除以前残留的文件；否则会把虚拟目录 bin 子目录中以前版本残留的 system.*.dll 文件删除
+// V3.6 (2025/8/28) dp2libraryxe 增加 rest.https 协议支持
+//                  dp2libraryxe 增加 https 协议支持
+

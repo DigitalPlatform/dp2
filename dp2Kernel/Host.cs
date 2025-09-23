@@ -594,7 +594,7 @@ EventLogEntryType.Error);
                             strMetadataUrl = "http://localhost:8001/dp2kernel/";
                         if (strMetadataUrl[strMetadataUrl.Length - 1] != '/')
                             strMetadataUrl += "/";
-                        strMetadataUrl += "metadata";
+                        strMetadataUrl += "$metadata";
 
                         ServiceMetadataBehavior behavior = new ServiceMetadataBehavior();
                         behavior.HttpGetEnabled = true;

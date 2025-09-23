@@ -262,6 +262,17 @@ namespace dp2Circulation
 
             this.SetWindowTitle();
 
+            // 2025/8/23
+            _ = Task.Run(async () =>
+            {
+                //await Task.Delay(100);
+                this.TryInvoke(() =>
+                {
+                    // 清除 SelectAll 状态
+                    UnselectAll(this.tabComboBox_queryWord);
+                });
+            });
+
 #if SUPPORT_OLD_STOP
             this.Channel = null;    // testing
 #endif

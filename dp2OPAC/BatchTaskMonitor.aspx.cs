@@ -56,6 +56,7 @@ ref sessioninfo) == false)
         // 是否登录?
         if (sessioninfo.UserID == "")
         {
+#if REMOVED
             if (this.Page.Request["forcelogin"] == "on")
             {
                 sessioninfo.LoginCallStack.Push(Request.RawUrl);
@@ -66,6 +67,16 @@ ref sessioninfo) == false)
             {
                 sessioninfo.LoginCallStack.Push(Request.RawUrl);
                 Response.Redirect("login.aspx?loginstyle=librarian", true);
+                return;
+            }
+            sessioninfo.LoginCallStack.Push(Request.RawUrl);
+            Response.Redirect("login.aspx", true);
+            return;
+#endif
+            var url = GetDefaultLoginUrl();
+            if (url != null)
+            {
+                Response.Redirect(url, true);
                 return;
             }
             sessioninfo.LoginCallStack.Push(Request.RawUrl);

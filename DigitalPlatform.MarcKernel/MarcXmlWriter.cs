@@ -183,9 +183,8 @@ namespace DigitalPlatform.Marc
         {
             strError = "";
             int nRet = 0;
-            string[] saField = null;
             nRet = MarcUtil.ConvertMarcToFieldArray(strMARC,
-                out saField,
+                out string [] saField,
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -304,6 +303,13 @@ namespace DigitalPlatform.Marc
                         }
                     }
 
+                    // 将头标区中的不合法字符变为 '*'
+                    {
+                        // 2025/9/3
+                        // 将头标区 24 字符中的非“西文字符”替换为 '*'。以免后面经 UTF-8 等编码方式产生超过 24 bytes 的输出
+                        MarcUtil.ReplaceNonLatinChars(ref strLine);
+                    }
+
                     strLine = ReplaceInvalidXmlChars(strLine);
 
                     if (WriteMarcPrefix == false)
@@ -417,7 +423,10 @@ namespace DigitalPlatform.Marc
                             "subfield", MarcNameSpaceUri);
 
                     if (strSubfieldName != null)
+                    {
                         _writer.WriteAttributeString("code", ReplaceInvalidXmlChars(strSubfieldName));
+                    }
+
                     _writer.WriteString(ReplaceInvalidXmlCharsEx(strSubfieldContent)); //注意这里是否有越界的危险
                     _writer.WriteEndElement();
                 }
@@ -443,7 +452,11 @@ namespace DigitalPlatform.Marc
             StringBuilder results = new StringBuilder();
             foreach(char ch in content)
             {
-                if (System.Xml.XmlConvert.IsXmlChar(ch))
+                if ((uint)ch <= 0x1f)   // 2025/9/10
+                {
+                    results.Append('*');
+                }
+                else if (System.Xml.XmlConvert.IsXmlChar(ch))
                     results.Append(ch);
                 else
                     results.Append(replaceChar);

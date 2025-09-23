@@ -439,14 +439,14 @@
             // 
             // textBox_borrower
             // 
-            this.textBox_borrower.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.textBox_borrower.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textBox_borrower.Dock = System.Windows.Forms.DockStyle.Fill;
             this.textBox_borrower.ImeMode = System.Windows.Forms.ImeMode.Disable;
             this.textBox_borrower.Location = new System.Drawing.Point(163, 579);
             this.textBox_borrower.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.textBox_borrower.MinimumSize = new System.Drawing.Size(220, 0);
             this.textBox_borrower.Name = "textBox_borrower";
-            this.textBox_borrower.Size = new System.Drawing.Size(290, 24);
+            this.textBox_borrower.Size = new System.Drawing.Size(444, 24);
             this.textBox_borrower.TabIndex = 45;
             this.textBox_borrower.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
             this.textBox_borrower.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);

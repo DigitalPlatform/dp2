@@ -142,7 +142,7 @@ namespace dp2Circulation.SearchForms
             }
         }
 
-        private void FilterSearchDialog_Load(object sender, EventArgs e)
+        private async void FilterSearchDialog_Load(object sender, EventArgs e)
         {
             if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.162") < 0)
                 this.checkBox_dontUseBatch.Visible = false;
@@ -154,7 +154,7 @@ namespace dp2Circulation.SearchForms
             else if (this._dbType == "authority")
                 BiblioSearchForm.FillAuthorityFromList(this.comboBox_from);
             */
-            BiblioSearchForm.FillLocationFilterList(this.comboBox_location);
+            await BiblioSearchForm.FillLocationFilterListAsync(this.comboBox_location);
         }
 
         private void FilterSearchDialog_FormClosed(object sender, FormClosedEventArgs e)

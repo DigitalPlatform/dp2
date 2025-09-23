@@ -1434,6 +1434,24 @@ namespace DigitalPlatform.LibraryServer
                     goto END1;
                 }
 
+                // 2025/9/14
+                if (strCategory == "login")
+                {
+                    if (strName == "patronPasswordExpireLength")
+                    {
+                        if (_patronPasswordExpirePeriod == TimeSpan.MinValue)
+                            strValue = "";
+                        else
+                            strValue = _patronPasswordExpirePeriod.ToString();
+                        goto END1;
+                    }
+                    else if (strName == "patronPasswordStyle")
+                    {
+                        strValue = _patronPasswordStyle;
+                        goto END1;
+                    }
+                }
+
             NOTFOUND:
                 if (String.IsNullOrEmpty(strError) == true)
                     strError = "未知的 category '" + strCategory + "' 和 name '" + strName + "'";
@@ -2209,6 +2227,38 @@ namespace DigitalPlatform.LibraryServer
                         app.OpacServerUrl = strValue;
                         app.Changed = true;
                         //app.ActivateManagerThread();
+                        goto END1;
+                    }
+
+                    strError = "(strCategory为 '" + strCategory + "' 时)未知的strName值 '" + strName + "' ";
+                    goto ERROR1;
+                }
+
+                // 2025/9/14
+                if (strCategory == "login")
+                {
+                    if (strName == "?patronPasswordExpireLength")
+                    {
+                        try
+                        {
+                            if (string.IsNullOrEmpty(strValue) == false)
+                                _patronPasswordExpirePeriod = ParseTimeSpan(strValue);
+                            else
+                                _patronPasswordExpirePeriod = TimeSpan.MaxValue;
+                            //app.Changed = true;
+                            goto END1;
+                        }
+                        catch (Exception)
+                        {
+                            strError = $"category '{strCategory}' value '{strValue}' 格式不合法";
+                            goto ERROR1;
+                        }
+                    }
+
+                    else if (strName == "?patronPasswordStyle")
+                    {
+                        _patronPasswordStyle = strValue;
+                        //app.Changed = true;
                         goto END1;
                     }
 

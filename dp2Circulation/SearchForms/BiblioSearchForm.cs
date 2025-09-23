@@ -1,22 +1,4 @@
-﻿using ClosedXML.Excel;
-using DigitalPlatform;
-using DigitalPlatform.CommonControl;
-using DigitalPlatform.dp2.Statis;
-using DigitalPlatform.Drawing;
-using DigitalPlatform.GUI;
-using DigitalPlatform.IO;
-using DigitalPlatform.LibraryClient;
-using DigitalPlatform.LibraryClient.localhost;
-using DigitalPlatform.Marc;
-using DigitalPlatform.MessageClient;
-using DigitalPlatform.Script;
-using DigitalPlatform.Text;
-using DigitalPlatform.Xml;
-using DigitalPlatform.Z3950;
-using DigitalPlatform.Z3950.UI;
-using dp2Circulation.Script;
-using dp2Circulation.SearchForms;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -32,7 +14,29 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Forms;
 using System.Xml;
+
+using ClosedXML.Excel;
+
 using static DigitalPlatform.Marc.MarcUtil;
+using DigitalPlatform;
+using DigitalPlatform.CommonControl;
+using DigitalPlatform.dp2.Statis;
+using DigitalPlatform.Drawing;
+using DigitalPlatform.GUI;
+using DigitalPlatform.IO;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.Marc;
+using DigitalPlatform.MessageClient;
+using DigitalPlatform.Script;
+using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
+using DigitalPlatform.Z3950;
+using DigitalPlatform.Z3950.UI;
+
+using dp2Circulation.Script;
+using dp2Circulation.SearchForms;
+
 
 namespace dp2Circulation
 {
@@ -226,17 +230,18 @@ namespace dp2Circulation
                 "search_from",
                 "");
             if (String.IsNullOrEmpty(strFrom) == false)
-                this.comboBox_from.Text = strFrom;
+                this.comboBox_from.SetText(strFrom);
 
-            this.checkedComboBox_biblioDbNames.Text = Program.MainForm.AppInfo.GetString(
+            this.checkedComboBox_biblioDbNames.SetText(
+                Program.MainForm.AppInfo.GetString(
                 this._dbType + "searchform",
                 "biblio_db_name",
-                "<全部>");
+                "<全部>"));
 
-            this.comboBox_matchStyle.Text = Program.MainForm.AppInfo.GetString(
+            this.comboBox_matchStyle.SetText(Program.MainForm.AppInfo.GetString(
                 this._dbType + "searchform",
                 "match_style",
-                "前方一致");
+                "前方一致"));
 
             bool bHideMatchStyle = Program.MainForm.AppInfo.GetBoolean(
                 "biblio_search_form",
@@ -247,7 +252,7 @@ namespace dp2Circulation
             {
                 this.label_matchStyle.Visible = false;
                 this.comboBox_matchStyle.Visible = false;
-                this.comboBox_matchStyle.Text = "前方一致"; // 隐藏后，采用缺省值
+                this.comboBox_matchStyle.SetText("前方一致"); // 隐藏后，采用缺省值
             }
 
             string strSaveString = Program.MainForm.AppInfo.GetString(
@@ -279,7 +284,7 @@ namespace dp2Circulation
 #endif
 
             // 
-            FillLocationFilterList(this.comboBox_location);
+            await FillLocationFilterListAsync(this.comboBox_location);
 
             this.comboBox_location.Text = Program.MainForm.AppInfo.GetString(
                 this._dbType + "searchform",
@@ -297,13 +302,17 @@ namespace dp2Circulation
             // 把输入焦点定位到 检索词 textbox
             _ = Task.Run(async () =>
             {
-                await Task.Delay(500);
+                //await Task.Delay(100);
                 this.TryInvoke(() =>
                 {
+                    // 清除 SelectAll 状态
+                    Unselect(this);
                     this.textBox_queryWord.Focus();
                 });
             });
         }
+
+
 
         public void BeginFillBiblioFromList(bool reload_configfile = false)
         {
@@ -325,20 +334,18 @@ namespace dp2Circulation
             });
         }
 
-        public static void FillLocationFilterList(ComboBox combobox)
+        public static async Task FillLocationFilterListAsync(ComboBox combobox)
         {
             string strError = "";
-            List<string> codes = null;
             // 获得全部可用的图书馆代码。注意，并不包含 "" (全局)
-            int nRet = Program.MainForm.GetAllLibraryCodes(out codes,
-            out strError);
-            if (nRet == -1)
+            var ret = await Program.MainForm.GetAllLibraryCodesAsync();
+            if (ret.Value == -1)
                 MessageBox.Show(Program.MainForm, strError);
             else
             {
                 combobox.Items.Clear();
                 combobox.Items.Add("<不筛选>");
-                foreach (string code in codes)
+                foreach (string code in ret.LibraryCodes)
                 {
                     combobox.Items.Add(code);
                 }
@@ -13730,6 +13737,7 @@ public class MyVerifyHost : VerifyHost
 
             OpenMarcFileDlg dlg = new OpenMarcFileDlg();
             MainForm.SetControlFont(dlg, this.Font);
+            dlg.AllowTypes = "*";
             dlg.IsOutput = true;
             dlg.UnimarcModify100 = this.LastModify100;
             dlg.AddG01Visible = true;
@@ -13743,8 +13751,25 @@ public class MyVerifyHost : VerifyHost
             dlg.EncodingName =
                 (String.IsNullOrEmpty(this.LastEncodingName) == true ? Global.GetEncodingName(preferredEncoding) : this.LastEncodingName);
             dlg.EncodingComment = "注: 原始编码方式为 " + Global.GetEncodingName(preferredEncoding);
-            dlg.MarcSyntax = "<自动>";    // strPreferedMarcSyntax;
-            dlg.EnableMarcSyntax = false;
+
+            List<string> syntax_list = new List<string>();
+            if (this.listView_records.SelectedItems.Count <= 10000)
+            {
+                syntax_list = GetMarcSyntax(this.listView_records.SelectedItems.Cast<ListViewItem>());
+            }
+
+            if (syntax_list.Count == 1)
+            {
+                dlg.MarcSyntax = syntax_list[0];
+                dlg.EnableMarcSyntax = false;
+            }
+            else
+            {
+                dlg.MarcSyntax = "<自动>";    // 这里设置 “<自动>” 的原因: 因为要确定当前选择的书目记录是否全部属于一种特定的 MARC 格式，比较耗费资源，所以干脆模糊化处理
+                dlg.EnableMarcSyntax = true;
+            }
+
+            // TODO: 可以考虑快速遍历全部的记录路径，如果全部都是同一种 MARC 格式，则可以将 dlg.MarcSyntax 设置为该格式
 #if REMOVED
             dlg.ShowDialog(this);
 
@@ -13763,6 +13788,7 @@ public class MyVerifyHost : VerifyHost
             {
                 MainForm.SetControlFont(dlg_905, this.Font);
                 dlg_905.AttachPanel(dlg.MainPanel, "文件名");
+                dlg.UnselectAll(); // 2025/8/22
                 dlg_905.FilterScriptDirectory = ExportMarcHoldingDialog.PrepareScriptDirectory();
                 dlg_905.UiState = Program.MainForm.AppInfo.GetString(
                     "BiblioSearchForm",
@@ -13805,6 +13831,13 @@ public class MyVerifyHost : VerifyHost
 
             bool unimarc_modify_100 = dlg.UnimarcModify100;
 
+            string unimarc_modify_100_method = dlg.UnimarcModify100Method;
+
+            string modify_100_style = "unimarc_100:" + unimarc_modify_100_method.Replace("<默认方法>", OpenMarcFileDlg.DefaultUnimarcModify100Method);
+            if (unimarc_modify_100 == false)
+                modify_100_style = "";
+
+            // "iso" "wor" "marcxml" "marcxchange" "dp2marcxml"
             string fileType = dlg.FileType;
             string subfieldDelemeter = dlg.SubfieldDelimeter;
 
@@ -13830,22 +13863,43 @@ public class MyVerifyHost : VerifyHost
 
             if (bExist == true)
             {
-                DialogResult result = MessageBox.Show(this,
-        "文件 '" + dlg.FileName + "' 已存在，是否以追加方式写入记录?\r\n\r\n--------------------\r\n注：(是)追加  (否)覆盖  (取消)放弃",
-        "BiblioSearchForm",
-        MessageBoxButtons.YesNoCancel,
-        MessageBoxIcon.Question,
-        MessageBoxDefaultButton.Button1);
-                if (result == DialogResult.Yes)
-                    bAppend = true;
-
-                if (result == DialogResult.No)
-                    bAppend = false;
-
-                if (result == DialogResult.Cancel)
+                if (fileType == "wor" || fileType == "iso")
                 {
-                    strError = "放弃处理...";
-                    goto ERROR1;
+                    DialogResult result = MessageBox.Show(this,
+            "文件 '" + dlg.FileName + "' 已存在，是否以追加方式写入记录?\r\n\r\n--------------------\r\n注：(是)追加  (否)覆盖  (取消)放弃",
+            "BiblioSearchForm",
+            MessageBoxButtons.YesNoCancel,
+            MessageBoxIcon.Question,
+            MessageBoxDefaultButton.Button1);
+                    if (result == DialogResult.Yes)
+                        bAppend = true;
+
+                    if (result == DialogResult.No)
+                        bAppend = false;
+
+                    if (result == DialogResult.Cancel)
+                    {
+                        strError = "放弃处理...";
+                        goto ERROR1;
+                    }
+                }
+                else if (fileType == "marcxml"
+                    || fileType == "marcxchange"
+                    || fileType == "dp2marcxml")
+                {
+                    DialogResult result = MessageBox.Show(this,
+"文件 '" + dlg.FileName + "' 已存在，是否覆盖它?\r\n\r\n--------------------\r\n注：(是)覆盖  (取消)放弃",
+"BiblioSearchForm",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+                    if (result == DialogResult.Yes)
+                        bAppend = false;
+                    else
+                    {
+                        strError = "放弃处理...";
+                        goto ERROR1;
+                    }
                 }
             }
 
@@ -13872,6 +13926,7 @@ public class MyVerifyHost : VerifyHost
             }
 
             Stream s = null;
+            XmlTextWriter w = null; // 2025/9/3
             bool clear_file = false;
             try
             {
@@ -13881,6 +13936,21 @@ public class MyVerifyHost : VerifyHost
                     s.SetLength(0);
                 else
                     s.Seek(0, SeekOrigin.End);
+
+                if (fileType == "marcxml"
+                    || fileType == "marcxchange"
+                    || fileType == "dp2marcxml")
+                {
+                    w = new XmlTextWriter(s, Encoding.UTF8);
+
+                    w.Formatting = Formatting.Indented;
+                    w.Indentation = 4;
+
+                    w.WriteStartDocument();
+                    w.WriteStartElement("dprms", "collection", DpNs.dprms);
+
+                    w.WriteAttributeString("xmlns", "dprms", null, DpNs.dprms);
+                }
             }
             catch (Exception ex)
             {
@@ -14249,7 +14319,7 @@ out string error);
                         ModifyOutputMARC(record.Text,
                             strMarcSyntax,
                             targetEncoding,
-                            unimarc_modify_100 ? "unimarc_100" : "",
+                            unimarc_modify_100 ? modify_100_style : "",
                             out string changed_marc);
 
                         changed_marc = changed_marc.Replace(dollar, subfieldDelemeter);
@@ -14272,7 +14342,7 @@ out string error);
                         // bytes.AddRange(targetEncoding.GetBytes("***\r\n"));
                         baTarget = bytes.ToArray();
                     }
-                    else
+                    else if (fileType == "iso")
                     {
                         // 将MARC机内格式转换为ISO2709格式
                         // parameters:
@@ -14287,7 +14357,7 @@ out string error);
                             record.Text,
                             strMarcSyntax,
                             targetEncoding,
-                            unimarc_modify_100 ? "unimarc_100" : "",
+                            unimarc_modify_100 ? modify_100_style : "",
                             out baTarget,
                             out strError);
                         if (nRet == -1)
@@ -14296,15 +14366,91 @@ out string error);
                             goto ERROR1;
                         }
                     }
-
-                    s.Write(baTarget, 0,
-                        baTarget.Length);
-
-                    if (dlg.CrLf == true && fileType == "iso")
+                    /*
+                    else
                     {
-                        byte[] baCrLf = targetEncoding.GetBytes("\r\n");
-                        s.Write(baCrLf, 0,
-                            baCrLf.Length);
+                        strError = $"暂不支持导出 {fileType} 类型的文件";
+                        goto ERROR1;
+                    }
+                    */
+
+                    if (w == null)
+                    {
+                        Debug.Assert(s != null);
+                        s.Write(baTarget, 0,
+                            baTarget.Length);
+
+                        if (dlg.CrLf == true && fileType == "iso")
+                        {
+                            byte[] baCrLf = targetEncoding.GetBytes("\r\n");
+                            s.Write(baCrLf, 0,
+                                baCrLf.Length);
+                        }
+                    }
+                    else if (w != null)
+                    {
+                        if (string.IsNullOrEmpty(strXml) == false)
+                        {
+                            if (fileType == "dp2marcxml")
+                            {
+                                nRet = MarcUtil.Marc2XmlEx(record.Text,
+        strMarcSyntax,
+        ref strXml,
+        out strError);
+                            }
+                            else if (fileType == "marcxml")
+                            {
+                                // UNIMARC 和 MARC21 都输出为 lc 的 slim 格式
+                                nRet = MarcUtil.Marc2XmlEx(record.Text,
+"usmarc",
+ref strXml,
+out strError);
+                            }
+                            else if (fileType == "marcxchange")
+                            {
+                                nRet = MarcUtil.Marc2XmlEx(record.Text,
+strMarcSyntax,
+ref strXml,
+out strError);
+                                if (nRet == -1)
+                                    goto ERROR1;
+                                nRet = MarcUtil.MarcXmlToXChange(strXml,
+            "",
+            out string strTarget,
+            out strError);
+                                strXml = strTarget;
+                            }
+                            else
+                            {
+                                strError = $"暂无法处理 XML 类族 '{fileType}' 格式导出";
+                                goto ERROR1;
+                            }
+
+                            if (nRet == -1)
+                                goto ERROR1;
+
+                            XmlDocument dom = new XmlDocument();
+                            try
+                            {
+                                dom.LoadXml(strXml);
+                            }
+                            catch (Exception ex)
+                            {
+                                strError = "XML 装入 DOM 时出错: " + ex.Message;
+                                // TODO: 提示后，可以选择跳过并继续
+                                goto ERROR1;
+                            }
+
+                            if (dom.DocumentElement != null)
+                            {
+                                // 给根元素设置几个参数
+                                DomUtil.SetAttr(dom.DocumentElement, "path", DpNs.dprms, Program.MainForm.LibraryServerUrl + "?" + item.BiblioInfo.RecPath);  // strRecPath
+                                DomUtil.SetAttr(dom.DocumentElement, "timestamp", DpNs.dprms, ByteArray.GetHexTimeStampString(item.BiblioInfo.Timestamp));   // baTimestamp
+
+                                dom.DocumentElement.WriteTo(w);
+                            }
+                        }
+
                     }
 
                     looping.Progress.SetProgressValue(++i);
@@ -14318,7 +14464,15 @@ out string error);
             }
             finally
             {
-                s.Close();
+                if (w != null)
+                {
+                    w.WriteEndElement();   // </collection>
+                    w.WriteEndDocument();
+                    w.Close();
+                }
+                else
+                    s.Close();
+
                 if (clear_file && File.Exists(this.LastIso2709FileName))
                     File.Delete(this.LastIso2709FileName);
 
@@ -14374,6 +14528,35 @@ out string error);
             RefreshPropertyView(false);
 
             MessageDlg.Show(this, strError, "导出过程出错");
+        }
+
+        // 2025/8/22
+        // 检测当前选择的书目记录都有哪些 MARC 语法
+        List<string> GetMarcSyntax(IEnumerable<ListViewItem> selected_items)
+        {
+            // dbname --> syntax
+            Hashtable syntax_table = new Hashtable();
+            foreach (var item in selected_items)
+            {
+                string strRecPath = ListViewUtil.GetItemText(item, 0);
+                if (string.IsNullOrEmpty(strRecPath) == true)
+                    continue;
+                var dbname = Global.GetDbName(strRecPath);
+
+                // 2025/9/3
+                if (string.IsNullOrEmpty(dbname))
+                    continue;
+
+                var syntax = syntax_table[dbname];
+                if (syntax != null)
+                    continue;   // 已经有了
+
+                var prop = Program.MainForm.GetBiblioDbProperty(dbname);
+                if (prop != null)   // 2025/9/3
+                    syntax_table.Add(dbname, prop.Syntax);
+            }
+
+            return syntax_table.Values.Cast<string>().Distinct().ToList();
         }
 
         // 构造校验字符串
@@ -14569,6 +14752,12 @@ out string error);
 
                 if (bCreate906)
                 {
+                    /*
+                    // 2025/9/3
+                    // 先删除以前的 906 字段
+                    record.select("field[@name='906']").detach();
+                    */
+
                     MarcField field = new MarcField("906", "  ");
 
                     foreach (EntityInfo info in loader)
@@ -14582,13 +14771,13 @@ out string error);
                         XmlDocument item_dom = new XmlDocument();
                         item_dom.LoadXml(info.OldRecord);
 
-                        // $a 册条码号
+                        // $a 册条码号 -- barcode
                         {
                             string strBarcode = DomUtil.GetElementText(item_dom.DocumentElement, "barcode");
                             field.add(new MarcSubfield("a", strBarcode));
                         }
 
-                        // $b 入藏库
+                        // $b 入藏库 -- location
                         {
                             string strLocation = DomUtil.GetElementText(item_dom.DocumentElement, "location");
                             strLocation = StringUtil.GetPureLocation(strLocation);
@@ -14597,7 +14786,7 @@ out string error);
                         }
 
                         // TODO: 要按照排架体系定义，分析出索取号的各行。比如三行的索取号
-                        // $c架位
+                        // $c架位 -- accessNo
                         {
                             string strAccessNo = DomUtil.GetElementText(item_dom.DocumentElement, "accessNo");
 
@@ -14607,42 +14796,58 @@ out string error);
                                 field.add(new MarcSubfield("c", strAccessNo));
                         }
 
-                        // $d册价格
+                        // $d册价格 -- price
                         {
                             string strPrice = DomUtil.GetElementText(item_dom.DocumentElement, "price");
                             if (string.IsNullOrEmpty(strPrice) == false)
                                 field.add(new MarcSubfield("d", strPrice));
                         }
 
-                        // $f册类型
+                        // $f册类型 -- bookType
                         {
                             string strBookType = DomUtil.GetElementText(item_dom.DocumentElement, "bookType");
                             if (string.IsNullOrEmpty(strBookType) == false)
                                 field.add(new MarcSubfield("f", strBookType));
                         }
 
-                        // $h登录号
+                        // $h登录号 -- registerNo
                         {
                             string strRegisterNo = DomUtil.GetElementText(item_dom.DocumentElement, "registerNo");
                             if (String.IsNullOrEmpty(strRegisterNo) == false)
                                 field.add(new MarcSubfield("h", strRegisterNo));
                         }
 
-                        // $r借阅者条码号
+                        // $r借阅者条码号 -- borrower
                         {
                             string strBorrower = DomUtil.GetElementText(item_dom.DocumentElement, "borrower");
                             if (String.IsNullOrEmpty(strBorrower) == false)
                                 field.add(new MarcSubfield("r", strBorrower));
                         }
 
-                        // $s图书状态
+                        // $s图书状态 -- state
                         {
                             string strState = DomUtil.GetElementText(item_dom.DocumentElement, "state");
                             if (String.IsNullOrEmpty(strState) == false)
                                 field.add(new MarcSubfield("s", strState));
                         }
 
-                        // $z附注
+                        // 2025/9/2
+                        // $o 经费来源 -- source
+                        {
+                            string strSource = DomUtil.GetElementText(item_dom.DocumentElement, "source");
+                            if (String.IsNullOrEmpty(strSource) == false)
+                                field.add(new MarcSubfield("o", strSource));
+                        }
+
+                        // 2025/9/2
+                        // $l 书商(销售渠道) -- seller
+                        {
+                            string strSeller = DomUtil.GetElementText(item_dom.DocumentElement, "seller");
+                            if (String.IsNullOrEmpty(strSeller) == false)
+                                field.add(new MarcSubfield("l", strSeller));
+                        }
+
+                        // $z附注 -- comment
                         {
                             string strComment = DomUtil.GetElementText(item_dom.DocumentElement, "comment");
                             if (String.IsNullOrEmpty(strComment) == false)
@@ -16681,6 +16886,8 @@ out string error);
                     if (index != -1)
                         this.textBox_queryWord.Text = this.textBox_queryWord.Text.Substring(0, index);
                 }
+
+                Unselect(this);
             }
         }
 

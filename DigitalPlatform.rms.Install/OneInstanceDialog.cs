@@ -817,13 +817,13 @@ namespace DigitalPlatform.rms
 
             WcfBindingDlg dlg = new WcfBindingDlg();
             GuiUtil.AutoSetDefaultFont(dlg);
+            dlg.DefaultUrls = default_urls;
             dlg.RestEnabled = false;    // 目前不允许 REST.HTTP 协议绑定
             dlg.BasicEnabled = false;    // 目前不允许 BASIC.HTTP 协议绑定
             if (this.IsNew && String.IsNullOrEmpty(this.textBox_bindings.Text) == true)
                 dlg.Urls = default_urls;
             else
                 dlg.Urls = this.textBox_bindings.Text.Replace("\r\n", ";").Split(new char[] { ';' });
-            dlg.DefaultUrls = default_urls;
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.ShowDialog(this);
             if (dlg.DialogResult != DialogResult.OK)

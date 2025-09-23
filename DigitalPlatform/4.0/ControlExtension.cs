@@ -12,6 +12,16 @@ namespace DigitalPlatform
     /// </summary>
     public static class ControlExtension
     {
+        public static void SetText(this TextBoxBase textbox, string text)
+        {
+            textbox.Text = text;
+            // textbox.Focus();
+            /*
+            textbox.SelectionLength = 0;
+            textbox.SelectionStart = textbox.Text.Length;
+            */
+        }
+
 
         public static void MessageBoxShow(
             this Control form, 

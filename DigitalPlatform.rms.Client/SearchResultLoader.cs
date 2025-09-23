@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
@@ -42,6 +43,10 @@ namespace DigitalPlatform.rms.Client
         // 在 GetSearchResult() 第一次调用以后获得 dp2kernel 一端结果集中实际存在的记录数
         public long ResultCount { get; set; }
 
+        // 2025/9/12
+        // 获取时的起始偏移量
+        public long Start { get; set; }
+
         public SearchResultLoader(RmsChannel channel,
             DigitalPlatform.Stop stop,
             string resultsetName,
@@ -61,7 +66,7 @@ namespace DigitalPlatform.rms.Client
 
             this.ResultCount = 0;
             long lHitCount = -1;
-            long lStart = 0;
+            long lStart = this.Start;
             long nPerCount = this.BatchSize == 0 ? -1 : this.BatchSize;
             // nPerCount = 1;  // test
             for (; ; )
@@ -74,9 +79,9 @@ namespace DigitalPlatform.rms.Client
                 if (this.MaxResultCount > 0)
                 {
                     if (length == -1)
-                        length = this.MaxResultCount - lStart;
-                    else if (lStart + length > this.MaxResultCount)
-                        length = this.MaxResultCount - lStart;
+                        length = this.MaxResultCount/* - lStart*/;
+                    else if (/*lStart + */length > this.MaxResultCount)
+                        length = this.MaxResultCount/* - lStart*/;
                 }
 
                 long lRet = this.Channel.DoGetSearchResult(

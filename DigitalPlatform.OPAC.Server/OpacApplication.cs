@@ -228,6 +228,39 @@ namespace DigitalPlatform.OPAC.Server
         {
         }
 
+        // 2025/9/5
+        // Web 界面强制登录 URL。
+        // 如果为空，则表示不强制登录，允许匿名访问
+        public string DefaultLoginUrl
+        {
+            get
+            {
+                if (this.WebUiDom == null || this.WebUiDom.DocumentElement == null)
+                    return null;
+                XmlNode node = this.WebUiDom.DocumentElement.SelectSingleNode("login");
+                if (node != null)
+                {
+                    return DomUtil.GetAttr(node, "defaultLoginUrl");
+                }
+                return null;
+            }
+        }
+
+        public string DefaultLogoutUrl
+        {
+            get
+            {
+                if (this.WebUiDom == null || this.WebUiDom.DocumentElement == null)
+                    return null;
+                XmlNode node = this.WebUiDom.DocumentElement.SelectSingleNode("login");
+                if (node != null)
+                {
+                    return DomUtil.GetAttr(node, "defaultLogoutUrl");
+                }
+                return null;
+            }
+        }
+
         // Web 界面的限定的图书馆代码。可以是逗号分隔的列表
         public string LimitWebUiLibraryCode
         {

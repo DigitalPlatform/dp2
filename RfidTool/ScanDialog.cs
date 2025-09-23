@@ -431,7 +431,10 @@ namespace RfidTool
                         // taginfo.EAS 可能会被修改
                         iteminfo.UhfProtocol = uhf_info.UhfProtocol;
                         pii = uhf_info.PII;
-                        oi = uhf_info.OI;
+                        if (uhf_info.ContainOiElement)  // 2025/9/21
+                            aoi = uhf_info.OI;
+                        else
+                            oi = uhf_info.OI;
 
 #if REMOVED
                         var epc_bank = Element.FromHexString(taginfo.UID);
@@ -971,6 +974,11 @@ namespace RfidTool
                     return;
                 }
 
+                // 2025/9/21
+                if (iteminfo != null && new_tag_info != null)
+                    UpdateItemInfo(iteminfo, new_tag_info);
+
+
                 WriteComplete?.Invoke(this, new WriteCompleteventArgs
                 {
                     Chip = chip,
@@ -1175,6 +1183,9 @@ namespace RfidTool
             }));
         }
 
+        // 不警告不合法的高校联盟 OI 值
+        bool _dontWarningInvalidGaoxiaoOI = false;
+
         public TagInfo GetTagInfo(TagInfo existing,
     LogicChip chip,
     bool eas)
@@ -1260,7 +1271,36 @@ MessageBoxDefaultButton.Button2);
                     }
                     */
 
-                    var result = GaoxiaoUtility.BuildTag(chip, build_user_bank, eas);
+                    // 2025/9/21
+                    // 检查机构代码是否符合高校联盟 OI 的格式
+                    var oi = chip.FindElement(ElementOID.OI)?.Text;
+                    if (string.IsNullOrEmpty(oi) == false
+                        && GaoxiaoUtility.VerifyOI(oi) == false
+                        && _dontWarningInvalidGaoxiaoOI == false)
+                    {
+                        var dialog_result = MessageDlg.Show(this,
+                            $"警告: 机构代码 '{oi}' 不符合高校联盟格式的规定。\r\n\r\n若坚持写入，将被写入到 User Bank 中的 27(备用)元素。\r\n\r\n请问是否坚持写入？",
+                            "写入高校联盟格式",
+                            MessageBoxButtons.YesNo,
+                            MessageBoxDefaultButton.Button2,
+                            ref _dontWarningInvalidGaoxiaoOI,
+                            new string[] { "继续", "放弃" },
+                            "以后不再警告");
+                        if (dialog_result != DialogResult.Yes)
+                            throw new Exception("放弃写入标签");
+                    }
+
+                    // 2025/9/21
+                    var epc_info = new GaoxiaoEpcInfo
+                    {
+                        Version = 5,
+                        Picking = 1,
+                        Reserve = 0
+                    };
+                    var result = GaoxiaoUtility.BuildTag(chip,
+                        build_user_bank,
+                        eas,
+                        epc_info);
                     if (result.Value == -1)
                         throw new Exception(result.ErrorInfo);
                     new_tag_info.Bytes = build_user_bank ? result.UserBank : null;

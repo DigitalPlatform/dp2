@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.101.*")]
-[assembly: AssemblyFileVersion("3.101.0.0")]
+[assembly: AssemblyVersion("3.103.*")]
+[assembly: AssemblyFileVersion("3.103.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -256,3 +256,9 @@ using System.Runtime.InteropServices;
 // 3.100 2025/5/8   DetailHost 类和 MainForm 类中的 AddPinyin() 函数改变了默认效果，默认会覆盖已有的拼音子字段。
 //                  在 strParameters 参数中包含 "append" 子参数可以改变这一行为，变为已有拼音子字段保持原样
 // 3.101 2025/5/12  在“实用工具”窗口中增加“出版者工具”属性页
+// 3.102 2025/8/22  书目查询窗的导出 ISO2709 功能增加了导出工作单格式文件(.wor)的能力
+//                  在上述功能的对话框中，改进“MARC格式” ComboBox 的状态处理：当拟导出的记录数在 10000 或以下时，并且都是单一类型 MARC 格式，此 ComboBox 内容为此 MARC 格式的名称。其它情况下，才是“<自动>”。令用户体验更好
+//                  解决上述功能中，MARC 文件打开对话框界面在打开后某些 ComboBox 控件会被自动全选内容的问题
+//                  解决书目查询窗、实体查询窗打开后某些 ComboBox 控件会被自动全选内容的问题
+// 3.103 2025/8/28  增加 rest.https 和 basic.https 协议支持
+//       2025/9/19  种册窗册属性页打开的册编辑对话框中，借阅者 textbox 中会显示证条码号和读者参考 ID。格式为 "P0000001 @refID:xxxxxxx"。证条码号是从册记录 borrower 元素的 barcode 属性中取得的

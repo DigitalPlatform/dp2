@@ -5213,10 +5213,23 @@ out strError);
             if (bRenew == true)
                 strOperName = this.GetString("续借");
 
+            string strReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement, "barcode");
+            string strReaderRefID = DomUtil.GetElementText(readerdom.DocumentElement, "refID");
+            // 2025/9/19
+            if (String.IsNullOrEmpty(strReaderBarcode) == true
+                && String.IsNullOrEmpty(strReaderRefID) == true)
+            {
+                // text-level: 内部错误
+                strError = "读者中证条码号和参考ID不应同时为空";
+                return -1;
+            }
+            string strReaderKey = dp2StringUtil.BuildReaderKey(strReaderBarcode, strReaderRefID);
+            string strReaderDisplayKey = dp2StringUtil.BuildReaderKeyLegacy(strReaderBarcode, strReaderRefID);
+
+
+            string strItemBarcode = DomUtil.GetElementText(itemdom.DocumentElement, "barcode");
             string strItemRefID = DomUtil.GetElementText(itemdom.DocumentElement,
     "refID");
-            string strReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement, "barcode");
-            string strItemBarcode = DomUtil.GetElementText(itemdom.DocumentElement, "barcode");
 
 #if REMOVED
             string strItemBarcodeParam = strItemBarcode;
@@ -5247,6 +5260,7 @@ out strError);
             }
 
             string strItemKey = dp2StringUtil.BuildReaderKey(strItemBarcode, strItemRefID);
+            string strItemDisplayKey = dp2StringUtil.BuildReaderKeyLegacy(strItemBarcode, strItemRefID);
 
             // 馆藏地点
             string strLocation = DomUtil.GetElementText(itemdom.DocumentElement, "location");
@@ -5539,7 +5553,7 @@ out strError);
                     // text-level: 用户提示
 
                     // string strReaderKey = DomUtil.GetElementText(readerdom.DocumentElement, "barcode");
-                    strError = "借阅操作被拒绝。读者 '" + strReaderBarcode + "' 早先已经借阅了册 '" + strItemKey + "' 。(读者记录中已存在对应的<borrow>元素)";
+                    strError = "借阅操作被拒绝。读者 '" + strReaderDisplayKey + "' 早先已经借阅了册 '" + strItemDisplayKey + "' 。(读者记录中已存在对应的<borrow>元素)";
                     // strError = "操作前在读者记录中发现居然已存在表明读者借阅了册'"+strItemKey+"'的字段信息 " + calendar_node.OuterXml;
                     return -1;
                 }
@@ -5647,7 +5661,7 @@ out strError);
                 // text-level: 用户提示
                 strError = string.Format(this.GetString("s操作被拒绝，因为册状态为s"),  // "{0}操作被拒绝，原因: 册 '{1}' 的状态为 '{2}'。"
                     strOperName,
-                    strItemKey, // strItemKey,
+                    strItemDisplayKey, // strItemKey,
                     strBookState);
                 // strOperName + "操作被拒绝，原因: 册 '" + strItemKey + "' 的状态为 '"+ strBookState + "'。";
                 return 0;
@@ -5660,7 +5674,7 @@ out strError);
                 // text-level: 用户提示
                 strError = string.Format(this.GetString("s操作被拒绝，因为合订成员册不能单独外借"),  // "{0}操作被拒绝，原因: 合订成员册 {1} 不能单独外借。"
                     strOperName,
-                    strItemKey  // strItemKey
+                    strItemDisplayKey  // strItemKey
                     );
                 return 0;
             }
@@ -5718,7 +5732,7 @@ out strError);
 
                 if (nThisTypeCount + 1 > nThisTypeMax)
                 {
-                    strError = "读者 '" + strReaderBarcode + "' 所借 '" + strBookType + "' 类图书数量将超过 " + GetReaderTypeCaption(strItemLibraryCode, strReaderLibraryCode, strReaderType) + " 对该图书类型 '" + strBookType + "' 的最多 可借册数 值 '" + strParamValue + "'，因此本次" + strOperName + "操作被拒绝";
+                    strError = "读者 '" + strReaderDisplayKey + "' 所借 '" + strBookType + "' 类图书数量将超过 " + GetReaderTypeCaption(strItemLibraryCode, strReaderLibraryCode, strReaderType) + " 对该图书类型 '" + strBookType + "' 的最多 可借册数 值 '" + strParamValue + "'，因此本次" + strOperName + "操作被拒绝";
                     return 0;
                 }
 
@@ -5773,7 +5787,7 @@ out strError);
                 if (nCount + 1 > nMax)
                 {
                     // text-level: 用户提示
-                    strError = "读者 '" + strReaderBarcode + "' 所借册数将超过 " + GetReaderTypeCaption(strItemLibraryCode, strReaderLibraryCode, strReaderType) + " 可借总册数 值'" + strParamValue + "'，因此本次" + strOperName + "操作被拒绝";
+                    strError = "读者 '" + strReaderDisplayKey + "' 所借册数将超过 " + GetReaderTypeCaption(strItemLibraryCode, strReaderLibraryCode, strReaderType) + " 可借总册数 值'" + strParamValue + "'，因此本次" + strOperName + "操作被拒绝";
                     return 0;
                 }
             }
@@ -7619,6 +7633,9 @@ out _);
                     string strOverdueString = "";
                     string strLostComment = "";
 
+                    bool bOverdue = false;
+                    string strOverdueInfo = ""; // 有关超期的提示信息
+
                     if (strAction != "read" && strAction != "boxing")
                     {
                         string strItemLibraryCode = GetItemLibraryCode(itemdom);
@@ -7697,6 +7714,13 @@ out _);
                             result.ErrorInfo += strWarning;
                             result.Value = 1;
                         }
+                        if (nRet == 1)
+                        {
+                            bOverdue = true;
+                            if (string.IsNullOrEmpty(strError))
+                                throw new Exception($"DoReturnItemXml() 返回 1 时，strError 中必须返回超期提示文字");
+                            strOverdueInfo = strError;
+                        }
                     }
                     else
                         nRet = 0;
@@ -7740,12 +7764,12 @@ out _);
                                 //      -1  出错
                                 //      0   没有找到
                                 //      1   找到
-                                nRet = GetBiblioRecPathByItemRecPath(
+                                var ret = GetBiblioRecPathByItemRecPath(
                         strOutputItemRecPath,
                         parent_id,
                         out string strBiblioRecPath,
                         out strError);
-                                if (nRet == -1)
+                                if (ret == -1)
                                     goto ERROR1;
                                 DomUtil.SetElementText(domOperLog.DocumentElement, "biblioRecPath",
         strBiblioRecPath);
@@ -7753,6 +7777,8 @@ out _);
                         }
                     }
 
+
+                    /*
                     bool bOverdue = false;
                     string strOverdueInfo = "";
 
@@ -7761,6 +7787,7 @@ out _);
                         bOverdue = true;
                         strOverdueInfo = strError;
                     }
+                    */
 
                     // 处理读者记录
                     // string strNewReaderXml = "";
@@ -13300,6 +13327,7 @@ out string _);
                 int nRet = GetArrivedQueueRecXml(
                     channel,
                     "@notifyID:" + strNotifyID,
+                    "",
                     out strNotifyXml,
                     out timestamp,
                     out strOutputPath,
@@ -15603,6 +15631,7 @@ out strError);
                 // sessioninfo.Channels,
                 channel,
                 strItemKey.Replace("@refID:", "@itemRefID:"),    // strItemKey
+                "",
                 out strNotifyXml,
                 out timestamp,
                 out strOutputPath,

@@ -202,8 +202,15 @@ bool bClickClose = false)
             {
                 ClientInfo.WriteErrorLog("fingerprintcenter 被木马软件干扰，无法启动");
                 MessageBox.Show(this, "fingerprintcenter 被木马软件干扰，无法启动");
-                Application.Exit();
-                return;
+                if (Control.ModifierKeys == Keys.Control)
+                {
+
+                }
+                else
+                {
+                    Application.Exit();
+                    return;
+                }
             }
 
             // ClearHtml();

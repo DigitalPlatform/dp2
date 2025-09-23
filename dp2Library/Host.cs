@@ -1,36 +1,34 @@
 ﻿// #define USERNAME
-
+using DigitalPlatform;
+using DigitalPlatform.Install;
+using DigitalPlatform.IO;
+using DigitalPlatform.LibraryServer;
+using DigitalPlatform.LibraryService;
+using DigitalPlatform.Text;
+using Microsoft.Win32;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.ServiceProcess;
-using System.Text;
-using System.Threading;
-using System.Xml;
 using System.Collections;
+using System.Collections.Generic;
+using System.Data.Sql;
+using System.Diagnostics;
+using System.IdentityModel.Selectors;
 using System.IO;
-
+using System.Runtime.Remoting;
+using System.Runtime.Remoting.Channels;
+using System.Runtime.Remoting.Channels.Ipc;
+using System.Runtime.Serialization.Formatters;
 using System.Security.Cryptography.X509Certificates;
+using System.Security.Policy;
 // using System.IdentityModel.Selectors;
 
 using System.ServiceModel;
 using System.ServiceModel.Description;
-using System.IdentityModel.Selectors;
-using System.Runtime.Remoting.Channels.Ipc;
-using System.Runtime.Remoting.Channels;
-using System.Runtime.Remoting;
-using System.Runtime.Serialization.Formatters;
-using System.Threading.Tasks;
 using System.ServiceModel.Security;
-
-using Microsoft.Win32;
-
-using DigitalPlatform;
-using DigitalPlatform.LibraryServer;
-using DigitalPlatform.IO;
-using DigitalPlatform.Text;
-using DigitalPlatform.Install;
-
+using System.ServiceProcess;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Xml;
 namespace dp2Library
 {
     public partial class LibraryServiceHost : ServiceBase
@@ -41,6 +39,8 @@ namespace dp2Library
         Thread m_thread = null;
 
         public EventLog Log = null;
+
+        public CancellationTokenSource Cancel = new CancellationTokenSource();
 
         public LibraryServiceHost()
         {
@@ -102,24 +102,59 @@ namespace dp2Library
 
         bool m_bConsoleRun = false;
 
+        void PaintLogo()
+        {
+            string text = @"
+     8        .oPYo. o      o 8                                
+     8            `8 8        8                                
+.oPYo8 .oPYo.    oP' 8     o8 8oPYo. oPYo. .oPYo. oPYo. o    o 
+8    8 8    8 .oP'   8      8 8    8 8  `' .oooo8 8  `' 8    8 
+8    8 8    8 8'     8      8 8    8 8     8    8 8     8    8 
+`YooP' 8YooP' 8ooooo 8oooo  8 `YooP' 8     `YooP8 8     `YooP8 
+:.....:8 ....:.............:..:.....:..:::::.....:..:::::....8 
+:::::::8 :::::::::::::::::::::::::::::::::::::::::::::::::ooP'.
+:::::::..:::::::::::::::::::::::::::::::::::::::::::::::::...::";
+            /*
+            string text = @"
+  ╔╗    ╔═══╗╔╗     ╔╗
+  ║║    ║╔═╗║║║     ║║
+╔═╝║╔══╗╚╝╔╝║║║   ╔╗║╚═╗╔═╗╔══╗ ╔═╗╔╗ ╔╗
+║╔╗║║╔╗║╔═╝╔╝║║ ╔╗╠╣║╔╗║║╔╝╚ ╗║ ║╔╝║║ ║║
+║╚╝║║╚╝║║║╚═╗║╚═╝║║║║╚╝║║║ ║╚╝╚╗║║ ║╚═╝║
+╚══╝║╔═╝╚═══╝╚═══╝╚╝╚══╝╚╝ ╚═══╝╚╝ ╚═╗╔╝
+    ║║                             ╔═╝║
+    ╚╝                             ╚══╝";
+            */
+            Console.WriteLine(text);
+        }
+
+        void ConsoleWriteLine(string strText)
+        {
+            if (this.m_bConsoleRun == false)
+                return;
+            Console.WriteLine(strText);
+        }
+
         private void ConsoleRun()
         {
             this.m_bConsoleRun = true;
+
+            PaintLogo();
 
             // Some biolerplate to react to close window event
             _handler += new CtrlEventHandler(Handler);
             API.SetConsoleCtrlHandler(_handler, true);
 
-            Console.WriteLine("{0}::starting...", GetType().FullName);
+            Console.WriteLine($"{GetType().FullName}::starting...");
 
             OnStart(null);
 
-            Console.WriteLine("{0}::ready (ENTER to exit)", GetType().FullName);
+            Console.WriteLine($"{GetType().FullName}::ready (ENTER to exit)");
 
             Console.ReadLine();
 
             OnStop();
-            Console.WriteLine("{0}::stopped", GetType().FullName);
+            Console.WriteLine($"{GetType().FullName}::stopped");
         }
 
 #if NO
@@ -290,6 +325,8 @@ namespace dp2Library
 
         void CloseHosts()
         {
+            Cancel?.Cancel();
+
             StringBuilder debugInfo = new StringBuilder();
 
             debugInfo.AppendFormat("{0}开始停止 {1} 个 host\r\n", GetTime(), this.m_hosts.Count);
@@ -354,6 +391,7 @@ EventLogEntryType.Information);
                 {
                     info.Dispose();
                     host.Extensions.Remove(info);
+                    // if (host.State == CommunicationState.Opened)
                     host.Close();
                     this.m_hosts.Remove(host);
                     return true;
@@ -517,6 +555,7 @@ EventLogEntryType.Information);
                     catch (Exception ex)
                     {
                         strError = $"dp2library 注册表参数 properties 值中 子参数 downloadBandwidth 值 '{bandwidth_string}' 格式不合法: {ex.Message}";
+                        ConsoleWriteLine("*** " + strError);
                         this.Log.WriteEntry(strError,
         EventLogEntryType.Error);
                         errors.Add(strError);
@@ -538,6 +577,7 @@ EventLogEntryType.Information);
                     catch (Exception ex)
                     {
                         strError = $"dp2library 注册表参数 properties 值中 子参数 uploadBandwidth 值 '{bandwidth_string}' 格式不合法: {ex.Message}";
+                        ConsoleWriteLine("*** " + strError);
                         this.Log.WriteEntry(strError,
         EventLogEntryType.Error);
                         errors.Add(strError);
@@ -547,8 +587,7 @@ EventLogEntryType.Information);
                 LibraryApplication.UploadBandwidth = bandwidth;
             }
 
-            int nCount = 0;
-
+            // int nCount = 0;
             for (int i = 0; ; i++)
             {
                 string strInstanceName = "";
@@ -573,14 +612,18 @@ EventLogEntryType.Information);
                 // 查重，看看 host 是否已经存在
                 if (FindHost(strInstanceName) != null)
                 {
-                    errors.Add("实例 '" + strInstanceName + "' 调用前已经是启动状态，不能重复启动");
+                    strError = "实例 '" + strInstanceName + "' 调用前已经是启动状态，不能重复启动";
+                    ConsoleWriteLine("*** " + strError);
+                    errors.Add(strError);
                     continue;
                 }
 
                 // 2021/7/16
                 if (StringUtil.IsInList("stop", style))
                 {
-                    errors.Add("实例 '" + strInstanceName + "' 已被管理员停用");
+                    strError = "实例 '" + strInstanceName + "' 已被管理员停用";
+                    ConsoleWriteLine("提醒: " + strError);
+                    errors.Add(strError);
                     continue;
                 }
 
@@ -607,6 +650,7 @@ EventLogEntryType.Information);
                     //if (strSha1 != SerialCodeForm.GetCheckCode(strSerialNumber))
                     {
                         strError = "dp2Library 实例 '" + strInstanceName + "' 序列号不合法，无法启动。\r\n调试信息如下：\r\n" + strDebugInfo;
+                        ConsoleWriteLine("*** " + strError);
                         this.Log.WriteEntry(strError,
     EventLogEntryType.Error);
                         errors.Add(strError);
@@ -621,6 +665,7 @@ EventLogEntryType.Information);
                         if (Int32.TryParse(strMaxClients, out nMaxClients) == false)
                         {
                             strError = "dp2Library 实例 '" + strInstanceName + "' 序列号 '" + strSerialNumber + "' 中 clients 参数值 '" + strMaxClients + "' 不合法，无法启动";
+                            ConsoleWriteLine("*** " + strError);
                             this.Log.WriteEntry(strError,
     EventLogEntryType.Error);
                             errors.Add(strError);
@@ -636,83 +681,96 @@ EventLogEntryType.Information);
                 strLicenseType = "server";
 #endif
 
-                ServiceHost host = new ServiceHost(typeof(LibraryService));
-                this.m_hosts.Add(host);
-
-                nCount++;
-
-                HostInfo info = new HostInfo();
-                info.InstanceName = strInstanceName;
-                info.DataDir = strDataDir;
-                info.MaxClients = nMaxClients;
-                info.LicenseType = strLicenseType;
-                info.Function = strFunction;
-                host.Extensions.Add(info);
-                /// 
-
-                bool bHasWsHttp = false;
-                // 绑定协议
-                foreach (string url in existing_urls)
                 {
-                    if (string.IsNullOrEmpty(url) == true)
-                        continue;
+                    ServiceHost host = new ServiceHost(typeof(LibraryService));
 
-                    Uri uri = null;
-                    try
-                    {
-                        uri = new Uri(url);
-                    }
-                    catch (Exception ex)
-                    {
-                        strError = "dp2Library OnStart() 警告：发现不正确的协议URL '" + url + "' (异常信息: " + ex.Message + ")。该URL已被放弃绑定。";
-                        this.Log.WriteEntry(strError,
-    EventLogEntryType.Error);
-                        errors.Add(strError);
-                        continue;
-                    }
 
-                    if (uri.Scheme.ToLower() == "http")
-                    {
-                        ServiceEndpoint endpoint = host.AddServiceEndpoint(typeof(ILibraryService),
-    CreateWsHttpBinding1(),
-    url);
-                        bHasWsHttp = true;
-                    }
-                    else if (uri.Scheme.ToLower() == "https")
-                    {
-                        ServiceEndpoint endpoint = host.AddServiceEndpoint(typeof(ILibraryService),
-    CreateWsHttpBinding10(),
-    url);
-                        // bHasWsHttp = true;
+                    HostInfo info = new HostInfo();
+                    info.InstanceName = strInstanceName;
+                    info.DataDir = strDataDir;
+                    info.MaxClients = nMaxClients;
+                    info.LicenseType = strLicenseType;
+                    info.Function = strFunction;
+                    host.Extensions.Add(info);
+                    /// 
 
-                        // This next line is optional. It specifies that the client's certificate
-                        // does not have to be issued by a trusted authority, but can be issued
-                        // by a peer if it is in the Trusted People store. Do not use this setting
-                        // for production code. The default is PeerTrust, which specifies that
-                        // the certificate must originate from a trusted certificate authority.
-                        host.Credentials.ClientCertificate.Authentication.CertificateValidationMode =
-                        X509CertificateValidationMode.PeerOrChainTrust;
-                    }
-                    else if (uri.Scheme.ToLower() == "rest.http")
+                    bool bHasWsHttp = false;
+                    // 绑定协议
+                    foreach (string url in existing_urls)
                     {
-                        ServiceEndpoint endpoint = host.AddServiceEndpoint(typeof(ILibraryServiceREST),
-CreateWebHttpBinding1(),
-url.Substring(5));
-                        if (endpoint.Behaviors.Find<WebHttpBehavior>() == null)
+                        if (string.IsNullOrEmpty(url) == true)
+                            continue;
+
+                        ConsoleWriteLine($"为实例 {strInstanceName} 绑定协议 {url}");
+
+                        Uri uri = null;
+                        try
                         {
-                            WebHttpBehavior behavior = new WebHttpBehavior();
-                            behavior.DefaultBodyStyle = System.ServiceModel.Web.WebMessageBodyStyle.Wrapped;
-                            behavior.DefaultOutgoingResponseFormat = System.ServiceModel.Web.WebMessageFormat.Json;
-                            behavior.AutomaticFormatSelectionEnabled = true;
-                            behavior.HelpEnabled = true;
-                            endpoint.Behaviors.Add(behavior);
+                            uri = new Uri(url);
                         }
-                    }
-                    else if (uri.Scheme.ToLower() == "basic.http")
-                    {
-                        ServiceEndpoint endpoint = host.AddServiceEndpoint(typeof(ILibraryServiceREST),
-CreateBasicHttpBinding1(),
-url.Substring(6));
+                        catch (Exception ex)
+                        {
+                            strError = "dp2Library OnStart() 警告：发现不正确的协议URL '" + url + "' (异常信息: " + ex.Message + ")。该URL已被放弃绑定。";
+                            ConsoleWriteLine("*** " + strError);
+                            this.Log.WriteEntry(strError,
+        EventLogEntryType.Error);
+                            errors.Add(strError);
+                            continue;
+                        }
+
+                        if (uri.Scheme.ToLower() == "http")
+                        {
+                            ServiceEndpoint endpoint = host.AddServiceEndpoint(typeof(ILibraryService),
+        CreateWsHttpBinding1(),
+        url);
+                            bHasWsHttp = true;
+                        }
+                        else if (uri.Scheme.ToLower() == "https")
+                        {
+                            ServiceEndpoint endpoint = host.AddServiceEndpoint(typeof(ILibraryService),
+        WcfBindings.CreateHttpsBinding1(),
+        url);
+                            // bHasWsHttp = true;
+                        }
+#if REMOVED
+                        else if (uri.Scheme.ToLower() == "https")
+                        {
+                            ServiceEndpoint endpoint = host.AddServiceEndpoint(typeof(ILibraryService),
+        CreateWsHttpBinding10(),
+        url);
+                            // bHasWsHttp = true;
+
+                            // This next line is optional. It specifies that the client's certificate
+                            // does not have to be issued by a trusted authority, but can be issued
+                            // by a peer if it is in the Trusted People store. Do not use this setting
+                            // for production code. The default is PeerTrust, which specifies that
+                            // the certificate must originate from a trusted certificate authority.
+                            host.Credentials.ClientCertificate.Authentication.CertificateValidationMode =
+                            X509CertificateValidationMode.PeerOrChainTrust;
+                        }
+#endif
+                        else if (uri.Scheme.ToLower() == "rest.http"
+                            || uri.Scheme.ToLower() == "rest.https")
+                        {
+                            ServiceEndpoint endpoint = host.AddServiceEndpoint(typeof(ILibraryServiceREST),
+    CreateWebHttpBinding1(uri.Scheme.ToLower() == "rest.https"),
+    url.Substring(5));
+                            if (endpoint.Behaviors.Find<WebHttpBehavior>() == null)
+                            {
+                                WebHttpBehavior behavior = new WebHttpBehavior();
+                                behavior.DefaultBodyStyle = System.ServiceModel.Web.WebMessageBodyStyle.Wrapped;
+                                behavior.DefaultOutgoingResponseFormat = System.ServiceModel.Web.WebMessageFormat.Json;
+                                behavior.AutomaticFormatSelectionEnabled = true;
+                                behavior.HelpEnabled = true;
+                                endpoint.Behaviors.Add(behavior);
+                            }
+                        }
+                        else if (uri.Scheme.ToLower() == "basic.http"
+                            || uri.Scheme.ToLower() == "basic.https")
+                        {
+                            ServiceEndpoint endpoint = host.AddServiceEndpoint(typeof(ILibraryServiceREST),
+    CreateBasicHttpBinding1(uri.Scheme.ToLower() == "basic.https"),
+    url.Substring(6));
 #if NO
                         if (endpoint.Behaviors.Find<WebHttpBehavior>() == null)
                         {
@@ -724,83 +782,89 @@ url.Substring(6));
                             endpoint.Behaviors.Add(behavior);
                         }
 #endif
-                    }
-                    else if (uri.Scheme.ToLower() == "net.pipe")
-                    {
-                        host.AddServiceEndpoint(typeof(ILibraryService),
-                            CreateNamedpipeBinding0(),
-                            url);
-                    }
-                    else if (uri.Scheme.ToLower() == "net.tcp")
-                    {
-                        host.AddServiceEndpoint(typeof(ILibraryService),
-            CreateNetTcpBinding0(),
-            url);
-                    }
-                    else
-                    {
-                        // 警告不能支持的协议
-                        strError = "dp2Library OnStart() 警告：发现不能支持的协议类型 '" + url + "'";
-                        this.Log.WriteEntry(strError,
-                            EventLogEntryType.Information);
-                        errors.Add(strError);
-                    }
-
-                    info.Protocol = uri.Scheme.ToLower();
-                }
-
-                // 如果具有ws1/ws2 binding，才启用证书
-                if (bHasWsHttp == true)
-                {
-                    try
-                    {
-                        X509Certificate2 cert = GetCertificate(strCertSN,
-                            out strError);
-                        if (cert == null)
+                        }
+                        else if (uri.Scheme.ToLower() == "net.pipe")
                         {
-                            strError = "dp2Library OnStart() 准备证书 时发生错误: " + strError;
-                            this.Log.WriteEntry(strError,
-EventLogEntryType.Error);
-                            errors.Add(strError);
+                            host.AddServiceEndpoint(typeof(ILibraryService),
+                                CreateNamedpipeBinding0(),
+                                url);
+                        }
+                        else if (uri.Scheme.ToLower() == "net.tcp")
+                        {
+                            host.AddServiceEndpoint(typeof(ILibraryService),
+                CreateNetTcpBinding0(),
+                url);
                         }
                         else
-                            host.Credentials.ServiceCertificate.Certificate = cert;
+                        {
+                            // 警告不能支持的协议
+                            strError = "dp2Library OnStart() 警告：发现不能支持的协议类型 '" + url + "'";
+                            ConsoleWriteLine("*** " + strError);
+                            this.Log.WriteEntry(strError,
+                                EventLogEntryType.Information);
+                            errors.Add(strError);
+                        }
 
+                        info.Protocol = uri.Scheme.ToLower();
                     }
-                    catch (Exception ex)
+
+                    // 如果具有ws1/ws2 binding，才启用证书
+                    if (bHasWsHttp == true)
                     {
-                        strError = "dp2Library OnStart() 获取证书时发生错误: " + ExceptionUtil.GetExceptionMessage(ex);
-                        this.Log.WriteEntry(strError,
-        EventLogEntryType.Error);
-                        errors.Add(strError);
-                        return nCount;
-                    }
-                }
+                        try
+                        {
+                            ConsoleWriteLine($"为实例 {strInstanceName} 绑定证书 {strCertSN}");
 
-                // 只有第一个host才有metadata能力
-                if (// i == 0 
-                    m_hosts.Count == 1
-                    && host.Description.Behaviors.Find<ServiceMetadataBehavior>() == null)
-                {
-                    // https://stackoverflow.com/questions/7967674/wcf-platformnotsupportedexception-when-running-server-projects
-                    string strWsHostUrl = FindUrl("http", existing_urls);
-                    if (string.IsNullOrEmpty(strWsHostUrl) == false)
+                            X509Certificate2 cert = GetCertificate(strCertSN,
+                                out strError);
+                            if (cert == null)
+                            {
+                                strError = "dp2Library OnStart() 准备证书 时发生错误: " + strError;
+                                ConsoleWriteLine("*** " + strError);
+                                this.Log.WriteEntry(strError,
+    EventLogEntryType.Error);
+                                errors.Add(strError);
+                            }
+                            else
+                                host.Credentials.ServiceCertificate.Certificate = cert;
+
+                        }
+                        catch (Exception ex)
+                        {
+                            strError = "dp2Library OnStart() 获取证书时发生错误: " + ExceptionUtil.GetExceptionMessage(ex);
+                            ConsoleWriteLine("*** " + strError);
+                            this.Log.WriteEntry(strError,
+            EventLogEntryType.Error);
+                            errors.Add(strError);
+                            return this.m_hosts.Count;
+                        }
+                    }
+
+                    // 只有第一个host才有metadata能力
+                    if (m_hosts.Count == 0
+                        && host.Description.Behaviors.Find<ServiceMetadataBehavior>() == null)
                     {
-                        string strMetadataUrl = strWsHostUrl;
-                        if (String.IsNullOrEmpty(strMetadataUrl) == true)
-                            strMetadataUrl = "http://localhost:8001/dp2library/";
-                        if (strMetadataUrl[strMetadataUrl.Length - 1] != '/')
-                            strMetadataUrl += "/";
-                        strMetadataUrl += "metadata";
+                        // https://stackoverflow.com/questions/7967674/wcf-platformnotsupportedexception-when-running-server-projects
+                        string strWsHostUrl = FindUrl("http", existing_urls);
+                        if (string.IsNullOrEmpty(strWsHostUrl) == false)
+                        {
+                            ConsoleWriteLine($"为实例 {strInstanceName} 启用 metadata 服务 {strWsHostUrl}");
 
-                        ServiceMetadataBehavior behavior = new ServiceMetadataBehavior();
-                        behavior.HttpGetEnabled = true;
-                        behavior.HttpGetUrl = new Uri(strMetadataUrl);
-                        host.Description.Behaviors.Add(behavior);
+                            string strMetadataUrl = strWsHostUrl;
+                            if (String.IsNullOrEmpty(strMetadataUrl) == true)
+                                strMetadataUrl = "http://localhost:8001/dp2library/";
+                            if (strMetadataUrl[strMetadataUrl.Length - 1] != '/')
+                                strMetadataUrl += "/";
+                            strMetadataUrl += "$metadata";
+
+                            ServiceMetadataBehavior behavior = new ServiceMetadataBehavior();
+                            behavior.HttpGetEnabled = true;
+                            behavior.HttpGetUrl = new Uri(strMetadataUrl);
+                            host.Description.Behaviors.Add(behavior);
+                        }
                     }
-                }
 
-                // 直接用默认值即可
+                    // 直接用默认值即可
 #if NO
                 if (host.Description.Behaviors.Find<ServiceThrottlingBehavior>() == null)
                 {
@@ -812,50 +876,61 @@ EventLogEntryType.Error);
                 }
 #endif
 
-                // IncludeExceptionDetailInFaults
-                ServiceDebugBehavior debug_behavior = host.Description.Behaviors.Find<ServiceDebugBehavior>();
-                if (debug_behavior == null)
-                {
-                    host.Description.Behaviors.Add(new ServiceDebugBehavior() { IncludeExceptionDetailInFaults = true });
-                }
-                else
-                {
-                    if (debug_behavior.IncludeExceptionDetailInFaults == false)
-                        debug_behavior.IncludeExceptionDetailInFaults = true;
-                }
+                    // IncludeExceptionDetailInFaults
+                    ServiceDebugBehavior debug_behavior = host.Description.Behaviors.Find<ServiceDebugBehavior>();
+                    if (debug_behavior == null)
+                    {
+                        host.Description.Behaviors.Add(new ServiceDebugBehavior() { IncludeExceptionDetailInFaults = true });
+                    }
+                    else
+                    {
+                        if (debug_behavior.IncludeExceptionDetailInFaults == false)
+                            debug_behavior.IncludeExceptionDetailInFaults = true;
+                    }
 
 #if NO
                 host.Credentials.UserNameAuthentication.UserNamePasswordValidationMode = System.ServiceModel.Security.UserNamePasswordValidationMode.Custom;
                 host.Credentials.UserNameAuthentication.CustomUserNamePasswordValidator = new MyValidator();
 #endif
 
-                host.Opening += new EventHandler(host_Opening);
-                host.Closing += new EventHandler(m_host_Closing);
 
-                try
-                {
-                    host.Open();
-                }
-                catch (Exception ex)
-                {
-                    // 让调试器能感觉到
-                    if (this.m_bConsoleRun == true)
-                        throw ex;
+                    host.Opening += new EventHandler(host_Opening);
+                    host.Closing += new EventHandler(m_host_Closing);
 
-                    strError = "dp2Library OnStart() host.Open() 时发生错误: instancename=[" + strInstanceName + "]:" + ExceptionUtil.GetExceptionMessage(ex);
-                    this.Log.WriteEntry(strError,
-    EventLogEntryType.Error);
-                    errors.Add(strError);
-                    return nCount;
+                    try
+                    {
+                        ConsoleWriteLine($"启动实例 {strInstanceName} 的 Host");
+                        host.Open();
+                    }
+                    catch (Exception ex)
+                    {
+                        // 让调试器能感觉到
+                        if (this.m_bConsoleRun == true)
+                            throw;
+
+                        strError = "dp2Library OnStart() host.Open() 时发生错误: instancename=[" + strInstanceName + "]:" + ExceptionUtil.GetExceptionMessage(ex);
+                        ConsoleWriteLine("*** " + strError);
+                        this.Log.WriteEntry(strError,
+        EventLogEntryType.Error);
+                        errors.Add(strError);
+                        return this.m_hosts.Count;
+                    }
+
+                    lock (this.m_hosts)
+                    {
+                        this.m_hosts.Add(host);
+                    }
                 }
             }
 
-            return nCount;
+            return this.m_hosts.Count;
         }
 
         void ThreadMain()
         {
             CloseHosts();
+
+            Cancel = new CancellationTokenSource();
 
             List<string> errors = null;
             OpenHosts(null, out errors);
@@ -1051,7 +1126,7 @@ EventLogEntryType.Error);
                         strMetadataUrl = "http://localhost:8001/dp2library/";
                     if (strMetadataUrl[strMetadataUrl.Length - 1] != '/')
                         strMetadataUrl += "/";
-                    strMetadataUrl += "metadata";
+                    strMetadataUrl += "$metadata";
 
                     ServiceMetadataBehavior behavior = new ServiceMetadataBehavior();
                     behavior.HttpGetEnabled = true;
@@ -1107,6 +1182,8 @@ EventLogEntryType.Error);
 
             this.Log.WriteEntry("dp2Library OnStart() end",
 EventLogEntryType.Information);
+
+            Cancel?.Cancel();
 
             this.m_thread = null;
         }
@@ -1184,7 +1261,7 @@ EventLogEntryType.Information);
         System.ServiceModel.Channels.Binding CreateWsHttpBinding1()
         {
             WSHttpBinding binding = new WSHttpBinding();
-            binding.Namespace = "http://dp2003.com/dp2library/";
+
             binding.Security.Mode = SecurityMode.Message;
 #if !USERNAME
             binding.Security.Message.ClientCredentialType = MessageCredentialType.None;
@@ -1201,9 +1278,7 @@ EventLogEntryType.Information);
 
             binding.ReliableSession.InactivityTimeout = new TimeSpan(0, 20, 0);
             // binding.ReliableSession.Enabled = false;
-
             binding.ReliableSession.InactivityTimeout = new TimeSpan(0, 20, 0);
-
             return binding;
         }
 
@@ -1233,11 +1308,12 @@ EventLogEntryType.Information);
         }
 
 
-        System.ServiceModel.Channels.Binding CreateWebHttpBinding1()
+        System.ServiceModel.Channels.Binding CreateWebHttpBinding1(bool isHTTPS = false)
         {
             WebHttpBinding binding = new WebHttpBinding();
             binding.Namespace = "http://dp2003.com/dp2library/";
-            binding.Security.Mode = WebHttpSecurityMode.None;
+            // binding.Security.Mode = WebHttpSecurityMode.None;
+            binding.Security.Mode = isHTTPS ? WebHttpSecurityMode.Transport : WebHttpSecurityMode.None;
             // binding.Security.Message.ClientCredentialType = MessageCredentialType.None;
             binding.MaxReceivedMessageSize = 1024 * 1024;
             // binding.MessageEncoding = WSMessageEncoding.Mtom;
@@ -1255,11 +1331,11 @@ EventLogEntryType.Information);
 
         // 2013/11/1
         // Basic HTTP
-        System.ServiceModel.Channels.Binding CreateBasicHttpBinding1()
+        System.ServiceModel.Channels.Binding CreateBasicHttpBinding1(bool isHTTPS = false)
         {
             BasicHttpBinding binding = new BasicHttpBinding();
             binding.Namespace = "http://dp2003.com/dp2library/";
-            binding.Security.Mode = BasicHttpSecurityMode.None;
+            binding.Security.Mode = isHTTPS ? BasicHttpSecurityMode.Transport : BasicHttpSecurityMode.None;
             // binding.Security.Message.ClientCredentialType = MessageCredentialType.None;
             binding.MaxReceivedMessageSize = 1024 * 1024;
             // binding.MessageEncoding = WSMessageEncoding.Mtom;
@@ -1579,7 +1655,7 @@ EventLogEntryType.Error);
             Console.WriteLine("共删除 " + nCount.ToString() + " 个临时文件");
         }
 
-#region Windows Service 控制命令设施
+        #region Windows Service 控制命令设施
 
         IpcServerChannel m_serverChannel = null;
 
@@ -1621,7 +1697,7 @@ EventLogEntryType.Error);
             }
         }
 
-#endregion
+        #endregion
     }
 
     public class MyValidator : UserNamePasswordValidator

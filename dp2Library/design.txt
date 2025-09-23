@@ -1,0 +1,14 @@
+
+https://learn.microsoft.com/zh-cn/dotnet/framework/wcf/feature-details/http-transport-security
+
+https://learn.microsoft.com/zh-cn/dotnet/framework/wcf/feature-details/configuring-http-and-https
+
+https://learn.microsoft.com/zh-cn/dotnet/framework/wcf/feature-details/how-to-configure-a-port-with-an-ssl-certificate
+
+https://www.cnblogs.com/frankyou/p/6897703.html
+
+~~~
+https://learn.microsoft.com/en-us/dotnet/framework/wcf/samples/custom-binding-reliable-session-over-https
+
+
+System.InvalidOperationException: 'Contract requires Session, but Binding 'RabbitMqBinding' doesn't support it or isn't configured properly to support it.

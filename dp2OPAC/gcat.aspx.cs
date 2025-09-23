@@ -30,6 +30,7 @@ ref sessioninfo) == false)
             // 是否登录?
             if (string.IsNullOrEmpty(sessioninfo.UserID))
             {
+#if REMOVED
                 if (this.Page.Request["forcelogin"] == "on")
                 {
                     sessioninfo.LoginCallStack.Push(Request.RawUrl);
@@ -44,6 +45,15 @@ ref sessioninfo) == false)
                 }
 
                 // 默认 public
+                sessioninfo.UserID = "public";
+                sessioninfo.IsReader = false;
+#endif
+                var url = GetDefaultLoginUrl();
+                if (url != null)
+                {
+                    Response.Redirect(url, true);
+                    return;
+                }
                 sessioninfo.UserID = "public";
                 sessioninfo.IsReader = false;
             }

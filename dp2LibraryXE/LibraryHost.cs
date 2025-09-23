@@ -1,16 +1,17 @@
-﻿using System;
+﻿using DigitalPlatform;
+using DigitalPlatform.IO;
+using DigitalPlatform.LibraryService;
+using DigitalPlatform.Text;
+using dp2Library;
+using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Security.Cryptography.X509Certificates;
 using System.ServiceModel;
+using System.ServiceModel.Channels;
 using System.ServiceModel.Description;
+using System.Threading;
 using System.Xml;
-
-using dp2Library;
-
-using DigitalPlatform;
-using DigitalPlatform.IO;
-using DigitalPlatform.Text;
+using static System.Net.WebRequestMethods;
 
 namespace dp2LibraryXE
 {
@@ -141,17 +142,20 @@ namespace dp2LibraryXE
                         CreateNetTcpBinding0(),
                         strUrl);
                 }
-                else if (uri.Scheme.ToLower() == "http")
+                else if (uri.Scheme.ToLower() == "http"
+                    || uri.Scheme.ToLower() == "https")
                 {
                     ServiceEndpoint endpoint = host.AddServiceEndpoint(typeof(ILibraryService),
-    CreateWsHttpBinding1(),
+    uri.Scheme.ToLower() == "http" ? CreateWsHttpBinding1() : WcfBindings.CreateHttpsBinding1(),
     strUrl);
-                    bHasWsHttp = true;
+                    if (uri.Scheme.ToLower() == "http")
+                        bHasWsHttp = true;
                 }
-                else if (uri.Scheme.ToLower() == "rest.http")
+                else if (uri.Scheme.ToLower() == "rest.http"
+                    || uri.Scheme.ToLower() == "rest.https")
                 {
                     ServiceEndpoint endpoint = host.AddServiceEndpoint(typeof(ILibraryServiceREST),
-CreateWebHttpBinding1(),
+CreateWebHttpBinding1(uri.Scheme.ToLower() == "rest.https"),
 strUrl.Substring(5));   // rest. 这几个字符要去掉
                     if (endpoint.Behaviors.Find<WebHttpBehavior>() == null)
                     {
@@ -180,7 +184,7 @@ strUrl.Substring(5));   // rest. 这几个字符要去掉
                     string strMetadataUrl = strUrl;    //  "http://localhost:8001/dp2library/xe/";
                     if (strMetadataUrl[strMetadataUrl.Length - 1] != '/')
                         strMetadataUrl += "/";
-                    strMetadataUrl += "metadata";
+                    strMetadataUrl += "$metadata";  // http://localhost/dp2library/xe/$metadata
 
                     ServiceMetadataBehavior behavior = new ServiceMetadataBehavior();
                     behavior.HttpGetEnabled = true;
@@ -349,13 +353,7 @@ strUrl.Substring(5));   // rest. 这几个字符要去掉
             }
         }
 
-        static void SetTimeout(System.ServiceModel.Channels.Binding binding)
-        {
-            binding.SendTimeout = new TimeSpan(0, 20, 0);
-            binding.ReceiveTimeout = new TimeSpan(0, 20, 0);    // 决定Session存活
-            binding.CloseTimeout = new TimeSpan(0, 20, 0);
-            binding.OpenTimeout = new TimeSpan(0, 20, 0);
-        }
+
 
         // np0: namedpipe 
         System.ServiceModel.Channels.Binding CreateNamedpipeBinding0()
@@ -370,7 +368,7 @@ strUrl.Substring(5));   // rest. 这几个字符要去掉
             quotas.MaxArrayLength = 1024 * 1024;
             quotas.MaxStringContentLength = 1024 * 1024;
             binding.ReaderQuotas = quotas;
-            SetTimeout(binding);
+            WcfBindings.SetTimeout(binding);
             // binding.ReliableSession.Enabled = false;
 
             return binding;
@@ -389,7 +387,7 @@ strUrl.Substring(5));   // rest. 这几个字符要去掉
             quotas.MaxArrayLength = 1024 * 1024;
             quotas.MaxStringContentLength = 1024 * 1024;
             binding.ReaderQuotas = quotas;
-            SetTimeout(binding);
+            WcfBindings.SetTimeout(binding);
             binding.ReliableSession.InactivityTimeout = new TimeSpan(0, 20, 0);
             // binding.ReliableSession.Enabled = false;
 
@@ -401,12 +399,55 @@ strUrl.Substring(5));   // rest. 这几个字符要去掉
         {
             WSHttpBinding binding = new WSHttpBinding();
             binding.Namespace = "http://dp2003.com/dp2library/";
-            binding.Security.Mode = SecurityMode.Message;
+            {
+                binding.Security.Mode = SecurityMode.Message;
 #if !USERNAME
-            binding.Security.Message.ClientCredentialType = MessageCredentialType.None;
+                binding.Security.Message.ClientCredentialType = MessageCredentialType.None;
 #else
             binding.Security.Message.ClientCredentialType = MessageCredentialType.UserName;
 #endif
+            }
+
+            binding.MaxReceivedMessageSize = 1024 * 1024;
+            binding.MessageEncoding = WSMessageEncoding.Mtom;
+            XmlDictionaryReaderQuotas quotas = new XmlDictionaryReaderQuotas();
+            quotas.MaxArrayLength = 1024 * 1024;
+            quotas.MaxStringContentLength = 1024 * 1024;
+            binding.ReaderQuotas = quotas;
+            WcfBindings.SetTimeout(binding);
+
+            binding.ReliableSession.InactivityTimeout = new TimeSpan(0, 20, 0);
+            // binding.ReliableSession.Enabled = false;
+
+            binding.ReliableSession.InactivityTimeout = new TimeSpan(0, 20, 0);
+            return binding;
+        }
+
+#if REMOVED
+        // https://learn.microsoft.com/en-us/dotnet/framework/wcf/samples/ws-transport-security
+        System.ServiceModel.Channels.Binding CreateWsHttpsBinding1()
+        {
+            var binding = new WSHttpBinding();
+            binding.Namespace = "http://dp2003.com/dp2library/";
+            binding.Security.Mode = SecurityMode.Transport;
+            binding.Security.Transport.ClientCredentialType = HttpClientCredentialType.None;
+            binding.Security.Message.ClientCredentialType = MessageCredentialType.None;
+
+            /*
+             // https://learn.microsoft.com/en-us/dotnet/framework/wcf/samples/custom-binding-reliable-session-over-https
+            BindingElementCollection outputBec = new BindingElementCollection();   //binding.CreateBindingElements();
+            var e = (HttpsTransportBindingElement)outputBec.Find<HttpsTransportBindingElement>();
+            outputBec.Add(new ReliableSessionBindingElement());
+            outputBec.Add(new HttpsTransportBindingElement());
+            var b = new CustomBinding(outputBec);
+            
+            return b;
+            */
+
+            // https://stackoverflow.com/questions/2650738/how-to-enable-wcf-session-with-wshttpbidning-with-transport-only-security
+            binding.ReliableSession.Enabled = true;
+            binding.ReliableSession.Ordered = true;
+
             binding.MaxReceivedMessageSize = 1024 * 1024;
             binding.MessageEncoding = WSMessageEncoding.Mtom;
             XmlDictionaryReaderQuotas quotas = new XmlDictionaryReaderQuotas();
@@ -415,19 +456,19 @@ strUrl.Substring(5));   // rest. 这几个字符要去掉
             binding.ReaderQuotas = quotas;
             SetTimeout(binding);
 
+            //binding.ReliableSession.Enabled = false;
             binding.ReliableSession.InactivityTimeout = new TimeSpan(0, 20, 0);
-            // binding.ReliableSession.Enabled = false;
-
             binding.ReliableSession.InactivityTimeout = new TimeSpan(0, 20, 0);
-
             return binding;
         }
+#endif
 
-        System.ServiceModel.Channels.Binding CreateWebHttpBinding1()
+        System.ServiceModel.Channels.Binding CreateWebHttpBinding1(bool isHTTPS = false)
         {
             WebHttpBinding binding = new WebHttpBinding();
             binding.Namespace = "http://dp2003.com/dp2library/";
-            binding.Security.Mode = WebHttpSecurityMode.None;
+            // binding.Security.Mode = WebHttpSecurityMode.None;
+            binding.Security.Mode = isHTTPS ? WebHttpSecurityMode.Transport : WebHttpSecurityMode.None;
             // binding.Security.Message.ClientCredentialType = MessageCredentialType.None;
             binding.MaxReceivedMessageSize = 1024 * 1024;
             // binding.MessageEncoding = WSMessageEncoding.Mtom;
@@ -435,7 +476,7 @@ strUrl.Substring(5));   // rest. 这几个字符要去掉
             quotas.MaxArrayLength = 1024 * 1024;
             quotas.MaxStringContentLength = 1024 * 1024;
             binding.ReaderQuotas = quotas;
-            SetTimeout(binding);
+            WcfBindings.SetTimeout(binding);
 
             // binding.ReliableSession.InactivityTimeout = new TimeSpan(0, 20, 0);
             // binding.ReliableSession.InactivityTimeout = new TimeSpan(0, 20, 0);

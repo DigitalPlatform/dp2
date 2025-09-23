@@ -1153,7 +1153,16 @@ namespace dp2Circulation
             this.ShelfNo = DomUtil.GetElementText(this._dataDom.DocumentElement, "shelfNo");
             this.CurrentLocation = DomUtil.GetElementText(this._dataDom.DocumentElement, "currentLocation");
 
-            this.Borrower = DomUtil.GetElementText(this._dataDom.DocumentElement, "borrower");
+            {
+                string borrower = DomUtil.GetElementText(this._dataDom.DocumentElement, "borrower");
+                string borrower_barcode = this._dataDom.DocumentElement.SelectSingleNode("borrower/@barcode")?.Value;
+                string display_text = borrower;
+                if (string.IsNullOrEmpty(borrower_barcode) == false
+                    && borrower_barcode != borrower)
+                    display_text = $"{borrower_barcode} {borrower}";
+                this.Borrower = display_text;
+            }
+
             this.BorrowDate = DomUtil.GetElementText(this._dataDom.DocumentElement, "borrowDate");
             this.BorrowPeriod = DomUtil.GetElementText(this._dataDom.DocumentElement, "borrowPeriod");
 
@@ -1257,7 +1266,12 @@ namespace dp2Circulation
             DomUtil.SetElementText(this._dataDom.DocumentElement, "shelfNo", this.ShelfNo);
             DomUtil.SetElementText(this._dataDom.DocumentElement, "currentLocation", this.CurrentLocation);
 
-            DomUtil.SetElementText(this._dataDom.DocumentElement, "borrower", this.Borrower);
+            {
+                string borrower_value = this.Borrower;
+                if (borrower_value != null && borrower_value.Contains(" "))
+                    borrower_value = StringUtil.ParseTwoPart(borrower_value, " ")[1];
+                DomUtil.SetElementText(this._dataDom.DocumentElement, "borrower", borrower_value);
+            }
             DomUtil.SetElementText(this._dataDom.DocumentElement, "borrowDate", this.BorrowDate);
             DomUtil.SetElementText(this._dataDom.DocumentElement, "borrowPeriod", this.BorrowPeriod);
 

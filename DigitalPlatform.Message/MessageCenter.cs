@@ -14,6 +14,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
+using DigitalPlatform.rms.Client.rmsws_localhost;
 
 namespace DigitalPlatform.Message
 {
@@ -178,6 +179,13 @@ namespace DigitalPlatform.Message
                 return -1;
             }
 
+            // 2025/9/12
+            if (strUserID.StartsWith("@refID:"))
+            {
+                strError = "strUserID参数目前不支持使用 @refID: 前缀";
+                return -1;
+            }
+
             if (String.IsNullOrEmpty(strBox) == true)
             {
                 // text-level: 内部错误
@@ -266,7 +274,7 @@ namespace DigitalPlatform.Message
                     // text-level: 用户提示
                     strError = string.Format(this.GetString("收件人s不存在"),   // "收件人 '{0}' 不存在。"
                         strRecipient);
-                        // "收件人 '" + strRecipient + "' 不存在。";
+                    // "收件人 '" + strRecipient + "' 不存在。";
                     return 0;
                 }
 
@@ -322,7 +330,7 @@ namespace DigitalPlatform.Message
             strError = "";
             int nRet = 0;
 
-            string[] parts = strAddress.Split(new char [] {';',','});
+            string[] parts = strAddress.Split(new char[] { ';', ',' });
             for (int i = 0; i < parts.Length; i++)
             {
                 string strPart = parts[i].Trim();
@@ -357,7 +365,7 @@ namespace DigitalPlatform.Message
                         strLeft = DecryptPassword(strValue);
                     else
                     {
-                        strError = "无法识别的部件名称 '"+strName+"'";
+                        strError = "无法识别的部件名称 '" + strName + "'";
                         return -1;
                     }
 
@@ -532,7 +540,7 @@ namespace DigitalPlatform.Message
             string strMime,
             string strBody,
             string strOldRecordID,
-            byte [] baOldTimeStamp,
+            byte[] baOldTimeStamp,
             out byte[] baOutputTimeStamp,
             out string strOutputID,
             out string strError)
@@ -647,6 +655,7 @@ namespace DigitalPlatform.Message
                 nRet = GetMessageByPath(
                     channel,
                     strPath,
+                    null,
                     messagelevel,
                     out message,
                     out strError);
@@ -697,6 +706,7 @@ namespace DigitalPlatform.Message
             nRet = GetMessageByPath(
                 channel,
                 strPath,
+                null,
                 messagelevel,
                 out message,
                 out strError);
@@ -708,7 +718,7 @@ namespace DigitalPlatform.Message
                 // text-level: 用户提示
                 strError = string.Format(this.GetString("此条消息不属于用户s, 不允许察看"),  // "此条消息不属于用户 '{0}', 不允许察看。"
                     strUserID);
-                    // "此条消息不属于用户 '" +strUserID+ "', 不允许察看。";
+                // "此条消息不属于用户 '" +strUserID+ "', 不允许察看。";
                 return -1;
             }
 
@@ -717,31 +727,40 @@ namespace DigitalPlatform.Message
 
         // 根据消息记录路径获得消息
         // 不检查消息是否属于特定用户
+        // parameters:
+        //      strXml  如果为空，则函数内会主动根据 strPath 获得 XML 记录
         int GetMessageByPath(
             RmsChannel channel,
             string strPath,
+            string strXml,
             MessageLevel messagelevel,
             out MessageData data,
             out string strError)
         {
+            strError = "";
+            long lRet = 0;
+
             data = new MessageData();
-
-            string strMetaData = "";
+            string strOutputPath = strPath;
             byte[] timestamp = null;
-            string strXml = "";
-            string strOutputPath = "";
 
-            long lRet = channel.GetRes(strPath,
-                out strXml,
-                out strMetaData,
-                out timestamp,
-                out strOutputPath,
-                out strError);
-            if (lRet == -1)
+            if (string.IsNullOrEmpty(strXml))
             {
-                // text-level: 内部错误
-                strError = "获得消息记录 '" + strPath + "' 时出错: " + strError;
-                return -1;
+                string strMetaData = "";
+                // byte[] timestamp = null;
+
+                lRet = channel.GetRes(strPath,
+                    out strXml,
+                    out strMetaData,
+                    out timestamp,
+                    out strOutputPath,
+                    out strError);
+                if (lRet == -1)
+                {
+                    // text-level: 内部错误
+                    strError = "获得消息记录 '" + strPath + "' 时出错: " + strError;
+                    return -1;
+                }
             }
 
             XmlDocument dom = new XmlDocument();
@@ -802,26 +821,22 @@ namespace DigitalPlatform.Message
                 DomUtil.SetElementText(dom.DocumentElement,
                     "touched", "1");
 
-                byte[] output_timestamp = null;
-                //string strOutputPath = "";
-
                 lRet = channel.DoSaveTextRes(strPath,
                     dom.OuterXml,
                     false,
                     "content,ignorechecktimestamp",
                     timestamp,
-                    out output_timestamp,
+                    out byte[] output_timestamp,
                     out strOutputPath,
                     out strError);
                 if (lRet == -1)
                 {
                     // text-level: 内部错误
-                    strError = "写回记录 '"+strPath+"' 时出错: " + strError;
+                    strError = "写回记录 '" + strPath + "' 时出错: " + strError;
                     return -1;
                 }
                 data.Touched = true;
                 data.TimeStamp = output_timestamp;
-
             }
 
             return 1;
@@ -982,7 +997,7 @@ namespace DigitalPlatform.Message
 
             Debug.Assert(nStart >= 0, "");
 
-
+#if REMOVED
             // 获得结果集中指定范围的记录路径
             ArrayList aLine = null;
             lRet = channel.DoGetSearchFullResult(
@@ -1028,8 +1043,35 @@ namespace DigitalPlatform.Message
                 messages.Add(data);
 
             }
+#endif
+            SearchResultLoader loader = new SearchResultLoader(channel,
+null,
+strResultsetName,
+"id,xml");
+            loader.ElementType = "Record";
+            loader.Start = nStart;
+            loader.MaxResultCount = nCount;
 
-            return aLine.Count;
+            foreach (Record record in loader)
+            {
+                // string[] cols = record.Cols;
+
+                string strPath = record.Path;
+
+                // TODO: level == none 只返回路径
+                nRet = GetMessageByPath(
+                    channel,
+                    strPath,
+                    record.RecordBody?.Xml,
+                    messagelevel,
+                    out MessageData data,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                messages.Add(data);
+            }
+            return messages.Count;
         }
 
         // 删除一个box中的全部消息
@@ -1044,7 +1086,7 @@ namespace DigitalPlatform.Message
 
             int nStart = 0;
             int nCount = -1;
-                int nTotalCount = 0;
+            int nTotalCount = 0;
             for (; ; )
             {
                 List<MessageData> messages = null;
@@ -1084,7 +1126,7 @@ namespace DigitalPlatform.Message
 
                 nStart += messages.Count;
                 nCount -= messages.Count;
-                
+
                 if (nStart >= nTotalCount)
                     break;
                 if (nCount <= 0)
@@ -1107,15 +1149,15 @@ namespace DigitalPlatform.Message
 
             string strError1 = "";
 
-//            Channel channel = Channels.GetChannel(this.ServerUrl);
+            //            Channel channel = Channels.GetChannel(this.ServerUrl);
 
-            for (int i = 0; i<ids.Count; i++)
+            for (int i = 0; i < ids.Count; i++)
             {
                 string strID = ids[i];
 
                 // string strPath = this.MessageDbName + "/" + strID;
 
-                byte [] timestamp = null;
+                byte[] timestamp = null;
                 // byte[] output_timestamp = null;
 
                 if (timestamps != null)
@@ -1130,7 +1172,7 @@ namespace DigitalPlatform.Message
                 if (nRet == -1)
                 {
                     // text-level: 内部错误
-                    strError1 += "删除记录 '" +strID+ "' 时发生错误: "+ strError + ";";
+                    strError1 += "删除记录 '" + strID + "' 时发生错误: " + strError + ";";
                 }
 
             }
@@ -1149,7 +1191,7 @@ namespace DigitalPlatform.Message
             bool bMoveToRecycleBin,
             RmsChannelCollection Channels,
             string strID,
-            byte [] timestamp,
+            byte[] timestamp,
             out string strError)
         {
             RmsChannel channel = Channels.GetChannel(this.ServerUrl);
@@ -1222,7 +1264,7 @@ namespace DigitalPlatform.Message
                 bNullTimeStamp = true;
 
 
-        REDO:
+            REDO:
             lRet = channel.DoDeleteRes(strPath,
                 timestamp,
                 out output_timestamp,

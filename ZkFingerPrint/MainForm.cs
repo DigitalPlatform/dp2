@@ -57,9 +57,17 @@ namespace ZkFingerprint
         {
             if (DetectVirus.DetectXXX(out _) || DetectVirus.DetectGuanjia(out _))
             {
+                // ClientInfo.WriteErrorLog("zkprintcenter 被木马软件干扰，无法启动");
                 MessageBox.Show(this, "zkprintcenter 被木马软件干扰，无法启动");
-                Application.Exit();
-                return;
+                if (Control.ModifierKeys == Keys.Control)
+                {
+
+                }
+                else
+                {
+                    Application.Exit();
+                    return;
+                }
             }
 
             AddShortcutToStartupGroup("dp2-中控指纹阅读器接口");

@@ -123,7 +123,7 @@ namespace dp2Circulation
                 this.DisplayBackgroundTextLn("开始自动更新(ClickOnce安装)");
                 // 2025/5/23
                 this.DisplayBackgroundTextLn(ClientInfo.GetClickOnceInstallLocation());
-                
+
                 ApplicationDeployment deployment = ApplicationDeployment.CurrentDeployment;
                 deployment.CheckForUpdateCompleted -= new CheckForUpdateCompletedEventHandler(ad_CheckForUpdateCompleted);
                 deployment.CheckForUpdateCompleted += new CheckForUpdateCompletedEventHandler(ad_CheckForUpdateCompleted);
@@ -170,7 +170,8 @@ namespace dp2Circulation
         {
             // 2024/6/24
             // 延时关闭背景窗
-            _ = Task.Run(async () => {
+            _ = Task.Run(async () =>
+            {
                 await Task.Delay(TimeSpan.FromSeconds(30), CancelToken);
                 CloseBackgroundForm();
             });
@@ -247,7 +248,8 @@ namespace dp2Circulation
         {
             // 2024/6/24
             // 延时关闭背景窗
-            _ = Task.Run(async () => {
+            _ = Task.Run(async () =>
+            {
                 await Task.Delay(TimeSpan.FromSeconds(30), CancelToken);
                 CloseBackgroundForm();
             });
@@ -3176,13 +3178,15 @@ AppInfo.GetString("config",
                         // 2022/3/10
                         ClearValueTableCache();
 
-                        _ = Task.Run(() =>
+                        _ = Task.Run(async () =>
                         {
                             string location = AppInfo.GetString("global", "currentLocation", "");
+
+                            // 填充列表
+                            await FillLibraryCodeListMenuAsync();
+
                             this.Invoke((Action)(() =>
                             {
-                                // 填充列表
-                                FillLibraryCodeListMenu();
                                 // 复原以前的选择
                                 SetCurrentLocation(location);
                             }));
@@ -3438,7 +3442,7 @@ TaskScheduler.Default);
             */
             var looping = Looping(out LibraryChannel channel,
                 null,
-                "timeout:0:1:0");
+                "settimeout:0:1:0");    // 这里通常是第一次连接服务器，超时时间不可太长。settimeout:0:1:0 的意思是强制设置为 1 分钟。而 timeout:0:1:0 则是如果短于 1 分钟则设置为 1 分钟，这个 channel 以前遗留的 .Timeout 值可能很大(比如 40 分钟)显然是不符合这里的要求的
             looping.Progress.SetMessage("正在连接服务器 " + channel.Url + " ...");
             try
             {
@@ -3554,7 +3558,9 @@ TaskScheduler.Default);
             Stop.Initial("正在检查服务器 " + channel.Url + " 的版本号, 请稍候 ...");
             Stop.BeginLoop();
             */
-            var looping = Looping(out LibraryChannel channel);
+            var looping = Looping(out LibraryChannel channel,
+                null,
+                "settimeout:0:1:0");
             looping.Progress.SetMessage("正在检查服务器 " + channel.Url + " 的版本号, 请稍候 ...");
             try
             {
@@ -3699,7 +3705,8 @@ TaskScheduler.Default);
             Stop.BeginLoop();
             */
             var looping = Looping(out LibraryChannel channel,
-                "正在列检索途径 ...");
+                "正在列检索途径 ...",
+                "settimeout:0:1:0");
             try
             {
                 // 获得书目库的检索途径
@@ -4165,7 +4172,8 @@ TaskScheduler.Default);
             Stop.BeginLoop();
             */
             var looping = Looping(out LibraryChannel channel,
-                "正在获得从服务器映射到本地的配置文件 ...");
+                "正在获得从服务器映射到本地的配置文件 ...",
+                "settimeout:0:2:0");
             try
             {
                 string strServerMappedPath = PathUtil.MergePath(this.DataDir, "servermapped");
@@ -4290,7 +4298,8 @@ TaskScheduler.Default);
             Stop.BeginLoop();
             */
             var looping = Looping(out LibraryChannel channel,
-                "正在获得图书馆一般信息 ...");
+                "正在获得图书馆一般信息 ...",
+                "settimeout:0:2:0");
             try
             {
                 this.LibraryName = "";
@@ -4417,7 +4426,8 @@ TaskScheduler.Default);
             Stop.BeginLoop();
             */
             var looping = Looping(out LibraryChannel channel,
-                "正在获得普通库属性列表 ...");
+                "正在获得普通库属性列表 ...",
+                "settimeout:0:2:0");
             try
             {
                 this.NormalDbProperties = new List<NormalDbProperty>();
@@ -4817,7 +4827,8 @@ TaskScheduler.Default);
             Stop.BeginLoop();
             */
             var looping = Looping(out LibraryChannel channel,
-                "正在获得全部数据库定义 ...");
+                "正在获得全部数据库定义 ...",
+                "settimeout:0:2:0");
             try
             {
                 string strValue = "";
@@ -4955,7 +4966,8 @@ TaskScheduler.Default);
             Stop.BeginLoop();
             */
             var looping = Looping(/*out LibraryChannel channel,*/
-                "正在初始化书目库属性列表 ...");
+                "正在初始化书目库属性列表 ...",
+                "settimeout:0:2:0");
             try
             {
                 this.BiblioDbProperties = new List<BiblioDbProperty>();
@@ -5102,7 +5114,8 @@ TaskScheduler.Default);
             Stop.BeginLoop();
             */
             var looping = Looping(/*out LibraryChannel channel,*/
-                "正在初始化读者库属性列表 ...");
+                "正在初始化读者库属性列表 ...",
+                "settimeout:0:2:0");
             try
             {
                 this.ReaderDbProperties = new List<ReaderDbProperty>();
@@ -5196,7 +5209,8 @@ TaskScheduler.Default);
             Stop.BeginLoop();
             */
             var looping = Looping(out LibraryChannel channel,
-                "正在初始化预约到书库属性列表 ...");
+                "正在初始化预约到书库属性列表 ...",
+                "settimeout:0:2:0");
             try
             {
                 this._arrivedDbName = "";
@@ -5297,7 +5311,8 @@ TaskScheduler.Default);
             Stop.BeginLoop();
             */
             var looping = Looping(out LibraryChannel channel,
-                "正在获得前端交费接口配置信息 ...");
+                "正在获得前端交费接口配置信息 ...",
+                "settimeout:0:2:0");
             try
             {
                 long lRet = channel.GetSystemParameter(
@@ -5401,7 +5416,8 @@ TaskScheduler.Default);
             Stop.BeginLoop();
             */
             var looping = Looping(out LibraryChannel channel,
-                "正在获得索取号配置信息 ...");
+                "正在获得索取号配置信息 ...",
+                "settimeout:0:2:0");
             try
             {
                 long lRet = channel.GetSystemParameter(
@@ -5475,7 +5491,8 @@ TaskScheduler.Default);
             Stop.BeginLoop();
             */
             var looping = Looping(out LibraryChannel channel,
-                "正在获得 RFID 配置信息 ...");
+                "正在获得 RFID 配置信息 ...",
+                "settimeout:0:2:0");
             try
             {
                 long lRet = channel.GetSystemParameter(
@@ -5532,7 +5549,8 @@ TaskScheduler.Default);
             Stop.BeginLoop();
             */
             var looping = Looping(out LibraryChannel channel,
-                "正在获得条码校验规则 ...");
+                "正在获得条码校验规则 ...",
+                "settimeout:0:2:0");
             try
             {
                 this.BarcodeValidation = "";
@@ -5645,7 +5663,8 @@ out strError);
             Stop.Initial("正在初始化实用库属性列表 ...");
             Stop.BeginLoop();
             */
-            var looping = Looping("正在初始化实用库属性列表 ...");
+            var looping = Looping("正在初始化实用库属性列表 ...",
+                "settimeout:0:2:0");
             try
             {
                 this.UtilDbProperties = new List<UtilDbProperty>();
@@ -5748,7 +5767,8 @@ out strError);
             Stop.BeginLoop();
             */
             var looping = Looping(out LibraryChannel channel,
-                "正在获得服务器当前时钟 ...");
+                "正在获得服务器当前时钟 ...",
+                "settimeout:0:1:0");
             try
             {
                 string strTime = "";
@@ -5820,10 +5840,20 @@ out strError);
             }
         }
 
-        void FillLibraryCodeListMenu()
+        async Task<NormalResult> FillLibraryCodeListMenuAsync()
         {
+            var ret = await GetAllLibraryCodesAsync();
+            /*
             int nRet = this.GetAllLibraryCodes(out List<string> all_library_codes,
                 out string strError);
+            */
+            if (ret.Value == -1)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = "获得全部馆代码时出错: " + ret.ErrorInfo
+                };
+            var all_library_codes = ret.LibraryCodes;
 
             List<string> library_codes = new List<string>();
             if (Global.IsGlobalUser(_currentLibraryCodeList) == true)
@@ -5834,44 +5864,48 @@ out strError);
             else
                 library_codes = StringUtil.SplitList(_currentLibraryCodeList);
 
-            // 保存以前的选择
-            string old_location = GetCurrentLocation();
-
-            this.toolStripDropDownButton_selectLibraryCode.DropDownItems.Clear();
-            foreach (string library_code in library_codes)
+            this.TryInvoke(() =>
             {
-                string strName = library_code;
-                if (string.IsNullOrEmpty(strName) == true)
-                    strName = "[总馆]";
-                ToolStripItem item = new ToolStripMenuItem(strName);
-                item.Tag = library_code;
-                item.Click += item_Click;
-                this.toolStripDropDownButton_selectLibraryCode.DropDownItems.Add(item);
-            }
+                // 保存以前的选择
+                string old_location = GetCurrentLocation();
 
-            // 添加附加的馆藏地
-            string value = this.AppInfo.GetString(
-    "global",
-    "additionalLocations",
-    "");
-            List<string> list = StringUtil.SplitList(value);
-            foreach (string s in list)
-            {
-                ToolStripItem item = new ToolStripMenuItem(s);
-                item.Tag = s;
-                item.Click += item_Click;
-                this.toolStripDropDownButton_selectLibraryCode.DropDownItems.Add(item);
-            }
+                this.toolStripDropDownButton_selectLibraryCode.DropDownItems.Clear();
+                foreach (string library_code in library_codes)
+                {
+                    string strName = library_code;
+                    if (string.IsNullOrEmpty(strName) == true)
+                        strName = "[总馆]";
+                    ToolStripItem item = new ToolStripMenuItem(strName);
+                    item.Tag = library_code;
+                    item.Click += item_Click;
+                    this.toolStripDropDownButton_selectLibraryCode.DropDownItems.Add(item);
+                }
 
-            // 恢复以前的选择
-            if (string.IsNullOrEmpty(old_location) == false)
-                SetCurrentLocation(old_location);
-            else
-            {
-                // 默认选定第一项
-                if (this.toolStripDropDownButton_selectLibraryCode.DropDownItems.Count > 0)
-                    item_Click(this.toolStripDropDownButton_selectLibraryCode.DropDownItems[0], new EventArgs());
-            }
+                // 添加附加的馆藏地
+                string value = this.AppInfo.GetString(
+        "global",
+        "additionalLocations",
+        "");
+                List<string> list = StringUtil.SplitList(value);
+                foreach (string s in list)
+                {
+                    ToolStripItem item = new ToolStripMenuItem(s);
+                    item.Tag = s;
+                    item.Click += item_Click;
+                    this.toolStripDropDownButton_selectLibraryCode.DropDownItems.Add(item);
+                }
+
+                // 恢复以前的选择
+                if (string.IsNullOrEmpty(old_location) == false)
+                    SetCurrentLocation(old_location);
+                else
+                {
+                    // 默认选定第一项
+                    if (this.toolStripDropDownButton_selectLibraryCode.DropDownItems.Count > 0)
+                        item_Click(this.toolStripDropDownButton_selectLibraryCode.DropDownItems[0], new EventArgs());
+                }
+            });
+            return new NormalResult();
         }
 
         void item_Click(object sender, EventArgs e)
@@ -5914,8 +5948,26 @@ out strError);
                 item_Click(this.toolStripDropDownButton_selectLibraryCode.DropDownItems[0], new EventArgs());
         }
 
+        public class GetCodesResult : NormalResult
+        {
+            public List<string> LibraryCodes { get; set; }
+        }
+
+        public async Task<GetCodesResult> GetAllLibraryCodesAsync()
+        {
+            return await Task.Run(() =>
+            {
+                var ret = this._getAllLibraryCodes(
+    out List<string> library_codes,
+    out string strError);
+                return new GetCodesResult { Value = ret,
+                    LibraryCodes = library_codes,
+                    ErrorInfo = strError };
+            });
+        }
+
         // 获得全部可用的图书馆代码。注意，并不包含 "" (全局)
-        public int GetAllLibraryCodes(out List<string> library_codes,
+        int _getAllLibraryCodes(out List<string> library_codes,
             out string strError)
         {
             strError = "";
@@ -5931,7 +5983,8 @@ out strError);
             }
             */
             var looping = Looping(out LibraryChannel channel,
-                "正在获得全部馆代码 ...");
+                "正在获得全部馆代码 ...",
+                "settimeout:0:2:0");
             try
             {
                 string strValue = "";

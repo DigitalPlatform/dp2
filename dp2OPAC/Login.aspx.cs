@@ -171,6 +171,17 @@ ref this.sessioninfo) == false)
 
             if (this.Request["action"] == "logout")
             {
+                // 2025/9/5
+                if (string.IsNullOrEmpty(app.DefaultLogoutUrl) == false)
+                {
+                    Session.Abandon();
+                    this.ClearCookiesLogin("online,token");
+
+                    Response.Redirect(app.DefaultLogoutUrl, true);
+                    this.Response.End();
+                    return;
+                }
+
                 string strSsoMainPageUrl = (string)this.Session["sso_mainpage_url"];
 
                 // 先前用SSO接口登录的，现在要跳转到其登录页面
@@ -267,7 +278,6 @@ ref this.sessioninfo) == false)
                         this.Response.End();
                         return;
                     }
-
                 }
 
                 this.Redirect("login.aspx");
@@ -999,7 +1009,7 @@ ref this.sessioninfo) == false)
     }
 
 
-#if NO 
+#if NO
     测试用
     int DoSsoLogin()
     {

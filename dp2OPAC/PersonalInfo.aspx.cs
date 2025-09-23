@@ -50,6 +50,17 @@ ref sessioninfo) == false)
         // 是否登录?
         if (sessioninfo.UserID == "")
         {
+#if REMOVED
+            sessioninfo.LoginCallStack.Push(Request.RawUrl);
+            Response.Redirect("login.aspx", true);
+            return;
+#endif
+            var url = GetDefaultLoginUrl();
+            if (url != null)
+            {
+                Response.Redirect(url, true);
+                return;
+            }
             sessioninfo.LoginCallStack.Push(Request.RawUrl);
             Response.Redirect("login.aspx", true);
             return;

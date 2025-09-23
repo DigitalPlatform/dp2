@@ -64,6 +64,17 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
+        /*
+        // https://github.com/dotnet/winforms/issues/5406
+        protected override void OnGotFocus(EventArgs e)
+        {
+            //Directly back
+            return;
+
+            base.OnGotFocus(e);
+        }
+        */
+
         private void TabComboBox_DrawItem(object sender, DrawItemEventArgs e)
         {
             string strText = (string)this.Items[e.Index];

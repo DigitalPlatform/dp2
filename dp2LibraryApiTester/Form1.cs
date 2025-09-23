@@ -22,7 +22,7 @@ namespace dp2LibraryApiTester
 {
     public partial class MainForm : Form
     {
-        CancellationTokenSource _cancel = new CancellationTokenSource();
+        CancellationTokenSource _cancelApp = new CancellationTokenSource();
 
         public MainForm()
         {
@@ -63,7 +63,7 @@ namespace dp2LibraryApiTester
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
-            _cancel?.Dispose();
+            _cancelApp?.Dispose();
 
             DataModel.Free();
 
@@ -291,7 +291,7 @@ string style = "")
             string[] lines = strText.Split(new char[] { '\n' });
             foreach (string line in lines)
             {
-                AppendHtml($"<div class='debug {style}'>" + HttpUtility.HtmlEncode(line).Replace(" ","&nbsp;") + "</div>");
+                AppendHtml($"<div class='debug {style}'>" + HttpUtility.HtmlEncode(line).Replace(" ", "&nbsp;") + "</div>");
             }
         }
 
@@ -498,21 +498,31 @@ string style = "")
             });
         }
 
-        private void MenuItem_test_loginApi_Click(object sender, EventArgs e)
+        private async void MenuItem_test_loginApi_Click(object sender, EventArgs e)
         {
-            Task.Run(() =>
+            using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(this._cancelApp.Token))
             {
-                try
+                _cancelCurrent = cancel;
+
+                await Task.Run(() =>
                 {
-                    var result = TestLoginApi.TestAll(_cancel.Token);
-                    if (result.Value == -1)
-                        DataModel.SetMessage(result.ErrorInfo, "error");
-                }
-                catch (Exception ex)
-                {
-                    AppendString($"exception: {ex.Message}", "error");
-                }
-            });
+                    EnableControls(false);
+                    try
+                    {
+                        var result = TestLoginApi.TestAll(cancel.Token);
+                        if (result.Value == -1)
+                            DataModel.SetMessage(result.ErrorInfo, "error");
+                    }
+                    catch (Exception ex)
+                    {
+                        AppendString($"exception: {ex.Message}", "error");
+                    }
+                    finally
+                    {
+                        EnableControls(true);
+                    }
+                });
+            }
         }
 
         private void MenuItem_test_reservation_all_Click(object sender, EventArgs e)
@@ -568,6 +578,23 @@ string style = "")
                     AppendString($"exception: {ex.Message}", "error");
                 }
             });
+        }
+
+        CancellationTokenSource _cancelCurrent = new CancellationTokenSource();
+
+
+        private void toolStripButton_stop_Click(object sender, EventArgs e)
+        {
+            _cancelCurrent?.Cancel();
+        }
+
+        void EnableControls(bool enable)
+        {
+            this.Invoke(new Action(() =>
+            {
+                this.menuStrip1.Enabled = enable;
+                this.toolStripButton_stop.Enabled = !enable;
+            }));
         }
     }
 }

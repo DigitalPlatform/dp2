@@ -173,9 +173,17 @@ namespace RfidCenter
 
             if (DetectVirus.DetectXXX(out _) || DetectVirus.DetectGuanjia(out _))
             {
+                ClientInfo.WriteErrorLog("rfidcenter 被木马软件干扰，无法启动");
                 MessageBox.Show(this, "rfidcenter 被木马软件干扰，无法启动");
-                Application.Exit();
-                return;
+                if (Control.ModifierKeys == Keys.Control)
+                {
+
+                }
+                else
+                {
+                    Application.Exit();
+                    return;
+                }
             }
 
             var bRet = ClientInfo.Initial("rfidcenter");

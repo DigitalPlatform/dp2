@@ -3416,6 +3416,7 @@ namespace DigitalPlatform.rms.Client
             return lResultTotalCount; // 结果集内的记录总数
         }
 
+        // BUG: 希望逐步废止本函数
         // 获取检索命中结果
         // 获得每列详细信息的版本
         public long DoGetSearchFullResult(
@@ -3515,6 +3516,7 @@ namespace DigitalPlatform.rms.Client
                         lStart += records.Length;
                         nCount += records.Length;
                         nPerCount = lTotalCount - lStart;
+                        Debug.Assert(nPerCount > 0);
                     }
 
                     // 做事
@@ -3547,9 +3549,7 @@ namespace DigitalPlatform.rms.Client
 
                     if (nCount >= result.Value || nCount >= lTotalCount)
                         break;
-
                 }
-
                 catch (Exception ex)
                 {
                     /*

@@ -1,17 +1,17 @@
-﻿using System;
+﻿using DigitalPlatform;
+using DigitalPlatform.OPAC.Server;
+using DigitalPlatform.OPAC.Web;
+using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Security.Policy;
+using System.Threading;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using System.Threading;
 using System.Xml;
-using System.Globalization;
-using System.IO;
-
-using DigitalPlatform;
-using DigitalPlatform.OPAC.Server;
-using DigitalPlatform.OPAC.Web;
 // using DigitalPlatform.CirculationClient;
 
 public partial class ReservationInfo : MyWebPage
@@ -47,6 +47,17 @@ ref sessioninfo) == false)
         // 是否登录?
         if (sessioninfo.UserID == "")
         {
+#if REMOVED
+            sessioninfo.LoginCallStack.Push(Request.RawUrl);
+            Response.Redirect("login.aspx", true);
+            return;
+#endif            
+            var url = GetDefaultLoginUrl();
+            if (url != null)
+            {
+                Response.Redirect(url, true);
+                return;
+            }
             sessioninfo.LoginCallStack.Push(Request.RawUrl);
             Response.Redirect("login.aspx", true);
             return;

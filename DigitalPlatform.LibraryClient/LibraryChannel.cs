@@ -58,7 +58,7 @@ namespace DigitalPlatform.LibraryClient
 
         TempCodeMismatch = 6,
 
-        PasswordExpired = 7,    // 密码已经失效 2021/7/4
+        PasswordExpired = 7,    // 密码已经过期 2021/7/4
     }
 
     /// <summary>
@@ -296,10 +296,11 @@ namespace DigitalPlatform.LibraryClient
         }
 
         // basic0: basic http
-        System.ServiceModel.Channels.Binding CreateBasic0Binding()
+        System.ServiceModel.Channels.Binding CreateBasic0Binding(bool isHTTPS = false)
         {
             BasicHttpBinding binding = new BasicHttpBinding();
-            binding.Security.Mode = BasicHttpSecurityMode.None;
+            // binding.Security.Mode = BasicHttpSecurityMode.None;
+            binding.Security.Mode = isHTTPS ? BasicHttpSecurityMode.Transport : BasicHttpSecurityMode.None;
             binding.AllowCookies = true;
             binding.MaxReceivedMessageSize = MaxReceivedMessageSize;
             XmlDictionaryReaderQuotas quotas = new XmlDictionaryReaderQuotas();
@@ -311,10 +312,11 @@ namespace DigitalPlatform.LibraryClient
         }
 
         // rest: rest http
-        System.ServiceModel.Channels.Binding CreateRestBinding()
+        System.ServiceModel.Channels.Binding CreateRestBinding(bool isHTTPS)
         {
             WebHttpBinding binding = new WebHttpBinding();
-            binding.Security.Mode = System.ServiceModel.WebHttpSecurityMode.None;
+            // binding.Security.Mode = System.ServiceModel.WebHttpSecurityMode.None;
+            binding.Security.Mode = isHTTPS ? WebHttpSecurityMode.Transport : WebHttpSecurityMode.None;
             binding.AllowCookies = true;
             binding.MaxReceivedMessageSize = MaxReceivedMessageSize;
             XmlDictionaryReaderQuotas quotas = new XmlDictionaryReaderQuotas();
@@ -378,10 +380,10 @@ namespace DigitalPlatform.LibraryClient
         System.ServiceModel.Channels.Binding CreateWs1Binding()
         {
             WSHttpBinding binding = new WSHttpBinding();
+
             binding.Security.Mode = SecurityMode.Message;
             binding.Security.Message.ClientCredentialType = MessageCredentialType.None;
             // binding.Security.Message.ClientCredentialType = MessageCredentialType.UserName;
-
 
             binding.MaxReceivedMessageSize = MaxReceivedMessageSize;
             binding.MessageEncoding = WSMessageEncoding.Mtom;
@@ -401,6 +403,7 @@ namespace DigitalPlatform.LibraryClient
 
             // Get the SecurityBindingElement and cast to a SymmetricSecurityBindingElement to set the IdentityVerifier.
             BindingElementCollection outputBec = binding.CreateBindingElements();
+
             SymmetricSecurityBindingElement ssbe = (SymmetricSecurityBindingElement)outputBec.Find<SecurityBindingElement>();
 
             //Set the Custom IdentityVerifier.
@@ -415,6 +418,40 @@ namespace DigitalPlatform.LibraryClient
             // Set the MaxClockSkew on the bootstrap element.
             bootstrap.LocalClientSettings.IdentityVerifier = new CustomIdentityVerifier();
             return new CustomBinding(outputBec);
+        }
+
+        System.ServiceModel.Channels.Binding CreateHttpsBinding1()
+        {
+            var elements = new BindingElementCollection();
+
+            var session = new ReliableSessionBindingElement()
+            {
+                Ordered = true,
+                InactivityTimeout = TimeSpan.FromMinutes(20)
+            };
+            var encoding = new TextMessageEncodingBindingElement(
+                    MessageVersion.Soap12WSAddressing10,
+                    System.Text.Encoding.UTF8);
+            {
+                // 设置 ReaderQuotas
+                encoding.ReaderQuotas.MaxArrayLength = 1024 * 1024;
+                encoding.ReaderQuotas.MaxStringContentLength = 1024 * 1024;
+                //encoding.ReaderQuotas.MaxDepth = 64;
+                //encoding.ReaderQuotas.MaxNameTableCharCount = 1024 * 1024;
+                //encoding.ReaderQuotas.MaxBytesPerRead = 4096;
+            }
+
+            var transport = new HttpsTransportBindingElement()
+            {
+                MaxReceivedMessageSize = 1024 * 1024
+            };
+            elements.Add(session);
+            elements.Add(encoding);
+            elements.Add(transport);
+            var binding = new CustomBinding(elements);
+            binding.Name = "CustomWsHttpsReliableBinding";
+            SetTimeout(binding);
+            return binding;
         }
 
         // 2021/6/18
@@ -638,12 +675,15 @@ out strError);
 
                         this.m_ws = new localhost.dp2libraryClient(CreateNp0Binding(), address);
                     }
-                    else if (uri.Scheme.ToLower() == "basic.http")
+                    else if (uri.Scheme.ToLower() == "basic.http"
+                        || uri.Scheme.ToLower() == "basic.https")
                     {
                         EndpointAddress address = new EndpointAddress(strUrl.Substring(6));
 
 #if BASIC_HTTP
-                        this.m_ws = new localhost.dp2libraryRESTClient(CreateBasic0Binding(), address);
+                        this.m_ws = new localhost.dp2libraryRESTClient(
+                            CreateBasic0Binding(uri.Scheme.ToLower() == "basic.https"),
+                            address);
 #else
                             throw new Exception("当前条件编译版本不支持 basic.http 协议方式");
 #endif
@@ -665,12 +705,15 @@ out strError);
 
                         // RefreshContext();
                     }
-                    else if (uri.Scheme.ToLower() == "rest.http")
+                    else if (uri.Scheme.ToLower() == "rest.http"
+                        || uri.Scheme.ToLower() == "rest.https")
                     {
                         EndpointAddress address = new EndpointAddress(strUrl.Substring(5));
 
                         // http://stackoverflow.com/questions/15401738/custom-endpoint-behavior-not-being-used-in-wcf-client-with-service-reference
-                        var factory = new ChannelFactory<localhost.dp2libraryREST>(CreateRestBinding(), address);
+                        var factory = new ChannelFactory<localhost.dp2libraryREST>(
+                            CreateRestBinding(uri.Scheme.ToLower() == "rest.https"),
+                            address);
                         if (factory.Endpoint.Behaviors.Find<WebHttpBehavior>() == null)
                         {
                             WebHttpBehavior behavior = new WebHttpBehavior();
@@ -713,6 +756,7 @@ out strError);
 
                         this.m_ws = new localhost.dp2libraryClient(CreateNt0Binding(), address);
                     }
+#if REMOVED
                     else if (uri.Scheme.ToLower() == "https")
                     {
                         EndpointAddress address = new EndpointAddress(strUrl);
@@ -734,6 +778,7 @@ out strError);
                         */
                         // SSLValidator.OverrideValidation();
                     }
+#endif
                     else
                     {
 #if NO
@@ -754,7 +799,15 @@ out strError);
                   EndpointIdentity.CreateDnsIdentity(uri.DnsSafeHost));
 #endif
                                 address = new EndpointAddress(strUrl);
-                                this.m_ws = new localhost.dp2libraryClient(CreateWs1Binding(), address);
+
+                                if (uri.Scheme.ToLower() == "https")
+                                    this.m_ws = new localhost.dp2libraryClient(
+                                        CreateHttpsBinding1(),
+                                        address);
+                                else
+                                    this.m_ws = new localhost.dp2libraryClient(
+                                        CreateWs1Binding(),
+                                        address);
 
                                 this.m_ws.ClientCredentials.ServiceCertificate.Authentication.CertificateValidationMode = System.ServiceModel.Security.X509CertificateValidationMode.Custom;
                                 this.m_ws.ClientCredentials.ServiceCertificate.Authentication.CustomCertificateValidator =

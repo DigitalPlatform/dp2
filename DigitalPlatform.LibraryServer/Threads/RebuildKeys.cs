@@ -694,6 +694,7 @@ out strError);
 
 
         // return:
+        //      -2  对象文件不存在。建议继续向后处理
         //      -1  出错
         //      0   结束处理。(本次调用没有处理记录)
         //      1   成功。后面可以继续向后处理(strNextRecPath返回了刚处理过的记录的路径)
@@ -741,6 +742,8 @@ out strError);
                 out strError);
             if (lRet == -1)
             {
+                if (channel.ErrorCode == ChannelErrorCode.NotFoundObjectFile)
+                    return -2;
                 if (channel.IsNotFound())
                 {
                     if (bFirst == true)
@@ -907,6 +910,8 @@ out strError);
             return 0;
         }
 
+        // return:
+        //      -2  对象文件没有招到。建议继续向后处理
         int processBiblioRecord(RmsChannel channel,
     ref bool bFirst,
     string strRecPath,
@@ -955,6 +960,8 @@ out strError);
                 out strError);
             if (lRet == -1)
             {
+                if (channel.ErrorCode == ChannelErrorCode.NotFoundObjectFile)
+                    return -2;
                 if (channel.IsNotFound())
                 {
                     if (bFirst == true)
@@ -1172,6 +1179,7 @@ out string strError)
                     string strPath = info.DbName + "/" + strID;
 
                     // return:
+                    //      -2  对象文件不存在。建议继续向后处理
                     //      -1  出错
                     //      0   结束处理。(本次调用没有处理记录)
                     //      1   成功。后面可以继续向后处理(strNextRecPath返回了刚处理过的记录的路径)
@@ -1187,6 +1195,11 @@ out string strError)
                         return 0;
                     if (nRet == -1)
                         return -1;
+                    if (nRet == -2)
+                    {
+                        this.AppendResultText($"*** 处理记录 {strOutputPath} 时出错(但批处理还将继续): {strError}\r\n");
+                        // 继续向后处理
+                    }
 #if NO
                     // string strDirectionComment = "";
 
@@ -1286,10 +1299,6 @@ out string strError)
                     if (bFirst == false)
                         info.RecID += "+";
 
-                    // 每 100 条显示一行
-                    if ((m_nRecordCount % 100) == 0)
-                        this.AppendResultText("已重建检索点 记录 " + strOutputPath + "  " + (m_nRecordCount + 1).ToString() + "\r\n");
-
                     // CONTINUE:
 
                     // 是否超过循环范围
@@ -1298,6 +1307,13 @@ out string strError)
                         strError = "数据库 '" + info.DbName + "' 当前记录 ID '" + strID + "' 不合法";
                         return -1;
                     }
+
+                    {
+                        if (ShallDisplay(m_nRecordCount)
+                            || nCur >= nEnd)
+                            this.AppendResultText("已重建检索点 记录 " + strOutputPath + "  " + (m_nRecordCount + 1).ToString() + "\r\n");
+                    }
+
                     if (nCur > nEnd)
                         break;
 
@@ -1350,6 +1366,7 @@ out string strError)
                 this.AppendResultText($"共处理记录 {m_nRecordCount} 条\r\n");
             }
         }
+
 
 #if NO
         // TODO: 用两个回调函数嵌入
@@ -1714,9 +1731,12 @@ out string strError)
                     strStartID = strInputStartNo;
                     bStartNotFound = true;
                 }
+                else if (channel.ErrorCode == ChannelErrorCode.NotFoundObjectFile)
+                {
+                    // 当作正常继续向后处理
+                }
                 else
-                    strError += "校验startno时出错： " + strError0 + " ";
-
+                    strError += "校验 startno 时出错： " + strError0 + " ";
             }
             else
             {
@@ -1756,9 +1776,13 @@ out string strError)
                     strEndID = strInputEndNo;
                     bEndNotFound = true;
                 }
+                else if (channel.ErrorCode == ChannelErrorCode.NotFoundObjectFile)
+                {
+                    // 当作正常继续向后处理
+                }
                 else
                 {
-                    strError += "校验endno时出错： " + strError0 + " ";
+                    strError += "校验 endno 时出错： " + strError0 + " ";
                 }
             }
             else

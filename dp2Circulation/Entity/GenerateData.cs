@@ -725,7 +725,7 @@ namespace dp2Circulation
 
 
                 if (this.m_genDataViewer == null
-                    || (bOpenWindow == true && this.m_genDataViewer.Visible == false))
+                    || (bOpenWindow == true && this.m_genDataViewer != null && this.m_genDataViewer.Visible == false))
                 {
                     m_genDataViewer = new GenerateDataForm();
 

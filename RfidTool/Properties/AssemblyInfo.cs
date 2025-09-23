@@ -33,8 +33,8 @@ using System.Runtime.InteropServices;
 //通过使用 "*"，如下所示:
 // [assembly: AssemblyVersion("1.0.*")]
 
-[assembly: AssemblyVersion("1.0.23")]
-[assembly: AssemblyFileVersion("1.0.23.0")]
+[assembly: AssemblyVersion("1.0.21")]
+[assembly: AssemblyFileVersion("1.0.21.0")]
 
 // 1.0.1 (2020/12/10) 增加保存“写入历史”列表功能; 感知 USB 插拔、自动重新连接读写器;
 //                      读写器连接成功后，会在状态行显示可用读卡器数量;
@@ -59,3 +59,5 @@ using System.Runtime.InteropServices;
 //                      设置对话框的“写入标签”属性页增加了一个 checkbox “写入时遇到解析错误的标签要当作空白标签覆盖”
 // 1.0.19 (2023/11/2) 改进 UHF 标签相关功能
 // 1.0.20 (2023/11/29) 清空 UHF 标签功能改为写入一串随机的值
+// 1.0.21 (2025/9/21) 扫入对话框在写入高校联盟格式时，增加了对即将写入的 OI 内容的校验，如果发现不符合高校联盟的 OI 要求，则会警告，询问是否强行写入。若强行写入，会写入 User Bank 的 27 (备用)元素
+//                      扫入对话框写入高校联盟格式内容时，会把 version 设置为 5

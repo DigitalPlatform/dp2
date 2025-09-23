@@ -4184,6 +4184,27 @@ out strError);
                 // 检查存取定义
                 else if (String.IsNullOrEmpty(sessioninfo.Access) == false)
                 {
+
+                    if (string.IsNullOrEmpty(strItemDbName))
+                    {
+                        strItemDbName = ResPath.GetDbName(info.NewRecPath);
+
+                        if (String.IsNullOrEmpty(strItemDbName) == true)
+                        {
+                            strError = "NewRecPath中数据库名不应为空";
+                            goto ERROR1;
+                        }
+                    }
+
+                    if (string.IsNullOrEmpty(strBiblioDbName))
+                    {
+                        var ret = this.GetBiblioDbNameByItemDbName(strItemDbName,
+                            out strBiblioDbName,
+                            out strError);
+                        if (ret != 1)
+                            goto ERROR1;
+                    }
+
                     var error = this.CheckSetItemAccess(sessioninfo,
     "item",
     strBiblioDbName + "," + strItemDbName,  // 两个数据库名命中任意一个就行

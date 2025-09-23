@@ -431,14 +431,14 @@ namespace DigitalPlatform.LibraryServer
                         if (nRet == 2)
                         {
                             // 最后一条补充提示一下
-                            if (((lIndex - 1) % 100) != 0)
+                            if (ShallDisplay(lIndex - 1))
                                 this.AppendResultText("做日志记录 " + strFileName + " " + (lIndex).ToString() + "\r\n");
                             break;
                         }
 
                         // 处理一个日志记录
 
-                        if ((lIndex % 100) == 0)
+                        if (ShallDisplay(lIndex))
                             this.AppendResultText("做日志记录 " + strFileName + " " + (lIndex + 1).ToString() + "\r\n");
 
                         /*

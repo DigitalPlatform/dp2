@@ -1176,5 +1176,14 @@ namespace DigitalPlatform.LibraryServer
 
             return 0;
         }
+
+        public static bool ShallDisplay(long count, int ratio = 100)
+        {
+            // 每 100 条显示一行
+            var step = Math.Max(count / ratio, ratio);
+
+            return (count % step) == 0;
+        }
+
     }
 }

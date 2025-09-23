@@ -56,8 +56,8 @@
             this.ToolStripMenuItem_configMongoDB = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_configServerReplication = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_configReporting = new System.Windows.Forms.ToolStripMenuItem();
-            this.checkBox_stopInstance = new System.Windows.Forms.CheckBox();
             this.ToolStripMenuItem_configMessageServer = new System.Windows.Forms.ToolStripMenuItem();
+            this.checkBox_stopInstance = new System.Windows.Forms.CheckBox();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -73,6 +73,7 @@
             // 
             // textBox_instanceName
             // 
+            this.textBox_instanceName.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.textBox_instanceName.Location = new System.Drawing.Point(284, 21);
             this.textBox_instanceName.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.textBox_instanceName.Name = "textBox_instanceName";
@@ -86,6 +87,7 @@
             // 
             this.textBox_dataDir.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_dataDir.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.textBox_dataDir.Location = new System.Drawing.Point(284, 68);
             this.textBox_dataDir.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.textBox_dataDir.Name = "textBox_dataDir";
@@ -110,6 +112,7 @@
             this.textBox_bindings.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_bindings.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.textBox_bindings.Location = new System.Drawing.Point(284, 332);
             this.textBox_bindings.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.textBox_bindings.Multiline = true;
@@ -235,6 +238,7 @@
             // 
             this.textBox_libraryName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_libraryName.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.textBox_libraryName.Location = new System.Drawing.Point(284, 556);
             this.textBox_libraryName.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.textBox_libraryName.Name = "textBox_libraryName";
@@ -276,7 +280,7 @@
             this.toolStrip1.Location = new System.Drawing.Point(26, 671);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Padding = new System.Windows.Forms.Padding(0, 0, 4, 0);
-            this.toolStrip1.Size = new System.Drawing.Size(407, 38);
+            this.toolStrip1.Size = new System.Drawing.Size(353, 38);
             this.toolStrip1.TabIndex = 22;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -348,6 +352,13 @@
             this.ToolStripMenuItem_configReporting.Text = "配置报表参数";
             this.ToolStripMenuItem_configReporting.Click += new System.EventHandler(this.ToolStripMenuItem_configReporting_Click);
             // 
+            // ToolStripMenuItem_configMessageServer
+            // 
+            this.ToolStripMenuItem_configMessageServer.Name = "ToolStripMenuItem_configMessageServer";
+            this.ToolStripMenuItem_configMessageServer.Size = new System.Drawing.Size(369, 40);
+            this.ToolStripMenuItem_configMessageServer.Text = "配置消息服务器参数";
+            this.ToolStripMenuItem_configMessageServer.Click += new System.EventHandler(this.ToolStripMenuItem_configMessageServer_Click);
+            // 
             // checkBox_stopInstance
             // 
             this.checkBox_stopInstance.AutoSize = true;
@@ -358,13 +369,6 @@
             this.checkBox_stopInstance.Text = "停用本实例";
             this.checkBox_stopInstance.UseVisualStyleBackColor = true;
             this.checkBox_stopInstance.CheckedChanged += new System.EventHandler(this.checkBox_stopInstance_CheckedChanged);
-            // 
-            // ToolStripMenuItem_configMessageServer
-            // 
-            this.ToolStripMenuItem_configMessageServer.Name = "ToolStripMenuItem_configMessageServer";
-            this.ToolStripMenuItem_configMessageServer.Size = new System.Drawing.Size(369, 40);
-            this.ToolStripMenuItem_configMessageServer.Text = "配置消息服务器参数";
-            this.ToolStripMenuItem_configMessageServer.Click += new System.EventHandler(this.ToolStripMenuItem_configMessageServer_Click);
             // 
             // OneInstanceDialog
             // 

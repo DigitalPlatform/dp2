@@ -61,6 +61,7 @@
             // 
             // textBox_instanceName
             // 
+            this.textBox_instanceName.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.textBox_instanceName.Location = new System.Drawing.Point(183, 21);
             this.textBox_instanceName.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.textBox_instanceName.Name = "textBox_instanceName";
@@ -74,6 +75,7 @@
             // 
             this.textBox_dataDir.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_dataDir.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.textBox_dataDir.Location = new System.Drawing.Point(183, 68);
             this.textBox_dataDir.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.textBox_dataDir.Name = "textBox_dataDir";
@@ -98,6 +100,7 @@
             this.textBox_bindings.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_bindings.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.textBox_bindings.Location = new System.Drawing.Point(183, 326);
             this.textBox_bindings.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.textBox_bindings.Multiline = true;
@@ -238,6 +241,7 @@
             this.comboBox_sqlServerType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_sqlServerType.Enabled = false;
             this.comboBox_sqlServerType.FormattingEnabled = true;
+            this.comboBox_sqlServerType.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.comboBox_sqlServerType.Items.AddRange(new object[] {
             "SQLite",
             "MS SQL Server",

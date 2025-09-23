@@ -6,10 +6,11 @@ using System.ComponentModel;
 using System.Windows.Forms;
 using System.Text;
 using System.IO;
+using System.Threading.Tasks;
+using System.Linq;
 
 using DigitalPlatform.Text;
 using DigitalPlatform.GUI;
-using System.Runtime.CompilerServices;
 
 namespace DigitalPlatform.Marc
 {
@@ -79,8 +80,9 @@ namespace DigitalPlatform.Marc
         private CheckBox checkBox_880;
         private Panel panel_main;
         private CheckBox checkBox_unimarc_modify_100;
-        private Label label4;
+        private Label label_subfieldDelimeter;
         private ComboBox comboBox_subfieldDelimeter;
+        private ComboBox comboBox_unimarc_modify_100;
         private IContainer components;
 
         /// <summary>
@@ -132,7 +134,8 @@ namespace DigitalPlatform.Marc
             this.checkBox_removeField998 = new System.Windows.Forms.CheckBox();
             this.checkBox_880 = new System.Windows.Forms.CheckBox();
             this.panel_main = new System.Windows.Forms.Panel();
-            this.label4 = new System.Windows.Forms.Label();
+            this.comboBox_unimarc_modify_100 = new System.Windows.Forms.ComboBox();
+            this.label_subfieldDelimeter = new System.Windows.Forms.Label();
             this.comboBox_subfieldDelimeter = new System.Windows.Forms.ComboBox();
             this.checkBox_unimarc_modify_100 = new System.Windows.Forms.CheckBox();
             this.panel_main.SuspendLayout();
@@ -214,7 +217,7 @@ namespace DigitalPlatform.Marc
             this.button_OK.Margin = new System.Windows.Forms.Padding(5);
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(137, 40);
-            this.button_OK.TabIndex = 14;
+            this.button_OK.TabIndex = 0;
             this.button_OK.Text = "确定";
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
@@ -225,7 +228,7 @@ namespace DigitalPlatform.Marc
             this.button_Cancel.Margin = new System.Windows.Forms.Padding(5);
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(137, 40);
-            this.button_Cancel.TabIndex = 15;
+            this.button_Cancel.TabIndex = 1;
             this.button_Cancel.Text = "取消";
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
@@ -243,11 +246,11 @@ namespace DigitalPlatform.Marc
             // checkBox_crLf
             // 
             this.checkBox_crLf.AutoSize = true;
-            this.checkBox_crLf.Location = new System.Drawing.Point(0, 391);
+            this.checkBox_crLf.Location = new System.Drawing.Point(0, 426);
             this.checkBox_crLf.Margin = new System.Windows.Forms.Padding(5);
             this.checkBox_crLf.Name = "checkBox_crLf";
             this.checkBox_crLf.Size = new System.Drawing.Size(363, 25);
-            this.checkBox_crLf.TabIndex = 13;
+            this.checkBox_crLf.TabIndex = 16;
             this.checkBox_crLf.Text = "在每条记录后添加回车换行符号(&C)";
             // 
             // label_encodingComment
@@ -261,11 +264,11 @@ namespace DigitalPlatform.Marc
             // checkBox_addG01Field
             // 
             this.checkBox_addG01Field.AutoSize = true;
-            this.checkBox_addG01Field.Location = new System.Drawing.Point(0, 429);
+            this.checkBox_addG01Field.Location = new System.Drawing.Point(0, 464);
             this.checkBox_addG01Field.Margin = new System.Windows.Forms.Padding(5);
             this.checkBox_addG01Field.Name = "checkBox_addG01Field";
             this.checkBox_addG01Field.Size = new System.Drawing.Size(186, 25);
-            this.checkBox_addG01Field.TabIndex = 14;
+            this.checkBox_addG01Field.TabIndex = 17;
             this.checkBox_addG01Field.Text = "加入-01字段(&G)";
             this.checkBox_addG01Field.UseVisualStyleBackColor = true;
             // 
@@ -304,27 +307,27 @@ namespace DigitalPlatform.Marc
             this.webBrowser1.MinimumSize = new System.Drawing.Size(37, 35);
             this.webBrowser1.Name = "webBrowser1";
             this.webBrowser1.Size = new System.Drawing.Size(389, 413);
-            this.webBrowser1.TabIndex = 15;
+            this.webBrowser1.TabIndex = 18;
             // 
             // checkBox_removeField998
             // 
             this.checkBox_removeField998.AutoSize = true;
-            this.checkBox_removeField998.Location = new System.Drawing.Point(0, 314);
+            this.checkBox_removeField998.Location = new System.Drawing.Point(0, 349);
             this.checkBox_removeField998.Margin = new System.Windows.Forms.Padding(5);
             this.checkBox_removeField998.Name = "checkBox_removeField998";
             this.checkBox_removeField998.Size = new System.Drawing.Size(252, 25);
-            this.checkBox_removeField998.TabIndex = 11;
+            this.checkBox_removeField998.TabIndex = 14;
             this.checkBox_removeField998.Text = "删除 997/998 字段(&R)";
             this.checkBox_removeField998.UseVisualStyleBackColor = true;
             // 
             // checkBox_880
             // 
             this.checkBox_880.AutoSize = true;
-            this.checkBox_880.Location = new System.Drawing.Point(0, 352);
+            this.checkBox_880.Location = new System.Drawing.Point(0, 387);
             this.checkBox_880.Margin = new System.Windows.Forms.Padding(5);
             this.checkBox_880.Name = "checkBox_880";
             this.checkBox_880.Size = new System.Drawing.Size(229, 25);
-            this.checkBox_880.TabIndex = 12;
+            this.checkBox_880.TabIndex = 15;
             this.checkBox_880.Text = "转换为 998 模式(&C)";
             this.checkBox_880.UseVisualStyleBackColor = true;
             this.checkBox_880.CheckedChanged += new System.EventHandler(this.checkBox_880_CheckedChanged);
@@ -334,7 +337,8 @@ namespace DigitalPlatform.Marc
             this.panel_main.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.panel_main.Controls.Add(this.label4);
+            this.panel_main.Controls.Add(this.comboBox_unimarc_modify_100);
+            this.panel_main.Controls.Add(this.label_subfieldDelimeter);
             this.panel_main.Controls.Add(this.comboBox_subfieldDelimeter);
             this.panel_main.Controls.Add(this.checkBox_unimarc_modify_100);
             this.panel_main.Controls.Add(this.textBox_filename);
@@ -359,15 +363,28 @@ namespace DigitalPlatform.Marc
             this.panel_main.TabIndex = 16;
             this.panel_main.VisibleChanged += new System.EventHandler(this.panel_main_VisibleChanged);
             // 
-            // label4
+            // comboBox_unimarc_modify_100
             // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(0, 249);
-            this.label4.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(159, 21);
-            this.label4.TabIndex = 16;
-            this.label4.Text = "子字段符号(&U):";
+            this.comboBox_unimarc_modify_100.Items.AddRange(new object[] {
+            "<默认方法>",
+            "utf-8(50__)|gb2312(0120)",
+            "utf-8(50__)|gb2312(0121)"});
+            this.comboBox_unimarc_modify_100.Location = new System.Drawing.Point(172, 315);
+            this.comboBox_unimarc_modify_100.Margin = new System.Windows.Forms.Padding(5);
+            this.comboBox_unimarc_modify_100.Name = "comboBox_unimarc_modify_100";
+            this.comboBox_unimarc_modify_100.Size = new System.Drawing.Size(305, 29);
+            this.comboBox_unimarc_modify_100.TabIndex = 13;
+            this.comboBox_unimarc_modify_100.Text = "<默认方法>";
+            // 
+            // label_subfieldDelimeter
+            // 
+            this.label_subfieldDelimeter.AutoSize = true;
+            this.label_subfieldDelimeter.Location = new System.Drawing.Point(0, 249);
+            this.label_subfieldDelimeter.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.label_subfieldDelimeter.Name = "label_subfieldDelimeter";
+            this.label_subfieldDelimeter.Size = new System.Drawing.Size(159, 21);
+            this.label_subfieldDelimeter.TabIndex = 10;
+            this.label_subfieldDelimeter.Text = "子字段符号(&U):";
             // 
             // comboBox_subfieldDelimeter
             // 
@@ -380,7 +397,7 @@ namespace DigitalPlatform.Marc
             this.comboBox_subfieldDelimeter.Margin = new System.Windows.Forms.Padding(5);
             this.comboBox_subfieldDelimeter.Name = "comboBox_subfieldDelimeter";
             this.comboBox_subfieldDelimeter.Size = new System.Drawing.Size(305, 29);
-            this.comboBox_subfieldDelimeter.TabIndex = 17;
+            this.comboBox_subfieldDelimeter.TabIndex = 11;
             this.comboBox_subfieldDelimeter.Text = "@";
             this.comboBox_subfieldDelimeter.TextChanged += new System.EventHandler(this.comboBox_subfieldDelimeter_TextChanged);
             // 
@@ -389,12 +406,12 @@ namespace DigitalPlatform.Marc
             this.checkBox_unimarc_modify_100.AutoSize = true;
             this.checkBox_unimarc_modify_100.Checked = true;
             this.checkBox_unimarc_modify_100.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox_unimarc_modify_100.Location = new System.Drawing.Point(0, 279);
+            this.checkBox_unimarc_modify_100.Location = new System.Drawing.Point(0, 290);
             this.checkBox_unimarc_modify_100.Margin = new System.Windows.Forms.Padding(5);
             this.checkBox_unimarc_modify_100.Name = "checkBox_unimarc_modify_100";
-            this.checkBox_unimarc_modify_100.Size = new System.Drawing.Size(338, 25);
-            this.checkBox_unimarc_modify_100.TabIndex = 10;
-            this.checkBox_unimarc_modify_100.Text = "自动规整 UNIMARC 100 字段(&M)";
+            this.checkBox_unimarc_modify_100.Size = new System.Drawing.Size(296, 25);
+            this.checkBox_unimarc_modify_100.TabIndex = 12;
+            this.checkBox_unimarc_modify_100.Text = "规整 UNIMARC 100 字段(&M)";
             this.checkBox_unimarc_modify_100.UseVisualStyleBackColor = true;
             // 
             // OpenMarcFileDlg
@@ -485,6 +502,31 @@ namespace DigitalPlatform.Marc
             HideMessageTip();
         }
 
+        public void UnselectAll()
+        {
+            this.TryInvoke(() =>
+            {
+                foreach (Control control in this.panel_main.Controls)
+                {
+                    if (control is TextBox)
+                        ((TextBox)control).Select(0, 0);
+                    else if (control is ComboBox)
+                        ((ComboBox)control).Select(0, 0);
+                }
+            });
+
+            {
+                _ = Task.Run(async () =>
+                {
+                    await Task.Delay(100); // 等待界面刷新
+                    this.TryInvoke(() =>
+                    {
+                        this.textBox_filename.Focus();
+                    });
+                });
+            }
+        }
+
         /*public*/
         delegate void Delegate_Initial();
 
@@ -498,6 +540,7 @@ namespace DigitalPlatform.Marc
             }
 
             this.checkBox_unimarc_modify_100.Visible = this.IsOutput;
+            this.comboBox_unimarc_modify_100.Visible = this.IsOutput;
 
             comboBox_marcSyntax_TextChanged(this, null);
         }
@@ -509,15 +552,16 @@ namespace DigitalPlatform.Marc
                 // 获得输出文件名
                 SaveFileDialog dlg = new SaveFileDialog();
 
-                dlg.Title = "请指定要输出的 MARC(ISO2709格式) 文件名";
+                dlg.Title = "请指定要导出的 MARC(ISO2709格式) 文件名";
                 dlg.CreatePrompt = false;
                 dlg.OverwritePrompt = false;
+
                 dlg.FileName = this.textBox_filename.Text;
 
-                dlg.Filter = "MARC (ISO2709) 文件 (*.iso;*.mrc)|*.iso;*.mrc|工作单文件 (*.wor)|*.wor|All files (*.*)|*.*";
+                dlg.Filter = GetFilter(this.textBox_filename.Text,
+                    _allow_types); // "MARC (ISO2709) 文件 (*.iso;*.mrc)|*.iso;*.mrc|工作单文件 (*.wor)|*.wor|All files (*.*)|*.*";
 
-                dlg.RestoreDirectory = true;
-
+                // dlg.RestoreDirectory = true;
                 if (dlg.ShowDialog(this) != DialogResult.OK)
                     return;
 
@@ -531,8 +575,9 @@ namespace DigitalPlatform.Marc
                 dlg.FileName = this.textBox_filename.Text;
 
                 // dlg.Filter = "ISO2709 文件 (*.iso;*.mrc)|*.iso;*.mrc|All files (*.*)|*.*";
-                dlg.Filter = "MARC (ISO2709) 文件 (*.iso;*.mrc)|*.iso;*.mrc|工作单文件 (*.wor)|*.wor|All files (*.*)|*.*";
-                dlg.RestoreDirectory = true;
+                dlg.Filter = GetFilter(this.textBox_filename.Text,
+                    _allow_types); // "MARC (ISO2709) 文件 (*.iso;*.mrc)|*.iso;*.mrc|工作单文件 (*.wor)|*.wor|All files (*.*)|*.*";
+                // dlg.RestoreDirectory = true;
 
                 if (dlg.ShowDialog() != DialogResult.OK)
                     return;
@@ -540,6 +585,65 @@ namespace DigitalPlatform.Marc
                 this.textBox_filename.Text = dlg.FileName;
             }
         }
+
+        #region GetFilter()
+
+        static string[] _filters = new string[] {
+            "MARC (ISO2709) 文件 (*.iso;*.mrc)|*.iso;*.mrc",
+            "工作单文件 (*.wor)|*.wor",
+            "MARCXML文件 (*.marcxml)|*.marcxml",
+            "MarcXChange文件 (*.marcxchange)|*.marcxchange",
+            "dp2 MARCXML文件 (*.dp2marcxml)|*.dp2marcxml",
+            "All files (*.*)|*.*",
+        };
+
+        static List<string> GetFilterList(string types)
+        {
+            List<string> results = new List<string>();
+            foreach (string type in types.Split(','))
+            {
+                if (type == "*")
+                    return _filters.ToList();
+                var found = _filters.Where(o => o.Contains("*." + type)).FirstOrDefault();
+                if (string.IsNullOrEmpty(found) == false)
+                    results.Add(found);
+            }
+            // 添加 _filters 中最后一项
+            results.Add(_filters.Last());
+            return results;
+        }
+
+        string _allow_types = "iso";
+
+        public string AllowTypes
+        {
+            get
+            {
+                return _allow_types;
+            }
+            set
+            {
+                _allow_types = value;
+            }
+        }
+
+        static string GetFilter(string fileName,
+            string types = "*")
+        {
+            // List<string> filterList = new List<string>(_filters);
+            List<string> filterList = GetFilterList(types);
+
+            var fileType = GetFileType(fileName);
+            int index = filterList.FindIndex(s => s.IndexOf("*." + fileType, StringComparison.OrdinalIgnoreCase) != -1);
+            if (index == -1)
+                index = 0; // 默认第一个
+            var first = filterList[index];
+            filterList.RemoveAt(index);
+            filterList.Insert(0, first);
+            return string.Join("|", filterList);
+        }
+
+        #endregion
 
         /// <summary>
         /// 获取或设置文件名全路径
@@ -584,6 +688,13 @@ namespace DigitalPlatform.Marc
             var ext = Path.GetExtension(fileName).Trim();
             if (ext.ToLower() == ".wor")
                 return "wor";
+            if (ext.ToLower() == ".marcxml")
+                return "marcxml";
+            if (ext.ToLower() == ".marcxchange")
+                return "marcxchange";
+            if (ext.ToLower() == ".dp2marcxml")
+                return "dp2marcxml";
+
             return "iso";
         }
 
@@ -593,11 +704,11 @@ namespace DigitalPlatform.Marc
             var fileType = GetFileType(this.FileName);
             if (fileType == "wor")
             {
-                this.comboBox_subfieldDelimeter.Visible = true;
+                SetSubfieldDelimeterVisible(true);
             }
             else
             {
-                this.comboBox_subfieldDelimeter.Visible = false;
+                SetSubfieldDelimeterVisible(false);
             }
         }
 
@@ -622,7 +733,7 @@ namespace DigitalPlatform.Marc
 
 
         /// <summary>
-        /// 获取或设置 MARC 格式。为 "unimarc" "usmarc" 之一
+        /// 获取或设置 MARC 格式。为 "unimarc" "usmarc" "<自动>"之一
         /// </summary>
         public string MarcSyntax
         {
@@ -857,10 +968,21 @@ namespace DigitalPlatform.Marc
             {
                 this.TryInvoke(() =>
                 {
-                    this.comboBox_catalogingRule.Visible = value;
-                    this.label_catalogingRule.Visible = value;
+                    SetCatalogingRuleVisible(value);
                 });
             }
+        }
+
+        void SetCatalogingRuleVisible(bool value)
+        {
+            this.comboBox_catalogingRule.Visible = value;
+            this.label_catalogingRule.Visible = value;
+        }
+
+        void SetSubfieldDelimeterVisible(bool value)
+        {
+            this.comboBox_subfieldDelimeter.Visible = value;
+            this.label_subfieldDelimeter.Visible = value;
         }
 
         /// <summary>
@@ -977,7 +1099,8 @@ namespace DigitalPlatform.Marc
             string strError = "";
             int nRet = 0;
 
-            if (GetFileType(strFileName) == "wor")
+            var file_type = GetFileType(strFileName);
+            if (file_type == "wor")
             {
                 nRet = LoadFirstWorksheetRecord(strFileName,
 encoding,
@@ -990,7 +1113,7 @@ out strError);
                 string dollar = new string(MarcUtil.SUBFLD, 1);
                 strMARC = strMARC.Replace(this.SubfieldDelimeter, dollar);
             }
-            else
+            else if (file_type == "iso")
             {
                 // return:
                 //      -1  出错
@@ -1000,6 +1123,9 @@ out strError);
                 out strMARC,
                 out strError);
             }
+            else
+                goto ERROR1;
+
             if (nRet == -1)
                 goto ERROR1;
 
@@ -1245,7 +1371,8 @@ out string strError)
                     //	1	结束(当前返回的记录有效)
                     //	2	结束(当前返回的记录无效)
                     int nRet = MarcUtil.ReadWorksheetRecord(reader,
-                        (marc, delimeter) => {
+                        (marc, delimeter) =>
+                        {
                             return marc.Replace(subfieldDelemiter, delimeter);
                         },
             out strMARC,
@@ -1295,9 +1422,15 @@ out string strError)
             if ((this.comboBox_marcSyntax.Text == "UNIMARC"
     || this.comboBox_marcSyntax.Text == "<自动>")
                 && this.IsOutput == true)
+            {
                 this.checkBox_unimarc_modify_100.Visible = true;
+                this.comboBox_unimarc_modify_100.Visible = true;
+            }
             else
+            {
                 this.checkBox_unimarc_modify_100.Visible = false;
+                this.comboBox_unimarc_modify_100.Visible = false;
+            }
         }
 
         public bool Mode880
@@ -1357,6 +1490,36 @@ out string strError)
             }
         }
 
+        // 修改 UNIMARC 100 字段的方法
+        // 格式为：utf-8(50__)|gb2312(0120)
+        // 圆括号内最多 8 字符。不足的字符位当作空格理解。
+        // '_' 指代空格字符。
+        public string UnimarcModify100Method
+        {
+            get
+            {
+                return this.TryGet(() =>
+                {
+                    return this.comboBox_unimarc_modify_100.Text;
+                });
+            }
+            set
+            {
+                this.TryInvoke(() =>
+                {
+                    this.comboBox_unimarc_modify_100.Text = value;
+                });
+            }
+        }
+
+        public static string DefaultUnimarcModify100Method
+        {
+            get
+            {
+                return "utf-8(50__)|gb2312(0120)";
+            }
+        }
+
         private void checkBox_880_CheckedChanged(object sender, EventArgs e)
         {
             // 自动显示文件的第一条
@@ -1379,6 +1542,7 @@ out string strError)
                 && _visible_change_count == 0)
             {
                 this.checkBox_unimarc_modify_100.Visible = this.IsOutput;
+                this.comboBox_unimarc_modify_100.Visible = this.IsOutput;
                 comboBox_marcSyntax_TextChanged(this, null);
 
                 _visible_change_count++;

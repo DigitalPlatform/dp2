@@ -603,11 +603,11 @@ namespace DigitalPlatform.LibraryServer
 
             WcfBindingDlg dlg = new WcfBindingDlg();
             GuiUtil.AutoSetDefaultFont(dlg);
+            dlg.DefaultUrls = default_urls;
             if (this.IsNew && String.IsNullOrEmpty(this.textBox_bindings.Text) == true)
                 dlg.Urls = default_urls;
             else
                 dlg.Urls = this.textBox_bindings.Text.Replace("\r\n", ";").Split(new char[] { ';' });
-            dlg.DefaultUrls = default_urls;
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.ShowDialog(this);
             if (dlg.DialogResult != DialogResult.OK)

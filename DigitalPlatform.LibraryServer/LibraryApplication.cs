@@ -1,6 +1,31 @@
 ﻿// #define OPTIMIZE_API
 #define LOG_INFO
 
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Data.SqlClient;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Messaging;
+using System.Net;
+using System.Reflection;
+using System.Runtime.Serialization;
+using System.Security.Principal;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Xml;
+
+using Microsoft.VisualStudio.Threading;
+using MongoDB.Bson;
+using MongoDB.Bson.IO;
+using MongoDB.Driver;
+using Newtonsoft.Json.Linq;
+
 using DigitalPlatform.Core;
 using DigitalPlatform.IO;
 using DigitalPlatform.LibraryServer.Common;
@@ -10,27 +35,6 @@ using DigitalPlatform.rms.Client;
 using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
-using Microsoft.VisualStudio.Threading;
-using MongoDB.Bson;
-using MongoDB.Bson.IO;
-using MongoDB.Driver;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Messaging;
-using System.Reflection;
-using System.Runtime.Serialization;
-using System.Security.Principal;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Xml;
 
 
 namespace DigitalPlatform.LibraryServer
@@ -74,8 +78,8 @@ namespace DigitalPlatform.LibraryServer
 
         public DailyItemCountTable DailyItemCountTable = new DailyItemCountTable();
 
-        internal static DateTime _expire = new DateTime(2025, 9, 15);
-        // 上一个版本是 2024/9/15 2024/3/15 2023/12/15 2023/9/15 2023/6/15 2023/3/15 2022/11/15 2022/9/15 2022/7/15 2022/5/15 2022/3/15 2021/12/15 2021/9/15 2021/7/15 2021/3/15 2020/11/15 2020/7/15 2019/2/15 2019/10/15 2019/7/15 2019/5/15 2019/2/15 2018/11/15 2018/9/15 2018/7/15 2018/5/15 2018/3/15 2017/1/15 2017/12/1 2017/9/1 2017/6/1 2017/3/1 2016/11/1
+        internal static DateTime _expire = new DateTime(2026, 9, 15);
+        // 上一个版本是 2025/9/15 2024/9/15 2024/3/15 2023/12/15 2023/9/15 2023/6/15 2023/3/15 2022/11/15 2022/9/15 2022/7/15 2022/5/15 2022/3/15 2021/12/15 2021/9/15 2021/7/15 2021/3/15 2020/11/15 2020/7/15 2019/2/15 2019/10/15 2019/7/15 2019/5/15 2019/2/15 2018/11/15 2018/9/15 2018/7/15 2018/5/15 2018/3/15 2017/1/15 2017/12/1 2017/9/1 2017/6/1 2017/3/1 2016/11/1
 
 #if NO
         int m_nRefCount = 0;
@@ -797,6 +801,16 @@ namespace DigitalPlatform.LibraryServer
                         this.Changed = true;
                         WriteErrorLog("自动为 library.xml 添加 uid '" + this.UID + "'");
                     }
+
+                    // localIP
+                    var localIP = dom.DocumentElement.GetAttribute("localIP");
+                    if (string.IsNullOrEmpty(localIP) == false)
+                    {
+                        _local_address_list = localIP.Split(',');
+                        WriteErrorLog($"localIP 参数值为 '{localIP}'");
+                    }
+                    else
+                        _local_address_list = null;
 
                     // 内核参数
                     // 元素<rmsserver>
@@ -4618,6 +4632,11 @@ out error);
                         if (string.IsNullOrEmpty(this.UID) == false)
                             writer.WriteAttributeString("uid", this.UID);
 
+                        // 2025/9/15
+                        if (this._local_address_list != null
+                            && this._local_address_list.Length != 0)
+                            writer.WriteAttributeString("localIP", StringUtil.MakePathList(this._local_address_list));
+
                         // 2008/6/6 new add
                         // <version>
                         {
@@ -4670,6 +4689,10 @@ out error);
                         writer.WriteAttributeString("outofReservationThreshold", this.OutofReservationThreshold.ToString());
                         writer.WriteAttributeString("canReserveOnshelf", this.CanReserveOnshelf == true ? "true" : "false");
                         writer.WriteAttributeString("notifyTypes", this.ArrivedNotifyTypes);
+
+                        // 2025/9/15
+                        if (this.PrepareOnshelf == true)
+                            writer.WriteAttributeString("prepareOnshelf", "true");
 
                         writer.WriteEndElement();
 
@@ -6721,6 +6744,7 @@ out error);
             // RmsChannelCollection channels,
             RmsChannel channel,
             string strItemBarcodeParam,
+            string state,
             out string strXml,
             out byte[] timestamp,
             out string strOutputPath,
@@ -6795,6 +6819,7 @@ out error);
             long lRet = this.SearchArrivedQueue(
                 channel,
                 strItemBarcodeParam,
+                state,
                 resultSetName,
                 out strError);
             if (lRet == -1)
@@ -6808,6 +6833,7 @@ out error);
 
             long lHitCount = lRet;
 
+            // BUG: 如果命中多1条，可能第一条是早已 outof 的，若取它出来就错了
             lRet = channel.DoGetSearchResult(
                 resultSetName,
                 0,
@@ -11899,7 +11925,7 @@ out strError);
             /*
             if (passwordExpired)
             {
-                strError = "帐户 '" + strLoginName + "' 密码已经失效";
+                strError = "帐户 '" + strLoginName + "' 密码已经过期";
                 return 0;
             }
             */
@@ -11945,10 +11971,42 @@ out strError);
             return DateTimeUtil.DateTimeToString8(DateTime.Now);
         }
 
+        internal string[] _local_address_list = null;
+
+        public bool IsLocalhost(string strIP)
+        {
+            SessionTable.VerifyIP(strIP);
+            if (strIP == "::1" || strIP == "127.0.0.1" || strIP == "localhost")
+                return true;
+            if (_local_address_list == null)
+            {
+                _local_address_list = GetLocalIPs().ToArray();
+            }
+
+            return _local_address_list.Where(o => o == strIP).Any();
+        }
+
+        public static List<string> GetLocalIPs()
+        {
+            return Dns.GetHostEntry(Dns.GetHostName())
+                .AddressList.Select(ip => ip.ToString()).ToList();
+        }
+
+        // 2025/9/3
+        // 把 IP 地址规范为尽量使用 localhost 形态。可以在 library.xml 的根元素 localIP 属性配置，可以逗号间隔多个 IP
+        string CannonicalizeIP(string ip)
+        {
+            if (string.IsNullOrEmpty(ip))
+                return ip;
+            if (IsLocalhost(ip))
+                ip = "localhost";
+            return StringUtil.CanonicalizeIP(ip);
+        }
+
         // 获得一个 token
         // TODO: 要解决 localhost 和 127.0.0.1 和 ::1 和具体四段 IP 地址之间的等同关系判断问题
         // 创建 token
-        public static int MakeToken(string strClientIP,
+        public int MakeToken(string strClientIpParam,
             string strTimeRange,
             string strHashedPassword,
             StringBuilder debugInfo,
@@ -11958,7 +12016,11 @@ out strError);
             strError = "";
             strToken = "";
 
-            debugInfo?.AppendLine($"enter MakeToken() strClientIP={strClientIP},strTimeRange={strTimeRange}, strHashedPassword={strHashedPassword}");
+            debugInfo?.AppendLine($"enter MakeToken() strClientIP={strClientIpParam},strTimeRange={strTimeRange}, strHashedPassword={strHashedPassword}");
+
+            var strClientIP = CannonicalizeIP(strClientIpParam);
+
+            debugInfo?.AppendLine($"IP 地址 {strClientIpParam} 正规化以后为: {strClientIP}");
 
             if (string.IsNullOrEmpty(strTimeRange) == true)
                 strTimeRange = GetTimeRangeByStyle(null);
@@ -12176,7 +12238,7 @@ out strError);
                         DateTime expire = temp_account.PasswordExpire;
                         if (DateTime.Now > expire)
                         {
-                            //strError = "密码已经失效";
+                            //strError = "密码已经过期";
                             //return -1;
                             passwordExpired = true;
                         }
@@ -13250,7 +13312,7 @@ out strError);
                 DateTime expire = GetPasswordExpire(readerdom.DocumentElement);
                 if (DateTime.Now > expire)
                 {
-                    //strError = "密码已经失效";
+                    //strError = "密码已经过期";
                     //return -1;
                     passwordExpired = true;
                 }
@@ -13358,7 +13420,7 @@ out strError);
 
                 if (now > expire)
                 {
-                    // 临时密码已经失效
+                    // 临时密码已经过期
                     return 0;
                 }
             }
@@ -19175,7 +19237,7 @@ out string db_type);
         AlreadyBorrowed = 38,   // 已经被当前读者借阅 2020/3/26
         AlreadyBorrowedByOther = 39,    // 已经被其他读者借阅 2020/3/26
         SyncDenied = 40,    // 同步操作被拒绝(因为实际操作时间之后又发生过借还操作) 2020/3/27
-        PasswordExpired = 41,   // 密码已经失效 2021/7/4
+        PasswordExpired = 41,   // 密码已经过期 2021/7/4
         BarcodeDup = 42,        // 条码号重复了 2021/8/9
         DisplayNameDup = 43,  // 显示名重复了 2021/8/9
         RefIdDup = 44,    // 参考 ID 重复了 2021/8/9
@@ -19555,7 +19617,7 @@ out string db_type);
             if (string.IsNullOrEmpty(list))
                 return true;    // 没有绑定 ip: ，表示不进行任何 IP 限制
 
-            if (StringUtil.MatchIpAddressList(list, strClientIP) == false)
+            if (/*StringUtil.*/MatchIpAddressList(list, strClientIP) == false)
             {
                 if (alter_type_list != null)
                 {
@@ -19571,6 +19633,42 @@ out string db_type);
                 alter_type_list.Add("ip"); // 表示已经验证了 ip: 绑定
             return true;
         }
+
+        #region IP 地址匹配
+
+        // 2025/8/27
+        // 匹配 ip 地址列表
+        // parameters:
+        //      strList IP 地址列表。例如 localhost|192.168.1.1|192.168.*.*
+        //      strIP   要检测的一个或者多个 IP 地址。形态为 "192.168.0.1(Z39.50); localhost"
+        public static bool MatchIpAddressList(string strList, string strIP)
+        {
+            if (strList == null)
+                return false;
+            var ip_list = new List<string>();
+            foreach (var ip in strIP.Split(new char[] { ';' }))
+            {
+                var current = ip.Split('(')[0].Trim();
+                ip_list.Add(current);
+            }
+            string[] pattern_list = strList.Split(new char[] { '|' });
+            foreach (string pattern0 in pattern_list)
+            {
+                var pattern = pattern0.Trim();  // 2025/1/21
+                if (pattern0.IndexOfAny(new char[] { '(', ')' }) != -1)
+                    throw new ArgumentException($"匹配 IP 地址时发现模式 '{pattern0}' 中有非法的圆括号字符");
+                foreach (string ip in ip_list)
+                {
+                    if (StringUtil.MatchIpAddress(pattern, ip) == true)
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
+        #endregion
+
 
         // 匹配 dp2Router 的前端 IP 地址
         // parameters:

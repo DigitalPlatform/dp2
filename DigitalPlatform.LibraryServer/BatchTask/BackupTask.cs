@@ -752,7 +752,7 @@ out strError);
                                     SetProgressText(m_nRecordCount.ToString() + " " + record.Path + " " + GetPercent((double)lCurrent, lTotalLength));
 
                                     // 每 100 条显示一行
-                                    if ((m_nRecordCount % 100) == 0)
+                                    if (ShallDisplay(m_nRecordCount))
                                         this.AppendResultText("已输出记录 " + record.Path + "  " + (m_nRecordCount + 1).ToString() + "\r\n");
                                     m_nRecordCount++;
 

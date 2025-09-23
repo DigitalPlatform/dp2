@@ -676,5 +676,53 @@ Stack:
                 return "./stylenew/" + strFilename;
             return "./style/" + strFilename;
         }
+
+        public void RedirectToLoginPage(bool push = true)
+        {
+            if (push)
+                sessioninfo.LoginCallStack.Push(this.Page.Request.RawUrl);
+
+            string strUrl = GetDefaultLoginUrl();
+            if (string.IsNullOrEmpty(strUrl) == false)
+                this.Response.Redirect(strUrl, true);
+            else
+                this.Response.Redirect("login.aspx", true);
+            this.Response.End();
+            return;
+        }
+
+        // 2025/9/5
+        // 当发现当前状态是未登录状态，需要进行的重定向处理
+        public string GetDefaultLoginUrl()
+        {
+            var value = this.Page.Request["forcelogin"];
+            if (value == "on")
+            {
+                sessioninfo.LoginCallStack.Push(Request.RawUrl);
+                return "login.aspx";
+            }
+            else if (value == "userid")
+            {
+                sessioninfo.LoginCallStack.Push(Request.RawUrl);
+                return "login.aspx?loginstyle=librarian";
+            }
+
+            // 如果 forcelogin 参数值为一个 URL，则重定向到这个 URL
+            else if (value != null
+                && value.StartsWith("url:"))
+            {
+                var url = value.Substring("url:".Length);
+                sessioninfo.LoginCallStack.Push(Request.RawUrl);
+                return url;
+            }
+
+            else if (string.IsNullOrEmpty(app.DefaultLoginUrl) == false)
+            {
+                sessioninfo.LoginCallStack.Push(Request.RawUrl);
+                return app.DefaultLoginUrl;
+            }
+
+            return null;
+        }
     }
 }

@@ -218,6 +218,18 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             channel.Dispose();
         }
 
+        public static int MaxPoolChannelCount
+        {
+            get
+            {
+                return _channelPool.MaxCount;
+            }
+            set
+            {
+                _channelPool.MaxCount = value;
+            }
+        }
+
         // parameters:
         //      style    风格。如果为 GUI，表示会自动添加 Idle 事件，并在其中执行 Application.DoEvents
         public static LibraryChannel GetChannel(string strUserName = "")

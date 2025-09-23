@@ -1047,7 +1047,9 @@ namespace DigitalPlatform.RFID.UI
             try
             {
                 bool build_user_bank = true;    // TODO
-                var result = GaoxiaoUtility.BuildTag(this, build_user_bank, this.EAS);
+                var result = GaoxiaoUtility.BuildTag(this, 
+                    build_user_bank, 
+                    this.EAS);  // epc_info ?
                 if (result.Value == -1)
                     throw new Exception(result.ErrorInfo);
 

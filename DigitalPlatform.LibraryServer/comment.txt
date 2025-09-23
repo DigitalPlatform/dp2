@@ -16,7 +16,7 @@ Login() API 的 strParameters 参数里面可以包含 clientip 子参数
 
 order权限
 囊括了
-getitemifo
+getiteminfo
 
 getorderinfo
 
@@ -268,3 +268,65 @@ GetBiblioInfo() API 和 SetBiblioInfo() API 联合使用的时候，如果一个
 ~~~
 期记录中可能内嵌采购记录。需要注意验证一下 SetEntities() API 中
 根元素下的 dprms:file 元素的 id 属性值和内嵌的 dprms:file 元素 id 属性值重复的情况
+
+~~~
+getiteminfo setiteminfo 权限增加存取定义
+
+中文图书:setiteminfo=new(newparam)|getiteminfo=*
+注: (newparam) 是故意写的，因为 new 动作并没有特别的参数，所以 (newparam) 没有作用。
+注：如果写成 getiteminfo= 也就是说等号后面没有 *，表示禁止 getiteminfo。
+注: setiteminfo 的 action 有 new/change/move/delete
+
+给每个动作造一个 API 测试的参数样例。
+(API 测试小前端的 setiteminfo 属性页 --- 实际上请求的是 SetEntities() API)
+
+new:
+strDbType: item
+strAction: new
+NewRecPath: 中文图书实体/?
+NewRecord: 
+<root>
+    <parent>1</parent>
+    <price>CNY39.80</price>
+    <barcode>B0000100</barcode>
+    <location>阅览室</location>
+    <bookType>普通</bookType>
+ </root>
+item_timestamp: 
+strStyle:
+OldRecPath:
+OldRecord:
+(注: NewRecPath 还可以是 "中文图书实体/100" 这样的确定路径)
+(注: new 册记录的时候如果 location 元素内容中包含 ",@reservation"，(服务器)是否需要在保存前特意去除?)
+
+change:
+strDbType: item
+strAction: change
+NewRecPath: 中文图书实体/1
+NewRecord: 略
+item_timestamp: 略
+strStyle:
+OldRecPath:
+OldRecord:
+
+move:
+strDbType: item
+strAction: move
+NewRecPath: 中文图书实体/6
+NewRecord: 略 (parent 元素值为 2)
+item_timestamp: 略
+strStyle:
+OldRecPath: 中文图书实体/5
+OldRecord: 略 (parent 元素值为 1)
+(注: 可以尝试将 OldRecord 和 NewRecord 两者都为空或者其中一个为空调用)
+
+delete:
+strDbType: item
+strAction: delete
+NewRecPath: 中文图书实体/6
+NewRecord: 
+item_timestamp: 略
+strStyle:
+OldRecPath: 中文图书实体/6
+OldRecord: 
+(注: TODO: NewRecPath 为空时应该也成功)

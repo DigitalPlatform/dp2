@@ -33,8 +33,8 @@ using System.Xml;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.183.*")]
-[assembly: AssemblyFileVersion("3.183.0.0")]
+[assembly: AssemblyVersion("3.188.*")]
+[assembly: AssemblyFileVersion("3.188.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCommentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -478,3 +478,29 @@ public bool ItemCanReturn(Account account,
             XmlDocument itemdom,
             out string strError)
 */
+//      3.184 (2025/8/26) 重建检索点的后台任务，对输出到显示结果临时文件的频率做了控制。以前版本这里是每处理 100 条输出一行文字，现在改为当处理的累积记录数为一万条时每处理一百条输出一行文字、处理记录数累积十万条时每处理一千条输出一行文字，以此类推。间隔数最小不小于一百。
+//                          其它后台任务也做了类似改进。
+//      3.185 (2025/8/28) dp2library 增加 rest.https 和 basic.https 两种新协议
+//                          GetChannelInfo() API 的两种风格，风格"ip-count" 的 .ClientIP 依然返回 Session 的第一个前端 IP(虽然现在是允许多个 IP 存储在 SessionInfo.ClientIpList 中)；风格 "" 的 .ClientIP 则变为返回 Session 的 ClientIpList 值，也就是说 Session 前端各个节点的 IP 地址
+//                          Ligin() API 中对 strParameters 参数中的 clientip 子参数的处理有所改进，会将请求路径上最远节点 IP 用到 app.SessionTable 的 ip 最大 Session 数的计算中(比如 dp2Capo 中的 Z39.50 服务器访问 dp2library 的情形)。(早先版本是以最近一个节点的 IP 来计算的)
+//              (2025/8/31) dp2library 增加 https 新协议
+//              (2025/9/10) library.xml 文件根元素增加了一个属性 localIP，定义实际上是 dp2library 服务器自己的公网 IP。便于 Login() API 中处理 token 登录时，对前端的 IP 地址进行归一化处理。避免无法认证实际上来自 localhost 的前端带 token 登录请求
+//      3.186 (2025/9/12) ListMessage() 和 GetMessage() API 优化。当使用 @refID:xxx 形态的参考 ID 检索消息时，会报错，避免取不到读者的消息
+//                          SearchCharging() API 在 patronBarcode 参数中使用 "!all" "!patron" "!item" 时报错说没有找到读者记录的 bug 已经消除
+//                          先前版本预约到书时，修改预约到书库记录的时候，可能会把 ID 号较小的原本 state 就是 "outof" 的记录的 state 再次修改，错过了修改 ID 号较大的记录，造成残留预约到书记录的故障。这个 bug 已经消除。
+//                          利用代理并 token 方式 Login() API 登录读者身份时，不再检查读者密码是否过期
+//              (2025/9/14) GetSystemParameter() API 增加以下 category -- value:
+//                              login -- patronPasswordExpireLength
+//                              login -- patronPasswordStyle
+//                          SetSystemParameter() API 增加以下 category -- value:
+//                              login -- ?patronPasswordExpireLength
+//                              login -- ?patronPasswordStyle
+//                          注: (为便于理解) library.xml 中 login 元素的 patronPasswordExpireLength 属性，当为空的时候，即便读者 XML 记录中 password 元素的 expire 属性有值，也不启用此读者账户的密码失效。
+//                              login 元素的 patronPasswordExpireLength 属性值不为空的时候，其值会影响到新设置的读者密码的失效期计算设置，但不会影响到已经设置的密码的失效期。也就是说，对于已经设置的密码的失效期而言，这个属性的值不为空只相当于一个“启用失效期作用”的开关。
+//      3.187 (2025/9/15) library.xml 保存时丢失根元素的 localIP 属性定义和 arrived 元素的 prepareOnshelf 属性定义的 bug 已经修正。
+//                          预约时写入读者 XML 记录 reservations/request 元素 requestItemBarcode 属性值，从写入 @refID:xxx 改进为尽量写入册条码号形态，便于兼容 dp2mini 备书功能的原有用法
+//              (2025/9/17) Reservation() API 写入的操作日志记录，先前版本写入的 itemBarcodeList 元素内容是册参考 ID，最新版改为尽量写入册条码号
+//      3.188 (2025/9/18) 为 WSDL metadata 修改了绑定的 URL 为: http://localhost/dp2library/$metadata。在 "metadata" 前增加了一个 "$"
+
+
+// TODO: GetReaderInfo() API 获取的读者 XML 记录中，password 元素的 expire 属性不要过滤，要让前端看到

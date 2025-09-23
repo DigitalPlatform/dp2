@@ -873,7 +873,14 @@ namespace DigitalPlatform.CommonControl
             label_state = new Label();
             label_state.Dock = DockStyle.Fill;
             label_state.AutoSize = true;
-            label_state.Image = this.Container.imageList_states.Images[0];
+            try
+            {
+                label_state.Image = this.Container?.imageList_states?.Images?[0];
+            }
+            catch
+            {
+
+            }
             label_state.ImageAlign = ContentAlignment.MiddleCenter;
 
             comboBox_logicOperator = new ComboBox();
@@ -1282,13 +1289,27 @@ namespace DigitalPlatform.CommonControl
                 // 如果不是这样,会造成输入汉字词组的时候只能上去一个字
                 API.PostMessage(this.Container.Handle, dp2QueryControl.WM_SET_BORDERSYTLE, index, 1);
                 // this.textBox_word.BorderStyle = BorderStyle.FixedSingle;
-                label_state.Image = this.Container.imageList_states.Images[1];
+                try
+                {
+                    label_state.Image = this.Container.imageList_states.Images[1];
+                }
+                catch
+                {
+
+                }
             }
             else
             {
                 API.PostMessage(this.Container.Handle, dp2QueryControl.WM_SET_BORDERSYTLE, index, 0);
                 // this.textBox_word.BorderStyle = BorderStyle.None;
-                label_state.Image = this.Container.imageList_states.Images[0];
+                try
+                {
+                    label_state.Image = this.Container.imageList_states.Images[0];
+                }
+                catch
+                {
+
+                }
             }
         }
 

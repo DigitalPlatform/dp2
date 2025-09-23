@@ -43,6 +43,7 @@ namespace RfidTool
             this.columnHeader_afi = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_oi = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_aoi = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_shelfLocation = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_antenna = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_readerName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_protocol = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -52,7 +53,6 @@ namespace RfidTool
             this.label_message = new System.Windows.Forms.Label();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.button_test = new System.Windows.Forms.Button();
-            this.columnHeader_shelfLocation = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.label_title = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
@@ -168,6 +168,11 @@ namespace RfidTool
             this.columnHeader_aoi.Text = "AOI(非标准所属机构)";
             this.columnHeader_aoi.Width = 210;
             // 
+            // columnHeader_shelfLocation
+            // 
+            this.columnHeader_shelfLocation.Text = "ShelfLocation";
+            this.columnHeader_shelfLocation.Width = 120;
+            // 
             // columnHeader_antenna
             // 
             this.columnHeader_antenna.Name = "columnHeader_antenna";
@@ -182,7 +187,7 @@ namespace RfidTool
             // columnHeader_protocol
             // 
             this.columnHeader_protocol.Text = "协议";
-            this.columnHeader_protocol.Width = 200;
+            this.columnHeader_protocol.Width = 260;
             // 
             // button_write
             // 
@@ -242,11 +247,6 @@ namespace RfidTool
             this.button_test.UseVisualStyleBackColor = true;
             this.button_test.Visible = false;
             this.button_test.Click += new System.EventHandler(this.button_test_Click);
-            // 
-            // columnHeader_shelfLocation
-            // 
-            this.columnHeader_shelfLocation.Text = "ShelfLocation";
-            this.columnHeader_shelfLocation.Width = 120;
             // 
             // label_title
             // 

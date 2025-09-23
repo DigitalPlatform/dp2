@@ -52,6 +52,16 @@ ref sessioninfo) == false)
         // if (sessioninfo.UserID == "")
         if (loginstate == LoginState.NotLogin || loginstate == LoginState.Public)
         {
+#if REMOVED
+            sessioninfo.LoginCallStack.Push(Request.RawUrl);
+            Response.Redirect("login.aspx", true);
+#endif
+            var url = GetDefaultLoginUrl();
+            if (url != null)
+            {
+                Response.Redirect(url, true);
+                return;
+            }
             sessioninfo.LoginCallStack.Push(Request.RawUrl);
             Response.Redirect("login.aspx", true);
             return;

@@ -2027,6 +2027,7 @@ out strError);
         }
 
 
+        // https://www.loc.gov/standards/iso25577/
         // 将marcxchange格式转化为机内使用的marcxml格式
         public static int MarcXChangeToXml(string strSource,
             out string strTarget,
@@ -2149,6 +2150,7 @@ out strError);
             return 0;
         }
 
+        // https://www.loc.gov/standards/iso25577/
         // 将机内使用的marcxml格式转化为marcxchange格式
         public static int MarcXmlToXChange(string strSource,
             string strType,
@@ -4296,7 +4298,11 @@ out strError);
         // parameters:
         //		strMarcSyntax   "unimarc" "usmarc"
         //      strStyle    修改方式。
-        //                  unimarc_100 自动覆盖修改 100 字段内和字符集编码方式有关的几个字符位
+        //                  unimarc_100:xxx 自动覆盖修改 100 字段内和字符集编码方式有关的几个字符位
+        //                  其中，xxx 部分是修改方法。定义如下：
+        //                      格式为：utf-8(50__)|gb2312(0120)
+        //                      圆括号内最多 8 字符。不足的字符位当作空格理解。
+        //                      '_' 指代空格字符。
         public static int ModifyOutputMARC(
             string strMARC,
             string strMarcSyntax,
@@ -4304,9 +4310,21 @@ out strError);
             string strStyle,
             out string strResult)
         {
+            if (strMARC == null)
+                throw new ArgumentNullException("strMARC 参数值不允许为 null");
+            if (strMARC.Length < 24)
+                throw new ArgumentException("strMARC 参数的内容长度必须至少为 24 字符");
+
             strResult = strMARC;
 
-            if (StringUtil.IsInList("unimarc_100", strStyle)
+            // 2025/9/3
+            // 将头标区 24 字符中的非“西文字符”替换为 '*'。以免后面经 UTF-8 等编码方式产生超过 24 bytes 的输出
+            ReplaceNonLatinChars(ref strResult);
+
+            var modify_method = StringUtil.GetParameterByPrefix(strStyle, "unimarc_100");
+
+            if (/*StringUtil.IsInList("unimarc_100", strStyle)*/
+                modify_method != null
                 && String.Compare(strMarcSyntax, "unimarc", true) == 0) // UNIMARC
             {
                 /*
@@ -4317,7 +4335,7 @@ out strError);
                 */
                 // 将100字段中28开始的位置按照UTF-8编码特性强行置值。
 
-                MarcRecord record = new MarcRecord(strMARC);
+                MarcRecord record = new MarcRecord(strResult);
                 bool bChanged = false;
 
                 string strValue = record.select("field[@name='100']/subfield[@name='a']").FirstContent;
@@ -4331,6 +4349,31 @@ out strError);
                     bChanged = true;
 
                 string strPart = strValue.Substring(26, 8);
+
+                // 2025/8/22
+                // 根据修改方法，获得指定编码方式的应有 8 字符
+                string new_value = GetEncodingRelativePart(
+                    modify_method,
+                    encoding);
+                if (new_value == null)
+                {
+                    // 没有找到要求的编码方式，当作不修改处理
+                }
+                else
+                {
+                    Debug.Assert(new_value != null && new_value.Length == 8);
+                    if (strPart == new_value)
+                    {
+                        // 已经符合要求
+                    }
+                    else
+                    {
+                        strValue = strValue.Remove(26, 8);
+                        strValue = strValue.Insert(26, new_value);
+                        bChanged = true;
+                    }
+                }
+#if REMOVED
                 // 看看26-29是否已经符合要求
                 if (encoding == Encoding.UTF8)
                 {
@@ -4369,6 +4412,7 @@ out strError);
                         bChanged = true;
                     }
                 }
+#endif
 
                 if (bChanged == true)
                 {
@@ -4393,6 +4437,93 @@ out strError);
             }
 
             return 0;
+        }
+
+        public static bool ReplaceNonLatinChars(ref string chars,
+            int replace_length = 24)
+        {
+            bool changed = false;
+            StringBuilder sb = new StringBuilder(chars.Length);
+            int i = 0;
+            foreach (var ch in chars)
+            {
+                if (i < replace_length && ((uint)ch > 0x7f || (uint)ch <= 0x1f))
+                {
+                    sb.Append('*');
+                    changed = true;
+                }
+                else
+                    sb.Append(ch);
+                i++;
+            }
+
+            if (changed)
+                chars = sb.ToString();
+            return changed;
+        }
+
+        public static bool ReplaceControlChars(ref string chars)
+        {
+            bool changed = false;
+            StringBuilder sb = new StringBuilder(chars.Length);
+            int i = 0;
+            foreach (var ch in chars)
+            {
+                if ((uint)ch <= 0x1f)
+                {
+                    sb.Append('*');
+                    changed = true;
+                }
+                else
+                    sb.Append(ch);
+                i++;
+            }
+
+            if (changed)
+                chars = sb.ToString();
+            return changed;
+        }
+
+
+        // 根据修改方法，获得指定编码方式的应有 8 字符
+        static string GetEncodingRelativePart(
+            string modify_method,
+            Encoding encoding)
+        {
+            var methods = modify_method.Split('|');
+            foreach (var method in methods)
+            {
+                // 切割编码方式名字和值
+                var parts = method.Split(new[] { '(', ')' }, StringSplitOptions.None);
+                if (parts.Length < 2)
+                    continue; // 格式不正确，跳过
+                var encoding_name = parts[0].Trim().ToLowerInvariant();
+
+                var value = parts[1].Trim();
+                if (value.Length > 8)
+                    throw new ArgumentException($"UNIMARC 100 字段修改方法定义 '{modify_method}' 中，圆括号内的值 '{value}' 长度不应超过 8 字符");
+                value = value.Replace("_", " ").PadRight(8, ' '); // 确保长度为8字符
+
+                if (string.IsNullOrEmpty(encoding_name)
+    || encoding_name == "*")
+                    return value;
+
+                // TODO: 测试找不到任何编码方式的情况
+                Encoding current_encoding = null;
+                try
+                {
+                    current_encoding = Encoding.GetEncoding(encoding_name);
+                }
+                catch
+                {
+                    throw new ArgumentException($"UNIMARC 100 字段修改方法定义 '{modify_method}' 中的编码方式名 '{encoding_name}' 不合法");
+                }
+
+                if (encoding.Equals(current_encoding))
+                    return value;
+            }
+
+            return null;    // not found
         }
 
 #if NO
@@ -4644,7 +4775,7 @@ out strError);
 
             09 - Character coding scheme
             Identifies the character coding scheme used in the record. 
-            # - MARC-8
+# - MARC-8
             a - UCS/Unicode
             (http://lcweb.loc.gov/marc/bibliographic/ecbdldrd.html)
             */
@@ -4739,7 +4870,7 @@ out strError);
 
             09 - Character coding scheme
             Identifies the character coding scheme used in the record. 
-            # - MARC-8
+# - MARC-8
             a - UCS/Unicode
             (http://lcweb.loc.gov/marc/bibliographic/ecbdldrd.html)
                         if (strMARC.Length >= 24 

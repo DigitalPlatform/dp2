@@ -1,18 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-using System.Xml;
-using System.IO;
-using System.Windows.Forms;
-using System.Diagnostics;
-using System.Collections;
-using System.Threading;
-using System.Runtime.Serialization;
-
-using DigitalPlatform.IO;
+﻿using DigitalPlatform.IO;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.Text;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Net.NetworkInformation;
+using System.Runtime.Serialization;
+using System.Text;
+using System.Threading;
+using System.Windows.Forms;
+using System.Xml;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -47,9 +48,9 @@ namespace DigitalPlatform.LibraryServer
         }
 
         public string RouterClientIP = null;  // 访问 dp2Router 的前端 IP 地址。null 表示请求中没有 _dp2router_clientip 头字段；"" 表示有这个头字段，但 value 为 ""
-        public string ClientIP = "";  // 前端 IP 地址
+        public string ClientIP = "";  // 前端 IP 地址。
         public string Via = ""; // 经由什么协议
-
+        public string ClientIpList = "";    // 前端 IP 地址的列表。形态为 "192.168.0.1(Z39.50); localhost" 或者 "localhost"
         public string SessionID = "";   // Session 唯一的 ID
 
         public bool NeedAutoClean = true;   // 是否需要自动清除
@@ -310,7 +311,7 @@ namespace DigitalPlatform.LibraryServer
 
         public override string ToString()
         {
-            return $"UserID={UserID},SessionID={SessionID},ClientIP={ClientIP},LibraryCodeList={LibraryCodeList},Via={Via},CallCount={CallCount},Lang={Lang},SessionTime=({SessionTime?.ToString()}),Closed={Closed},RouterClientIP={RouterClientIP},NeedAutoClien={NeedAutoClean},Used={Used},TempDir={TempDir}";  // ,Rights=({Rights})
+            return $"UserID={UserID},SessionID={SessionID},ClientIP={ClientIP},ClientIpList={ClientIpList};LibraryCodeList={LibraryCodeList},Via={Via},CallCount={CallCount},Lang={Lang},SessionTime=({SessionTime?.ToString()}),Closed={Closed},RouterClientIP={RouterClientIP},NeedAutoClien={NeedAutoClean},Used={Used},TempDir={TempDir}";  // ,Rights=({Rights})
         }
 
         public void Touch()
@@ -431,6 +432,7 @@ namespace DigitalPlatform.LibraryServer
                 this.DupResultSet.Dispose();
 
             this.ClientIP = "";
+            this.ClientIpList = "";
         }
 
         void Channels_AskAccountInfo(object sender, AskAccountInfoEventArgs e)
@@ -618,7 +620,8 @@ namespace DigitalPlatform.LibraryServer
                         account.PasswordType,
                         strPassword,
                         account.Password,
-                        true, out strError);
+                        true, 
+                        out strError);
                     if (nRet == -1)
                     {
                         strError = "MatchUserPassword() error: " + strError;
@@ -626,6 +629,11 @@ namespace DigitalPlatform.LibraryServer
                     }
                     if (nRet == 0)
                     {
+                        if (App.DebugMode)
+                        {
+                            // App.WriteDebugInfo();
+                        }
+
                         if (bPublicError == true)
                             strError = this.App.GetString("帐户不存在或密码不正确") + " session 2";
                         else
@@ -636,7 +644,8 @@ namespace DigitalPlatform.LibraryServer
                     // 2021/7/16
                     // *** 检查密码强度
                     if (StringUtil.IsInList("login", this.App._passwordStyle) == true
-                        && StringUtil.IsInList(strUserID, "reader,public,opac", false) == false)
+                        && StringUtil.IsInList(strUserID, "reader,public,opac", false) == false
+                        && StringUtil.IsInList("simplepassword", this.RightsOrigin) == false/*2025/9/11 账户权限特许简单密码*/)
                     {
                         var account_element = this.App.FindUserAccount(strUserID,
     out strError);
@@ -657,7 +666,7 @@ namespace DigitalPlatform.LibraryServer
                         if (nRet == 0)
                         {
                             // passwordExpired = true;
-                            strError = $"账户现有密码强度不够，请修改密码后重新登录: {strError}";
+                            strError = $"账户 '{strUserID}' 现有密码强度不够，请修改密码后重新登录: {strError}";
                             return -1;
                         }
                     }
@@ -701,7 +710,7 @@ namespace DigitalPlatform.LibraryServer
                 }
                 string strToken = "";
                 StringBuilder debugInfo = this.App.DebugMode ? new StringBuilder() : null;
-                nRet = LibraryApplication.MakeToken(strClientIP,
+                nRet = this.App.MakeToken(strClientIP,
                     LibraryApplication.GetTimeRangeByStyle(strGetToken),
                     strHashedPassword,
                     debugInfo,
@@ -1494,6 +1503,8 @@ SetStartEventArgs e);
                 if (address != null)
                     strIP = address.ClientIP;
 
+                // strIP = GetFirstIP(strIP);
+
                 long v = _incIpCount(strIP, 1);
 
                 int nMax = this.MaxSessionsPerIp;
@@ -1581,6 +1592,7 @@ SetStartEventArgs e);
                     {
                         _incIpCount(sessioninfo.ClientIP, -1);
                         sessioninfo.ClientIP = "";
+                        sessioninfo.ClientIpList = "";
                     }
 
                     nCount++;
@@ -1842,6 +1854,7 @@ SetStartEventArgs e);
                 {
                     _incIpCount(sessioninfo.ClientIP, -1);
                     sessioninfo.ClientIP = "";   // 避免后面多次调用时重复减去 ip 计数
+                    sessioninfo.ClientIpList = "";
                 }
             }
             finally
@@ -1928,6 +1941,7 @@ SetStartEventArgs e);
                     {
                         _incIpCount(info.ClientIP, -1);
                         info.ClientIP = "";
+                        info.ClientIpList = "";
                     }
                 }
             }
@@ -1958,8 +1972,27 @@ SetStartEventArgs e);
             }
         }
 
-        public static bool IsLocalhost(string strIP)
+        // 2025/8/28
+        // 获得 IP 列表中的第一个 IP 地址
+        // parameters:
+        //      list    IP 地址列表。分号间隔。形态为 "192.168.0.1(z3950); localhost"
+        public static string GetFirstIP(string list)
         {
+            if (string.IsNullOrEmpty(list))
+                return list;
+            var result = list.Split(new char[] { ';' })[0].Trim();
+            return result.Split(new char[] { '(', })[0].Trim();
+        }
+
+        public static void VerifyIP(string strIP)
+        {
+            if (strIP.Contains(";") == true)
+                throw new ArgumentException("单个 IP 字符串中不应包含分号 ';' 字符");
+        }
+
+        public bool IsLocalhost(string strIP)
+        {
+            SessionTable.VerifyIP(strIP);
             if (strIP == "::1" || strIP == "127.0.0.1" || strIP == "localhost")
                 return true;
             return false;
@@ -1967,6 +2000,7 @@ SetStartEventArgs e);
 
         public bool IsSpecialIp(string strIP)
         {
+            VerifyIP(strIP);
             if (this.SpecialIpList == null || this.SpecialIpList.Count == 0)
                 return false;
             if (this.SpecialIpList.IndexOf(strIP) != -1)
@@ -1974,12 +2008,22 @@ SetStartEventArgs e);
             return false;
         }
 
+        public void AdjustClientICount(string old_ip, string new_ip)
+        {
+            if (old_ip == new_ip)
+                return;
+            _incIpCount(old_ip, -1);
+            _incIpCount(new_ip, 1);
+        }
+
         // 增量 IP 统计数字
         // 如果 IP 事项总数超过限额，会抛出异常
         // parameters:
         //      strIP   前端机器的 IP 地址。还用于辅助判断是否超过 MaxClients。localhost 是不计算在内的
-        long _incIpCount(string strIP, int nDelta)
+        long _incIpCount(string ip_param, int nDelta)
         {
+            var strIP = GetFirstIP(ip_param);
+
             // this.MaxClients = 0;    // test
             lock (this._ipTable.SyncRoot)   // 2022/5/12
             {
@@ -2043,7 +2087,8 @@ SetStartEventArgs e);
         }
 
         // 根据 ip 地址聚集其它字段信息
-        void GatherFields(ref List<ChannelInfo> infos)
+        void GatherFields(ref List<ChannelInfo> infos,
+            bool return_ip_list = false)
         {
             List<string> ips = new List<string>();
             foreach (ChannelInfo info in infos)
@@ -2051,14 +2096,15 @@ SetStartEventArgs e);
                 ips.Add(info.ClientIP);
             }
 
-            List<ChannelInfo> results = GatherFields(ips);
+            List<ChannelInfo> results = GatherFields(ips, return_ip_list);
             int i = 0;
             foreach (string ip in ips)
             {
                 ChannelInfo info = infos[i];
                 foreach (ChannelInfo result in results)
                 {
-                    if (result.ClientIP == ip)
+                    var first_ip = GetFirstIP(result.ClientIP);
+                    if (first_ip == ip)
                     {
                         result.Count = info.Count;
                         infos[i] = result;
@@ -2079,7 +2125,11 @@ SetStartEventArgs e);
             }
         }
 
-        List<ChannelInfo> GatherFields(List<string> ips)
+        // parameters:
+        //      return_ip_list  如果为 true，表示要返回 sessioninfo.ClientIpList 字段
+        //                      如果为 false，表示只返回 sessioninfo.ClientIP 字段
+        List<ChannelInfo> GatherFields(List<string> ips,
+            bool return_ip_list = false)
         {
             List<ChannelInfo> results = new List<ChannelInfo>();
 
@@ -2102,7 +2152,10 @@ SetStartEventArgs e);
 
                 ChannelInfo info = new ChannelInfo();
                 info.SessionID = session.SessionID;
-                info.ClientIP = session.ClientIP;
+                if (return_ip_list == true)
+                    info.ClientIP = session.ClientIpList;
+                else
+                    info.ClientIP = session.ClientIP;
                 info.UserName = session.UserID;
                 info.LibraryCode = session.LibraryCodeList;
                 info.Via = session.Via;
@@ -2215,7 +2268,7 @@ SetStartEventArgs e);
 
         // 列出指定的通道信息
         public int ListChannels(
-            string strClientIP,
+            string ip_param,
             string strUserName,
             string strStyle,
             out List<ChannelInfo> infos,
@@ -2223,6 +2276,8 @@ SetStartEventArgs e);
         {
             strError = "";
             infos = new List<ChannelInfo>();
+
+            string strClientIP = GetFirstIP(ip_param);
 
             if (this.m_lock.TryEnterReadLock(m_nLockTimeout) == false)
                 throw new ApplicationException("锁定尝试中超时");
@@ -2316,7 +2371,7 @@ SetStartEventArgs e);
 
                         ChannelInfo info = new ChannelInfo();
                         info.SessionID = session.SessionID;
-                        info.ClientIP = session.ClientIP;
+                        info.ClientIP = session.ClientIpList;
                         info.UserName = session.UserID;
                         info.LibraryCode = session.LibraryCodeList;
                         info.Via = session.Via;

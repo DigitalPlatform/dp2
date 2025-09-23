@@ -431,11 +431,23 @@ namespace DigitalPlatform.LibraryServer
                 goto ERROR1;
             }
 
-            // 在架册集合
-            List<string> OnShelfItemBarcodes = new List<string>();
+            // 尽量转换为册条码号列表
+            nRet = ConvertRefIdListToItemBarcodeList(channel,
+strItemBarcodeListParam,
+out string strItemBarcodeList,
+out strError);
+            if (nRet == -1)
+                strItemBarcodeList = strItemBarcodeListParam;
 
-            // 被删除的已到书状态册集合
-            List<string> ArriveItemBarcodes = new List<string>();
+            // 在架册集合。尽可能用 @refID:xxx 形态
+            List<string> OnShelfItemKeys = new List<string>();
+            // 尽可能用条码号形态
+            List<string> display_onshelf_itembarcodes = new List<string>();
+
+            // 被删除的已到书状态册集合。尽可能用 @refID:xxx 形态
+            List<string> ArriveItemKeys = new List<string>();
+            // 尽可能用条码号形态
+            List<string> display_arrive_itembarcodes = new List<string>();
 
             // 加读者记录锁
 #if DEBUG_LOCK_READER
@@ -642,7 +654,7 @@ namespace DigitalPlatform.LibraryServer
                 // for (int i = 0; i < itembarcodes.Length; i++)
                 foreach (var strItemRefIdString in itemrefids)
                 {
-                    // string strItemBarcode = itembarcodes[i].Trim();
+                    // string strItemKeys = itembarcodes[i].Trim();
 
                     if (String.IsNullOrEmpty(strItemRefIdString) == true)
                         continue;
@@ -679,7 +691,7 @@ namespace DigitalPlatform.LibraryServer
                             // text-level: 用户提示
                             result.ErrorInfo = string.Format(this.GetString("册条码号s不存在"),   // "册条码号 {0} 不存在"
                                 strItemRefIdString);
-                            // "册条码号 '" + strItemBarcode + "' 不存在";
+                            // "册条码号 '" + strItemKeys + "' 不存在";
                             result.ErrorCode = ErrorCode.ItemBarcodeNotFound;
                             return result;
                         }
@@ -698,7 +710,7 @@ namespace DigitalPlatform.LibraryServer
                             strError = string.Format(this.GetString("册条码号s有重复"),   // "册条码号 '{0}' 有重复({1}条)，无法进行预约操作。"
                                 strItemRefIdString,
                                 nRet.ToString());
-                            // "册条码号 '" + strItemBarcode + "' 有重复(" + nRet.ToString() + "条)，无法进行预约操作。";
+                            // "册条码号 '" + strItemKeys + "' 有重复(" + nRet.ToString() + "条)，无法进行预约操作。";
                         }
 
                         nRet = LibraryApplication.LoadToDom(strItemXml,
@@ -827,11 +839,26 @@ namespace DigitalPlatform.LibraryServer
 
                         }
 
+                        string BARCODE(string barcode, string refid)
+                        {
+                            if (string.IsNullOrEmpty(barcode) == false)
+                                return barcode;
+                            return "@refID:" + refid;
+                        }
+
                         if (bOnShelf == true)
-                            OnShelfItemBarcodes.Add("@refID:" + strItemRefID/*strItemBarcode*/);
+                        {
+                            OnShelfItemKeys.Add("@refID:" + strItemRefID/*strItemKeys*/);
+                            display_onshelf_itembarcodes.Add(BARCODE(strItemBarcode, strItemRefID));
+                            Debug.Assert(OnShelfItemKeys.Count == display_onshelf_itembarcodes.Count);
+                        }
 
                         if (bArrived == true)
-                            ArriveItemBarcodes.Add("@refID:" + strItemRefID/*strItemBarcode*/);
+                        {
+                            ArriveItemKeys.Add("@refID:" + strItemRefID/*strItemKeys*/);
+                            display_arrive_itembarcodes.Add(BARCODE(strItemBarcode, strItemRefID));
+                            Debug.Assert(ArriveItemKeys.Count == display_arrive_itembarcodes.Count);
+                        }
 
                         // 写回册记录
                         lRet = channel.DoSaveTextRes(strOutputItemRecPath,
@@ -910,8 +937,11 @@ namespace DigitalPlatform.LibraryServer
                     DomUtil.SetElementText(domOperLog.DocumentElement,
                         "readerRefID", strReaderRefID);
 
+                    // 2025/9/17 改为 strItemBarcodeList
                     DomUtil.SetElementText(domOperLog.DocumentElement,
-                        "itemBarcodeList", strItemBarcodeListParam);
+                        "itemBarcodeList", 
+                        strItemBarcodeList/*strItemBarcodeListParam*/);
+
                     // 2024/1/30
                     DomUtil.SetElementText(domOperLog.DocumentElement,
     "itemRefIdList", strItemRefIdList);
@@ -943,14 +973,15 @@ namespace DigitalPlatform.LibraryServer
 
                 // 对当前在普通架的图书，立即发出到书通知
                 if (this.CanReserveOnshelf == true
-                    && OnShelfItemBarcodes.Count > 0)
+                    && OnShelfItemKeys.Count > 0)
                 {
                     // 只通知第一个在架的册
-                    string strItemBarcode = OnShelfItemBarcodes[0];
+                    string strItemKeys = OnShelfItemKeys[0];
+                    string display_strItemBarcode = display_onshelf_itembarcodes[0];
 
-                    if (string.IsNullOrEmpty(strItemBarcode) == true)
+                    if (string.IsNullOrEmpty(strItemKeys) == true)
                     {
-                        strError = "内部错误：OnShelfItemBarcodes 的第一个元素为空。数组情况 '" + StringUtil.MakePathList(OnShelfItemBarcodes) + "'";
+                        strError = "内部错误：OnShelfItemKeys 的第一个元素为空。数组情况 '" + StringUtil.MakePathList(OnShelfItemKeys) + "'";
                         goto ERROR1;
                     }
 
@@ -964,7 +995,7 @@ namespace DigitalPlatform.LibraryServer
                         channel,
                         strReaderBarcode,
                         false,  // 不需要函数内加读者锁，因为这里已经加了
-                        strItemBarcode,
+                        strItemKeys,
                         true,   // 在普通架
                         true,   // 需要修改当前册记录的<request>元素state属性
                         "",
@@ -991,30 +1022,37 @@ namespace DigitalPlatform.LibraryServer
                     // 给与成功提示
                     // text-level: 用户提示
                     string strMessage = string.Format(this.GetString("请注意，您刚提交的预约请求立即就得到了兑现"), // "请注意，您刚提交的预约请求立即就得到了兑现(预约到书通知消息也向您发出了，请注意查收)。所预约的册 {0} 为在架状态，已为您保留，您从现在起就可来图书馆办理借阅手续。"
-                        strItemBarcode);
+                        display_strItemBarcode);
                     // 2024/9/21
                     if (this.PrepareOnshelf)
-                        strMessage = "预约请求提交成功。所预约的册 " + strItemBarcode + " 为在架状态，已进入备书流程，请耐心等待取书消息通知。";
-                    // "请注意，您刚提交的预约请求立即就得到了兑现(预约到书通知消息也向您发出了，请注意查收)。所预约的册 " + strItemBarcode + " 为在架状态，已为您保留，您从现在起就可来图书馆办理借阅手续。";
-                    if (OnShelfItemBarcodes.Count > 1)
+                        strMessage = "预约请求提交成功。所预约的册 " + display_strItemBarcode + " 为在架状态，已进入备书流程，请耐心等待取书消息通知。";
+                    // "请注意，您刚提交的预约请求立即就得到了兑现(预约到书通知消息也向您发出了，请注意查收)。所预约的册 " + strItemKeys + " 为在架状态，已为您保留，您从现在起就可来图书馆办理借阅手续。";
+                    if (OnShelfItemKeys.Count > 1)
                     {
-                        OnShelfItemBarcodes.Remove(strItemBarcode);
-                        string[] barcodelist = new string[OnShelfItemBarcodes.Count];
-                        OnShelfItemBarcodes.CopyTo(barcodelist);
+                        // OnShelfItemKeys.Remove(strItemKeys);
+                        var index = OnShelfItemKeys.IndexOf(strItemKeys);
+                        if (index != -1)
+                        {
+                            display_onshelf_itembarcodes.RemoveAt(index);
+                            OnShelfItemKeys.RemoveAt(index);
+                        }
+
+                        string[] barcodelist = display_onshelf_itembarcodes.ToArray();
                         // text-level: 用户提示
                         strMessage += string.Format(this.GetString("您在同一预约请求中也同时提交了其他在架状态的册"),   // "您在同一预约请求中也同时提交了其他在架状态的册: {0}。因同一集合中的前述册 {1} 的生效，这些册同时被忽略。(如确要预约多个在架的册让它们都独立生效，请每次勾选一个后单独提交，而不要把多个册一次性提交。)"
                             String.Join(",", barcodelist),
-                            strItemBarcode);
-                        // "您在同一预约请求中也同时提交了其他在架状态的册: " + String.Join(",", barcodelist) + "。因同一集合中的前述册 " + strItemBarcode + " 的生效，这些册同时被忽略。(如确要预约多个在架的册让它们都独立生效，请每次勾选一个后单独提交，而不要把多个册一次性提交。)";
+                            display_strItemBarcode);
+                        // "您在同一预约请求中也同时提交了其他在架状态的册: " + String.Join(",", barcodelist) + "。因同一集合中的前述册 " + strItemKeys + " 的生效，这些册同时被忽略。(如确要预约多个在架的册让它们都独立生效，请每次勾选一个后单独提交，而不要把多个册一次性提交。)";
                     }
 
                     result.ErrorInfo = strMessage;
                 }
 
-                if (ArriveItemBarcodes.Count > 0)
+                if (ArriveItemKeys.Count > 0)
                 {
-                    string[] barcodelist = new string[ArriveItemBarcodes.Count];
-                    ArriveItemBarcodes.CopyTo(barcodelist);
+                    //string[] barcodelist = new string[ArriveItemKeys.Count];
+                    //ArriveItemKeys.CopyTo(barcodelist);
+                    var barcodelist = display_arrive_itembarcodes.ToArray();
 
                     // text-level: 用户提示
                     result.ErrorInfo += string.Format(this.GetString("册s在删除前已经处在到书状态"),    // "册 {0} 在删除前已经处在“到书”状态。您刚刚删除了这(些)请求，这意味着您已经放弃取书。图书馆将顺次满足后面排队等待的预约者的请求，或允许其他读者借阅此书。(若您意图要去图书馆正常取书，请一定不要去删除这样的状态为“已到书”的请求，软件会在您取书后自动删除)"
@@ -1297,7 +1335,7 @@ namespace DigitalPlatform.LibraryServer
                         // text-level: 用户提示
                         strError = string.Format(this.GetString("不能预约在架的册s"), // "不能预约在架(未被借出的)册 {0}"
                             strItemBarcode);
-                        // "不能预约在架(未被借出的)册 " + strItemBarcode;
+                        // "不能预约在架(未被借出的)册 " + strItemKeys;
                         return -1;
                     }
 
@@ -1365,6 +1403,7 @@ namespace DigitalPlatform.LibraryServer
                             // channels,
                             channel,
                             strItemBarcode.Replace("@refID:", "@itemRefID:"),
+                            "arrived",
                             out strQueueRecXml,
                             out baQueueRecTimestamp,
                             out strQueueRecPath,
@@ -2029,7 +2068,24 @@ out strError);
                 DomUtil.SetAttr(readerRequestNode, "arrivedDate", this.Clock.GetClock());
                 // 实际到达的一个册条码号 2007/1/18 
                 // 也有一定几率是 "@refID:xxx" 形态
-                DomUtil.SetAttr(readerRequestNode, "arrivedItemBarcode", strItemBarcodeParam);  // 借阅信息链重构版本曾经用过 strItemRefIdString
+                {
+                    // 2025/9/15
+                    string barcode = strItemBarcodeParam;
+                    // 尽可能转换为册条码号形态
+                    if (strItemBarcodeParam.StartsWith("@refID:"))
+                    {
+                        nRet = ConvertRefIdListToItemBarcodeList(channel,
+    strItemBarcodeParam,
+    out string strItemBarcodeString,
+    out strError);
+                        /*
+                        if (nRet == -1)
+                            return -1;
+                        */
+                        barcode = strItemBarcodeString;
+                    }
+                    DomUtil.SetAttr(readerRequestNode, "arrivedItemBarcode", barcode);  // strItemBarcodeParam // 借阅信息链重构版本曾经用过 strItemRefIdString
+                }
                 // 2025/4/23 补充
                 // 实际到达的一个册参考 ID
                 readerRequestNode.SetAttribute("arrivedItemRefID", strItemRefIdString);
@@ -2186,7 +2242,7 @@ out strError);
 
         // 发出放弃取书通知
         // parameters:
-        //      strItemBarcode  册条码号。必须是册条码号。如果册条码号为空，参考ID需要使用 strRefID 参数
+        //      strItemKeys  册条码号。必须是册条码号。如果册条码号为空，参考ID需要使用 strRefID 参数
         //      strRefID        参考ID
         //      strLibraryCode  读者所在的馆代码
         //      strReaderXml    预约了图书的读者的XML记录。用于消息通知接口
@@ -2215,7 +2271,7 @@ out strError);
             string strLocation = DomUtil.GetElementText(itemdom.DocumentElement, "location");
             strLocation = StringUtil.GetPureLocationString(strLocation);
 
-            // 兼容 strItemBarcode 中含有前缀的用法
+            // 兼容 strItemKeys 中含有前缀的用法
             string strHead = "@refID:";
             if (StringUtil.HasHead(strItemBarcode, strHead, true) == true)
             {
@@ -2549,7 +2605,7 @@ out strError);
         // 注：本函数可能要删除部分通知记录
         // (2024/9/21) 当使用 dp2mini 备书流程时，并且 bOnShelf 为 true，本函数不直接通知读者。备书流程会通知读者
         // parameters:
-        //      strItemBarcode  册条码号。必须是册条码号。如果册条码号为空，参考ID需要使用 strRefID 参数
+        //      strItemKeys  册条码号。必须是册条码号。如果册条码号为空，参考ID需要使用 strRefID 参数
         //      strRefID        参考ID
         //      bOnShelf    要通知的册是否在架。在架指并没有人借阅过，本来就在书架上。
         //      strLibraryCode  读者所在的馆代码
@@ -2622,6 +2678,7 @@ out strError);
                 // channels,
                 channel,
                 strItemBarcodeParam.Replace("@refID:", "@itemRefID:"),
+                "",
                 out strNotifyXml,
                 out timestamp,
                 out strOutputPath,
@@ -3423,14 +3480,14 @@ out strError);
             // 4) 删除当前通知记录
 
             // 2007/7/5 
-            bool bAlreadeDeleted = false;
+            bool bAlreadyDeleted = false;
             if (DeletedNotifyRecPaths != null)
             {
                 if (DeletedNotifyRecPaths.IndexOf(strQueueRecPath) != -1)
-                    bAlreadeDeleted = true;
+                    bAlreadyDeleted = true;
             }
 
-            if (bAlreadeDeleted == false)
+            if (bAlreadyDeleted == false)
             {
                 lRet = channel.DoDeleteRes(
                     strQueueRecPath,
@@ -3510,6 +3567,7 @@ out string strRoom);
         //                          @itemRefID: 前缀表示册参考ID。
         //                          @notifyID: 是通知记录本身的参考ID
         //                          @patronRefID: 是读者记录的参考ID
+        //      state   记录状态。如果为空，表示不加此限制；如果=="arrived"，表示只要state=arrived的记录
         // return:
         //      -1  error
         //      0   not found
@@ -3518,6 +3576,7 @@ out string strRoom);
         public long SearchArrivedQueue(
             RmsChannel channel,
             string strItemBarcodeParam,
+            string state,
             string resultSetName,
             out string strError)
         {
@@ -3565,6 +3624,20 @@ out string strRoom);
                 + "'><item><word>"
                 + StringUtil.GetXmlStringSimple(strItemBarcodeParam)
                 + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>1000</maxCount></item><lang>zh</lang></target>";
+
+            // 2025/9/12
+            // 限定状态
+            if (string.IsNullOrEmpty(state) == false)
+            {
+                if (string.IsNullOrEmpty(strQueryXml) == false)
+                    strQueryXml += "<operator value='AND'/>";
+                strQueryXml += "<target list='"
+    + StringUtil.GetXmlStringSimple(this.ArrivedDbName + ":状态")
+    + "'><item><word>"
+    + StringUtil.GetXmlStringSimple(state)
+    + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang></target>";
+                strQueryXml = "<group>" + strQueryXml + "</group>";
+            }
 
             return channel.DoSearch(strQueryXml,
                 resultSetName,

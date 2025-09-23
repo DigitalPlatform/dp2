@@ -64,6 +64,7 @@
     <Compile Include="ILibraryServiceREST.cs" />
     <Compile Include="LibraryService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WcfBindings.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DigitalPlatform.IO\DigitalPlatform.IO.csproj">

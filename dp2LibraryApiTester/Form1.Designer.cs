@@ -29,6 +29,7 @@ namespace dp2LibraryApiTester
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.MenuItem_file = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_settings = new System.Windows.Forms.ToolStripMenuItem();
@@ -49,11 +50,13 @@ namespace dp2LibraryApiTester
             this.MenuItem_test_prepareCheckBorrow_clear = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_test_reservation = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_test_reservation_all = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_test_setEntitiesFieldRights = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
-            this.MenuItem_test_setEntitiesFieldRights = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripButton_stop = new System.Windows.Forms.ToolStripButton();
             this.menuStrip1.SuspendLayout();
+            this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -65,7 +68,7 @@ namespace dp2LibraryApiTester
             this.MenuItem_test});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(800, 37);
+            this.menuStrip1.Size = new System.Drawing.Size(800, 36);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -74,7 +77,7 @@ namespace dp2LibraryApiTester
             this.MenuItem_file.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MenuItem_settings});
             this.MenuItem_file.Name = "MenuItem_file";
-            this.MenuItem_file.Size = new System.Drawing.Size(72, 33);
+            this.MenuItem_file.Size = new System.Drawing.Size(72, 32);
             this.MenuItem_file.Text = "文件";
             // 
             // MenuItem_settings
@@ -97,7 +100,7 @@ namespace dp2LibraryApiTester
             this.MenuItem_test_reservation,
             this.MenuItem_test_setEntitiesFieldRights});
             this.MenuItem_test.Name = "MenuItem_test";
-            this.MenuItem_test.Size = new System.Drawing.Size(72, 33);
+            this.MenuItem_test.Size = new System.Drawing.Size(72, 32);
             this.MenuItem_test.Text = "测试";
             // 
             // MenuItem_initialEnvironment
@@ -216,9 +219,16 @@ namespace dp2LibraryApiTester
             // MenuItem_test_reservation_all
             // 
             this.MenuItem_test_reservation_all.Name = "MenuItem_test_reservation_all";
-            this.MenuItem_test_reservation_all.Size = new System.Drawing.Size(315, 40);
+            this.MenuItem_test_reservation_all.Size = new System.Drawing.Size(255, 40);
             this.MenuItem_test_reservation_all.Text = "执行全部测试";
             this.MenuItem_test_reservation_all.Click += new System.EventHandler(this.MenuItem_test_reservation_all_Click);
+            // 
+            // MenuItem_test_setEntitiesFieldRights
+            // 
+            this.MenuItem_test_setEntitiesFieldRights.Name = "MenuItem_test_setEntitiesFieldRights";
+            this.MenuItem_test_setEntitiesFieldRights.Size = new System.Drawing.Size(388, 40);
+            this.MenuItem_test_setEntitiesFieldRights.Text = "测试 SetEntities() 字段权限";
+            this.MenuItem_test_setEntitiesFieldRights.Click += new System.EventHandler(this.MenuItem_test_setEntitiesFieldRights_Click);
             // 
             // statusStrip1
             // 
@@ -232,27 +242,33 @@ namespace dp2LibraryApiTester
             // toolStrip1
             // 
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
-            this.toolStrip1.Location = new System.Drawing.Point(0, 37);
+            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripButton_stop});
+            this.toolStrip1.Location = new System.Drawing.Point(0, 36);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(800, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(800, 38);
             this.toolStrip1.TabIndex = 2;
             this.toolStrip1.Text = "toolStrip1";
             // 
             // webBrowser1
             // 
             this.webBrowser1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.webBrowser1.Location = new System.Drawing.Point(0, 62);
+            this.webBrowser1.Location = new System.Drawing.Point(0, 74);
             this.webBrowser1.MinimumSize = new System.Drawing.Size(20, 20);
             this.webBrowser1.Name = "webBrowser1";
-            this.webBrowser1.Size = new System.Drawing.Size(800, 366);
+            this.webBrowser1.Size = new System.Drawing.Size(800, 354);
             this.webBrowser1.TabIndex = 3;
             // 
-            // MenuItem_test_setEntitiesFieldRights
+            // toolStripButton_stop
             // 
-            this.MenuItem_test_setEntitiesFieldRights.Name = "MenuItem_test_setEntitiesFieldRights";
-            this.MenuItem_test_setEntitiesFieldRights.Size = new System.Drawing.Size(388, 40);
-            this.MenuItem_test_setEntitiesFieldRights.Text = "测试 SetEntities() 字段权限";
-            this.MenuItem_test_setEntitiesFieldRights.Click += new System.EventHandler(this.MenuItem_test_setEntitiesFieldRights_Click);
+            this.toolStripButton_stop.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_stop.Enabled = false;
+            this.toolStripButton_stop.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_stop.Image")));
+            this.toolStripButton_stop.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_stop.Name = "toolStripButton_stop";
+            this.toolStripButton_stop.Size = new System.Drawing.Size(58, 32);
+            this.toolStripButton_stop.Text = "停止";
+            this.toolStripButton_stop.Click += new System.EventHandler(this.toolStripButton_stop_Click);
             // 
             // MainForm
             // 
@@ -271,6 +287,8 @@ namespace dp2LibraryApiTester
             this.Load += new System.EventHandler(this.Form1_Load);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
+            this.toolStrip1.ResumeLayout(false);
+            this.toolStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -302,6 +320,7 @@ namespace dp2LibraryApiTester
         private System.Windows.Forms.ToolStripMenuItem MenuItem_test_reservation;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_test_reservation_all;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_test_setEntitiesFieldRights;
+        private System.Windows.Forms.ToolStripButton toolStripButton_stop;
     }
 }
 

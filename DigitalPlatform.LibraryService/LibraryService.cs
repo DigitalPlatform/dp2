@@ -12,7 +12,6 @@ using System.Threading;
 using System.Globalization;
 using System.ServiceModel.Channels;
 using System.Threading.Tasks;
-using System.Linq;
 
 
 using DigitalPlatform;
@@ -748,9 +747,39 @@ namespace dp2Library
 
                 Hashtable parameters = StringUtil.ParseParameters(strParameters, ',', '=');
 
+                /*
                 // 2018/7/11
                 // 使用可信的前端提供的 clientip 参数
                 string strClientIP = parameters.ContainsKey("clientip") == true ? parameters["clientip"] as string : sessioninfo.ClientIP;
+                */
+                var clientip = parameters.ContainsKey("clientip") == true ? parameters["clientip"] as string : "";
+
+                // 2025/9/3
+                clientip = StringUtil.CanonicalizeIP(clientip);
+
+                // 2025/8/27
+                // 这样便于后续环节所有关于前端 IP 的算法都利用这个 clientip 参数值
+                // 避免位于 localhost 的 dp2Capo 请求 dp2library 的所有通道都在 150 限额中计算
+                // 也就是说，按每个 Z39.50 前端 100 个通道限额计算
+                // 把 sessioninfo.ClientIP 变成一个列表，允许有多个 IP 地址。表达整个通讯路径上的各个节点的 IP 地址
+                {
+                    if (string.IsNullOrEmpty(clientip) == false)
+                    {
+                        if (string.IsNullOrEmpty(sessioninfo.ClientIP) == false)
+                            sessioninfo.ClientIpList = $"{clientip}; {sessioninfo.ClientIP}";
+                        else
+                            sessioninfo.ClientIpList = clientip;
+
+                        // 如果 IP 发生变化，需要将原来的 sessioninfo.ClientIP 原有的 ip 计数，转给 clientip 
+                        var first_ip = SessionTable.GetFirstIP(clientip);
+                        this.app.SessionTable.AdjustClientICount(sessioninfo.ClientIP, first_ip);
+                        sessioninfo.ClientIP = first_ip;
+                    }
+                    else
+                        sessioninfo.ClientIpList = sessioninfo.ClientIP;
+                }
+
+                string strClientIP = sessioninfo.ClientIP;
 
                 nRet = app.UserNameTable.BeforeLogin(strUserName,
                 strClientIP,
@@ -931,7 +960,7 @@ namespace dp2Library
 
                             if (passwordExpired1 == true)
                             {
-                                strError = "simulate 登录时第一阶段利用管理员帐户 '" + info.ManagerUserName + "' 验证登录失败: 密码已经失效";
+                                strError = "simulate 登录时第一阶段利用管理员帐户 '" + info.ManagerUserName + "' 验证登录失败: 密码已经过期";
                                 sessioninfo.Account = null;
                                 result.Value = -1;
                                 result.ErrorInfo = strError;
@@ -1004,7 +1033,7 @@ namespace dp2Library
 
                     if (nRet == 1 && passwordExpired2 == true)
                     {
-                        strError = $"'{strUserName}' 登录失败: 密码已经失效";
+                        strError = $"'{strUserName}' 登录失败: 密码已经过期";
                         sessioninfo.Account = null;
                         result.Value = -1;
                         result.ErrorInfo = strError;
@@ -1103,7 +1132,7 @@ namespace dp2Library
 
                             if (nRet == 1 && passwordExpired3 == true)
                             {
-                                strError = "simulate 登录时第一阶段利用管理员帐户 '" + info.ManagerUserName + "' 验证登录失败: 密码已经失效";
+                                strError = "simulate 登录时第一阶段利用管理员帐户 '" + info.ManagerUserName + "' 验证登录失败: 密码已经过期";
                                 sessioninfo.Account = null;
                                 result.Value = -1;
                                 result.ErrorInfo = strError;
@@ -1160,14 +1189,26 @@ namespace dp2Library
                         out strError);
 
                     // 2021/7/5
-                    if (nRet != -1 && passwordExpired10 == true)
+                    if (nRet != -1 && passwordExpired10 == true
+                        && strPassword != null && IsTokenPassword(strPassword) == false/*2025/9/12 防止代理登录的读者进行密码过期判断*/)
                     {
-                        strError = "密码已经失效";
+                        strError = $"读者 '{strUserName}' 密码已经过期";
                         sessioninfo.Account = null;
                         result.Value = -1;
                         result.ErrorInfo = strError;
                         result.ErrorCode = ErrorCode.PasswordExpired;
                         return result;
+                    }
+
+                    // 判断一个字符串是否为形态 token:xxxxx|||xxxxx
+                    bool IsTokenPassword(string text)
+                    {
+                        if (string.IsNullOrEmpty(text) == true)
+                            return false;
+                        if (text.StartsWith("token:")
+                            && text.Contains("|||"))
+                            return true;
+                        return false;
                     }
 
                     // 2023/4/13
@@ -1866,7 +1907,7 @@ namespace dp2Library
                 {
                     result.Value = 0;
                     result.ErrorCode = ErrorCode.PasswordExpired;
-                    result.ErrorInfo = "密码已经失效";
+                    result.ErrorInfo = "密码已经过期";
                     return result;
                 }
 
@@ -2640,19 +2681,19 @@ namespace dp2Library
     bool throw_exception = true)
         {
             // 2025/1/21
-            // 排序依据的列 sortby:id 或者 sortby:key
+            // 排序依据的列 sortby:user_id 或者 sortby:key
             var sortby = StringUtil.GetParameterByPrefix(strOutputStyle, "sortby");
             if (string.IsNullOrEmpty(sortby))
-                sortby = "id";
+                sortby = "user_id";
             else
             {
                 // 检查 sortby 值
-                if (sortby != "id" && sortby != "key")
+                if (sortby != "user_id" && sortby != "key")
                 {
-                    var error = $"strOutputStyle 参数值 '{strOutputStyle}' 不合法: sortby: 子参数值应为 'id' 或 'key'";
+                    var error = $"strOutputStyle 参数值 '{strOutputStyle}' 不合法: sortby: 子参数值应为 'user_id' 或 'key'";
                     if (throw_exception)
                         throw new ArgumentException(error);
-                    return "id";
+                    return "user_id";
                 }
             }
 
@@ -2708,7 +2749,8 @@ namespace dp2Library
                 RmsChannel channel = null;
 
                 // 2024/2/7
-                if (patronBarcode.StartsWith("@itemBarcode:"))
+                if (patronBarcode.StartsWith("@itemBarcode:")
+                    && patronBarcode.StartsWith("!") == false)
                 {
                     if (channel == null)
                         channel = sessioninfo.Channels.GetChannel(app.WsUrl);
@@ -2723,7 +2765,8 @@ namespace dp2Library
                         goto ERROR1;
                     patronBarcode = strItemRefIdList.Replace("@refID:", "@itemRefID:");
                 }
-                else if (patronBarcode.StartsWith("@") == false)
+                else if (patronBarcode.StartsWith("@") == false
+                    && patronBarcode.StartsWith("!") == false)
                 {
                     if (channel == null)
                         channel = sessioninfo.Channels.GetChannel(app.WsUrl);
@@ -3069,6 +3112,13 @@ out error);
                     return result;
                 }
 
+                var user_id = GetMessageUserID(sessioninfo);
+                if (user_id == null)
+                {
+                    strError = "当前用户 '" + sessioninfo.UserID + "' 是基于参考ID方式登录的，但尚未指定读者证条码号，因此无法进行 SetFriends() 操作";
+                    goto ERROR1;
+                }
+
                 string strBody = "证条码号为 " + sessioninfo.UserID + " 的读者希望和您成为好友。鉴别文字为 '" + strComment + "'。";
 
                 // 发送消息
@@ -3078,7 +3128,7 @@ out error);
                 nRet = app.MessageCenter.SendMessage(
                     sessioninfo.Channels,
                     strReaderBarcode,
-                    sessioninfo.UserID, // "图书馆",
+                    user_id,    // sessioninfo.UserID, // "图书馆",
                     "{fr} " + sessioninfo.UserID + " 请求和您成为好友",
                     "text",    // "text",
                     strBody,
@@ -3545,7 +3595,7 @@ out error);
         //      strResultSetName    结果集名。如果为空，表示使用当前缺省结果集"default"
         //      lStart  要获取的开始位置。从0开始计数
         //      lCount  要获取的个数
-        //      strBrowseInfoStyle  所返回的SearchResult中包含哪些信息。为逗号分隔的字符串列表值，取值可为 id/cols 之一。例如，"id,cols"表示同时获取id和浏览信息各列，而"id"表示仅取得id列。
+        //      strBrowseInfoStyle  所返回的SearchResult中包含哪些信息。为逗号分隔的字符串列表值，取值可为 user_id/cols 之一。例如，"user_id,cols"表示同时获取id和浏览信息各列，而"user_id"表示仅取得id列。
         //                  sort 子参数，表示 dp2library 本地排序的特性
         //      strLang 语言代码。一般为"zh"
         //      searchresults   返回包含记录信息的SearchResult对象数组
@@ -3638,7 +3688,7 @@ out error);
                         strResultSetName,
                         lStart,
                         lCount,
-                        GetModifiedStyle(strBrowseInfoStyle), // 为了过滤需要，确保获得 xml 和 id 
+                        GetModifiedStyle(strBrowseInfoStyle), // 为了过滤需要，确保获得 xml 和 user_id 
                         strLang,
                         null,
                         out searchresults,
@@ -3891,7 +3941,7 @@ out error);
             if (strBrowseInfoStyle.StartsWith("@"))
                 return strBrowseInfoStyle;
 
-            string modified_style = strBrowseInfoStyle + ",id";
+            string modified_style = strBrowseInfoStyle + ",user_id";
             if (StringUtil.IsInList("cols", strBrowseInfoStyle))
                 modified_style += ",xml";
             return modified_style;
@@ -3958,7 +4008,7 @@ out error);
                 // 2023/1/29
                 if (string.IsNullOrEmpty(record.Path))
                 {
-                    ClearRecord(record, $"因缺乏 record.Path 部分，无法进行过滤。请在 strBrowseStyle 中包含 id");
+                    ClearRecord(record, $"因缺乏 record.Path 部分，无法进行过滤。请在 strBrowseStyle 中包含 user_id");
                     i++;
                     continue;
                 }
@@ -5462,7 +5512,7 @@ out timestamp);
 
                 string strError = "";
                 long lRet = channel.GetBrowseRecords(paths,
-                        GetModifiedStyle(strBrowseInfoStyle), // 为了过滤需要，确保获得 xml 和 id 
+                        GetModifiedStyle(strBrowseInfoStyle), // 为了过滤需要，确保获得 xml 和 user_id 
                         out searchresults,
                         out strError);
                 if (lRet == -1)
@@ -6329,9 +6379,9 @@ out QueryResult[] results)
         //      strQueryXml 返回数据库内核层所使用的XML检索式，便于进行调试
         //      strSearchStyle  可以包含 desc，表示命中结果按照降序排列
         //      strOutputStyle  如果包含"keycount"，表示输出 key + count形式
-        //                      如果包含"keyid"，表示输出 key + id 形式
-        //                      如果 keycount 和 keyid 都不具备，则表示为一般输出 id 形式
-        //                      当处于 keycount 或 keyid 状态时，可以包含 sortby:key 或 sortby:id 分别代表按照命中 key 排序和按照命中 id 排序。(缺省为 sortby:id)
+        //                      如果包含"keyid"，表示输出 key + user_id 形式
+        //                      如果 keycount 和 keyid 都不具备，则表示为一般输出 user_id 形式
+        //                      当处于 keycount 或 keyid 状态时，可以包含 sortby:key 或 sortby:user_id 分别代表按照命中 key 排序和按照命中 user_id 排序。(缺省为 sortby:user_id)
         //                      可以包含 desc，表示对命中结果排序采用降序。(为兼容以前版本，strSearchStyle 和 strOutputStyle 参数都可以用这个值，不过建议用在 strOutputStyle 中)
         //                      如果包含 explain，表示希望在 explain 参数中返回检索过程的解释信息
         //      strLocationFilter   馆藏地点过滤条件
@@ -7415,14 +7465,14 @@ out QueryResult[] results)
         //      strFrom 检索途径
         //      strMathStyle    匹配方式 exact left right middle
         //      strSearchStyle  检索风格。
-        //                      desc 表示检索结果集中的记录按照 id 倒序排列。缺省为正序
+        //                      desc 表示检索结果集中的记录按照 user_id 倒序排列。缺省为正序
         //                      最终是通过 XML 检索式中 item/order 元素文本值 "DESC" 来实现的
         //      strOutputStyle  输出风格。
         //                      desc 表示倒序。
         //                      keycount 
         //                      keycount，则输出归并统计后的key+count(把相同的 key 后面的 count 合并)；否则，或者缺省，为传统的输出记录id
-        //                      keyid，输出 key 和 id
-        //                      如果 keycount 和 keyid 都没有，则表示仅输出 id
+        //                      keyid，输出 key 和 user_id
+        //                      如果 keycount 和 keyid 都没有，则表示仅输出 user_id
         //                      特殊用法, 如果包含 __buildqueryxml，则在result.ErrorInfo中返回XML检索式，但不进行检索
         // 权限: 
         //      需要 searchitem 权限
@@ -7480,7 +7530,7 @@ out QueryResult[] results)
                 string strQueryXml = "";
                 // 构造检索实体库的 XML 检索式
                 // parameters:
-                //      strSearchStyle  desc 表示检索结果集中的记录按照 id 倒序排列。缺省为正序
+                //      strSearchStyle  desc 表示检索结果集中的记录按照 user_id 倒序排列。缺省为正序
                 //                      最终是通过 XML 检索式中 item/order 元素文本值 "DESC" 来实现的
                 // return:
                 //      -1  出错
@@ -18953,6 +19003,15 @@ out strError);
             if (result.Value == -1)
                 return result;
 
+            // 2025/9/12
+            var user_id = GetMessageUserID(sessioninfo);
+            if (user_id == null)
+            {
+                result.Value = -1;
+                result.ErrorInfo = "当前用户 '" + sessioninfo.UserID + "' 是基于参考ID方式登录的，但尚未指定读者证条码号，因此无法进行 GetMessage() 操作";
+                result.ErrorCode = ErrorCode.AccessDenied;
+                return result;
+            }
             try
             {
                 if (message_ids.Length == 2 && message_ids[0] == "!msmq")
@@ -19004,7 +19063,7 @@ out strError);
 
                 int nRet = app.MessageCenter.GetMessage(
         sessioninfo.Channels,
-        sessioninfo.UserID,
+        user_id, // sessioninfo.UserID,
         message_ids,
         messagelevel,
         out messages,
@@ -19055,20 +19114,29 @@ out strError);
             if (result.Value == -1)
                 return result;
 
+            // 2025/9/12
+            var id = GetMessageUserID(sessioninfo);
+            if (id == null)
+            {
+                result.Value = -1;
+                result.ErrorInfo = "当前用户 '" + sessioninfo.UserID + "' 是基于参考ID方式登录的，但尚未指定读者证条码号，因此无法进行 ListMessage() 操作";
+                result.ErrorCode = ErrorCode.AccessDenied;
+                return result;
+            }
             try
             {
                 int nRet = app.MessageCenter.GetMessage(
-                sessioninfo.Channels,
-                strResultsetName,
-                strStyle,
-                sessioninfo.UserID,
-                strBoxType,
+                    sessioninfo.Channels,
+                    strResultsetName,
+                    strStyle,
+                    id, // sessioninfo.UserID,
+                    strBoxType,
                     messagelevel,
-                nStart,
-                nCount,
-                out nTotalCount,
-                out messages,
-                out strError);
+                    nStart,
+                    nCount,
+                    out nTotalCount,
+                    out messages,
+                    out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
@@ -19140,6 +19208,22 @@ out strError);
         }
 #endif
 
+        string GetMessageUserID(SessionInfo sessioninfo)
+        {
+            var id = sessioninfo.UserID;
+            if (id.StartsWith("@refID:"))
+            {
+                if (sessioninfo.Account == null
+                    || string.IsNullOrEmpty(sessioninfo.Account.Barcode) == true)
+                {
+                    return null;
+                }
+                id = sessioninfo.Account.Barcode;
+            }
+
+            return id;
+        }
+
         // parameters:
         //      strAction   "save" "delete" "send"
         public LibraryServerResult SetMessage(string strAction,
@@ -19157,6 +19241,13 @@ out strError);
             try
             {
                 int nRet = 0;
+
+                var user_id = GetMessageUserID(sessioninfo);
+                if (user_id == null)
+                {
+                    strError = "当前用户 '" + sessioninfo.UserID + "' 是基于参考ID方式登录的，但尚未指定读者证条码号，因此无法进行 SetMessage() 操作";
+                    goto ERROR1;
+                }
 
                 // TODO: 应考虑权限问题。
                 if (strAction == "delete")
@@ -19190,7 +19281,7 @@ out strError);
                     // 删除一个box中的全部消息
                     nRet = app.MessageCenter.DeleteMessage(
                         sessioninfo.Channels,
-                        sessioninfo.UserID,
+                        user_id, // sessioninfo.UserID,
                         bMoveToRecycleBin,
                         strStyle,
                         out strError);
@@ -19207,7 +19298,7 @@ out strError);
                         nRet = app.MessageCenter.SaveMessage(
                             sessioninfo.Channels,
                             data.strRecipient,
-                            sessioninfo.UserID, // data.strSender,
+                            user_id, // sessioninfo.UserID, // data.strSender,
                             data.strSubject,
                             data.strMime,
                             data.strBody,
@@ -19352,7 +19443,7 @@ out strError);
                             nRet = app.MessageCenter.SendMessage(
                             sessioninfo.Channels,
                             data.strRecipient,
-                            sessioninfo.UserID,
+                            user_id, // sessioninfo.UserID,
                             data.strSubject,
                             data.strMime,
                             data.strBody,
@@ -19388,12 +19479,13 @@ out strError);
                             continue;
                         }
 
+
                         // 2021/7/13
                         // 以上之外的 recipient，默认发送到 dp2 内置信箱
                         nRet = app.MessageCenter.SendMessage(
                         sessioninfo.Channels,
                         data.strRecipient,
-                        sessioninfo.UserID,
+                        user_id, // sessioninfo.UserID,
                         data.strSubject,
                         data.strMime,
                         data.strBody,

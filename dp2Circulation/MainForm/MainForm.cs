@@ -1810,7 +1810,8 @@ Stack:
             }
 
             // 刷新框架窗工具条上的馆藏地列表
-            this.BeginInvoke(new Action(FillLibraryCodeListMenu));
+            // this.BeginInvoke(new Action(FillLibraryCodeListMenu));
+            _ = FillLibraryCodeListMenuAsync();
 
             // 缺省字体发生了变化
             if (strOldDefaultFontString != this.DefaultFontString)
@@ -3249,7 +3250,7 @@ false);
 #endif
 
                     // 2021/2/3
-                    e.Parameters += ",gettoken=day";
+                    // e.Parameters += ",gettoken=day";
 
                     // 2014/10/23
                     if (this.TestMode == true)
