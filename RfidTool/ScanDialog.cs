@@ -1,15 +1,4 @@
-﻿using DigitalPlatform;
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.CommonControl;
-using DigitalPlatform.Core;
-using DigitalPlatform.GUI;
-using DigitalPlatform.LibraryServer.Common;
-using DigitalPlatform.RFID;
-using DigitalPlatform.RFID.UI;
-using DigitalPlatform.Text;
-using DigitalPlatform.Xml;
-using DocumentFormat.OpenXml.EMMA;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -21,6 +10,17 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
+
+using DigitalPlatform;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.CommonControl;
+using DigitalPlatform.Core;
+using DigitalPlatform.GUI;
+using DigitalPlatform.LibraryServer.Common;
+using DigitalPlatform.RFID;
+using DigitalPlatform.RFID.UI;
+using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
 
 namespace RfidTool
 {
@@ -214,7 +214,7 @@ namespace RfidTool
             this.Text = $"扫描并写入 {GetCaption(this.TypeOfUsage)}";
         }
 
-        public string GetCaption(string tu)
+        public static string GetCaption(string tu)
         {
             if (tu == "30")
                 return "层架标";
@@ -987,8 +987,17 @@ namespace RfidTool
 
                 // 写入 UID-->PII 对照关系日志文件
                 if (tou == "10")
+                {
+                    if (new_tag_info.Protocol == InventoryInfo.ISO18000P6C)
+                    {
+                        var bytes = tag.TagInfo.Tag as byte[];
+                        if (bytes == null)
+                            throw new Exception("(uhf) tag.TagInfo.Tag 为 null，无法获得 TID");
+                        uid = ByteArray.GetHexTimeStampString(bytes);
+                    }
                     DataModel.WriteToUidLogFile(uid,
                         ModifyDialog.MakeOiPii(barcode, oi, aoi));
+                }
 
                 /*
                 // 2022/7/24
@@ -1089,9 +1098,9 @@ namespace RfidTool
 
         // 注: 这里都是设置为国标语义中的 TypeOfUsage。
         // 最后创建标签内容的时候，相关模块会自动翻译不同格式的内容语义到具体格式要求
-        void SetTypeOfUsage(LogicChip chip)
+        public static void SetTypeOfUsage(LogicChip chip, string tou)
         {
-            string tou = this.TypeOfUsage;
+            // string tou = this.TypeOfUsage;
 
             // TODO: 如果是图书类型，是否可以根本不写入 TypeOfUsage 元素？
             // 似乎可以建立一个配置参数，决定默认的图书 TypeOfUsage 是否明确写入
@@ -1192,7 +1201,7 @@ namespace RfidTool
         {
             if (existing.Protocol == InventoryInfo.ISO15693)
             {
-                SetTypeOfUsage(chip/*, "gb"*/);
+                SetTypeOfUsage(chip, this.TypeOfUsage);
 
                 TagInfo new_tag_info = existing.Clone();
                 new_tag_info.Bytes = chip.GetBytes(
@@ -1245,18 +1254,22 @@ namespace RfidTool
                     if (isExistingGB)
                     {
                         string warning = $"警告：即将用高校联盟格式覆盖原有国标格式";
-                        DialogResult dialog_result = MessageBox.Show(this,
+                        DialogResult dialog_result =
+                            this.TryGet(() =>
+                            {
+                                return MessageBox.Show(this,
 $"{warning}\r\n\r\n确实要覆盖？",
 $"ScanDialog",
 MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,
 MessageBoxDefaultButton.Button2);
+                            });
                         if (dialog_result == DialogResult.No)
                             throw new Exception("放弃写入");
                     }
 
                     // chip.SetElement(ElementOID.TypeOfUsage, tou);
-                    SetTypeOfUsage(chip/*, "gxlm"*/);
+                    SetTypeOfUsage(chip, this.TypeOfUsage);
 
                     /*
                     // 2023/10/24
@@ -1278,14 +1291,18 @@ MessageBoxDefaultButton.Button2);
                         && GaoxiaoUtility.VerifyOI(oi) == false
                         && _dontWarningInvalidGaoxiaoOI == false)
                     {
-                        var dialog_result = MessageDlg.Show(this,
-                            $"警告: 机构代码 '{oi}' 不符合高校联盟格式的规定。\r\n\r\n若坚持写入，将被写入到 User Bank 中的 27(备用)元素。\r\n\r\n请问是否坚持写入？",
-                            "写入高校联盟格式",
-                            MessageBoxButtons.YesNo,
-                            MessageBoxDefaultButton.Button2,
-                            ref _dontWarningInvalidGaoxiaoOI,
-                            new string[] { "继续", "放弃" },
-                            "以后不再警告");
+                        var dialog_result =
+                            this.TryGet(() =>
+                            {
+                                return MessageDlg.Show(this,
+                                $"警告: 机构代码 '{oi}' 不符合高校联盟格式的规定。\r\n\r\n若坚持写入，将被写入到 User Bank 中的 27(备用)元素。\r\n\r\n请问是否坚持写入？",
+                                "写入高校联盟格式",
+                                MessageBoxButtons.YesNo,
+                                MessageBoxDefaultButton.Button2,
+                                ref _dontWarningInvalidGaoxiaoOI,
+                                new string[] { "继续", "放弃" },
+                                "以后不再警告");
+                            });
                         if (dialog_result != DialogResult.Yes)
                             throw new Exception("放弃写入标签");
                     }
@@ -1293,10 +1310,11 @@ MessageBoxDefaultButton.Button2);
                     // 2025/9/21
                     var epc_info = new GaoxiaoEpcInfo
                     {
-                        Version = 5,
+                        Version = 4,
                         Lending = false,
-                        Picking = 1,
-                        Reserve = 0
+                        Picking = 0,
+                        Reserve = 0,
+                        // ContentParameters = new int[] { 3, 4, 11, 14 },   // 强行规定 Content Parameters 值
                     };
                     var result = GaoxiaoUtility.BuildTag(chip,
                         build_user_bank,
@@ -1304,6 +1322,10 @@ MessageBoxDefaultButton.Button2);
                         epc_info);
                     if (result.Value == -1)
                         throw new Exception(result.ErrorInfo);
+
+                    // testing
+                    // result.EpcBank = ModifyContentParameter(result.EpcBank);
+
                     new_tag_info.Bytes = build_user_bank ? result.UserBank : null;
                     new_tag_info.UID = UhfUtility.EpcBankHex(result.EpcBank);  // existing.UID.Substring(0, 4) + Element.GetHexString(result.EpcBank);
                 }
@@ -1313,16 +1335,20 @@ MessageBoxDefaultButton.Button2);
                     if (isExistingGB == false)
                     {
                         string warning = $"警告：即将用国标格式覆盖原有高校联盟格式";
-                        DialogResult dialog_result = MessageBox.Show(this,
-$"{warning}\r\n\r\n确实要覆盖？",
-$"ScanDialog",
-MessageBoxButtons.YesNo,
-MessageBoxIcon.Question,
-MessageBoxDefaultButton.Button2);
+                        DialogResult dialog_result =
+                            this.TryGet(() =>
+                            {
+                                return MessageBox.Show(this,
+    $"{warning}\r\n\r\n确实要覆盖？",
+    $"ScanDialog",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+                            });
                         if (dialog_result == DialogResult.No)
                             throw new Exception("放弃写入");
                     }
-                    SetTypeOfUsage(chip/*, "gb"*/);
+                    SetTypeOfUsage(chip, this.TypeOfUsage);
 
                     var result = UhfUtility.BuildTag(chip,
                         build_user_bank,
@@ -1338,6 +1364,19 @@ MessageBoxDefaultButton.Button2);
 
             throw new ArgumentException($"目前暂不支持 {existing.Protocol} 协议标签的写入操作");
         }
+
+#if REMOVED
+        static byte[] ModifyContentParameter(byte[] epc_bank)
+        {
+            if (epc_bank == null || epc_bank.Length < 4)
+                throw new ArgumentException("epc_bank 参数值不允许为空，不允许长度小于 4");
+            byte[] result = epc_bank.ToList().ToArray();
+            int start = 4;
+            result[start + 2] = 0x00;
+            result[start + 3] = 0x53;
+            return result;
+        }
+#endif
 
         private void button_write_Click(object sender, EventArgs e)
         {
@@ -1502,7 +1541,7 @@ MessageBoxDefaultButton.Button2);
                     );
                 MessageDlg.Show(this, result, "解释文字");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }
@@ -1625,6 +1664,11 @@ MessageBoxDefaultButton.Button2);
                     }
                 }
             }
+
+            if (GaoxiaoUtility.IsWhdt(epc_bank))
+                text.AppendLine("whdt");
+            else
+                text.AppendLine("gxlm");
 
             return text.ToString();
         }

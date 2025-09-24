@@ -156,11 +156,11 @@ namespace RfidTool
             this.groupBox_uhf.TabStop = false;
             this.groupBox_uhf.Text = " UHF(超高频)标签 ";
             // 
-            // checkBox_writeUserBank
+            // checkBox_writeUhfUserBank
             // 
             this.checkBox_writeUserBank.AutoSize = true;
             this.checkBox_writeUserBank.Location = new System.Drawing.Point(20, 93);
-            this.checkBox_writeUserBank.Name = "checkBox_writeUserBank";
+            this.checkBox_writeUserBank.Name = "checkBox_writeUhfUserBank";
             this.checkBox_writeUserBank.Size = new System.Drawing.Size(242, 25);
             this.checkBox_writeUserBank.TabIndex = 2;
             this.checkBox_writeUserBank.Text = "要写入 User Bank(&U)";

@@ -129,7 +129,7 @@ namespace RfidTool
                                         UID = uid,
                                         AntennaID = antennaID
                                     };
-                                    return GetTagInfo(readerName, info, "");
+                                    return GetTagInfo(readerName, info, "tid"); // 获得 tid 速度较慢
                                 },
                                 (add_tags, update_tags, remove_tags) =>
                                 {

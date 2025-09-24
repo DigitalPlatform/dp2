@@ -323,6 +323,12 @@ namespace RfidDrivers.First
                     return error;
             }
 
+            /*
+            // testing 对 reader 排序
+            _readers.Sort((a, b) => {
+                return string.Compare(a.Name, b.Name);
+            });
+            */
             return new NormalResult();
         }
 
@@ -4474,13 +4480,16 @@ out Reader reader);
                         var error = VerifyEpcCrc(uid);
                         if (error == null)
                         {
-                            return new SetEasResult
+                            var result1 = new SetEasResult
                             {
                                 Value = -1,
                                 ErrorInfo = $"UID 为 {uid} 标签可能是一个超高频(UHF)标签(经过验算 EPC Hex 得知)",
                                 ErrorCode = "tagNotFound",
                                 OldUID = uid,
                             };
+                            // 2025/9/24
+                            error_results.Add(result1);
+                            continue;
                         }
 
 

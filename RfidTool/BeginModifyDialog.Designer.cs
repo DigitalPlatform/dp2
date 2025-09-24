@@ -33,6 +33,8 @@ namespace RfidTool
             this.button_OK = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage_action = new System.Windows.Forms.TabPage();
+            this.button_modifyVerifyRule = new System.Windows.Forms.Button();
+            this.checkBox_verifyPii = new System.Windows.Forms.CheckBox();
             this.checkBox_writeUidLog = new System.Windows.Forms.CheckBox();
             this.checkBox_oi = new System.Windows.Forms.CheckBox();
             this.textBox_rfid_oi = new System.Windows.Forms.TextBox();
@@ -45,10 +47,14 @@ namespace RfidTool
             this.linkLabel_oiHelp = new System.Windows.Forms.LinkLabel();
             this.textBox_rfid_aoi = new System.Windows.Forms.TextBox();
             this.tabPage_other = new System.Windows.Forms.TabPage();
-            this.checkBox_verifyPii = new System.Windows.Forms.CheckBox();
-            this.button_modifyVerifyRule = new System.Windows.Forms.Button();
+            this.checkBox_writeUhfUserBank = new System.Windows.Forms.CheckBox();
+            this.comboBox_switchMethod = new System.Windows.Forms.ComboBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.tabControl1.SuspendLayout();
             this.tabPage_action.SuspendLayout();
+            this.tabPage_other.SuspendLayout();
+            this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // button_Cancel
@@ -114,6 +120,26 @@ namespace RfidTool
             this.tabPage_action.TabIndex = 0;
             this.tabPage_action.Text = "动作参数";
             this.tabPage_action.UseVisualStyleBackColor = true;
+            // 
+            // button_modifyVerifyRule
+            // 
+            this.button_modifyVerifyRule.Location = new System.Drawing.Point(244, 384);
+            this.button_modifyVerifyRule.Name = "button_modifyVerifyRule";
+            this.button_modifyVerifyRule.Size = new System.Drawing.Size(294, 39);
+            this.button_modifyVerifyRule.TabIndex = 14;
+            this.button_modifyVerifyRule.Text = "配置校验规则 ...";
+            this.button_modifyVerifyRule.UseVisualStyleBackColor = true;
+            this.button_modifyVerifyRule.Click += new System.EventHandler(this.button_modifyVerifyRule_Click);
+            // 
+            // checkBox_verifyPii
+            // 
+            this.checkBox_verifyPii.AutoSize = true;
+            this.checkBox_verifyPii.Location = new System.Drawing.Point(10, 392);
+            this.checkBox_verifyPii.Name = "checkBox_verifyPii";
+            this.checkBox_verifyPii.Size = new System.Drawing.Size(166, 25);
+            this.checkBox_verifyPii.TabIndex = 13;
+            this.checkBox_verifyPii.Text = "校验 PII (&V)";
+            this.checkBox_verifyPii.UseVisualStyleBackColor = true;
             // 
             // checkBox_writeUidLog
             // 
@@ -235,6 +261,7 @@ namespace RfidTool
             // 
             // tabPage_other
             // 
+            this.tabPage_other.Controls.Add(this.groupBox1);
             this.tabPage_other.Location = new System.Drawing.Point(4, 31);
             this.tabPage_other.Name = "tabPage_other";
             this.tabPage_other.Size = new System.Drawing.Size(768, 473);
@@ -242,25 +269,52 @@ namespace RfidTool
             this.tabPage_other.Text = "其它";
             this.tabPage_other.UseVisualStyleBackColor = true;
             // 
-            // checkBox_verifyPii
+            // checkBox_writeUhfUserBank
             // 
-            this.checkBox_verifyPii.AutoSize = true;
-            this.checkBox_verifyPii.Location = new System.Drawing.Point(10, 392);
-            this.checkBox_verifyPii.Name = "checkBox_verifyPii";
-            this.checkBox_verifyPii.Size = new System.Drawing.Size(166, 25);
-            this.checkBox_verifyPii.TabIndex = 13;
-            this.checkBox_verifyPii.Text = "校验 PII (&V)";
-            this.checkBox_verifyPii.UseVisualStyleBackColor = true;
+            this.checkBox_writeUhfUserBank.AutoSize = true;
+            this.checkBox_writeUhfUserBank.Enabled = false;
+            this.checkBox_writeUhfUserBank.Location = new System.Drawing.Point(34, 113);
+            this.checkBox_writeUhfUserBank.Name = "checkBox_writeUhfUserBank";
+            this.checkBox_writeUhfUserBank.Size = new System.Drawing.Size(242, 25);
+            this.checkBox_writeUhfUserBank.TabIndex = 3;
+            this.checkBox_writeUhfUserBank.Text = "要写入 User Bank(&U)";
+            this.checkBox_writeUhfUserBank.UseVisualStyleBackColor = true;
             // 
-            // button_modifyVerifyRule
+            // comboBox_switchMethod
             // 
-            this.button_modifyVerifyRule.Location = new System.Drawing.Point(244, 384);
-            this.button_modifyVerifyRule.Name = "button_modifyVerifyRule";
-            this.button_modifyVerifyRule.Size = new System.Drawing.Size(294, 39);
-            this.button_modifyVerifyRule.TabIndex = 14;
-            this.button_modifyVerifyRule.Text = "配置校验规则 ...";
-            this.button_modifyVerifyRule.UseVisualStyleBackColor = true;
-            this.button_modifyVerifyRule.Click += new System.EventHandler(this.button_modifyVerifyRule_Click);
+            this.comboBox_switchMethod.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox_switchMethod.FormattingEnabled = true;
+            this.comboBox_switchMethod.Items.AddRange(new object[] {
+            "高校联盟-->UHF国标",
+            "UHF国标-->高校联盟",
+            "[不切换]"});
+            this.comboBox_switchMethod.Location = new System.Drawing.Point(217, 50);
+            this.comboBox_switchMethod.Name = "comboBox_switchMethod";
+            this.comboBox_switchMethod.Size = new System.Drawing.Size(455, 29);
+            this.comboBox_switchMethod.TabIndex = 1;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(30, 53);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(180, 21);
+            this.label2.TabIndex = 0;
+            this.label2.Text = "切换内容格式(&S):";
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox1.Controls.Add(this.comboBox_switchMethod);
+            this.groupBox1.Controls.Add(this.checkBox_writeUhfUserBank);
+            this.groupBox1.Controls.Add(this.label2);
+            this.groupBox1.Location = new System.Drawing.Point(17, 23);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(733, 220);
+            this.groupBox1.TabIndex = 4;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = " UHF(超高频)标签 ";
             // 
             // BeginModifyDialog
             // 
@@ -278,6 +332,9 @@ namespace RfidTool
             this.tabControl1.ResumeLayout(false);
             this.tabPage_action.ResumeLayout(false);
             this.tabPage_action.PerformLayout();
+            this.tabPage_other.ResumeLayout(false);
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -302,5 +359,9 @@ namespace RfidTool
         private System.Windows.Forms.CheckBox checkBox_writeUidLog;
         private System.Windows.Forms.CheckBox checkBox_verifyPii;
         private System.Windows.Forms.Button button_modifyVerifyRule;
+        private System.Windows.Forms.ComboBox comboBox_switchMethod;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.CheckBox checkBox_writeUhfUserBank;
+        private System.Windows.Forms.GroupBox groupBox1;
     }
 }

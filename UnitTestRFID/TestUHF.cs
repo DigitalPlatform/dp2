@@ -506,6 +506,19 @@ USR 000879030000845600000C022808100400010001000000000000000000000000000000000000
             Debug.WriteLine(result.ToString());
         }
 
+        // hh 厂家
+        // 24E6 3400 8003 0053 3813 0058 B907 0000
+        [TestMethod]
+        public void display_epc_4()
+        {
+            var epc_bank = Element.FromHexString("24E634008003005338130058B9070000");
+            var user_bank = Element.FromHexString("0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+            var result = GaoxiaoUtility.ParseTag(epc_bank,
+                user_bank,
+                "");
+
+            Debug.WriteLine(result.ToString());
+        }
 
         [TestMethod]
         public void test_overwriteBank_01()

@@ -34,6 +34,7 @@ namespace RfidTool
                     this.checkBox_uidPiiMap,
                     this.comboBox_eas,
                     this.checkBox_verifyPii,
+                    this.comboBox_switchMethod,
                     // this.textBox_verifyRule,
                 };
                 return GuiState.GetUiState(controls);
@@ -50,6 +51,7 @@ namespace RfidTool
                     this.checkBox_uidPiiMap,
                     this.comboBox_eas,
                     this.checkBox_verifyPii,
+                    this.comboBox_switchMethod,
                     // this.textBox_verifyRule,
                 };
                 GuiState.SetUiState(controls, value);
@@ -266,6 +268,23 @@ namespace RfidTool
             }
         }
 
+        /*
+高校联盟-->UHF国标
+UHF国标-->高校联盟
+[不切换]
+        * */
+        public string SwitchMethod
+        {
+            get
+            {
+                return this.comboBox_switchMethod.Text;
+            }
+            set
+            {
+                this.comboBox_switchMethod.Text = value;
+            }
+        }
+
         private void comboBox_eas_TextChanged(object sender, EventArgs e)
         {
             if (string.IsNullOrEmpty(this.comboBox_eas.Text)
@@ -294,6 +313,9 @@ namespace RfidTool
         private void BeginModifyDialog_Load(object sender, EventArgs e)
         {
             // this.textBox_verifyRule.Text = DataModel.PiiVerifyRule;
+
+            // 只读，显示全局参数提供参考
+            this.checkBox_writeUhfUserBank.Checked = DataModel.WriteUhfUserBank;
         }
 
         private void button_modifyVerifyRule_Click(object sender, EventArgs e)

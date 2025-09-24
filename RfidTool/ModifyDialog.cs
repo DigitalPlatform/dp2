@@ -89,6 +89,7 @@ namespace RfidTool
                     WriteUidPiiLog = dlg.WriteUidPiiLog,
                     VerifyPii = dlg.VerifyPii,
                     PiiVerifyRule = dlg.PiiVerifyRule,
+                    SwitchMethod = dlg.SwitchMethod,
                 };
             }
 
@@ -265,7 +266,7 @@ namespace RfidTool
                                         //      -1  表示遇到了严重出错，要停止循环调用本函数
                                         //      0   表示全部完成，没有遇到出错的情况
                                         //      >0  表示处理过程中有事项出错。后继需要调主循环调用本函数
-                                        var process_result = await ProcessTags(result.Results, current_token);
+                                        var process_result = await ProcessTagsAsync(result.Results, current_token);
                                         _error_count = process_result.Value;
                                         _verify_error_count = process_result.VerifyErrorCount;
                                         process_count += process_result.ProcessCount;
@@ -511,8 +512,10 @@ namespace RfidTool
             {
                 foreach (var tag in tags)
                 {
+                    /*
                     if (tag.Protocol != InventoryInfo.ISO15693)
                         continue;
+                    */
 
                     ListViewItem item = ListViewUtil.FindItem(this.listView_tags, tag.UID, COLUMN_UID);
                     if (item == null)
@@ -546,9 +549,17 @@ namespace RfidTool
 
             // UID --> PII 日志是否成功写入过了
             public bool UidPiiLogWrited { get; set; }
+
+            // 2025/9/23
+            // 标签所用的 UHF 标准。空/gb/gxlm 其中空表示未知
+            public string UhfProtocol { get; set; }
+
+            // 2025/9/23
+            public Exception Exception { get; set; }
+
         }
 
-        // 刷新一个 ListViewItem 的所有列显示
+        // 用 OneTag 刷新一个 ListViewItem 的相关列显示
         void RefreshItem(ListViewItem item, OneTag tag)
         {
             var iteminfo = item.Tag as ItemInfo;
@@ -618,7 +629,7 @@ namespace RfidTool
         //      -1  表示遇到了严重出错，要停止循环调用本函数
         //      0   表示全部完成，没有遇到出错的情况
         //      >0  表示处理过程中有事项出错。后继需要调主循环调用本函数
-        async Task<ProcessResult> ProcessTags(List<OneTag> tags,
+        async Task<ProcessResult> ProcessTagsAsync(List<OneTag> tags,
             CancellationToken token)
         {
             if (tags == null)
@@ -641,8 +652,10 @@ namespace RfidTool
                             ErrorCode = "cancel"
                         };
 
+                    /*
                     if (tag.Protocol != InventoryInfo.ISO15693)
                         continue;
+                    */
 
                     ListViewItem item = (ListViewItem)this.Invoke((Func<ListViewItem>)(() =>
                     {
@@ -681,7 +694,9 @@ namespace RfidTool
                             UID = tag.UID,
                             AntennaID = tag.AntennaID
                         };
-                        var get_result = GetTagInfo(tag.ReaderName, info, "");
+                        var get_result = GetTagInfo(tag.ReaderName,
+                            info,
+                            "tid"); // 如果需要写入 tid --> barcode 日志
                         if (get_result.Value == -1)
                         {
                             SetErrorInfo(item, get_result.ErrorInfo);
@@ -738,6 +753,13 @@ namespace RfidTool
                         {
                             // 间隔一定时间才鸣叫
                             ErrorSound();
+
+                            if (action_result.ErrorCode == "cancel")
+                                return new ProcessResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = action_result.ErrorInfo
+                                };
                         }
                     }
                     else
@@ -809,7 +831,37 @@ namespace RfidTool
 
                 if (taginfo.Protocol == InventoryInfo.ISO18000P6C)
                 {
-                    throw new NotImplementedException("暂不支持");
+                    // 注1: taginfo.EAS 在调用后可能被修改
+                    // 注2: 本函数不再抛出异常。会在 ErrorInfo 中报错
+                    var uhf_info = RfidTagList.GetUhfChipInfo(taginfo, "convertValueToGB"); // "dontCheckUMI"
+
+                    if (string.IsNullOrEmpty(uhf_info.ErrorInfo) == false)
+                    {
+                        /*
+                        var ex = new Exception(uhf_info.ErrorInfo);
+                        iteminfo.Exception = ex;
+                        ListViewUtil.ChangeItemText(item, COLUMN_PII, "error:" + ex.Message);
+                        SetItemColor(item, "error");
+                        return;
+                        */
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = uhf_info.ErrorInfo
+                        };
+                    }
+
+                    // TODO: 对于 .Bytes 缺失的畸形 UHF 标签，最好是尽量解析内容，然后给出警告信息解释问题所在
+                    // 单独严格解析一次标签内容
+
+                    chip = uhf_info.Chip;
+                    // taginfo.EAS 可能会被修改
+                    iteminfo.UhfProtocol = uhf_info.UhfProtocol;
+                    pii = uhf_info.PII;
+                    if (uhf_info.ContainOiElement)
+                        aoi = uhf_info.OI;
+                    else
+                        oi = uhf_info.OI;
                 }
                 else
                 {
@@ -835,7 +887,8 @@ namespace RfidTool
 
                 tou = chip?.FindElement(ElementOID.TypeOfUsage)?.Text;
 
-                if (string.IsNullOrEmpty(oi))
+                if (string.IsNullOrEmpty(oi)
+                    && taginfo.Protocol == InventoryInfo.ISO15693)
                 {
                     oi = chip?.FindElement(ElementOID.OI)?.Text;
                     aoi = chip?.FindElement(ElementOID.AOI)?.Text;
@@ -922,6 +975,7 @@ namespace RfidTool
                 }
                 */
 
+                // 写入 UID --> PII 对照日志
                 if (/*_action.WriteUidPiiLog &&*/ iteminfo.UidPiiLogWrited == false)
                 {
                     if (string.IsNullOrEmpty(pii) == false)
@@ -929,18 +983,73 @@ namespace RfidTool
                         string new_oi = chip?.FindElement(ElementOID.OI)?.Text;
                         string new_aoi = chip?.FindElement(ElementOID.AOI)?.Text;
 
-                        DataModel.WriteToUidLogFile(iteminfo.Tag.UID, 
+                        string uid = iteminfo.Tag.UID;
+                        if (taginfo.Protocol == InventoryInfo.ISO18000P6C)
+                        {
+                            var bytes = taginfo.Tag as byte[];
+                            uid = ByteArray.GetHexTimeStampString(bytes);
+                        }
+
+                        DataModel.WriteToUidLogFile(uid,
                             MakeOiPii(pii, new_oi, new_aoi));
-                        
+
                         iteminfo.UidPiiLogWrited = true;
                     }
+                }
+
+                // 判断内容格式是否需要切换
+                if (changed == false && taginfo.Protocol == InventoryInfo.ISO18000P6C)
+                {
+                    if (iteminfo.UhfProtocol == "gb"
+                        && _action.SwitchMethod == "UHF国标-->高校联盟")
+                        changed = true;
+                    else if (iteminfo.UhfProtocol == "gxlm"
+    && _action.SwitchMethod == "高校联盟-->UHF国标")
+                        changed = true;
+                }
+
+                // 为判断 UHF 标签内容是否有写入 User Bank 的，需要先创建好标签内容
+                var tag = iteminfo.Tag;
+                TagInfo new_tag_info = null;
+                try
+                {
+                    new_tag_info = GetTagInfo(taginfo, chip, new_eas);
+                }
+                catch(Exception ex)
+                {
+                    ClientInfo.WriteErrorLog($"DoAction() GetTagInfo() exception: {ExceptionUtil.GetDebugText(ex)}");
+                    string error = "exception1:" + ex.Message;
+                    SetErrorInfo(item, error);
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = error,
+                        ErrorCode = "cancel",
+                    };
+                }
+
+                // 判断 User Bank 的存在与否是否发生了变化
+                if (changed == false && taginfo.Protocol == InventoryInfo.ISO18000P6C)
+                {
+                    // 进行一些检查
+
+                    if (DataModel.WriteUhfUserBank
+                        && new_tag_info.Bytes != taginfo.Bytes)
+                        changed = true;
+                    else if (DataModel.WriteUhfUserBank == false
+    && taginfo.Bytes != null
+    && new_tag_info.Bytes == null)
+                        changed = true;
                 }
 
                 // 写回标签
                 if (changed)
                 {
+                    /*
                     var tag = iteminfo.Tag;
                     var new_tag_info = GetTagInfo(taginfo, chip, new_eas);
+                    */
+
                     // 写入标签
                     var write_result = WriteTagInfo(tag.ReaderName,
                         taginfo,
@@ -958,6 +1067,8 @@ namespace RfidTool
 
                     iteminfo.TagInfo = new_tag_info;
                     iteminfo.State = "succeed";
+
+
                     this.Invoke((Action)(() =>
                     {
                         RefreshItem(item);
@@ -1052,6 +1163,7 @@ namespace RfidTool
             return null;    // 无法识别的 tou
         }
 
+#if OLD
         public static TagInfo GetTagInfo(TagInfo existing,
 LogicChip chip,
 bool eas)
@@ -1073,6 +1185,280 @@ bool eas)
             }
 
             throw new ArgumentException($"目前暂不支持 {existing.Protocol} 协议标签的写入操作");
+        }
+#endif
+
+        string _typeOfUsage = "10"; // 10 图书; 80 读者证; 30 层架标
+
+        // 准备即将写入的内容
+        public TagInfo GetTagInfo(TagInfo existing,
+LogicChip chip,
+bool eas)
+        {
+            bool _dontWarningInvalidGaoxiaoOI = true;
+
+            if (existing.Protocol == InventoryInfo.ISO15693)
+            {
+                ScanDialog.SetTypeOfUsage(chip, this._typeOfUsage);
+
+                TagInfo new_tag_info = existing.Clone();
+                new_tag_info.Bytes = chip.GetBytes(
+                    (int)(new_tag_info.MaxBlockCount * new_tag_info.BlockSize),
+                    (int)new_tag_info.BlockSize,
+                    LogicChip.GetBytesStyle.None,
+                    out string block_map);
+                new_tag_info.LockStatus = block_map;
+
+                // 上架状态
+                new_tag_info.SetEas(eas);
+
+                return new_tag_info;
+            }
+
+            if (existing.Protocol == InventoryInfo.ISO18000P6C)
+            {
+                var build_user_bank = DataModel.WriteUhfUserBank;
+
+                // 读者卡和层架标必须有 User Bank，不然 TU 字段没有地方放
+                if (build_user_bank == false
+    && this._typeOfUsage != "10")
+                    throw new Exception($"{ScanDialog.GetCaption(this._typeOfUsage)}必须写入 User Bank");
+
+                // TODO: 判断标签内容是空白/国标/高校联盟格式，采取不同的写入格式
+                /*
+高校联盟格式
+国标格式
+* */
+                var isExistingGB = UhfUtility.IsISO285604Format(Element.FromHexString(existing.UID), existing.Bytes);
+
+                bool dontSwitch = string.IsNullOrEmpty(_action.SwitchMethod) || _action.SwitchMethod == "[不切换]";
+
+                TagInfo new_tag_info = existing.Clone();
+                /*
+高校联盟-->UHF国标
+UHF国标-->高校联盟
+[不切换]
+                * */
+                if (_action.SwitchMethod == "UHF国标-->高校联盟"
+                    || (dontSwitch && isExistingGB == false))
+                {
+                    // 写入高校联盟数据格式
+                    if (isExistingGB)
+                    {
+                        string warning = $"警告：即将用高校联盟格式覆盖原有国标格式";
+                        DialogResult dialog_result =
+                            this.TryGet(() =>
+                            {
+                                return MessageBox.Show(this,
+    $"{warning}\r\n\r\n确实要覆盖？",
+    $"ModifyDialog",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+                            });
+                        if (dialog_result == DialogResult.No)
+                            throw new Exception("放弃写入");
+                    }
+
+                    // chip.SetElement(ElementOID.TypeOfUsage, tou);
+                    ScanDialog.SetTypeOfUsage(chip, this._typeOfUsage);
+
+                    /*
+                    // 2023/10/24
+                    // chip 中的 AOI 改到 OI 中。这是由“设置”对话框的局限造成的麻烦。(设置对话框中不允许非规范的机构代码填入 OI 文字框，只能填入 AOI 文字框)
+                    {
+                        var element_aoi = chip.FindElement(ElementOID.AOI);
+                        if (element_aoi != null && string.IsNullOrEmpty(element_aoi.Text) == false)
+                        {
+                            chip.SetElement(ElementOID.OI, element_aoi.Text, false);
+                            chip.RemoveElement(ElementOID.AOI);
+                        }
+                    }
+                    */
+
+                    // 2025/9/21
+                    // 检查机构代码是否符合高校联盟 OI 的格式
+                    var oi = chip.FindElement(ElementOID.OI)?.Text;
+                    if (string.IsNullOrEmpty(oi) == false
+                        && GaoxiaoUtility.VerifyOI(oi) == false
+                        && _dontWarningInvalidGaoxiaoOI == false)
+                    {
+                        var dialog_result =
+                            this.TryGet(() =>
+                            {
+                                return MessageDlg.Show(this,
+                                $"警告: 机构代码 '{oi}' 不符合高校联盟格式的规定。\r\n\r\n若坚持写入，将被写入到 User Bank 中的 27(备用)元素。\r\n\r\n请问是否坚持写入？",
+                                "写入高校联盟格式",
+                                MessageBoxButtons.YesNo,
+                                MessageBoxDefaultButton.Button2,
+                                ref _dontWarningInvalidGaoxiaoOI,
+                                new string[] { "继续", "放弃" },
+                                "以后不再警告");
+                            });
+                        if (dialog_result != DialogResult.Yes)
+                            throw new Exception("放弃写入标签");
+                    }
+
+                    // 警告丢失 TypeOfUsage 和 OI(AOI)
+                    VerifyElementsCondition(chip,
+                        build_user_bank);
+
+                    // 2025/9/21
+                    var epc_info = new GaoxiaoEpcInfo
+                    {
+                        Version = 4,
+                        Lending = false,
+                        Picking = 0,
+                        Reserve = 0,
+                    };
+                    // 可能抛出 ArgumentException
+                    var result = GaoxiaoUtility.BuildTag(chip,
+                        build_user_bank,
+                        eas,
+                        epc_info);
+                    if (result.Value == -1)
+                        throw new Exception(result.ErrorInfo);
+                    new_tag_info.Bytes = build_user_bank ? result.UserBank : null;
+                    new_tag_info.UID = UhfUtility.EpcBankHex(result.EpcBank);  // existing.UID.Substring(0, 4) + Element.GetHexString(result.EpcBank);
+                }
+                else if (_action.SwitchMethod == "高校联盟-->UHF国标"
+                    || (dontSwitch && isExistingGB == true))
+                {
+                    // 写入国标数据格式
+                    if (isExistingGB == false)
+                    {
+                        string warning = $"警告：即将用国标格式覆盖原有高校联盟格式";
+                        DialogResult dialog_result =
+                            this.TryGet(() =>
+                            {
+                                return MessageBox.Show(this,
+    $"{warning}\r\n\r\n确实要覆盖？",
+    $"ScanDialog",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+                            });
+                        if (dialog_result == DialogResult.No)
+                            throw new Exception("放弃写入");
+                    }
+                    ScanDialog.SetTypeOfUsage(chip, this._typeOfUsage);
+
+                    var result = UhfUtility.BuildTag(chip,
+                        build_user_bank,
+                        true,
+                        eas ? "afi_eas_on" : "");
+                    if (result.Value == -1)
+                        throw new Exception(result.ErrorInfo);
+                    new_tag_info.Bytes = build_user_bank ? result.UserBank : null;
+                    new_tag_info.UID = UhfUtility.EpcBankHex(result.EpcBank);  // existing.UID.Substring(0, 4) + Element.GetHexString(result.EpcBank);
+                }
+                else
+                {
+                    throw new ArgumentException($"出现了超出预料的组合 dontSwitch={dontSwitch} _action.SwitchMethod={_action.SwitchMethod} isExistingGB={isExistingGB}");
+                }
+
+                return new_tag_info;
+            }
+
+            throw new ArgumentException($"目前暂不支持 {existing.Protocol} 协议标签的写入操作");
+        }
+
+        bool _dontWarningLostTU = false;
+        bool _dontWarningLostOI = false;
+
+        // 检查当不写入 UserBank 时可能和 chip 中哪些元素相矛盾。警告并尝试删除矛盾的元素
+        bool VerifyElementsCondition(LogicChip chip,
+            bool build_user_bank)
+        {
+            bool changed = false;
+            if (build_user_bank == false)
+            {
+                var tou = chip.FindElement(ElementOID.TypeOfUsage)?.Text;
+                if (IsNormalBookTou(tou) == false)
+                {
+                    // 如果具有非 '1?' 的 TypeOfUsage，这表明不应缺乏 User Bank。
+                    // 因为如果缺了 User Bank，则会被默认为图书类型，这样就令读出标签的人产生误会了
+                    // throw new ArgumentException($"又要写入 TypeOfUsage 元素(内容为 '{tou}')，又不让写入 User Bank，这种组合不被支持。因为这样会被读出时误当作图书类型标签");
+
+                    DialogResult dialog_result = DialogResult.Yes;
+                    if (_dontWarningLostTU == false)
+                    {
+                        dialog_result = this.TryGet(() =>
+                        {
+                            return MessageDlg.Show(this,
+                            $"您选择了不写入 User Bank 内容，这样会丢失标签中原有的 TypeOfUsage 元素。\r\n\r\n请问是否继续写入？",
+                            "丢失元素警告",
+                            MessageBoxButtons.YesNo,
+                            MessageBoxDefaultButton.Button2,
+                            ref _dontWarningLostTU,
+                            new string[] { "继续", "放弃" },
+                            "以后不再警告");
+                        });
+                    }
+                    if (dialog_result != DialogResult.Yes)
+                        throw new Exception("放弃写入标签");
+
+                    // 删除 chip 中 TypeOfUsage 元素
+                    if (chip.RemoveElement(ElementOID.TypeOfUsage) != null)
+                        changed = true;
+                }
+
+                var element_aoi = chip.FindElement(ElementOID.AOI);
+                var element_oi = chip.FindElement(ElementOID.OI);
+
+                string oi = element_oi?.Text;
+                if (string.IsNullOrEmpty(oi))
+                    oi = element_aoi?.Text;
+
+                // 如果不让写入 user_bank，但又想要写入机构代码，那就只能包含在 PII 之内了
+                if (build_user_bank == false && string.IsNullOrEmpty(oi) == false)
+                {
+                    // throw new ArgumentException("又要写入 OI 字段，又不让写入 User Bank，这种组合不被支持。因为高校联盟格式的 EPC 册号码中不允许出现字符 '.'，所以机构代码无法以 UII 部件方式进入 EPC Bank");
+
+                    DialogResult dialog_result = DialogResult.Yes;
+                    if (_dontWarningLostOI == false)
+                    {
+                        dialog_result = this.TryGet(() =>
+                        {
+                            return MessageDlg.Show(this,
+                            $"您选择了不写入 User Bank 内容，这样会丢失标签中原有的机构代码 '{oi}'。\r\n\r\n请问是否继续写入？",
+                            "丢失机构代码警告",
+                            MessageBoxButtons.YesNo,
+                            MessageBoxDefaultButton.Button2,
+                            ref _dontWarningLostOI,
+                            new string[] { "继续", "放弃" },
+                            "以后不再警告");
+                        });
+                    }
+                    if (dialog_result != DialogResult.Yes)
+                        throw new Exception("放弃写入标签");
+
+                    // TODO: 删除 chip 中 OI 或 AOI 元素
+                    if (chip.RemoveElement(ElementOID.OI) != null)
+                        changed = true;
+                    if (chip.RemoveElement(ElementOID.AOI) != null)
+                        changed = true;
+                }
+
+            }
+            return changed;
+
+            // 是否普通图书类型?
+            bool IsNormalBookTou(string value)
+            {
+                /*
+                if (string.IsNullOrEmpty(value)
+    || value.StartsWith("1")
+    || value.StartsWith("2")
+    || value.StartsWith("7"))
+                    return true;
+                */
+                // 注: 20 和 70 是特殊的图书，不被当作普通图书
+                if (string.IsNullOrEmpty(value)
+|| value.StartsWith("1"))
+                    return true;
+                return false;
+            }
         }
 
 
@@ -1115,7 +1501,36 @@ bool eas)
 
                     if (taginfo.Protocol == InventoryInfo.ISO18000P6C)
                     {
-                        throw new NotImplementedException("暂不支持");
+                        // throw new NotImplementedException("暂不支持");
+
+                        // 注1: taginfo.EAS 在调用后可能被修改
+                        // 注2: 本函数不再抛出异常。会在 ErrorInfo 中报错
+                        var uhf_info = RfidTagList.GetUhfChipInfo(taginfo, "convertValueToGB"); // "dontCheckUMI"
+
+                        if (string.IsNullOrEmpty(uhf_info.ErrorInfo) == false)
+                        {
+                            var ex = new Exception(uhf_info.ErrorInfo);
+                            iteminfo.Exception = ex;
+                            ListViewUtil.ChangeItemText(item, COLUMN_PII, "error:" + ex.Message);
+                            SetItemColor(item, "error");
+                            return;
+                        }
+
+                        // TODO: 对于 .Bytes 缺失的畸形 UHF 标签，最好是尽量解析内容，然后给出警告信息解释问题所在
+                        // 单独严格解析一次标签内容
+
+                        chip = uhf_info.Chip;
+                        // taginfo.EAS 可能会被修改
+                        iteminfo.UhfProtocol = uhf_info.UhfProtocol;
+                        pii = uhf_info.PII;
+                        if (uhf_info.ContainOiElement)
+                            aoi = uhf_info.OI;
+                        else
+                            oi = uhf_info.OI;
+
+                        tou = chip?.FindElement(ElementOID.TypeOfUsage)?.Text;
+                        eas = taginfo.EAS ? "On" : "Off";
+                        afi = Element.GetHexString(taginfo.AFI);
                     }
                     else
                     {
@@ -1139,7 +1554,8 @@ bool eas)
                     eas = taginfo.EAS ? "On" : "Off";
                     afi = Element.GetHexString(taginfo.AFI);
 
-                    if (string.IsNullOrEmpty(oi))
+                    if (string.IsNullOrEmpty(oi)
+                        && taginfo.Protocol == InventoryInfo.ISO15693)
                     {
                         oi = chip?.FindElement(ElementOID.OI)?.Text;
                         aoi = chip?.FindElement(ElementOID.AOI)?.Text;
@@ -1154,6 +1570,17 @@ bool eas)
                 ListViewUtil.ChangeItemText(item, COLUMN_OI, oi);
                 ListViewUtil.ChangeItemText(item, COLUMN_AOI, aoi);
 
+                // 刷新协议栏
+                if (taginfo.Protocol == InventoryInfo.ISO18000P6C)
+                {
+                    string name = iteminfo.UhfProtocol;
+                    if (iteminfo.UhfProtocol == "gxlm")
+                        name = "高校联盟";
+                    else if (iteminfo.UhfProtocol == "gb")
+                        name = "国标";
+                    ListViewUtil.ChangeItemText(item, COLUMN_PROTOCOL,
+                        string.IsNullOrEmpty(name) ? taginfo.Protocol : taginfo.Protocol + ":" + name);
+                }
 
                 // 过滤 TU
                 if (FilterTU(_action.FilterTU, tou))
@@ -1426,6 +1853,14 @@ bool eas)
                 _validator = null;
             }
         }
+
+        // 切换内容格式 的 方法
+        /*
+高校联盟-->UHF国标
+UHF国标-->高校联盟
+[不切换]
+        * */
+        public string SwitchMethod { get; set; }
 
         BarcodeValidator _validator = null;
 
