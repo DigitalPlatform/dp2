@@ -355,6 +355,19 @@ namespace RfidTool
             }
         }
 
+        // 2025/9/30
+        public static string GaoxiaoParameters
+        {
+            get
+            {
+                return ClientInfo.Config.Get("general", "gaoxiao_parameters", null);
+            }
+            set
+            {
+                ClientInfo.Config.Set("general", "gaoxiao_parameters", value);
+            }
+        }
+
         // 当写入标签的时候是否校验条码号
         public static bool VerifyPiiWhenWriteTag
         {
@@ -394,7 +407,37 @@ namespace RfidTool
                 ClientInfo.Config.SetBoolean("writeTag", "errorContentAsBlank", value);
             }
         }
-        
+
+        public static GaoxiaoEpcInfo BuildGaoxiaoEpcInfo(bool lending = false)
+        {
+            var parameters = DataModel.GaoxiaoParameters;
+
+            byte[] bytes = null;
+            {
+                var cphex = StringUtil.GetParameterByPrefix(parameters, "cphex");
+                if (string.IsNullOrEmpty(cphex) == false)
+                    bytes = ByteArray.GetTimeStampByteArray(cphex);
+            }
+
+            var version = StringUtil.GetParameterByPrefix(parameters, "version");
+            int version_value = string.IsNullOrEmpty(version) ? 4 : int.Parse(version);
+
+            var picking = StringUtil.GetParameterByPrefix(parameters, "picking");
+            int picking_value = string.IsNullOrEmpty(picking) ? 0 : int.Parse(picking);
+
+            var reserve = StringUtil.GetParameterByPrefix(parameters, "reserve");
+            int reserve_value = string.IsNullOrEmpty(reserve) ? 0 : int.Parse(reserve);
+
+            return new GaoxiaoEpcInfo
+            {
+                Version = version_value,
+                Lending = lending,
+                Picking = picking_value,
+                Reserve = reserve_value,
+                OverwriteContentParameterBytes = bytes,
+            };
+        }
+
 
         // 写入标签
         public static NormalResult WriteTagInfo(string one_reader_name,
@@ -406,7 +449,7 @@ namespace RfidTool
             {
                 var result = _driver.WriteTagInfo(one_reader_name, old_tag_info, new_tag_info);
 
-                // UHF 保存后 EPC 会发生变化，为了避免引起不必要的 GetTagInfo 动作，ClearTagTable() 时第二参数应该为 false
+                // UHF 保存后 EPC 会发生变化，为了避免引起不必要的 PrepareTagInfo 动作，ClearTagTable() 时第二参数应该为 false
                 bool clearTagInfo = (old_tag_info.Protocol == InventoryInfo.ISO15693 ? true : false);
                 // 清除缓存
                 TagList.ClearTagTable(old_tag_info.UID, clearTagInfo);
@@ -728,7 +771,7 @@ namespace RfidTool
                     _uidWriter = null;
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 ClientInfo.WriteErrorLog($"关闭 UID 对照文件时出现异常: {ExceptionUtil.GetDebugText(ex)}");
             }

@@ -965,7 +965,7 @@ namespace RfidTool
                 if (this.IsBook())
                     eas = true;
 
-                TagInfo new_tag_info = GetTagInfo(tag.TagInfo, chip, eas);
+                TagInfo new_tag_info = PrepareTagInfo(tag.TagInfo, chip, eas);
 
                 NormalResult write_result = null;
                 for (int i = 0; i < 2; i++)
@@ -1005,7 +1005,8 @@ namespace RfidTool
                         var bytes = tag.TagInfo.Tag as byte[];
                         if (bytes == null)
                             throw new Exception("(uhf) tag.TagInfo.Tag 为 null，无法获得 TID");
-                        uid = ByteArray.GetHexTimeStampString(bytes)?.ToUpper();
+                        // uid = ByteArray.GetHexTimeStampString(bytes)?.ToUpper();
+                        uid = ModifyDialog.GetTidHex(bytes);
                     }
                     DataModel.WriteToUidLogFile(uid,
                         ModifyDialog.MakeOiPii(barcode, oi, aoi));
@@ -1207,7 +1208,7 @@ namespace RfidTool
         // 不警告不合法的高校联盟 OI 值
         bool _dontWarningInvalidGaoxiaoOI = false;
 
-        public TagInfo GetTagInfo(TagInfo existing,
+        public TagInfo PrepareTagInfo(TagInfo existing,
     LogicChip chip,
     bool eas)
         {
@@ -1320,14 +1321,17 @@ MessageBoxDefaultButton.Button2);
                     }
 
                     // 2025/9/21
+                    /*
                     var epc_info = new GaoxiaoEpcInfo
                     {
                         Version = 4,
                         Lending = false,
                         Picking = 0,
                         Reserve = 0,
-                        // ContentParameters = new int[] { 3, 4, 11, 14 },   // 强行规定 Content Parameters 值
+                        ContentParameters = new int[] { 3, 4, 11, 14 },   // 强行规定 Content Parameters 值
                     };
+                    */
+                    var epc_info = DataModel.BuildGaoxiaoEpcInfo();
                     var result = GaoxiaoUtility.BuildTag(chip,
                         build_user_bank,
                         eas,
@@ -1868,7 +1872,7 @@ MessageBoxDefaultButton.Button2);
 
                 UpdateItemInfo(item_info, new_tag_info);
 
-                // await Task.Run(() => { GetTagInfo(item); });
+                // await Task.Run(() => { PrepareTagInfo(item); });
                 return;
             }
             catch (Exception ex)
@@ -2120,7 +2124,7 @@ new_tag_info);
                     // RefreshItem(item);
                 });
                 */
-                // await Task.Run(() => { GetTagInfo(item); });
+                // await Task.Run(() => { PrepareTagInfo(item); });
                 return;
             }
             catch (Exception ex)
@@ -2218,7 +2222,7 @@ new_tag_info);
 
                 UpdateItemInfo(item_info, new_tag_info);
 
-                // await Task.Run(() => { GetTagInfo(item); });
+                // await Task.Run(() => { PrepareTagInfo(item); });
                 return;
             }
             catch (Exception ex)

@@ -1,4 +1,4 @@
-﻿#define SIMU_ERROR  // 模拟第一次写入 UHF 标签发生错误，然后自动重试写入
+﻿// #define SIMU_ERROR  // 模拟第一次写入 UHF 标签发生错误，然后自动重试写入
 
 using System;
 using System.Collections.Generic;
@@ -633,6 +633,23 @@ namespace RfidTool
             }
         }
 
+        /*
+2025-09-30 12:03:37.217 +08:00 [ERR] 修改循环出现异常: Type: System.ArgumentNullException
+Message: 值不能为 null。
+参数名: first
+Stack:
+   在 System.Windows.Forms.Control.MarshaledInvoke(Control caller, Delegate method, Object[] args, Boolean synchronous)
+   在 System.Windows.Forms.Control.Invoke(Delegate method, Object[] args)
+   在 RfidTool.ModifyDialog.<ProcessTagsAsync>d__52.MoveNext()
+--- 引发异常的上一位置中堆栈跟踪的末尾 ---
+   在 System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   在 System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   在 System.Runtime.CompilerServices.TaskAwaiter`1.GetResult()
+   在 RfidTool.ModifyDialog.<>c__DisplayClass21_0.<<BeginModify>b__0>d.MoveNext()
+--- 引发异常的上一位置中堆栈跟踪的末尾 ---
+   在 System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   在 RfidTool.ModifyDialog.<>c__DisplayClass21_0.<<BeginModify>b__0>d.MoveNext()         * 
+         * */
         // 处理每一个标签的修改动作
         // result.Value:
         //      -1  表示遇到了严重出错，要停止循环调用本函数
@@ -1039,11 +1056,11 @@ namespace RfidTool
                 TagInfo new_tag_info = null;
                 try
                 {
-                    new_tag_info = GetTagInfo(taginfo, chip, new_eas);
+                    new_tag_info = PrepareTagInfo(taginfo, chip, new_eas);
                 }
                 catch (Exception ex)
                 {
-                    ClientInfo.WriteErrorLog($"DoAction() GetTagInfo() exception: {ExceptionUtil.GetDebugText(ex)}");
+                    ClientInfo.WriteErrorLog($"DoAction() PrepareTagInfo() exception: {ExceptionUtil.GetDebugText(ex)}");
                     string error = "exception1:" + ex.Message;
                     SetErrorInfo(item, error);
                     return new NormalResult
@@ -1073,7 +1090,7 @@ namespace RfidTool
                 {
                     /*
                     var tag = iteminfo.Tag;
-                    var new_tag_info = GetTagInfo(taginfo, chip, new_eas);
+                    var new_tag_info = PrepareTagInfo(taginfo, chip, new_eas);
                     */
 
 #if SIMU_ERROR
@@ -1088,7 +1105,11 @@ namespace RfidTool
                     var write_result = WriteTagInfo(tag.ReaderName,
                         taginfo,
                         new_tag_info);
-                    if (write_result.Value == -1 || _simuErrorCount == 0)
+                    if (write_result.Value == -1
+#if SIMU_ERROR
+                        || _simuErrorCount == 0
+#endif
+                        )
                     {
 #if SIMU_ERROR
                         if (_simuErrorCount == 0
@@ -1294,7 +1315,7 @@ bool eas)
         string _typeOfUsage = "10"; // 10 图书; 80 读者证; 30 层架标
 
         // 准备即将写入的内容
-        public TagInfo GetTagInfo(TagInfo existing,
+        public TagInfo PrepareTagInfo(TagInfo existing,
 LogicChip chip,
 bool eas)
         {
@@ -1414,6 +1435,7 @@ UHF国标-->高校联盟
                             build_user_bank);
 
                     // 2025/9/21
+                    /*
                     var epc_info = new GaoxiaoEpcInfo
                     {
                         Version = 4,
@@ -1421,6 +1443,9 @@ UHF国标-->高校联盟
                         Picking = 0,
                         Reserve = 0,
                     };
+                    */
+                    var epc_info = DataModel.BuildGaoxiaoEpcInfo();
+
                     // 可能抛出 ArgumentException
                     var result = GaoxiaoUtility.BuildTag(chip != null ? chip : new LogicChip(),
                         build_user_bank,
@@ -1967,10 +1992,10 @@ UHF国标-->高校联盟
             var hex = GetTidHex(tid);
             _writeErrorTable.Remove(hex);
 
-            this.TryInvoke(() =>
-            {
+            //this.TryInvoke(() =>
+            //{
                 Program.MainForm.RemoveWriteErrorItem(hex);
-            });
+            //});
         }
 
         public static string GetTidHex(byte[] tid)

@@ -80,7 +80,16 @@ namespace DigitalPlatform.RFID
             result.Add(second);
 
             // *** EPC 的第 3-4 字节
-            var two_bytes = EncodeContentParameter(info.ContentParameters);
+            byte[] two_bytes = new byte[] { 0, 0 };
+            // 特殊指定的 Content Parameter bytes 优先
+            if (info.OverwriteContentParameterBytes != null)
+            {
+                if (info.OverwriteContentParameterBytes.Length != 2)
+                    throw new ArgumentException($"GaoxiaoEpcInfo.OverwriteContentParameterBytes 中内容长度应该为 2。但现在是 {info.OverwriteContentParameterBytes.Length}");
+                two_bytes = info.OverwriteContentParameterBytes;
+            }
+            else
+                two_bytes = EncodeContentParameter(info.ContentParameters);
             if (two_bytes.Length != 2)
                 throw new Exception($"EncodeContentParameter() 编码的结果应该是 2 字节(但现在是 {two_bytes.Length} 字节)");
             result.AddRange(two_bytes);
@@ -778,13 +787,13 @@ namespace DigitalPlatform.RFID
 
         public static string GetUserElementName(int oid)
         {
-            switch(oid)
+            switch (oid)
             {
                 case 3:
                     return "所属馆标识 OwnerLibrary";
                 case 4:
                     return "卷册信息 SetInformation";
-                    case 5:
+                case 5:
                     return "馆藏类别与状态 TypeOfUsage";
                 case 6:
                     return "馆藏位置 ItemLocation";
@@ -794,13 +803,13 @@ namespace DigitalPlatform.RFID
                     return "馆际互借事务号 ILL-BorrowingTransactionNumber";
                 case 14:
                     return "备选的馆藏标识符(条码号) AlternativeItemIdentifier";
-                case 15: 
+                case 15:
                     return "临时馆藏位置 TemporaryItemLocation";
-                case 16: 
+                case 16:
                     return "主题 Subject";
-                case 24: 
+                case 24:
                     return "分馆标识 SubsidiaryOfAnOwnerLibrary";
-                case 26: 
+                case 26:
                     return "ISBN/ISSN";
                 case 27:
                     return "备选项(数字平台计划用作 AOI)";
@@ -1220,7 +1229,7 @@ namespace DigitalPlatform.RFID
             epc_info.Lending = !eas;
             // Version(5) Picking(1) Reserve(1)
             // epc_info.Version = 1;   // ?
-            
+
             if (epc_info.ContentParameters == null)
             {
                 if (build_user_bank)
@@ -2129,6 +2138,11 @@ A~F 未来使用
 
         // 内容索引。OID 的数组
         public int[] ContentParameters { get; set; }
+
+        // 2025/9/30
+        // 表示构建 EPC 时，使用特殊的 ContentParameters 覆盖字节。如果为 null，表示不覆盖，使用 ContentParamters(int [])
+        // 注: 解析 EPC 时用不到这个字段
+        public byte[] OverwriteContentParameterBytes { get; set; }
 
         // *** EPC 载荷的第 5-12/16/18 字节
 

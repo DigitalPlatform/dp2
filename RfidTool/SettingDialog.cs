@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
+using DigitalPlatform;
 using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.Text;
 
@@ -41,6 +41,8 @@ namespace RfidTool
             this.numericUpDown_seconds.Value = DataModel.BeforeScanSeconds;
 
             this.textBox_verifyRule.Text = DataModel.PiiVerifyRule;
+
+            this.textBox_gaoxiaoParameters.Text = DataModel.GaoxiaoParameters;
 
             if (StringUtil.IsInList("activateVerifyRule", this.OpenStyle) == true)
             {
@@ -148,6 +150,21 @@ namespace RfidTool
                 }
             }
 
+            // 2025/9/30
+            // 检查 content parameter bytes
+            {
+                var text = this.textBox_gaoxiaoParameters.Text;
+                if (string.IsNullOrEmpty(text) == false)
+                {
+                    var errors = VerifyGaoxiaoParameters(text);
+                    if (errors.Count > 0)
+                    {
+                        strError = $"高校联盟固定值 '{text}' 格式不合法: \r\n{StringUtil.MakePathList(errors, "\r\n")}";
+                        goto ERROR1;
+                    }
+                }
+            }
+
             DataModel.DefaultOiString = this.textBox_rfid_oi.Text;
             DataModel.DefaultAoiString = this.textBox_rfid_aoi.Text;
 
@@ -165,11 +182,122 @@ namespace RfidTool
 
             DataModel.PiiVerifyRule = this.textBox_verifyRule.Text;
 
+            DataModel.GaoxiaoParameters = this.textBox_gaoxiaoParameters.Text;
+
             this.DialogResult = DialogResult.OK;
             this.Close();
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        /*
+                    var epc_info = new GaoxiaoEpcInfo
+                    {
+                        Version = 4,
+                        Lending = false,
+                        Picking = 0,
+                        Reserve = 0,
+                        OverwriteContentParameterBytes = ByteArray.GetTimeStampByteArray(DataModel.GaoxiaoParameters),
+                    };
+                    // 预留位
+            first |= (byte)((info.Reserve & 0x03) << 4);
+
+            // 分拣信息
+            first |= (byte)(info.Picking & 0xf);
+        * */
+        // cphex:0053,version:4,picking:0,reserve:0
+        static List<string> VerifyGaoxiaoParameters(string value)
+        {
+            var errors = new List<string>();
+
+            if (string.IsNullOrEmpty(value) == false)
+            {
+                if (value.Contains(":") == false)
+                    errors.Add($"高校联盟固定值参数 '{value}' 不合法。合法格式样例 cphex:0053,version:4,picking:0,reserve:0");
+                if (value.Contains("=") == true)
+                    errors.Add($"高校联盟固定值参数 '{value}' 不合法。不应包含字符 '='。合法格式样例 cphex:0053,version:4,picking:0,reserve:0");
+                if (value.Contains(";") == true)
+                    errors.Add($"高校联盟固定值参数 '{value}' 不合法。不应包含字符 ';'。合法格式样例 cphex:0053,version:4,picking:0,reserve:0");
+            }
+
+
+            {
+                var cp = StringUtil.GetParameterByPrefix(value, "cphex");
+                if (string.IsNullOrEmpty(cp) == false)
+                {
+                    if (cp.Length != 4)
+                    {
+                        errors.Add($"cphex 参数值 '{cp}' 格式不合法: 应为 4 个十六进制字符(当前长度 {cp.Length} 个)");
+                    }
+                    else
+                    {
+                        byte[] bytes = null;
+                        try
+                        {
+                            bytes = ByteArray.GetTimeStampByteArray(cp);
+                        }
+                        catch (Exception ex)
+                        {
+                            errors.Add($"cphex 参数值 '{cp}' 格式不合法: {ex.Message}");
+                        }
+                        if (bytes.Length != 2)
+                        {
+                            errors.Add($"cphex 参数值 '{cp}' 格式不合法: 最多只能包含 2 个字节(当前有 {bytes.Length} 个)");
+                        }
+                    }
+                }
+            }
+
+            {
+                var version = StringUtil.GetParameterByPrefix(value, "version");
+                if (string.IsNullOrEmpty(version) == false)
+                {
+                    if (byte.TryParse(version, out byte version_value) == false)
+                    {
+                        errors.Add($"version 参数值 '{version}' 格式不合法: 应为 1-64 之间的整数");
+                    }
+
+                    else if (version_value <= 0 || version_value > 65)
+                    {
+                        errors.Add($"version 参数值 '{version}' 格式不合法: 应为 1-64 之间的整数");
+                    }
+                }
+            }
+
+            {
+                var picking = StringUtil.GetParameterByPrefix(value, "picking");
+                if (string.IsNullOrEmpty(picking) == false)
+                {
+                    if (byte.TryParse(picking, out byte picking_value) == false)
+                    {
+                        errors.Add($"picking 参数值 '{picking}' 格式不合法: 应为 0-15 之间的整数");
+                    }
+
+                    else if (picking_value < 0 || picking_value > 15)
+                    {
+                        errors.Add($"picking 参数值 '{picking}' 格式不合法: 应为 0-15 之间的整数");
+                    }
+                }
+            }
+
+            {
+                var reserve = StringUtil.GetParameterByPrefix(value, "reserve");
+                if (string.IsNullOrEmpty(reserve) == false)
+                {
+                    if (byte.TryParse(reserve, out byte reserve_value) == false)
+                    {
+                        errors.Add($"reserve 参数值 '{reserve}' 格式不合法: 应为 0-3 之间的整数");
+                    }
+
+                    else if (reserve_value < 0 || reserve_value > 3)
+                    {
+                        errors.Add($"reserve 参数值 '{reserve}' 格式不合法: 应为 0-3 之间的整数");
+                    }
+                }
+            }
+
+            return errors;
         }
 
         private void button_Cancel_Click(object sender, EventArgs e)
@@ -230,7 +358,7 @@ OI的校验，总长度不超过16位。
 
         static bool IsLetterOrDigit(string text)
         {
-            foreach(char ch in text)
+            foreach (char ch in text)
             {
                 if (char.IsLetter(ch) && char.IsUpper(ch) == false)
                     return false;

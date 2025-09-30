@@ -12,3 +12,37 @@
 过程中检查写入的元素是否正确。
 2) 高校联盟格式写入超过 5 字符的非标 AOI。然后尝试批处理修改为 5 字符的 OI。
 过程中检查写入的元素是否正确。
+
+
+~~~
+
+13032907CD22D385114FC04FC0D1
+这个 EPC 内容可以解释为高校联盟，也可以解释为 UHF 国标。
+
+=== PC ===
+Hex(十六进制内容):	2907
+LengthIndicator=5, UMI=False, XPC=False, ISO=True, AFI=07
+=== 尝试按照高校联盟格式解析 ===
+=== EPC Bank ===
+Hex(十六进制内容):	13032907CD22D385114FC04FC0D1
+PC(协议控制字):	LengthIndicator=5, UMI=False, XPC=False, ISO=True, AFI=07
+高校联盟字段:	PII=O,EncodingType=0,Version=35,ContentParameters='3(所属馆标识 OwnerLibrary),5(馆藏类别与状态 TypeOfUsage),15(临时馆藏位置 TemporaryItemLocation),16(主题 Subject),24(分馆标识 SubsidiaryOfAnOwnerLibrary),28(备选项),30(备选项),31(备选项)',Lending=True,Reserve=0,Picking=13
+=== User Bank ===
+Hex(十六进制内容):	
+=== 尝试按照国标格式解析 ===
+=== EPC Bank ===
+Hex(十六进制内容):	13032907CD22D385114FC04FC0D1
+PC(协议控制字):	LengthIndicator=5, UMI=False, XPC=False, ISO=True, AFI=07
+UII:	22333.B0000004
+=== User Bank ===
+Hex(十六进制内容):	
+gxlm
+
+
+~~~
+发现一张标签，写入时 PC.UMI 为 false，
+但写入后 PC.UMI 变为 true 了。
+这张标签的 UserBank 容量只有 4 word
+
+EPC: 751B3400000300002803001200000000
+UserBank: 00000000

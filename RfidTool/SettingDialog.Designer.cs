@@ -54,6 +54,8 @@ namespace RfidTool
             this.checkBox_enableTagCache = new System.Windows.Forms.CheckBox();
             this.button_OK = new System.Windows.Forms.Button();
             this.button_Cancel = new System.Windows.Forms.Button();
+            this.label5 = new System.Windows.Forms.Label();
+            this.textBox_gaoxiaoParameters = new System.Windows.Forms.TextBox();
             this.tabControl1.SuspendLayout();
             this.tabPage_writeTag.SuspendLayout();
             this.groupBox_uhf.SuspendLayout();
@@ -75,7 +77,7 @@ namespace RfidTool
             this.tabControl1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(726, 545);
+            this.tabControl1.Size = new System.Drawing.Size(739, 593);
             this.tabControl1.TabIndex = 0;
             // 
             // tabPage_writeTag
@@ -95,7 +97,7 @@ namespace RfidTool
             this.tabPage_writeTag.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.tabPage_writeTag.Name = "tabPage_writeTag";
             this.tabPage_writeTag.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.tabPage_writeTag.Size = new System.Drawing.Size(718, 510);
+            this.tabPage_writeTag.Size = new System.Drawing.Size(731, 558);
             this.tabPage_writeTag.TabIndex = 0;
             this.tabPage_writeTag.Text = "写入标签";
             this.tabPage_writeTag.UseVisualStyleBackColor = true;
@@ -103,7 +105,7 @@ namespace RfidTool
             // checkBox_writeTag_errorContentAsBlank
             // 
             this.checkBox_writeTag_errorContentAsBlank.AutoSize = true;
-            this.checkBox_writeTag_errorContentAsBlank.Location = new System.Drawing.Point(10, 441);
+            this.checkBox_writeTag_errorContentAsBlank.Location = new System.Drawing.Point(10, 499);
             this.checkBox_writeTag_errorContentAsBlank.Name = "checkBox_writeTag_errorContentAsBlank";
             this.checkBox_writeTag_errorContentAsBlank.Size = new System.Drawing.Size(510, 25);
             this.checkBox_writeTag_errorContentAsBlank.TabIndex = 9;
@@ -113,7 +115,7 @@ namespace RfidTool
             // checkBox_writeTag_useLocalStoreage
             // 
             this.checkBox_writeTag_useLocalStoreage.AutoSize = true;
-            this.checkBox_writeTag_useLocalStoreage.Location = new System.Drawing.Point(225, 410);
+            this.checkBox_writeTag_useLocalStoreage.Location = new System.Drawing.Point(225, 468);
             this.checkBox_writeTag_useLocalStoreage.Name = "checkBox_writeTag_useLocalStoreage";
             this.checkBox_writeTag_useLocalStoreage.Size = new System.Drawing.Size(195, 25);
             this.checkBox_writeTag_useLocalStoreage.TabIndex = 8;
@@ -123,7 +125,7 @@ namespace RfidTool
             // checkBox_writeTag_verifyPii
             // 
             this.checkBox_writeTag_verifyPii.AutoSize = true;
-            this.checkBox_writeTag_verifyPii.Location = new System.Drawing.Point(10, 410);
+            this.checkBox_writeTag_verifyPii.Location = new System.Drawing.Point(10, 468);
             this.checkBox_writeTag_verifyPii.Name = "checkBox_writeTag_verifyPii";
             this.checkBox_writeTag_verifyPii.Size = new System.Drawing.Size(174, 25);
             this.checkBox_writeTag_verifyPii.TabIndex = 7;
@@ -136,7 +138,7 @@ namespace RfidTool
             this.checkBox_changeAOI.Location = new System.Drawing.Point(535, 65);
             this.checkBox_changeAOI.Name = "checkBox_changeAOI";
             this.checkBox_changeAOI.Size = new System.Drawing.Size(78, 25);
-            this.checkBox_changeAOI.TabIndex = 6;
+            this.checkBox_changeAOI.TabIndex = 4;
             this.checkBox_changeAOI.Text = "修改";
             this.checkBox_changeAOI.UseVisualStyleBackColor = true;
             this.checkBox_changeAOI.CheckedChanged += new System.EventHandler(this.checkBox_changeAOI_CheckedChanged);
@@ -145,22 +147,24 @@ namespace RfidTool
             // 
             this.groupBox_uhf.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox_uhf.Controls.Add(this.textBox_gaoxiaoParameters);
+            this.groupBox_uhf.Controls.Add(this.label5);
             this.groupBox_uhf.Controls.Add(this.checkBox_writeUserBank);
             this.groupBox_uhf.Controls.Add(this.checkBox_warningWhenUhfFormatMismatch);
             this.groupBox_uhf.Controls.Add(this.comboBox_uhfDataFormat);
             this.groupBox_uhf.Controls.Add(this.label3);
             this.groupBox_uhf.Location = new System.Drawing.Point(10, 198);
             this.groupBox_uhf.Name = "groupBox_uhf";
-            this.groupBox_uhf.Size = new System.Drawing.Size(702, 184);
-            this.groupBox_uhf.TabIndex = 5;
+            this.groupBox_uhf.Size = new System.Drawing.Size(715, 237);
+            this.groupBox_uhf.TabIndex = 6;
             this.groupBox_uhf.TabStop = false;
             this.groupBox_uhf.Text = " UHF(超高频)标签 ";
             // 
-            // checkBox_writeUhfUserBank
+            // checkBox_writeUserBank
             // 
             this.checkBox_writeUserBank.AutoSize = true;
             this.checkBox_writeUserBank.Location = new System.Drawing.Point(20, 93);
-            this.checkBox_writeUserBank.Name = "checkBox_writeUhfUserBank";
+            this.checkBox_writeUserBank.Name = "checkBox_writeUserBank";
             this.checkBox_writeUserBank.Size = new System.Drawing.Size(242, 25);
             this.checkBox_writeUserBank.TabIndex = 2;
             this.checkBox_writeUserBank.Text = "要写入 User Bank(&U)";
@@ -187,7 +191,7 @@ namespace RfidTool
             "国标格式"});
             this.comboBox_uhfDataFormat.Location = new System.Drawing.Point(215, 38);
             this.comboBox_uhfDataFormat.Name = "comboBox_uhfDataFormat";
-            this.comboBox_uhfDataFormat.Size = new System.Drawing.Size(481, 29);
+            this.comboBox_uhfDataFormat.Size = new System.Drawing.Size(494, 29);
             this.comboBox_uhfDataFormat.TabIndex = 1;
             // 
             // label3
@@ -205,7 +209,7 @@ namespace RfidTool
             this.linkLabel_oiHelp.Location = new System.Drawing.Point(6, 140);
             this.linkLabel_oiHelp.Name = "linkLabel_oiHelp";
             this.linkLabel_oiHelp.Size = new System.Drawing.Size(262, 21);
-            this.linkLabel_oiHelp.TabIndex = 4;
+            this.linkLabel_oiHelp.TabIndex = 5;
             this.linkLabel_oiHelp.TabStop = true;
             this.linkLabel_oiHelp.Text = "帮助：如何设置机构代码？";
             this.linkLabel_oiHelp.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel_oiHelp_LinkClicked);
@@ -255,7 +259,7 @@ namespace RfidTool
             this.tabPage_modifyTag.Controls.Add(this.label4);
             this.tabPage_modifyTag.Location = new System.Drawing.Point(4, 31);
             this.tabPage_modifyTag.Name = "tabPage_modifyTag";
-            this.tabPage_modifyTag.Size = new System.Drawing.Size(718, 491);
+            this.tabPage_modifyTag.Size = new System.Drawing.Size(718, 510);
             this.tabPage_modifyTag.TabIndex = 2;
             this.tabPage_modifyTag.Text = "修改标签";
             this.tabPage_modifyTag.UseVisualStyleBackColor = true;
@@ -288,7 +292,7 @@ namespace RfidTool
             this.tabPage_other.Controls.Add(this.checkBox_enableTagCache);
             this.tabPage_other.Location = new System.Drawing.Point(4, 31);
             this.tabPage_other.Name = "tabPage_other";
-            this.tabPage_other.Size = new System.Drawing.Size(718, 491);
+            this.tabPage_other.Size = new System.Drawing.Size(718, 510);
             this.tabPage_other.TabIndex = 1;
             this.tabPage_other.Text = "其它";
             this.tabPage_other.UseVisualStyleBackColor = true;
@@ -333,7 +337,7 @@ namespace RfidTool
             // button_OK
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_OK.Location = new System.Drawing.Point(506, 559);
+            this.button_OK.Location = new System.Drawing.Point(519, 607);
             this.button_OK.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(111, 40);
@@ -346,7 +350,7 @@ namespace RfidTool
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button_Cancel.Location = new System.Drawing.Point(622, 559);
+            this.button_Cancel.Location = new System.Drawing.Point(635, 607);
             this.button_Cancel.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(111, 40);
@@ -355,13 +359,31 @@ namespace RfidTool
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(16, 166);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(168, 21);
+            this.label5.TabIndex = 4;
+            this.label5.Text = "高校联盟固定值:";
+            // 
+            // textBox_gaoxiaoParameters
+            // 
+            this.textBox_gaoxiaoParameters.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_gaoxiaoParameters.Location = new System.Drawing.Point(215, 163);
+            this.textBox_gaoxiaoParameters.Name = "textBox_gaoxiaoParameters";
+            this.textBox_gaoxiaoParameters.Size = new System.Drawing.Size(494, 31);
+            this.textBox_gaoxiaoParameters.TabIndex = 5;
+            // 
             // SettingDialog
             // 
             this.AcceptButton = this.button_OK;
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
-            this.ClientSize = new System.Drawing.Size(747, 608);
+            this.ClientSize = new System.Drawing.Size(760, 656);
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
             this.Controls.Add(this.tabControl1);
@@ -416,5 +438,7 @@ namespace RfidTool
         private System.Windows.Forms.CheckBox checkBox_writeTag_verifyPii;
         private System.Windows.Forms.CheckBox checkBox_writeTag_useLocalStoreage;
         private System.Windows.Forms.CheckBox checkBox_writeTag_errorContentAsBlank;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.TextBox textBox_gaoxiaoParameters;
     }
 }
