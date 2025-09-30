@@ -53,6 +53,7 @@ namespace RfidTool
             this.columnHeader_readerName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_antenna = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_protocol = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_tid = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.toolStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -179,7 +180,8 @@ namespace RfidTool
             this.columnHeader_afi,
             this.columnHeader_readerName,
             this.columnHeader_antenna,
-            this.columnHeader_protocol});
+            this.columnHeader_protocol,
+            this.columnHeader_tid});
             this.listView_tags.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView_tags.FullRowSelect = true;
             this.listView_tags.HideSelection = false;
@@ -245,6 +247,11 @@ namespace RfidTool
             this.columnHeader_protocol.Text = "协议";
             this.columnHeader_protocol.Width = 260;
             // 
+            // columnHeader_tid
+            // 
+            this.columnHeader_tid.Text = "TID";
+            this.columnHeader_tid.Width = 300;
+            // 
             // ModifyDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
@@ -294,5 +301,6 @@ namespace RfidTool
         private System.Windows.Forms.ToolStripButton toolStripButton_clearList;
         private System.Windows.Forms.ToolStripButton toolStripButton_nextScan;
         private System.Windows.Forms.ColumnHeader columnHeader_afi;
+        private System.Windows.Forms.ColumnHeader columnHeader_tid;
     }
 }

@@ -1,4 +1,6 @@
-﻿using System;
+﻿#define SIMU_ERROR  // 模拟第一次写入 UHF 标签发生错误，然后自动重试写入
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -212,7 +214,7 @@ namespace RfidTool
                             await SpeakCounter(token);
 
                             string readerNameList = "*";
-                            var result = DataModel.ListTags(readerNameList, "");
+                            var result = DataModel.ListTags(readerNameList, "");  // getTagInfo 是为了可以获得 UHF 标签的 TID
                             if (result.Results == null)
                                 result.Results = new List<OneTag>();
                             if (result.Value == -1)
@@ -497,6 +499,7 @@ namespace RfidTool
         const int COLUMN_READERNAME = 8;
         const int COLUMN_ANTENNA = 9;
         const int COLUMN_PROTOCOL = 10;
+        const int COLUMN_TID = 11;
 
         class FillResult : NormalResult
         {
@@ -512,10 +515,8 @@ namespace RfidTool
             {
                 foreach (var tag in tags)
                 {
-                    /*
-                    if (tag.Protocol != InventoryInfo.ISO15693)
+                    if (tag.Protocol == InventoryInfo.ISO14443A)
                         continue;
-                    */
 
                     ListViewItem item = ListViewUtil.FindItem(this.listView_tags, tag.UID, COLUMN_UID);
                     if (item == null)
@@ -576,7 +577,15 @@ namespace RfidTool
             ListViewUtil.ChangeItemText(item, COLUMN_UID, tag.UID);
             ListViewUtil.ChangeItemText(item, COLUMN_ANTENNA, tag.AntennaID.ToString());
             ListViewUtil.ChangeItemText(item, COLUMN_READERNAME, tag.ReaderName);
+
+            Debug.Assert(tag.Protocol != "ISO14443A");
             ListViewUtil.ChangeItemText(item, COLUMN_PROTOCOL, tag.Protocol);
+
+            if (tag.Protocol == InventoryInfo.ISO18000P6C)
+            {
+                byte[] tid_bank = tag.TagInfo?.Tag as byte[];
+                ListViewUtil.ChangeItemText(item, COLUMN_TID, GetTidHex(tid_bank));
+            }
 
             ListViewUtil.ChangeItemText(item, COLUMN_PII, "(尚未填充)");
         }
@@ -652,10 +661,8 @@ namespace RfidTool
                             ErrorCode = "cancel"
                         };
 
-                    /*
-                    if (tag.Protocol != InventoryInfo.ISO15693)
+                    if (tag.Protocol == InventoryInfo.ISO14443A)
                         continue;
-                    */
 
                     ListViewItem item = (ListViewItem)this.Invoke((Func<ListViewItem>)(() =>
                     {
@@ -737,6 +744,23 @@ namespace RfidTool
                     // 跳过以前已经处理过的项目
                     if (iteminfo.State == "cross")
                         continue;
+
+                    // 尝试将先前出错的标签重试写入
+                    {
+                        NormalResult retry_ret = new NormalResult();
+                        this.Invoke((Action)(() =>
+                        {
+                            retry_ret = RetryWriteTag(item);
+                            if (retry_ret.Value == 1)
+                            {
+                                ListViewUtil.ChangeItemText(item, COLUMN_ERRORINFO, "自动重试写入修改成功");
+                                SetItemColor(item, "changed");
+                                process_count++;
+                            }
+                        }));
+                        if (retry_ret.Value != 0)
+                            continue;   // EPC 可能已经被改变，不要继续后面的批处理动作
+                    }
 
                     // 第三步，执行修改动作
                     var action_result = DoAction(item);
@@ -833,7 +857,7 @@ namespace RfidTool
                 {
                     // 注1: taginfo.EAS 在调用后可能被修改
                     // 注2: 本函数不再抛出异常。会在 ErrorInfo 中报错
-                    var uhf_info = RfidTagList.GetUhfChipInfo(taginfo, "convertValueToGB"); // "dontCheckUMI"
+                    var uhf_info = RfidTagList.GetUhfChipInfo(taginfo/*, "convertValueToGB,ensureChip"*/); // "dontCheckUMI"
 
                     if (string.IsNullOrEmpty(uhf_info.ErrorInfo) == false)
                     {
@@ -855,6 +879,8 @@ namespace RfidTool
                     // 单独严格解析一次标签内容
 
                     chip = uhf_info.Chip;
+                    Debug.Assert(chip != null);
+
                     // taginfo.EAS 可能会被修改
                     iteminfo.UhfProtocol = uhf_info.UhfProtocol;
                     pii = uhf_info.PII;
@@ -987,7 +1013,7 @@ namespace RfidTool
                         if (taginfo.Protocol == InventoryInfo.ISO18000P6C)
                         {
                             var bytes = taginfo.Tag as byte[];
-                            uid = ByteArray.GetHexTimeStampString(bytes);
+                            uid = ByteArray.GetHexTimeStampString(bytes)?.ToUpper();
                         }
 
                         DataModel.WriteToUidLogFile(uid,
@@ -1015,7 +1041,7 @@ namespace RfidTool
                 {
                     new_tag_info = GetTagInfo(taginfo, chip, new_eas);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     ClientInfo.WriteErrorLog($"DoAction() GetTagInfo() exception: {ExceptionUtil.GetDebugText(ex)}");
                     string error = "exception1:" + ex.Message;
@@ -1050,12 +1076,84 @@ namespace RfidTool
                     var new_tag_info = GetTagInfo(taginfo, chip, new_eas);
                     */
 
+#if SIMU_ERROR
+                    // testing
+                    // 
+                    string save_uid = new_tag_info.UID;
+                    if (_simuErrorCount == 0)
+                        new_tag_info.UID = "A8203400000300050730303030303033";
+#endif
+
                     // 写入标签
                     var write_result = WriteTagInfo(tag.ReaderName,
                         taginfo,
                         new_tag_info);
-                    if (write_result.Value == -1)
+                    if (write_result.Value == -1 || _simuErrorCount == 0)
                     {
+#if SIMU_ERROR
+                        if (_simuErrorCount == 0
+                            && string.IsNullOrEmpty(write_result.ErrorInfo))
+                            write_result.ErrorInfo = "模拟写入错误";
+                        _simuErrorCount++;
+                        new_tag_info.UID = save_uid;
+#endif
+
+                        // 把未成功写入的 EPC 和 TID 记载到内存，便于后面重试写入
+                        Debug.Assert(taginfo.Tag != null);
+                        var tid = taginfo.Tag as byte[];
+                        var error_info = new WriteErrorInfo
+                        {
+                            TID = tid,
+                            OldTagInfo = taginfo,
+                            NewTagInfo = new_tag_info,
+                        };
+                        SetWriteErrorInfo(tid, error_info);
+
+                        this.TryInvoke(() =>
+                        {
+                            var dlg = Program.MainForm.OpenWriteErrorDialog();
+                            dlg.Add(error_info, $"写标签出错: {write_result.ErrorInfo}");
+                        });
+
+                        /*
+                        // 及时刷新 ListViewItem 内容，为后继重试写入做准备
+                        this.Invoke((Action)(() =>
+                        {
+                            RefreshItem(item);
+                        }));
+                        */
+
+                        string error = $"写入标签出错: {write_result.ErrorInfo}";
+                        SetErrorInfo(item, error);
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = error,
+                            ErrorCode = tag.Protocol == InventoryInfo.ISO18000P6C ? "cancel" : "",  // 超高频写入错误时，可能已经损坏 EPC 内容，所以要中断整个处理循环，重新开始了
+                        };
+                    }
+                    else
+                    {
+                        /*
+                        // testing
+
+                        // 把未成功写入的 EPC 和 TID 记载到内存，便于后面重试写入
+                        Debug.Assert(taginfo.Tag != null);
+                        var tid = taginfo.Tag as byte[];
+                        var error_info = new WriteErrorInfo
+                        {
+                            TID = tid,
+                            OldTagInfo = taginfo,
+                            NewTagInfo = new_tag_info,
+                        };
+                        _writeErrorTable[tid] = error_info;
+
+                        this.TryInvoke(() =>
+                        {
+                            var dlg = Program.MainForm.OpenWriteErrorDialog();
+                            dlg.Add(error_info);
+                        });
+
                         string error = $"写入标签出错: {write_result.ErrorInfo}";
                         SetErrorInfo(item, error);
                         return new NormalResult
@@ -1063,6 +1161,7 @@ namespace RfidTool
                             Value = -1,
                             ErrorInfo = error
                         };
+                        */
                     }
 
                     iteminfo.TagInfo = new_tag_info;
@@ -1112,6 +1211,10 @@ namespace RfidTool
                 };
             }
         }
+
+#if SIMU_ERROR
+        int _simuErrorCount = 0; // 用于测试
+#endif
 
         public static string MakeOiPii(string pii, string oi, string aoi)
         {
@@ -1195,7 +1298,7 @@ bool eas)
 LogicChip chip,
 bool eas)
         {
-            bool _dontWarningInvalidGaoxiaoOI = true;
+            bool dontWarningInvalidGaoxiaoOI = true;
 
             if (existing.Protocol == InventoryInfo.ISO15693)
             {
@@ -1246,22 +1349,28 @@ UHF国标-->高校联盟
                     if (isExistingGB)
                     {
                         string warning = $"警告：即将用高校联盟格式覆盖原有国标格式";
-                        DialogResult dialog_result =
-                            this.TryGet(() =>
+                        DialogResult dialog_result = DialogResult.Yes;
+                        if (_dontWarningChangeToDifferentFormat == false)
+                        {
+                            dialog_result = this.TryGet(() =>
                             {
-                                return MessageBox.Show(this,
-    $"{warning}\r\n\r\n确实要覆盖？",
-    $"ModifyDialog",
-    MessageBoxButtons.YesNo,
-    MessageBoxIcon.Question,
-    MessageBoxDefaultButton.Button2);
+                                return MessageDlg.Show(this,
+                                    $"{warning}\r\n\r\n确实要覆盖？",
+                                    $"ModifyDialog",
+                                    MessageBoxButtons.YesNo,
+                                    MessageBoxDefaultButton.Button2,
+                                    ref _dontWarningChangeToDifferentFormat,
+                                    new string[] { "继续", "放弃" },
+                                    "以后不再警告");
                             });
+                        }
                         if (dialog_result == DialogResult.No)
                             throw new Exception("放弃写入");
                     }
 
                     // chip.SetElement(ElementOID.TypeOfUsage, tou);
-                    ScanDialog.SetTypeOfUsage(chip, this._typeOfUsage);
+                    if (chip != null)
+                        ScanDialog.SetTypeOfUsage(chip, this._typeOfUsage);
 
                     /*
                     // 2023/10/24
@@ -1278,10 +1387,10 @@ UHF国标-->高校联盟
 
                     // 2025/9/21
                     // 检查机构代码是否符合高校联盟 OI 的格式
-                    var oi = chip.FindElement(ElementOID.OI)?.Text;
+                    var oi = chip?.FindElement(ElementOID.OI)?.Text;
                     if (string.IsNullOrEmpty(oi) == false
                         && GaoxiaoUtility.VerifyOI(oi) == false
-                        && _dontWarningInvalidGaoxiaoOI == false)
+                        && dontWarningInvalidGaoxiaoOI == false)
                     {
                         var dialog_result =
                             this.TryGet(() =>
@@ -1291,7 +1400,7 @@ UHF国标-->高校联盟
                                 "写入高校联盟格式",
                                 MessageBoxButtons.YesNo,
                                 MessageBoxDefaultButton.Button2,
-                                ref _dontWarningInvalidGaoxiaoOI,
+                                ref dontWarningInvalidGaoxiaoOI,
                                 new string[] { "继续", "放弃" },
                                 "以后不再警告");
                             });
@@ -1300,8 +1409,9 @@ UHF国标-->高校联盟
                     }
 
                     // 警告丢失 TypeOfUsage 和 OI(AOI)
-                    VerifyElementsCondition(chip,
-                        build_user_bank);
+                    if (chip != null)
+                        VerifyElementsCondition(chip,
+                            build_user_bank);
 
                     // 2025/9/21
                     var epc_info = new GaoxiaoEpcInfo
@@ -1312,7 +1422,7 @@ UHF国标-->高校联盟
                         Reserve = 0,
                     };
                     // 可能抛出 ArgumentException
-                    var result = GaoxiaoUtility.BuildTag(chip,
+                    var result = GaoxiaoUtility.BuildTag(chip != null ? chip : new LogicChip(),
                         build_user_bank,
                         eas,
                         epc_info);
@@ -1328,22 +1438,28 @@ UHF国标-->高校联盟
                     if (isExistingGB == false)
                     {
                         string warning = $"警告：即将用国标格式覆盖原有高校联盟格式";
-                        DialogResult dialog_result =
-                            this.TryGet(() =>
+                        DialogResult dialog_result = DialogResult.Yes;
+                        if (_dontWarningChangeToDifferentFormat == false)
+                        {
+                            dialog_result = this.TryGet(() =>
                             {
-                                return MessageBox.Show(this,
-    $"{warning}\r\n\r\n确实要覆盖？",
-    $"ScanDialog",
-    MessageBoxButtons.YesNo,
-    MessageBoxIcon.Question,
-    MessageBoxDefaultButton.Button2);
+                                return MessageDlg.Show(this,
+                                    $"{warning}\r\n\r\n确实要覆盖？",
+                                    $"ScanDialog",
+                                    MessageBoxButtons.YesNo,
+                                    MessageBoxDefaultButton.Button2,
+                                    ref _dontWarningChangeToDifferentFormat,
+                                    new string[] { "继续", "放弃" },
+                                    "以后不再警告");
                             });
+                        }
                         if (dialog_result == DialogResult.No)
                             throw new Exception("放弃写入");
                     }
-                    ScanDialog.SetTypeOfUsage(chip, this._typeOfUsage);
+                    if (chip != null)
+                        ScanDialog.SetTypeOfUsage(chip, this._typeOfUsage);
 
-                    var result = UhfUtility.BuildTag(chip,
+                    var result = UhfUtility.BuildTag(chip != null ? chip : new LogicChip(),
                         build_user_bank,
                         true,
                         eas ? "afi_eas_on" : "");
@@ -1363,8 +1479,9 @@ UHF国标-->高校联盟
             throw new ArgumentException($"目前暂不支持 {existing.Protocol} 协议标签的写入操作");
         }
 
-        bool _dontWarningLostTU = false;
-        bool _dontWarningLostOI = false;
+        bool _dontWarningLostTU = false;    // 不警告丢失 TypeOfUsage
+        bool _dontWarningLostOI = false;    // 不警告丢失 OI
+        bool _dontWarningChangeToDifferentFormat = false;   // 在转换为不同格式的时候不警告
 
         // 检查当不写入 UserBank 时可能和 chip 中哪些元素相矛盾。警告并尝试删除矛盾的元素
         bool VerifyElementsCondition(LogicChip chip,
@@ -1505,7 +1622,7 @@ UHF国标-->高校联盟
 
                         // 注1: taginfo.EAS 在调用后可能被修改
                         // 注2: 本函数不再抛出异常。会在 ErrorInfo 中报错
-                        var uhf_info = RfidTagList.GetUhfChipInfo(taginfo, "convertValueToGB"); // "dontCheckUMI"
+                        var uhf_info = RfidTagList.GetUhfChipInfo(taginfo/*, "convertValueToGB,ensureChip"*/); // "dontCheckUMI"
 
                         if (string.IsNullOrEmpty(uhf_info.ErrorInfo) == false)
                         {
@@ -1520,6 +1637,8 @@ UHF国标-->高校联盟
                         // 单独严格解析一次标签内容
 
                         chip = uhf_info.Chip;
+                        Debug.Assert(chip != null);
+
                         // taginfo.EAS 可能会被修改
                         iteminfo.UhfProtocol = uhf_info.UhfProtocol;
                         pii = uhf_info.PII;
@@ -1580,6 +1699,9 @@ UHF国标-->高校联盟
                         name = "国标";
                     ListViewUtil.ChangeItemText(item, COLUMN_PROTOCOL,
                         string.IsNullOrEmpty(name) ? taginfo.Protocol : taginfo.Protocol + ":" + name);
+
+                    byte[] tid_bank = taginfo.Tag as byte[];
+                    ListViewUtil.ChangeItemText(item, COLUMN_TID, GetTidHex(tid_bank));
                 }
 
                 // 过滤 TU
@@ -1742,6 +1864,126 @@ UHF国标-->高校联盟
         }
 
         #region 标签缓存
+
+        // 重试写入早先发生写入错误的标签内容
+        void RetryWriteTags()
+        {
+            foreach (ListViewItem item in this.listView_tags.Items)
+            {
+                RetryWriteTag(item);
+            }
+        }
+
+        // return:
+        //      -1  重写时出错
+        //      0   没有必要重写
+        //      1   成功重写
+        NormalResult RetryWriteTag(ListViewItem item)
+        {
+            var iteminfo = item.Tag as ItemInfo;
+            if (iteminfo == null || iteminfo.TagInfo == null)
+                return new NormalResult();
+
+            if (iteminfo.TagInfo.Protocol == InventoryInfo.ISO18000P6C)
+            {
+                byte[] tid = iteminfo.TagInfo.Tag as byte[];
+                // 用 TID 从 _writeErrorTable 中找到对应的 WriteErrorInfo
+                var error_info = GetWriteErrorInfo(tid);
+                if (error_info == null)
+                    return new NormalResult();
+                var uid = ListViewUtil.GetItemText(item, COLUMN_UID);
+                // 如果当前标签的 EPC 和 UserBank 原来的一样，说明标签是完整的，没有被损坏。就不用重写了。如果用户需要改写，用正常改写的方法就可以了
+                if (uid == error_info.OldTagInfo.UID
+                    && iteminfo.TagInfo.Bytes.SequenceEqual(error_info.OldTagInfo.Bytes))
+                {
+                    RemoveWriteErrorInfo(tid);
+                    return new NormalResult();
+                }
+
+                var write_result = WriteTagInfo(iteminfo.TagInfo.ReaderName,
+    iteminfo.TagInfo,
+    error_info.NewTagInfo);
+                if (write_result.Value == -1)
+                {
+                    string error = $"自动重试写入标签时出错: {write_result.ErrorInfo}";
+                    SetErrorInfo(item, error);
+                    error_info.RetryCount++;
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = error,
+                        ErrorCode = write_result.ErrorCode
+                    };
+                }
+                else
+                {
+                    // 写入成功，刷新显示
+                    // TODO: 重新读入标签?
+                    ListViewUtil.ChangeItemText(item, COLUMN_UID, error_info.NewTagInfo.UID);
+                    RefreshItem(item);
+                    RemoveWriteErrorInfo(tid);
+                    return new NormalResult { Value = 1 };
+                }
+            }
+            return new NormalResult();
+        }
+
+        public class WriteErrorInfo
+        {
+            public byte[] TID { get; set; }
+
+            public string ReaderName { get; set; }
+
+            public TagInfo OldTagInfo { get; set; }
+
+            public TagInfo NewTagInfo { get; set; }
+
+            public NormalResult ErrorResult { get; set; }
+
+            public int RetryCount { get; set; }
+        }
+
+        // 存储写入标签时发生错误的详细信息。供后来重试写入
+        // TID byte[] --> WriteErrorInfo
+        Hashtable _writeErrorTable = new Hashtable();
+
+        public WriteErrorInfo GetWriteErrorInfo(byte[] tid)
+        {
+            var hex = GetTidHex(tid);
+            return _writeErrorTable[hex] as WriteErrorInfo;
+        }
+
+        public void SetWriteErrorInfo(byte[] tid, WriteErrorInfo info)
+        {
+            var hex = GetTidHex(tid);
+            if (info == null)
+                _writeErrorTable.Remove(hex);
+            else
+                _writeErrorTable[hex] = info;
+        }
+
+        public void RemoveWriteErrorInfo(byte[] tid)
+        {
+            var hex = GetTidHex(tid);
+            _writeErrorTable.Remove(hex);
+
+            this.TryInvoke(() =>
+            {
+                Program.MainForm.RemoveWriteErrorItem(hex);
+            });
+        }
+
+        public static string GetTidHex(byte[] tid)
+        {
+            if (tid == null)
+                return "";
+            if (tid.Length < 12)
+                throw new ArgumentException("tid 长度不应小于 12");
+
+            var head = tid.AsQueryable().Take(12).ToArray();
+            var hex = ByteArray.GetHexTimeStampString(head).ToUpper();
+            return hex;
+        }
 
         public NormalResult WriteTagInfo(string one_reader_name,
     TagInfo old_tag_info,

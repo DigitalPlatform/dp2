@@ -35,6 +35,7 @@ namespace RfidTool
                     this.comboBox_eas,
                     this.checkBox_verifyPii,
                     this.comboBox_switchMethod,
+                    this.tabControl1,
                     // this.textBox_verifyRule,
                 };
                 return GuiState.GetUiState(controls);
@@ -52,6 +53,7 @@ namespace RfidTool
                     this.comboBox_eas,
                     this.checkBox_verifyPii,
                     this.comboBox_switchMethod,
+                    this.tabControl1,
                     // this.textBox_verifyRule,
                 };
                 GuiState.SetUiState(controls, value);

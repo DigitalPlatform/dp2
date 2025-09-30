@@ -1,24 +1,24 @@
 ﻿// #define VERIFY_OPENDOOR // 开门命令后立即追加一个检查门状态的命令，看看门是否是打开状态
 
+using DigitalPlatform;
+using DigitalPlatform.RFID;
+using DigitalPlatform.Text;
+using RFIDLIB;
+using Serilog;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.ExceptionServices;
+using System.Security;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Sources;
 using System.Xml;
-using System.Runtime.ExceptionServices;
-using System.Security;
-
-using Serilog;
-using RFIDLIB;
-
-using DigitalPlatform;
-using DigitalPlatform.RFID;
-using DigitalPlatform.Text;
 
 // 锁定全部读卡器靠一个全局锁来实现。锁定一个读卡器靠 RecordLock 来实现。锁定一个读卡器之前，先尝试用 read 方式获得全局锁
 
@@ -3700,6 +3700,9 @@ out Reader reader);
             if (readers.Count == 0)
                 return new FindTagResult { Value = -1, ErrorInfo = $"没有找到名为 {reader_name} 的读卡器" };
 
+            byte [] tid = null;
+            if (pii != null && pii.StartsWith("tid:"))
+                tid = ByteArray.GetTimeStampByteArray(pii.Substring("tid:".Length));
 
             // 锁定所有读卡器?
             Lock();
@@ -3741,6 +3744,35 @@ out Reader reader);
                     }
 
                     Debug.Assert(nTagCount == results.Count);
+
+                    // 2025/9/28
+                    // 匹配 UHF 标签的 TID bank
+                    if (tid != null
+                        && StringUtil.IsInList(InventoryInfo.ISO18000P6C, reader.Protocols))
+                    {
+                        var result = FindByTid(results.ToArray(),
+reader.Name,
+tid);
+                        if (result == null)
+                            continue;
+                        if (result.Value == -1)
+                        {
+                            temp_result = new FindTagResult
+                            {
+                                Value = -1,
+                                ErrorInfo = $"FindByTid error: {result.ErrorInfo}",
+                                ErrorCode = result.ErrorCode
+                            };
+                            continue;
+                        }
+                        return new FindTagResult
+                        {
+                            Value = 1,
+                            ReaderName = reader.Name,
+                            AntennaID = result.TagInfo.AntennaID,
+                            UID = result.TagInfo.UID
+                        };
+                    }
 
                     foreach (InventoryInfo info in results)
                     {
@@ -3948,6 +3980,34 @@ out Reader reader);
             {
                 Unlock();
             }
+        }
+
+        // 从 inventory 结果中根据 tid 寻找标签。
+        // 相当于执行了 GetTagInfo()
+        // return:
+        //    null  没有找到
+        GetTagInfoResult FindByTid(InventoryInfo[] infos,
+            string reader_name,
+            byte[] tid)
+        {
+            foreach (InventoryInfo info in infos)
+            {
+                var result = GetTagInfo(reader_name,
+                    info,
+                    "tid");
+                if (result.Value == -1)
+                {
+                    if (result.ErrorCode == "tagNotFound")
+                        continue;
+                    return result;
+                }
+
+                var bytes = result.TagInfo.Tag as byte[];
+                if (bytes.SequenceEqual(tid))
+                    return result;
+            }
+
+            return null;
         }
 
         public NormalResult LoadFactoryDefault(string reader_name)
@@ -4781,6 +4841,7 @@ out Reader reader);
                         }
 
 
+                        // TODO: 如果写入错误，并且 old_tag_info.Tag 中有值，则可以用 tid 重新定位 epc 再写入一次
                         if (iret != 0)
                         {
                             // TODO: 尝试恢复以前的 User Bank 内容?

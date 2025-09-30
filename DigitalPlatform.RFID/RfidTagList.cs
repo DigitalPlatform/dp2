@@ -636,7 +636,7 @@ namespace DigitalPlatform.RFID
         }
 
         public static ChipInfo GetChipInfo(TagInfo taginfo,
-            string style = "convertValueToGB")
+            string style = "convertValueToGB,ensureChip")   // 2025/9/30 增加了 ensureChip 缺省值
         {
             if (taginfo.Protocol == InventoryInfo.ISO15693)
             {

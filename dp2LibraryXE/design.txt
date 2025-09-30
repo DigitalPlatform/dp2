@@ -11,3 +11,18 @@ Add the following to your csproj on your "main"/root project
     <CleanSQLiteInteropFiles>false</CleanSQLiteInteropFiles>
     <CollectSQLiteInteropFiles>false</CollectSQLiteInteropFiles>
 </PropertyGroup>
+
+~~~
+如果是先安装了 dp2libraryxe，然后马上从一个用户单位的大备份文件恢复，这时候启动
+dp2libraryxe，就没有 dp2opac 模块。需要专门安装一次。但安装以后，opac.xml
+中的 dp2library opac 账户密码，和从用户单位大备份恢复后的 opac 账户密码可能不同，
+这样 opac 模块启动时就会报错。
+解决办法，一个办法是在安装 dp2opac 模块的时候，弹出一个对话框允许输入指定 opac 账户名和密码。
+这样安装程序负责在 dp2library 确认和创建这个账户，然后给 opac.xml 设置上。
+另一个办法，是安装 opac 模块是还是原样(无对话框弹出)，但单独提供一个设置修改 opac
+账户和密码的功能，用于日常管理维护。
+
+另外，当在内务系统管理窗的内核属性页直接修改了 opac_biblio.fltx 配置文件，或者
+利用刷新数据库定义修改了这个配置文件，opac 模块无法感知到这种修改并重新编译相关
+assembly，建议提供一个联动的机制。或者修改配置文件的界面保存文件后，弹出对话框
+提醒操作者对 opac 模块重启，或者利用 opac 的管理员界面进行配置文件重新初始化 Assembly。

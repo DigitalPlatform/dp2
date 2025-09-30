@@ -8248,7 +8248,10 @@ out strError);
                     }
 
                     // 查重
-                    if (string.IsNullOrEmpty(strNewBiblio) == false)
+                    // 2025/9/25 move 动作，实际上不应该查重。因为如果查重就会造成多条重复的情况下无法 move 成功，这样工作人员就没法利用 move 功能进行消除重复的操作了
+                    // TODO: 一个可选的方法，是对 target 记录原内容进行查重，得到一个重复的记录路径的集合(注意减掉 source 路径)。然后对 target 记录的新内容进行查重，得到另一个发生重复的记录路径的集合(注意减掉 source 路径)。如果后一个集合中出现了越出第一个集合的路径，就报错返回。也就是说，只允许集合缩小，不允许集合变大
+                    if (string.IsNullOrEmpty(strNewBiblio) == false
+                        && !(strAction == "move" || strAction == "onlymovebiblio"))
                     {
                         // return:
                         //      -1  出错
@@ -8311,27 +8314,31 @@ out strError);
                                 strNewBiblio = strExistingSourceXml;
                         }
 
-                        // return:
-                        //      -1  出错
-                        //      0   没有命中
-                        //      >0  命中条数。此时 strError 中返回发生重复的路径列表
-                        nRet = SearchBiblioDup(
-                            sessioninfo,
-                            strNewBiblioRecPath,
-                            strExistingSourceXml,
-                            "copybiblio", // strResultSetName,
-                            strAction == "move" || strAction == "onlymovebiblio" ? new List<string> { strBiblioRecPath } : null,
-                            out _,
-                            out strError);
-                        if (nRet == -1)
-                            goto ERROR1;
-                        if (nRet > 0)
+                        // 2025/9/25 move 动作，实际上不应该查重。因为如果查重就会造成多条重复的情况下无法 move 成功，这样工作人员就没法利用 move 功能进行消除重复的操作了
+                        if (!(strAction == "move" || strAction == "onlymovebiblio"))
                         {
-                            strOutputBiblioRecPath = strError;
-                            result.Value = -1;
-                            result.ErrorInfo = "经查重发现书目库中已有 " + nRet.ToString() + " 条重复记录(" + strOutputBiblioRecPath + ")。本次保存操作(" + strAction + ")被拒绝";
-                            result.ErrorCode = ErrorCode.BiblioDup;
-                            return result;
+                            // return:
+                            //      -1  出错
+                            //      0   没有命中
+                            //      >0  命中条数。此时 strError 中返回发生重复的路径列表
+                            nRet = SearchBiblioDup(
+                                sessioninfo,
+                                strNewBiblioRecPath,
+                                strExistingSourceXml,
+                                "copybiblio", // strResultSetName,
+                                strAction == "move" || strAction == "onlymovebiblio" ? new List<string> { strBiblioRecPath } : null,
+                                out _,
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                            if (nRet > 0)
+                            {
+                                strOutputBiblioRecPath = strError;
+                                result.Value = -1;
+                                result.ErrorInfo = "经查重发现书目库中已有 " + nRet.ToString() + " 条重复记录(" + strOutputBiblioRecPath + ")。本次保存操作(" + strAction + ")被拒绝";
+                                result.ErrorCode = ErrorCode.BiblioDup;
+                                return result;
+                            }
                         }
                     }
 

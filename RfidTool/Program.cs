@@ -18,6 +18,16 @@ namespace RfidTool
 {
     static class Program
     {
+        public static MainForm _mainForm = null;
+
+        public static MainForm MainForm
+        {
+            get
+            {
+                return _mainForm;
+            }
+        }
+
         // https://stackoverflow.com/questions/8836093/how-can-i-specify-a-dllimport-path-at-runtime
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         static extern bool SetDllDirectory(string lpPathName);
@@ -55,7 +65,8 @@ namespace RfidTool
                     // Application.SetHighDpiMode(HighDpiMode.SystemAware);
                     Application.EnableVisualStyles();
                     Application.SetCompatibleTextRenderingDefault(false);
-                    Application.Run(new MainForm());
+                    _mainForm = new MainForm();
+                    Application.Run(_mainForm);
                 }
                 else
                 {

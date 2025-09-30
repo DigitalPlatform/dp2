@@ -21,7 +21,7 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.IO;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
-using System.Runtime.Remoting.Messaging;
+using static RfidTool.ModifyDialog;
 
 namespace RfidTool
 {
@@ -30,6 +30,8 @@ namespace RfidTool
         ScanDialog _scanDialog = null;
 
         ModifyDialog _modifyDialog = null;
+
+        WriteErrorDialog _writeErrorDialog = null;
 
         ErrorTable _errorTable = null;
 
@@ -333,6 +335,27 @@ bool bClickClose = false)
             }
         }
 
+        void CreateWriteErrorDialog()
+        {
+            if (_writeErrorDialog == null)
+            {
+                _writeErrorDialog = new WriteErrorDialog();
+
+                _writeErrorDialog.FormClosing += (sender, e) => {
+                    var dialog = sender as Form;
+
+                    // 将关闭改为隐藏
+                    dialog.Visible = false;
+                    if (e.CloseReason == CloseReason.UserClosing)
+                        e.Cancel = true;
+                };
+
+                GuiUtil.SetControlFont(_writeErrorDialog, this.Font);
+                ClientInfo.MemoryState(_writeErrorDialog, "writeErrorDialog", "state");
+                _writeErrorDialog.UiState = ClientInfo.Config.Get("writeErrorDialog", "uiState", null);
+            }
+        }
+
         private void _modifyDialog_WriteComplete(object sender, WriteCompleteventArgs e)
         {
             this.Invoke((Action)(() =>
@@ -419,6 +442,14 @@ _cancel.Token,
                 _modifyDialog?.Close();
                 _modifyDialog?.Dispose();
                 _modifyDialog = null;
+            }
+
+            {
+                if (_writeErrorDialog != null)
+                    ClientInfo.Config.Set("writeErrorDialog", "uiState", _writeErrorDialog.UiState);
+                _writeErrorDialog?.Close();
+                _writeErrorDialog?.Dispose();
+                _writeErrorDialog = null;
             }
 
             this.ShowMessage("正在退出 ...");
@@ -1054,6 +1085,24 @@ MessageBoxDefaultButton.Button2);
                 return;
 
             EntityStoreage.DeleteAll();
+        }
+
+        private void MenuItem_openWriteErrorDialog_Click(object sender, EventArgs e)
+        {
+            OpenWriteErrorDialog();
+        }
+
+        public WriteErrorDialog OpenWriteErrorDialog()
+        {
+            CreateWriteErrorDialog();
+            if (_writeErrorDialog.Visible == false)
+                _writeErrorDialog.Show(this);
+            return _writeErrorDialog;
+        }
+
+        public void RemoveWriteErrorItem(string tid_hex)
+        {
+            _writeErrorDialog?.Remove(tid_hex);
         }
     }
 

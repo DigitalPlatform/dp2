@@ -692,6 +692,7 @@ namespace DigitalPlatform.RFID
                 text.AppendLine("=== EPC Bank ===");
                 text.AppendLine($"Hex(十六进制内容):\t{ByteArray.GetHexTimeStampString(epc_bank)?.ToUpper()}");
                 text.AppendLine($"PC(协议控制字):\t{this.PC.ToString()}");
+                text.AppendLine($"UII:\t{this.UII}");   // 2025/9/25
                 text.AppendLine("=== User Bank ===");
                 text.AppendLine($"Hex(十六进制内容):\t{ByteArray.GetHexTimeStampString(user_bank)?.ToUpper()}");
                 if (this.LogicChip != null)

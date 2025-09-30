@@ -187,6 +187,8 @@ namespace DigitalPlatform.RFID
             return bytes;
         }
 
+        public bool NeedTid = false; // 是否需要在标签信息中获取 TID
+
         // parameters:
         //      readerNameList  list中包含的内容的读卡器名(列表)。注意 list 中包含的标签，可能并不是全部读卡器的标签。对没有包含在其中的标签，本函数需要注意跳过(维持现状)，不要当作被删除处理
         // 异常：
@@ -344,7 +346,8 @@ namespace DigitalPlatform.RFID
 
                     // 2020/12/16
                     // 根据 PC 判断是否需要读出 User Bank
-                    if (tag.Protocol == InventoryInfo.ISO18000P6C)
+                    if (tag.Protocol == InventoryInfo.ISO18000P6C
+                        && NeedTid == false)
                     {
                         // TODO: UID 字符串转换为 byte [] 速度慢。最好是专门取特定位置两个字符即可
                         var umi = UhfUtility.GetUMI(Element.FromHexString(tag.UID), 2);
@@ -371,6 +374,7 @@ namespace DigitalPlatform.RFID
                                         update_books.Add(data);
                                 }
                             }
+                            // TODO: 如果 .TagInfo 中需要获得 .Tag，还是需要调用 GetTagInfo() 才行
                             continue;
                         }
                     }

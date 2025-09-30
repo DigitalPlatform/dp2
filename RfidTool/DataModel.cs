@@ -69,6 +69,7 @@ namespace RfidTool
 
             // 首次设置是否启用缓存
             TagList.EnableTagCache = EnableTagCache;
+            TagList.NeedTid = true; // 差额运算中是否需要 TID
 
             _task = Task.Factory.StartNew(
                 async () =>
@@ -572,7 +573,7 @@ namespace RfidTool
                             // TODO: 这里要利用 Hashtable 缓存
                             GetTagInfoResult result0 = null;
 
-                            result0 = _driver.GetTagInfo(reader.Name, info);
+                            result0 = _driver.GetTagInfo(reader.Name, info, "tid");    // 注： style 为 "tid" 可以获得 TID Bank 内容
                             if (result0.Value == -1)
                             {
                                 tag.TagInfo = null;
@@ -675,6 +676,7 @@ namespace RfidTool
         static StreamWriter _uidWriter = null;
 
         // 写入 UID-->UII(OI.PII) 对照关系日志文件
+        // TODO: 检查记事本打开文件的情况下，是否依然可以写入文件
         public static void WriteToUidLogFile(string uid,
             string uii)
         {

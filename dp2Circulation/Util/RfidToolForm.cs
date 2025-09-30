@@ -1510,15 +1510,28 @@ TaskScheduler.Default);
                     {
                         // *** ISO15693 HF
 
-                        // Exception:
-                        //      可能会抛出异常 ArgumentException TagDataException
-                        var chip = LogicChip.From(tag_info.Bytes,
-                            (int)tag_info.BlockSize);
-                        // string pii = chip.FindElement(ElementOID.PII)?.Text;
-                        pii = chip.FindElement(ElementOID.PII)?.Text;
-                        oi = chip.FindElement(ElementOID.OI)?.Text;
-                        if (string.IsNullOrEmpty(oi))
-                            oi = chip.FindElement(ElementOID.AOI)?.Text;
+                        try
+                        {
+                            // Exception:
+                            //      可能会抛出异常 ArgumentException TagDataException
+                            LogicChip chip = LogicChip.From(tag_info.Bytes,
+                                (int)tag_info.BlockSize);
+                            // string pii = chip.FindElement(ElementOID.PII)?.Text;
+                            pii = chip.FindElement(ElementOID.PII)?.Text;
+                            oi = chip.FindElement(ElementOID.OI)?.Text;
+                            if (string.IsNullOrEmpty(oi))
+                                oi = chip.FindElement(ElementOID.AOI)?.Text;
+                        }
+                        catch(TagDataException ex)
+                        {
+                            // 2025/9/25
+                            this.Invoke((Action)(() =>
+                            {
+                                ListViewUtil.ChangeItemText(item, COLUMN_PII, "error:" + ex.Message);
+                                // 把 item 修改为红色背景，表示出错的状态
+                                SetItemColor(item, "error");
+                            }));
+                        }
                     }
 
                     if (string.IsNullOrEmpty(pii))
@@ -1532,8 +1545,9 @@ TaskScheduler.Default);
                     {
                         token.ThrowIfCancellationRequested();
 
+                        var uii = BuildUii(pii, oi, null);
                         long lRet = channel.GetItemInfo(looping.Progress,
-                            BuildUii(pii, oi, null),
+                            uii,
                             "xml",
                             out string xml,
                             "",
@@ -1545,13 +1559,13 @@ TaskScheduler.Default);
                             item_info.Xml = xml;
                             // TODO: 给 item 设置出错状态
                             // 注意要防止 “馆外机构”等报错，导致这里被反复执行 API 请求，让 server 非常繁忙
-                            item_info.XmlErrorInfo = strError;
+                            item_info.XmlErrorInfo = $"册记录 '{uii}' {strError}";
                             continue;
                         }
                         else if (lRet == 0)
                         {
                             item_info.Xml = xml;
-                            item_info.XmlErrorInfo = string.IsNullOrEmpty(strError) ? "not found" : strError;
+                            item_info.XmlErrorInfo = string.IsNullOrEmpty(strError) ? $"册记录 '{uii}' 没有找到" : $"册记录 '{uii}' {strError}";
                         }
                         else
                         {
@@ -1753,11 +1767,20 @@ TaskScheduler.Default);
                     }
                     else
                     {
-                        // Exception:
-                        //      可能会抛出异常 ArgumentException TagDataException
-                        LogicChip chip = LogicChip.From(tag_info.Bytes,
-                        (int)tag_info.BlockSize);
-                        pii = chip.FindElement(ElementOID.PII)?.Text;
+                        try
+                        {
+                            // Exception:
+                            //      可能会抛出异常 ArgumentException TagDataException
+                            LogicChip chip = LogicChip.From(tag_info.Bytes,
+                            (int)tag_info.BlockSize);
+                            pii = chip.FindElement(ElementOID.PII)?.Text;
+                        }
+                        catch(TagDataException ex)
+                        {
+                            // 2025/9/25
+                            item_info.EasChecked = true;
+                            goto ERROR1;
+                        }
                     }
 
                     // 把 tag_info.EAS 设置到位
@@ -1767,6 +1790,12 @@ TaskScheduler.Default);
                         || (info.Prefix == "pii" && pii == info.Text)
                         || (info.Prefix == "uid" && uid == info.Text))
                     {
+                        // 2025/9/25
+                        if (string.IsNullOrEmpty(item_info.XmlErrorInfo) == false)
+                        {
+                            errors.Add($"{item_info.XmlErrorInfo}。无法完成 EAS 修正");
+                            goto CONTINUE;
+                        }
                         // 获得册记录的外借状态。
                         // return:
                         //      -2  册记录为空，无法判断状态
@@ -2797,7 +2826,7 @@ TaskScheduler.Default);
                     if (result.TagInfo.Tag != null)
                     {
                         var bytes = result.TagInfo.Tag as byte[];
-                        text.AppendLine($"Hex(十六进制内容):\t{ByteArray.GetHexTimeStampString(bytes).ToUpper()} ({bytes?.Length}bytes)");
+                        text.AppendLine($"Hex(十六进制内容):\t{ByteArray.GetHexTimeStampString(bytes)?.ToUpper()} ({bytes?.Length}bytes)");
                     }
                 }
             }
@@ -3594,6 +3623,10 @@ TaskScheduler.Default);
                 goto ERROR1;
             }
             */
+            if (item_info.OneTag.Protocol == InventoryInfo.ISO14443A)
+                return "暂不支持 ISO14443A 标签写入";
+            if (item_info.OneTag.Protocol == InventoryInfo.ISO18000P6C)
+                return "暂不支持 ISO18000P6C 标签写入";
 
             try
             {
@@ -3704,6 +3737,10 @@ new_tag_info);
             if (item_info.LogicChipItem == null)
                 return false;
             */
+            if (item_info.OneTag.Protocol == InventoryInfo.ISO14443A)
+                return "暂不支持 ISO14443A 标签写入";
+            if (item_info.OneTag.Protocol == InventoryInfo.ISO18000P6C)
+                return "暂不支持 ISO18000P6C 标签写入";
 
             string strError = "";
 

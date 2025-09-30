@@ -303,6 +303,7 @@ namespace RfidTool
         const int COLUMN_ANTENNA = 10;
         const int COLUMN_READERNAME = 11;
         const int COLUMN_PROTOCOL = 12;
+        const int COLUMN_TID = 13;
 
         object _syncRootFill = new object();
 
@@ -330,6 +331,9 @@ namespace RfidTool
         {
             foreach (var tag in tags)
             {
+                if (tag.OneTag.Protocol == InventoryInfo.ISO14443A)
+                    continue;
+
                 ListViewItem item = ListViewUtil.FindItem(this.listView_tags, tag.OneTag.UID, COLUMN_UID);
                 if (item == null)
                 {
@@ -397,6 +401,12 @@ namespace RfidTool
             ListViewUtil.ChangeItemText(item, COLUMN_READERNAME, tag.OneTag.ReaderName);
             ListViewUtil.ChangeItemText(item, COLUMN_PROTOCOL, tag.OneTag.Protocol);
 
+            if (tag.OneTag?.Protocol == InventoryInfo.ISO18000P6C)
+            {
+                byte[] tid_bank = tag.OneTag?.TagInfo?.Tag as byte[];
+                ListViewUtil.ChangeItemText(item, COLUMN_TID, ModifyDialog.GetTidHex(tid_bank));
+            }
+
             ListViewUtil.ChangeItemText(item, COLUMN_PII, "(尚未填充)");
             ListViewUtil.ChangeItemText(item, COLUMN_TITLE, "");
             ListViewUtil.ChangeItemText(item, COLUMN_ACCESSNO, "");
@@ -413,7 +423,7 @@ namespace RfidTool
                     {
                         // 注1: taginfo.EAS 在调用后可能被修改
                         // 注2: 本函数不再抛出异常。会在 ErrorInfo 中报错
-                        var uhf_info = RfidTagList.GetUhfChipInfo(taginfo, "convertValueToGB"); // "dontCheckUMI"
+                        var uhf_info = RfidTagList.GetUhfChipInfo(taginfo/*, "convertValueToGB,ensureChip"*/); // "dontCheckUMI"
 
                         if (string.IsNullOrEmpty(uhf_info.ErrorInfo) == false)
                         {
@@ -428,6 +438,8 @@ namespace RfidTool
                         // 单独严格解析一次标签内容
 
                         chip = uhf_info.Chip;
+                        Debug.Assert(chip != null);
+
                         // taginfo.EAS 可能会被修改
                         iteminfo.UhfProtocol = uhf_info.UhfProtocol;
                         pii = uhf_info.PII;
@@ -993,7 +1005,7 @@ namespace RfidTool
                         var bytes = tag.TagInfo.Tag as byte[];
                         if (bytes == null)
                             throw new Exception("(uhf) tag.TagInfo.Tag 为 null，无法获得 TID");
-                        uid = ByteArray.GetHexTimeStampString(bytes);
+                        uid = ByteArray.GetHexTimeStampString(bytes)?.ToUpper();
                     }
                     DataModel.WriteToUidLogFile(uid,
                         ModifyDialog.MakeOiPii(barcode, oi, aoi));
@@ -1660,7 +1672,7 @@ MessageBoxDefaultButton.Button2);
                     if (result.TagInfo.Tag != null)
                     {
                         var bytes = result.TagInfo.Tag as byte[];
-                        text.AppendLine($"Hex(十六进制内容):\t{ByteArray.GetHexTimeStampString(bytes).ToUpper()} ({bytes?.Length}bytes)");
+                        text.AppendLine($"Hex(十六进制内容):\t{ByteArray.GetHexTimeStampString(bytes)?.ToUpper()} ({bytes?.Length}bytes)");
                     }
                 }
             }
@@ -2023,7 +2035,7 @@ new_tag_info);
 
             DuplicateUhfTagDialog dlg = new DuplicateUhfTagDialog();
             dlg.EpcBankHex = epc_bank_hex;
-            dlg.UserBankHex = ByteArray.GetHexTimeStampString(user_bank)?.ToUpper(); ;
+            dlg.UserBankHex = ByteArray.GetHexTimeStampString(user_bank)?.ToUpper();
             if (dlg.ShowDialog(this) != DialogResult.OK)
                 return;
             epc_bank_hex = dlg.EpcBankHex;
