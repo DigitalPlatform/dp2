@@ -1,18 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Xml;
-using System.IO;
-using System.Collections;
-using System.Reflection;
-using System.Threading;
-using System.Diagnostics;
-
-using DigitalPlatform;	// Stop类
-using DigitalPlatform.rms.Client;
-using DigitalPlatform.Xml;
+﻿using DigitalPlatform;	// Stop类
 using DigitalPlatform.IO;
+using DigitalPlatform.rms.Client;
 using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Reflection;
+using System.Text;
+using System.Threading;
+using System.Xml;
+using static DigitalPlatform.LibraryServer.LibraryApplication;
 
 
 namespace DigitalPlatform.LibraryServer
@@ -73,6 +73,9 @@ namespace DigitalPlatform.LibraryServer
             XmlDocument domExist,
             XmlDocument domNew,
             bool outofrangeAsError,
+#if DEBUG
+            delegate_checkAccess func_checkAccess,
+#endif
             out string strMergedXml,
             out string strError)
         {
@@ -116,6 +119,9 @@ namespace DigitalPlatform.LibraryServer
                 sessioninfo.RightsOrigin,
                 domNew,
                 domExist,
+#if ITEM_ACCESS_RIGHTS
+                    func_checkAccess,
+#endif
                 ref bChangePartDeniedParam,
                 out strError);
             if (nRet == -1)

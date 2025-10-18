@@ -4320,6 +4320,7 @@ out strError);
                                 domNew,
                                 elements,   // strAction == "transfer" ? transfer_entity_element_names : null,
                                 false,
+                                null,
                                 out strNewXml,
                                 out strError);
                             if (nRet == -1)
@@ -4353,7 +4354,10 @@ out strError);
                                     strAction,
                                     domExist,
                                     domNew,
-                                                        false,  //??
+                                    false,  //??
+#if ITEM_ACCESS_RIGHTS
+                                    null,
+#endif
                                     out strNewXml,
                                     out strError);
                                 if (nRet == -1)

@@ -749,7 +749,7 @@ out strError);
                     if (bFirst == true)
                     {
                         // 如果不要强制循环，此时也不能结束，否则会让用户以为数据库里面根本没有数据
-                        // AutoCloseMessageBox.Show(this, "您为数据库 " + info.DbName + " 指定的首记录 " + strID + strDirectionComment + " 不存在。\r\n\r\n(注：为避免出现此提示，可在操作前勾选“校准首尾ID”)\r\n\r\n按 确认 继续向后找...");
+                        // AutoCloseMessageBox.Show(this, "您为数据库 " + info.DbNames + " 指定的首记录 " + strID + strDirectionComment + " 不存在。\r\n\r\n(注：为避免出现此提示，可在操作前勾选“校准首尾ID”)\r\n\r\n按 确认 继续向后找...");
                         bFirst = false;
                         return 1;
                     }
@@ -906,7 +906,7 @@ out strError);
     out string strError)
         {
             strError = "";
-            // 检查 info.DbName 是否为书目库
+            // 检查 info.DbNames 是否为书目库
             return 0;
         }
 
@@ -967,7 +967,7 @@ out strError);
                     if (bFirst == true)
                     {
                         // 如果不要强制循环，此时也不能结束，否则会让用户以为数据库里面根本没有数据
-                        // AutoCloseMessageBox.Show(this, "您为数据库 " + info.DbName + " 指定的首记录 " + strID + strDirectionComment + " 不存在。\r\n\r\n(注：为避免出现此提示，可在操作前勾选“校准首尾ID”)\r\n\r\n按 确认 继续向后找...");
+                        // AutoCloseMessageBox.Show(this, "您为数据库 " + info.DbNames + " 指定的首记录 " + strID + strDirectionComment + " 不存在。\r\n\r\n(注：为避免出现此提示，可在操作前勾选“校准首尾ID”)\r\n\r\n按 确认 继续向后找...");
                         bFirst = false;
                         return 1;
                     }

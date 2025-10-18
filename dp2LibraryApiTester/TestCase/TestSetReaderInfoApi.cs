@@ -446,6 +446,7 @@ namespace dp2LibraryApiTester
                 if (lRet == -1)
                     goto ERROR1;
 
+                // TODO: 要设法在测试完成后恢复原来的条码号校验规则
                 // 设置条码号校验规则
                 int ret = Utility.SetBarcodeValidation(
                     @"<validator location=',流通库,测试库,智能书柜,阅览室,保存本库'>

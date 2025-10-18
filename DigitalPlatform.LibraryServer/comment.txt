@@ -330,3 +330,52 @@ strStyle:
 OldRecPath: 中文图书实体/6
 OldRecord: 
 (注: TODO: NewRecPath 为空时应该也成功)
+
+
+~~~
+原有的 getobject getxxxobject setobject setxxxobject 应对存取定义改造，
+有两种处理办法：
+
+1) 当具有存取定义的时候，这些权限都转为认存取定义里面的相应权限。
+比如：
+中文图书:setitemobject=|getitemobject=;setitemobject=*|getitemobject=*
+
+2) 当具有存取定义的时候，这些权限不再作为独立的权限存在，而是作为 getxxxinfo 和 setxxxinfo 的“字段定义”部分存在
+比如：
+中文图书:setbiblioinfo=new(001-999,object),change(200-300,object);
+中文图书:setiteminfo=new(xml,object),change(xml)
+或者：
+中文图书:setbiblioinfo=new(*),change(*)
+(注:星号表示包括所有 MARC 字段和 object)
+中文图书:setiteminfo=new(*),change(xml)
+(注:星号等同于 xml,object )
+
+注: 以上两种方法，存取定义中 getobject 和 setobject 权限都倾向不再使用。而是分散到具体的权限去了
+
+
+~~~
+重构过程：
+
+方法：用 ITEM_ACCESS_RIGHTS 搜索新写的代码。用 'object"' 和 'object,' 搜索以前的可能相关的代码
+
+1) FilterBiblioRecord() 函数
+
+GetBiblioInfo() API 用到这个函数。
+注意到，(如果存在存取定义并且)formats 中为 summary 时，代码还会检查存取定义中是否具备 getbibliosummary 或者 getauthorirysummary 权限。
+可能需要对 GetBiblioSummary() API 代码检查一下，看看是否遗漏了检查 getbibliosummary 权限?
+
+测试: 
+a) GetBiblioInfos() API 的 strBiblioXml 可以提交一个书目记录内容，让 dp2library 创建 summary 等格式内容返回。这时依赖 strBiblioRecPath 内容决定权限检查时匹配哪一个数据库的存取定义
+b) GetBiblioInfos() API 获得 XML 记录内容时，可通过存取定义过滤书目记录中的 dprms:file 元素
+    例如: 中文图书:getbibliosummary|getbiblioobject=
+c) WriteRes() API 写入书目记录下级对象。需要 setbiblioobject 或者 setobject 权限
+
+2) ManageDatabase() API
+
+目前仅实现了 getinfo action 利用数据库名配置存取定义。其它 action 还只能整体用 managedatabase 权限定义，还不能约束到具体数据库名
+
+
+~~~
+发现一个内务种册窗的 bug
+先让当前账户缺乏 setbiblioobject 和 setobject 权限
+然后把一条书目记录下属的某个对象删除，然后全部保存。会报错说缺乏权限。但此时种册窗的“全部保存”按钮变成灰色了

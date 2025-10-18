@@ -1,35 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-using System.Xml;
-using System.IO;
-using System.Collections;
-using System.Reflection;
-using System.Threading;
-using System.Diagnostics;
-using System.Net.Mail;
-
-using DigitalPlatform;	// Stop类
-using DigitalPlatform.rms.Client;
-using DigitalPlatform.Xml;
-using DigitalPlatform.IO;
-using DigitalPlatform.Text;
-using DigitalPlatform.Script;
-using DigitalPlatform.MarcDom;
-using DigitalPlatform.Marc;
-
-using DigitalPlatform.Message;
-using DigitalPlatform.rms.Client.rmsws_localhost;
+﻿using DigitalPlatform;	// Stop类
 using DigitalPlatform.Core;
-using System.Data.SqlClient;
-using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolTip;
+using DigitalPlatform.IO;
+using DigitalPlatform.Marc;
+using DigitalPlatform.MarcDom;
+using DigitalPlatform.Message;
+using DigitalPlatform.rms.Client;
+using DigitalPlatform.rms.Client.rmsws_localhost;
+using DigitalPlatform.Script;
+using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
+using Microsoft.SqlServer.Server;
 using MongoDB.Driver.Core.Clusters.ServerSelectors;
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
+using System.Diagnostics;
+using System.IO;
+using System.Net.Mail;
+using System.Reflection;
+using System.Runtime.Serialization;
+using System.Text;
+using System.Threading;
 using System.Web;
 using System.Web.UI.WebControls;
-using System.Runtime.Serialization;
+using System.Windows.Forms;
+using System.Xml;
+using System.Xml.Linq;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolTip;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -202,7 +201,7 @@ namespace DigitalPlatform.LibraryServer
         // 
         // TODO: 将来可以增加在strBiblioRecPath中允许多种检索入口的能力，比方说允许使用itembarcode和itemconfirmpath(甚至和excludebibliopath)结合起来定位种。这样就完全可以取代原有GetBiblioSummary API的功能
         // parameters:
-        //      strBiblioRecPath    种记录路径。如果在最后接续"$prev" "$next"，表示前一条或后一条。
+        //      strBiblioRecPath    书目记录路径。如果在最后接续"$prev" "$next"，表示前一条或后一条。
         //      formats     希望获得信息的若干格式。如果 == null，表示希望只返回timestamp (results返回空)
         //                  可以用多种格式：xml html text @??? summary outputpath
         // Result.Value -1出错 0没有找到 1找到
@@ -261,6 +260,23 @@ namespace DigitalPlatform.LibraryServer
                 {
                     if (String.Compare(format, "summary", true) == 0)
                     {
+#if ITEM_ACCESS_RIGHTS
+                        // 需要检查存取定义中的 getbibliosummary 权限
+                        var error = CheckAccess(
+                            sessioninfo,
+                            "获取书目摘要",
+                            ResPath.GetDbName(strBiblioRecPath),
+                            "getbibliosummary,order",
+                            "",
+                            out string access_parameters);
+                        if (error != null)
+                        {
+                            result.Value = -1;
+                            result.ErrorInfo = error;
+                            result.ErrorCode = ErrorCode.AccessDenied;
+                            return result;
+                        }
+#else
                         // 权限字符串
                         if (StringUtil.IsInList("getbibliosummary,order", sessioninfo.RightsOrigin) == false)
                         {
@@ -269,6 +285,7 @@ namespace DigitalPlatform.LibraryServer
                             result.ErrorCode = ErrorCode.AccessDenied;
                             return result;
                         }
+#endif
                     }
                 }
             }
@@ -768,19 +785,31 @@ namespace DigitalPlatform.LibraryServer
         // 根据 strAccessParameters，过滤书目记录中的字段
         int FilterBiblioRecord(SessionInfo sessioninfo,
             string strAccessParameters,
+            string recpath,
             ref string strBiblioXml,
             out string strError)
         {
             strError = "";
             int nRet = 0;
 
-            // 2023/1/28 把这一段放到外面，让前端提交的 XML 记录也经过字段过滤步骤
+            string dbname = ResPath.GetDbName(recpath);
+#if ITEM_ACCESS_RIGHTS
+            var has_setobject_rights = CheckAccess(sessioninfo,
+                "写对象",
+                dbname,
+                "setobject,setbiblioobject",
+                "",
+                out _) == null;
+#else
+            var has_setobject_rights = StringUtil.IsInList("setobject,setbiblioobject", sessioninfo.Rights);
+#endif
+
+            // 2023/1/28 把这一段放到外面，让前端提交的 XML 记录也经过字段过滤步骤。可以理解为 XML 记录模拟写入，写入时要根据权限对字段进行过滤
             // 2013/3/6
             // 过滤字段内容
             // 没有 writeres 和 setobject 权限，也可以进入处理?
             if (string.IsNullOrEmpty(strAccessParameters) == false
-                // || !(StringUtil.IsInList("writeres", sessioninfo.Rights) == true || StringUtil.IsInList("setobject", sessioninfo.Rights) == true)
-                || StringUtil.IsInList("setobject,setbiblioobject", sessioninfo.Rights) == false
+                || has_setobject_rights == false
                 )
             {
                 // 根据字段权限定义过滤出允许的内容
@@ -792,23 +821,50 @@ namespace DigitalPlatform.LibraryServer
                 //      1   有部分字段被修改或滤除。strError 中返回被修改或滤除的字段的名字
                 nRet = FilterBiblioByFieldNameList(
 #if USE_OBJECTRIGHTS
-                            StringUtil.IsInList("objectRights", this.Function) == true ? sessioninfo.Rights : null,
+                    StringUtil.IsInList("objectRights", this.Function) == true ? sessioninfo.Rights : null,
+#else
+#if ITEM_ACCESS_RIGHTS
+
+                    (r) =>
+                    {
+                        if (r == "download" || r == "preview")
+                            return sessioninfo.Rights;
+                        return CheckAccess(sessioninfo,
+                            $"书目记录下级对象({r})",
+                            dbname,
+                            r,
+                            "",
+                            out _);
+                    },
 #else
                     sessioninfo.Rights,
 #endif
-                    strAccessParameters,
+#endif
+                    strAccessParameters,    // 字段名列表
                     ref strBiblioXml,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
             }
 
+#if ITEM_ACCESS_RIGHTS
+            var has_getobject_rights = CheckAccess(sessioninfo,
+    "读对象",
+    dbname,
+    "getbiblioobject,getobject",
+    "",
+    out _) == null;
+
+#else
+            var has_getobject_rights = StringUtil.IsInList("getbiblioobject,getobject", sessioninfo.RightsOrigin);
+#endif
+
             // 根据账户权限中是否具备 getbiblioobject 或 getobject，决定是否滤除书目 XML 记录中的 dprms:file 元素
             // 注意判断针对 object 的写权限字段范围是否大于读。
             // 如果出现这种情况，可以有两种方法处理:
             // 1) 立即报错返回。因为如果不报错，前端提交的没有 file 元素的记录直接覆盖进去，原有记录的 file 元素就丢失了。
             // 2) SetBiblioInfo() API 内处理的时候，削弱写权限，等于用读和写的交集来决定那些字段可以写入。不过这样的缺点是系统给管理员发现系统表现不符合预期会感到困惑，不容易想到这是写权限字段范围大于读引起的保护性降格行为
-            if (StringUtil.IsInList("getbiblioobject,getobject", sessioninfo.RightsOrigin) == false
+            if (has_getobject_rights == false
                 && string.IsNullOrEmpty(strBiblioXml) == false)
             {
                 XmlDocument temp = new XmlDocument();
@@ -1117,6 +1173,7 @@ namespace DigitalPlatform.LibraryServer
             // 根据 strAccessParameters，过滤书目记录中的字段
             nRet = FilterBiblioRecord(sessioninfo,
                 strAccessParameters,
+                strOutputPath,
                 ref strBiblioXml,
                 out strError);
             if (nRet == -1)
@@ -1203,6 +1260,38 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     // TODO: 是否要延迟获得书目记录?
+
+                    // 2025/10/16
+                    // 重构书目记录路径获得书目摘要的这部分代码，和 GetBiblioSummary() API 中的代码部分共用
+
+                    // return:
+                    //      -1  出错
+                    //      0   没有找到
+                    //      1   从 cache 找到
+                    //      2   从书目库找到
+                    nRet = BuildBiblioSummary(
+                        channel,
+                        strCurrentBiblioRecPath,
+                        "", // 不必创建 fragment 部分
+                        (string p, out string data, out string error) =>
+                        {
+                            Debug.Assert(strCurrentBiblioRecPath == p);
+                            data = strBiblioXml;
+                            error = "";
+                            return 1;
+                        },
+                        out SummaryItem summary,
+                        out strError);
+                    if (nRet == -1 || nRet == 0)
+                    {
+                        AppendErrorText(strError);
+                        goto CONTINUE;
+                    }
+
+                    // 注：这里并没有把产生好的摘要字符串写入 mongodb 缓存数据库
+                    strBiblio = summary.Summary;
+
+#if REMOVED
                     SummaryItem summary = GetBiblioSummary(strCurrentBiblioRecPath);
                     if (summary != null && string.IsNullOrEmpty(summary.Summary) == false)
                     {
@@ -1311,7 +1400,7 @@ namespace DigitalPlatform.LibraryServer
                         }
                         string strSummary = "";
 
-                        // 将种记录数据从XML格式转换为HTML格式
+                        // 将书目记录数据从XML格式转换为HTML格式
                         if (string.IsNullOrEmpty(strBiblioXml) == false)
                         {
                             if (bFltx == true)
@@ -1353,6 +1442,8 @@ namespace DigitalPlatform.LibraryServer
                         // 注：这里并没有把产生好的摘要字符串写入 mongodb 缓存数据库
                         strBiblio = strSummary;
                     }
+
+#endif
                 }
                 // 目标记录路径
                 else if (String.Compare(strBiblioType, "targetrecpath", true) == 0)
@@ -1376,7 +1467,7 @@ namespace DigitalPlatform.LibraryServer
                         goto CONTINUE;
                     }
                 }
-                // 如果只需要种记录的XML格式
+                // 如果只需要书目记录的XML格式
                 else if (IsResultType(strBiblioType, "xml", out string parameters)
                     || IsResultType(strBiblioType, "iso2709", out parameters)
                     || IsResultType(strBiblioType, "marc", out parameters)
@@ -2371,8 +2462,31 @@ namespace DigitalPlatform.LibraryServer
             }
 #endif
 
+#if ITEM_ACCESS_RIGHTS
+            var delay_check_rights = false; // 是否要延迟检查权限
+#endif
+
             if (sessioninfo != null)
             {
+#if ITEM_ACCESS_RIGHTS
+                // 需要检查存取定义中的 getbibliosummary 权限
+                var error = CheckAccess(
+                    sessioninfo,
+                    "获取书目摘要",
+                    null,   // 第一阶段检查，不指定数据库名
+                    "getbibliosummary,order",
+                    "",
+                    out string access_parameters);
+                if (error != null)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = error;
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+                delay_check_rights = true;
+
+#else
                 // 权限判断
                 // 权限字符串
                 if (StringUtil.IsInList("getbibliosummary,order", sessioninfo.RightsOrigin) == false)
@@ -2382,6 +2496,7 @@ namespace DigitalPlatform.LibraryServer
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
+#endif
             }
 
             int nRet = 0;
@@ -2499,7 +2614,6 @@ namespace DigitalPlatform.LibraryServer
 
                 if (nRet == 0)
                 {
-
                     result.Value = 0;
                     result.ErrorInfo = "册记录没有找到";
                     result.ErrorCode = ErrorCode.NotFound;
@@ -2623,7 +2737,30 @@ namespace DigitalPlatform.LibraryServer
                 goto ERROR1;
             }
 
-            string strBiblioXml = "";
+#if ITEM_ACCESS_RIGHTS
+            Debug.Assert(string.IsNullOrEmpty(strBiblioDbName) == false);
+            if (delay_check_rights)
+            {
+                var error = CheckAccess(
+                    sessioninfo,
+                    "获取书目摘要",
+                    strBiblioDbName,   // 第二阶段检查，要指定数据库名
+                    "getbibliosummary,order",
+                    "",
+                    out string access_parameters);
+                if (error == "normal")
+                    delay_check_rights = true;
+                if (error != null)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = error;
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+            }
+#endif
+
+            // string strBiblioXml = "";
             strBiblioRecPath = strBiblioDbName + "/" + strBiblioRecID;
 
         LOADBIBLIO:
@@ -2637,6 +2774,59 @@ namespace DigitalPlatform.LibraryServer
                 return result;
             }
 
+            // return:
+            //      -1  出错
+            //      0   没有找到
+            //      1   从 cache 找到
+            //      2   从书目库找到
+            nRet = BuildBiblioSummary(
+                channel,
+                strBiblioRecPath,
+                "build_image_fragment",
+                null,
+                out SummaryItem summary,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            if (nRet == 0)
+            {
+                result.Value = -1;
+                result.ErrorInfo = strError;
+                result.ErrorCode = ErrorCode.NotFound;
+                return result;
+            }
+            if (nRet == 1)
+            {
+                // 从存储中命中
+                if (this.Statis != null)
+                    this.Statis.IncreaseEntryValue(
+                    sessioninfo.LibraryCodeList,
+                    "获取书目摘要",
+                    "存储命中次",
+                    1);
+            }
+            if (nRet == 2)
+            {
+                if (this.Statis != null
+&& sessioninfo != null)
+                    this.Statis.IncreaseEntryValue(
+                    sessioninfo.LibraryCodeList,
+                    "获取书目摘要",
+                    "构造次",
+                    1);
+                // 存入 cache
+                this.SetBiblioSummary(strBiblioRecPath, summary.Summary, summary.ImageFragment);
+            }
+
+            if (StringUtil.IsInList("coverimage", strBiblioRecPathExclude) == true)
+                strSummary = summary.ImageFragment + summary.Summary;
+            else
+                strSummary = summary.Summary;
+
+            result.Value = 1;
+            return result;
+#if REMOVED
+            // 从 cache 存储中获得书目摘要
             SummaryItem summary = GetBiblioSummary(strBiblioRecPath);
             if (summary != null)
             {
@@ -2669,60 +2859,9 @@ return result;
 
             // 获得本地配置文件
 
-            string strRemotePath = BrowseFormat.CanonicalizeScriptFileName(
-                ResPath.GetDbName(strBiblioRecPath),
-                "./cfgs/summary.fltx");
 
-            nRet = this.CfgsMap.MapFileToLocal(
-                // sessioninfo.Channels,
-                channel,
-                strRemotePath,
-                out string strLocalPath,
-                out strError);
-            if (nRet == -1)
-                goto ERROR1;
-            if (nRet == 0)
-            {
-                // 配置.fltx文件不存在, 再试探.cs文件
-                strRemotePath = BrowseFormat.CanonicalizeScriptFileName(
-                ResPath.GetDbName(strBiblioRecPath),
-                "./cfgs/summary.cs");
 
-                nRet = this.CfgsMap.MapFileToLocal(
-                    // sessioninfo.Channels,
-                    channel,
-                    strRemotePath,
-                    out strLocalPath,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-                if (nRet == 0)
-                {
-                    strError = strRemotePath + "不存在...";
-                    goto ERROR1;
-                }
-            }
-
-            bool bFltx = false;
-            // 如果是一般.cs文件, 还需要获得.cs.ref配置文件
-            if (IsCsFileName(strRemotePath) == true)
-            {
-                nRet = this.CfgsMap.MapFileToLocal(
-                    // sessioninfo.Channels,
-                    channel,
-                    strRemotePath + ".ref",
-                    out string strTempPath,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-                bFltx = false;
-            }
-            else
-            {
-                bFltx = true;
-            }
-
-            // 取得种记录
+            // 取得书目记录
             lRet = channel.GetRes(strBiblioRecPath,
                 out strBiblioXml,
                 out strMetaData,
@@ -2731,7 +2870,7 @@ return result;
                 out strError);
             if (lRet == -1)
             {
-                strError = "获得种记录 '" + strBiblioRecPath + "' 时出错: " + strError;
+                strError = "获得书目记录 '" + strBiblioRecPath + "' 时出错: " + strError;
                 if (channel.IsNotFound())
                 {
                     result.Value = -1;
@@ -2781,7 +2920,64 @@ return result;
                 }
             }
 
-            // 将种记录数据从XML格式转换为HTML格式
+            // 获得配置文件
+            string strLocalPath = "";
+            bool bFltx = false;
+            {
+                string strRemotePath = BrowseFormat.CanonicalizeScriptFileName(
+        ResPath.GetDbName(strBiblioRecPath),
+        "./cfgs/summary.fltx");
+
+                nRet = this.CfgsMap.MapFileToLocal(
+                    // sessioninfo.Channels,
+                    channel,
+                    strRemotePath,
+                    out strLocalPath,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                if (nRet == 0)
+                {
+                    // 配置.fltx文件不存在, 再试探.cs文件
+                    strRemotePath = BrowseFormat.CanonicalizeScriptFileName(
+                    ResPath.GetDbName(strBiblioRecPath),
+                    "./cfgs/summary.cs");
+
+                    nRet = this.CfgsMap.MapFileToLocal(
+                        // sessioninfo.Channels,
+                        channel,
+                        strRemotePath,
+                        out strLocalPath,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    if (nRet == 0)
+                    {
+                        strError = strRemotePath + "不存在...";
+                        goto ERROR1;
+                    }
+                }
+
+                // 如果是一般.cs文件, 还需要获得.cs.ref配置文件
+                if (IsCsFileName(strRemotePath) == true)
+                {
+                    nRet = this.CfgsMap.MapFileToLocal(
+                        // sessioninfo.Channels,
+                        channel,
+                        strRemotePath + ".ref",
+                        out string strTempPath,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    bFltx = false;
+                }
+                else
+                {
+                    bFltx = true;
+                }
+            }
+
+            // 根据书目记录 XML 利用脚本创建书目摘要
             if (string.IsNullOrEmpty(strBiblioXml) == false)
             {
                 if (bFltx == true)
@@ -2812,6 +3008,7 @@ return result;
             else
                 strSummary = "";
 
+            // 存入 cache
             this.SetBiblioSummary(strBiblioRecPath, strSummary, strFragment);
 
             if (StringUtil.IsInList("coverimage", strBiblioRecPathExclude) == true)
@@ -2835,11 +3032,218 @@ return result;
 
             result.Value = 1;
             return result;
+#endif
         ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
             return result;
+        }
+
+        // return:
+        //      -1  出错
+        //      0   没有找到
+        //      1   找到
+        delegate int delegate_getBiblioRecord(string recpath,
+            out string strBiblioXml,
+            out string strError);
+
+        // parameters:
+        //      style  风格参数。目前有一个值 "build_image_fragment"，表示要创建封面图像的 img 片段并返回到 summary.ImageFragment 成员中
+        // return:
+        //      -1  出错
+        //      0   没有找到
+        //      1   从 cache 找到
+        //      2   从书目库找到
+        int BuildBiblioSummary(
+            RmsChannel channel,
+            string strBiblioRecPath,
+            string style,
+            delegate_getBiblioRecord func_getBiblioRecord,
+            out SummaryItem summary,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            // 从 cache 存储中获得书目摘要
+            summary = GetBiblioSummary(strBiblioRecPath);
+            if (summary != null)
+                return 1;
+
+            string strBiblioXml = "";
+            if (func_getBiblioRecord != null)
+            {
+                nRet = func_getBiblioRecord(strBiblioRecPath,
+                    out strBiblioXml,
+                    out strError);
+                if (nRet == -1 || nRet == 0)
+                    return nRet;
+            }
+            else
+            {
+                // 取得书目记录
+                var lRet = channel.GetRes(strBiblioRecPath,
+                    out strBiblioXml,
+                    out _,  // strMetaData,
+                    out _,  // byte[] timestamp,
+                    out _,  // strOutputItemPath,
+                    out strError);
+                if (lRet == -1)
+                {
+                    strError = "获得书目记录 '" + strBiblioRecPath + "' 时出错: " + strError;
+                    if (channel.IsNotFound())
+                    {
+                        return 0;
+                    }
+                    return -1;
+                }
+            }
+
+            var build_image_fragment = StringUtil.IsInList("build_image_fragment", style);
+
+            string strFragment = "";
+            string strMarc = "";
+            string strMarcSyntax = "";
+            if (build_image_fragment)
+            {
+                {
+                    // 转换为MARC格式
+
+                    // 将MARCXML格式的xml记录转换为marc机内格式字符串
+                    // parameters:
+                    //		bWarning	==true, 警告后继续转换,不严格对待错误; = false, 非常严格对待错误,遇到错误后不继续转换
+                    //		strMarcSyntax	指示marc语法,如果==""，则自动识别
+                    //		strOutMarcSyntax	out参数，返回marc，如果strMarcSyntax == ""，返回找到marc语法，否则返回与输入参数strMarcSyntax相同的值
+                    nRet = MarcUtil.Xml2Marc(strBiblioXml,
+                        true,
+                        "", // this.CurMarcSyntax,
+                        out strMarcSyntax,
+                        out strMarc,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                }
+
+                // fragment 总是要产生，只是最后是否返回给前端需要判断一下
+                {
+                    // 获得封面图像 URL
+                    string strImageUrl = ScriptUtil.GetCoverImageUrl(strMarc, "SmallImage");
+                    if (string.IsNullOrEmpty(strImageUrl) == false)
+                    {
+                        if (StringUtil.HasHead(strImageUrl, "uri:") == true)
+                        {
+                            strImageUrl = "object-path:" + strBiblioRecPath + "/object/" + strImageUrl.Substring(4);
+                            strFragment = "<img class='biblio pending' name='" + strImageUrl + "'/>";
+                        }
+                        else
+                        {
+                            strFragment = "<img class='biblio' src='" + strImageUrl + "'/>";
+                        }
+                    }
+                }
+            }
+
+            // 获得配置文件
+            string strLocalPath = "";
+            bool bFltx = false;
+            {
+                string strRemotePath = BrowseFormat.CanonicalizeScriptFileName(
+        ResPath.GetDbName(strBiblioRecPath),
+        "./cfgs/summary.fltx");
+
+                nRet = this.CfgsMap.MapFileToLocal(
+                    // sessioninfo.Channels,
+                    channel,
+                    strRemotePath,
+                    out strLocalPath,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 0)
+                {
+                    // 配置.fltx文件不存在, 再试探.cs文件
+                    strRemotePath = BrowseFormat.CanonicalizeScriptFileName(
+                    ResPath.GetDbName(strBiblioRecPath),
+                    "./cfgs/summary.cs");
+
+                    nRet = this.CfgsMap.MapFileToLocal(
+                        // sessioninfo.Channels,
+                        channel,
+                        strRemotePath,
+                        out strLocalPath,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                    if (nRet == 0)
+                    {
+                        strError = strRemotePath + "不存在...";
+                        return -1;
+                    }
+                }
+
+                // 如果是一般.cs文件, 还需要获得.cs.ref配置文件
+                if (IsCsFileName(strRemotePath) == true)
+                {
+                    nRet = this.CfgsMap.MapFileToLocal(
+                        // sessioninfo.Channels,
+                        channel,
+                        strRemotePath + ".ref",
+                        out string strTempPath,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                    bFltx = false;
+                }
+                else
+                {
+                    bFltx = true;
+                }
+            }
+
+            string strSummary = "";
+            // 根据书目记录 XML 利用脚本创建书目摘要
+            if (string.IsNullOrEmpty(strBiblioXml) == false)
+            {
+                if (bFltx == true)
+                {
+                    string strFilterFileName = strLocalPath;
+                    // 当 build_image_fragment 为 true 时，传入的是 MARC 格式。可以节省一点开销
+                    nRet = this.ConvertBiblioXmlToHtml(
+                        strFilterFileName,
+                        build_image_fragment ? strMarc : strBiblioXml,    // strBiblioXml,
+                        build_image_fragment ? strMarcSyntax : null,
+                        strBiblioRecPath,
+                        out strSummary,
+                        out strError);
+                }
+                else
+                {
+                    nRet = this.ConvertRecordXmlToHtml(
+                        strLocalPath,
+                        strLocalPath + ".ref",
+                        strBiblioXml,
+                        strBiblioRecPath,   // 2009/10/18 
+                        out strSummary,
+                        out strError);
+                }
+                if (nRet == -1)
+                    return -1;
+            }
+            else
+                strSummary = "";
+
+            summary = new SummaryItem
+            {
+                ImageFragment = strFragment,
+                Summary = strSummary
+            };
+#if REMOVED
+            // 存入 cache
+            this.SetBiblioSummary(strBiblioRecPath, strSummary, strFragment);
+#endif
+
+            return 2;
         }
 
         // 探测MARC格式
@@ -2934,6 +3338,15 @@ return result;
             return 1;
         }
 
+        // 触发权限判断。
+        // parameters:
+        //      rights  希望判断的权限值。逗号列表
+        //              特殊地，若为 "download" 或 "preview"，表示希望返回权限字符串中关于对象资源的下载或预览级别参数
+        // return:
+        //    null  具备权限
+        //    其它    不具备权限，返回错误信息
+        public delegate string delegate_checkAccess(string rights);
+
         // 合并联合编目的新旧书目库XML记录
         // 功能：排除新记录中对strLibraryCode定义以外的905字段的修改
         // parameters:
@@ -2947,7 +3360,11 @@ return result;
         //      0   new record not changed
         //      1   new record changed
         int MergeOldNewBiblioRec(
+#if ITEM_ACCESS_RIGHTS
+            delegate_checkAccess func_checkAccess,
+#else
             string strRights,
+#endif
             string strUnionCatalogStyle,
             string strLibraryCode,
             string strDefaultOperation,
@@ -2968,7 +3385,11 @@ return result;
             {
                 if ((string.IsNullOrEmpty(strFieldNameList) == false || strChangeableFieldNameList != null/*2024/6/4 增加*/)
                     // || !(StringUtil.IsInList("writeres", strRights) == true || StringUtil.IsInList("setobject", strRights) == true)
+#if ITEM_ACCESS_RIGHTS
+                    || func_checkAccess("setobject,setbiblioobject") != null
+#else
                     || StringUtil.IsInList("setobject,setbiblioobject", strRights) == false
+#endif
                     )
                 {
                     // return:
@@ -2976,7 +3397,11 @@ return result;
                     //      0   成功
                     //      1   有部分修改要求被拒绝。strError 中返回了注释信息
                     int nRet = MergeOldNewBiblioByFieldNameList(
+#if ITEM_ACCESS_RIGHTS
+                        func_checkAccess,
+#else
                         strRights,
+#endif
                         strDefaultOperation,
                         strFieldNameList,
                         strChangeableFieldNameList,
@@ -3087,7 +3512,13 @@ return result;
 #endif
 
                 // 如果不具备 setbiblioobject 和 setobject 权限，则要屏蔽前端发来的 XML 记录中的 dprms:file 元素
-                if (StringUtil.IsInList("setbiblioobject,setobject", strRights) == false)
+                if (
+#if ITEM_ACCESS_RIGHTS
+                    func_checkAccess("setbiblioobject,setobject") != null
+#else
+                    StringUtil.IsInList("setbiblioobject,setobject", strRights) == false
+#endif
+                    )
                 {
                     string strRequstFragments = GetAllFileElements(domNew);
 
@@ -3140,7 +3571,13 @@ return result;
                     // 此时 StringUtil.IsInList("setbiblioobject,setobject", strRights) == true
                     // 意味着直接采纳前端发来的 XML 记录中的 dprms:file 元素，写入记录
                     // 但需要注意检查账户权限，读的字段范围是否小于写的字段范围？如果小了，则读和写往返一轮会丢失记录中原有的 dprms:file 元素。这种情况需要直接报错
-                    if (StringUtil.IsInList("getbiblioobject,getobject", strRights) == false)
+                    if (
+#if ITEM_ACCESS_RIGHTS
+                        func_checkAccess("getbiblioobject,getobject") != null
+#else
+                        StringUtil.IsInList("getbiblioobject,getobject", strRights) == false
+#endif
+                        )
                     {
                         strError = $"操作被放弃。{GetCurrentUserName(null)}的权限定义不正确：具有 setbiblioobject(或 setobject) 但不具有 getbiblioobject(或getobject) 权限(即写范围大于读范围)，这样会造成数据库内书目记录中原有的 dprms:file 元素丢失。请修改当前账户权限再重新操作";
                         return -1;
@@ -3302,7 +3739,7 @@ return result;
         }
 
         // 2025/2/22
-        public static string EnsureRefID(ref string xml, 
+        public static string EnsureRefID(ref string xml,
             bool global = false)
         {
             if (string.IsNullOrEmpty(xml))
@@ -3323,7 +3760,7 @@ return result;
         {
             if (dom == null || dom.DocumentElement == null)
                 return null;
-            var nodes = dom.DocumentElement.SelectNodes( wildcard ? "//refID" : "refID");
+            var nodes = dom.DocumentElement.SelectNodes(wildcard ? "//refID" : "refID");
             if (nodes.Count > 0)
             {
                 foreach (XmlElement node in nodes)
@@ -3435,7 +3872,11 @@ return result;
         //      0   成功
         //      1   有部分字段被修改或滤除。strError 中返回被修改或滤除的字段的名字
         public static int FilterBiblioByFieldNameList(
+#if ITEM_ACCESS_RIGHTS
+            delegate_checkAccess func_checkAccess,
+#else
             string strUserRights,
+#endif
             string strFieldNameList,
             ref string strBiblioXml,
             out string strError)
@@ -3472,6 +3913,27 @@ return result;
             bool bChanged = false;
             string strComment = "";
 
+#if ITEM_ACCESS_RIGHTS
+            if (func_checkAccess != null)
+            {
+                // 对 MARC 记录进行过滤，将那些当前用户无法读取的 856 字段删除
+                // return:
+                //      -1  出错
+                //      其他  滤除的 856 字段个数
+                nRet = RemoveCantGet856(
+                func_checkAccess,
+                ref strMarc,
+                out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet > 0)
+                {
+                    bChanged = true;
+                    strComment = $"856({nRet.ToString()}个)";
+                }
+            }
+#else
+
             if (strUserRights != null)
             {
                 // 对 MARC 记录进行过滤，将那些当前用户无法读取的 856 字段删除
@@ -3490,6 +3952,7 @@ return result;
                     strComment = $"856({nRet.ToString()}个)";
                 }
             }
+#endif
 
             // 2023/3/23
             // 先排除掉 997
@@ -3627,7 +4090,11 @@ out string strError)
         //      0   成功
         //      1   有部分修改要求被拒绝。strError 中返回了注释信息
         static int MergeOldNewBiblioByFieldNameList(
+#if ITEM_ACCESS_RIGHTS
+            delegate_checkAccess func_checkAccess,
+#else
             string strUserRights,
+#endif
             string strDefaultOperation,
             string strFieldNameList,
             string strChangeableFieldNameList, // 2023/2/11
@@ -3737,7 +4204,11 @@ out string strError)
             //      -1  出错
             //      其他  滤除的 856 字段个数
             nRet = MaskCantGet856(
+#if ITEM_ACCESS_RIGHTS
+                func_checkAccess,
+#else
                 strUserRights,
+#endif
                 true,
                 ref strNewMarc,
                 out strError);
@@ -3747,7 +4218,11 @@ out string strError)
                 b856Masked = true;
 
             nRet = MaskCantGet856(
+#if ITEM_ACCESS_RIGHTS
+                func_checkAccess,
+#else
     strUserRights,
+#endif
     true,
     ref strOldMarc,
     out strError);
@@ -4215,7 +4690,11 @@ ref string strMARC)
         //      -1  出错
         //      其他  标记的 856 字段个数
         public static int MaskCantGet856(
+#if ITEM_ACCESS_RIGHTS
+            delegate_checkAccess func_checkAccess,
+#else
             string strUserRights,
+#endif
             bool clearMaskBefore,
             ref string strMARC,
             out string strError)
@@ -4226,8 +4705,13 @@ ref string strMARC)
                 return 0;
 
             // 只要当前账户具备 setobject 或 writeres 权限，等于他可以获取任何对象，为了编辑加工的需要
-            if (StringUtil.IsInList("setobject,setbiblioobject", strUserRights) == true
-                /*|| StringUtil.IsInList("writeres", strUserRights) == true*/)
+            if (
+#if ITEM_ACCESS_RIGHTS
+                func_checkAccess("setobject,setbiblioobject") == null
+#else
+                StringUtil.IsInList("setobject,setbiblioobject", strUserRights) == true
+#endif
+                )
                 return 0;
 
             string strMaskChar = new string((char)1, 1);
@@ -4259,6 +4743,17 @@ ref string strMARC)
                 if (string.IsNullOrEmpty(strObjectRights) == true)
                     continue;
 
+#if ITEM_ACCESS_RIGHTS
+                // 对象是否允许被获取?
+                if (CanGet("download", func_checkAccess("download"), strObjectRights) == false
+                    && CanGet("preview", func_checkAccess("preview"), strObjectRights) == false /*2022/10/13*/)
+                {
+                    field.Content += strMaskChar;
+                    nCount++;
+                }
+#endif
+
+#if !ITEM_ACCESS_RIGHTS
                 // 对象是否允许被获取?
                 if (CanGet("download", strUserRights, strObjectRights) == false
                     && CanGet("preview", strUserRights, strObjectRights) == false /*2022/10/13*/)
@@ -4266,6 +4761,7 @@ ref string strMARC)
                     field.Content += strMaskChar;
                     nCount++;
                 }
+#endif
             }
 
             if (nCount > 0)
@@ -4278,15 +4774,24 @@ ref string strMARC)
         //      -1  出错
         //      其他  滤除的 856 字段个数
         public static int RemoveCantGet856(
+#if ITEM_ACCESS_RIGHTS
+            delegate_checkAccess func_checkAccess,
+#else
             string strUserRights,
+#endif
             ref string strMARC,
             out string strError)
         {
             strError = "";
 
             // 只要当前账户具备 setobject 或 writeres 权限，等于他可以获取任何对象，为了编辑加工的需要
-            if (StringUtil.IsInList("setobject,setbiblioobject", strUserRights) == true
-                /*|| StringUtil.IsInList("writeres", strUserRights) == true*/)
+            if (
+#if ITEM_ACCESS_RIGHTS
+                func_checkAccess("setobject,setbiblioobject") == null
+#else
+                StringUtil.IsInList("setobject,setbiblioobject", strUserRights) == true
+#endif
+                )
                 return 0;
 
             MarcRecord record = new MarcRecord(strMARC);
@@ -4309,10 +4814,17 @@ ref string strMARC)
                 if (string.IsNullOrEmpty(strObjectRights) == true)
                     continue;
 
+#if ITEM_ACCESS_RIGHTS
+                // 对象是否允许被获取?
+                if (CanGet("download", func_checkAccess("download"), strObjectRights) == false
+                    && CanGet("preview", func_checkAccess("preview"), strObjectRights) == false)
+                    delete_fields.Add(field);
+#else
                 // 对象是否允许被获取?
                 if (CanGet("download", strUserRights, strObjectRights) == false
                     && CanGet("preview", strUserRights, strObjectRights) == false/*2022/10/13*/)
                     delete_fields.Add(field);
+#endif
             }
 
             foreach (MarcField field in delete_fields)
@@ -5851,7 +6363,21 @@ out strError);
                         //      0   not delete any fields
                         //      1   deleted some fields
                         nRet = MergeOldNewBiblioRec(
+#if ITEM_ACCESS_RIGHTS
+                            (r) =>
+                            {
+                                if (r == "download" || r == "preview")
+                                    return strRights;
+                                return CheckAccess(sessioninfo,
+                                    $"书目记录下级对象({r})",
+                                    ResPath.GetDbName(strBiblioRecPath),
+                                    r,
+                                    "",
+                                    out _);
+                            },
+#else
                             strRights,
+#endif
                             strUnionCatalogStyle,
                             strLibraryCode,
                             "insert,replace,delete",
@@ -5879,7 +6405,21 @@ out strError);
                     //      0   not delete any fields
                     //      1   deleted some fields
                     nRet = MergeOldNewBiblioRec(
+#if ITEM_ACCESS_RIGHTS
+                            (r) =>
+                            {
+                                if (r == "download" || r == "preview")
+                                    return strRights;
+                                return CheckAccess(sessioninfo,
+                                    $"书目记录下级对象({r})",
+                                    ResPath.GetDbName(strBiblioRecPath),
+                                    r,
+                                    "",
+                                    out _);
+                            },
+#else
                         strRights,
+#endif
                         strUnionCatalogStyle,
                         strLibraryCode,
                         "insert",
@@ -5993,7 +6533,21 @@ out strError);
                     //      0   not delete any fields
                     //      1   deleted some fields
                     nRet = MergeOldNewBiblioRec(
+#if ITEM_ACCESS_RIGHTS
+                            (r) =>
+                            {
+                                if (r == "download" || r == "preview")
+                                    return strRights;
+                                return CheckAccess(sessioninfo,
+                                    $"书目记录下级对象({r})",
+                                    ResPath.GetDbName(strBiblioRecPath),
+                                    r,
+                                    "",
+                                    out _);
+                            },
+#else
                         strRights,
+#endif
                         strUnionCatalogStyle,
                         strLibraryCode,
                         "insert",
@@ -6214,7 +6768,21 @@ out strError);
                     //      0   not delete any fields
                     //      1   deleted some fields
                     nRet = MergeOldNewBiblioRec(
+#if ITEM_ACCESS_RIGHTS
+                            (r) =>
+                            {
+                                if (r == "download" || r == "preview")
+                                    return strRights;
+                                return CheckAccess(sessioninfo,
+                                    $"书目记录下级对象({r})",
+                                    ResPath.GetDbName(strBiblioRecPath),
+                                    r,
+                                    "",
+                                    out _);
+                            },
+#else
                         strRights,
+#endif
                         strUnionCatalogStyle,
                         strLibraryCode,
                         "insert,replace,delete",
@@ -6418,7 +6986,21 @@ out strError);
                     //      0   not delete any fields
                     //      1   deleted some fields
                     nRet = MergeOldNewBiblioRec(
+#if ITEM_ACCESS_RIGHTS
+                            (r) =>
+                            {
+                                if (r == "download" || r == "preview")
+                                    return strRights;
+                                return CheckAccess(sessioninfo,
+                                    $"书目记录下级对象({r})",
+                                    ResPath.GetDbName(strBiblioRecPath),
+                                    r,
+                                    "",
+                                    out _);
+                            },
+#else
                         strRights,
+#endif
                         strUnionCatalogStyle,
                         strLibraryCode,
                         "delete",
@@ -7389,14 +7971,22 @@ out strError);
             string strRecPath,
             XmlDocument dom,
             string db_type,
+#if ITEM_ACCESS_RIGHTS
+            delegate_checkAccess func_checkAccess,
+#else
             string rights,
+#endif
             out string strError)
         {
             strError = "";
 
             // 检查 当包含 write 的时候是否也包含了 read
             int nRet = CheckWriteReadObjectValid(db_type,
+#if ITEM_ACCESS_RIGHTS
+                func_checkAccess,
+#else
                 rights,
+#endif
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -7406,7 +7996,12 @@ out strError);
 
             var files = dom.DocumentElement.SelectNodes("//dprms:file", mngr);
             if (files.Count > 0
-                && StringUtil.IsInList($"set{db_type}object,setobject", rights) == false)
+#if ITEM_ACCESS_RIGHTS
+                && func_checkAccess($"set{db_type}object,setobject") != null
+#else
+                && StringUtil.IsInList($"set{db_type}object,setobject", rights) == false
+#endif
+                )
             {
                 strError = $"{SessionInfo.GetCurrentUserName(null)}不具备 set{db_type}object 或 setobject 权限，然而记录 '{strRecPath}' 中包含 dprms:file 元素，操作被拒绝";
                 return -1;
@@ -7417,17 +8012,30 @@ out strError);
 
         // 账户权限检查 当包含 write 的时候是否也包含了 read
         static int CheckWriteReadObjectValid(string db_type,
+#if ITEM_ACCESS_RIGHTS
+            delegate_checkAccess func_checkAccess,
+#else
             string rights,
+#endif
             out string strError)
         {
             strError = "";
 
+#if ITEM_ACCESS_RIGHTS
+            if (func_checkAccess($"set{db_type}object,setobject") == null
+                && func_checkAccess($"get{db_type}object,getobject") != null)
+            {
+                strError = $"当前账户包含了 set{db_type}object 或 setobject 权限，但不包含 get{db_type}object 或 getobject，这违反了账户安全原则，操作被拒绝。请联系系统管理员修改账户权限到合规状态";
+                return -1;
+            }
+#else
             if (StringUtil.IsInList($"set{db_type}object,setobject", rights) == true
                 && StringUtil.IsInList($"get{db_type}object,getobject", rights) == false)
             {
                 strError = $"当前账户包含了 set{db_type}object 或 setobject 权限，但不包含 get{db_type}object 或 getobject，这违反了账户安全原则，操作被拒绝。请联系系统管理员修改账户权限到合规状态";
                 return -1;
             }
+#endif
 
             return 0;
         }
@@ -7489,10 +8097,22 @@ out strError);
                 }
 
                 int nRet = CheckDprmsFileRight(
-        strRecPath,
-        dom,
-        db_type,
+                    strRecPath,
+                    dom,
+                    db_type,
+#if ITEM_ACCESS_RIGHTS
+                    (r) =>
+                    {
+                        return CheckAccess(sessioninfo,
+                            $"书目记录下级对象({r})",
+                            ResPath.GetDbName(strRecPath),
+                            r,
+                            "",
+                            out _);
+                    },
+#else
         sessioninfo.RightsOrigin,
+#endif
         out strError);
                 if (nRet == -1)
                     return -1;
@@ -7551,11 +8171,23 @@ out strError);
                 }
                 */
                 int nRet = CheckDprmsFileRight(
-        strRecPath,
-        dom,
-        "item",
+                    strRecPath,
+                    dom,
+                    "item",
+#if ITEM_ACCESS_RIGHTS
+                    (r) =>
+                    {
+                        return CheckAccess(sessioninfo,
+                            $"书目记录下级对象({r})",
+                            ResPath.GetDbName(strRecPath),
+                            r,
+                            "",
+                            out _);
+                    },
+#else
         sessioninfo.RightsOrigin,
-        out strError);
+#endif
+                    out strError);
                 if (nRet == -1)
                     return -1;
             }
@@ -8038,7 +8670,22 @@ out strError);
                     //      0   成功
                     //      1   有部分字段被修改或滤除。strError 中返回被修改或滤除的字段的名字
                     nRet = FilterBiblioByFieldNameList(
+#if ITEM_ACCESS_RIGHTS
+
+                    (r) =>
+                    {
+                        if (r == "download" || r == "preview")
+                            return sessioninfo.Rights;
+                        return CheckAccess(sessioninfo,
+                            $"书目记录下级对象({r})",
+                            strTargetBiblioDbName,
+                            r,
+                            "",
+                            out _);
+                    },
+#else
                         sessioninfo.Rights,
+#endif
                         strReadAccessParameters,
                         ref strExistingSourceXml,
                         out strError);
@@ -8189,7 +8836,21 @@ out strError);
                         //      0   not delete any fields
                         //      1   deleted some fields
                         nRet = MergeOldNewBiblioRec(
+#if ITEM_ACCESS_RIGHTS
+                            (r) =>
+                            {
+                                if (r == "download" || r == "preview")
+                                    return strRights;
+                                return CheckAccess(sessioninfo,
+                                    $"书目记录下级对象({r})",
+                                    strTargetBiblioDbName,
+                                    r,
+                                    "",
+                                    out _);
+                            },
+#else
                             strRights,
+#endif
                             strUnionCatalogStyle,
                             strLibraryCodeList,
                             "insert,replace,delete",
@@ -8558,6 +9219,22 @@ out strError);
             return result;
         }
 
+        public string GetTwoDbName(string strBiblioDbName,
+            string strDbType)
+        {
+            if (string.IsNullOrEmpty(strBiblioDbName))
+                throw new ArgumentException("strBiblioDbName 参数值不允许为空");
+            var ret = this.GetSubDbName(strBiblioDbName,
+                strDbType,
+                out string strSubDbName,
+                out string strError);
+            if (ret == -1)
+                return strBiblioDbName;
+            if (string.IsNullOrEmpty(strSubDbName) == false)
+                return strBiblioDbName + "," + strSubDbName;
+            return strBiblioDbName;
+        }
+
         // TODO: 想办法实现完美的出错 Undo 功能，即具备完整事务回滚能力
         // 2011/4/24
         // 调用前，假定书目记录已经被锁定
@@ -8638,7 +9315,18 @@ out strError);
             if (entityinfos != null && entityinfos.Count > 0)
             {
                 // 权限字符串
-                if (StringUtil.IsInList("setiteminfo,setobject", sessioninfo.RightsOrigin) == false)
+                if (
+#if ITEM_ACCESS_RIGHTS
+                    CheckAccess(sessioninfo,
+                    "册信息",
+                    GetTwoDbName(strTargetBiblioDbName, "item"),
+                    "setiteminfo,setobject",
+                    "",
+                    out _) != null
+#else
+                    StringUtil.IsInList("setiteminfo,setobject", sessioninfo.RightsOrigin) == false
+#endif
+                    )
                 {
                     strError = $"复制(移动)书目信息的操作被拒绝。因拟操作的书目记录带有下属的实体记录，但{GetCurrentUserName(sessioninfo)}不具备 setiteminfo 或 setobject 权限，不能复制或者移动它们。";
                     return -2;
@@ -8762,7 +9450,18 @@ out strError);
             if (orderinfos != null && orderinfos.Count > 0)
             {
                 // 权限字符串
-                if (StringUtil.IsInList("setorderinfo,setobject,order", sessioninfo.RightsOrigin) == false)
+                if (
+#if ITEM_ACCESS_RIGHTS
+                    CheckAccess(sessioninfo,
+                    "订购信息",
+                    GetTwoDbName(strTargetBiblioDbName, "order"),
+                    "setorderinfo,setobject,order",
+                    "",
+                    out _) != null
+#else
+                    StringUtil.IsInList("setorderinfo,setobject,order", sessioninfo.RightsOrigin) == false
+#endif
+                    )
                 {
                     strError = $"复制(移动)书目信息的操作被拒绝。因拟操作的书目记录带有下属的订购记录，但{GetCurrentUserName(sessioninfo)}不具备 setorderinfo、setobject 或 order 权限，不能复制或移动它们。";
                     return -2;
@@ -8816,7 +9515,18 @@ out strError);
             if (issueinfos != null && issueinfos.Count > 0)
             {
                 // 权限字符串
-                if (StringUtil.IsInList("setissueinfo,setobject", sessioninfo.RightsOrigin) == false)
+                if (
+#if ITEM_ACCESS_RIGHTS
+                    CheckAccess(sessioninfo,
+                    "期信息",
+                    GetTwoDbName(strTargetBiblioDbName, "issue"),
+                    "setissueinfo,setobject",
+                    "",
+                    out _) != null
+#else
+                    StringUtil.IsInList("setissueinfo,setobject", sessioninfo.RightsOrigin) == false
+#endif
+                    )
                 {
                     strError = $"复制(移动)书目信息的操作被拒绝。因拟操作的书目记录带有下属的期记录，但{GetCurrentUserName(sessioninfo)}不具备 setissueinfo 或 setobject 权限，不能复制或移动它们。";
                     return -2;

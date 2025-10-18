@@ -1,40 +1,39 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
 using System.Diagnostics;
-using System.IO;
-using System.Xml;
-using System.Web;
-using System.Reflection;
-using System.Threading.Tasks;
-using System.Threading;
-using System.Runtime.CompilerServices;
-using System.Linq;
+using System.Drawing;
 using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Web;
+using System.Windows.Forms;
+using System.Xml;
 
-using ClosedXML.Excel;
 
 using static dp2Circulation.ReaderInfoForm;
-using dp2Circulation.Reader;
-
+using ClosedXML.Excel;
 using DigitalPlatform;
-using DigitalPlatform.GUI;
-using DigitalPlatform.Xml;
-using DigitalPlatform.IO;
-using DigitalPlatform.CommonControl;
-using DigitalPlatform.Text;
-using DigitalPlatform.ResultSet;
-using DigitalPlatform.Interfaces;
-using DigitalPlatform.Marc;
-using DigitalPlatform.Script;
 using DigitalPlatform.CirculationClient;
+using DigitalPlatform.CommonControl;
+using DigitalPlatform.dp2.Statis;
+using DigitalPlatform.GUI;
+using DigitalPlatform.Interfaces;
+using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
-using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.LibraryServer;
+using DigitalPlatform.Marc;
+using DigitalPlatform.ResultSet;
+using DigitalPlatform.Script;
+using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
+using dp2Circulation.Reader;
 
 namespace dp2Circulation
 {
@@ -2869,7 +2868,7 @@ TaskScheduler.Default);
                     if (action != null)
                     {
                         /*
-                        var result = this.TryGet(() =>
+                        var dialog_result = this.TryGet(() =>
                         {
                             var content = action.MergeContent(this,
                                 summary,
@@ -2883,8 +2882,8 @@ TaskScheduler.Default);
                                 return content;
                             return null;
                         });
-                        if (result == FieldMerge.SKIP)
-                            return result;
+                        if (dialog_result == FieldMerge.SKIP)
+                            return dialog_result;
                         */
                         var ret = DoAction(action, strElementName);
                         if (ret == FieldMerge.SKIP)
@@ -5215,14 +5214,34 @@ MessageBoxDefaultButton.Button2);
         }
 
         // 导出读者详情到 Excel 文件
+        // TODO: 可以分化为按照证条码号导出，和按照读者记录路径导出(加上 @recpath: 前缀)
         void menu_exportReaderInfoToExcelFile_Click(object sender, EventArgs e)
+        {
+            var control = Control.ModifierKeys == Keys.Control;
+            ExportReaderInfoToExcelFile(control ? "barcode" : "recpath");
+        }
+
+        // parameters:
+        //      key_type    检索键类型。为 recpath barcode 之一
+        void ExportReaderInfoToExcelFile(string key_type)
         {
             string strError = "";
             List<string> barcodes = new List<string>();
             foreach (ListViewItem item in this.listView_records.SelectedItems)
             {
+                var barcode = key_type == "recpath" ?
+                    ListViewUtil.GetItemText(item, 0) :
+                    ListViewUtil.GetItemText(item, 1);
+                if (string.IsNullOrEmpty(barcode))
+                {
+                    strError = $"不允许出现 {key_type} 为空的行";
+                    goto ERROR1;
+                }
+
+                if (key_type == "recpath")
+                    barcode = "@path:" + barcode;
                 // TODO: 用 style 来识别列
-                barcodes.Add(item.SubItems[1].Text);
+                barcodes.Add(barcode); // item.SubItems[1].Text
             }
 
             // return:
@@ -5239,6 +5258,7 @@ MessageBoxDefaultButton.Button2);
         ERROR1:
             MessageBox.Show(this, strError);
         }
+
 
         // 导出为条码号文件
         void menu_exportBarcodeFile_Click(object sender, EventArgs e)
@@ -8120,6 +8140,10 @@ dlg.UiState);
         {
             strError = "";
 
+            bool hide_dialog = false;
+            DialogResult dialog_result = DialogResult.Yes;
+            int retry_count = 0;
+
             var new_timeout = TimeSpan.FromSeconds(30);
 
             LibraryChannel channel = this.GetChannel();
@@ -8164,7 +8188,7 @@ dlg.UiState);
 
                     // 获得读者记录
                     looping.Progress.SetMessage("正在处理读者记录 " + strBarcode + " ...");
-
+                REDO:
                     string[] results = null;
                     long lRet = channel.GetReaderInfo(
                         looping.Progress,
@@ -8176,23 +8200,56 @@ dlg.UiState);
                         out string strOutputRecPath,
                         out byte[] baTimestamp,
                         out strError);
-                    if (lRet == -1)
+                    if (lRet == -1 
+                        || lRet == 0
+                        || lRet > 1)
                     {
+                        if (lRet > 1)   // 不可能发生吧?
+                        {
+                            strError = "读者证条码号 " + strBarcode + " 命中记录 " + lRet.ToString() + " 条，放弃装入读者记录。\r\n\r\n注意这是一个严重错误，请系统管理员尽快排除。";
+                            return -1;
+                        }
+
+                        strError = $"获取读者记录 {strBarcode} 时出错: {strError}";
+
                         // TODO: 如果遇到 timeout 出错可以考虑重做一次
+
+                        // 2025/10/13
+                        if (hide_dialog == false)
+                        {
+                            dialog_result = MessageDialog.Show(this,
+                                $"{strError}\r\n\r\n(重试) 重试操作;(跳过) 跳过本条继续处理后面的记录; (中断) 中断处理",
+                                MessageBoxButtons.YesNoCancel,
+                                MessageBoxDefaultButton.Button1,
+                                "此后不再出现本对话框",
+                                ref hide_dialog,
+                                new string[] { "重试", "跳过", "中断" },
+                                10);
+                        }
+                        if (dialog_result == DialogResult.Yes)
+                        {
+                            retry_count++;
+                            // 重试超过 10 次则取消 hide_dialog
+                            if (retry_count >= 10)
+                            {
+                                hide_dialog = false;
+                                retry_count = 0;
+                            }
+                            goto REDO;
+                        }
+                        if (dialog_result == DialogResult.No)
+                            goto CONTINUE;
                         return -1;
                     }
 
+                    /*
                     if (lRet == 0)
                         return -1;
+                    */
 
-                    if (lRet > 1)   // 不可能发生吧?
-                    {
-                        strError = "读者证条码号 " + strBarcode + " 命中记录 " + lRet.ToString() + " 条，放弃装入读者记录。\r\n\r\n注意这是一个严重错误，请系统管理员尽快排除。";
-                        return -1;
-                    }
                     if (results == null || results.Length < 1)
                     {
-                        strError = "返回的results不正常。";
+                        strError = "GetReaderInfo() 返回的 results 不正常。";
                         return -1;
                     }
 
@@ -8219,6 +8276,7 @@ dlg.UiState);
                             break;
                     }
 
+                CONTINUE:
                     nReaderIndex++;
                     if (looping.Progress != null)
                         looping.Progress.SetProgressValue(nReaderIndex);

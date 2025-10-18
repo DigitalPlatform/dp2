@@ -9,6 +9,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.LibraryServer.Common;
+using System.Data;
 
 // using DigitalPlatform.rms.Client.rmsws_localhost;   // Record
 
@@ -175,7 +176,19 @@ out byte[] baOutputTimestamp)
             //      1   new record changed
             nRet = ItemDatabase.MergeOldNewRec(
                 db_type,
+#if ITEM_ACCESS_RIGHTS
+                (r) =>
+                {
+                    return CheckAccess(sessioninfo,
+                        $"{db_type}记录下级对象({r})",
+                        ResPath.GetDbName(strRecPath),
+                        r,
+                        "",
+                        out _);
+                },
+#else
                 sessioninfo.RightsOrigin,
+#endif
                 domExist,
                 domNew,
                 ref bChangePartDeniedParam,
@@ -1628,7 +1641,7 @@ out error);
                 strFrom,
                 out string strPath,
                 out string strExistingXml,
-                out byte [] timestamp,
+                out byte[] timestamp,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -1720,7 +1733,7 @@ out error);
                 false,  // bInlucdePreamble
                 "ignorechecktimestamp", // style
                 timestamp,
-                out byte [] baOutputTimeStamp,
+                out byte[] baOutputTimeStamp,
                 out string strOutputPath,
                 out strError);
             if (lRet == -1)

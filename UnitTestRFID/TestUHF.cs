@@ -1,15 +1,14 @@
-﻿using System;
+﻿using DigitalPlatform;
+using DigitalPlatform.RFID;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Diagnostics;
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 using static DigitalPlatform.RFID.LogicChip;
-using DigitalPlatform;
-using DigitalPlatform.RFID;
+using static DigitalPlatform.RFID.RfidTagList;
 
 namespace UnitTestRFID
 {
@@ -633,6 +632,36 @@ USR 000879030000845600000C022808100400010001000000000000000000000000000000000000
             Assert.AreEqual(false, result.FileIndicator);
             Assert.AreEqual(null, result.StidUri);
             Assert.AreEqual((UInt64)0x0, result.SerialNumberInteger);
+
+        }
+
+        [TestMethod]
+        public void test_detect_01()
+        {
+            byte[] epc_bank = Element.FromHexString(
+@"1303 2907 CD22 D385 114F C04F C0D1");
+
+            var isGB = UhfUtility.IsISO285604Format(epc_bank, null);
+
+            var parse_result = GaoxiaoUtility.ParseTag(
+epc_bank,
+null); 
+            if (parse_result.Value == -1)
+            {
+                if (parse_result.ErrorCode == "parseEpcError"
+                    || parse_result.ErrorCode == "parseError")
+                {
+                    return new ChipInfo
+                    {
+                        ErrorInfo = parse_result.ErrorInfo,
+                        // TODO: 为 result 增加 ErrorCode
+                    };
+                }
+
+                // throw new Exception(parse_result.ErrorInfo);
+                result.ErrorInfo = parse_result.ErrorInfo;
+                return result;
+            }
 
         }
     }

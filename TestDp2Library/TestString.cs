@@ -11,6 +11,7 @@ using DigitalPlatform.Text;
 using static DigitalPlatform.Text.dp2StringUtil;
 using DigitalPlatform.Xml;
 using System.Xml;
+using static DigitalPlatform.LibraryServer.LibraryApplication;
 
 namespace TestDp2Library
 {
@@ -843,6 +844,343 @@ namespace TestDp2Library
             dbname,
             operation);
             Assert.AreEqual(correct, result);
+        }
+
+        // 数据库名字为空
+        [TestMethod]
+        public void test_getDbOperRights_12()
+        {
+            string access = "中文图书:getbiblioinfo=1;*:getbiblioinfo=2";
+            string dbname = "";
+            string operation = "getbiblioinfo";
+            string correct = "1";
+            var result = LibraryApplication.GetDbOperRights(access,
+            dbname,
+            operation);
+            Assert.AreEqual(correct, result);
+        }
+
+        // 2025/10/15
+        // 验证 strOperation 参数中使用多个权限值的清醒
+        [TestMethod]
+        public void test_getDbOperRights_21()
+        {
+            string access = "中文图书:getbiblioinfo=1|order=2";
+            string dbname = "中文图书";
+            string operation = "getbiblioinfo,order";
+            string correct = "1";
+            var result = LibraryApplication.GetDbOperRights(access,
+            dbname,
+            operation);
+            Assert.AreEqual(correct, result);
+        }
+
+        // 从左到右扫描，先命中 getbiblioinfo=1
+        [TestMethod]
+        public void test_getDbOperRights_22()
+        {
+            string access = "中文图书:getbiblioinfo=1|order=2";
+            string dbname = "中文图书";
+            string operation = "order,getbiblioinfo";
+            string correct = "1";
+            var result = LibraryApplication.GetDbOperRights(access,
+            dbname,
+            operation);
+            Assert.AreEqual(correct, result);
+        }
+
+        // 否定
+        [TestMethod]
+        public void test_getDbOperRights_23()
+        {
+            string access = "中文图书:getbiblioinfo=|order=2";
+            string dbname = "中文图书";
+            string operation = "order,getbiblioinfo";
+            string correct = "2";
+            var result = LibraryApplication.GetDbOperRights(access,
+            dbname,
+            operation);
+            Assert.AreEqual(correct, result);
+        }
+
+        // 否定。两个都是否定
+        [TestMethod]
+        public void test_getDbOperRights_24()
+        {
+            string access = "中文图书:getbiblioinfo=|order=";
+            string dbname = "中文图书";
+            string operation = "order,getbiblioinfo";
+            string correct = "";
+            var result = LibraryApplication.GetDbOperRights(access,
+            dbname,
+            operation);
+            Assert.AreEqual(correct, result);
+        }
+
+        // 没有找到
+        [TestMethod]
+        public void test_getDbOperRights_25()
+        {
+            string access = "中文图书:getbiblioinfo=|order=";
+            string dbname = "中文图书";
+            string operation = "borrow,return";
+            string correct = null;
+            var result = LibraryApplication.GetDbOperRights(access,
+            dbname,
+            operation);
+            Assert.AreEqual(correct, result);
+        }
+
+        [TestMethod]
+        public void test_getDbOperRightsEx_01()
+        {
+            string access = "中文图书:getbiblioinfo=1|order=2";
+            string dbname = "中文图书";
+            string operations = "getbiblioinfo,order";
+            List<OperRights> correct = new List<OperRights> {
+                new OperRights{Operation = "getbiblioinfo", Rights = "1", DbNames = "中文图书" },
+                new OperRights{Operation = "order", Rights = "2" , DbNames = "中文图书"},
+            };
+            var result = LibraryApplication.GetDbOperRightsEx(access,
+            dbname,
+            operations);
+            var error = CheckEqual(correct, result);
+            if (error != null)
+                throw new InternalTestFailureException(error);
+        }
+
+        [TestMethod]
+        public void test_getDbOperRightsEx_02()
+        {
+            string access = "中文图书:getbiblioinfo=1|order=";
+            string dbname = "中文图书";
+            string operations = "getbiblioinfo,order";
+            List<OperRights> correct = new List<OperRights> {
+                new OperRights{Operation = "getbiblioinfo", Rights = "1", DbNames = "中文图书" },
+                new OperRights{Operation = "order", Rights = "" , DbNames = "中文图书"},
+            };
+            var result = LibraryApplication.GetDbOperRightsEx(access,
+            dbname,
+            operations);
+            var error = CheckEqual(correct, result);
+            if (error != null)
+                throw new InternalTestFailureException(error);
+        }
+
+        [TestMethod]
+        public void test_getDbOperRightsEx_03()
+        {
+            string access = "中文图书:getbiblioinfo=1|order";
+            string dbname = "中文图书";
+            string operations = "getbiblioinfo,order";
+            List<OperRights> correct = new List<OperRights> {
+                new OperRights{Operation = "getbiblioinfo", Rights = "1", DbNames = "中文图书" },
+                new OperRights{Operation = "order", Rights = "*" , DbNames = "中文图书"},
+            };
+            var result = LibraryApplication.GetDbOperRightsEx(access,
+            dbname,
+            operations);
+            var error = CheckEqual(correct, result);
+            if (error != null)
+                throw new InternalTestFailureException(error);
+        }
+
+        [TestMethod]
+        public void test_getDbOperRightsEx_04()
+        {
+            string access = "中文图书:getbiblioinfo=1|order=2;西文图书:getbiblioinfo=3|order=4";
+            string dbname = "西文图书";
+            string operations = "getbiblioinfo,order";
+            List<OperRights> correct = new List<OperRights> {
+                new OperRights{Operation = "getbiblioinfo", Rights = "3", DbNames = "西文图书" },
+                new OperRights{Operation = "order", Rights = "4" , DbNames = "西文图书"},
+            };
+            var result = LibraryApplication.GetDbOperRightsEx(access,
+            dbname,
+            operations);
+            var error = CheckEqual(correct, result);
+            if (error != null)
+                throw new InternalTestFailureException(error);
+        }
+
+        [TestMethod]
+        public void test_getDbOperRightsEx_05()
+        {
+            string access = "*:getbiblioinfo=1|order=2;西文图书:getbiblioinfo=3|order=4";
+            string dbname = "西文图书";
+            string operations = "getbiblioinfo,order";
+            List<OperRights> correct = new List<OperRights> {
+                new OperRights{Operation = "getbiblioinfo", Rights = "1", DbNames = "西文图书" },
+                new OperRights{Operation = "order", Rights = "2" , DbNames = "西文图书"},
+                new OperRights{Operation = "getbiblioinfo", Rights = "3", DbNames = "西文图书" },
+                new OperRights{Operation = "order", Rights = "4" , DbNames = "西文图书"},
+            };
+            var result = LibraryApplication.GetDbOperRightsEx(access,
+            dbname,
+            operations);
+            var error = CheckEqual(correct, result);
+            if (error != null)
+                throw new InternalTestFailureException(error);
+        }
+
+
+        [TestMethod]
+        public void test_getDbOperRightsEx_06()
+        {
+            string access = "*:getbiblioinfo=1|order=2;西文图书:getbiblioinfo=3|order=4";
+            string dbname = "中文图书";
+            string operations = "getbiblioinfo,order";
+            List<OperRights> correct = new List<OperRights> {
+                new OperRights{Operation = "getbiblioinfo", Rights = "1", DbNames = "中文图书" },
+                new OperRights{Operation = "order", Rights = "2" , DbNames = "中文图书"},
+            };
+            var result = LibraryApplication.GetDbOperRightsEx(access,
+            dbname,
+            operations);
+            var error = CheckEqual(correct, result);
+            if (error != null)
+                throw new InternalTestFailureException(error);
+        }
+
+        // 多个数据库名
+        [TestMethod]
+        public void test_getDbOperRightsEx_07()
+        {
+            string access = "中文图书:getbiblioinfo=1|order=2;西文图书:getbiblioinfo=3|order=4";
+            string dbname = "中文图书,西文图书";
+            string operations = "getbiblioinfo,order";
+            List<OperRights> correct = new List<OperRights> {
+                new OperRights{Operation = "getbiblioinfo", Rights = "1", DbNames = "中文图书" },
+                new OperRights{Operation = "order", Rights = "2" , DbNames = "中文图书"},
+                new OperRights{Operation = "getbiblioinfo", Rights = "3", DbNames = "西文图书" },
+                new OperRights{Operation = "order", Rights = "4" , DbNames = "西文图书"},
+            };
+            var result = LibraryApplication.GetDbOperRightsEx(access,
+            dbname,
+            operations);
+            var error = CheckEqual(correct, result);
+            if (error != null)
+                throw new InternalTestFailureException(error);
+        }
+
+        // 条件中多个数据库名，存取定义中数据库名为 *
+        [TestMethod]
+        public void test_getDbOperRightsEx_08()
+        {
+            string access = "*:getbiblioinfo=1|order=2;西文图书:getbiblioinfo=3|order=4";
+            string dbname = "中文图书,西文图书";
+            string operations = "getbiblioinfo,order";
+            List<OperRights> correct = new List<OperRights> {
+                new OperRights{Operation = "getbiblioinfo", Rights = "1", DbNames = "中文图书,西文图书" },
+                new OperRights{Operation = "order", Rights = "2" , DbNames = "中文图书,西文图书"},
+                new OperRights{Operation = "getbiblioinfo", Rights = "3", DbNames = "西文图书" },
+                new OperRights{Operation = "order", Rights = "4" , DbNames = "西文图书"},
+            };
+            var result = LibraryApplication.GetDbOperRightsEx(access,
+            dbname,
+            operations);
+            var error = CheckEqual(correct, result);
+            if (error != null)
+                throw new InternalTestFailureException(error);
+        }
+
+        // 数据库名字为空
+        [TestMethod]
+        public void test_getDbOperRightsEx_09()
+        {
+            string access = "中文图书:getbiblioinfo=1;*:getbiblioinfo=2";
+            string dbname = "";
+            string operations = "getbiblioinfo";
+            List<OperRights> correct = new List<OperRights> {
+                new OperRights{Operation = "getbiblioinfo", Rights = "1", DbNames = "中文图书" },
+                new OperRights{Operation = "getbiblioinfo", Rights = "2", DbNames = "*" },
+            };
+            var result = LibraryApplication.GetDbOperRightsEx(access,
+            dbname,
+            operations);
+            var error = CheckEqual(correct, result);
+            if (error != null)
+                throw new InternalTestFailureException(error);
+        }
+
+        // 数据库名字为空
+        [TestMethod]
+        public void test_getDbOperRightsEx_10()
+        {
+            string access = "中文图书:getbiblioinfo=1;*:getbiblioinfo=2";
+            string dbname = "*";
+            string operations = "getbiblioinfo";
+            List<OperRights> correct = new List<OperRights> {
+                new OperRights{Operation = "getbiblioinfo", Rights = "1", DbNames = "中文图书" },
+                new OperRights{Operation = "getbiblioinfo", Rights = "2", DbNames = "*" },
+            };
+            var result = LibraryApplication.GetDbOperRightsEx(access,
+            dbname,
+            operations);
+            var error = CheckEqual(correct, result);
+            if (error != null)
+                throw new InternalTestFailureException(error);
+        }
+
+        // 否定的在肯定的前面
+        [TestMethod]
+        public void test_getDbOperRightsEx_11()
+        {
+            string access = "中文图书:setiteminfo=new,change|getiteminfo|getbibliosummary1|managedatabase=|getsystemparameter=;*:managedatabase";
+            string dbname = "中文图书";
+            string operations = "managedatabase,order";
+            List<OperRights> correct = new List<OperRights> {
+                new OperRights{Operation = "managedatabase", Rights = "", DbNames = "中文图书" },
+                new OperRights{Operation = "managedatabase", Rights = "*", DbNames = "中文图书" },
+            };
+            var result = LibraryApplication.GetDbOperRightsEx(access,
+            dbname,
+            operations);
+            var error = CheckEqual(correct, result);
+            if (error != null)
+                throw new InternalTestFailureException(error);
+        }
+
+        // 否定的在肯定的前面
+        [TestMethod]
+        public void test_getDbOperRightsEx_12()
+        {
+            string access = "中文图书:setiteminfo=new,change|getiteminfo|getbibliosummary1|managedatabase=|getsystemparameter=;*:managedatabase";
+            string dbname = "中文图书";
+            string operations = "managedatabase,order";
+            var result = LibraryApplication.GetDbOperRights(access,
+            dbname,
+            operations);
+            Assert.AreEqual("", result);    // "" 表示否定
+        }
+
+        [TestMethod]
+        public void test_getDbOperRightsEx_13()
+        {
+            // 任意数据库名字，匹配上了最后一截 *:managedatabase。相当于 *:managedatabase=*
+            string access = "中文图书:setiteminfo=new,change|getiteminfo|getbibliosummary1|managedatabase=|getsystemparameter=;*:managedatabase";
+            string dbname = "";
+            string operations = "managedatabase,order";
+            var result = LibraryApplication.GetDbOperRights(access,
+            dbname,
+            operations);
+            Console.WriteLine($"result='{result}'");
+            Assert.IsTrue(result == "*");    // "" 表示否定
+        }
+
+        static string CheckEqual(List<OperRights> list1, List<OperRights> list2)
+        {
+            if (list1.Count != list2.Count)
+                return $"list1.Count={list1.Count} 和 list2.Count={list2.Count} 不相等";
+            for (int i = 0; i < list1.Count; i++)
+            {
+                var s1 = list1[i].ToString();
+                var s2 = list2[i].ToString();
+                if (s1 != s2)
+                    return $"index 位置 {i} 的两个元素不相等。\r\n'{s1}' != \r\n'{s2}'";
+            }
+
+            return null;
         }
     }
 }

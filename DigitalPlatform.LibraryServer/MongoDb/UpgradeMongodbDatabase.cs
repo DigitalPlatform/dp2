@@ -43,7 +43,7 @@ namespace DigitalPlatform.LibraryServer
             /*
             foreach (ItemDbCfg cfg in this.ItemDbs)
             {
-                if (String.IsNullOrEmpty(cfg.DbName) == true)
+                if (String.IsNullOrEmpty(cfg.DbNames) == true)
                     continue;
             }
             */
@@ -237,8 +237,8 @@ out strError);
             List<string> db_paths = new List<string>();
             foreach (var cfg in this.ReaderDbs)
             {
-                if (string.IsNullOrEmpty(cfg.DbName) == false)
-                    db_paths.Add(this.WsUrl + "?" + cfg.DbName);
+                if (string.IsNullOrEmpty(cfg.DbNames) == false)
+                    db_paths.Add(this.WsUrl + "?" + cfg.DbNames);
             }
             */
             var db_paths = this.ReaderDbs

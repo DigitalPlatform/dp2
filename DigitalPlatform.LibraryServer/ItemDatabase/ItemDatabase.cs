@@ -18,6 +18,7 @@ using DigitalPlatform.Script;
 using DigitalPlatform.rms.Client.rmsws_localhost;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Xml.Linq;
+using static DigitalPlatform.LibraryServer.LibraryApplication;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -360,6 +361,9 @@ namespace DigitalPlatform.LibraryServer
             XmlDocument domExist,
             XmlDocument domNew,
             bool outofrangeAsError,
+#if DEBUG
+            delegate_checkAccess func_checkAccess,
+#endif
             out string strMergedXml,
             out string strError)
         {
@@ -381,7 +385,11 @@ namespace DigitalPlatform.LibraryServer
         //      1   new record changed
         public static int MergeOldNewRec(
             string db_type,
-    string strRights,
+#if ITEM_ACCESS_RIGHTS
+            delegate_checkAccess func_checkAccess,
+#else
+            string strRights,
+#endif
     //string strOldBiblioXml,
     //ref string strNewBiblioXml,
     XmlDocument domOld,
@@ -453,7 +461,13 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 // 如果不具备 setxxxobject 和 setobject 权限，则要屏蔽前端发来的 XML 记录中的 dprms:file 元素
-                if (StringUtil.IsInList($"set{db_type}object,setobject", strRights) == false)
+                if (
+#if ITEM_ACCESS_RIGHTS
+                    func_checkAccess($"set{db_type}object,setobject") != null
+#else
+                    StringUtil.IsInList($"set{db_type}object,setobject", strRights) == false
+#endif
+                    )
                 {
                     string strRequstFragments = LibraryApplication.GetAllFileElements(domNew);
 
@@ -485,7 +499,13 @@ namespace DigitalPlatform.LibraryServer
                     // 此时 StringUtil.IsInList("setbiblioobject,setobject", strRights) == true
                     // 意味着直接采纳前端发来的 XML 记录中的 dprms:file 元素，写入记录
                     // 但需要注意检查账户权限，读的字段范围是否小于写的字段范围？如果小了，则读和写往返一轮会丢失记录中原有的 dprms:file 元素。这种情况需要直接报错
-                    if (StringUtil.IsInList($"get{db_type}object,getobject", strRights) == false)
+                    if (
+#if ITEM_ACCESS_RIGHTS
+                        func_checkAccess($"get{db_type}object,getobject") != null
+#else
+                        StringUtil.IsInList($"get{db_type}object,getobject", strRights) == false
+#endif
+                        )
                     {
                         strError = $"操作被放弃。{SessionInfo.GetCurrentUserName(null)}的权限定义不正确：具有 set{db_type}object(或 setobject) 但不具有 get{db_type}object(或getobject) 权限(即写范围大于读范围)，这样会造成数据库内记录中原有的 dprms:file 元素丢失。请修改当前账户权限再重新操作";
                         return -1;
@@ -538,11 +558,14 @@ namespace DigitalPlatform.LibraryServer
         //      1   old record changed
         public static int MergeNewOldRec(
             string db_type,
-    string strRights,
-    XmlDocument domNew,
-    XmlDocument domOld,
-    ref bool bChangePartDeniedParam,
-    out string strError)
+            string strRights,
+            XmlDocument domNew,
+            XmlDocument domOld,
+#if ITEM_ACCESS_RIGHTS
+            delegate_checkAccess func_checkAccess,
+#endif
+            ref bool bChangePartDeniedParam,
+            out string strError)
         {
             strError = "";
             string strOldSave = domOld.OuterXml;
@@ -553,7 +576,13 @@ namespace DigitalPlatform.LibraryServer
             try
             {
                 // 如果不具备 setbiblioobject 和 setobject 权限，则要屏蔽前端发来的 XML 记录中的 dprms:file 元素
-                if (StringUtil.IsInList($"set{db_type}object,setobject", strRights) == false)
+                if (
+#if ITEM_ACCESS_RIGHTS
+                    func_checkAccess != null && func_checkAccess($"set{db_type}object,setobject") != null
+#else
+                    StringUtil.IsInList($"set{db_type}object,setobject", strRights) == false
+#endif
+                    )
                 {
                     // domOld 不发生变化
                     string strRequstFragments = LibraryApplication.GetAllFileElements(domNew);
@@ -572,7 +601,13 @@ namespace DigitalPlatform.LibraryServer
                     // 此时 StringUtil.IsInList("setbiblioobject,setobject", strRights) == true
                     // 意味着直接采纳前端发来的 XML 记录中的 dprms:file 元素，写入记录
                     // 但需要注意检查账户权限，读的字段范围是否小于写的字段范围？如果小了，则读和写往返一轮会丢失记录中原有的 dprms:file 元素。这种情况需要直接报错
-                    if (StringUtil.IsInList($"get{db_type}object,getobject", strRights) == false)
+                    if (
+#if ITEM_ACCESS_RIGHTS
+                        func_checkAccess != null && func_checkAccess($"get{db_type}object,getobject") != null
+#else
+                        StringUtil.IsInList($"get{db_type}object,getobject", strRights) == false
+#endif
+                        )
                     {
                         strError = $"操作被放弃。{SessionInfo.GetCurrentUserName(null)}的权限定义不正确：具有 set{db_type}object(或 setobject) 但不具有 get{db_type}object(或getobject) 权限(即写范围大于读范围)，这样会造成数据库内记录中原有的 dprms:file 元素丢失。请修改当前账户权限再重新操作";
                         return -1;
@@ -662,6 +697,9 @@ namespace DigitalPlatform.LibraryServer
             string strBiblioRecId,
             string strExistingXml,
             string strOriginXml,
+#if ITEM_ACCESS_RIGHTS
+            delegate_checkAccess func_checkAccess,
+#endif
             out string strXml,
             out string strError)
         {
@@ -721,6 +759,9 @@ namespace DigitalPlatform.LibraryServer
                     domExist,
                     dom,
                     false,  //??
+#if ITEM_ACCESS_RIGHTS
+                    func_checkAccess,
+#endif
                     out strXml,
                     out strError);
                 if (nRet == -1)
@@ -1189,7 +1230,20 @@ namespace DigitalPlatform.LibraryServer
                     "delete",
                     domExist,
                     domNew,
-                                        false,  //??
+                    false,  //??
+#if ITEM_ACCESS_RIGHTS
+                    (r) =>
+                    {
+                        string db_type = this.ItemNameInternal.ToLower();
+
+                        return CheckAccess(sessioninfo,
+                            $"{db_type}记录下级对象({r})",
+                            ResPath.GetDbName(info.NewRecPath),
+                            r,
+                            "",
+                            out _);
+                    },
+#endif
                     out string _,
                     out strError);
                 if (nRet == -1)
@@ -1558,6 +1612,19 @@ out strError);
                 domSourceExist,
                 domNew,
                 StringUtil.IsInList("outofrangeAsError", info.Style),
+#if ITEM_ACCESS_RIGHTS
+                    (r) =>
+                    {
+                        string db_type = this.ItemNameInternal.ToLower();
+
+                        return CheckAccess(sessioninfo,
+                            $"{db_type}记录下级对象({r})",
+                            ResPath.GetDbName(info.NewRecPath),
+                            r,
+                            "",
+                            out _);
+                    },
+#endif
                 out string strNewXml,
                 out strError);
             if (nRet == -1)
@@ -1931,6 +1998,19 @@ out strError);
                         domExist,
                         domNew,
                         StringUtil.IsInList("outofrangeAsError", info.Style),
+#if ITEM_ACCESS_RIGHTS
+                        (r) =>
+                        {
+                            string db_type = this.ItemNameInternal.ToLower();
+
+                            return CheckAccess(sessioninfo,
+                                $"{db_type}记录下级对象({r})",
+                                ResPath.GetDbName(info.NewRecPath),
+                                r,
+                                "",
+                                out _);
+                        },
+#endif
                         out string strNewXml,
                         out strError);
                     if (nRet == -1)
@@ -2121,7 +2201,20 @@ out strError);
                 if (db_type == "order")
                     list = $"set{db_type}info,set{db_type}object,setobject,order";
 
-                if (StringUtil.IsInList(list, sessioninfo.RightsOrigin) == false)
+                if (
+#if ITEM_ACCESS_RIGHTS
+                    CheckAccess(sessioninfo,
+                    $"修改{db_type}记录",
+                    "", // 第一阶段，不涉及数据库名
+                    list,
+                    "",
+                    out _) != null
+
+                    // TODO: 注意检查第二阶段，针对每一条记录
+#else
+                    StringUtil.IsInList(list, sessioninfo.RightsOrigin) == false
+#endif
+                    )
                 {
                     result.Value = -1;
                     result.ErrorInfo = $"修改{type_name}信息 操作被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 {list} 权限之一";
@@ -2907,6 +3000,19 @@ out strError);
                                 strBiblioRecId,
                                 existing_xml,
                                 info.NewRecord,
+#if ITEM_ACCESS_RIGHTS
+                    (r) =>
+                    {
+                        string db_type = this.ItemNameInternal.ToLower();
+
+                        return CheckAccess(sessioninfo,
+                            $"{db_type}记录下级对象({r})",
+                            ResPath.GetDbName(info.NewRecPath),
+                            r,
+                            "",
+                            out _);
+                    },
+#endif
                                 out strNewXml,
                                 out strError);
                             if (nRet == -1)

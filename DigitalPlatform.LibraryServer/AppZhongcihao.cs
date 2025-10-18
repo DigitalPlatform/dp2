@@ -555,12 +555,12 @@ for (int i = 0; i < nodes.Count; i++)
     XmlNode node = nodes[i];
 
     DbZhongcihaoProperty prop = new DbZhongcihaoProperty();
-    prop.DbName = DomUtil.GetAttr(node, "name");
+    prop.DbNames = DomUtil.GetAttr(node, "name");
     prop.NumberXPath = DomUtil.GetAttr(node, "rightxpath");
     prop.TitleXPath = DomUtil.GetAttr(node, "titlexpath");
     prop.AuthorXPath = DomUtil.GetAttr(node, "authorxpath");
 
-    db_prop_table[prop.DbName] = prop;
+    db_prop_table[prop.DbNames] = prop;
 }
  * */
             bool bCols = (StringUtil.IsInList("cols", strBrowseInfoStyle) == true);

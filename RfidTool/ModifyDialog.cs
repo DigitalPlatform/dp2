@@ -214,7 +214,7 @@ namespace RfidTool
                             await SpeakCounter(token);
 
                             string readerNameList = "*";
-                            var result = DataModel.ListTags(readerNameList, "");  // getTagInfo 是为了可以获得 UHF 标签的 TID
+                            var result = DataModel.ListTags(readerNameList, "rssi");  // getTagInfo 是为了可以获得 UHF 标签的 TID
                             if (result.Results == null)
                                 result.Results = new List<OneTag>();
                             if (result.Value == -1)
@@ -500,6 +500,7 @@ namespace RfidTool
         const int COLUMN_ANTENNA = 9;
         const int COLUMN_PROTOCOL = 10;
         const int COLUMN_TID = 11;
+        const int COLUMN_RSSI = 12;
 
         class FillResult : NormalResult
         {
@@ -577,6 +578,7 @@ namespace RfidTool
             ListViewUtil.ChangeItemText(item, COLUMN_UID, tag.UID);
             ListViewUtil.ChangeItemText(item, COLUMN_ANTENNA, tag.AntennaID.ToString());
             ListViewUtil.ChangeItemText(item, COLUMN_READERNAME, tag.ReaderName);
+            ListViewUtil.ChangeItemText(item, COLUMN_RSSI, tag.RSSI.ToString());
 
             Debug.Assert(tag.Protocol != "ISO14443A");
             ListViewUtil.ChangeItemText(item, COLUMN_PROTOCOL, tag.Protocol);

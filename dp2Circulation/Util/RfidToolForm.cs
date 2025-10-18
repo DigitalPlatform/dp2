@@ -2593,13 +2593,15 @@ TaskScheduler.Default);
 
             menuItem = new MenuItem("清空标签内容 [" + this.listView_tags.SelectedItems.Count.ToString() + "] (&C)");
             menuItem.Click += new System.EventHandler(this.menu_clearSelectedTagContent_Click);
-            if (this.listView_tags.SelectedItems.Count == 0)
+            if (this.listView_tags.SelectedItems.Count == 0
+                || CountingSaveableItems(this.listView_tags.SelectedItems.Cast<ListViewItem>(), "ISO15693,ISO18000P6C") == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("创建标签内容 [" + this.listView_tags.SelectedItems.Count.ToString() + "] (&R)");
-            menuItem.Click += new System.EventHandler(this.menu_createSelectedTagContent_Click);
-            if (this.listView_tags.SelectedItems.Count == 0)
+            menuItem = new MenuItem("写入原始 HEX 内容 [" + this.listView_tags.SelectedItems.Count.ToString() + "] (&R)");
+            menuItem.Click += new System.EventHandler(this.menu_createSelectedTagHexContent_Click);
+            if (this.listView_tags.SelectedItems.Count == 0
+                || CountingSaveableItems(this.listView_tags.SelectedItems.Cast<ListViewItem>(), "ISO18000P6C") == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
@@ -2610,7 +2612,8 @@ TaskScheduler.Default);
 
             menuItem = new MenuItem("保存标签内容 [" + this.listView_tags.SelectedItems.Count.ToString() + "] (&S)");
             menuItem.Click += new System.EventHandler(this.menu_saveSelectedTagContent_Click);
-            if (this.listView_tags.SelectedItems.Count == 0)
+            if (this.listView_tags.SelectedItems.Count == 0
+                || CountingSaveableItems(this.listView_tags.SelectedItems.Cast<ListViewItem>()) == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
@@ -2635,13 +2638,15 @@ TaskScheduler.Default);
 
             menuItem = new MenuItem("测试创建错误的标签内容 [" + this.listView_tags.SelectedItems.Count.ToString() + "] (&S)");
             menuItem.Click += new System.EventHandler(this.menu_saveSelectedErrorTagContent_Click);
-            if (this.listView_tags.SelectedItems.Count == 0)
+            if (this.listView_tags.SelectedItems.Count == 0
+                || CountingSaveableItems(this.listView_tags.SelectedItems.Cast<ListViewItem>(), "ISO15693") == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
             menuItem = new MenuItem("测试创建 PII 为空的标签内容 [" + this.listView_tags.SelectedItems.Count.ToString() + "] (&S)");
-            menuItem.Click += new System.EventHandler(this.menu_saveSelectedErrorTagContent_1_Click);
-            if (this.listView_tags.SelectedItems.Count == 0)
+            menuItem.Click += new System.EventHandler(this.menu_saveBlankPiiTagContent_Click);
+            if (this.listView_tags.SelectedItems.Count == 0
+                || CountingSaveableItems(this.listView_tags.SelectedItems.Cast<ListViewItem>(), "ISO15693") == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
@@ -2911,8 +2916,9 @@ TaskScheduler.Default);
             ListViewUtil.SelectAllItems(this.listView_tags);
         }
 
-        // 根据制定的内容创建标签
-        void menu_createSelectedTagContent_Click(object sender, EventArgs e)
+        // TODO: 增加对 ISO15693 协议的支持
+        // 写入原始 HEX 内容
+        void menu_createSelectedTagHexContent_Click(object sender, EventArgs e)
         {
             string strError = "";
 
@@ -2934,6 +2940,16 @@ TaskScheduler.Default);
             dlg.UserBankHex = ByteArray.GetHexTimeStampString(user_bank)?.ToUpper(); ;
             if (dlg.ShowDialog(this) != DialogResult.OK)
                 return;
+
+            var result = MessageBox.Show(this,
+$"创建标签内容，会覆盖当前标签的原有内容。\r\n\r\n确实要覆盖? ",
+"RfidToolForm",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+            if (result == DialogResult.No)
+                return;
+
             epc_bank_hex = dlg.EpcBankHex;
             string user_bank_hex = dlg.UserBankHex;
 
@@ -3074,8 +3090,14 @@ TaskScheduler.Default);
             ItemInfo item_info = (ItemInfo)item.Tag;
             if (item_info.OneTag.Protocol == InventoryInfo.ISO18000P6C)
                 return await ClearUhfTagContentAsync(item, lock_as_error);
-            else
+            else if (item_info.OneTag.Protocol == InventoryInfo.ISO15693)
                 return await ClearHfTagContentAsync(item, lock_as_error);
+            else
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"暂不支持 {item_info.OneTag.Protocol} 协议的标签"
+                };
         }
 
         // parameters:
@@ -3581,8 +3603,18 @@ TaskScheduler.Default);
             }
         }
 
-        async void menu_saveSelectedErrorTagContent_1_Click(object sender, EventArgs e)
+        // 故意写入 PII 为空的标签内容
+        async void menu_saveBlankPiiTagContent_Click(object sender, EventArgs e)
         {
+            var result = MessageBox.Show(this,
+$"写入 PII 为空的标签内容，会覆盖当前标签的原有内容。\r\n\r\n确实要覆盖? ",
+"RfidToolForm",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+            if (result == DialogResult.No)
+                return;
+
             _ = BeginSaveItemChangeAsync(
                 ListViewUtil.GetSelectedItems(this.listView_tags),
                 async (item) => await SaveBlankPiiTagContentAsync(item));
@@ -3608,6 +3640,47 @@ TaskScheduler.Default);
             if (errors.Count > 0)
                 MessageDlg.Show(this, StringUtil.MakePathList(errors, "\r\n"), "保存出错");
 #endif
+        }
+
+        int CountingSaveableItems(IEnumerable<ListViewItem> items,
+            string style = "changed,ISO15693,ISO18000P6C")
+        {
+            int count = 0;
+            foreach(var item in items)
+            {
+                ItemInfo item_info = (ItemInfo)item.Tag;
+                if (item_info == null)
+                    continue;
+                if (StringUtil.IsInList("changed", style)
+                    && item_info.LogicChipItem?.Changed == false)
+                    continue;
+
+                // 对 ISO14443A 协议的标签暂不支持保存操作
+                if (item_info.OneTag.Protocol == InventoryInfo.ISO14443A)
+                    continue;
+
+                if (StringUtil.IsInList("ISO14443A", style)
+    && item_info.OneTag.Protocol == InventoryInfo.ISO14443A)
+                {
+                    count++;
+                    continue;
+                }
+
+                if (StringUtil.IsInList("ISO15693", style)
+&& item_info.OneTag.Protocol == InventoryInfo.ISO15693)
+                {
+                    count++;
+                    continue;
+                }
+
+                if (StringUtil.IsInList("ISO18000P6C", style)
+&& item_info.OneTag.Protocol == InventoryInfo.ISO18000P6C)
+                {
+                    count++;
+                    continue;
+                }
+            }
+            return count;
         }
 
         // 故意写入 PII 为空的标签内容
@@ -3701,6 +3774,15 @@ new_tag_info);
 
         async void menu_saveSelectedErrorTagContent_Click(object sender, EventArgs e)
         {
+            var result = MessageBox.Show(this,
+$"测试创建错误的标签内容，会覆盖当前标签的原有内容。\r\n\r\n确实要覆盖? ",
+"RfidToolForm",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+            if (result == DialogResult.No)
+                return;
+
             _ = BeginSaveItemChangeAsync(
                 ListViewUtil.GetSelectedItems(this.listView_tags),
                 async (item) => await SaveErrorTagContent1Async(item));

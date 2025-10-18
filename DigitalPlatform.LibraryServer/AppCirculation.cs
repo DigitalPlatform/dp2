@@ -3491,6 +3491,14 @@ out strError);
             return result;
         }
 
+        // 2025/10/13
+        // 判断当前 library.xml 中是否定义了 rfid 元素
+        public bool HasRfidDefined()
+        {
+            var rfid = this.LibraryCfgDom.DocumentElement.SelectSingleNode("rfid") as XmlElement;
+            return rfid != null;
+        }
+
         // return:
         //      -1  出错
         //      0   没有通过较验
@@ -6262,6 +6270,9 @@ out _);
             return strText.ToLower().StartsWith("@bibliorecpath:");
         }
 
+        // TODO: 如果当前 library.xml 并没有定义 rfid 元素，表明
+        // 图书馆并未引入 RFID 功能，那么 barcode 中的点左右部分应该理解为
+        // barcode 本身的部分，而(点的左侧部分)不应被当作机构代码。
         public static void ParseOI(string strItemBarcodeParam,
             out string strItemBarcode,
             out string strOwnerInstitution)
@@ -16080,8 +16091,9 @@ out strError);
                 strError = $"当前读者记录的参考 ID 为空，无法完成借书操作";
                 return -1;
             }
-            // TODO: 改进为显示友好的形态
+
             string strReaderKey = dp2StringUtil.BuildReaderKey(strReaderBarcode, strReaderRefID);
+            string strReaderDisplayKey = dp2StringUtil.BuildReaderKeyLegacy(strReaderBarcode, strReaderRefID);
 
             string strLocation = DomUtil.GetElementText(itemdom.DocumentElement,
     "location");
@@ -16125,8 +16137,9 @@ out strError);
                 strError = $"当前册记录({strItemRecPath}) 的参考 ID 字段为空，无法完成借书操作";
                 return -1;
             }
-            // TODO: 改进为显示友好的形态
+
             string strItemKey = dp2StringUtil.BuildReaderKey(strItemBarcode, strItemRefID);
+            string strItemDisplayKey = dp2StringUtil.BuildReaderKeyLegacy(strItemBarcode, strItemRefID);
 
             // 2020/9/8
             string strItemOI = DomUtil.GetElementText(itemdom.DocumentElement, "oi");
@@ -16667,7 +16680,16 @@ out strError);
             // 修改册记录
             // 注: strOldReaderKey 内容可能是证条码号，也可能是 @refID:xxx 形态，使用时注意判断
             string strOldReaderKey = DomUtil.GetElementText(itemdom.DocumentElement,
-                "borrower");
+                "borrower",
+                out XmlNode node);
+            string strOldReaderDisplayKey = "";
+            {
+                if (node != null)
+                    strOldReaderDisplayKey = DomUtil.GetAttr(node, "barcode");
+                if (string.IsNullOrEmpty(strOldReaderDisplayKey))
+                    strOldReaderDisplayKey = strOldReaderKey;
+            }
+
 
             if (bRenew == false)
             {
@@ -16679,13 +16701,13 @@ out strError);
                         || GetRefID(strOldReaderKey) == strReaderRefID)
                     {
                         // text-level: 用户提示
-                        strError = "借阅操作被拒绝。因册 '" + strItemKey + "' 在本次操作前已经被当前读者 '" + strReaderKey + "' 借阅了。";
+                        strError = "借阅操作被拒绝。因册 '" + strItemDisplayKey + "' 在本次操作前已经被当前读者 '" + strReaderDisplayKey + "' 借阅了。";
                         error_code = ErrorCode.AlreadyBorrowed;    // 已经被当前读者借阅
                         return -1;
                     }
 
                     // text-level: 用户提示
-                    strError = "借阅操作被拒绝。因册 '" + strItemKey + "' 在本次操作前已经处于被读者 '" + strOldReaderKey + "' 借阅(持有)状态(尚未归还)。\r\n如果属于拿错情况，请工作人员立即扣留此书，设法交还给持有人；\r\n如果确系(经持有人同意)其他读者要转借此册，需先履行还书手续；\r\n如果持有人要续借此册，请履行续借手续。";
+                    strError = "借阅操作被拒绝。因册 '" + strItemDisplayKey + "' 在本次操作前已经处于被读者 '" + strOldReaderDisplayKey + "' 借阅(持有)状态(尚未归还)。\r\n如果属于拿错情况，请工作人员立即扣留此书，设法交还给持有人；\r\n如果确系(经持有人同意)其他读者要转借此册，需先履行还书手续；\r\n如果持有人要续借此册，请履行续借手续。";
                     error_code = ErrorCode.AlreadyBorrowedByOther;   // 已经被其他读者借阅
                     return -1;
                 }

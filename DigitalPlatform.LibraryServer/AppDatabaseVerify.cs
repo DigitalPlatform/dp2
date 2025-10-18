@@ -52,7 +52,7 @@ namespace DigitalPlatform.LibraryServer
                 string dbname = GetSingleDbName(strDbType);
                 if (string.IsNullOrEmpty(dbname) == false)
                 {
-                    strError = "删除完成后，" + strDbTypeCaption + "库名 '" + strDbName + "' 在 LibraryApplication 的 相应成员(.???DbName)内没有清理干净";
+                    strError = "删除完成后，" + strDbTypeCaption + "库名 '" + strDbName + "' 在 LibraryApplication 的 相应成员(.???DbNames)内没有清理干净";
                     return 0;
                 }
             }
@@ -144,12 +144,12 @@ namespace DigitalPlatform.LibraryServer
                 string dbname = GetSingleDbName(strDbType);
                 if (string.IsNullOrEmpty(dbname) == true)
                 {
-                    strError = "创建完成后，" + strDbTypeCaption + "库名 '" + strDbName + "' 在 LibraryApplication 的 相应成员(.???DbName)内没有设置";
+                    strError = "创建完成后，" + strDbTypeCaption + "库名 '" + strDbName + "' 在 LibraryApplication 的 相应成员(.???DbNames)内没有设置";
                     return 0;
                 }
                 if (dbname != strDbName)
                 {
-                    strError = "创建完成后，" + strDbTypeCaption + "库名 '" + strDbName + "' 在 LibraryApplication 的 相应成员(.???DbName)内设置的值 '" + dbname + "' 和期望值 '" + strDbName + "' 不符合";
+                    strError = "创建完成后，" + strDbTypeCaption + "库名 '" + strDbName + "' 在 LibraryApplication 的 相应成员(.???DbNames)内设置的值 '" + dbname + "' 和期望值 '" + strDbName + "' 不符合";
                     return 0;
                 }
             }

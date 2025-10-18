@@ -220,6 +220,7 @@
     <Compile Include="StopwordCfg.cs" />
     <Compile Include="TableInfo.cs" />
     <Compile Include="UnitTestKeys.cs" />
+    <Compile Include="UnitTest\TestBrowseCfg.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

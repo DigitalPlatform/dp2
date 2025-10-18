@@ -378,5 +378,23 @@ OI的校验，总长度不超过16位。
         {
             this.textBox_rfid_aoi.Text = "";
         }
+
+        /*
+高校联盟格式
+国标格式         * 
+         * */
+        private void comboBox_uhfDataFormat_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (this.comboBox_uhfDataFormat.Text == "高校联盟格式")
+            {
+                this.textBox_gaoxiaoParameters.Visible = true;
+                this.label_gaoxiaoParameters.Visible = true;
+            }
+            else
+            {
+                this.textBox_gaoxiaoParameters.Visible = false;
+                this.label_gaoxiaoParameters.Visible = false;
+            }
+        }
     }
 }

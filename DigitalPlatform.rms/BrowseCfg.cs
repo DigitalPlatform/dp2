@@ -1,26 +1,34 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
-using System.Xml;
-using System.Xml.Xsl;
-using System.Xml.XPath;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
+using System.Xml;
+using System.Xml.XPath;
+using System.Xml.Xsl;
 
 using Jint;
 
-using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
-using DigitalPlatform.Text;
 using DigitalPlatform.Marc;
+using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
+using System.Linq;
 
 namespace DigitalPlatform.rms
 {
     // 浏览格式
     public class BrowseCfg : KeysBrowseBase
     {
+        // col 或 use 或 script 元素 --> CacheItem 对照表
         Hashtable m_exprCache = new Hashtable();
+
+        /*
+        // col 元素 --> ColCacheItem 对照表
+        Hashtable _colCache = new Hashtable();
+        */
+
         List<string> _useNames = new List<string>();
         // Hashtable m_methodsCache = new Hashtable();
 
@@ -31,6 +39,7 @@ namespace DigitalPlatform.rms
         {
             base.Clear();
             m_exprCache.Clear();
+            // _colCache.Clear();
             _useNames.Clear();
             // m_methodsCache.Clear();
             this.m_xt = null;
@@ -38,7 +47,7 @@ namespace DigitalPlatform.rms
 
         static List<string> GetMethods(string strConvert)
         {
-            // List<string> convert_methods = StringUtil.SplitList(strConvert);
+            // List<string> col_convert_methods = StringUtil.SplitList(strConvert);
             List<string> convert_methods = StringUtil.SplitString(strConvert,
     ",",
     new string[] { "()" },
@@ -78,10 +87,54 @@ namespace DigitalPlatform.rms
         class CacheItem
         {
             public XPathExpression expr { get; set; }
+
             public List<string> convert_methods { get; set; }
-            public string Use { get; set; }
+
+            public string InnerText { get; set; }
+
+            public XmlElement Element { get; set; }
+
+            //public string Use { get; set; }
             // javascript 脚本
-            public string Script { get; set; }
+            //public string Script { get; set; }
+        }
+
+        /*
+        class ColCacheItem
+        {
+            public List<string> col_convert_methods { get; set; }
+        }
+        */
+
+        // 设置一些通用 Cache 属性
+        // 包括 convert .InnerText
+        CacheItem SetNormalCache(XmlElement nodeCol)
+        {
+            var col_cache_item = new CacheItem();
+            m_exprCache[nodeCol] = col_cache_item;
+            col_cache_item.Element = nodeCol;
+            // 把 convert 参数缓存起来
+            string strConvert = nodeCol.GetAttribute("convert");
+            if (string.IsNullOrEmpty(strConvert) == false)
+            {
+                List<string> convert_methods = GetMethods(strConvert);
+                col_cache_item.convert_methods = convert_methods;
+            }
+            else
+                col_cache_item.convert_methods = new List<string>();
+
+            string strUse = nodeCol.InnerText.Trim();
+            if (string.IsNullOrEmpty(strUse) == false)
+            {
+                col_cache_item.InnerText = strUse;
+            }
+
+            return col_cache_item;
+        }
+
+        CacheItem GetCacheItem(XmlElement element)
+        {
+            return (m_exprCache[element] as CacheItem);
         }
 
         // TODO: XPathExpression可以缓存起来，加快速度
@@ -122,7 +175,7 @@ namespace DigitalPlatform.rms
             }
             */
 
-            int nResultLength = 0;
+            // int nResultLength = 0;
 
             XPathNavigator nav = domData.CreateNavigator();
 
@@ -144,81 +197,103 @@ namespace DigitalPlatform.rms
 
                     foreach (XmlElement nodeCol in nodeListCol)
                     {
-                        CacheItem cache_item = new CacheItem();
-                        m_exprCache[nodeCol] = cache_item;
+                        SetNormalCache(nodeCol);
 
-                        // XmlNode nodeXpath = nodeListXpath[i];
-                        XmlElement nodeXPath = nodeCol.SelectSingleNode("xpath") as XmlElement;
-                        string strXpath = "";
-                        if (nodeXPath != null)
-                            strXpath = nodeXPath.InnerText.Trim();
-                        if (string.IsNullOrEmpty(strXpath) == false)
+                        // XmlElement nodeXPath = nodeCol.SelectSingleNode("xpath") as XmlElement;
+                        // 2025/10/18 改为支持 col 下多个 xpath 元素
+                        var xpath_nodes = nodeCol.SelectNodes("xpath");
+                        foreach (XmlElement nodeXPath in xpath_nodes)
                         {
-                            string strNstableName = DomUtil.GetAttrDiff(nodeXPath, "nstable");
-                            XmlNamespaceManager nsmgr = (XmlNamespaceManager)this.tableNsClient[nodeXPath];
+                            CacheItem cache_item = SetNormalCache(nodeXPath);
+
+                            string strXpath = "";
+                            if (nodeXPath != null)
+                                strXpath = nodeXPath.InnerText.Trim();
+                            if (string.IsNullOrEmpty(strXpath) == false)
+                            {
+                                string strNstableName = DomUtil.GetAttrDiff(nodeXPath, "nstable");
+                                XmlNamespaceManager nsmgr = (XmlNamespaceManager)this.tableNsClient[nodeXPath];
 #if DEBUG
-                            if (nsmgr != null)
-                            {
-                                Debug.Assert(strNstableName != null, "此时应该没有定义'nstable'属性。");
-                            }
-                            else
-                            {
-                                Debug.Assert(strNstableName == null, "此时必须没有定义'nstable'属性。");
-                            }
+                                if (nsmgr != null)
+                                {
+                                    Debug.Assert(strNstableName != null, "此时应该没有定义'nstable'属性。");
+                                }
+                                else
+                                {
+                                    Debug.Assert(strNstableName == null, "此时必须没有定义'nstable'属性。");
+                                }
 #endif
 
-                            try
-                            {
-                                XPathExpression expr = nav.Compile(strXpath);
-                                if (nsmgr != null)
-                                    expr.SetContext(nsmgr);
+                                try
+                                {
+                                    XPathExpression expr = nav.Compile(strXpath);
+                                    if (nsmgr != null)
+                                        expr.SetContext(nsmgr);
 
-                                cache_item.expr = expr;
+                                    cache_item.expr = expr;
+                                }
+                                catch (Exception ex)
+                                {
+                                    throw new Exception($"{ex.Message}。XPath='{strXpath}'", ex);
+                                }
                             }
-                            catch (Exception ex)
+
+                            /*
+                            // 把 convert 参数也缓存起来
+                            // XmlNode nodeCol = nodeXpath.ParentNode;
+                            string strConvert = nodeCol.GetAttribute("convert");
+                            if (string.IsNullOrEmpty(strConvert) == false)
                             {
-                                throw new Exception($"{ex.Message}。XPath='{strXpath}'", ex);
+                                List<string> col_convert_methods = GetMethods(strConvert);
+                                cache_item.col_convert_methods = col_convert_methods;
                             }
+                            else
+                                cache_item.col_convert_methods = new List<string>();
+                            */
+
+
                         }
 
-                        // 把 convert 参数也缓存起来
-                        // XmlNode nodeCol = nodeXpath.ParentNode;
-                        string strConvert = nodeCol.GetAttribute("convert");
-                        if (string.IsNullOrEmpty(strConvert) == false)
+                        // 把 use 元素 InnerText 缓存起来
+                        foreach (XmlElement nodeUse in nodeCol.SelectNodes("use"))
                         {
-                            List<string> convert_methods = GetMethods(strConvert);
-                            cache_item.convert_methods = convert_methods;
-                        }
-                        else
-                            cache_item.convert_methods = new List<string>();
-
-                        // 把 use 元素 text 缓存起来
-                        {
-                            XmlElement nodeUse = nodeCol.SelectSingleNode("use") as XmlElement;
-                            string strUse = "";
-                            if (nodeUse != null)
-                                strUse = nodeUse.InnerText.Trim();
-                            if (string.IsNullOrEmpty(strUse) == false)
-                            {
-                                cache_item.Use = strUse;
-                            }
+                            // XmlElement nodeUse = nodeCol.SelectSingleNode("use") as XmlElement;
+                            SetNormalCache(nodeUse);
                         }
 
-                        // 2018/9/29
-                        // 把 script 元素 text 缓存起来
+                        // 把 script 元素 InnerText 缓存起来
+                        foreach (XmlElement nodeScript in nodeCol.SelectNodes("script"))
                         {
-                            XmlElement script = nodeCol.SelectSingleNode("script") as XmlElement;
-                            cache_item.Script = script?.InnerText.Trim();
+                            SetNormalCache(nodeScript);
                         }
                     }
                 }
 
-                Dictionary<string, MarcColumn> results = null;
-                string filter = this._dom.DocumentElement.GetAttribute("filter");
-                if (filter == "marc" && this._useNames.Count > 0)
+                /*
+                    Dictionary<string, MarcColumn> browse_table = null;
+                    string filter = this._dom.DocumentElement.GetAttribute("filter");
+                    if (filter == "marc" && this._useNames.Count > 0)
+                    {
+                        browse_table = MarcBrowse.Build(domData,
+                            this._useNames);
+                    }
+                */
+                Dictionary<string, MarcColumn> browse_table = null;
+                // 尽量延迟创建
+                Dictionary<string, MarcColumn> EnsureMarcBrowseBuilt()
                 {
-                    results = MarcBrowse.Build(domData,
-                        this._useNames);
+                    if (browse_table != null)
+                        return browse_table;
+                    if (browse_table == null
+                        // && this._dom.DocumentElement.GetAttribute("filter") == "marc"
+                        && this._useNames.Count > 0)
+                    {
+                        browse_table = MarcBrowse.Build(domData,
+                            this._useNames);
+                        return browse_table;
+                    }
+                    browse_table = new Dictionary<string, MarcColumn>();
+                    return browse_table;
                 }
 
                 MarcRecord record = null;
@@ -227,128 +302,163 @@ namespace DigitalPlatform.rms
 
                 foreach (XmlElement nodeCol in nodeListCol)
                 {
-#if NO
-                    XmlNode nodeXpath = nodeListXpath[i];
-                    string strXpath = nodeXpath.InnerText.Trim(); // 2012/2/16
-                    if (string.IsNullOrEmpty(strXpath) == true)
-                        continue;
+                    string prefix = nodeCol.GetAttribute("prefix");
+                    string postfix = nodeCol.GetAttribute("postfix");
 
-                    // 优化速度 2014/1/29
-                    XmlNode nodeCol = nodeXpath.ParentNode;
-#endif
-                    CacheItem cache_item = m_exprCache[nodeCol] as CacheItem;
-                    List<string> convert_methods = cache_item.convert_methods;
-                    if (convert_methods == null)
+                    // 一个 col 的文字堆积
+                    StringBuilder colText = new StringBuilder();
+                    colText.Append(nodeCol.GetAttribute("text"));
+
+                    CacheItem col_cache_item = GetCacheItem(nodeCol);
+                    List<string> col_convert_methods = col_cache_item?.convert_methods;
+                    // var convert = nodeCol.GetAttribute("convert");
+
+                    // 看看是否要插入什么分隔符
+                    string strColSep = GetSepString(col_convert_methods) ?? "";
+
+                    void AppendText(string new_text, string sep)
                     {
-                        Debug.Assert(false, "");
-                        string strConvert = DomUtil.GetAttr(nodeCol, "convert");
-                        convert_methods = GetMethods(strConvert);
+                        if (string.IsNullOrEmpty(new_text) == false
+                            && colText.Length > 0
+                            && string.IsNullOrEmpty(sep) == false
+                            )
+                            colText.Append(sep);
+                        colText.Append(new_text);
                     }
 
-                    string prefix = nodeCol.GetAttribute("prefix");
-
-                    string strText = nodeCol.GetAttribute("text");
-
-                    XPathExpression expr = cache_item.expr;
-
-                    if (expr != null)
+                    foreach (XmlElement child in nodeCol.ChildNodes)
                     {
-                        if (expr == null)
+                        CacheItem child_cache_item = GetCacheItem(child);
+                        List<string> child_convert_methods = child_cache_item?.convert_methods;
+
+                        // TODO: 也放入缓存中
+                        string child_sep = GetSepString(child_convert_methods) ?? "";
+
+
+                        if (child.Name == "xpath")
                         {
+                            // xpath 元素取出 CacheItem
+                            CacheItem cache_item = m_exprCache[child] as CacheItem;
+
+                            XPathExpression expr = cache_item.expr;
+
+                            // xpath 元素
+                            if (expr != null)
+                            {
+                                if (expr == null)
+                                {
 #if NO
                         this.m_exprCache.Clear();
                         this.m_methodsCache.Clear();
                         goto CREATE_CACHE;  // TODO: 如何预防死循环?
 #endif
-                        }
+                                }
 
-                        Debug.Assert(expr != null, "");
+                                Debug.Assert(expr != null, "");
 
-                        if (expr.ReturnType == XPathResultType.Number)
-                        {
-                            strText = nav.Evaluate(expr).ToString();//Convert.ToString((int)(nav.Evaluate(expr)));
-                            strText = ConvertText(convert_methods, strText);
+                                if (expr.ReturnType == XPathResultType.Number)
+                                {
+                                    var current = nav.Evaluate(expr).ToString();//Convert.ToString((int)(nav.Evaluate(expr)));
+                                    current = (ConvertText(col_convert_methods, current));
+                                    AppendText(current, strColSep);
+                                }
+                                else if (expr.ReturnType == XPathResultType.Boolean)
+                                {
+                                    var current = Convert.ToString((bool)(nav.Evaluate(expr)));
+                                    current = (ConvertText(col_convert_methods, current));
+                                    AppendText(current, strColSep);
+                                }
+                                else if (expr.ReturnType == XPathResultType.String)
+                                {
+                                    var current = (string)(nav.Evaluate(expr));
+                                    current = ConvertText(col_convert_methods, current);
+                                    AppendText(current, strColSep);
+                                }
+                                else if (expr.ReturnType == XPathResultType.NodeSet)
+                                {
+                                    var current_text = new StringBuilder(4096);
+                                    var iterator = nav.Select(expr);
+                                    while (iterator.MoveNext())
+                                    {
+                                        XPathNavigator navigator = iterator.Current;
+                                        string strOneText = navigator.Value;
+                                        if (strOneText == "")
+                                            continue;
 
-                        }
-                        else if (expr.ReturnType == XPathResultType.Boolean)
-                        {
-                            strText = Convert.ToString((bool)(nav.Evaluate(expr)));
-                            strText = ConvertText(convert_methods, strText);
-                        }
-                        else if (expr.ReturnType == XPathResultType.String)
-                        {
-                            strText = (string)(nav.Evaluate(expr));
-                            strText = ConvertText(convert_methods, strText);
-                        }
-                        else if (expr.ReturnType == XPathResultType.NodeSet)
-                        {
-                            // 看看是否要插入什么分隔符
-                            string strSep = GetSepString(convert_methods);
+                                        strOneText = ConvertText(col_convert_methods, strOneText);
 
-                            XPathNodeIterator iterator = nav.Select(expr);
-                            StringBuilder text = new StringBuilder(4096);
-                            while (iterator.MoveNext())
-                            {
-                                XPathNavigator navigator = iterator.Current;
-                                string strOneText = navigator.Value;
-                                if (strOneText == "")
-                                    continue;
+                                        // 加入分隔符号
+                                        if (current_text.Length > 0 && string.IsNullOrEmpty(strColSep) == false)
+                                            current_text.Append(strColSep);
 
-                                strOneText = ConvertText(convert_methods, strOneText);
+                                        current_text.Append(strOneText);
+                                    }
 
-                                // 加入分隔符号
-                                if (text.Length > 0 && string.IsNullOrEmpty(strSep) == false)
-                                    text.Append(strSep);
-
-                                text.Append(strOneText);
-                            }
-
-                            strText = text.ToString();
-                        }
-                        else
-                        {
-                            strError = "XPathExpression的ReturnType为'" + expr.ReturnType.ToString() + "'无效";
-                            return -1;
-                        }
-                    }
-
-                    if (string.IsNullOrEmpty(cache_item.Use) == false)
-                    {
-                        // 2021/9/10
-                        if (results == null)
-                        {
-                            strError = "browse 配置文件根元素应当具备属性 filter='marc'";
-                            return -1;
-                        }
-
-                        // 看看是否要插入什么分隔符
-                        string strSep = GetSepString(convert_methods);
-                        StringBuilder text = new StringBuilder();
-                        // <use></use> 内的文本允许使用逗号间隔的多个名字
-                        var use_list = StringUtil.SplitList(cache_item.Use, ",");
-                        foreach (var use in use_list)
-                        {
-                            results.TryGetValue(use, out MarcColumn column);
-                            if (column != null && string.IsNullOrEmpty(column.Value) == false)
-                            {
-                                // 加入分隔符号
-                                if (text.Length > 0 && string.IsNullOrEmpty(strSep) == false)
-                                    text.Append(strSep);
-                                text.Append(column.Value);
+                                    AppendText(current_text.ToString(), strColSep);
+                                }
+                                else
+                                {
+                                    strError = "XPathExpression 的 ReturnType 为 '" + expr.ReturnType.ToString() + "' 无效";
+                                    return -1;
+                                }
                             }
                         }
 
-                        strText += text.ToString();
-                    }
+                        // TODO: use 元素也可以有自己的 convert 和 prefix 属性
+                        // use 元素
+                        else if (child.Name == "use")    // string.IsNullOrEmpty(cache_item.Use) == false
+                        {
+                            /*
+                            // 2021/9/10
+                            if (browse_table == null)
+                            {
+                                strError = "MARC 浏览 browse_table == null";
+                                // strError = "browse 配置文件根元素应当具备属性 filter='marc'";
+                                return -1;
+                            }
+                            */
 
-                    if (string.IsNullOrEmpty(cache_item.Script) == false)
-                    {
-                        int nRet = GetMarcRecord(domData,
-    ref record,
-    ref strMarcSyntax,
-    out strError);
-                        if (nRet == -1)
-                            return -1;
+                            string use_value = child.InnerText.Trim();
+
+                            StringBuilder current_text = new StringBuilder();
+                            // <use></use> 内的文本允许使用逗号间隔的多个名字
+                            var use_list = StringUtil.SplitList(use_value, ",");
+
+                            EnsureMarcBrowseBuilt();
+                            foreach (var use in use_list)
+                            {
+                                browse_table.TryGetValue(use, out MarcColumn column);
+                                if (column != null && string.IsNullOrEmpty(column.Value) == false)
+                                {
+                                    // 加入分隔符号
+                                    if (current_text.Length > 0 && string.IsNullOrEmpty(child_sep) == false)
+                                        current_text.Append(child_sep);
+                                    current_text.Append(column.Value);
+                                }
+                            }
+
+                            // 2025/10/17 不要忘了加入 error 列
+                            if (browse_table.ContainsKey("error")
+                                && use_list.Contains("error") == false)
+                            {
+                                current_text.Append("error: " + browse_table["error"].Value);
+                            }
+
+                            AppendText(current_text.ToString(), strColSep);
+                        }
+
+                        // script 元素
+                        else if (child.Name == "script")   // string.IsNullOrEmpty(cache_item.Script) == false
+                        {
+                            // TODO: 提升到高层创建
+                            int nRet = GetMarcRecord(domData,
+        ref record,
+        ref strMarcSyntax,
+        out strError);
+                            if (nRet == -1)
+                                return -1;
+
+                            var script_value = child.InnerText.Trim();
 
 #if NO
                         Jurassic.ScriptEngine engine = new Jurassic.ScriptEngine();
@@ -359,39 +469,48 @@ namespace DigitalPlatform.rms
                         if (string.IsNullOrEmpty(result) == false)
                             strText += result;
 #endif
-                        if (engine == null)
-                            engine = new Engine(cfg => cfg.AllowClr(typeof(MarcQuery).Assembly))
-        .SetValue("syntax", strMarcSyntax)
-        .SetValue("biblio", record);
+                            if (engine == null)
+                                engine = new Engine(cfg => cfg.AllowClr(typeof(MarcQuery).Assembly))
+            .SetValue("syntax", strMarcSyntax)
+            .SetValue("biblio", record);
 
-                        string result = engine.Execute("var DigitalPlatform = importNamespace('DigitalPlatform');\r\n"
-                            + cache_item.Script) // execute a statement
-                            ?.GetCompletionValue() // get the latest statement completion value
-                            ?.ToObject()?.ToString() // converts the value to .NET
-                            ;
-                        if (string.IsNullOrEmpty(result) == false)
-                            strText += result;
+                            string result = engine.Execute("var DigitalPlatform = importNamespace('DigitalPlatform');\r\n"
+                                + script_value) // execute a statement
+                                ?.GetCompletionValue() // get the latest statement completion value
+                                ?.ToObject()?.ToString() // converts the value to .NET
+                                ;
+                            if (string.IsNullOrEmpty(result) == false)
+                            {
+                                AppendText(result, strColSep);
+                            }
+                        }
+                        else
+                            continue;
+
+                        // 空内容也要算作一列
+
+                        /*
+                        // 2022/7/22
+                        // 包含列标题
+                        if (string.IsNullOrEmpty(strText) == false
+                            && type_list != null
+                            && (type_list.Count == 0 || type_list.IndexOf(type) != -1))
+                            strText = $"~{type}:" + strText;
+                        */
+
                     }
 
-                    // 空内容也要算作一列
-
-                    /*
-                    // 2022/7/22
-                    // 包含列标题
-                    if (string.IsNullOrEmpty(strText) == false
-                        && type_list != null
-                        && (type_list.Count == 0 || type_list.IndexOf(type) != -1))
-                        strText = $"~{type}:" + strText;
-                    */
-
-                    // 2022/7/22
-                    // 包含前缀
-                    if (string.IsNullOrEmpty(strText) == false
-                        && string.IsNullOrEmpty(prefix) == false)
-                        strText = prefix + strText;
-
-                    col_array.Add(strText);
-                    nResultLength += strText.Length;
+                    // 2022/7/22 支持前缀
+                    // 2025/10/18 支持后缀
+                    if (colText.Length > 0)
+                    {
+                        if (string.IsNullOrEmpty(prefix) == false)
+                            colText.Insert(0, prefix);
+                        if (string.IsNullOrEmpty(postfix) == false)
+                            colText.Append(postfix);
+                    }
+                    col_array.Add(colText.ToString());
+                    // nResultLength += colText.Length;
                 }
             }
             else if (this._dom.DocumentElement.Prefix == "xsl")
@@ -461,8 +580,14 @@ namespace DigitalPlatform.rms
                             && string.IsNullOrEmpty(prefix) == false)
                             strColText = prefix + strColText;
 
+                        // 2025/10/18
+                        string postfix = colNode.GetAttribute("postfix");
+                        if (string.IsNullOrEmpty(strColText) == false
+                            && string.IsNullOrEmpty(postfix) == false)
+                            strColText += postfix;
+
                         col_array.Add(strColText);
-                        nResultLength += strColText.Length;
+                        // nResultLength += strColText.Length;
                     }
                 }
                 catch (Exception ex)
@@ -470,7 +595,7 @@ namespace DigitalPlatform.rms
                     strError = "!error: browse XSLT 生成的结果文件加载到 XMLDOM 时出错：" + ex.Message;
                     // return -1;
                     col_array.Add(strError);
-                    nResultLength += strError.Length;
+                    // nResultLength += strError.Length;
                 }
             }
             else
@@ -481,12 +606,8 @@ namespace DigitalPlatform.rms
 
             // 把col_array转到cols里
             cols = col_array.ToArray();
-            /*
-            cols = new string[col_array.Count + nStartCol];
-            col_array.CopyTo(cols, nStartCol);
-            */
-            // cols = ConvertUtil.GetStringArray(nStartCol, col_array);
-            return nResultLength;
+            // return nResultLength;
+            return col_array.Sum(o => o.Length);
         }
 
         int GetMarcRecord(XmlDocument domData,
@@ -542,6 +663,9 @@ namespace DigitalPlatform.rms
         // 获得分隔符定义
         static string GetSepString(List<string> methods)
         {
+            if (methods == null)
+                return null;
+
             string strMethod = "";
             foreach (string s in methods)
             {

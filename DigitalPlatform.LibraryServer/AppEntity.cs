@@ -263,6 +263,9 @@ namespace DigitalPlatform.LibraryServer
             XmlDocument domNew,
             string[] element_names,
             bool outofrangeAsError,
+#if DEBUG
+            delegate_checkAccess func_checkAccess,
+#endif
             out string strMergedXml,
             out string strError)
         {
@@ -291,6 +294,9 @@ namespace DigitalPlatform.LibraryServer
                     sessioninfo.RightsOrigin,
                     domNew,
                     domExist,
+#if ITEM_ACCESS_RIGHTS
+                    func_checkAccess,
+#endif
                     ref bChangePartDeniedParam,
                     out strError);
                 if (nRet == -1)
@@ -5034,6 +5040,15 @@ out strError);
                                 strBiblioRecId,
                                 existing_xml,
                                 info.NewRecord,
+                                (r) =>
+                                {
+                                    return CheckAccess(sessioninfo,
+                                        $"册记录下级对象({r})",
+                                        ResPath.GetDbName(info.NewRecPath),
+                                        r,
+                                        "",
+                                        out _);
+                                },
                                 out string strNewXml,
                                 out strError);
                             if (nRet == -1)
@@ -6059,6 +6074,9 @@ out strError);
             string strBiblioRecId,
             string strExistingXml,
             string strOriginXml,
+#if ITEM_ACCESS_RIGHTS
+            delegate_checkAccess func_checkAccess,
+#endif
             out string strXml,
             out string strError)
         {
@@ -6150,6 +6168,9 @@ out strError);
                     sessioninfo,
                     domExist,
                     dom,
+#if ITEM_ACCESS_RIGHTS
+                    func_checkAccess,
+#endif
                     out strXml,
                     out strError);
                 if (nRet == -1)
@@ -6174,6 +6195,7 @@ out strError);
             SessionInfo sessioninfo,
             XmlDocument domExist,
             XmlDocument domNew,
+            delegate_checkAccess func_checkAccess,
             out string strMergedXml,
             out string strError)
         {
@@ -6189,8 +6211,12 @@ out strError);
             //      0   new record not changed
             //      1   new record changed
             int nRet = ItemDatabase.MergeOldNewRec(
-                "item",
+                    "item",
+#if ITEM_ACCESS_RIGHTS
+                    func_checkAccess,
+#else
                 sessioninfo.RightsOrigin,
+#endif
                 domExist,
                 domNew,
                 ref bChangePartDeniedParam,
@@ -6427,6 +6453,17 @@ out strError);
                     sessioninfo,
                     domExist,
                     domNew,
+#if ITEM_ACCESS_RIGHTS
+                    (r) =>
+                     {
+                         return CheckAccess(sessioninfo,
+                             $"册记录下级对象({r})",
+                             ResPath.GetDbName(info.NewRecPath),
+                             r,
+                             "",
+                             out _);
+                     },
+#endif
                     out string _,
                     out strError);
                 if (nRet == -1)
@@ -7229,6 +7266,17 @@ out strError);
                     domNew,
                     elements,   // strAction == "transfer" ? transfer_entity_element_names : null,
                     StringUtil.IsInList("outofrangeAsError", strStyle),
+#if ITEM_ACCESS_RIGHTS
+                    (r) =>
+                    {
+                        return CheckAccess(sessioninfo,
+                            $"册记录下级对象({r})",
+                            ResPath.GetDbName(info.NewRecPath),
+                            r,
+                            "",
+                            out _);
+                    },
+#endif
                     out string strNewXml,
                     out strError);
                 if (nRet == -1)
@@ -8074,6 +8122,17 @@ strSourceLibraryCode);
                 domNew,
                 null,
                 StringUtil.IsInList("outofrangeAsError", strStyle),
+#if ITEM_ACCESS_RIGHTS
+                    (r) =>
+                    {
+                        return CheckAccess(sessioninfo,
+                            $"册记录下级对象({r})",
+                            ResPath.GetDbName(info.NewRecPath),
+                            r,
+                            "",
+                            out _);
+                    },
+#endif
                 out string strNewXml,
                 out strError);
             if (nRet == -1)

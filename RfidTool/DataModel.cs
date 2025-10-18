@@ -94,7 +94,7 @@ namespace RfidTool
 
 
                         string readerNameList = "*";
-                        var result = ListTags(readerNameList, "");
+                        var result = ListTags(readerNameList, "rssi");
                         if (result.Value == -1)
                             SetError?.Invoke(result,
                                 new SetErrorEventArgs { Error = result.ErrorInfo });
@@ -592,6 +592,7 @@ namespace RfidTool
                                 DSFID = info.DsfID,
                                 AntennaID = info.AntennaID, // 2019/9/25
                                                             // InventoryInfo = info    // 有些冗余的字段
+                                RSSI = info.RSSI,   // 2025/9/30
                             };
 
                             /*

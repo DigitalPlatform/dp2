@@ -304,6 +304,7 @@ namespace RfidTool
         const int COLUMN_READERNAME = 11;
         const int COLUMN_PROTOCOL = 12;
         const int COLUMN_TID = 13;
+        const int COLUMN_RSSI = 14;
 
         object _syncRootFill = new object();
 
@@ -400,6 +401,7 @@ namespace RfidTool
             ListViewUtil.ChangeItemText(item, COLUMN_ANTENNA, tag.OneTag.AntennaID.ToString());
             ListViewUtil.ChangeItemText(item, COLUMN_READERNAME, tag.OneTag.ReaderName);
             ListViewUtil.ChangeItemText(item, COLUMN_PROTOCOL, tag.OneTag.Protocol);
+            ListViewUtil.ChangeItemText(item, COLUMN_RSSI, tag.OneTag.RSSI.ToString());
 
             if (tag.OneTag?.Protocol == InventoryInfo.ISO18000P6C)
             {

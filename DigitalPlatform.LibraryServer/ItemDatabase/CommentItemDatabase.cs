@@ -1,11 +1,11 @@
-﻿using System;
+﻿using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
+using System;
 using System.Collections.Generic;
-using System.Xml;
 using System.Diagnostics;
 using System.Linq;
-
-using DigitalPlatform.Xml;
-using DigitalPlatform.Text;
+using System.Xml;
+using static DigitalPlatform.LibraryServer.LibraryApplication;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -72,6 +72,9 @@ namespace DigitalPlatform.LibraryServer
             XmlDocument domExistParam,
             XmlDocument domNewParam,
             bool outofrangeAsError,
+#if DEBUG
+            delegate_checkAccess func_checkAccess,
+#endif
             out string strMergedXml,
             out string strError)
         {
@@ -110,6 +113,9 @@ namespace DigitalPlatform.LibraryServer
                 sessioninfo.RightsOrigin,
                 domNew,
                 domExist,
+#if ITEM_ACCESS_RIGHTS
+                    func_checkAccess,
+#endif
                 ref bChangePartDeniedParam,
                 out strError);
             if (nRet == -1)
@@ -928,6 +934,9 @@ out string strError)
             string strBiblioRecId,
             string strExistingXml,
             string strOriginXml,
+#if ITEM_ACCESS_RIGHTS
+            delegate_checkAccess func_checkAccess,
+#endif
             out string strXml,
             out string strError)
         {
@@ -947,6 +956,9 @@ out string strError)
             strBiblioRecId,
             strExistingXml,
             strOriginXml,
+#if ITEM_ACCESS_RIGHTS
+            func_checkAccess,
+#endif
             out strXml,
             out strError);
             if (nRet == -1)

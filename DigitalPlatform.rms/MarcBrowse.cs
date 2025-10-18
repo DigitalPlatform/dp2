@@ -1,4 +1,6 @@
 ﻿using DigitalPlatform.Marc;
+using DigitalPlatform.Text;
+using Google.Protobuf.WellKnownTypes;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -81,13 +83,334 @@ namespace DigitalPlatform.rms
             }
             else if (strOutMarcSyntax == "usmarc")
             {
-                results.Add("error", new MarcColumn("error", "尚未支持 USMARC 的 marc filter"));
-                return results;
+                // results.Add("error", new MarcColumn("error", "尚未支持 USMARC 的 marc filter"));
+                // return results;
+                return BuildUsmarc(strMarc, column_list);
             }
 
             return results;
         }
 
+        /* 以下是一个 USMARC 西文书目库的 browse 配置文件范例
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+    <nstable>
+        <item prefix="marc" url="http://www.loc.gov/MARC21/slim" />
+    </nstable>
+    <col title="书名">
+        <title>
+            <caption lang="zh-CN">书名</caption>
+            <caption lang="en">Title</caption>
+        </title>
+        <use>title</use>
+    </col>
+    <col title="作者">
+        <title>
+            <caption lang="zh-CN">作者</caption>
+            <caption lang="en">Author</caption>
+        </title>
+        <use>author</use>
+    </col>
+    <col title="出版者">
+        <title>
+            <caption lang="zh-CN">出版者</caption>
+            <caption lang="en">Publisher</caption>
+        </title>
+        <use>publisher</use>
+    </col>
+    <col title="出版时间">
+        <title>
+            <caption lang="zh-CN">出版时间</caption>
+            <caption lang="en">Publish time</caption>
+        </title>
+        <use>publishtime</use>
+    </col>
+    <col title="中图法分类号">
+        <title>
+            <caption lang="zh-CN">中图法分类号</caption>
+            <caption lang="en">CLC classification</caption>
+        </title>
+        <use>clc</use>
+    </col>
+    <col title="主题词">
+        <title>
+            <caption lang="zh-CN">主题词</caption>
+            <caption lang="en">Subject</caption>
+        </title>
+        <use>subject</use>
+    </col>
+    <col title="关键词" convert="join(; )">
+        <title>
+            <caption lang="zh-CN">关键词</caption>
+            <caption lang="en">Keyword</caption>
+        </title>
+        <xpath nstable="">//marc:record/marc:datafield[@tag='610']/marc:subfield[@code='a']</xpath>
+    </col>
+    <col title="ISBN">
+        <title>
+            <caption lang="zh-CN">ISBN</caption>
+            <caption lang="en">ISBN</caption>
+        </title>
+        <use>isbn</use>
+    </col>
+</root>
+         * */
+
+        // USMARC 可用的列名: title, author, publisher, publishtime, clc, ktf, rdf, lcc, nlm, ddc, nal, subject, isbn
+        public static Dictionary<string, MarcColumn> BuildUsmarc(string strMarc,
+    List<string> column_list_param = null)
+        {
+            Dictionary<string, MarcColumn> results = new Dictionary<string, MarcColumn>();
+            List<string> column_list = new List<string>();
+            if (column_list_param != null)
+                column_list.AddRange(column_list_param);
+
+            MarcRecord record = new MarcRecord(strMarc);
+
+            // title
+            if (column_list_param == null
+                || column_list.Remove("title") == true)
+            {
+                string value = BuildContent(record,
+                    "245",
+                    new string[] { "a ", "b " },
+                    true);
+                if (string.IsNullOrEmpty(value) == false)
+                    results.Add("title", new MarcColumn("title", value));
+            }
+
+            // author
+            if (column_list_param == null
+                || column_list.Remove("author") == true)
+            {
+                string value = BuildContent(record,
+    "245",
+    new string[] { "c " },
+    true);
+                if (string.IsNullOrEmpty(value) == false)
+                    results.Add("author", new MarcColumn("author", value));
+            }
+
+            // publisher
+            if (column_list_param == null
+                || column_list.Remove("publisher") == true)
+            {
+                string value = BuildContent(record,
+"264,260",
+new string[] { "b " },
+true);
+
+                if (string.IsNullOrEmpty(value) == false)
+                    results.Add("publisher", new MarcColumn("publisher", value));
+            }
+
+            // publishtime
+            if (column_list_param == null
+                || column_list.Remove("publishtime") == true)
+            {
+                string value = BuildContent(record,
+"264,260",
+new string[] { "c " },
+true);
+                if (string.IsNullOrEmpty(value) == false)
+                    results.Add("publishtime", new MarcColumn("publishtime", value));
+            }
+
+            // clc
+            if (column_list_param == null
+                || column_list.Remove("clc") == true)
+            {
+                string value = BuildContent(record,
+"093",
+new string[] { "a " },
+true);
+                if (string.IsNullOrEmpty(value) == false)
+                    results.Add("clc", new MarcColumn("clc", value));
+            }
+
+            // ktf
+            if (column_list_param == null
+    || column_list.Remove("ktf") == true)
+            {
+                string value = BuildContent(record,
+"094",
+new string[] { "a " },
+true);
+                if (string.IsNullOrEmpty(value) == false)
+                    results.Add("ktf", new MarcColumn("ktf", value));
+            }
+
+            // rdf
+            if (column_list_param == null
+|| column_list.Remove("rdf") == true)
+            {
+                string value = BuildContent(record,
+"095",
+new string[] { "a " },
+true);
+                if (string.IsNullOrEmpty(value) == false)
+                    results.Add("rdf", new MarcColumn("rdf", value));
+            }
+
+            // lcc
+            if (column_list_param == null
+|| column_list.Remove("lcc") == true)
+            {
+                string value = BuildContent(record,
+"050",
+new string[] { "a " },
+true);
+                if (string.IsNullOrEmpty(value) == false)
+                    results.Add("lcc", new MarcColumn("lcc", value));
+            }
+
+            // nlm
+            // NLM class no.
+            if (column_list_param == null
+|| column_list.Remove("nlm") == true)
+            {
+                string value = BuildContent(record,
+"060",
+new string[] { "a " },
+true);
+                if (string.IsNullOrEmpty(value) == false)
+                    results.Add("nlm", new MarcColumn("nlm", value));
+            }
+
+            // ddc
+            // Dewey class no.
+            if (column_list_param == null
+|| column_list.Remove("ddc") == true)
+            {
+                string value = BuildContent(record,
+"082",
+new string[] { "a " },
+true);
+                if (string.IsNullOrEmpty(value) == false)
+                    results.Add("ddc", new MarcColumn("ddc", value));
+            }
+
+            // nal
+            // NAL class no.
+            if (column_list_param == null
+|| column_list.Remove("nal") == true)
+            {
+                string value = BuildContent(record,
+"070",
+new string[] { "a " },
+true);
+                if (string.IsNullOrEmpty(value) == false)
+                    results.Add("nal", new MarcColumn("nal", value));
+            }
+
+            // subject
+            // Subjects
+            // ("field[@names='600' or @names='610' or @names='630'
+            // or @names='650' or @names='651']");
+            if (column_list_param == null
+                || column_list.Remove("subject") == true)
+            {
+                string value = BuildContent(record,
+"600,610,630,650,651",
+new string[] { "a; ", "x--", "y--", "z--" },
+true);
+                if (string.IsNullOrEmpty(value) == false)
+                    results.Add("subject", new MarcColumn("subject", value));
+            }
+
+            /*
+            // ?
+            if (column_list_param == null
+                || column_list.Remove("keyword") == true)
+            {
+                string value = BuildContent(record,
+"610",
+new string[] { "a; " },
+true);
+                if (string.IsNullOrEmpty(value) == false)
+                    results.Add("keyword", new MarcColumn("keyword", value));
+            }
+            */
+
+            if (column_list_param == null
+                || column_list.Remove("isbn") == true)
+            {
+                string value = BuildContent(record,
+"020",
+new string[] { "a " },
+true);
+                if (string.IsNullOrEmpty(value) == false)
+                    results.Add("isbn", new MarcColumn("isbn", value));
+            }
+
+            return results;
+        }
+
+        /* 以下是一个 UNIMARC 中文书目库的 browse 配置文件范例
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+    <nstable>
+        <item prefix="marc" url="http://dp2003.com/UNIMARC" />
+    </nstable>
+    <col title="书名">
+        <title>
+            <caption lang="zh-CN">书名</caption>
+            <caption lang="en">Title</caption>
+        </title>
+        <use>title</use>
+    </col>
+    <col title="作者">
+        <title>
+            <caption lang="zh-CN">作者</caption>
+            <caption lang="en">Author</caption>
+        </title>
+        <use>author</use>
+    </col>
+    <col title="出版者">
+        <title>
+            <caption lang="zh-CN">出版者</caption>
+            <caption lang="en">Publisher</caption>
+        </title>
+        <use>publisher</use>
+    </col>
+    <col title="出版时间">
+        <title>
+            <caption lang="zh-CN">出版时间</caption>
+            <caption lang="en">Publish time</caption>
+        </title>
+        <use>publishtime</use>
+    </col>
+    <col title="中图法分类号">
+        <title>
+            <caption lang="zh-CN">中图法分类号</caption>
+            <caption lang="en">CLC classification</caption>
+        </title>
+        <use>clc</use>
+    </col>
+    <col title="主题词">
+        <title>
+            <caption lang="zh-CN">主题词</caption>
+            <caption lang="en">Subject</caption>
+        </title>
+        <use>subject</use>
+    </col>
+    <col title="关键词" convert="join(; )">
+        <title>
+            <caption lang="zh-CN">关键词</caption>
+            <caption lang="en">Keyword</caption>
+        </title>
+        <xpath nstable="">//marc:record/marc:datafield[@tag='610']/marc:subfield[@code='a']</xpath>
+    </col>
+    <col title="ISBN">
+        <title>
+            <caption lang="zh-CN">ISBN</caption>
+            <caption lang="en">ISBN</caption>
+        </title>
+        <use>isbn</use>
+    </col>
+</root>
+        * */
+        // UNIMARC 可用的列名: title, author, publisher, publishtime, clc, ktf, rdf, subject, keyword, isbn
         public static Dictionary<string, MarcColumn> BuildUnimarc(string strMarc,
             List<string> column_list_param = null)
         {
@@ -97,6 +420,8 @@ namespace DigitalPlatform.rms
                 column_list.AddRange(column_list_param);
 
             MarcRecord record = new MarcRecord(strMarc);
+
+            // title
             if (column_list_param == null
                 || column_list.Remove("title") == true)
             {
@@ -108,6 +433,7 @@ namespace DigitalPlatform.rms
                     results.Add("title", new MarcColumn("title", value));
             }
 
+            // author
             if (column_list_param == null
                 || column_list.Remove("author") == true)
             {
@@ -119,6 +445,7 @@ namespace DigitalPlatform.rms
                     results.Add("author", new MarcColumn("author", value));
             }
 
+            // publisher
             if (column_list_param == null
                 || column_list.Remove("publisher") == true)
             {
@@ -130,6 +457,7 @@ true);
                     results.Add("publisher", new MarcColumn("publisher", value));
             }
 
+            // publishtime
             if (column_list_param == null
                 || column_list.Remove("publishtime") == true)
             {
@@ -141,6 +469,7 @@ true);
                     results.Add("publishtime", new MarcColumn("publishtime", value));
             }
 
+            // clc
             if (column_list_param == null
                 || column_list.Remove("clc") == true)
             {
@@ -152,6 +481,31 @@ true);
                     results.Add("clc", new MarcColumn("clc", value));
             }
 
+            // ktf
+            if (column_list_param == null
+|| column_list.Remove("ktf") == true)
+            {
+                string value = BuildContent(record,
+"692",
+new string[] { "a; " },
+true);
+                if (string.IsNullOrEmpty(value) == false)
+                    results.Add("ktf", new MarcColumn("ktf", value));
+            }
+
+            // rdf
+            if (column_list_param == null
+|| column_list.Remove("rdf") == true)
+            {
+                string value = BuildContent(record,
+"694",
+new string[] { "a; " },
+true);
+                if (string.IsNullOrEmpty(value) == false)
+                    results.Add("rdf", new MarcColumn("rdf", value));
+            }
+
+            // subject
             if (column_list_param == null
                 || column_list.Remove("subject") == true)
             {
@@ -163,6 +517,7 @@ true);
                     results.Add("subject", new MarcColumn("subject", value));
             }
 
+            // keyword
             if (column_list_param == null
                 || column_list.Remove("keyword") == true)
             {
@@ -174,7 +529,7 @@ true);
                     results.Add("keyword", new MarcColumn("keyword", value));
             }
 
-
+            // isbn
             if (column_list_param == null
                 || column_list.Remove("isbn") == true)
             {
@@ -189,26 +544,29 @@ true);
             return results;
         }
 
-        static List<MarcField> GetMarcFields(MarcRecord record, string name)
+        // parameters:
+        //      names   字段名列表。用逗号间隔
+        static List<MarcField> GetMarcFields(MarcRecord record, string names)
         {
             List<MarcField> results = new List<MarcField>();
             foreach(MarcField field in record.ChildNodes)
             {
-                if (field.Name == name)
+                if (StringUtil.IsInList(field.Name,names))
                     results.Add(field);
             }
             return results;
         }
 
         // parameters:
+        //      fieldNames      字段名列表。逗号间隔
         //      subfieldList    字符串数组。每个单元格式如下: "a; " 第一字符表示子字段名，后面若干字符表示要插入的前置符号。
         static string BuildContent(MarcRecord record,
-            string fieldName,
+            string fieldNames,
             string[] subfieldList,
             bool trimStart)
         {
             List<char> chars = new List<char>() { ' ' };    // 用于 TrimStart 的字符
-            Hashtable prefix_table = new Hashtable();  // name -> prefix 
+            Hashtable prefix_table = new Hashtable();  // names -> prefix 
             foreach (string s in subfieldList)
             {
                 string name = s.Substring(0, 1);
@@ -220,7 +578,7 @@ true);
                     chars.Add(strChar[0]);
             }
 
-            List<MarcField> fields = GetMarcFields(record, fieldName);
+            List<MarcField> fields = GetMarcFields(record, fieldNames);
 
             StringBuilder text = new StringBuilder();
             foreach (MarcField field in fields)

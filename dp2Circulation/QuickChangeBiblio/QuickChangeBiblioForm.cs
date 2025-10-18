@@ -680,10 +680,9 @@ MessageBoxDefaultButton.Button1);
                     }
                     if (String.IsNullOrEmpty(strRemove) == false)
                     {
-                        strResult += "\r\n在状态值(998$s)中去除 '" + strAdd + "'";
+                        strResult += "\r\n在状态值(998$s)中去除 '" + strRemove + "'";
                         nCount++;
                     }
-
                 }
                 else
                 {

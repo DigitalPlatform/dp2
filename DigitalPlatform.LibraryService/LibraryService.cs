@@ -6924,6 +6924,22 @@ out QueryResult[] results)
             {
                 if (strAction == "notifynewbook")
                 {
+#if ITEM_ACCESS_RIGHTS
+                    var error = LibraryApplication.CheckAccess(
+                        sessioninfo,
+                        "通知读者新书到达",
+                        ResPath.GetDbName(strBiblioRecPath),
+                        "setbiblioinfo,order",
+                        strAction,
+                        out _);
+                    if (error != null)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = error;
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
+                    }
+#else
                     // 权限字符串
                     if (StringUtil.IsInList("setbiblioinfo,order", sessioninfo.RightsOrigin) == false)
                     {
@@ -6932,7 +6948,7 @@ out QueryResult[] results)
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
-
+#endif
                     return app.NotifyNewBook(
                        sessioninfo,
                        strBiblioRecPath,
@@ -12583,6 +12599,24 @@ Stack:
 
             try
             {
+#if ITEM_ACCESS_RIGHTS
+                // 需要检查存取定义中的 managedatabase 权限
+                var error = LibraryApplication.CheckAccess(
+                    sessioninfo,
+                    $"管理数据库({strAction})",
+                    null,   // 第一阶段检查，不指定数据库名
+                    strAction == "getinfo" ? "managedatabase,getsystemparameter,order" : "managedatabase",
+                    strAction,
+                    out string access_parameters);
+                if (error != null)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = error;
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+#else
+
                 // getinfo 动作 权限单独判断 2013/1/27
                 if (strAction == "getinfo")
                 {
@@ -12637,7 +12671,7 @@ Stack:
                                 }
                                 else
                                 {
-                                    strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{dbname_list}' 执行 初始化 操作的存取权限";
+                                    strError = $"{SessionInfo.GetCurrentUserName(sessioninfo)} 不具备 针对数据库 '{dbname_list}' 执行 {strAction} 操作的存取权限";
                                     result.Value = -1;
                                     result.ErrorInfo = strError;
                                     result.ErrorCode = ErrorCode.AccessDenied;
@@ -12678,7 +12712,9 @@ Stack:
                             return result;
                         }
                     }
+
                 }
+#endif
 
                 // return:
                 //      -1  出错

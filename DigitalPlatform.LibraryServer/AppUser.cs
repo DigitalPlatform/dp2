@@ -87,6 +87,72 @@ namespace DigitalPlatform.LibraryServer
             return right + ",getrecord";
         }
 
+#if ITEM_ACCESS_RIGHTS
+        // 或者针对一个特定数据库、特定操作的权限定义字符串
+        /*
+            原始定义字符串格式： "中央库:setbiblioinfo=new,change|getbiblioinfo=xxx;工作库:setbiblioinfo=new"
+         * 
+         * */
+        // parameters:
+        //      strDbNames   数据库名。如果为空，表示匹配权限字符串中的任意数据库名
+        //      strOperations    操作类型。比如 "setbiblioinfo" 或者 "setbiblioinfo,getbiblioinfo"
+        // return:
+        //      null    指定的操作类型的权限没有定义
+        //      ""      定义了指定类型的操作权限，但是否定的定义
+        //      其它      权限列表。* 表示通配的权限列表。注意，如果 strOperations 中存在多个操作类型，只会返回找到的第一个操作类型的定义
+        public static string GetDbOperRights(string strAccessString,
+            string strDbName,
+            string strOperation)
+        {
+            // 是否具有多个 operation
+            bool multiple_operation = strOperation == null ? false : strOperation.Contains(",");
+
+            // 使用最新版函数
+            var results = GetDbOperRightsEx(strAccessString,
+                strDbName,
+                strOperation);
+            if (multiple_operation)
+            {
+                // 先对 Operation 和 DbNames 均相同的进行去重，去掉第一个以后的其余的
+                {
+                    results = RemoveDupOperation(results);
+                }
+
+                // 返回不是否定的第一个
+                foreach (var result in results)
+                {
+                    if (string.IsNullOrEmpty(result.Rights) == false)
+                        return result.Rights;
+                }
+            }
+
+            if (results.Count > 0)
+                return results[0].Rights;
+            return null;
+        }
+
+        // 先对 Operation 相同的进行去重，去掉第一个以后的其余的
+        static List<OperRights> RemoveDupOperation(List<OperRights> items)
+        {
+            Hashtable hashtable = new Hashtable();
+            List<OperRights> results = new List<OperRights>();
+            foreach (var item in items)
+            {
+                string key = GetKey(item);
+                if (hashtable.ContainsKey(key) == false)
+                {
+                    hashtable[key] = null;
+                    results.Add(item);
+                }
+            }
+
+            return results;
+            string GetKey(OperRights item)
+            {
+                return item.Operation + "|" + item.DbNames;
+            }
+        }
+#else
         // 或者针对一个特定数据库、特定操作的权限定义字符串
         /*
             原始定义字符串格式： "中央库:setbiblioinfo=new,change|getbiblioinfo=xxx;工作库:setbiblioinfo=new"
@@ -94,14 +160,18 @@ namespace DigitalPlatform.LibraryServer
          * */
         // parameters:
         //      strDbName   数据库名。如果为空，表示匹配权限字符串中的任意数据库名
+        //      strOperations    操作类型。比如 "setbiblioinfo" 或者 "setbiblioinfo,getbiblioinfo"
         // return:
         //      null    指定的操作类型的权限没有定义
         //      ""      定义了指定类型的操作权限，但是否定的定义
-        //      其它      权限列表。* 表示通配的权限列表
+        //      其它      权限列表。* 表示通配的权限列表。注意，如果 strOperations 中存在多个操作类型，只会返回找到的第一个操作类型的定义
         public static string GetDbOperRights(string strAccessString,
             string strDbName,
             string strOperation)
         {
+            // 是否具有多个 operation
+            bool multiple_operation = strOperation == null ? false : strOperation.Contains(",");
+
             // string[] segments = strAccessString.Split(new char[] {';'});
             List<string> segments = StringUtil.SplitString(strAccessString,
                 ";",
@@ -187,6 +257,177 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return null;    // not found
+        }
+#endif
+
+        // 一个操作类型的权限
+        public class OperRights
+        {
+            // 命中的操作类型名字
+            public string Operation { get; set; }
+
+            // 命中的数据库名字
+            public string DbNames { get; set; }
+
+            // 权限
+            public string Rights { get; set; }
+
+            public override string ToString()
+            {
+                return $"Operation={Operation},Rights={Rights},DbNames={DbNames}";
+            }
+        }
+
+        public static List<OperRights> GetDbOperRightsEx(
+            string strAccessString,
+            string strDbNames,
+            string strOperations)
+        {
+            // 是否具有多个 operation
+            // bool multiple_operation = strOperations == null ? false : strOperations.Contains(",");
+            List<OperRights> results = new List<OperRights>();
+
+            // string[] segments = strAccessString.Split(new char[] {';'});
+            List<string> segments = StringUtil.SplitString(strAccessString,
+                ";",
+                new string[] { "()" },
+                StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < segments.Count; i++)
+            {
+                string strSegment = segments[i].Trim();
+                if (String.IsNullOrEmpty(strSegment) == true)
+                    continue;
+                string current_dbnames = "";
+
+                int nRet = strSegment.IndexOf(":");
+                if (nRet == -1)
+                {
+                    // 仅有数据库名列表部分，操作名列表和权限列表都为*
+                    current_dbnames = strSegment;
+
+                    // 剩余部分
+                    strSegment = "*";
+                    goto DOMATCH;
+                }
+                else
+                {
+                    current_dbnames = strSegment.Substring(0, nRet).Trim();
+
+                    // 剩余部分
+                    strSegment = strSegment.Substring(nRet + 1).Trim();
+                }
+
+            DOMATCH:
+                // string[] sections = strSegment.Split(new char[] {'|'});
+                List<string> sections = StringUtil.SplitString(strSegment,
+                    "|",
+                    new string[] { "()" },
+                    StringSplitOptions.RemoveEmptyEntries);
+
+                for (int j = 0; j < sections.Count; j++)
+                {
+                    string strOperList = "";
+                    string strRightsList = "";
+
+                    string strSection = sections[j];
+                    if (String.IsNullOrEmpty(strSection) == true)
+                        continue;
+
+                    nRet = strSection.IndexOf("=");
+                    if (nRet == -1)
+                    {
+                        // 仅有操作名列表部分，权限列表为*
+                        strOperList = strSection;
+                        strRightsList = "*";
+                    }
+                    else
+                    {
+                        strOperList = strSection.Substring(0, nRet).Trim();
+                        strRightsList = strSection.Substring(nRet + 1).Trim();
+                    }
+
+                    string hit_dbname = null;
+                    if (current_dbnames == "*")
+                    {
+                        // 数据库名通配
+                        hit_dbname = string.IsNullOrEmpty(strDbNames) ? "*" : strDbNames;
+                    }
+                    else
+                    {
+                        if (string.IsNullOrEmpty(strDbNames) == false)    // 如果参数 strDbNames 为空，则任何库名都算匹配
+                        {
+                            if (strDbNames == "*")
+                                hit_dbname = current_dbnames;
+                            else
+                            {
+                                hit_dbname = ContainsInList(strDbNames, current_dbnames);
+                                if (hit_dbname == null)
+                                    continue;   // 数据库名不在列表中
+                            }
+                        }
+
+                        if (hit_dbname == null)
+                            hit_dbname = current_dbnames;
+                    }
+
+                    string hit_operation = null;
+                    if (strOperList == "*")
+                    {
+                        // 操作名通配
+                        hit_operation = "*";
+                    }
+                    else
+                    {
+                        hit_operation = ContainsInList(strOperations, strOperList);
+                        if (hit_operation == null)
+                            continue;   // 操作名不在列表中
+                    }
+
+                    results.Add(new OperRights
+                    {
+                        Operation = hit_operation,
+                        DbNames = hit_dbname,    // 注：这里有可能是 xxx,xxx 的形态
+                        Rights = strRightsList
+                    });
+                }
+            }
+
+            /*
+            if (results.Count > 0)
+            {
+                // 优先返回第一个不是空的
+                foreach (var s in results)
+                {
+                    if (string.IsNullOrEmpty(s) == false)
+                        return s;
+                }
+            }
+            */
+            // TODO: 对 Operation 和 DbNames 均相同的进行去重，去掉第一个以后的其余的
+            return results;
+        }
+
+        // 检查 short_value 是否包含在 long_value 列表中
+        // parameters:
+        //      short_value 较短的列表。要检查是否被包含的值。比如 "1,2"
+        //      long_value  较长的列表。被检查的列表。比如 "1,2,3"
+        // return:
+        //      null 没有找到
+        //      其它 命中的 short_value 中的第一个列举值
+        public static string ContainsInList(string short_value, string long_value)
+        {
+            var short_list = short_value.Split(',');
+            var long_list = long_value.Split(',');
+            foreach (var short_v in short_list)
+            {
+                foreach (var long_v in long_list)
+                {
+                    if (short_v.Equals(long_v))
+                        return short_v;
+                }
+            }
+
+            return null;
         }
 
         // 获得一个账户的信息。不受当前用户的管辖范围的限制。所以这个函数只能提供内部使用，要谨慎
@@ -834,18 +1075,18 @@ namespace DigitalPlatform.LibraryServer
         //      1   合法
         public static int ValidatePassword(
             string passwordStyle,
-    XmlElement account,
-    string password,
-    out string strError)
+        XmlElement account,
+        string password,
+        out string strError)
         {
             strError = "";
             if (string.IsNullOrEmpty(passwordStyle))
                 return 1;
             return ValidatePassword(
-    account,
-    password,
-    passwordStyle,
-    out strError);
+        account,
+        password,
+        passwordStyle,
+        out strError);
         }
         */
 
@@ -872,11 +1113,11 @@ namespace DigitalPlatform.LibraryServer
 
             // 风格 1
             /*
-1. 8个字符，且不能是顺序、逆序或相同
-2. 数字加字母组合
-3. 密码和用户名不可以一样
-4. 临时密码不可以当做正式密码使用
-5. 新旧密码不能一样
+        1. 8个字符，且不能是顺序、逆序或相同
+        2. 数字加字母组合
+        3. 密码和用户名不可以一样
+        4. 临时密码不可以当做正式密码使用
+        5. 新旧密码不能一样
              * */
             if (StringUtil.IsInList("style-1", style))
             {
@@ -1093,8 +1334,8 @@ namespace DigitalPlatform.LibraryServer
 #endif
 
                 nRet = this.UserNameTable.BeforeLogin(strUserName,
-strClientIP,
-out strError);
+        strClientIP,
+        out strError);
                 if (nRet == -1)
                     return -1;
 
@@ -1310,10 +1551,10 @@ out strError);
         // 正在编写中
         // 将 library.xml 中的(全部定义中)一个馆代码修改为指定的值
         public int ChangeLibraryCode(
-    SessionInfo sessioninfo,
-    string strOldLibraryCode,
-    string strNewLibraryCode,
-    out string strError)
+        SessionInfo sessioninfo,
+        string strOldLibraryCode,
+        string strNewLibraryCode,
+        out string strError)
         {
             strError = "";
             if (strOldLibraryCode == null)
@@ -1345,7 +1586,7 @@ out strError);
             }
 
             /*
-    <locationTypes>
+        <locationTypes>
         <item canborrow="no" itemBarcodeNullable="yes">保存本库</item>
         <item canborrow="no" itemBarcodeNullable="yes">阅览室</item>
         <item canborrow="yes" itemBarcodeNullable="yes">流通库</item>
@@ -1354,7 +1595,7 @@ out strError);
             <item canborrow="yes" itemBarcodeNullable="yes">流通库</item>
             <item canborrow="yes" itemBarcodeNullable="no">班级书架</item>
         </library>
-    </locationTypes>
+        </locationTypes>
              * */
 
             // 1) 如果是从 "" --> "非空"，则需要把 locationTypes 直接下属的 item 元素移动到一个 library 元素下级
@@ -1436,13 +1677,13 @@ out strError);
 
 
             /* 排架体系。注意 location 元素 name 属性值包含通配符的情况
-    <callNumber>
+        <callNumber>
         <group name="中图法" classType="中图法" qufenhaoType="Cutter-Sanborn Three-Figure,GCAT" zhongcihaodb="" callNumberStyle="索取类号+区分号">
             <location name="保存本库" />
             <location name="阅览室" />
             <location name="流通库" />
         </group>
-    </callNumber>
+        </callNumber>
              * */
             XmlNodeList locations = this.LibraryCfgDom.DocumentElement.SelectNodes("callNumber/group/location");
             foreach (XmlElement location in locations)
@@ -1459,7 +1700,7 @@ out strError);
             }
 
             /*
-<rightsTable>
+        <rightsTable>
         <type reader="本科生">
             <param name="可借总册数" value="10" />
             <param name="可预约册数" value="5" />
@@ -1469,7 +1710,7 @@ out strError);
                 <param name="可借册数" value="10" />
                 <param name="借期" value="31day,15day" />
                 <param name="超期违约金因子" value="CNY1.0/day" />
-...
+        ...
         </type>
         <readerTypes>
             <item>本科生</item>
@@ -1485,9 +1726,9 @@ out strError);
             <item>原版西文</item>
         </bookTypes>
         <library code="海淀分馆">
-...
+        ...
         </library>
-    </rightsTable>
+        </rightsTable>
              * */
 
             // 1) 如果是从 "" --> "非空"，则需要把 rightsTable 直接下属的 除了 library 元素移动到一个 library 元素下级
@@ -2022,8 +2263,8 @@ out strError);
                     strHashedPassword);
                 // 2025/2/12
                 DomUtil.SetElementText(domOperLog.DocumentElement,
-    "type",
-    type);
+        "type",
+        type);
 
                 // 2025/2/18
                 // 新账户的馆代码

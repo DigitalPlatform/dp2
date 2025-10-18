@@ -4245,7 +4245,7 @@ out error);
                 XmlElement newnode = dom.CreateElement("database");
                 node.AppendChild(newnode);
 
-                newnode.SetAttribute("name", this.ReaderDbs[i].DbName);
+                newnode.SetAttribute("name", this.ReaderDbs[i].DbNames);
             }
         }
          */
@@ -7403,7 +7403,7 @@ out strError);
             // int nInCount = 0;   // 参与流通的读者库个数
             foreach (string strDbName in dbnames)
             {
-                // string strDbName = app.ReaderDbs[i].DbName;
+                // string strDbName = app.ReaderDbs[i].DbNames;
 
                 if (string.IsNullOrEmpty(strDbName) == true)
                 {
@@ -17106,9 +17106,9 @@ strLibraryCode);    // 读者所在的馆代码
             var error = CheckDbSetRights(
                 sessioninfo,
                 strRights,
-strDbName,
-strAction,
-out string db_type);
+                strDbName,
+                strAction,
+                out string db_type);
             if (error != null)
             {
                 // 如果是对象路径，则还要继续向后判断，看看是否具备 writexxxobject 权限
@@ -17191,12 +17191,26 @@ out string db_type);
                     // 对象资源
                     if (strFirstPart == "object")
                     {
+#if ITEM_ACCESS_RIGHTS
+                        var check_error = CheckAccess(sessioninfo,
+                            $"写入书目记录下级对象",
+                            strDbName,
+                            "setbiblioobject,setobject",
+                            "",
+                            out _);
+                        if (check_error != null)
+                        {
+                            strError = error;
+                            return 0;
+                        }
+#else
                         // /*(在具备 setbiblioinfo 基础上)*/进一步需要 setbiblioobject 或 setobject 权限
                         if (StringUtil.IsInList("setbiblioobject,setobject", strRights) == false)
                         {
                             strError = $"写入对象资源 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 setbiblioobject 或 setobject 权限";
                             return 0;
                         }
+#endif
                         return 1;   // 如果有了 setobject 权限，就不再需要writeres权限
                     }
                 }
@@ -17284,12 +17298,26 @@ out string db_type);
                     // 对象资源
                     if (strFirstPart == "object")
                     {
+#if ITEM_ACCESS_RIGHTS
+                        var check_error = CheckAccess(sessioninfo,
+    $"写入读者记录下级对象",
+    strDbName,
+    "setreaderobject,setobject",
+    "",
+    out _);
+                        if (check_error != null)
+                        {
+                            strError = error;
+                            return 0;
+                        }
+#else
                         // /*(在具备 setreaderinfo 基础上)*/进一步需要 setobject 或 setreaderobject 权限
                         if (StringUtil.IsInList("setreaderobject,setobject", strRights) == false)
                         {
                             strError = $"写入对象资源 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 setreaderobject 或 setobject 权限";
                             return 0;
                         }
+#endif
 
                         // 读者身份判断
                         if (bIsReader && sessioninfo.Account.ReaderDomPath != strDbName + "/" + strRecordID)
@@ -17380,12 +17408,26 @@ out string db_type);
                     // 对象资源
                     if (strFirstPart == "object")
                     {
+#if ITEM_ACCESS_RIGHTS
+                        var check_error = CheckAccess(sessioninfo,
+    $"写入{db_type}记录下级对象",
+    strDbName,
+    $"set{db_type}object,setobject",
+    "",
+    out _);
+                        if (check_error != null)
+                        {
+                            strError = error;
+                            return 0;
+                        }
+#else
                         // (在具备 setxxxinfo 基础上)进一步需要 setobject 或 setxxxobject 权限
                         if (StringUtil.IsInList($"set{db_type}object,setobject", strRights) == false)
                         {
                             strError = $"写入对象资源 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 set{db_type}object 或 setobject 权限";
                             return 0;
                         }
+#endif
                         return 1;
                     }
                 }
@@ -17451,11 +17493,25 @@ out string db_type);
                     // 对象资源
                     if (strFirstPart == "object")
                     {
+#if ITEM_ACCESS_RIGHTS
+                        var check_error = CheckAccess(sessioninfo,
+$"写入{db_type}记录下级对象",
+strDbName,
+$"set{db_type}object,setobject",
+"",
+out _);
+                        if (check_error != null)
+                        {
+                            strError = error;
+                            return 0;
+                        }
+#else
                         if (StringUtil.IsInList($"set{util_db_type}object,setobject", strRights) == false)
                         {
                             strError = $"写入对象资源 {strResPath} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 set{util_db_type}object 或 setobject 权限";
                             return 0;
                         }
+#endif
                         return 1;   // 如果有了setobject权限，就不再需要 writeres 权限
                     }
                 }
@@ -18012,7 +18068,9 @@ out string db_type);
                     {
 
                         // 检查 getobject 或 getxxxobject 权限
-                        error = CheckGetObjectRights(sessioninfo, db_type);
+                        error = CheckGetObjectRights(sessioninfo,
+                            strDbName,
+                            db_type);
                         if (error != null)
                         {
                             strError = error;
@@ -18511,8 +18569,31 @@ out string db_type);
         // 检查 getxxxobject 权限
         string CheckGetObjectRights(
             SessionInfo sessioninfo,
+            string dbname,  // 2025/10/16
             string db_type)
         {
+#if ITEM_ACCESS_RIGHTS
+            if (CheckAccess(sessioninfo,
+                $"获取{db_type}记录下属的对象",
+                dbname,
+                "getobject",
+                "",
+                out _) == null)
+                return null;
+
+            if (string.IsNullOrEmpty(db_type))
+                throw new Exception($"用户 {sessioninfo.UserID} CheckGetObjectRights() 出现异常，db_type 参数为空");
+
+            var error = CheckAccess(sessioninfo,
+                $"获取{db_type}记录下属的对象",
+                dbname,
+                $"get{db_type}object",
+                "",
+                out _);
+            return error;
+
+            // return $"{SessionInfo.GetCurrentUserName(sessioninfo)} 获取{db_type}记录下属的对象被拒绝。不具备 get{db_type}object 权限或 getobject 权限";
+#else
             // getobject 是指允许获得所有数据库记录的下级对象
             if (StringUtil.IsInList("getobject", sessioninfo.RightsOrigin) == true)
                 return null;
@@ -18524,6 +18605,7 @@ out string db_type);
                 return null;
 
             return $"{SessionInfo.GetCurrentUserName(sessioninfo)} 获取{db_type}记录下属的对象被拒绝。不具备 get{db_type}object 权限或 getobject 权限";
+#endif
         }
 
         // 检查 setxxxinfo 权限
@@ -19174,6 +19256,250 @@ out string db_type);
             }
 
             return null;
+        }
+
+        // 存取定义和普通权限均可的一类权限名称表。
+        // 注: 也就是说，这个表外的其它权限名称，就是只有普通权限的。
+        public static string[] _access_enabled_rights = {
+            "getbiblioinfo","setbiblioinfo",
+            "getiteminfo","setiteminfo",
+            "getorderinfo","setorderinfo",
+            "getissueinfo","setissueinfo",
+            "getcommentinfo","setcommentinfo",
+            "getobject", "setobject",
+            "getbiblioobject","setbiblioobject",
+            "getitemobject","setitemobject",
+            "getorderobject","setorderobject",
+            "getissueobject","setissueobject",
+            "getcommentobject","setcommentobject",
+            "getbibliosummary",
+            "order",
+            "managedatabase",
+        };
+
+        // 判断 rights 中是否至少有一个权限值是启用了存取定义的
+        public static bool IsAccessEnabled(string rights)
+        {
+            if (string.IsNullOrEmpty(rights))
+                return false;
+            /*
+            if (string.IsNullOrEmpty(rights))
+                throw new ArgumentException("rights 参数值不允许为空");
+            */
+            var list = rights.Split(',');
+            foreach (string s in list)
+            {
+                if (IndexOf(_access_enabled_rights, s) != -1)
+                    return true;
+            }
+            return false;
+        }
+
+        public static void SplitRights(string rights,
+            out string access_rights,
+            out string normal_rights)
+        {
+            access_rights = "";
+            normal_rights = "";
+            if (string.IsNullOrEmpty(rights))
+                return;
+            List<string> access_list = new List<string>();
+            List<string> normal_list = new List<string>();
+            var list = rights.Split(',');
+            foreach (string s in list)
+            {
+                if (IndexOf(_access_enabled_rights, s) != -1)
+                {
+                    access_list.Add(s);
+                    normal_list.Add(s); // 也是普通权限
+                }
+                else
+                    normal_list.Add(s);
+            }
+            access_rights = StringUtil.MakePathList(access_list);
+            normal_rights = StringUtil.MakePathList(normal_list);
+        }
+
+        // parameters:
+        //      rights  权限列表。可以把存取定义权限和普通权限混在一起
+        // 检查当前用户是否具备存取定义权限或普通权限
+        // parameters:
+        //      oper_name       操作名称。用于权限不足时的报错文字。如果为空，则用 rights 报错
+        //      strDbNameList   和权限有关的数据库名。可以是逗号间隔的多个数据库名(比如 setiteminfo 就可以联用书目库名和实体库名)
+        //      rights          权限列表。可以把存取定义权限和普通权限混在一起。比如 "setbiblioinfo" 或 "borrow,return"
+        //                      如果为空，表示不检查存取定义(而会检查普通权限(假如 normal_rights 不为空的话))
+        //      strAction       动作名。比如 new。注: 只有普通权限的权限，没有动作名，本参数置为空即可
+        // return:
+        //      "normal"    (存取定义已经满足要求了，但)还需要进一步检查普通权限
+        //      null    具备权限
+        //      其它      不具备权限。文字是报错信息
+        public static string CheckAccess(SessionInfo sessioninfo,
+    string oper_name,
+    string strDbNameList,
+    string rights,
+    string strAction,
+    out string strAccessParameters)
+        {
+            SplitRights(rights,
+            out string access_rights,
+            out string normal_rights);
+            return CheckAccess(sessioninfo,
+            oper_name,
+            strDbNameList,
+            access_rights,
+            strAction,
+            normal_rights,
+            out strAccessParameters);
+        }
+
+        // 2025/10/15
+        // 检查当前用户是否具备存取定义权限或普通权限
+        // parameters:
+        //      oper_name       操作名称。用于权限不足时的报错文字。如果为空，则用 rights 报错
+        //      strDbNameList   和权限有关的数据库名。可以是逗号间隔的多个数据库名(比如 setiteminfo 就可以联用书目库名和实体库名)
+        //      right_names     要检查的存取定义权限名。比如 "setbiblioinfo" 或 "borrow,return"
+        //                      如果为空，表示不检查存取定义(而会检查普通权限(假如 normal_rights 不为空的话))
+        //      strAction       动作名。比如 new。注: 只有普通权限的权限，没有动作名，本参数置为空即可
+        //      normal_rights   要检查的普通权限名。检查顺序是，先检查 right_names，后检查 normal_rights
+        //                      当 right_names 为空时，本参数这是要检查的普通权限(列表)。
+        //                      当 right_names 不为空时，本参数这是在存取定义权限检查完并且没有找到后，需要继续检查的普通权限值。如果此时本参数为空，默认采用 right_names 来继续检查普通权限
+        //                      当 normal_rights 为空，但存取定义检查发现没有任何相关的存取定义，本函数就没法继续检查普通权限了，但会返回 "normal"，表示希望提醒调主注意，可以考虑后续自行检查普通权限
+        // return:
+        //      "normal"    (存取定义已经满足要求了，但)还需要进一步检查普通权限
+        //      null    具备权限
+        //      其它      不具备权限。文字是报错信息
+        public static string CheckAccess(SessionInfo sessioninfo,
+            string oper_name,
+            string strDbNameList,
+            string right_names,
+            string strAction,
+            string normal_rights,
+            out string strAccessParameters)
+        {
+            strAccessParameters = "";
+
+#if REMOVED
+            if (right_name != null && right_name.Contains(","))
+                throw new ArgumentException($"right_name 属性值中不允许包含逗号 (当前 right_name='{right_name}')");
+#endif
+            // TODO: 增加自动判断一个 rights 是否需要检查存取定义的功能。
+            // 注: 所有权限中，一些是存取定义和普通权限都可用的; 另外一些是只有普通权限，没有启用对应的存取定义的。如果在散落各处的调用本函数的代码中体现，则代码维护会比较困难
+
+            bool bRightVerified = false;
+
+            // rights 权限是否启用了存取定义能力。比如 getbiblioinfo 就是启用了存取定义的
+            bool is_access_enabled = IsAccessEnabled(right_names);
+            /*
+            // 如果一个权限是 AccessEnabled，然而 normal_rights 又为空，则自动把 rights 当作普通权限，以备检查
+            if (is_access_enabled
+                && string.IsNullOrEmpty(normal_rights))
+                normal_rights = rights;
+            */
+
+            var has_access = String.IsNullOrEmpty(sessioninfo.Access) == false;
+            // 检查存取权限
+            if (string.IsNullOrEmpty(right_names) == false
+                && is_access_enabled
+                && has_access)
+            {
+                // TODO: rights 中要先去掉不适合存取定义的权限值，再调用
+                string strAccessActionList = "";
+                // return:
+                //      null    指定的操作类型的权限没有定义
+                //      ""      定义了指定类型的操作权限，但是否定的定义
+                //      其它      权限列表。* 表示通配的权限列表
+                strAccessActionList = GetDbOperRights(sessioninfo.Access,
+                    strDbNameList,
+                    right_names);
+                if (strAccessActionList == null)
+                {
+                    if (string.IsNullOrEmpty(strDbNameList))
+                    {
+                        // 看看是不是关于 setxxxinfo 的任何权限都没有定义?
+                        strAccessActionList = GetDbOperRights(sessioninfo.Access,
+                            "",
+                            right_names);
+                    }
+                    // 如果存取定义中没有定义任何有关 rights 的权限
+                    if (strAccessActionList == null)
+                    {
+                        if (is_access_enabled
+                            && string.IsNullOrEmpty(normal_rights) == false)
+                        {
+                            // TODO: 可以提示"既没有... 也没有 ..."
+                            goto CHECK_RIGHTS_2;
+                        }
+
+                        // return "normal";    // 还需要继续检查普通权限中的 setxxxinfo
+                    }
+
+                    {
+                        return "用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + GetDatabaseCaption(strDbNameList) + "' 执行权限为 " +
+                            right_names +
+                            " 动作为 " + strAction + " 的存取定义权限";
+                    }
+                }
+                if (strAccessActionList == "*")
+                {
+                    // 通配
+                }
+                else
+                {
+                    if (IsInAccessList(strAction,
+                        strAccessActionList,
+                        true,
+                        out strAccessParameters) == false)
+                    {
+                        return "用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 " + GetDatabaseCaption(strDbNameList) + " 执行权限为 " +
+                            right_names +
+                            " 动作为 " + strAction + " 的存取定义权限";
+                    }
+                }
+
+                bRightVerified = true;
+            }
+
+        CHECK_RIGHTS_2:
+            if (bRightVerified == false
+                && string.IsNullOrEmpty(normal_rights) == false)
+            {
+                // 权限字符串
+                if (StringUtil.IsInList(normal_rights, sessioninfo.RightsOrigin) == false)
+                {
+                    string caption;
+                    if (string.IsNullOrEmpty(oper_name) == false)
+                        caption = oper_name;
+                    else
+                        caption = normal_rights;
+
+                    // TODO: 根据 rights 和 normal_rights 的非空情况，决定如何组织报错文字
+                    // 如果两者均为非空，可以考虑报错为“存取定义缺乏 xxx，并且普通权限也缺乏 xxx”
+                    // 如果仅仅是 rights 非空，可以考虑报错为“存取定义缺乏 xxx”
+                    // 如果仅仅是 normal_rights 非空，可以考虑报错为“普通权限定义缺乏 xxx”
+                    // 注: 可能还需要结合 is_access_enabled 状态辅助上述判断
+                    // TODO: 报错文字中的 xxx,xxx 权限要变换为 xxx 或 xxx
+                    if (has_access && is_access_enabled && string.IsNullOrEmpty(right_names) == false)
+                        return $"{caption} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 {GetListText(right_names)} 存取定义权限";
+                    else
+                        return $"{caption} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 {GetListText(normal_rights)} 普通权限";
+                }
+                strAccessParameters = "*";  // 这样返回，即便被调主后面当作存取定义判断也是没有问题的
+            }
+
+            return null;
+            string GetListText(string list)
+            {
+                var array = StringUtil.SplitList(list, ',');
+                return StringUtil.MakePathList(array, " 或 ");
+            }
+
+            string GetDatabaseCaption(string list)
+            {
+                string database_caption = list;
+                if (string.IsNullOrEmpty(database_caption) || database_caption == "*")
+                    database_caption = "[任意数据库]";
+                return database_caption;
+            }
         }
 
     }

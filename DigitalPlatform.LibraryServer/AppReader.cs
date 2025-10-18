@@ -122,7 +122,7 @@ namespace DigitalPlatform.LibraryServer
                 XmlNode node = nodes[i];
                 if (node.ParentNode != null)
                 {
-                    if (exclude_func != null 
+                    if (exclude_func != null
                         && exclude_func(node as XmlElement) == true)
                         continue;
 
@@ -136,7 +136,7 @@ namespace DigitalPlatform.LibraryServer
 
             // 然后将source记录中的全部<dprms:file>元素插入到target记录中
             nodes = domSource.DocumentElement.SelectNodes("//dprms:file", nsmgr);
-            foreach(XmlElement file_element in nodes)
+            foreach (XmlElement file_element in nodes)
             {
                 if (exclude_func != null
     && exclude_func(file_element as XmlElement) == true)
@@ -144,7 +144,7 @@ namespace DigitalPlatform.LibraryServer
 
                 var id = file_element.GetAttribute("id");
                 // 2025/4/22
-                if (string.IsNullOrEmpty(id) )
+                if (string.IsNullOrEmpty(id))
                 {
                     if (throwException == false)
                         continue;
@@ -346,7 +346,11 @@ namespace DigitalPlatform.LibraryServer
             XmlDocument domExistParam,
             XmlDocument domNew,
             string[] important_fields,
+#if ITEM_ACCESS_RIGHTS
+            delegate_checkAccess func_checkAccess,
+#else
             string strRights,
+#endif
             // out string strMergedXml,
             out XmlDocument domMerged,
             out List<string> denied_element_names,
@@ -653,6 +657,20 @@ namespace DigitalPlatform.LibraryServer
                 {
                     // 2023/2/9
                     // 检查写集合大于读集合的账户权限问题
+#if ITEM_ACCESS_RIGHTS
+                    if (func_checkAccess != null)
+                    {
+                        if (func_checkAccess("setreaderobject,setobject") == null
+                            && func_checkAccess("getreaderobject,getobject") != null)
+                        {
+                            // 此时 StringUtil.IsInList("setreaderobject,setobject", strRights) == true
+                            // 意味着直接采纳前端发来的 XML 记录中的 dprms:file 元素，写入记录
+                            // 但需要注意检查账户权限，读的字段范围是否小于写的字段范围？如果小了，则读和写往返一轮会丢失记录中原有的 dprms:file 元素。这种情况需要直接报错
+                            strError = $"{GetCurrentUserName(null)}的权限定义不正确：具有 setreaderobject(或setobject) 但不具有 getreaderobject(或getobject) 权限(即写范围大于读范围)，这样会造成数据库内读者记录中原有的 dprms:file 元素丢失。请修改当前账户权限再重新操作";
+                            return -1;
+                        }
+                    }
+#else
                     if (strRights != null)
                     {
                         if (StringUtil.IsInList("setreaderobject,setobject", strRights) == true
@@ -665,6 +683,7 @@ namespace DigitalPlatform.LibraryServer
                             return -1;
                         }
                     }
+#endif
 
                     // 删除target中的全部<dprms:file>元素，然后将source记录中的全部<dprms:file>元素插入到target记录中
                     MergeDprmsFile(ref domExist,
@@ -2422,8 +2441,20 @@ out strError);
                             strAction == "new" ? "change" : strAction,
                             existing_dom,
                             domNewRec,
-                            CanonicalizeElementNames(important_fields),
+                                CanonicalizeElementNames(important_fields),
+#if ITEM_ACCESS_RIGHTS
+                                (r) =>
+                                {
+                                    return CheckAccess(sessioninfo,
+                                        $"读者记录下级对象({r})",
+                                        ResPath.GetDbName(strRecPath),
+                                        r,
+                                        "",
+                                        out _);
+                                },
+#else
                             sessioninfo.RightsOrigin,
+#endif
                             out XmlDocument output_dom,
                             out denied_element_names,
                             out strError);
@@ -3085,7 +3116,7 @@ strLibraryCode);    // 读者所在的馆代码
             }
 
             // 选用当前用户能管辖的第一个读者库
-            // strReaderDbName = app.ReaderDbs[0].DbName;
+            // strReaderDbName = app.ReaderDbs[0].DbNames;
             List<string> dbnames = app.GetCurrentReaderDbNameList(libraryCodeList);
             if (dbnames.Count > 0)
                 strReaderDbName = dbnames[0];
@@ -3944,12 +3975,24 @@ root, strLibraryCode);
                 //      0   成功
                 //      1   成功，并且 refID 元素是利用上了 domNew 里面的 refID 元素
                 nRet = MergeTwoReaderXml(
-                element_names,
-                strAction,
-                domExist,
-                domNewRec,
-                CanonicalizeElementNames(importantFields),
+                    element_names,
+                    strAction,
+                    domExist,
+                    domNewRec,
+                    CanonicalizeElementNames(importantFields),
+#if ITEM_ACCESS_RIGHTS
+                    (r) =>
+                    {
+                        return CheckAccess(sessioninfo,
+                            $"读者记录下级对象({r})",
+                            ResPath.GetDbName(strRecPath),
+                            r,
+                            "",
+                            out _);
+                    },
+#else
                 sessioninfo.RightsOrigin,
+#endif
                 // importantFields == null || string.IsNullOrEmpty(importantFields) ? null : importantFields.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries),
                 out XmlDocument domMerged,
                 out denied_element_names,
@@ -6388,7 +6431,7 @@ out strError);
                                 else if (StringUtil.IsInList("next", strCommand))
                                     result.ErrorInfo = "到尾";
                                 else
-                                    result.ErrorInfo = "没有找到";
+                                    result.ErrorInfo = $"读者记录 '{strReaderRecPath}' 没有找到";
                                 result.ErrorCode = ErrorCode.NotFound;
                                 return result;
                             }
@@ -6426,7 +6469,7 @@ out strError);
                         goto ERROR1;
                     if (nRet == 0)
                     {
-                        result.ErrorInfo = "没有找到";
+                        result.ErrorInfo = $"显示名为 '{strDisplayName}' 的读者记录没有找到";
                         result.ErrorCode = ErrorCode.NotFound;
                         return result;
                     }
@@ -6484,8 +6527,17 @@ out strError);
                     }
                 }
 
-                ParseOI(strBarcode, out string strPureBarcode, out strOwnerInstitution);
-                strBarcode = strPureBarcode;
+                // 2025/10/13
+                // 只有当 library.xml 定义了 rfid 元素的情况下，才会理解证条码号中的 .
+                // 否则会把 . (包括其左右部分)当作证条码号本身
+                if (HasRfidDefined() == true)
+                {
+                    ParseOI(strBarcode, out string strPureBarcode, out strOwnerInstitution);
+                    strBarcode = strPureBarcode;
+                }
+
+                // 搜寻过的检索途径
+                List<string> used_froms = new List<string>();
 
                 // 加读锁
                 // 可以避免拿到读者记录处理中途的临时状态
@@ -6537,6 +6589,7 @@ out strError);
                     if (nRet > 0)
                         strOutputPath = recpaths[0];
 
+                    used_froms.Add("证条码号");
 #if NO
                     // 快速版本。无法获得全部重复的路径
                     // return:
@@ -6621,6 +6674,8 @@ out strError);
                             strError = "用身份证号 '" + strIdcardNumber + "' 读入读者记录时发生错误: " + strError;
                             goto ERROR1;
                         }
+
+                        used_froms.Add("身份证号");
 #if NO
                         if (SessionInfo.IsGlobalUser(sessioninfo.LibraryCodeList) == false
                             && nRet > 0)
@@ -6687,6 +6742,8 @@ out strError);
                                 goto ERROR1;
                             }
 
+                            used_froms.Add(strFrom);
+
 #if NO
                             if (SessionInfo.IsGlobalUser(sessioninfo.LibraryCodeList) == false
                                 && nRet > 0)
@@ -6714,7 +6771,7 @@ out strError);
 
                 NOT_FOUND:
                     result.Value = 0;
-                    result.ErrorInfo = "没有找到";
+                    result.ErrorInfo = $"读者 '{strBarcode}' 没有找到(搜寻过检索途径: {StringUtil.MakePathList(used_froms, ",")})";
                     result.ErrorCode = ErrorCode.NotFound;
                     return result;
                 }

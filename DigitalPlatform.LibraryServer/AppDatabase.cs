@@ -46,6 +46,19 @@ namespace DigitalPlatform.LibraryServer
             strOutputInfo = "";
             strError = "";
 
+            delegate_checkDatabaseRights func = (d,a) => {
+                if (string.IsNullOrEmpty(a))
+                    a = strAction;
+                var error = LibraryApplication.CheckAccess(
+        sessioninfo,
+        $"管理数据库({a})",
+        d,   // 第二阶段检查，针对特定数据库
+        a == "getinfo" ? "managedatabase,getsystemparameter,order" : "managedatabase",
+        a,
+        out string access_parameters);
+                return error;
+            };
+
             RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
 
             // 列出数据库名
@@ -56,6 +69,7 @@ namespace DigitalPlatform.LibraryServer
                     strLibraryCodeList,
                     strDatabaseNames,
                     strStyle,
+                    func,
                     out strOutputInfo,
                     out strError);
             }
@@ -74,6 +88,7 @@ namespace DigitalPlatform.LibraryServer
                         strDatabaseInfo,
                         false,
                         strStyle,
+                        // func,
                         out strOutputInfo,
                         out strError);
                 }
@@ -3573,7 +3588,7 @@ strCommentDbName,
                     /*
                     physics_db_props.Add(new DatabaseProperty
                     {
-                        DbName = strName,
+                        DbNames = strName,
                         Type = "biblio",
                     });
                     */
@@ -7156,6 +7171,7 @@ out strError);
             string strDatabaseInfo,
             bool bRecreate,
             string strStyle,
+            // delegate_checkDatabaseRights func_checkRights,
             out string strOutputInfo,
             out string strError)
         {
@@ -7607,7 +7623,7 @@ out strError);
 
                     bDbChanged = true;
 
-                    string strAttrName = strDbType + "DbName";
+                    string strAttrName = strDbType + "DbNames";
                     if (strDbType == "entity")
                         strAttrName = "name";   // 例外
                     DomUtil.SetAttr(nodeDatabase, strAttrName, strName);
@@ -9890,6 +9906,14 @@ out strError);
             return 1;
         }
 
+        // parameters:
+        //      action  动作。如果为空，表示调主默认的操作
+        // return:
+        //      null    可以访问
+        //      其他    不可以访问。返回不可以访问的原因
+        delegate string delegate_checkDatabaseRights(string dbname,
+            string action = null);
+
         // 获得数据库信息
         // parameters:
         //      strLibraryCodeList  当前用户的管辖分馆代码列表
@@ -9904,6 +9928,7 @@ out strError);
             string strLibraryCodeList,
             string strDatabaseNames,
             string strStyle,
+            delegate_checkDatabaseRights func_checkRights,
             out string strOutputInfo,
             out string strError)
         {
@@ -9947,15 +9972,25 @@ out strError);
                     // 验证数据库是否成功删除
                     if (strVerifyMethod == "delete")
                     {
+                        if (func_checkRights != null)
+                        {
+                            var error = func_checkRights.Invoke(strName, "delete");
+                            if (error != null)
+                            {
+                                strError = error;
+                                return -1;
+                            }
+                        }
+
                         // return:
                         //      -1  验证过程出现错误(也就是说验证过程没有来的及完成)
                         //      0   验证发现不正确
                         //      1   验证发现正确
                         int nRet = VerifyDatabaseDelete(
                             channel,
-                    strDbType,
-                    strName,
-                    out strError);
+                            strDbType,
+                            strName,
+                            out strError);
                         if (nRet != 1)
                             return -1;
                         continue;   // 因为数据库不存在，所以就没有必要向后继续获取数据库信息并返回了
@@ -9972,11 +10007,25 @@ out strError);
                         if (string.IsNullOrEmpty(this.MongoDbConnStr) == false
                             && this.AccessLogDatabase != null)
                         {
+                            strName = AccessLogDbName;
+                            if (func_checkRights != null)
+                            {
+                                var error = func_checkRights.Invoke(strName);
+                                if (error != null)
+                                {
+                                    /*
+                                    strError = error;
+                                    return -1;
+                                    */
+                                    continue;
+                                }
+                            }
+
                             XmlNode nodeDatabase = dom.CreateElement("database");
                             dom.DocumentElement.AppendChild(nodeDatabase);
 
                             DomUtil.SetAttr(nodeDatabase, "type", "_accessLog");
-                            DomUtil.SetAttr(nodeDatabase, "name", AccessLogDbName);
+                            DomUtil.SetAttr(nodeDatabase, "name", strName);
                         }
                         continue;
                     }
@@ -9986,11 +10035,19 @@ out strError);
                         if (string.IsNullOrEmpty(this.MongoDbConnStr) == false
                             && this.AccessLogDatabase != null)
                         {
+                            strName = HitCountDbName;
+                            if (func_checkRights != null)
+                            {
+                                var error = func_checkRights.Invoke(strName);
+                                if (error != null)
+                                    continue;
+                            }
+
                             XmlNode nodeDatabase = dom.CreateElement("database");
                             dom.DocumentElement.AppendChild(nodeDatabase);
 
                             DomUtil.SetAttr(nodeDatabase, "type", "_hitcount");
-                            DomUtil.SetAttr(nodeDatabase, "name", HitCountDbName);
+                            DomUtil.SetAttr(nodeDatabase, "name", strName);
                         }
                         continue;
                     }
@@ -10000,11 +10057,19 @@ out strError);
                         if (string.IsNullOrEmpty(this.MongoDbConnStr) == false
                             && this.ChargingOperDatabase != null)
                         {
+                            strName = ChargingHistoryDbName;
+                            if (func_checkRights != null)
+                            {
+                                var error = func_checkRights.Invoke(strName);
+                                if (error != null)
+                                    continue;
+                            }
+
                             XmlNode nodeDatabase = dom.CreateElement("database");
                             dom.DocumentElement.AppendChild(nodeDatabase);
 
                             DomUtil.SetAttr(nodeDatabase, "type", "_chargingOper");
-                            DomUtil.SetAttr(nodeDatabase, "name", ChargingHistoryDbName);
+                            DomUtil.SetAttr(nodeDatabase, "name", strName);
                         }
                         continue;
                     }
@@ -10014,11 +10079,19 @@ out strError);
                         if (string.IsNullOrEmpty(this.MongoDbConnStr) == false
                             && this.SummaryCollection != null)
                         {
+                            strName = BiblioSummaryDbName;
+                            if (func_checkRights != null)
+                            {
+                                var error = func_checkRights.Invoke(strName);
+                                if (error != null)
+                                    continue;
+                            }
+
                             XmlNode nodeDatabase = dom.CreateElement("database");
                             dom.DocumentElement.AppendChild(nodeDatabase);
 
                             DomUtil.SetAttr(nodeDatabase, "type", "_biblioSummary");
-                            DomUtil.SetAttr(nodeDatabase, "name", BiblioSummaryDbName);
+                            DomUtil.SetAttr(nodeDatabase, "name", strName);
                         }
                         continue;
                     }
@@ -10028,8 +10101,8 @@ out strError);
                         // TODO: 注意读者库要筛选当前用户能管辖的部分名字
                         int nRet = GetDbNamesByType(strDbType,
                             strLibraryCodeList,
-            out temp_names,
-            out strError);
+                            out temp_names,
+                            out strError);
                         if (nRet == -1)
                             return -1;
                         names.InsertRange(i + 1, temp_names);
@@ -10268,11 +10341,19 @@ out strError);
 
                 if (ServerDatabaseUtility.IsSingleDbType(strDbType))
                 {
+                    strName = this.GetSingleDbName(strDbType);
+                    if (func_checkRights != null)
+                    {
+                        var error = func_checkRights.Invoke(strName);
+                        if (error != null)
+                            continue;
+                    }
+
                     XmlNode nodeDatabase = dom.CreateElement("database");
                     dom.DocumentElement.AppendChild(nodeDatabase);
 
                     DomUtil.SetAttr(nodeDatabase, "type", strDbType);
-                    DomUtil.SetAttr(nodeDatabase, "name", this.GetSingleDbName(strDbType));
+                    DomUtil.SetAttr(nodeDatabase, "name", strName);
                     continue;
                 }
 
@@ -10376,6 +10457,13 @@ out strError);
                         string strDbName = cfg.DbName;
                         if (strName == strDbName)
                         {
+                            if (func_checkRights != null)
+                            {
+                                var error = func_checkRights.Invoke(strName);
+                                if (error != null)
+                                    goto CONTINUE;
+                            }
+
                             XmlElement nodeDatabase = dom.CreateElement("database");
                             dom.DocumentElement.AppendChild(nodeDatabase);
 
@@ -10398,6 +10486,13 @@ out strError);
                         string strDbName = database.GetAttribute("name");
                         if (strName == strDbName)
                         {
+                            if (func_checkRights != null)
+                            {
+                                var error = func_checkRights.Invoke(strName);
+                                if (error != null)
+                                    goto CONTINUE;
+                            }
+
                             XmlElement nodeDatabase = dom.CreateElement("database");
                             dom.DocumentElement.AppendChild(nodeDatabase);
 
@@ -10418,6 +10513,13 @@ out strError);
                         string strDbName = this.ItemDbs[j].BiblioDbName;
                         if (strName == strDbName)
                         {
+                            if (func_checkRights != null)
+                            {
+                                var error = func_checkRights.Invoke(strName);
+                                if (error != null)
+                                    goto CONTINUE;
+                            }
+
                             XmlNode nodeDatabase = dom.CreateElement("database");
                             dom.DocumentElement.AppendChild(nodeDatabase);
 
@@ -10462,6 +10564,13 @@ out strError);
                         }
                         if (strName == strDbName)
                         {
+                            if (func_checkRights != null)
+                            {
+                                var error = func_checkRights.Invoke(strName);
+                                if (error != null)
+                                    continue;
+                            }
+
                             XmlNode nodeDatabase = dom.CreateElement("database");
                             dom.DocumentElement.AppendChild(nodeDatabase);
 
@@ -10564,6 +10673,13 @@ out strError);
                     XmlNode nodeUtilDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("utilDb/database[@name='" + strName + "']");
                     if (nodeUtilDatabase != null)
                     {
+                        if (func_checkRights != null)
+                        {
+                            var error = func_checkRights.Invoke(strName);
+                            if (error != null)
+                                continue;
+                        }
+
                         string strType = DomUtil.GetAttr(nodeUtilDatabase, "type");
 
                         XmlNode nodeDatabase = dom.CreateElement("database");

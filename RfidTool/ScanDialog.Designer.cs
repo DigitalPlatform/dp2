@@ -47,6 +47,7 @@ namespace RfidTool
             this.columnHeader_antenna = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_readerName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_protocol = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_tid = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.button_write = new System.Windows.Forms.Button();
             this.textBox_processingBarcode = new System.Windows.Forms.TextBox();
             this.button_clearProcessingBarcode = new System.Windows.Forms.Button();
@@ -54,7 +55,7 @@ namespace RfidTool
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.button_test = new System.Windows.Forms.Button();
             this.label_title = new System.Windows.Forms.Label();
-            this.columnHeader_tid = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_rssi = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.SuspendLayout();
             // 
             // label1
@@ -105,7 +106,8 @@ namespace RfidTool
             this.columnHeader_antenna,
             this.columnHeader_readerName,
             this.columnHeader_protocol,
-            this.columnHeader_tid});
+            this.columnHeader_tid,
+            this.columnHeader_rssi});
             this.listView_tags.FullRowSelect = true;
             this.listView_tags.HideSelection = false;
             this.listView_tags.Location = new System.Drawing.Point(10, 188);
@@ -191,6 +193,11 @@ namespace RfidTool
             this.columnHeader_protocol.Text = "协议";
             this.columnHeader_protocol.Width = 260;
             // 
+            // columnHeader_tid
+            // 
+            this.columnHeader_tid.Text = "TID";
+            this.columnHeader_tid.Width = 300;
+            // 
             // button_write
             // 
             this.button_write.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
@@ -260,10 +267,9 @@ namespace RfidTool
             this.label_title.Size = new System.Drawing.Size(899, 69);
             this.label_title.TabIndex = 9;
             // 
-            // columnHeader_tid
+            // columnHeader_rssi
             // 
-            this.columnHeader_tid.Text = "TID";
-            this.columnHeader_tid.Width = 300;
+            this.columnHeader_rssi.Text = "RSSI";
             // 
             // ScanDialog
             // 
@@ -320,5 +326,6 @@ namespace RfidTool
         private System.Windows.Forms.ColumnHeader columnHeader_shelfLocation;
         private System.Windows.Forms.Label label_title;
         private System.Windows.Forms.ColumnHeader columnHeader_tid;
+        private System.Windows.Forms.ColumnHeader columnHeader_rssi;
     }
 }

@@ -33,8 +33,8 @@ using System.Xml;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.189.*")]
-[assembly: AssemblyFileVersion("3.189.0.0")]
+[assembly: AssemblyVersion("3.191.*")]
+[assembly: AssemblyFileVersion("3.191.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCommentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -503,5 +503,9 @@ public bool ItemCanReturn(Account account,
 //      3.188 (2025/9/18) 为 WSDL metadata 修改了绑定的 URL 为: http://localhost/dp2library/$metadata。在 "metadata" 前增加了一个 "$"
 //      3.189 (2025/9/25) SetEntities() GetItemInfo() 等 API 增加了存取定义中的 setiteminfo 和 getiteminfo 权限。原有账户，当存取定义不为空时，其普通权限中的 setiteminfo 和 getiteminfo 需要手动处理
 //                          CopyBiblio() API 中 move 和 onlymovebiblio 在三条以上书目记录发生重复的情况下，会报错说有重复记录无法移动成功。这是因为自动进行了查重，并且只从命中结果中排除了源记录路径，没有排除掉第三条记录的路径造成的。最新版在 *move* 操作都不自动查重了，目的是让试图缩减重复的操作得以进行。
+//      3.190 (2025/10/14) GetReaderInfo() API 利用 strBarcode 进行检索的时候，如果 strBarcode 内容中出现了点，此前版本会当作机构代码和证条码号看待。最新版做了改进，当 library.xml 中存在 rfid 元素时，依然是原有效果，而当 library.xml 中没有定义 rfid 元素的时候，strBarcode 中的内容会被当作证条码号对待。也就是说，假设一条读者 XML 记录中 barcode 元素内容为 ABC.1234，则利用 GetReaderInfo() API 可以成功获得这条记录。
+//		3.191 (2025/10/18) dp2Kernel 中的 browse 配置文件先前允许使用 <root filter='marc'> 方式，以对应 col/use 元素用法。最新版取消了 root 元素的 filter 属性，当使用 col/use 时，系统会自动做好相应的内部处理。现存的 browse 配置文件中若残留 root/@filter 属性，对功能不会有任何影响
+//                          对 dp2library 账户权限 setiteminfo setobject setitemobject 等，增加对应的存取定义能力
+
 
 // TODO: GetReaderInfo() API 获取的读者 XML 记录中，password 元素的 expire 属性不要过滤，要让前端看到
