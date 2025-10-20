@@ -1,11 +1,12 @@
-﻿using DigitalPlatform.Text;
-using DigitalPlatform.Xml;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Xml;
+
 using static DigitalPlatform.LibraryServer.LibraryApplication;
+using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -280,6 +281,14 @@ unprocessed_element_names.Except(_auto_maintain_comment_element_names)));
 
             bool changed = !AreEqualXml(origin_xml, strMergedXml);
 
+            // 2025/10/19 添加
+            if (changed == true
+                && string.IsNullOrEmpty(strWarning) == false
+                && bChangePartDeniedParam == true)
+            {
+                strError = strWarning;
+                return 1;
+            }
             // 2025/4/20
             // 合法范围元素有改变；超出合法范围的元素也有改变
             if (changed == true && outof_range == true)
@@ -319,6 +328,7 @@ unprocessed_element_names.Except(_auto_maintain_comment_element_names)));
                 List<string> range = new List<string>(core_comment_element_names);
                 range.AddRange(_auto_maintain_comment_element_names);
                 range.Add("creator");
+                range.AddRange(LibraryApplication.file_element_names); // 2025/10/19
                 return range;
             }
         }

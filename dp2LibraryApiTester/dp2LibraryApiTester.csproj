@@ -98,6 +98,7 @@
     <Compile Include="SettingDialog.Designer.cs">
       <DependentUpon>SettingDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="TestCase\TestGetEntities.cs" />
     <Compile Include="TestCase\TestLoginApi.cs" />
     <Compile Include="TestCase\TestReservation.cs" />
     <Compile Include="TestCase\TestSearchBiblioSafety.cs" />
@@ -174,6 +175,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="design.txt" />
     <Content Include="history.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

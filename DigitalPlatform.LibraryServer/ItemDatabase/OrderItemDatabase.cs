@@ -279,6 +279,15 @@ namespace DigitalPlatform.LibraryServer
 
             bool changed = !AreEqualXml(origin_xml, strMergedXml);
 
+            // 2025/10/19 添加
+            if (changed == true
+                && string.IsNullOrEmpty(strWarning) == false
+                && bChangePartDeniedParam == true)
+            {
+                strError = strWarning;
+                return 1;
+            }
+
             // 2025/4/20
             // 合法范围元素有改变；超出合法范围的元素也有改变
             if (changed == true && outof_range == true)
@@ -321,6 +330,7 @@ namespace DigitalPlatform.LibraryServer
 
                 List<string> range = new List<string>(core_order_element_names);
                 range.AddRange(other_names);
+                range.AddRange(LibraryApplication.file_element_names); // 2025/10/19
                 return range;
             }
         }

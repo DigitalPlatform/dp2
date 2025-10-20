@@ -1,27 +1,26 @@
-﻿using System;
+﻿using DigitalPlatform;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.IO;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.Marc;
+using DigitalPlatform.Script;
+using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
+using DocumentFormat.OpenXml.EMMA;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Text;
+using System.Threading;
+using System.Web;
 using System.Windows.Forms;
 using System.Xml;
-using System.Diagnostics;
-using System.Threading;
-using System.IO;
-using System.Web;
-using System.Collections;
-
-using DigitalPlatform;
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.Xml;
-using DigitalPlatform.IO;
-using DigitalPlatform.Marc;
-using DigitalPlatform.Text;
-
-using DigitalPlatform.LibraryClient.localhost;
-using DigitalPlatform.Script;
-using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -221,6 +220,17 @@ namespace dp2Circulation
             }
         }
 
+        bool _autogen_dont_prompt = false;
+        int _autogen_redo_count = 0;
+        DialogResult _autogen_dialog_result = DialogResult.Cancel;
+
+        void ClearDontPrompt()
+        {
+            _autogen_dont_prompt = false;
+            _autogen_redo_count = 0;
+            _autogen_dialog_result = DialogResult.Cancel;
+        }
+
         // return:
         //      -1  出错
         //      0   放弃处理
@@ -279,6 +289,9 @@ MessageBoxDefaultButton.Button1);
             int nCount = 0; // 总共处理多少条
             int nChangedCount = 0;  // 发生修改的有多少条
 
+            GenerateData genData = new GenerateData(this, null);
+            ClearDontPrompt();
+
             DateTime now = DateTime.Now;
 
             stop?.SetProgressRange(0, this.textBox_paths.Lines.Length);
@@ -303,17 +316,23 @@ MessageBoxDefaultButton.Button1);
 
                 if (String.IsNullOrEmpty(strLine) == true)
                     continue;
+                // return:
+                //      -1  出错
+                //      0   未发生改变
+                //      1   发生了改变
+                //      2   希望调主跳过这条继续处理下一条
                 nRet = ChangeOneRecord(
                     stop,
                     channel,
                     strLine,
                     now,
+                    genData,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
-                nCount++;
                 if (nRet == 1)
                     nChangedCount++;
+                nCount++;
                 stop?.SetProgressValue(i + 1);
             }
 
@@ -377,6 +396,9 @@ MessageBoxDefaultButton.Button1);
             {
                 DateTime now = DateTime.Now;
 
+                GenerateData genData = new GenerateData(this, null);
+                ClearDontPrompt();
+
                 stop?.SetProgressRange(0, sr.BaseStream.Length);
 
                 Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
@@ -412,17 +434,19 @@ MessageBoxDefaultButton.Button1);
                     //      -1  出错
                     //      0   未发生改变
                     //      1   发生了改变
+                    //      2   希望调主跳过这条继续处理下一条
                     nRet = ChangeOneRecord(
                         stop,
                         channel,
                         strLine,
                         now,
+                        genData,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
-                    nCount++;
                     if (nRet == 1)
                         nChangedCount++;
+                    nCount++;
                     stop?.SetProgressValue(sr.BaseStream.Position);
                 }
             }
@@ -451,11 +475,13 @@ MessageBoxDefaultButton.Button1);
         //      -1  出错
         //      0   未发生改变
         //      1   发生了改变
+        //      2   希望调主跳过这条继续处理下一条
         int ChangeOneRecord(
             Stop stop,
             LibraryChannel channel,
             string strBiblioRecPath,
             DateTime now,
+            GenerateData genData,
             out string strError)
         {
             strError = "";
@@ -468,15 +494,13 @@ MessageBoxDefaultButton.Button1);
             string[] formats = new string[1];
             formats[0] = "xml";
 
-            string[] results = null;
-            byte[] timestamp = null;
             long lRet = channel.GetBiblioInfos(
                 stop,
                 strBiblioRecPath,
                 "",
                 formats,
-                out results,
-                out timestamp,
+                out string[] results,
+                out byte[] timestamp,
                 out strError);
             if (lRet == 0)
             {
@@ -504,14 +528,13 @@ MessageBoxDefaultButton.Button1);
             }
 
 
-            string strMARC = "";
             // 将XML格式转换为MARC格式
             // 自动从数据记录中获得MARC语法
             nRet = MarcUtil.Xml2Marc(strXml,
                 true,
                 "", // strMarcSyntax,
                 out string strOutMarcSyntax,
-                out strMARC,
+                out string strMARC,
                 out strError);
             if (nRet == -1)
             {
@@ -613,19 +636,65 @@ MessageBoxDefaultButton.Button1);
                 return -1;
 
             // 合并<dprms:file>元素
-            XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
-            nsmgr.AddNamespace("dprms", DpNs.dprms);
-
-            XmlNodeList nodes = domOrigin.DocumentElement.SelectNodes("//dprms:file", nsmgr);
-
-            for (int i = 0; i < nodes.Count; i++)
             {
-                XmlElement new_node = domMarc.CreateElement("dprms",
-                    "file",
-                    DpNs.dprms);
-                domMarc.DocumentElement.AppendChild(new_node);
-                DomUtil.SetElementOuterXml(new_node, nodes[i].OuterXml);
+                XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
+                nsmgr.AddNamespace("dprms", DpNs.dprms);
+
+                XmlNodeList nodes = domOrigin.DocumentElement.SelectNodes("//dprms:file", nsmgr);
+
+                for (int i = 0; i < nodes.Count; i++)
+                {
+                    XmlElement new_node = domMarc.CreateElement("dprms",
+                        "file",
+                        DpNs.dprms);
+                    domMarc.DocumentElement.AppendChild(new_node);
+                    DomUtil.SetElementOuterXml(new_node, nodes[i].OuterXml);
+                }
             }
+
+            var dont_trigger_autogen = false;
+
+            // 触发 dp2circulation_marc_autogen.cs 脚本
+            if (genData != null && dont_trigger_autogen == false)
+            {
+            REDO_TRIGGER:
+                MarcRecord record = new MarcRecord(strMARC);
+
+                // 触发 dp2circulation_marc_autogen.cs 脚本
+                // return:
+                //      -1  出错
+                //      0   record 没有发生改变
+                //      1   record 发生了改变
+                //      2   希望调主重做
+                //      3   希望调主跳过本条继续处理下一条
+                nRet = BiblioSearchForm.TriggerAutoGen(
+this,
+genData,
+strBiblioRecPath,
+record,
+ref _autogen_dont_prompt,
+ref _autogen_redo_count,
+ref _autogen_dialog_result,
+out strError);
+                if (nRet == -1)
+                    return -1;
+                else if (nRet == 1)
+                {
+                    var xml = domMarc.DocumentElement.OuterXml;
+                    nRet = MarcUtil.Marc2XmlEx(record.Text,
+                        strMarcSyntax,
+                        ref xml,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                    domMarc.LoadXml(xml);
+                }
+                else if (nRet == 2)
+                    goto REDO_TRIGGER;
+                else if (nRet == 3)
+                    return 2;   // 没有保存，跳过了本条
+            }
+
 
             // 保存
             byte[] baNewTimestamp = null;

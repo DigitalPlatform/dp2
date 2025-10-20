@@ -4348,7 +4348,7 @@ handle.CancelTokenSource.Token).Result;
                             task = null;
 
                             sw.Stop();
-                            explainInfo?.AppendLine($"第一阶段耗费时间 {sw.Elapsed}。SQL 语句: {strCommand}{(aSqlParameter.Count > 0 ? " 参数: "+ToString(aSqlParameter) : "")}");
+                            explainInfo?.AppendLine($"第一阶段耗费时间 {sw.Elapsed}。SQL 语句: {strCommand}{(aSqlParameter.Count > 0 ? " 参数: " + ToString(aSqlParameter) : "")}");
                             sw.Restart();
 
                             // 此时剩余的超时时间
@@ -7260,7 +7260,8 @@ List<DbParameter> aSqlParameter)
                                         if (String.IsNullOrEmpty(strLastModifyTime) == false)
                                             DomUtil.SetAttr(fileNode, "__lastmodifytime", strLastModifyTime);
 
-                                        DomUtil.SetAttr(fileNode, "__timestamp", strObjectTimestamp);
+                                        if (string.IsNullOrEmpty(strObjectTimestamp) == false)
+                                            DomUtil.SetAttr(fileNode, "__timestamp", strObjectTimestamp);
                                     }
                                 }
                             } // end if (strXml != "")
@@ -18741,6 +18742,7 @@ List<DbParameter> aSqlParameter)
             List<string> new_file_ids = new List<string>();
             if (newDom != null)
             {
+                // TODO: 发现重复的 dprms:file/@id 属性值的时候，要报错
                 XmlNamespaceManager newNsmgr = new XmlNamespaceManager(newDom.NameTable);
                 newNsmgr.AddNamespace("dprms", DpNs.dprms);
                 XmlNodeList newFileList = newDom.SelectNodes("//dprms:file", newNsmgr);
@@ -18772,11 +18774,30 @@ List<DbParameter> aSqlParameter)
             if (new_file_ids.Count == 0 && old_file_ids.Count == 0)
                 return 0;
 
-            //数据必须先排序
-            //aNewFileID.Sort(new ComparerClass());
-            //aOldFileID.Sort(new ComparerClass());
-            new_file_ids.Sort();  // TODO: 大小写是否敏感 ?
-            old_file_ids.Sort();
+            //数据必须先排序和去重 (2025/10/19 增加去重能力)
+            var comparer = new StringComparer();    // 确保和 MergeStringList() 采用同样的排序方法
+
+            {
+                var save_count = new_file_ids.Count;
+                new_file_ids = new_file_ids.OrderBy(o => o, comparer).Distinct().ToList();
+                var delta = save_count - new_file_ids.Count;
+                if (delta != 0)
+                {
+                    strError = $"新的 XML 内容中发现有重复的 dprms:file/@id 属性值(重复{delta}个)";
+                    return -1;
+                }
+            }
+
+            {
+                var save_count = old_file_ids.Count;
+                old_file_ids = old_file_ids.OrderBy(o => o, comparer).Distinct().ToList();
+                var delta = save_count - old_file_ids.Count;
+                if (delta != 0)
+                {
+                    strError = $"旧的 XML 内容中发现有重复的 dprms:file/@id 属性值(重复{delta}个)";
+                    return -1;
+                }
+            }
 
             List<string> targetLeft = new List<string>();
             List<string> targetMiddle = null;   //  new List<string>();
@@ -19640,6 +19661,13 @@ List<DbParameter> aSqlParameter)
             return 0;
         }
 
+        class StringComparer : IComparer<string>
+        {
+            public int Compare(string x, string y)
+            {
+                return x.CompareTo(y);
+            }
+        }
 
         // 检索连接对象是否正确
         // return:

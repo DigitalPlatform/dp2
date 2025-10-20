@@ -58,6 +58,24 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
+        // 2025/10/18
+        public string db_type
+        {
+            get
+            {
+                var value = ItemNameInternal.ToLower();
+                if (value == "item"
+                    || value == "order"
+                    || value == "issue"
+                    || value == "comment")
+                {
+                    return value;
+                }
+                else
+                    throw new ArgumentException($"从 ItemNameInternal 获得的值 {value} 无法用于 db_type");
+            }
+        }
+
         // (派生类必须重载)
         // 检索时的缺省结果集名称。例如“entities” “issues” “orders”
         public virtual string DefaultResultsetName
@@ -1234,7 +1252,7 @@ namespace DigitalPlatform.LibraryServer
 #if ITEM_ACCESS_RIGHTS
                     (r) =>
                     {
-                        string db_type = this.ItemNameInternal.ToLower();
+                        string db_type = this.db_type;
 
                         return CheckAccess(sessioninfo,
                             $"{db_type}记录下级对象({r})",
@@ -1615,7 +1633,7 @@ out strError);
 #if ITEM_ACCESS_RIGHTS
                     (r) =>
                     {
-                        string db_type = this.ItemNameInternal.ToLower();
+                        string db_type = this.db_type;
 
                         return CheckAccess(sessioninfo,
                             $"{db_type}记录下级对象({r})",
@@ -2001,7 +2019,7 @@ out strError);
 #if ITEM_ACCESS_RIGHTS
                         (r) =>
                         {
-                            string db_type = this.ItemNameInternal.ToLower();
+                            string db_type = this.db_type;
 
                             return CheckAccess(sessioninfo,
                                 $"{db_type}记录下级对象({r})",
@@ -2184,7 +2202,7 @@ out strError);
 
             // 2023/2/21
             {
-                string db_type = this.ItemNameInternal.ToLower();
+                string db_type = this.db_type;
                 string type_name = this.ItemName;
                 // 对读者身份的判断
                 if ((db_type == "order" || db_type == "issue")
@@ -2256,7 +2274,7 @@ out strError);
                 }
             }
 
-            // 获得书目库对应的事项库名
+            // 获得书目库对应的下级库名
             nRet = this.GetItemDbName(strBiblioDbName,
                  out string strItemDbName,
                  out strError);
@@ -2321,10 +2339,29 @@ out strError);
                 // 2025/4/27
                 // 检查存取定义
                 string strAccessParameters = "";
+                { 
+                    var error = this.App.CheckSetItemAccessEx(
+                        sessioninfo,
+                        this.db_type,
+                        strBiblioRecPath,
+                        info,
+                        out strAccessParameters);
+                    if (error != null)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = error;
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
+                    }
+                }
+
+
+#if REMOVED
+                string strAccessParameters = "";
                 if (String.IsNullOrEmpty(sessioninfo.Access) == false)
                 {
                     var error = this.App.CheckSetItemAccess(sessioninfo,
-    ItemNameInternal.ToLower(),
+    this.db_type,
     strBiblioDbName + "," + strItemDbName,  // 两个数据库名命中任意一个就行
     strAction,
     out strAccessParameters);
@@ -2348,6 +2385,8 @@ out strError);
                     if (normal_check_result != null)
                         return normal_check_result;
                 }
+#endif // of REMOVED
+
 #endif
 
                 bool bForce = false;    // 是否为强制操作(强制操作不去除源记录中的流通信息字段内容)
@@ -2534,6 +2573,21 @@ out strError);
                     error.ErrorCode = ErrorCodeValue.CommonError;
                     ErrorInfos.Add(error);
                     continue;
+                }
+
+                // 根据 info.NewRecPath 和 info.OldRecPath 检查数据库权限
+                // action 为 "new" 时，NewRecPath。NewRecPath 有可能为空，这时候从 strBiblioRecPath 中取(不允许为空)
+                //      对目标数据库，要求 setiteminfo.new 权限
+                // action 为 "change" 时, NewRecPath
+                //      对目标数据库，要求 setiteminfo.change 权限
+                // action 为 "delete" 时, OldRecPath
+                //      对目标数据库，要求 setiteminfo.delete 权限
+                // action 为 "copy" 时, OldRecPath 和 NewRecPath
+                //      对于源数据库，要求 getiteminfo 权限；对于目标数据库，要求 setiteminfo.new|change 权限(目标为确定 id 时需要 change, 为追加形态时要求 new)
+                // action 为 "move" 时，OldRecPath 和 NewRecPath 都要检查
+                //      对于源数据库，要求 getiteminfo 和 setiteminfo.delete 权限；对于目标数据库，要求 getiteminfo 权限
+                {
+
                 }
 
                 // 2024/5/12
@@ -3003,7 +3057,7 @@ out strError);
 #if ITEM_ACCESS_RIGHTS
                     (r) =>
                     {
-                        string db_type = this.ItemNameInternal.ToLower();
+                        string db_type = this.db_type;
 
                         return CheckAccess(sessioninfo,
                             $"{db_type}记录下级对象({r})",
@@ -3321,6 +3375,8 @@ out strError);
             return result;
         }
 
+
+
         // 执行脚本函数 VerifyItem
         // parameters:
         // return:
@@ -3477,6 +3533,37 @@ out strError);
                 result.ErrorCode = ErrorCode.ItemDbNotDef;  // 2016/4/15
                 return result;
             }
+
+#if ITEM_ACCESS_RIGHTS
+            {
+                string rights = $"{GetInfoRight($"get{db_type}info")},order";
+                /*
+                if (db_type == "order")
+                    rights = $"{GetInfoRight("getorderinfo")},order";
+                else if (db_type == "issue")
+                    rights = $"{GetInfoRight("getcommentinfo")},order";
+                else if (db_type == "comment")
+                    rights = $"{GetInfoRight("getissueinfo")},order";
+                else
+                    throw new ArgumentException($"未知的 db_type '{db_type}'");
+                */
+
+                var error = CheckAccess(sessioninfo,
+                    $"获得书目记录 {strBiblioRecPath} 下属的全部{db_type}记录",
+                    strBiblioDbName + "," + strItemDbName,
+                    $"{GetInfoRight($"get{db_type}info")},order",
+                    "",
+                    out _);
+                if (error != null)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = error;
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+            }
+#endif
+
 
             RmsChannel channel = sessioninfo.Channels.GetChannel(this.App.WsUrl);
             if (channel == null)
@@ -5091,7 +5178,7 @@ out string strError)
 
             bool changed = false;
 
-            string db_type = this.ItemNameInternal.ToLower();
+            string db_type = this.db_type;
             /*
             string alias_right = "";
             // 检查 db_type

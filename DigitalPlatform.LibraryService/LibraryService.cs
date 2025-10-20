@@ -9022,6 +9022,8 @@ out QueryResult[] results)
 
             try
             {
+#if ITEM_ACCESS_RIGHTS
+#else
                 // 权限字符串
                 if (StringUtil.IsInList($"{InfoRight("getissueinfo")},order", sessioninfo.RightsOrigin) == false)
                 {
@@ -9030,6 +9032,7 @@ out QueryResult[] results)
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
+#endif
 
                 return app.IssueItemDatabase.GetItems(sessioninfo,
                     strBiblioRecPath,
@@ -10588,6 +10591,10 @@ PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin)
 
             try
             {
+#if ITEM_ACCESS_RIGHTS
+
+#else
+
                 // 权限字符串
                 if (StringUtil.IsInList($"{InfoRight("getorderinfo")},order", sessioninfo.RightsOrigin) == false)
                 {
@@ -10596,6 +10603,7 @@ PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin)
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
+#endif
 
                 return app.OrderItemDatabase.GetItems(sessioninfo,
                     strBiblioRecPath,
@@ -17948,6 +17956,8 @@ out strError);
 
             try
             {
+#if ITEM_ACCESS_RIGHTS
+#else
                 // 权限字符串
                 if (StringUtil.IsInList($"{InfoRight("getcommentinfo")},order", sessioninfo.RightsOrigin) == false)
                 {
@@ -17956,6 +17966,7 @@ out strError);
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
+#endif
 
                 return app.CommentItemDatabase.GetItems(sessioninfo,
                     strBiblioRecPath,

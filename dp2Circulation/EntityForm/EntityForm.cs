@@ -8864,6 +8864,7 @@ out strError);
             Stop stop,  // 2022/11/1
             LibraryChannel channel,
             string strAction,
+            string strSourceBiblioRecPath,  // 2025/10/20
             string strTargetBiblioRecPath,
             string strMergeStyle,
             out string strXml,  // 顺便返回书目记录XML格式
@@ -8902,6 +8903,8 @@ out strError);
                         BeforeSaveRecordEventArgs e = new BeforeSaveRecordEventArgs();
                         this.TryInvoke(() =>    // 2023/2/1
                         {
+                            e.SaveAction = strAction;
+                            e.SourceRecPath = strSourceBiblioRecPath;
                             e.TargetRecPath = strTargetBiblioRecPath;
                             // this._genData.DetailHostObj.BeforeSaveRecord(this.m_marcEditor, e);
                             this._genData.DetailHostObj.Invoke("BeforeSaveRecord", this.m_marcEditor, e);
@@ -9236,6 +9239,8 @@ out strError);
                     BeforeSaveRecordEventArgs e = new BeforeSaveRecordEventArgs();
                     this.TryInvoke(() =>    // 2023/2/1
                     {
+                        e.SaveAction = "save";
+                        e.SourceRecPath = "";
                         e.TargetRecPath = strTargetPath;
                         // this._genData.DetailHostObj.BeforeSaveRecord(this.m_marcEditor, e);
                         this._genData.DetailHostObj.Invoke("BeforeSaveRecord", this.m_marcEditor, e);
@@ -15995,6 +16000,7 @@ out strError);
                             looping.Progress,
                             channel,
             "onlycopybiblio",
+            strOldBiblioRecPath,
             strTargetRecPathParam,
             strMergeStyle,
             out strXml,
@@ -16008,6 +16014,7 @@ out strError);
                             looping.Progress,
                             channel,
                             "copy",
+                            strOldBiblioRecPath,
                             strTargetRecPathParam,
                             strMergeStyle,
                             out strXml,
@@ -16027,6 +16034,7 @@ out strError);
                         looping.Progress,
                         channel,
                         "move",
+                        strOldBiblioRecPath,
                         strTargetRecPathParam,
                         strMergeStyle,
                         out strXml,

@@ -808,6 +808,8 @@ this.UiState);
                         if (genData.DetailHostObj != null)
                         {
                             BeforeSaveRecordEventArgs e = new BeforeSaveRecordEventArgs();
+                            e.SaveAction = "save";
+                            e.SourceRecPath = "";
                             e.TargetRecPath = strBiblioRecPath;
                             this.TryInvoke(() =>
                             {

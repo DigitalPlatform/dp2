@@ -5621,8 +5621,8 @@ GetCurrentBrowseStyle());
         //      1   找到
         public static int DetectDefaultCatalogingRule(
         string strBiblioRecPath,
-    out string catalogingRule,
-    out string strError)
+        out string catalogingRule,
+        out string strError)
         {
             strError = "";
             catalogingRule = "";
@@ -7783,6 +7783,9 @@ MessageBoxDefaultButton.Button2);
             channel.Timeout = TimeSpan.FromMinutes(2);
 
             GenerateData genData = new GenerateData(this, null);
+            bool _autogen_dont_prompt = false;
+            int _autogen_redo_count = 0;
+            DialogResult _autogen_dialog_result = DialogResult.Cancel;
 
             /*
             _stop.Style = StopStyle.EnableHalfStop;
@@ -7847,6 +7850,7 @@ MessageBoxDefaultButton.Button2);
 
                     string biblio_rec_path = BiblioInfo.GetPath(strRecPath);
 
+#if REMOVED
                     if (dont_trigger_autogen == false)
                     {
                         // 2024/7/23
@@ -7893,7 +7897,55 @@ MessageBoxDefaultButton.Button2);
                             }
                         }
                     }
+#endif
+                    if (dont_trigger_autogen == false)
+                    {
+                    REDO_TRIGGER:
+                        int nRet = MarcUtil.Xml2Marc(info.NewXml,    // info.OldXml,
+true,
+null,
+out string strMarcSyntax,
+out string strMARC,
+out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "XML转换到MARC记录时出错: " + strError;
+                            goto ERROR1;
+                        }
+                        MarcRecord record = new MarcRecord(strMARC);
 
+                        // 触发 dp2circulation_marc_autogen.cs 脚本
+                        // return:
+                        //      -1  出错
+                        //      0   record 没有发生改变
+                        //      1   record 发生了改变
+                        //      2   希望调主重做
+                        //      3   希望调主跳过本条继续处理下一条
+                        nRet = TriggerAutoGen(
+            this,
+            genData,
+            biblio_rec_path,
+            record,
+            ref _autogen_dont_prompt,
+            ref _autogen_redo_count,
+            ref _autogen_dialog_result,
+            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        else if (nRet == 1)
+                        {
+                            nRet = MarcUtil.Marc2XmlEx(record.Text,
+    strMarcSyntax,
+    ref info.NewXml,
+    out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                        }
+                        else if (nRet == 2)
+                            goto REDO_TRIGGER;
+                        else if (nRet == 3)
+                            goto CONTINUE;
+                    }
 
                     int nRedoCount = 0;
                 REDO_SAVE:
@@ -8156,6 +8208,85 @@ MessageBoxDefaultButton.Button2);
                 ErrorInfo = strError
             };
         }
+
+        // 触发 dp2circulation_marc_autogen.cs 脚本
+        // return:
+        //      -1  出错
+        //      0   record 没有发生改变
+        //      1   record 发生了改变
+        //      2   希望调主重做
+        //      3   希望调主跳过本条继续处理下一条
+        public static int TriggerAutoGen(
+            MyForm form,
+            GenerateData genData,
+            string strBiblioRecPath,
+            MarcRecord record,
+            ref bool bDontPrompt,
+            ref int nRedoCount,
+            ref DialogResult dialog_result,
+            out string strError)
+        {
+            strError = "";
+
+            // 2024/7/23
+            int nRet = genData.InitialAutogenAssembly(strBiblioRecPath,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            if (genData.DetailHostObj != null)
+            {
+                BeforeSaveRecordEventArgs e = new BeforeSaveRecordEventArgs();
+                e.SaveAction = "save";
+                e.SourceRecPath = "";
+                e.TargetRecPath = strBiblioRecPath;
+                form.TryInvoke(() =>
+                {
+                    genData.DetailHostObj.Invoke("BeforeSaveRecord",
+                        record,
+                        e);
+                });
+                if (string.IsNullOrEmpty(e.ErrorInfo) == false)
+                {
+                    strError = $"记录 '{strBiblioRecPath}' 准备阶段出现错误: {e.ErrorInfo}";
+                    goto ERROR1;
+                }
+                if (e.Changed)
+                {
+                    return 1;
+                }
+            }
+
+            return 0;   // 没有发生改变
+        ERROR1:
+            if (bDontPrompt == false || nRedoCount >= 10)
+            {
+                bool temp = bDontPrompt;
+                string message = $"dp2circulation_marc_autogen.cs 自动处理书目记录 {strBiblioRecPath} 时出错:\r\n{strError}\r\n---\r\n\r\n是否重试?\r\n\r\n注：\r\n[重试] 重试保存\r\n[跳过] 放弃保存当前记录，但继续后面的处理\r\n[中断] 中断整批操作";
+                dialog_result = form.TryGet(() =>
+                {
+                    return MessageDlg.Show(form,
+                    message,
+                    "BiblioSearchForm",
+                    MessageBoxButtons.YesNoCancel,
+                    MessageBoxDefaultButton.Button1,
+                    ref temp,
+                    new string[] { "重试", "跳过", "中断" },
+                    "下次不再询问");
+                });
+                bDontPrompt = temp;
+            }
+            if (dialog_result == DialogResult.Yes)
+            {
+                nRedoCount++;
+                return 2;
+            }
+            if (dialog_result == DialogResult.No)
+                return 3;
+
+            strError += "。用户中断";
+            return -1;
+        }
+
 
         // TODO: 将来改用 SearchFormBase::ChangeBiblioInfoKey()
         void ChangeRecPath(BiblioInfo info, string strRecPath)
@@ -10061,6 +10192,9 @@ out strError);
 
                         MarcRecord record = new MarcRecord(strMARC);
                         BeforeSaveRecordEventArgs e = new BeforeSaveRecordEventArgs();
+                        Debug.Assert(string.IsNullOrEmpty(strRecPath) == false);
+                        e.SaveAction = bCopy ? "copy" : "move";
+                        e.SourceRecPath = strRecPath;
                         e.TargetRecPath = dlg.RecPath;
                         this.TryInvoke(() =>
                         {

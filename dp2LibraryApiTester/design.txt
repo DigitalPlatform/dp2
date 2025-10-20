@@ -1,0 +1,46 @@
+
+~~~
+测试 GetItemInfo() API
+
+根据(getobject,getitemobject)权限控制是否能获取 dprms:file 元素。权限又分为普通权限和存取定义
+
+~~~
+测试 GetRes() API 获取对象
+
+根据(getobject,getitemobject)权限控制是否能获取对象。权限又分为普通权限和存取定义。
+
+~~~
+测试 WriteRes() API 写入对象
+
+根据(setobject,setitemobject)权限控制是否能写入对象。权限又分为普通权限和存取定义。
+
+
+~~~
+测试书目记录复制和移动
+
+特别关注携带的下级对象是否正确复制和移动了，权限又分为普通权限和存取定义。
+存取定义可以精确指定哪些数据库不允许操作，哪些数据库允许操作。可以制造出源数据库和目标数据库权限不等的场景。
+
+~~~
+测试只移动书目记录的下级记录
+
+~~~
+
+测试 SetEntities() API
+
+特别关注 dprms:file 元素是否允许写入。
+
+~~~
+测试 GetEntities() API
+
+特别关注 dprms:file 元素是否允许读取。
+
+~~~
+测试 SetReaderInfo() API
+
+特别关注复杂字段权限。
+
+~~~
+测试 GetReaderInfo() API
+
+特别关注复杂字段权限。

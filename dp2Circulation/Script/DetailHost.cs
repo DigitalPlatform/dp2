@@ -1,25 +1,24 @@
 ﻿#define SHITOUTANG  // 石头汤分类法和著者号的支持
 
+using DigitalPlatform;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.CommonControl;
+using DigitalPlatform.GUI;
+using DigitalPlatform.IO;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.Marc;
+using DigitalPlatform.Script;
+using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
-using System.Windows.Forms;
 using System.Diagnostics;
-using System.Xml;
 using System.IO;
-
-using DigitalPlatform;
-using DigitalPlatform.Marc;
-using DigitalPlatform.CommonControl;
-using DigitalPlatform.GUI;
-using DigitalPlatform.Text;
-using DigitalPlatform.Script;
-using DigitalPlatform.Xml;
-using DigitalPlatform.IO;
-
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.LibraryClient;
+using System.Reflection;
+using System.Web;
+using System.Windows.Forms;
+using System.Xml;
 using static dp2Circulation.CallNumberForm;
 
 namespace dp2Circulation
@@ -250,6 +249,48 @@ namespace dp2Circulation
         {
 
         }
+
+        /// <summary>
+        /// 向控制台输出 HTML
+        /// </summary>
+        /// <param name="strHtml">要输出的 HTML 字符串</param>
+        public void OutputHtml(string strHtml)
+        {
+            Program.MainForm.OperHistory.AppendHtml(strHtml);
+        }
+
+        // 获得数据库默认的编目规则
+        public static string GetDefaultCatalogingRule(string biblio_recpath)
+        {
+            // 获得数据库默认的编目规则
+            // return:
+            //      -1  出错
+            //      0   没有找到
+            //      1   找到
+            var ret = BiblioSearchForm.DetectDefaultCatalogingRule(
+            biblio_recpath,
+            out string catalogingRule,
+            out string strError);
+            return catalogingRule;
+        }
+
+        // parameters:
+        //      nWarningLevel   0 正常文本(白色背景) 1 警告文本(黄色背景) >=2 错误文本(红色背景)
+        /// <summary>
+        /// 向控制台输出纯文本
+        /// </summary>
+        /// <param name="strText">要输出的纯文本字符串</param>
+        /// <param name="nWarningLevel">警告级别。0 正常文本(白色背景) 1 警告文本(黄色背景) >=2 错误文本(红色背景)</param>
+        public void OutputText(string strText, int nWarningLevel = 0)
+        {
+            string strClass = "normal";
+            if (nWarningLevel == 1)
+                strClass = "warning";
+            else if (nWarningLevel >= 2)
+                strClass = "error";
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug " + strClass + "'>" + HttpUtility.HtmlEncode(strText).Replace("\r\n", "<br/>") + "</div>");
+        }
+
 
         /// <summary>
         /// 调用一个 Ctrl+A 功能

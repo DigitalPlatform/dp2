@@ -1,31 +1,29 @@
 ﻿#define BASIC_HTTP
 
+using DigitalPlatform.Core;
+using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.Text;
 using System;
-using System.Collections.Generic;
-using System.Text;
-
-using System.Threading;
-using System.Xml;
-using System.Diagnostics;
-using System.ServiceModel;
-using System.ServiceModel.Channels;
-using System.ServiceModel.Security;
-using System.ServiceModel.Security.Tokens;
-
-using System.IO;
-using System.IdentityModel.Policy;
-using System.IdentityModel.Claims;
-using System.IdentityModel.Selectors;
-using System.Security.Cryptography.X509Certificates;
 using System.Collections;
-using System.ServiceModel.Description;
-using System.Web;
+using System.Collections.Generic;
+using System.Data.SqlClient;
+using System.Diagnostics;
+using System.IdentityModel.Claims;
+using System.IdentityModel.Policy;
+using System.IdentityModel.Selectors;
+using System.IO;
 using System.Net;
 using System.Net.Security;
-
-using DigitalPlatform.Text;
-using DigitalPlatform.LibraryClient.localhost;
-using DigitalPlatform.Core;
+using System.Security.Cryptography.X509Certificates;
+using System.ServiceModel;
+using System.ServiceModel.Channels;
+using System.ServiceModel.Description;
+using System.ServiceModel.Security;
+using System.ServiceModel.Security.Tokens;
+using System.Text;
+using System.Threading;
+using System.Web;
+using System.Xml;
 
 namespace DigitalPlatform.LibraryClient
 {
@@ -2741,7 +2739,11 @@ out strError);
         {
             this.ClearRedoCount();
 
-            if (this.BeforeLogin != null)
+            if (this.BeforeLogin == null)
+            {
+                this.ErrorCode = ErrorCode.NotLogin;
+            }
+            else
             {
                 BeforeLoginEventArgs ea = new BeforeLoginEventArgs
                 {
@@ -3497,15 +3499,29 @@ out strError);
                 LibraryServerResult result = this.ws.EndSetEntities(
                     out errorinfos,
                     soapresult);
+#if OLD
                 if (result.Value == -1 && result.ErrorCode == ErrorCode.NotLogin)
                 {
                     if (DoNotLogin(ref strError) == 1)
                         goto REDO;
                     return -1;
                 }
+
                 strError = result.ErrorInfo;
                 this.ErrorCode = result.ErrorCode;
                 this.ClearRedoCount();
+                return result.Value;
+#endif
+                // return:
+                //      -1  需要 return -1
+                //      0   需要继续向后执行
+                //      1   需要 REDO
+                var ret = CheckNotLogin(result,
+                    ref strError);
+                if (ret == 1)
+                    goto REDO;
+                if (ret == -1)
+                    return -1;
                 return result.Value;
             }
             catch (Exception ex)
@@ -3514,6 +3530,36 @@ out strError);
                 if (nRet == 0)
                     return -1;
                 goto REDO;
+            }
+        }
+
+        // return:
+        //      -1  需要 return -1
+        //      0   需要继续向后执行
+        //      1   需要 REDO
+        long CheckNotLogin(LibraryServerResult result,
+            ref string strError)
+        {
+            try
+            {
+                strError = result.ErrorInfo;
+                if (result.Value == -1 && result.ErrorCode == ErrorCode.NotLogin)
+                {
+                    if (DoNotLogin(ref strError) == 1)
+                    {
+                        // goto REDO;
+                        return 1;   // 重做 API 请求
+                    }
+                    return -1;  // 返回错误
+                }
+
+                return 0;   // 继续向后
+            }
+            finally
+            {
+                strError = result.ErrorInfo;
+                this.ErrorCode = result.ErrorCode;
+                this.ClearRedoCount();
             }
         }
 

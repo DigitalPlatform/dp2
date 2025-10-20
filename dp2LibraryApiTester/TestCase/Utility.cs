@@ -1,16 +1,44 @@
-﻿using System;
+﻿using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.Text;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using DigitalPlatform.LibraryClient;
-using DigitalPlatform.LibraryClient.localhost;
-
 namespace dp2LibraryApiTester
 {
     public static class Utility
     {
+
+        public static string GetError(EntityInfo[] errorinfos, out ErrorCodeValue error_code)
+        {
+            error_code = ErrorCodeValue.NoError;
+
+            if (errorinfos != null)
+            {
+                List<ErrorCodeValue> codes = new List<ErrorCodeValue>();
+                List<string> errors = new List<string>();
+                foreach (var error in errorinfos)
+                {
+                    if (error.ErrorCode != ErrorCodeValue.NoError)
+                    {
+                        errors.Add(error.ErrorInfo);
+                        codes.Add(error.ErrorCode);
+                    }
+                }
+
+                if (codes.Count > 0)
+                    error_code = codes[0];
+
+                if (errors.Count > 0)
+                    return StringUtil.MakePathList(errors, "; ");
+            }
+
+            return null;
+        }
+
 
         public static void DisplayErrors(List<string> errors)
         {

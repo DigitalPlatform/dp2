@@ -19165,6 +19165,161 @@ out _);
             return 1;
         }
 
+        /*
+         * SetEntities() API 中 info.Action 的可能性:
+                    if (info.Action == "new"
+                        || info.Action == "change"
+                        || info.Action == "transfer"
+                        || info.Action == "setuid"
+                        || info.Action == "delete"
+                        || info.Action == "move")         * 
+         * */
+
+        // 2025/10/20
+        // 根据 info.NewRecPath 和 info.OldRecPath 检查 SetItem() 针对数据库权限
+        // action 为 "new" 时，NewRecPath。NewRecPath 有可能为空，这时候从 strBiblioRecPath 中取(不允许为空)
+        //      对目标数据库，要求 setiteminfo.new 权限
+        // action 为 "change" 时, NewRecPath
+        //      对目标数据库，要求 setiteminfo.change 权限
+        // action 为 "delete" 时, OldRecPath
+        //      对目标数据库，要求 setiteminfo.delete 权限
+        // action 为 "copy" 时, OldRecPath 和 NewRecPath
+        //      对于源数据库，要求 getiteminfo 权限；对于目标数据库，要求 setiteminfo.new|change 权限(目标为确定 id 时需要 change, 为追加形态时要求 new)
+        // action 为 "move" 时，OldRecPath 和 NewRecPath 都要检查
+        //      对于源数据库，要求 getiteminfo 和 setiteminfo.delete 权限；对于目标数据库，要求 getiteminfo 权限
+        public string CheckSetItemAccessEx(
+            SessionInfo sessioninfo,
+            string db_type,
+            string biblio_rec_path,
+            EntityInfo info,
+            out string parameters)
+        {
+
+            if (info.Action == "new")
+            {
+                var dbnames = AutoGetTwoDbName(db_type,
+                    info.NewRecPath,
+                    biblio_rec_path);
+
+                var error = CheckAccess(sessioninfo,
+                    $"创建{db_type}记录",
+                    dbnames,
+                    $"set{db_type}info",
+                    info.Action,
+                    out parameters);
+                return error;
+            }
+            else if (info.Action == "change")
+            {
+                if (string.IsNullOrEmpty(info.NewRecPath))
+                    throw new ArgumentException($"info.NewRecPath 为空，无法判断 {db_type}  {info.Action}  权限");
+
+                var dbnames = AutoGetTwoDbName(db_type,
+                    info.NewRecPath,
+                    biblio_rec_path);
+                var error = CheckAccess(sessioninfo,
+                    $"修改{db_type}记录",
+                    dbnames,
+                    $"set{db_type}info",
+                    info.Action,
+                    out parameters);
+                return error;
+            }
+            else if (info.Action == "delete")
+            {
+                if (string.IsNullOrEmpty(info.OldRecPath))
+                    throw new ArgumentException($"info.OldRecPath 为空，无法判断 {db_type} {info.Action} 权限");
+
+                var dbnames = AutoGetTwoDbName(db_type,
+                    info.OldRecPath,
+                    biblio_rec_path);
+                var error = CheckAccess(sessioninfo,
+                    $"删除{db_type}记录",
+                    dbnames,
+                    $"set{db_type}info",
+                    info.Action,
+                    out parameters);
+                return error;
+            }
+            else if (info.Action == "copy"
+                || info.Action == "move")
+            {
+                // 先检查源
+                {
+                    if (string.IsNullOrEmpty(info.OldRecPath))
+                        throw new ArgumentException($"info.OldRecPath 为空，无法判断 {db_type} {info.Action} 之 get{db_type}info 权限");
+
+                    var dbnames = AutoGetTwoDbName(db_type,
+        info.OldRecPath,
+        biblio_rec_path);
+
+                    if (info.Action == "copy")
+                    {
+                        var error = CheckAccess(sessioninfo,
+            $"{info.Action} {db_type}记录，源",
+            dbnames,
+            $"get{db_type}info",
+            "",
+            out parameters);
+                        if (error != null)
+                            return error;
+                    }
+                    else
+                    {
+                        // 判断 getxxxinfo 权限。
+                        // 从权限完整性上来说，应该在 SetUser() 位置检查 setxxxinfo.delete 权限要求有配套的 getxxxinfo 权限 
+
+                        // 判断是否具有删除源的权限
+                        var error = CheckAccess(sessioninfo,
+$"{info.Action} {db_type}记录，源",
+dbnames,
+$"get{db_type}info",
+"delete",
+out parameters);
+                        if (error != null)
+                            return error;
+                    }
+
+                }
+
+                // 再检查目标
+                {
+                    if (string.IsNullOrEmpty(info.NewRecPath))
+                        throw new ArgumentException($"info.NewRecPath 为空，无法判断 {db_type} {info.Action} 之 set{db_type}info 权限");
+
+                    var dbnames = AutoGetTwoDbName(db_type,
+info.NewRecPath,
+biblio_rec_path);
+                    var error = CheckAccess(sessioninfo,
+                        $"{info.Action} {db_type}记录，目标",
+                        dbnames,
+                        $"set{db_type}info",
+                        ResPath.IsAppendRecPath(info.NewRecPath) ? "new" : "change",
+                        out parameters);
+                    return error;
+                }
+            }
+            else if (db_type == "item"
+                && info.Action == "transfer")
+            {
+                if (string.IsNullOrEmpty(info.NewRecPath))
+                    throw new ArgumentException($"info.NewRecPath 为空，无法判断 {db_type} {info.Action} 权限");
+                var dbnames = AutoGetTwoDbName(db_type,
+                    info.NewRecPath,
+                    biblio_rec_path);
+                var error = CheckAccess(sessioninfo,
+                    $"修改{db_type}记录(调拨馆藏)",
+                    dbnames,
+                    $"set{db_type}info",
+                    info.Action,
+                    out parameters);
+                return error;
+            }
+            else
+                throw new ArgumentException($"{db_type}类型下级库 无法识别的 info.Action '{info.Action}'");
+        }
+
+        // 即将废止!
         // 检查当前用户是否具备 SetOrders() 等 API 的存取定义权限
         // parameters:
         //      check_normal_right 是否要连带一起检查普通权限？如果不连带，则本函数可能返回 "normal"，意思是需要追加检查一下普通权限

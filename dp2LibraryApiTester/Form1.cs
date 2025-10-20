@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Data.Sql;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -500,6 +502,20 @@ string style = "")
 
         private async void MenuItem_test_loginApi_Click(object sender, EventArgs e)
         {
+            await Process((token) =>
+            {
+                try
+                {
+                    var result = TestLoginApi.TestAll(token);
+                    if (result.Value == -1)
+                        DataModel.SetMessage(result.ErrorInfo, "error");
+                }
+                catch (Exception ex)
+                {
+                    AppendString($"exception: {ex.Message}", "error");
+                }
+            });
+#if REMOVED
             using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(this._cancelApp.Token))
             {
                 _cancelCurrent = cancel;
@@ -523,6 +539,7 @@ string style = "")
                     }
                 });
             }
+#endif
         }
 
         private void MenuItem_test_reservation_all_Click(object sender, EventArgs e)
@@ -542,31 +559,35 @@ string style = "")
             });
         }
 
-        private void MenuItem_test_setEntitiesFieldRights_Click(object sender, EventArgs e)
+        private async void MenuItem_test_setEntitiesFieldRights_Click(object sender, EventArgs e)
         {
-            Task.Run(() =>
+            await Process((token) =>
             {
                 try
                 {
-                    var result = TestSetEntities.TestAll("item");
+                    NormalResult result;
+
+                    result = TestSetEntities.TestAll("item", token);
                     if (result.Value == -1)
                     {
                         AppendString(result.ErrorInfo, "error");
                         return;
                     }
-                    result = TestSetEntities.TestAll("issue");
+
+                    result = TestSetEntities.TestAll("issue", token);
                     if (result.Value == -1)
                     {
                         AppendString(result.ErrorInfo, "error");
                         return;
                     }
-                    result = TestSetEntities.TestAll("order");
+                    result = TestSetEntities.TestAll("order", token);
                     if (result.Value == -1)
                     {
                         AppendString(result.ErrorInfo, "error");
                         return;
                     }
-                    result = TestSetEntities.TestAll("comment");
+
+                    result = TestSetEntities.TestAll("comment", token);
                     if (result.Value == -1)
                     {
                         AppendString(result.ErrorInfo, "error");
@@ -595,6 +616,72 @@ string style = "")
                 this.menuStrip1.Enabled = enable;
                 this.toolStripButton_stop.Enabled = !enable;
             }));
+        }
+
+        private async void MenuItem_test_getEntitiesFieldRights_Click(object sender, EventArgs e)
+        {
+            await Process((token) =>
+            {
+                try
+                {
+                    NormalResult result;
+
+                    result = TestGetEntities.TestAll("item", token);
+                    if (result.Value == -1)
+                    {
+                        AppendString(result.ErrorInfo, "error");
+                        return;
+                    }
+
+                    result = TestGetEntities.TestAll("issue", token);
+                    if (result.Value == -1)
+                    {
+                        AppendString(result.ErrorInfo, "error");
+                        return;
+                    }
+                    result = TestGetEntities.TestAll("order", token);
+                    if (result.Value == -1)
+                    {
+                        AppendString(result.ErrorInfo, "error");
+                        return;
+                    }
+
+                    result = TestGetEntities.TestAll("comment", token);
+                    if (result.Value == -1)
+                    {
+                        AppendString(result.ErrorInfo, "error");
+                        return;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    AppendString($"exception: {ex.Message}", "error");
+                }
+            });
+        }
+
+        // delegate void delegate_process(CancellationToken token);
+
+        async Task Process(Action<CancellationToken> action)
+        {
+            using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(this._cancelApp.Token))
+            {
+                _cancelCurrent = cancel;
+                EnableControls(false);
+                try
+                {
+                    await Task.Factory.StartNew(
+                        () => action(cancel.Token),
+                        cancel.Token,
+                        TaskCreationOptions.LongRunning,
+                        TaskScheduler.Default);
+                    // await Task.Run(()=>action(cancel.Token), cancel.Token);
+                }
+                finally
+                {
+                    EnableControls(true);
+                }
+            }
         }
     }
 }

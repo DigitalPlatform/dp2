@@ -1,10 +1,10 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using System.Diagnostics;
 
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
@@ -13,6 +13,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform;
 using DigitalPlatform.LibraryClient.localhost;
+using System.Threading;
 
 namespace dp2LibraryApiTester
 {
@@ -20,7 +21,8 @@ namespace dp2LibraryApiTester
     {
         static string _dbType = "item"; // order/issue/comment
 
-        public static NormalResult TestAll(string dbType)
+        public static NormalResult TestAll(string dbType,
+            CancellationToken token)
         {
             _dbType = dbType;
 
@@ -29,6 +31,28 @@ namespace dp2LibraryApiTester
             result = PrepareEnvironment();
             if (result.Value == -1) return result;
 
+            token.ThrowIfCancellationRequested();
+            {
+                result = TestWriteRights("file");
+                if (result.Value == -1) return result;
+
+                result = TestWriteRights("file,negative");
+                if (result.Value == -1) return result;
+
+                result = TestWriteRights("file,access");
+                if (result.Value == -1) return result;
+
+                result = TestWriteRights("file,access,negative");
+                if (result.Value == -1) return result;
+
+                // mix 表示否定的权限是用混合方式表达的，比如有一个不相干的数据库具有权限
+                result = TestWriteRights("file,access,negative,mix");
+                if (result.Value == -1) return result;
+
+            }
+
+            token.ThrowIfCancellationRequested();
+
             {
                 result = TestWriteRights("");
                 if (result.Value == -1) return result;
@@ -36,7 +60,6 @@ namespace dp2LibraryApiTester
                 result = TestWriteRights("negative");
                 if (result.Value == -1) return result;
 
-                /*
                 result = TestWriteRights("access");
                 if (result.Value == -1) return result;
 
@@ -46,8 +69,9 @@ namespace dp2LibraryApiTester
                 // mix 表示否定的权限是用混合方式表达的，比如有一个不相干的数据库具有权限
                 result = TestWriteRights("access,negative,mix");
                 if (result.Value == -1) return result;
-                */
             }
+
+            token.ThrowIfCancellationRequested();
 
             {
                 result = TestSetSubrecords("test_rights", "notchanged");
@@ -65,6 +89,8 @@ namespace dp2LibraryApiTester
                 result = TestSetSubrecords("test_rights", "outofrange_04");
                 if (result.Value == -1) return result;
             }
+
+            token.ThrowIfCancellationRequested();
 
             // 测试 dprms:file 元素的处理
             {
@@ -99,187 +125,232 @@ namespace dp2LibraryApiTester
         public static NormalResult PrepareEnvironment()
         {
             string strError = "";
-
-            LibraryChannel channel = DataModel.GetChannel();
-            TimeSpan old_timeout = channel.Timeout;
-            channel.Timeout = TimeSpan.FromMinutes(10);
+            int nRet = 0;
+            long lRet = 0;
 
             try
             {
-                // 创建测试所需的书目库
-
-                // 如果测试用的书目库以前就存在，要先删除。
-                DataModel.SetMessage("正在删除测试用书目库 ...");
-                string strOutputInfo = "";
-                long lRet = channel.ManageDatabase(
-    null,
-    "delete",
-    _strBiblioDbName,    // strDatabaseNames,
-    "",
-    "",
-    out strOutputInfo,
-    out strError);
-                if (lRet == -1)
                 {
-                    if (channel.ErrorCode != DigitalPlatform.LibraryClient.localhost.ErrorCode.NotFound)
-                        goto ERROR1;
-                }
+                    // 利用默认账户进行准备操作
+                    LibraryChannel channel = DataModel.GetChannel();
+                    TimeSpan old_timeout = channel.Timeout;
+                    channel.Timeout = TimeSpan.FromMinutes(10);
 
-                DataModel.SetMessage("正在创建测试用书目库 ...");
-                // 创建一个书目库
-                // parameters:
-                // return:
-                //      -1  出错
-                //      0   没有必要创建，或者操作者放弃创建。原因在 strError 中
-                //      1   成功创建
-                int nRet = ManageHelper.CreateBiblioDatabase(
-                    channel,
-                    null,
-                    _strBiblioDbName,
-                    _dbType == "issue" ? "series" : "book",
-                    "unimarc",
-                    "*",
-                    "",
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-
-                // *** 创建书目记录
-                string path = _strBiblioDbName + "/?";
-                var record = BuildBiblioRecord("测试题名", "");
-
-                string strXml = "";
-                nRet = MarcUtil.Marc2XmlEx(
-    record.Text,
-    "unimarc",
-    ref strXml,
-    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-                DataModel.SetMessage("正在创建书目记录");
-                lRet = channel.SetBiblioInfo(null,
-                    "new",
-                    path,
-                    "xml", // strBiblioType
-                    strXml,
-                    null,
-                    null,
-                    "", // style
-                    out string output_biblio_recpath,
-                    out byte[] new_timestamp,
-                    out strError);
-                if (lRet == -1)
-                    goto ERROR1;
-
-                _biblio_recpath = output_biblio_recpath;
-
-                // 创建册记录
-                DataModel.SetMessage($"正在创建书目的下级({_dbType})记录");
-                EntityInfo[] errorinfos = null;
-                var entities = BuildEntityRecords();
-                if (_dbType == "item")
-                    lRet = channel.SetEntities(null,
-                        output_biblio_recpath,
-                        entities,
-                        out errorinfos,
-                        out strError);
-                else if (_dbType == "order")
-                    lRet = channel.SetOrders(null,
-    output_biblio_recpath,
-    entities,
-    out errorinfos,
-    out strError);
-                else if (_dbType == "issue")
-                    lRet = channel.SetIssues(null,
-    output_biblio_recpath,
-    entities,
-    out errorinfos,
-    out strError);
-                else if (_dbType == "comment")
-                {
-
-                    lRet = channel.SetComments(null,
-    output_biblio_recpath,
-    entities,
-    out errorinfos,
-    out strError);
-
-                }
-                else
-                    throw new ArgumentException("_dbType error");
-                if (lRet == -1)
-                    goto ERROR1;
-                strError = GetError(errorinfos, out ErrorCodeValue error_code);
-                if (string.IsNullOrEmpty(strError) == false)
-                {
-                    if (_dbType == "comment" && error_code == ErrorCodeValue.PartialDenied)
+                    try
                     {
-                        // 创建评注记录，XML 中的 creator 元素，会导致返回 PartialDenied 错误码
+                        // 创建测试所需的书目库
+
+                        // 如果测试用的书目库以前就存在，要先删除。
+                        DataModel.SetMessage("正在删除测试用书目库 ...");
+                        string strOutputInfo = "";
+                        lRet = channel.ManageDatabase(
+            null,
+            "delete",
+            _strBiblioDbName,    // strDatabaseNames,
+            "",
+            "",
+            out strOutputInfo,
+            out strError);
+                        if (lRet == -1)
+                        {
+                            if (channel.ErrorCode != DigitalPlatform.LibraryClient.localhost.ErrorCode.NotFound)
+                                goto ERROR1;
+                        }
+
+                        DataModel.SetMessage("正在创建测试用书目库 ...");
+                        // 创建一个书目库
+                        // parameters:
+                        // return:
+                        //      -1  出错
+                        //      0   没有必要创建，或者操作者放弃创建。原因在 strError 中
+                        //      1   成功创建
+                        nRet = ManageHelper.CreateBiblioDatabase(
+                            channel,
+                            null,
+                            _strBiblioDbName,
+                            _dbType == "issue" ? "series" : "book",
+                            "unimarc",
+                            "*",
+                            "",
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+
+                        // 临时设置 不校验条码号
+                        lRet = channel.SetSystemParameter(null,
+                            "circulation",
+                            "?VerifyBarcode",
+                            "false",
+                            out strError);
+                        if (lRet == -1)
+                            goto ERROR1;
+
+                        // 准备 dp2library 账户
+                        {
+                            DataModel.SetMessage($"正在删除用户 {StringUtil.MakePathList(_user_names, ",")} ...");
+                            nRet = Utility.DeleteUsers(channel,
+                                _user_names,
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+
+                            // 创建
+
+                            // 通过 rights_template 定义，能正常访问实体记录
+                            DataModel.SetMessage("正在创建用户 test_rights ...");
+                            string rights = "";
+                            // setbiblioinfo 权限是因为要用这个账户来创建书目记录
+                            if (_dbType == "item")
+                                rights = "getbiblioinfo,setbiblioinfo,getiteminfo,setiteminfo,getitemobject,setitemobject";
+                            else if (_dbType == "order")
+                                rights = "getbiblioinfo,setbiblioinfo,getorderinfo,setorderinfo,getorderobject,setorderobject";
+                            else if (_dbType == "issue")
+                                rights = "getbiblioinfo,setbiblioinfo,getissueinfo,setissueinfo,getissueobject,setissueobject";
+                            else if (_dbType == "comment")
+                                rights = "getbiblioinfo,setbiblioinfo,getcommentinfo,setcommentinfo,getcommentobject,setcommentobject";
+                            else
+                                throw new ArgumentException("_dbType error");
+
+                            lRet = channel.SetUser(null,
+                                "new",
+                                new UserInfo
+                                {
+                                    UserName = "test_rights",
+                                    Rights = rights,
+                                },
+                                out strError);
+                            if (lRet == -1)
+                                goto ERROR1;
+
+                            // 不具备 getiteminfo，造成无法访问实体记录的效果
+                            DataModel.SetMessage("正在创建用户 test_cannot ...");
+                            rights = "";
+                            if (_dbType == "item")
+                                rights = "searchitem,search";
+                            else if (_dbType == "order")
+                                rights = "searchorder,search";
+                            else if (_dbType == "issue")
+                                rights = "searchissue,search";
+                            else if (_dbType == "comment")
+                                rights = "searchcomment,search";
+                            else
+                                throw new ArgumentException("_dbType error");
+
+                            lRet = channel.SetUser(null,
+                                "new",
+                                new UserInfo
+                                {
+                                    UserName = "test_cannot",
+                                    Rights = rights,
+                                    Access = "",
+                                },
+                                out strError);
+                            if (lRet == -1)
+                                goto ERROR1;
+                        }
+
+
                     }
-                    else
-                        goto ERROR1;
+                    finally
+                    {
+                        channel.Timeout = old_timeout;
+                        DataModel.ReturnChannel(channel);
+                    }
                 }
-                _itemRecordPath = errorinfos[0].NewRecPath;
 
-                DataModel.SetMessage($"正在删除用户 {StringUtil.MakePathList(_user_names, ",")} ...");
-                nRet = Utility.DeleteUsers(channel,
-                    _user_names,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-
-                // 创建
-
-                // 通过 rights 定义，能正常访问实体记录
-                DataModel.SetMessage("正在创建用户 test_rights ...");
-                string rights = "";
-                if (_dbType == "item")
-                    rights = "getiteminfo,setiteminfo,getitemobject,setitemobject";
-                else if (_dbType == "order")
-                    rights = "getorderinfo,setorderinfo,getorderobject,setorderobject";
-                else if (_dbType == "issue")
-                    rights = "getissueinfo,setissueinfo,getissueobject,setissueobject";
-                else if (_dbType == "comment")
-                    rights = "getcommentinfo,setcommentinfo,getcommentobject,setcommentobject";
-                else
-                    throw new ArgumentException("_dbType error");
-
-                lRet = channel.SetUser(null,
-                    "new",
-                    new UserInfo
+                {
+                    // 利用 test_right 账户进行准备操作。评注库库要求原始创建者才能修改评注记录
+                    LibraryChannel channel = DataModel.NewChannel("test_rights", "");
+                    TimeSpan old_timeout = channel.Timeout;
+                    channel.Timeout = TimeSpan.FromMinutes(10);
+                    try
                     {
-                        UserName = "test_rights",
-                        Rights = rights,
-                    },
-                    out strError);
-                if (lRet == -1)
-                    goto ERROR1;
+                        // 创建书目记录和下级记录
+                        {
+                            // *** 创建书目记录
+                            string path = _strBiblioDbName + "/?";
+                            var record = BuildBiblioRecord("测试题名", "");
 
-                // 不具备 getiteminfo，造成无法访问实体记录的效果
-                DataModel.SetMessage("正在创建用户 test_cannot ...");
-                rights = "";
-                if (_dbType == "item")
-                    rights = "searchitem,search";
-                else if (_dbType == "order")
-                    rights = "searchorder,search";
-                else if (_dbType == "issue")
-                    rights = "searchissue,search";
-                else if (_dbType == "comment")
-                    rights = "searchcomment,search";
-                else
-                    throw new ArgumentException("_dbType error");
+                            string strXml = "";
+                            nRet = MarcUtil.Marc2XmlEx(
+                record.Text,
+                "unimarc",
+                ref strXml,
+                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                            DataModel.SetMessage("正在创建书目记录");
+                            lRet = channel.SetBiblioInfo(null,
+                                "new",
+                                path,
+                                "xml", // strBiblioType
+                                strXml,
+                                null,
+                                null,
+                                "", // style
+                                out string output_biblio_recpath,
+                                out byte[] new_timestamp,
+                                out strError);
+                            if (lRet == -1)
+                                goto ERROR1;
 
-                lRet = channel.SetUser(null,
-                    "new",
-                    new UserInfo
+                            _biblio_recpath = output_biblio_recpath;
+
+                            // 创建册记录
+                            DataModel.SetMessage($"正在创建书目的下级({_dbType})记录");
+                            EntityInfo[] errorinfos = null;
+                            var entities = BuildEntityRecords();
+                            if (_dbType == "item")
+                                lRet = channel.SetEntities(null,
+                                    output_biblio_recpath,
+                                    entities,
+                                    out errorinfos,
+                                    out strError);
+                            else if (_dbType == "order")
+                                lRet = channel.SetOrders(null,
+                output_biblio_recpath,
+                entities,
+                out errorinfos,
+                out strError);
+                            else if (_dbType == "issue")
+                                lRet = channel.SetIssues(null,
+                output_biblio_recpath,
+                entities,
+                out errorinfos,
+                out strError);
+                            else if (_dbType == "comment")
+                            {
+
+                                lRet = channel.SetComments(null,
+                output_biblio_recpath,
+                entities,
+                out errorinfos,
+                out strError);
+
+                            }
+                            else
+                                throw new ArgumentException("_dbType error");
+                            if (lRet == -1)
+                                goto ERROR1;
+                            strError = Utility.GetError(errorinfos, out ErrorCodeValue error_code);
+                            if (string.IsNullOrEmpty(strError) == false)
+                            {
+                                if (_dbType == "comment" && error_code == ErrorCodeValue.PartialDenied)
+                                {
+                                    // 创建评注记录，XML 中的 creator 元素，会导致返回 PartialDenied 错误码
+                                }
+                                else
+                                    goto ERROR1;
+                            }
+                            _itemRecordPath = errorinfos[0].NewRecPath;
+                        }
+                    }
+                    finally
                     {
-                        UserName = "test_cannot",
-                        Rights = rights,
-                        Access = "",
-                    },
-                    out strError);
-                if (lRet == -1)
-                    goto ERROR1;
+                        channel.Timeout = old_timeout;
+                        DataModel.DeleteChannel(channel);
+                    }
+                }
 
                 return new NormalResult();
             }
@@ -288,11 +359,7 @@ namespace dp2LibraryApiTester
                 strError = "PrepareEnvironment() Exception: " + ExceptionUtil.GetExceptionText(ex);
                 goto ERROR1;
             }
-            finally
-            {
-                channel.Timeout = old_timeout;
-                DataModel.ReturnChannel(channel);
-            }
+
         ERROR1:
             DataModel.SetMessage($"PrepareEnvironment() error: {strError}", "error");
             return new NormalResult
@@ -313,14 +380,20 @@ namespace dp2LibraryApiTester
         static void SetInDefElement(XmlDocument item_dom,
     string in_def_element_name)
         {
+            // TODO: 增加关于 SetEntities() 等 API 在 dprms:file/@id 重复时的校验能力
             if (in_def_element_name == "http://dp2003.com/dprms:file")
             {
                 // 创建一个 dprms:file 元素
-                //var nsmgr = new XmlNamespaceManager(item_dom.NameTable);
-                // nsmgr.AddNamespace("dprms", "http://dp2003.com/dprms");
-                var file_element = item_dom.CreateElement("dprms:file", "http://dp2003.com/dprms");
-                item_dom.DocumentElement.AppendChild(file_element);
-                file_element.SetAttribute("id", "1");
+                var nsmgr = new XmlNamespaceManager(item_dom.NameTable);
+                nsmgr.AddNamespace("dprms", "http://dp2003.com/dprms");
+
+                var file_element = item_dom.DocumentElement.SelectSingleNode($"//dprms:file[@id='1']", nsmgr) as XmlElement;
+                if (file_element == null)
+                {
+                    file_element = item_dom.CreateElement("dprms:file", "http://dp2003.com/dprms");
+                    item_dom.DocumentElement.AppendChild(file_element);
+                    file_element.SetAttribute("id", "1");
+                }
             }
             else
                 DomUtil.SetElementText(item_dom.DocumentElement,
@@ -350,10 +423,10 @@ namespace dp2LibraryApiTester
 
             LibraryChannel channel = null;
 
-            if (_dbType == "comment")
-                channel = DataModel.GetChannel();   // 评注记录需要用原始创建者身份来写入修改
-            else
-                channel = DataModel.NewChannel(userName, "");
+            //if (_dbType == "comment")
+            //    channel = DataModel.GetChannel();   // 评注记录需要用原始创建者身份来写入修改
+            //else
+            channel = DataModel.NewChannel(userName, "");
 
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromMinutes(10);
@@ -680,7 +753,7 @@ in_def_element_name);
 
                     if (output_entities[0].ErrorCode != ErrorCodeValue.PartialDenied)
                     {
-                        strError = $"{condition} 条件测试 {SetItemsApiName()}() 阶段出错: 返回的错误码不是期望的 ErrorCodeValue.PartialDenied, 而是 {output_entities[0].ErrorCode}";
+                        strError = $"{condition} 条件测试 {SetItemsApiName()}() 阶段出错: 返回的错误码不是期望的 ErrorCodeValue.PartialDenied, 而是 {output_entities[0].ErrorCode}\r\n原始错误信息: {output_entities[0].ErrorInfo}";
                         goto ERROR1;
                     }
                     else
@@ -690,7 +763,7 @@ in_def_element_name);
                 }
                 else if (StringUtil.IsInList("outofrange_04", condition))
                 {
-                    // outofrange_03 条件测试
+                    // outofrange_04 条件测试
                     // 册记录中有一个超出系统允许的元素 ttt，和一个并不超出系统允许的元素 comment,
                     // 并且 entity.Style 中包含 outofrangeAsError
                     {
@@ -804,10 +877,10 @@ in_def_element_name);
             finally
             {
                 channel.Timeout = old_timeout;
-                if (_dbType == "comment")
-                    DataModel.ReturnChannel(channel);
-                else
-                    DataModel.DeleteChannel(channel);
+                //if (_dbType == "comment")
+                //    DataModel.ReturnChannel(channel);
+                //else
+                DataModel.DeleteChannel(channel);
             }
 
         ERROR1:
@@ -985,19 +1058,25 @@ out strError);
                 item_timestamp = output_items[0].NewTimestamp;
             }
 
+            if (string.IsNullOrEmpty(strError)
+                && ret == -1)
+                throw new ArgumentException($"SetItems() 中调用 SetXXX() API 的 strError 不该返回空");
             return ret;
         }
 
         #region
 
-        // 测试和修改有关的账户权限
+        public delegate void delegate_restore_user_rights();
+
+        // 测试“和修改有关的”账户权限
         // parameters:
         //      condition   "normal" 普通权限(缺省)
         //                  "access" 存取定义权限
         //                  "negative" 反向权限
         //                  "positive"  正向权限(缺省)
         //                  "mix" 混合权限
-        //                  normal 或 acces 可组合 positive 或 negative
+        //                  normal 或 access 可组合 positive 或 negative
+        //                  "file" 包含 dprms:file 元素
         public static NormalResult TestWriteRights(
     string condition)
         {
@@ -1006,6 +1085,8 @@ out strError);
             bool negative = StringUtil.IsInList("negative", condition);
             bool access = StringUtil.IsInList("access", condition);
             bool mix = StringUtil.IsInList("mix", condition);
+
+            bool file = StringUtil.IsInList("file", condition);
 
             // 用于构造账户的通道
             var super_channel = DataModel.GetChannel();
@@ -1018,32 +1099,56 @@ out strError);
                 string strItemDbName = StringUtil.GetDbName(_itemRecordPath);
 
                 // 准备一个账户 test_normal_account
-                string rights = "";
-                string access_string = "";
+                string rights_template = "";
+                string access_string_template = "";
                 if (access)
                 {
-                    rights = "";
-                    access_string = $"{strItemDbName}:set{{dbtype}}info=new,change,delete|get{{dbtype}}info";
-                    if (negative == true)
+                    rights_template = "";
+
+                    if (file == false)
                     {
-                        if (mix == true)
-                            access_string = $"{strItemDbName}changed:set{{dbtype}}info=new,change,delete|get{{dbtype}}info|{strItemDbName}changed:set{{dbtype}}info=|get{{dbtype}}info";
-                        else
-                            access_string = $"{strItemDbName}:set{{dbtype}}info=|get{{dbtype}}info";
+                        access_string_template = $"{strItemDbName}:set{{dbtype}}info=new,change,delete|get{{dbtype}}info";
+
+                        if (negative == true)
+                        {
+                            if (mix == true)
+                                access_string_template = $"{strItemDbName}changed:set{{dbtype}}info=new,change,delete|get{{dbtype}}info|{strItemDbName}changed:set{{dbtype}}info=|get{{dbtype}}info";
+                            else
+                                access_string_template = $"{strItemDbName}:set{{dbtype}}info=|get{{dbtype}}info";
+                        }
+                    }
+                    else // file == true
+                    {
+                        access_string_template = $"{strItemDbName}:set{{dbtype}}info=new,change,delete|get{{dbtype}}info";
+
+                        if (negative == false)
+                            access_string_template += "|set{dbtype}object|get{dbtype}object";
+                        else // negative == true
+                        {
+                            // file + negative 表示 object 部分权限反向测试。不是指普通权限反向测试
+                            access_string_template += "|set{dbtype}object=|get{dbtype}object=";
+                        }
                     }
                 }
                 else
                 {
-                    rights = "set{dbtype}info,get{dbtype}info";
-                    access_string = "";
+                    rights_template = "set{dbtype}info,get{dbtype}info";
+                    if (file && negative == false)
+                        rights_template += ",set{dbtype}object,get{dbtype}object";
+                    access_string_template = "";
                     if (negative == true)
-                        rights = "";
+                    {
+                        if (file)
+                            rights_template = "set{dbtype}info,get{dbtype}info";    // 故意没有 set{dbtype}object 权限
+                        else
+                            rights_template = "";
+                    }
                 }
 
-                var result = PrepareWriteAccounts(super_channel,
+                var result = PrepareWritingAccounts(super_channel,
     "test_normal_account",
-    rights,
-    access_string
+    rights_template,
+    access_string_template
     );
                 if (result.Value == -1)
                     return result;
@@ -1060,7 +1165,7 @@ out strError);
                     if (result.Value == -1)
                         return result;
                     // 补充创建一条记录用于后继 negative 状态下测试 change 和 delete
-                    if (negative)
+                    if (negative && file == false)
                     {
                         result = WriteNew(super_channel,
     condition.Replace("negative", ""),
@@ -1077,9 +1182,19 @@ out strError);
                     }
 
                     // change item record
-                    result = WriteChange(channel,
+                    result = WriteChange(ref channel,
                         condition,
                         item_recpath,
+                        () =>
+                        {
+                            var ret = PrepareWritingAccounts(super_channel,
+"test_normal_account",
+rights_template,
+access_string_template
+);
+                            if (ret.Value == -1)
+                                throw new Exception($"恢复原有账户权限时出错: {ret.ErrorInfo}");
+                        },
                         ref item_timestamp);
                     if (result.Value == -1)
                         return result;
@@ -1114,7 +1229,8 @@ out strError);
             };
         }
 
-        static NormalResult PrepareWriteAccounts(LibraryChannel channel,
+        // 准备“写入用途”的账户
+        static NormalResult PrepareWritingAccounts(LibraryChannel channel,
             string userName,
             string rights_template,
             string access_template)
@@ -1132,7 +1248,7 @@ out strError);
 
             // 创建
 
-            // 通过 rights 定义，能正常访问实体记录
+            // 通过 rights_template 定义，能正常访问实体记录
             DataModel.SetMessage($"正在创建用户 {userName} ...");
             var rights = rights_template?.Replace("{dbtype}", _dbType);
             var access = access_template?.Replace("{dbtype}", _dbType);
@@ -1164,6 +1280,7 @@ out strError);
             item_recpath = "";
 
             bool negative = StringUtil.IsInList("negative", condition);
+            bool file = StringUtil.IsInList("file", condition);
 
             string item_xml = @"<root>
 <barcode></barcode>
@@ -1184,6 +1301,28 @@ out strError);
                 item_xml = _commentXml;
             }
 
+            // 2025/10/18
+            {
+                string in_def_element_name = "comment"; // 定义范围内的元素名
+                if (_dbType == "comment")
+                    in_def_element_name = "summary"; // 评注库没有 comment 元素
+
+                if (StringUtil.IsInList("file", condition))
+                    in_def_element_name = "http://dp2003.com/dprms:file";
+
+                string out_def_element_name = "ttt";    // 定义范围外的元素名
+
+
+                XmlDocument item_dom = new XmlDocument();
+                item_dom.LoadXml(item_xml);
+                /* 
+                SetOutDefElement(item_dom,
+        out_def_element_name);
+                */
+                SetInDefElement(item_dom,
+    in_def_element_name);
+                item_xml = item_dom.OuterXml;
+            }
 
             // string strItemDbName = StringUtil.GetDbName(_itemRecordPath);
 
@@ -1230,13 +1369,25 @@ out strError);
 
             if (negative)
             {
-                if (output_items[0].ErrorCode != ErrorCodeValue.AccessDenied)
+                // 2025/10/18
+                if (file && output_items[0].ErrorCode == ErrorCodeValue.PartialDenied)
+                    goto END1;  // 还需要得到 recpath 和 timestamp
+
+                else if (output_items[0].ErrorCode == ErrorCodeValue.AccessDenied)
+                    return new NormalResult();
+
+                if (file)
                     return new NormalResult
                     {
                         Value = -1,
-                        ErrorInfo = $"WriteNew() 创建 {_dbType} 记录时出现错误: 期待返回错误码 {ErrorCodeValue.AccessDenied}，但返回了 {output_items[0].ErrorCode} ({output_items[0].ErrorInfo})"
+                        ErrorInfo = $"WriteNew() {condition} 创建 {_dbType} 记录时出现错误: 期待返回错误码 {ErrorCodeValue.PartialDenied}，但返回了 {output_items[0].ErrorCode} ({output_items[0].ErrorInfo})"
                     };
-                return new NormalResult();
+                else
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"WriteNew() {condition} 创建 {_dbType} 记录时出现错误: 期待返回错误码 {ErrorCodeValue.AccessDenied}，但返回了 {output_items[0].ErrorCode} ({output_items[0].ErrorInfo})"
+                    };
             }
             else
             {
@@ -1248,17 +1399,22 @@ out strError);
                     };
             }
 
+        END1:
             item_recpath = output_items[0].NewRecPath;
-            DataModel.SetMessage($"{channel.UserName} 身份创建 {_dbType} 记录 {item_recpath} 成功", "green");
+            DataModel.SetMessage($"{channel.UserName} 身份创建 {_dbType} 记录 {item_recpath} 成功({condition})", "green");
             return new NormalResult();
         }
 
-        static NormalResult WriteChange(LibraryChannel channel,
+        // parameters:
+        //      channel [ref] 中途可能更换通道。要让调主感知到
+        static NormalResult WriteChange(ref LibraryChannel channel,
             string condition,
             string item_recpath,
+            delegate_restore_user_rights func_restore,
             ref byte[] item_timestamp)
         {
             bool negative = StringUtil.IsInList("negative", condition);
+            bool file = StringUtil.IsInList("file", condition);
 
             var ret = GetItem(channel,
     item_recpath,
@@ -1267,6 +1423,9 @@ out strError);
     out string strError);
             if (ret == -1)
             {
+                //if (negative && file && channel.ErrorCode == ErrorCode.PartialDenied)   // dprms:file 元素被拒绝
+                //    return new NormalResult();
+
                 if (negative && channel.ErrorCode == ErrorCode.AccessDenied)
                     return new NormalResult();
 
@@ -1276,6 +1435,16 @@ out strError);
                     ErrorInfo = strError
                 };
             }
+
+            string in_def_element_name = "comment"; // 定义范围内的元素名
+            if (_dbType == "comment")
+                in_def_element_name = "summary"; // 评注库没有 comment 元素
+
+            if (StringUtil.IsInList("file", condition))
+                in_def_element_name = "http://dp2003.com/dprms:file";
+
+            string out_def_element_name = "ttt";    // 定义范围外的元素名
+
 
             XmlDocument item_dom = new XmlDocument();
             item_dom.LoadXml(item_xml);
@@ -1304,6 +1473,10 @@ out strError);
                     "summary",
                     $"{DateTime.Now.ToString()} 修改");
             }
+
+            if (file)
+                SetInDefElement(item_dom,
+    in_def_element_name);
 
             List<EntityInfo> items = new List<EntityInfo>();
             EntityInfo item = new EntityInfo
@@ -1345,13 +1518,26 @@ out strError);
 
             if (negative)
             {
-                if (output_items[0].ErrorCode != ErrorCodeValue.AccessDenied)
+                if (file && output_items[0].ErrorCode == ErrorCodeValue.PartialDenied)
+                {
+                    goto CONTINUE;
+                    return new NormalResult();
+                }
+                else if (output_items[0].ErrorCode == ErrorCodeValue.AccessDenied)
+                    return new NormalResult();
+
+                if (file)
                     return new NormalResult
                     {
                         Value = -1,
-                        ErrorInfo = $"WriteChange() 写入 {_dbType} 记录时出现错误: 期待返回错误码 {ErrorCodeValue.AccessDenied}，但返回了 {output_items[0].ErrorCode} ({output_items[0].ErrorInfo})"
+                        ErrorInfo = $"WriteChange({condition}) 写入 {_dbType} 记录时出现错误: 期待返回错误码 {ErrorCodeValue.PartialDenied}，但返回了 {output_items[0].ErrorCode} ({output_items[0].ErrorInfo})"
                     };
-                return new NormalResult();
+                else
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"WriteChange({condition}) 写入 {_dbType} 记录时出现错误: 期待返回错误码 {ErrorCodeValue.AccessDenied}，但返回了 {output_items[0].ErrorCode} ({output_items[0].ErrorInfo})"
+                    };
             }
             else
             {
@@ -1363,8 +1549,76 @@ out strError);
                     };
             }
 
+        CONTINUE:
             item_recpath = output_items[0].NewRecPath;
             item_xml = output_items[0].NewRecord;
+
+            if (negative && file)
+            {
+                // 重新写入一条含有 dprms:file 元素的记录。需要临时升级账户的权限，增加 setxxxobject 权限
+                var change_ret = ChangeUserRights(channel.UserName,
+                    "set{dbtype}object,get{dbtype}object,set{dbtype}info,get{dbtype}info",
+                    "");
+                if (change_ret.Value == -1)
+                    return change_ret;
+#if REMOVED
+                var super_channel = DataModel.GetChannel();
+                try
+                {
+                    // TODO: 检查，账户权限修改后，dp2library 是否自动切断了这个用户名的所有活跃通道？
+                    var result = PrepareWriteAccounts(super_channel,
+    channel.UserName,   // "test_normal_account",
+    "set{dbtype}object,get{dbtype}object,set{dbtype}info,get{dbtype}info",
+    ""
+    );
+                    if (result.Value == -1)
+                        return result;
+                }
+                finally
+                {
+                    DataModel.ReturnChannel(super_channel);
+                }
+#endif
+                // 权限改变后，重新登录
+                var username = channel.UserName;
+                DataModel.DeleteChannel(channel);
+                channel = DataModel.NewChannel(username, "");
+
+                items[0].OldTimestamp = item_timestamp;
+                ret = SetItems(channel,
+_biblio_recpath,
+items.ToArray(),
+ref item_timestamp,
+out output_items,
+out strError);
+                if (ret == -1)
+                {
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError
+                    };
+                }
+
+                if (output_items[0].ErrorCode != ErrorCodeValue.NoError)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = output_items[0].ErrorInfo,
+                        ErrorCode = output_items[0].ErrorCode.ToString()
+                    };
+
+                item_recpath = output_items[0].NewRecPath;
+                item_xml = output_items[0].NewRecord;
+
+                // 恢复先前的权限
+                {
+                    func_restore();
+
+                    DataModel.DeleteChannel(channel);
+                    channel = DataModel.NewChannel(username, "");
+                }
+            }
 
             // 检查返回的 XML 中是否具备 refID 元素内容
             {
@@ -1377,13 +1631,35 @@ out strError);
                     return new NormalResult
                     {
                         Value = -1,
-                        ErrorInfo = $"WriteChange() {_dbType} 返回的 XML 中不应该缺乏 refID 元素内容"
+                        ErrorInfo = $"WriteChange({condition}) {_dbType} 返回的 XML 中不应该缺乏 refID 元素内容"
                     };
                 }
             }
 
-            DataModel.SetMessage($"{channel.UserName} 身份修改 {_dbType} 记录 {item_recpath} 成功", "green");
+            DataModel.SetMessage($"{channel.UserName} 身份修改 {_dbType} 记录 {item_recpath} 成功({condition})", "green");
             return new NormalResult();
+        }
+
+        static NormalResult ChangeUserRights(string username,
+            string rights_template,
+            string access_string_template)
+        {
+            var super_channel = DataModel.GetChannel();
+            try
+            {
+                var result = PrepareWritingAccounts(super_channel,
+username,   // "test_normal_account",
+rights_template,
+access_string_template
+);
+                if (result.Value == -1)
+                    return result;
+                return new NormalResult();
+            }
+            finally
+            {
+                DataModel.ReturnChannel(super_channel);
+            }
         }
 
         static NormalResult WriteDelete(LibraryChannel channel,
@@ -1392,6 +1668,10 @@ out strError);
             byte[] item_timestamp)
         {
             bool negative = StringUtil.IsInList("negative", condition);
+            bool file = StringUtil.IsInList("negative", condition);
+
+            // TODO: negative + file 应该先写入成功一条含有 dprms:file 元素的记录，
+            // 然后再尝试删除，并期待返回错误码 PartialDenied
 
             List<EntityInfo> items = new List<EntityInfo>();
             EntityInfo item = new EntityInfo
@@ -1414,6 +1694,7 @@ out strError);
                 if (negative && channel.ErrorCode == ErrorCode.AccessDenied)
                     return new NormalResult();
 
+                Debug.Assert(string.IsNullOrEmpty(strError) == false);
                 return new NormalResult
                 {
                     Value = -1,
@@ -1434,6 +1715,8 @@ out strError);
 
             if (negative)
             {
+                if (file && output_items[0].ErrorCode == ErrorCodeValue.PartialDenied)
+                    return new NormalResult();
                 if (output_items[0].ErrorCode != ErrorCodeValue.AccessDenied)
                     return new NormalResult
                     {
@@ -1584,33 +1867,6 @@ out strError);
             };
             results.Add(entity);
             return results.ToArray();
-        }
-
-        static string GetError(EntityInfo[] errorinfos, out ErrorCodeValue error_code)
-        {
-            error_code = ErrorCodeValue.NoError;
-
-            if (errorinfos != null)
-            {
-                List<ErrorCodeValue> codes = new List<ErrorCodeValue>();
-                List<string> errors = new List<string>();
-                foreach (var error in errorinfos)
-                {
-                    if (error.ErrorCode != ErrorCodeValue.NoError)
-                    {
-                        errors.Add(error.ErrorInfo);
-                        codes.Add(error.ErrorCode);
-                    }
-                }
-
-                if (codes.Count > 0)
-                    error_code = codes[0];
-
-                if (errors.Count > 0)
-                    return StringUtil.MakePathList(errors, "; ");
-            }
-
-            return null;
         }
     }
 

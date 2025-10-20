@@ -85,8 +85,14 @@ namespace DigitalPlatform.LibraryServer
                 "operations",
                 "libraryCode",
                 "oi",
-                "http://dp2003.com/dprms:file",
+
             };
+
+        // 2025/10/19
+        // 和对象资源有关的元素名
+        public static string[] file_element_names = new string[] {
+                "http://dp2003.com/dprms:file",
+        };
 
         static string GetNamespaceName(XmlElement element)
         {
@@ -119,7 +125,7 @@ namespace DigitalPlatform.LibraryServer
             if (this.ItemAdditionalFields != null && this.ItemAdditionalFields.Count > 0)
                 range.AddRange(this.ItemAdditionalFields);
             range.AddRange(checkinout_element_names);
-
+            range.AddRange(file_element_names); // 2025/10/19
             return range;
         }
 
@@ -409,19 +415,23 @@ namespace DigitalPlatform.LibraryServer
 
             strMergedXml = domExist.OuterXml;
 
-            /*
-            if (string.IsNullOrEmpty(strWarning) == false
+            if (changed == true
+                && string.IsNullOrEmpty(strWarning) == false
                 && bChangePartDeniedParam == true)
             {
+                // 这里的局部被拒绝，是因为合法字段中出现了权限不足的被拒绝
+                // TODO: 今后可以考虑返回一种可组合的错误码，这里为 OutofRangeDenied
                 strError = strWarning;
                 return 1;
             }
-            */
 
             // 2025/4/20
             // 合法范围元素有改变；超出合法范围的元素也有改变
-            if (changed == true && outof_range == true)
+            if (changed == true
+                && outof_range == true)
             {
+                // 这里的局部被拒绝，是因为超出合法范围的字段被拒绝。
+                // TODO: 今后可以考虑返回一种可组合的错误码，这里为 InRangeDenied
                 strError = strWarning;
                 return 1;
             }
@@ -2109,7 +2119,8 @@ strOldRefID);
 
         // 获得册信息
         // parameters:
-        //      strBiblioRecPath    书目记录路径，仅包含库名和id部分。如果用 @path-list: 引导，表示这里是根据给出的册记录路径来获取册记录
+        //      strBiblioRecPath    书目记录路径，仅包含库名和id部分。
+        //                          (尚未实现)如果用 @path-list: 引导，表示这里是根据给出的册记录路径来获取册记录
         //      lStart  返回从第几个开始    2009/6/7 add
         //      lCount  总共返回几个。0和-1都表示全部返回(0是为了兼容旧API)
         //      entityinfos 返回的实体信息数组
@@ -2146,6 +2157,26 @@ strOldRefID);
 
             LibraryServerResult result = new LibraryServerResult();
 
+#if ITEM_ACCESS_RIGHTS
+            /*
+            if (strBiblioRecPath.StartsWith("@"))
+            {
+                var error = CheckAccess(sessioninfo,
+        $"获得书目记录 {strBiblioRecPath} 下属的全部册记录",
+        "", // 第一阶段，无法确定数据库名。因为 strBiblioRecPath 参数值可能还有 @ 前缀这样的情况
+        $"{GetInfoRight("getiteminfo")},order",
+        "",
+        out _);
+                if (error != null)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = error;
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+            }
+            */
+#else
             // 权限字符串
             if (StringUtil.IsInList($"{GetInfoRight("getiteminfo")},order", sessioninfo.RightsOrigin) == false)
             {
@@ -2154,6 +2185,7 @@ strOldRefID);
                 result.ErrorCode = ErrorCode.AccessDenied;
                 return result;
             }
+#endif
 
             // 规范化参数值
             if (lCount == 0)
@@ -2202,6 +2234,24 @@ strOldRefID);
                 result.ErrorCode = ErrorCode.ItemDbNotDef;
                 return result;
             }
+
+#if ITEM_ACCESS_RIGHTS
+            {
+                var error = CheckAccess(sessioninfo,
+                    $"获得书目记录 {strBiblioRecPath} 下属的全部册记录",
+                    strBiblioDbName + "," + strItemDbName,
+                    $"{GetInfoRight("getiteminfo")},order",
+                    "",
+                    out _);
+                if (error != null)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = error;
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+            }
+#endif
 
             RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
             if (channel == null)
@@ -4000,6 +4050,9 @@ out strError);
 
             LibraryServerResult result = new LibraryServerResult();
 
+            // TODO: 这里需要改进为第一阶段检查权限。
+            // 后面再针对每一条册记录第二阶段检查权限。
+
             // 普通权限字符串
             // 如果不满足，则令 result.Value = -1，但不立即返回报错，要等待后面存取定义判断以后再报错
             if (StringUtil.IsInList("setiteminfo,writerecord,order", sessioninfo.RightsOrigin) == false)
@@ -4185,6 +4238,24 @@ out strError);
                         }
                     }
                 }
+                else
+                {
+                        var error = this.CheckSetItemAccessEx(
+                            sessioninfo,
+                            "item",
+                            strBiblioRecPath,
+                            info,
+                            out strAccessParameters);
+                        if (error != null)
+                        {
+                            result.Value = -1;
+                            result.ErrorInfo = error;
+                            result.ErrorCode = ErrorCode.AccessDenied;
+                            return result;
+                        }
+                }
+#if REMOVED
+
 #if ITEM_ACCESS_RIGHTS
                 // 2025/4/27
                 // 检查存取定义
@@ -4237,6 +4308,8 @@ out strError);
                     if (result.Value == -1)
                         return result;
                 }
+
+#endif // of REMOVED
 
                 if (info.Action == "forcenew"
                     || info.Action == "forcechange"

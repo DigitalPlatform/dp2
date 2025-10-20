@@ -137,6 +137,10 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             LibraryChannel channel = sender as LibraryChannel;
             if (e.FirstTry == true)
             {
+                if (e.UserName != DataModel.dp2libraryUserName
+                    && string.IsNullOrEmpty(e.UserName) == false)
+                    throw new ArgumentException($"{e.UserName} 和默认账户不吻合。请改用 .NewChanel() 函数申请 LibraryChannel");
+                
                 e.UserName = DataModel.dp2libraryUserName;
 
                 e.Password = DataModel.dp2libraryPassword;
@@ -234,6 +238,9 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
         //      style    风格。如果为 GUI，表示会自动添加 Idle 事件，并在其中执行 Application.DoEvents
         public static LibraryChannel GetChannel(string strUserName = "")
         {
+            if (string.IsNullOrEmpty(strUserName) == false)
+                throw new ArgumentException($"GetChannel() 函数目前不允许使用非空的用户名 '{strUserName}'。请改用 NewChannel() 函数(和 DeleteChannel() 函数配套)");
+
             string strServerUrl = DataModel.dp2libraryServerUrl;
 
             if (string.IsNullOrEmpty(strUserName))

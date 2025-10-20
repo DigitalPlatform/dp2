@@ -1626,11 +1626,24 @@ namespace DigitalPlatform.LibraryServer
                         List<DeleteEntityInfo> entityinfos = null;
                         long lTemp = 0;
 
+#if ITEM_ACCESS_RIGHTS
+                        var error = CheckAccess(sessioninfo,
+                            $"获取书目记录 {strCurrentBiblioRecPath} 的下级记录",
+                            GetTwoDbName(strBiblioDbName, "item"),
+                            $"{GetInfoRight("getiteminfo")},order",
+                            "",
+                            out _);
+                        if (error != null)
+                        {
+                            lTemp = -1;
+                        }
+#else
                         // 权限字符串
                         if (StringUtil.IsInList($"{GetInfoRight("getiteminfo")},order", sessioninfo.RightsOrigin) == false)
                         {
                             lTemp = -1;
                         }
+#endif
                         else
                         {
                             // 探测书目记录有没有下属的实体记录(也顺便看看实体记录里面是否有流通信息)?
@@ -1694,11 +1707,24 @@ namespace DigitalPlatform.LibraryServer
                         List<DeleteEntityInfo> orderinfos = null;
                         long lTemp = 0;
 
+#if ITEM_ACCESS_RIGHTS
+                        var error = CheckAccess(sessioninfo,
+    $"获取书目记录 {strCurrentBiblioRecPath} 的下级记录",
+    GetTwoDbName(strBiblioDbName, "order"),
+    $"{GetInfoRight("getorderinfo")},order",
+    "",
+    out _);
+                        if (error != null)
+                        {
+                            lTemp = -1;
+                        }
+#else
                         // 权限字符串
                         if (StringUtil.IsInList($"{GetInfoRight("getorderinfo")},order", sessioninfo.RightsOrigin) == false)
                         {
                             lTemp = -1;
                         }
+#endif
                         else
                         {
                             // return:
@@ -1745,11 +1771,24 @@ namespace DigitalPlatform.LibraryServer
                         List<DeleteEntityInfo> issueinfos = null;
                         long lTemp = 0;
 
+#if ITEM_ACCESS_RIGHTS
+                        var error = CheckAccess(sessioninfo,
+    $"获取书目记录 {strCurrentBiblioRecPath} 的下级记录",
+    GetTwoDbName(strBiblioDbName, "issue"),
+    $"{GetInfoRight("getissueinfo")},order",
+    "",
+    out _);
+                        if (error != null)
+                        {
+                            lTemp = -1;
+                        }
+#else
                         // 权限字符串
                         if (StringUtil.IsInList($"{GetInfoRight("getissueinfo")},order", sessioninfo.RightsOrigin) == false)
                         {
                             lTemp = -1;
                         }
+#endif
                         else
                         {
                             // return:
@@ -1796,11 +1835,24 @@ namespace DigitalPlatform.LibraryServer
                         List<DeleteEntityInfo> commentinfos = null;
                         long lTemp = 0;
 
+#if ITEM_ACCESS_RIGHTS
+                        var error = CheckAccess(sessioninfo,
+    $"获取书目记录 {strCurrentBiblioRecPath} 的下级记录",
+    GetTwoDbName(strBiblioDbName, "comment"),
+    $"{GetInfoRight("getcommentinfo")},order",
+    "",
+    out _);
+                        if (error != null)
+                        {
+                            lTemp = -1;
+                        }
+#else
                         // 权限字符串
                         if (StringUtil.IsInList($"{GetInfoRight("getcommentinfo")},order", sessioninfo.RightsOrigin) == false)
                         {
                             lTemp = -1;
                         }
+#endif
                         else
                         {
                             // return:
@@ -9219,11 +9271,41 @@ out strError);
             return result;
         }
 
+        // 以书目库路径或下级记录路径获得两个数据库名
+        public string AutoGetTwoDbName(
+            string db_type,
+            string item_recpath,
+            string biblio_recpath)
+        {
+            // 下级优先
+            if (string.IsNullOrEmpty(item_recpath) == false)
+                return GetTwoDbName(item_recpath);
+            if (string.IsNullOrEmpty(biblio_recpath) == false)
+                return GetTwoDbName(biblio_recpath, db_type);
+            throw new ArgumentException("item_recpath 和 biblio_recpath 不应同时为空");
+        }
+
+        // 以下级记录路径获得两个数据库名
+        public string GetTwoDbName(string strItemRecPath)
+        {
+            var child_dbName = ResPath.GetDbName(strItemRecPath);
+            var ret = GetBiblioDbNameByChildDbName(child_dbName,
+                out string biblio_dbname,
+                out _);
+            if (string.IsNullOrEmpty(biblio_dbname))
+                return child_dbName;
+            return child_dbName + "," + biblio_dbname;
+        }
+
+        // 以书目库名获得两个数据库名
         public string GetTwoDbName(string strBiblioDbName,
             string strDbType)
         {
             if (string.IsNullOrEmpty(strBiblioDbName))
                 throw new ArgumentException("strBiblioDbName 参数值不允许为空");
+            if (strBiblioDbName.Contains("/"))
+                strBiblioDbName = ResPath.GetDbName(strBiblioDbName);
+
             var ret = this.GetSubDbName(strBiblioDbName,
                 strDbType,
                 out string strSubDbName,
@@ -9231,7 +9313,7 @@ out strError);
             if (ret == -1)
                 return strBiblioDbName;
             if (string.IsNullOrEmpty(strSubDbName) == false)
-                return strBiblioDbName + "," + strSubDbName;
+                return strSubDbName + "," + strBiblioDbName;
             return strBiblioDbName;
         }
 
@@ -9581,7 +9663,18 @@ out strError);
             if (commentinfos != null && commentinfos.Count > 0)
             {
                 // 权限字符串
-                if (StringUtil.IsInList("setcommentinfo,writerecord", sessioninfo.RightsOrigin) == false)
+                if (
+#if ITEM_ACCESS_RIGHTS
+                    CheckAccess(sessioninfo,
+                    "评注信息",
+                    GetTwoDbName(strTargetBiblioDbName, "comment"),
+                    "setcommentinfo,writerecord",
+                    "",
+                    out _) != null
+#else
+                    StringUtil.IsInList("setcommentinfo,writerecord", sessioninfo.RightsOrigin) == false
+#endif
+                    )
                 {
                     strError = $"复制(移动)书目信息的操作被拒绝。因拟操作的书目记录带有下属的评注记录，但{GetCurrentUserName(sessioninfo)}不具备 setcommentinfo 或 writerecord 权限，不能复制或移动它们。";
                     return -2;
