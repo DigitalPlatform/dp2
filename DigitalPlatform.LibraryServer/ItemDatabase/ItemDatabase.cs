@@ -379,7 +379,7 @@ namespace DigitalPlatform.LibraryServer
             XmlDocument domExist,
             XmlDocument domNew,
             bool outofrangeAsError,
-#if DEBUG
+#if ITEM_ACCESS_RIGHTS
             delegate_checkAccess func_checkAccess,
 #endif
             out string strMergedXml,
@@ -3536,7 +3536,7 @@ out strError);
 
 #if ITEM_ACCESS_RIGHTS
             {
-                string rights = $"{GetInfoRight($"get{db_type}info")},order";
+                string rights = $"{GetInfoRight($"get{db_type}info")}"; // ,order
                 /*
                 if (db_type == "order")
                     rights = $"{GetInfoRight("getorderinfo")},order";
@@ -3551,7 +3551,7 @@ out strError);
                 var error = CheckAccess(sessioninfo,
                     $"获得书目记录 {strBiblioRecPath} 下属的全部{db_type}记录",
                     strBiblioDbName + "," + strItemDbName,
-                    $"{GetInfoRight($"get{db_type}info")},order",
+                    $"{GetInfoRight($"get{db_type}info")}", // ,order
                     "",
                     out _);
                 if (error != null)

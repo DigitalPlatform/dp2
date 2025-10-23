@@ -33,8 +33,8 @@ using System.Xml;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.191.*")]
-[assembly: AssemblyFileVersion("3.191.0.0")]
+[assembly: AssemblyVersion("3.192.*")]
+[assembly: AssemblyFileVersion("3.192.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCommentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -506,6 +506,6 @@ public bool ItemCanReturn(Account account,
 //      3.190 (2025/10/14) GetReaderInfo() API 利用 strBarcode 进行检索的时候，如果 strBarcode 内容中出现了点，此前版本会当作机构代码和证条码号看待。最新版做了改进，当 library.xml 中存在 rfid 元素时，依然是原有效果，而当 library.xml 中没有定义 rfid 元素的时候，strBarcode 中的内容会被当作证条码号对待。也就是说，假设一条读者 XML 记录中 barcode 元素内容为 ABC.1234，则利用 GetReaderInfo() API 可以成功获得这条记录。
 //		3.191 (2025/10/18) dp2Kernel 中的 browse 配置文件先前允许使用 <root filter='marc'> 方式，以对应 col/use 元素用法。最新版取消了 root 元素的 filter 属性，当使用 col/use 时，系统会自动做好相应的内部处理。现存的 browse 配置文件中若残留 root/@filter 属性，对功能不会有任何影响
 //                          对 dp2library 账户权限 setiteminfo setobject setitemobject 等，增加对应的存取定义能力
-
+//      3.192 (2025/10/23) ManageDatabase() API 的 refresh 动作，给 refreshStyle 元素增加了一个 templateDir 属性，可以指定特殊的模板根目录进行刷新数据库定义的操作。如果这个属性为空，则依然使用 dp2library 数据目录下原有的 templates 子目录
 
 // TODO: GetReaderInfo() API 获取的读者 XML 记录中，password 元素的 expire 属性不要过滤，要让前端看到

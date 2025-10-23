@@ -144,15 +144,21 @@ namespace DigitalPlatform.rms
         void SetExtTypeString()
         {
             XmlNode nodeConvertKeyNumber = null;
+            // 取得第一个 convert/number 元素
             if (nodesConvertKeyNumber != null
                 && nodesConvertKeyNumber.Count > 0)
                 nodeConvertKeyNumber = nodesConvertKeyNumber[0];
 
             XmlNode nodeConvertQueryNumber = null;
+            // 取得第一个 convertQuery/number 元素
             if (nodesConvertQueryNumber != null
                 && nodesConvertQueryNumber.Count > 0)
                 nodeConvertQueryNumber = nodesConvertQueryNumber[0];
 
+            // 如果 convert/number 和 convertQuery/number 都存在
+            // 根据 number/@style 属性值进行判断。
+            // 根据一定条件，追加 _time _rfc1123time _freetime _utime 到 strExtStyle 中
+            // 便于前端感知到相关检索点可以利用时间字符串，和具体时间格式
             if (nodeConvertKeyNumber != null
                 && nodeConvertQueryNumber != null)
             {

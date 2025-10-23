@@ -24,6 +24,37 @@ namespace DigitalPlatform.LibraryServer
     /// </summary>
     public partial class LibraryApplication
     {
+        // 注: 即将弃用
+        // 检查基本权限和存取定义是否允许指定的操作
+        public static LibraryServerResult CheckRights(
+            SessionInfo sessioninfo,
+            string list,
+            string dbname = "",
+            string action_name = "")
+        {
+            var error = CheckAccess(sessioninfo,
+                action_name,
+                dbname,
+                list,
+                "",
+                out _);
+            if (error != null)
+            {
+                var result = new LibraryServerResult();
+                result.Value = -1;
+                result.ErrorInfo = error;
+                result.ErrorCode = ErrorCode.AccessDenied;
+                return result;
+            }
+            return null;
+            // ... 或 ...
+            string GetListString(string value)
+            {
+                return StringUtil.MakePathList(StringUtil.SplitList(value), " 或 ");
+            }
+        }
+
+#if REMOVED
         // 检查基本权限和存取定义是否允许指定的操作
         public static LibraryServerResult CheckRights(
             SessionInfo sessioninfo,
@@ -38,7 +69,7 @@ namespace DigitalPlatform.LibraryServer
                 foreach (var right in StringUtil.SplitList(list))
                 {
                     var s = GetDbOperRights(sessioninfo.Access,
-        "",
+        dbname,  // "",
         right);
                     if (string.IsNullOrEmpty(s) == false)
                         return null;
@@ -74,6 +105,7 @@ namespace DigitalPlatform.LibraryServer
                 return StringUtil.MakePathList(StringUtil.SplitList(value), " 或 ");
             }
         }
+#endif
 
         // 翻译 getxxxinfo 权限
         public static string GetInfoRight(string right)
@@ -81,9 +113,21 @@ namespace DigitalPlatform.LibraryServer
             if (right == "getiteminfo"
                 || right == "getissueinfo"
                 || right == "getorderinfo"
-                || right == "getcommentinfo")
+                || right == "getcommentinfo"
+                || right == "getbiblioinfo"/*2025/10/23*/
+                || right == "getbibliosummary")
+            {
+#if DEBUG
+                if (StringUtil.IsInList("getrecord,order", right) == true)
+                    throw new ArgumentException($"在调用 GetInfoRight() 以前 right='{right}' 中已经包含了 getrecord 或 order。请精简它");
+#endif
                 return right + ",getrecord,order";
+            }
 
+#if DEBUG
+            if (StringUtil.IsInList("getrecord", right) == true)
+                throw new ArgumentException($"在调用 GetInfoRight() 以前 right='{right}' 中已经包含了 getrecord。请精简它");
+#endif
             return right + ",getrecord";
         }
 

@@ -269,7 +269,7 @@ namespace DigitalPlatform.LibraryServer
             XmlDocument domNew,
             string[] element_names,
             bool outofrangeAsError,
-#if DEBUG
+#if ITEM_ACCESS_RIGHTS
             delegate_checkAccess func_checkAccess,
 #endif
             out string strMergedXml,
@@ -2240,7 +2240,7 @@ strOldRefID);
                 var error = CheckAccess(sessioninfo,
                     $"获得书目记录 {strBiblioRecPath} 下属的全部册记录",
                     strBiblioDbName + "," + strItemDbName,
-                    $"{GetInfoRight("getiteminfo")},order",
+                    $"{GetInfoRight("getiteminfo")}", // ,order
                     "",
                     out _);
                 if (error != null)
@@ -9209,7 +9209,7 @@ strSourceLibraryCode);
                 var ret = LibraryApplication.CheckRights(
         sessioninfo,
         $"{GetInfoRight($"get{db_type}info")}",
-        dbname,
+        GetTwoDbName(dbname),
         $"获取{db_type}信息");
                 if (ret != null && ret.ErrorCode == ErrorCode.AccessDenied)
                 {

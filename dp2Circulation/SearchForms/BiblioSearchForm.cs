@@ -8239,6 +8239,7 @@ out strError);
                 e.SaveAction = "save";
                 e.SourceRecPath = "";
                 e.TargetRecPath = strBiblioRecPath;
+                e.CurrentUserName = Program.MainForm.CurrentUserName;
                 form.TryInvoke(() =>
                 {
                     genData.DetailHostObj.Invoke("BeforeSaveRecord",
@@ -10196,6 +10197,7 @@ out strError);
                         e.SaveAction = bCopy ? "copy" : "move";
                         e.SourceRecPath = strRecPath;
                         e.TargetRecPath = dlg.RecPath;
+                        e.CurrentUserName = Program.MainForm.CurrentUserName;
                         this.TryInvoke(() =>
                         {
                             genData.DetailHostObj.Invoke("BeforeSaveRecord",

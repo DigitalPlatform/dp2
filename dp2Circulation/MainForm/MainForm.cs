@@ -2560,6 +2560,11 @@ false);
         // 清除配置文件本地缓存
         private void MenuItem_clearCfgCache_Click(object sender, EventArgs e)
         {
+            ClearCfgCache();
+        }
+
+        public void ClearCfgCache()
+        {
             cfgCache.ClearCfgCache();
 
             this.AssemblyCache.Clear(); // 顺便也清除Assembly缓存

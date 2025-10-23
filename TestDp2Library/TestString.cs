@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.Text;
-using static DigitalPlatform.Text.dp2StringUtil;
 using DigitalPlatform.Xml;
-using System.Xml;
+using static DigitalPlatform.Text.dp2StringUtil;
 using static DigitalPlatform.LibraryServer.LibraryApplication;
 
 namespace TestDp2Library

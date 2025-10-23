@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-using System.Diagnostics;
+
+using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation
 {
@@ -14,6 +16,8 @@ namespace dp2Circulation
     /// </summary>
     internal partial class RefreshStyleDialog : Form
     {
+        public GetTempalteDirsFunc GetTempalteDirs { get; set; }
+
         public bool AutoRebuildKeysVisible = false;
 
         public string IncludeFilenames = "";
@@ -24,10 +28,35 @@ namespace dp2Circulation
             InitializeComponent();
         }
 
+        static string[] _single_filenames = new string[] { 
+        "dp2circulation_marc_autogen.cs",
+        "dp2circulation_marc_verify.cs",
+        "dp2circulation_marc_conver.cs",
+        };
+
         private void RefreshStyleDialog_Load(object sender, EventArgs e)
         {
             if (AutoRebuildKeysVisible == true)
                 this.checkBox_autoRebuildKeys.Visible = true;
+
+            {
+                foreach(var item in _single_filenames)
+                {
+                    this.checkedComboBox_singleCfgFileName.Items.Add(item);
+                }
+            }
+
+            {
+                var results = GetTempalteDirs?.Invoke();
+                if (results != null)
+                {
+                    this.comboBox_templatesPath.Items.Clear();
+                    foreach(var result in results)
+                    {
+                        this.comboBox_templatesPath.Items.Add(result);
+                    }
+                }
+            }
         }
 
         private void button_OK_Click(object sender, EventArgs e)
@@ -45,6 +74,18 @@ namespace dp2Circulation
             else if (this.radioButton_structure.Checked == true)
             {
                 this.IncludeFilenames = "keys,browse";
+                this.ExcludeFilenames = "";
+            }
+            else if (this.radioButton_singleCfgFile.Checked == true)
+            {
+                // 2025/10/23
+                var filename = this.checkedComboBox_singleCfgFileName.Text;
+                if (string.IsNullOrEmpty(filename) == true)
+                {
+                    MessageBox.Show(this, "尚未输入要刷新的单个配置文件名");
+                    return;
+                }
+                this.IncludeFilenames = filename;
                 this.ExcludeFilenames = "";
             }
             else
@@ -113,5 +154,70 @@ MessageBoxDefaultButton.Button2);
                 this.checkBox_recoverState.Checked = value;
             }
         }
+
+        public string TemplatesPath
+        {
+            get
+            {
+                return this.comboBox_templatesPath.Text;
+            }
+            set
+            {
+                this.comboBox_templatesPath.Text = value;
+            }
+        }
+
+        public bool TemplatesDirVisible
+        {
+            get
+            {
+                return this.comboBox_templatesPath.Visible;
+            }
+            set
+            {
+                if (value == false)
+                    this.comboBox_templatesPath.Text = "";
+                this.comboBox_templatesPath.Visible = value;
+                this.label_templatePath.Visible = value;
+            }
+        }
+
+        private void radioButton_singleCfgFile_CheckedChanged(object sender, EventArgs e)
+        {
+            this.checkedComboBox_singleCfgFileName.Visible = this.radioButton_singleCfgFile.Checked;
+        }
+
+        public string UiState
+        {
+            get
+            {
+                List<object> controls = new List<object>();
+                controls.Add(this.radioButton_all);
+                controls.Add(this.radioButton_structure);
+                controls.Add(this.radioButton_allButTemplateFile);
+                controls.Add(this.radioButton_singleCfgFile);
+                controls.Add(this.checkedComboBox_singleCfgFileName);
+                controls.Add(this.comboBox_templatesPath);
+                controls.Add(this.checkBox_autoRebuildKeys);
+                controls.Add(this.checkBox_recoverState);
+                return GuiState.GetUiState(controls);
+            }
+            set
+            {
+                List<object> controls = new List<object>();
+                controls.Add(this.radioButton_all);
+                controls.Add(this.radioButton_structure);
+                controls.Add(this.radioButton_allButTemplateFile);
+                controls.Add(this.radioButton_singleCfgFile);
+                controls.Add(this.checkedComboBox_singleCfgFileName);
+                controls.Add(this.comboBox_templatesPath);
+                controls.Add(this.checkBox_autoRebuildKeys);
+                controls.Add(this.checkBox_recoverState);
+                GuiState.SetUiState(controls, value);
+            }
+        }
+
     }
+
+    public delegate string[] GetTempalteDirsFunc();
 }

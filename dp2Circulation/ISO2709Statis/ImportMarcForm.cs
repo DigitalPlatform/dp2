@@ -811,6 +811,7 @@ this.UiState);
                             e.SaveAction = "save";
                             e.SourceRecPath = "";
                             e.TargetRecPath = strBiblioRecPath;
+                            e.CurrentUserName = Program.MainForm.CurrentUserName;
                             this.TryInvoke(() =>
                             {
                                 genData.DetailHostObj.Invoke("BeforeSaveRecord",

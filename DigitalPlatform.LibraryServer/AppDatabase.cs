@@ -1,21 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-using System.Xml;
-using System.IO;
-using System.Diagnostics;
-
-using Ionic.Zip;
-
-using DigitalPlatform.rms.Client;
-using DigitalPlatform.Xml;
-using DigitalPlatform.IO;
-using DigitalPlatform.Text;
+﻿using DigitalPlatform.IO;
 using DigitalPlatform.LibraryServer.Common;
+using DigitalPlatform.rms.Client;
 using DigitalPlatform.rms.Client.rmsws_localhost;
-using System.Web.UI;
-using System.Data.SqlClient;
+using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
+using Ionic.Zip;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using System.Xml;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -46,7 +42,8 @@ namespace DigitalPlatform.LibraryServer
             strOutputInfo = "";
             strError = "";
 
-            delegate_checkDatabaseRights func = (d,a) => {
+            delegate_checkDatabaseRights func = (d, a) =>
+            {
                 if (string.IsNullOrEmpty(a))
                     a = strAction;
                 var error = LibraryApplication.CheckAccess(
@@ -4011,6 +4008,7 @@ out strError);
 
             string strInclude = "";
             string strExclude = "";
+            string templatePath = "";
 
             bool bAutoRebuildKeys = false;  // 2014/11/26
             bool bRecoverModeKeys = false;  // 2015/9/28
@@ -4028,13 +4026,17 @@ out strError);
                     strError = "参数 strDatabaseInfo 的值装入 XMLDOM 时出错: " + ex.Message;
                     return -1;
                 }
-                XmlNode style_node = style_dom.DocumentElement.SelectSingleNode("//refreshStyle");
+                var style_node = style_dom.DocumentElement.SelectSingleNode("//refreshStyle") as XmlElement;
                 if (style_node != null)
                 {
                     strInclude = DomUtil.GetAttr(style_node, "include");
                     strExclude = DomUtil.GetAttr(style_node, "exclude");
                     bAutoRebuildKeys = DomUtil.GetBooleanParam(style_node, "autoRebuildKeys", false);
                     bRecoverModeKeys = DomUtil.GetBooleanParam(style_node, "recoverModeKeys", false);
+
+                    // 2025/10/23
+                    // 刷新定义时用到的模板根目录。如果为空，表示使用 dp2library 数据目录下的默认 templates 目录
+                    templatePath = style_node.GetAttribute("templatePath");
                 }
                 strRefreshStyleOuterXml = style_node.OuterXml;
             }
@@ -4048,6 +4050,27 @@ out strError);
             List<string> other_dbnames = new List<string>();    // 其他类型的数据库名集合
             List<string> other_types = new List<string>();  // 和 other_dbnames 锁定对应的数据库类型集合
 
+            string strTemplatePath = "";    // 物理路径
+            if (string.IsNullOrEmpty(templatePath) == false)
+            {
+                if (Path.IsPathRooted(templatePath))
+                    strTemplatePath = Path.GetFullPath(templatePath);
+                else
+                    strTemplatePath = Path.Combine(this.DataDir, templatePath);
+
+                // 安全性检查：不允许文件和目录越出指定的根目录
+                if (PathUtil.IsChildOrEqual(strTemplatePath, this.DataDir) == false)
+                {
+                    strError = $"因前端指定的模板目录 '{templatePath}' 越出 dp2library 数据目录，刷新数据库定义的操作被拒绝";
+                    goto ERROR1;
+                }
+
+                if (Directory.Exists(strTemplatePath) == false)
+                {
+                    strError = $"由前端指定的(位于 dp2library 服务器的)模板子目录 '{templatePath}' 不存在(物理路径为 '{strTemplatePath}')，无法进行刷新数据库定义的操作";
+                    goto ERROR1;
+                }
+            }
             // RmsChannel channel = Channels.GetChannel(this.WsUrl);
 
             string[] names = strDatabaseNames.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
@@ -4090,18 +4113,35 @@ out strError);
                     // 2018/9/25 changed
                     RequestBiblioDatabase info = RequestBiblioDatabase.FromBiblioCfgNode(nodeDatabase);
 
-                    // 刷新书目库
                     // string strTemplateDir = this.DataDir + "\\templates\\" + "biblio_" + strSyntax + "_" + strUsage;
-                    string strTemplateDir = info.GetBiblioTemplateDir(this.DataDir);
+                    string strTemplateDir = strTemplatePath;
+                    if (string.IsNullOrEmpty(strTemplatePath))
+                    {
+                        strTemplateDir = info.GetBiblioTemplateDir(Path.Combine(this.DataDir, "templates"));
+                        Debug.Assert(string.IsNullOrEmpty(strTemplateDir) == false);
+                    }
+                    else
+                    {
+                        strTemplateDir = info.GetBiblioTemplateDir(strTemplatePath);
+                        Debug.Assert(string.IsNullOrEmpty(strTemplateDir) == false);
+
+                        if (Directory.Exists(strTemplateDir) == false)
+                        {
+                            strError = $"由前端指定的(位于 dp2library 服务器的)的模板子目录 '{strTemplateDir}' 不存在，无法进行刷新数据库 {strName} 定义的操作";
+                            goto ERROR1;
+                        }
+                    }
+
+                    // 刷新书目库
 
                     nRet = RefreshDatabase(channel,
-                        strTemplateDir,
-                        strName,
-                        strInclude,
-                        strExclude,
-                        bRecoverModeKeys,
-                        strLogFileName,
-                        out strError);
+                            strTemplateDir,
+                            strName,
+                            strInclude,
+                            strExclude,
+                            bRecoverModeKeys,
+                            strLogFileName,
+                            out strError);
                     if (nRet == -1)
                     {
                         strError = "刷新小书目库 '" + strName + "' 定义时发生错误: " + strError;
@@ -6264,10 +6304,10 @@ out strError);
                 return info;
             }
 
-            public string GetBiblioTemplateDir(string strDataDir)
+            public string GetBiblioTemplateDir(string strTemplatesRootDir)
             {
-                // this.DataDir + "\\templates\\" + "biblio_" + info.Syntax + "_" + info.Usage;
-                return Path.Combine(strDataDir, "templates\\" + "biblio_" + this.Syntax + "_" + this.Usage);
+                // return Path.Combine(strDataDir, "templates\\" + "biblio_" + this.Syntax + "_" + this.Usage);
+                return Path.Combine(strTemplatesRootDir, "biblio_" + this.Syntax + "_" + this.Usage);
             }
 
             // 从 library.xml XML 中构建
@@ -6789,7 +6829,7 @@ out strError);
             // 开始创建
 
             // 创建书目库
-            string strTemplateDir = info.GetBiblioTemplateDir(this.DataDir);
+            string strTemplateDir = info.GetBiblioTemplateDir(Path.Combine(this.DataDir, "templates"));
 
             // this.DataDir + "\\templates\\" + "biblio_" + info.Syntax + "_" + info.Usage;
 

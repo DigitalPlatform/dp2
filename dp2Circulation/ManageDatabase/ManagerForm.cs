@@ -115,22 +115,30 @@ namespace dp2Circulation
 
             this.treeView_arrangement.ImageList = this.imageList_arrangement;
 
-            ListViewProperty prop = new ListViewProperty();
-            this.listView_calendar.Tag = prop;
+            {
+                ListViewProperty prop = new ListViewProperty();
+                this.listView_calendar.Tag = prop;
 
-            ColumnSortStyle style = new ColumnSortStyle("calendar_name");
-            style.CompareFunc += new CompareEventHandler(prop_CompareColumn);
+                ColumnSortStyle style = new ColumnSortStyle("calendar_name");
+                style.CompareFunc += new CompareEventHandler(prop_CompareColumn);
 
-            // 第一列特殊，记录路径
-            prop.SetSortStyle(0, style);
-            //prop.CompareColumn -= new CompareEventHandler(prop_CompareColumn);
-            //prop.CompareColumn += new CompareEventHandler(prop_CompareColumn); 
+                // 第一列特殊，记录路径
+                prop.SetSortStyle(0, style);
+                //prop.CompareColumn -= new CompareEventHandler(prop_CompareColumn);
+                //prop.CompareColumn += new CompareEventHandler(prop_CompareColumn); 
+            }
 
             this.loanPolicyControlWrapper1.LoanPolicyControl.Owner = this;
             this.loanPolicyControlWrapper1.PropertyChanged += new PropertyChangedEventHandler(loanPolicyControlWrapper1_PropertyChanged);
 
-            ListViewProperty prop1 = new ListViewProperty();
-            this.listView_location_list.Tag = prop1;
+            {
+                ListViewProperty prop1 = new ListViewProperty();
+                this.listView_location_list.Tag = prop1;
+            }
+
+            {
+                this.listView_databases.Tag = new ListViewProperty();
+            }
 
             this.kernelResTree1.AppInfo = Program.MainForm.AppInfo;
             this.kernelResTree1.CssFileName = Path.Combine(Program.MainForm.DataDir, "markdown/default.css");  // 2024/7/1
@@ -914,6 +922,7 @@ namespace dp2Circulation
             strError = "";
 
             this.listView_databases.Items.Clear();
+            ListViewUtil.ClearSortColumns(this.listView_databases);
 
             string strOutputInfo = "";
             int nRet = GetAllDatabaseInfo(out strOutputInfo,
@@ -935,14 +944,26 @@ namespace dp2Circulation
             }
 
             XmlNodeList nodes = dom.DocumentElement.SelectNodes("database");
-            for (int i = 0; i < nodes.Count; i++)
+            // for (int i = 0; i < nodes.Count; i++)
+            foreach (XmlElement node in nodes)
             {
-                XmlNode node = nodes[i];
+                // XmlNode node = nodes[i];
 
                 string strName = DomUtil.GetAttr(node, "name");
                 string strType = DomUtil.GetAttr(node, "type");
                 string strRole = DomUtil.GetAttr(node, "role");
                 string strLibraryCode = DomUtil.GetAttr(node, "libraryCode");
+                string syntax = node.GetAttribute("syntax");
+
+                string book_or_series = "";
+                if (strType == "biblio")
+                {
+                    string issueDbName = node.GetAttribute("issueDbName");
+                    if (string.IsNullOrEmpty(issueDbName))
+                        book_or_series = "图书";
+                    else
+                        book_or_series = "期刊";
+                }
 
                 // 2008/7/2
                 // 空的名字将被忽略
@@ -970,6 +991,10 @@ namespace dp2Circulation
                 //item.SubItems.Add(strTypeName);
                 //item.SubItems.Add(strShuoming);
                 ListViewUtil.ChangeItemText(item, DATABASE_COLUMN_TYPENAME, strTypeName);
+
+                ListViewUtil.ChangeItemText(item, DATABASE_COLUMN_MARCSYNTAX, SyntaxCaption(syntax));
+                ListViewUtil.ChangeItemText(item, DATABASE_COLUMN_BOOKORSERIES, book_or_series);
+
                 ListViewUtil.ChangeItemText(item, DATABASE_COLUMN_SHUOMING, strShuoming);
 
                 item.Tag = node.OuterXml;   // 记载XML定义片断
@@ -978,11 +1003,23 @@ namespace dp2Circulation
             }
 
             return 0;
+            string SyntaxCaption(string syntax)
+            {
+                if (syntax == "unimarc")
+                    return "UNIMARC";
+                if (syntax == "usmarc")
+                    return "USMARC(MARC21)";
+                return syntax;
+            }
         }
 
         const int DATABASE_COLUMN_NAME = 0;
         const int DATABASE_COLUMN_TYPENAME = 1;
-        const int DATABASE_COLUMN_SHUOMING = 2;
+
+        const int DATABASE_COLUMN_MARCSYNTAX = 2;
+        const int DATABASE_COLUMN_BOOKORSERIES = 3;
+
+        const int DATABASE_COLUMN_SHUOMING = 4;
 
         // 确定一个数据库是不是书目库类型?
         bool IsDatabaseBiblioType(string strDatabaseName)
@@ -2770,7 +2807,7 @@ namespace dp2Circulation
             }
             // 对话框警告
             DialogResult result = MessageBox.Show(this,
-                "确实要刷新数据库 " + strDbNameList + " 的定义?\r\n\r\n说明：1) 数据库被刷新定义后，根据情况可能需要进行刷新数据库内记录的检索点的操作(否则现有记录的检索点可能会不全)。\r\n      2) 如果刷新的是(大)书目库的定义，则(大)书目库从属的实体库、订购库、期库也会一并被刷新定义。",
+                "确实要刷新数据库 " + strDbNameList + " 的定义?\r\n\r\n说明：\r\n      1) 数据库被刷新定义后，根据情况可能需要进行刷新数据库内记录的检索点的操作(否则现有记录的检索点可能会不全)。\r\n      2) 如果刷新的是(大)书目库的定义，则(大)书目库从属的实体库、订购库、期库也会一并被刷新定义。",
                 "ManagerForm",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question,
@@ -2781,16 +2818,31 @@ namespace dp2Circulation
             RefreshStyleDialog style_dlg = new RefreshStyleDialog();
             MainForm.SetControlFont(style_dlg, this.Font, false);
 
+            // 判断 dp2library 版本 3.192 之前的版本不允许使用“指定模板根目录刷新数据库定义”的功能
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.192") < 0)
+            {
+                style_dlg.TemplatesDirVisible = false;
+            }
+
             // 2.38
             if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.38") >= 0)
                 style_dlg.AutoRebuildKeysVisible = true;
 
             if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.54") >= 0)
                 style_dlg.RecoverStateVisible = bHasReaderDatabase;
-
+            style_dlg.GetTempalteDirs = () => {
+                return GetTempalteDirs().ToArray();
+            };
             style_dlg.StartPosition = FormStartPosition.CenterScreen;
+            style_dlg.UiState = Program.MainForm.AppInfo.GetString(
+"ManagerForm",
+"RefreshStyleDialog_uiState",
+"");
             style_dlg.ShowDialog(this);
-
+            Program.MainForm.AppInfo.SetString(
+"ManagerForm",
+"RefreshStyleDialog_uiState",
+style_dlg.UiState);
             if (style_dlg.DialogResult == DialogResult.Cancel)
                 return;
 
@@ -2833,13 +2885,20 @@ namespace dp2Circulation
                 DomUtil.SetAttr(style_dom.DocumentElement,
                     "include", style_dlg.IncludeFilenames);
                 DomUtil.SetAttr(style_dom.DocumentElement,
-                     "exclude", style_dlg.ExcludeFilenames);
+                    "exclude", style_dlg.ExcludeFilenames);
                 DomUtil.SetAttr(style_dom.DocumentElement,
                     "autoRebuildKeys", style_dlg.AutoRebuildKeys == true ? "true" : "false");
 
                 // 2015/9/28
                 DomUtil.SetAttr(style_dom.DocumentElement,
                     "recoverModeKeys", style_dlg.RecoverState == true ? "true" : "false");
+
+                // 2025/10/23
+                if (string.IsNullOrEmpty(style_dlg.TemplatesPath) == false)
+                {
+                    style_dom.DocumentElement.SetAttribute("templatePath",
+                        style_dlg.TemplatesPath);
+                }
 
                 string strKeysChangedDbpaths = "";
 
@@ -2946,12 +3005,50 @@ namespace dp2Circulation
             if (String.IsNullOrEmpty(strError) == false)
                 MessageBox.Show(this, strError);
 
+            // 2025/10/21
+            // 清理 AssemblyCache。主要是考虑到 dp2circulation_marc_autogen.cs 等配置文件先前可能曾经被编译存储到 Cache 中了
+            // TODO: 需要设法得到 哪些 _autogen.cs 配置文件哪些被修改了的信息，便于精准调用 AssemblyCache.Clear()
+            Program.MainForm.ClearCfgCache();
+
             // 2015/6/13
             // 重新获得各种库名、列表
             Program.MainForm.StartPrepareNames(false, false);
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        // 从 dp2library 数据目录下搜寻名为 *templates* 的子目录名
+        List<string> GetTempalteDirs()
+        {
+            var looping = Looping(out LibraryChannel channel,
+    "正在获取数据库模板子目录 ...",
+    "settimeout:0:0:5");
+            try
+            {
+                string category = "!";
+                string pattern = "*templates*";
+
+                var results = new List<string>();
+                FileItemLoader loader = new FileItemLoader(channel,
+                    null,
+                    category, // "!operlog",
+                    pattern);
+                foreach (FileItemInfo info in loader)
+                {
+                    results.Add(info.Name);
+                }
+
+                return results;
+            }
+            catch (Exception ex)
+            {
+                return new List<string> { "error:" + ex.Message };
+            }
+            finally
+            {
+                looping.Dispose();
+            }
         }
 
         // 初始化
@@ -9960,6 +10057,11 @@ namespace dp2Circulation
         private void textBox_barcodeValidation_TextChanged(object sender, EventArgs e)
         {
             this.BarcodeValidationChanged = true;
+        }
+
+        private void listView_databases_ColumnClick(object sender, ColumnClickEventArgs e)
+        {
+            ListViewUtil.OnColumnClick(this.listView_databases, e);
         }
     }
 

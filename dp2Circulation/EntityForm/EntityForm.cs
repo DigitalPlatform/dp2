@@ -8906,6 +8906,7 @@ out strError);
                             e.SaveAction = strAction;
                             e.SourceRecPath = strSourceBiblioRecPath;
                             e.TargetRecPath = strTargetBiblioRecPath;
+                            e.CurrentUserName = Program.MainForm.CurrentUserName;
                             // this._genData.DetailHostObj.BeforeSaveRecord(this.m_marcEditor, e);
                             this._genData.DetailHostObj.Invoke("BeforeSaveRecord", this.m_marcEditor, e);
                             if (string.IsNullOrEmpty(e.ErrorInfo) == false)
@@ -9242,6 +9243,7 @@ out strError);
                         e.SaveAction = "save";
                         e.SourceRecPath = "";
                         e.TargetRecPath = strTargetPath;
+                        e.CurrentUserName = Program.MainForm.CurrentUserName;
                         // this._genData.DetailHostObj.BeforeSaveRecord(this.m_marcEditor, e);
                         this._genData.DetailHostObj.Invoke("BeforeSaveRecord", this.m_marcEditor, e);
                         if (string.IsNullOrEmpty(e.ErrorInfo) == false)

@@ -264,3 +264,4 @@ using System.Runtime.InteropServices;
 //       2025/9/19  种册窗册属性页打开的册编辑对话框中，借阅者 textbox 中会显示证条码号和读者参考 ID。格式为 "P0000001 @refID:xxxxxxx"。证条码号是从册记录 borrower 元素的 barcode 属性中取得的
 //       2025/10/14 RFID 工具窗，对上下文菜单中几个涉及到写入标签的命令，进行了改进，让上下文菜单事项在条件不适合的时候显示为 Disabled 状态，避免操作者误解
 //                  书目查询窗的导出读者详细信息 Excel 文件的功能，从以前的依据浏览列表中的证条码号列，改为依据册记录路径列。(以避免当读者证条码号内容中包含 . 的时候无法用 GetReaderInfo() API 成功获取到读者记录的问题)
+//       2025/10/20 dp2circulation_marc_autogen.cs 相关的 DetailHost 类增强了 BeforeSaveRecord() 对复制和移动操作的支持。

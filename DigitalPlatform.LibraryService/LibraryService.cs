@@ -7712,6 +7712,7 @@ out QueryResult[] results)
 
                     // 初步判断一下任意数据库名的 getiteminfo 存取定义是否具备。如果不具备则直接 AccessDenied 返回了
                     // 注意后期在知道记录的路径以后，还要补充判断一次这个数据库的 getiteminfo 存取定义是否具备
+#if REMOVED
                     var ret = LibraryApplication.CheckRights(
             sessioninfo,
             $"{InfoRight($"get{strItemDbType}info")},order",
@@ -7719,9 +7720,26 @@ out QueryResult[] results)
             $"获取{typeCaption}信息");
                     if (ret != null)
                         return ret;
+#endif
+                    var error1 = LibraryApplication.CheckAccess(
+                        sessioninfo,
+                        $"获取{typeCaption}信息",
+                        "",
+                        $"{InfoRight($"get{strItemDbType}info")}",    // ,order
+                        "",
+                        out _);
+                    if (error1 != null)
+                    {
+                        return new LibraryServerResult
+                        {
+                            Value = -1,
+                            ErrorCode = ErrorCode.AccessDenied,
+                            ErrorInfo = error1
+                        };
+                    }
                 }
 #else
-                if (strItemDbType == "item")
+                    if (strItemDbType == "item")
                 {
                     // 权限字符串
                     if (StringUtil.IsInList($"{InfoRight("getiteminfo")},order", sessioninfo.RightsOrigin) == false)
@@ -8154,6 +8172,9 @@ out QueryResult[] results)
 #endif
 
 #if ITEM_ACCESS_RIGHTS
+
+                // 错误提示模糊不清
+#if REMOVED
                 // 2025/5/15
                 // 精确判断一下具体数据库名的 getiteminfo 存取定义是否具备。
                 if (string.IsNullOrEmpty(sessioninfo.Access) == false)
@@ -8165,6 +8186,22 @@ out QueryResult[] results)
             $"获取{typeCaption}信息");
                     if (ret != null)
                         return ret;
+                }
+#endif
+                // 2025/10/23
+                var error = LibraryApplication.CheckAccess(
+                    sessioninfo,
+                    $"获取{typeCaption}信息",
+                    app.GetTwoDbName(strItemRecPath),
+                    $"{InfoRight($"get{strItemDbType}info")}",
+                    "",
+                    out _);
+                if (error != null)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = error;
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
                 }
 #endif
 
@@ -9247,6 +9284,11 @@ out QueryResult[] results)
                     string strCurrentIssueDbName = ResPath.GetDbName(strIssueRecPath);
 
                     string strCurrentDbType = app.GetDbType(strCurrentIssueDbName);
+                    if (string.IsNullOrEmpty(strCurrentDbType))
+                    {
+                        strError = $"数据库 '{strCurrentIssueDbName}' 的类型无法识别，或数据库不存在";
+                        goto ERROR1;
+                    }
                     if (strCurrentDbType != strDbType)
                     {
                         strError = "记录路径 '" + strIssueRecPath + "' 中的数据库名 '" + strCurrentIssueDbName + "' 不是类型 " + strDbType + "，因此拒绝操作。";

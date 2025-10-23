@@ -370,6 +370,8 @@ namespace DigitalPlatform.CommonControl
 
                 string strStyle = (string)table["style"];
                 string strIndex = (string)table["index"];
+                // 2025/10/23
+                string text = (string)table["text"];
 
                 ComboBoxStyle style;
                 Enum.TryParse<ComboBoxStyle>(strStyle, out style);
@@ -388,6 +390,7 @@ namespace DigitalPlatform.CommonControl
                 }
                 else if (style == ComboBoxStyle.DropDown)
                 {
+                    /*
                     // TODO: 恢复 .Text ?
                     int i = 0;
                     int.TryParse(strIndex, out i);
@@ -398,6 +401,23 @@ namespace DigitalPlatform.CommonControl
                     catch
                     {
                     }
+                    */
+
+                    // 2025/10/23
+                    if (int.TryParse(strIndex, out int index) == false)
+                        index = -1;
+                    try
+                    {
+                        if (index != -1)
+                            combobox.SelectedIndex = index;
+                    }
+                    catch
+                    {
+                    }
+
+                    if (string.IsNullOrEmpty(combobox.Text)
+                        && string.IsNullOrEmpty(text) == false)
+                        combobox.Text = text;
                 }
             }
         }
@@ -407,6 +427,8 @@ namespace DigitalPlatform.CommonControl
             Hashtable table = new Hashtable();
             table["style"] = combobox.DropDownStyle.ToString();
             table["index"] = combobox.SelectedIndex.ToString();
+            // 2025/10/23
+            table["text"] = combobox.Text;
 
             return combobox.GetType().ToString() + ":"
                 + StringUtil.BuildParameterString(table, ',', '=', "url");

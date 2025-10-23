@@ -73,7 +73,7 @@ namespace DigitalPlatform.LibraryServer
             XmlDocument domExistParam,
             XmlDocument domNewParam,
             bool outofrangeAsError,
-#if DEBUG
+#if ITEM_ACCESS_RIGHTS
             delegate_checkAccess func_checkAccess,
 #endif
             out string strMergedXml,

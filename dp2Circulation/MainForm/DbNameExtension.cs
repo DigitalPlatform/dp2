@@ -755,6 +755,21 @@ namespace dp2Circulation
             return false;
         }
 
+        // 2025/10/22
+        public bool HasRole(string biblio_dbname, string role)
+        {
+            return this.BiblioDbProperties.Where(p => p.DbName == biblio_dbname && StringUtil.IsInList(role, p.Role)).Any();
+        }
+
+        public bool IsCatalogWorkDb(string biblio_dbname)
+        {
+            return HasRole(biblio_dbname, "catalogWork");
+        }
+
+        public bool IsCatalogTargetDb(string biblio_dbname)
+        {
+            return HasRole(biblio_dbname, "catalogWork");
+        }
 
         // 2012/9/1
         /// <summary>

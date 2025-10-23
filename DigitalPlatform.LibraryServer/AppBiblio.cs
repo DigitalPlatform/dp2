@@ -1042,7 +1042,7 @@ namespace DigitalPlatform.LibraryServer
                 if (strDbType == "biblio")
                 {
                     // 权限字符串
-                    if (StringUtil.IsInList($"{GetInfoRight("getbiblioinfo")},order", sessioninfo.RightsOrigin) == false)
+                    if (StringUtil.IsInList($"{GetInfoRight("getbiblioinfo")}", sessioninfo.RightsOrigin) == false) // ,order
                     {
                         strError = $"获取书目信息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 getbiblioinfo 或 order 权限。";
                         return -2;
@@ -1630,7 +1630,7 @@ namespace DigitalPlatform.LibraryServer
                         var error = CheckAccess(sessioninfo,
                             $"获取书目记录 {strCurrentBiblioRecPath} 的下级记录",
                             GetTwoDbName(strBiblioDbName, "item"),
-                            $"{GetInfoRight("getiteminfo")},order",
+                            $"{GetInfoRight("getiteminfo")}",   // ,order
                             "",
                             out _);
                         if (error != null)
@@ -1711,7 +1711,7 @@ namespace DigitalPlatform.LibraryServer
                         var error = CheckAccess(sessioninfo,
     $"获取书目记录 {strCurrentBiblioRecPath} 的下级记录",
     GetTwoDbName(strBiblioDbName, "order"),
-    $"{GetInfoRight("getorderinfo")},order",
+    $"{GetInfoRight("getorderinfo")}",  // ,order
     "",
     out _);
                         if (error != null)
@@ -1775,7 +1775,7 @@ namespace DigitalPlatform.LibraryServer
                         var error = CheckAccess(sessioninfo,
     $"获取书目记录 {strCurrentBiblioRecPath} 的下级记录",
     GetTwoDbName(strBiblioDbName, "issue"),
-    $"{GetInfoRight("getissueinfo")},order",
+    $"{GetInfoRight("getissueinfo")}",  // ,order
     "",
     out _);
                         if (error != null)
@@ -1839,7 +1839,7 @@ namespace DigitalPlatform.LibraryServer
                         var error = CheckAccess(sessioninfo,
     $"获取书目记录 {strCurrentBiblioRecPath} 的下级记录",
     GetTwoDbName(strBiblioDbName, "comment"),
-    $"{GetInfoRight("getcommentinfo")},order",
+    $"{GetInfoRight("getcommentinfo")}",    // ,order
     "",
     out _);
                         if (error != null)
@@ -8625,7 +8625,7 @@ out strError);
             if (bReadRightVerified == false)
             {
                 // 权限字符串
-                if (StringUtil.IsInList($"{GetInfoRight("getbiblioinfo")},order", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList($"{GetInfoRight("getbiblioinfo")}", sessioninfo.RightsOrigin) == false) // ,order
                 {
                     result.Value = -1;
                     result.ErrorInfo = $"设置书目信息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备针对源数据库的 getbiblioinfo 或 order 权限。";

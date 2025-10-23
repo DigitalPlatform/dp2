@@ -1464,29 +1464,29 @@ ref string locationString)
         {
             string old_marc = record.Text;
 
-            MarcSubfield subfield_e = null;
+            MarcSubfield subfield_d = null;
             if (string.IsNullOrEmpty(locationString) == false)
-                subfield_e = LocateMarcNode(record,
+                subfield_d = LocateMarcNode(record,
                 locationString) as MarcSubfield;
 
             bool subfield_name_match = false;
-            if (subfield_e != null && subfield_e.Name == "d")
+            if (subfield_d != null && subfield_d.Name == "d")
                 subfield_name_match = true;
 
             // 判断 subfield 是否为 200$d
-            if (subfield_e != null
-                && subfield_e.Parent?.Name == "200"
+            if (subfield_d != null
+                && subfield_d.Parent?.Name == "200"
                 && subfield_name_match)
             {
 
             }
             else
-                subfield_e = null;
+                subfield_d = null;
 
-            if (subfield_e == null)
+            if (subfield_d == null)
                 return false;
 
-            MarcField new_field = new MarcField("500", "10", $"‡a{subfield_e.Content.TrimStart('=', ' ')}‡mChinese".Replace("‡", MarcQuery.SUBFLD));
+            MarcField new_field = new MarcField("500", "10", $"‡a{subfield_d.Content.TrimStart('=', ' ')}‡mChinese".Replace("‡", MarcQuery.SUBFLD));
             record.ChildNodes.insertSequence(
                 new_field,
                 InsertSequenceStyle.PreferTail);

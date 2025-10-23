@@ -35,6 +35,7 @@ using DigitalPlatform.rms.Client;
 using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
+using System.ComponentModel;
 
 
 namespace DigitalPlatform.LibraryServer
@@ -18548,7 +18549,7 @@ out _);
                 if (db_type == "biblio")
                 {
                     // 权限字符串
-                    if (StringUtil.IsInList($"{GetInfoRight("getbiblioinfo")},order", sessioninfo.RightsOrigin) == false)
+                    if (StringUtil.IsInList($"{GetInfoRight("getbiblioinfo")}", sessioninfo.RightsOrigin) == false) // ,order
                     {
                         return $"获取书目信息被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 getbiblioinfo 或 order 权限。";
                     }
@@ -19450,7 +19451,12 @@ biblio_rec_path);
             return false;
         }
 
+        // parameters:
+        //      has_access_string   sessioninfo 中是否存在 Access 内容。
+        //                          如果存在，则要把 rights 中的权限区分为 存取定义 和 普通权限 返回，普通权限中不包含已经放到存取定义中的那些值
+        //                          如果不存在，则要把 rights 中的权限区分为 存取定义 和 rights 中全部 返回，后者权限中包含已经放到存取定义中的那些值
         public static void SplitRights(string rights,
+            bool has_access_string,
             out string access_rights,
             out string normal_rights)
         {
@@ -19458,6 +19464,14 @@ biblio_rec_path);
             normal_rights = "";
             if (string.IsNullOrEmpty(rights))
                 return;
+
+            if (has_access_string == false)
+            {
+                access_rights = "";
+                normal_rights = rights;
+                return;
+            }
+
             List<string> access_list = new List<string>();
             List<string> normal_list = new List<string>();
             var list = rights.Split(',');
@@ -19466,7 +19480,7 @@ biblio_rec_path);
                 if (IndexOf(_access_enabled_rights, s) != -1)
                 {
                     access_list.Add(s);
-                    normal_list.Add(s); // 也是普通权限
+                    // normal_list.Add(s); // 也是普通权限
                 }
                 else
                     normal_list.Add(s);
@@ -19496,8 +19510,9 @@ biblio_rec_path);
     out string strAccessParameters)
         {
             SplitRights(rights,
-            out string access_rights,
-            out string normal_rights);
+                string.IsNullOrEmpty(sessioninfo.Access) == false,
+                out string access_rights,
+                out string normal_rights);
             return CheckAccess(sessioninfo,
             oper_name,
             strDbNameList,
@@ -19533,6 +19548,13 @@ biblio_rec_path);
         {
             strAccessParameters = "";
 
+#if DEBUG
+            ThrowIfDup(right_names);
+            ThrowIfDup(normal_rights);
+#endif
+
+            var errors = new List<string>();
+
 #if REMOVED
             if (right_name != null && right_name.Contains(","))
                 throw new ArgumentException($"right_name 属性值中不允许包含逗号 (当前 right_name='{right_name}')");
@@ -19544,6 +19566,7 @@ biblio_rec_path);
 
             // rights 权限是否启用了存取定义能力。比如 getbiblioinfo 就是启用了存取定义的
             bool is_access_enabled = IsAccessEnabled(right_names);
+
             /*
             // 如果一个权限是 AccessEnabled，然而 normal_rights 又为空，则自动把 rights 当作普通权限，以备检查
             if (is_access_enabled
@@ -19582,6 +19605,10 @@ biblio_rec_path);
                             && string.IsNullOrEmpty(normal_rights) == false)
                         {
                             // TODO: 可以提示"既没有... 也没有 ..."
+                            if (string.IsNullOrEmpty(strAction))
+                                errors.Add($"不具备针对数据库 '{GetDatabaseCaption(strDbNameList)}' 权限为 '{right_names}' 的存取定义权限");
+                            else
+                                errors.Add($"不具备针对数据库 '{GetDatabaseCaption(strDbNameList)}' 权限为 '{right_names}' 动作为 '{strAction}' 的存取定义权限");
                             goto CHECK_RIGHTS_2;
                         }
 
@@ -19633,10 +19660,13 @@ biblio_rec_path);
                     // 如果仅仅是 normal_rights 非空，可以考虑报错为“普通权限定义缺乏 xxx”
                     // 注: 可能还需要结合 is_access_enabled 状态辅助上述判断
                     // TODO: 报错文字中的 xxx,xxx 权限要变换为 xxx 或 xxx
-                    if (has_access && is_access_enabled && string.IsNullOrEmpty(right_names) == false)
-                        return $"{caption} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 {GetListText(right_names)} 存取定义权限";
-                    else
-                        return $"{caption} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}不具备 {GetListText(normal_rights)} 普通权限";
+
+                    //if (has_access && is_access_enabled && string.IsNullOrEmpty(right_names) == false)
+                    //    errors.Add($"不具备 {GetListText(right_names)} 存取定义权限");
+                    //else
+                    errors.Add($"不具备 {GetListText(normal_rights)} 普通权限");
+
+                    return JoinErrors($"{caption} 被拒绝。{SessionInfo.GetCurrentUserName(sessioninfo)}", errors);
                 }
                 strAccessParameters = "*";  // 这样返回，即便被调主后面当作存取定义判断也是没有问题的
             }
@@ -19655,8 +19685,32 @@ biblio_rec_path);
                     database_caption = "[任意数据库]";
                 return database_caption;
             }
+
+            string JoinErrors(string prefix, List<string> list)
+            {
+                StringBuilder text = new StringBuilder();
+                text.Append(prefix);
+                for (int i = 0; i < list.Count; i++)
+                {
+                    if (list.Count >= 2)
+                    {
+                        if (i == 0)
+                            text.Append("既");
+                        else
+                            text.Append("，也");
+                    }
+                    text.Append(list[i]);
+                }
+                return text.ToString();
+            }
         }
 
+        static void ThrowIfDup(string rights)
+        {
+            var list = rights.Split(',');
+            if (list.Distinct().ToList().Count != list.Length)
+                throw new ArgumentException($"权限字符串 '{rights}' 中存在重复的权限");
+        }
     }
 
 #if NO
